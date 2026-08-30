@@ -44,13 +44,36 @@ The repository will additionally contain:
 
 - `.fvmrc` for the exact Flutter SDK version.
 - `.gitignore` rules for FVM's machine-local directory.
+- `.codex/config.toml` for team-scoped, non-secret MCP definitions.
+- `.agents/skills/` for version-controlled Skills required by every contributor.
 - `pubspec.lock` containing the resolved application dependency graph; it is committed and must not be ignored.
 - `README.md` onboarding commands that consistently use FVM.
 - `docs/superpowers/` bootstrap design and execution records.
 
+## Team Codex configuration
+
+Context7 is a required project MCP, not a Skill. The repository commits this non-secret definition:
+
+```toml
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp/oauth"
+required = true
+```
+
+Codex loads the project configuration only after a contributor trusts the repository. Each contributor authenticates Context7 locally; OAuth credentials and tokens are never committed.
+
+The repository vendors these team-required Skills under `.agents/skills/`:
+
+- `grill-with-docs`, together with its required `grilling` and `domain-modeling` Skills, for explicit plan interrogation, terminology work, and ADR capture.
+- `ui-ux-pro-max`, including its Python scripts, searchable data, and Flutter stack guidance, for later UI design and review work.
+
+All vendored Skills must come from traceable public upstream repositories, be pinned to exact source commits, retain applicable license files, and be recorded in the Skill inventory. `grill-with-docs` remains explicit-only because it may update project documentation. `ui-ux-pro-max` is not invoked during bootstrap and does not establish an ENMORI design system.
+
+Figma, GitHub, Firebase, Notion, and Ollama are recorded as planned integrations only. Bootstrap does not add their MCP definitions, choose providers or tools, authenticate accounts, or commit credentials.
+
 ## Skill installation policy
 
-Skills are installed into the user's Codex skill directory, not copied into the Flutter repository. Installation is split into two groups:
+Team-required Skills are committed under `.agents/skills/`. Other audited Skills may be installed into the user's Codex skill directory when they are useful but not yet part of the team baseline. Installation is split into two groups:
 
 1. Project definition and governance: project context, requirements engineering, architecture, data modeling, testing strategy, Scrum planning, privacy/security, and consistency review.
 2. Flutter delivery: Flutter architecture and patterns, responsive layout, layout diagnosis, animation, Dart unit tests, widget tests, integration tests, Flutter/Dart review, and systematic debugging.
@@ -65,6 +88,7 @@ Each requested third-party Skill must be resolved to a specific public repositor
 - Do not edit shell startup files without explicit approval. Verification may invoke FVM by its absolute installed path in the current session.
 - Do not install Android SDK, JDK, Xcode, CocoaPods, or IDE packages as part of this bootstrap.
 - Do not install unverifiable Skills.
+- Do not commit MCP OAuth credentials, API keys, bearer tokens, or environment-secret values.
 
 ## Verification
 
@@ -81,6 +105,8 @@ Bootstrap succeeds when all of the following hold:
 - iOS Runner build configurations use `com.enmori.app` as their base product bundle identifier.
 - No production identifier remains as the generated `com.enmori.enmori` value.
 - `git status` shows no Flutter SDK cache under version control.
+- `.codex/config.toml` defines Context7 as a required project MCP without credentials.
+- Project Skill directories contain complete, non-symlinked copies of `grill-with-docs`, `grilling`, `domain-modeling`, and `ui-ux-pro-max` with recorded upstream commits and licenses.
 - Every requested Skill is classified as installed, already available, or unresolved with its source status recorded.
 
 `fvm flutter doctor -v` is diagnostic rather than a pass/fail gate: missing platform-managed dependencies are reported separately. A Linux workstation is not expected to validate an iOS/Xcode build.
@@ -89,3 +115,4 @@ Bootstrap succeeds when all of the following hold:
 
 - Flutter release archive JSON listed Flutter `3.47.2` as the current stable Linux release on 2026-08-31.
 - FVM documentation defines `.fvmrc` as the committed project version configuration, recommends ignoring `.fvm/`, and exposes Flutter commands through `fvm flutter`.
+- OpenAI documentation defines `.agents/skills` as the repository-level Skill location and `.codex/config.toml` as the project-scoped MCP configuration location for trusted projects.

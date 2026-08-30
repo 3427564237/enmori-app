@@ -19,6 +19,9 @@
 - Flutter is exactly `3.47.2`; Dart is the bundled `3.13.2`.
 - `.fvmrc` is committed and `.fvm/` is ignored.
 - `pubspec.lock` is committed and stable across repeated dependency resolution.
+- Context7 is a required project MCP configured without committed credentials.
+- `grill-with-docs`, `grilling`, `domain-modeling`, and `ui-ux-pro-max` are complete, version-controlled project Skills with exact upstream provenance.
+- Figma, GitHub, Firebase, Notion, and Ollama remain unconfigured roadmap entries during bootstrap.
 - Do not depend on Arch/AUR Flutter.
 - Do not install Android SDK, JDK, Xcode, CocoaPods, device drivers, or IDE packages.
 - Do not introduce product architecture, backend, state management, features, or UI decisions.
@@ -255,7 +258,115 @@ Expected: `git ls-files --error-unmatch pubspec.lock` succeeds.
 
 ---
 
-### Task 4: Install the verified, non-conflicting Skill subset
+### Task 4: Add the team-scoped Codex baseline
+
+**Files:**
+- Create: `.codex/config.toml`
+- Create: `.agents/skills/grill-with-docs/**`
+- Create: `.agents/skills/grilling/**`
+- Create: `.agents/skills/domain-modeling/**`
+- Create: `.agents/skills/ui-ux-pro-max/**`
+- Create: `docs/tooling/team-skills.lock`
+- Create: `docs/tooling/integrations-roadmap.md`
+
+**Interfaces:**
+- Consumes: current commits from `mattpocock/skills` and `nextlevelbuilder/ui-ux-pro-max-skill`, plus the Context7 remote MCP endpoint.
+- Produces: a repository-tracked team Skill baseline and a non-secret project MCP definition.
+
+- [ ] **Step 1: Create the project-scoped Context7 definition**
+
+Create `.codex/config.toml` with exactly:
+
+```toml
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp/oauth"
+required = true
+```
+
+- [ ] **Step 2: Validate that the MCP file is parseable and contains no credential fields**
+
+```bash
+python3 -c 'import pathlib,tomllib; p=pathlib.Path(".codex/config.toml"); d=tomllib.loads(p.read_text()); assert d["mcp_servers"]["context7"] == {"url": "https://mcp.context7.com/mcp/oauth", "required": True}'
+rg -n -i 'token|secret|password|api[_-]?key|authorization' .codex/config.toml
+```
+
+Expected: Python exits 0 and `rg` returns no matches. Each contributor will trust the repository and authenticate Context7 locally.
+
+- [ ] **Step 3: Resolve and fetch exact upstream Skill commits into temporary directories**
+
+```bash
+git clone --depth 1 https://github.com/mattpocock/skills.git /tmp/enmori-mattpocock-skills
+git -C /tmp/enmori-mattpocock-skills rev-parse HEAD
+git clone --depth 1 https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git /tmp/enmori-ui-ux-pro-max
+git -C /tmp/enmori-ui-ux-pro-max rev-parse HEAD
+```
+
+Expected: each command prints one 40-character commit SHA. Record the literal SHAs in `docs/tooling/team-skills.lock` before committing the vendored files.
+
+- [ ] **Step 4: Vendor the complete docs-grilling Skill set**
+
+Copy these complete upstream directories without symlinks:
+
+```text
+/tmp/enmori-mattpocock-skills/skills/engineering/grill-with-docs
+  -> .agents/skills/grill-with-docs
+/tmp/enmori-mattpocock-skills/skills/productivity/grilling
+  -> .agents/skills/grilling
+/tmp/enmori-mattpocock-skills/skills/engineering/domain-modeling
+  -> .agents/skills/domain-modeling
+```
+
+Also retain the upstream MIT license in `.agents/skills/LICENSE.mattpocock-skills`.
+
+- [ ] **Step 5: Vendor the complete UI/UX Skill**
+
+Copy `/tmp/enmori-ui-ux-pro-max/src/ui-ux-pro-max` to `.agents/skills/ui-ux-pro-max` without symlinks. Retain the upstream MIT license in `.agents/skills/LICENSE.ui-ux-pro-max-skill`.
+
+- [ ] **Step 6: Record exact Skill provenance**
+
+Create `docs/tooling/team-skills.lock` with one tab-separated row per Skill containing: Skill name, upstream repository, exact 40-character commit SHA from Step 3, upstream path, and license. `grill-with-docs`, `grilling`, and `domain-modeling` share the same `mattpocock/skills` SHA; `ui-ux-pro-max` uses the `nextlevelbuilder/ui-ux-pro-max-skill` SHA.
+
+- [ ] **Step 7: Record later MCP integrations without configuring them**
+
+Create `docs/tooling/integrations-roadmap.md` with these statuses:
+
+```markdown
+# Integration Roadmap
+
+| Integration | Type | Bootstrap status | Authentication rule |
+|---|---|---|---|
+| Context7 | MCP | Required and configured | Each contributor authenticates locally |
+| Figma | MCP + Skills | Planned | Each contributor authenticates locally |
+| GitHub | MCP | Planned | Use an environment variable or local OAuth; never commit a token |
+| Firebase | MCP | Planned | Choose tooling and scopes before configuration |
+| Notion | MCP or plugin | Planned | Each contributor authenticates locally |
+| Ollama | Local MCP/tooling | Planned | Define the supported local endpoint and model policy first |
+```
+
+- [ ] **Step 8: Validate the vendored Skill packages**
+
+```bash
+for enmori_team_skill in grill-with-docs grilling domain-modeling ui-ux-pro-max; do
+  test -s ".agents/skills/${enmori_team_skill}/SKILL.md"
+  test ! -L ".agents/skills/${enmori_team_skill}"
+done
+python3 .agents/skills/ui-ux-pro-max/scripts/search.py "mobile accessibility responsive" --stack flutter
+```
+
+Expected: all four `SKILL.md` files exist as real project files and the Flutter search command exits 0.
+
+- [ ] **Step 9: Commit the team Codex baseline**
+
+```bash
+git add .codex/config.toml .agents/skills docs/tooling/team-skills.lock docs/tooling/integrations-roadmap.md
+git commit -m "chore: add team Codex baseline"
+```
+
+Expected: no token, OAuth credential, or machine-local absolute path is committed.
+
+---
+
+### Task 5: Install the verified, non-conflicting personal Skill subset
 
 **Files:**
 - Create outside repository: `/home/miku/.codex/skills/dart-add-unit-test/`
@@ -363,14 +474,14 @@ Expected: the repository contains only the inventory; global Skill implementatio
 
 ---
 
-### Task 5: Run final repository verification
+### Task 6: Run final repository verification
 
 **Files:**
 - Verify: all repository bootstrap files
 - Verify: Git history and ignore rules
 
 **Interfaces:**
-- Consumes: Tasks 1-4.
+- Consumes: Tasks 1-5.
 - Produces: evidence that the bootstrap meets the approved spec without introducing product decisions.
 
 - [ ] **Step 1: Verify exact SDK and FVM project selection**
