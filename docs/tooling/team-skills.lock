@@ -1,0 +1,12 @@
+# Team Skill Lock
+
+Project-scoped Codex Skills are vendored under `.agents/skills`. Update them only through an explicit review, and update the commit recorded here in the same change.
+
+| Skill | Upstream | Path | Commit |
+| --- | --- | --- | --- |
+| `grill-with-docs` | `mattpocock/skills` | `skills/engineering/grill-with-docs` | `6654f6b60cd9d5be8b54c6fafe44346dabeb3b76` |
+| `grilling` | `mattpocock/skills` | `skills/productivity/grilling` | `6654f6b60cd9d5be8b54c6fafe44346dabeb3b76` |
+| `domain-modeling` | `mattpocock/skills` | `skills/engineering/domain-modeling` | `6654f6b60cd9d5be8b54c6fafe44346dabeb3b76` |
+| `ui-ux-pro-max` | `nextlevelbuilder/ui-ux-pro-max-skill` | `.claude/skills/ui-ux-pro-max` | `8bd29e775453ebcae52b6e6514fbf134df0c5770` |
+
+The corresponding upstream license texts are retained in `.agents/skills/_licenses`.
