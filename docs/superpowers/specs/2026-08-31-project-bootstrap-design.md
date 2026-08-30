@@ -31,12 +31,20 @@ FVM itself is a developer tool rather than a repository dependency. On this Linu
 
 Flutter will generate its normal application skeleton directly in the repository root with `flutter create --platforms=android,ios --org com.enmori --project-name enmori .`. The existing `.git` directory must be preserved.
 
+Flutter derives the initial native identifiers from the organization and project name, so this command initially produces `com.enmori.enmori`. Bootstrap must then change only the generated native identifier settings:
+
+- Android `namespace` and `applicationId` become `com.enmori.app`.
+- iOS Runner `PRODUCT_BUNDLE_IDENTIFIER` values become `com.enmori.app`; generated test-host identifiers may retain their normal suffixes derived from this base identifier.
+
+The Dart package and project name remain `enmori`. Bootstrap must not rename them to `app` as a shortcut for obtaining the native identifier.
+
 The generated starter counter application and its starter widget test are retained only as a smoke-testable baseline. No product architecture, state-management library, backend integration, or UI design is chosen during bootstrap.
 
 The repository will additionally contain:
 
 - `.fvmrc` for the exact Flutter SDK version.
 - `.gitignore` rules for FVM's machine-local directory.
+- `pubspec.lock` containing the resolved application dependency graph; it is committed and must not be ignored.
 - `README.md` onboarding commands that consistently use FVM.
 - `docs/superpowers/` bootstrap design and execution records.
 
@@ -66,9 +74,12 @@ Bootstrap succeeds when all of the following hold:
 - `fvm flutter --version` reports Flutter `3.47.2` and Dart `3.13.2`.
 - `.fvmrc` pins Flutter `3.47.2`.
 - `fvm flutter pub get` succeeds.
+- `pubspec.lock` exists, is tracked by Git, and remains unchanged after a second `fvm flutter pub get`.
 - `fvm flutter analyze` succeeds.
 - `fvm flutter test` succeeds.
-- Android and iOS project directories exist with identifier `com.enmori.app`.
+- Android `namespace` and `applicationId` are exactly `com.enmori.app`.
+- iOS Runner build configurations use `com.enmori.app` as their base product bundle identifier.
+- No production identifier remains as the generated `com.enmori.enmori` value.
 - `git status` shows no Flutter SDK cache under version control.
 - Every requested Skill is classified as installed, already available, or unresolved with its source status recorded.
 
