@@ -230,17 +230,20 @@ No concrete Figma export is required for this context phase. Pixel-accurate impl
 | 2026-07-31 | Only two blocking defects named; no new feature work. | Freezes scope while requiring two corrections. |
 | 2026-08-01 | Internal record says both corrections were fixed/retested and package frozen. | Status update only; not a separately attributable Sponsor ruling. |
 | 2026-08-31 | PM resolves C1–C8 and C10, leaves C9 open, and prospectively approves the bounded COMP3851B Admin increment plus Calendar/Footprint/AI terminology and behavior recorded here. | This is a new PM decision record. It does not retroactively alter COMP3851A scope, UAT evidence, or Sponsor/Supervisor history. |
+| 2026-09-01 | PM approves the Flutter client architecture and Fake-auth validation slice recorded by S-PM-0901. | Replaces the earlier deferred-client-architecture status only for Flutter client structure/state/routing/testing; backend, schema, API, Firebase, UI, and algorithm decisions remain open. |
 
 No explicit Supervisor decision could be attributed from the available records. This absence must not be filled by inference.
 
-## 9. Evidence-backed technical boundaries—not a selected architecture
+## 9. Technical boundaries and approved Flutter client architecture
 
 - The COMP3851A formal sources describe a Flutter/Dart client and a Firebase serverless baseline using Cloud Functions in TypeScript/Node.js, Cloud Firestore, and Firebase Authentication. This is historical/formal evidence, not approval of the detailed COMP3851B architecture.
 - Protected operations and model access remain behind an authenticated backend boundary; Flutter must not directly access the Qwen runtime or acquire authorization authority.
 - The recorded Qwen Local Model Adapter is an approved isolation boundary around the current Ollama runtime, not approval of a complete backend topology or an irreplaceable runtime choice.
 - Physical-server fleets, Kubernetes, a microservice estate, and enterprise infrastructure remain outside the recorded scope.
-- A layered Flutter client/repository structure was previously described as guidance, but no client architecture has been approved. It imposes no project constraint until an explicit architecture decision is recorded.
-- Exact Firebase/backend deployment, client layering, state management, schema, API contracts, package dependencies, branch policy, and testing architecture remain **undecided in this phase**.
+- S-PM-0901 approves the Flutter client architecture summarized in `ARCHITECTURE.md`: feature-first organization with Presentation, selective Domain, and Data layers; Repository interfaces; Riverpod without code generation; constructor injection; `go_router`; project `Result<T>`/`AppFailure`; and an application-lifetime Auth Session Provider.
+- The approved validation slice uses `FakeAuthRepository` and requires a vertical integration test across bootstrap, session Provider, Router, ViewModel, Repository, and observed session state. It is not production authentication.
+- `flutter_riverpod`, `go_router`, and SDK `integration_test` support are approved in principle for this slice; compatible versions must be verified against Flutter 3.47.2 and `pubspec.lock` committed.
+- Exact Firebase/backend deployment, real Auth integration, schema, API contracts, branch policy, product-wide testing strategy, and architecture outside the approved Flutter client scope remain **undecided**.
 
 ## 10. Conflict register
 

@@ -9,6 +9,7 @@
 - Online UI source supplied by PM: [Figma Make — 修改登陆界面](https://www.figma.com/make/UFmjpkfucM4TctMuRQfsOC/%E4%BF%AE%E6%94%B9%E7%99%BB%E9%99%86%E7%95%8C%E9%9D%A2?t=QGiRIeFYsrfwKyGw-1). The Figma connector can resolve its Make source manifest (including `src/app/App.tsx`, guidelines, styles, and image resources). It is therefore recorded as the current online UI entry point. No export is required for this extraction stage.
 - External report supplied by PM: `ENMORI_Interim_Report_Group(1).docx`, 662,914 bytes, SHA-256 `e9d535e39937aa593136199ab363a8cb682a8abcb0ac2964fedf436fbf30ac12`. The source file is not stored in this repository. The PM identifies it as the COMP3851A final project report; the file itself is internally titled and tagged as an interim group report. It is recorded as a late synthesis source, not silently promoted above formal decisions.
 - PM conflict dispositions recorded on 2026-08-31: C1–C8 and C10 were decided; C9 was explicitly left open. The durable record is [`docs/decisions/2026-08-31-pm-requirements-decisions.md`](decisions/2026-08-31-pm-requirements-decisions.md). These are current PM decisions and are not represented as historical Sponsor/Supervisor approvals.
+- Flutter client architecture approved by PM on 2026-09-01: [`docs/decisions/2026-09-01-flutter-client-architecture.md`](decisions/2026-09-01-flutter-client-architecture.md), with canonical rules in [`ARCHITECTURE.md`](../ARCHITECTURE.md). The decision is limited to the Flutter client and leaves backend, schema, API, Firebase, UI, and algorithm choices unresolved.
 - No application code in this repository was treated as a requirements source, and no Flutter business code was changed.
 
 Git upload dates are not document approval dates: nearly all records entered this repository on 2026-08-02. Dates below therefore come from the document body where available. Several Office metadata dates are unreliable, including inherited 2013 template dates.
@@ -60,6 +61,7 @@ Every supersession must retain both the old source and the new source. Conflicts
 | S-MM-0801 | `Sprint5/Meeting_Minutes/Meeting_Minutes_2026-08-01.{docx,pdf}` | 2026-08-01 | Internal finalisation meeting | B | Records the two defects as fixed/retested and freezes the final package, but is not separately attributed to Sponsor approval. |
 | S-MM-ALL | `Meeting_Minutes_Complete.pdf` | 2026-05-21–2026-08-01 | Consolidated duplicate | B | Convenient compiled copy of the twelve meetings; per-meeting files remain the traceable originals. |
 | S-PM-0831 | [`docs/decisions/2026-08-31-pm-requirements-decisions.md`](decisions/2026-08-31-pm-requirements-decisions.md) | 2026-08-31 | Confirmed PM decision record | A | Resolves C1–C8 and C10 for current/future scope and explicitly leaves C9 open. This is PM authority, not evidence of an earlier Sponsor/Supervisor decision. |
+| S-PM-0901 | [`docs/decisions/2026-09-01-flutter-client-architecture.md`](decisions/2026-09-01-flutter-client-architecture.md) | 2026-09-01 | Confirmed PM architecture decision | A | Approves the Flutter client architecture and Fake-auth validation slice only; does not approve backend, schema, API, Firebase, UI, or algorithm decisions. |
 
 No separately attributable Supervisor decision was found. References to supervision or review do not identify an explicit Supervisor ruling.
 
@@ -117,7 +119,7 @@ The repository itself contains no Figma URL. The PM-supplied Figma Make link fil
 
 The tables above describe logical sources and authority. This appendix accounts for every tracked file, including supporting files grouped above. “Sprint date” means the Sprint/meeting date stated by path or body; where no document date exists, upload time is not substituted for an approval date.
 
-S-FR1 is not inserted into the tracked-file inventory below because it is an external PM-supplied file. S-PM-0831 is tracked in this application repository, but is outside the separately inventoried `nexus-five-project-records` snapshot.
+S-FR1 is not inserted into the tracked-file inventory below because it is an external PM-supplied file. S-PM-0831 and S-PM-0901 are tracked in this application repository, but are outside the separately inventoried `nexus-five-project-records` snapshot.
 
 | Files | Date | Nature | Grade |
 |---|---|---|:---:|

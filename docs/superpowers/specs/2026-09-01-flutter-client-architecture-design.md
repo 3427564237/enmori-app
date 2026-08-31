@@ -1,12 +1,13 @@
 # ENMORI Flutter Client Architecture Design
 
-- **Status:** Pending PM review of this complete written specification
+- **Status:** Approved by PM on 2026-09-01
 - **Decision scope:** Flutter client only
 - **Decision owner:** LI HOURUI, ENMORI PM
+- **Decision source:** S-PM-0901
 - **Prepared:** 2026-09-01
 - **Pinned baseline:** Flutter 3.47.2 / Dart 3.13.2
 
-The individual design sections were approved during the architecture review. This document is not yet a reusable project authority: implementation and updates to the canonical project decision trail wait for PM approval of this exact written specification.
+The individual design sections and this complete written specification were approved by the PM. The durable decision is `docs/decisions/2026-09-01-flutter-client-architecture.md`; `ARCHITECTURE.md` is the canonical operating summary. This specification preserves the detailed rationale, alternatives, and acceptance criteria.
 
 ## 1. Purpose and scope
 
@@ -375,13 +376,11 @@ The later implementation is acceptable only when:
 
 ## 20. Governance and next gate
 
-After PM approval of this complete document:
-
-1. persist a dated PM architecture decision under `docs/decisions/`;
-2. update `docs/SOURCE_MAP.md`, `docs/PROJECT_CONTEXT.md`, and affected deferred/open-decision wording together;
-3. create or update the canonical `ARCHITECTURE.md` without adding unapproved decisions;
-4. use `writing-plans` to produce the implementation plan; and
-5. do not implement until that plan is reviewed under the normal project workflow.
+- S-PM-0901 records the PM approval and its scope boundary.
+- `ARCHITECTURE.md` is the canonical operating summary; this specification contains the complete design rationale and acceptance criteria.
+- `docs/SOURCE_MAP.md`, `docs/PROJECT_CONTEXT.md`, and `docs/OPEN_QUESTIONS.md` preserve the approval and remaining deferred areas.
+- Implementation requires a `writing-plans` implementation plan and normal project review.
+- Approval of this architecture does not approve any deferred backend, schema, API, UI, algorithm, Firebase, or product behavior decision.
 
 ## References
 

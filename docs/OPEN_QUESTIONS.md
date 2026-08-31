@@ -88,18 +88,19 @@ This register contains only unresolved authority, behavior, verification, or imp
 | C3 — Check-in required fields | At least Note or Mood; Weather is linked when available and failure does not block. | S-BR2/S-BR45/S-MM-0711 interpreted and confirmed by S-PM-0831. |
 | C6 — Recent Check-in AI context | At most five most recent eligible Check-ins from the preceding seven days, only for consented Check-in conversational assistance. | S-PM-0831; explicitly excluded from recommendation generation/ranking. |
 | C10 — Special Care eligibility | Any established friend; no minimum friendship duration. | S-PM-0831; S-FR1's “long-time” wording is illustrative only. |
+| Flutter client architecture deferral | Feature-first layered client architecture, Riverpod without code generation, `go_router`, Repository `Result<T>` protocol, application-lifetime Auth Session observation, and a Fake-auth validation slice are approved. | S-PM-0901, 2026-09-01; backend, schema, API, Firebase, UI, and algorithm decisions remain outside this approval. |
 
 ## 6. Explicitly deferred—not questions to answer by invention
 
 Until PM approves a later phase, do not finalize:
 
-- architecture or backend topology;
+- backend topology and architecture outside the approved S-PM-0901 Flutter client scope;
 - data model/schema, migrations, or referential implementation;
 - API request/response contracts;
-- package dependencies or `pubspec.yaml` changes;
+- dependency additions beyond the approved Architecture Slice, and exact package versions until Flutter 3.47.2 compatibility is verified;
 - Firebase deployment/configuration;
-- testing strategy/documentation;
-- Sprint 1 implementation backlog or Walking Skeleton;
+- product-wide testing strategy/documentation beyond the approved Architecture Slice evidence;
+- production feature backlog or Walking Skeleton beyond the Fake-auth architecture validation slice;
 - Account Action Request approval or execution workflow;
 - arbitrary model routing/failover, recommendation factors, algorithms, formulas, or data sources.
 
