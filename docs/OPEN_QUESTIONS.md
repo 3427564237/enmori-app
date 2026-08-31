@@ -12,6 +12,7 @@ This register contains only unresolved authority, behavior, verification, or imp
 | Q-04 | Unassigned | Open | Unscheduled | UI baseline and visual acceptance |
 | Q-27 | Unassigned | Open | Unscheduled | Account Action Request workflow and authorization |
 | Q-28 | Unassigned | Open | Unscheduled | Recommendation factor registry and Admin configuration |
+| Q-29 | LI HOURUI | Open | Sprint 1 Release Planning | COMP3851B Release MVP content and completion boundary |
 | Q-06 | Unassigned | Open | Unscheduled | Original COMP3851A scope provenance |
 | Q-07 | Unassigned | Open | Unscheduled | Project-plan provenance and deferred Admin history |
 | Q-08 | Unassigned | Open | Unscheduled | COMP3851A Admin conflict provenance |
@@ -40,6 +41,7 @@ This register contains only unresolved authority, behavior, verification, or imp
 | Q-04 | Which UI artifact/version is the approval baseline, and who approved it? | The PM-supplied Figma Make link is the sole current UI entry point; repository exports differ and carry no approval metadata. | Pixel-accurate UI implementation and visual acceptance need a named immutable baseline/version. |
 | Q-27 | Who reviews, approves, rejects, and executes an Account Action Request, and what are the allowed state transitions? | S-PM-0831 approves creation of an auditable Pending request only. It explicitly does not approve direct Disable, Suspend, Delete, or Restore. | Any approval/execution UI, authorization role, notification, appeal, session handling, retention, or state mutation would otherwise be invented. |
 | Q-28 | Which recommendation factors are in the implemented and approved factor registry? | S-PM-0831 restricts Admin factor creation to this registry; existing sources identify factor categories but not a complete approved registry or configuration constraints. | Admin factor CRUD and publication cannot safely accept an undefined factor set. |
+| Q-29 | Which confirmed capabilities are Must, Should, and Stretch for the Week 9 COMP3851B Release MVP, and what exact Release Goal and Release Definition of Done apply? | S-PM-0901-MVP establishes four development Sprints and a prioritized, demonstrable, testable Week 9 MVP, but deliberately does not select its feature set. | A credible four-Sprint roadmap and Sprint 1 production-feature commitment require an approved release boundary; the Fake-auth Architecture Validation Slice may proceed within its existing approval. |
 
 ## 2. Missing authoritative records
 
@@ -89,6 +91,7 @@ This register contains only unresolved authority, behavior, verification, or imp
 | C6 — Recent Check-in AI context | At most five most recent eligible Check-ins from the preceding seven days, only for consented Check-in conversational assistance. | S-PM-0831; explicitly excluded from recommendation generation/ranking. |
 | C10 — Special Care eligibility | Any established friend; no minimum friendship duration. | S-PM-0831; S-FR1's “long-time” wording is illustrative only. |
 | Flutter client architecture deferral | Feature-first layered client architecture, Riverpod without code generation, `go_router`, Repository `Result<T>` protocol, application-lifetime Auth Session observation, and a Fake-auth validation slice are approved. | S-PM-0901, 2026-09-01; backend, schema, API, Firebase, UI, and algorithm decisions remain outside this approval. |
+| COMP3851B Week 9 delivery interpretation | Week 9 targets a prioritized, demonstrable, testable Release MVP after four development Sprints; it is not a promise to implement every confirmed capability by Week 9. Weeks 10–12 are for concentrated stabilization without replacing Sprint-level testing. | S-PM-0901-MVP, 2026-09-01; exact MVP feature selection remains open as Q-29. |
 
 ## 6. Explicitly deferred—not questions to answer by invention
 

@@ -2,7 +2,7 @@
 
 ## 1. Status and interpretation rules
 
-This is a source-grounded extraction from the project-records repository at commit `5d4ac26`, the PM-supplied COMP3851A report S-FR1, and dated PM decisions S-PM-0831, completed 2026-08-31. It is not an implementation plan. Source IDs refer to `docs/SOURCE_MAP.md`.
+This is a source-grounded extraction from the project-records repository at commit `5d4ac26`, the PM-supplied COMP3851A report S-FR1, and dated PM decisions S-PM-0831, S-PM-0901, and S-PM-0901-MVP. It is not an implementation plan. Source IDs refer to `docs/SOURCE_MAP.md`.
 
 The controlling rule is incremental supersession: a later, explicit Sponsor decision or formal package changes only the affected rule. Everything else from an earlier frozen package remains. Old rules are retained in the change trail rather than silently overwritten.
 
@@ -231,8 +231,16 @@ No concrete Figma export is required for this context phase. Pixel-accurate impl
 | 2026-08-01 | Internal record says both corrections were fixed/retested and package frozen. | Status update only; not a separately attributable Sponsor ruling. |
 | 2026-08-31 | PM resolves C1–C8 and C10, leaves C9 open, and prospectively approves the bounded COMP3851B Admin increment plus Calendar/Footprint/AI terminology and behavior recorded here. | This is a new PM decision record. It does not retroactively alter COMP3851A scope, UAT evidence, or Sponsor/Supervisor history. |
 | 2026-09-01 | PM approves the Flutter client architecture and Fake-auth validation slice recorded by S-PM-0901. | Replaces the earlier deferred-client-architecture status only for Flutter client structure/state/routing/testing; backend, schema, API, Firebase, UI, and algorithm decisions remain open. |
+| 2026-09-01 | PM defines Week 9 as a prioritized, demonstrable, testable COMP3851B Release MVP after four two-week development Sprints, with academic Weeks 10–12 reserved for concentrated stabilization. | Does not commit every confirmed capability to Week 9, select the exact MVP feature set, or postpone Sprint-level testing until stabilization. |
 
 No explicit Supervisor decision could be attributed from the available records. This absence must not be filled by inference.
+
+## 8.1 COMP3851B release-planning boundary
+
+- Sprint 1 covers academic Weeks 2–3, Sprint 2 Weeks 4–5, Sprint 3 Weeks 6–7, and Sprint 4 Weeks 8–9. [S-PM-0901-MVP]
+- The Week 9 target is a prioritized, demonstrable, testable COMP3851B Release MVP rather than implementation of every confirmed product capability. [S-PM-0901-MVP]
+- Academic Weeks 10–12 concentrate on cross-feature testing, UAT, optimization, compatibility, defect closure, and release evidence. Testing, review, and applicable platform evidence still belong in the Definition of Done for every development Sprint. [S-PM-0901-MVP]
+- The exact Must/Should/Stretch set, Release Goal, Release Definition of Done, and four-Sprint forecast are not yet approved. This release boundary does not permanently remove confirmed capabilities from the wider product scope. [S-PM-0901-MVP]
 
 ## 9. Technical boundaries and approved Flutter client architecture
 
