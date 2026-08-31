@@ -1,0 +1,41 @@
+# ENMORI Team Policy
+
+## Process identity
+
+ENMORI uses Scrum-inspired planning with PM direct assignment. Members surface feasibility, dependency, and capacity conflicts; LI HOURUI retains final priority, assignment, and Sprint-scope acceptance authority.
+
+## Team and capacity
+
+| Member | Default direction | Sprint capacity |
+| --- | --- | ---: |
+| LI HOURUI | PM; Flutter frontend and AI support | 20h |
+| SHI ZHENGQI | DPM; backend | 20h |
+| JIN ZIHAN | Testing lead; strategy, automation, integration, UAT | 20h |
+| ZHOU YAOYIN | AI, algorithms, Qwen/Ollama, approved backend integration | 20h |
+| DU KUN | UI/UX, Flutter UI, macOS/iOS device validation | 20h |
+
+The Sprint ceiling is 100h. All implementation, PM, meeting, review, test, documentation, and rework hours count. Warn at exactly 100h because no buffer exists; do not reduce capacity automatically. Reject a higher total or a member above 20h unless LI explicitly changes that Sprint's capacity.
+
+## Estimation and Ready
+
+Use Story Points 1, 2, 3, 5, or 8. Split anything larger than 8. Every task has estimated hours. A PBI is Ready only with an evidence-backed source, testable acceptance criteria, scope boundary, resolved affected blockers, dependencies, accepted Points, estimated task hours, PM-assigned owner, different reviewer, and platform/device gates.
+
+## Workflow and WIP
+
+GitHub Projects owns execution state: Backlog -> Ready -> In Progress -> In Review -> Done, with Blocked branching from active work. Each member owns at most one primary In Progress task and may review other work. A Blocked item records the blocker, responsible party or dependency, and next review point. Carryover returns to PM consideration; never recommit it automatically.
+
+Notion owns meeting notes, decisions, Sprint Review, and Retrospective. Do not duplicate authoritative task status in Notion.
+
+## Assignment and review
+
+LI directly assigns every task. Owner and reviewer must differ. Prefer DU or LI for UI/Flutter review; SHI for backend review; ZHOU or LI for AI/algorithm review; JIN for test-artifact review; and LI/SHI cross-review for requirements and governance. LI may adjust this mapping without permitting self-review.
+
+Every implementation owner writes or updates relevant tests. JIN owns the strategy, cross-feature/integration verification, and UAT evidence, not all test implementation.
+
+## Completion chain
+
+Done requires owner implementation and self-test, different-reviewer approval, JIN's gate where integration/UAT applies, analyzer and relevant tests, required platform evidence, no unresolved high-priority review issue, updated traceability/docs, repository hygiene, LI's scope acceptance, merge, and GitHub Project status Done. Low-risk documentation may skip JIN but never the different reviewer.
+
+## iOS gate
+
+Every iOS-dependent PBI assigns DU to macOS/iOS device validation, JIN to scenario/evidence review, and another qualified member to code review. Evidence records device model, OS version, command, result, and useful screenshot, recording, or log in the Issue or PR. Treat DU availability as a dependency and single-point risk. Android/Linux evidence cannot substitute for iOS evidence.
