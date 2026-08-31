@@ -26,7 +26,7 @@ Provide a reproducible Flutter and Android command-line development environment 
 - Team onboarding for Linux, Windows, macOS, Android licenses, and iOS validation boundaries.
 - Local installation of the official Android command-line SDK on the current Linux workstation.
 - Registration of that SDK with the pinned Flutter toolchain.
-- Analysis, unit/widget tests, Flutter doctor diagnostics, and an unsigned/debug Android APK build.
+- Analysis, unit/widget tests, Flutter doctor diagnostics, and a debug Android APK build using the standard local debug signing configuration; release signing is outside this phase.
 
 ### Excluded
 
@@ -64,7 +64,7 @@ This split keeps build inputs reviewable without pretending that Linux, Windows,
 | Flutter | Exactly `3.47.2` | `.fvmrc` |
 | Dart | Exactly `3.13.2`, bundled with Flutter | Flutter SDK |
 | Gradle | Exactly `9.3.1` | `android/gradle/wrapper/gradle-wrapper.properties` |
-| Android Gradle Plugin | Exactly `9.1.0` | `android/settings.gradle.kts` |
+| Android Gradle Plugin | Exactly `9.1.0` | Flutter 3.47.2 generated template in `android/settings.gradle.kts` |
 | Kotlin Android plugin | Exactly `2.4.0` | `android/settings.gradle.kts` |
 | Android compile SDK | API 36 | Flutter 3.47.2 generated contract |
 | Android target SDK | API 36 | Flutter 3.47.2 generated contract |
@@ -110,12 +110,20 @@ It must:
 - detect the Android SDK from Flutter configuration, `ANDROID_HOME`, `ANDROID_SDK_ROOT`, or standard host paths without writing any configuration;
 - verify API 36, Build Tools 36.0.0, and NDK 28.2.13676358 directories;
 - report `adb` and `sdkmanager` availability when present;
-- on macOS, report whether `xcodebuild` and CocoaPods are available, without failing Android-only work because iOS signing is unavailable;
+- on macOS, report whether `xcodebuild` and CocoaPods are available as warning-only observations under the default validation policy;
 - distinguish required failures, target-specific warnings, and informational observations;
 - never print environment-variable values that may contain credentials;
-- exit non-zero only when a required project contract for the selected host target is violated.
+- exit non-zero only when a requirement in the default validation policy is violated.
 
-The first implementation may default to validating Flutter plus Android on Linux/Windows and Flutter plus Android/iOS prerequisites on macOS. Optional flags may narrow the target later, but the initial script must not introduce a general task runner or package dependency.
+The first implementation uses this fixed default validation policy:
+
+| Host | Flutter | Android | iOS prerequisites |
+| --- | --- | --- | --- |
+| Linux | Required | Required | Not applicable |
+| Windows | Required | Required | Not applicable |
+| macOS | Required | Required | Warning-only |
+
+Consequently, a macOS host without Xcode or CocoaPods exits successfully when the Flutter and Android requirements pass, while reporting that iOS work is not ready. A future `--target ios` or `--target all` mode may promote missing Xcode or CocoaPods to a required failure. The initial checker does not implement target-selection arguments, a general task runner, or a package dependency.
 
 ### VS Code workspace settings
 
@@ -187,7 +195,7 @@ fvm flutter test
 fvm flutter build apk --debug
 ```
 
-The final APK must be produced from the standard generated application using application ID `com.enmori.app`. Building the APK is an environment verification step, not feature implementation.
+The final APK must be produced from the standard generated application using application ID `com.enmori.app` and the standard local debug signing configuration. Building the APK is an environment verification step, not feature implementation; release signing remains out of scope.
 
 ### Cross-platform gates
 
