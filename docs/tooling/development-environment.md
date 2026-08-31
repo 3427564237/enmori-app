@@ -57,6 +57,8 @@ Enter every response yourself. Never automate this command with `yes`, redirecte
 <sdk-root>/cmdline-tools/latest/bin/sdkmanager --sdk_root=<sdk-root> --package_file=<repository-root>/tool/android-sdk-packages.txt
 ```
 
+Recent Command-line Tools releases may print a deprecation notice recommending the newer `android sdk` command. This baseline retains `sdkmanager` because its interactive `--licenses` and `--package_file` behavior has been verified for the current setup. Treat migration to `android sdk` as a separate tooling-contract change: verify equivalent license and manifest behavior, then update this guide and the checker together.
+
 The manifest intentionally contains no emulator or system image. Use a physical Android device for initial development; emulator and AVD setup are outside this phase.
 
 ## Linux
