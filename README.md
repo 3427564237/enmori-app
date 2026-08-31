@@ -6,23 +6,24 @@ Flutter project bootstrap for Android and iOS.
 
 - Git
 - FVM
-- Platform tooling for the target OS (Android SDK and JDK; Xcode on macOS for iOS)
+- JDK 17 through JDK 25
+- Android Command-line Tools and the SDK packages declared by the repository
+- Xcode and CocoaPods on macOS when working on iOS
 
 Do not use a globally installed Flutter SDK for this repository. The project SDK is pinned by FVM.
 
 ## Setup
 
 ```sh
-git clone <repository-url>
-cd ENMORI
 fvm install
 fvm flutter pub get
-fvm flutter doctor -v
+fvm dart run tool/check_environment.dart
 ```
 
-Use `fvm flutter` for all Flutter commands:
+See the [development environment guide](docs/tooling/development-environment.md) for the Linux, Windows, and macOS SDK setup, manual license steps, and troubleshooting. Use FVM for every Flutter and Dart command:
 
 ```sh
+fvm flutter doctor -v
 fvm flutter analyze
 fvm flutter test
 fvm flutter run
