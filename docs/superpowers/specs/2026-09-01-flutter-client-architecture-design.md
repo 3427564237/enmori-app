@@ -133,8 +133,10 @@ Rules:
 
 Use Riverpod as the composition mechanism and reactive Presentation runtime. Do not use Riverpod as a hidden service locator inside business classes.
 
-- Service, Repository, and ViewModel classes receive dependencies through constructors.
-- Providers construct and bind those classes at feature/app composition boundaries.
+- Non-Riverpod Domain/Data classes, including Services and Repository implementations, receive dependencies through constructors.
+- A Riverpod ViewModel declares its Repository dependency in `build()` using `ref.watch(repositoryProvider)`; this is the approved Presentation-layer exception to constructor injection.
+- ViewModel commands use dependencies declared during `build()`. They do not pass `Ref` into Domain/Data or read unrelated Providers ad hoc.
+- Providers construct and bind non-Riverpod classes at feature/app composition boundaries.
 - Tests replace Providers through overrides.
 - Do not add `get_it` or another dependency container in this architecture slice.
 - Do not use Riverpod code generation in this architecture slice.
@@ -362,7 +364,7 @@ The later implementation is acceptable only when:
 
 1. code follows the feature-first dependency rules without cross-feature Data/Presentation imports;
 2. Domain compiles without Flutter, Riverpod, or external SDK imports;
-3. Riverpod is used for composition while business classes retain constructor injection;
+3. Riverpod ViewModels declare Repository dependencies in `build()` via `ref.watch`, while non-Riverpod Domain/Data classes retain constructor injection and never receive `Ref`;
 4. no View receives `AsyncValue<Result<T>>`;
 5. external exception types do not escape Data;
 6. Router consumes the folded router-facing auth state;

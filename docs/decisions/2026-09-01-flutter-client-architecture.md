@@ -7,7 +7,7 @@
 - **Detailed specification:** [`docs/superpowers/specs/2026-09-01-flutter-client-architecture-design.md`](../superpowers/specs/2026-09-01-flutter-client-architecture-design.md)
 - **Canonical summary:** [`ARCHITECTURE.md`](../../ARCHITECTURE.md)
 
-ENMORI adopts feature-first Flutter organization with Presentation, selective Domain, and Data layers inside each feature. Riverpod without code generation is the client composition and Presentation-state mechanism; business classes retain constructor injection. `go_router` provides declarative navigation. Repository interfaces isolate Presentation/Domain from Data implementations and external Services.
+ENMORI adopts feature-first Flutter organization with Presentation, selective Domain, and Data layers inside each feature. Riverpod without code generation is the client composition and Presentation-state mechanism. Non-Riverpod Domain/Data classes retain constructor injection. A Riverpod ViewModel declares its Repository dependency in `build()` through `ref.watch(repositoryProvider)`; its commands use that declared dependency, and `Ref` does not cross into Domain/Data. `go_router` provides declarative navigation. Repository interfaces isolate Presentation/Domain from Data implementations and external Services.
 
 The project-wide Repository result protocol is handwritten Dart `Result<T>` / `AppFailure`. Repository/Domain boundaries do not expose Riverpod `AsyncValue`; ViewModels unwrap Repository results and expose `AsyncValue<UiState>` or explicit immutable UI state. Data-layer normalization may occur in a Service or Repository, but vendor exception types cannot escape Data.
 

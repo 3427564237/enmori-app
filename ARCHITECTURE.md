@@ -64,7 +64,9 @@ External SDK or API
 ## Riverpod and ViewModels
 
 - Use Riverpod without code generation for dependency composition and reactive Presentation state.
-- Business classes use constructor injection and do not read global Providers internally.
+- Non-Riverpod Domain/Data classes use constructor injection and never receive `Ref`.
+- Riverpod ViewModels declare Repository dependencies in `build()` with `ref.watch(repositoryProvider)`.
+- ViewModel commands use dependencies declared during `build()`; they do not perform unrelated ad hoc Provider reads.
 - Do not add a second DI container such as `get_it` in the architecture slice.
 - Use one ViewModel per View or cohesive interaction flow.
 - Use `Notifier`/`AsyncNotifier` with immutable UI state.
