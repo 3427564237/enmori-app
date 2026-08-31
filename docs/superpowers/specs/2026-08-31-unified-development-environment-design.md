@@ -152,14 +152,15 @@ The current host uses a per-user SDK at `/home/miku/Android/Sdk`. This is a loca
 
 Implementation will:
 
-1. Download the official stable Android Command-line Tools artifact or installer without piping it directly into a shell.
-2. Record its download URL and checksum in the execution evidence.
-3. Inspect the installer/archive layout before execution or extraction.
-4. Install Command-line Tools under the selected SDK root using the official `cmdline-tools/latest` directory structure.
-5. Ask the user to accept Android SDK licenses interactively; Codex must not synthesize license acceptance.
-6. Install the package manifest with `sdkmanager`.
-7. Register the SDK with the FVM-managed Flutter SDK using `fvm flutter config --android-sdk /home/miku/Android/Sdk`.
-8. Allow Flutter/Gradle to generate ignored `android/local.properties`; never commit it.
+1. Present the official Android SDK terms associated with the Command-line Tools download and wait for the user to confirm acceptance; Codex must not accept them on the user's behalf.
+2. Download the official stable Android Command-line Tools artifact without piping it directly into a shell.
+3. Record its download URL and checksum in the execution evidence.
+4. Inspect the archive layout before extraction into the SDK root.
+5. Install Command-line Tools under the selected SDK root using the official `cmdline-tools/latest` directory structure.
+6. Run `sdkmanager --licenses` interactively and hand the terminal to the user for any additional package-license acceptance; Codex must not synthesize responses.
+7. Install the package manifest with `sdkmanager`.
+8. Register the SDK with the FVM-managed Flutter SDK using `fvm flutter config --android-sdk /home/miku/Android/Sdk`.
+9. Allow Flutter/Gradle to generate ignored `android/local.properties`; never commit it.
 
 The existing Arch `android-tools` package may remain installed. The SDK-managed `platform-tools` copy is part of the coherent SDK root; command resolution and `flutter doctor` output will be inspected so two `adb` installations do not silently produce incompatible server/client behavior.
 
@@ -167,7 +168,7 @@ No shell startup file is changed during the first implementation. If persistent 
 
 ## License and secret handling
 
-- Android SDK license text must be displayed and accepted by the developer who is bound by it.
+- Android SDK terms required for the Command-line Tools download and any package licenses presented by `sdkmanager` must be displayed and accepted by the developer who is bound by them.
 - License files under the Android SDK remain machine-local.
 - The environment checker never accepts licenses or modifies SDK state.
 - No Android, Firebase, GitHub, Figma, Notion, Context7, signing, or model-runtime token enters the repository.
