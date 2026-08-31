@@ -1,6 +1,6 @@
 # Team Skill Lock
 
-Project-scoped Codex Skills are vendored under `.agents/skills`. Update them only through an explicit review, and update the commit recorded here in the same change.
+Project-scoped Codex Skills are stored under `.agents/skills`. Update them only through an explicit review. Upstream-vendored Skills must update the recorded upstream commit in the same change; project-authored Skills are identified as tracked locally.
 
 | Skill | Upstream | Path | Commit |
 | --- | --- | --- | --- |
@@ -8,5 +8,6 @@ Project-scoped Codex Skills are vendored under `.agents/skills`. Update them onl
 | `grilling` | `mattpocock/skills` | `skills/productivity/grilling` | `6654f6b60cd9d5be8b54c6fafe44346dabeb3b76` |
 | `domain-modeling` | `mattpocock/skills` | `skills/engineering/domain-modeling` | `6654f6b60cd9d5be8b54c6fafe44346dabeb3b76` |
 | `ui-ux-pro-max` | `nextlevelbuilder/ui-ux-pro-max-skill` | `.claude/skills/ui-ux-pro-max` | `8bd29e775453ebcae52b6e6514fbf134df0c5770` |
+| `enmori-scrum-planning` | Project-authored | `.agents/skills/enmori-scrum-planning` | Tracked in this repository |
 
 The corresponding upstream license texts are retained in `.agents/skills/_licenses`.

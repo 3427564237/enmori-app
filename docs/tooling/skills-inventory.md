@@ -12,6 +12,7 @@ Exact sources and commits are recorded in `team-skills.lock`.
 | `grilling` | Required dependency of `grill-with-docs` | Vendored; use on request |
 | `domain-modeling` | Domain terminology, `CONTEXT.md`, and ADR support | Vendored; use during approved documentation work |
 | `ui-ux-pro-max` | UI/UX research and Flutter-specific guidance | Vendored; use only for UI/UX work |
+| `enmori-scrum-planning` | ENMORI backlog refinement, direct assignment, capacity, review, iOS evidence, Review, and Retro | Project-authored; preview before PM-approved external writes |
 
 Context7 is not a Skill. It is a required MCP server declared in `.codex/config.toml`; every developer authenticates locally.
 
@@ -43,7 +44,7 @@ Restart Codex after installation so newly installed personal Skills are discover
 | `software-architecture` | Not installed | Reviewed prominent candidate was not Flutter-specific and would overlap the Flutter architecture Skill |
 | `data-modeling` | Deferred | Select only after backend and persistence scope are approved; `domain-modeling` covers terminology and ADR work now |
 | `testing` | Not installed | Reviewed prominent candidate targeted a different test stack; the three Flutter/Dart test Skills cover current needs |
-| `scrum-planning` | Not installed | Source is unresolved; choose only after the team's planning workflow is known |
+| `scrum-planning` | Replaced | A project-authored `enmori-scrum-planning` Skill implements the confirmed five-person workflow without relying on an unresolved generic source |
 | `project-consistency-review` | Not installed | Source is unresolved; define the repository's source-of-truth documents before selecting this role |
 
 ## Selection rule
