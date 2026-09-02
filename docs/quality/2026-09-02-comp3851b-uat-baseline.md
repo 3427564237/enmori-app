@@ -1,13 +1,19 @@
 # COMP3851B Week 9 Release MVP UAT baseline
 
-- **Status:** Approved verification baseline by LI HOURUI on 2026-09-02; every case remains `Not Run`
+- **Status:** Approved semantic/case baseline by LI HOURUI on 2026-09-02; Week 9 platform execution boundary later superseded by S-PM-0902-IOS01; every case remains `Not Run`
 - **Baseline ID:** UAT-B-0902-R1
 - **Release authority:** [S-PM-0901-SCOPE](../decisions/2026-09-01-comp3851b-mvp-scope-priorities.md)
+- **Refinement authority:** [S-PM-0902-BR01](../decisions/2026-09-02-backlog-refinement-priority.md)
+- **Platform-timing supersession:** [S-PM-0902-IOS01](../decisions/2026-09-02-ios-product-delivery-deferral.md)
 - **Governance:** [S-PM-0902-GOV](../decisions/2026-09-02-project-authority-supersession-governance.md)
 - **Historical boundary:** This is a new COMP3851B baseline. It does not close Q-C9 or convert the COMP3851A 15/20 snapshot into 20/20.
 - **Implementation status:** Not executed; no Pass, Release acceptance, or implementation readiness is claimed
 
 The PM approved this verification baseline after correcting the Q18 Release-scope gate, CORE-16 authority gate, CORE-08/09 evidence classification, Q04 deviation-candidate references, and staffing wording. Approval accepts the verification contract only. It does not approve implementation, make any PBI Ready, add Q18 Add Friend/Friend Request to the Week 9 mandatory Release scope, resolve the CORE-16 disclosure contract, approve a retained Q04 deviation candidate, or record Release acceptance.
+
+S-PM-0902-IOS01 subsequently supersedes only R1's Week 9 product-platform timing: Week 9 product implementation/evidence/UAT is Android-only and complete iOS product implementation/UAT is deferred until after Week 9. R1's case semantics and all `Not Run` results remain accepted. UAT-B-0902-R2 defines the approved amended platform execution contract; R1 must not be used to claim either a Week 9 dual-platform Pass or an automatically accepted Android Pass.
+
+The [UAT-B-0902-R2 platform amendment](2026-09-02-comp3851b-uat-baseline-r2.md) was approved under [S-PM-0903-UAT02](../decisions/2026-09-03-uat-r2-platform-amendment.md). Approval fixes the platform mapping and aggregation contract only; every case remains `Not Run`.
 
 ## 1. Purpose and user value
 
@@ -23,7 +29,7 @@ The PM confirmed this execution boundary on 2026-09-02:
 
 - UAT covers the Week 9 ordinary-community-member Release MVP: the approved core flow plus Must Event Recommendation, Friend Recommendation, Friends Activity ranking, Persona management, and bounded AI Assistant.
 - Admin Recommendation Configuration and Account Action Request approval/execution are excluded. Q-28 and Q-27 remain separate affected-scope blockers.
-- User-visible UAT runs on Android and iOS devices against the controlled HTTPS demonstration Backend, an isolated demonstration Firebase environment, and the approved Qwen 9B digest on the controlled host.
+- Original R1 platform boundary: user-visible UAT runs on Android and iOS devices against the controlled HTTPS demonstration Backend, an isolated demonstration Firebase environment, and the approved Qwen 9B digest on the controlled host. S-PM-0902-IOS01 supersedes the Week 9 timing of this rule: Android is the Week 9 product platform and iOS product UAT is deferred; approved R2 encodes the executable amendment.
 - Emulator Suite and Fake Qwen evidence are automated/integration prerequisites only; they cannot substitute for Android/iOS UAT or live controlled-host Qwen evidence.
 - ENMORI has no approved custom offline product mode. Loss of connectivity is exercised only as an approved error, empty, unavailable, or fallback condition.
 - Device models, OS versions, build identifiers, environment names, URLs, test-account identifiers, timestamps, and dependency controls are recorded at execution time rather than invented in this baseline.
@@ -150,7 +156,7 @@ All cases are `Not Run` until execution evidence says otherwise.
 
 ### 7.3 Q18 Add Friend and Friend Request — Release-scope gated
 
-This pack accepts the Q18 verification design but is `Release-scope gated; non-mandatory`. It becomes part of the mandatory Week 9 Release Pass set only after a separate durable PM decision explicitly adds the Add Friend/Friend Request flow to that Release scope. It does not authorize a direct Friend Request action from Friend Recommendation.
+This pack accepts the Q18 verification design but is `Release-scope gated; non-mandatory` under S-PM-0902-BR01. It becomes part of the mandatory Week 9 Release Pass set only after a separate later durable PM decision explicitly adds the Add Friend/Friend Request flow to that Release scope. This prospective COMP3851B priority does not invalidate historical COMP3851A/Sprint 3 Friend Request requirements or evidence. It does not authorize a direct Friend Request action from Friend Recommendation.
 
 | ID | Platform | Gate | Data / Given | When | Then | Primary authority |
 |---|---|---|---|---|---|---|

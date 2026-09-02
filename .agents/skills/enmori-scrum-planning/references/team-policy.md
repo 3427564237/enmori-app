@@ -16,6 +16,8 @@ ENMORI uses Scrum-inspired planning with PM direct assignment. Members surface f
 
 The Sprint ceiling is 100h. All implementation, PM, meeting, review, test, documentation, and rework hours count. Warn at exactly 100h because no buffer exists; do not reduce capacity automatically. Reject a higher total or a member above 20h unless LI explicitly changes that Sprint's capacity.
 
+Where one approved PBI contains legitimate, non-duplicative work that can be decomposed across all five members, keep proposed member workload approximately balanced. Balance does not require artificial equality and must not invent or broaden scope, assign work outside competence, duplicate evidence, permit self-review, or weaken dependency/platform gates. Record an evidence-based reason and obtain explicit PM acceptance for any material imbalance. This prospective rule is introduced by S-PM-0903-RMVP01A-STAFF-REV; it was not part of the earlier policy.
+
 ## Estimation and Ready
 
 Use Story Points 1, 2, 3, 5, or 8. Split anything larger than 8. Every task has estimated hours. A PBI is Ready only with an evidence-backed source, testable acceptance criteria, scope boundary, resolved affected blockers, dependencies, accepted Points, estimated task hours, PM-assigned owner, different reviewer, and platform/device gates.

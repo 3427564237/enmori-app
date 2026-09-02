@@ -166,3 +166,7 @@ It does not:
 - close Q-04.
 
 Q04-D approval does not approve Q04-DEV-14 through Q04-DEV-19 or Q04-DEV-21 through Q04-DEV-22. They remain numbered candidates for later PM review. Q-04 remains Open.
+
+## Subsequent bounded RMVP-01A acceptance
+
+[S-PM-0903-Q04-RMVP01A-R1](../../decisions/2026-09-03-q04-rmvp-01a-entry-core-acceptance.md) subsequently approves Q04-DEV-15 and new Q04-DEV-23/24 for the bounded RMVP-01A entry/core projection, together with its exact six-surface state/copy, slice-scoped SP-01/05/06 and Android responsive/accessibility acceptance. Q04-D's original eight-candidate disposition remains the issuance-time audit trail. Q04-DEV-14, Q04-DEV-16–19 and Q04-DEV-21–22 remain unapproved; evidence and Q-04 remain Open.

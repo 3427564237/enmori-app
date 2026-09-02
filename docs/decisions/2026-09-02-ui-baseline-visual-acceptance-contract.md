@@ -299,3 +299,7 @@ Q-04 remains Open. The eight retained deviation candidates, shared-pattern accep
 S-PM-0902-GOV subsequently adopts Q04-B's authority and conflict model as the canonical project-wide model and corrects the former `AGENTS.md` hierarchy. Q04's visual-evidence tiers and deviation governance remain specific to Q04.
 
 This is a current PM UI-governance decision, not a Sponsor/Supervisor decision, not visual implementation, and not evidence that Version 5 was previously approved under these exact terms.
+
+## Subsequent bounded RMVP-01A acceptance
+
+[S-PM-0903-Q04-RMVP01A-R1](2026-09-03-q04-rmvp-01a-entry-core-acceptance.md) subsequently approves Q04-DEV-15 and new Q04-DEV-23/24, the bounded M02/M06/M07/M08-shell/M19-note/M20 detailed state/copy contract, slice-scoped SP-01/05/06 and its Android responsive/accessibility acceptance baseline. This later compatible specificity does not erase Q04-D's issuance-time candidate record. Seven earlier candidates remain unapproved; evidence remains Pending and no matrix row becomes Visual Implementation Ready.

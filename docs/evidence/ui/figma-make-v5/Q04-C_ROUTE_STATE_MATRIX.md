@@ -250,3 +250,17 @@ These candidates are not approved deviations. Their numbers reserve an unambiguo
 ## Continuation boundary
 
 No matrix row in this population is `Accepted Evidence Complete` or `Visual Implementation Ready`. Q-04 remains Open. Version 5 evidence verification remains Pending.
+
+## Subsequent approved status overlay — RMVP-01A entry/core R1
+
+This overlay records a later bounded decision without rewriting the original pre-Q04-D population above. [S-PM-0903-Q04-RMVP01A-R1](../../../decisions/2026-09-03-q04-rmvp-01a-entry-core-acceptance.md) exactly approves [Q04-RMVP01A-ENTRY-CORE-PREVIEW-0903-R1](../../../superpowers/specs/2026-09-03-q04-rmvp-01a-entry-core-acceptance-preview.md) for RMVP-01A only.
+
+| Affected scope | Subsequent authority/content status | Remaining evidence/readiness gate |
+|---|---|---|
+| Q04-DEV-15 | Approved for canonical immutable-Username onboarding within the Week 9 lifecycle. | Required state/capture, provenance, responsive and accessibility evidence remains Pending. |
+| Q04-DEV-23 | Approved as the paired Initial Choice contract: M06 is information-only; M07 provides exactly `Accept — Public` and `Reject — Private`. | Required state/capture, provenance, responsive and accessibility evidence remains Pending. |
+| Q04-DEV-24 | Approved: successful Firebase identity creation alone must not present Product Account onboarding as complete. | Recoverable incomplete-onboarding state/copy and evidence remains Pending. |
+| M02, M06, M07, M08 shell, M19 Note-only and M20 saved/later-read-confirmed states | Bounded content/state direction approved for RMVP-01A. | The decision does not itself supply accepted captures or make any row Visual Implementation Ready. |
+| SP-01, SP-05 and SP-06 | Approved only where used by the bounded RMVP-01A surfaces. | Shared-pattern evidence and the applicable Android baseline remain Pending. |
+
+Q04-DEV-14, Q04-DEV-16–19 and Q04-DEV-21–22 remain unapproved broader-surface candidates. No original matrix row becomes `Accepted Evidence Complete` or `Visual Implementation Ready` from this approval. Q-04 therefore remains Open, and RMVP-01A remains Not Ready until its other approved Ready gates also pass.
