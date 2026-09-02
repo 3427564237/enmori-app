@@ -2,13 +2,13 @@
 
 ## 1. Status and interpretation rules
 
-This is a source-grounded extraction from the project-records repository at commit `5d4ac26`, the PM-supplied COMP3851A report S-FR1, and dated PM decisions S-PM-0831, S-PM-0901, and S-PM-0901-MVP. It is not an implementation plan. Source IDs refer to `docs/SOURCE_MAP.md`.
+This is a source-grounded extraction from the project-records repository at commit `5d4ac26`, the PM-supplied COMP3851A report S-FR1, and the confirmed PM decision records listed in `docs/SOURCE_MAP.md`, including the project-wide governance correction S-PM-0902-GOV. It is not an implementation plan. Source IDs refer to `docs/SOURCE_MAP.md`.
 
-The controlling rule is incremental supersession: a later, explicit Sponsor decision or formal package changes only the affected rule. Everything else from an earlier frozen package remains. Old rules are retained in the change trail rather than silently overwritten.
+The controlling governance is S-PM-0902-GOV: applicable Sponsor/Supervisor authority is above PM-controlled project decisions within its scope; PM decisions govern delegated, implementation-detail, and otherwise-undecided matters without silently overriding a conflicting higher authority. A later date alone never constitutes supersession. Compatible same-tier specificity may coexist; an actual same-tier conflict requires explicit competent supersession or a new authoritative resolution. Old and new rules remain in the change trail.
 
 Confidence labels:
 
-- **Confirmed**: supported by a controlling formal source or explicit Sponsor decision and not materially contradicted by an equal/higher authority.
+- **Confirmed**: supported by an applicable authoritative source under S-PM-0902-GOV and not materially contradicted by an equal/higher authority.
 - **Confirmed change**: a later authoritative source explicitly replaces an earlier rule; both are recorded.
 - **Confirmed PM decision**: explicitly approved by the PM on 2026-08-31 for current or future scope; it does not retroactively become a Sponsor/Supervisor decision.
 - **Blocked by conflict**: authoritative and derivative/final-looking records disagree enough that implementation must wait.
@@ -32,7 +32,7 @@ The current public product name is **ENMORI**. **Nexus Five** is the project tea
 | Events | Recommend/list events, show details, mark **Interested** and **Going** independently, expose permission-filtered interested people, and open third-party registration. | S-BR2, S-BR3, S-BR45, S-KD5 |
 | External registration | After returning from a third-party registration page, ask the user to confirm Yes/No. Yes records Going/Booked business state; No leaves it unchanged. Opening a link is not proof of booking. | S-BR45, S-KD5 |
 | Friends | Send/receive/accept/decline friend requests; friendship exists only after acceptance; show a permission-filtered friend page and Friends Activity. | S-BR3, S-BR45 |
-| Search and discovery | “My Friends” searches established friends by name. “Add Friend” is separate and searches username/account ID/unique username with self/duplicate/existing-friend prevention. Friend recommendation is separate from active search. | S-BR45, S-KD5 |
+| Search and discovery | “Search My Friends” searches the current user's established friends by name. “Add Friend” is separate and accepts only the target's canonical user-facing Username for direct lookup; internal AccountId and DisplayName are not Add Friend lookup keys. Friend Recommendation is separate from active search. | S-BR45, S-KD5, S-PM-0902-Q18 |
 | Special Care | A user may privately flag any established friend as Special Care; no minimum friendship duration applies. It causes no notification and is a ranking weight/pinning rule, not an eligibility filter and not an input to friend recommendation. | S-BR45, S-KD5, S-FR1, S-PM-0831 |
 | Home | Three relevant modules: Event Recommendation, Friend Recommendation/People You May Want To Know, and Friends Activity. Each shows Top 2 plus See All; Friends Activity appears immediately after Check-in. | S-BR45, S-KD5 |
 | Persona | Create, select, edit, and delete up to five user-defined Persona configurations; one is active after explicit confirmation. Persona controls presentation style, not eligibility, authorization, or deterministic ranking. | S-BR45, S-MM-0717, S-KD5 |
@@ -57,6 +57,14 @@ The current public product name is **ENMORI**. **Nexus Five** is the project tea
 | Social/SingPass/biometric/anonymous authentication | Formal technical scope uses Firebase email/password authentication. [S-BR4] |
 | Physical server fleet, Kubernetes, microservices, or enterprise infrastructure | Excluded by the formal COMP3851A serverless baseline; this does not approve a detailed COMP3851B architecture. [S-BR4] |
 
+### 2.3 COMP3851B Week 9 Release priority
+
+S-PM-0901-SCOPE makes the following confirmed capabilities **Must** for the Week 9 Release MVP: bounded AI Assistant, Event Recommendation, Friend Recommendation, Friends Activity ranking, and Persona create/read/update/delete, selection, and activation. This priority is incremental to the previously reviewed core demonstration flow for user entry, profile/interests/privacy, Check-in, event interaction, Calendar, and Footprint. [S-PM-0901-SCOPE]
+
+Admin Recommendation Configuration remains in the wider confirmed COMP3851B scope as **Should / Not Ready**. It is not a Week 9 Must and must not block implementation of a separately approved deterministic v1 recommendation design. [S-PM-0901-SCOPE]
+
+Must denotes Release priority only. The affected production PBIs remain Blocked / Not Ready until their applicable Backend/Auth/Data/API, field-allowlist, recommendation-formula, Persona-lifecycle, AI-retention, fallback, Qwen-runtime, UI-baseline, testing, owner/reviewer, estimation, and platform-evidence gates are resolved. No such unresolved detail is approved by priority alone. [S-PM-0901-SCOPE]
+
 ## 3. Functional requirements
 
 The following are normalized statements, not newly invented official requirement IDs.
@@ -72,6 +80,10 @@ The following are normalized statements, not newly invented official requirement
 
 - A Check-in requires at least one of note or mood and receives a timestamp. [S-BR2]
 - Weather is saved/linked when available under the Check-in's existing privacy rules. Weather unavailability or lookup failure must not block Check-in creation. Weather is context, not a third required input. [S-BR45, S-MM-0711, S-FR1 p. 3, S-PM-0831]
+- Q13-A selects Open-Meteo for the controlled non-commercial Week 9 Release through a Backend-only adapter. It uses only explicitly permitted Approx Location quantized to a 0.1-degree grid, discloses that the coordinate crosses to an external provider subject to then-current provider-side logging/retention, and makes compliant nearby Open-Meteo/CC BY attribution mandatory wherever its Weather data are displayed. [S-PM-0902-Q13]
+- Q13-B permits one monotonic two-second current-Weather attempt per logical Check-in creation, explicitly requests Unix UTC time, validates declared Celsius/WMO units and a -30/+15-minute freshness window, and performs no automatic retry, background lookup, or later backfill. Any Weather failure leaves an otherwise valid Check-in creatable without Weather. [S-PM-0902-Q13]
+- Q13-C freezes `weather_projection_v1` with minimal source/time/one-decimal-Celsius/nine-condition semantics, decimal half-away-from-zero rounding, and no retrospective remapping. Weather inherits Check-in authority/lifecycle; permission withdrawal is race-safe; Qwen receives only the fixed safe condition label. [S-PM-0902-Q13]
+- Q13-D fixes deterministic Weather display/attribution and canonical links, extends application-owned attribution to materially Weather-derived Q17 output, uses enrichment applicability for transient no-Weather copy, excludes commercial Free API use and broader Weather features, and defines mandatory Release evidence. [S-PM-0902-Q13]
 - Approximate location/context is optional and consent-dependent; precise/live/background location is prohibited. [S-BR2]
 - Check-in uses the already-saved privacy state read-only; it must not introduce a second location-visibility default or independent location-privacy toggle. [S-BR45, S-KD5]
 - Deleting a Check-in must remove it from dependent Calendar, Footprint, Friends Activity, Map, and Heatmap views. [S-BR2, S-PM-0831]
@@ -92,6 +104,10 @@ The following are normalized statements, not newly invented official requirement
 
 - Friend requests support send, receive, accept, and decline. Only acceptance creates friendship. [S-BR3]
 - My Friends search and Add Friend search are separate flows with different candidate sets. [S-BR45, S-KD5]
+- Q18-A prospectively standardizes direct Add Friend lookup on the target's current user-facing unique Username only. The opaque AccountId remains internal and DisplayName remains non-authoritative presentation text. Username validation, matching, lifecycle, result projection, and request behavior remain Open under Q-18. [S-PM-0902-Q18]
+- Q18-B freezes ASCII-only Username syntax and canonicalization, exact-equality Add Friend lookup, global atomic uniqueness across Accounts/reservations, a fixed MVP reserved namespace, Week 9 immutability, and no automatic or deletion-triggered reuse. Result projection, protected-state handling, Friend Request behavior/errors, UI, API/schema, implementation, and evidence remain Open. [S-PM-0902-Q18]
+- Q18-C requires authenticated/authorized Add Friend lookup, a fixed lifecycle/block/protected-rule precedence, a minimum identity projection, requester-relative relationship states only for eligible targets, semantically indistinguishable target-unavailable/rate-protection outcomes, and read-only enumeration-protected behavior. It creates no new hidden eligibility rule. [S-PM-0902-Q18]
+- Q18-D fixes one Pending request per unordered Account pair, a Backend-authoritative 30-day Pending lifetime, atomic accept/decline/invalidation/expiry behavior, first-valid-commit race semantics, requester-level send protection, privacy-safe stable errors, no implicit terminal-record retention, and explicit MVP exclusions. Q-18 is Resolved at requirement-contract level; downstream API/schema/UI/operations/evidence gates remain. [S-PM-0902-Q18]
 - Friends Activity candidates must pass visibility/consent filtering before ranking. The feed is unified: Special Care may increase rank, but eligible ordinary friends can still appear in Top 2 and See All. [S-BR45, S-KD5]
 - On the Friend Page, Special Care friends are pinned ahead of ordinary friends. The flag is private, creates no friend notification, and may be applied to any established friend without a minimum friendship duration. [S-KD5, S-FR1, S-PM-0831]
 
@@ -101,12 +117,17 @@ The following are normalized statements, not newly invented official requirement
 - Backend deterministic logic owns candidate construction, approved factors, weights, score, order, tie handling, and fallback. [S-BR5]
 - Home shows Top 2 from the already-ranked result for each module and See All shows the complete ranked set without UI reordering. [S-BR45, S-KD5]
 - Event Recommendation, Friend Recommendation, and Friends Activity are distinct modules. “Activity Recommendation” is not the approved Home label. [S-KD5]
-- Exact numeric weights, normalization, decay, and tie-breakers in S-ALG4 are **not confirmed** by a controlling source. [S-BR45, S-ALG4]
+- Exact numeric weights, normalization, decay, and tie-breakers in S-ALG4 remain **unapproved**. S-PM-0901-Q03 separately controls the current deterministic v1 formulas and does not adopt S-ALG4. [S-BR45, S-ALG4, S-PM-0901-Q03]
 
 ### 3.6 AI and Persona
 
 - Qwen3.5-9B is the sole primary model for the Sprint 5 target. Qwen3.5-4B is a manually selected development/low-spec alternative, not an automatic failover target. [S-BR5]
 - Ollama is the current local runtime behind a Qwen Local Model Adapter; vLLM, SGLang, and llama.cpp are future options, not commitments. [S-BR5]
+- Q31-A makes Qwen3.5-9B the sole Week 9 Release-acceptance model, keeps 4B explicit and development-only, prohibits application-level filesystem/network/database/shell/tool/persistent-memory capabilities, and requires both the human-readable reference and immutable model/manifest digest actually loaded by Ollama as Release identity evidence. [S-PM-0902-Q31]
+- Q31-B applies one monotonic 60-second total deadline with nested 5-second queue and 45-second generation ceilings, counts the complete model-facing input against a 4096-token limit, bounds the host to one active/two queued requests, and holds each per-user slot from acceptance to application terminal state. Disconnect and timeout fail closed; an unconfirmed underlying invocation quarantines the host generation slot. [S-PM-0902-Q31]
+- Q31-C requires duplicate-aware, single-root raw JSON parsing before object materialization, exact versioned output schemas, deterministic structural/authority validation, and a separate fail-closed semantic output policy. A runtime validation pass must not be reported as algorithmic proof that unrestricted free text is grounded. [S-PM-0902-Q31]
+- Q31-D permits no automatic model retry. AI Conversation failure creates no synthetic assistant content; Recommendation explanation may fall back only within the unexpired overall deadline through Backend-owned deterministic rendering of the approved safe explanation projection. Overall timeout and stale/abandoned/deletion terminal states permit no later fallback. Failure does not advance the Conversation anchor, while an already-persisted user message retains its Q14-B effect. [S-PM-0902-Q31]
+- Q31-E keeps dependency readiness distinct from `busy` admission capacity and defines mandatory identity, isolation, timing, terminal, parser, semantic-policy, fallback, retention, and live-9B evidence. The adversarial corpus proves only defined cases. Runtime readiness is blocked by any unresolved contract/evidence failure, not an undefined generic defect-priority label. [S-PM-0902-Q31]
 - Flutter must never call the local model/runtime directly. The authenticated backend applies authorization, privacy/visibility, minimization, purpose checks, validation, and deterministic fallback before/after model use. [S-BR5]
 - Qwen cannot access Firestore/database state or independently fetch user/event/friend records. It receives only an approved minimized payload. [S-BR5]
 - Qwen may explain, summarize, or conversationally present an approved result. It may not create recommendation candidates, decide access, set weights/scores, reorder output, or persist authoritative state. [S-BR5]
@@ -158,6 +179,11 @@ Exact validation syntax, API shape, schema/storage, deployment, and implementati
 - Selection requires confirmation and yields one active Persona.
 - Edit/delete are in scope; delete requires confirmation.
 - Tone Presets are removed as a separate concept.
+- Create produces an inactive Persona. Confirmed activation atomically replaces the unique Active Persona authority; zero Active Personas is valid. [S-PM-0901-Q19]
+- Permanent deletion removes the live Persona entity/content, has no Restore, frees capacity, and clears active authority without selecting a replacement. [S-PM-0901-Q19]
+- The approved structured properties are owner-only `displayName`, `tone`, `responseLength`, and `formatStyle` under the S-PM-0901-Q19 enums. Free-text Persona prompts and arbitrary extensions are prohibited. [S-PM-0901-Q19]
+- Persona-based AI uses an immutable projection snapshot captured at request start. Edit/Active change affects later requests; permanent deletion causes an in-flight result to fail closed before persistence/delivery. [S-PM-0901-Q19]
+- Historical Conversation does not resolve or retain a readable Persona. Only non-content `presentationMode` and non-identifying projection schema version metadata may remain with the Conversation. [S-PM-0901-Q19]
 
 ### 4.5 COMP3851B Admin lifecycle
 
@@ -183,23 +209,36 @@ Exact validation syntax, API shape, schema/storage, deployment, and implementati
 | Admin trust boundary | Admin role is assigned out of band by an authorized system owner and verified by protected server-side authorization; the Flutter UI cannot confer Admin status. | S-BR5, S-PM-0831 |
 | Admin audit boundary | Account actions create a Pending auditable request only; this phase approves neither an execution path nor access to unrelated private profiles, Check-ins, locations, friendships, or AI conversations. | S-PM-0831 |
 | Sensitive inference | Do not infer mental health or expose private/non-consenting data through recommendations or AI. | S-BR2, S-BR4, S-MM-0717 |
-| Retention | Raw prompts/responses should not be stored long-term by default, but an exact retention period is not approved. | S-BR5; open question |
+| Retention | No unapproved secondary AI/Recommendation copies; Conversations expire 90 days after dedicated `lastPersistedMessageAt`; operational logs expire after 30 days under a strict cross-layer allowlist; Admin Configuration and Account Action Request retention/audit use the approved entity-specific anchors and lifetimes. | S-BR5; S-PM-0902-Q14 |
 
 ## 6. Recommendation and AI rules
 
-Approved recommendation factors exist at category level, not as approved numeric formulas:
+The approved deterministic v1 field and formula boundary is:
 
-- Event recommendations may use permitted interests, event attributes/context, and other explicitly allowed non-sensitive factors.
-- Friend recommendations may use shared interests, common events/event interest, and permitted approximate/contextual overlap only after privacy filtering.
-- Friends Activity may rank a unified eligible activity set using recency/relevance and Special Care as a weight.
+- Event Recommendation v1 uses valid user Interest Tag IDs matched to the Event's valid Interest Tag IDs after Event status/time eligibility. Q12-A explicitly supersedes Q03/Q17's ambiguous `eventCategoryOrTagIds` phrase: the separately typed Event Category ID does not score or implicitly match by name. It does not score Check-in, Mood, Activity, Weather, location, social data, Interested/Going counts, popularity, Special Care, Persona, or AI history. [S-PM-0901-Q17, S-PM-0901-Q03, S-PM-0902-Q12]
+- Friend Recommendation v1 derives only shared interests and common Events from purpose-authorized fields after account, privacy, friendship, and pending-request eligibility. Approximate/contextual overlap is not enabled in v1, and Special Care is prohibited. [S-PM-0901-Q17]
+- Friends Activity v1 filters accepted-friend Activity by privacy/visibility before using approved type/category, server-authoritative time, and the requesting user's Backend-only Special Care boolean. Special Care cannot restore an ineligible Activity and never enters Qwen. [S-PM-0901-Q17]
 - The backend must remain deterministic and explainable; AI may verbalize the reason but cannot manufacture one unsupported by the deterministic result.
 - COMP3851B Admin may create and configure only factors backed by already implemented and approved factor logic. Configuration uses Draft and explicit Publish, creates an effective version, and preserves the version used by historical recommendations. [S-PM-0831]
 
-S-ALG4’s 0–100 scores, fixed weights, seven-day decay, normalization, and exact tie-breakers are implementation proposals unless PM supplies approval evidence. They must not be copied into code as confirmed business rules.
+For consented Check-in conversational assistance, one Backend `asOf` defines a rolling `[asOf - 7 × 24 hours, asOf]` window. After authorization, consent, deletion, future-date, and window filtering, the Backend selects at most the five newest records and projects only UTC time, authorized Note text, normalized Mood label, normalized Activity label, and normalized Weather-condition label. Activity and Weather objects, provider payloads, temperature, location, IDs, paths, and arbitrary maps do not enter Qwen. [S-PM-0901-Q17]
+
+Recommendation explanation receives one already-selected result plus its minimal deterministic reason, never a candidate pool or score vector. S-PM-0901-Q19 closes the Persona gate with `persona_presentation_v1`, containing only schema version and approved tone, response-length, and format-style enums. Persona identity, display name, object, revision, timestamps, and free text never enter Qwen. [S-PM-0901-Q17, S-PM-0901-Q19]
+
+S-PM-0901-Q03 approves fixed non-negative integer v1 scoring without candidate-pool normalization. Event Recommendation scores interest matches and orders ties by upcoming start time then canonical Event ID. Friend Recommendation scores two points per shared Interest and one per common Event, then applies the approved count/ID total ordering. Friends Activity adds fixed recency, Activity relevance, and Backend-private Special Care points inside a seven-day window, then orders by score, time, and canonical source tuple. [S-PM-0901-Q03]
+
+Q16 defines zero results as a successful deterministic computation: no eligibility/positive-factor broadening, Qwen call, stale-result reuse, or user-visible Recommendation history. Q14-approved aggregate telemetry may record an empty returned-result count but not candidate identity or protected exclusion reasons. Home, See All, and Refresh recompute independently with their captured `asOf`. Approved titles are `No event recommendations right now`, `No friend recommendations right now`, and `No recent activity from friends`, with the corresponding supporting copy in S-PM-0902-Q16. [S-PM-0902-Q16]
+
+S-ALG4's different 0–100 scores, weights, seven-day decay, normalization, and tie-breakers remain unapproved and must not be substituted for S-PM-0901-Q03.
 
 ## 7. UI / UX decisions
 
-- Current online UI entry point: S-FIGMA, supplied by PM on 2026-08-31. It is the only UI link required at this stage.
+- Current online UI entry point: S-FIGMA, supplied by PM on 2026-08-31. S-PM-0902-Q04 Q04-A freezes Figma Make file `UFmjpkfucM4TctMuRQfsOC`, Version 5, title `Create individual event details`, displayed as August 1, 2026 at 7:37 PM, as the visual reference baseline; no unstated timezone is inferred.
+- Version 5 is a non-pixel-perfect, incomplete linear prototype and basic first-pass visual design. It controls recognizable visual direction, not Business Rules, scope, production interaction semantics, Flutter structure, API/Backend behaviour, accessibility exceptions, or platform exceptions. [S-PM-0902-Q04]
+- The PM-supplied source archive, SHA-256, extracted source, file inventory, intake date, and recorder are retained under `docs/evidence/ui/figma-make-v5/`. Exact historical-Version-5 provenance, reference captures/dimensions, external-dependency reproduction evidence, and full evidence verification remain Pending and block affected screens/states from Visual Implementation Ready. [S-PM-0902-Q04]
+- Q04-BASELINE-LIMITATION-01 records the prototype's linear/demonstration limitation. Q04-B defines role/scope-aware authority precedence and requires explicit same-tier supersession rather than document recency. Q04-DEV-01 through Q04-DEV-13 are approved observed/provisional deviations. Q04-C requires every one of the 42 exported routes to receive an inventory disposition, permits zero-to-many route/matrix relationships, records required production states missing from Figma, and independently gates shared visual patterns. Classification records authoritative scope but cannot change it. Population content acceptance and completeness remain Pending. [S-PM-0902-Q04]
+- Q04-D accepts the inventory/grouping/disposition content after conservative review: 42/42 routes, 37 Release routes, five Prototype Evidence Only routes, 27 supported production surfaces plus two evidence-only rows, 38 material state groups, 29 rows, and 12 still-unready patterns. DEV-20 is not retained; DEV-14–19/21–22 remain unapproved candidates. This does not approve implementation or readiness. [S-PM-0902-Q04]
+- S-PM-0902-GOV adopts the Q04/SOURCE_MAP authority and conflict model project-wide. Applicable Sponsor/Supervisor authority ranks above PM-controlled decisions within scope; PM remains authoritative for delegated, implementation-detail, and otherwise-undecided matters. Date alone never supersedes, and a same-tier conflict requires explicit competent supersession or a new resolution unless compatible specificity allows both rules to apply. [S-PM-0902-GOV]
 - Repository UI exports remain historical/corroborating evidence, especially S-UI5 and S-UIMAKE.
 - Initial consent/privacy flow: Accept → Public; Reject → Private; both enter the app; Friends-only is later in Settings.
 - Check-in does not carry a second privacy default or independent location toggle.
@@ -214,7 +253,7 @@ S-ALG4’s 0–100 scores, fixed weights, seven-day decay, normalization, and ex
 - Early Group screens in S-UIMAP/S-UIS1 are obsolete due to later scope removal.
 - ENMORI is the current product name; Nexus Five names the team and Campus Connect is an obsolete historical label. Existing mismatched exports remain historical evidence and are not silently relabelled. [S-PM-0831]
 
-No concrete Figma export is required for this context phase. Pixel-accurate implementation later may require a node-specific design link or exports because Figma Make does not expose the same node/screenshot workflow as a standard `/design/` file.
+No concrete Figma export was required for the 2026-08-31 context-extraction phase. S-PM-0902-Q04 now requires the verified Version 5 archive, digest, historical-version provenance, reference captures/dimensions, dependency inventory, and recorder/date evidence before Visual Implementation readiness. Q04-A does not require pixel-perfect reproduction.
 
 ## 8. Sponsor / Supervisor decision trail
 
@@ -230,8 +269,35 @@ No concrete Figma export is required for this context phase. Pixel-accurate impl
 | 2026-07-31 | Only two blocking defects named; no new feature work. | Freezes scope while requiring two corrections. |
 | 2026-08-01 | Internal record says both corrections were fixed/retested and package frozen. | Status update only; not a separately attributable Sponsor ruling. |
 | 2026-08-31 | PM resolves C1–C8 and C10, leaves C9 open, and prospectively approves the bounded COMP3851B Admin increment plus Calendar/Footprint/AI terminology and behavior recorded here. | This is a new PM decision record. It does not retroactively alter COMP3851A scope, UAT evidence, or Sponsor/Supervisor history. |
-| 2026-09-01 | PM approves the Flutter client architecture and Fake-auth validation slice recorded by S-PM-0901. | Replaces the earlier deferred-client-architecture status only for Flutter client structure/state/routing/testing; backend, schema, API, Firebase, UI, and algorithm decisions remain open. |
+| 2026-09-01 | PM approves the Flutter client architecture and Fake-auth validation slice recorded by S-PM-0901. | Replaces the earlier deferred-client-architecture status only for Flutter client structure/state/routing/testing. Backend architecture remained open at this decision point and was subsequently resolved at architecture level by S-PM-0901-BACKEND; feature schema, field, UI, and algorithm decisions remain separately gated. |
 | 2026-09-01 | PM defines Week 9 as a prioritized, demonstrable, testable COMP3851B Release MVP after four two-week development Sprints, with academic Weeks 10–12 reserved for concentrated stabilization. | Does not commit every confirmed capability to Week 9, select the exact MVP feature set, or postpone Sprint-level testing until stabilization. |
+| 2026-09-01 | PM makes bounded AI Assistant, Event Recommendation, Friend Recommendation, Friends Activity ranking, and Persona management Week 9 Must capabilities; Admin Recommendation Configuration remains Should / Not Ready. | Must is priority, not readiness. Backend/Auth/Data/API, field allowlists, algorithms, lifecycle, retention, fallback, Qwen runtime, and UI baseline remain unresolved; detailed Sprint 2–4 refinement waits for those decisions. |
+| 2026-09-01 | PM approves the Q-30 Backend Architecture Baseline recorded by S-PM-0901-BACKEND. | Resolves the trusted Backend/Auth/Data/API, controlled-deployment, testing, operations, and repository-boundary architecture. It does not approve feature endpoints/DTOs, Firestore schema, recommendation formulas, field allowlists, Qwen operational parameters, final UI, or public deployment. |
+| 2026-09-01 | PM approves purpose-specific Q-17 recommendation and non-Persona AI field allowlists recorded by S-PM-0901-Q17. | At this decision point Q-17 is partially resolved: deterministic v1 and non-Persona AI inputs are bounded, while Persona-to-Qwen remains Blocked pending an exact projection. S-PM-0901-Q19 later closes that remainder; retention, fallback, runtime, and UI stay separate. |
+| 2026-09-01 | PM resolves Q-03 through the deterministic v1 recommendation formulas recorded by S-PM-0901-Q03. | Approves fixed scoring and total ordering for Event Recommendation, Friend Recommendation, and Friends Activity. Does not adopt S-ALG4, approve Admin configuration, or settle zero-result behavior. |
+| 2026-09-01 | PM resolves Q-19 and closes Q-17's Persona projection gate through S-PM-0901-Q19. | Approves Persona lifecycle, permanent deletion, historical usage metadata, Conversation deletion/source invalidation, structured Persona fields, projection enums, and request-start snapshot semantics. Retention duration, UI copy, API/schema, account actions, and Qwen runtime remain separate. |
+| 2026-09-02 | PM resolves Q-14 through S-PM-0902-Q14. | Approves purpose-limited retention, Conversation and log expiry, Admin Configuration history/audit, and exact Account Action Request expiry/content-minimization/audit boundaries. It approves no Account Action enum value or execution workflow and is not Sponsor/Supervisor authority. |
+| 2026-09-02 | PM approves Q31-A through S-PM-0902-Q31. | Approves Qwen model identity, isolation, Backend-only selection authority, and immutable loaded-digest Release evidence. Q-31 remains Open for timeout/budget, concurrency, validation, and fallback. |
+| 2026-09-02 | PM approves Q31-B through S-PM-0902-Q31. | Approves the unique monotonic total deadline, nested timing/token budgets, bounded host/per-user capacity, cancellation, and terminal/quarantine semantics. Q-31 remains Open for structured-output validation and fallback. |
+| 2026-09-02 | PM approves Q31-C through S-PM-0902-Q31. | Approves raw duplicate/single-root enforcement, exact output schemas, deterministic runtime validation, and a separately evidenced semantic model-output policy. Q-31 remains Open for retry/fallback and closure evidence. |
+| 2026-09-02 | PM approves Q31-D through S-PM-0902-Q31. | Approves zero automatic retry, overall-deadline terminal behavior, non-content AI Conversation failure, safe-projection-only Recommendation fallback, and Conversation-anchor effects. Q-31 remains Open only for Q31-E closure evidence. |
+| 2026-09-02 | PM approves Q31-E and resolves Q-31 through S-PM-0902-Q31. | Approves readiness/admission separation and the mandatory automated/live-host evidence and closure gates. Requirement resolution is not implementation readiness or Sponsor/Supervisor approval. |
+| 2026-09-02 | PM approves Q16 Common through S-PM-0902-Q16. | Approves common successful-empty, privacy-safe observability, request-independence, and refresh semantics. Q-16 remains Open for three module-specific behaviors and final copy. |
+| 2026-09-02 | PM approves Q16-A through Q16-C and resolves Q-16 through S-PM-0902-Q16. | Approves exact module copy and common Home/See All/Refresh behavior without approving DTO names or Q-04 visual treatment. |
+| 2026-09-02 | PM approves Q12-A through S-PM-0902-Q12. | Approves distinct catalogue identities and name normalization, and explicitly supersedes Q03/Q17's ambiguous Event Category/Tag scoring-input terminology while preserving the formula and ordering. Q-12 remains Open for Q12-B–D. |
+| 2026-09-02 | PM approves Q12-B through S-PM-0902-Q12. | Approves the non-cascading Active/Inactive lifecycle, existing-reference preservation, restore/rename behavior, safe Event editing with an already-inactive Category, and inactive-plus-zero-reference permanent deletion. Q-12 remains Open for Q12-C–D. |
+| 2026-09-02 | PM approves Q12-C through S-PM-0902-Q12. | Approves Backend-verified Admin mutation authority, expected/authoritative revision distinction, stale-before-no-op validation, new/replacement-only Active checks, concurrency, and distinct stable HTTP/application errors. Q-12 remains Open only for Q12-D. |
+| 2026-09-02 | PM approves Q12-D and resolves Q-12 through S-PM-0902-Q12. | Approves bounded single-entity catalogue operations and explicit exclusions, including no bulk import/export, hierarchy/mapping, cascade, extended metadata, analytics/reference disclosure, or retained catalogue audit-history product. |
+| 2026-09-02 | PM approves Q13-A through S-PM-0902-Q13. | Approves the controlled non-commercial Open-Meteo provider, Backend-only/minimized 0.1-degree Approx Location boundary, third-party processing disclosure, and mandatory attribution. Q-13 remains Open for Q13-B–D. |
+| 2026-09-02 | PM approves Q13-B through S-PM-0902-Q13. | Approves the single two-second minimum-variable lookup, explicit Unix UTC and declared-unit validation, stricter freshness window, and non-blocking no-retry/no-backfill behavior. Q-13 remains Open for Q13-C–D. |
+| 2026-09-02 | PM approves Q13-C through S-PM-0902-Q13. | Approves frozen projection semantics/mapping/rounding, minimal Check-in-owned persistence, deletion/withdrawal races, and condition-label-only Qwen projection. Q-13 remains Open only for Q13-D. |
+| 2026-09-02 | PM approves Q13-D and resolves Q-13 through S-PM-0902-Q13. | Approves deterministic Weather/Q17 attribution with frozen canonical links, enrichment-based fallback copy, explicit Free API/product exclusions, and mandatory evidence. Requirement resolution is not implementation/compliance evidence. |
+| 2026-09-02 | PM approves Q18-A through S-PM-0902-Q18. | Prospectively standardizes AccountId, Username, and DisplayName vocabulary; Username alone is the direct Add Friend lookup key. Q-18 remains Open for validation, matching, lifecycle, result projection, request behavior, API/schema/UI, implementation, and evidence. |
+| 2026-09-02 | PM approves Q18-B through S-PM-0902-Q18. | Approves the frozen ASCII canonicalization pipeline, exact-only lookup, global atomic reservation uniqueness, fixed namespace protection, immutable Week 9 lifecycle, and no deletion-triggered reuse. Q-18 remains Open for result projection, protected-state handling, Friend Request behavior/errors, exclusions, API/schema/UI, implementation, and evidence. |
+| 2026-09-02 | PM approves Q18-C through S-PM-0902-Q18. | Approves authenticated/authorized exact lookup, fixed privacy precedence, minimum result projection, eligible requester-relative relationship states, target-level non-distinguishability, read-only behavior, and enumeration protection. Q-18 remains Open only for Friend Request mutation/concurrency/errors/exclusions and downstream API/schema/UI/evidence. |
+| 2026-09-02 | PM approves Q18-D and resolves Q-18 through S-PM-0902-Q18. | Approves 30-day Pending lifetime, protected send/accept/decline/invalidation/expiry, pair uniqueness and first-valid-commit race behavior, requester-level abuse protection, terminal-outcome/retention separation, privacy-safe errors, exclusions, and mandatory evidence. Requirement resolution is not downstream implementation readiness. |
+| 2026-09-02 | PM approves Q04-A through Q04-D through S-PM-0902-Q04 and supplies the exported Make source. | Freezes Version 5/evidence and authority/matrix governance, then accepts the populated inventory/grouping/dispositions. Five routes remain prototype-only; eight new deviation candidates, patterns, provenance/captures, and readiness remain unresolved. Q-04 remains Open. |
+| 2026-09-02 | PM approves S-PM-0902-GOV as an explicit project-governance correction. | Makes the Q04/SOURCE_MAP authority model canonical project-wide, corrects the former repository wording that placed PM beside Sponsor/Supervisor at the highest tier, rejects date-only supersession, and preserves compatible specificity plus explicit same-tier conflict resolution. It is not a Sponsor/Supervisor decision. |
 
 No explicit Supervisor decision could be attributed from the available records. This absence must not be filled by inference.
 
@@ -240,18 +306,24 @@ No explicit Supervisor decision could be attributed from the available records. 
 - Sprint 1 covers academic Weeks 2–3, Sprint 2 Weeks 4–5, Sprint 3 Weeks 6–7, and Sprint 4 Weeks 8–9. [S-PM-0901-MVP]
 - The Week 9 target is a prioritized, demonstrable, testable COMP3851B Release MVP rather than implementation of every confirmed product capability. [S-PM-0901-MVP]
 - Academic Weeks 10–12 concentrate on cross-feature testing, UAT, optimization, compatibility, defect closure, and release evidence. Testing, review, and applicable platform evidence still belong in the Definition of Done for every development Sprint. [S-PM-0901-MVP]
-- The exact Must/Should/Stretch set, Release Goal, Release Definition of Done, and four-Sprint forecast are not yet approved. This release boundary does not permanently remove confirmed capabilities from the wider product scope. [S-PM-0901-MVP]
+- S-PM-0901-SCOPE selects bounded AI Assistant, Event Recommendation, Friend Recommendation, Friends Activity ranking, and Persona management as Week 9 Must capabilities. Admin Recommendation Configuration is Should / Not Ready. This selection does not permanently remove other confirmed capabilities from the wider product scope. [S-PM-0901-SCOPE]
+- The Release Goal and Definition of Done boundary are recorded by S-PM-0901-SCOPE. Detailed Sprint 2–4 selection, ownership, estimates, and sequencing remain subject to re-refinement after the affected blockers are resolved. [S-PM-0901-SCOPE]
+- Sprint 1 may proceed with the already approved Fake-auth Architecture Validation Slice. It is not production authentication and does not settle any production blocker. [S-PM-0901, S-PM-0901-SCOPE]
 
-## 9. Technical boundaries and approved Flutter client architecture
+## 9. Technical boundaries and approved client/Backend architecture
 
-- The COMP3851A formal sources describe a Flutter/Dart client and a Firebase serverless baseline using Cloud Functions in TypeScript/Node.js, Cloud Firestore, and Firebase Authentication. This is historical/formal evidence, not approval of the detailed COMP3851B architecture.
-- Protected operations and model access remain behind an authenticated backend boundary; Flutter must not directly access the Qwen runtime or acquire authorization authority.
-- The recorded Qwen Local Model Adapter is an approved isolation boundary around the current Ollama runtime, not approval of a complete backend topology or an irreplaceable runtime choice.
-- Physical-server fleets, Kubernetes, a microservice estate, and enterprise infrastructure remain outside the recorded scope.
+- The COMP3851A formal sources describe a Flutter/Dart client and a Firebase serverless baseline using Cloud Functions in TypeScript/Node.js, Cloud Firestore, and Firebase Authentication. S-PM-0901-BACKEND is the controlling PM decision for the prospective COMP3851B Backend architecture; it does not retroactively alter the historical baseline.
+- Flutter uses Firebase Authentication directly but sends all product-data, social, recommendation, AI, and Admin operations through the versioned HTTPS REST/JSON Backend. The Backend verifies identity and is the business authorization, privacy, and data-access boundary. [S-PM-0901-BACKEND]
+- The Backend baseline is a TypeScript-strict Node.js 24 LTS feature-first modular monolith using Fastify in Bootstrap/Transport, Firebase Admin/Firestore Infrastructure adapters, and an internal Qwen Adapter to a separately supervised local Ollama process. [S-PM-0901-BACKEND]
+- `Application/Domain defines Ports; Infrastructure implements Ports; inner layers never import Infrastructure.` Vendor types and raw errors remain inside Infrastructure; Transport maps only stable application failures. [S-PM-0901-BACKEND]
+- Cloud Firestore is the Week 9 product datastore, but Flutter has no direct product-data access. Backend Admin technical privilege never substitutes for use-case authorization or privacy filtering. Qwen has no Firestore credential or write authority. [S-PM-0901-BACKEND]
+- Week 9 uses one controlled Linux demonstration host behind a controlled HTTPS edge. The raw Backend listener and Ollama are not device/LAN-visible. Dependency failure does not crash the Backend process, while readiness and affected endpoint availability may degrade independently. [S-PM-0901-BACKEND]
+- The repository remains single-repository with Backend source under `backend/` and the normative OpenAPI contract under independent `api/`. Flutter does not import Backend source. [S-PM-0901-BACKEND]
+- Physical-server fleets, Kubernetes, a microservice estate, enterprise infrastructure, and public long-term Internet deployment remain outside the recorded Week 9 scope.
 - S-PM-0901 approves the Flutter client architecture summarized in `ARCHITECTURE.md`: feature-first organization with Presentation, selective Domain, and Data layers; Repository interfaces; Riverpod without code generation; constructor injection for non-Riverpod Domain/Data classes; ViewModel Repository dependencies declared through `ref.watch` in `build()`; `go_router`; project `Result<T>`/`AppFailure`; and an application-lifetime Auth Session Provider.
 - The approved validation slice uses `FakeAuthRepository` and requires a vertical integration test across bootstrap, session Provider, Router, ViewModel, Repository, and observed session state. It is not production authentication.
 - `flutter_riverpod`, `go_router`, and SDK `integration_test` support are approved in principle for this slice; compatible versions must be verified against Flutter 3.47.2 and `pubspec.lock` committed.
-- Exact Firebase/backend deployment, real Auth integration, schema, API contracts, branch policy, product-wide testing strategy, and architecture outside the approved Flutter client scope remain **undecided**.
+- Feature endpoint/DTO fields, Firestore schema/indexes, exact dependency patch/tooling, any unlisted purpose field, final UI, and exact deployment products/configuration remain **undecided**. Q-03, Q-14, Q-17, Q-19, and Q-31 resolve their requirement contracts, but do not make an affected production PBI Ready without their applicable implementation-evidence and remaining contract gates. [S-PM-0901-BACKEND, S-PM-0901-Q17, S-PM-0901-Q03, S-PM-0901-Q19, S-PM-0902-Q14, S-PM-0902-Q31, S-PM-0901-SCOPE]
 
 ## 10. Conflict register
 
@@ -285,7 +357,7 @@ S-FR1 was cross-checked against the formal requirements, late Sprint records, UA
 
 - S-ALG4 specifies exact weights, 0–100 formulas, normalization, seven-day decay, and tie-breakers.
 - S-BR45 deliberately leaves formulas/weights/normalization/decay/tie-breakers outside the formal package; Sponsor decisions confirm only factors, privacy-first filtering, determinism, explainability, and Top 2.
-- Status: exact algorithm is unconfirmed, not approved merely because the document is detailed.
+- Status: **superseded prospectively for deterministic v1 by S-PM-0901-Q03.** S-ALG4 itself remains unapproved and must not be treated as the basis of the current formula.
 
 ### C-03 — Booked semantics
 
@@ -335,4 +407,4 @@ S-FR1 was cross-checked against the formal requirements, late Sprint records, UA
 
 The canonical glossary is [`CONTEXT.md`](../CONTEXT.md). This extraction document preserves evidence and requirement boundaries; it is no longer a second glossary authority. Technical integration terms such as Qwen Local Model Adapter remain described in the relevant source-grounded sections rather than in the domain glossary.
 
-Exact scoring formulas, the approved factor-registry contents, account-request approval/execution semantics, and the final data schema remain unconfirmed.
+The approved factor-registry contents, account-request approval/execution semantics, and the final data schema remain unconfirmed. Deterministic v1 scoring is controlled by S-PM-0901-Q03.

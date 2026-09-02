@@ -1,0 +1,3 @@
+# Preserve the PM-supplied Figma Make source export byte-for-byte as evidence.
+# Its original archive contains a small number of trailing-space lines.
+docs/evidence/ui/figma-make-v5/source/** whitespace=-trailing-space

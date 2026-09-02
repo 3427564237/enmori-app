@@ -4,8 +4,9 @@
 - **Authority:** S-PM-0901, 2026-09-01
 - **Scope:** Flutter client only
 - **Detailed design:** [`docs/superpowers/specs/2026-09-01-flutter-client-architecture-design.md`](docs/superpowers/specs/2026-09-01-flutter-client-architecture-design.md)
+- **Backend architecture:** [`docs/superpowers/specs/2026-09-01-backend-architecture-design.md`](docs/superpowers/specs/2026-09-01-backend-architecture-design.md) (S-PM-0901-BACKEND)
 
-This is the canonical operating summary for Flutter client structure and dependency rules. It does not approve backend, schema, API, Firebase, UI, or algorithm decisions. If this summary and the approved detailed design appear to conflict, report the conflict and stop affected work rather than choosing silently.
+This is the canonical operating summary for Flutter client structure and dependency rules. It does not itself approve Backend, schema, API, Firebase, UI, or algorithm decisions. Backend architecture is governed separately by S-PM-0901-BACKEND; feature schemas and contracts remain separately gated. If this summary and either applicable approved design appear to conflict, report the conflict and stop affected work rather than choosing silently.
 
 ## Organization
 
@@ -167,10 +168,10 @@ The slice does not add `get_it`, Provider, BLoC, Freezed, `json_serializable`, M
 
 ## Deferred decisions
 
-This architecture does not decide:
+This Flutter architecture does not decide:
 
-- Firebase configuration, real Auth adapter, or token lifecycle;
-- backend topology, Cloud Functions, or deployment;
+- feature-specific Firebase configuration or the real client Auth adapter implementation;
+- Backend implementation details beyond the separately approved S-PM-0901-BACKEND boundary;
 - Firestore schema, DTO fields, migrations, or API contracts;
 - recommendation formulas or factor registry;
 - final Figma/UI baseline;

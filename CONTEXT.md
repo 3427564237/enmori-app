@@ -21,6 +21,21 @@ _Avoid_: Check-in Timeline
 
 ## Events and discovery
 
+**AccountId**:
+The immutable opaque canonical Account identity under Backend authority. It is not a public handle or an Add Friend search key.
+
+**Username**:
+The current user-facing unique identifier and sole direct Add Friend lookup key for an ordinary user Account.
+
+**DisplayName**:
+Non-authoritative presentation text. It is not unique and is not a direct Add Friend lookup key.
+
+**Add Friend**:
+Direct Username lookup for initiating the approved Friend Request flow. It is separate from Search My Friends and Friend Recommendation.
+
+**Search My Friends**:
+Name-based search limited to the current user's established friendship set.
+
 **Interested**:
 An event-interest intent independent from Going.
 

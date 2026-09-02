@@ -4,12 +4,14 @@
 
 For any affected requirement, use this hierarchy and preserve the supersession trail:
 
-1. The latest dated, explicit Sponsor/Supervisor decision or confirmed PM decision record, each controlling only within the deciding role's stated scope. A PM decision must not be represented as an earlier Sponsor/Supervisor approval.
-2. The latest formal Business Rules and Requirements package for that scope, but only where it explicitly adds to or supersedes an earlier package.
-3. Earlier frozen formal requirements that have not been superseded.
-4. Traceability matrices, UAT records, UI exports, diagrams, reports, and current code as supporting evidence only.
+1. Applicable non-waivable law, licence, privacy, security, accessibility, and platform obligations.
+2. Explicit formal Sponsor/Supervisor decisions and applicable formal project or assessment authority, each controlling only within the attributed role's stated scope.
+3. Confirmed PM-controlled project decisions and approved Business Rules and Requirements packages within their stated scopes. PM decisions are authoritative for delegated, implementation-detail, and otherwise-undecided project matters, but cannot silently override a conflicting Sponsor/Supervisor decision.
+4. Earlier formal requirements that a competent authority explicitly freezes or leaves unchanged.
+5. Traceability matrices, UAT records, UI exports, diagrams, reports, prototypes, and other derivative records as supporting evidence only.
+6. Current implementation behavior as implementation evidence only, never proof of a requirement.
 
-If sources at the same or different levels conflict, do not choose silently. Report the conflict and stop work on the affected behavior until it is resolved.
+A later document date alone never establishes supersession. Same-tier sources coexist where compatible specificity allows both to apply. A same-tier conflict requires explicit competent supersession or a new authoritative resolution; otherwise report the conflict and stop work only on the affected behavior. Every resolution must retain the old source, the new source, and the scope of change.
 
 ## Required conduct
 
