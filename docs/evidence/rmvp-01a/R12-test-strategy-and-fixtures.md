@@ -34,11 +34,16 @@ The profiles below are execution-local projections of the approved baseline fixt
 |---|---|---|
 | `RMVP-FX-NEW-ACCEPT` | New ordinary member; valid unregistered email/password; available canonical Username; no Product Account | R12-T01, R13 accept path, `CORE-01.A` |
 | `RMVP-FX-NEW-REJECT` | Same as `RMVP-FX-NEW-ACCEPT`, independently reset; Initial Choice is `reject` | R12-T02, R13 reject path, `CORE-02.A` |
-| `RMVP-FX-INCOMPLETE` | Firebase identity exists and is authenticated; Product Account onboarding is absent/incomplete; no completion projection | R12-T03, R13 resume/cancel paths |
-| `RMVP-FX-USERNAME` | Controlled invalid, unavailable, and conflicting canonical Username variants; no reason for unavailability exposed to the requester | R12-T05 |
+| `RMVP-FX-INCOMPLETE` | Firebase identity exists and is authenticated; Product Account onboarding is absent/incomplete; no completion projection | R12-T03, R12-T09B, R13 resume/cancel paths |
+| `RMVP-FX-USERNAME-INVALID` | Username values that fail the approved Q18-B canonical validation; no reservation or Product Account mutation | R12-T05A |
+| `RMVP-FX-USERNAME-UNAVAILABLE` | A valid canonical Username already reserved by another account; the reason is not exposed to the requester | R12-T05B |
+| `RMVP-FX-ONBOARDING-CONFLICT` | Auth Principal is already bound to a different completed onboarding input; the completed account remains authoritative | R12-T05C |
 | `RMVP-FX-ONBOARDED` | Active ordinary member with completed Product Account; owner AccountId is internal and distinct from Firebase UID | R12-T07–T10, R13, R14 |
 | `RMVP-FX-NOTE` | Valid Note variants plus empty, Unicode-whitespace-only, 500-grapheme, 501-grapheme, internal-line-break, and undeclared-field inputs | R12-T08, `CORE-05.A` |
-| `RMVP-FX-AUTH` | Missing, malformed, expired, revoked, disabled, and non-owner identity variants | R12-T06, R12-T09, R12-T11, `X-01` |
+| `RMVP-FX-FIREBASE-REGISTRATION` | Synthetic invalid Firebase credentials for a registration attempt; no Product Account exists | R12-T06A |
+| `RMVP-FX-AUTH-REQUIRED` | Missing, malformed, or expired token on a protected Backend operation | R12-T06B, `X-01` |
+| `RMVP-FX-AUTH-FORBIDDEN` | Revoked or disabled identity variants on a protected Backend operation | R12-T09A |
+| `RMVP-FX-NON-OWNER` | Authenticated member and a Check-in owned by a different AccountId | R12-T11, `X-01` |
 | `RMVP-FX-CHECKIN` | One owner Check-in with opaque ID, normalized Note and server UTC `createdAt`; separate non-owned and missing IDs | R12-T11, R13 later-read path |
 | `RMVP-FX-DEPENDENCY` | Controlled Backend/Firebase/Firestore unavailable responses, network loss, pending cancellation and late-response timing controls | R12-T12, R13/R14 failure evidence |
 
@@ -60,13 +65,17 @@ All rows below start as `Not Run`. The expected outcome is the contract oracle f
 | R12-T02 | AC-02 / UC-02 / `CORE-02.A` | `RMVP-FX-NEW-REJECT` | Submit valid Username + `reject`; one commit returns `rejected` + `private`, marks onboarding complete, and performs no rejected optional processing | `Not Run` |
 | R12-T03 | AC-03 / UC-01–02 | `RMVP-FX-INCOMPLETE` | Re-enter after Firebase identity creation but incomplete Product Account; route to resumable onboarding, never claim completed account, and permit the same intent to be retried | `Not Run` |
 | R12-T04 | AC-03 / UC-02 alternative | `RMVP-FX-INCOMPLETE` or committed onboarding reset | Repeat the same onboarding request with the same owner, key and input; return the original safe projection and create no duplicate binding, reservation, account, or idempotency result | `Not Run` |
-| R12-T05 | AC-01/02 / UC-02 errors | `RMVP-FX-USERNAME` | Exercise invalid, unavailable and conflicting Username variants; return respectively `USERNAME_INVALID`, privacy-safe `USERNAME_UNAVAILABLE`, or `ONBOARDING_CONFLICT`; create nothing new and disclose no protected reason | `Not Run` |
-| R12-T06 | AC-07 / UC-01–02 / `X-01` | `RMVP-FX-AUTH` | Exercise missing/malformed/expired identity and Firebase registration failure; fail closed with `AUTH_REQUIRED` or safe auth validation, create no Product Account, and expose no trusted identity fields | `Not Run` |
+| R12-T05A | AC-01/02 / UC-02 error | `RMVP-FX-USERNAME-INVALID` | Submit one invalid canonical Username with otherwise valid authenticated onboarding input; return exactly `USERNAME_INVALID`, create no Product Account/Username Reservation, and retain no success state | `Not Run` |
+| R12-T05B | AC-01/02 / UC-02 error | `RMVP-FX-USERNAME-UNAVAILABLE` | Submit one valid canonical Username already reserved by another account; return exactly privacy-safe `USERNAME_UNAVAILABLE`, disclose no reservation/owner reason, and create no new records | `Not Run` |
+| R12-T05C | AC-01/02 / UC-02 error | `RMVP-FX-ONBOARDING-CONFLICT` | Submit onboarding input from an Auth Principal already bound to a different completed onboarding input; return exactly `ONBOARDING_CONFLICT`, preserve the completed account, and create no new records | `Not Run` |
+| R12-T06A | UC-01 error | `RMVP-FX-FIREBASE-REGISTRATION` | Submit invalid Firebase registration credentials; show the approved safe Firebase-authentication validation state, create no Firebase identity or Product Account, and do not route to completed onboarding | `Not Run` |
+| R12-T06B | AC-07 / UC-02 / `X-01` | `RMVP-FX-AUTH-REQUIRED` | Send one protected Backend operation with a missing, malformed, or expired identity; return exactly `AUTH_REQUIRED`, fail closed, mutate nothing, and expose no protected content or trusted identity field | `Not Run` |
 | R12-T07 | AC-04 / UC-03 / `CORE-05.A` | `RMVP-FX-ONBOARDED` + `RMVP-FX-NOTE` | Submit a valid Note with no Mood, Weather, Activity or Approx Location; create exactly one owner Check-in with opaque ID and server UTC time; return the owner-safe projection | `Not Run` |
 | R12-T08 | AC-06 / M19 | `RMVP-FX-NOTE` | Submit empty, Unicode-whitespace-only, over-limit and undeclared-field inputs; return `CHECKIN_INVALID`, create nothing, preserve internal whitespace/line breaks, and apply 1–500 Unicode grapheme validation | `Not Run` |
-| R12-T09 | AC-07 / UC-03 | `RMVP-FX-AUTH` + `RMVP-FX-ONBOARDED` | Exercise revoked/disabled identity and incomplete onboarding; return `AUTH_FORBIDDEN` or `ONBOARDING_REQUIRED`, create nothing, and never trust client-selected owner fields | `Not Run` |
+| R12-T09A | AC-07 / UC-03 | `RMVP-FX-AUTH-FORBIDDEN` + `RMVP-FX-ONBOARDED` | Send a protected create operation with a revoked or disabled identity; return exactly `AUTH_FORBIDDEN`, create nothing, and never trust client-selected owner fields | `Not Run` |
+| R12-T09B | AC-07 / UC-03 | `RMVP-FX-INCOMPLETE` | Send a protected create operation for an authenticated member without completed onboarding; return exactly `ONBOARDING_REQUIRED`, create nothing, and do not expose or infer a Product Account | `Not Run` |
 | R12-T10 | UC-03 alternative | `RMVP-FX-ONBOARDED` + `RMVP-FX-NOTE` | Retry a committed Check-in with the same key/input and then reuse that key with changed input; exact retry returns the original projection with no duplicate, changed input returns `IDEMPOTENCY_CONFLICT` with no new record | `Not Run` |
-| R12-T11 | AC-05/07 / UC-04 / persistence proof | `RMVP-FX-CHECKIN` + `RMVP-FX-AUTH` | Same owner later reads the opaque ID and receives the same Note/server time; missing or non-owned IDs return indistinguishable `CHECKIN_UNAVAILABLE` with no content or ownership clue | `Not Run` |
+| R12-T11 | AC-05/07 / UC-04 / persistence proof | `RMVP-FX-CHECKIN` + `RMVP-FX-NON-OWNER` | Same owner later reads the opaque ID and receives the same Note/server time; missing or non-owned IDs return indistinguishable `CHECKIN_UNAVAILABLE` with no content or ownership clue | `Not Run` |
 | R12-T12 | AC-08 / UC-01–04 / `X-04` | `RMVP-FX-DEPENDENCY` | During pending onboarding/create/read, inject controlled dependency loss and leave the screen; show only generic unavailable/retry, never fabricate success, and ignore a late response on the abandoned screen; reconcile any committed result only by explicit retry/read | `Not Run` |
 | R12-T13 | UAT evidence rule / `ENV-05` | All applicable profiles | Verify the evidence packet contains complete identity/build/device/time/environment/fixture/steps/result/reviewer fields and no secrets, tokens, prohibited content or uncontrolled real-user data | `Not Run` |
 
@@ -99,11 +108,11 @@ R15 is a different-reviewer gate over applicable LI/SHI/DU/ZHOU implementation a
 
 | Approved source | R12 coverage | Later evidence consumer |
 |---|---|---|
-| RMVP-01A R2 AC-01/02 | R12-T01/T02 | R13 onboarding execution; `CORE-01.A`/`CORE-02.A` |
+| RMVP-01A R2 AC-01/02 | R12-T01/T02/T05A/T05B/T05C | R13 onboarding execution; `CORE-01.A`/`CORE-02.A` |
 | RMVP-01A R2 AC-03 | R12-T03/T04 | R13 resume/exact-retry execution |
 | RMVP-01A R2 AC-04/05 | R12-T07/T10/T11 | R13 create-then-later-read; `CORE-05.A` persistence proof |
 | RMVP-01A R2 AC-06 | R12-T08 | R13 validation; Android M19/M20 evidence |
-| RMVP-01A R2 AC-07 | R12-T06/T09/T11 | R13 fail-closed identity/ownership; affected `X-01` |
+| RMVP-01A R2 AC-07 | R12-T06B/T09A/T09B/T11 | R13 fail-closed identity/ownership; affected `X-01` |
 | RMVP-01A R2 AC-08 | R12-T12 | R13 cancellation/dependency; R14 Android retry/late-response evidence |
 | UAT-B-0902-R2 §5 | R12-T13 and §7 schema | R14 evidence collation and R15 gate input |
 
