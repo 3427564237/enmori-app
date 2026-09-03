@@ -19,14 +19,19 @@ export type FindOwnedCheckInRepositoryResult =
 /**
  * R9 implementations resolve the internal AccountId, assign opaque identity
  * and server UTC time, and atomically commit the Check-in and 24-hour
- * idempotency result. Missing and non-owned reads must return the same
+ * idempotency result using the Application-supplied Clock/ID Port values. The
+ * request fingerprint is based only on the normalized Note, never on generated
+ * ID/time values. Missing and non-owned reads must return the same
  * not_found_or_not_owned result and must not expose ownerAccountId.
  */
 export interface CheckInRepository {
   create(command: {
     readonly firebaseUid: string;
+    readonly checkInId: string;
     readonly note: NormalizedNote;
+    readonly createdAt: string;
     readonly idempotencyKey: IdempotencyKey;
+    readonly idempotencyExpiresAt: string;
   }): Promise<CreateCheckInRepositoryResult>;
 
   findOwned(query: {
