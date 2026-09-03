@@ -1,0 +1,187 @@
+import 'dart:convert';
+
+import 'package:enmori/core/network/backend_api_client.dart';
+import 'package:enmori/core/result/result.dart';
+import 'package:enmori/features/account/data/backend_account_repository.dart';
+import 'package:enmori/features/account/domain/account_repository.dart';
+import 'package:enmori/features/check_in/data/backend_check_in_repository.dart';
+import 'package:enmori/features/check_in/domain/check_in_repository.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+
+void main() {
+  group('BackendAccountRepository', () {
+    test(
+      'sends the approved Accept payload and parses the safe account',
+      () async {
+        late http.Request captured;
+        final client = _client((request) async {
+          captured = request;
+          return http.Response(
+            jsonEncode({
+              'account': {
+                'username': 'miku_01',
+                'optionalProcessingConsent': 'accepted',
+                'checkInVisibility': 'public',
+                'onboardingCompletedAt': '2026-09-03T03:15:00Z',
+              },
+            }),
+            201,
+          );
+        });
+        final repository = BackendAccountRepository(client);
+
+        final result = await repository.completeOnboarding(
+          username: 'miku_01',
+          initialChoice: InitialChoice.accept,
+          idempotencyKey: 'abcdefghijklmnopqrstuv',
+        );
+
+        expect(captured.method, 'PUT');
+        expect(captured.url.path, '/v1/me/onboarding');
+        expect(captured.headers['authorization'], 'Bearer test-token');
+        expect(captured.headers['idempotency-key'], 'abcdefghijklmnopqrstuv');
+        expect(jsonDecode(captured.body), {
+          'username': 'miku_01',
+          'initialChoice': 'accept',
+        });
+        final account = (result as Success<ProductAccount>).value;
+        expect(account.username, 'miku_01');
+        expect(
+          account.optionalProcessingConsent,
+          OptionalProcessingConsent.accepted,
+        );
+        expect(account.checkInVisibility, CheckInVisibility.public);
+      },
+    );
+
+    test('keeps incomplete onboarding distinct from completion', () async {
+      final client = _client(
+        (request) async =>
+            http.Response(jsonEncode({'status': 'required'}), 200),
+      );
+      final repository = BackendAccountRepository(client);
+
+      final result = await repository.readOnboardingStatus();
+
+      expect(
+        (result as Success<OnboardingStatus>).value,
+        isA<OnboardingRequired>(),
+      );
+    });
+
+    test('maps the Reject branch to rejected and private', () async {
+      late http.Request captured;
+      final client = _client((request) async {
+        captured = request;
+        return http.Response(
+          jsonEncode({
+            'account': {
+              'username': 'miku_01',
+              'optionalProcessingConsent': 'rejected',
+              'checkInVisibility': 'private',
+              'onboardingCompletedAt': '2026-09-03T03:15:00Z',
+            },
+          }),
+          201,
+        );
+      });
+      final repository = BackendAccountRepository(client);
+
+      final result = await repository.completeOnboarding(
+        username: 'miku_01',
+        initialChoice: InitialChoice.reject,
+        idempotencyKey: 'abcdefghijklmnopqrstuv',
+      );
+
+      expect(jsonDecode(captured.body), {
+        'username': 'miku_01',
+        'initialChoice': 'reject',
+      });
+      final account = (result as Success<ProductAccount>).value;
+      expect(
+        account.optionalProcessingConsent,
+        OptionalProcessingConsent.rejected,
+      );
+      expect(account.checkInVisibility, CheckInVisibility.private);
+    });
+  });
+
+  group('BackendCheckInRepository', () {
+    test('creates only the declared Note field', () async {
+      late http.Request captured;
+      final client = _client((request) async {
+        captured = request;
+        return http.Response(jsonEncode(_checkInEnvelope), 201);
+      });
+      final repository = BackendCheckInRepository(client);
+
+      final result = await repository.create(
+        note: 'A controlled test note.',
+        idempotencyKey: 'abcdefghijklmnopqrstuv',
+      );
+
+      expect(captured.method, 'POST');
+      expect(captured.url.path, '/v1/check-ins');
+      expect(jsonDecode(captured.body), {'note': 'A controlled test note.'});
+      expect((result as Success<CheckIn>).value.checkInId, 'chk_test');
+    });
+
+    test('performs a separate owner read with an encoded opaque id', () async {
+      late http.Request captured;
+      final client = _client((request) async {
+        captured = request;
+        return http.Response(jsonEncode(_checkInEnvelope), 200);
+      });
+      final repository = BackendCheckInRepository(client);
+
+      final result = await repository.readOwned(checkInId: 'chk/id');
+
+      expect(captured.method, 'GET');
+      expect(captured.url.path, '/v1/check-ins/chk%2Fid');
+      expect(
+        (result as Success<CheckIn>).value.note,
+        'A controlled test note.',
+      );
+    });
+
+    test('maps the stable privacy-safe unavailable failure', () async {
+      final client = _client(
+        (request) async => http.Response(
+          jsonEncode({
+            'error': {
+              'code': 'CHECKIN_UNAVAILABLE',
+              'message': 'Check-in is unavailable.',
+              'requestId': 'req_test',
+            },
+          }),
+          404,
+        ),
+      );
+      final repository = BackendCheckInRepository(client);
+
+      final result = await repository.readOwned(checkInId: 'missing');
+
+      final failure = (result as Failure<CheckIn>).failure;
+      expect(failure.kind, AppFailureKind.checkInUnavailable);
+      expect(failure.requestId, 'req_test');
+    });
+  });
+}
+
+BackendApiClient _client(MockClientHandler handler) {
+  return BackendApiClient(
+    Uri.parse('https://example.invalid'),
+    () async => const Success('test-token'),
+    httpClient: MockClient(handler),
+  );
+}
+
+const _checkInEnvelope = {
+  'checkIn': {
+    'checkInId': 'chk_test',
+    'note': 'A controlled test note.',
+    'createdAt': '2026-09-03T03:20:00Z',
+  },
+};

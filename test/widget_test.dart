@@ -1,30 +1,41 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:enmori/app/app.dart';
+import 'package:enmori/app/providers.dart';
+import 'package:enmori/features/auth/domain/auth_repository.dart';
+import 'package:enmori/features/auth/presentation/registration_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:enmori/main.dart';
+import 'support/fakes.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('observed unauthenticated session routes to registration', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    addTearDown(auth.close);
+    late ProviderContainer container;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container = ProviderContainer(
+          overrides: [authRepositoryProvider.overrideWithValue(auth)],
+        ),
+        child: const EnmoriApp(),
+      ),
+    );
+    addTearDown(container.dispose);
+    auth.emit(const AuthSessionUnauthenticated());
+    await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    expect(find.byKey(const Key('route-register')), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await container
+        .read(registrationControllerProvider.notifier)
+        .register(email: 'member@example.invalid', password: 'test-password');
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('route-register')), findsOneWidget);
+    expect(auth.watchCount, 1);
   });
 }
