@@ -1,0 +1,15 @@
+# ENMORI modification notice (2026-09-03): default prompt names the Skill.
+interface:
+  display_name: "Figma"
+  short_description: "Use Figma MCP for design-to-code work"
+  icon_small: "./assets/figma-small.svg"
+  icon_large: "./assets/figma.png"
+  default_prompt: "Use $figma to inspect the target design as evidence and translate approved UI decisions into project-conformant guidance."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "figma"
+      description: "Figma MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.figma.com/mcp"

@@ -1,6 +1,6 @@
 # ENMORI team Skill distribution and routing design
 
-- **Status:** Approved in chat on 2026-09-03; written design awaiting PM review
+- **Status:** Approved by PM on 2026-09-03; implementation authorized from design commit `2771fb9`
 - **Decision owner:** LI HOURUI, ENMORI PM
 - **Scope:** Repository-distributed Codex Skills, routing precedence, conflict handling, provenance, and a project-authored Backend development Skill
 - **Does not authorize:** Product-scope changes, application dependencies, Backend endpoint/schema invention, Firebase deployment, credentials, GitHub/Notion status changes, or product implementation
@@ -173,4 +173,3 @@ The change is complete only when:
 - **Workflow ceremony:** `brainstorming` and `writing-plans` can interrupt bounded Issue execution. Control: explicit-only invocation and routing by task type.
 - **Tool availability:** Figma/MCP-dependent Skills may be selected without an authenticated connector. Control: report the missing tool and continue only with work that does not require it.
 - **Upstream drift:** Team members could receive different behaviour if sources float. Control: vendor complete content and pin source commits in `team-skills.lock`.
-

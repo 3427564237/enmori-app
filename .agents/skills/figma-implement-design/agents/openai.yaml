@@ -1,0 +1,15 @@
+# ENMORI modification notice (2026-09-03): default prompt names the Skill and approved scope.
+interface:
+  display_name: "Figma Implement Design"
+  short_description: "Turn Figma designs into production-ready code"
+  icon_small: "./assets/figma-small.svg"
+  icon_large: "./assets/figma.png"
+  default_prompt: "Use $figma-implement-design to implement this approved Figma surface within the repository's requirement and UI authority boundaries."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "figma"
+      description: "Figma MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.figma.com/mcp"

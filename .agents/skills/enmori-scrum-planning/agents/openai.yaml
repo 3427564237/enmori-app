@@ -3,4 +3,4 @@ interface:
   short_description: "Plan and govern ENMORI team Sprints"
   default_prompt: "Use $enmori-scrum-planning to prepare an ENMORI Sprint plan for PM approval."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

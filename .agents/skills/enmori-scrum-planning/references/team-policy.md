@@ -4,6 +4,16 @@
 
 ENMORI uses Scrum-inspired planning with PM direct assignment. Members surface feasibility, dependency, and capacity conflicts; LI HOURUI retains final priority, assignment, and Sprint-scope acceptance authority.
 
+## Skill operators and invocation
+
+All five members retain this Skill so its team rules and output formats are shared, but invocation is explicit-only and daily coding does not invoke it.
+
+- LI HOURUI is the primary operator and may use it for refinement, assignment, Sprint Planning, rebalance, Review, Retrospective, and closure within applicable authority.
+- SHI ZHENGQI may use it only when LI delegates a specific read-only analysis or preview. That delegation does not authorize an external write or planning decision.
+- JIN ZIHAN, ZHOU YAOYIN, and DU KUN may use it only when LI explicitly names a planning or reporting task for them.
+- No member may self-assign, reprioritize, expand Sprint scope, change external state, or write GitHub/Notion planning state without LI's exact approval of the current preview.
+- During ordinary coding, follow the assigned Issue, reviewer chain, `AGENTS.md`, and only the applicable implementation/test Skills.
+
 ## Team and capacity
 
 | Member | Default direction | Sprint capacity |

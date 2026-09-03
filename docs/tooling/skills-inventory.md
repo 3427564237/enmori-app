@@ -1,52 +1,55 @@
-# Skill Inventory
+# Team Codex Skill Inventory
 
-This inventory separates repository-required team tooling from personal Codex tooling. Installing a Skill does not approve any architecture, package, backend, state-management, feature, or UI decision.
+Every Skill listed as shared is committed under `.agents/skills/` and is available to all five ENMORI members from the cloned repository. Availability does not imply invocation or approval. Use [the routing and precedence rules](skill-routing.md); exact source commits, licences, modifications, and verification are in the root [`team-skills.lock`](../../team-skills.lock).
 
-## Shared in this repository
+## Shared Skills
 
-Exact sources and commits are recorded in `team-skills.lock`.
+| Skill | Source class | Invocation | Team purpose |
+| --- | --- | --- | --- |
+| `enmori-backend-development` | Project-authored | Implicitly eligible | Assigned Backend/API implementation or review inside the approved TypeScript/Fastify/Firebase/Ports/OpenAPI boundary. |
+| `enmori-scrum-planning` | Project-authored | Explicit only | PM-controlled refinement, assignment, Sprint Planning/rebalance, Review, Retro, closure, and named planning reports. |
+| `domain-modeling` | Vendored | Explicit only | Confirmed terminology, `CONTEXT.md`, and ADR work; metadata is conservatively explicit-only for all tasks. |
+| `ui-ux-pro-max` | Vendored | Implicitly eligible | UI/UX, accessibility, interaction, visual, responsive, typography, and Flutter-specific guidance within approved UI authority. |
+| `grill-with-docs` | Vendored | Explicit only | Deliberately requested plan/design stress testing with documentation support. |
+| `grilling` | Vendored | Explicit only | Deliberately requested stress-test interview; dependency of `grill-with-docs`. |
+| `dart-flutter-patterns` | Vendored | Implicitly eligible | Dart/Flutter patterns constrained by ENMORI's Riverpod/no-codegen/feature-first architecture and approved dependencies. |
+| `dart-add-unit-test` | Vendored | Implicitly eligible | Pure Dart/Flutter logic unit tests, using fakes unless another test dependency is approved. |
+| `flutter-add-widget-test` | Vendored | Implicitly eligible | Widget rendering, interaction, accessibility, and provider-boundary tests. |
+| `flutter-add-integration-test` | Vendored | Implicitly eligible | Approved Android/iOS integration flows using Flutter 3.47.2/FVM `integration_test`; legacy Driver paths are conditional. |
+| `flutter-build-responsive-layout` | Vendored | Implicitly eligible | Responsive layout work for approved targets and breakpoints. |
+| `flutter-fix-layout-issues` | Vendored | Implicitly eligible | Evidence-led repair of observed overflow and constraint failures. |
+| `flutter-dart-code-review` | Vendored | Implicitly eligible | Independent Flutter/Dart review against repository rules and the assigned Issue. |
+| `systematic-debugging` | Vendored | Implicitly eligible | Root-cause investigation of bugs, test/build failures, performance problems, and unexpected behavior. |
+| `figma` | Vendored | Implicitly eligible | Fetch Figma context/screenshots/variables/assets from a supplied source as design evidence. |
+| `figma-implement-design` | Vendored | Implicitly eligible | Implement an already approved Figma surface after requirement/Q04 authority and exact node scope are established. |
+| `brainstorming` | Vendored | Explicit only | Design genuinely new or changed behavior; do not reopen an already approved bounded design. |
+| `writing-plans` | Vendored | Explicit only | Plan complex work from an approved specification; a plan does not grant implementation authority. |
 
-| Skill | Purpose | Status |
+Context7 is an MCP server, not a Skill. Its repository endpoint is declared in `.codex/config.toml`; each developer authenticates locally. Figma authentication is also local and must never be copied into the repository.
+
+The 18 repository Skill names are unique within `.agents/skills/`. Codex can nevertheless list a repository Skill and a separately installed personal Skill with the same name; it does not merge them. For ENMORI work, verify the displayed path and select the repository copy under this checkout. A personal same-name copy is outside the lock and must not be treated as team evidence.
+
+## Intentionally excluded
+
+| Skill | Decision | Reason |
 | --- | --- | --- |
-| `grill-with-docs` | Stress-test project documents | Vendored; use on request |
-| `grilling` | Required dependency of `grill-with-docs` | Vendored; use on request |
-| `domain-modeling` | Domain terminology, `CONTEXT.md`, and ADR support | Vendored; use during approved documentation work |
-| `ui-ux-pro-max` | UI/UX research and Flutter-specific guidance | Vendored; use only for UI/UX work |
-| `enmori-scrum-planning` | ENMORI backlog refinement, direct assignment, capacity, review, iOS evidence, Review, and Retro | Project-authored; preview before PM-approved external writes |
+| `flutter-apply-architecture-best-practices` | Not distributed | Its prescriptive MVVM/ChangeNotifier direction can conflict with the approved Riverpod architecture. |
+| `requirements-engineering` | Not distributed | The installed source is iOS-oriented and overlaps ENMORI's authority-first requirements process. |
+| `develop-web-game` | Not distributed | Unrelated to ENMORI delivery. |
+| `jupyter-notebook` | Not distributed | No approved notebook-based delivery workflow. |
+| `screenshot` | Not distributed | General/system utility rather than repository project expertise. |
 
-Context7 is not a Skill. It is a required MCP server declared in `.codex/config.toml`; every developer authenticates locally.
+Exclusion is scoped to this distribution decision and is not a claim that a Skill is generally unsafe. Reconsideration requires a separately reviewed source and bounded purpose.
 
-## Personal Skills installed on the bootstrap machine
-
-These are not vendored and are not automatically installed for teammates.
-
-| Skill | Source commit | Review note |
-| --- | --- | --- |
-| `dart-add-unit-test` | `flutter/agent-plugins@864cf8797b190ddb81e4875db6dd6bab89641f62` | Flutter/Dart test implementation |
-| `flutter-add-widget-test` | `flutter/agent-plugins@864cf8797b190ddb81e4875db6dd6bab89641f62` | Widget test implementation |
-| `flutter-add-integration-test` | `flutter/agent-plugins@864cf8797b190ddb81e4875db6dd6bab89641f62` | Re-check its Flutter Driver setup against the pinned SDK before applying |
-| `flutter-apply-architecture-best-practices` | `flutter/agent-plugins@864cf8797b190ddb81e4875db6dd6bab89641f62` | Prescribes MVVM/ChangeNotifier patterns; architecture still requires explicit project approval |
-| `flutter-build-responsive-layout` | `flutter/agent-plugins@864cf8797b190ddb81e4875db6dd6bab89641f62` | Responsive layout implementation |
-| `flutter-fix-layout-issues` | `flutter/agent-plugins@864cf8797b190ddb81e4875db6dd6bab89641f62` | Layout diagnosis and repair |
-| `dart-flutter-patterns` | `affaan-m/ECC@ce64e417fd420a0df98ed0aa00809eea5e74e127` | Advisory patterns; examples do not select project dependencies or state management |
-| `flutter-dart-code-review` | `affaan-m/ECC@ce64e417fd420a0df98ed0aa00809eea5e74e127` | Review checklist; project requirements take precedence |
-| `requirements-engineering` | `SwiftyJourney/requirements-engineering-skill@b0e91f2f3251819490e977f206ff4d26fba9b818` | Specification artifacts are useful, but its examples and handoff language are iOS-oriented |
-| `brainstorming` | Existing local installation | Use before creative design work |
-
-Restart Codex after installation so newly installed personal Skills are discovered reliably.
-
-## Original candidate list: deferred or replaced
+## Rejected Backend candidates
 
 | Candidate | Decision | Reason |
 | --- | --- | --- |
-| `flutter-animating-apps` | Deferred | No verified current source in the reviewed Flutter Skills repository; animation work is not part of bootstrap |
-| `project-context` | Not installed | Name is ambiguous; repository documents and `domain-modeling` provide a safer initial source-of-truth workflow |
-| `software-architecture` | Not installed | Reviewed prominent candidate was not Flutter-specific and would overlap the Flutter architecture Skill |
-| `data-modeling` | Deferred | Select only after backend and persistence scope are approved; `domain-modeling` covers terminology and ADR work now |
-| `testing` | Not installed | Reviewed prominent candidate targeted a different test stack; the three Flutter/Dart test Skills cover current needs |
-| `scrum-planning` | Replaced | A project-authored `enmori-scrum-planning` Skill implements the confirmed five-person workflow without relying on an unresolved generic source |
-| `project-consistency-review` | Not installed | Source is unresolved; define the repository's source-of-truth documents before selecting this role |
+| `Mindrally/skills` `fastify-typescript` | Do not install | It prescribes Prisma and JWT defaults that conflict with or exceed ENMORI's approved Firebase identity, Firestore adapter, and dependency decisions. |
+| `alinaqi/maggy` `firebase` | Do not install | It promotes client Firestore, Cloud Functions, Google sign-in, and example schemas that conflict with or exceed ENMORI authority. |
 
-## Selection rule
+The project-authored `enmori-backend-development` Skill replaces these candidates without adding a dependency, endpoint, DTO, Firestore schema/index, or deployment decision.
 
-Invoke only the smallest set needed for a task. Project requirements and approved decisions override generic Skill recommendations. A Skill that suggests a new package, architecture, state-management system, backend, or UI direction must pause for explicit project approval before implementation.
+## Update rule
+
+Do not refresh a vendored Skill from a moving branch. Review the complete upstream directory and licence, pin a new commit in `team-skills.lock`, reapply and record only necessary ENMORI modifications, then rerun the complete integrity and security checks. Do not copy local authentication or alter `.codex/config.toml` as part of a routine Skill update.

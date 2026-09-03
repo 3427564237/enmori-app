@@ -21,3 +21,21 @@ A later document date alone never establishes supersession. Same-tier sources co
 - Do not make a major architecture, backend, data-model, dependency, or infrastructure decision without explicit approval.
 - Persist a confirmed PM decision under `docs/decisions/` before treating it as a reusable source; a chat reference alone is not a durable project record.
 - Do not commit secrets, credentials, tokens, private keys, service-account files, or sensitive configuration.
+
+## Codex Skill authority and routing
+
+Use [the repository Skill routing rules](docs/tooling/skill-routing.md) and only the smallest sufficient Skill set for the assigned task. Repository availability does not imply invocation, and invoking a Skill does not approve implementation, dependencies, architecture, product behavior, external writes, or a readiness claim.
+
+Apply Skill advice in this order:
+
+1. applicable non-waivable law, privacy, security, accessibility, licence, and platform obligations;
+2. applicable Sponsor/Supervisor and assessment authority;
+3. confirmed PM decisions and approved project contracts within scope;
+4. this `AGENTS.md`;
+5. the assigned GitHub Issue's approved scope, acceptance criteria, dependencies, and reviewer path;
+6. project-authored ENMORI Skills;
+7. stack-specific repository Skills;
+8. general workflow Skills; and
+9. examples, templates, and defaults inside any Skill.
+
+Explicit invocation selects a workflow but never raises its authority. If instructions conflict, follow the more task-specific Skill only when it remains compatible with every higher-precedence source. Otherwise stop only the affected work, identify the conflicting instructions and sources, and obtain a competent resolution; do not choose silently.

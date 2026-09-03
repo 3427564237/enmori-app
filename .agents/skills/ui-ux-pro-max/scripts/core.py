@@ -136,7 +136,7 @@ WEB_STACKS = frozenset(WEB_STACK_CURRENT_MAJORS) | {"shadcn"}
 STACK_CURRENT_VERSIONS = {
     **{stack: (major,) for stack, major in WEB_STACK_CURRENT_MAJORS.items()},
     "react-native": (0, 86),
-    "flutter": (3, 44),
+    "flutter": (3, 47),
     "swiftui": (16,),
     "jetpack-compose": (1, 11),
     "avalonia": (12,),
@@ -158,7 +158,7 @@ STACK_CURRENT_APPLICABILITY = {
     "nuxtjs": "nuxtjs 4.5",
     "nuxt-ui": "nuxt-ui 4.10",
     "react-native": "react-native 0.86.x",
-    "flutter": "flutter 3.44.x",
+    "flutter": "flutter 3.47.2",
     "swiftui": "swiftui current",
     "jetpack-compose": "jetpack-compose 1.11.4",
     "avalonia": "avalonia 12",

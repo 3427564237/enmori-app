@@ -1,0 +1,6 @@
+interface:
+  display_name: "Writing Plans"
+  short_description: "Plan complex work from an approved specification"
+  default_prompt: "Use $writing-plans to create an implementation plan from this approved specification."
+policy:
+  allow_implicit_invocation: false

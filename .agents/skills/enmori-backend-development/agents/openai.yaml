@@ -1,0 +1,6 @@
+interface:
+  display_name: "ENMORI Backend Development"
+  short_description: "Implement approved ENMORI Backend slices safely"
+  default_prompt: "Use $enmori-backend-development to implement or review this assigned Backend slice within the approved architecture and contract boundaries."
+policy:
+  allow_implicit_invocation: true

@@ -110,7 +110,7 @@ class TestNativeDesktopStackFreshness(unittest.TestCase):
 
         versioned_cases = {
             "react-native": "upgrade React Native 0.75 to React Native 0.86 Hermes",
-            "flutter": "upgrade Flutter 3.22 to Flutter 3.44 predictive back",
+            "flutter": "upgrade Flutter 3.22 to Flutter 3.47 predictive back",
             "threejs": "upgrade Three.js r128 to r185 outputColorSpace",
         }
         for stack, query in versioned_cases.items():
