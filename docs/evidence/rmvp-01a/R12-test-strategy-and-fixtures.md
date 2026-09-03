@@ -116,4 +116,32 @@ R15 is a different-reviewer gate over applicable LI/SHI/DU/ZHOU implementation a
 | RMVP-01A R2 AC-08 | R12-T12 | R13 cancellation/dependency; R14 Android retry/late-response evidence |
 | UAT-B-0902-R2 §5 | R12-T13 and §7 schema | R14 evidence collation and R15 gate input |
 
-**Current disposition:** R12 design artifact prepared for SHI's independent R5B review. R13, R14 and R15 remain `Not Run` until their stated predecessors and evidence exist.
+## 10. Execution checklist and notification order
+
+This checklist is a coordination aid, not execution evidence. An unchecked item is not inferred from a branch, issue assignment, repository access, or an earlier environment check.
+
+### R13 entry checklist — all required before execution
+
+- [ ] **R1** — LI's Flutter entry/onboarding/Check-in integration and owner-focused tests are available at a linked commit/PR.
+- [ ] **R4** — SHI's approved Backend Application/Domain/Transport implementation and owner-focused tests are available at a linked commit/PR.
+- [ ] **R9** — ZHOU's Firebase Auth/Firestore infrastructure adapters and contract tests are available at a linked commit/PR.
+- [ ] **R10** — ZHOU's reproducible controlled Backend/Firebase environment and sanitized configuration evidence are available.
+- [x] **R12 design** — this strategy, fixture and traceability artifact is committed at `cad65f1`.
+- [ ] **R5B review** — SHI's independent review of the R12 artifact/result is complete and its disposition is recorded.
+- [ ] **Controlled run identity** — build commit, isolated environment, fixture reset and executor are recorded before any R13 result is assigned.
+
+### Execution order after the checklist is complete
+
+1. Verify each checked predecessor from its linked commit/PR and confirm that the controlled environment and fixture reset are reproducible.
+2. Notify LI in Issue #4 that the R13 entry checklist is complete. Do not send this notification while any item above is unchecked.
+3. Run only the approved R13 cross-boundary scenarios. Keep every unexecuted scenario `Not Run`; assign `Pass`, `Fail` or `Blocked` only from complete evidence under §7.
+4. Start R14 only after R7 and R13 outputs exist, then collate the Android `.A` evidence and defect/retest ledger.
+5. Start R15 only after applicable R1–R11 implementation and component-review outputs exist. Exclude R12–R14 and R5B from JIN's own gate, then leave R16 for LI's terminal review.
+
+### LI notification template (do not post until all prerequisites are verified)
+
+```text
+Issue #4 R13 entry check: R1/R4/R9/R10 predecessor outputs and SHI R5B review are linked and verified. Controlled environment and fixture reset are identified. Requesting LI confirmation to begin R13; R13/R14/R15 remain Not Run until their own evidence exists.
+```
+
+**Current disposition:** R12 strategy/fixtures/traceability is revised and pushed in PR #7 at `cad65f1`; SHI R5B re-review is pending. R13, R14 and R15 remain `Not Run`, and the LI notification is intentionally not posted until every R13 entry item is verified.
