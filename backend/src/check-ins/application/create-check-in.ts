@@ -1,7 +1,10 @@
 import { appFailure, type AppFailure } from "../../shared/application/app-failure.js";
+import { createAuthoritativeValues } from "../../shared/application/authoritative-values.js";
 import { validateIdempotencyKey } from "../../shared/domain/idempotency-key.js";
 import { err, ok, type Result } from "../../shared/domain/result.js";
+import type { Clock } from "../../shared/ports/clock.js";
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
+import type { OpaqueIdGenerator } from "../../shared/ports/opaque-id-generator.js";
 import { normalizeNote } from "../domain/note.js";
 import type { CheckInRepository } from "../ports/check-in-repository.js";
 import type { CheckInProjection } from "./check-in-model.js";
@@ -12,7 +15,11 @@ export interface CreateCheckInOutput {
 }
 
 export class CreateCheckIn {
-  public constructor(private readonly repository: CheckInRepository) {}
+  public constructor(
+    private readonly repository: CheckInRepository,
+    private readonly clock: Clock,
+    private readonly checkInIdGenerator: OpaqueIdGenerator,
+  ) {}
 
   public async execute(input: {
     readonly principal: AuthPrincipal;
@@ -25,10 +32,19 @@ export class CreateCheckIn {
     const key = validateIdempotencyKey(input.idempotencyKey);
     if (!key.ok) return key;
 
+    const authoritative = createAuthoritativeValues(
+      this.clock,
+      this.checkInIdGenerator,
+    );
+    if (!authoritative.ok) return authoritative;
+
     const result = await this.repository.create({
       firebaseUid: input.principal.firebaseUid,
+      checkInId: authoritative.value.opaqueId,
       note: note.value,
+      createdAt: authoritative.value.occurredAt,
       idempotencyKey: key.value,
+      idempotencyExpiresAt: authoritative.value.idempotencyExpiresAt,
     });
 
     switch (result.kind) {

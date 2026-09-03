@@ -1,7 +1,10 @@
 import { appFailure, type AppFailure } from "../../shared/application/app-failure.js";
+import { createAuthoritativeValues } from "../../shared/application/authoritative-values.js";
 import { validateIdempotencyKey } from "../../shared/domain/idempotency-key.js";
 import { err, ok, type Result } from "../../shared/domain/result.js";
+import type { Clock } from "../../shared/ports/clock.js";
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
+import type { OpaqueIdGenerator } from "../../shared/ports/opaque-id-generator.js";
 import { deriveInitialChoice } from "../domain/initial-choice.js";
 import { canonicalizeUsername } from "../domain/username.js";
 import type { OnboardingRepository } from "../ports/onboarding-repository.js";
@@ -13,7 +16,11 @@ export interface CompleteOnboardingOutput {
 }
 
 export class CompleteOnboarding {
-  public constructor(private readonly repository: OnboardingRepository) {}
+  public constructor(
+    private readonly repository: OnboardingRepository,
+    private readonly clock: Clock,
+    private readonly accountIdGenerator: OpaqueIdGenerator,
+  ) {}
 
   public async execute(input: {
     readonly principal: AuthPrincipal;
@@ -30,11 +37,21 @@ export class CompleteOnboarding {
     const key = validateIdempotencyKey(input.idempotencyKey);
     if (!key.ok) return key;
 
+    const authoritative = createAuthoritativeValues(
+      this.clock,
+      this.accountIdGenerator,
+    );
+    if (!authoritative.ok) return authoritative;
+
     const result = await this.repository.complete({
       firebaseUid: input.principal.firebaseUid,
+      accountId: authoritative.value.opaqueId,
       canonicalUsername: username.value,
-      initialChoice: choice.value.initialChoice,
+      optionalProcessingConsent: choice.value.optionalProcessingConsent,
+      checkInVisibility: choice.value.checkInVisibility,
+      onboardingCompletedAt: authoritative.value.occurredAt,
       idempotencyKey: key.value,
+      idempotencyExpiresAt: authoritative.value.idempotencyExpiresAt,
     });
 
     switch (result.kind) {
