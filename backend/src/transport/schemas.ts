@@ -1,0 +1,176 @@
+import type { FastifySchema } from "fastify";
+
+export const approvedFailureCodes = [
+  "AUTH_REQUIRED",
+  "AUTH_FORBIDDEN",
+  "USERNAME_INVALID",
+  "USERNAME_UNAVAILABLE",
+  "ONBOARDING_REQUIRED",
+  "ONBOARDING_CONFLICT",
+  "CHECKIN_INVALID",
+  "CHECKIN_UNAVAILABLE",
+  "IDEMPOTENCY_CONFLICT",
+  "SERVICE_UNAVAILABLE",
+] as const;
+
+const utcTimestamp = {
+  type: "string",
+  pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$",
+} as const;
+
+export const accountSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "username",
+    "optionalProcessingConsent",
+    "checkInVisibility",
+    "onboardingCompletedAt",
+  ],
+  properties: {
+    username: { type: "string" },
+    optionalProcessingConsent: {
+      type: "string",
+      enum: ["accepted", "rejected"],
+    },
+    checkInVisibility: { type: "string", enum: ["public", "private"] },
+    onboardingCompletedAt: utcTimestamp,
+  },
+} as const;
+
+export const checkInSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["checkInId", "note", "createdAt"],
+  properties: {
+    checkInId: { type: "string", minLength: 1 },
+    note: { type: "string" },
+    createdAt: utcTimestamp,
+  },
+} as const;
+
+export const errorEnvelopeSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["error"],
+  properties: {
+    error: {
+      type: "object",
+      additionalProperties: false,
+      required: ["code", "message", "requestId"],
+      properties: {
+        code: { type: "string", enum: approvedFailureCodes },
+        message: { type: "string", minLength: 1 },
+        requestId: { type: "string", minLength: 1 },
+      },
+    },
+  },
+} as const;
+
+const commandHeaders = {
+  type: "object",
+  required: ["idempotency-key"],
+  properties: {
+    "idempotency-key": {
+      type: "string",
+      pattern: "^[A-Za-z0-9_-]{22,64}$",
+    },
+  },
+} as const;
+
+const onboardingBody = {
+  type: "object",
+  additionalProperties: false,
+  required: ["username", "initialChoice"],
+  properties: {
+    username: { type: "string" },
+    initialChoice: { type: "string", enum: ["accept", "reject"] },
+  },
+} as const;
+
+const checkInBody = {
+  type: "object",
+  additionalProperties: false,
+  required: ["note"],
+  properties: {
+    note: { type: "string" },
+  },
+} as const;
+
+const checkInParams = {
+  type: "object",
+  additionalProperties: false,
+  required: ["checkInId"],
+  properties: {
+    checkInId: { type: "string", minLength: 1 },
+  },
+} as const;
+
+const accountEnvelope = {
+  type: "object",
+  additionalProperties: false,
+  required: ["account"],
+  properties: { account: accountSchema },
+} as const;
+
+const onboardingStatus = {
+  oneOf: [
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["status"],
+      properties: { status: { const: "required" } },
+    },
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["status", "account"],
+      properties: {
+        status: { const: "completed" },
+        account: accountSchema,
+      },
+    },
+  ],
+} as const;
+
+const checkInEnvelope = {
+  type: "object",
+  additionalProperties: false,
+  required: ["checkIn"],
+  properties: { checkIn: checkInSchema },
+} as const;
+
+const withErrors = (
+  success: Record<number, unknown>,
+  statuses: readonly number[],
+) => Object.fromEntries([
+  ...Object.entries(success),
+  ...statuses.map((status) => [status, errorEnvelopeSchema]),
+]);
+
+export const completeOnboardingSchema = {
+  headers: commandHeaders,
+  body: onboardingBody,
+  response: withErrors(
+    { 200: accountEnvelope, 201: accountEnvelope },
+    [400, 401, 403, 409, 503],
+  ),
+} satisfies FastifySchema;
+
+export const getOnboardingSchema = {
+  response: withErrors({ 200: onboardingStatus }, [401, 403, 503]),
+} satisfies FastifySchema;
+
+export const createCheckInSchema = {
+  headers: commandHeaders,
+  body: checkInBody,
+  response: withErrors(
+    { 200: checkInEnvelope, 201: checkInEnvelope },
+    [400, 401, 403, 409, 503],
+  ),
+} satisfies FastifySchema;
+
+export const getCheckInSchema = {
+  params: checkInParams,
+  response: withErrors({ 200: checkInEnvelope }, [401, 403, 404, 409, 503]),
+} satisfies FastifySchema;
