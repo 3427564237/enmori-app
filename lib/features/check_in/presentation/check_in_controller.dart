@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/providers.dart';
+import '../../../core/network/idempotency_key_generator.dart';
+import '../../../core/network/idempotency_key_provider.dart';
 import '../../../core/presentation/command_state.dart';
 import '../../../core/result/result.dart';
+import '../check_in_providers.dart';
 import '../domain/check_in_repository.dart';
 
 final checkInControllerProvider =
@@ -14,9 +16,15 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
   int _operation = 0;
   String? _createNote;
   String? _createIdempotencyKey;
+  late CheckInRepository _repository;
+  late IdempotencyKeyGenerator _keyGenerator;
 
   @override
-  CommandState<CheckIn> build() => const CommandIdle();
+  CommandState<CheckIn> build() {
+    _repository = ref.watch(checkInRepositoryProvider);
+    _keyGenerator = ref.watch(idempotencyKeyGeneratorProvider);
+    return const CommandIdle();
+  }
 
   Future<void> create({required String note}) async {
     final normalizedResult = normalizeCheckInNote(note);
@@ -27,16 +35,15 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
     final normalized = (normalizedResult as Success<String>).value;
     if (_createNote != normalized || _createIdempotencyKey == null) {
       _createNote = normalized;
-      _createIdempotencyKey = ref
-          .read(idempotencyKeyGeneratorProvider)
-          .generate();
+      _createIdempotencyKey = _keyGenerator.generate();
     }
 
     final operation = ++_operation;
     state = const CommandPending();
-    final result = await ref
-        .read(checkInRepositoryProvider)
-        .create(note: normalized, idempotencyKey: _createIdempotencyKey!);
+    final result = await _repository.create(
+      note: normalized,
+      idempotencyKey: _createIdempotencyKey!,
+    );
     if (operation != _operation) return;
     state = switch (result) {
       Success<CheckIn>(:final value) => CommandSucceeded(value),
@@ -49,9 +56,7 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
   }
 
   Future<void> readPersisted({required String checkInId}) async {
-    await _run(
-      () => ref.read(checkInRepositoryProvider).readOwned(checkInId: checkInId),
-    );
+    await _run(() => _repository.readOwned(checkInId: checkInId));
   }
 
   Future<void> _run(Future<Result<CheckIn>> Function() command) async {

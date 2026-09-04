@@ -1,22 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/network/backend_api_client.dart';
-import '../core/network/idempotency_key_generator.dart';
 import '../core/result/result.dart';
-import '../features/account/data/backend_account_repository.dart';
+import '../features/account/account_providers.dart';
 import '../features/account/domain/account_repository.dart';
-import '../features/auth/data/firebase_auth_repository.dart';
-import '../features/auth/data/unavailable_auth_repository.dart';
+import '../features/auth/auth_providers.dart';
 import '../features/auth/domain/auth_repository.dart';
-import '../features/check_in/data/backend_check_in_repository.dart';
-import '../features/check_in/domain/check_in_repository.dart';
-
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  if (Firebase.apps.isEmpty) return const UnavailableAuthRepository();
-  return FirebaseAuthRepository(FirebaseAuth.instance);
-});
 
 final backendBaseUriProvider = Provider<Uri?>((ref) {
   const configured = String.fromEnvironment('ENMORI_API_BASE_URL');
@@ -26,10 +15,6 @@ final backendBaseUriProvider = Provider<Uri?>((ref) {
   return parsed;
 });
 
-final idempotencyKeyGeneratorProvider = Provider<IdempotencyKeyGenerator>(
-  (ref) => SecureIdempotencyKeyGenerator(),
-);
-
 final backendApiClientProvider = Provider<BackendApiClient>((ref) {
   final client = BackendApiClient(
     ref.watch(backendBaseUriProvider),
@@ -38,23 +23,6 @@ final backendApiClientProvider = Provider<BackendApiClient>((ref) {
   ref.onDispose(client.close);
   return client;
 });
-
-final accountRepositoryProvider = Provider<AccountRepository>((ref) {
-  return BackendAccountRepository(ref.watch(backendApiClientProvider));
-});
-
-final checkInRepositoryProvider = Provider<CheckInRepository>((ref) {
-  return BackendCheckInRepository(ref.watch(backendApiClientProvider));
-});
-
-final authSessionProvider = StreamProvider<AuthSession>((ref) {
-  return ref.watch(authRepositoryProvider).watchSession();
-});
-
-final onboardingStatusProvider =
-    FutureProvider.family<Result<OnboardingStatus>, String>((ref, subject) {
-      return ref.watch(accountRepositoryProvider).readOnboardingStatus();
-    });
 
 enum RouterGateState {
   resolving,

@@ -1,9 +1,11 @@
 import 'dart:async';
 
-import 'package:enmori/app/providers.dart';
+import 'package:enmori/core/network/idempotency_key_provider.dart';
 import 'package:enmori/core/presentation/command_state.dart';
 import 'package:enmori/core/result/result.dart';
+import 'package:enmori/features/account/account_providers.dart';
 import 'package:enmori/features/account/presentation/onboarding_controller.dart';
+import 'package:enmori/features/check_in/check_in_providers.dart';
 import 'package:enmori/features/check_in/presentation/check_in_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,5 +58,53 @@ void main() {
     await controller.create(note: 'A controlled test note.');
     expect(repository.createKeys, hasLength(2));
     expect(repository.createKeys[1], repository.createKeys[0]);
+  });
+
+  test('onboarding clears the idempotency key after success', () async {
+    final repository = FakeAccountRepository();
+    final keys = FakeIdempotencyKeyGenerator([
+      'aaaaaaaaaaaaaaaaaaaaaa',
+      'bbbbbbbbbbbbbbbbbbbbbb',
+    ]);
+    final container = ProviderContainer(
+      overrides: [
+        accountRepositoryProvider.overrideWithValue(repository),
+        idempotencyKeyGeneratorProvider.overrideWithValue(keys),
+      ],
+    );
+    addTearDown(container.dispose);
+    final controller = container.read(onboardingControllerProvider.notifier);
+
+    await controller.complete(username: 'miku_01', initialChoice: .accept);
+    await controller.complete(username: 'miku_01', initialChoice: .accept);
+
+    expect(repository.onboardingKeys, [
+      'aaaaaaaaaaaaaaaaaaaaaa',
+      'bbbbbbbbbbbbbbbbbbbbbb',
+    ]);
+  });
+
+  test('Check-in clears the idempotency key after success', () async {
+    final repository = FakeCheckInRepository();
+    final keys = FakeIdempotencyKeyGenerator([
+      'aaaaaaaaaaaaaaaaaaaaaa',
+      'bbbbbbbbbbbbbbbbbbbbbb',
+    ]);
+    final container = ProviderContainer(
+      overrides: [
+        checkInRepositoryProvider.overrideWithValue(repository),
+        idempotencyKeyGeneratorProvider.overrideWithValue(keys),
+      ],
+    );
+    addTearDown(container.dispose);
+    final controller = container.read(checkInControllerProvider.notifier);
+
+    await controller.create(note: 'A controlled test note.');
+    await controller.create(note: 'A controlled test note.');
+
+    expect(repository.createKeys, [
+      'aaaaaaaaaaaaaaaaaaaaaa',
+      'bbbbbbbbbbbbbbbbbbbbbb',
+    ]);
   });
 }

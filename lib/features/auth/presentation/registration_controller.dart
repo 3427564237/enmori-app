@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/providers.dart';
 import '../../../core/presentation/command_state.dart';
 import '../../../core/result/result.dart';
+import '../auth_providers.dart';
+import '../domain/auth_repository.dart';
 
 final registrationControllerProvider =
     NotifierProvider<RegistrationController, CommandState<void>>(
@@ -11,9 +12,13 @@ final registrationControllerProvider =
 
 final class RegistrationController extends Notifier<CommandState<void>> {
   int _operation = 0;
+  late AuthRepository _repository;
 
   @override
-  CommandState<void> build() => const CommandIdle();
+  CommandState<void> build() {
+    _repository = ref.watch(authRepositoryProvider);
+    return const CommandIdle();
+  }
 
   Future<void> register({
     required String email,
@@ -21,9 +26,7 @@ final class RegistrationController extends Notifier<CommandState<void>> {
   }) async {
     final operation = ++_operation;
     state = const CommandPending();
-    final result = await ref
-        .read(authRepositoryProvider)
-        .register(email: email, password: password);
+    final result = await _repository.register(email: email, password: password);
     if (operation != _operation) return;
     state = switch (result) {
       Success<void>() => const CommandSucceeded(null),

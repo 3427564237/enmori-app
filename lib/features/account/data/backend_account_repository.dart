@@ -1,4 +1,5 @@
 import '../../../core/network/backend_api_client.dart';
+import '../../../core/network/utc_timestamp_parser.dart';
 import '../../../core/result/result.dart';
 import '../domain/account_repository.dart';
 
@@ -73,7 +74,7 @@ final class BackendAccountRepository implements AccountRepository {
       'private' => CheckInVisibility.private,
       _ => null,
     };
-    final parsedTime = DateTime.tryParse(completedAt)?.toUtc();
+    final parsedTime = tryParseUtcTimestamp(completedAt);
     if (parsedConsent == null ||
         parsedVisibility == null ||
         parsedTime == null) {

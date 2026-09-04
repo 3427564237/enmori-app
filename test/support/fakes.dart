@@ -1,9 +1,20 @@
 import 'dart:async';
 
+import 'package:enmori/core/network/idempotency_key_generator.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/check_in/domain/check_in_repository.dart';
+
+final class FakeIdempotencyKeyGenerator implements IdempotencyKeyGenerator {
+  FakeIdempotencyKeyGenerator(this._keys);
+
+  final List<String> _keys;
+  int _index = 0;
+
+  @override
+  String generate() => _keys[_index++];
+}
 
 final class FakeAuthRepository implements AuthRepository {
   FakeAuthRepository({AuthSession? initialSession}) {

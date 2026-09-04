@@ -3,7 +3,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/account/account_providers.dart';
+import '../features/account/data/backend_account_repository.dart';
+import '../features/auth/auth_providers.dart';
+import '../features/auth/data/firebase_auth_repository.dart';
 import '../features/auth/data/unavailable_auth_repository.dart';
+import '../features/check_in/check_in_providers.dart';
+import '../features/check_in/data/backend_check_in_repository.dart';
 import 'app.dart';
 import 'providers.dart';
 
@@ -30,10 +36,19 @@ Future<void> bootstrap() async {
   runApp(
     ProviderScope(
       overrides: [
-        if (!firebaseReady)
-          authRepositoryProvider.overrideWithValue(
-            const UnavailableAuthRepository(),
-          ),
+        authRepositoryProvider.overrideWithValue(
+          firebaseReady
+              ? FirebaseAuthRepository(FirebaseAuth.instance)
+              : const UnavailableAuthRepository(),
+        ),
+        accountRepositoryProvider.overrideWith(
+          (ref) =>
+              BackendAccountRepository(ref.watch(backendApiClientProvider)),
+        ),
+        checkInRepositoryProvider.overrideWith(
+          (ref) =>
+              BackendCheckInRepository(ref.watch(backendApiClientProvider)),
+        ),
       ],
       child: const EnmoriApp(),
     ),

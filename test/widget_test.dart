@@ -1,5 +1,5 @@
 import 'package:enmori/app/app.dart';
-import 'package:enmori/app/providers.dart';
+import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/auth/presentation/registration_controller.dart';
 import 'package:flutter/material.dart';

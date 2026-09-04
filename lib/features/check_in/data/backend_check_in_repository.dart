@@ -1,4 +1,5 @@
 import '../../../core/network/backend_api_client.dart';
+import '../../../core/network/utc_timestamp_parser.dart';
 import '../../../core/result/result.dart';
 import '../domain/check_in_repository.dart';
 
@@ -40,9 +41,7 @@ final class BackendCheckInRepository implements CheckInRepository {
     final checkInId = checkIn['checkInId'];
     final note = checkIn['note'];
     final createdAt = checkIn['createdAt'];
-    final parsedTime = createdAt is String
-        ? DateTime.tryParse(createdAt)?.toUtc()
-        : null;
+    final parsedTime = tryParseUtcTimestamp(createdAt);
     if (checkInId is! String || note is! String || parsedTime == null) {
       return _invalidCheckIn();
     }

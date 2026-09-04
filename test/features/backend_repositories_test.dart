@@ -11,6 +11,58 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
+  group('BackendApiClient', () {
+    test('rejects missing and non-string request IDs', () async {
+      final invalidErrors = <Map<String, Object?>>[
+        {'code': 'SERVICE_UNAVAILABLE', 'message': 'Unsafe remote message.'},
+        {
+          'code': 'SERVICE_UNAVAILABLE',
+          'message': 'Unsafe remote message.',
+          'requestId': 42,
+        },
+      ];
+
+      for (final error in invalidErrors) {
+        final client = _client(
+          (request) async => http.Response(jsonEncode({'error': error}), 503),
+        );
+        final result = await client.get('/v1/test');
+        client.close();
+
+        final failure = (result as Failure<JsonObject>).failure;
+        expect(failure.kind, AppFailureKind.serviceUnavailable);
+        expect(failure.message, 'The service is unavailable. Try again.');
+        expect(failure.requestId, isNull);
+      }
+    });
+
+    test(
+      'rejects an unknown error code without exposing its message',
+      () async {
+        final client = _client(
+          (request) async => http.Response(
+            jsonEncode({
+              'error': {
+                'code': 'UNKNOWN_REMOTE_CODE',
+                'message': 'Unsafe remote message.',
+                'requestId': 'req_test',
+              },
+            }),
+            500,
+          ),
+        );
+
+        final result = await client.get('/v1/test');
+        client.close();
+
+        final failure = (result as Failure<JsonObject>).failure;
+        expect(failure.kind, AppFailureKind.serviceUnavailable);
+        expect(failure.message, 'The service is unavailable. Try again.');
+        expect(failure.requestId, isNull);
+      },
+    );
+  });
+
   group('BackendAccountRepository', () {
     test(
       'sends the approved Accept payload and parses the safe account',
@@ -106,6 +158,39 @@ void main() {
       );
       expect(account.checkInVisibility, CheckInVisibility.private);
     });
+
+    test('rejects account timestamps that are not explicit UTC', () async {
+      for (final timestamp in [
+        '2026-09-03T03:15:00',
+        '2026-09-03T11:15:00+08:00',
+        'not-a-time',
+      ]) {
+        final client = _client(
+          (request) async => http.Response(
+            jsonEncode({
+              'account': {
+                'username': 'miku_01',
+                'optionalProcessingConsent': 'accepted',
+                'checkInVisibility': 'public',
+                'onboardingCompletedAt': timestamp,
+              },
+            }),
+            201,
+          ),
+        );
+        final repository = BackendAccountRepository(client);
+
+        final result = await repository.completeOnboarding(
+          username: 'miku_01',
+          initialChoice: InitialChoice.accept,
+          idempotencyKey: 'abcdefghijklmnopqrstuv',
+        );
+        client.close();
+
+        final failure = (result as Failure<ProductAccount>).failure;
+        expect(failure.kind, AppFailureKind.unexpected);
+      }
+    });
   });
 
   group('BackendCheckInRepository', () {
@@ -166,6 +251,37 @@ void main() {
       final failure = (result as Failure<CheckIn>).failure;
       expect(failure.kind, AppFailureKind.checkInUnavailable);
       expect(failure.requestId, 'req_test');
+    });
+
+    test('rejects Check-in timestamps that are not explicit UTC', () async {
+      for (final timestamp in [
+        '2026-09-03T03:20:00',
+        '2026-09-03T11:20:00+08:00',
+        'not-a-time',
+      ]) {
+        final client = _client(
+          (request) async => http.Response(
+            jsonEncode({
+              'checkIn': {
+                'checkInId': 'chk_test',
+                'note': 'A controlled test note.',
+                'createdAt': timestamp,
+              },
+            }),
+            201,
+          ),
+        );
+        final repository = BackendCheckInRepository(client);
+
+        final result = await repository.create(
+          note: 'A controlled test note.',
+          idempotencyKey: 'abcdefghijklmnopqrstuv',
+        );
+        client.close();
+
+        final failure = (result as Failure<CheckIn>).failure;
+        expect(failure.kind, AppFailureKind.unexpected);
+      }
     });
   });
 }

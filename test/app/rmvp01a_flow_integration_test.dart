@@ -1,9 +1,11 @@
 import 'package:enmori/app/app.dart';
-import 'package:enmori/app/providers.dart';
 import 'package:enmori/core/presentation/command_state.dart';
+import 'package:enmori/features/account/account_providers.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
 import 'package:enmori/features/account/presentation/onboarding_controller.dart';
+import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
+import 'package:enmori/features/check_in/check_in_providers.dart';
 import 'package:enmori/features/check_in/presentation/check_in_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

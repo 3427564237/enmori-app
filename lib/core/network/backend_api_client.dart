@@ -123,29 +123,33 @@ final class BackendApiClient {
     final code = error['code'];
     final message = error['message'];
     final requestId = error['requestId'];
-    if (code is! String || message is! String) {
+    if (code is! String || message is! String || requestId is! String) {
       return const AppFailure(
         kind: AppFailureKind.serviceUnavailable,
         message: 'The service is unavailable. Try again.',
       );
     }
 
-    return AppFailure(
-      kind: switch (code) {
-        'AUTH_REQUIRED' => AppFailureKind.authRequired,
-        'AUTH_FORBIDDEN' => AppFailureKind.authForbidden,
-        'USERNAME_INVALID' => AppFailureKind.usernameInvalid,
-        'USERNAME_UNAVAILABLE' => AppFailureKind.usernameUnavailable,
-        'ONBOARDING_REQUIRED' => AppFailureKind.onboardingRequired,
-        'ONBOARDING_CONFLICT' => AppFailureKind.onboardingConflict,
-        'CHECKIN_INVALID' => AppFailureKind.checkInInvalid,
-        'CHECKIN_UNAVAILABLE' => AppFailureKind.checkInUnavailable,
-        'IDEMPOTENCY_CONFLICT' => AppFailureKind.idempotencyConflict,
-        'SERVICE_UNAVAILABLE' => AppFailureKind.serviceUnavailable,
-        _ => AppFailureKind.unexpected,
-      },
-      message: message,
-      requestId: requestId is String ? requestId : null,
-    );
+    final kind = switch (code) {
+      'AUTH_REQUIRED' => AppFailureKind.authRequired,
+      'AUTH_FORBIDDEN' => AppFailureKind.authForbidden,
+      'USERNAME_INVALID' => AppFailureKind.usernameInvalid,
+      'USERNAME_UNAVAILABLE' => AppFailureKind.usernameUnavailable,
+      'ONBOARDING_REQUIRED' => AppFailureKind.onboardingRequired,
+      'ONBOARDING_CONFLICT' => AppFailureKind.onboardingConflict,
+      'CHECKIN_INVALID' => AppFailureKind.checkInInvalid,
+      'CHECKIN_UNAVAILABLE' => AppFailureKind.checkInUnavailable,
+      'IDEMPOTENCY_CONFLICT' => AppFailureKind.idempotencyConflict,
+      'SERVICE_UNAVAILABLE' => AppFailureKind.serviceUnavailable,
+      _ => null,
+    };
+    if (kind == null) {
+      return const AppFailure(
+        kind: AppFailureKind.serviceUnavailable,
+        message: 'The service is unavailable. Try again.',
+      );
+    }
+
+    return AppFailure(kind: kind, message: message, requestId: requestId);
   }
 }

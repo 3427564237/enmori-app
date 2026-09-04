@@ -1,6 +1,6 @@
-import 'package:enmori/app/providers.dart';
 import 'package:enmori/core/presentation/command_state.dart';
 import 'package:enmori/core/result/result.dart';
+import 'package:enmori/features/check_in/check_in_providers.dart';
 import 'package:enmori/features/check_in/domain/check_in_repository.dart';
 import 'package:enmori/features/check_in/presentation/check_in_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

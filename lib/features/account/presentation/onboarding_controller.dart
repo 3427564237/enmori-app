@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/providers.dart';
+import '../../../core/network/idempotency_key_generator.dart';
+import '../../../core/network/idempotency_key_provider.dart';
 import '../../../core/presentation/command_state.dart';
 import '../../../core/result/result.dart';
-import '../../auth/domain/auth_repository.dart';
+import '../../auth/auth_providers.dart';
+import '../account_providers.dart';
 import '../domain/account_repository.dart';
 
 final onboardingControllerProvider =
@@ -16,9 +18,17 @@ final class OnboardingController
   int _operation = 0;
   String? _commandFingerprint;
   String? _idempotencyKey;
+  late AccountRepository _repository;
+  late IdempotencyKeyGenerator _keyGenerator;
+  String? _authSubject;
 
   @override
-  CommandState<ProductAccount> build() => const CommandIdle();
+  CommandState<ProductAccount> build() {
+    _repository = ref.watch(accountRepositoryProvider);
+    _keyGenerator = ref.watch(idempotencyKeyGeneratorProvider);
+    _authSubject = ref.watch(currentAuthSubjectProvider);
+    return const CommandIdle();
+  }
 
   Future<void> complete({
     required String username,
@@ -28,17 +38,15 @@ final class OnboardingController
     final fingerprint = '${initialChoice.name}\u0000$username';
     if (_commandFingerprint != fingerprint || _idempotencyKey == null) {
       _commandFingerprint = fingerprint;
-      _idempotencyKey = ref.read(idempotencyKeyGeneratorProvider).generate();
+      _idempotencyKey = _keyGenerator.generate();
     }
     final idempotencyKey = _idempotencyKey!;
     state = const CommandPending();
-    final result = await ref
-        .read(accountRepositoryProvider)
-        .completeOnboarding(
-          username: username,
-          initialChoice: initialChoice,
-          idempotencyKey: idempotencyKey,
-        );
+    final result = await _repository.completeOnboarding(
+      username: username,
+      initialChoice: initialChoice,
+      idempotencyKey: idempotencyKey,
+    );
     if (operation != _operation) return;
 
     state = switch (result) {
@@ -48,8 +56,7 @@ final class OnboardingController
     if (result case Success<ProductAccount>()) {
       _commandFingerprint = null;
       _idempotencyKey = null;
-      final session = ref.read(authSessionProvider).value;
-      if (session case AuthSessionAuthenticated(:final subject)) {
+      if (_authSubject case final subject?) {
         ref.invalidate(onboardingStatusProvider(subject));
       }
     }
