@@ -5,12 +5,14 @@
 - Owner: ZHOU YAOYIN (`@YaoyinZhou3922`)
 - Branch: `codex/issue-6-r10-emulator`
 - Accepted R9 / branch base: `d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0`
-- R10 implementation commit: `55c3d91e549e943e823d28a5f881973d6ddd0815`
+- R10 implementation commits: `55c3d91e549e943e823d28a5f881973d6ddd0815`
+  and `31b8ef041444490ecaa6a09860d8839f50560ae7`
 - Contract: `S-PM-0903-RMVP01A-CONTRACT`
 - Toolchain: `S-PM-0905-RMVP01A-TOOLCHAIN`
 - Reviewer path: SHI ZHENGQI independently reviews R10 in R5A
-- Current disposition: owner verification passed; R10 remains submitted for
-  independent review and is not complete until the current head is accepted
+- Current disposition: owner verification passed; R10 is prepared for
+  independent review and is not complete until the current head is published
+  and accepted
 
 This record covers only the reproducible local Firebase Authentication and
 Cloud Firestore Emulator environment assigned to R10. It does not claim R11,
@@ -21,7 +23,7 @@ accessibility, Q04, UAT, Release or Done evidence.
 
 | Item | Recorded value |
 |---|---|
-| Execution time | `2026-09-05T21:19:50+08:00` |
+| Execution time | `2026-09-05T22:11:04+08:00` |
 | Executor | ZHOU YAOYIN |
 | Host boundary | Sanitized local Windows x64 workstation |
 | Node.js | `v24.19.0` |
@@ -33,6 +35,7 @@ accessibility, Q04, UAT, Release or Done evidence.
 | Auth endpoint | loopback `127.0.0.1:9099` |
 | Firestore endpoint | loopback `127.0.0.1:8080` |
 | Emulator UI | disabled |
+| GCP metadata probing | disabled for the Emulator test process |
 | Credentials / real data | none used |
 | Fixture data | fixed `controlled-*` IDs and `.invalid` email addresses only |
 | Lockfile commit | `d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0` |
@@ -55,7 +58,8 @@ It fails closed for unset, development, controlled-demo or production mode,
 for a real project ID, for mismatched project IDs, and for missing or remote
 Emulator endpoints. The `demo-` project identity also makes any accidental
 request to a non-emulated Firebase product fail instead of reaching a live
-resource.
+resource. The test runner disables GCP metadata-server detection so the
+credential-free local run does not probe a cloud metadata endpoint.
 
 ## Reproduction
 
@@ -97,7 +101,8 @@ invented to suppress that warning.
 ## Emulator coverage
 
 - The environment guard proves tests cannot select a live Firebase project or
-  non-loopback Firebase endpoint.
+  non-loopback Firebase endpoint, and the runner prevents cloud metadata
+  probing.
 - Auth state is reset through the Emulator REST reset endpoint, and Firestore
   state is reset through the Emulator-only database flush endpoint.
 - A real Auth Emulator ID token maps to the exact verified Firebase principal.
