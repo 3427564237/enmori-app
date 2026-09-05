@@ -2,9 +2,12 @@
 
 - **Owner:** SHI ZHENGQI (`@GGGGHOST-CN`)
 - **Branch:** `codex/issue-2-r4-transport-openapi`
-- **Implementation commit:** `ad333bbcbb977aab89fbd6abf61cf56f6f39f67b`
+- **Transport/OpenAPI implementation commit:** `ad333bbcbb977aab89fbd6abf61cf56f6f39f67b`
+- **LI review correction commit:** `ed5909c2541293e086c32d698bba8a2020a17f2a`
+- **Idempotency-key decision implementation commit:** `9271304d905c34cfa04910d164af7a0542673cd5`
 - **Baseline:** `e5aa474` (`main`, merged toolchain decision PR #9)
 - **Scope:** R4 Application/Domain/Ports, Fastify Transport, hand-maintained OpenAPI 3.1 contract, and owner tests
+- **Later controlling clarification:** `S-PM-0905-RMVP01A-IDEMPOTENCY-KEY-ERROR` (merged decision PR #15, `503bad33`)
 
 ## Approved toolchain and paths
 
@@ -27,14 +30,14 @@ The project-level `package.json` and `pnpm-lock.yaml` pin the approved R4 depend
 |---|---|
 | `node --version` | Pass — `v24.19.0` |
 | `pnpm --version` | Pass — `11.19.0` |
-| `pnpm install --frozen-lockfile` | Pass — lockfile reproducible |
-| `pnpm backend:verify` | Pass — strict TypeScript build and 34/34 `node:test` tests; 0 failed/skipped/todo |
+| `pnpm --config.ignore-scripts=true install --frozen-lockfile` | Pass — lockfile reproducible; lifecycle scripts not executed |
+| `pnpm --config.ignore-scripts=true run backend:verify` | Pass — strict TypeScript build and 39/39 `node:test` tests; 0 failed/skipped/todo |
 | `fvm dart run tool/check_environment.dart` | Pass for required Flutter/Dart/Java/Android SDK checks; `adb` remains warning-only/unavailable |
 | `fvm flutter analyze` | Pass — no issues |
 | `fvm flutter test` | Pass — 15/15 tests |
 | `git diff --cached --check` before commit | Pass |
 
-Backend owner tests cover the exact four-route inventory, request mapping, approved 200/201 behavior, strict request fields, idempotency-key validation, Bearer authentication outcomes, every approved application failure mapping, privacy-safe not-found behavior, safe failure envelopes, public response projection, unknown dependency failure containment, OpenAPI alignment, and the exact Node.js runtime.
+Backend owner tests cover the exact four-route inventory, request mapping, approved 200/201 behavior, strict request fields, Bearer authentication outcomes and authentication-before-command-validation ordering, missing/malformed `Idempotency-Key` classification as `IDEMPOTENCY_KEY_INVALID`, preservation of `IDEMPOTENCY_CONFLICT` for valid-key/different-input reuse, exact retry recovery when fresh Clock/ID values are unavailable, full outer Unicode `White_Space` Note normalization, every approved application failure mapping, privacy-safe not-found behavior, safe failure envelopes without raw request data, public response projection, unknown dependency failure containment, OpenAPI alignment, and the exact Node.js runtime.
 
 ## Independent R5B review
 
@@ -44,7 +47,7 @@ This review is design-artifact approval only. It is not execution evidence and d
 
 ## Current blockers and exclusions
 
-- R4 implementation and local owner verification have no code or toolchain blocker.
-- LI authorized publication of the four R4 commits on `codex/issue-2-r4-transport-openapi`, followed by a Draft PR to `main` with LI as the requested reviewer.
+- R4 implementation and current owner verification have no code or toolchain blocker.
+- Draft PR #12 remains Draft / Changes Requested until LI independently accepts the revised head; no merge or completion is claimed by this owner evidence.
 - `adb` is unavailable, so no Android device execution was performed.
-- R9/R10 adapters/environment, R6/R7 client/device work, R13–R15, controlled-backend integration, Android evidence, Q04, UAT, and release status remain outside SHI's current implementation scope and are `Not Run` unless their owners record valid evidence.
+- R9 combined integration/re-review waits for accepted R4. R10 adapters/environment, R6/R7 client/device work, R13–R15, controlled-backend integration, Android evidence, Q04, accessibility, UAT, and release status remain outside SHI's current implementation scope and are `Not Run` unless their owners record valid evidence.
