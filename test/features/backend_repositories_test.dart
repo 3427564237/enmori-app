@@ -61,6 +61,33 @@ void main() {
         expect(failure.requestId, isNull);
       },
     );
+
+    test('maps an invalid idempotency key as its own stable failure', () async {
+      final client = _client(
+        (request) async => http.Response(
+          jsonEncode({
+            'error': {
+              'code': 'IDEMPOTENCY_KEY_INVALID',
+              'message': 'Provide a valid request key and try again.',
+              'requestId': 'req_idempotency_key',
+            },
+          }),
+          400,
+        ),
+      );
+
+      final result = await client.post(
+        '/v1/check-ins',
+        body: {'note': 'First Check-in'},
+        idempotencyKey: 'abcdefghijklmnopqrstuv',
+      );
+      client.close();
+
+      final failure = (result as Failure<JsonObject>).failure;
+      expect(failure.kind, AppFailureKind.idempotencyKeyInvalid);
+      expect(failure.message, 'Provide a valid request key and try again.');
+      expect(failure.requestId, 'req_idempotency_key');
+    });
   });
 
   group('BackendAccountRepository', () {

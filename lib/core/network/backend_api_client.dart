@@ -139,6 +139,7 @@ final class BackendApiClient {
       'ONBOARDING_CONFLICT' => AppFailureKind.onboardingConflict,
       'CHECKIN_INVALID' => AppFailureKind.checkInInvalid,
       'CHECKIN_UNAVAILABLE' => AppFailureKind.checkInUnavailable,
+      'IDEMPOTENCY_KEY_INVALID' => AppFailureKind.idempotencyKeyInvalid,
       'IDEMPOTENCY_CONFLICT' => AppFailureKind.idempotencyConflict,
       'SERVICE_UNAVAILABLE' => AppFailureKind.serviceUnavailable,
       _ => null,

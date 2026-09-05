@@ -9,6 +9,7 @@ enum AppFailureKind {
   onboardingConflict,
   checkInInvalid,
   checkInUnavailable,
+  idempotencyKeyInvalid,
   idempotencyConflict,
   serviceUnavailable,
   configurationUnavailable,
