@@ -10,6 +10,7 @@ import type {
 } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import {
   FIRESTORE_COLLECTIONS,
+  createAuthBindingDocumentId,
   createIdempotencyIdentity,
   createRequestFingerprint,
   isSafeDocumentId,
@@ -30,8 +31,11 @@ function accountPath(accountId: string): string {
   return `${FIRESTORE_COLLECTIONS.accounts}/${accountId}`;
 }
 
-function authBindingPath(firebaseUid: string): string {
-  return `${FIRESTORE_COLLECTIONS.authBindings}/${firebaseUid}`;
+function authBindingPath(firebaseUid: string): string | undefined {
+  const documentId = createAuthBindingDocumentId(firebaseUid);
+  return documentId === undefined
+    ? undefined
+    : `${FIRESTORE_COLLECTIONS.authBindings}/${documentId}`;
 }
 
 function checkInPath(checkInId: string): string {
@@ -46,7 +50,7 @@ function validCommand(command: CreateCommand): boolean {
   const occurredAt = new Date(command.createdAt).getTime();
   const expiresAt = new Date(command.idempotencyExpiresAt).getTime();
   return (
-    isSafeDocumentId(command.firebaseUid) &&
+    createAuthBindingDocumentId(command.firebaseUid) !== undefined &&
     isSafeDocumentId(command.checkInId) &&
     isUtcIsoInstant(command.createdAt) &&
     isUtcIsoInstant(command.idempotencyExpiresAt) &&
@@ -83,13 +87,14 @@ export class FirestoreCheckInRepository implements CheckInRepository {
   public async create(
     command: CreateCommand,
   ): Promise<CreateCheckInRepositoryResult> {
-    if (!validCommand(command)) return dependencyUnavailable;
+    const bindingPath = authBindingPath(command.firebaseUid);
+    if (!validCommand(command) || bindingPath === undefined) {
+      return dependencyUnavailable;
+    }
 
     try {
       return await this.firestore.runTransaction(async (transaction) => {
-        const binding = await transaction.get(
-          authBindingPath(command.firebaseUid),
-        );
+        const binding = await transaction.get(bindingPath);
         if (binding === undefined) return { kind: "onboarding_required" };
         const accountId = parseAuthBinding(binding);
         if (accountId === undefined) return dependencyUnavailable;
@@ -173,16 +178,15 @@ export class FirestoreCheckInRepository implements CheckInRepository {
     readonly firebaseUid: string;
     readonly checkInId: string;
   }): Promise<FindOwnedCheckInRepositoryResult> {
-    if (!isSafeDocumentId(query.firebaseUid)) return dependencyUnavailable;
+    const bindingPath = authBindingPath(query.firebaseUid);
+    if (bindingPath === undefined) return dependencyUnavailable;
     if (!isSafeDocumentId(query.checkInId)) {
       return { kind: "not_found_or_not_owned" };
     }
 
     try {
       return await this.firestore.runTransaction(async (transaction) => {
-        const binding = await transaction.get(
-          authBindingPath(query.firebaseUid),
-        );
+        const binding = await transaction.get(bindingPath);
         if (binding === undefined) return { kind: "onboarding_required" };
         const accountId = parseAuthBinding(binding);
         if (accountId === undefined) return dependencyUnavailable;

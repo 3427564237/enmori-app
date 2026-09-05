@@ -9,8 +9,12 @@ import {
   InMemoryFirestoreGateway,
 } from "./support/in-memory-firestore-gateway.js";
 
+const FIREBASE_UID = "controlled-firebase-uid-001";
+const AUTH_BINDING_PATH =
+  "auth_bindings/uid_Y29udHJvbGxlZC1maXJlYmFzZS11aWQtMDAx";
+
 const ACCOUNT_SEED = {
-  "auth_bindings/controlled-firebase-uid-001": {
+  [AUTH_BINDING_PATH]: {
     accountId: "controlled-account-001",
   },
   "accounts/controlled-account-001": {
@@ -29,7 +33,7 @@ function command(noteInput = "A controlled check-in") {
   if (!note.ok || !key.ok) throw new Error("controlled fixture invalid");
 
   return {
-    firebaseUid: "controlled-firebase-uid-001",
+    firebaseUid: FIREBASE_UID,
     checkInId: "controlled-check-in-001",
     note: note.value,
     createdAt: "2026-09-05T02:00:00.000Z",
@@ -120,7 +124,7 @@ test("owned read returns one safe projection and hides non-owned records", async
 
   assert.deepEqual(
     await repository.findOwned({
-      firebaseUid: "controlled-firebase-uid-001",
+      firebaseUid: FIREBASE_UID,
       checkInId: "owned-check-in",
     }),
     {
@@ -133,11 +137,11 @@ test("owned read returns one safe projection and hides non-owned records", async
     },
   );
   const absent = await repository.findOwned({
-    firebaseUid: "controlled-firebase-uid-001",
+    firebaseUid: FIREBASE_UID,
     checkInId: "absent-check-in",
   });
   const nonOwned = await repository.findOwned({
-    firebaseUid: "controlled-firebase-uid-001",
+    firebaseUid: FIREBASE_UID,
     checkInId: "other-check-in",
   });
   assert.deepEqual(absent, { kind: "not_found_or_not_owned" });
@@ -175,7 +179,7 @@ test("owned read fails closed for an invalid stored Note", async () => {
 
   assert.deepEqual(
     await repository.findOwned({
-      firebaseUid: "controlled-firebase-uid-001",
+      firebaseUid: FIREBASE_UID,
       checkInId: "controlled-check-in-001",
     }),
     { kind: "dependency_unavailable" },

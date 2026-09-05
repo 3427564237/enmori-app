@@ -9,6 +9,10 @@ import {
   InMemoryFirestoreGateway,
 } from "./support/in-memory-firestore-gateway.js";
 
+const FIREBASE_UID = "controlled-firebase-uid-001";
+const AUTH_BINDING_PATH =
+  "auth_bindings/uid_Y29udHJvbGxlZC1maXJlYmFzZS11aWQtMDAx";
+
 function command(overrides: Readonly<Record<string, unknown>> = {}) {
   const username = canonicalizeUsername("member_001");
   const key = validateIdempotencyKey("ControlledKey_1234567890");
@@ -17,7 +21,7 @@ function command(overrides: Readonly<Record<string, unknown>> = {}) {
   if (!username.ok || !key.ok) throw new Error("controlled fixture invalid");
 
   return {
-    firebaseUid: "controlled-firebase-uid-001",
+    firebaseUid: FIREBASE_UID,
     accountId: "controlled-account-001",
     canonicalUsername: username.value,
     optionalProcessingConsent: "accepted" as const,
@@ -43,7 +47,7 @@ test("onboarding atomically writes the four approved record groups", async () =>
       onboardingCompletedAt: "2026-09-05T00:00:00.000Z",
     },
   });
-  assert.deepEqual(gateway.read("auth_bindings/controlled-firebase-uid-001"), {
+  assert.deepEqual(gateway.read(AUTH_BINDING_PATH), {
     accountId: "controlled-account-001",
   });
   assert.deepEqual(gateway.read("username_reservations/member_001"), {
@@ -135,13 +139,13 @@ test("onboarding status distinguishes missing and valid completed accounts", asy
     new InMemoryFirestoreGateway(),
   );
   assert.deepEqual(
-    await missing.getStatus("controlled-firebase-uid-001"),
+    await missing.getStatus(FIREBASE_UID),
     { kind: "required" },
   );
 
   const completed = new FirestoreOnboardingRepository(
     new InMemoryFirestoreGateway({
-      "auth_bindings/controlled-firebase-uid-001": {
+      [AUTH_BINDING_PATH]: {
         accountId: "controlled-account-001",
       },
       "accounts/controlled-account-001": {
@@ -153,7 +157,7 @@ test("onboarding status distinguishes missing and valid completed accounts", asy
     }),
   );
   assert.deepEqual(
-    await completed.getStatus("controlled-firebase-uid-001"),
+    await completed.getStatus(FIREBASE_UID),
     {
       kind: "completed",
       account: {
@@ -169,7 +173,7 @@ test("onboarding status distinguishes missing and valid completed accounts", asy
 test("onboarding status fails closed for a non-canonical stored Username", async () => {
   const repository = new FirestoreOnboardingRepository(
     new InMemoryFirestoreGateway({
-      "auth_bindings/controlled-firebase-uid-001": {
+      [AUTH_BINDING_PATH]: {
         accountId: "controlled-account-001",
       },
       "accounts/controlled-account-001": {
@@ -182,7 +186,34 @@ test("onboarding status fails closed for a non-canonical stored Username", async
   );
 
   assert.deepEqual(
-    await repository.getStatus("controlled-firebase-uid-001"),
+    await repository.getStatus(FIREBASE_UID),
     { kind: "dependency_unavailable" },
+  );
+});
+
+test("onboarding uses one encoded Auth Binding path for create and lookup", async () => {
+  const firebaseUid = "firebase/user.__name__.用户";
+  const expectedPath =
+    "auth_bindings/uid_ZmlyZWJhc2UvdXNlci5fX25hbWVfXy7nlKjmiLc";
+  const gateway = new InMemoryFirestoreGateway();
+  const repository = new FirestoreOnboardingRepository(gateway);
+
+  const created = await repository.complete(command({ firebaseUid }));
+  const status = await repository.getStatus(firebaseUid);
+
+  assert.equal(created.kind, "created");
+  assert.equal(status.kind, "completed");
+  assert.deepEqual(gateway.read(expectedPath), {
+    accountId: "controlled-account-001",
+  });
+  assert.equal(
+    gateway.entries().some(([path]) => path.includes(firebaseUid)),
+    false,
+  );
+  const publicResults = JSON.stringify([created, status]);
+  assert.equal(publicResults.includes(firebaseUid), false);
+  assert.equal(
+    publicResults.includes(expectedPath.slice("auth_bindings/".length)),
+    false,
   );
 });

@@ -63,10 +63,38 @@ export function isSafeDocumentId(value: string): boolean {
   );
 }
 
+export function createAuthBindingDocumentId(
+  firebaseUid: string,
+): string | undefined {
+  if (
+    firebaseUid.length === 0 ||
+    !firebaseUid.isWellFormed() ||
+    [...firebaseUid].length > 128
+  ) {
+    return undefined;
+  }
+
+  const encodedUid = Buffer.from(firebaseUid, "utf8").toString("base64url");
+  const documentId = `uid_${encodedUid}`;
+  return isSafeDocumentId(documentId) ? documentId : undefined;
+}
+
 export function isUtcIsoInstant(value: unknown): value is string {
-  if (typeof value !== "string" || !value.endsWith("Z")) return false;
+  if (
+    typeof value !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(value)
+  ) {
+    return false;
+  }
   const parsed = new Date(value);
-  return Number.isFinite(parsed.getTime()) && parsed.toISOString() === value;
+  if (!Number.isFinite(parsed.getTime())) return false;
+
+  const normalized = parsed.toISOString();
+  if (normalized.slice(0, 19) !== value.slice(0, 19)) return false;
+
+  const fractional = /\.(\d+)Z$/.exec(value)?.[1];
+  return fractional === undefined ||
+    normalized.slice(20, 23) === `${fractional}000`.slice(0, 3);
 }
 
 export function isUnexpired(

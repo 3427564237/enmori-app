@@ -12,6 +12,7 @@ import type {
 } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import {
   FIRESTORE_COLLECTIONS,
+  createAuthBindingDocumentId,
   createIdempotencyIdentity,
   createRequestFingerprint,
   isSafeDocumentId,
@@ -29,8 +30,11 @@ function accountPath(accountId: string): string {
   return `${FIRESTORE_COLLECTIONS.accounts}/${accountId}`;
 }
 
-function authBindingPath(firebaseUid: string): string {
-  return `${FIRESTORE_COLLECTIONS.authBindings}/${firebaseUid}`;
+function authBindingPath(firebaseUid: string): string | undefined {
+  const documentId = createAuthBindingDocumentId(firebaseUid);
+  return documentId === undefined
+    ? undefined
+    : `${FIRESTORE_COLLECTIONS.authBindings}/${documentId}`;
 }
 
 function usernameReservationPath(canonicalUsername: string): string {
@@ -45,7 +49,7 @@ function validCommand(command: CompleteCommand): boolean {
   const occurredAt = new Date(command.onboardingCompletedAt).getTime();
   const expiresAt = new Date(command.idempotencyExpiresAt).getTime();
   return (
-    isSafeDocumentId(command.firebaseUid) &&
+    createAuthBindingDocumentId(command.firebaseUid) !== undefined &&
     isSafeDocumentId(command.accountId) &&
     isSafeDocumentId(command.canonicalUsername) &&
     isUtcIsoInstant(command.onboardingCompletedAt) &&
@@ -57,7 +61,7 @@ function validCommand(command: CompleteCommand): boolean {
 async function replayCompletedOnboarding(input: {
   readonly transaction: FirestoreTransactionGateway;
   readonly record: IdempotencyRecord;
-  readonly firebaseUid: string;
+  readonly bindingPath: string;
 }): Promise<CompleteOnboardingRepositoryResult> {
   const expectedPrefix = `${FIRESTORE_COLLECTIONS.accounts}/`;
   if (!input.record.committedResponseReference.startsWith(expectedPrefix)) {
@@ -68,9 +72,7 @@ async function replayCompletedOnboarding(input: {
   );
   if (!isSafeDocumentId(accountId)) return dependencyUnavailable;
 
-  const binding = await input.transaction.get(
-    authBindingPath(input.firebaseUid),
-  );
+  const binding = await input.transaction.get(input.bindingPath);
   const account = await input.transaction.get(accountPath(accountId));
   if (
     binding === undefined ||
@@ -91,7 +93,10 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
   public async complete(
     command: CompleteCommand,
   ): Promise<CompleteOnboardingRepositoryResult> {
-    if (!validCommand(command)) return dependencyUnavailable;
+    const bindingPath = authBindingPath(command.firebaseUid);
+    if (!validCommand(command) || bindingPath === undefined) {
+      return dependencyUnavailable;
+    }
 
     const operation = "complete_onboarding" as const;
     const identity = createIdempotencyIdentity({
@@ -131,12 +136,11 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
             return replayCompletedOnboarding({
               transaction,
               record,
-              firebaseUid: command.firebaseUid,
+              bindingPath,
             });
           }
         }
 
-        const bindingPath = authBindingPath(command.firebaseUid);
         const existingBinding = await transaction.get(bindingPath);
         if (existingBinding !== undefined) {
           const existingAccountId = parseAuthBinding(existingBinding);
@@ -201,11 +205,12 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
   public async getStatus(
     firebaseUid: string,
   ): Promise<GetOnboardingRepositoryResult> {
-    if (!isSafeDocumentId(firebaseUid)) return dependencyUnavailable;
+    const bindingPath = authBindingPath(firebaseUid);
+    if (bindingPath === undefined) return dependencyUnavailable;
 
     try {
       return await this.firestore.runTransaction(async (transaction) => {
-        const binding = await transaction.get(authBindingPath(firebaseUid));
+        const binding = await transaction.get(bindingPath);
         if (binding === undefined) return { kind: "required" };
         const accountId = parseAuthBinding(binding);
         if (accountId === undefined) return dependencyUnavailable;
