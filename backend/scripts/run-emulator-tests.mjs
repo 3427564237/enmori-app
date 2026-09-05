@@ -4,7 +4,11 @@ const result = spawnSync(
   process.execPath,
   ["--test", "backend/dist/emulator-test/**/*.test.js"],
   {
-    env: { ...process.env, ENMORI_ENVIRONMENT: "test" },
+    env: {
+      ...process.env,
+      ENMORI_ENVIRONMENT: "test",
+      METADATA_SERVER_DETECTION: "none",
+    },
     stdio: "inherit",
   },
 );

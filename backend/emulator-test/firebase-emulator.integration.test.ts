@@ -169,6 +169,7 @@ test("test mode uses loopback-only Auth and Firestore demo resources", () => {
   assert.equal(environment.projectId, "demo-enmori-rmvp01a-r10");
   assert.equal(environment.authHost, "127.0.0.1:9099");
   assert.equal(environment.firestoreHost, "127.0.0.1:8080");
+  assert.equal(process.env.METADATA_SERVER_DETECTION, "none");
 });
 
 test("fixture reset clears Auth and Firestore Emulator state", async () => {
@@ -200,6 +201,8 @@ test("Auth Emulator verifies ordinary and Admin-claimed principals without promo
   const adminClaimToken = await signInWithPassword(
     "ordinary.member@example.invalid",
   );
+  const decoded = await auth.verifyIdToken(adminClaimToken, true);
+  assert.equal(decoded.admin, true);
   assert.deepEqual(await verifier.verifyIdToken(adminClaimToken), {
     kind: "verified",
     principal: { firebaseUid: FIREBASE_UID },
