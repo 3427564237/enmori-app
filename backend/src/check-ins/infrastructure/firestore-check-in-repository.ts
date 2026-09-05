@@ -79,7 +79,7 @@ async function replayCreatedCheckIn(input: {
   if (stored === undefined || stored.ownerAccountId !== input.accountId) {
     return dependencyUnavailable;
   }
-  const projection = parseCheckInProjection(stored);
+  const projection = parseCheckInProjection(stored, checkInId);
   return projection === undefined
     ? dependencyUnavailable
     : { kind: "replayed", checkIn: projection };
@@ -156,7 +156,6 @@ export class FirestoreCheckInRepository implements CheckInRepository {
         if (candidate !== undefined) return dependencyUnavailable;
 
         const checkIn: StoredDocument = {
-          checkInId: creation.checkInId,
           ownerAccountId: accountId,
           note: command.note,
           createdAt: creation.createdAt,
@@ -217,7 +216,7 @@ export class FirestoreCheckInRepository implements CheckInRepository {
         if (stored === undefined || stored.ownerAccountId !== accountId) {
           return { kind: "not_found_or_not_owned" };
         }
-        const projection = parseCheckInProjection(stored);
+        const projection = parseCheckInProjection(stored, query.checkInId);
         return projection === undefined
           ? dependencyUnavailable
           : { kind: "found", checkIn: projection };

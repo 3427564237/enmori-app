@@ -73,7 +73,7 @@ test("UTC instants reject offsets, invalid dates and non-exact forms", () => {
   assert.equal(isUtcIsoInstant("2026-09-03t03:20:00z"), false);
 });
 
-test("stored projections accept the approved no-fraction UTC form", () => {
+test("stored projections accept approved UTC and derive Check-in ID externally", () => {
   assert.deepEqual(
     parseAccountProjection({
       username: "member_001",
@@ -89,15 +89,27 @@ test("stored projections accept the approved no-fraction UTC form", () => {
     },
   );
   assert.deepEqual(
-    parseCheckInProjection({
-      checkInId: "controlled-check-in-001",
-      note: "Controlled note",
-      createdAt: "2026-09-03T03:20:00Z",
-    }),
+    parseCheckInProjection(
+      {
+        note: "Controlled note",
+        createdAt: "2026-09-03T03:20:00Z",
+      },
+      "controlled-check-in-001",
+    ),
     {
       checkInId: "controlled-check-in-001",
       note: "Controlled note",
       createdAt: "2026-09-03T03:20:00Z",
     },
+  );
+  assert.equal(
+    parseCheckInProjection(
+      {
+        note: "Controlled note",
+        createdAt: "2026-09-03T03:20:00Z",
+      },
+      "unsafe/path",
+    ),
+    undefined,
   );
 });

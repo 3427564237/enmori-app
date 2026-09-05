@@ -58,7 +58,6 @@ test("check-in create atomically writes the approved record and idempotency resu
     },
   });
   assert.deepEqual(gateway.read("check_ins/controlled-check-in-001"), {
-    checkInId: "controlled-check-in-001",
     ownerAccountId: "controlled-account-001",
     note: "A controlled check-in",
     createdAt: "2026-09-05T02:00:00.000Z",
@@ -127,13 +126,11 @@ test("owned read returns one safe projection and hides non-owned records", async
   const gateway = new InMemoryFirestoreGateway({
     ...ACCOUNT_SEED,
     "check_ins/owned-check-in": {
-      checkInId: "owned-check-in",
       ownerAccountId: "controlled-account-001",
       note: "Owned controlled data",
       createdAt: "2026-09-05T04:00:00.000Z",
     },
     "check_ins/other-check-in": {
-      checkInId: "other-check-in",
       ownerAccountId: "other-account",
       note: "Other controlled data",
       createdAt: "2026-09-05T04:00:00.000Z",
@@ -188,7 +185,6 @@ test("owned read fails closed for an invalid stored Note", async () => {
     new InMemoryFirestoreGateway({
       ...ACCOUNT_SEED,
       "check_ins/controlled-check-in-001": {
-        checkInId: "controlled-check-in-001",
         ownerAccountId: "controlled-account-001",
         note: "",
         createdAt: "2026-09-05T04:00:00.000Z",

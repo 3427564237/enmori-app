@@ -168,12 +168,12 @@ export function parseAccountProjection(
 
 export function parseCheckInProjection(
   data: Readonly<Record<string, unknown>>,
+  checkInId: string,
 ): CheckInProjection | undefined {
-  const { checkInId, note, createdAt } = data;
+  const { note, createdAt } = data;
   const normalizedNote =
     typeof note === "string" ? normalizeNote(note) : undefined;
   if (
-    typeof checkInId !== "string" ||
     !isSafeDocumentId(checkInId) ||
     normalizedNote === undefined ||
     !normalizedNote.ok ||
