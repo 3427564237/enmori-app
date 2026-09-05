@@ -3,20 +3,19 @@
 ## Scope
 
 - Branch: `codex/issue-6-r9-infrastructure`
-- R9 revision commit: `25744002d61b86ec4d0f60dc824c15b6c90c3363`
-- Consumed R4 Ports commit: `7593f62f12feef0e59daa6131350f0c4b483a704`
+- Accepted R4 `main` commit: `fcaff75349f15b298412cd105273708b6d87e913`
+- R9 integration commit: `1bb13020291057ddc478779533b6e69e505f524e`
 - Toolchain authority: `S-PM-0905-RMVP01A-TOOLCHAIN`
 - Auth Binding ID authority: `S-PM-0905-RMVP01A-AUTHBINDING-ID`
 - Controlled data only: deterministic `controlled-*` identifiers, synthetic usernames, notes and timestamps
 - Reviewer path: SHI independently reviews R9 Infrastructure in R5A
 
-This evidence covers R9 only: Firebase Admin Auth Principal verification,
-Firestore repositories and atomic transaction behavior, and Infrastructure
-contract tests. R10 controlled Emulator/environment work and R11 boundary review
-are not started.
-
-This is R9-only revision evidence. R4 PR #12 is still under revision, so the
-required accepted-R4 rebase and combined R4+R9 suite are not claimed here.
+This evidence covers the required integration of R9 with the accepted R4 head:
+the accepted Application/Domain/Ports, Transport, OpenAPI and owner tests remain
+present, while R9 adds Firebase Admin Auth Principal verification, Firestore
+repositories, atomic transaction behavior and Infrastructure contract tests.
+R10 controlled Emulator/environment work and R11 boundary review are not
+started.
 
 ## Approved execution environment
 
@@ -24,7 +23,7 @@ required accepted-R4 rebase and combined R4+R9 suite are not claimed here.
 |---|---|
 | Node.js | `v24.19.0` |
 | pnpm | `11.19.0` |
-| Lockfile | `pnpm-lock.yaml`, frozen during verification; SHA-256 `B0B322975FF2BDD223916DC8DBB413D5771FC90137EA18CF0190F8C578F3C84B` |
+| Lockfile | `pnpm-lock.yaml`, frozen during verification; SHA-256 `BBB1C963E479D3785A8236E6FE056801477BAA7133FAA9BDBCE3EC166CE5069D` |
 | Credentials / real data | None used |
 
 ## Reproduction
@@ -33,11 +32,15 @@ required accepted-R4 rebase and combined R4+R9 suite are not claimed here.
 pnpm --version
 node --version
 pnpm --config.ignore-scripts=true install --frozen-lockfile
-pnpm --config.ignore-scripts=true run backend:test
+pnpm --config.ignore-scripts=true run backend:verify
+git diff --check
 ```
 
-Result: Backend strict TypeScript compile passed; Infrastructure contract tests
-passed, **35/35**, with no failures.
+Result: frozen install passed; strict TypeScript compile passed; the recursive
+combined R4+R9 suite passed, **76/76**, with 0 failed, skipped or todo; diff
+check passed. The 76 tests comprise all 39 accepted R4 owner tests and 37 R9
+Infrastructure/adapter contract tests, including the two accepted-Port
+integration regressions for exact retry without a fresh creation candidate.
 
 `ignore-scripts` is explicit because pnpm reports pending lifecycle scripts for
 three transitive packages. No lifecycle script was approved or executed for R9.
@@ -54,6 +57,8 @@ The project-level allow/deny policy remains an approval question before R10.
   idempotency result.
 - Raw idempotency keys are neither persisted nor used in document paths.
 - Generated IDs and times do not affect request fingerprints or exact retry.
+- Exact committed retries remain recoverable when R4 cannot supply a fresh
+  optional creation candidate after Clock or ID generation failure.
 - Reused keys with changed member input create nothing new.
 - Missing and non-owned Check-in reads produce the same privacy-safe result.
 - Application-derived onboarding consent/visibility is persisted without being
@@ -75,7 +80,7 @@ The project-level allow/deny policy remains an approval question before R10.
 ## Not Run / blocker
 
 - Firebase Auth Emulator and Firestore Emulator execution: **Not Run (R10)**.
-- R10 start: **No**, until R9 is independently reviewed/stable and the pending
-  accepted-R4 rebase and combined R4+R9 suite are independently approved by
-  SHI. The evidenced `ignore-scripts` posture remains unchanged.
-- Android, controlled Backend integration and UAT: **Not Run**.
+- R10 start: **No**, until SHI independently approves this integrated R9 head
+  as boundary-stable. The evidenced `ignore-scripts` posture remains unchanged.
+- R11, Android, Q04, accessibility, controlled Backend integration, UAT,
+  Release and Done: **Not Run**.
