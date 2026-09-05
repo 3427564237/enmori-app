@@ -122,13 +122,15 @@ This checklist is a coordination aid, not execution evidence. An unchecked item 
 
 ### R13 entry checklist — all required before execution
 
-- [ ] **R1** — LI's Flutter entry/onboarding/Check-in integration and owner-focused tests are available at a linked commit/PR.
+- [x] **R1** — LI's Flutter entry/onboarding/Check-in integration and owner-focused tests are available at commit `5e7dd22` / Draft PR #8. R8 and the remaining component reviews are still pending; device integration remains `Not Run`.
 - [ ] **R4** — SHI's approved Backend Application/Domain/Transport implementation and owner-focused tests are available at a linked commit/PR.
-- [ ] **R9** — ZHOU's Firebase Auth/Firestore infrastructure adapters and contract tests are available at a linked commit/PR.
+- [x] **R9** — ZHOU's Firebase Auth/Firestore infrastructure adapters and contract tests are available at commit `344c9bcc` / Draft PR #10 (28/28 contract tests reported `Pass`). SHI's independent R9 boundary review is still pending.
 - [ ] **R10** — ZHOU's reproducible controlled Backend/Firebase environment and sanitized configuration evidence are available.
 - [x] **R12 design** — this strategy, fixture and traceability artifact is committed at `cad65f1`.
 - [x] **R5B review** — SHI's independent re-review approved the R12 artifact on 2026-09-04 against `7d46b94`; approval is design/review evidence only, not execution evidence.
 - [ ] **Controlled run identity** — build commit, isolated environment, fixture reset and executor are recorded before any R13 result is assigned.
+
+R4 publication, SHI's R9 boundary review, and R10 controlled-environment evidence remain separate unchecked gates. R13 cannot start while any of them is missing, even though R1 and the R9 implementation/test output are now available.
 
 ### Execution order after the checklist is complete
 
@@ -144,4 +146,4 @@ This checklist is a coordination aid, not execution evidence. An unchecked item 
 Issue #4 R13 entry check: R1/R4/R9/R10 predecessor outputs and SHI R5B review are linked and verified. Controlled environment and fixture reset are identified. Requesting LI confirmation to begin R13; R13/R14/R15 remain Not Run until their own evidence exists.
 ```
 
-**Current disposition:** R12 strategy/fixtures/traceability is approved by SHI's R5B re-review on 2026-09-04 against `7d46b94` (PR #7). This closes the R12 review only; it is not execution evidence and does not authorize or claim R13, R14, R15, Android, controlled-backend integration, UAT or release completion. R13, R14 and R15 remain `Not Run`, and the LI notification is intentionally not posted until every remaining R13 entry item is verified.
+**Current disposition:** R12 strategy/fixtures/traceability is approved by SHI's R5B re-review on 2026-09-04 against `7d46b94` (PR #7). R1 output (`5e7dd22`) and R9 output (`344c9bcc`) are now published for their own review paths, but R4 publication, SHI's R9 boundary review, R10 controlled-environment evidence and the controlled run identity remain outstanding. This closes the R12 review only; it is not execution evidence and does not authorize or claim R13, R14, R15, Android, controlled-backend integration, UAT or release completion. R13, R14 and R15 remain `Not Run`, and the LI notification is intentionally not posted until every remaining R13 entry item is verified.
