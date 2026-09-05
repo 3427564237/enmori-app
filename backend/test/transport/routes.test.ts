@@ -238,7 +238,7 @@ test("authentication precedes command-header validation", async () => {
   }
 });
 
-test("strict schemas reject undeclared fields and invalid idempotency keys", async () => {
+test("strict schemas reject undeclared fields", async () => {
   let calls = 0;
   const deps = dependencies();
   deps.completeOnboarding.execute = async () => {
@@ -258,12 +258,6 @@ test("strict schemas reject undeclared fields and invalid idempotency keys", asy
     headers: commandHeaders,
     payload: { note: checkIn.note, mood: "happy" },
   });
-  const invalidKey = await app.inject({
-    method: "POST",
-    url: "/v1/check-ins",
-    headers: { ...authHeaders, "idempotency-key": "short" },
-    payload: { note: checkIn.note },
-  });
   const extraOnboardingField = await app.inject({
     method: "PUT",
     url: "/v1/me/onboarding",
@@ -277,10 +271,60 @@ test("strict schemas reject undeclared fields and invalid idempotency keys", asy
 
   assert.equal(extraField.statusCode, 400);
   assert.equal(extraField.json().error.code, "CHECKIN_INVALID");
-  assert.equal(invalidKey.statusCode, 409);
-  assert.equal(invalidKey.json().error.code, "IDEMPOTENCY_CONFLICT");
   assert.equal(extraOnboardingField.statusCode, 400);
   assert.equal(extraOnboardingField.json().error.code, "USERNAME_INVALID");
+  assert.equal(calls, 0);
+});
+
+test("authenticated commands safely classify missing or malformed idempotency keys", async () => {
+  let calls = 0;
+  const deps = dependencies();
+  deps.completeOnboarding.execute = async () => {
+    calls += 1;
+    return ok({ disposition: "created", account });
+  };
+  deps.createCheckIn.execute = async () => {
+    calls += 1;
+    return ok({ disposition: "created", checkIn });
+  };
+  const app = await buildApp(deps);
+  test.after(() => app.close());
+
+  const privateNote = "private controlled request content";
+  const commands = [
+    {
+      method: "PUT" as const,
+      url: "/v1/me/onboarding",
+      payload: { username: "miku_01", initialChoice: "accept" },
+    },
+    {
+      method: "POST" as const,
+      url: "/v1/check-ins",
+      payload: { note: privateNote },
+    },
+  ];
+
+  for (const command of commands) {
+    for (const invalidKey of [undefined, "not-a.valid-key"] as const) {
+      const response = await app.inject({
+        ...command,
+        headers:
+          invalidKey === undefined
+            ? authHeaders
+            : { ...authHeaders, "idempotency-key": invalidKey },
+      });
+
+      assert.equal(response.statusCode, 400);
+      assert.equal(response.json().error.code, "IDEMPOTENCY_KEY_INVALID");
+      assert.equal(
+        response.json().error.message,
+        "Provide a valid request key and try again.",
+      );
+      assert.equal(typeof response.json().error.requestId, "string");
+      assert.doesNotMatch(responseText(response), /not-a\.valid-key/);
+      assert.doesNotMatch(responseText(response), /private controlled request content/);
+    }
+  }
   assert.equal(calls, 0);
 });
 
@@ -312,6 +356,7 @@ test("Transport maps every remaining approved application failure", async () => 
     { code: "ONBOARDING_CONFLICT", status: 409, route: "onboarding" },
     { code: "CHECKIN_INVALID", status: 400, route: "checkIn" },
     { code: "ONBOARDING_REQUIRED", status: 409, route: "checkIn" },
+    { code: "IDEMPOTENCY_KEY_INVALID", status: 400, route: "checkIn" },
     { code: "IDEMPOTENCY_CONFLICT", status: 409, route: "checkIn" },
     { code: "SERVICE_UNAVAILABLE", status: 503, route: "checkIn" },
   ];

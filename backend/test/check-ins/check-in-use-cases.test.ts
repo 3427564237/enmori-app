@@ -106,6 +106,25 @@ test("recovers an exact Check-in retry when new Clock/ID values are unavailable"
   }
 });
 
+test("rejects an invalid idempotency key before the Check-in Port", async () => {
+  const repository = new FakeCheckInRepository();
+  const result = await new CreateCheckIn(
+    repository,
+    clock,
+    checkInIds,
+  ).execute({
+    principal: { firebaseUid: "firebase-1" },
+    note: "saved note",
+    idempotencyKey: "short",
+  });
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.failure.code, "IDEMPOTENCY_KEY_INVALID");
+  }
+  assert.equal(repository.commands.length, 0);
+});
+
 test("maps create outcomes without claiming success", async () => {
   const expected = {
     onboarding_required: "ONBOARDING_REQUIRED",

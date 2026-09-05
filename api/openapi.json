@@ -181,6 +181,7 @@
         "name": "Idempotency-Key",
         "in": "header",
         "required": true,
+        "description": "Validated after authentication; a missing or malformed value returns IDEMPOTENCY_KEY_INVALID.",
         "schema": {
           "type": "string",
           "pattern": "^[A-Za-z0-9_-]{22,64}$"
@@ -304,6 +305,7 @@
                   "ONBOARDING_CONFLICT",
                   "CHECKIN_INVALID",
                   "CHECKIN_UNAVAILABLE",
+                  "IDEMPOTENCY_KEY_INVALID",
                   "IDEMPOTENCY_CONFLICT",
                   "SERVICE_UNAVAILABLE"
                 ]
@@ -424,7 +426,7 @@
         }
       },
       "BadRequest": {
-        "description": "Invalid onboarding request",
+        "description": "Invalid onboarding request or Idempotency-Key",
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
@@ -432,7 +434,7 @@
         }
       },
       "CheckInInvalid": {
-        "description": "Invalid Check-in request",
+        "description": "Invalid Check-in request or Idempotency-Key",
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }

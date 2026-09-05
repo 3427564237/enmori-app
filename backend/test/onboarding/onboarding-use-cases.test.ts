@@ -112,17 +112,29 @@ test("recovers an exact onboarding retry when new Clock/ID values are unavailabl
 
 test("does not call the repository for invalid input", async () => {
   const repository = new FakeOnboardingRepository();
-  const result = await new CompleteOnboarding(
+  const useCase = new CompleteOnboarding(
     repository,
     clock,
     accountIds,
-  ).execute({
+  );
+  const invalidUsername = await useCase.execute({
     principal: { firebaseUid: "firebase-1" },
     username: "invalid__name",
     initialChoice: "accept",
     idempotencyKey: "A".repeat(22),
   });
-  assert.equal(result.ok, false);
+  const invalidKey = await useCase.execute({
+    principal: { firebaseUid: "firebase-1" },
+    username: "alex_7",
+    initialChoice: "accept",
+    idempotencyKey: "short",
+  });
+
+  assert.equal(invalidUsername.ok, false);
+  assert.equal(invalidKey.ok, false);
+  if (!invalidKey.ok) {
+    assert.equal(invalidKey.failure.code, "IDEMPOTENCY_KEY_INVALID");
+  }
   assert.equal(repository.commands.length, 0);
 });
 

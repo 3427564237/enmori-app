@@ -31,6 +31,10 @@ export const APP_FAILURE_CATALOGUE = {
     statusCode: 404,
     message: "This Check-in is unavailable.",
   },
+  IDEMPOTENCY_KEY_INVALID: {
+    statusCode: 400,
+    message: "Provide a valid request key and try again.",
+  },
   IDEMPOTENCY_CONFLICT: {
     statusCode: 409,
     message: "This request conflicts with an earlier operation.",

@@ -12,7 +12,7 @@ export function validateIdempotencyKey(
 ): Result<IdempotencyKey, AppFailure> {
   return IDEMPOTENCY_KEY_PATTERN.test(input)
     ? ok(input as IdempotencyKey)
-    : err(appFailure("IDEMPOTENCY_CONFLICT"));
+    : err(appFailure("IDEMPOTENCY_KEY_INVALID"));
 }
 
 export { IDEMPOTENCY_KEY_PATTERN };

@@ -42,7 +42,7 @@ function validationFailureCode(
     fastifyError.statusCode === 400
   ) {
     const context = fastifyError.validationContext;
-    if (context === "headers") return "IDEMPOTENCY_CONFLICT";
+    if (context === "headers") return "IDEMPOTENCY_KEY_INVALID";
 
     const route = request.routeOptions.url;
     if (request.method === "PUT" && route === "/v1/me/onboarding") {

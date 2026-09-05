@@ -23,6 +23,7 @@ test("maps the approved error catalogue to exact HTTP statuses", () => {
       ONBOARDING_CONFLICT: 409,
       CHECKIN_INVALID: 400,
       CHECKIN_UNAVAILABLE: 404,
+      IDEMPOTENCY_KEY_INVALID: 400,
       IDEMPOTENCY_CONFLICT: 409,
       SERVICE_UNAVAILABLE: 503,
     },
@@ -31,12 +32,25 @@ test("maps the approved error catalogue to exact HTTP statuses", () => {
     appFailure("CHECKIN_INVALID").message,
     "Check-in details are invalid.",
   );
+  assert.equal(
+    appFailure("IDEMPOTENCY_KEY_INVALID").message,
+    "Provide a valid request key and try again.",
+  );
 });
 
 test("accepts only 22-64 character base64url idempotency keys", () => {
   assert.equal(validateIdempotencyKey("A".repeat(22)).ok, true);
   assert.equal(validateIdempotencyKey("aZ09_-".repeat(10)).ok, true);
-  assert.equal(validateIdempotencyKey("A".repeat(21)).ok, false);
-  assert.equal(validateIdempotencyKey("A".repeat(65)).ok, false);
-  assert.equal(validateIdempotencyKey("not+base64/url==========").ok, false);
+  for (const invalid of [
+    "",
+    "A".repeat(21),
+    "A".repeat(65),
+    "not+base64/url==========",
+  ]) {
+    const result = validateIdempotencyKey(invalid);
+    assert.equal(result.ok, false);
+    if (!result.ok) {
+      assert.equal(result.failure.code, "IDEMPOTENCY_KEY_INVALID");
+    }
+  }
 });
