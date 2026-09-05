@@ -22,13 +22,15 @@ function command(overrides: Readonly<Record<string, unknown>> = {}) {
 
   return {
     firebaseUid: FIREBASE_UID,
-    accountId: "controlled-account-001",
     canonicalUsername: username.value,
     optionalProcessingConsent: "accepted" as const,
     checkInVisibility: "public" as const,
-    onboardingCompletedAt: "2026-09-05T00:00:00.000Z",
     idempotencyKey: key.value,
-    idempotencyExpiresAt: "2026-09-06T00:00:00.000Z",
+    creation: {
+      accountId: "controlled-account-001",
+      onboardingCompletedAt: "2026-09-05T00:00:00.000Z",
+      idempotencyExpiresAt: "2026-09-06T00:00:00.000Z",
+    },
     ...overrides,
   };
 }
@@ -67,9 +69,11 @@ test("onboarding exact retry returns the original projection and ignores new gen
 
   const result = await repository.complete(
     command({
-      accountId: "controlled-account-002",
-      onboardingCompletedAt: "2026-09-05T01:00:00.000Z",
-      idempotencyExpiresAt: "2026-09-06T01:00:00.000Z",
+      creation: {
+        accountId: "controlled-account-002",
+        onboardingCompletedAt: "2026-09-05T01:00:00.000Z",
+        idempotencyExpiresAt: "2026-09-06T01:00:00.000Z",
+      },
     }),
   );
 
@@ -85,11 +89,13 @@ test("onboarding reused key with different member input creates nothing", async 
 
   const result = await repository.complete(
     command({
-      accountId: "controlled-account-002",
       optionalProcessingConsent: "rejected",
       checkInVisibility: "private",
-      onboardingCompletedAt: "2026-09-05T01:00:00.000Z",
-      idempotencyExpiresAt: "2026-09-06T01:00:00.000Z",
+      creation: {
+        accountId: "controlled-account-002",
+        onboardingCompletedAt: "2026-09-05T01:00:00.000Z",
+        idempotencyExpiresAt: "2026-09-06T01:00:00.000Z",
+      },
     }),
   );
 
@@ -118,11 +124,30 @@ test("onboarding rejects a non-24-hour expiry without writing", async () => {
 
   assert.deepEqual(
     await repository.complete(
-      command({ idempotencyExpiresAt: "2026-09-05T23:59:59.999Z" }),
+      command({
+        creation: {
+          accountId: "controlled-account-001",
+          onboardingCompletedAt: "2026-09-05T00:00:00.000Z",
+          idempotencyExpiresAt: "2026-09-05T23:59:59.999Z",
+        },
+      }),
     ),
     { kind: "dependency_unavailable" },
   );
   assert.equal(gateway.entries().length, 0);
+});
+
+test("onboarding exact retry is recoverable without a fresh creation candidate", async () => {
+  const gateway = new InMemoryFirestoreGateway();
+  const repository = new FirestoreOnboardingRepository(gateway);
+  const original = command();
+  await repository.complete(original);
+
+  const { creation: _creation, ...retry } = original;
+  const result = await repository.complete(retry);
+
+  assert.equal(result.kind, "replayed");
+  assert.equal(gateway.entries().length, 4);
 });
 
 test("onboarding contains Firestore failures at the stable port boundary", async () => {

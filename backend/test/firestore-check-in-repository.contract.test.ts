@@ -34,11 +34,13 @@ function command(noteInput = "A controlled check-in") {
 
   return {
     firebaseUid: FIREBASE_UID,
-    checkInId: "controlled-check-in-001",
     note: note.value,
-    createdAt: "2026-09-05T02:00:00.000Z",
     idempotencyKey: key.value,
-    idempotencyExpiresAt: "2026-09-06T02:00:00.000Z",
+    creation: {
+      checkInId: "controlled-check-in-001",
+      createdAt: "2026-09-05T02:00:00.000Z",
+      idempotencyExpiresAt: "2026-09-06T02:00:00.000Z",
+    },
   };
 }
 
@@ -76,9 +78,11 @@ test("check-in exact retry returns the committed projection without a duplicate"
   const retry = command();
   const result = await repository.create({
     ...retry,
-    checkInId: "controlled-check-in-002",
-    createdAt: "2026-09-05T03:00:00.000Z",
-    idempotencyExpiresAt: "2026-09-06T03:00:00.000Z",
+    creation: {
+      checkInId: "controlled-check-in-002",
+      createdAt: "2026-09-05T03:00:00.000Z",
+      idempotencyExpiresAt: "2026-09-06T03:00:00.000Z",
+    },
   });
 
   assert.equal(result.kind, "replayed");
@@ -94,13 +98,28 @@ test("check-in reused key with different Note creates nothing", async () => {
   const changed = command("Different controlled check-in");
   const result = await repository.create({
     ...changed,
-    checkInId: "controlled-check-in-002",
-    createdAt: "2026-09-05T03:00:00.000Z",
-    idempotencyExpiresAt: "2026-09-06T03:00:00.000Z",
+    creation: {
+      checkInId: "controlled-check-in-002",
+      createdAt: "2026-09-05T03:00:00.000Z",
+      idempotencyExpiresAt: "2026-09-06T03:00:00.000Z",
+    },
   });
 
   assert.deepEqual(result, { kind: "idempotency_conflict" });
   assert.equal(gateway.read("check_ins/controlled-check-in-002"), undefined);
+  assert.equal(gateway.entries().length, 4);
+});
+
+test("check-in exact retry is recoverable without a fresh creation candidate", async () => {
+  const gateway = new InMemoryFirestoreGateway(ACCOUNT_SEED);
+  const repository = new FirestoreCheckInRepository(gateway);
+  const original = command();
+  await repository.create(original);
+
+  const { creation: _creation, ...retry } = original;
+  const result = await repository.create(retry);
+
+  assert.equal(result.kind, "replayed");
   assert.equal(gateway.entries().length, 4);
 });
 

@@ -47,13 +47,17 @@ function idempotencyPath(documentId: string): string {
 }
 
 function validCommand(command: CreateCommand): boolean {
-  const occurredAt = new Date(command.createdAt).getTime();
-  const expiresAt = new Date(command.idempotencyExpiresAt).getTime();
+  if (createAuthBindingDocumentId(command.firebaseUid) === undefined) {
+    return false;
+  }
+  if (command.creation === undefined) return true;
+
+  const occurredAt = new Date(command.creation.createdAt).getTime();
+  const expiresAt = new Date(command.creation.idempotencyExpiresAt).getTime();
   return (
-    createAuthBindingDocumentId(command.firebaseUid) !== undefined &&
-    isSafeDocumentId(command.checkInId) &&
-    isUtcIsoInstant(command.createdAt) &&
-    isUtcIsoInstant(command.idempotencyExpiresAt) &&
+    isSafeDocumentId(command.creation.checkInId) &&
+    isUtcIsoInstant(command.creation.createdAt) &&
+    isUtcIsoInstant(command.creation.idempotencyExpiresAt) &&
     expiresAt - occurredAt === IDEMPOTENCY_WINDOW_MILLISECONDS
   );
 }
@@ -118,16 +122,25 @@ export class FirestoreCheckInRepository implements CheckInRepository {
         if (storedOperation !== undefined) {
           const record = parseIdempotencyRecord(storedOperation);
           if (record === undefined) return dependencyUnavailable;
-          const active = isUnexpired(record.expiresAt, command.createdAt);
-          if (active === undefined) return dependencyUnavailable;
-          if (active) {
-            if (
-              record.scope !== accountId ||
-              record.operation !== operation ||
-              record.keyDigest !== identity.keyDigest
-            ) {
+          if (
+            record.scope !== accountId ||
+            record.operation !== operation ||
+            record.keyDigest !== identity.keyDigest
+          ) {
+            return dependencyUnavailable;
+          }
+          if (command.creation === undefined) {
+            if (record.requestFingerprint !== requestFingerprint) {
               return dependencyUnavailable;
             }
+            return replayCreatedCheckIn({ transaction, record, accountId });
+          }
+          const active = isUnexpired(
+            record.expiresAt,
+            command.creation.createdAt,
+          );
+          if (active === undefined) return dependencyUnavailable;
+          if (active) {
             if (record.requestFingerprint !== requestFingerprint) {
               return { kind: "idempotency_conflict" };
             }
@@ -135,15 +148,18 @@ export class FirestoreCheckInRepository implements CheckInRepository {
           }
         }
 
-        const candidatePath = checkInPath(command.checkInId);
+        const creation = command.creation;
+        if (creation === undefined) return dependencyUnavailable;
+
+        const candidatePath = checkInPath(creation.checkInId);
         const candidate = await transaction.get(candidatePath);
         if (candidate !== undefined) return dependencyUnavailable;
 
         const checkIn: StoredDocument = {
-          checkInId: command.checkInId,
+          checkInId: creation.checkInId,
           ownerAccountId: accountId,
           note: command.note,
-          createdAt: command.createdAt,
+          createdAt: creation.createdAt,
         };
         const idempotency: IdempotencyRecord = {
           scope: accountId,
@@ -151,7 +167,7 @@ export class FirestoreCheckInRepository implements CheckInRepository {
           keyDigest: identity.keyDigest,
           requestFingerprint,
           committedResponseReference: candidatePath,
-          expiresAt: command.idempotencyExpiresAt,
+          expiresAt: creation.idempotencyExpiresAt,
         };
         transaction.create(candidatePath, checkIn);
         if (storedOperation === undefined) {
@@ -163,9 +179,9 @@ export class FirestoreCheckInRepository implements CheckInRepository {
         return {
           kind: "created",
           checkIn: {
-            checkInId: command.checkInId,
+            checkInId: creation.checkInId,
             note: command.note,
-            createdAt: command.createdAt,
+            createdAt: creation.createdAt,
           },
         };
       });

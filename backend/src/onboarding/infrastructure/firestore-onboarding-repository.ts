@@ -46,14 +46,24 @@ function idempotencyPath(documentId: string): string {
 }
 
 function validCommand(command: CompleteCommand): boolean {
-  const occurredAt = new Date(command.onboardingCompletedAt).getTime();
-  const expiresAt = new Date(command.idempotencyExpiresAt).getTime();
+  if (
+    createAuthBindingDocumentId(command.firebaseUid) === undefined ||
+    !isSafeDocumentId(command.canonicalUsername)
+  ) {
+    return false;
+  }
+  if (command.creation === undefined) return true;
+
+  const occurredAt = new Date(
+    command.creation.onboardingCompletedAt,
+  ).getTime();
+  const expiresAt = new Date(
+    command.creation.idempotencyExpiresAt,
+  ).getTime();
   return (
-    createAuthBindingDocumentId(command.firebaseUid) !== undefined &&
-    isSafeDocumentId(command.accountId) &&
-    isSafeDocumentId(command.canonicalUsername) &&
-    isUtcIsoInstant(command.onboardingCompletedAt) &&
-    isUtcIsoInstant(command.idempotencyExpiresAt) &&
+    isSafeDocumentId(command.creation.accountId) &&
+    isUtcIsoInstant(command.creation.onboardingCompletedAt) &&
+    isUtcIsoInstant(command.creation.idempotencyExpiresAt) &&
     expiresAt - occurredAt === IDEMPOTENCY_WINDOW_MILLISECONDS
   );
 }
@@ -117,19 +127,29 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
         if (storedOperation !== undefined) {
           const record = parseIdempotencyRecord(storedOperation);
           if (record === undefined) return dependencyUnavailable;
+          if (
+            record.scope !== command.firebaseUid ||
+            record.operation !== operation ||
+            record.keyDigest !== identity.keyDigest
+          ) {
+            return dependencyUnavailable;
+          }
+          if (command.creation === undefined) {
+            if (record.requestFingerprint !== requestFingerprint) {
+              return dependencyUnavailable;
+            }
+            return replayCompletedOnboarding({
+              transaction,
+              record,
+              bindingPath,
+            });
+          }
           const active = isUnexpired(
             record.expiresAt,
-            command.onboardingCompletedAt,
+            command.creation.onboardingCompletedAt,
           );
           if (active === undefined) return dependencyUnavailable;
           if (active) {
-            if (
-              record.scope !== command.firebaseUid ||
-              record.operation !== operation ||
-              record.keyDigest !== identity.keyDigest
-            ) {
-              return dependencyUnavailable;
-            }
             if (record.requestFingerprint !== requestFingerprint) {
               return { kind: "idempotency_conflict" };
             }
@@ -140,6 +160,9 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
             });
           }
         }
+
+        const creation = command.creation;
+        if (creation === undefined) return dependencyUnavailable;
 
         const existingBinding = await transaction.get(bindingPath);
         if (existingBinding !== undefined) {
@@ -157,7 +180,7 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
         const reservationPath = usernameReservationPath(
           command.canonicalUsername,
         );
-        const candidateAccountPath = accountPath(command.accountId);
+        const candidateAccountPath = accountPath(creation.accountId);
         const reservation = await transaction.get(reservationPath);
         const candidateAccount = await transaction.get(candidateAccountPath);
         if (reservation !== undefined) return { kind: "username_unavailable" };
@@ -167,7 +190,7 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
           username: command.canonicalUsername,
           optionalProcessingConsent: command.optionalProcessingConsent,
           checkInVisibility: command.checkInVisibility,
-          onboardingCompletedAt: command.onboardingCompletedAt,
+          onboardingCompletedAt: creation.onboardingCompletedAt,
         };
         const idempotency: IdempotencyRecord = {
           scope: command.firebaseUid,
@@ -175,11 +198,11 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
           keyDigest: identity.keyDigest,
           requestFingerprint,
           committedResponseReference: candidateAccountPath,
-          expiresAt: command.idempotencyExpiresAt,
+          expiresAt: creation.idempotencyExpiresAt,
         };
 
-        transaction.create(bindingPath, { accountId: command.accountId });
-        transaction.create(reservationPath, { accountId: command.accountId });
+        transaction.create(bindingPath, { accountId: creation.accountId });
+        transaction.create(reservationPath, { accountId: creation.accountId });
         transaction.create(candidateAccountPath, account);
         if (storedOperation === undefined) {
           transaction.create(operationPath, { ...idempotency });
@@ -193,7 +216,7 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
             username: command.canonicalUsername,
             optionalProcessingConsent: command.optionalProcessingConsent,
             checkInVisibility: command.checkInVisibility,
-            onboardingCompletedAt: command.onboardingCompletedAt,
+            onboardingCompletedAt: creation.onboardingCompletedAt,
           },
         };
       });
