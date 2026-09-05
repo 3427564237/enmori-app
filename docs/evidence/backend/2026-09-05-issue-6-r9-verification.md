@@ -5,6 +5,7 @@
 - Branch: `codex/issue-6-r9-infrastructure`
 - Accepted R4 `main` commit: `fcaff75349f15b298412cd105273708b6d87e913`
 - R9 integration commit: `1bb13020291057ddc478779533b6e69e505f524e`
+- R9 Check-in storage-boundary correction: `1dfc9063d631fc4296a5ca00ed97d7fe0d50a3fb`
 - Toolchain authority: `S-PM-0905-RMVP01A-TOOLCHAIN`
 - Auth Binding ID authority: `S-PM-0905-RMVP01A-AUTHBINDING-ID`
 - Controlled data only: deterministic `controlled-*` identifiers, synthetic usernames, notes and timestamps
@@ -33,6 +34,7 @@ pnpm --version
 node --version
 pnpm --config.ignore-scripts=true install --frozen-lockfile
 pnpm --config.ignore-scripts=true run backend:verify
+node --test backend/dist/test/firestore-check-in-repository.contract.test.js backend/dist/test/firestore-records.contract.test.js
 git diff --check
 ```
 
@@ -41,6 +43,7 @@ combined R4+R9 suite passed, **76/76**, with 0 failed, skipped or todo; diff
 check passed. The 76 tests comprise all 39 accepted R4 owner tests and 37 R9
 Infrastructure/adapter contract tests, including the two accepted-Port
 integration regressions for exact retry without a fresh creation candidate.
+The focused Check-in repository/record suite passed **15/15**.
 
 `ignore-scripts` is explicit because pnpm reports pending lifecycle scripts for
 three transitive packages. No lifecycle script was approved or executed for R9.
@@ -55,6 +58,10 @@ The project-level allow/deny policy remains an approval question before R10.
   Product Account and committed idempotency result.
 - Check-in creation atomically creates the approved Check-in and committed
   idempotency result.
+- The physical `check_ins/{checkInId}` document stores only the approved
+  `ownerAccountId`, `note` and `createdAt` fields. Public projection IDs are
+  derived from the validated document path/query or committed response
+  reference and are not read from an unapproved stored field.
 - Raw idempotency keys are neither persisted nor used in document paths.
 - Generated IDs and times do not affect request fingerprints or exact retry.
 - Exact committed retries remain recoverable when R4 cannot supply a fresh
