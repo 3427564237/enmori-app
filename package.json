@@ -1,0 +1,22 @@
+{
+  "name": "enmori-app",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": "24.19.0",
+    "pnpm": "11.19.0"
+  },
+  "scripts": {
+    "backend:build": "tsc --project backend/tsconfig.json",
+    "backend:test": "node --test \"backend/dist/test/**/*.test.js\"",
+    "backend:verify": "pnpm backend:build && pnpm backend:test"
+  },
+  "dependencies": {
+    "fastify": "5.12.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "typescript": "7.0.2"
+  }
+}
