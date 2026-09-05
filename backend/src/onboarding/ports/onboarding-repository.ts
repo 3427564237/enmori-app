@@ -22,6 +22,21 @@ export type GetOnboardingRepositoryResult =
   | { readonly kind: "completed"; readonly account: AccountProjection }
   | DependencyUnavailable;
 
+export interface OnboardingCreationCandidate {
+  readonly accountId: string;
+  readonly onboardingCompletedAt: string;
+  readonly idempotencyExpiresAt: string;
+}
+
+export interface CompleteOnboardingCommand {
+  readonly firebaseUid: string;
+  readonly canonicalUsername: CanonicalUsername;
+  readonly optionalProcessingConsent: OptionalProcessingConsent;
+  readonly checkInVisibility: CheckInVisibility;
+  readonly idempotencyKey: IdempotencyKey;
+  readonly creation?: OnboardingCreationCandidate;
+}
+
 /**
  * R9 implementations must atomically create the Auth Binding, Username
  * Reservation, Product Account and committed onboarding idempotency result.
@@ -29,21 +44,16 @@ export type GetOnboardingRepositoryResult =
  * compared with a request fingerprint derived only from the approved member
  * input. Generated AccountId and time values are not part of that fingerprint.
  * Application supplies the already-derived consent/visibility projection so
- * Infrastructure does not repeat product behavior. The committed safe result
- * is retained until idempotencyExpiresAt; the raw key is never logged or used
- * as a storage path.
+ * Infrastructure does not repeat product behavior. Infrastructure checks for
+ * an exact committed retry before it requires the optional creation candidate;
+ * this keeps a recoverable result available when new Clock/ID generation is
+ * unavailable. The committed safe result is retained until the candidate's
+ * idempotencyExpiresAt; the raw key is never logged or used as a storage path.
  */
 export interface OnboardingRepository {
-  complete(command: {
-    readonly firebaseUid: string;
-    readonly accountId: string;
-    readonly canonicalUsername: CanonicalUsername;
-    readonly optionalProcessingConsent: OptionalProcessingConsent;
-    readonly checkInVisibility: CheckInVisibility;
-    readonly onboardingCompletedAt: string;
-    readonly idempotencyKey: IdempotencyKey;
-    readonly idempotencyExpiresAt: string;
-  }): Promise<CompleteOnboardingRepositoryResult>;
+  complete(
+    command: CompleteOnboardingCommand,
+  ): Promise<CompleteOnboardingRepositoryResult>;
 
   getStatus(firebaseUid: string): Promise<GetOnboardingRepositoryResult>;
 }

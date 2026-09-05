@@ -51,7 +51,7 @@ export async function registerR4Routes(
     Headers: CommandHeaders;
   }>(
     "/v1/me/onboarding",
-    { schema: completeOnboardingSchema, preHandler: authenticate },
+    { schema: completeOnboardingSchema, onRequest: authenticate },
     async (request, reply) => {
       const result = await dependencies.completeOnboarding.execute({
         principal: requirePrincipal(request),
@@ -68,7 +68,7 @@ export async function registerR4Routes(
 
   app.get(
     "/v1/me/onboarding",
-    { schema: getOnboardingSchema, preHandler: authenticate },
+    { schema: getOnboardingSchema, onRequest: authenticate },
     async (request, reply) => {
       const result = await dependencies.getOnboarding.execute(
         requirePrincipal(request),
@@ -87,7 +87,7 @@ export async function registerR4Routes(
 
   app.post<{ Body: CreateCheckInBody; Headers: CommandHeaders }>(
     "/v1/check-ins",
-    { schema: createCheckInSchema, preHandler: authenticate },
+    { schema: createCheckInSchema, onRequest: authenticate },
     async (request, reply) => {
       const result = await dependencies.createCheckIn.execute({
         principal: requirePrincipal(request),
@@ -103,7 +103,7 @@ export async function registerR4Routes(
 
   app.get<{ Params: CheckInParams }>(
     "/v1/check-ins/:checkInId",
-    { schema: getCheckInSchema, preHandler: authenticate },
+    { schema: getCheckInSchema, onRequest: authenticate },
     async (request, reply) => {
       const result = await dependencies.getCheckIn.execute({
         principal: requirePrincipal(request),

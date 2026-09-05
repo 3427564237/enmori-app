@@ -36,15 +36,21 @@ export class CreateCheckIn {
       this.clock,
       this.checkInIdGenerator,
     );
-    if (!authoritative.ok) return authoritative;
 
     const result = await this.repository.create({
       firebaseUid: input.principal.firebaseUid,
-      checkInId: authoritative.value.opaqueId,
       note: note.value,
-      createdAt: authoritative.value.occurredAt,
       idempotencyKey: key.value,
-      idempotencyExpiresAt: authoritative.value.idempotencyExpiresAt,
+      ...(authoritative.ok
+        ? {
+            creation: {
+              checkInId: authoritative.value.opaqueId,
+              createdAt: authoritative.value.occurredAt,
+              idempotencyExpiresAt:
+                authoritative.value.idempotencyExpiresAt,
+            },
+          }
+        : {}),
     });
 
     switch (result.kind) {

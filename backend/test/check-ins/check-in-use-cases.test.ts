@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { CreateCheckIn } from "../../src/check-ins/application/create-check-in.js";
 import { GetCheckIn } from "../../src/check-ins/application/get-check-in.js";
-import { ok } from "../../src/shared/domain/result.js";
+import { err, ok } from "../../src/shared/domain/result.js";
+import { dependencyUnavailable } from "../../src/shared/ports/dependency-failure.js";
 import type {
   CheckInRepository,
   CreateCheckInRepositoryResult,
@@ -60,13 +61,49 @@ test("normalizes Note before the atomic create Port", async () => {
   assert.deepEqual(repository.commands, [
     {
       firebaseUid: "firebase-1",
-      checkInId: "chk_01",
       note: "saved note",
-      createdAt: "2026-09-03T03:20:00.000Z",
       idempotencyKey: "A".repeat(22),
-      idempotencyExpiresAt: "2026-09-04T03:20:00.000Z",
+      creation: {
+        checkInId: "chk_01",
+        createdAt: "2026-09-03T03:20:00.000Z",
+        idempotencyExpiresAt: "2026-09-04T03:20:00.000Z",
+      },
     },
   ]);
+});
+
+test("recovers an exact Check-in retry when new Clock/ID values are unavailable", async () => {
+  for (const unavailable of ["clock", "id"] as const) {
+    const repository = new FakeCheckInRepository();
+    repository.createResult = { kind: "replayed", checkIn };
+    const useCase = new CreateCheckIn(
+      repository,
+      unavailable === "clock"
+        ? { now: () => err(dependencyUnavailable) }
+        : clock,
+      unavailable === "id"
+        ? { generate: () => err(dependencyUnavailable) }
+        : checkInIds,
+    );
+
+    const result = await useCase.execute({
+      principal: { firebaseUid: "firebase-1" },
+      note: "saved note",
+      idempotencyKey: "A".repeat(22),
+    });
+
+    assert.deepEqual(result, {
+      ok: true,
+      value: { disposition: "replayed", checkIn },
+    });
+    assert.deepEqual(repository.commands, [
+      {
+        firebaseUid: "firebase-1",
+        note: "saved note",
+        idempotencyKey: "A".repeat(22),
+      },
+    ]);
+  }
 });
 
 test("maps create outcomes without claiming success", async () => {

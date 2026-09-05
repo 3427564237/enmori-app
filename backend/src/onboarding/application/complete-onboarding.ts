@@ -41,17 +41,23 @@ export class CompleteOnboarding {
       this.clock,
       this.accountIdGenerator,
     );
-    if (!authoritative.ok) return authoritative;
 
     const result = await this.repository.complete({
       firebaseUid: input.principal.firebaseUid,
-      accountId: authoritative.value.opaqueId,
       canonicalUsername: username.value,
       optionalProcessingConsent: choice.value.optionalProcessingConsent,
       checkInVisibility: choice.value.checkInVisibility,
-      onboardingCompletedAt: authoritative.value.occurredAt,
       idempotencyKey: key.value,
-      idempotencyExpiresAt: authoritative.value.idempotencyExpiresAt,
+      ...(authoritative.ok
+        ? {
+            creation: {
+              accountId: authoritative.value.opaqueId,
+              onboardingCompletedAt: authoritative.value.occurredAt,
+              idempotencyExpiresAt:
+                authoritative.value.idempotencyExpiresAt,
+            },
+          }
+        : {}),
     });
 
     switch (result.kind) {

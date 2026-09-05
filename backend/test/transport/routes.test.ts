@@ -183,6 +183,61 @@ test("missing and malformed Bearer credentials fail closed", async () => {
   }
 });
 
+test("authentication precedes command-header validation", async () => {
+  const commands = [
+    {
+      method: "PUT" as const,
+      url: "/v1/me/onboarding",
+      payload: { username: "miku_01", initialChoice: "accept" },
+    },
+    {
+      method: "POST" as const,
+      url: "/v1/check-ins",
+      payload: { note: checkIn.note },
+    },
+  ];
+  const cases: Array<{
+    authorization?: string;
+    identityResult?: IdentityVerificationResult;
+    expectedStatus: number;
+    expectedCode: string;
+  }> = [
+    { expectedStatus: 401, expectedCode: "AUTH_REQUIRED" },
+    {
+      authorization: "Basic token",
+      expectedStatus: 401,
+      expectedCode: "AUTH_REQUIRED",
+    },
+    {
+      authorization: "Bearer expired-token",
+      identityResult: { kind: "invalid" },
+      expectedStatus: 401,
+      expectedCode: "AUTH_REQUIRED",
+    },
+    {
+      authorization: "Bearer revoked-token",
+      identityResult: { kind: "forbidden" },
+      expectedStatus: 403,
+      expectedCode: "AUTH_FORBIDDEN",
+    },
+  ];
+
+  for (const current of cases) {
+    for (const command of commands) {
+      const app = await buildApp(dependencies(current.identityResult));
+      const headers =
+        current.authorization === undefined
+          ? { "idempotency-key": "short" }
+          : { authorization: current.authorization };
+      const response = await app.inject({ ...command, headers });
+      await app.close();
+
+      assert.equal(response.statusCode, current.expectedStatus);
+      assert.equal(response.json().error.code, current.expectedCode);
+    }
+  }
+});
+
 test("strict schemas reject undeclared fields and invalid idempotency keys", async () => {
   let calls = 0;
   const deps = dependencies();
