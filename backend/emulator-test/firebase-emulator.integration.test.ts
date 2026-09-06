@@ -170,6 +170,20 @@ test("test mode uses loopback-only Auth and Firestore demo resources", () => {
   assert.equal(environment.authHost, "127.0.0.1:9099");
   assert.equal(environment.firestoreHost, "127.0.0.1:8080");
   assert.equal(process.env.METADATA_SERVER_DETECTION, "none");
+  const controlledProfile = process.env.ENMORI_CONTROLLED_PROFILE_DIRECTORY;
+  assert.notEqual(controlledProfile, undefined);
+  for (const name of ["APPDATA", "HOME", "USERPROFILE", "XDG_CONFIG_HOME"]) {
+    assert.equal(process.env[name], controlledProfile);
+  }
+  for (const name of [
+    "CLOUDSDK_CONFIG",
+    "ENMORI_R10_CREDENTIAL_PROBE",
+    "FIREBASE_CONFIG",
+    "FIREBASE_TOKEN",
+    "GOOGLE_APPLICATION_CREDENTIALS",
+  ]) {
+    assert.equal(process.env[name], undefined);
+  }
 });
 
 test("fixture reset clears Auth and Firestore Emulator state", async () => {
