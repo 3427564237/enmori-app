@@ -23,7 +23,9 @@ void main() {
 
     await _pumpEvidencePage(tester, const RegistrationPage());
     expect(find.byKey(const Key('route-register')), findsOneWidget);
-    expect(find.text('Register'), findsWidgets);
+    expect(find.byKey(const Key('r6-register-email')), findsOneWidget);
+    expect(find.byKey(const Key('r6-register-password')), findsOneWidget);
+    expect(find.byKey(const Key('r6-register-submit')), findsOneWidget);
     await _screenshot(binding, 'r7_01_m02_registration');
 
     await _pumpOnboardingToPurpose(tester);
