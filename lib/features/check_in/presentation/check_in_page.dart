@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/command_state.dart';
+import '../../../core/result/result.dart';
 import '../domain/check_in_repository.dart';
 import 'check_in_controller.dart';
 
 enum _CheckInAction { create, read }
 
 final class CheckInComposerPage extends ConsumerStatefulWidget {
-  const CheckInComposerPage({super.key});
+  const CheckInComposerPage({this.onReturnHome, super.key});
+
+  final VoidCallback? onReturnHome;
 
   @override
   ConsumerState<CheckInComposerPage> createState() =>
@@ -20,6 +23,7 @@ final class _CheckInComposerPageState
   final _noteController = TextEditingController();
   CheckIn? _committedCheckIn;
   _CheckInAction? _lastAction;
+  String? _noteErrorText;
 
   @override
   void dispose() {
@@ -65,9 +69,10 @@ final class _CheckInComposerPageState
                   minLines: 5,
                   maxLines: 8,
                   maxLength: 500,
-                  onChanged: (_) => setState(() {}),
+                  onChanged: (_) => setState(() => _noteErrorText = null),
                   decoration: InputDecoration(
                     alignLabelWithHint: true,
+                    errorText: _noteErrorText,
                     helperText: '$noteLength / 500 characters',
                     labelText: 'Note',
                   ),
@@ -82,11 +87,7 @@ final class _CheckInComposerPageState
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.check_circle_outline),
-                  label: Text(
-                    pending && _lastAction == _CheckInAction.create
-                        ? 'Create committed'
-                        : 'Create Check-in',
-                  ),
+                  label: const Text('Save Check-in'),
                 ),
                 const SizedBox(height: 20),
                 _statusBlock(state),
@@ -99,6 +100,22 @@ final class _CheckInComposerPageState
   }
 
   Widget _statusBlock(CommandState<CheckIn> state) {
+    if (state is CommandPending<CheckIn>) {
+      return _ResultPanel(
+        key: Key(
+          _lastAction == _CheckInAction.read
+              ? 'r6-check-in-confirming'
+              : 'r6-check-in-saving',
+        ),
+        icon: _lastAction == _CheckInAction.read ? Icons.sync : Icons.save,
+        title: _lastAction == _CheckInAction.read
+            ? 'Confirming your saved Check-in…'
+            : 'Saving Check-in',
+        body: _lastAction == _CheckInAction.read
+            ? 'Reading the saved Check-in from backend-only product data.'
+            : 'Saving your Check-in with the approved backend operation.',
+      );
+    }
     if (state case CommandFailed<CheckIn>(:final failure)) {
       final confirming = _lastAction == _CheckInAction.read;
       return _ResultPanel(
@@ -107,16 +124,17 @@ final class _CheckInComposerPageState
         ),
         icon: confirming ? Icons.sync_problem : Icons.error_outline,
         title: confirming ? 'Confirmation unavailable' : 'Check-in not saved',
-        body: failure.message,
-      );
-    }
-    if (state is CommandPending<CheckIn> &&
-        _lastAction == _CheckInAction.read) {
-      return const _ResultPanel(
-        key: Key('r6-check-in-confirming'),
-        icon: Icons.sync,
-        title: 'Confirming saved Check-in',
-        body: 'Reading the saved Check-in from backend-only product data.',
+        body: confirming
+            ? _confirmationFailureCopy(failure.kind)
+            : _createFailureCopy(failure.kind),
+        action: confirming && _committedCheckIn != null
+            ? FilledButton.icon(
+                key: const Key('r6-check-in-retry-confirmation'),
+                onPressed: () => _confirm(_committedCheckIn!),
+                icon: const Icon(Icons.sync),
+                label: const Text('Retry confirmation'),
+              )
+            : null,
       );
     }
     final checkIn = _committedCheckIn;
@@ -127,19 +145,19 @@ final class _CheckInComposerPageState
     return _ResultPanel(
       key: Key(confirmed ? 'r6-check-in-confirmed' : 'r6-check-in-committed'),
       icon: confirmed ? Icons.verified : Icons.task_alt,
-      title: confirmed ? 'Confirmed from saved Check-in' : 'Create committed',
+      title: confirmed ? 'Saved Check-in confirmed.' : 'Check-in saved.',
       body:
           '${checkIn.note}\nSaved at ${checkIn.createdAt.toUtc().toIso8601String()}',
       action: confirmed
-          ? null
+          ? OutlinedButton.icon(
+              key: const Key('r6-return-home-inline'),
+              onPressed: widget.onReturnHome ?? () {},
+              icon: const Icon(Icons.home_outlined),
+              label: const Text('Return Home'),
+            )
           : FilledButton.icon(
               key: const Key('r6-check-in-confirm'),
-              onPressed: () {
-                _lastAction = _CheckInAction.read;
-                ref
-                    .read(checkInControllerProvider.notifier)
-                    .readPersisted(checkInId: checkIn.checkInId);
-              },
+              onPressed: () => _confirm(checkIn),
               icon: const Icon(Icons.sync),
               label: const Text('Confirm saved Check-in'),
             ),
@@ -147,10 +165,41 @@ final class _CheckInComposerPageState
   }
 
   void _create() {
+    final normalized = _noteController.text.trim();
+    final noteLength = normalized.characters.length;
+    if (noteLength == 0) {
+      setState(() => _noteErrorText = 'Enter a Note before saving.');
+      return;
+    }
+    if (noteLength > 500) {
+      setState(() => _noteErrorText = 'Keep the Note within 500 characters.');
+      return;
+    }
     _lastAction = _CheckInAction.create;
+    ref.read(checkInControllerProvider.notifier).create(note: normalized);
+  }
+
+  void _confirm(CheckIn checkIn) {
+    _lastAction = _CheckInAction.read;
     ref
         .read(checkInControllerProvider.notifier)
-        .create(note: _noteController.text);
+        .readPersisted(checkInId: checkIn.checkInId);
+  }
+
+  String _createFailureCopy(AppFailureKind kind) {
+    return switch (kind) {
+      AppFailureKind.checkInInvalid => 'Enter a Note before saving.',
+      AppFailureKind.idempotencyConflict =>
+        'This Check-in attempt changed after it was submitted. Start a new attempt.',
+      _ => "We couldn't save this Check-in yet.",
+    };
+  }
+
+  String _confirmationFailureCopy(AppFailureKind kind) {
+    return switch (kind) {
+      AppFailureKind.checkInUnavailable => 'This Check-in is unavailable.',
+      _ => "We couldn't confirm this Check-in yet.",
+    };
   }
 }
 
@@ -172,12 +221,7 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref
-          .read(checkInControllerProvider.notifier)
-          .readPersisted(checkInId: widget.checkInId);
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _readPersisted());
   }
 
   @override
@@ -194,14 +238,14 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
               const _ResultPanel(
                 key: Key('r6-saved-check-in-confirming'),
                 icon: Icons.sync,
-                title: 'Confirming saved Check-in',
+                title: 'Confirming your saved Check-in…',
                 body: 'Reading backend-only product data.',
               )
             else if (state case CommandSucceeded<CheckIn>(:final value))
               _ResultPanel(
                 key: const Key('r6-saved-check-in-confirmed'),
                 icon: Icons.verified,
-                title: 'Confirmed from saved Check-in',
+                title: 'Saved Check-in confirmed.',
                 body:
                     '${value.note}\nSaved at ${value.createdAt.toUtc().toIso8601String()}',
               )
@@ -210,19 +254,39 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
                 key: const Key('r6-saved-check-in-unavailable'),
                 icon: Icons.sync_problem,
                 title: 'Confirmation unavailable',
-                body: failure.message,
+                body: _confirmationFailureCopy(failure.kind),
+                action: FilledButton.icon(
+                  key: const Key('r6-saved-check-in-retry-confirmation'),
+                  onPressed: _readPersisted,
+                  icon: const Icon(Icons.sync),
+                  label: const Text('Retry confirmation'),
+                ),
               ),
             const SizedBox(height: 20),
             OutlinedButton.icon(
               key: const Key('r6-return-home'),
               onPressed: widget.onReturnHome,
               icon: const Icon(Icons.home_outlined),
-              label: const Text('Return home'),
+              label: const Text('Return Home'),
             ),
           ],
         ),
       ),
     );
+  }
+
+  void _readPersisted() {
+    if (!mounted) return;
+    ref
+        .read(checkInControllerProvider.notifier)
+        .readPersisted(checkInId: widget.checkInId);
+  }
+
+  String _confirmationFailureCopy(AppFailureKind kind) {
+    return switch (kind) {
+      AppFailureKind.checkInUnavailable => 'This Check-in is unavailable.',
+      _ => "We couldn't confirm this Check-in yet.",
+    };
   }
 }
 
@@ -254,7 +318,13 @@ final class _ResultPanel extends StatelessWidget {
           children: [
             Icon(icon),
             const SizedBox(height: 12),
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            Semantics(
+              header: true,
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
             const SizedBox(height: 8),
             Text(body),
             if (action != null) ...[const SizedBox(height: 12), action!],
