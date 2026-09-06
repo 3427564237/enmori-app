@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { after, before, beforeEach, test } from "node:test";
 
 import { deleteApp, initializeApp, type App } from "firebase-admin/app";
@@ -22,6 +22,23 @@ import { SystemClock } from "../src/shared/infrastructure/system-clock.js";
 
 const environment = requireControlledEmulatorEnvironment(process.env);
 const PASSWORD = `${randomUUID()}Aa1!`;
+const fixtureRunTag = randomBytes(6).toString("hex");
+
+function fixtureUid(role: string): string {
+  return `r13-${fixtureRunTag}-${role}`;
+}
+
+function fixtureEmail(role: string): string {
+  return `r13.${role}.${fixtureRunTag}@example.invalid`;
+}
+
+function fixtureUsername(role: string): string {
+  return `r13${fixtureRunTag}${role}`;
+}
+
+function freshIdempotencyKey(): string {
+  return randomBytes(24).toString("base64url");
+}
 
 type JsonObject = Record<string, unknown>;
 type ApiResult = { readonly response: Response; readonly body: JsonObject };
@@ -188,16 +205,18 @@ function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-test("R13-T01/T07/T11 create, exact retry and later owner read across the boundary", async () => {
+test("R13 accept create, exact retry, changed-Note conflict and later owner read", async () => {
+  const onboardingKey = freshIdempotencyKey();
+  const checkInKey = freshIdempotencyKey();
   const token = await createControlledUser({
-    uid: "r13-accept-user",
-    email: "r13.accept@example.invalid",
+    uid: fixtureUid("accept-user"),
+    email: fixtureEmail("accept"),
   });
 
   const onboarding = await requestJson("/v1/me/onboarding", {
     method: "PUT",
-    headers: authHeaders(token, "R13AcceptOnboardingKey0001"),
-    body: JSON.stringify({ username: "r13_member_001", initialChoice: "accept" }),
+    headers: authHeaders(token, onboardingKey),
+    body: JSON.stringify({ username: fixtureUsername("accept"), initialChoice: "accept" }),
   });
   assert.equal(onboarding.response.status, 201);
   const account = accountFrom(onboarding.body);
@@ -208,7 +227,7 @@ test("R13-T01/T07/T11 create, exact retry and later owner read across the bounda
 
   const checkIn = await requestJson("/v1/check-ins", {
     method: "POST",
-    headers: authHeaders(token, "R13AcceptCheckInKey0001"),
+    headers: authHeaders(token, checkInKey),
     body: JSON.stringify({ note: "Controlled R13 owner note" }),
   });
   assert.equal(checkIn.response.status, 201);
@@ -219,11 +238,20 @@ test("R13-T01/T07/T11 create, exact retry and later owner read across the bounda
 
   const retry = await requestJson("/v1/check-ins", {
     method: "POST",
-    headers: authHeaders(token, "R13AcceptCheckInKey0001"),
+    headers: authHeaders(token, checkInKey),
     body: JSON.stringify({ note: "Controlled R13 owner note" }),
   });
   assert.equal(retry.response.status, 200);
   assert.deepEqual(checkInFrom(retry.body), created);
+
+  const changedNote = await requestJson("/v1/check-ins", {
+    method: "POST",
+    headers: authHeaders(token, checkInKey),
+    body: JSON.stringify({ note: "Changed controlled R13 owner note" }),
+  });
+  assert.equal(changedNote.response.status, 409);
+  assert.equal(errorCode(changedNote.body), "IDEMPOTENCY_CONFLICT");
+  assert.equal((await firestore.collection("check_ins").get()).size, 1);
 
   const laterRead = await requestJson(
     `/v1/check-ins/${String(created.checkInId)}`,
@@ -242,17 +270,17 @@ test("R13-T01/T07/T11 create, exact retry and later owner read across the bounda
   ]);
 });
 
-test("R13-T02/T10 reject path preserves privacy and idempotency conflict semantics", async () => {
+test("R13 reject path preserves onboarding exact-retry and conflict semantics", async () => {
+  const onboardingKey = freshIdempotencyKey();
   const token = await createControlledUser({
-    uid: "r13-reject-user",
-    email: "r13.reject@example.invalid",
+    uid: fixtureUid("reject-user"),
+    email: fixtureEmail("reject"),
   });
-  const key = "R13RejectOnboardingKey0001";
 
   const rejected = await requestJson("/v1/me/onboarding", {
     method: "PUT",
-    headers: authHeaders(token, key),
-    body: JSON.stringify({ username: "r13_member_002", initialChoice: "reject" }),
+    headers: authHeaders(token, onboardingKey),
+    body: JSON.stringify({ username: fixtureUsername("reject"), initialChoice: "reject" }),
   });
   assert.equal(rejected.response.status, 201);
   const rejectedAccount = accountFrom(rejected.body);
@@ -261,54 +289,59 @@ test("R13-T02/T10 reject path preserves privacy and idempotency conflict semanti
 
   const exactRetry = await requestJson("/v1/me/onboarding", {
     method: "PUT",
-    headers: authHeaders(token, key),
-    body: JSON.stringify({ username: "r13_member_002", initialChoice: "reject" }),
+    headers: authHeaders(token, onboardingKey),
+    body: JSON.stringify({ username: fixtureUsername("reject"), initialChoice: "reject" }),
   });
   assert.equal(exactRetry.response.status, 200);
   assert.deepEqual(accountFrom(exactRetry.body), rejectedAccount);
 
   const changedInput = await requestJson("/v1/me/onboarding", {
     method: "PUT",
-    headers: authHeaders(token, key),
-    body: JSON.stringify({ username: "r13_member_003", initialChoice: "reject" }),
+    headers: authHeaders(token, onboardingKey),
+    body: JSON.stringify({ username: fixtureUsername("reject-changed"), initialChoice: "reject" }),
   });
   assert.equal(changedInput.response.status, 409);
   assert.equal(errorCode(changedInput.body), "IDEMPOTENCY_CONFLICT");
   assert.equal(
-    (await firestore.doc("username_reservations/r13_member_003").get()).exists,
+    (await firestore.doc(`username_reservations/${fixtureUsername("reject-changed")}`).get()).exists,
     false,
   );
 });
 
-test("R13 identity, incomplete onboarding and privacy-safe negative paths fail closed", async () => {
+test("R13 identity, validation, incomplete onboarding and privacy-safe negative paths fail closed", async () => {
+  const ownerOnboardingKey = freshIdempotencyKey();
+  const otherOnboardingKey = freshIdempotencyKey();
+  const ownerCheckInKey = freshIdempotencyKey();
+  const invalidUsernameKey = freshIdempotencyKey();
+  const incompleteCheckInKey = freshIdempotencyKey();
   const ownerToken = await createControlledUser({
-    uid: "r13-owner-user",
-    email: "r13.owner@example.invalid",
+    uid: fixtureUid("owner-user"),
+    email: fixtureEmail("owner"),
   });
   const otherToken = await createControlledUser({
-    uid: "r13-other-user",
-    email: "r13.other@example.invalid",
+    uid: fixtureUid("other-user"),
+    email: fixtureEmail("other"),
   });
   const incompleteToken = await createControlledUser({
-    uid: "r13-incomplete-user",
-    email: "r13.incomplete@example.invalid",
+    uid: fixtureUid("incomplete-user"),
+    email: fixtureEmail("incomplete"),
   });
 
   const ownerOnboarding = await requestJson("/v1/me/onboarding", {
     method: "PUT",
-    headers: authHeaders(ownerToken, "R13OwnerOnboardingKey0001"),
-    body: JSON.stringify({ username: "r13_owner_001", initialChoice: "accept" }),
+    headers: authHeaders(ownerToken, ownerOnboardingKey),
+    body: JSON.stringify({ username: fixtureUsername("owner"), initialChoice: "accept" }),
   });
   assert.equal(ownerOnboarding.response.status, 201);
   const otherOnboarding = await requestJson("/v1/me/onboarding", {
     method: "PUT",
-    headers: authHeaders(otherToken, "R13OtherOnboardingKey0001"),
-    body: JSON.stringify({ username: "r13_other_001", initialChoice: "accept" }),
+    headers: authHeaders(otherToken, otherOnboardingKey),
+    body: JSON.stringify({ username: fixtureUsername("other"), initialChoice: "accept" }),
   });
   assert.equal(otherOnboarding.response.status, 201);
   const ownerCheckIn = await requestJson("/v1/check-ins", {
     method: "POST",
-    headers: authHeaders(ownerToken, "R13OwnerCheckInKey0001"),
+    headers: authHeaders(ownerToken, ownerCheckInKey),
     body: JSON.stringify({ note: "Private owner note" }),
   });
   assert.equal(ownerCheckIn.response.status, 201);
@@ -339,7 +372,7 @@ test("R13 identity, incomplete onboarding and privacy-safe negative paths fail c
 
   const invalidUsername = await requestJson("/v1/me/onboarding", {
     method: "PUT",
-    headers: authHeaders(otherToken, "R13InvalidUsernameKey0001"),
+    headers: authHeaders(otherToken, invalidUsernameKey),
     body: JSON.stringify({ username: "Invalid Username", initialChoice: "accept" }),
   });
   assert.equal(invalidUsername.response.status, 400);
@@ -347,7 +380,7 @@ test("R13 identity, incomplete onboarding and privacy-safe negative paths fail c
 
   const incompleteCreate = await requestJson("/v1/check-ins", {
     method: "POST",
-    headers: authHeaders(incompleteToken, "R13IncompleteCheckInKey001"),
+    headers: authHeaders(incompleteToken, incompleteCheckInKey),
     body: JSON.stringify({ note: "Must not persist" }),
   });
   assert.equal(incompleteCreate.response.status, 409);
@@ -355,14 +388,16 @@ test("R13 identity, incomplete onboarding and privacy-safe negative paths fail c
 });
 
 test("R13-T12 cancellation aborts the client response and exact retry reconciles the authoritative result", async () => {
+  const onboardingKey = freshIdempotencyKey();
+  const checkInKey = freshIdempotencyKey();
   const token = await createControlledUser({
-    uid: "r13-cancel-user",
-    email: "r13.cancel@example.invalid",
+    uid: fixtureUid("cancel-user"),
+    email: fixtureEmail("cancel"),
   });
   const onboarding = await requestJson("/v1/me/onboarding", {
     method: "PUT",
-    headers: authHeaders(token, "R13CancelOnboardingKey0001"),
-    body: JSON.stringify({ username: "r13_cancel_001", initialChoice: "accept" }),
+    headers: authHeaders(token, onboardingKey),
+    body: JSON.stringify({ username: fixtureUsername("cancel"), initialChoice: "accept" }),
   });
   assert.equal(onboarding.response.status, 201);
 
@@ -385,7 +420,7 @@ test("R13-T12 cancellation aborts the client response and exact retry reconciles
   const controller = new AbortController();
   const cancelledRequest = fetch(`http://127.0.0.1:${address.port}/v1/check-ins`, {
     method: "POST",
-    headers: authHeaders(token, "R13CancelCheckInKey0001"),
+    headers: authHeaders(token, checkInKey),
     body: JSON.stringify({ note: "Cancelled client request" }),
     signal: controller.signal,
   });
@@ -400,7 +435,7 @@ test("R13-T12 cancellation aborts the client response and exact retry reconciles
 
   const retry = await requestJson("/v1/check-ins", {
     method: "POST",
-    headers: authHeaders(token, "R13CancelCheckInKey0001"),
+    headers: authHeaders(token, checkInKey),
     body: JSON.stringify({ note: "Cancelled client request" }),
   });
   assert.ok(retry.response.status === 200 || retry.response.status === 201);
