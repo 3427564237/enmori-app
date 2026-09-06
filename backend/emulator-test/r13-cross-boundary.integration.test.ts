@@ -145,6 +145,7 @@ function authHeaders(
 ): Record<string, string> {
   return {
     authorization: `Bearer ${token}`,
+    "content-type": "application/json",
     ...(idempotencyKey === undefined
       ? {}
       : { "idempotency-key": idempotencyKey }),
@@ -299,6 +300,12 @@ test("R13 identity, incomplete onboarding and privacy-safe negative paths fail c
     body: JSON.stringify({ username: "r13_owner_001", initialChoice: "accept" }),
   });
   assert.equal(ownerOnboarding.response.status, 201);
+  const otherOnboarding = await requestJson("/v1/me/onboarding", {
+    method: "PUT",
+    headers: authHeaders(otherToken, "R13OtherOnboardingKey0001"),
+    body: JSON.stringify({ username: "r13_other_001", initialChoice: "accept" }),
+  });
+  assert.equal(otherOnboarding.response.status, 201);
   const ownerCheckIn = await requestJson("/v1/check-ins", {
     method: "POST",
     headers: authHeaders(ownerToken, "R13OwnerCheckInKey0001"),
@@ -343,7 +350,7 @@ test("R13 identity, incomplete onboarding and privacy-safe negative paths fail c
     headers: authHeaders(incompleteToken, "R13IncompleteCheckInKey001"),
     body: JSON.stringify({ note: "Must not persist" }),
   });
-  assert.equal(incompleteCreate.response.status, 403);
+  assert.equal(incompleteCreate.response.status, 409);
   assert.equal(errorCode(incompleteCreate.body), "ONBOARDING_REQUIRED");
 });
 

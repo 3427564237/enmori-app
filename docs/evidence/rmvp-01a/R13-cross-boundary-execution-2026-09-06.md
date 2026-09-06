@@ -2,7 +2,7 @@
 
 - **Work package:** Issue #4 / R13
 - **Executor:** JIN ZIHAN (`@chuxi12483468`)
-- **Execution timestamp:** 2026-09-06 22:20:50 +08:00 (SGT)
+- **Execution timestamp:** 2026-09-06 22:36:26 +08:00 (SGT; command completed)
 - **Build commit:** `3411c57298419b634a14088142111b5964c5973b` on `main`
 - **Controlled project:** `demo-enmori-rmvp01a` (non-real Firebase Emulator project)
 - **Endpoints:** Auth `127.0.0.1:9099`; Firestore `127.0.0.1:8080`; loopback only
@@ -25,25 +25,24 @@
 |---|---|---|
 | `pnpm --config.ignore-scripts=true install --frozen-lockfile` | Lockfile and supply-chain policy verification completed with the pinned workspace dependencies. | `Pass` |
 | `pnpm --config.ignore-scripts=true run backend:verify` | Executed with the bundled Node.js `24.19.0`; strict build and backend suite completed with 96/96 tests passing. | `Pass` (R10/R9 baseline only) |
-| `pnpm --config.ignore-scripts=true run backend:verify:emulator` | Firebase CLI `15.29.0` stopped before starting Auth/Firestore Emulator because the executor exposed Java `17.0.10`; this CLI requires Java `21` or newer. | `Blocked` |
+| `pnpm --config.ignore-scripts=true run backend:verify:emulator` | Executed with Temurin Java `21.0.12.1` and bundled Node.js `24.19.0`; Auth/Firestore Emulator started on loopback and the serial R10/R13 process completed with 11/11 tests passing. | `Pass` (R10 baseline + R13 execution) |
 
-The emulator command did not reach the R13 test process. The installed host Node.js `24.15.0` was also unsuitable for the pinned runtime check; rerunning the non-emulator baseline with the bundled Node.js `24.19.0` produced the 96/96 result above. No Java 21 runtime or unapproved substitute was selected during this run.
+The earlier Java `17.0.10` attempt was blocked before emulator startup and remains recorded in the prior checkpoint history; after installing and explicitly selecting the approved Temurin Java 21 runtime, the same controlled command reached the test process. The serial test runner prevents R10/R13 fixture resets from racing. No production data, credentials or real personal content were used.
 
 ## R13 scenario disposition
 
-The valid controlled Emulator process was not established, so no R13 scenario received an execution result. The scenarios remain `Not Run`, with the run attempt recorded as `Blocked` by the executor Java prerequisite.
+The controlled Emulator process was established with the recorded identity and all assigned R13 scenarios completed. The table below records observed results from this run; R14 and R15 remain separate gates and are not inferred from these results.
 
 | Scenario group | Scope | Result |
 |---|---|---|
-| R13-T01/T07/T11 | Accept onboarding, Note-only create, exact retry and later owner read | `Not Run` |
-| R13-T02/T10 | Reject/private onboarding and idempotency conflict | `Not Run` |
-| R13-T05/T06/T09 | Identity, incomplete onboarding, validation and privacy-safe negative paths | `Not Run` |
-| R13-T12 | Client cancellation and authoritative retry reconciliation | `Not Run` |
+| R13-T01/T07/T11 | Accept onboarding, Note-only create, exact retry and later owner read | `Pass` |
+| R13-T02/T10 | Reject/private onboarding and idempotency conflict | `Pass` |
+| R13-T05/T06/T09 | Identity, incomplete onboarding, validation and privacy-safe negative paths | `Pass` |
+| R13-T12 | Client cancellation and authoritative retry reconciliation | `Pass` |
 
 ## Boundary and blocker
 
-- No integration `Pass`, Android result, UAT result or release result is claimed.
+- No Android result, UAT result, release result or overall-gate `Pass` is claimed from this R13 run.
 - R14 remains `Not Run` pending completed R13 and LI-accepted DU R7 surface evidence; PR #14 remains `Changes Requested` under LI R3.
 - R15 remains `Not Run` pending its complete component inputs.
-- **Current technical blocker:** activate an approved Java 21+ runtime for Firebase CLI 15.29.0 on the executor, then rerun the same controlled command with the recorded project, loopback endpoints and fixture reset contract.
-
+- **Current technical blocker:** none for R13 execution. SHI R5B independent review of the R13 implementation/evidence is pending. R14 remains gated by completed R13 plus LI-accepted DU R7 surface evidence; R15 remains gated by its component inputs.

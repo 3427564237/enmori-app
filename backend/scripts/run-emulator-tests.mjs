@@ -12,7 +12,7 @@ const controlledProfileDirectory = mkdtempSync(
 try {
   const result = spawnSync(
     process.execPath,
-    ["--test", "backend/dist/emulator-test/**/*.test.js"],
+    ["--test", "--test-concurrency=1", "backend/dist/emulator-test/**/*.test.js"],
     {
       env: buildControlledEmulatorTestEnvironment(
         process.env,
