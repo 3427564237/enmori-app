@@ -1,8 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/account/presentation/onboarding_page.dart';
+import '../../features/auth/presentation/registration_page.dart';
+import '../../features/check_in/presentation/check_in_page.dart';
+import '../home_shell_page.dart';
 import '../providers.dart';
+import '../route_status_pages.dart';
 
 abstract final class AppRoutes {
   static const startup = '/startup';
@@ -26,17 +31,41 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       location: state.matchedLocation,
     ),
     routes: [
-      _boundaryRoute(AppRoutes.startup, 'route-startup'),
-      _boundaryRoute(AppRoutes.register, 'route-register'),
-      _boundaryRoute(AppRoutes.onboarding, 'route-onboarding'),
-      _boundaryRoute(AppRoutes.home, 'route-home'),
-      _boundaryRoute(AppRoutes.checkIn, 'route-check-in'),
+      GoRoute(
+        path: AppRoutes.startup,
+        builder: (context, state) => const StartupPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.register,
+        builder: (context, state) => const RegistrationPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (context, state) => OnboardingPage(
+          onCompleted: () => context.go(AppRoutes.checkIn),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.home,
+        builder: (context, state) => HomeShellPage(
+          onStartCheckIn: () => context.go(AppRoutes.checkIn),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.checkIn,
+        builder: (context, state) => const CheckInComposerPage(),
+      ),
       GoRoute(
         path: '/check-in/:checkInId',
-        builder: (context, state) =>
-            const RouteBoundaryPage(boundaryKey: Key('route-check-in-saved')),
+        builder: (context, state) => SavedCheckInPage(
+          checkInId: state.pathParameters['checkInId'] ?? '',
+          onReturnHome: () => context.go(AppRoutes.home),
+        ),
       ),
-      _boundaryRoute(AppRoutes.unavailable, 'route-unavailable'),
+      GoRoute(
+        path: AppRoutes.unavailable,
+        builder: (context, state) => const UnavailablePage(),
+      ),
     ],
   );
   ref.onDispose(() {
@@ -59,18 +88,11 @@ String? redirectFor({required RouterGateState gate, required String location}) {
     RouterGateState.authenticated => switch (location) {
       AppRoutes.startup ||
       AppRoutes.register ||
-      AppRoutes.onboarding ||
       AppRoutes.unavailable => AppRoutes.home,
+      AppRoutes.onboarding => AppRoutes.checkIn,
       _ => null,
     },
   };
-}
-
-GoRoute _boundaryRoute(String path, String keyValue) {
-  return GoRoute(
-    path: path,
-    builder: (context, state) => RouteBoundaryPage(boundaryKey: Key(keyValue)),
-  );
 }
 
 final class RouterRefreshNotifier extends ChangeNotifier {
@@ -78,18 +100,5 @@ final class RouterRefreshNotifier extends ChangeNotifier {
     ref.listen<RouterGateState>(routerGateProvider, (previous, next) {
       if (previous != next) notifyListeners();
     });
-  }
-}
-
-/// A compile-safe integration seam for DU's independently owned R6 surfaces.
-/// It intentionally contains no product copy, visual design, or interaction.
-final class RouteBoundaryPage extends StatelessWidget {
-  const RouteBoundaryPage({required this.boundaryKey, super.key});
-
-  final Key boundaryKey;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: SizedBox.expand(key: boundaryKey));
   }
 }
