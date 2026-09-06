@@ -125,21 +125,21 @@ This checklist is a coordination aid, not execution evidence. An unchecked item 
 - [x] **R1** — LI's Flutter entry/onboarding/Check-in integration and owner-focused tests are available at commit `5e7dd22` / PR #8, merged to `main`. Owner-reported analyze, full tests and debug APK are `Pass`; device integration remains `Not Run`.
 - [x] **R4** — SHI's approved Backend Application/Domain/Transport implementation and owner-focused tests are available via PR #12, merged to `main` as `fcaff75349f15b298412cd105273708b6d87e913`. The reported owner-focused suite is 39/39 `Pass`.
 - [x] **R9** — ZHOU's Firebase Auth/Firestore infrastructure adapters and contract tests are merged via PR #10 as commit `d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0`; SHI's independent boundary review is approved. The reported contract suite is 76/76 `Pass`; this is predecessor evidence only, not R13 execution evidence.
-- [ ] **R10** — ZHOU's reproducible controlled Backend/Firebase environment and sanitized configuration evidence are not available. R10 remains `Not Run` and is the next required R13 predecessor.
+- [ ] **R10** — ZHOU submitted the controlled Firebase Emulator/Backend revision at PR #16, current head `66f06a3eadf26b4684c868c694ef439fbbd92494` (focused credential-isolation fix `7e398b6dbb17708a588d040afab4b63244633a17`). Owner evidence reports 96/96 Backend tests and 7/7 Emulator tests, but SHI's current-head acceptance is still pending after the prior `Changes Requested` review. R10 remains unchecked and is not authorized for R13 until SHI accepts it.
 - [x] **R12 design** — this strategy, fixture and traceability artifact is committed at `cad65f1`.
 - [x] **R5B review** — SHI's independent re-review approved the R12 artifact on 2026-09-04 against `7d46b94`; approval is design/review evidence only, not execution evidence.
 - [ ] **Controlled run identity** — build commit, isolated environment, fixture reset and executor are recorded before any R13 result is assigned.
 
-R10 controlled-environment evidence and the controlled run identity remain separate unchecked R13 gates. R7's device/emulator blocker separately prevents R14. R13 cannot start while any required R13 item is missing, even though R1, R4 and R9 are now merged.
+R10 acceptance and the controlled run identity remain separate unchecked R13 gates. R7's Android evidence is also incomplete: PR #14 has a `Changes Requested` LI R3 review, despite the reported named-device smoke. R13 cannot start while any required R13 item is missing, even though R1, R4 and R9 are now merged.
 
 ### R14 readiness watch
 
-- [ ] **R7 Android device/UAT evidence** — `Not Run`; the scheduled checkpoint had no ADB-visible supported device or emulator. A concrete device/emulator is required before Android evidence can begin.
+- [ ] **R7 Android device/UAT evidence** — PR #14 reports a named vivo V2243A / Android 15 device and bounded APK install/launch smoke, but LI's R3 review is `Changes Requested` at head `0837143dfe3a3bcdcd258f32a5fb2aa6450e3fb0`. Approved R6 corrections, formatting, bounded surface/accessibility evidence and the sanitized R7 capture package remain incomplete; R7/UAT is not accepted.
 
 ### Execution order after the checklist is complete
 
 1. Verify each checked predecessor from its linked commit/PR and confirm that the controlled environment and fixture reset are reproducible.
-2. Notify LI in Issue #4 that the R13 entry checklist is complete. Do not send this notification while any item above is unchecked.
+2. After SHI accepts the R10 current head, notify LI in Issue #4 before starting the controlled R13 run. Do not send this notification while any item above is unchecked.
 3. Run only the approved R13 cross-boundary scenarios. Keep every unexecuted scenario `Not Run`; assign `Pass`, `Fail` or `Blocked` only from complete evidence under §7.
 4. Start R14 only after R7 and R13 outputs exist, then collate the Android `.A` evidence and defect/retest ledger.
 5. Start R15 only after applicable R1–R11 implementation and component-review outputs exist. Exclude R12–R14 and R5B from JIN's own gate, then leave R16 for LI's terminal review.
@@ -150,4 +150,4 @@ R10 controlled-environment evidence and the controlled run identity remain separ
 Issue #4 R13 entry check: R1/R4/R9/R10 predecessor outputs and SHI R5B review are linked and verified. Controlled environment and fixture reset are identified. Requesting LI confirmation to begin R13; R13/R14/R15 remain Not Run until their own evidence exists.
 ```
 
-**Current disposition:** R12 strategy/fixtures/traceability is approved by SHI's R5B re-review on 2026-09-04 against `7d46b94` (PR #7). R1 (`5e7dd22` / PR #8), R4 (`fcaff75349f15b298412cd105273708b6d87e913` / PR #12) and R9 (`d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0` / PR #10) are merged to `main`. R10 controlled-environment evidence and the controlled run identity remain outstanding; R7 still has no ADB-visible supported device or emulator. R9 approval closes the prior R9 blocker only; it does not authorize or claim R13, R14, R15, Android, controlled-backend integration, UAT or release completion. R13, R14 and R15 remain `Not Run`, and the LI notification is intentionally not posted until the R10 evidence and all remaining R13 entry conditions are verified.
+**Readiness update for the 2026-09-07 12:00 SGT checkpoint:** R12 strategy/fixtures/traceability is approved by SHI's R5B re-review on 2026-09-04 against `7d46b94` (PR #7). R1 (`5e7dd22` / PR #8), R4 (`fcaff75349f15b298412cd105273708b6d87e913` / PR #12) and R9 (`d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0` / PR #10) are merged to `main`. R10's revised head (`66f06a3` / PR #16) has owner evidence but remains pending SHI acceptance after the focused credential-isolation correction. PR #14 has LI's `Changes Requested` R3 review; its named-device smoke does not yet satisfy the R7 capture/UAT gate. The controlled run identity remains outstanding. R13, R14 and R15 remain `Not Run`; R10 acceptance must be followed by LI notification before any controlled R13 run, and no integration, Android, UAT or `Pass` result is claimed.
