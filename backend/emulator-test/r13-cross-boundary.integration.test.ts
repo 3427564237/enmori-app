@@ -298,12 +298,12 @@ test("R13 reject path preserves onboarding exact-retry and conflict semantics", 
   const changedInput = await requestJson("/v1/me/onboarding", {
     method: "PUT",
     headers: authHeaders(token, onboardingKey),
-    body: JSON.stringify({ username: fixtureUsername("reject-changed"), initialChoice: "reject" }),
+    body: JSON.stringify({ username: fixtureUsername("rejectchanged"), initialChoice: "reject" }),
   });
   assert.equal(changedInput.response.status, 409);
   assert.equal(errorCode(changedInput.body), "IDEMPOTENCY_CONFLICT");
   assert.equal(
-    (await firestore.doc(`username_reservations/${fixtureUsername("reject-changed")}`).get()).exists,
+    (await firestore.doc(`username_reservations/${fixtureUsername("rejectchanged")}`).get()).exists,
     false,
   );
 });
