@@ -2,12 +2,16 @@
 
 - **Work package:** Issue #4 / R13
 - **Executor:** JIN ZIHAN (`@chuxi12483468`)
-- **Execution timestamp:** 2026-09-06 22:36:26 +08:00 (SGT; command completed)
-- **Build commit:** `3411c57298419b634a14088142111b5964c5973b` on `main`
-- **Controlled project:** `demo-enmori-rmvp01a` (non-real Firebase Emulator project)
+- **Execution timestamp:** 2026-09-07 02:16:36 +08:00 (SGT; corrected command set completed)
+- **Tested code head:** `d26a829f9d2ff5c228b2c1727c64c304925b8f03` (the R13 test/fixture code that produced 11/11)
+- **Merge base:** `ce1a6e13955c9d1806758e453c7ded661da1e083` (`main` before the R13 changes)
+- **R10 baseline merge:** `3411c57298419b634a14088142111b5964c5973b` (PR #16)
+- **Controlled project:** `demo-enmori-rmvp01a-r10` (non-real Firebase Emulator project; matches the pinned runner)
 - **Endpoints:** Auth `127.0.0.1:9099`; Firestore `127.0.0.1:8080`; loopback only
 - **Fixture labels:** `RMVP-FX-NEW-ACCEPT`, `RMVP-FX-NEW-REJECT`, `RMVP-FX-INCOMPLETE`, `RMVP-FX-AUTH-REQUIRED`, `RMVP-FX-CHECKIN`, `RMVP-FX-NON-OWNER`, `RMVP-FX-DEPENDENCY`
-- **Fixture reset contract:** Auth and Firestore state reset before each scenario and after the suite; no production data, credentials, tokens or real personal content are persisted in evidence.
+- **Fixture version:** `R13-FX-v2` — run-scoped synthetic fixture generator in the tested code head; emails, UIDs, passwords and 22–64 character base64url idempotency keys are generated at runtime and are not committed or recorded.
+- **Fixture reset result:** Auth and Firestore reset passed before every scenario and after the suite; the temporary controlled profile was cleaned up with no `enmori-r10-profile-*` directory remaining.
+- **Data boundary:** No production data, credentials, tokens or real personal content are persisted in evidence.
 
 ## Predecessor verification
 
@@ -23,22 +27,24 @@
 
 | Command | Observation | Result |
 |---|---|---|
-| `pnpm --config.ignore-scripts=true install --frozen-lockfile` | Lockfile and supply-chain policy verification completed with the pinned workspace dependencies. | `Pass` |
-| `pnpm --config.ignore-scripts=true run backend:verify` | Executed with the bundled Node.js `24.19.0`; strict build and backend suite completed with 96/96 tests passing. | `Pass` (R10/R9 baseline only) |
-| `pnpm --config.ignore-scripts=true run backend:verify:emulator` | Executed with Temurin Java `21.0.12.1` and bundled Node.js `24.19.0`; Auth/Firestore Emulator started on loopback and the serial R10/R13 process completed with 11/11 tests passing. | `Pass` (R10 baseline + R13 execution) |
+| `pnpm --config.ignore-scripts=true install --frozen-lockfile` | Lockfile commit `d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0`; frozen install completed with pnpm `11.19.0`. | `Pass` |
+| `pnpm --config.ignore-scripts=true run backend:verify` | Node.js `24.19.0`; strict compile and backend suite completed with 96/96 tests passing. | `Pass` (R10/R9 baseline only) |
+| `pnpm --config.ignore-scripts=true run backend:verify:emulator` | Firebase CLI package `15.29.0`, Java `21.0.12.1`, Node.js `24.19.0`; Auth/Firestore Emulator started on loopback and the serial R10/R13 process completed with 11/11 tests passing. | `Pass` (R10 baseline + R13 execution) |
 
-The earlier Java `17.0.10` attempt was blocked before emulator startup and remains recorded in the prior checkpoint history; after installing and explicitly selecting the approved Temurin Java 21 runtime, the same controlled command reached the test process. The serial test runner prevents R10/R13 fixture resets from racing. No production data, credentials or real personal content were used.
+The earlier Java `17.0.10` attempt was blocked before emulator startup and remains recorded in the prior checkpoint history. The corrected run explicitly selected the installed Java 21 runtime and the pinned `demo-enmori-rmvp01a-r10` project. The serial test runner prevents R10/R13 fixture resets from racing.
 
 ## R13 scenario disposition
 
-The controlled Emulator process was established with the recorded identity and all assigned R13 scenarios completed. The table below records observed results from this run; R14 and R15 remain separate gates and are not inferred from these results.
+The controlled Emulator process was established with the corrected identity and all four assigned R13 test groups completed. The table below records only the exact R12 oracles exercised by those tests; unexecuted R12 subcases remain `Not Run`. R14 and R15 remain separate gates and are not inferred from these results.
 
-| Scenario group | Scope | Result |
+| R13 test | Exact R12 oracle(s) exercised | R13 result |
 |---|---|---|
-| R13-T01/T07/T11 | Accept onboarding, Note-only create, exact retry and later owner read | `Pass` |
-| R13-T02/T10 | Reject/private onboarding and idempotency conflict | `Pass` |
-| R13-T05/T06/T09 | Identity, incomplete onboarding, validation and privacy-safe negative paths | `Pass` |
-| R13-T12 | Client cancellation and authoritative retry reconciliation | `Pass` |
+| Accept onboarding, Note-only create, exact retry, changed-Note conflict and later owner read | `R12-T01`, `R12-T07`, `R12-T10` (Check-in exact retry + changed Note), `R12-T11` owner read | `Pass` |
+| Reject/private onboarding with exact retry and changed onboarding input | `R12-T02`, `R12-T04` | `Pass` |
+| Missing/malformed identity, invalid Username, incomplete onboarding, non-owner/missing privacy-safe read | `R12-T05A`, `R12-T06B` (missing/malformed branch only), `R12-T09B`, `R12-T11` non-owner/missing branch | `Pass` |
+| Client cancellation and authoritative retry reconciliation | `R12-T12` | `Pass` |
+
+The following approved R12 subcases were not exercised by this R13 run and remain `Not Run`: `R12-T05B`, `R12-T05C`, `R12-T06A`, the expired-identity branch of `R12-T06B`, `R12-T08`, `R12-T09A`, and all other catalogue rows not listed above. The R12 catalogue's initial-result column is unchanged.
 
 ## Boundary and blocker
 
