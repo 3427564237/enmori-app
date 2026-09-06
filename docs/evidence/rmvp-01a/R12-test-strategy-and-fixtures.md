@@ -125,12 +125,25 @@ This checklist is a coordination aid, not execution evidence. An unchecked item 
 - [x] **R1** — LI's Flutter entry/onboarding/Check-in integration and owner-focused tests are available at commit `5e7dd22` / PR #8, merged to `main`. Owner-reported analyze, full tests and debug APK are `Pass`; device integration remains `Not Run`.
 - [x] **R4** — SHI's approved Backend Application/Domain/Transport implementation and owner-focused tests are available via PR #12, merged to `main` as `fcaff75349f15b298412cd105273708b6d87e913`. The reported owner-focused suite is 39/39 `Pass`.
 - [x] **R9** — ZHOU's Firebase Auth/Firestore infrastructure adapters and contract tests are merged via PR #10 as commit `d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0`; SHI's independent boundary review is approved. The reported contract suite is 76/76 `Pass`; this is predecessor evidence only, not R13 execution evidence.
-- [ ] **R10** — ZHOU submitted the controlled Firebase Emulator/Backend revision at PR #16, current head `66f06a3eadf26b4684c868c694ef439fbbd92494` (focused credential-isolation fix `7e398b6dbb17708a588d040afab4b63244633a17`). Owner evidence reports 96/96 Backend tests and 7/7 Emulator tests, but SHI's current-head acceptance is still pending after the prior `Changes Requested` review. R10 remains unchecked and is not authorized for R13 until SHI accepts it.
+- [x] **R10** — ZHOU's controlled Firebase Emulator/Backend revision is merged via PR #16 as `3411c57298419b634a14088142111b5964c5973b` from reviewed head `66f06a3eadf26b4684c868c694ef439fbbd92494`; SHI's R5A current-head review is approved. Owner/reviewer evidence reports 96/96 Backend tests and 7/7 Emulator tests with credential isolation and fixture reset.
 - [x] **R12 design** — this strategy, fixture and traceability artifact is committed at `cad65f1`.
 - [x] **R5B review** — SHI's independent re-review approved the R12 artifact on 2026-09-04 against `7d46b94`; approval is design/review evidence only, not execution evidence.
-- [ ] **Controlled run identity** — build commit, isolated environment, fixture reset and executor are recorded before any R13 result is assigned.
+- [x] **Controlled run identity** — recorded below before any R13 result is assigned; this identity is evidence metadata, not a result.
 
-R10 acceptance and the controlled run identity remain separate unchecked R13 gates. R7's Android evidence is also incomplete: PR #14 has a `Changes Requested` LI R3 review, despite the reported named-device smoke. R13 cannot start while any required R13 item is missing, even though R1, R4 and R9 are now merged.
+All R13 entry checks are now present and linkable after R10 acceptance. R7's Android evidence is still incomplete: PR #14 has a `Changes Requested` LI R3 review, despite the reported named-device smoke, so R14 remains blocked. LI must be notified before the controlled R13 run begins.
+
+### Controlled R13 run identity
+
+- **Status:** Recorded before execution; no scenario result is implied by this record.
+- **Merged build commit:** `3411c57298419b634a14088142111b5964c5973b` (`main`, R10 merge via PR #16).
+- **Executor:** JIN ZIHAN (`@chuxi12483468`).
+- **Controlled project:** `demo-enmori-rmvp01a-r10` (non-real Firebase Emulator project only).
+- **Endpoints:** Auth `127.0.0.1:9099`; Firestore `127.0.0.1:8080`; loopback only.
+- **Sanitized fixture labels:** `RMVP-FX-NEW-ACCEPT`, `RMVP-FX-NEW-REJECT`, `RMVP-FX-INCOMPLETE`, `RMVP-FX-AUTH-REQUIRED`, `RMVP-FX-CHECKIN`, `RMVP-FX-NON-OWNER`, `RMVP-FX-DEPENDENCY`.
+- **Fixture reset:** Auth and Firestore Emulator state reset before each scenario and after the suite; no production data, credentials, tokens or real personal content.
+- **Approved commands:** `pnpm --config.ignore-scripts=true install --frozen-lockfile`; `pnpm --config.ignore-scripts=true run backend:verify`; `pnpm --config.ignore-scripts=true run backend:verify:emulator`.
+- **Recorded at:** `2026-09-06 22:13:32 +08:00` (SGT).
+- **Evidence destination:** `docs/evidence/rmvp-01a/R13-cross-boundary-execution-2026-09-06.md`.
 
 ### R14 readiness watch
 
@@ -150,4 +163,4 @@ R10 acceptance and the controlled run identity remain separate unchecked R13 gat
 Issue #4 R13 entry check: R1/R4/R9/R10 predecessor outputs and SHI R5B review are linked and verified. Controlled environment and fixture reset are identified. Requesting LI confirmation to begin R13; R13/R14/R15 remain Not Run until their own evidence exists.
 ```
 
-**Readiness update for the 2026-09-07 12:00 SGT checkpoint:** R12 strategy/fixtures/traceability is approved by SHI's R5B re-review on 2026-09-04 against `7d46b94` (PR #7). R1 (`5e7dd22` / PR #8), R4 (`fcaff75349f15b298412cd105273708b6d87e913` / PR #12) and R9 (`d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0` / PR #10) are merged to `main`. R10's revised head (`66f06a3` / PR #16) has owner evidence but remains pending SHI acceptance after the focused credential-isolation correction. PR #14 has LI's `Changes Requested` R3 review; its named-device smoke does not yet satisfy the R7 capture/UAT gate. The controlled run identity remains outstanding. R13, R14 and R15 remain `Not Run`; R10 acceptance must be followed by LI notification before any controlled R13 run, and no integration, Android, UAT or `Pass` result is claimed.
+**Readiness update for the 2026-09-07 12:00 SGT checkpoint:** R12 strategy/fixtures/traceability is approved by SHI's R5B re-review on 2026-09-04 against `7d46b94` (PR #7). R1 (`5e7dd22` / PR #8), R4 (`fcaff75349f15b298412cd105273708b6d87e913` / PR #12), R9 (`d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0` / PR #10) and R10 (`3411c57298419b634a14088142111b5964c5973b` / PR #16) are merged to `main`; R10's current head was independently approved by SHI. The controlled run identity is recorded above. PR #14 has LI's `Changes Requested` R3 review; its named-device smoke does not yet satisfy the R7 capture/UAT gate. R13, R14 and R15 remain `Not Run` until their own execution/evidence exists. LI must be notified before the controlled R13 run; no integration, Android, UAT or `Pass` result is pre-recorded.
