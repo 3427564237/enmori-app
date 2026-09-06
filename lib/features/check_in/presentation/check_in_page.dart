@@ -1,4 +1,3 @@
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,10 +11,12 @@ final class CheckInComposerPage extends ConsumerStatefulWidget {
   const CheckInComposerPage({super.key});
 
   @override
-  ConsumerState<CheckInComposerPage> createState() => _CheckInComposerPageState();
+  ConsumerState<CheckInComposerPage> createState() =>
+      _CheckInComposerPageState();
 }
 
-final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage> {
+final class _CheckInComposerPageState
+    extends ConsumerState<CheckInComposerPage> {
   final _noteController = TextEditingController();
   CheckIn? _committedCheckIn;
   _CheckInAction? _lastAction;
@@ -28,7 +29,10 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<CommandState<CheckIn>>(checkInControllerProvider, (previous, next) {
+    ref.listen<CommandState<CheckIn>>(checkInControllerProvider, (
+      previous,
+      next,
+    ) {
       if (!mounted) return;
       if (next case CommandSucceeded<CheckIn>(:final value)) {
         setState(() => _committedCheckIn = value);
@@ -98,13 +102,16 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
     if (state case CommandFailed<CheckIn>(:final failure)) {
       final confirming = _lastAction == _CheckInAction.read;
       return _ResultPanel(
-        key: Key(confirming ? 'r6-check-in-unavailable' : 'r6-check-in-failure'),
+        key: Key(
+          confirming ? 'r6-check-in-unavailable' : 'r6-check-in-failure',
+        ),
         icon: confirming ? Icons.sync_problem : Icons.error_outline,
         title: confirming ? 'Confirmation unavailable' : 'Check-in not saved',
         body: failure.message,
       );
     }
-    if (state is CommandPending<CheckIn> && _lastAction == _CheckInAction.read) {
+    if (state is CommandPending<CheckIn> &&
+        _lastAction == _CheckInAction.read) {
       return const _ResultPanel(
         key: Key('r6-check-in-confirming'),
         icon: Icons.sync,
@@ -114,12 +121,15 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
     }
     final checkIn = _committedCheckIn;
     if (checkIn == null) return const SizedBox.shrink();
-    final confirmed = state is CommandSucceeded<CheckIn> && _lastAction == _CheckInAction.read;
+    final confirmed =
+        state is CommandSucceeded<CheckIn> &&
+        _lastAction == _CheckInAction.read;
     return _ResultPanel(
       key: Key(confirmed ? 'r6-check-in-confirmed' : 'r6-check-in-committed'),
       icon: confirmed ? Icons.verified : Icons.task_alt,
       title: confirmed ? 'Confirmed from saved Check-in' : 'Create committed',
-      body: '${checkIn.note}\nSaved at ${checkIn.createdAt.toUtc().toIso8601String()}',
+      body:
+          '${checkIn.note}\nSaved at ${checkIn.createdAt.toUtc().toIso8601String()}',
       action: confirmed
           ? null
           : FilledButton.icon(
@@ -138,7 +148,9 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
 
   void _create() {
     _lastAction = _CheckInAction.create;
-    ref.read(checkInControllerProvider.notifier).create(note: _noteController.text);
+    ref
+        .read(checkInControllerProvider.notifier)
+        .create(note: _noteController.text);
   }
 }
 
@@ -190,7 +202,8 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
                 key: const Key('r6-saved-check-in-confirmed'),
                 icon: Icons.verified,
                 title: 'Confirmed from saved Check-in',
-                body: '${value.note}\nSaved at ${value.createdAt.toUtc().toIso8601String()}',
+                body:
+                    '${value.note}\nSaved at ${value.createdAt.toUtc().toIso8601String()}',
               )
             else if (state case CommandFailed<CheckIn>(:final failure))
               _ResultPanel(
@@ -244,10 +257,7 @@ final class _ResultPanel extends StatelessWidget {
             Text(title, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(body),
-            if (action != null) ...[
-              const SizedBox(height: 12),
-              action!,
-            ],
+            if (action != null) ...[const SizedBox(height: 12), action!],
           ],
         ),
       ),
