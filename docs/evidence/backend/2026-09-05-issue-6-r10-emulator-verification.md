@@ -7,12 +7,14 @@
 - Accepted R9 / branch base: `d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0`
 - R10 implementation commits: `55c3d91e549e943e823d28a5f881973d6ddd0815`
   and `31b8ef041444490ecaa6a09860d8839f50560ae7`
+- Credential-isolation correction:
+  `7e398b6dbb17708a588d040afab4b63244633a17`
 - Contract: `S-PM-0903-RMVP01A-CONTRACT`
 - Toolchain: `S-PM-0905-RMVP01A-TOOLCHAIN`
 - Reviewer path: SHI ZHENGQI independently reviews R10 in R5A
-- Current disposition: owner verification passed; R10 is prepared for
-  independent review and is not complete until the current head is published
-  and accepted
+- Current disposition: owner verification passed; the credential-isolation
+  revision is prepared for independent current-head re-review and R10 is not
+  complete until that published head is accepted
 
 This record covers only the reproducible local Firebase Authentication and
 Cloud Firestore Emulator environment assigned to R10. It does not claim R11,
@@ -23,7 +25,7 @@ accessibility, Q04, UAT, Release or Done evidence.
 
 | Item | Recorded value |
 |---|---|
-| Execution time | `2026-09-05T22:11:04+08:00` |
+| Execution time | `2026-09-06T20:14:55+08:00` |
 | Executor | ZHOU YAOYIN |
 | Host boundary | Sanitized local Windows x64 workstation |
 | Node.js | `v24.19.0` |
@@ -36,6 +38,8 @@ accessibility, Q04, UAT, Release or Done evidence.
 | Firestore endpoint | loopback `127.0.0.1:8080` |
 | Emulator UI | disabled |
 | GCP metadata probing | disabled for the Emulator test process |
+| Child-process environment | explicit non-secret allowlist only |
+| Credential discovery profile | fresh empty per-run temporary directory, removed after execution |
 | Credentials / real data | none used |
 | Fixture data | fixed `controlled-*` IDs and `.invalid` email addresses only |
 | Lockfile commit | `d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0` |
@@ -46,17 +50,28 @@ disabled UI and single-project consistency. No `.firebaserc`, Firebase project
 alias, credential, service-account material, deployment configuration, rules
 deployment, index, TTL, scheduler or cleanup mechanism is present.
 
+The runner no longer spreads the host environment into the test process. It
+passes only the exact Emulator/project variables and a bounded set of ordinary
+OS/runtime variables. Credential-bearing variables and arbitrary host
+variables are not inherited. A fresh empty temporary profile is created for
+each execution; `HOME`, `USERPROFILE`, `APPDATA` and `XDG_CONFIG_HOME` all point
+to it so platform credential discovery cannot fall back to the developer's
+profile. The directory is removed in the runner's `finally` path.
+
 The runtime guard requires all of the following before an Emulator test can
 initialize Firebase Admin:
 
 1. explicit `ENMORI_ENVIRONMENT=test` mode;
 2. a `demo-` project ID shared by Firebase Admin and the Emulator CLI;
 3. both Auth and Firestore Emulator variables; and
-4. loopback-only endpoints with valid ports.
+4. loopback-only endpoints with valid ports;
+5. one isolated credential profile shared by all platform profile roots; and
+6. no credential/token/key marker or ambient Firebase/Cloud SDK configuration.
 
 It fails closed for unset, development, controlled-demo or production mode,
-for a real project ID, for mismatched project IDs, and for missing or remote
-Emulator endpoints. The `demo-` project identity also makes any accidental
+for a real project ID, for mismatched project IDs, for missing or remote
+Emulator endpoints, for ambient credential variables and for an inconsistent
+credential profile. The `demo-` project identity also makes any accidental
 request to a non-emulated Firebase product fail instead of reaching a live
 resource. The test runner disables GCP metadata-server detection so the
 credential-free local run does not probe a cloud metadata endpoint.
@@ -75,6 +90,19 @@ pnpm --config.ignore-scripts=true run backend:verify:emulator
 git diff --check
 ```
 
+The second Emulator run used the following synthetic, non-secret parent marker
+to prove that an arbitrary credential-marked host variable is not inherited by
+the Backend test process:
+
+```powershell
+$env:ENMORI_R10_CREDENTIAL_PROBE = 'synthetic-non-secret'
+try {
+  pnpm --config.ignore-scripts=true run backend:verify:emulator
+} finally {
+  Remove-Item Env:ENMORI_R10_CREDENTIAL_PROBE -ErrorAction SilentlyContinue
+}
+```
+
 Lifecycle scripts remained disabled. No package, lifecycle script or alternate
 version was approved or introduced by R10.
 
@@ -84,11 +112,13 @@ version was approved or introduced by R10.
 |---|---|
 | Frozen install | Pass |
 | Strict TypeScript build | Pass |
-| Complete recursive R4+R9 plus R10 guard suite | **84/84 Pass**, 0 failed/skipped/todo |
+| Complete recursive R4+R9 plus R10 guard suite | **96/96 Pass**, 0 failed/skipped/todo |
 | Auth + Firestore Emulator run 1 | **7/7 Pass**, 0 failed/skipped/todo |
 | Auth + Firestore Emulator run 2 | **7/7 Pass**, 0 failed/skipped/todo |
 | Emulator startup and automatic shutdown | Pass on both runs |
 | Auth and Firestore reset endpoints | Pass; fixed state cleared before every test and after the suite |
+| Synthetic parent credential-marker isolation | Pass; marker absent from the test process |
+| Temporary credential-profile cleanup | Pass; no per-run profile directory remained |
 | `git diff --check` | Pass |
 
 The Firestore Emulator reports its standard warning that no client Security
@@ -101,8 +131,8 @@ invented to suppress that warning.
 ## Emulator coverage
 
 - The environment guard proves tests cannot select a live Firebase project or
-  non-loopback Firebase endpoint, and the runner prevents cloud metadata
-  probing.
+  non-loopback Firebase endpoint, and the runner prevents ambient credentials,
+  developer-profile credential discovery and cloud metadata probing.
 - Auth state is reset through the Emulator REST reset endpoint, and Firestore
   state is reset through the Emulator-only database flush endpoint.
 - A real Auth Emulator ID token maps to the exact verified Firebase principal.
