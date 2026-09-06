@@ -41,19 +41,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (context, state) => OnboardingPage(
-          onCompleted: () => context.go(AppRoutes.checkIn),
-        ),
+        builder: (context, state) =>
+            OnboardingPage(onCompleted: () => context.go(AppRoutes.checkIn)),
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => HomeShellPage(
-          onStartCheckIn: () => context.go(AppRoutes.checkIn),
-        ),
+        builder: (context, state) =>
+            HomeShellPage(onStartCheckIn: () => context.go(AppRoutes.checkIn)),
       ),
       GoRoute(
         path: AppRoutes.checkIn,
-        builder: (context, state) => const CheckInComposerPage(),
+        builder: (context, state) =>
+            CheckInComposerPage(onReturnHome: () => context.go(AppRoutes.home)),
       ),
       GoRoute(
         path: '/check-in/:checkInId',
