@@ -198,14 +198,21 @@ final class _CheckInComposerPageState
     return switch (kind) {
       AppFailureKind.checkInInvalid => 'Enter a Note before saving.',
       AppFailureKind.idempotencyConflict => 'This Check-in attempt changed after it was submitted. Start a new attempt.',
-      _ => "We couldn't save this Check-in yet.",
+      AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
+      AppFailureKind.authForbidden => 'This account cannot continue.',
+      AppFailureKind.serviceUnavailable ||
+      AppFailureKind.configurationUnavailable =>
+        'This service is temporarily unavailable. Try again.',
+      _ => 'This service is temporarily unavailable. Try again.',
     };
   }
 
   String _confirmationFailureCopy(AppFailureKind kind) {
     return switch (kind) {
       AppFailureKind.checkInUnavailable => 'This Check-in is unavailable.',
-      _ => "We couldn't confirm this Check-in yet.",
+      AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
+      AppFailureKind.authForbidden => 'This account cannot continue.',
+      _ => 'This service is temporarily unavailable. Try again.',
     };
   }
 }
@@ -301,7 +308,9 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
   String _confirmationFailureCopy(AppFailureKind kind) {
     return switch (kind) {
       AppFailureKind.checkInUnavailable => 'This Check-in is unavailable.',
-      _ => "We couldn't confirm this Check-in yet.",
+      AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
+      AppFailureKind.authForbidden => 'This account cannot continue.',
+      _ => 'This service is temporarily unavailable. Try again.',
     };
   }
 }

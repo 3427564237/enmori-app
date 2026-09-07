@@ -234,11 +234,13 @@ final class _FailureText extends StatelessWidget {
     AppFailureKind.authenticationInvalid =>
       'Enter valid account details and try again.',
     AppFailureKind.accountAlreadyExists =>
-      'This account cannot be created with these details.',
+      'This email is already registered. Sign in instead or use another email.',
     AppFailureKind.serviceUnavailable ||
     AppFailureKind.configurationUnavailable =>
-      'Account creation is temporarily unavailable. Try again.',
-    _ => 'Account creation could not be completed. Try again.',
+      'This service is temporarily unavailable. Try again.',
+    AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
+    AppFailureKind.authForbidden => 'This account cannot continue.',
+    _ => 'This service is temporarily unavailable. Try again.',
   };
 }
 

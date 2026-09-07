@@ -55,6 +55,13 @@ void main() {
               ),
               findsWidgets,
             );
+            await _ensureBuiltAndVisible(
+              tester,
+              find.byKey(
+                const Key('r6-initial-choice-reject'),
+                skipOffstage: false,
+              ),
+            );
             expect(
               find.bySemanticsLabel(
                 RegExp('Reject.*optional processing.*Private'),
@@ -250,6 +257,17 @@ void main() {
       find.byKey(const Key('r6-initial-choice-purpose-copy')),
       findsOneWidget,
     );
+    expect(find.text('Optional data use'), findsOneWidget);
+    expect(
+      find.text(
+        'This release does not perform optional AI or Recommendation processing in this setup flow. Your choice saves whether separately authorised optional features may use their approved data later. Reject keeps optional processing off. Either choice lets you continue.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('r6-initial-choice-purpose-supporting-statement')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('r6-initial-choice-accept')), findsNothing);
 
     await _tapByKey(tester, const Key('r6-initial-choice-info-continue'));
@@ -392,7 +410,10 @@ void main() {
     await tester.tap(find.byKey(const Key('r6-check-in-confirm')));
     await tester.pumpAndSettle();
 
-    expect(find.text("We couldn't confirm this Check-in yet."), findsOneWidget);
+    expect(
+      find.text('This service is temporarily unavailable. Try again.'),
+      findsOneWidget,
+    );
     expect(find.text('raw backend message'), findsNothing);
     expect(
       find.byKey(const Key('r6-check-in-retry-confirmation')),
@@ -403,6 +424,111 @@ void main() {
     await tester.pumpAndSettle();
     expect(checkIn.readIds, ['chk_test', 'chk_test']);
   });
+
+  testWidgets('registration uses the approved public error catalogue', (
+    tester,
+  ) async {
+    for (final entry in [
+      (
+        AppFailureKind.accountAlreadyExists,
+        'This email is already registered. Sign in instead or use another email.',
+      ),
+      (AppFailureKind.authRequired, 'Your session has expired. Sign in again.'),
+      (AppFailureKind.authForbidden, 'This account cannot continue.'),
+      (
+        AppFailureKind.serviceUnavailable,
+        'This service is temporarily unavailable. Try again.',
+      ),
+    ]) {
+      final auth = FakeAuthRepository()
+        ..registerResult = Failure(
+          AppFailure(kind: entry.$1, message: 'unsafe'),
+        );
+      addTearDown(auth.close);
+      await _pumpR6Page(tester, const RegistrationPage(), auth: auth);
+      await tester.enterText(
+        find.byKey(const Key('r6-register-email')),
+        'du@example.com',
+      );
+      await tester.enterText(
+        find.byKey(const Key('r6-register-password')),
+        'password1',
+      );
+      await tester.enterText(
+        find.byKey(const Key('r6-register-confirm-password')),
+        'password1',
+      );
+      await tester.tap(find.byKey(const Key('r6-register-submit')));
+      await tester.pumpAndSettle();
+      expect(find.text(entry.$2), findsOneWidget);
+      expect(find.text('unsafe'), findsNothing);
+    }
+  });
+
+  testWidgets('onboarding maps AUTH_REQUIRED to public copy', (tester) async {
+    await _expectOnboardingPublicError(
+      tester,
+      AppFailureKind.authRequired,
+      'Your session has expired. Sign in again.',
+    );
+  });
+
+  testWidgets('onboarding maps AUTH_FORBIDDEN to public copy', (tester) async {
+    await _expectOnboardingPublicError(
+      tester,
+      AppFailureKind.authForbidden,
+      'This account cannot continue.',
+    );
+  });
+
+  testWidgets('onboarding maps SERVICE_UNAVAILABLE to public copy', (
+    tester,
+  ) async {
+    await _expectOnboardingPublicError(
+      tester,
+      AppFailureKind.serviceUnavailable,
+      'This service is temporarily unavailable. Try again.',
+    );
+  });
+
+  testWidgets('Check-in uses protected and service public errors', (
+    tester,
+  ) async {
+    for (final entry in [
+      (AppFailureKind.authRequired, 'Your session has expired. Sign in again.'),
+      (AppFailureKind.authForbidden, 'This account cannot continue.'),
+      (
+        AppFailureKind.serviceUnavailable,
+        'This service is temporarily unavailable. Try again.',
+      ),
+    ]) {
+      final checkIn = FakeCheckInRepository()
+        ..createResult = Failure(AppFailure(kind: entry.$1, message: 'unsafe'));
+      await _pumpR6Page(tester, const CheckInComposerPage(), checkIn: checkIn);
+      await tester.enterText(
+        find.byKey(const Key('r6-check-in-note')),
+        'A controlled test note.',
+      );
+      await tester.tap(find.byKey(const Key('r6-check-in-create')));
+      await tester.pumpAndSettle();
+      expect(find.text(entry.$2), findsOneWidget);
+      expect(find.text('unsafe'), findsNothing);
+    }
+  });
+}
+
+Future<void> _expectOnboardingPublicError(
+  WidgetTester tester,
+  AppFailureKind kind,
+  String copy,
+) async {
+  final account = FakeAccountRepository()
+    ..completionResult = Failure(AppFailure(kind: kind, message: 'unsafe'));
+  await _pumpOnboardingToChoice(tester, account: account);
+  await _tapByKey(tester, const Key('r6-initial-choice-accept'));
+  await tester.pumpAndSettle();
+  expect(find.text(copy), findsOneWidget);
+  expect(find.text('unsafe'), findsNothing);
 }
 
 Future<void> _withViewport(

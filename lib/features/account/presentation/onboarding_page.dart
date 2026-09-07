@@ -56,7 +56,7 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final pending = state is CommandPending<ProductAccount>;
     final title = switch (_step) {
       _OnboardingStep.username => 'Choose your Username',
-      _OnboardingStep.purpose => 'Initial Choice information',
+      _OnboardingStep.purpose => 'Optional data use',
       _OnboardingStep.choice => 'Choose your initial settings',
     };
     return Scaffold(
@@ -143,8 +143,13 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   List<Widget> _purposeStep() {
     return [
       const Text(
-        'The two final choices jointly control approved optional processing and current Check-in visibility. Either choice allows continued use of the bounded core flow.',
+        'This release does not perform optional AI or Recommendation processing in this setup flow. Your choice saves whether separately authorised optional features may use their approved data later. Reject keeps optional processing off. Either choice lets you continue.',
         key: Key('r6-initial-choice-purpose-copy'),
+      ),
+      const SizedBox(height: 12),
+      const Text(
+        'Check-in Notes are not used for Recommendation ranking. Approximate location is not a Recommendation or AI input.',
+        key: Key('r6-initial-choice-purpose-supporting-statement'),
       ),
       const SizedBox(height: 20),
       FilledButton(
@@ -297,7 +302,12 @@ final class _FailureText extends StatelessWidget {
       AppFailureKind.usernameUnavailable => 'This Username is unavailable.',
       AppFailureKind.onboardingConflict =>
         'Account setup could not be completed with these details.',
-      _ => 'Account setup could not be completed. Try again.',
+      AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
+      AppFailureKind.authForbidden => 'This account cannot continue.',
+      AppFailureKind.serviceUnavailable ||
+      AppFailureKind.configurationUnavailable =>
+        'This service is temporarily unavailable. Try again.',
+      _ => 'This service is temporarily unavailable. Try again.',
     };
   }
 }
