@@ -4,7 +4,7 @@
 - **Executor:** JIN ZIHAN (`@chuxi12483468`)
 - **Execution timestamp:** 2026-09-07 02:16:36 +08:00 (SGT; corrected command set completed)
 - **Tested code head:** `d26a829f9d2ff5c228b2c1727c64c304925b8f03` (the R13 test/fixture code that produced 11/11)
-- **Merge base:** `ce1a6e13955c9d1806758e453c7ded661da1e083` (`main` before the R13 changes)
+- **Merge base:** `3411c57298419b634a14088142111b5964c5973b` (exact merge base against the PR base/current `origin/main`)
 - **R10 baseline merge:** `3411c57298419b634a14088142111b5964c5973b` (PR #16)
 - **Controlled project:** `demo-enmori-rmvp01a-r10` (non-real Firebase Emulator project; matches the pinned runner)
 - **Endpoints:** Auth `127.0.0.1:9099`; Firestore `127.0.0.1:8080`; loopback only

@@ -136,7 +136,7 @@ All R13 entry checks are present and linkable after R10 acceptance. R7's Android
 
 - **Status:** Corrected controlled run completed; R13 results remain subject to SHI R5B independent review.
 - **Tested code head:** `d26a829f9d2ff5c228b2c1727c64c304925b8f03` (R13 test/fixture code that produced 11/11).
-- **Merge base:** `ce1a6e13955c9d1806758e453c7ded661da1e083`; R10 baseline merge is `3411c57298419b634a14088142111b5964c5973b` (PR #16).
+- **Merge base:** `3411c57298419b634a14088142111b5964c5973b` (exact merge base against the PR base/current `origin/main`); R10 baseline merge is the same commit (PR #16).
 - **Executor:** JIN ZIHAN (`@chuxi12483468`).
 - **Controlled project:** `demo-enmori-rmvp01a-r10` (non-real Firebase Emulator project only).
 - **Endpoints:** Auth `127.0.0.1:9099`; Firestore `127.0.0.1:8080`; loopback only.
