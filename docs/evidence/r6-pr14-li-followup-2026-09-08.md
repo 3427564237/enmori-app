@@ -10,7 +10,7 @@ DU revision only. R14, Q04, UAT, Release and Done remain Not Run.
 
 - Base/main: `ba8bfcca68b0de73c8c6b46e9f40385f999dd469`
 - Merge base before this revision: `ba8bfcca68b0de73c8c6b46e9f40385f999dd469`
-- Revised head: `7aeaaadf9aea12179fb1d0d8d0e6600a986e75c3`
+- Revised head: `8d52ed0b5353bdb78229879a65c1430398f26f1e`
 
 ## R6 changes
 
@@ -32,4 +32,4 @@ DU revision only. R14, Q04, UAT, Release and Done remain Not Run.
 
 ## Device execution
 
-ADB target observed: `10ACC70EX7000Y8`; after the phone authorized USB debugging, state changed to `device`. Device: `V2243A`, Android `15`, API `35`. The exact-head drive attempt reached APK installation but the install did not return within the execution window; no Android test result is claimed. Current precise blocker is device-side APK installation/USB install authorization. R6 local build remains passing. After the phone permits USB installation, rerun the exact-head APK and capture the six approved pages plus redacted accessibility/UI dump.
+ADB target observed: `10ACC70EX7000Y8`; state `device`. Device: `V2243A`, Android `15`, API `35`. Exact-head drive command completed successfully after USB installation authorization. Result: `R7 bounded Android evidence covers six approved R6 pages`, Pass. Six screenshots were produced under `build/r7-screenshots`; sanitized accessibility/UI dump is present in the existing R7 evidence package. No device blocker remains.

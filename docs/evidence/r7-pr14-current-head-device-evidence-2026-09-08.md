@@ -9,6 +9,7 @@ This package binds DU's PR #14 R6/R7 review delivery to the PR branch after upda
 - PR: #14
 - Branch: `du/r6-rmvp01a-ui-widget-first-pass`
 - Base before verification: `main@ba8bfcca68b0de73c8c6b46e9f40385f999dd469`
+- Final evidence head: `8d52ed0b5353bdb78229879a65c1430398f26f1e`
 - Merge base after updating onto main: `ba8bfcca68b0de73c8c6b46e9f40385f999dd469`
 - Boundary: RouteBoundaryPage remains R6 seam evidence only.
 - Not Run: R14, Q04, controlled Backend integration, UAT, Release, Done.
@@ -46,7 +47,7 @@ Result: Pass, `No issues found! (ran in 8.2s)`.
 flutter test
 ```
 
-Result: Pass, `49/49`, `All tests passed!`.
+Result: Pass, `51/51`, `All tests passed!`.
 
 ```powershell
 flutter build apk --debug
@@ -70,12 +71,12 @@ Result: Pass.
 APK SHA-256 after current-head rebuild:
 
 ```text
-8D5CE4C9E666F9D1717A1CA257B737778E55CC3859EED3D80731B88931D21E13
+16FFB108AFBA115DFAAB8C7B9FEF9D38A2E06DA056906F8EFA551AAF70166B84
 ```
 
 ## Real Android Owner Evidence
 
-The real-device execution was already completed and is reused as owner evidence. It is not rerun only to re-upload artifacts.
+The real-device execution was rerun for the exact current APK after USB debugging and USB installation authorization.
 
 Device:
 
