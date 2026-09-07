@@ -80,7 +80,9 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         key: const Key('r6-register-password'),
                         controller: _passwordController,
                         autofillHints: const [AutofillHints.newPassword],
-                        decoration: const InputDecoration(labelText: 'Password'),
+                        decoration: const InputDecoration(
+                          labelText: 'Password',
+                        ),
                         obscureText: true,
                         textInputAction: TextInputAction.next,
                         validator: _validatePassword,
@@ -108,10 +110,14 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         icon: pending
                             ? const SizedBox.square(
                                 dimension: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.person_add),
-                        label: Text(pending ? 'Creating account' : 'Create account'),
+                        label: Text(
+                          pending ? 'Creating account' : 'Create account',
+                        ),
                       ),
                     ],
                   ),
@@ -126,7 +132,9 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    ref.read(registrationControllerProvider.notifier).register(
+    ref
+        .read(registrationControllerProvider.notifier)
+        .register(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );

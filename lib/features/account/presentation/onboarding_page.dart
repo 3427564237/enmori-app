@@ -81,7 +81,9 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   const SizedBox(height: 8),
                   const LinearProgressIndicator(),
                 ],
-                if (state case CommandFailed<ProductAccount>(:final failure)) ...[
+                if (state case CommandFailed<ProductAccount>(
+                  :final failure,
+                )) ...[
                   const SizedBox(height: 16),
                   _FailureText(failure: failure),
                   if (_step == _OnboardingStep.choice &&

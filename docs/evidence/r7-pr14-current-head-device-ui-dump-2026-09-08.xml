@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sanitized-ui-dump source="adb shell uiautomator dump" date="2026-09-07" device="vivo V2243A" android="15" api="35" package="com.enmori.app">
+  <surface id="M20" name="Saved Check-in confirmed">
+    <node class="android.widget.FrameLayout" package="com.enmori.app" enabled="true" focusable="false" focused="false" bounds="[0,0][1440,3200]">
+      <node class="android.widget.FrameLayout" package="com.enmori.app" resource-id="android:id/content" enabled="true" bounds="[0,0][1440,3200]">
+        <node class="android.widget.FrameLayout" package="com.enmori.app" enabled="true" focusable="true" focused="true" bounds="[0,0][1440,3200]">
+          <node class="android.view.View" package="com.enmori.app" content-desc="New Check-in" enabled="true" focusable="true" focused="false" bounds="[64,208][633,320]" />
+          <node class="android.widget.ScrollView" package="com.enmori.app" enabled="true" focusable="true" scrollable="true" bounds="[0,376][1440,2059]">
+            <node class="android.widget.EditText" package="com.enmori.app" text="[sanitized evidence note]" clickable="true" enabled="true" focusable="true" focused="true" bounds="[96,376][1344,843]">
+              <node class="android.view.View" package="com.enmori.app" content-desc="32 / 500 characters" enabled="true" focusable="true" bounds="[96,779][555,843]" />
+              <node class="android.view.View" package="com.enmori.app" content-desc="468 characters remaining" enabled="true" focusable="true" bounds="[1170,779][1344,843]" />
+            </node>
+            <node class="android.widget.Button" package="com.enmori.app" content-desc="Save Check-in" clickable="true" enabled="true" focusable="true" focused="false" bounds="[96,891][1344,1083]" />
+            <node class="android.view.View" package="com.enmori.app" content-desc="Saved Check-in confirmed.&#10;[sanitized check-in note]&#10;Saved at 2026-09-03T03:20:00.000Z" enabled="true" focusable="true" focused="false" bounds="[96,1163][1344,1963]">
+              <node class="android.widget.Button" package="com.enmori.app" content-desc="Return Home" clickable="true" enabled="true" focusable="true" focused="false" bounds="[160,1707][783,1899]" />
+            </node>
+          </node>
+        </node>
+      </node>
+    </node>
+  </surface>
+</sanitized-ui-dump>

@@ -8,7 +8,9 @@ final class EnmoriApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = ColorScheme.fromSeed(seedColor: const Color(0xff1f6f5b));
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xff1f6f5b),
+    );
     return MaterialApp.router(
       title: 'ENMORI',
       theme: ThemeData(

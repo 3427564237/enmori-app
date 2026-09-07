@@ -14,10 +14,7 @@ final class HomeShellPage extends StatelessWidget {
           key: const Key('route-home'),
           padding: const EdgeInsets.all(24),
           children: [
-            Text(
-              'Home',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            Text('Home', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 12),
             const Text('A bounded shell for account and check-in entry.'),
             const SizedBox(height: 24),

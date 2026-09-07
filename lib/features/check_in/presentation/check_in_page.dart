@@ -189,8 +189,7 @@ final class _CheckInComposerPageState
   String _createFailureCopy(AppFailureKind kind) {
     return switch (kind) {
       AppFailureKind.checkInInvalid => 'Enter a Note before saving.',
-      AppFailureKind.idempotencyConflict =>
-        'This Check-in attempt changed after it was submitted. Start a new attempt.',
+      AppFailureKind.idempotencyConflict => 'This Check-in attempt changed after it was submitted. Start a new attempt.',
       _ => "We couldn't save this Check-in yet.",
     };
   }
