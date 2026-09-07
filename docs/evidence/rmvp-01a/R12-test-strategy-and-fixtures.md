@@ -122,18 +122,39 @@ This checklist is a coordination aid, not execution evidence. An unchecked item 
 
 ### R13 entry checklist — all required before execution
 
-- [ ] **R1** — LI's Flutter entry/onboarding/Check-in integration and owner-focused tests are available at a linked commit/PR.
-- [ ] **R4** — SHI's approved Backend Application/Domain/Transport implementation and owner-focused tests are available at a linked commit/PR.
-- [ ] **R9** — ZHOU's Firebase Auth/Firestore infrastructure adapters and contract tests are available at a linked commit/PR.
-- [ ] **R10** — ZHOU's reproducible controlled Backend/Firebase environment and sanitized configuration evidence are available.
+- [x] **R1** — LI's Flutter entry/onboarding/Check-in integration and owner-focused tests are available at commit `5e7dd22` / PR #8, merged to `main`. Owner-reported analyze, full tests and debug APK are `Pass`; device integration remains `Not Run`.
+- [x] **R4** — SHI's approved Backend Application/Domain/Transport implementation and owner-focused tests are available via PR #12, merged to `main` as `fcaff75349f15b298412cd105273708b6d87e913`. The reported owner-focused suite is 39/39 `Pass`.
+- [x] **R9** — ZHOU's Firebase Auth/Firestore infrastructure adapters and contract tests are merged via PR #10 as commit `d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0`; SHI's independent boundary review is approved. The reported contract suite is 76/76 `Pass`; this is predecessor evidence only, not R13 execution evidence.
+- [x] **R10** — ZHOU's controlled Firebase Emulator/Backend revision is merged via PR #16 as `3411c57298419b634a14088142111b5964c5973b` from reviewed head `66f06a3eadf26b4684c868c694ef439fbbd92494`; SHI's R5A current-head review is approved. Owner/reviewer evidence reports 96/96 Backend tests and 7/7 Emulator tests with credential isolation and fixture reset.
 - [x] **R12 design** — this strategy, fixture and traceability artifact is committed at `cad65f1`.
 - [x] **R5B review** — SHI's independent re-review approved the R12 artifact on 2026-09-04 against `7d46b94`; approval is design/review evidence only, not execution evidence.
-- [ ] **Controlled run identity** — build commit, isolated environment, fixture reset and executor are recorded before any R13 result is assigned.
+- [x] **Controlled run identity** — recorded below before the R13 run; the corrected execution result is recorded separately in the R13 evidence record.
+
+All R13 entry checks are present and linkable after R10 acceptance. R7's Android evidence is still incomplete: PR #14 has a `Changes Requested` LI R3 review, despite the reported named-device smoke, so R14 remains blocked. LI was notified in Issue #4 before the controlled R13 run began.
+
+### Controlled R13 run identity
+
+- **Status:** Corrected controlled run completed; R13 results remain subject to SHI R5B independent review.
+- **Tested code head:** `d26a829f9d2ff5c228b2c1727c64c304925b8f03` (R13 test/fixture code that produced 11/11).
+- **Merge base:** `3411c57298419b634a14088142111b5964c5973b` (exact merge base against the PR base/current `origin/main`); R10 baseline merge is the same commit (PR #16).
+- **Executor:** JIN ZIHAN (`@chuxi12483468`).
+- **Controlled project:** `demo-enmori-rmvp01a-r10` (non-real Firebase Emulator project only).
+- **Endpoints:** Auth `127.0.0.1:9099`; Firestore `127.0.0.1:8080`; loopback only.
+- **Sanitized fixture labels:** `RMVP-FX-NEW-ACCEPT`, `RMVP-FX-NEW-REJECT`, `RMVP-FX-INCOMPLETE`, `RMVP-FX-AUTH-REQUIRED`, `RMVP-FX-CHECKIN`, `RMVP-FX-NON-OWNER`, `RMVP-FX-DEPENDENCY`.
+- **Fixture version/reset:** `R13-FX-v2`; run-scoped synthetic emails, UIDs, passwords and base64url idempotency keys generated at runtime. Auth and Firestore Emulator reset passed before each scenario and after the suite; temporary controlled profile cleanup passed.
+- **Toolchain:** Node.js `24.19.0`; pnpm `11.19.0`; Firebase CLI package `15.29.0`; Java `21.0.12.1`; lockfile commit `d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0`.
+- **Approved commands:** `pnpm --config.ignore-scripts=true install --frozen-lockfile`; `pnpm --config.ignore-scripts=true run backend:verify`; `pnpm --config.ignore-scripts=true run backend:verify:emulator`.
+- **Recorded at:** `2026-09-07 02:16:36 +08:00` (SGT; corrected command set completed).
+- **Evidence destination:** `docs/evidence/rmvp-01a/R13-cross-boundary-execution-2026-09-06.md`.
+
+### R14 readiness watch
+
+- [ ] **R7 Android device/UAT evidence** — PR #14 reports a named vivo V2243A / Android 15 device and bounded APK install/launch smoke, but LI's R3 review is `Changes Requested` at head `0837143dfe3a3bcdcd258f32a5fb2aa6450e3fb0`. Approved R6 corrections, formatting, bounded surface/accessibility evidence and the sanitized R7 capture package remain incomplete; R7/UAT is not accepted.
 
 ### Execution order after the checklist is complete
 
 1. Verify each checked predecessor from its linked commit/PR and confirm that the controlled environment and fixture reset are reproducible.
-2. Notify LI in Issue #4 that the R13 entry checklist is complete. Do not send this notification while any item above is unchecked.
+2. After SHI accepts the R10 current head, notify LI in Issue #4 before starting the controlled R13 run. Do not send this notification while any item above is unchecked.
 3. Run only the approved R13 cross-boundary scenarios. Keep every unexecuted scenario `Not Run`; assign `Pass`, `Fail` or `Blocked` only from complete evidence under §7.
 4. Start R14 only after R7 and R13 outputs exist, then collate the Android `.A` evidence and defect/retest ledger.
 5. Start R15 only after applicable R1–R11 implementation and component-review outputs exist. Exclude R12–R14 and R5B from JIN's own gate, then leave R16 for LI's terminal review.
@@ -144,4 +165,4 @@ This checklist is a coordination aid, not execution evidence. An unchecked item 
 Issue #4 R13 entry check: R1/R4/R9/R10 predecessor outputs and SHI R5B review are linked and verified. Controlled environment and fixture reset are identified. Requesting LI confirmation to begin R13; R13/R14/R15 remain Not Run until their own evidence exists.
 ```
 
-**Current disposition:** R12 strategy/fixtures/traceability is approved by SHI's R5B re-review on 2026-09-04 against `7d46b94` (PR #7). This closes the R12 review only; it is not execution evidence and does not authorize or claim R13, R14, R15, Android, controlled-backend integration, UAT or release completion. R13, R14 and R15 remain `Not Run`, and the LI notification is intentionally not posted until every remaining R13 entry item is verified.
+**Readiness and execution update for the 2026-09-07 12:00 SGT checkpoint:** R12 strategy/fixtures/traceability is approved by SHI's R5B re-review on 2026-09-04 against `7d46b94` (PR #7). R1 (`5e7dd22` / PR #8), R4 (`fcaff75349f15b298412cd105273708b6d87e913` / PR #12), R9 (`d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0` / PR #10) and R10 (`3411c57298419b634a14088142111b5964c5973b` / PR #16) are merged to `main`; R10's current head was independently approved by SHI. The corrected controlled run identity and exact toolchain are recorded; LI was notified before execution. The corrected Emulator command completed with 11/11 tests passing, with exact R12 oracle mappings recorded and unexecuted R12 subcases left `Not Run`. SHI's R5B review of the prior R13 head returned `Changes Requested`; this correction head is being submitted for renewed independent review. PR #14 has LI's `Changes Requested` R3 review; its named-device smoke does not yet satisfy the R7 capture/UAT gate. R14 and R15 remain `Not Run`; no Android, UAT, release or overall-gate result is claimed.
