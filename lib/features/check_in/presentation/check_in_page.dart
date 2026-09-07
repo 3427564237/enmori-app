@@ -20,14 +20,22 @@ final class CheckInComposerPage extends ConsumerStatefulWidget {
 
 final class _CheckInComposerPageState
     extends ConsumerState<CheckInComposerPage> {
+  late final CheckInController _controller;
   final _noteController = TextEditingController();
   CheckIn? _committedCheckIn;
   _CheckInAction? _lastAction;
   String? _noteErrorText;
 
   @override
+  void initState() {
+    super.initState();
+    _controller = ref.read(checkInControllerProvider.notifier);
+  }
+
+  @override
   void dispose() {
     _noteController.dispose();
+    Future<void>.microtask(() => _controller.abandon(resetState: false));
     super.dispose();
   }
 
@@ -217,10 +225,19 @@ final class SavedCheckInPage extends ConsumerStatefulWidget {
 }
 
 final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
+  late final CheckInController _controller;
+
   @override
   void initState() {
     super.initState();
+    _controller = ref.read(checkInControllerProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) => _readPersisted());
+  }
+
+  @override
+  void dispose() {
+    Future<void>.microtask(() => _controller.abandon(resetState: false));
+    super.dispose();
   }
 
   @override

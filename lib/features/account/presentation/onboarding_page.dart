@@ -18,6 +18,7 @@ final class OnboardingPage extends ConsumerStatefulWidget {
 }
 
 final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
+  late final OnboardingController _controller;
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   _OnboardingStep _step = _OnboardingStep.username;
@@ -25,8 +26,15 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   InitialChoice? _chosenChoice;
 
   @override
+  void initState() {
+    super.initState();
+    _controller = ref.read(onboardingControllerProvider.notifier);
+  }
+
+  @override
   void dispose() {
     _usernameController.dispose();
+    Future<void>.microtask(() => _controller.abandon(resetState: false));
     super.dispose();
   }
 
@@ -191,7 +199,7 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   String? _validateUsername(String? value) {
     final username = value?.trim() ?? '';
-    final validShape = RegExp(r'^[a-z0-9](?:[a-z0-9_]{1,28}[a-z0-9])?$')
+    final validShape = RegExp(r'^[a-z0-9][a-z0-9_]{1,28}[a-z0-9]$')
         .hasMatch(username);
     if (!validShape || username.contains('__')) {
       return 'Enter a valid Username using the format shown.';

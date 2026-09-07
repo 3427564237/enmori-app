@@ -150,6 +150,47 @@ void main() {
     },
   );
 
+  testWidgets('registration renders linked SP-01 multi-error summary', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    addTearDown(auth.close);
+    await _pumpR6Page(tester, const RegistrationPage(), auth: auth);
+    await _tapByKey(tester, const Key('r6-register-submit'));
+    await tester.pump();
+    expect(
+      find.byKey(const Key('sp01-register-error-summary')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('sp01-register-error-email-link')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('sp01-register-error-password-link')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('sp01-register-error-confirmPassword-link')),
+      findsOneWidget,
+    );
+    expect(find.text('backend detail'), findsNothing);
+  });
+
+  testWidgets('late onboarding response is ignored after page exit', (
+    tester,
+  ) async {
+    final completion = Completer<Result<ProductAccount>>();
+    final account = FakeAccountRepository()..pendingCompletion = completion;
+    await _pumpOnboardingToChoice(tester, account: account);
+    await _tapByKey(tester, const Key('r6-initial-choice-accept'));
+    await tester.pump();
+    await tester.pumpWidget(const SizedBox.shrink());
+    completion.complete(Success(testAccount()));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('onboarding enforces approved Username boundaries', (
     tester,
   ) async {
@@ -157,6 +198,7 @@ void main() {
 
     for (final invalid in [
       'Du_kun',
+      'a',
       'ab',
       'abcdefghijklmnopqrstuvwxyz12345',
       '_dukun',

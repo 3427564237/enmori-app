@@ -13,16 +13,31 @@ final class RegistrationPage extends ConsumerStatefulWidget {
 }
 
 final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
+  late final RegistrationController _controller;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+  final _confirmFocusNode = FocusNode();
+  bool _submitted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ref.read(registrationControllerProvider.notifier);
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _confirmFocusNode.dispose();
+    Future<void>.microtask(() => _controller.abandon(resetState: false));
     super.dispose();
   }
 
@@ -69,6 +84,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                       TextFormField(
                         key: const Key('r6-register-email'),
                         controller: _emailController,
+                        focusNode: _emailFocusNode,
                         autofillHints: const [AutofillHints.email],
                         decoration: const InputDecoration(labelText: 'Email'),
                         keyboardType: TextInputType.emailAddress,
@@ -79,6 +95,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                       TextFormField(
                         key: const Key('r6-register-password'),
                         controller: _passwordController,
+                        focusNode: _passwordFocusNode,
                         autofillHints: const [AutofillHints.newPassword],
                         decoration: const InputDecoration(
                           labelText: 'Password',
@@ -91,6 +108,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                       TextFormField(
                         key: const Key('r6-register-confirm-password'),
                         controller: _confirmController,
+                        focusNode: _confirmFocusNode,
                         autofillHints: const [AutofillHints.newPassword],
                         decoration: const InputDecoration(
                           labelText: 'Confirm password',
@@ -99,6 +117,13 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         textInputAction: TextInputAction.done,
                         validator: _validateConfirmPassword,
                       ),
+                      if (_submitted && _fieldErrors.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        _ValidationSummary(
+                          errors: _fieldErrors,
+                          onFocus: _focusField,
+                        ),
+                      ],
                       if (state case CommandFailed<void>(:final failure)) ...[
                         const SizedBox(height: 12),
                         _FailureText(failure: failure),
@@ -130,7 +155,29 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
     );
   }
 
+  List<_FieldError> get _fieldErrors => [
+    if (_validateEmail(_emailController.text) != null)
+      _FieldError(
+        'Email',
+        _validateEmail(_emailController.text)!,
+        _RegistrationField.email,
+      ),
+    if (_validatePassword(_passwordController.text) != null)
+      _FieldError(
+        'Password',
+        _validatePassword(_passwordController.text)!,
+        _RegistrationField.password,
+      ),
+    if (_validateConfirmPassword(_confirmController.text) != null)
+      _FieldError(
+        'Confirm password',
+        _validateConfirmPassword(_confirmController.text)!,
+        _RegistrationField.confirmPassword,
+      ),
+  ];
+
   void _submit() {
+    setState(() => _submitted = true);
     if (!(_formKey.currentState?.validate() ?? false)) return;
     ref
         .read(registrationControllerProvider.notifier)
@@ -138,6 +185,15 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+  }
+
+  void _focusField(_RegistrationField field) {
+    final node = switch (field) {
+      _RegistrationField.email => _emailFocusNode,
+      _RegistrationField.password => _passwordFocusNode,
+      _RegistrationField.confirmPassword => _confirmFocusNode,
+    };
+    node.requestFocus();
   }
 
   String? _validateEmail(String? value) {
@@ -152,7 +208,9 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   }
 
   String? _validateConfirmPassword(String? value) {
-    if (value != _passwordController.text) return 'Passwords must match.';
+    if ((value ?? '').isEmpty || value != _passwordController.text) {
+      return 'Passwords must match.';
+    }
     return null;
   }
 }
@@ -166,9 +224,66 @@ final class _FailureText extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme.error;
     return Text(
-      failure.message,
+      _publicFailureCopy(failure.kind),
       key: const Key('r6-register-failure'),
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: color),
+    );
+  }
+
+  String _publicFailureCopy(AppFailureKind kind) => switch (kind) {
+    AppFailureKind.authenticationInvalid =>
+      'Enter valid account details and try again.',
+    AppFailureKind.accountAlreadyExists =>
+      'This account cannot be created with these details.',
+    AppFailureKind.serviceUnavailable ||
+    AppFailureKind.configurationUnavailable =>
+      'Account creation is temporarily unavailable. Try again.',
+    _ => 'Account creation could not be completed. Try again.',
+  };
+}
+
+enum _RegistrationField { email, password, confirmPassword }
+
+final class _FieldError {
+  const _FieldError(this.label, this.message, this.field);
+  final String label;
+  final String message;
+  final _RegistrationField field;
+}
+
+final class _ValidationSummary extends StatelessWidget {
+  const _ValidationSummary({required this.errors, required this.onFocus});
+  final List<_FieldError> errors;
+  final ValueChanged<_RegistrationField> onFocus;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: 'Review ${errors.length} fields before continuing.',
+      child: DecoratedBox(
+        key: const Key('sp01-register-error-summary'),
+        decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).colorScheme.error),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Review ${errors.length} fields before continuing.'),
+              for (final error in errors)
+                TextButton(
+                  key: Key('sp01-register-error-${error.field.name}-link'),
+                  onPressed: () => onFocus(error.field),
+                  child: Text('${error.label}: ${error.message}'),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
