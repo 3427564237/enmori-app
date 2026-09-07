@@ -32,4 +32,4 @@ DU revision only. R14, Q04, UAT, Release and Done remain Not Run.
 
 ## Device execution
 
-ADB target observed: `10ACC70EX7000Y8`; current state is `unauthorized`. The host has no authorized Android execution result yet. Device execution is therefore blocked by USB debugging authorization on the phone, not by the R6 local build. After the phone authorizes this host, rerun the exact-head APK and capture the six approved pages plus redacted accessibility/UI dump.
+ADB target observed: `10ACC70EX7000Y8`; after the phone authorized USB debugging, state changed to `device`. Device: `V2243A`, Android `15`, API `35`. The exact-head drive attempt reached APK installation but the install did not return within the execution window; no Android test result is claimed. Current precise blocker is device-side APK installation/USB install authorization. R6 local build remains passing. After the phone permits USB installation, rerun the exact-head APK and capture the six approved pages plus redacted accessibility/UI dump.
