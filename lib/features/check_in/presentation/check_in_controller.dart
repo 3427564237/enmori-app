@@ -70,8 +70,8 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
     };
   }
 
-  void abandon() {
+  void abandon({bool resetState = true}) {
     _operation++;
-    state = const CommandIdle();
+    if (resetState) state = const CommandIdle();
   }
 }

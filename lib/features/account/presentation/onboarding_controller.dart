@@ -62,8 +62,8 @@ final class OnboardingController
     }
   }
 
-  void abandon() {
+  void abandon({bool resetState = true}) {
     _operation++;
-    state = const CommandIdle();
+    if (resetState) state = const CommandIdle();
   }
 }

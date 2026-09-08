@@ -34,8 +34,8 @@ final class RegistrationController extends Notifier<CommandState<void>> {
     };
   }
 
-  void abandon() {
+  void abandon({bool resetState = true}) {
     _operation++;
-    state = const CommandIdle();
+    if (resetState) state = const CommandIdle();
   }
 }

@@ -24,6 +24,7 @@ final class FakeAuthRepository implements AuthRepository {
   final _sessions = StreamController<AuthSession>.broadcast();
   Result<void> registerResult = const Success(null);
   Result<String> tokenResult = const Success('test-token');
+  int registerCount = 0;
   int watchCount = 0;
 
   void emit(AuthSession session) => _sessions.add(session);
@@ -37,7 +38,10 @@ final class FakeAuthRepository implements AuthRepository {
   Future<Result<void>> register({
     required String email,
     required String password,
-  }) async => registerResult;
+  }) async {
+    registerCount++;
+    return registerResult;
+  }
 
   @override
   Stream<AuthSession> watchSession() {
@@ -50,6 +54,8 @@ final class FakeAccountRepository implements AccountRepository {
   Result<OnboardingStatus> statusResult = const Success(OnboardingRequired());
   Result<ProductAccount>? completionResult;
   Completer<Result<ProductAccount>>? pendingCompletion;
+  final completedUsernames = <String>[];
+  final completedChoices = <InitialChoice>[];
   final onboardingKeys = <String>[];
 
   @override
@@ -58,6 +64,8 @@ final class FakeAccountRepository implements AccountRepository {
     required InitialChoice initialChoice,
     required String idempotencyKey,
   }) async {
+    completedUsernames.add(username);
+    completedChoices.add(initialChoice);
     onboardingKeys.add(idempotencyKey);
     final pending = pendingCompletion;
     if (pending != null) return pending.future;
@@ -78,6 +86,7 @@ final class FakeCheckInRepository implements CheckInRepository {
   Completer<Result<CheckIn>>? pendingCreate;
   final createKeys = <String>[];
   final createdNotes = <String>[];
+  final readIds = <String>[];
 
   @override
   Future<Result<CheckIn>> create({
@@ -92,8 +101,10 @@ final class FakeCheckInRepository implements CheckInRepository {
   }
 
   @override
-  Future<Result<CheckIn>> readOwned({required String checkInId}) async =>
-      readResult;
+  Future<Result<CheckIn>> readOwned({required String checkInId}) async {
+    readIds.add(checkInId);
+    return readResult;
+  }
 }
 
 ProductAccount testAccount({String username = 'miku_01'}) {
