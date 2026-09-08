@@ -46,12 +46,12 @@ content other than the controlled sanitized fixture.
 
 | Surface | Versioned Android screenshot | Accessible controls / state covered by the R7 Android test |
 | --- | --- | --- |
-| M02 Registration | `docs/evidence/pr14-r7-7e76da4-android/r7_01_m02_registration.png` | Email, Password, confirmation, Username and submit are located by stable keys before capture. |
+| M02 Registration | `docs/evidence/pr14-r7-7e76da4-android/r7_01_m02_registration.png` | The R7 target locates Email, Password and Submit by stable keys before capture; Username belongs to the later Onboarding surface. |
 | M06 Optional data use | `docs/evidence/pr14-r7-7e76da4-android/r7_02_m06_initial_choice_information.png` | Purpose copy and the single Continue control are present before capture. |
 | M07 paired Initial Choice | `docs/evidence/pr14-r7-7e76da4-android/r7_03_m07_paired_initial_choice.png` | Semantics labels include the optional-processing and Public/Private consequence for both Accept and Reject. |
 | M08 Home shell | `docs/evidence/pr14-r7-7e76da4-android/r7_04_m08_home_shell.png` | New Check-in is present as the entry action before capture. |
 | M19 Note-only Check-in | `docs/evidence/pr14-r7-7e76da4-android/r7_05_m19_note_only_check_in.png` | Note editor and Save Check-in are present before capture. |
-| M20 saved Check-in | `docs/evidence/pr14-r7-7e76da4-android/r7_06_m20_saved_check_in_confirmed.png` | Saved Check-in confirmed and Return Home are present after authoritative create then later-read confirmation. |
+| M20 saved Check-in | `docs/evidence/pr14-r7-7e76da4-android/r7_06_m20_saved_check_in_confirmed.png` | Saved Check-in confirmed and Return Home are present after a fake repository create and separate fake later-read UI flow; this is not real Backend persistence evidence. |
 
 The responsive widget suite exercises these semantic controls at 360x800 and
 800x360 with text scales 1.0 and 2.0. In particular it asserts the M07
