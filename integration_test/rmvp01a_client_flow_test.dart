@@ -52,7 +52,7 @@ void main() {
         .read(onboardingControllerProvider.notifier)
         .complete(username: 'miku_01', initialChoice: InitialChoice.reject);
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('route-home')), findsOneWidget);
+    expect(find.byKey(const Key('route-check-in')), findsOneWidget);
 
     await container
         .read(checkInControllerProvider.notifier)

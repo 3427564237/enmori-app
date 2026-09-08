@@ -26,6 +26,7 @@ function command(overrides: Readonly<Record<string, unknown>> = {}) {
     optionalProcessingConsent: "accepted" as const,
     checkInVisibility: "public" as const,
     idempotencyKey: key.value,
+    currentInstant: "2026-09-05T00:00:00.000Z",
     creation: {
       accountId: "controlled-account-001",
       onboardingCompletedAt: "2026-09-05T00:00:00.000Z",
@@ -74,6 +75,7 @@ test("onboarding exact retry returns the original projection and ignores new gen
         onboardingCompletedAt: "2026-09-05T01:00:00.000Z",
         idempotencyExpiresAt: "2026-09-06T01:00:00.000Z",
       },
+      currentInstant: "2026-09-05T01:00:00.000Z",
     }),
   );
 
@@ -96,6 +98,7 @@ test("onboarding reused key with different member input creates nothing", async 
         onboardingCompletedAt: "2026-09-05T01:00:00.000Z",
         idempotencyExpiresAt: "2026-09-06T01:00:00.000Z",
       },
+      currentInstant: "2026-09-05T01:00:00.000Z",
     }),
   );
 
@@ -144,9 +147,46 @@ test("onboarding exact retry is recoverable without a fresh creation candidate",
   await repository.complete(original);
 
   const { creation: _creation, ...retry } = original;
+  retry.currentInstant = "2026-09-05T23:59:59.999Z";
   const result = await repository.complete(retry);
 
   assert.equal(result.kind, "replayed");
+  assert.equal(gateway.entries().length, 4);
+});
+
+test("onboarding does not replay at the exact expiry without a fresh creation candidate", async () => {
+  const gateway = new InMemoryFirestoreGateway();
+  const repository = new FirestoreOnboardingRepository(gateway);
+  const original = command();
+  await repository.complete(original);
+
+  const { creation: _creation, ...retry } = original;
+  const result = await repository.complete({
+    ...retry,
+    currentInstant: "2026-09-06T00:00:00.000Z",
+  });
+
+  assert.deepEqual(result, { kind: "dependency_unavailable" });
+  assert.equal(gateway.entries().length, 4);
+});
+
+test("onboarding does not replay outside the window or with unknown time", async () => {
+  const gateway = new InMemoryFirestoreGateway();
+  const repository = new FirestoreOnboardingRepository(gateway);
+  const original = command();
+  await repository.complete(original);
+
+  const { creation: _creation, currentInstant: _instant, ...retry } = original;
+  assert.deepEqual(
+    await repository.complete({
+      ...retry,
+      currentInstant: "2026-09-06T00:00:00.001Z",
+    }),
+    { kind: "dependency_unavailable" },
+  );
+  assert.deepEqual(await repository.complete(retry), {
+    kind: "dependency_unavailable",
+  });
   assert.equal(gateway.entries().length, 4);
 });
 

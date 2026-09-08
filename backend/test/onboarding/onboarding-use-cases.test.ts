@@ -64,6 +64,7 @@ test("canonicalizes and creates onboarding through the Port", async () => {
       optionalProcessingConsent: "accepted",
       checkInVisibility: "public",
       idempotencyKey: "A".repeat(22),
+      currentInstant: "2026-09-03T03:15:00.000Z",
       creation: {
         accountId: "acct_01",
         onboardingCompletedAt: "2026-09-03T03:15:00.000Z",
@@ -73,19 +74,12 @@ test("canonicalizes and creates onboarding through the Port", async () => {
   ]);
 });
 
-test("recovers an exact onboarding retry when new Clock/ID values are unavailable", async () => {
-  for (const unavailable of ["clock", "id"] as const) {
+test("recovers an exact onboarding retry when new ID generation is unavailable", async () => {
     const repository = new FakeOnboardingRepository();
     repository.completeResult = { kind: "replayed", account };
-    const useCase = new CompleteOnboarding(
-      repository,
-      unavailable === "clock"
-        ? { now: () => err(dependencyUnavailable) }
-        : clock,
-      unavailable === "id"
-        ? { generate: () => err(dependencyUnavailable) }
-        : accountIds,
-    );
+    const useCase = new CompleteOnboarding(repository, clock, {
+      generate: () => err(dependencyUnavailable),
+    });
 
     const result = await useCase.execute({
       principal: { firebaseUid: "firebase-1" },
@@ -105,9 +99,35 @@ test("recovers an exact onboarding retry when new Clock/ID values are unavailabl
         optionalProcessingConsent: "accepted",
         checkInVisibility: "public",
         idempotencyKey: "A".repeat(22),
+        currentInstant: "2026-09-03T03:15:00.000Z",
       },
     ]);
-  }
+});
+
+test("does not offer an unbounded onboarding replay when Clock is unavailable", async () => {
+  const repository = new FakeOnboardingRepository();
+  repository.completeResult = dependencyUnavailable;
+  const result = await new CompleteOnboarding(
+    repository,
+    { now: () => err(dependencyUnavailable) },
+    accountIds,
+  ).execute({
+    principal: { firebaseUid: "firebase-1" },
+    username: "alex_7",
+    initialChoice: "accept",
+    idempotencyKey: "A".repeat(22),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(repository.commands, [
+    {
+      firebaseUid: "firebase-1",
+      canonicalUsername: "alex_7",
+      optionalProcessingConsent: "accepted",
+      checkInVisibility: "public",
+      idempotencyKey: "A".repeat(22),
+    },
+  ]);
 });
 
 test("does not call the repository for invalid input", async () => {

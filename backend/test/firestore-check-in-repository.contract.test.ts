@@ -36,6 +36,7 @@ function command(noteInput = "A controlled check-in") {
     firebaseUid: FIREBASE_UID,
     note: note.value,
     idempotencyKey: key.value,
+    currentInstant: "2026-09-05T02:00:00.000Z",
     creation: {
       checkInId: "controlled-check-in-001",
       createdAt: "2026-09-05T02:00:00.000Z",
@@ -82,6 +83,7 @@ test("check-in exact retry returns the committed projection without a duplicate"
       createdAt: "2026-09-05T03:00:00.000Z",
       idempotencyExpiresAt: "2026-09-06T03:00:00.000Z",
     },
+    currentInstant: "2026-09-05T03:00:00.000Z",
   });
 
   assert.equal(result.kind, "replayed");
@@ -102,6 +104,7 @@ test("check-in reused key with different Note creates nothing", async () => {
       createdAt: "2026-09-05T03:00:00.000Z",
       idempotencyExpiresAt: "2026-09-06T03:00:00.000Z",
     },
+    currentInstant: "2026-09-05T03:00:00.000Z",
   });
 
   assert.deepEqual(result, { kind: "idempotency_conflict" });
@@ -116,9 +119,46 @@ test("check-in exact retry is recoverable without a fresh creation candidate", a
   await repository.create(original);
 
   const { creation: _creation, ...retry } = original;
+  retry.currentInstant = "2026-09-06T01:59:59.999Z";
   const result = await repository.create(retry);
 
   assert.equal(result.kind, "replayed");
+  assert.equal(gateway.entries().length, 4);
+});
+
+test("check-in does not replay at the exact expiry without a fresh creation candidate", async () => {
+  const gateway = new InMemoryFirestoreGateway(ACCOUNT_SEED);
+  const repository = new FirestoreCheckInRepository(gateway);
+  const original = command();
+  await repository.create(original);
+
+  const { creation: _creation, ...retry } = original;
+  const result = await repository.create({
+    ...retry,
+    currentInstant: "2026-09-06T02:00:00.000Z",
+  });
+
+  assert.deepEqual(result, { kind: "dependency_unavailable" });
+  assert.equal(gateway.entries().length, 4);
+});
+
+test("check-in does not replay outside the window or with unknown time", async () => {
+  const gateway = new InMemoryFirestoreGateway(ACCOUNT_SEED);
+  const repository = new FirestoreCheckInRepository(gateway);
+  const original = command();
+  await repository.create(original);
+
+  const { creation: _creation, currentInstant: _instant, ...retry } = original;
+  assert.deepEqual(
+    await repository.create({
+      ...retry,
+      currentInstant: "2026-09-06T02:00:00.001Z",
+    }),
+    { kind: "dependency_unavailable" },
+  );
+  assert.deepEqual(await repository.create(retry), {
+    kind: "dependency_unavailable",
+  });
   assert.equal(gateway.entries().length, 4);
 });
 

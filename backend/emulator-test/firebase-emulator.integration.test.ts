@@ -139,6 +139,7 @@ function onboardingCommand(input: {
     optionalProcessingConsent: "accepted" as const,
     checkInVisibility: "public" as const,
     idempotencyKey: key.value,
+    currentInstant: "2026-09-05T00:00:00.000Z",
     creation: {
       accountId: input.accountId ?? "controlled-account-001",
       onboardingCompletedAt: "2026-09-05T00:00:00.000Z",
@@ -157,6 +158,7 @@ function checkInCommand() {
     firebaseUid: FIREBASE_UID,
     note: note.value,
     idempotencyKey: key.value,
+    currentInstant: "2026-09-05T01:00:00.000Z",
     creation: {
       checkInId: "controlled-check-in-001",
       createdAt: "2026-09-05T01:00:00.000Z",

@@ -23,8 +23,10 @@ final class FakeAuthRepository implements AuthRepository {
 
   final _sessions = StreamController<AuthSession>.broadcast();
   Result<void> registerResult = const Success(null);
+  Result<void> signInResult = const Success(null);
   Result<String> tokenResult = const Success('test-token');
   int registerCount = 0;
+  int signInCount = 0;
   int watchCount = 0;
 
   void emit(AuthSession session) => _sessions.add(session);
@@ -44,6 +46,15 @@ final class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<Result<void>> signIn({
+    required String email,
+    required String password,
+  }) async {
+    signInCount++;
+    return signInResult;
+  }
+
+  @override
   Stream<AuthSession> watchSession() {
     watchCount++;
     return _sessions.stream;
@@ -52,6 +63,8 @@ final class FakeAuthRepository implements AuthRepository {
 
 final class FakeAccountRepository implements AccountRepository {
   Result<OnboardingStatus> statusResult = const Success(OnboardingRequired());
+  final statusResponses = <Future<Result<OnboardingStatus>>>[];
+  int statusReadCount = 0;
   Result<ProductAccount>? completionResult;
   Completer<Result<ProductAccount>>? pendingCompletion;
   final completedUsernames = <String>[];
@@ -77,7 +90,11 @@ final class FakeAccountRepository implements AccountRepository {
   }
 
   @override
-  Future<Result<OnboardingStatus>> readOnboardingStatus() async => statusResult;
+  Future<Result<OnboardingStatus>> readOnboardingStatus() async {
+    statusReadCount++;
+    if (statusResponses.isNotEmpty) return statusResponses.removeAt(0);
+    return statusResult;
+  }
 }
 
 final class FakeCheckInRepository implements CheckInRepository {

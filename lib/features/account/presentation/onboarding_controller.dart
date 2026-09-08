@@ -26,7 +26,13 @@ final class OnboardingController
   CommandState<ProductAccount> build() {
     _repository = ref.watch(accountRepositoryProvider);
     _keyGenerator = ref.watch(idempotencyKeyGeneratorProvider);
-    _authSubject = ref.watch(currentAuthSubjectProvider);
+    final authSubject = ref.watch(currentAuthSubjectProvider);
+    if (_authSubject != authSubject) {
+      _operation++;
+      _commandFingerprint = null;
+      _idempotencyKey = null;
+    }
+    _authSubject = authSubject;
     return const CommandIdle();
   }
 

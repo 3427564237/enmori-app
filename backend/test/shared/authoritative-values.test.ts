@@ -3,14 +3,18 @@ import test from "node:test";
 import {
   createAuthoritativeValues,
   IDEMPOTENCY_WINDOW_MILLISECONDS,
+  readAuthoritativeInstant,
 } from "../../src/shared/application/authoritative-values.js";
 import { err, ok } from "../../src/shared/domain/result.js";
 import { dependencyUnavailable } from "../../src/shared/ports/dependency-failure.js";
 
 test("derives UTC time and the exact 24-hour idempotency expiry", () => {
   const now = new Date("2026-09-05T04:00:00Z");
+  const instant = readAuthoritativeInstant({ now: () => ok(now) });
+  assert.equal(instant.ok, true);
+  if (!instant.ok) throw new Error("controlled clock unavailable");
   const result = createAuthoritativeValues(
-    { now: () => ok(now) },
+    instant.value,
     { generate: () => ok("opaque_01") },
   );
 
@@ -26,21 +30,25 @@ test("derives UTC time and the exact 24-hour idempotency expiry", () => {
 });
 
 test("fails closed when Clock or ID generation is unavailable", () => {
-  const clockFailure = createAuthoritativeValues(
+  const clockFailure = readAuthoritativeInstant(
     { now: () => err(dependencyUnavailable) },
-    { generate: () => ok("opaque_01") },
   );
   const idFailure = createAuthoritativeValues(
-    { now: () => ok(new Date("2026-09-05T04:00:00Z")) },
+    "2026-09-05T04:00:00.000Z",
+    { generate: () => ok("opaque_01") },
+  );
+  const actualIdFailure = createAuthoritativeValues(
+    "2026-09-05T04:00:00.000Z",
     { generate: () => err(dependencyUnavailable) },
   );
 
   assert.equal(clockFailure.ok, false);
-  assert.equal(idFailure.ok, false);
+  assert.equal(idFailure.ok, true);
+  assert.equal(actualIdFailure.ok, false);
   if (!clockFailure.ok) {
     assert.equal(clockFailure.failure.code, "SERVICE_UNAVAILABLE");
   }
-  if (!idFailure.ok) {
-    assert.equal(idFailure.failure.code, "SERVICE_UNAVAILABLE");
+  if (!actualIdFailure.ok) {
+    assert.equal(actualIdFailure.failure.code, "SERVICE_UNAVAILABLE");
   }
 });

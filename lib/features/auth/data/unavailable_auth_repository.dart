@@ -19,5 +19,11 @@ final class UnavailableAuthRepository implements AuthRepository {
   }) async => const Failure(_failure);
 
   @override
+  Future<Result<void>> signIn({
+    required String email,
+    required String password,
+  }) async => const Failure(_failure);
+
+  @override
   Stream<AuthSession> watchSession() => Stream<AuthSession>.error(_failure);
 }

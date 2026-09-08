@@ -6,7 +6,9 @@ import '../../../core/result/result.dart';
 import 'registration_controller.dart';
 
 final class RegistrationPage extends ConsumerStatefulWidget {
-  const RegistrationPage({super.key});
+  const RegistrationPage({this.onSignIn, super.key});
+
+  final VoidCallback? onSignIn;
 
   @override
   ConsumerState<RegistrationPage> createState() => _RegistrationPageState();
@@ -144,6 +146,12 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                           pending ? 'Creating account' : 'Create account',
                         ),
                       ),
+                      if (widget.onSignIn case final onSignIn?)
+                        TextButton(
+                          key: const Key('register-sign-in'),
+                          onPressed: pending ? null : onSignIn,
+                          child: const Text('Sign in'),
+                        ),
                     ],
                   ),
                 ),

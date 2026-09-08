@@ -47,7 +47,11 @@ function idempotencyPath(documentId: string): string {
 }
 
 function validCommand(command: CreateCommand): boolean {
-  if (createAuthBindingDocumentId(command.firebaseUid) === undefined) {
+  if (
+    createAuthBindingDocumentId(command.firebaseUid) === undefined ||
+    (command.currentInstant !== undefined &&
+      !isUtcIsoInstant(command.currentInstant))
+  ) {
     return false;
   }
   if (command.creation === undefined) return true;
@@ -56,6 +60,7 @@ function validCommand(command: CreateCommand): boolean {
   const expiresAt = new Date(command.creation.idempotencyExpiresAt).getTime();
   return (
     isSafeDocumentId(command.creation.checkInId) &&
+    command.currentInstant === command.creation.createdAt &&
     isUtcIsoInstant(command.creation.createdAt) &&
     isUtcIsoInstant(command.creation.idempotencyExpiresAt) &&
     expiresAt - occurredAt === IDEMPOTENCY_WINDOW_MILLISECONDS
@@ -129,15 +134,12 @@ export class FirestoreCheckInRepository implements CheckInRepository {
           ) {
             return dependencyUnavailable;
           }
-          if (command.creation === undefined) {
-            if (record.requestFingerprint !== requestFingerprint) {
-              return dependencyUnavailable;
-            }
-            return replayCreatedCheckIn({ transaction, record, accountId });
+          if (command.currentInstant === undefined) {
+            return dependencyUnavailable;
           }
           const active = isUnexpired(
             record.expiresAt,
-            command.creation.createdAt,
+            command.currentInstant,
           );
           if (active === undefined) return dependencyUnavailable;
           if (active) {

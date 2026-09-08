@@ -34,6 +34,7 @@ export interface CompleteOnboardingCommand {
   readonly optionalProcessingConsent: OptionalProcessingConsent;
   readonly checkInVisibility: CheckInVisibility;
   readonly idempotencyKey: IdempotencyKey;
+  readonly currentInstant?: string;
   readonly creation?: OnboardingCreationCandidate;
 }
 
@@ -43,12 +44,12 @@ export interface CompleteOnboardingCommand {
  * The raw key must be SHA-256 digested, scoped by principal and operation, and
  * compared with a request fingerprint derived only from the approved member
  * input. Generated AccountId and time values are not part of that fingerprint.
- * Application supplies the already-derived consent/visibility projection so
- * Infrastructure does not repeat product behavior. Infrastructure checks for
- * an exact committed retry before it requires the optional creation candidate;
- * this keeps a recoverable result available when new Clock/ID generation is
- * unavailable. The committed safe result is retained until the candidate's
- * idempotencyExpiresAt; the raw key is never logged or used as a storage path.
+ * Application supplies the already-derived consent/visibility projection and
+ * an authoritative current instant independently from the optional creation
+ * candidate. Infrastructure checks the committed result's 24-hour validity
+ * before replay, so ID generation failure can still recover an active exact
+ * retry while Clock failure or expiry fails closed. The raw key is never
+ * logged or used as a storage path.
  */
 export interface OnboardingRepository {
   complete(
