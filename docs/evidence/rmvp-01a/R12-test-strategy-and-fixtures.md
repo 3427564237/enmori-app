@@ -130,7 +130,7 @@ This checklist is a coordination aid, not execution evidence. An unchecked item 
 - [x] **R5B review** — SHI's independent re-review approved the R12 artifact on 2026-09-04 against `7d46b94`; approval is design/review evidence only, not execution evidence.
 - [x] **Controlled run identity** — recorded below before the R13 run; the corrected execution result is recorded separately in the R13 evidence record.
 
-All R13 entry checks are present and linkable after R10 acceptance. R7's Android evidence is still incomplete: PR #14 has a `Changes Requested` LI R3 review, despite the reported named-device smoke, so R14 remains blocked. LI was notified in Issue #4 before the controlled R13 run began.
+All R13 entry checks are present and linkable after R10 acceptance. R13 is merged in PR #11 at `34d08a630d715fbe5fbdcd4ae2c00553a1ace405`. R7 Android evidence is now accepted: PR #14 is merged at `7720fb50d1d129edd74e310f049a37841506503e` and LI's current-head review is approved. LI was notified in Issue #4 before the controlled R13 run began.
 
 ### Controlled R13 run identity
 
@@ -149,7 +149,9 @@ All R13 entry checks are present and linkable after R10 acceptance. R7's Android
 
 ### R14 readiness watch
 
-- [ ] **R7 Android device/UAT evidence** — PR #14 reports a named vivo V2243A / Android 15 device and bounded APK install/launch smoke, but LI's R3 review is `Changes Requested` at head `0837143dfe3a3bcdcd258f32a5fb2aa6450e3fb0`. Approved R6 corrections, formatting, bounded surface/accessibility evidence and the sanitized R7 capture package remain incomplete; R7/UAT is not accepted.
+- [x] **R7 Android device/UAT input** — PR #14 is merged at `7720fb50d1d129edd74e310f049a37841506503e` and LI's current-head review is `Approved`. DU's bounded vivo V2243A / Android 15 evidence includes the six approved surfaces and sanitized capture/accessibility dump. This is predecessor input, not an R14 result.
+- [x] **Physical product-chain input** — LI's immutable PR #18 evidence is available at head `3a732041c79326b7ad53c52bef99cf52ab981713` (vivo V2405A / Android 16): registration, Accept/Public, Reject/Private, Note-only create, later owner read, and approved Auth/Account/Check-in boundaries were observed; Backend 110/110, Flutter analyze, and Flutter 69/69 passed. The Sign-in late-result P2 remains open.
+- [ ] **R14 execution/UAT packet** — R14-specific Android integration/UAT collation, defect/retest ledger, and any required accessibility/Q04 evidence have not been run or accepted.
 
 ### Execution order after the checklist is complete
 
@@ -166,3 +168,5 @@ Issue #4 R13 entry check: R1/R4/R9/R10 predecessor outputs and SHI R5B review ar
 ```
 
 **Readiness and execution update for the 2026-09-07 12:00 SGT checkpoint:** R12 strategy/fixtures/traceability is approved by SHI's R5B re-review on 2026-09-04 against `7d46b94` (PR #7). R1 (`5e7dd22` / PR #8), R4 (`fcaff75349f15b298412cd105273708b6d87e913` / PR #12), R9 (`d8ea465bdbb22c0bb69e10b4f7dba54f2c6761d0` / PR #10) and R10 (`3411c57298419b634a14088142111b5964c5973b` / PR #16) are merged to `main`; R10's current head was independently approved by SHI. The corrected controlled run identity and exact toolchain are recorded; LI was notified before execution. The corrected Emulator command completed with 11/11 tests passing, with exact R12 oracle mappings recorded and unexecuted R12 subcases left `Not Run`. SHI's R5B review of the prior R13 head returned `Changes Requested`; this correction head is being submitted for renewed independent review. PR #14 has LI's `Changes Requested` R3 review; its named-device smoke does not yet satisfy the R7 capture/UAT gate. R14 and R15 remain `Not Run`; no Android, UAT, release or overall-gate result is claimed.
+
+**Current R14 readiness update for 2026-09-09:** The former R14 physical-device/product-chain dependency is available. R13 is merged at `34d08a630d715fbe5fbdcd4ae2c00553a1ace405`; DU's R7 predecessor is merged and LI-approved at PR #14 head `7720fb50d1d129edd74e310f049a37841506503e`; and LI's immutable product-chain evidence is recorded at PR #18 head `3a732041c79326b7ad53c52bef99cf52ab981713`. R14 readiness collation may begin from these inputs. R14 execution/UAT remains `Not Run` until its own complete evidence packet exists. The PR #18 Sign-in late-result P2 remains open; unexecuted R12 rows, TalkBack/accessibility/Q04, R15, UAT acceptance, Release and Done are not inferred.
