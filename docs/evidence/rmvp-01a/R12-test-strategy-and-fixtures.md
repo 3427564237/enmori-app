@@ -151,7 +151,8 @@ All R13 entry checks are present and linkable after R10 acceptance. R13 is merge
 
 - [x] **R7 Android device/UAT input** — PR #14 is merged at `7720fb50d1d129edd74e310f049a37841506503e` and LI's current-head review is `Approved`. DU's bounded vivo V2243A / Android 15 evidence includes the six approved surfaces and sanitized capture/accessibility dump. This is predecessor input, not an R14 result.
 - [x] **Physical product-chain input** — LI's immutable PR #18 evidence is available at head `3a732041c79326b7ad53c52bef99cf52ab981713` (vivo V2405A / Android 16): registration, Accept/Public, Reject/Private, Note-only create, later owner read, and approved Auth/Account/Check-in boundaries were observed; Backend 110/110, Flutter analyze, and Flutter 69/69 passed. The Sign-in late-result P2 remains open.
-- [ ] **R14 execution/UAT packet** — R14-specific Android integration/UAT collation, defect/retest ledger, and any required accessibility/Q04 evidence have not been run or accepted.
+- [x] **R14 execution packet publication** — PR #19 publishes `R14-android-product-chain-execution-2026-09-09.md` at packet commit `be36fee663db869b9021786d7e0cbfbf4a3b7cd1`, mapping only observed LI/DU evidence and preserving `Not Run` rows.
+- [ ] **R14 independent disposition/UAT acceptance** — `@GGGGHOST-CN` review is requested; human audible TalkBack traversal, full Q04 evidence, and formal UAT acceptance remain pending.
 
 ### Execution order after the checklist is complete
 
