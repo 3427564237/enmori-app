@@ -6,6 +6,9 @@ import 'package:enmori/features/account/account_providers.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
+import 'package:enmori/features/auth/presentation/sign_in_controller.dart';
+import 'package:enmori/features/auth/presentation/sign_in_page.dart';
+import 'package:enmori/core/presentation/command_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -109,6 +112,74 @@ void main() {
         expect(
           find.byKey(Key(completed ? 'route-home' : 'route-onboarding')),
           findsOneWidget,
+        );
+      },
+    );
+  }
+
+  for (final lateResult in <Result<void>>[
+    const Success(null),
+    const Failure(
+      AppFailure(
+        kind: AppFailureKind.authenticationInvalid,
+        message: 'late sign-in failure',
+      ),
+    ),
+  ]) {
+    final outcome = lateResult is Success<void> ? 'success' : 'failure';
+    testWidgets(
+      'late Sign-in $outcome cannot update state or leave the destination',
+      (tester) async {
+        final pendingSignIn = Completer<Result<void>>();
+        final auth = FakeAuthRepository()..pendingSignIn = pendingSignIn;
+        final container = ProviderContainer(
+          overrides: [authRepositoryProvider.overrideWithValue(auth)],
+        );
+        addTearDown(auth.close);
+        addTearDown(container.dispose);
+        var succeededCount = 0;
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              home: SignInPage(
+                onCreateAccount: () {},
+                onSucceeded: () => succeededCount++,
+              ),
+            ),
+          ),
+        );
+        await tester.enterText(
+          find.byKey(const Key('sign-in-email')),
+          'member@example.invalid',
+        );
+        await tester.enterText(
+          find.byKey(const Key('sign-in-password')),
+          'test-password',
+        );
+        await tester.tap(find.byKey(const Key('sign-in-submit')));
+        await tester.pump();
+        expect(
+          container.read(signInControllerProvider),
+          isA<CommandPending<void>>(),
+        );
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: const MaterialApp(home: Text('destination')),
+          ),
+        );
+        await tester.pump();
+        pendingSignIn.complete(lateResult);
+        await tester.pumpAndSettle();
+
+        expect(find.text('destination'), findsOneWidget);
+        expect(succeededCount, 0);
+        expect(
+          container.read(signInControllerProvider),
+          isA<CommandPending<void>>(),
         );
       },
     );
