@@ -23,7 +23,7 @@ The evidence result below describes only behavior actually observed in immutable
 | CORE-02.A | Firebase registration, valid Username, Initial Choice Reject, Private onboarding, Note-only Check-in and later owner read | Pass — LI physical product-chain path observed | Not Run — acceptance pending | [LI product-chain README](https://github.com/3427564237/enmori-app/blob/3a732041c79326b7ad53c52bef99cf52ab981713/docs/evidence/rmvp-01a/2026-09-09-li-phone-product-chain/README.md) |
 | CORE-05.A | Note-only Check-in create followed by independent later owner read | Pass — both LI physical paths observed | Not Run — acceptance pending | [Accept/Public capture](https://github.com/3427564237/enmori-app/blob/3a732041c79326b7ad53c52bef99cf52ab981713/docs/evidence/rmvp-01a/2026-09-09-li-phone-product-chain/accept-public-later-read.png), [Reject/Private capture](https://github.com/3427564237/enmori-app/blob/3a732041c79326b7ad53c52bef99cf52ab981713/docs/evidence/rmvp-01a/2026-09-09-li-phone-product-chain/reject-private-later-read.png) |
 | X-01 | Missing identity on protected operation | Pass — unauthenticated HTTPS 401 AUTH_REQUIRED observed by LI | Not Run — focused UAT acceptance pending | [R14 packet](https://github.com/3427564237/enmori-app/blob/8b3f3fecb373c3dceb5b813e3b464070ee24297d/docs/evidence/rmvp-01a/R14-android-product-chain-execution-2026-09-09.md) |
-| X-01 | Malformed or expired identity | Not Run | Not Run | No immutable physical execution record exists |
+| X-01 | Malformed identity | Pass — JIN controlled loopback returned 401 AUTH_REQUIRED | Not Run — Android UAT pending | [JIN X-01 loopback record](2026-09-11-jin-x01-loopback.md) |\n| X-01 | Expired identity | Not Run — no expired token generated in this run | Not Run | [JIN X-01 loopback record](2026-09-11-jin-x01-loopback.md) |
 | X-01 | Privacy-safe negative branch where applicable (missing/non-owner content) | Pass in R13 controlled execution; not a physical Android UAT result | Not Run — Android UAT acceptance pending | [R13 controlled evidence](https://github.com/3427564237/enmori-app/blob/34d08a630d715fbe5fbdcd4ae2c00553a1ace405/docs/evidence/rmvp-01a/R13-cross-boundary-execution-2026-09-06.md) |
 
 No unit, widget, emulator or prior platform result is promoted into the formal Android UAT status column.
@@ -42,7 +42,7 @@ The original R12 catalogue remains a design record with its initial-result colum
 | T05B Username unavailable | Not Run | Not Run | Not Run |
 | T05C Onboarding conflict | Not Run | Not Run | Not Run |
 | T06A Invalid Firebase registration | Not Run | Not Run | Not Run |
-| T06B AUTH_REQUIRED | Pass for missing/malformed branch; expired branch Not Run | Pass for missing-identity boundary only; malformed/expired Not Run | Partial: missing branch observed; expired remains Not Run |
+| T06B AUTH_REQUIRED | Pass for missing/malformed branch; expired branch Not Run | Pass for missing-identity boundary only; malformed/expired Not Run | Partial: missing and malformed observed in controlled loopback; expired remains Not Run |
 | T07 Note-only create | Pass | Pass | Pass for observed behavior; formal UAT acceptance pending |
 | T08 Invalid Note validation | Not Run | Not Run | Not Run |
 | T09A Forbidden identity | Not Run | Not Run | Not Run |
@@ -60,7 +60,7 @@ Rows marked Not Run are not current-stage accessibility blockers. They remain vi
 |---|---|---|---|
 | Focused functional Android UAT: CORE-01.A / CORE-02.A | Not Run — acceptance pending | Build commit and APK SHA; named Android device/OS; executor; controlled endpoint; fixture version/reset; timestamp/timezone; numbered steps; observed output | docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/ |
 | Focused functional Android UAT: CORE-05.A | Not Run — acceptance pending | Same fields; include create response, later owner read and server-time projection | docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/ |
-| Focused X-01 malformed/expired branch | Not Run | Current-main code head; controlled Auth/Backend endpoint; synthetic identity fixture; reset result; exact response code/safe message; executor and timestamp | docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/ |
+| Focused X-01 malformed/expired branch | Partial — malformed Pass; expired Not Run | Current-main code head; controlled Auth/Backend endpoint; synthetic identity fixture; reset result; exact response code/safe message; executor and timestamp | docs/evidence/rmvp-01a/2026-09-11-jin-x01-loopback.md |
 | Non-accessibility Q04 provenance/traceability | Not Run | Source decision IDs, immutable file/commit links, scope mapping, reviewer and timestamp; no accessibility-only rows | docs/evidence/rmvp-01a/2026-09-11-q04-non-accessibility/ |
 | Ordinary-scale responsive evidence | Not Run | Current-main build/APK identity, approved ordinary-scale profile(s), device/viewport, executor, timestamp/timezone, numbered captures and sanitized logs | docs/evidence/rmvp-01a/2026-09-11-q04-non-accessibility/ |
 
@@ -89,7 +89,7 @@ A sanitized unauthenticated 401 AUTH_REQUIRED observation proves only ingress/au
 3. Generate fresh synthetic registration credentials, opaque IDs and idempotency keys per run. Never log raw credentials, tokens or keys.
 4. Reset the controlled Auth/Firestore state before each scenario and after the suite; record the reset result and sanitized fixture version.
 5. Execute CORE-01.A and CORE-02.A as separate Accept/Public and Reject/Private branches, then execute CORE-05.A create followed by later owner read.
-6. Execute the affected X-01 malformed/expired identity branch with a controlled protected operation; expect the approved fail-closed response and no mutation.
+6. Execute the affected X-01 malformed/expired identity branches with controlled protected operations; the completed malformed branch is recorded in the JIN loopback evidence, while expired remains Not Run until a fresh expired-token fixture is available. Expect the approved fail-closed response and no mutation.
 7. Capture ordinary-scale responsive and non-accessibility Q04 provenance/traceability evidence only. Keep accessibility-only execution visible as Not Run — Deferred.
 8. Publish immutable screenshots/logs/records under the destinations above, with executor, device/build/environment/time fields and no credentials.
 9. Request independent current-head review from GGGGHOST-CN. Record only evidence-backed Pass, Fail or Blocked results; leave missing evidence Not Run.
