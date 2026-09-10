@@ -80,7 +80,8 @@ related unit/widget check into a different scenario.
 
 ### Recovery and Android/Q04 observations
 
-- [PR #18 current-head P2 handoff and Flutter 71/71 result](https://github.com/3427564237/enmori-app/pull/18#issuecomment-5599373485)
+- [Sign-in late-result tests at immutable commit `9d93bde3fe4461c85c928b1ae9da5dc23f8e5ae4`](https://github.com/3427564237/enmori-app/commit/9d93bde3fe4461c85c928b1ae9da5dc23f8e5ae4), including [`recovery_flow_test.dart`](https://github.com/3427564237/enmori-app/blob/9d93bde3fe4461c85c928b1ae9da5dc23f8e5ae4/test/app/recovery_flow_test.dart) and [`fakes.dart`](https://github.com/3427564237/enmori-app/blob/9d93bde3fe4461c85c928b1ae9da5dc23f8e5ae4/test/support/fakes.dart)
+- [DU independent approval closing P2 at PR #18 exact head `266483589f61db543c2ce736765691ff49c76df2`](https://github.com/3427564237/enmori-app/pull/18#pullrequestreview-5153299004)
 - [LI TalkBack-enabled six-surface README](https://github.com/3427564237/enmori-app/blob/266483589f61db543c2ce736765691ff49c76df2/docs/evidence/rmvp-01a/2026-09-09-li-phone-talkback/README.md)
 - [TalkBack-enabled settings capture](https://github.com/3427564237/enmori-app/blob/266483589f61db543c2ce736765691ff49c76df2/docs/evidence/rmvp-01a/2026-09-09-li-phone-talkback/talkback-enabled-settings.png)
 - [M02 registration screenshot](https://github.com/3427564237/enmori-app/blob/266483589f61db543c2ce736765691ff49c76df2/docs/evidence/rmvp-01a/2026-09-09-li-phone-talkback/m02-registration.png)
@@ -93,7 +94,7 @@ related unit/widget check into a different scenario.
 
 ## 4. Defects and blockers
 
-- **Open P2:** PR #18's late Sign-in success/failure correction is published at the current head and has owner verification; independent review must still explicitly close it.
+- **P2 status:** Closed by DU's independent approval at PR #18 exact head `266483589f61db543c2ce736765691ff49c76df2`; the correction is pinned to commit `9d93bde3fe4461c85c928b1ae9da5dc23f8e5ae4` and linked above.
 - **No execution blocker for the listed LI evidence:** the physical product-chain and TalkBack-enabled runs completed with the results above.
 - **Not a defect claim:** human audible swipe-by-swipe TalkBack traversal was not performed; it remains `Not Run` by design.
 - **Remaining gates:** unexecuted R12 rows, R14 UAT acceptance, full Q04/accessibility authority, R15, Release and Done remain separate and are not inferred.
