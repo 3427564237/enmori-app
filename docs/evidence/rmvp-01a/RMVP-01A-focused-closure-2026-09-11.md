@@ -68,7 +68,7 @@ No result is Pass until the listed identity, steps, observations and sanitized e
 
 ### JIN-owned preflight for LI-operated Android run (current status)
 
-JIN is the R14 owner and Testing Lead. JIN's available personal device is iOS, so the Android physical run is operated by LI HOURUI on the connected vivo V2405A. No private-tailnet invitation is published or used by JIN for this route; LI will revoke or expire any unused invitation outside GitHub.
+JIN is the R14 owner and Testing Lead. JIN's available personal device is iOS, so the Android physical run is operated by LI HOURUI on the connected vivo V2405A. No private-tailnet invitation is published or used by JIN for this route; LI will revoke or expire any unused invitation outside GitHub. The Android phone's Tailscale app is the only Tailscale component to verify; the LI workstation uses ADB and does not require Tailscale CLI.
 
 | Preflight field | Status | Recorded value / boundary |
 |---|---|---|
@@ -76,7 +76,7 @@ JIN is the R14 owner and Testing Lead. JIN's available personal device is iOS, s
 | APK SHA-256 | Blocked | JIN must build the APK from the exact current-main SHA and record its SHA-256 before LI operates the device; no prior APK hash is substituted |
 | Android operator/device | Ready for LI run | LI HOURUI; vivo V2405A, Android 16/API 36; device serial is intentionally omitted |
 | ADB precondition | Not Run | Before every ADB action LI must verify adb get-state and adb devices -l; only state device is acceptable; local reset authorization is limited to application ID com.enmori.app |
-| Tailscale | Ready for LI route | Tailscale remains on LI's Android device/workstation path; JIN does not need Tailscale installation or invitation access |
+| Tailscale on Android test device | Not Run | Verify Tailscale is online in LI's Android app after any out-of-band enrollment; the workstation needs only ADB, and no workstation Tailscale CLI is required or recorded |
 | Private HTTPS Serve edge | Not Run | LI must verify that the app reaches only the private HTTPS Serve edge; record endpoint class and HTTP result without address/FQDN or credentials |
 | Fixture/reset | Ready | JIN supplies fresh synthetic credentials, opaque IDs and idempotency keys; reset controlled Auth/Firestore before and after each scenario |
 | Evidence destination | Ready | docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/ and docs/evidence/rmvp-01a/2026-09-11-q04-non-accessibility/ |
@@ -113,7 +113,7 @@ This route correction does not waive functional Android evidence, non-accessibil
 
 **Current blocker (evidence closure, not implementation):** the exact current-main APK has not yet been built and its SHA-256 has not been recorded, so LI cannot safely operate the focused Android run. This is a JIN-owned preflight blocker. The local ADB check also currently has no attached device, but LI's connected vivo V2405A is the designated operator device.
 
-**Exact missing input:** JIN's APK built from current main 8b3f3fecb373c3dceb5b813e3b464070ee24297d, with its SHA-256, plus LI's ADB preflight confirmation (adb get-state and adb devices -l showing state device) and private HTTPS Serve reachability. No private invitation is requested from JIN and no device serial or tailnet data may be recorded.
+**Exact missing input:** JIN's APK built from current main 8b3f3fecb373c3dceb5b813e3b464070ee24297d, with its SHA-256, plus LI's ADB preflight confirmation (adb get-state and adb devices -l showing state device), Android-phone Tailscale-online confirmation and private HTTPS Serve reachability. The workstation needs only ADB; no private invitation is requested from JIN and no device serial or tailnet data may be recorded.
 
 **Exact required output:** one sanitized current-main evidence packet with a Pass/Fail/Blocked/Not Run result for CORE-01.A, CORE-02.A, CORE-05.A and each X-01 branch, exact APK/build identity, LI device model/OS (without serial), executor, endpoint class, fixture/reset, timestamp/timezone, numbered observations, sanitized captures/logs and SHI's independent disposition. A 401 AUTH_REQUIRED result is ingress/auth evidence only and cannot be recorded as a product-flow or UAT Pass.
 
