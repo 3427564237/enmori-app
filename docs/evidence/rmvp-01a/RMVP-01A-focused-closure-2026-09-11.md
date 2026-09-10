@@ -84,10 +84,14 @@ The prior request for an LI-device audible TalkBack handoff is withdrawn by the 
 
 This withdrawal does not waive functional Android evidence, non-accessibility Q04 provenance/traceability, ordinary-scale responsive evidence, applicable non-waivable obligations, or formal assessment authority.
 
-## 7. Blockers and review request
+## 7. Concrete blocker report and review request
 
-Current closure blockers are limited to the still-mandatory functional UAT acceptance, non-accessibility Q04 provenance/traceability, ordinary-scale responsive evidence, and independent review of this exact packet. Deferred accessibility rows are excluded from this blocker set.
+**Current blocker (evidence closure, not implementation):** the required LI/PM UAT-authority input is missing for a current-main, formal focused functional run. Specifically, no accepted row-level Android UAT record yet contains all of the following for CORE-01.A, CORE-02.A, CORE-05.A and the affected X-01 branch: exact build/APK identity, named device/OS, executor, controlled endpoint, synthetic fixture/reset result, timestamp/timezone, numbered steps, sanitized captures/logs and an independent UAT disposition. Existing LI physical product-chain and R13 controlled evidence remain useful immutable observations, but cannot be promoted to formal UAT acceptance.
 
-The full 45-case Week 9 Release UAT, Release acceptance and Project Done remain not passed and are outside this focused slice.
+**Exact required output:** one sanitized current-main evidence packet with a Pass/Fail/Blocked/Not Run result for each focused branch, the complete identity fields listed above, and an independent review/acceptance record. No credentials, tokens or real-user content may be included.
+
+**Next executable handoff window:** proposed LI/PM functional Android run on 2026-09-11 14:00–16:00 SGT using the current-main build pin 8b3f3fecb373c3dceb5b813e3b464070ee24297d on the named LI device (vivo V2405A, Android 16/API 36); LI/PM confirmation of the actor and exact APK identity is required before execution. In parallel, JIN can run the controlled malformed/expired X-01 branch on the pinned loopback environment during 2026-09-11 16:00–17:00 SGT. These are proposed functional windows only; no run is claimed here.
+
+Deferred accessibility-only rows remain Not Run — Deferred and are excluded from this blocker. The full 45-case Week 9 Release UAT, Release acceptance and Project Done remain not passed and are outside this focused slice.
 
 @GGGGHOST-CN: please review the exact commit containing this packet by 2026-09-12 12:00 SGT. Approve only evidenced rows or identify focused evidence-backed defects. Do not convert Not Run — Deferred rows, formal UAT-pending rows or the full Week 9 gate into Pass.
