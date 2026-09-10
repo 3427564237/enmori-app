@@ -84,13 +84,19 @@ The prior request for an LI-device audible TalkBack handoff is withdrawn by the 
 
 This withdrawal does not waive functional Android evidence, non-accessibility Q04 provenance/traceability, ordinary-scale responsive evidence, applicable non-waivable obligations, or formal assessment authority.
 
-## 7. Concrete blocker report and review request
+## 7. Concrete owner-scoped blocker report and review request
 
-**Current blocker (evidence closure, not implementation):** the required LI/PM UAT-authority input is missing for a current-main, formal focused functional run. Specifically, no accepted row-level Android UAT record yet contains all of the following for CORE-01.A, CORE-02.A, CORE-05.A and the affected X-01 branch: exact build/APK identity, named device/OS, executor, controlled endpoint, synthetic fixture/reset result, timestamp/timezone, numbered steps, sanitized captures/logs and an independent UAT disposition. Existing LI physical product-chain and R13 controlled evidence remain useful immutable observations, but cannot be promoted to formal UAT acceptance.
+**R14 execution/evidence owner:** JIN ZIHAN (@chuxi12483468). JIN owns the focused Android UAT execution, evidence collation and defect/retest ledger. LI does not own this execution; LI's role is later scope acceptance/terminal review.
 
-**Exact required output:** one sanitized current-main evidence packet with a Pass/Fail/Blocked/Not Run result for each focused branch, the complete identity fields listed above, and an independent review/acceptance record. No credentials, tokens or real-user content may be included.
+**Current blocker (evidence closure, not implementation):** JIN has not yet published a current-main focused Android UAT record containing the required build/APK, device/OS, executor, controlled endpoint, synthetic fixture/reset, timestamp/timezone, numbered steps, sanitized captures/logs and row-level disposition for CORE-01.A, CORE-02.A, CORE-05.A and the affected X-01 branch. Existing LI physical product-chain evidence and R13 controlled evidence remain immutable observations and do not transfer R14 execution ownership or constitute formal UAT acceptance.
 
-**Next executable handoff window:** proposed LI/PM functional Android run on 2026-09-11 14:00–16:00 SGT using the current-main build pin 8b3f3fecb373c3dceb5b813e3b464070ee24297d on the named LI device (vivo V2405A, Android 16/API 36); LI/PM confirmation of the actor and exact APK identity is required before execution. In parallel, JIN can run the controlled malformed/expired X-01 branch on the pinned loopback environment during 2026-09-11 16:00–17:00 SGT. These are proposed functional windows only; no run is claimed here.
+**Missing input and minimum handoff:** physical Android execution access for JIN is not currently recorded for a current-main build. If JIN cannot use an available named device directly, the minimum requested handoff is access to the LI vivo V2405A (Android 16/API 36) for a supervised functional run; JIN remains the executor and evidence owner, while LI later performs scope acceptance. The former audible TalkBack handoff remains withdrawn and is not requested.
+
+**Exact required output:** one sanitized current-main evidence packet with a Pass/Fail/Blocked/Not Run result for each focused branch, complete identity fields, numbered observations and an independent review/acceptance record. No credentials, tokens or real-user content may be included.
+
+**Separate JIN-controlled run:** the malformed/expired X-01 branch is independently executable by JIN on the pinned loopback Auth/Backend environment. Its current status is Not Run; proposed execution window is 2026-09-11 16:00–17:00 SGT, with the exact current-main SHA, toolchain, fixture/reset and safe response recorded at execution. This run does not depend on the physical-device handoff.
+
+**Next executable physical-device window:** proposed JIN functional Android run on 2026-09-11 14:00–16:00 SGT using the current-main build pin 8b3f3fecb373c3dceb5b813e3b464070ee24297d and vivo V2405A / Android 16/API 36 if the minimum device handoff is confirmed. These are proposed windows only; no run is claimed here.
 
 Deferred accessibility-only rows remain Not Run — Deferred and are excluded from this blocker. The full 45-case Week 9 Release UAT, Release acceptance and Project Done remain not passed and are outside this focused slice.
 
