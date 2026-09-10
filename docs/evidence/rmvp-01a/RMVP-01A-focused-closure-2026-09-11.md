@@ -74,7 +74,7 @@ JIN is the R14 owner and Testing Lead. JIN's available personal device is iOS, s
 | Preflight field | Status | Recorded value / boundary |
 |---|---|---|
 | Current main SHA | Pass | 8b3f3fecb373c3dceb5b813e3b464070ee24297d |
-| APK SHA-256 | Blocked | JIN must build the APK from the exact current-main SHA and record its SHA-256 before LI operates the device; no prior APK hash is substituted |
+| APK SHA-256 | Pass | Current-main debug APK SHA-256 `F00E9074874B8AECB6220A697CC2BD34578F10E476671FC927ECF272A7A31EC0`; [immutable preflight record](2026-09-11-current-main-apk-preflight.md) |
 | Android operator/device | Ready for LI run | LI HOURUI; vivo V2405A, Android 16/API 36; device serial is intentionally omitted |
 | ADB precondition | Not Run | Before every ADB action LI must verify adb get-state and adb devices -l; only state device is acceptable; local reset authorization is limited to application ID com.enmori.app |
 | Tailscale on Android test device | Not Run | Verify Tailscale is online in LI's Android app after any out-of-band enrollment; the workstation needs only ADB, and no workstation Tailscale CLI is required or recorded |
@@ -151,13 +151,13 @@ This route correction does not waive functional Android evidence, non-accessibil
 
 **R14 execution/evidence owner:** JIN ZIHAN (@chuxi12483468). JIN owns the functional Android UAT execution plan, evidence collation and defect/retest ledger. LI is the physical operator only; SHI independently reviews the final exact evidence head; LI performs later scope acceptance.
 
-**Current blocker (evidence closure, not implementation):** the exact current-main APK has not yet been built and its SHA-256 has not been recorded, so LI cannot safely operate the focused Android run. A local build attempt was blocked by the installed FVM Flutter cache requesting an unavailable engine artifact, and the workstation Node.js is v24.15.0 rather than the repository's pinned v24.19.0; no APK hash was produced. This is a JIN-owned preflight blocker. The local ADB check also currently has no attached device, but LI's connected vivo V2405A is the designated operator device.
+**Current blocker (evidence closure, not implementation):** the current-main debug APK is now built and its SHA-256 is recorded in the immutable preflight record. Remaining JIN-owned preflight items are LI's action-time ADB confirmation (`adb get-state` and `adb devices -l` showing `device`), Android-phone Tailscale-online confirmation and private HTTPS Serve-edge reachability. The local ADB check still has no attached device, but LI's connected vivo V2405A is the designated operator device.
 
-**Exact missing input:** JIN's APK built from current main 8b3f3fecb373c3dceb5b813e3b464070ee24297d, with its SHA-256, plus LI's ADB preflight confirmation (adb get-state and adb devices -l showing state device), Android-phone Tailscale-online confirmation and private HTTPS Serve reachability. The workstation needs only ADB; no private invitation is requested from JIN and no device serial or tailnet data may be recorded.
+**Exact missing input:** LI's ADB preflight confirmation (`adb get-state` and `adb devices -l` showing state `device`), Android-phone Tailscale-online confirmation and private HTTPS Serve reachability. The workstation needs only ADB; the current-main APK and SHA-256 are recorded in the immutable preflight record. No private invitation is requested from JIN and no device serial or tailnet data may be recorded.
 
 **Exact required output:** one sanitized current-main evidence packet with a Pass/Fail/Blocked/Not Run result for CORE-01.A, CORE-02.A, CORE-05.A and each X-01 branch, exact APK/build identity, LI device model/OS (without serial), executor, endpoint class, fixture/reset, timestamp/timezone, numbered observations, sanitized captures/logs and SHI's independent disposition. A 401 AUTH_REQUIRED result is ingress/auth evidence only and cannot be recorded as a product-flow or UAT Pass.
 
-**Next executable windows:** JIN APK build/preflight publication is required first. Once that preflight is available, LI's proposed focused Android run window is 2026-09-11 14:00–16:00 SGT on vivo V2405A / Android 16/API 36; JIN's separate controlled malformed/expired X-01 run is proposed for 2026-09-11 16:00–17:00 SGT. These are proposed windows only; no run is claimed here.
+**Next executable windows:** After LI's action-time ADB, phone-side Tailscale and private Serve-edge checks are recorded, LI may run the focused Android steps on vivo V2405A / Android 16/API 36. JIN's malformed/expired X-01 loopback evidence is separately published; expired identity remains Not Run until a fresh expired-token fixture is available.
 
 Deferred accessibility-only rows remain Not Run — Deferred and are excluded from this blocker. The full 45-case Week 9 Release UAT, Release acceptance and Project Done remain not passed and are outside this focused slice.
 
