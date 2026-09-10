@@ -66,24 +66,22 @@ Rows marked Not Run are not current-stage accessibility blockers. They remain vi
 
 No result is Pass until the listed identity, steps, observations and sanitized evidence fields are complete and independently reviewable.
 
-### JIN-device preflight (current status)
+### JIN-owned preflight for LI-operated Android run (current status)
 
-This is a sanitized preflight record for the corrected JIN-owned execution route. No invitation URL, auth key, tailnet address/FQDN, credential, token or device serial is recorded.
+JIN is the R14 owner and Testing Lead. JIN's available personal device is iOS, so the Android physical run is operated by LI HOURUI on the connected vivo V2405A. No private-tailnet invitation is published or used by JIN for this route; LI will revoke or expire any unused invitation outside GitHub.
 
 | Preflight field | Status | Recorded value / boundary |
 |---|---|---|
 | Current main SHA | Pass | 8b3f3fecb373c3dceb5b813e3b464070ee24297d |
-| APK SHA-256 | Not Run | Must be captured from an APK built from the exact current-main SHA before execution |
-| JIN-controlled Android device model and Android/API | Blocked | No supported JIN-owned device is currently attached; record exact model/OS/API only after connection |
-| Local ADB state | Blocked | Sanitized check reports no attached device (adb devices listed no device); serial is intentionally omitted |
-| Tailscale state on test device/workstation | Blocked | Tailscale CLI is not currently available in this workstation preflight; LI must provide the private-tailnet enrollment outside GitHub |
-| Private HTTPS Serve edge reachability | Not Run | Verify only after enrollment; record endpoint class and HTTP result without address/FQDN or credentials |
-| Fixture/reset | Not Run | Use fresh synthetic credentials/opaque IDs/idempotency keys; reset controlled Auth/Firestore before and after each scenario |
+| APK SHA-256 | Blocked | JIN must build the APK from the exact current-main SHA and record its SHA-256 before LI operates the device; no prior APK hash is substituted |
+| Android operator/device | Ready for LI run | LI HOURUI; vivo V2405A, Android 16/API 36; device serial is intentionally omitted |
+| ADB precondition | Not Run | Before every ADB action LI must verify adb get-state and adb devices -l; only state device is acceptable; local reset authorization is limited to application ID com.enmori.app |
+| Tailscale | Ready for LI route | Tailscale remains on LI's Android device/workstation path; JIN does not need Tailscale installation or invitation access |
+| Private HTTPS Serve edge | Not Run | LI must verify that the app reaches only the private HTTPS Serve edge; record endpoint class and HTTP result without address/FQDN or credentials |
+| Fixture/reset | Ready | JIN supplies fresh synthetic credentials, opaque IDs and idempotency keys; reset controlled Auth/Firestore before and after each scenario |
 | Evidence destination | Ready | docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/ and docs/evidence/rmvp-01a/2026-09-11-q04-non-accessibility/ |
 
-A sanitized unauthenticated 401 AUTH_REQUIRED observation, if obtained, proves only ingress/auth enforcement. It is not a product-flow result and is not a UAT Pass.
-
-
+A sanitized unauthenticated 401 AUTH_REQUIRED observation proves only ingress/auth enforcement. It is not a product-flow result and is not a UAT Pass.
 ## 5. Numbered execution checklist
 
 1. Verify that current `main` is still 8b3f3fecb373c3dceb5b813e3b464070ee24297d; if it has moved, record the exact newer main SHA and refresh this packet branch before any run.
@@ -96,29 +94,30 @@ A sanitized unauthenticated 401 AUTH_REQUIRED observation, if obtained, proves o
 8. Publish immutable screenshots/logs/records under the destinations above, with executor, device/build/environment/time fields and no credentials.
 9. Request independent current-head review from GGGGHOST-CN. Record only evidence-backed Pass, Fail or Blocked results; leave missing evidence Not Run.
 
-## 6. Device-route and accessibility boundary
+## 6. Execution split and accessibility boundary
 
-The former LI-device functional handoff is withdrawn. JIN must use a JIN-controlled supported Android device connected to JIN's own workstation/ADB and private tailnet. LI's role is limited to transmitting the enrollment invitation outside GitHub and later scope acceptance; LI does not become the UAT executor or evidence owner.
+- **JIN ZIHAN:** R14 owner and Testing Lead; supplies the exact current-main build/APK preflight, numbered CORE-01.A/CORE-02.A/CORE-05.A runbook, synthetic fixtures/reset plan, result matrix, evidence collation and defect/retest ledger.
+- **LI HOURUI:** physical operator of the connected vivo V2405A, Android 16/API 36, for the focused Android steps only. LI must verify adb get-state and adb devices -l before every ADB action and may reset only com.enmori.app.
+- **JIN ZIHAN:** separately executes the malformed/expired X-01 branch on the controlled loopback environment.
+- **SHI ZHENGQI:** independently reviews the final exact evidence head.
+- **LI HOURUI:** performs later Sprint-scope acceptance only after SHI's disposition; this does not replace SHI review.
 
-The earlier request for an LI-device audible TalkBack handoff is also withdrawn by the Sponsor scope correction. No human audible TalkBack handoff window is required for this current-stage packet. Human audible traversal and remaining accessibility-only evidence remain Not Run — Deferred, with existing implementation/tests/evidence retained.
+The previous JIN-device/private-tailnet route and the LI-device handoff wording are withdrawn. No private invitation is to be posted or committed for this run; LI will revoke or expire any unused invitation outside GitHub. The earlier audible TalkBack handoff is also withdrawn by the Sponsor decision. Human audible traversal and remaining accessibility-only evidence remain Not Run — Deferred, with existing implementation/tests/evidence retained.
 
-After enrollment, the invitation must be expired/revoked. After the evidence/review window, remove JIN's device access unless LI separately approves continued access. This route must never record an invitation URL, auth key, tailnet address/FQDN, credential, token, device serial or private content.
+After any enrollment, LI must expire/revoke the invitation. After the evidence/review window, remove any temporary device access unless LI separately approves continued access. Do not record invitation material, auth keys, tailnet addresses/FQDNs, credentials, tokens, serials or private content.
 
-This route correction does not waive functional Android evidence, non-accessibility Q04 provenance/traceability, ordinary-scale responsive evidence, applicable non-waivable obligations, or formal assessment authority.
-
+This route correction does not waive functional Android evidence, non-accessibility Q04 provenance/traceability, ordinary-scale responsive evidence, applicable non-waivable obligations or formal assessment authority.
 ## 7. Concrete owner-scoped blocker report and review request
 
-**R14 execution/evidence owner:** JIN ZIHAN (@chuxi12483468). JIN owns the focused Android UAT execution, evidence collation and defect/retest ledger. LI's role is limited to tailnet authorization and later scope acceptance; SHI remains the independent reviewer.
+**R14 execution/evidence owner:** JIN ZIHAN (@chuxi12483468). JIN owns the functional Android UAT execution plan, evidence collation and defect/retest ledger. LI is the physical operator only; SHI independently reviews the final exact evidence head; LI performs later scope acceptance.
 
-**Current blocker (evidence closure, not implementation):** JIN's workstation currently has no attached Android device in the sanitized ADB check, and Tailscale is not available in the workstation preflight. Therefore the corrected private-tailnet execution route cannot start. This is a JIN-owned device/environment blocker, not a transfer of UAT authority to LI.
+**Current blocker (evidence closure, not implementation):** the exact current-main APK has not yet been built and its SHA-256 has not been recorded, so LI cannot safely operate the focused Android run. This is a JIN-owned preflight blocker. The local ADB check also currently has no attached device, but LI's connected vivo V2405A is the designated operator device.
 
-**Exact missing input:** a supported JIN-controlled Android device connected to JIN's own workstation/ADB, plus private-tailnet enrollment transmitted outside GitHub. The device model/Android/API, ADB device state, Tailscale-online state and private HTTPS Serve reachability must be recorded only after verification; serials, addresses, invitation material and credentials must remain omitted.
+**Exact missing input:** JIN's APK built from current main 8b3f3fecb373c3dceb5b813e3b464070ee24297d, with its SHA-256, plus LI's ADB preflight confirmation (adb get-state and adb devices -l showing state device) and private HTTPS Serve reachability. No private invitation is requested from JIN and no device serial or tailnet data may be recorded.
 
-**Exact required output:** one sanitized current-main evidence packet with a Pass/Fail/Blocked/Not Run result for each focused branch, exact build/APK identity, device model/OS (without serial), executor, controlled endpoint class, fixture/reset, timestamp/timezone, numbered observations and an independent review/acceptance record. A 401 AUTH_REQUIRED result is ingress/auth evidence only and cannot be recorded as a product-flow or UAT Pass.
+**Exact required output:** one sanitized current-main evidence packet with a Pass/Fail/Blocked/Not Run result for CORE-01.A, CORE-02.A, CORE-05.A and each X-01 branch, exact APK/build identity, LI device model/OS (without serial), executor, endpoint class, fixture/reset, timestamp/timezone, numbered observations, sanitized captures/logs and SHI's independent disposition. A 401 AUTH_REQUIRED result is ingress/auth evidence only and cannot be recorded as a product-flow or UAT Pass.
 
-**Separate JIN-controlled run:** the malformed/expired X-01 branch remains independently executable by JIN on the pinned loopback Auth/Backend environment. Its status is Not Run; proposed window is 2026-09-11 16:00–17:00 SGT, with the exact current-main SHA, toolchain, fixture/reset and safe response recorded at execution. It does not depend on the physical-device route.
-
-**Next executable device window:** after LI transmits the private-tailnet invitation outside GitHub and JIN verifies enrollment, propose 2026-09-11 14:00–16:00 SGT for JIN's own Android device functional run. This is a proposed window only; no run is claimed until the preflight passes.
+**Next executable windows:** JIN APK build/preflight publication is required first. Once that preflight is available, LI's proposed focused Android run window is 2026-09-11 14:00–16:00 SGT on vivo V2405A / Android 16/API 36; JIN's separate controlled malformed/expired X-01 run is proposed for 2026-09-11 16:00–17:00 SGT. These are proposed windows only; no run is claimed here.
 
 Deferred accessibility-only rows remain Not Run — Deferred and are excluded from this blocker. The full 45-case Week 9 Release UAT, Release acceptance and Project Done remain not passed and are outside this focused slice.
 
