@@ -151,7 +151,7 @@ This route correction does not waive functional Android evidence, non-accessibil
 
 **R14 execution/evidence owner:** JIN ZIHAN (@chuxi12483468). JIN owns the functional Android UAT execution plan, evidence collation and defect/retest ledger. LI is the physical operator only; SHI independently reviews the final exact evidence head; LI performs later scope acceptance.
 
-**Current blocker (evidence closure, not implementation):** the exact current-main APK has not yet been built and its SHA-256 has not been recorded, so LI cannot safely operate the focused Android run. This is a JIN-owned preflight blocker. The local ADB check also currently has no attached device, but LI's connected vivo V2405A is the designated operator device.
+**Current blocker (evidence closure, not implementation):** the exact current-main APK has not yet been built and its SHA-256 has not been recorded, so LI cannot safely operate the focused Android run. A local build attempt was blocked by the installed FVM Flutter cache requesting an unavailable engine artifact, and the workstation Node.js is v24.15.0 rather than the repository's pinned v24.19.0; no APK hash was produced. This is a JIN-owned preflight blocker. The local ADB check also currently has no attached device, but LI's connected vivo V2405A is the designated operator device.
 
 **Exact missing input:** JIN's APK built from current main 8b3f3fecb373c3dceb5b813e3b464070ee24297d, with its SHA-256, plus LI's ADB preflight confirmation (adb get-state and adb devices -l showing state device), Android-phone Tailscale-online confirmation and private HTTPS Serve reachability. The workstation needs only ADB; no private invitation is requested from JIN and no device serial or tailnet data may be recorded.
 
