@@ -89,6 +89,8 @@ S-PM-0903-Q04-RMVP01A-R1 approves the exact bounded Q04 entry/core R1: Q04-DEV-1
 
 S-PM-0903-RMVP01A-START subsequently applies a bounded proportional-governance correction: RMVP-01A is Ready and enters delivery setup; necessary A01 validation is absorbed into the approved 78h work rather than scheduled as a separate 24h item. Compatible dependency choices, controlled emulator setup, bounded Q04 execution evidence and exact Android evidence remain mandatory Done conditions instead of start blockers. Product code is held until the stable baseline is pushed and GitHub/Notion team publication is complete. [S-PM-0903-RMVP01A-START]
 
+S-SPONSOR-0910-RMVP01A-A11Y-DEFER subsequently removes the remaining accessibility-specific execution and evidence, including human audible TalkBack traversal, from the current RMVP-01A Sprint/Increment closure gate. LI HOURUI explicitly relayed and recorded this as a Sponsor decision. Deferred rows remain `Not Run — Deferred`; the earlier Q04 accessibility baseline, implementation, tests and evidence are retained for future work. Functional bounded UAT, non-accessibility Q04 evidence, higher non-waivable obligations, Release acceptance and all other Done gates remain unchanged. [S-SPONSOR-0910-RMVP01A-A11Y-DEFER]
+
 ## 3. Functional requirements
 
 The following are normalized statements, not newly invented official requirement IDs.
@@ -334,6 +336,7 @@ No concrete Figma export was required for the 2026-08-31 context-extraction phas
 | 2026-09-03 | PM approves S-PM-0903-RMVP01A-EST. | Approves RMVP-01A at 8 SP as a relative estimate, not a conversion from 78h. Remaining Ready gates, Sprint, implementation and external writes remain unapproved. |
 | 2026-09-03 | PM approves S-PM-0903-Q04-RMVP01A-R1. | Approves the bounded six-surface entry/core visual-state contract, Q04-DEV-15/23/24 and slice-scoped SP-01/05/06. Evidence remains Pending; no Visual Implementation Ready, Ready, Sprint or implementation follows. |
 | 2026-09-03 | PM approves S-PM-0903-RMVP01A-START. | Makes RMVP-01A Ready, absorbs necessary A01 validation into its 78h work and authorizes delivery setup. Product coding waits for stable-baseline push and team publication; Done evidence and scope exclusions remain. |
+| 2026-09-10 | Sponsor defers the remaining RMVP-01A accessibility-specific execution/evidence from the current stage; LI HOURUI relays and records S-SPONSOR-0910-RMVP01A-A11Y-DEFER. | Human audible TalkBack and the remaining accessibility-only evidence move to future work and remain `Not Run — Deferred`. The earlier baseline is retained; functional UAT, non-accessibility Q04 evidence, higher non-waivable obligations, Release and other Done gates remain. |
 
 No explicit Supervisor decision could be attributed from the available records. This absence must not be filled by inference.
 
