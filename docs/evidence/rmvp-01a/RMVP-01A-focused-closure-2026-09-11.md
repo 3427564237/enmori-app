@@ -104,7 +104,7 @@ A sanitized unauthenticated 401 AUTH_REQUIRED observation proves only ingress/au
 
 The previous JIN-device/private-tailnet route and the LI-device handoff wording are withdrawn. No private invitation is to be posted or committed for this run; LI will revoke or expire any unused invitation outside GitHub. The earlier audible TalkBack handoff is also withdrawn by the Sponsor decision. Human audible traversal and remaining accessibility-only evidence remain Not Run — Deferred, with existing implementation/tests/evidence retained.
 
-After any enrollment, LI must expire/revoke the invitation. After the evidence/review window, remove any temporary device access unless LI separately approves continued access. Do not record invitation material, auth keys, tailnet addresses/FQDNs, credentials, tokens, serials or private content.
+Because this Android route does not use an invitation, LI should revoke or expire the unused invitation outside GitHub. After the evidence/review window, remove any temporary device access unless LI separately approves continued access. Do not record invitation material, auth keys, tailnet addresses/FQDNs, credentials, tokens, serials or private content.
 
 This route correction does not waive functional Android evidence, non-accessibility Q04 provenance/traceability, ordinary-scale responsive evidence, applicable non-waivable obligations or formal assessment authority.
 ## 7. Concrete owner-scoped blocker report and review request
