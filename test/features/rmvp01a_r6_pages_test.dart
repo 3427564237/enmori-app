@@ -117,7 +117,7 @@ void main() {
 
             await _pumpR6Page(
               tester,
-              const UnavailablePage(),
+              UnavailablePage(onRetry: () {}),
               textScale: textScale,
             );
             expect(find.byKey(const Key('route-unavailable')), findsOneWidget);

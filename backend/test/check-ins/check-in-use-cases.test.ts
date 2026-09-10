@@ -63,6 +63,7 @@ test("normalizes Note before the atomic create Port", async () => {
       firebaseUid: "firebase-1",
       note: "saved note",
       idempotencyKey: "A".repeat(22),
+      currentInstant: "2026-09-03T03:20:00.000Z",
       creation: {
         checkInId: "chk_01",
         createdAt: "2026-09-03T03:20:00.000Z",
@@ -72,19 +73,12 @@ test("normalizes Note before the atomic create Port", async () => {
   ]);
 });
 
-test("recovers an exact Check-in retry when new Clock/ID values are unavailable", async () => {
-  for (const unavailable of ["clock", "id"] as const) {
+test("recovers an exact Check-in retry when new ID generation is unavailable", async () => {
     const repository = new FakeCheckInRepository();
     repository.createResult = { kind: "replayed", checkIn };
-    const useCase = new CreateCheckIn(
-      repository,
-      unavailable === "clock"
-        ? { now: () => err(dependencyUnavailable) }
-        : clock,
-      unavailable === "id"
-        ? { generate: () => err(dependencyUnavailable) }
-        : checkInIds,
-    );
+    const useCase = new CreateCheckIn(repository, clock, {
+      generate: () => err(dependencyUnavailable),
+    });
 
     const result = await useCase.execute({
       principal: { firebaseUid: "firebase-1" },
@@ -101,9 +95,32 @@ test("recovers an exact Check-in retry when new Clock/ID values are unavailable"
         firebaseUid: "firebase-1",
         note: "saved note",
         idempotencyKey: "A".repeat(22),
+        currentInstant: "2026-09-03T03:20:00.000Z",
       },
     ]);
-  }
+});
+
+test("does not offer an unbounded Check-in replay when Clock is unavailable", async () => {
+  const repository = new FakeCheckInRepository();
+  repository.createResult = dependencyUnavailable;
+  const result = await new CreateCheckIn(
+    repository,
+    { now: () => err(dependencyUnavailable) },
+    checkInIds,
+  ).execute({
+    principal: { firebaseUid: "firebase-1" },
+    note: "saved note",
+    idempotencyKey: "A".repeat(22),
+  });
+
+  assert.equal(result.ok, false);
+  assert.deepEqual(repository.commands, [
+    {
+      firebaseUid: "firebase-1",
+      note: "saved note",
+      idempotencyKey: "A".repeat(22),
+    },
+  ]);
 });
 
 test("rejects an invalid idempotency key before the Check-in Port", async () => {

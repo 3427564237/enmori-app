@@ -26,6 +26,7 @@ export interface CreateCheckInCommand {
   readonly firebaseUid: string;
   readonly note: NormalizedNote;
   readonly idempotencyKey: IdempotencyKey;
+  readonly currentInstant?: string;
   readonly creation?: CheckInCreationCandidate;
 }
 
@@ -33,11 +34,13 @@ export interface CreateCheckInCommand {
  * R9 implementations resolve the internal AccountId, assign opaque identity
  * and server UTC time, and atomically commit the Check-in and 24-hour
  * idempotency result using the Application-supplied Clock/ID Port values.
- * Infrastructure checks for an exact committed retry before it requires the
- * optional creation candidate, so Clock/ID failure cannot hide a recoverable
- * result. The request fingerprint is based only on the normalized Note, never
- * on generated ID/time values. Missing and non-owned reads must return the same
- * not_found_or_not_owned result and must not expose ownerAccountId.
+ * Infrastructure checks committed-result validity using the independently
+ * supplied current instant before it requires the optional creation candidate.
+ * ID failure can therefore recover an active exact retry, while Clock failure
+ * or expiry fails closed. The request fingerprint is based only on the
+ * normalized Note, never on generated ID/time values. Missing and non-owned
+ * reads must return the same not_found_or_not_owned result and must not expose
+ * ownerAccountId.
  */
 export interface CheckInRepository {
   create(command: CreateCheckInCommand): Promise<CreateCheckInRepositoryResult>;

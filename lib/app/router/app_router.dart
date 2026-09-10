@@ -2,8 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/account/account_providers.dart';
 import '../../features/account/presentation/onboarding_page.dart';
+import '../../features/auth/auth_providers.dart';
 import '../../features/auth/presentation/registration_page.dart';
+import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/check_in/presentation/check_in_page.dart';
 import '../home_shell_page.dart';
 import '../providers.dart';
@@ -12,10 +15,13 @@ import '../route_status_pages.dart';
 abstract final class AppRoutes {
   static const startup = '/startup';
   static const register = '/register';
+  static const signIn = '/sign-in';
   static const onboarding = '/onboarding';
   static const home = '/home';
   static const checkIn = '/check-in';
   static const unavailable = '/unavailable';
+  static const configurationUnavailable = '/configuration-unavailable';
+  static const forbidden = '/account-unavailable';
 
   static String savedCheckIn(String checkInId) =>
       '/check-in/${Uri.encodeComponent(checkInId)}';
@@ -37,7 +43,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (context, state) => const RegistrationPage(),
+        builder: (context, state) =>
+            RegistrationPage(onSignIn: () => context.go(AppRoutes.signIn)),
+      ),
+      GoRoute(
+        path: AppRoutes.signIn,
+        builder: (context, state) => SignInPage(
+          onCreateAccount: () => context.go(AppRoutes.register),
+          onSucceeded: () {
+            final subject = ref.read(currentAuthSubjectProvider);
+            if (subject != null) {
+              ref.invalidate(onboardingStatusProvider(subject));
+            }
+          },
+        ),
       ),
       GoRoute(
         path: AppRoutes.onboarding,
@@ -63,7 +82,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.unavailable,
-        builder: (context, state) => const UnavailablePage(),
+        builder: (context, state) => UnavailablePage(
+          onRetry: () {
+            final subject = ref.read(currentAuthSubjectProvider);
+            if (subject != null) {
+              ref.invalidate(onboardingStatusProvider(subject));
+            }
+          },
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.configurationUnavailable,
+        builder: (context, state) => const ConfigurationUnavailablePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.forbidden,
+        builder: (context, state) => const AccountUnavailablePage(),
       ),
     ],
   );
@@ -79,14 +113,27 @@ String? redirectFor({required RouterGateState gate, required String location}) {
     RouterGateState.resolving =>
       location == AppRoutes.startup ? null : AppRoutes.startup,
     RouterGateState.unauthenticated =>
-      location == AppRoutes.register ? null : AppRoutes.register,
+      location == AppRoutes.register || location == AppRoutes.signIn
+          ? null
+          : AppRoutes.register,
+    RouterGateState.signInRequired =>
+      location == AppRoutes.signIn ? null : AppRoutes.signIn,
     RouterGateState.onboardingRequired =>
       location == AppRoutes.onboarding ? null : AppRoutes.onboarding,
     RouterGateState.unavailable =>
       location == AppRoutes.unavailable ? null : AppRoutes.unavailable,
+    RouterGateState.configurationUnavailable =>
+      location == AppRoutes.configurationUnavailable
+          ? null
+          : AppRoutes.configurationUnavailable,
+    RouterGateState.forbidden =>
+      location == AppRoutes.forbidden ? null : AppRoutes.forbidden,
     RouterGateState.authenticated => switch (location) {
       AppRoutes.startup ||
       AppRoutes.register ||
+      AppRoutes.signIn ||
+      AppRoutes.configurationUnavailable ||
+      AppRoutes.forbidden ||
       AppRoutes.unavailable => AppRoutes.home,
       AppRoutes.onboarding => AppRoutes.checkIn,
       _ => null,

@@ -1,5 +1,8 @@
 import { appFailure, type AppFailure } from "../../shared/application/app-failure.js";
-import { createAuthoritativeValues } from "../../shared/application/authoritative-values.js";
+import {
+  createAuthoritativeValues,
+  readAuthoritativeInstant,
+} from "../../shared/application/authoritative-values.js";
 import { validateIdempotencyKey } from "../../shared/domain/idempotency-key.js";
 import { err, ok, type Result } from "../../shared/domain/result.js";
 import type { Clock } from "../../shared/ports/clock.js";
@@ -32,15 +35,19 @@ export class CreateCheckIn {
     const key = validateIdempotencyKey(input.idempotencyKey);
     if (!key.ok) return key;
 
-    const authoritative = createAuthoritativeValues(
-      this.clock,
-      this.checkInIdGenerator,
-    );
+    const currentInstant = readAuthoritativeInstant(this.clock);
+    const authoritative = currentInstant.ok
+      ? createAuthoritativeValues(
+          currentInstant.value,
+          this.checkInIdGenerator,
+        )
+      : currentInstant;
 
     const result = await this.repository.create({
       firebaseUid: input.principal.firebaseUid,
       note: note.value,
       idempotencyKey: key.value,
+      ...(currentInstant.ok ? { currentInstant: currentInstant.value } : {}),
       ...(authoritative.ok
         ? {
             creation: {

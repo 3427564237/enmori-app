@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:enmori/core/network/backend_api_client.dart';
@@ -12,6 +13,97 @@ import 'package:http/testing.dart';
 
 void main() {
   group('BackendApiClient', () {
+    test('rejects non-HTTPS configuration before token or request', () async {
+      for (final uri in [
+        Uri.parse('http://example.invalid'),
+        Uri.parse('ftp://example.invalid'),
+      ]) {
+        var tokenCalls = 0;
+        var requestCalls = 0;
+        final client = BackendApiClient(
+          uri,
+          () async {
+            tokenCalls++;
+            return const Success('synthetic-token');
+          },
+          httpClient: MockClient((request) async {
+            requestCalls++;
+            return http.Response('{}', 200);
+          }),
+        );
+
+        final result = await client.get('/v1/me/onboarding');
+        client.close();
+
+        expect(
+          (result as Failure<JsonObject>).failure.kind,
+          AppFailureKind.configurationUnavailable,
+        );
+        expect(tokenCalls, 0);
+        expect(requestCalls, 0);
+      }
+    });
+
+    test('bounds token acquisition without sending a request', () async {
+      final token = Completer<Result<String>>();
+      var requestCalls = 0;
+      final client = BackendApiClient(
+        Uri.parse('https://example.invalid'),
+        () => token.future,
+        httpClient: MockClient((request) async {
+          requestCalls++;
+          return http.Response('{}', 200);
+        }),
+        operationTimeout: const Duration(milliseconds: 10),
+      );
+
+      final result = await client.get('/v1/me/onboarding');
+      client.close();
+
+      expect(
+        (result as Failure<JsonObject>).failure.kind,
+        AppFailureKind.serviceUnavailable,
+      );
+      expect(requestCalls, 0);
+    });
+
+    test('bounds waiting for response headers', () async {
+      final response = Completer<http.Response>();
+      final client = BackendApiClient(
+        Uri.parse('https://example.invalid'),
+        () async => const Success('synthetic-token'),
+        httpClient: MockClient((request) => response.future),
+        operationTimeout: const Duration(milliseconds: 10),
+      );
+
+      final result = await client.get('/v1/me/onboarding');
+      client.close();
+
+      expect(
+        (result as Failure<JsonObject>).failure.kind,
+        AppFailureKind.serviceUnavailable,
+      );
+    });
+
+    test('bounds reading a response body', () async {
+      final body = StreamController<List<int>>();
+      addTearDown(body.close);
+      final client = BackendApiClient(
+        Uri.parse('https://example.invalid'),
+        () async => const Success('synthetic-token'),
+        httpClient: _HangingBodyClient(body.stream),
+        operationTimeout: const Duration(milliseconds: 10),
+      );
+
+      final result = await client.get('/v1/me/onboarding');
+      client.close();
+
+      expect(
+        (result as Failure<JsonObject>).failure.kind,
+        AppFailureKind.serviceUnavailable,
+      );
+    });
+
     test('rejects missing and non-string request IDs', () async {
       final invalidErrors = <Map<String, Object?>>[
         {'code': 'SERVICE_UNAVAILABLE', 'message': 'Unsafe remote message.'},
@@ -311,6 +403,17 @@ void main() {
       }
     });
   });
+}
+
+final class _HangingBodyClient extends http.BaseClient {
+  _HangingBodyClient(this._body);
+
+  final Stream<List<int>> _body;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    return http.StreamedResponse(_body, 200);
+  }
 }
 
 BackendApiClient _client(MockClientHandler handler) {

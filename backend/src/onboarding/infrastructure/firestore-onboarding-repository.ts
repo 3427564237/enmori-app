@@ -48,7 +48,9 @@ function idempotencyPath(documentId: string): string {
 function validCommand(command: CompleteCommand): boolean {
   if (
     createAuthBindingDocumentId(command.firebaseUid) === undefined ||
-    !isSafeDocumentId(command.canonicalUsername)
+    !isSafeDocumentId(command.canonicalUsername) ||
+    (command.currentInstant !== undefined &&
+      !isUtcIsoInstant(command.currentInstant))
   ) {
     return false;
   }
@@ -62,6 +64,7 @@ function validCommand(command: CompleteCommand): boolean {
   ).getTime();
   return (
     isSafeDocumentId(command.creation.accountId) &&
+    command.currentInstant === command.creation.onboardingCompletedAt &&
     isUtcIsoInstant(command.creation.onboardingCompletedAt) &&
     isUtcIsoInstant(command.creation.idempotencyExpiresAt) &&
     expiresAt - occurredAt === IDEMPOTENCY_WINDOW_MILLISECONDS
@@ -134,19 +137,12 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
           ) {
             return dependencyUnavailable;
           }
-          if (command.creation === undefined) {
-            if (record.requestFingerprint !== requestFingerprint) {
-              return dependencyUnavailable;
-            }
-            return replayCompletedOnboarding({
-              transaction,
-              record,
-              bindingPath,
-            });
+          if (command.currentInstant === undefined) {
+            return dependencyUnavailable;
           }
           const active = isUnexpired(
             record.expiresAt,
-            command.creation.onboardingCompletedAt,
+            command.currentInstant,
           );
           if (active === undefined) return dependencyUnavailable;
           if (active) {

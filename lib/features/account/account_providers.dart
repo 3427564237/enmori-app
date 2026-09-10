@@ -7,8 +7,8 @@ final accountRepositoryProvider = Provider<AccountRepository>(
   (ref) => const _UnavailableAccountRepository(),
 );
 
-final onboardingStatusProvider =
-    FutureProvider.family<Result<OnboardingStatus>, String>((ref, subject) {
+final onboardingStatusProvider = FutureProvider.autoDispose
+    .family<Result<OnboardingStatus>, String>((ref, subject) {
       return ref.watch(accountRepositoryProvider).readOnboardingStatus();
     });
 

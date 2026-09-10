@@ -4,6 +4,7 @@ import '../../../core/network/idempotency_key_generator.dart';
 import '../../../core/network/idempotency_key_provider.dart';
 import '../../../core/presentation/command_state.dart';
 import '../../../core/result/result.dart';
+import '../../auth/auth_providers.dart';
 import '../check_in_providers.dart';
 import '../domain/check_in_repository.dart';
 
@@ -18,11 +19,19 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
   String? _createIdempotencyKey;
   late CheckInRepository _repository;
   late IdempotencyKeyGenerator _keyGenerator;
+  String? _authSubject;
 
   @override
   CommandState<CheckIn> build() {
     _repository = ref.watch(checkInRepositoryProvider);
     _keyGenerator = ref.watch(idempotencyKeyGeneratorProvider);
+    final authSubject = ref.watch(currentAuthSubjectProvider);
+    if (_authSubject != authSubject) {
+      _operation++;
+      _createNote = null;
+      _createIdempotencyKey = null;
+    }
+    _authSubject = authSubject;
     return const CommandIdle();
   }
 

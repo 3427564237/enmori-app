@@ -33,6 +33,13 @@ void main() {
         ),
         AppRoutes.onboarding,
       );
+      expect(
+        redirectFor(
+          gate: RouterGateState.signInRequired,
+          location: AppRoutes.home,
+        ),
+        AppRoutes.signIn,
+      );
     });
 
     test('authenticated members keep product routes without loops', () {
@@ -59,6 +66,17 @@ void main() {
           location: AppRoutes.home,
         ),
         AppRoutes.unavailable,
+      );
+      expect(
+        redirectFor(
+          gate: RouterGateState.configurationUnavailable,
+          location: AppRoutes.home,
+        ),
+        AppRoutes.configurationUnavailable,
+      );
+      expect(
+        redirectFor(gate: RouterGateState.forbidden, location: AppRoutes.home),
+        AppRoutes.forbidden,
       );
     });
   });

@@ -11,12 +11,22 @@ export interface AuthoritativeValues {
   readonly idempotencyExpiresAt: string;
 }
 
-export function createAuthoritativeValues(
+export function readAuthoritativeInstant(
   clock: Clock,
-  idGenerator: OpaqueIdGenerator,
-): Result<AuthoritativeValues, AppFailure> {
+): Result<string, AppFailure> {
   const current = clock.now();
   if (!current.ok || !Number.isFinite(current.value.getTime())) {
+    return err(appFailure("SERVICE_UNAVAILABLE"));
+  }
+  return ok(current.value.toISOString());
+}
+
+export function createAuthoritativeValues(
+  currentInstant: string,
+  idGenerator: OpaqueIdGenerator,
+): Result<AuthoritativeValues, AppFailure> {
+  const occurredAt = new Date(currentInstant);
+  if (!Number.isFinite(occurredAt.getTime())) {
     return err(appFailure("SERVICE_UNAVAILABLE"));
   }
 
@@ -27,9 +37,9 @@ export function createAuthoritativeValues(
 
   return ok({
     opaqueId: generated.value,
-    occurredAt: current.value.toISOString(),
+    occurredAt: occurredAt.toISOString(),
     idempotencyExpiresAt: new Date(
-      current.value.getTime() + IDEMPOTENCY_WINDOW_MILLISECONDS,
+      occurredAt.getTime() + IDEMPOTENCY_WINDOW_MILLISECONDS,
     ).toISOString(),
   });
 }

@@ -43,6 +43,29 @@ final class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<Result<void>> signIn({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return const Success(null);
+    } on FirebaseAuthException catch (error) {
+      return Failure(_mapFirebaseFailure(error));
+    } on FirebaseException {
+      return const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'Authentication is unavailable. Try again.',
+        ),
+      );
+    }
+  }
+
+  @override
   Future<Result<String>> getIdToken() async {
     final user = _firebaseAuth.currentUser;
     if (user == null) {
@@ -86,6 +109,12 @@ final class FirebaseAuthRepository implements AuthRepository {
       'invalid-email' || 'weak-password' => const AppFailure(
         kind: AppFailureKind.authenticationInvalid,
         message: 'Registration details are invalid.',
+      ),
+      'invalid-credential' ||
+      'user-not-found' ||
+      'wrong-password' => const AppFailure(
+        kind: AppFailureKind.authenticationInvalid,
+        message: 'Authentication details are invalid.',
       ),
       'user-disabled' => const AppFailure(
         kind: AppFailureKind.authForbidden,

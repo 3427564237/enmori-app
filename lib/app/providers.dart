@@ -9,10 +9,7 @@ import '../features/auth/domain/auth_repository.dart';
 
 final backendBaseUriProvider = Provider<Uri?>((ref) {
   const configured = String.fromEnvironment('ENMORI_API_BASE_URL');
-  if (configured.isEmpty) return null;
-  final parsed = Uri.tryParse(configured);
-  if (parsed == null || !parsed.hasScheme || !parsed.hasAuthority) return null;
-  return parsed;
+  return parseApprovedBackendBaseUri(configured);
 });
 
 final backendApiClientProvider = Provider<BackendApiClient>((ref) {
@@ -27,16 +24,23 @@ final backendApiClientProvider = Provider<BackendApiClient>((ref) {
 enum RouterGateState {
   resolving,
   unauthenticated,
+  signInRequired,
   onboardingRequired,
   authenticated,
   unavailable,
+  configurationUnavailable,
+  forbidden,
 }
 
 final routerGateProvider = Provider<RouterGateState>((ref) {
   final session = ref.watch(authSessionProvider);
   return switch (session) {
     AsyncLoading<AuthSession>() => RouterGateState.resolving,
-    AsyncError<AuthSession>() => RouterGateState.unavailable,
+    AsyncError<AuthSession>(:final error) =>
+      error is AppFailure &&
+              error.kind == AppFailureKind.configurationUnavailable
+          ? RouterGateState.configurationUnavailable
+          : RouterGateState.unavailable,
     AsyncData<AuthSession>(value: AuthSessionInitializing()) =>
       RouterGateState.resolving,
     AsyncData<AuthSession>(value: AuthSessionUnauthenticated()) =>
@@ -58,7 +62,15 @@ RouterGateState _foldOnboarding(AsyncValue<Result<OnboardingStatus>> status) {
       value: Success<OnboardingStatus>(value: OnboardingCompleted()),
     ) =>
       RouterGateState.authenticated,
-    AsyncData<Result<OnboardingStatus>>(value: Failure<OnboardingStatus>()) =>
-      RouterGateState.unavailable,
+    AsyncData<Result<OnboardingStatus>>(
+      value: Failure<OnboardingStatus>(:final failure),
+    ) =>
+      switch (failure.kind) {
+        AppFailureKind.authRequired => RouterGateState.signInRequired,
+        AppFailureKind.authForbidden => RouterGateState.forbidden,
+        AppFailureKind.configurationUnavailable =>
+          RouterGateState.configurationUnavailable,
+        _ => RouterGateState.unavailable,
+      },
   };
 }
