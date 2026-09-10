@@ -98,41 +98,41 @@ A sanitized unauthenticated 401 AUTH_REQUIRED observation proves only ingress/au
 
 ### 5.1 Screen-by-screen LI operator scripts (JIN-owned preflight)
 
-These scripts are the required operator input for LI. They follow the current-main Flutter flow at `8b3f3fecb373c3dceb5b813e3b464070ee24297d`; LI must not invent copy, expected outcomes or evidence classifications.
+These scripts follow the implemented Flutter flow at current main `8b3f3fecb373c3dceb5b813e3b464070ee24297d`. LI must not invent copy, expected outcomes or evidence classifications.
 
 **Common setup and registration (repeat for each fresh branch fixture):**
 
 1. JIN records the exact current-main SHA, exact APK SHA-256, fixture version and reset result. Immediately before every ADB action, LI runs `adb get-state` and `adb devices -l`; only state `device` is acceptable.
-2. Launch the pinned APK on the vivo V2405A. On **Create account**, enter the run-scoped synthetic **Email**, **Password** and **Confirm password**, then tap **Create account**. Expected state: Firebase Email/Password registration succeeds and the app enters **Choose your Username**. Capture `core-<branch>-01-registration.png`.
-3. Enter the run-scoped synthetic **Username** and tap **Continue**. Expected state: the **Optional data use** purpose screen appears. Capture `core-<branch>-02-username.png`.
-4. Verify the approved purpose copy and supporting statement, then tap **Continue**. Expected state: **Choose your initial settings** with the two semantic controls **Accept — Public** and **Reject — Private**. Capture `core-<branch>-03-purpose.png`.
+2. Launch the pinned APK on the vivo V2405A. On **Create account**, enter run-scoped synthetic **Email**, **Password** and **Confirm password**, then tap **Create account**. Expected state: Firebase Email/Password registration succeeds and the app enters **Choose your Username**. Capture `core-<branch>-01-registration.png`.
+3. Enter the run-scoped synthetic **Username** and tap **Continue**. Expected state: **Optional data use** appears. Capture `core-<branch>-02-username.png`.
+4. Verify the approved purpose copy and supporting statement, then tap **Continue**. Expected state: **Choose your initial settings** with **Accept — Public** and **Reject — Private**. Capture `core-<branch>-03-purpose.png`.
 
 **CORE-01.A — Accept/Public:**
 
-5. Tap **Accept — Public**. This control submits onboarding immediately; there is no separate onboarding completion or Home step. Expected next state: **Note-only Check-in** composer. Capture `core-01-04-choice-to-composer.png`.
-6. In the composer, enter synthetic note label `r14-core01-note-v1` in **Note**, then tap **Save Check-in**. Expected intermediate result: **Check-in saved.** with **Confirm saved Check-in**. Capture `core-01-05-check-in-saved.png`.
-7. Tap **Confirm saved Check-in**. This performs the later backend owner read. Expected result: **Saved Check-in confirmed.** showing the same note and saved timestamp, with **Return Home**. Capture `core-01-06-later-owner-read.png`. This confirmation capture is the CORE-05.A later-read evidence for this branch.
+5. Tap **Accept — Public**. This control submits onboarding immediately; there is no separate completion or Home step. Expected next state: **Note-only Check-in** composer. Capture `core-01-04-choice-to-composer.png`.
+6. Enter synthetic note label `r14-core01-note-v1` in **Note**, then tap **Save Check-in**. Expected intermediate state: **Check-in saved.** with **Confirm saved Check-in**. Capture `core-01-05-check-in-saved.png`.
+7. Tap **Confirm saved Check-in**. This performs the later backend owner read. Expected result: **Saved Check-in confirmed.** showing the same note and saved timestamp, with **Return Home**. Capture `core-01-06-later-owner-read.png`. This is the CORE-05.A later-read capture for this branch.
 
 **CORE-02.A — Reject/Private:**
 
-8. Repeat steps 1–4 with a fresh synthetic fixture. Tap **Reject — Private**. This control submits onboarding immediately; there is no separate onboarding completion or Home step. Expected next state: **Note-only Check-in** composer. Capture `core-02-04-choice-to-composer.png`.
+8. Repeat steps 1–4 with a fresh fixture. Tap **Reject — Private**. This control submits onboarding immediately; expected next state is **Note-only Check-in** composer. Capture `core-02-04-choice-to-composer.png`.
 9. Enter synthetic note label `r14-core02-note-v1`, tap **Save Check-in**, and verify **Check-in saved.** with **Confirm saved Check-in**. Capture `core-02-05-check-in-saved.png`.
 10. Tap **Confirm saved Check-in**. Expected result: **Saved Check-in confirmed.** showing the same note and saved timestamp, with **Return Home**. Capture `core-02-06-later-owner-read.png`.
 
 **CORE-05.A — create then later owner read:**
 
-11. Use a third fresh fixture and complete registration, Username and either approved Initial Choice branch. From the resulting composer, enter `r14-core05-note-v1`, tap **Save Check-in**, and capture the **Check-in saved.** / **Confirm saved Check-in** intermediate result as `core-05-01-check-in-saved.png`.
-12. Tap **Confirm saved Check-in**. Expected result: the backend-backed later owner read displays **Saved Check-in confirmed.**, the same synthetic Note and the saved timestamp, with **Return Home**. Capture `core-05-02-later-owner-read.png`. Do not return Home or attempt to reopen a saved-item list; current Home exposes no such list.
+11. Use a third fresh fixture and complete registration, Username and either approved Initial Choice branch. In the resulting composer, enter `r14-core05-note-v1`, tap **Save Check-in**, and capture **Check-in saved.** / **Confirm saved Check-in** as `core-05-01-check-in-saved.png`.
+12. Tap **Confirm saved Check-in**. Expected result: backend-backed later owner read displays **Saved Check-in confirmed.**, the same Note and saved timestamp, with **Return Home**. Capture `core-05-02-later-owner-read.png`. Do not return Home or attempt to reopen a saved-item list; current Home exposes no such list.
 
 **Controlled reset procedure (before and after every branch):**
 
-- The immutable controlled-environment procedure is the runner at [`backend/scripts/run-emulator-tests.mjs` pinned to current main](https://github.com/3427564237/enmori-app/blob/8b3f3fecb373c3dceb5b813e3b464070ee24297d/backend/scripts/run-emulator-tests.mjs), which creates an isolated temporary profile, runs the Auth/Firestore reset and removes the profile after execution. JIN is responsible for applying the same approved reset procedure to the non-real physical-run backend before and after each LI branch, recording the fixture version, pre-reset/post-reset counts and reset result.
+- The immutable reset implementation is [`backend/scripts/run-emulator-tests.mjs` at current main](https://github.com/3427564237/enmori-app/blob/8b3f3fecb373c3dceb5b813e3b464070ee24297d/backend/scripts/run-emulator-tests.mjs). It creates an isolated temporary profile, runs the controlled Auth/Firestore reset, and removes the profile after execution. JIN is responsible for applying the same approved non-real reset procedure to the physical-run backend before and after each LI branch, recording fixture version, pre-reset/post-reset counts and reset result.
 - LI may clear local data only for application ID `com.enmori.app`, after recording JIN's reset instruction, and must re-check ADB state before that action. LI does not reset unrelated packages or handle environment credentials.
-- After capture, JIN records the sanitized evidence paths and confirms that no credential, token, serial or private content is stored.
+- After capture, JIN records sanitized evidence paths and verifies that no credential, token, serial or private content is stored.
 
 **LI → JIN handoff:**
 
-LI returns one sanitized run sheet per branch to JIN through the approved project channel, containing fixture version, branch, action number, timestamp/timezone, observed copy/state, screenshot/XML filenames and any deviation. JIN commits the immutable files to `docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/`, updates the result matrix and defect/retest ledger, and publishes the final evidence commit. No credential, token, device serial, tailnet address/FQDN or private content is transmitted.
+LI returns one sanitized run sheet per branch through the approved project channel, containing fixture version, branch, action number, timestamp/timezone, observed copy/state, screenshot/XML filenames and any deviation. JIN commits immutable files under `docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/`, updates the result matrix and defect/retest ledger, and publishes the final evidence commit. No credential, token, device serial, tailnet address/FQDN or private content is transmitted.
 
 ## 6. Execution split and accessibility boundary
 
