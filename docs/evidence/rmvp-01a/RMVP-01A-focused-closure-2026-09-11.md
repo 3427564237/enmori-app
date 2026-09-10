@@ -2,8 +2,8 @@
 
 - **Work package:** Issue #4 / current RMVP-01A closure
 - **Packet owner:** JIN ZIHAN (@chuxi12483468)
-- **Prepared:** 2026-09-11 17:45:58 +08:00 (SGT)
-- **Current main at preparation:** 8b3f3fecb373c3dceb5b813e3b464070ee24297d
+- **Prepared:** Exact preparation time not recorded; commit publication time is not used as a substitute.
+- **Current-main pin used to create this packet branch:** 8b3f3fecb373c3dceb5b813e3b464070ee24297d (current `main` at branch creation)
 - **Status:** Focused evidence closure packet; independent review requested
 - **Sponsor boundary:** S-SPONSOR-0910-RMVP01A-A11Y-DEFER, recorded in PR #21 at exact head 20bce0a1191dafa1dee4e7d25b90e9d16ef84a0c and merged to main as 8b3f3fecb373c3dceb5b813e3b464070ee24297d
 
@@ -68,7 +68,7 @@ No result is Pass until the listed identity, steps, observations and sanitized e
 
 ## 5. Numbered execution checklist
 
-1. Freeze current main at 8b3f3fecb373c3dceb5b813e3b464070ee24297d or record the exact newer main SHA immediately before a run.
+1. Verify that current `main` is still 8b3f3fecb373c3dceb5b813e3b464070ee24297d; if it has moved, record the exact newer main SHA and refresh this packet branch before any run.
 2. Build the Android artifact from that exact SHA and record the APK SHA-256; do not reuse an unpinned artifact.
 3. Generate fresh synthetic registration credentials, opaque IDs and idempotency keys per run. Never log raw credentials, tokens or keys.
 4. Reset the controlled Auth/Firestore state before each scenario and after the suite; record the reset result and sanitized fixture version.
