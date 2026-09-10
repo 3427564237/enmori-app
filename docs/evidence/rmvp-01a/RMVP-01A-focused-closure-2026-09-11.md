@@ -97,42 +97,41 @@ A sanitized unauthenticated 401 AUTH_REQUIRED observation proves only ingress/au
 
 ### 5.1 Screen-by-screen LI operator scripts (JIN-owned preflight)
 
-The following scripts are the required operator input for LI. They use synthetic labels only; LI must not invent copy, expected outcomes or evidence classifications.
+These scripts are the required operator input for LI. They follow the current-main Flutter flow at `8b3f3fecb373c3dceb5b813e3b464070ee24297d`; LI must not invent copy, expected outcomes or evidence classifications.
 
-**Common setup and registration (each branch):**
+**Common setup and registration (repeat for each fresh branch fixture):**
 
-1. JIN records the exact current-main SHA and APK SHA-256, fixture version and reset result. LI verifies `adb get-state` and `adb devices -l` immediately before each ADB action; only state `device` is acceptable.
-2. Launch the pinned APK on the vivo V2405A. On Registration, enter the run-scoped synthetic Email and Password, then tap **Submit**. Expected state: Firebase Email/Password registration succeeds and the app enters the Username onboarding screen. Capture `core-<branch>-01-registration.png`.
-3. On Username onboarding, enter the run-scoped synthetic Username and tap **Continue**. Expected state: the purpose/information screen is shown. Capture `core-<branch>-02-purpose.png`.
-4. Verify the approved purpose copy is visible: “This release does not perform optional AI or Recommendation processing in this setup flow. Your choice saves whether separately authorised optional features may use their approved data later. Reject keeps optional processing off. Either choice lets you continue.” Tap **Continue**. Expected state: **Choose your initial settings** with distinct Accept/Public and Reject/Private choices. Capture `core-<branch>-03-initial-choice.png`.
+1. JIN records the exact current-main SHA, exact APK SHA-256, fixture version and reset result. Immediately before every ADB action, LI runs `adb get-state` and `adb devices -l`; only state `device` is acceptable.
+2. Launch the pinned APK on the vivo V2405A. On **Create account**, enter the run-scoped synthetic **Email**, **Password** and **Confirm password**, then tap **Create account**. Expected state: Firebase Email/Password registration succeeds and the app enters **Choose your Username**. Capture `core-<branch>-01-registration.png`.
+3. Enter the run-scoped synthetic **Username** and tap **Continue**. Expected state: the **Optional data use** purpose screen appears. Capture `core-<branch>-02-username.png`.
+4. Verify the approved purpose copy and supporting statement, then tap **Continue**. Expected state: **Choose your initial settings** with the two semantic controls **Accept — Public** and **Reject — Private**. Capture `core-<branch>-03-purpose.png`.
 
 **CORE-01.A — Accept/Public:**
 
-5. Tap the semantic control labelled **Accept — optional processing — Public**. Expected state: accepted optional-processing choice and Public visibility are selected; no private/protected reason is exposed. Tap the screen’s continue/complete action. Expected state: Home shell with **New Check-in**. Capture `core-01-04-home.png`.
-6. Tap **New Check-in**. On the Note-only composer, enter synthetic note label `r14-core01-note-v1` and tap **Save Check-in**. Expected state: the save/confirmation action is available and one Note-only create is submitted. Capture `core-01-05-create.png`.
-7. Tap the confirmation control. Expected copy/state: **Saved Check-in confirmed.** with **Return Home**. Capture `core-01-06-confirmed.png`.
-8. Tap **Return Home**, reopen the saved Check-in and verify the same synthetic note and displayed timestamp are read by the owner. Capture `core-01-07-later-owner-read.png`.
+5. Tap **Accept — Public**. This control submits onboarding immediately; there is no separate onboarding completion or Home step. Expected next state: **Note-only Check-in** composer. Capture `core-01-04-choice-to-composer.png`.
+6. In the composer, enter synthetic note label `r14-core01-note-v1` in **Note**, then tap **Save Check-in**. Expected intermediate result: **Check-in saved.** with **Confirm saved Check-in**. Capture `core-01-05-check-in-saved.png`.
+7. Tap **Confirm saved Check-in**. This performs the later backend owner read. Expected result: **Saved Check-in confirmed.** showing the same note and saved timestamp, with **Return Home**. Capture `core-01-06-later-owner-read.png`. This confirmation capture is the CORE-05.A later-read evidence for this branch.
 
 **CORE-02.A — Reject/Private:**
 
-9. Repeat steps 1–4 with a fresh synthetic fixture. Tap the semantic control labelled **Reject — optional processing — Private**. Expected state: rejected optional-processing choice and Private visibility are selected; optional processing remains off. Tap continue/complete and verify Home shell with **New Check-in**. Capture `core-02-04-home.png`.
-10. Tap **New Check-in**, enter `r14-core02-note-v1`, tap **Save Check-in**, then confirm. Expected copy/state: **Saved Check-in confirmed.** with **Return Home**. Capture `core-02-05-create.png` and `core-02-06-confirmed.png`.
-11. Tap **Return Home**, reopen the saved Check-in and verify the same synthetic note and displayed timestamp are read by the owner. Capture `core-02-07-later-owner-read.png`.
+8. Repeat steps 1–4 with a fresh synthetic fixture. Tap **Reject — Private**. This control submits onboarding immediately; there is no separate onboarding completion or Home step. Expected next state: **Note-only Check-in** composer. Capture `core-02-04-choice-to-composer.png`.
+9. Enter synthetic note label `r14-core02-note-v1`, tap **Save Check-in**, and verify **Check-in saved.** with **Confirm saved Check-in**. Capture `core-02-05-check-in-saved.png`.
+10. Tap **Confirm saved Check-in**. Expected result: **Saved Check-in confirmed.** showing the same note and saved timestamp, with **Return Home**. Capture `core-02-06-later-owner-read.png`.
 
 **CORE-05.A — create then later owner read:**
 
-12. Use a third fresh fixture. Complete registration, Username and either approved Initial Choice branch using steps 1–5 or 1–4 plus step 9. From Home tap **New Check-in**, enter `r14-core05-note-v1`, tap **Save Check-in**, confirm **Saved Check-in confirmed.**, return Home, then reopen the saved item. Expected result: exactly one matching controlled Check-in, with the owner later reading the same Note and timestamp. Capture `core-05-01-create.png` and `core-05-02-later-owner-read.png`.
+11. Use a third fresh fixture and complete registration, Username and either approved Initial Choice branch. From the resulting composer, enter `r14-core05-note-v1`, tap **Save Check-in**, and capture the **Check-in saved.** / **Confirm saved Check-in** intermediate result as `core-05-01-check-in-saved.png`.
+12. Tap **Confirm saved Check-in**. Expected result: the backend-backed later owner read displays **Saved Check-in confirmed.**, the same synthetic Note and the saved timestamp, with **Return Home**. Capture `core-05-02-later-owner-read.png`. Do not return Home or attempt to reopen a saved-item list; current Home exposes no such list.
 
 **Controlled reset procedure (before and after every branch):**
 
-- JIN is responsible for the approved non-real Auth/Firestore environment reset. For each run JIN creates a fresh fixture version, stops any prior controlled session, resets only the synthetic Auth user and Firestore records belonging to that fixture, and records pre-reset/post-reset counts and the reset result. The exact reset procedure is the project’s approved controlled-environment runbook; credentials, tokens and raw identifiers are never placed in the repository.
-- LI may clear local data only for application ID `com.enmori.app`, after recording the reset request, and must re-check ADB state before the clearing action. LI does not reset unrelated packages or handle environment credentials.
-- After evidence capture JIN records the retained sanitized evidence paths and confirms no raw credential, token, serial or private content is stored.
+- The immutable controlled-environment procedure is the runner at [`backend/scripts/run-emulator-tests.mjs` pinned to current main](https://github.com/3427564237/enmori-app/blob/8b3f3fecb373c3dceb5b813e3b464070ee24297d/backend/scripts/run-emulator-tests.mjs), which creates an isolated temporary profile, runs the Auth/Firestore reset and removes the profile after execution. JIN is responsible for applying the same approved reset procedure to the non-real physical-run backend before and after each LI branch, recording the fixture version, pre-reset/post-reset counts and reset result.
+- LI may clear local data only for application ID `com.enmori.app`, after recording JIN's reset instruction, and must re-check ADB state before that action. LI does not reset unrelated packages or handle environment credentials.
+- After capture, JIN records the sanitized evidence paths and confirms that no credential, token, serial or private content is stored.
 
 **LI → JIN handoff:**
 
-LI returns one sanitized run sheet per branch to JIN through the approved project channel, containing the fixture version, branch, action number, timestamp/timezone, observed copy/state, screenshot/XML filenames and any deviation. JIN attaches the immutable files to the destination paths, updates the result matrix and defect/retest ledger, and publishes the final evidence commit. No credential, token, device serial, tailnet address/FQDN or private content is transmitted.
-
+LI returns one sanitized run sheet per branch to JIN through the approved project channel, containing fixture version, branch, action number, timestamp/timezone, observed copy/state, screenshot/XML filenames and any deviation. JIN commits the immutable files to `docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/`, updates the result matrix and defect/retest ledger, and publishes the final evidence commit. No credential, token, device serial, tailnet address/FQDN or private content is transmitted.
 
 ## 6. Execution split and accessibility boundary
 
