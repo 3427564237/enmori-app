@@ -74,12 +74,12 @@ JIN is the R14 owner and Testing Lead. JIN's available personal device is iOS, s
 | Preflight field | Status | Recorded value / boundary |
 |---|---|---|
 | Current main SHA | Pass | 8b3f3fecb373c3dceb5b813e3b464070ee24297d |
-| APK SHA-256 | Pass | Current-main debug APK SHA-256 `F00E9074874B8AECB6220A697CC2BD34578F10E476671FC927ECF272A7A31EC0`; [immutable preflight record](2026-09-11-current-main-apk-preflight.md) |
+| APK SHA-256 | Ready for LI verification | Current-main controlled-config debug APK SHA-256 `131D3E7B34CF95ED8D12B7840CBC31FF9C239CFF074E25DC783E9EFB0FFCA50E`; [immutable preflight record](2026-09-11-current-main-apk-preflight.md). LI must verify the delivered copy before installation. |
 | Android operator/device | Ready for LI run | LI HOURUI; vivo V2405A, Android 16/API 36; device serial is intentionally omitted |
 | ADB precondition | Not Run | Before every ADB action LI must verify adb get-state and adb devices -l; only state device is acceptable; local reset authorization is limited to application ID com.enmori.app |
 | Tailscale on Android test device | Not Run | Verify Tailscale is online in LI's Android app after any out-of-band enrollment; the workstation needs only ADB, and no workstation Tailscale CLI is required or recorded |
 | Private HTTPS Serve edge | Not Run | LI must verify that the app reaches only the private HTTPS Serve edge; record endpoint class and HTTP result without address/FQDN or credentials |
-| Fixture/reset | Ready | JIN supplies fresh synthetic credentials, opaque IDs and idempotency keys; reset controlled Auth/Firestore before and after each scenario |
+| Fixture/reset | Blocked for physical run | The committed `run-emulator-tests.mjs` procedure resets only the Auth/Firestore Emulator. An approved immutable physical Firebase/Firestore reset procedure and its responsible environment owner are still required; no physical reset is claimed. |
 | Evidence destination | Ready | docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/ and docs/evidence/rmvp-01a/2026-09-11-q04-non-accessibility/ |
 
 A sanitized unauthenticated 401 AUTH_REQUIRED observation proves only ingress/auth enforcement. It is not a product-flow result and is not a UAT Pass.
@@ -88,7 +88,7 @@ A sanitized unauthenticated 401 AUTH_REQUIRED observation proves only ingress/au
 1. Verify that current `main` is still 8b3f3fecb373c3dceb5b813e3b464070ee24297d; if it has moved, record the exact newer main SHA and refresh this packet branch before any run.
 2. Build the Android artifact from that exact SHA and record the APK SHA-256; do not reuse an unpinned artifact.
 3. Generate fresh synthetic registration credentials, opaque IDs and idempotency keys per run. Never log raw credentials, tokens or keys.
-4. Reset the controlled Auth/Firestore state before each scenario and after the suite; record the reset result and sanitized fixture version.
+4. Obtain and record the immutable physical Firebase/Firestore reset procedure from the responsible controlled-environment owner. If it is unavailable, stop the physical run and record `Blocked`; the Emulator reset script is not a physical reset procedure.
 5. Execute CORE-01.A and CORE-02.A as separate Accept/Public and Reject/Private branches, then execute CORE-05.A create followed by later owner read.
 6. Execute the affected X-01 malformed/expired identity branches with controlled protected operations; the completed malformed branch is recorded in the JIN loopback evidence, while expired remains Not Run until a fresh expired-token fixture is available. Expect the approved fail-closed response and no mutation.
 7. Capture ordinary-scale responsive and non-accessibility Q04 provenance/traceability evidence only. Keep accessibility-only execution visible as Not Run — Deferred.
@@ -124,9 +124,10 @@ These scripts follow the implemented Flutter flow at current main `8b3f3fecb373c
 11. Use a third fresh fixture and complete registration, Username and either approved Initial Choice branch. In the resulting composer, enter `r14-core05-note-v1`, tap **Save Check-in**, and capture **Check-in saved.** / **Confirm saved Check-in** as `core-05-01-check-in-saved.png`.
 12. Tap **Confirm saved Check-in**. Expected result: backend-backed later owner read displays **Saved Check-in confirmed.**, the same Note and saved timestamp, with **Return Home**. Capture `core-05-02-later-owner-read.png`. Do not return Home or attempt to reopen a saved-item list; current Home exposes no such list.
 
-**Controlled reset procedure (before and after every branch):**
+**Controlled reset boundary (before and after every branch):**
 
-- The immutable reset implementation is [`backend/scripts/run-emulator-tests.mjs` at current main](https://github.com/3427564237/enmori-app/blob/8b3f3fecb373c3dceb5b813e3b464070ee24297d/backend/scripts/run-emulator-tests.mjs). It creates an isolated temporary profile, runs the controlled Auth/Firestore reset, and removes the profile after execution. JIN is responsible for applying the same approved non-real reset procedure to the physical-run backend before and after each LI branch, recording fixture version, pre-reset/post-reset counts and reset result.
+- The immutable [`backend/scripts/run-emulator-tests.mjs` procedure](https://github.com/3427564237/enmori-app/blob/8b3f3fecb373c3dceb5b813e3b464070ee24297d/backend/scripts/run-emulator-tests.mjs) creates an isolated temporary profile and resets only the controlled Auth/Firestore Emulator. It is valid for loopback evidence, but it is not a physical Firebase/Firestore reset procedure.
+- The physical LI run is blocked until the controlled-environment owner supplies an immutable physical reset procedure, responsible operator and availability confirmation. JIN must record the procedure reference, fixture version and before/after result; no physical reset is inferred from the Emulator script.
 - LI may clear local data only for application ID `com.enmori.app`, after recording JIN's reset instruction, and must re-check ADB state before that action. LI does not reset unrelated packages or handle environment credentials.
 - After capture, JIN records sanitized evidence paths and verifies that no credential, token, serial or private content is stored.
 
@@ -151,13 +152,13 @@ This route correction does not waive functional Android evidence, non-accessibil
 
 **R14 execution/evidence owner:** JIN ZIHAN (@chuxi12483468). JIN owns the functional Android UAT execution plan, evidence collation and defect/retest ledger. LI is the physical operator only; SHI independently reviews the final exact evidence head; LI performs later scope acceptance.
 
-**Current blocker (evidence closure, not implementation):** the current-main debug APK is now built and its SHA-256 is recorded in the immutable preflight record. Remaining JIN-owned preflight items are LI's action-time ADB confirmation (`adb get-state` and `adb devices -l` showing `device`), Android-phone Tailscale-online confirmation and private HTTPS Serve-edge reachability. The local ADB check still has no attached device, but LI's connected vivo V2405A is the designated operator device.
+**Current blocker (evidence closure, not implementation):** the controlled-config current-main APK is built and its SHA-256 is recorded in the immutable preflight record, but LI must still verify the delivered copy before installation. The physical run also lacks an approved immutable Firebase/Firestore reset procedure and responsible environment owner. Remaining JIN-owned preflight items are LI's action-time ADB confirmation (`adb get-state` and `adb devices -l` showing `device`), Android-phone Tailscale-online confirmation and private HTTPS Serve-edge reachability. The local ADB check still has no attached device, but LI's connected vivo V2405A is the designated operator device.
 
-**Exact missing input:** LI's ADB preflight confirmation (`adb get-state` and `adb devices -l` showing state `device`), Android-phone Tailscale-online confirmation and private HTTPS Serve reachability. The workstation needs only ADB; the current-main APK and SHA-256 are recorded in the immutable preflight record. No private invitation is requested from JIN and no device serial or tailnet data may be recorded.
+**Exact missing input:** LI's ADB preflight confirmation (`adb get-state` and `adb devices -l` showing state `device`), Android-phone Tailscale-online confirmation, private HTTPS Serve reachability, and an immutable physical Firebase/Firestore reset procedure with a named responsible operator. The workstation needs only ADB; the current-main APK and SHA-256 are recorded in the immutable preflight record. No private invitation is requested from JIN and no device serial or tailnet data may be recorded.
 
 **Exact required output:** one sanitized current-main evidence packet with a Pass/Fail/Blocked/Not Run result for CORE-01.A, CORE-02.A, CORE-05.A and each X-01 branch, exact APK/build identity, LI device model/OS (without serial), executor, endpoint class, fixture/reset, timestamp/timezone, numbered observations, sanitized captures/logs and SHI's independent disposition. A 401 AUTH_REQUIRED result is ingress/auth evidence only and cannot be recorded as a product-flow or UAT Pass.
 
-**Next executable windows:** After LI's action-time ADB, phone-side Tailscale and private Serve-edge checks are recorded, LI may run the focused Android steps on vivo V2405A / Android 16/API 36. JIN's malformed/expired X-01 loopback evidence is separately published; expired identity remains Not Run until a fresh expired-token fixture is available.
+**Next executable windows:** After LI's action-time ADB, phone-side Tailscale, private Serve-edge checks and the physical reset procedure are recorded, LI may run the focused Android steps on vivo V2405A / Android 16/API 36. JIN's malformed X-01 loopback evidence has been rerun under the pinned Node.js version; expired identity remains `Not Run` because no approved fresh expired-token fixture/procedure is available. The expired branch must be executed or reported as a focused blocker before it can be accepted.
 
 Deferred accessibility-only rows remain Not Run — Deferred and are excluded from this blocker. The full 45-case Week 9 Release UAT, Release acceptance and Project Done remain not passed and are outside this focused slice.
 
