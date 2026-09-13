@@ -40,6 +40,22 @@ function freshIdempotencyKey(): string {
   return randomBytes(24).toString("base64url");
 }
 
+function expiredIdentityToken(uid: string): string {
+  const now = Math.floor(Date.now() / 1_000);
+  const encode = (value: Readonly<Record<string, unknown>>) =>
+    Buffer.from(JSON.stringify(value), "utf8").toString("base64url");
+  return `${encode({ alg: "none", typ: "JWT" })}.${encode({
+    aud: environment.projectId,
+    auth_time: now - 7_200,
+    exp: now - 3_600,
+    firebase: { identities: {}, sign_in_provider: "password" },
+    iat: now - 7_200,
+    iss: `https://securetoken.google.com/${environment.projectId}`,
+    sub: uid,
+    user_id: uid,
+  })}.`;
+}
+
 type JsonObject = Record<string, unknown>;
 type ApiResult = { readonly response: Response; readonly body: JsonObject };
 
@@ -385,6 +401,25 @@ test("R13 identity, validation, incomplete onboarding and privacy-safe negative 
   });
   assert.equal(incompleteCreate.response.status, 409);
   assert.equal(errorCode(incompleteCreate.body), "ONBOARDING_REQUIRED");
+});
+
+test("X-01 expired identity fails closed on a protected operation", async () => {
+  const response = await requestJson("/v1/me/onboarding", {
+    method: "PUT",
+    headers: authHeaders(
+      expiredIdentityToken(fixtureUid("expired-identity")),
+      freshIdempotencyKey(),
+    ),
+    body: JSON.stringify({
+      username: fixtureUsername("expired"),
+      initialChoice: "accept",
+    }),
+  });
+
+  assert.equal(response.response.status, 401);
+  assert.equal(errorCode(response.body), "AUTH_REQUIRED");
+  assert.equal(errorMessage(response.body), "Your session has expired. Sign in again.");
+  assert.deepEqual(await firestore.listCollections(), []);
 });
 
 test("R13-T12 cancellation aborts the client response and exact retry reconciles the authoritative result", async () => {

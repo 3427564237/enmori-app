@@ -32,9 +32,9 @@ The runner completed with **1 test pass, 0 failures, 0 skipped/todo**, and emula
 | Malformed identity | Pass | Protected onboarding request with malformed Bearer token returned HTTP 401 with stable `AUTH_REQUIRED`; no mutation. |
 | Privacy-safe missing/non-owner read | Pass | Missing and non-owner reads were indistinguishable (404 / `CHECKIN_UNAVAILABLE` and safe message); protected Note content was not disclosed. |
 | Incomplete onboarding protected create | Pass | Authenticated but incomplete fixture returned HTTP 409 `ONBOARDING_REQUIRED`; no product Check-in was created. |
-| Expired identity | Not Run | No approved fresh expired-token fixture/procedure was available for this run. The approved contract mapping remains `AUTH_REQUIRED`; this branch is an explicit focused blocker and requires a separately generated valid expired identity before acceptance. |
+| Expired identity | Superseded by Pass record | The expired branch was not run in this historical record; see the fresh protected-operation execution in [`2026-09-13-jin-x01-expired-identity.md`](2026-09-13-jin-x01-expired-identity.md). |
 
-This record is a controlled loopback result only. It is not Android physical evidence or formal UAT acceptance. The expired-identity row remains `Not Run`; no UAT, Release or Project Done status is inferred.
+This record is a controlled loopback result only. It is not Android physical evidence or formal UAT acceptance. The expired-identity row is superseded by the fresh evidence linked above; no UAT, Release or Project Done status is inferred.
 
 ## Evidence destination and handoff
 
