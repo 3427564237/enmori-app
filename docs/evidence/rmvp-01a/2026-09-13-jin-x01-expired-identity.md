@@ -3,7 +3,7 @@
 - **Work package:** Issue #4 / R14 affected X-01
 - **Executor:** JIN ZIHAN (`@chuxi12483468`)
 - **Product/current-main SHA:** `8b3f3fecb373c3dceb5b813e3b464070ee24297d`
-- **Test-harness commit:** `36dd312` (contains the focused integration test and its execution evidence)
+- **Test-harness commit:** `36dd31291c9914cc4e5cdcf2b7858837019c9c3c` (contains the focused integration test and its execution evidence)
 - **Execution timestamp:** 2026-09-13 10:44:33 +08:00 (SGT; command completed)
 - **Controlled environment:** Firebase Auth + Firestore Emulator, demo project `demo-enmori-rmvp01a-r10`, loopback only
 - **Toolchain:** Node.js `24.19.0`, pnpm `11.19.0`, Firebase CLI `15.29.0`, Java `21.0.12.1`
