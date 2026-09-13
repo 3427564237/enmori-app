@@ -1,5 +1,9 @@
 # Open Questions and Required Decisions
 
+## Sprint 2 bounded disposition — 2026-09-13
+
+[S-PM-0913-SPRINT2](decisions/2026-09-13-sprint2-scope-capacity-contract.md) records LI's confirmed Sprint 2 scope, 104h capacity, own-interest cardinality, minimum Interest/Event interfaces and synthetic-data boundary. It does not close the wider Profile, Event-publishing, AI-product, Friend-discoverability, Q04 provenance or Release-evidence questions. Owners record concrete contract mappings inside the approved boundary before shared implementation integration; unresolved material authority is escalated only for the affected behavior. Internal AI/Friend components are not proof of those wider gates. Earlier unresolved and resolved records below remain retained.
+
 This register contains only unresolved authority, behavior, verification, or implementation-boundary questions after S-PM-0831. Resolved items are retained in §5 so that the decision trail is not erased. A plausible implementation choice is not a confirmed requirement.
 
 ## Register management metadata
