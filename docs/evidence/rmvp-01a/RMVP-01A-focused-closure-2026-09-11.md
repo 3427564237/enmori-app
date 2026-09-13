@@ -4,6 +4,7 @@
 - **Packet owner:** JIN ZIHAN (@chuxi12483468)
 - **Prepared:** Exact preparation time not recorded; commit publication time is not used as a substitute.
 - **Current-main pin used to create this packet branch:** 8b3f3fecb373c3dceb5b813e3b464070ee24297d (current `main` at branch creation)
+- **Latest assembled evidence head:** e2c1473dec2423922472e9d5834e8a806267adf8 (PR #23 branch; includes the JIN X-01 expired-identity evidence)
 - **Status:** Focused evidence closure packet; independent review requested
 - **Sponsor boundary:** S-SPONSOR-0910-RMVP01A-A11Y-DEFER, recorded in PR #21 at exact head 20bce0a1191dafa1dee4e7d25b90e9d16ef84a0c and merged to main as 8b3f3fecb373c3dceb5b813e3b464070ee24297d
 
@@ -19,9 +20,9 @@ The evidence result below describes only behavior actually observed in immutable
 
 | Anchor / boundary | Required branch | Evidence-backed result | Formal focused-UAT status | Immutable source |
 |---|---|---|---|---|
-| CORE-01.A | Firebase registration, valid Username, Initial Choice Accept, Public onboarding, Note-only Check-in and later owner read | Pass — LI physical product-chain path observed | Not Run — acceptance pending | [LI product-chain README](https://github.com/3427564237/enmori-app/blob/3a732041c79326b7ad53c52bef99cf52ab981713/docs/evidence/rmvp-01a/2026-09-09-li-phone-product-chain/README.md) |
-| CORE-02.A | Firebase registration, valid Username, Initial Choice Reject, Private onboarding, Note-only Check-in and later owner read | Pass — LI physical product-chain path observed | Not Run — acceptance pending | [LI product-chain README](https://github.com/3427564237/enmori-app/blob/3a732041c79326b7ad53c52bef99cf52ab981713/docs/evidence/rmvp-01a/2026-09-09-li-phone-product-chain/README.md) |
-| CORE-05.A | Note-only Check-in create followed by independent later owner read | Pass — both LI physical paths observed | Not Run — acceptance pending | [Accept/Public capture](https://github.com/3427564237/enmori-app/blob/3a732041c79326b7ad53c52bef99cf52ab981713/docs/evidence/rmvp-01a/2026-09-09-li-phone-product-chain/accept-public-later-read.png), [Reject/Private capture](https://github.com/3427564237/enmori-app/blob/3a732041c79326b7ad53c52bef99cf52ab981713/docs/evidence/rmvp-01a/2026-09-09-li-phone-product-chain/reject-private-later-read.png) |
+| CORE-01.A | Firebase registration, valid Username, Initial Choice Accept, Public onboarding, Note-only Check-in and later owner read | Pass — LI physical product-chain path observed | Not Run — acceptance pending | [LI focused-run README](https://github.com/3427564237/enmori-app/blob/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/README.md) |
+| CORE-02.A | Firebase registration, valid Username, Initial Choice Reject, Private onboarding, Note-only Check-in and later owner read | Pass — LI physical product-chain path observed | Not Run — acceptance pending | [LI focused-run README](https://github.com/3427564237/enmori-app/blob/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/README.md) |
+| CORE-05.A | Note-only Check-in create followed by independent later owner read | Pass — LI observed a fresh independent path | Not Run — acceptance pending | [CORE-05 later-read capture](https://github.com/3427564237/enmori-app/blob/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/core05-later-read.png) |
 | X-01 | Missing identity on protected operation | Pass — unauthenticated HTTPS 401 AUTH_REQUIRED observed by LI | Not Run — focused UAT acceptance pending | [R14 packet](https://github.com/3427564237/enmori-app/blob/8b3f3fecb373c3dceb5b813e3b464070ee24297d/docs/evidence/rmvp-01a/R14-android-product-chain-execution-2026-09-09.md) |
 | X-01 | Malformed identity | Pass — JIN controlled loopback returned 401 AUTH_REQUIRED | Not Run — Android UAT pending | [JIN X-01 loopback record](2026-09-11-jin-x01-loopback.md) |
 | X-01 | Expired identity | Pass — fresh synthetic expired identity returned 401 `AUTH_REQUIRED` on a protected operation with no mutation | Not Run — Android UAT acceptance pending | [JIN expired-identity evidence](2026-09-13-jin-x01-expired-identity.md) |
@@ -43,7 +44,7 @@ The original R12 catalogue remains a design record with its initial-result colum
 | T05B Username unavailable | Not Run | Not Run | Not Run |
 | T05C Onboarding conflict | Not Run | Not Run | Not Run |
 | T06A Invalid Firebase registration | Not Run | Not Run | Not Run |
-| T06B AUTH_REQUIRED | Pass for missing/malformed branch; expired branch Not Run | Pass for missing-identity boundary only; malformed/expired Not Run | Partial: missing and malformed observed in controlled loopback; expired remains Not Run |
+| T06B AUTH_REQUIRED | Pass for missing, malformed and expired protected-operation branches | Pass for missing-identity boundary only; malformed/expired remain loopback-only | Pass for all three JIN-controlled loopback branches; formal Android negative-path UAT remains Not Run |
 | T07 Note-only create | Pass | Pass | Pass for observed behavior; formal UAT acceptance pending |
 | T08 Invalid Note validation | Not Run | Not Run | Not Run |
 | T09A Forbidden identity | Not Run | Not Run | Not Run |
@@ -62,8 +63,8 @@ Rows marked Not Run are not current-stage accessibility blockers. They remain vi
 | Focused functional Android UAT: CORE-01.A / CORE-02.A | Not Run — acceptance pending | Build commit and APK SHA; named Android device/OS; executor; controlled endpoint; fixture version/reset; timestamp/timezone; numbered steps; observed output | docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/ |
 | Focused functional Android UAT: CORE-05.A | Not Run — acceptance pending | Same fields; include create response, later owner read and server-time projection | docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/ |
 | Focused X-01 malformed/expired branch | Pass — malformed and expired protected-operation branches evidenced | Current-main code head; controlled Auth/Backend endpoint; synthetic identity fixture; reset result; exact response code/safe message; executor and timestamp | docs/evidence/rmvp-01a/2026-09-13-jin-x01-expired-identity.md |
-| Non-accessibility Q04 provenance/traceability | Not Run | Source decision IDs, immutable file/commit links, scope mapping, reviewer and timestamp; no accessibility-only rows | docs/evidence/rmvp-01a/2026-09-11-q04-non-accessibility/ |
-| Ordinary-scale responsive evidence | Not Run | Current-main build/APK identity, approved ordinary-scale profile(s), device/viewport, executor, timestamp/timezone, numbered captures and sanitized logs | docs/evidence/rmvp-01a/2026-09-11-q04-non-accessibility/ |
+| Non-accessibility Q04 provenance/traceability | Not Run — partial source mapping supplied | Source decision IDs, immutable file/commit links, scope mapping, reviewer and timestamp; no accessibility-only rows | [LI M02/M06/M07/M08/M19/M20 mapping](https://github.com/3427564237/enmori-app/blob/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/README.md) |
+| Ordinary-scale responsive evidence | Not Run — one ordinary-scale profile supplied | Current-main build/APK identity, approved ordinary-scale profile(s), device/viewport, executor, timestamp/timezone, numbered captures and sanitized logs | [LI ordinary-scale profile and captures](https://github.com/3427564237/enmori-app/blob/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/README.md) |
 
 No result is Pass until the listed identity, steps, observations and sanitized evidence fields are complete and independently reviewable.
 
@@ -76,11 +77,11 @@ JIN is the R14 owner and Testing Lead. JIN's available personal device is iOS, s
 | Current main SHA | Pass | 8b3f3fecb373c3dceb5b813e3b464070ee24297d |
 | APK SHA-256 | Ready for LI verification | Current-main controlled-config debug APK SHA-256 `131D3E7B34CF95ED8D12B7840CBC31FF9C239CFF074E25DC783E9EFB0FFCA50E`; [immutable preflight record](2026-09-11-current-main-apk-preflight.md). LI must verify the delivered copy before installation. |
 | Android operator/device | Ready for LI run | LI HOURUI; vivo V2405A, Android 16/API 36; device serial is intentionally omitted |
-| ADB precondition | Not Run | Before every ADB action LI must verify adb get-state and adb devices -l; only state device is acceptable; local reset authorization is limited to application ID com.enmori.app |
-| Tailscale on Android test device | Not Run | Verify Tailscale is online in LI's Android app after any out-of-band enrollment; the workstation needs only ADB, and no workstation Tailscale CLI is required or recorded |
-| Private HTTPS Serve edge | Not Run | LI must verify that the app reaches only the private HTTPS Serve edge; record endpoint class and HTTP result without address/FQDN or credentials |
-| Fixture/reset | Blocked for physical run | The committed `run-emulator-tests.mjs` procedure resets only the Auth/Firestore Emulator. An approved immutable physical Firebase/Firestore reset procedure and its responsible environment owner are still required; no physical reset is claimed. |
-| Evidence destination | Ready | docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/ and docs/evidence/rmvp-01a/2026-09-11-q04-non-accessibility/ |
+| ADB precondition | Pass | LI verified `adb get-state` and `adb devices -l` immediately before every ADB action; only state `device` was accepted; local reset authorization was limited to `com.enmori.app` |
+| Tailscale on Android test device | Pass — route observed | Phone VPN presence and successful configured-app access were observed; no separate Tailscale UI screenshot is claimed; the workstation used ADB only |
+| Private HTTPS Serve edge | Pass — route observed | Unauthenticated edge probe returned 401 `AUTH_REQUIRED`, and configured app flows subsequently demonstrated private API reachability; the 401 alone is not a UAT result |
+| Fixture/reset | Pass | Immutable physical procedure supplied in [commit `2bd17c1`](https://github.com/3427564237/enmori-app/blob/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/physical-fixture-procedure.md); fresh synthetic identities/reservations were absent before each branch and exact cleanup absence was verified |
+| Evidence destination | Pass | [LI focused-run evidence head `dfa4853...`](https://github.com/3427564237/enmori-app/tree/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/) and JIN's X-01 evidence under `docs/evidence/rmvp-01a/` |
 
 A sanitized unauthenticated 401 AUTH_REQUIRED observation proves only ingress/auth enforcement. It is not a product-flow result and is not a UAT Pass.
 ## 5. Numbered execution checklist
@@ -88,7 +89,7 @@ A sanitized unauthenticated 401 AUTH_REQUIRED observation proves only ingress/au
 1. Verify that current `main` is still 8b3f3fecb373c3dceb5b813e3b464070ee24297d; if it has moved, record the exact newer main SHA and refresh this packet branch before any run.
 2. Build the Android artifact from that exact SHA and record the APK SHA-256; do not reuse an unpinned artifact.
 3. Generate fresh synthetic registration credentials, opaque IDs and idempotency keys per run. Never log raw credentials, tokens or keys.
-4. Obtain and record the immutable physical Firebase/Firestore reset procedure from the responsible controlled-environment owner. If it is unavailable, stop the physical run and record `Blocked`; the Emulator reset script is not a physical reset procedure.
+4. Use and cite the supplied immutable physical Firebase/Firestore procedure at the LI focused-run evidence head. It verifies fresh synthetic identities/reservations before each branch and exact post-run cleanup; the Emulator reset script remains separate loopback evidence.
 5. Execute CORE-01.A and CORE-02.A as separate Accept/Public and Reject/Private branches, then execute CORE-05.A create followed by later owner read.
 6. The affected X-01 malformed and expired identity branches are evidenced with controlled protected operations in the linked JIN records. Expect the approved fail-closed response and no mutation; do not promote this loopback result to Android UAT.
 7. Capture ordinary-scale responsive and non-accessibility Q04 provenance/traceability evidence only. Keep accessibility-only execution visible as Not Run — Deferred.
@@ -126,8 +127,8 @@ These scripts follow the implemented Flutter flow at current main `8b3f3fecb373c
 
 **Controlled reset boundary (before and after every branch):**
 
-- The immutable [`backend/scripts/run-emulator-tests.mjs` procedure](https://github.com/3427564237/enmori-app/blob/8b3f3fecb373c3dceb5b813e3b464070ee24297d/backend/scripts/run-emulator-tests.mjs) creates an isolated temporary profile and resets only the controlled Auth/Firestore Emulator. It is valid for loopback evidence, but it is not a physical Firebase/Firestore reset procedure.
-- The physical LI run is blocked until the controlled-environment owner supplies an immutable physical reset procedure, responsible operator and availability confirmation. JIN must record the procedure reference, fixture version and before/after result; no physical reset is inferred from the Emulator script.
+- The immutable [`backend/scripts/run-emulator-tests.mjs` procedure](https://github.com/3427564237/enmori-app/blob/8b3f3fecb373c3dceb5b813e3b464070ee24297d/backend/scripts/run-emulator-tests.mjs) creates an isolated temporary profile and resets only the controlled Auth/Firestore Emulator. It remains valid for loopback evidence, but is not the physical reset procedure.
+- The physical LI run used the supplied [immutable physical fixture procedure](https://github.com/3427564237/enmori-app/blob/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/physical-fixture-procedure.md), with LI named as operator and fresh synthetic before/after verification recorded.
 - LI may clear local data only for application ID `com.enmori.app`, after recording JIN's reset instruction, and must re-check ADB state before that action. LI does not reset unrelated packages or handle environment credentials.
 - After capture, JIN records sanitized evidence paths and verifies that no credential, token, serial or private content is stored.
 
@@ -152,13 +153,13 @@ This route correction does not waive functional Android evidence, non-accessibil
 
 **R14 execution/evidence owner:** JIN ZIHAN (@chuxi12483468). JIN owns the functional Android UAT execution plan, evidence collation and defect/retest ledger. LI is the physical operator only; SHI independently reviews the final exact evidence head; LI performs later scope acceptance.
 
-**Current blocker (evidence closure, not implementation):** the controlled-config current-main APK is built and its SHA-256 is recorded in the immutable preflight record, but LI must still verify the delivered copy before installation. The physical run also lacks an approved immutable Firebase/Firestore reset procedure and responsible environment owner. Remaining JIN-owned preflight items are LI's action-time ADB confirmation (`adb get-state` and `adb devices -l` showing `device`), Android-phone Tailscale-online confirmation and private HTTPS Serve-edge reachability. The local ADB check still has no attached device, but LI's connected vivo V2405A is the designated operator device.
+**Current blocker (evidence closure, not implementation):** LI's physical Android execution and physical fixture/reset handoff are complete and linked above; JIN's X-01 malformed and expired loopback evidence is complete. Remaining gates are SHI's independent current-head disposition, formal focused-UAT acceptance, full non-accessibility Q04 provenance/traceability and any additional responsive profiles required by the acceptance authority.
 
-**Exact missing input:** LI's ADB preflight confirmation (`adb get-state` and `adb devices -l` showing state `device`), Android-phone Tailscale-online confirmation, private HTTPS Serve reachability, and an immutable physical Firebase/Firestore reset procedure with a named responsible operator. The workstation needs only ADB; the current-main APK and SHA-256 are recorded in the immutable preflight record. No private invitation is requested from JIN and no device serial or tailnet data may be recorded.
+**Exact missing input:** SHI's independent disposition on the assembled exact head and the competent authority's formal focused-UAT/Q04 acceptance decisions. No physical device, reset-procedure or X-01 fixture blocker remains. No private invitation, device serial or tailnet data is required in the packet.
 
 **Exact required output:** one sanitized current-main evidence packet with a Pass/Fail/Blocked/Not Run result for CORE-01.A, CORE-02.A, CORE-05.A and each X-01 branch, exact APK/build identity, LI device model/OS (without serial), executor, endpoint class, fixture/reset, timestamp/timezone, numbered observations, sanitized captures/logs and SHI's independent disposition. A 401 AUTH_REQUIRED result is ingress/auth evidence only and cannot be recorded as a product-flow or UAT Pass.
 
-**Next executable windows:** After LI's action-time ADB, phone-side Tailscale, private Serve-edge checks and the physical reset procedure are recorded, LI may run the focused Android steps on vivo V2405A / Android 16/API 36. JIN's malformed and expired X-01 loopback evidence is now complete under the pinned Node.js version; these results remain loopback evidence only and do not replace Android UAT.
+**Next executable windows:** JIN has completed the X-01 malformed and expired loopback evidence and consumed LI's physical observations. SHI may now review the assembled exact head; after that disposition, LI may perform later Sprint-scope acceptance. The loopback results remain separate from formal Android UAT acceptance.
 
 Deferred accessibility-only rows remain Not Run — Deferred and are excluded from this blocker. The full 45-case Week 9 Release UAT, Release acceptance and Project Done remain not passed and are outside this focused slice.
 
