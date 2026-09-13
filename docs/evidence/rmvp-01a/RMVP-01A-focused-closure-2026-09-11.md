@@ -4,7 +4,7 @@
 - **Packet owner:** JIN ZIHAN (@chuxi12483468)
 - **Prepared:** Exact preparation time not recorded; commit publication time is not used as a substitute.
 - **Current-main pin used to create this packet branch:** 8b3f3fecb373c3dceb5b813e3b464070ee24297d (current `main` at branch creation)
-- **Latest assembled evidence head:** e2c1473dec2423922472e9d5834e8a806267adf8 (PR #23 branch; includes the JIN X-01 expired-identity evidence)
+- **Historical JIN X-01 evidence snapshot:** e2c1473dec2423922472e9d5834e8a806267adf8 (superseded by the current packet revision; the final handoff SHA is recorded in the PR comment)
 - **Status:** Focused evidence closure packet; independent review requested
 - **Sponsor boundary:** S-SPONSOR-0910-RMVP01A-A11Y-DEFER, recorded in PR #21 at exact head 20bce0a1191dafa1dee4e7d25b90e9d16ef84a0c and merged to main as 8b3f3fecb373c3dceb5b813e3b464070ee24297d
 
@@ -63,8 +63,8 @@ Rows marked Not Run are not current-stage accessibility blockers. They remain vi
 | Focused functional Android UAT: CORE-01.A / CORE-02.A | Not Run — acceptance pending | Build commit and APK SHA; named Android device/OS; executor; controlled endpoint; fixture version/reset; timestamp/timezone; numbered steps; observed output | docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/ |
 | Focused functional Android UAT: CORE-05.A | Not Run — acceptance pending | Same fields; include create response, later owner read and server-time projection | docs/evidence/rmvp-01a/2026-09-11-focused-functional-uat/ |
 | Focused X-01 malformed/expired branch | Pass — malformed and expired protected-operation branches evidenced | Current-main code head; controlled Auth/Backend endpoint; synthetic identity fixture; reset result; exact response code/safe message; executor and timestamp | docs/evidence/rmvp-01a/2026-09-13-jin-x01-expired-identity.md |
-| Non-accessibility Q04 provenance/traceability | Not Run — partial source mapping supplied | Source decision IDs, immutable file/commit links, scope mapping, reviewer and timestamp; no accessibility-only rows | [LI M02/M06/M07/M08/M19/M20 mapping](https://github.com/3427564237/enmori-app/blob/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/README.md) |
-| Ordinary-scale responsive evidence | Not Run — one ordinary-scale profile supplied | Current-main build/APK identity, approved ordinary-scale profile(s), device/viewport, executor, timestamp/timezone, numbered captures and sanitized logs | [LI ordinary-scale profile and captures](https://github.com/3427564237/enmori-app/blob/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/README.md) |
+| Non-accessibility Q04 provenance/traceability | Not Run — partial source mapping supplied | JIN must add Version-5 provenance/digest/reference and map M02/M06/M07/M08/M19/M20 to DEV-15/23/24, SP-01/05/06 and RMVP/UAT; accessibility-only rows stay excluded | [LI M02/M06/M07/M08/M19/M20 mapping](https://github.com/3427564237/enmori-app/blob/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/README.md) |
+| Ordinary-scale responsive evidence | Not Run — portrait profile supplied; landscape gap remains | Approved 360x800 portrait and 800x360 landscape at scale 1.0 are required; only the portrait profile is supplied in the LI packet | [LI ordinary-scale portrait profile](https://github.com/3427564237/enmori-app/blob/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/README.md) |
 
 No result is Pass until the listed identity, steps, observations and sanitized evidence fields are complete and independently reviewable.
 
@@ -75,8 +75,8 @@ JIN is the R14 owner and Testing Lead. JIN's available personal device is iOS, s
 | Preflight field | Status | Recorded value / boundary |
 |---|---|---|
 | Current main SHA | Pass | 8b3f3fecb373c3dceb5b813e3b464070ee24297d |
-| APK SHA-256 | Ready for LI verification | Current-main controlled-config debug APK SHA-256 `131D3E7B34CF95ED8D12B7840CBC31FF9C239CFF074E25DC783E9EFB0FFCA50E`; [immutable preflight record](2026-09-11-current-main-apk-preflight.md). LI must verify the delivered copy before installation. |
-| Android operator/device | Ready for LI run | LI HOURUI; vivo V2405A, Android 16/API 36; device serial is intentionally omitted |
+| APK SHA-256 | Pass — LI verified delivered artifact | Current-main controlled-config debug APK SHA-256 `131D3E7B34CF95ED8D12B7840CBC31FF9C239CFF074E25DC783E9EFB0FFCA50E`; LI rehashed the delivered 194,780,208-byte copy and verified the five approved Firebase/API values. The earlier preflight record remains historical. |
+| Android operator/device | Pass — LI physical run complete | LI HOURUI; vivo V2405A, Android 16/API 36; device serial is intentionally omitted; [immutable LI observations](https://github.com/3427564237/enmori-app/tree/dfa4853b8796e132d1e48e1eae1257f4748d859f/docs/evidence/rmvp-01a/2026-09-13-li-focused-run/) |
 | ADB precondition | Pass | LI verified `adb get-state` and `adb devices -l` immediately before every ADB action; only state `device` was accepted; local reset authorization was limited to `com.enmori.app` |
 | Tailscale on Android test device | Pass — route observed | Phone VPN presence and successful configured-app access were observed; no separate Tailscale UI screenshot is claimed; the workstation used ADB only |
 | Private HTTPS Serve edge | Pass — route observed | Unauthenticated edge probe returned 401 `AUTH_REQUIRED`, and configured app flows subsequently demonstrated private API reachability; the 401 alone is not a UAT result |
@@ -153,13 +153,13 @@ This route correction does not waive functional Android evidence, non-accessibil
 
 **R14 execution/evidence owner:** JIN ZIHAN (@chuxi12483468). JIN owns the functional Android UAT execution plan, evidence collation and defect/retest ledger. LI is the physical operator only; SHI independently reviews the final exact evidence head; LI performs later scope acceptance.
 
-**Current blocker (evidence closure, not implementation):** LI's physical Android execution and physical fixture/reset handoff are complete and linked above; JIN's X-01 malformed and expired loopback evidence is complete. Remaining gates are SHI's independent current-head disposition, formal focused-UAT acceptance, full non-accessibility Q04 provenance/traceability and any additional responsive profiles required by the acceptance authority.
+**Current blocker (evidence closure, not implementation):** LI's physical Android execution and physical fixture/reset handoff are complete and linked above; JIN's X-01 malformed and expired loopback evidence is complete. JIN still owns two non-deferred Q04 outputs: the approved 800x360 landscape profile at scale 1.0, and the Version-5 provenance/digest/reference plus M02/M06/M07/M08/M19/M20 to DEV-15/23/24 to SP-01/05/06 to RMVP/UAT traceability map. SHI's independent disposition and formal focused-UAT acceptance remain later gates.
 
-**Exact missing input:** SHI's independent disposition on the assembled exact head and the competent authority's formal focused-UAT/Q04 acceptance decisions. No physical device, reset-procedure or X-01 fixture blocker remains. No private invitation, device serial or tailnet data is required in the packet.
+**Exact missing input:** JIN-owned Q04 evidence listed above, including one 800x360 landscape capture set at scale 1.0 and the Version-5 provenance/digest/reference and traceability links. Owner: JIN ZIHAN. Next handoff: JIN publishes the Q04 delta and sends the landscape run sheet to LI HOURUI for the next available Android session; the exact device window is to be booked and recorded before that run. SHI's independent disposition and the competent authority's formal focused-UAT acceptance are separate later gates. No physical device, reset-procedure or X-01 fixture blocker remains.
 
 **Exact required output:** one sanitized current-main evidence packet with a Pass/Fail/Blocked/Not Run result for CORE-01.A, CORE-02.A, CORE-05.A and each X-01 branch, exact APK/build identity, LI device model/OS (without serial), executor, endpoint class, fixture/reset, timestamp/timezone, numbered observations, sanitized captures/logs and SHI's independent disposition. A 401 AUTH_REQUIRED result is ingress/auth evidence only and cannot be recorded as a product-flow or UAT Pass.
 
-**Next executable windows:** JIN has completed the X-01 malformed and expired loopback evidence and consumed LI's physical observations. SHI may now review the assembled exact head; after that disposition, LI may perform later Sprint-scope acceptance. The loopback results remain separate from formal Android UAT acceptance.
+**Next executable windows:** JIN will publish the non-accessibility Q04 provenance/traceability delta and coordinate one LI Android session for the missing 800x360 landscape profile. SHI may then review the assembled exact head; after that disposition, LI may perform later Sprint-scope acceptance. The loopback results remain separate from formal Android UAT acceptance.
 
 Deferred accessibility-only rows remain Not Run — Deferred and are excluded from this blocker. The full 45-case Week 9 Release UAT, Release acceptance and Project Done remain not passed and are outside this focused slice.
 
