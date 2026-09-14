@@ -43,7 +43,7 @@ final class BackendApiClient {
   Future<Result<JsonObject>> put(
     String path, {
     required JsonObject body,
-    required String idempotencyKey,
+    String? idempotencyKey,
   }) => _send('PUT', path, body: body, idempotencyKey: idempotencyKey);
 
   Future<Result<JsonObject>> post(
@@ -181,6 +181,9 @@ final class BackendApiClient {
       'ONBOARDING_CONFLICT' => AppFailureKind.onboardingConflict,
       'CHECKIN_INVALID' => AppFailureKind.checkInInvalid,
       'CHECKIN_UNAVAILABLE' => AppFailureKind.checkInUnavailable,
+      'INTEREST_SELECTION_INVALID' => AppFailureKind.interestSelectionInvalid,
+      'INTEREST_REVISION_PRECONDITION_FAILED' =>
+        AppFailureKind.interestRevisionPreconditionFailed,
       'IDEMPOTENCY_KEY_INVALID' => AppFailureKind.idempotencyKeyInvalid,
       'IDEMPOTENCY_CONFLICT' => AppFailureKind.idempotencyConflict,
       'SERVICE_UNAVAILABLE' => AppFailureKind.serviceUnavailable,

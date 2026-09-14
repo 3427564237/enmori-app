@@ -5,6 +5,7 @@ import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/check_in/domain/check_in_repository.dart';
+import 'package:enmori/features/interests/domain/interest_repository.dart';
 
 final class FakeIdempotencyKeyGenerator implements IdempotencyKeyGenerator {
   FakeIdempotencyKeyGenerator(this._keys);
@@ -124,6 +125,61 @@ final class FakeCheckInRepository implements CheckInRepository {
   Future<Result<CheckIn>> readOwned({required String checkInId}) async {
     readIds.add(checkInId);
     return readResult;
+  }
+}
+
+final class FakeInterestRepository implements InterestRepository {
+  Result<List<InterestTagOption>> catalogueResult = Success([
+    const InterestTagOption(interestTagId: 'tag-art', displayName: 'Art'),
+    const InterestTagOption(interestTagId: 'tag-books', displayName: 'Books'),
+  ]);
+  Result<InterestSelection> ownResult = const Success(
+    InterestSelection(interestTags: [], revision: 0),
+  );
+  Result<InterestSelection>? replaceResult;
+  Completer<Result<List<InterestTagOption>>>? pendingCatalogue;
+  Completer<Result<InterestSelection>>? pendingOwn;
+  Completer<Result<InterestSelection>>? pendingReplace;
+  int catalogueReads = 0;
+  int ownReads = 0;
+  final savedIds = <List<String>>[];
+  final expectedRevisions = <int>[];
+
+  @override
+  Future<Result<List<InterestTagOption>>> readSelectableTags() async {
+    catalogueReads++;
+    return pendingCatalogue?.future ?? catalogueResult;
+  }
+
+  @override
+  Future<Result<InterestSelection>> readOwn() async {
+    ownReads++;
+    return pendingOwn?.future ?? ownResult;
+  }
+
+  @override
+  Future<Result<InterestSelection>> replaceOwn({
+    required List<String> interestTagIds,
+    required int expectedRevision,
+  }) async {
+    savedIds.add([...interestTagIds]);
+    expectedRevisions.add(expectedRevision);
+    final pending = pendingReplace;
+    if (pending != null) return pending.future;
+    return replaceResult ??
+        Success(
+          InterestSelection(
+            interestTags: [
+              for (final id in interestTagIds)
+                SelectedInterestTag(
+                  interestTagId: id,
+                  displayName: id == 'tag-art' ? 'Art' : 'Books',
+                  lifecycleState: InterestLifecycleState.active,
+                ),
+            ],
+            revision: expectedRevision + 1,
+          ),
+        );
   }
 }
 

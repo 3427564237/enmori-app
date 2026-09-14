@@ -30,6 +30,18 @@ export class InMemoryFirestoreGateway implements FirestoreGateway {
         const document = candidate.get(path);
         return document === undefined ? undefined : copyDocument(document);
       },
+      list: async (collectionPath) => {
+        const prefix = `${collectionPath}/`;
+        return [...candidate.entries()]
+          .filter(([path]) => {
+            if (!path.startsWith(prefix)) return false;
+            return !path.slice(prefix.length).includes("/");
+          })
+          .map(([path, document]) => ({
+            id: path.slice(prefix.length),
+            data: copyDocument(document),
+          }));
+      },
       create: (path, document) => {
         if (candidate.has(path)) throw new Error("document already exists");
         candidate.set(path, copyDocument(document));

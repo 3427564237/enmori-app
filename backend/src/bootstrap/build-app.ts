@@ -54,6 +54,9 @@ function validationFailureCode(
     if (request.method === "GET" && route === "/v1/check-ins/:checkInId") {
       return "CHECKIN_UNAVAILABLE";
     }
+    if (request.method === "PUT" && route === "/v1/me/interests") {
+      return "INTEREST_SELECTION_INVALID";
+    }
   }
   return "SERVICE_UNAVAILABLE";
 }

@@ -31,6 +31,14 @@ export const APP_FAILURE_CATALOGUE = {
     statusCode: 404,
     message: "This Check-in is unavailable.",
   },
+  INTEREST_SELECTION_INVALID: {
+    statusCode: 422,
+    message: "Choose up to 10 available interests and try again.",
+  },
+  INTEREST_REVISION_PRECONDITION_FAILED: {
+    statusCode: 412,
+    message: "Your interests changed. Reload them before saving again.",
+  },
   IDEMPOTENCY_KEY_INVALID: {
     statusCode: 400,
     message: "Provide a valid request key and try again.",

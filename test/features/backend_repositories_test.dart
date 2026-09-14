@@ -7,6 +7,8 @@ import 'package:enmori/features/account/data/backend_account_repository.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
 import 'package:enmori/features/check_in/data/backend_check_in_repository.dart';
 import 'package:enmori/features/check_in/domain/check_in_repository.dart';
+import 'package:enmori/features/interests/data/backend_interest_repository.dart';
+import 'package:enmori/features/interests/domain/interest_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -403,6 +405,138 @@ void main() {
       }
     });
   });
+
+  group('BackendInterestRepository', () {
+    test('reads selectable tags and own Active/Inactive selection', () async {
+      final client = _client((request) async {
+        if (request.url.path == '/v1/interest-tags') {
+          return http.Response(
+            jsonEncode({
+              'interestTags': [
+                {'interestTagId': 'tag-art', 'displayName': 'Art'},
+              ],
+            }),
+            200,
+          );
+        }
+        return http.Response(jsonEncode(_interestEnvelope), 200);
+      });
+      final repository = BackendInterestRepository(client);
+
+      final catalogue = await repository.readSelectableTags();
+      final own = await repository.readOwn();
+      client.close();
+
+      expect(
+        (catalogue as Success<List<InterestTagOption>>)
+            .value
+            .single
+            .displayName,
+        'Art',
+      );
+      final selection = (own as Success<InterestSelection>).value;
+      expect(selection.revision, 3);
+      expect(
+        selection.interestTags.single.lifecycleState,
+        InterestLifecycleState.inactive,
+      );
+    });
+
+    test('saves the revision payload without an idempotency key', () async {
+      late http.Request captured;
+      final client = _client((request) async {
+        captured = request;
+        return http.Response(jsonEncode(_interestEnvelope), 200);
+      });
+      final repository = BackendInterestRepository(client);
+
+      final result = await repository.replaceOwn(
+        interestTagIds: ['tag-old'],
+        expectedRevision: 2,
+      );
+      client.close();
+
+      expect(captured.method, 'PUT');
+      expect(captured.url.path, '/v1/me/interests');
+      expect(captured.headers.containsKey('idempotency-key'), isFalse);
+      expect(jsonDecode(captured.body), {
+        'interestTagIds': ['tag-old'],
+        'expectedRevision': 2,
+      });
+      expect((result as Success<InterestSelection>).value.revision, 3);
+    });
+
+    test('rejects malformed or duplicate Interest projections', () async {
+      final invalidPayloads = [
+        {
+          'interestTags': [
+            {'interestTagId': 'tag-art'},
+          ],
+        },
+        {
+          'interests': {
+            'interestTags': [
+              {
+                'interestTagId': 'tag-art',
+                'displayName': 'Art',
+                'lifecycleState': 'active',
+              },
+              {
+                'interestTagId': 'tag-art',
+                'displayName': 'Art',
+                'lifecycleState': 'active',
+              },
+            ],
+            'revision': 1,
+          },
+        },
+      ];
+      for (final payload in invalidPayloads) {
+        final client = _client(
+          (request) async => http.Response(jsonEncode(payload), 200),
+        );
+        final repository = BackendInterestRepository(client);
+        final result = payload.containsKey('interests')
+            ? await repository.readOwn()
+            : await repository.readSelectableTags();
+        client.close();
+        expect((result as Failure).failure.kind, AppFailureKind.unexpected);
+      }
+    });
+
+    test('maps Interest invalid and stale revision failures', () async {
+      final cases = [
+        (
+          'INTEREST_SELECTION_INVALID',
+          AppFailureKind.interestSelectionInvalid,
+          422,
+        ),
+        (
+          'INTEREST_REVISION_PRECONDITION_FAILED',
+          AppFailureKind.interestRevisionPreconditionFailed,
+          412,
+        ),
+      ];
+      for (final (code, kind, status) in cases) {
+        final client = _client(
+          (request) async => http.Response(
+            jsonEncode({
+              'error': {
+                'code': code,
+                'message': 'Safe failure.',
+                'requestId': 'req-interest',
+              },
+            }),
+            status,
+          ),
+        );
+        final result = await BackendInterestRepository(client)
+            .replaceOwn(interestTagIds: [], expectedRevision: 0);
+        client.close();
+        expect((result as Failure<InterestSelection>).failure.kind, kind);
+      }
+    });
+  });
 }
 
 final class _HangingBodyClient extends http.BaseClient {
@@ -429,5 +563,18 @@ const _checkInEnvelope = {
     'checkInId': 'chk_test',
     'note': 'A controlled test note.',
     'createdAt': '2026-09-03T03:20:00Z',
+  },
+};
+
+const _interestEnvelope = {
+  'interests': {
+    'interestTags': [
+      {
+        'interestTagId': 'tag-old',
+        'displayName': 'Legacy',
+        'lifecycleState': 'inactive',
+      },
+    ],
+    'revision': 3,
   },
 };

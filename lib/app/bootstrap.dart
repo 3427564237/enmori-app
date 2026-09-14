@@ -10,6 +10,8 @@ import '../features/auth/data/firebase_auth_repository.dart';
 import '../features/auth/data/unavailable_auth_repository.dart';
 import '../features/check_in/check_in_providers.dart';
 import '../features/check_in/data/backend_check_in_repository.dart';
+import '../features/interests/data/backend_interest_repository.dart';
+import '../features/interests/interests_providers.dart';
 import 'app.dart';
 import 'providers.dart';
 
@@ -48,6 +50,10 @@ Future<void> bootstrap() async {
         checkInRepositoryProvider.overrideWith(
           (ref) =>
               BackendCheckInRepository(ref.watch(backendApiClientProvider)),
+        ),
+        interestRepositoryProvider.overrideWith(
+          (ref) =>
+              BackendInterestRepository(ref.watch(backendApiClientProvider)),
         ),
       ],
       child: const EnmoriApp(),

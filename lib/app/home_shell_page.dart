@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 final class HomeShellPage extends StatelessWidget {
-  const HomeShellPage({required this.onStartCheckIn, super.key});
+  const HomeShellPage({
+    required this.onStartCheckIn,
+    this.onEditInterests,
+    super.key,
+  });
 
   final VoidCallback onStartCheckIn;
+  final VoidCallback? onEditInterests;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +28,13 @@ final class HomeShellPage extends StatelessWidget {
               onPressed: onStartCheckIn,
               icon: const Icon(Icons.edit_note),
               label: const Text('New Check-in'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              key: const Key('edit-interests-button'),
+              onPressed: onEditInterests,
+              icon: const Icon(Icons.interests_outlined),
+              label: const Text('Edit interests'),
             ),
           ],
         ),
