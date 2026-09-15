@@ -15,6 +15,7 @@ test("maps the approved error catalogue to exact HTTP statuses", () => {
       ]),
     ),
     {
+      REQUEST_INVALID: 400,
       AUTH_REQUIRED: 401,
       AUTH_FORBIDDEN: 403,
       USERNAME_INVALID: 400,

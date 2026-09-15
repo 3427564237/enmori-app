@@ -2,6 +2,8 @@ import Fastify, {
   type FastifyInstance,
   type FastifyRequest,
 } from "fastify";
+import type { RecommendEvents } from "../event-recommendations/application/recommend-events.js";
+import { registerEventRecommendationRoute } from "../event-recommendations/transport/register-route.js";
 import type { AppFailureCode } from "../shared/application/app-failure.js";
 import { sendFailureCode } from "../transport/error-response.js";
 import {
@@ -10,7 +12,7 @@ import {
 } from "../transport/register-routes.js";
 
 export async function buildApp(
-  dependencies: R4RouteDependencies,
+  dependencies: R4RouteDependencies & { readonly recommendEvents?: Pick<RecommendEvents, "execute"> },
 ): Promise<FastifyInstance> {
   const app = Fastify({
     logger: false,
@@ -24,6 +26,12 @@ export async function buildApp(
   });
 
   await registerR4Routes(app, dependencies);
+  if (dependencies.recommendEvents !== undefined) {
+    await registerEventRecommendationRoute(app, {
+      identityVerifier: dependencies.identityVerifier,
+      recommendEvents: dependencies.recommendEvents,
+    });
+  }
   await app.ready();
   return app;
 }
@@ -45,6 +53,9 @@ function validationFailureCode(
     if (context === "headers") return "IDEMPOTENCY_KEY_INVALID";
 
     const route = request.routeOptions.url;
+    if (context === "querystring" && route === "/v1/recommendations/events") {
+      return "REQUEST_INVALID";
+    }
     if (request.method === "PUT" && route === "/v1/me/onboarding") {
       return "USERNAME_INVALID";
     }

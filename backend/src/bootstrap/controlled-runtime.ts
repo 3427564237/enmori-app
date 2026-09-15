@@ -1,4 +1,7 @@
 import { pathToFileURL } from "node:url";
+import { RecommendEvents } from "../event-recommendations/application/recommend-events.js";
+import { FirebaseAdminEventReadGateway } from "../event-recommendations/infrastructure/event-read-gateway.js";
+import { FirestoreEventRecommendationRepository } from "../event-recommendations/infrastructure/firestore-event-recommendation-repository.js";
 
 import {
   deleteApp,
@@ -46,6 +49,9 @@ async function createControlledRuntime(
     const clock = new SystemClock();
     const ids = new CryptoOpaqueIdGenerator();
     const app = await buildApp({
+      recommendEvents: new RecommendEvents(new FirestoreEventRecommendationRepository(
+        new FirebaseAdminEventReadGateway(getFirestore(firebaseApp)),
+      ), clock),
       identityVerifier: new FirebaseIdentityVerifier(getAuth(firebaseApp)),
       completeOnboarding: new CompleteOnboarding(
         onboardingRepository,

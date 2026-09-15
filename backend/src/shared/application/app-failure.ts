@@ -1,4 +1,8 @@
 export const APP_FAILURE_CATALOGUE = {
+  REQUEST_INVALID: {
+    statusCode: 400,
+    message: "Request parameters are invalid.",
+  },
   AUTH_REQUIRED: {
     statusCode: 401,
     message: "Your session has expired. Sign in again.",

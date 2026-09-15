@@ -1,5 +1,10 @@
 export const ROUTE_INVENTORY = [
   {
+    method: "GET",
+    path: "/v1/recommendations/events",
+    successStatuses: [200],
+  },
+  {
     method: "PUT",
     path: "/v1/me/onboarding",
     successStatuses: [200, 201],

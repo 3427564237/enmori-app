@@ -1,6 +1,7 @@
 import type { FastifySchema } from "fastify";
 
 export const approvedFailureCodes = [
+  "REQUEST_INVALID",
   "AUTH_REQUIRED",
   "AUTH_FORBIDDEN",
   "USERNAME_INVALID",
