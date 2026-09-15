@@ -48,7 +48,10 @@ void main() {
     );
     await _screenshot(binding, 'r7_03_m07_paired_initial_choice');
 
-    await _pumpEvidencePage(tester, HomeShellPage(onStartCheckIn: () {}));
+    await _pumpEvidencePage(
+      tester,
+      HomeShellPage(onStartCheckIn: () {}, onSeeAllEvents: () {}),
+    );
     expect(find.byKey(const Key('route-home')), findsOneWidget);
     expect(find.byKey(const Key('r6-new-check-in-button')), findsOneWidget);
     await _screenshot(binding, 'r7_04_m08_home_shell');

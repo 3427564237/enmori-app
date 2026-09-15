@@ -8,6 +8,9 @@ import '../../features/auth/auth_providers.dart';
 import '../../features/auth/presentation/registration_page.dart';
 import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/check_in/presentation/check_in_page.dart';
+import '../../features/event_recommendations/domain/event_recommendation_repository.dart';
+import '../../features/event_recommendations/presentation/event_recommendations_controller.dart';
+import '../../features/event_recommendations/presentation/event_recommendations_page.dart';
 import '../../features/interests/presentation/interest_editor_page.dart';
 import '../home_shell_page.dart';
 import '../providers.dart';
@@ -21,6 +24,7 @@ abstract final class AppRoutes {
   static const home = '/home';
   static const checkIn = '/check-in';
   static const interests = '/interests';
+  static const eventRecommendations = '/events';
   static const unavailable = '/unavailable';
   static const configurationUnavailable = '/configuration-unavailable';
   static const forbidden = '/account-unavailable';
@@ -69,8 +73,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.home,
         builder: (context, state) => HomeShellPage(
           onStartCheckIn: () => context.go(AppRoutes.checkIn),
-          onEditInterests: () => context.push<bool>(AppRoutes.interests),
+          onEditInterests: () async {
+            final saved = await context.push<bool>(AppRoutes.interests);
+            if (saved == true) {
+              await ref
+                  .read(eventRecommendationsControllerProvider.notifier)
+                  .load(view: EventRecommendationView.home);
+            }
+          },
+          onSeeAllEvents: () => context.go(AppRoutes.eventRecommendations),
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.eventRecommendations,
+        builder: (context, state) => const EventRecommendationsPage(),
       ),
       GoRoute(
         path: AppRoutes.checkIn,

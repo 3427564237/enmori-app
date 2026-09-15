@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../features/event_recommendations/presentation/event_recommendations_page.dart';
+
 final class HomeShellPage extends StatelessWidget {
   const HomeShellPage({
     required this.onStartCheckIn,
     this.onEditInterests,
+    required this.onSeeAllEvents,
     super.key,
   });
 
   final VoidCallback onStartCheckIn;
   final VoidCallback? onEditInterests;
+  final VoidCallback onSeeAllEvents;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +25,7 @@ final class HomeShellPage extends StatelessWidget {
           children: [
             Text('Home', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 12),
-            const Text('A bounded shell for account and check-in entry.'),
+            const Text('Your Check-in and upcoming event recommendations.'),
             const SizedBox(height: 24),
             FilledButton.icon(
               key: const Key('r6-new-check-in-button'),
@@ -36,6 +40,13 @@ final class HomeShellPage extends StatelessWidget {
               icon: const Icon(Icons.interests_outlined),
               label: const Text('Edit interests'),
             ),
+            const SizedBox(height: 32),
+            Text(
+              'Events for you',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 12),
+            EventRecommendationsSection(onSeeAll: onSeeAllEvents),
           ],
         ),
       ),

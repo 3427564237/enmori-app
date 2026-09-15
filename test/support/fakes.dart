@@ -6,6 +6,7 @@ import 'package:enmori/features/account/domain/account_repository.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/check_in/domain/check_in_repository.dart';
 import 'package:enmori/features/interests/domain/interest_repository.dart';
+import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 
 final class FakeIdempotencyKeyGenerator implements IdempotencyKeyGenerator {
   FakeIdempotencyKeyGenerator(this._keys);
@@ -183,6 +184,28 @@ final class FakeInterestRepository implements InterestRepository {
   }
 }
 
+final class FakeEventRecommendationRepository
+    implements EventRecommendationRepository {
+  Result<EventRecommendationResponse> homeResult = Success(
+    testEventRecommendations(),
+  );
+  Result<EventRecommendationResponse> allResult = Success(
+    testEventRecommendations(),
+  );
+  final views = <EventRecommendationView>[];
+
+  @override
+  Future<Result<EventRecommendationResponse>> read({
+    required EventRecommendationView view,
+  }) async {
+    views.add(view);
+    return switch (view) {
+      EventRecommendationView.home => homeResult,
+      EventRecommendationView.all => allResult,
+    };
+  }
+}
+
 ProductAccount testAccount({String username = 'miku_01'}) {
   return ProductAccount(
     username: username,
@@ -197,5 +220,38 @@ CheckIn testCheckIn() {
     checkInId: 'chk_test',
     note: 'A controlled test note.',
     createdAt: DateTime.utc(2026, 9, 3, 3, 20),
+  );
+}
+
+EventRecommendationResponse testEventRecommendations() {
+  return EventRecommendationResponse(
+    asOf: DateTime.utc(2026, 9, 15, 9),
+    formulaVersion: 'q03-v1',
+    items: [
+      EventRecommendation(
+        eventId: 'evt_03',
+        title: 'Third-ranked event',
+        startAt: DateTime.utc(2026, 9, 18, 10),
+        endAt: DateTime.utc(2026, 9, 18, 11),
+        matchedInterestLabels: const ['Music'],
+        reasonCode: 'MATCHED_INTERESTS',
+      ),
+      EventRecommendation(
+        eventId: 'evt_01',
+        title: 'First-ranked event',
+        startAt: DateTime.utc(2026, 9, 16, 10),
+        endAt: DateTime.utc(2026, 9, 16, 11),
+        matchedInterestLabels: const ['Art', 'Music'],
+        reasonCode: 'MATCHED_INTERESTS',
+      ),
+      EventRecommendation(
+        eventId: 'evt_02',
+        title: 'Second-ranked event',
+        startAt: DateTime.utc(2026, 9, 17, 10),
+        endAt: DateTime.utc(2026, 9, 17, 11),
+        matchedInterestLabels: const ['Art'],
+        reasonCode: 'MATCHED_INTERESTS',
+      ),
+    ],
   );
 }

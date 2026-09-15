@@ -7,6 +7,8 @@ import 'package:enmori/features/account/data/backend_account_repository.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
 import 'package:enmori/features/check_in/data/backend_check_in_repository.dart';
 import 'package:enmori/features/check_in/domain/check_in_repository.dart';
+import 'package:enmori/features/event_recommendations/data/backend_event_recommendation_repository.dart';
+import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 import 'package:enmori/features/interests/data/backend_interest_repository.dart';
 import 'package:enmori/features/interests/domain/interest_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -537,6 +539,64 @@ void main() {
       }
     });
   });
+
+  group('BackendEventRecommendationRepository', () {
+    test(
+      'requests the declared view and preserves Backend item order',
+      () async {
+        late http.Request captured;
+        final client = _client((request) async {
+          captured = request;
+          return http.Response(jsonEncode(_recommendationResponse), 200);
+        });
+        final repository = BackendEventRecommendationRepository(client);
+
+        final result = await repository.read(
+          view: EventRecommendationView.home,
+        );
+
+        expect(captured.method, 'GET');
+        expect(captured.url.path, '/v1/recommendations/events');
+        expect(captured.url.queryParameters['view'], 'home');
+        final value = (result as Success<EventRecommendationResponse>).value;
+        expect(value.formulaVersion, 'q03-v1');
+        expect(value.items.map((item) => item.eventId), ['evt_03', 'evt_01']);
+        expect(value.items.first.matchedInterestLabels, ['Music']);
+      },
+    );
+
+    test(
+      'fails closed when an Event response omits required safe fields',
+      () async {
+        final client = _client(
+          (request) async => http.Response(
+            jsonEncode({
+              'asOf': '2026-09-15T09:00:00Z',
+              'formulaVersion': 'q03-v1',
+              'items': [
+                {
+                  'eventId': 'evt_01',
+                  'title': 'Missing reason',
+                  'startAt': '2026-09-16T10:00:00Z',
+                  'endAt': '2026-09-16T11:00:00Z',
+                  'matchedInterestLabels': ['Art'],
+                },
+              ],
+            }),
+            200,
+          ),
+        );
+        final repository = BackendEventRecommendationRepository(client);
+
+        final result = await repository.read(view: EventRecommendationView.all);
+
+        expect(
+          (result as Failure<EventRecommendationResponse>).failure.kind,
+          AppFailureKind.unexpected,
+        );
+      },
+    );
+  });
 }
 
 final class _HangingBodyClient extends http.BaseClient {
@@ -577,4 +637,27 @@ const _interestEnvelope = {
     ],
     'revision': 3,
   },
+};
+
+const _recommendationResponse = {
+  'asOf': '2026-09-15T09:00:00Z',
+  'formulaVersion': 'q03-v1',
+  'items': [
+    {
+      'eventId': 'evt_03',
+      'title': 'Third-ranked event',
+      'startAt': '2026-09-18T10:00:00Z',
+      'endAt': '2026-09-18T11:00:00Z',
+      'matchedInterestLabels': ['Music'],
+      'reasonCode': 'MATCHED_INTERESTS',
+    },
+    {
+      'eventId': 'evt_01',
+      'title': 'First-ranked event',
+      'startAt': '2026-09-16T10:00:00Z',
+      'endAt': '2026-09-16T11:00:00Z',
+      'matchedInterestLabels': ['Art', 'Music'],
+      'reasonCode': 'MATCHED_INTERESTS',
+    },
+  ],
 };
