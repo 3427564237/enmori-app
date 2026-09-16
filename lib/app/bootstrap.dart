@@ -53,7 +53,6 @@ Future<void> bootstrap() async {
           (ref) =>
               BackendCheckInRepository(ref.watch(backendApiClientProvider)),
         ),
-<<<<<<< HEAD
         interestRepositoryProvider.overrideWith(
           (ref) =>
               BackendInterestRepository(ref.watch(backendApiClientProvider)),

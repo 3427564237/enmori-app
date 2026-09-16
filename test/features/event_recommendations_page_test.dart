@@ -1,8 +1,11 @@
 import 'package:enmori/app/home_shell_page.dart';
+import 'package:enmori/app/providers.dart';
+import 'package:enmori/app/router/app_router.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 import 'package:enmori/features/event_recommendations/event_recommendations_providers.dart';
 import 'package:enmori/features/event_recommendations/presentation/event_recommendations_page.dart';
+import 'package:enmori/features/interests/interests_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -93,6 +96,57 @@ void main() {
       EventRecommendationView.home,
     ]);
   });
+
+  testWidgets(
+    'saving Interests returns Home with a fresh recommendation request',
+    (tester) async {
+      final interests = FakeInterestRepository();
+      final recommendations = FakeEventRecommendationRepository();
+      final container = ProviderContainer(
+        overrides: [
+          routerGateProvider.overrideWithValue(RouterGateState.authenticated),
+          interestRepositoryProvider.overrideWithValue(interests),
+          eventRecommendationRepositoryProvider.overrideWithValue(
+            recommendations,
+          ),
+        ],
+      );
+      addTearDown(() {
+        container.dispose();
+      });
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            routerConfig: container.read(appRouterProvider),
+          ),
+        ),
+      );
+      await _pumpRouteFrames(tester);
+
+      expect(recommendations.views, [EventRecommendationView.home]);
+      await tester.tap(find.byKey(const Key('edit-interests-button')));
+      await _pumpRouteFrames(tester);
+      await tester.tap(find.byKey(const Key('interest-option-tag-art')));
+      await tester.tap(find.byKey(const Key('interest-save')));
+      await _pumpRouteFrames(tester);
+      await tester.tap(find.byKey(const Key('interest-done')));
+      await _pumpRouteFrames(tester);
+
+      expect(recommendations.views, [
+        EventRecommendationView.home,
+        EventRecommendationView.home,
+      ]);
+      expect(find.byKey(const Key('route-home')), findsOneWidget);
+    },
+  );
+}
+
+Future<void> _pumpRouteFrames(WidgetTester tester) async {
+  for (var index = 0; index < 5; index++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
 }
 
 Future<void> _pump(

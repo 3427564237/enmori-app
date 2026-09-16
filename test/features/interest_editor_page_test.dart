@@ -17,10 +17,13 @@ void main() {
   testWidgets('Home exposes the Interest editor entry', (tester) async {
     var opened = false;
     await tester.pumpWidget(
-      MaterialApp(
-        home: HomeShellPage(
-          onStartCheckIn: () {},
-          onEditInterests: () => opened = true,
+      ProviderScope(
+        child: MaterialApp(
+          home: HomeShellPage(
+            onStartCheckIn: () {},
+            onEditInterests: () => opened = true,
+            onSeeAllEvents: () {},
+          ),
         ),
       ),
     );
