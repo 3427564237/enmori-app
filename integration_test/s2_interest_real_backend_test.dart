@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:enmori/core/network/backend_api_client.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/interests/data/backend_interest_repository.dart';
@@ -10,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:http/io_client.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +42,9 @@ void main() {
       const fixturePassword = String.fromEnvironment('ENMORI_TEST_PASSWORD');
       const fixtureInterestTagId = String.fromEnvironment(
         'ENMORI_TEST_INTEREST_TAG_ID',
+      );
+      const testCertificate = String.fromEnvironment(
+        'ENMORI_TEST_TLS_CERTIFICATE_BASE64',
       );
 
       for (final (name, value) in [
@@ -70,6 +77,19 @@ void main() {
         password: fixturePassword,
       );
 
+      IOClient? testHttpClient;
+      if (testCertificate.isNotEmpty) {
+        final uri = Uri.parse(apiBaseUrl);
+        if (!firebaseProjectId.startsWith('demo-') ||
+            uri.scheme != 'https' ||
+            uri.host != '10.0.2.2') {
+          throw StateError('Test TLS trust is limited to the Android Emulator');
+        }
+        final context = SecurityContext(withTrustedRoots: false)
+          ..setTrustedCertificatesBytes(base64Decode(testCertificate));
+        testHttpClient = IOClient(HttpClient(context: context));
+      }
+
       final client = BackendApiClient(
         parseApprovedBackendBaseUri(apiBaseUrl),
         () async {
@@ -83,6 +103,7 @@ void main() {
                 )
               : Success(token);
         },
+        httpClient: testHttpClient,
       );
       addTearDown(client.close);
       final repository = BackendInterestRepository(client);
@@ -126,6 +147,45 @@ void main() {
         ),
         !wasSelected,
       );
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [interestRepositoryProvider.overrideWithValue(repository)],
+          child: const MaterialApp(home: InterestEditorPage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.widget<CheckboxListTile>(option).value, !wasSelected);
+
+      // A second writer advances the revision after this editor's read.
+      final concurrent = await repository.replaceOwn(
+        interestTagIds: const [],
+        expectedRevision: later.revision,
+      );
+      expect(concurrent, isA<Success<InterestSelection>>());
+      await tester.tap(find.byKey(const Key('interest-save')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('interest-conflict')), findsOneWidget);
+      expect(
+        tester
+            .widget<FilledButton>(find.byKey(const Key('interest-save')))
+            .onPressed,
+        isNull,
+      );
+      await tester.tap(find.text('Reload interests'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('interest-conflict')), findsNothing);
+      expect(tester.widget<CheckboxListTile>(option).value, isFalse);
+      await tester.tap(find.byKey(const Key('interest-save')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('interest-save-success')), findsOneWidget);
+      final empty = await repository.readOwn();
+      expect(empty, isA<Success<InterestSelection>>());
+      final selection = (empty as Success<InterestSelection>).value;
+      expect(selection.interestTags, isEmpty);
+      expect(selection.revision, later.revision + 2);
     },
   );
 }
