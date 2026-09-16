@@ -1,6 +1,12 @@
 export const FRIEND_RECOMMENDATION_FORMULA_VERSION =
   "friend_recommendation_v1" as const;
 
+/**
+ * Trusted, request-local projection supplied after upstream authorization and
+ * source validation. Interest IDs must already be valid/active. Event IDs must
+ * already be authorized for this requester and purpose. These types do not
+ * establish those facts and must never be populated directly from client data.
+ */
 export interface AuthorizedFriendRankingProjection {
   readonly authorizedInterestTagIds: readonly string[];
   readonly authorizedInterestedEventIds: readonly string[];
@@ -58,12 +64,48 @@ function authorizedEventIds(
   ]);
 }
 
+interface CandidateFactors {
+  readonly interests: ReadonlySet<string>;
+  readonly events: ReadonlySet<string>;
+}
+
+function sameIds(left: ReadonlySet<string>, right: ReadonlySet<string>): boolean {
+  return left.size === right.size && intersectionSize(left, right) === left.size;
+}
+
+function uniqueCandidateFactors(
+  candidates: readonly AuthorizedFriendRankingCandidateProjection[],
+): ReadonlyMap<string, CandidateFactors | null> {
+  const unique = new Map<string, CandidateFactors | null>();
+  for (const candidate of candidates) {
+    const id = candidate.candidateAccountId;
+    const previous = unique.get(id);
+    // A conflicting identity stays excluded, even if another copy follows it.
+    if (previous === null) continue;
+
+    const current: CandidateFactors = {
+      interests: distinctIds(candidate.authorizedInterestTagIds),
+      events: authorizedEventIds(candidate),
+    };
+    if (previous === undefined) {
+      unique.set(id, current);
+    } else if (!sameIds(previous.interests, current.interests) ||
+      !sameIds(previous.events, current.events)) {
+      // Do not synthesize a larger projection or trust an arbitrary first/last
+      // record when upstream supplies inconsistent source data for one ID.
+      unique.set(id, null);
+    }
+  }
+  return unique;
+}
+
 /**
  * Ranks already-eligible, purpose-authorized projections only.
  *
  * Account eligibility, discoverability, self/friend/pending exclusions and data
- * reads remain upstream responsibilities. Duplicate candidate identities fail
- * closed and do not enter the ranked result.
+ * reads remain upstream responsibilities. Repeated equivalent projections are
+ * scored once. Conflicting projections for one identity fail closed. This is an
+ * internal computation result, not a public response or persisted history.
  */
 export function rankAuthorizedFriendCandidates(
   requester: AuthorizedFriendRankingProjection,
@@ -71,32 +113,17 @@ export function rankAuthorizedFriendCandidates(
 ): readonly RankedFriendCandidate[] {
   const requesterInterests = distinctIds(requester.authorizedInterestTagIds);
   const requesterEvents = authorizedEventIds(requester);
-  const candidateIdentityCounts = new Map<string, number>();
-
-  for (const candidate of candidates) {
-    candidateIdentityCounts.set(
-      candidate.candidateAccountId,
-      (candidateIdentityCounts.get(candidate.candidateAccountId) ?? 0) + 1,
-    );
-  }
-
   const ranked: RankedFriendCandidate[] = [];
-  for (const candidate of candidates) {
-    if (candidateIdentityCounts.get(candidate.candidateAccountId) !== 1) {
-      continue;
-    }
+  for (const [candidateAccountId, factors] of uniqueCandidateFactors(candidates)) {
+    if (factors === null) continue;
 
-    const candidateInterests = distinctIds(
-      candidate.authorizedInterestTagIds,
-    );
-    const candidateEvents = authorizedEventIds(candidate);
     const sharedInterestCount = intersectionSize(
       requesterInterests,
-      candidateInterests,
+      factors.interests,
     );
     const commonEventCount = intersectionSize(
       requesterEvents,
-      candidateEvents,
+      factors.events,
     );
 
     if (sharedInterestCount === 0 && commonEventCount === 0) continue;
@@ -104,7 +131,7 @@ export function rankAuthorizedFriendCandidates(
     const sharedInterestPoints = sharedInterestCount * 2;
     const commonEventPoints = commonEventCount;
     ranked.push({
-      candidateAccountId: candidate.candidateAccountId,
+      candidateAccountId,
       score: sharedInterestPoints + commonEventPoints,
       factors: {
         shared_interest: {
