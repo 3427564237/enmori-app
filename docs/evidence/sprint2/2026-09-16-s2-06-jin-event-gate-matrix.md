@@ -27,6 +27,35 @@ integrated app and Backend identities actually handed over. Do not infer
 integration from separate approved PRs or copy the older runbook's resolved
 target blocker into the current result.
 
+### Handoff reconciliation — 2026-09-16 11:29 UTC / 19:29 SGT
+
+JIN is ready to receive the handoff. The source heads and Issue/PR discussions
+were refreshed; the execution prerequisites are still incomplete. This is a
+readiness check, not the start of the 3h execution allocation or an integrated
+test result. The preparation snapshots above remain historical.
+
+| Input | Exact current source | Observed handoff status |
+| --- | --- | --- |
+| Main | `d7832066df1bb8f915d7732458cb24b78cc807ec` | Friend and AI components merged; no new component work assigned |
+| S2-01, PR #32 | `e36e73507bc5675985e4105ca943eaf7ebbd29a0` | DU's [independent approval](https://github.com/3427564237/enmori-app/issues/30#issuecomment-5696260685) is available; LI's separate Firebase-Emulator Interest result is owner evidence only |
+| S2-02, PR #33 | `7585542cc4d07817768fc4a0a74d110b2f79084e` | Initializer implemented and owner-tested; [ZHOU's incremental review requested](https://github.com/3427564237/enmori-app/pull/33#issuecomment-5696407251); actual Demo initialization and runtime handoff still Not Run |
+| S2-03, PR #34 | `8bc1039f1ddb8fba80aac8bc91bd4c9a2b9555cc` | [DU reports source composition, fresh Home after save, 95/95 Flutter tests and a debug APK](https://github.com/3427564237/enmori-app/issues/30#issuecomment-5696227203); LI's review of this increment and actual controlled-Demo Emulator handoff remain outstanding |
+| LI clarification, PR #37 | `b7759b129d5225c4a0b45fd8934d496cd171bde0` | [S-PM-0916-S2DU-VALIDATION](https://github.com/3427564237/enmori-app/blob/b7759b129d5225c4a0b45fd8934d496cd171bde0/docs/decisions/2026-09-16-s2-du-controlled-validation-handoff.md) supplies the runtime boundary and AVD-local failure/recovery method; target confirmation is resolved |
+
+The initializer's [owner verification](https://github.com/3427564237/enmori-app/blob/7585542cc4d07817768fc4a0a74d110b2f79084e/docs/evidence/sprint2/2026-09-16-s2-02-demo-initializer-verification.md)
+reports Backend 162/162 and isolated Firebase Emulator 22/22. Those results are
+attributed owner evidence, not JIN reruns or proof of actual Demo initialization.
+DU's built APK likewise does not establish a runtime handoff or client reachability.
+
+The remaining sequence is ZHOU's initializer review, SHI's actual create-only
+initialization/runtime delivery, and DU's reviewed integrated version with real
+Android Emulator evidence and reproducible handoff. JIN then reconciles the
+actual app/Backend/test identities and executes the existing 3h allocation
+(0.5h reconciliation, 1.5h automation/execution, 1h evidence). Record the actual
+UTC/SGT start and end when that window begins; no execution time is claimed here.
+Submit the resulting exact commit to SHI for independent review. All eight rows
+remain **Not Run**, and Issue #29 remains open.
+
 ## Required handoff before execution
 
 1. DU supplies the integrated app commit, Backend commit, relevant predecessor
@@ -43,17 +72,44 @@ target blocker into the current result.
    If a supplied account is already onboarded, it cannot by itself satisfy the
    new-onboarding assertion; record that row Not Run until a suitable fixture
    is provided. Do not delete/recreate accounts to manufacture a fresh state.
-5. DU supplies the existing approved method for one bounded dependency failure
-   and restoration, plus a way to distinguish Home and All requests. Do not stop
-   a shared service, reset data or introduce a new mock framework.
+5. DU identifies the dedicated test AVD and how to apply LI's approved local
+   connectivity interruption/restoration below, plus a way to distinguish Home
+   and All requests. Do not stop a shared service, reset data or introduce a new
+   mock framework.
 
 Android Emulator is the execution device. Firebase Emulator and the controlled
-Demo are separate Backend environment classes. Record which class DU actually
-hands over, without silently substituting the other. Automated Firebase tests
-remain restricted to their isolated test environment. In particular, LI's
+Demo are separate Backend environment classes. This gate requires the approved
+real Demo `enmori-rmvp-controlled`, `ENMORI_USE_FIREBASE_AUTH_EMULATOR=false`,
+and the existing controlled-demo Backend with Auth/Firestore Emulator variables
+absent. Record the actual runtime and approved HTTPS reachability from DU's
+handoff. Automated Firebase component tests remain restricted to their isolated
+test environment. In particular, LI's
 `s2_interest_real_backend_test.dart` explicitly calls `useAuthEmulator`; it must
 not be run unchanged against the controlled Demo. Environment or contract
 mismatches must be resolved in the handoff before execution.
+
+### Approved failure and recovery method
+
+Apply LI's S-PM-0916-S2DU-VALIDATION clarification to rows S2-06-07/08:
+
+1. Establish a successful signed-in Event read on the handed-over dedicated
+   Android Emulator and record its original Wi-Fi/mobile-data states.
+2. Explicitly select that AVD for every ADB command. Temporarily disable only
+   its Wi-Fi and mobile data with `shell svc wifi disable` and
+   `shell svc data disable`, then open See All for a fresh request.
+3. Assert the safe error and visible Retry. If another connection keeps the AVD
+   online, record the scenario as blocked in its evidence and retain Not Run
+   for any unexecuted assertion; do not interrupt shared infrastructure.
+4. Restore exactly the original radio states in a finally/cleanup step, even
+   after a failed assertion. Verify connectivity and invoke the visible Retry.
+
+Label the result **Emulator-local connectivity failure / explicit retry
+recovery** and identify whether the observed failure was at Auth refresh or
+Backend transport. This procedure does not prove a Firestore outage or Backend
+HTTP 503; reuse the owner evidence for server dependency/error mappings. A new
+live server-side fault needs a separately scoped method. Host networking, VPN,
+firewall, DNS, shared services, Firebase, IAM and fixture data are outside this
+procedure.
 
 ## Automated assertion matrix
 
@@ -69,8 +125,8 @@ UI observations but do not alone prove persistence or independent requests.
 | S2-06-04 | Return to Home after the successful save | A new `view=home` request occurs after save; Home shows at most two entries in that response's Backend order, with title/time/matched-Interest reason | Request assertion output plus Home screenshot/semantics | Not Run |
 | S2-06-05 | Open See All after Home has loaded | A separate `view=all` request reaches the Backend and returns its own `asOf`/items; All displays its own response in Backend order, not a reused Home list | Distinct request observations, assertion output, All screenshot/semantics | Not Run |
 | S2-06-06 | Save an empty own-Interest selection using the existing UI, then load Home and All independently | Both requests succeed with empty items; show `No event recommendations right now` and `Update your interests or check again later.`; no stale events, fallback candidates or dependency-error state | Successful-response/empty assertions and empty-state UI evidence | Not Run |
-| S2-06-07 | Restore the nonempty selection; apply only the handed-over bounded dependency-failure method and request recommendations | Safe error and explicit Retry appear; dependency failure is not presented as successful empty; no vendor text/token/stack leak and no hidden retry loop | Safe error category and assertion output; failure method identified without private configuration | Not Run |
-| S2-06-08 | Restore the dependency, then invoke the visible Retry action | A new request succeeds and replaces the error state with the valid result; retained saved interests remain available | Recovery/request assertions and resolved UI evidence | Not Run |
+| S2-06-07 | Restore the nonempty selection and establish a successful Event read; apply LI's approved dedicated-AVD connectivity interruption and open See All | Safe error and explicit Retry appear; connectivity failure is not presented as successful empty; no vendor text/token/stack leak and no hidden retry loop | Safe error category and assertion output; identify Auth-refresh or Backend-transport boundary without private configuration | Not Run |
+| S2-06-08 | Restore the AVD's original radio states and verify connectivity, then invoke the visible Retry action | A new request succeeds and replaces the error state with the valid result; retained saved interests remain available | Cleanup/restoration proof, recovery/request assertions and resolved UI evidence | Not Run |
 
 For S2-06-05, different `asOf` values are not required: rapid independent calls
 can share a timestamp. Prove two requests and separate computation from the
