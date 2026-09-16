@@ -8,8 +8,13 @@ import { buildApp } from "../src/bootstrap/build-app.js";
 import { RecommendEvents } from "../src/event-recommendations/application/recommend-events.js";
 import { FirebaseAdminEventReadGateway } from "../src/event-recommendations/infrastructure/event-read-gateway.js";
 import { FirestoreEventRecommendationRepository } from "../src/event-recommendations/infrastructure/firestore-event-recommendation-repository.js";
+import {
+  initializeApprovedS2Demo,
+  loadApprovedS2DemoManifest,
+} from "../src/event-recommendations/infrastructure/s2-demo-initializer.js";
 import { FirebaseIdentityVerifier } from "../src/shared/infrastructure/firebase/firebase-identity-verifier.js";
 import { requireControlledEmulatorEnvironment } from "../src/shared/infrastructure/firebase/controlled-emulator-environment.js";
+import { FirebaseAdminFirestoreGateway } from "../src/shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId } from "../src/shared/infrastructure/firebase/firestore-records.js";
 import { appFailure } from "../src/shared/application/app-failure.js";
 import { ok, err } from "../src/shared/domain/result.js";
@@ -141,39 +146,25 @@ test("real Event API missing/malformed/expired/disabled/revoked identity fails c
   } finally { await app.close(); }
 });
 
-/** Test-only named synthetic initializer. No Demo initializer or public API. */
-async function initializeNamedEmulatorEvents(manifest: FixtureDocuments): Promise<"created" | "unchanged" | "conflict"> {
+test("approved initializer is create-only, atomic and race safe in the isolated Emulator", async () => {
+  await seed();
   requireControlledEmulatorEnvironment(process.env);
   assert.equal(firebaseApp.options.projectId, environment.projectId);
-  const entries = Object.entries(manifest);
-  assert.ok(entries.every(([path]) => /^(interest_tags|events)\/[^/]+$/.test(path)));
-  return firestore.runTransaction(async (transaction) => {
-    const existing = await Promise.all(entries.map(([path]) => transaction.get(firestore.doc(path))));
-    for (let index = 0; index < entries.length; index++) {
-      if (existing[index]!.exists) {
-        try { assert.deepEqual(existing[index]!.data(), entries[index]![1]); }
-        catch { return "conflict"; }
-      }
-    }
-    let created = false;
-    entries.forEach(([path, data], index) => {
-      if (!existing[index]!.exists) { transaction.create(firestore.doc(path), data); created = true; }
-    });
-    return created ? "created" : "unchanged";
-  });
-}
-test("test-only synthetic initialization is create-only, atomic and race safe", async () => {
-  await seed();
   const original = await dump();
-  const manifest = { "events/s2-named-init": eventTestRecords()["events/ev_a"]!,
-    "interest_tags/s2-named-tag": { displayName: "Synthetic", lifecycleState: "active", revision: 1 } };
-  const results = await Promise.all([initializeNamedEmulatorEvents(manifest), initializeNamedEmulatorEvents(manifest)]);
+  const manifest = await loadApprovedS2DemoManifest();
+  const gateway = new FirebaseAdminFirestoreGateway(firestore);
+  const results = await Promise.all([
+    initializeApprovedS2Demo(gateway, manifest),
+    initializeApprovedS2Demo(gateway, manifest),
+  ]);
   assert.deepEqual(results.sort(), ["created", "unchanged"]);
-  assert.equal(await initializeNamedEmulatorEvents(manifest), "unchanged");
+  assert.equal(await initializeApprovedS2Demo(gateway, manifest), "unchanged");
   for (const [path, data] of Object.entries(original)) assert.deepEqual((await dump())[path], data);
-  const beforeConflict = await dump();
-  const conflict = { "events/s2-other-new": eventTestRecords()["events/ev_a"]!,
-    "events/s2-named-init": { ...manifest["events/s2-named-init"], title: "Do not overwrite" } };
-  assert.equal(await initializeNamedEmulatorEvents(conflict), "conflict");
-  assert.deepEqual(await dump(), beforeConflict, "conflict must write nothing, including otherwise absent targets");
+  await firestore.doc(manifest.documents[0]!.path).set({ ...manifest.documents[0]!.data,
+    displayName: "Do not overwrite" });
+  await firestore.doc(manifest.documents[1]!.path).delete();
+  const beforeConflictingRun = await dump();
+  assert.equal(await initializeApprovedS2Demo(gateway, manifest), "conflict");
+  assert.deepEqual(await dump(), beforeConflictingRun,
+    "conflict must write nothing, including otherwise absent targets");
 });

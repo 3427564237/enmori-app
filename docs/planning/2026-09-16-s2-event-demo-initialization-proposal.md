@@ -2,22 +2,23 @@
 
 - Owner: SHI ZHENGQI (`GGGGHOST-CN`)
 - Scope: Issue #28 / Draft PR #33
-- Status: **Proposed for LI confirmation; actual Demo initialization is Not Run**
-- Controlling decisions: S-PM-0913-SPRINT2 and S-PM-0915-S2EVENT-MAPPING
+- Status: **Target and manifest confirmed; initializer implementation in progress; actual Demo initialization is Not Run**
+- Controlling decisions: S-PM-0913-SPRINT2, S-PM-0915-S2EVENT-MAPPING,
+  S-PM-0916-S2DEMO-MANIFEST and S-PM-0916-S2DEMO-TARGET
 
-## Proposed target allowlist
+## Confirmed target allowlist
 
-The proposed allowlist contains exactly one Firebase project ID:
+LI confirmed the allowlist contains exactly one Firebase project ID in
+S-PM-0916-S2DEMO-TARGET at commit `a0727d2502d8e669feafb17ba57050906a4439c8`:
 
 ```text
-enmori-controlled-01
+enmori-rmvp-controlled
 ```
 
-No alias, wildcard, second project, endpoint or credential is allowed. The ID is
-the repository's existing valid controlled non-Emulator example; this proposal
-does **not** claim that the project exists, is isolated, or is owned by the
-approved Demo environment. LI must verify those facts and either confirm this
-exact ID or replace it with the exact isolated project ID before execution.
+No alias, wildcard, second project, endpoint or credential is allowed. LI's
+target decision records owner-side existence and explicitly attests that this
+is the isolated non-production Demo project. The superseded example
+`enmori-controlled-01` is not an approved target.
 The Emulator-only `demo-enmori-rmvp01a-r10` is explicitly outside this allowlist.
 
 The later initializer must fail before Firebase initialization unless the
@@ -51,11 +52,11 @@ Category, credential, endpoint, project ID, arbitrary source path or mutation
 instruction. The static owner test validates every named record through the
 approved Interest/Event parsers and pins the path list and canonical digest.
 
-## Proposed execution boundary after confirmation
+## Confirmed execution boundary
 
-After, and only after, LI records confirmation, the initializer will be a fixed
-code path for this manifest and the confirmed single-project allowlist. In one
-Firestore transaction it will read all six named targets before writing:
+The initializer is a fixed code path for this manifest and the confirmed
+single-project allowlist. After independent review, it will read all six named
+targets in one Firestore transaction before writing:
 
 1. If every target is absent, create all six records.
 2. If every existing target exactly equals the approved record and the rest are
@@ -68,14 +69,11 @@ It will use only transaction `create` for absent named paths. There is no
 write, credential handling or deployment behavior. Any race or dependency
 failure must fail closed without a partial initialization claim.
 
-## Confirmation requested
+## Remaining execution gate
 
-LI is asked to record both decisions explicitly:
-
-1. confirm or replace the single exact isolated Firebase project ID; and
-2. approve manifest version `s2-event-demo-v1`, its six exact paths/records and
-   the pinned canonical digest.
-
-Until both are confirmed, initializer implementation and actual Demo access
-remain stopped. Production/client-rules acceptance, Android integration, UAT,
-Release and Done remain **Not Run** and are not implied by this proposal.
+LI has confirmed both the target and fixed manifest. The new initializer code
+must pass owner tests and isolated Emulator tests, then receive ZHOU's assigned
+independent current-head review before SHI executes it against the confirmed
+Demo target. Until that review and execution occur, actual Demo initialization
+remains **Not Run**. Production/client-rules acceptance, Android integration,
+UAT, Release and Done remain **Not Run** and are not implied by this proposal.
