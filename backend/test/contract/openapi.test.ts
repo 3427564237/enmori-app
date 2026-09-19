@@ -75,7 +75,7 @@ test("OpenAPI protects every route and scopes Idempotency-Key to commands", asyn
     const hasKey = parameters.some(
       (parameter) => parameter.$ref === "#/components/parameters/IdempotencyKey",
     );
-    assert.equal(hasKey, route.method === "PUT" || route.method === "POST");
+    assert.equal(hasKey, route.requiresIdempotencyKey);
   }
 });
 
@@ -87,8 +87,12 @@ test("OpenAPI schemas reject undeclared fields and list every approved error", a
   for (const name of [
     "CompleteOnboardingRequest",
     "CreateCheckInRequest",
+    "ReplaceOwnInterestsRequest",
     "Account",
     "CheckIn",
+    "InterestTagSummary",
+    "SelectedInterestTag",
+    "OwnInterests",
     "ErrorEnvelope",
   ]) {
     assert.equal(schemas[name]?.additionalProperties, false, name);
@@ -111,7 +115,13 @@ test("OpenAPI public schemas contain no trusted internal identity fields", async
   const components = contract.components as JsonObject;
   const schemas = components.schemas as Record<string, JsonObject>;
 
-  for (const name of ["Account", "CheckIn"]) {
+  for (const name of [
+    "Account",
+    "CheckIn",
+    "InterestTagSummary",
+    "SelectedInterestTag",
+    "OwnInterests",
+  ]) {
     const properties = schemas[name]?.properties as JsonObject;
     assert.equal("accountId" in properties, false);
     assert.equal("firebaseUid" in properties, false);

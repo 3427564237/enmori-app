@@ -18,6 +18,9 @@ async function appFor(execute: Pick<RecommendEvents, "execute">["execute"] = asy
     getOnboarding: { execute: async () => ok({ status: "required" as const }) },
     createCheckIn: { execute: async () => err(appFailure("SERVICE_UNAVAILABLE")) },
     getCheckIn: { execute: async () => err(appFailure("CHECKIN_UNAVAILABLE")) },
+    getInterestTags: { execute: async () => err(appFailure("SERVICE_UNAVAILABLE")) },
+    getOwnInterests: { execute: async () => err(appFailure("SERVICE_UNAVAILABLE")) },
+    replaceOwnInterests: { execute: async () => err(appFailure("SERVICE_UNAVAILABLE")) },
     recommendEvents: { execute },
   });
 }

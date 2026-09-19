@@ -10,6 +10,10 @@ import type { FastifyInstance } from "fastify";
 import { buildApp } from "../src/bootstrap/build-app.js";
 import { CreateCheckIn } from "../src/check-ins/application/create-check-in.js";
 import { GetCheckIn } from "../src/check-ins/application/get-check-in.js";
+import { GetInterestTags } from "../src/interests/application/get-interest-tags.js";
+import { GetOwnInterests } from "../src/interests/application/get-own-interests.js";
+import { ReplaceOwnInterests } from "../src/interests/application/replace-own-interests.js";
+import { FirestoreInterestRepository } from "../src/interests/infrastructure/firestore-interest-repository.js";
 import { FirestoreCheckInRepository } from "../src/check-ins/infrastructure/firestore-check-in-repository.js";
 import { CompleteOnboarding } from "../src/onboarding/application/complete-onboarding.js";
 import { GetOnboarding } from "../src/onboarding/application/get-onboarding.js";
@@ -70,6 +74,9 @@ let dependencies: {
   readonly getOnboarding: GetOnboarding;
   readonly createCheckIn: CreateCheckIn;
   readonly getCheckIn: GetCheckIn;
+  readonly getInterestTags: GetInterestTags;
+  readonly getOwnInterests: GetOwnInterests;
+  readonly replaceOwnInterests: ReplaceOwnInterests;
 };
 
 before(async () => {
@@ -82,6 +89,7 @@ before(async () => {
   const gateway = new FirebaseAdminFirestoreGateway(firestore);
   const onboardingRepository = new FirestoreOnboardingRepository(gateway);
   const checkInRepository = new FirestoreCheckInRepository(gateway);
+  const interestRepository = new FirestoreInterestRepository(gateway);
   const clock = new SystemClock();
   dependencies = {
     identityVerifier: new FirebaseIdentityVerifier(auth),
@@ -97,6 +105,9 @@ before(async () => {
       new CryptoOpaqueIdGenerator(),
     ),
     getCheckIn: new GetCheckIn(checkInRepository),
+    getInterestTags: new GetInterestTags(interestRepository),
+    getOwnInterests: new GetOwnInterests(interestRepository),
+    replaceOwnInterests: new ReplaceOwnInterests(interestRepository),
   };
   app = await buildApp(dependencies);
   await app.listen({ host: "127.0.0.1", port: 0 });
@@ -420,6 +431,79 @@ test("X-01 expired identity fails closed on a protected operation", async () => 
   assert.equal(errorCode(response.body), "AUTH_REQUIRED");
   assert.equal(errorMessage(response.body), "Your session has expired. Sign in again.");
   assert.deepEqual(await firestore.listCollections(), []);
+});
+
+test("S2-01 real Auth, Fastify and Firestore flow saves ten Interests and reads them later", async () => {
+  const token = await createControlledUser({
+    uid: fixtureUid("interest-user"),
+    email: fixtureEmail("interest"),
+  });
+  const onboarding = await requestJson("/v1/me/onboarding", {
+    method: "PUT",
+    headers: authHeaders(token, freshIdempotencyKey()),
+    body: JSON.stringify({
+      username: fixtureUsername("interest"),
+      initialChoice: "accept",
+    }),
+  });
+  assert.equal(onboarding.response.status, 201);
+
+  const ids = Array.from({ length: 10 }, (_, index) => `tag-${index}`);
+  await Promise.all(
+    ids.map((id, index) =>
+      firestore.doc(`interest_tags/${id}`).create({
+        displayName: `Interest ${index}`,
+        lifecycleState: "active",
+        revision: 1,
+      }),
+    ),
+  );
+  await firestore.doc("interest_tags/tag-inactive").create({
+    displayName: "Inactive",
+    lifecycleState: "inactive",
+    revision: 1,
+  });
+
+  const catalogue = await requestJson("/v1/interest-tags", {
+    headers: authHeaders(token),
+  });
+  const empty = await requestJson("/v1/me/interests", {
+    headers: authHeaders(token),
+  });
+  const saved = await requestJson("/v1/me/interests", {
+    method: "PUT",
+    headers: authHeaders(token),
+    body: JSON.stringify({ interestTagIds: ids, expectedRevision: 0 }),
+  });
+  const laterRead = await requestJson("/v1/me/interests", {
+    headers: authHeaders(token),
+  });
+  const stale = await requestJson("/v1/me/interests", {
+    method: "PUT",
+    headers: authHeaders(token),
+    body: JSON.stringify({ interestTagIds: [], expectedRevision: 0 }),
+  });
+  const newInactive = await requestJson("/v1/me/interests", {
+    method: "PUT",
+    headers: authHeaders(token),
+    body: JSON.stringify({
+      interestTagIds: ["tag-inactive"],
+      expectedRevision: 1,
+    }),
+  });
+
+  assert.equal(catalogue.response.status, 200);
+  assert.equal((catalogue.body.interestTags as unknown[]).length, 10);
+  assert.deepEqual(empty.body, {
+    interests: { interestTags: [], revision: 0 },
+  });
+  assert.equal(saved.response.status, 200);
+  assert.deepEqual(laterRead.body, saved.body);
+  assert.equal(stale.response.status, 412);
+  assert.equal(errorCode(stale.body), "INTEREST_REVISION_PRECONDITION_FAILED");
+  assert.equal(newInactive.response.status, 422);
+  assert.equal(errorCode(newInactive.body), "INTEREST_SELECTION_INVALID");
+  assert.doesNotMatch(JSON.stringify(saved.body), /accountId|firebaseUid|owner/i);
 });
 
 test("R13-T12 cancellation aborts the client response and exact retry reconciles the authoritative result", async () => {

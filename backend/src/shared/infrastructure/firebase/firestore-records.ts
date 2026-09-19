@@ -12,6 +12,8 @@ export const FIRESTORE_COLLECTIONS = {
   usernameReservations: "username_reservations",
   checkIns: "check_ins",
   idempotency: "idempotency",
+  interestTags: "interest_tags",
+  accountInterests: "account_interests",
 } as const;
 
 export type IdempotencyOperation =

@@ -3,6 +3,10 @@ import type { CreateCheckIn } from "../check-ins/application/create-check-in.js"
 import type { GetCheckIn } from "../check-ins/application/get-check-in.js";
 import type { CompleteOnboarding } from "../onboarding/application/complete-onboarding.js";
 import type { GetOnboarding } from "../onboarding/application/get-onboarding.js";
+import type { GetInterestTags } from "../interests/application/get-interest-tags.js";
+import type { GetOwnInterests } from "../interests/application/get-own-interests.js";
+import type { ReplaceOwnInterests } from "../interests/application/replace-own-interests.js";
+import type { OwnInterestsProjection } from "../interests/application/interest-model.js";
 import type { AccountProjection } from "../onboarding/application/onboarding-model.js";
 import type { CheckInProjection } from "../check-ins/application/check-in-model.js";
 import type { IdentityVerifier } from "../shared/ports/identity-verifier.js";
@@ -13,6 +17,9 @@ import {
   createCheckInSchema,
   getCheckInSchema,
   getOnboardingSchema,
+  getInterestTagsSchema,
+  getOwnInterestsSchema,
+  replaceOwnInterestsSchema,
 } from "./schemas.js";
 
 export interface R4RouteDependencies {
@@ -21,6 +28,9 @@ export interface R4RouteDependencies {
   readonly getOnboarding: Pick<GetOnboarding, "execute">;
   readonly createCheckIn: Pick<CreateCheckIn, "execute">;
   readonly getCheckIn: Pick<GetCheckIn, "execute">;
+  readonly getInterestTags: Pick<GetInterestTags, "execute">;
+  readonly getOwnInterests: Pick<GetOwnInterests, "execute">;
+  readonly replaceOwnInterests: Pick<ReplaceOwnInterests, "execute">;
 }
 
 interface CompleteOnboardingBody {
@@ -38,6 +48,11 @@ interface CreateCheckInBody {
 
 interface CheckInParams {
   readonly checkInId: string;
+}
+
+interface ReplaceOwnInterestsBody {
+  readonly interestTagIds: readonly string[];
+  readonly expectedRevision: number;
 }
 
 export async function registerR4Routes(
@@ -113,6 +128,44 @@ export async function registerR4Routes(
       return reply.code(200).send({ checkIn: checkInResponse(result.value) });
     },
   );
+
+  app.get(
+    "/v1/interest-tags",
+    { schema: getInterestTagsSchema, onRequest: authenticate },
+    async (request, reply) => {
+      const result = await dependencies.getInterestTags.execute(
+        requirePrincipal(request),
+      );
+      if (!result.ok) return sendFailure(request, reply, result.failure);
+      return reply.code(200).send({ interestTags: result.value });
+    },
+  );
+
+  app.get(
+    "/v1/me/interests",
+    { schema: getOwnInterestsSchema, onRequest: authenticate },
+    async (request, reply) => {
+      const result = await dependencies.getOwnInterests.execute(
+        requirePrincipal(request),
+      );
+      if (!result.ok) return sendFailure(request, reply, result.failure);
+      return reply.code(200).send({ interests: interestsResponse(result.value) });
+    },
+  );
+
+  app.put<{ Body: ReplaceOwnInterestsBody }>(
+    "/v1/me/interests",
+    { schema: replaceOwnInterestsSchema, onRequest: authenticate },
+    async (request, reply) => {
+      const result = await dependencies.replaceOwnInterests.execute({
+        principal: requirePrincipal(request),
+        interestTagIds: request.body.interestTagIds,
+        expectedRevision: request.body.expectedRevision,
+      });
+      if (!result.ok) return sendFailure(request, reply, result.failure);
+      return reply.code(200).send({ interests: interestsResponse(result.value) });
+    },
+  );
 }
 
 function accountResponse(account: AccountProjection): AccountProjection {
@@ -129,5 +182,18 @@ function checkInResponse(checkIn: CheckInProjection): CheckInProjection {
     checkInId: checkIn.checkInId,
     note: checkIn.note,
     createdAt: checkIn.createdAt,
+  };
+}
+
+function interestsResponse(
+  interests: OwnInterestsProjection,
+): OwnInterestsProjection {
+  return {
+    interestTags: interests.interestTags.map((tag) => ({
+      interestTagId: tag.interestTagId,
+      displayName: tag.displayName,
+      lifecycleState: tag.lifecycleState,
+    })),
+    revision: interests.revision,
   };
 }

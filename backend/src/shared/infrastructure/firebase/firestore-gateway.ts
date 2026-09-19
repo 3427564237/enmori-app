@@ -5,9 +5,14 @@ import type {
 } from "firebase-admin/firestore";
 
 export type StoredDocument = Readonly<Record<string, unknown>>;
+export interface StoredDocumentEntry {
+  readonly id: string;
+  readonly data: StoredDocument;
+}
 
 export interface FirestoreTransactionGateway {
   get(path: string): Promise<StoredDocument | undefined>;
+  list(collectionPath: string): Promise<readonly StoredDocumentEntry[]>;
   create(path: string, data: StoredDocument): void;
   set(path: string, data: StoredDocument): void;
 }
@@ -31,6 +36,18 @@ class FirebaseAdminTransactionGateway
     if (!snapshot.exists) return undefined;
     const data = snapshot.data();
     return data === undefined ? undefined : { ...data };
+  }
+
+  public async list(
+    collectionPath: string,
+  ): Promise<readonly StoredDocumentEntry[]> {
+    const snapshot = await this.transaction.get(
+      this.firestore.collection(collectionPath),
+    );
+    return snapshot.docs.map((document) => ({
+      id: document.id,
+      data: { ...document.data() },
+    }));
   }
 
   public create(path: string, data: StoredDocument): void {

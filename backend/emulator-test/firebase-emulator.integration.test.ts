@@ -8,6 +8,7 @@ import { getAuth, type Auth } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
 import { FirestoreCheckInRepository } from "../src/check-ins/infrastructure/firestore-check-in-repository.js";
+import { FirestoreInterestRepository } from "../src/interests/infrastructure/firestore-interest-repository.js";
 import { normalizeNote } from "../src/check-ins/domain/note.js";
 import { FirestoreOnboardingRepository } from "../src/onboarding/infrastructure/firestore-onboarding-repository.js";
 import { canonicalizeUsername } from "../src/onboarding/domain/username.js";
@@ -28,6 +29,7 @@ let auth: Auth;
 let firestore: Firestore;
 let onboarding: FirestoreOnboardingRepository;
 let checkIns: FirestoreCheckInRepository;
+let interests: FirestoreInterestRepository;
 
 before(() => {
   app = initializeApp(
@@ -39,6 +41,7 @@ before(() => {
   const gateway = new FirebaseAdminFirestoreGateway(firestore);
   onboarding = new FirestoreOnboardingRepository(gateway);
   checkIns = new FirestoreCheckInRepository(gateway);
+  interests = new FirestoreInterestRepository(gateway);
 });
 
 beforeEach(async () => {
@@ -339,4 +342,177 @@ test("Firestore Emulator creates and privately reads the approved Check-in recor
     },
   );
   assert.equal((await firestore.collection("check_ins").get()).size, 1);
+});
+
+test("Firestore Emulator saves and later reads an account-isolated Interest selection", async () => {
+  await onboarding.complete(onboardingCommand());
+  await onboarding.complete(
+    onboardingCommand({
+      firebaseUid: OTHER_FIREBASE_UID,
+      accountId: "controlled-account-002",
+      username: "member_002",
+      idempotencyKey: "ControlledR10OnboardingKey02",
+    }),
+  );
+  await firestore.doc("interest_tags/tag-art").create({
+    displayName: "Art",
+    lifecycleState: "active",
+    revision: 1,
+  });
+  await firestore.doc("interest_tags/tag-legacy").create({
+    displayName: "Legacy",
+    lifecycleState: "inactive",
+    revision: 2,
+  });
+
+  const saved = await interests.replaceOwn({
+    firebaseUid: FIREBASE_UID,
+    interestTagIds: ["tag-art"],
+    expectedRevision: 0,
+  });
+  const laterRead = await interests.getOwn(FIREBASE_UID);
+  const otherRead = await interests.getOwn(OTHER_FIREBASE_UID);
+
+  assert.equal(saved.kind, "saved");
+  assert.deepEqual(laterRead, saved.kind === "saved"
+    ? { kind: "found", value: saved.value }
+    : undefined);
+  assert.deepEqual(otherRead, {
+    kind: "found",
+    value: { interestTags: [], revision: 0 },
+  });
+  assert.deepEqual(
+    (await firestore.doc("account_interests/controlled-account-001").get()).data(),
+    { interestTagIds: ["tag-art"], revision: 1 },
+  );
+  assert.equal(
+    (await firestore.doc("account_interests/controlled-account-002").get()).exists,
+    false,
+  );
+});
+
+test("Firestore Emulator prevents two stale-revision updates from overwriting", async () => {
+  await onboarding.complete(onboardingCommand());
+  for (const [id, displayName] of [["tag-art", "Art"], ["tag-books", "Books"]]) {
+    await firestore.doc(`interest_tags/${id}`).create({
+      displayName,
+      lifecycleState: "active",
+      revision: 1,
+    });
+  }
+  const initial = await interests.replaceOwn({
+    firebaseUid: FIREBASE_UID,
+    interestTagIds: [],
+    expectedRevision: 0,
+  });
+  assert.equal(initial.kind, "saved");
+
+  const results = await Promise.all([
+    interests.replaceOwn({
+      firebaseUid: FIREBASE_UID,
+      interestTagIds: ["tag-art"],
+      expectedRevision: 1,
+    }),
+    interests.replaceOwn({
+      firebaseUid: FIREBASE_UID,
+      interestTagIds: ["tag-books"],
+      expectedRevision: 1,
+    }),
+  ]);
+  assert.deepEqual(
+    results.map((result) => result.kind).sort(),
+    ["revision_precondition_failed", "saved"],
+  );
+  const persisted = await interests.getOwn(FIREBASE_UID);
+  assert.equal(persisted.kind, "found");
+  if (persisted.kind !== "found") throw new Error("persisted selection missing");
+  assert.equal(persisted.value.revision, 2);
+  assert.equal(persisted.value.interestTags.length, 1);
+});
+
+test("Firestore Emulator enforces Inactive assignment against current persisted state", async () => {
+  await onboarding.complete(onboardingCommand());
+  await firestore.doc("interest_tags/tag-legacy").create({
+    displayName: "Legacy",
+    lifecycleState: "active",
+    revision: 1,
+  });
+  assert.equal(
+    (await interests.replaceOwn({
+      firebaseUid: FIREBASE_UID,
+      interestTagIds: ["tag-legacy"],
+      expectedRevision: 0,
+    })).kind,
+    "saved",
+  );
+  await firestore.doc("interest_tags/tag-legacy").update({
+    lifecycleState: "inactive",
+    revision: 2,
+  });
+  assert.equal(
+    (await interests.replaceOwn({
+      firebaseUid: FIREBASE_UID,
+      interestTagIds: ["tag-legacy"],
+      expectedRevision: 1,
+    })).kind,
+    "saved",
+  );
+  assert.equal(
+    (await interests.replaceOwn({
+      firebaseUid: FIREBASE_UID,
+      interestTagIds: [],
+      expectedRevision: 2,
+    })).kind,
+    "saved",
+  );
+  assert.equal(
+    (await interests.replaceOwn({
+      firebaseUid: FIREBASE_UID,
+      interestTagIds: ["tag-legacy"],
+      expectedRevision: 3,
+    })).kind,
+    "selection_invalid",
+  );
+});
+
+test("Firestore Emulator serializes a concurrent Tag deactivation and new assignment", async () => {
+  await onboarding.complete(onboardingCommand());
+  const tagReference = firestore.doc("interest_tags/tag-race");
+  await tagReference.create({
+    displayName: "Race",
+    lifecycleState: "active",
+    revision: 1,
+  });
+
+  const [replacement] = await Promise.all([
+    interests.replaceOwn({
+      firebaseUid: FIREBASE_UID,
+      interestTagIds: ["tag-race"],
+      expectedRevision: 0,
+    }),
+    firestore.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(tagReference);
+      assert.equal(snapshot.data()?.lifecycleState, "active");
+      transaction.update(tagReference, {
+        lifecycleState: "inactive",
+        revision: 2,
+      });
+    }),
+  ]);
+
+  assert.equal(
+    replacement.kind === "saved" || replacement.kind === "selection_invalid",
+    true,
+  );
+  const persisted = await interests.getOwn(FIREBASE_UID);
+  assert.equal(persisted.kind, "found");
+  if (persisted.kind !== "found") throw new Error("persisted selection missing");
+  if (replacement.kind === "saved") {
+    assert.deepEqual(
+      persisted.value.interestTags.map((tag) => [tag.interestTagId, tag.lifecycleState]),
+      [["tag-race", "inactive"]],
+    );
+  } else {
+    assert.deepEqual(persisted.value, { interestTags: [], revision: 0 });
+  }
 });

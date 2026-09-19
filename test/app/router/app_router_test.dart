@@ -53,6 +53,13 @@ void main() {
       expect(
         redirectFor(
           gate: RouterGateState.authenticated,
+          location: AppRoutes.interests,
+        ),
+        isNull,
+      );
+      expect(
+        redirectFor(
+          gate: RouterGateState.authenticated,
           location: AppRoutes.onboarding,
         ),
         AppRoutes.checkIn,
