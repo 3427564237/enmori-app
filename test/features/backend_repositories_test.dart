@@ -570,39 +570,68 @@ void main() {
       },
     );
 
-    test(
-      'fails closed when an Event response omits required safe fields',
-      () async {
-        final client = _client(
-          (request) async => http.Response(
-            jsonEncode({
-              'asOf': '2026-09-15T09:00:00Z',
-              'formulaVersion': 'event_recommendation_v1',
-              'items': [
-                {
-                  'eventId': 'evt_01',
-                  'title': 'Missing reason',
-                  'startAt': '2026-09-16T10:00:00Z',
-                  'endAt': '2026-09-16T11:00:00Z',
-                  'matchedInterests': [
-                    {'interestTagId': 'interest_art', 'displayName': 'Art'},
-                  ],
-                },
-              ],
-            }),
-            200,
-          ),
-        );
-        final repository = BackendEventRecommendationRepository(client);
+    test('fails closed when an Event item omits reasonCode', () async {
+      final client = _client(
+        (request) async => http.Response(
+          jsonEncode({
+            'asOf': '2026-09-15T09:00:00Z',
+            'formulaVersion': 'event_recommendation_v1',
+            'items': [
+              {
+                'eventId': 'evt_01',
+                'title': 'Missing reason',
+                'startAt': '2026-09-16T10:00:00Z',
+                'endAt': '2026-09-16T11:00:00Z',
+                'matchedInterests': [
+                  {'interestTagId': 'interest_art', 'displayName': 'Art'},
+                ],
+              },
+            ],
+          }),
+          200,
+        ),
+      );
+      final repository = BackendEventRecommendationRepository(client);
 
-        final result = await repository.read(view: EventRecommendationView.all);
+      final result = await repository.read(view: EventRecommendationView.all);
 
-        expect(
-          (result as Failure<EventRecommendationResponse>).failure.kind,
-          AppFailureKind.unexpected,
-        );
-      },
-    );
+      expect(
+        (result as Failure<EventRecommendationResponse>).failure.kind,
+        AppFailureKind.unexpected,
+      );
+    });
+
+    test('fails closed when a matchedInterests object is malformed', () async {
+      final client = _client(
+        (request) async => http.Response(
+          jsonEncode({
+            'asOf': '2026-09-15T09:00:00Z',
+            'formulaVersion': 'event_recommendation_v1',
+            'items': [
+              {
+                'eventId': 'evt_01',
+                'title': 'Malformed match',
+                'startAt': '2026-09-16T10:00:00Z',
+                'endAt': '2026-09-16T11:00:00Z',
+                'matchedInterests': [
+                  {'interestTagId': 'interest_art'},
+                ],
+                'reasonCode': 'interest_match',
+              },
+            ],
+          }),
+          200,
+        ),
+      );
+      final repository = BackendEventRecommendationRepository(client);
+
+      final result = await repository.read(view: EventRecommendationView.all);
+
+      expect(
+        (result as Failure<EventRecommendationResponse>).failure.kind,
+        AppFailureKind.unexpected,
+      );
+    });
 
     test('accepts a successful empty Event response', () async {
       final client = _client(
