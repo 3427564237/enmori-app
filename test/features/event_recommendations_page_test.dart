@@ -4,6 +4,7 @@ import 'package:enmori/app/router/app_router.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 import 'package:enmori/features/event_recommendations/event_recommendations_providers.dart';
+import 'package:enmori/features/event_recommendations/presentation/event_recommendations_controller.dart';
 import 'package:enmori/features/event_recommendations/presentation/event_recommendations_page.dart';
 import 'package:enmori/features/interests/interests_providers.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,34 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fakes.dart';
 
 void main() {
+  test('a departed Event view cannot cancel its successor request', () async {
+    final repository = FakeEventRecommendationRepository();
+    final container = ProviderContainer(
+      overrides: [
+        eventRecommendationRepositoryProvider.overrideWithValue(repository),
+      ],
+    );
+    addTearDown(container.dispose);
+    final controller = container.read(
+      eventRecommendationsControllerProvider.notifier,
+    );
+
+    final homeOperation = controller.load(view: EventRecommendationView.home);
+    final allOperation = controller.load(view: EventRecommendationView.all);
+    controller.abandon(homeOperation);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(
+      container.read(eventRecommendationsControllerProvider),
+      isA<AsyncData<EventRecommendationResponse>>(),
+    );
+    expect(repository.views, [
+      EventRecommendationView.home,
+      EventRecommendationView.all,
+    ]);
+    controller.abandon(allOperation);
+  });
+
   testWidgets('Home keeps Backend order and presents only its Top 2', (
     tester,
   ) async {

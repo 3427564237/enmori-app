@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
@@ -21,9 +23,17 @@ final class EventRecommendationsController
     return const AsyncLoading();
   }
 
-  Future<void> load({required EventRecommendationView view}) async {
+  int load({required EventRecommendationView view}) {
     final operation = ++_operation;
     state = const AsyncLoading();
+    unawaited(_completeLoad(operation: operation, view: view));
+    return operation;
+  }
+
+  Future<void> _completeLoad({
+    required int operation,
+    required EventRecommendationView view,
+  }) async {
     final result = await _repository.read(view: view);
     if (operation != _operation) return;
     state = switch (result) {
@@ -35,7 +45,7 @@ final class EventRecommendationsController
     };
   }
 
-  void abandon() {
-    _operation++;
+  void abandon(int operation) {
+    if (operation == _operation) _operation++;
   }
 }

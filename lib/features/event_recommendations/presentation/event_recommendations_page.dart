@@ -21,6 +21,7 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
 final class _EventRecommendationsSectionState
     extends ConsumerState<EventRecommendationsSection> {
   late final EventRecommendationsController _controller;
+  int? _operation;
 
   @override
   void initState() {
@@ -31,12 +32,13 @@ final class _EventRecommendationsSectionState
 
   @override
   void dispose() {
-    _controller.abandon();
+    final operation = _operation;
+    if (operation != null) _controller.abandon(operation);
     super.dispose();
   }
 
   void _load() {
-    _controller.load(view: EventRecommendationView.home);
+    _operation = _controller.load(view: EventRecommendationView.home);
   }
 
   @override
@@ -62,6 +64,7 @@ final class EventRecommendationsPage extends ConsumerStatefulWidget {
 final class _EventRecommendationsPageState
     extends ConsumerState<EventRecommendationsPage> {
   late final EventRecommendationsController _controller;
+  int? _operation;
 
   @override
   void initState() {
@@ -72,12 +75,13 @@ final class _EventRecommendationsPageState
 
   @override
   void dispose() {
-    _controller.abandon();
+    final operation = _operation;
+    if (operation != null) _controller.abandon(operation);
     super.dispose();
   }
 
   void _load() {
-    _controller.load(view: EventRecommendationView.all);
+    _operation = _controller.load(view: EventRecommendationView.all);
   }
 
   @override

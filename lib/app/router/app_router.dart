@@ -76,7 +76,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           onEditInterests: () async {
             final saved = await context.push<bool>(AppRoutes.interests);
             if (saved == true) {
-              await ref
+              ref
                   .read(eventRecommendationsControllerProvider.notifier)
                   .load(view: EventRecommendationView.home);
             }
