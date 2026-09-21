@@ -190,7 +190,7 @@ final class _RecommendationList extends StatelessWidget {
                 title: Text(item.title),
                 subtitle: Text(
                   '${_formatTime(item.startAt)} to ${_formatTime(item.endAt)}\n'
-                  'Matches: ${item.matchedInterestLabels.join(', ')}',
+                  'Matches: ${item.matchedInterests.map((interest) => interest.displayName).join(', ')}',
                 ),
               ),
             ),

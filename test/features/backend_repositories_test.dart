@@ -559,9 +559,14 @@ void main() {
         expect(captured.url.path, '/v1/recommendations/events');
         expect(captured.url.queryParameters['view'], 'home');
         final value = (result as Success<EventRecommendationResponse>).value;
-        expect(value.formulaVersion, 'q03-v1');
+        expect(value.formulaVersion, 'event_recommendation_v1');
         expect(value.items.map((item) => item.eventId), ['evt_03', 'evt_01']);
-        expect(value.items.first.matchedInterestLabels, ['Music']);
+        expect(
+          value.items.first.matchedInterests.map(
+            (interest) => interest.displayName,
+          ),
+          ['Music'],
+        );
       },
     );
 
@@ -572,14 +577,16 @@ void main() {
           (request) async => http.Response(
             jsonEncode({
               'asOf': '2026-09-15T09:00:00Z',
-              'formulaVersion': 'q03-v1',
+              'formulaVersion': 'event_recommendation_v1',
               'items': [
                 {
                   'eventId': 'evt_01',
                   'title': 'Missing reason',
                   'startAt': '2026-09-16T10:00:00Z',
                   'endAt': '2026-09-16T11:00:00Z',
-                  'matchedInterestLabels': ['Art'],
+                  'matchedInterests': [
+                    {'interestTagId': 'interest_art', 'displayName': 'Art'},
+                  ],
                 },
               ],
             }),
@@ -596,6 +603,27 @@ void main() {
         );
       },
     );
+
+    test('accepts a successful empty Event response', () async {
+      final client = _client(
+        (request) async => http.Response(
+          jsonEncode({
+            'asOf': '2026-09-15T09:00:00Z',
+            'formulaVersion': 'event_recommendation_v1',
+            'items': [],
+          }),
+          200,
+        ),
+      );
+      final repository = BackendEventRecommendationRepository(client);
+
+      final result = await repository.read(view: EventRecommendationView.all);
+
+      expect(
+        (result as Success<EventRecommendationResponse>).value.items,
+        isEmpty,
+      );
+    });
   });
 }
 
@@ -641,23 +669,28 @@ const _interestEnvelope = {
 
 const _recommendationResponse = {
   'asOf': '2026-09-15T09:00:00Z',
-  'formulaVersion': 'q03-v1',
+  'formulaVersion': 'event_recommendation_v1',
   'items': [
     {
       'eventId': 'evt_03',
       'title': 'Third-ranked event',
       'startAt': '2026-09-18T10:00:00Z',
       'endAt': '2026-09-18T11:00:00Z',
-      'matchedInterestLabels': ['Music'],
-      'reasonCode': 'MATCHED_INTERESTS',
+      'matchedInterests': [
+        {'interestTagId': 'interest_music', 'displayName': 'Music'},
+      ],
+      'reasonCode': 'interest_match',
     },
     {
       'eventId': 'evt_01',
       'title': 'First-ranked event',
       'startAt': '2026-09-16T10:00:00Z',
       'endAt': '2026-09-16T11:00:00Z',
-      'matchedInterestLabels': ['Art', 'Music'],
-      'reasonCode': 'MATCHED_INTERESTS',
+      'matchedInterests': [
+        {'interestTagId': 'interest_art', 'displayName': 'Art'},
+        {'interestTagId': 'interest_music', 'displayName': 'Music'},
+      ],
+      'reasonCode': 'interest_match',
     },
   ],
 };

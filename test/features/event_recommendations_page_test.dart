@@ -48,7 +48,7 @@ void main() {
       ..homeResult = Success(
         EventRecommendationResponse(
           asOf: DateTime.utc(2026, 9, 15),
-          formulaVersion: 'q03-v1',
+          formulaVersion: 'event_recommendation_v1',
           items: const [],
         ),
       );

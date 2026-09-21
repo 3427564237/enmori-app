@@ -3,6 +3,9 @@ import '../../../core/network/utc_timestamp_parser.dart';
 import '../../../core/result/result.dart';
 import '../domain/event_recommendation_repository.dart';
 
+const _formulaVersion = 'event_recommendation_v1';
+const _reasonCode = 'interest_match';
+
 final class BackendEventRecommendationRepository
     implements EventRecommendationRepository {
   BackendEventRecommendationRepository(this._client);
@@ -26,7 +29,10 @@ final class BackendEventRecommendationRepository
     final asOf = tryParseUtcTimestamp(value['asOf']);
     final formulaVersion = value['formulaVersion'];
     final items = value['items'];
-    if (asOf == null || formulaVersion is! String || items is! List) {
+    if (asOf == null ||
+        formulaVersion is! String ||
+        formulaVersion != _formulaVersion ||
+        items is! List) {
       return _invalidResponse();
     }
 
@@ -37,16 +43,36 @@ final class BackendEventRecommendationRepository
       final title = item['title'];
       final startAt = tryParseUtcTimestamp(item['startAt']);
       final endAt = tryParseUtcTimestamp(item['endAt']);
-      final labels = item['matchedInterestLabels'];
+      final matchedInterests = item['matchedInterests'];
       final reasonCode = item['reasonCode'];
       if (eventId is! String ||
+          eventId.isEmpty ||
           title is! String ||
+          title.isEmpty ||
           startAt == null ||
           endAt == null ||
-          labels is! List ||
-          labels.any((label) => label is! String) ||
-          reasonCode is! String) {
+          matchedInterests is! List ||
+          matchedInterests.isEmpty ||
+          reasonCode != _reasonCode) {
         return _invalidResponse();
+      }
+      final parsedInterests = <MatchedInterest>[];
+      for (final interest in matchedInterests) {
+        if (interest is! Map<String, dynamic>) return _invalidResponse();
+        final interestTagId = interest['interestTagId'];
+        final displayName = interest['displayName'];
+        if (interestTagId is! String ||
+            interestTagId.isEmpty ||
+            displayName is! String ||
+            displayName.isEmpty) {
+          return _invalidResponse();
+        }
+        parsedInterests.add(
+          MatchedInterest(
+            interestTagId: interestTagId,
+            displayName: displayName,
+          ),
+        );
       }
       parsedItems.add(
         EventRecommendation(
@@ -54,7 +80,7 @@ final class BackendEventRecommendationRepository
           title: title,
           startAt: startAt,
           endAt: endAt,
-          matchedInterestLabels: labels.cast<String>(),
+          matchedInterests: parsedInterests,
           reasonCode: reasonCode,
         ),
       );

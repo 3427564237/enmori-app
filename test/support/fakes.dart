@@ -226,31 +226,44 @@ CheckIn testCheckIn() {
 EventRecommendationResponse testEventRecommendations() {
   return EventRecommendationResponse(
     asOf: DateTime.utc(2026, 9, 15, 9),
-    formulaVersion: 'q03-v1',
+    formulaVersion: 'event_recommendation_v1',
     items: [
       EventRecommendation(
         eventId: 'evt_03',
         title: 'Third-ranked event',
         startAt: DateTime.utc(2026, 9, 18, 10),
         endAt: DateTime.utc(2026, 9, 18, 11),
-        matchedInterestLabels: const ['Music'],
-        reasonCode: 'MATCHED_INTERESTS',
+        matchedInterests: const [
+          MatchedInterest(
+            interestTagId: 'interest_music',
+            displayName: 'Music',
+          ),
+        ],
+        reasonCode: 'interest_match',
       ),
       EventRecommendation(
         eventId: 'evt_01',
         title: 'First-ranked event',
         startAt: DateTime.utc(2026, 9, 16, 10),
         endAt: DateTime.utc(2026, 9, 16, 11),
-        matchedInterestLabels: const ['Art', 'Music'],
-        reasonCode: 'MATCHED_INTERESTS',
+        matchedInterests: const [
+          MatchedInterest(interestTagId: 'interest_art', displayName: 'Art'),
+          MatchedInterest(
+            interestTagId: 'interest_music',
+            displayName: 'Music',
+          ),
+        ],
+        reasonCode: 'interest_match',
       ),
       EventRecommendation(
         eventId: 'evt_02',
         title: 'Second-ranked event',
         startAt: DateTime.utc(2026, 9, 17, 10),
         endAt: DateTime.utc(2026, 9, 17, 11),
-        matchedInterestLabels: const ['Art'],
-        reasonCode: 'MATCHED_INTERESTS',
+        matchedInterests: const [
+          MatchedInterest(interestTagId: 'interest_art', displayName: 'Art'),
+        ],
+        reasonCode: 'interest_match',
       ),
     ],
   );

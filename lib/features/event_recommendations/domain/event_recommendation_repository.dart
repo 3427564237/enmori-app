@@ -2,13 +2,23 @@ import '../../../core/result/result.dart';
 
 enum EventRecommendationView { home, all }
 
+final class MatchedInterest {
+  const MatchedInterest({
+    required this.interestTagId,
+    required this.displayName,
+  });
+
+  final String interestTagId;
+  final String displayName;
+}
+
 final class EventRecommendation {
   const EventRecommendation({
     required this.eventId,
     required this.title,
     required this.startAt,
     required this.endAt,
-    required this.matchedInterestLabels,
+    required this.matchedInterests,
     required this.reasonCode,
   });
 
@@ -16,7 +26,7 @@ final class EventRecommendation {
   final String title;
   final DateTime startAt;
   final DateTime endAt;
-  final List<String> matchedInterestLabels;
+  final List<MatchedInterest> matchedInterests;
   final String reasonCode;
 }
 
