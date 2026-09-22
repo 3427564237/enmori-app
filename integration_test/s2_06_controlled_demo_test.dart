@@ -481,6 +481,7 @@ void main() {
     } finally {
       await report.finish(httpObserver.records);
       await report.phase('finished');
+      await report.waitEvidenceReceipt();
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
       container?.dispose();
@@ -759,7 +760,7 @@ class _Report {
   String? currentRow;
   String get cache => Directory.systemTemp.path;
   Future<void> initialize() async {
-    for (final name in ['radios_off', 'radios_restored']) {
+    for (final name in ['radios_off', 'radios_restored', 'evidence_saved']) {
       final file = File('$cache/s2-06-$name');
       if (await file.exists()) await file.delete();
     }
@@ -793,6 +794,19 @@ class _Report {
 
   Future<void> phase(String value) =>
       File('$cache/s2-06-phase').writeAsString(value, flush: true);
+  Future<void> waitEvidenceReceipt() async {
+    // flutter test may uninstall the app on completion. Keep its sandbox alive
+    // until the host has read and validated the sanitized result JSON.
+    final receipt = File('$cache/s2-06-evidence_saved');
+    final until = DateTime.now().add(const Duration(seconds: 60));
+    while (!receipt.existsSync() && DateTime.now().isBefore(until)) {
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+    if (!receipt.existsSync()) {
+      throw TestFailure('Host did not acknowledge sanitized evidence export.');
+    }
+  }
+
   Future<void> finish(List<_Request> requests) async {
     final evidence = {
       'appSource': appHead,

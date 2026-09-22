@@ -42,10 +42,23 @@ $metadata = [ordered]@{
     mobileDataOriginal = $dataOriginal
     radiosInterrupted = $false
     radiosRestored = $false
+    evidenceExported = $false
 }
-# Clear only this harness's old app-cache evidence and coordination markers.
-& $Adb -s $Serial shell run-as com.enmori.app rm -f cache/s2-06-phase cache/s2-06-radios_off cache/s2-06-radios_restored cache/s2-06-result.json
-if ($LASTEXITCODE -ne 0) { throw 'Dedicated debug app cache is unavailable.' }
+# The test initializes its own markers after installation. flutter test can
+# uninstall the package after a run, so no installed package is required here.
+$coordinationDirectory = ''
+
+function Export-GateEvidence {
+    $raw = (& $Adb -s $Serial shell run-as com.enmori.app cat "$coordinationDirectory/s2-06-result.json") -join [Environment]::NewLine
+    if ($LASTEXITCODE -ne 0) { throw 'Gate evidence is unavailable.' }
+    $parsed = $raw | ConvertFrom-Json
+    if ($parsed.rows.PSObject.Properties.Count -ne 8 -or $null -eq $parsed.assertions) {
+        throw 'Gate evidence schema is incomplete.'
+    }
+    $raw | Set-Content -LiteralPath (Join-Path $outPath 'gate-result-sanitized.json')
+    $parsed.rows | ConvertTo-Json -Compress | Write-Output
+    $metadata.evidenceExported = $true
+}
 
 function Set-RadioStates([string]$Wifi, [string]$Data) {
     $wifiAction = if ($Wifi -eq '1') { 'enable' } else { 'disable' }
@@ -83,7 +96,17 @@ try {
     $child = Start-Process @startOptions
     $until = (Get-Date).AddMinutes(25)
     while (-not $child.HasExited -and (Get-Date) -lt $until) {
-        $phase = ((& $Adb -s $Serial shell run-as com.enmori.app cat cache/s2-06-phase 2>$null) -join '').Trim()
+        # Directory.systemTemp is code_cache on this API 36 runtime. Discover
+        # either supported app-private location instead of assuming cache.
+        $phase = ''
+        foreach ($candidate in @('code_cache', 'cache')) {
+            $observed = ((& $Adb -s $Serial shell run-as com.enmori.app cat "$candidate/s2-06-phase" 2>$null) -join '').Trim()
+            if ($observed -in @('running', 'disable_radios', 'restore_radios', 'finished')) {
+                $phase = $observed
+                $coordinationDirectory = $candidate
+                break
+            }
+        }
         if ($phase -in @('running', 'disable_radios', 'restore_radios', 'finished') -and
             $phase -ne $lastPhase) {
             Write-Output ('S2_06_HOST phase=' + $phase)
@@ -92,13 +115,17 @@ try {
                 # Cleanup flag is set before either radio changes.
                 $metadata.radiosInterrupted = $true
                 Set-RadioStates '0' '0'
-                & $Adb -s $Serial shell run-as com.enmori.app touch cache/s2-06-radios_off
+                & $Adb -s $Serial shell run-as com.enmori.app touch "$coordinationDirectory/s2-06-radios_off"
                 if ($LASTEXITCODE -ne 0) { throw 'Offline acknowledgment failed.' }
             } elseif ($phase -eq 'restore_radios') {
                 Set-RadioStates $wifiOriginal $dataOriginal
                 $metadata.radiosRestored = $true
-                & $Adb -s $Serial shell run-as com.enmori.app touch cache/s2-06-radios_restored
+                & $Adb -s $Serial shell run-as com.enmori.app touch "$coordinationDirectory/s2-06-radios_restored"
                 if ($LASTEXITCODE -ne 0) { throw 'Restoration acknowledgment failed.' }
+            } elseif ($phase -eq 'finished') {
+                Export-GateEvidence
+                & $Adb -s $Serial shell run-as com.enmori.app touch "$coordinationDirectory/s2-06-evidence_saved"
+                if ($LASTEXITCODE -ne 0) { throw 'Evidence acknowledgment failed.' }
             }
         }
         Start-Sleep -Seconds 1
@@ -118,16 +145,10 @@ try {
     }
     $metadata.endedUtc = [DateTime]::UtcNow.ToString('o')
     $metadata | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outPath 'host-result-sanitized.json')
-    $result = (& $Adb -s $Serial shell run-as com.enmori.app cat cache/s2-06-result.json 2>$null) -join [Environment]::NewLine
-    if ($LASTEXITCODE -eq 0 -and $result.StartsWith('{')) {
-        $parsed = $result | ConvertFrom-Json
-        $result | Set-Content -LiteralPath (Join-Path $outPath 'gate-result-sanitized.json')
-        $parsed.rows | ConvertTo-Json -Compress | Write-Output
-    }
     $apk = Join-Path $repo 'build/app/outputs/flutter-apk/app-debug.apk'
     if (Test-Path -LiteralPath $apk) {
         (Get-FileHash -LiteralPath $apk -Algorithm SHA256).Hash |
             Set-Content -LiteralPath (Join-Path $outPath 'test-apk-sha256.txt')
     }
 }
-if ($metadata.flutterExitCode -ne 0) { exit 1 }
+if ($metadata.flutterExitCode -ne 0 -or -not $metadata.evidenceExported) { exit 1 }
