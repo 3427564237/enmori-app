@@ -1,4 +1,4 @@
-# S2-06 Event gate matrix — preparation, 2026-09-16
+# S2-06 Event gate matrix — reconciled 2026-09-22 SGT
 
 - Owner / executor: JIN ZIHAN; independent reviewer of actual results: SHI ZHENGQI.
 - Assigned scope: Issue #29, 3h Event cross-feature automated verification.
@@ -10,7 +10,77 @@
 S2-04 is merged and accepted; S2-05 independent review is complete. This record
 does not reopen either component or claim S2-06 execution. Issue #29 stays open.
 
-## Sources and observed dependencies
+## Current handoff reconciliation — 2026-09-22 SGT
+
+This reconciliation supersedes the **current-blocker interpretation** of the
+16 September snapshots below. Matrix preparation at
+`c454ca2a0c5e1fefa0bc7b2e2da1c46d0904cea4` remains complete. No S2-06
+execution window has started and all eight rows remain **Not Run**.
+
+| Input | Current evidence | Disposition |
+| --- | --- | --- |
+| Integrated app/source review | PR #40 `cdd0b9dad5705e4ac9887efe2cd86d3c07b7f4b4`; [SHI exact-head approval](https://github.com/3427564237/enmori-app/pull/40#pullrequestreview-5269129913) | Resolved; no outstanding source-review blocker |
+| Deployed Backend | [LI deployment and focused physical evidence](https://github.com/3427564237/enmori-app/issues/30#issuecomment-5764879978), Backend source `cdd0b9dad5705e4ac9887efe2cd86d3c07b7f4b4` | Resolved at the published deployment; JIN access is a separate handoff item, not an assertion that deployment is missing |
+| Fixed Demo data | [LI execution](https://github.com/3427564237/enmori-app/issues/28#issuecomment-5701714506), [SHI acknowledgment](https://github.com/3427564237/enmori-app/issues/28#issuecomment-5705678419), and LI's latest read-only 6/6 verification | Complete: created six fixed records; approved manifest/digest unchanged; reuse evidence without initialization or reset |
+| DU Emulator validation | [DU API 36 run](https://github.com/3427564237/enmori-app/issues/30#issuecomment-5766726591) | Received as DU owner evidence: registration/Initial Choice/check-in, empty before selection, Community/Music save and restart/later read, Home 2/All 4, unavailable/Retry recovery. It is not JIN's automated gate |
+| APK provenance | DU reports `832CDF5A43DFA76FBF91F90FCD5DB33FFD2A24C4894C5AD30DF457A4D93D7AE3`; LI separately reports `8a29c8f0e52ae64336a88be5ae49ad4e9e0cf308f70579639821081d22d2c383` | Distinct builds, not conflicting hashes. DU's hash was originally built at `eb846237e69f285d116037b4fc70658fef99d832`; SHI verified unchanged production trees at test-only `cdd0b9d`. Record the actual JIN test build when executed |
+| Identity setup | [LI local synthetic-account decision](https://github.com/3427564237/enmori-app/issues/28#issuecomment-5741263197) and DU's registration result | Setup pattern received; no shared-password blocker. JIN must exercise fresh onboarding with locally held synthetic credentials, not reuse DU's already-onboarded session as proof |
+
+### Remaining handoff items and owners
+
+1. **DU (@397781783dk-prog): reproducible Emulator launch and access handoff.**
+   Identify the dedicated AVD/model (API 36 is already reported), SDK/tool
+   versions, sanitized launch/build/test commands, and the existing private
+   Dart-define configuration location/mechanism for JIN. Confirm how JIN's AVD
+   uses the approved private HTTPS path. **LI (@3427564237)** owns any required
+   access provisioning through that existing private channel; no new runtime,
+   ADC transfer, shared password, tunnel or IAM arrangement is requested.
+2. **DU: harness and request-observation handoff.** Supply the existing
+   executable harness/entry point and exact revision/command, or explicitly
+   confirm that the DU run used UI/ADB only. Supply the existing observation
+   seam/procedure for fresh post-save Home and independent All requests, with
+   sanitized results/artifact references. JIN owns the missing cross-feature
+   assertions and controlled-Demo test implementation within the assigned 3h;
+   DU is not being assigned the S2-06 gate.
+3. **DU: dedicated-AVD failure/recovery reproduction.** Tie the reported
+   unavailable/Retry run to the named AVD and approved radio-only procedure,
+   including original Wi-Fi/mobile-data states, restoration/cleanup outcome,
+   and available sanitized checkpoint evidence/execution window. JIN will
+   record its own original states and restore them in cleanup. The published
+   summary does not yet establish those reproduction details or automated
+   Home/All request assertions.
+
+Read-only local checks found one configured AVD, `pixel_7_-_api_36`, and zero
+running Emulators. This does not establish that it is DU's dedicated AVD. The
+known ignored `rmvp01a-controlled.json` was absent from both local checkouts;
+no `ENMORI_*` process variables were present. Configuration may exist elsewhere,
+but its approved location/access has not been handed over to this executor.
+No device was launched or network state changed during reconciliation.
+
+At exact PR #40 head, the tracked integration-test inventory still contains
+`r6_surface_device_evidence_test.dart`, `rmvp01a_client_flow_test.dart`, and
+`s2_interest_real_backend_test.dart`; no DU controlled-Demo gate entry point is
+identified in the published handoff. The RMVP flow uses fakes, and the Interest
+test unconditionally calls `useAuthEmulator`. Neither is a valid unchanged
+command for this gate. The older DU preparation runbook still has historical
+target/initialization blockers; those are superseded by the evidence above.
+
+**Execution scheduling:** an unconditional execution window cannot yet be
+committed because the reproducible access/harness handoff is incomplete. JIN
+reports these exact items on 22 September SGT, toward the existing 25 September
+primary-execution close target. Once received, use the existing 3h allocation:
+0.5h reconciliation, 1.5h automation/execution, 1h evidence. Record actual
+app/Backend/test SHAs, UTC/SGT start/end, AVD/API, sanitized commands/assertions,
+all eight dispositions and defect/retest outcomes, then request SHI
+(@GGGGHOST-CN) review of the actual result commit. This documentation update is
+not that result commit and does not trigger a premature results review.
+
+Reconciliation checks: GitHub issue/review/deployment evidence and exact-head
+test inventory read; local AVD/config presence checked without exposing private
+values. No product tests or S2-06 assertions executed; no product defect/retest
+result produced. Friend implementation and JIN's AI review remain complete.
+
+## Historical sources and observed dependencies — 2026-09-16
 
 | Input | Source observed when preparing this matrix | Effect on execution |
 | --- | --- | --- |
@@ -47,7 +117,7 @@ reports Backend 162/162 and isolated Firebase Emulator 22/22. Those results are
 attributed owner evidence, not JIN reruns or proof of actual Demo initialization.
 DU's built APK likewise does not establish a runtime handoff or client reachability.
 
-The remaining sequence is ZHOU's initializer review, SHI's actual create-only
+At that historical checkpoint, the remaining sequence was ZHOU's initializer review, SHI's actual create-only
 initialization/runtime delivery, and DU's reviewed integrated version with real
 Android Emulator evidence and reproducible handoff. JIN then reconciles the
 actual app/Backend/test identities and executes the existing 3h allocation
@@ -56,7 +126,7 @@ UTC/SGT start and end when that window begins; no execution time is claimed here
 Submit the resulting exact commit to SHI for independent review. All eight rows
 remain **Not Run**, and Issue #29 remains open.
 
-## Required handoff before execution
+## Required handoff before execution (criteria; current status above)
 
 1. DU supplies the integrated app commit, Backend commit, relevant predecessor
    heads and LI's disposition on the actual integration increment, with a
@@ -196,6 +266,8 @@ identifiers or raw personal payloads in evidence. Restrict request observations
 to the allowed operational metadata and test assertions over approved synthetic
 fixtures; do not enable unrestricted network/body logging.
 
-At preparation time: initialization/runtime handoff and DU's controlled
-integrated handoff are pending; all eight execution rows remain **Not Run**.
+Current status, 22 September SGT: source review, deployment, fixed-manifest
+initialization and DU's reported Emulator validation are received. Only the
+reproducible DU Emulator/harness/access handoff items listed above remain
+outstanding before JIN execution; all eight rows remain **Not Run**.
 No physical-device proxy work, UAT, Release or Issue/Project completion is claimed.
