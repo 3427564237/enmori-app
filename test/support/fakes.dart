@@ -5,6 +5,8 @@ import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/check_in/domain/check_in_repository.dart';
+import 'package:enmori/features/interests/domain/interest_repository.dart';
+import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 
 final class FakeIdempotencyKeyGenerator implements IdempotencyKeyGenerator {
   FakeIdempotencyKeyGenerator(this._keys);
@@ -127,6 +129,83 @@ final class FakeCheckInRepository implements CheckInRepository {
   }
 }
 
+final class FakeInterestRepository implements InterestRepository {
+  Result<List<InterestTagOption>> catalogueResult = Success([
+    const InterestTagOption(interestTagId: 'tag-art', displayName: 'Art'),
+    const InterestTagOption(interestTagId: 'tag-books', displayName: 'Books'),
+  ]);
+  Result<InterestSelection> ownResult = const Success(
+    InterestSelection(interestTags: [], revision: 0),
+  );
+  Result<InterestSelection>? replaceResult;
+  Completer<Result<List<InterestTagOption>>>? pendingCatalogue;
+  Completer<Result<InterestSelection>>? pendingOwn;
+  Completer<Result<InterestSelection>>? pendingReplace;
+  int catalogueReads = 0;
+  int ownReads = 0;
+  final savedIds = <List<String>>[];
+  final expectedRevisions = <int>[];
+
+  @override
+  Future<Result<List<InterestTagOption>>> readSelectableTags() async {
+    catalogueReads++;
+    return pendingCatalogue?.future ?? catalogueResult;
+  }
+
+  @override
+  Future<Result<InterestSelection>> readOwn() async {
+    ownReads++;
+    return pendingOwn?.future ?? ownResult;
+  }
+
+  @override
+  Future<Result<InterestSelection>> replaceOwn({
+    required List<String> interestTagIds,
+    required int expectedRevision,
+  }) async {
+    savedIds.add([...interestTagIds]);
+    expectedRevisions.add(expectedRevision);
+    final pending = pendingReplace;
+    if (pending != null) return pending.future;
+    return replaceResult ??
+        Success(
+          InterestSelection(
+            interestTags: [
+              for (final id in interestTagIds)
+                SelectedInterestTag(
+                  interestTagId: id,
+                  displayName: id == 'tag-art' ? 'Art' : 'Books',
+                  lifecycleState: InterestLifecycleState.active,
+                ),
+            ],
+            revision: expectedRevision + 1,
+          ),
+        );
+  }
+}
+
+final class FakeEventRecommendationRepository
+    implements EventRecommendationRepository {
+  Result<EventRecommendationResponse> homeResult = Success(
+    testEventRecommendations(),
+  );
+  Result<EventRecommendationResponse> allResult = Success(
+    testEventRecommendations(),
+  );
+  final views = <EventRecommendationView>[];
+
+  @override
+  Future<Result<EventRecommendationResponse>> read({
+    required EventRecommendationView view,
+  }) async {
+    views.add(view);
+    return switch (view) {
+      EventRecommendationView.home => homeResult,
+      EventRecommendationView.all => allResult,
+    };
+  }
+}
+
 ProductAccount testAccount({String username = 'miku_01'}) {
   return ProductAccount(
     username: username,
@@ -141,5 +220,51 @@ CheckIn testCheckIn() {
     checkInId: 'chk_test',
     note: 'A controlled test note.',
     createdAt: DateTime.utc(2026, 9, 3, 3, 20),
+  );
+}
+
+EventRecommendationResponse testEventRecommendations() {
+  return EventRecommendationResponse(
+    asOf: DateTime.utc(2026, 9, 15, 9),
+    formulaVersion: 'event_recommendation_v1',
+    items: [
+      EventRecommendation(
+        eventId: 'evt_03',
+        title: 'Third-ranked event',
+        startAt: DateTime.utc(2026, 9, 18, 10),
+        endAt: DateTime.utc(2026, 9, 18, 11),
+        matchedInterests: const [
+          MatchedInterest(
+            interestTagId: 'interest_music',
+            displayName: 'Music',
+          ),
+        ],
+        reasonCode: 'interest_match',
+      ),
+      EventRecommendation(
+        eventId: 'evt_01',
+        title: 'First-ranked event',
+        startAt: DateTime.utc(2026, 9, 16, 10),
+        endAt: DateTime.utc(2026, 9, 16, 11),
+        matchedInterests: const [
+          MatchedInterest(interestTagId: 'interest_art', displayName: 'Art'),
+          MatchedInterest(
+            interestTagId: 'interest_music',
+            displayName: 'Music',
+          ),
+        ],
+        reasonCode: 'interest_match',
+      ),
+      EventRecommendation(
+        eventId: 'evt_02',
+        title: 'Second-ranked event',
+        startAt: DateTime.utc(2026, 9, 17, 10),
+        endAt: DateTime.utc(2026, 9, 17, 11),
+        matchedInterests: const [
+          MatchedInterest(interestTagId: 'interest_art', displayName: 'Art'),
+        ],
+        reasonCode: 'interest_match',
+      ),
+    ],
   );
 }

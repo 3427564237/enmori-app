@@ -22,6 +22,11 @@ const checkIn = {
   createdAt: "2026-09-05T04:05:00.000Z",
 } as const;
 
+const interests = {
+  interestTags: [],
+  revision: 0,
+} as const;
+
 function dependencies(
   identityResult: IdentityVerificationResult = {
     kind: "verified",
@@ -43,6 +48,15 @@ function dependencies(
     },
     getCheckIn: {
       execute: async () => ok(checkIn),
+    },
+    getInterestTags: {
+      execute: async () => ok([]),
+    },
+    getOwnInterests: {
+      execute: async () => ok(interests),
+    },
+    replaceOwnInterests: {
+      execute: async () => ok({ ...interests, revision: 1 }),
     },
   };
 }
@@ -139,6 +153,122 @@ test("GET routes expose only approved safe projections", async () => {
   assert.doesNotMatch(responseText(persisted), /ownerAccountId|firebaseUid/i);
 });
 
+test("Interest routes map the fixed catalogue and own-selection contract", async () => {
+  const deps = dependencies();
+  const input: unknown[] = [];
+  deps.getInterestTags.execute = async () => ok([
+    { interestTagId: "tag-a", displayName: "Art" },
+  ]);
+  deps.getOwnInterests.execute = async () => ok({
+    interestTags: [
+      {
+        interestTagId: "tag-old",
+        displayName: "Legacy",
+        lifecycleState: "inactive" as const,
+      },
+    ],
+    revision: 3,
+  });
+  deps.replaceOwnInterests.execute = async (value) => {
+    input.push(value);
+    return ok({
+      interestTags: [
+        {
+          interestTagId: "tag-a",
+          displayName: "Art",
+          lifecycleState: "active" as const,
+        },
+      ],
+      revision: 4,
+    });
+  };
+  const app = await buildApp(deps);
+  test.after(() => app.close());
+
+  const catalogue = await app.inject({
+    method: "GET",
+    url: "/v1/interest-tags",
+    headers: authHeaders,
+  });
+  const own = await app.inject({
+    method: "GET",
+    url: "/v1/me/interests",
+    headers: authHeaders,
+  });
+  const saved = await app.inject({
+    method: "PUT",
+    url: "/v1/me/interests",
+    headers: authHeaders,
+    payload: { interestTagIds: ["tag-a"], expectedRevision: 3 },
+  });
+
+  assert.equal(catalogue.statusCode, 200);
+  assert.deepEqual(catalogue.json(), {
+    interestTags: [{ interestTagId: "tag-a", displayName: "Art" }],
+  });
+  assert.equal(own.statusCode, 200);
+  assert.equal(saved.statusCode, 200);
+  assert.deepEqual(input, [{
+    principal: { firebaseUid: "firebase-1" },
+    interestTagIds: ["tag-a"],
+    expectedRevision: 3,
+  }]);
+  assert.equal("idempotency-key" in saved.headers, false);
+  assert.doesNotMatch(responseText(saved), /accountId|firebaseUid|owner/i);
+});
+
+test("Interest PUT rejects invalid selections before the use case", async () => {
+  let calls = 0;
+  const deps = dependencies();
+  deps.replaceOwnInterests.execute = async () => {
+    calls += 1;
+    return ok({ interestTags: [], revision: 1 });
+  };
+  const app = await buildApp(deps);
+  test.after(() => app.close());
+
+  const invalidPayloads = [
+    { interestTagIds: ["tag-a", "tag-a"], expectedRevision: 0 },
+    { interestTagIds: Array.from({ length: 11 }, (_, i) => `tag-${i}`), expectedRevision: 0 },
+    { interestTagIds: ["tag-a"], expectedRevision: -1 },
+    { interestTagIds: ["tag-a"], expectedRevision: 0, accountId: "private" },
+  ];
+  for (const payload of invalidPayloads) {
+    const response = await app.inject({
+      method: "PUT",
+      url: "/v1/me/interests",
+      headers: authHeaders,
+      payload,
+    });
+    assert.equal(response.statusCode, 422);
+    assert.equal(response.json().error.code, "INTEREST_SELECTION_INVALID");
+  }
+  assert.equal(calls, 0);
+});
+
+test("Interest failures preserve 412, 422, onboarding and dependency semantics", async () => {
+  const cases = [
+    ["INTEREST_REVISION_PRECONDITION_FAILED", 412],
+    ["INTEREST_SELECTION_INVALID", 422],
+    ["ONBOARDING_REQUIRED", 409],
+    ["SERVICE_UNAVAILABLE", 503],
+  ] as const;
+  for (const [code, status] of cases) {
+    const deps = dependencies();
+    deps.replaceOwnInterests.execute = async () => err(appFailure(code));
+    const app = await buildApp(deps);
+    const response = await app.inject({
+      method: "PUT",
+      url: "/v1/me/interests",
+      headers: authHeaders,
+      payload: { interestTagIds: [], expectedRevision: 0 },
+    });
+    await app.close();
+    assert.equal(response.statusCode, status);
+    assert.equal(response.json().error.code, code);
+  }
+});
+
 test("authentication outcomes map to safe stable envelopes", async () => {
   const cases: Array<{
     result: IdentityVerificationResult;
@@ -194,6 +324,11 @@ test("authentication precedes command-header validation", async () => {
       method: "POST" as const,
       url: "/v1/check-ins",
       payload: { note: checkIn.note },
+    },
+    {
+      method: "PUT" as const,
+      url: "/v1/me/interests",
+      payload: { interestTagIds: [], expectedRevision: 0 },
     },
   ];
   const cases: Array<{

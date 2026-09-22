@@ -73,7 +73,7 @@ void main() {
 
             await _pumpR6Page(
               tester,
-              HomeShellPage(onStartCheckIn: () {}),
+              HomeShellPage(onStartCheckIn: () {}, onSeeAllEvents: () {}),
               textScale: textScale,
             );
             expect(find.byKey(const Key('route-home')), findsOneWidget);

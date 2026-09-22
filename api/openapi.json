@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "ENMORI RMVP-01A Backend API",
-    "version": "1.0.0"
+    "title": "ENMORI Backend API",
+    "version": "1.1.0"
   },
   "servers": [],
   "security": [
@@ -166,6 +166,105 @@
           }
         }
       }
+    },
+    "/v1/recommendations/events": {
+      "get": {
+        "operationId": "recommendEvents",
+        "description": "Authenticated independent request-time computation. Exactly one view, no unknown query parameters or body. Server asOf, full Q03 ordering before Home Top 2. No history, pagination continuity or fallback.",
+        "parameters": [{"name": "view", "in": "query", "required": true, "schema": {"type": "string", "enum": ["home", "all"]}, "description": "Exactly one value; missing, duplicate or invalid query parameters yield REQUEST_INVALID."}],
+        "responses": {
+          "200": {"description": "Ordered recommendations, including successful empty items", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/EventRecommendations"}}}},
+          "400": {"description": "REQUEST_INVALID: Event query parameters only", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorEnvelope"}}}},
+          "401": {"$ref": "#/components/responses/AuthRequired"},
+          "403": {"$ref": "#/components/responses/AuthForbidden"},
+          "409": {"$ref": "#/components/responses/OnboardingRequired"},
+          "503": {"$ref": "#/components/responses/ServiceUnavailable"}
+        }
+      }
+    },
+    "/v1/interest-tags": {
+      "get": {
+        "operationId": "listSelectableInterestTags",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/InterestTagList"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthForbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/OnboardingRequired"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/me/interests": {
+      "get": {
+        "operationId": "getOwnInterests",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OwnInterests"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthForbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/OnboardingRequired"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "operationId": "replaceOwnInterests",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceOwnInterestsRequest"
+              },
+              "example": {
+                "interestTagIds": ["interest_community"],
+                "expectedRevision": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OwnInterests"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthForbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/OnboardingRequired"
+          },
+          "412": {
+            "$ref": "#/components/responses/InterestRevisionPreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/InterestSelectionInvalid"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -189,6 +288,27 @@
       }
     },
     "schemas": {
+      "EventUtcTimestamp": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$"},
+      "MatchedInterest": {
+        "type": "object", "additionalProperties": false, "required": ["interestTagId", "displayName"],
+        "properties": {"interestTagId": {"type": "string", "minLength": 1}, "displayName": {"type": "string", "minLength": 1}}
+      },
+      "EventRecommendationItem": {
+        "type": "object", "additionalProperties": false,
+        "required": ["eventId", "title", "startAt", "endAt", "matchedInterests", "reasonCode"],
+        "properties": {
+          "eventId": {"type": "string", "minLength": 1}, "title": {"type": "string", "minLength": 1},
+          "startAt": {"$ref": "#/components/schemas/EventUtcTimestamp"}, "endAt": {"$ref": "#/components/schemas/EventUtcTimestamp"},
+          "matchedInterests": {"type": "array", "minItems": 1, "items": {"$ref": "#/components/schemas/MatchedInterest"}},
+          "reasonCode": {"type": "string", "const": "interest_match"}
+        }
+      },
+      "EventRecommendations": {
+        "type": "object", "additionalProperties": false, "required": ["asOf", "formulaVersion", "items"],
+        "properties": {"asOf": {"$ref": "#/components/schemas/EventUtcTimestamp"},
+          "formulaVersion": {"type": "string", "const": "event_recommendation_v1"},
+          "items": {"type": "array", "items": {"$ref": "#/components/schemas/EventRecommendationItem"}}}
+      },
       "CompleteOnboardingRequest": {
         "type": "object",
         "additionalProperties": false,
@@ -218,6 +338,29 @@
         "properties": {
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "ReplaceOwnInterestsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "interestTagIds",
+          "expectedRevision"
+        ],
+        "properties": {
+          "interestTagIds": {
+            "type": "array",
+            "maxItems": 10,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0
           }
         }
       },
@@ -274,6 +417,68 @@
           }
         }
       },
+      "InterestTagSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "interestTagId",
+          "displayName"
+        ],
+        "properties": {
+          "interestTagId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "SelectedInterestTag": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "interestTagId",
+          "displayName",
+          "lifecycleState"
+        ],
+        "properties": {
+          "interestTagId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lifecycleState": {
+            "type": "string",
+            "enum": ["active", "inactive"]
+          }
+        }
+      },
+      "OwnInterests": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "interestTags",
+          "revision"
+        ],
+        "properties": {
+          "interestTags": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/SelectedInterestTag"
+            }
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
       "UtcTimestamp": {
         "type": "string",
         "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"
@@ -297,6 +502,7 @@
               "code": {
                 "type": "string",
                 "enum": [
+                  "REQUEST_INVALID",
                   "AUTH_REQUIRED",
                   "AUTH_FORBIDDEN",
                   "USERNAME_INVALID",
@@ -305,6 +511,8 @@
                   "ONBOARDING_CONFLICT",
                   "CHECKIN_INVALID",
                   "CHECKIN_UNAVAILABLE",
+                  "INTEREST_SELECTION_INVALID",
+                  "INTEREST_REVISION_PRECONDITION_FAILED",
                   "IDEMPOTENCY_KEY_INVALID",
                   "IDEMPOTENCY_CONFLICT",
                   "SERVICE_UNAVAILABLE"
@@ -425,6 +633,43 @@
           }
         }
       },
+      "InterestTagList": {
+        "description": "Active controlled Interest Tags available for new selection",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["interestTags"],
+              "properties": {
+                "interestTags": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InterestTagSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "OwnInterests": {
+        "description": "Complete current own-Interest selection",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["interests"],
+              "properties": {
+                "interests": {
+                  "$ref": "#/components/schemas/OwnInterests"
+                }
+              }
+            }
+          }
+        }
+      },
       "BadRequest": {
         "description": "Invalid onboarding request or Idempotency-Key",
         "content": {
@@ -483,6 +728,22 @@
       },
       "CheckInUnavailable": {
         "description": "Missing and non-owned Check-ins are indistinguishable",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+          }
+        }
+      },
+      "InterestSelectionInvalid": {
+        "description": "Interest selection violates cardinality, uniqueness, existence or lifecycle rules",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+          }
+        }
+      },
+      "InterestRevisionPreconditionFailed": {
+        "description": "Expected Interest selection revision is stale and a fresh read is required",
         "content": {
           "application/json": {
             "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }

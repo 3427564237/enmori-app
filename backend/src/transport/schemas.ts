@@ -1,6 +1,7 @@
 import type { FastifySchema } from "fastify";
 
 export const approvedFailureCodes = [
+  "REQUEST_INVALID",
   "AUTH_REQUIRED",
   "AUTH_FORBIDDEN",
   "USERNAME_INVALID",
@@ -9,6 +10,8 @@ export const approvedFailureCodes = [
   "ONBOARDING_CONFLICT",
   "CHECKIN_INVALID",
   "CHECKIN_UNAVAILABLE",
+  "INTEREST_SELECTION_INVALID",
+  "INTEREST_REVISION_PRECONDITION_FAILED",
   "IDEMPOTENCY_KEY_INVALID",
   "IDEMPOTENCY_CONFLICT",
   "SERVICE_UNAVAILABLE",
@@ -47,6 +50,40 @@ export const checkInSchema = {
     checkInId: { type: "string", minLength: 1 },
     note: { type: "string" },
     createdAt: utcTimestamp,
+  },
+} as const;
+
+export const interestTagSummarySchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["interestTagId", "displayName"],
+  properties: {
+    interestTagId: { type: "string", minLength: 1 },
+    displayName: { type: "string", minLength: 1 },
+  },
+} as const;
+
+export const selectedInterestTagSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["interestTagId", "displayName", "lifecycleState"],
+  properties: {
+    ...interestTagSummarySchema.properties,
+    lifecycleState: { type: "string", enum: ["active", "inactive"] },
+  },
+} as const;
+
+export const ownInterestsSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["interestTags", "revision"],
+  properties: {
+    interestTags: {
+      type: "array",
+      maxItems: 10,
+      items: selectedInterestTagSchema,
+    },
+    revision: { type: "integer", minimum: 0 },
   },
 } as const;
 
@@ -141,6 +178,37 @@ const checkInEnvelope = {
   properties: { checkIn: checkInSchema },
 } as const;
 
+const interestTagListEnvelope = {
+  type: "object",
+  additionalProperties: false,
+  required: ["interestTags"],
+  properties: {
+    interestTags: { type: "array", items: interestTagSummarySchema },
+  },
+} as const;
+
+const ownInterestsEnvelope = {
+  type: "object",
+  additionalProperties: false,
+  required: ["interests"],
+  properties: { interests: ownInterestsSchema },
+} as const;
+
+const replaceOwnInterestsBody = {
+  type: "object",
+  additionalProperties: false,
+  required: ["interestTagIds", "expectedRevision"],
+  properties: {
+    interestTagIds: {
+      type: "array",
+      maxItems: 10,
+      uniqueItems: true,
+      items: { type: "string", minLength: 1 },
+    },
+    expectedRevision: { type: "integer", minimum: 0 },
+  },
+} as const;
+
 const withErrors = (
   success: Record<number, unknown>,
   statuses: readonly number[],
@@ -174,4 +242,20 @@ export const createCheckInSchema = {
 export const getCheckInSchema = {
   params: checkInParams,
   response: withErrors({ 200: checkInEnvelope }, [401, 403, 404, 409, 503]),
+} satisfies FastifySchema;
+
+export const getInterestTagsSchema = {
+  response: withErrors({ 200: interestTagListEnvelope }, [401, 403, 409, 503]),
+} satisfies FastifySchema;
+
+export const getOwnInterestsSchema = {
+  response: withErrors({ 200: ownInterestsEnvelope }, [401, 403, 409, 503]),
+} satisfies FastifySchema;
+
+export const replaceOwnInterestsSchema = {
+  body: replaceOwnInterestsBody,
+  response: withErrors(
+    { 200: ownInterestsEnvelope },
+    [401, 403, 409, 412, 422, 503],
+  ),
 } satisfies FastifySchema;

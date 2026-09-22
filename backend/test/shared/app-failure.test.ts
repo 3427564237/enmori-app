@@ -15,6 +15,7 @@ test("maps the approved error catalogue to exact HTTP statuses", () => {
       ]),
     ),
     {
+      REQUEST_INVALID: 400,
       AUTH_REQUIRED: 401,
       AUTH_FORBIDDEN: 403,
       USERNAME_INVALID: 400,
@@ -23,6 +24,8 @@ test("maps the approved error catalogue to exact HTTP statuses", () => {
       ONBOARDING_CONFLICT: 409,
       CHECKIN_INVALID: 400,
       CHECKIN_UNAVAILABLE: 404,
+      INTEREST_SELECTION_INVALID: 422,
+      INTEREST_REVISION_PRECONDITION_FAILED: 412,
       IDEMPOTENCY_KEY_INVALID: 400,
       IDEMPOTENCY_CONFLICT: 409,
       SERVICE_UNAVAILABLE: 503,

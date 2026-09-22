@@ -7,6 +7,10 @@ import 'package:enmori/features/account/data/backend_account_repository.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
 import 'package:enmori/features/check_in/data/backend_check_in_repository.dart';
 import 'package:enmori/features/check_in/domain/check_in_repository.dart';
+import 'package:enmori/features/event_recommendations/data/backend_event_recommendation_repository.dart';
+import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
+import 'package:enmori/features/interests/data/backend_interest_repository.dart';
+import 'package:enmori/features/interests/domain/interest_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -403,6 +407,253 @@ void main() {
       }
     });
   });
+
+  group('BackendInterestRepository', () {
+    test('reads selectable tags and own Active/Inactive selection', () async {
+      final client = _client((request) async {
+        if (request.url.path == '/v1/interest-tags') {
+          return http.Response(
+            jsonEncode({
+              'interestTags': [
+                {'interestTagId': 'tag-art', 'displayName': 'Art'},
+              ],
+            }),
+            200,
+          );
+        }
+        return http.Response(jsonEncode(_interestEnvelope), 200);
+      });
+      final repository = BackendInterestRepository(client);
+
+      final catalogue = await repository.readSelectableTags();
+      final own = await repository.readOwn();
+      client.close();
+
+      expect(
+        (catalogue as Success<List<InterestTagOption>>)
+            .value
+            .single
+            .displayName,
+        'Art',
+      );
+      final selection = (own as Success<InterestSelection>).value;
+      expect(selection.revision, 3);
+      expect(
+        selection.interestTags.single.lifecycleState,
+        InterestLifecycleState.inactive,
+      );
+    });
+
+    test('saves the revision payload without an idempotency key', () async {
+      late http.Request captured;
+      final client = _client((request) async {
+        captured = request;
+        return http.Response(jsonEncode(_interestEnvelope), 200);
+      });
+      final repository = BackendInterestRepository(client);
+
+      final result = await repository.replaceOwn(
+        interestTagIds: ['tag-old'],
+        expectedRevision: 2,
+      );
+      client.close();
+
+      expect(captured.method, 'PUT');
+      expect(captured.url.path, '/v1/me/interests');
+      expect(captured.headers.containsKey('idempotency-key'), isFalse);
+      expect(jsonDecode(captured.body), {
+        'interestTagIds': ['tag-old'],
+        'expectedRevision': 2,
+      });
+      expect((result as Success<InterestSelection>).value.revision, 3);
+    });
+
+    test('rejects malformed or duplicate Interest projections', () async {
+      final invalidPayloads = [
+        {
+          'interestTags': [
+            {'interestTagId': 'tag-art'},
+          ],
+        },
+        {
+          'interests': {
+            'interestTags': [
+              {
+                'interestTagId': 'tag-art',
+                'displayName': 'Art',
+                'lifecycleState': 'active',
+              },
+              {
+                'interestTagId': 'tag-art',
+                'displayName': 'Art',
+                'lifecycleState': 'active',
+              },
+            ],
+            'revision': 1,
+          },
+        },
+      ];
+      for (final payload in invalidPayloads) {
+        final client = _client(
+          (request) async => http.Response(jsonEncode(payload), 200),
+        );
+        final repository = BackendInterestRepository(client);
+        final result = payload.containsKey('interests')
+            ? await repository.readOwn()
+            : await repository.readSelectableTags();
+        client.close();
+        expect((result as Failure).failure.kind, AppFailureKind.unexpected);
+      }
+    });
+
+    test('maps Interest invalid and stale revision failures', () async {
+      final cases = [
+        (
+          'INTEREST_SELECTION_INVALID',
+          AppFailureKind.interestSelectionInvalid,
+          422,
+        ),
+        (
+          'INTEREST_REVISION_PRECONDITION_FAILED',
+          AppFailureKind.interestRevisionPreconditionFailed,
+          412,
+        ),
+      ];
+      for (final (code, kind, status) in cases) {
+        final client = _client(
+          (request) async => http.Response(
+            jsonEncode({
+              'error': {
+                'code': code,
+                'message': 'Safe failure.',
+                'requestId': 'req-interest',
+              },
+            }),
+            status,
+          ),
+        );
+        final result = await BackendInterestRepository(client)
+            .replaceOwn(interestTagIds: [], expectedRevision: 0);
+        client.close();
+        expect((result as Failure<InterestSelection>).failure.kind, kind);
+      }
+    });
+  });
+
+  group('BackendEventRecommendationRepository', () {
+    test(
+      'requests the declared view and preserves Backend item order',
+      () async {
+        late http.Request captured;
+        final client = _client((request) async {
+          captured = request;
+          return http.Response(jsonEncode(_recommendationResponse), 200);
+        });
+        final repository = BackendEventRecommendationRepository(client);
+
+        final result = await repository.read(
+          view: EventRecommendationView.home,
+        );
+
+        expect(captured.method, 'GET');
+        expect(captured.url.path, '/v1/recommendations/events');
+        expect(captured.url.queryParameters['view'], 'home');
+        final value = (result as Success<EventRecommendationResponse>).value;
+        expect(value.formulaVersion, 'event_recommendation_v1');
+        expect(value.items.map((item) => item.eventId), ['evt_03', 'evt_01']);
+        expect(
+          value.items.first.matchedInterests.map(
+            (interest) => interest.displayName,
+          ),
+          ['Music'],
+        );
+      },
+    );
+
+    test('fails closed when an Event item omits reasonCode', () async {
+      final client = _client(
+        (request) async => http.Response(
+          jsonEncode({
+            'asOf': '2026-09-15T09:00:00Z',
+            'formulaVersion': 'event_recommendation_v1',
+            'items': [
+              {
+                'eventId': 'evt_01',
+                'title': 'Missing reason',
+                'startAt': '2026-09-16T10:00:00Z',
+                'endAt': '2026-09-16T11:00:00Z',
+                'matchedInterests': [
+                  {'interestTagId': 'interest_art', 'displayName': 'Art'},
+                ],
+              },
+            ],
+          }),
+          200,
+        ),
+      );
+      final repository = BackendEventRecommendationRepository(client);
+
+      final result = await repository.read(view: EventRecommendationView.all);
+
+      expect(
+        (result as Failure<EventRecommendationResponse>).failure.kind,
+        AppFailureKind.unexpected,
+      );
+    });
+
+    test('fails closed when a matchedInterests object is malformed', () async {
+      final client = _client(
+        (request) async => http.Response(
+          jsonEncode({
+            'asOf': '2026-09-15T09:00:00Z',
+            'formulaVersion': 'event_recommendation_v1',
+            'items': [
+              {
+                'eventId': 'evt_01',
+                'title': 'Malformed match',
+                'startAt': '2026-09-16T10:00:00Z',
+                'endAt': '2026-09-16T11:00:00Z',
+                'matchedInterests': [
+                  {'interestTagId': 'interest_art'},
+                ],
+                'reasonCode': 'interest_match',
+              },
+            ],
+          }),
+          200,
+        ),
+      );
+      final repository = BackendEventRecommendationRepository(client);
+
+      final result = await repository.read(view: EventRecommendationView.all);
+
+      expect(
+        (result as Failure<EventRecommendationResponse>).failure.kind,
+        AppFailureKind.unexpected,
+      );
+    });
+
+    test('accepts a successful empty Event response', () async {
+      final client = _client(
+        (request) async => http.Response(
+          jsonEncode({
+            'asOf': '2026-09-15T09:00:00Z',
+            'formulaVersion': 'event_recommendation_v1',
+            'items': [],
+          }),
+          200,
+        ),
+      );
+      final repository = BackendEventRecommendationRepository(client);
+
+      final result = await repository.read(view: EventRecommendationView.all);
+
+      expect(
+        (result as Success<EventRecommendationResponse>).value.items,
+        isEmpty,
+      );
+    });
+  });
 }
 
 final class _HangingBodyClient extends http.BaseClient {
@@ -430,4 +681,45 @@ const _checkInEnvelope = {
     'note': 'A controlled test note.',
     'createdAt': '2026-09-03T03:20:00Z',
   },
+};
+
+const _interestEnvelope = {
+  'interests': {
+    'interestTags': [
+      {
+        'interestTagId': 'tag-old',
+        'displayName': 'Legacy',
+        'lifecycleState': 'inactive',
+      },
+    ],
+    'revision': 3,
+  },
+};
+
+const _recommendationResponse = {
+  'asOf': '2026-09-15T09:00:00Z',
+  'formulaVersion': 'event_recommendation_v1',
+  'items': [
+    {
+      'eventId': 'evt_03',
+      'title': 'Third-ranked event',
+      'startAt': '2026-09-18T10:00:00Z',
+      'endAt': '2026-09-18T11:00:00Z',
+      'matchedInterests': [
+        {'interestTagId': 'interest_music', 'displayName': 'Music'},
+      ],
+      'reasonCode': 'interest_match',
+    },
+    {
+      'eventId': 'evt_01',
+      'title': 'First-ranked event',
+      'startAt': '2026-09-16T10:00:00Z',
+      'endAt': '2026-09-16T11:00:00Z',
+      'matchedInterests': [
+        {'interestTagId': 'interest_art', 'displayName': 'Art'},
+        {'interestTagId': 'interest_music', 'displayName': 'Music'},
+      ],
+      'reasonCode': 'interest_match',
+    },
+  ],
 };

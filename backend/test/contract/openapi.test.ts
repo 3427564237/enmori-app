@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import test from "node:test";
 import { ROUTE_INVENTORY } from "../../src/transport/route-inventory.js";
 import { approvedFailureCodes } from "../../src/transport/schemas.js";
+import { eventRecommendationsSchema } from "../../src/event-recommendations/transport/schemas.js";
 
 type JsonObject = Record<string, unknown>;
 
@@ -13,7 +14,7 @@ async function loadContract(): Promise<JsonObject> {
   ) as JsonObject;
 }
 
-test("OpenAPI 3.1 exposes exactly the approved R4 route inventory", async () => {
+test("OpenAPI 3.1 exposes exactly the approved R4 and S2-02 route inventory", async () => {
   const contract = await loadContract();
   assert.equal(contract.openapi, "3.1.0");
   const paths = contract.paths as Record<string, JsonObject>;
@@ -26,6 +27,26 @@ test("OpenAPI 3.1 exposes exactly the approved R4 route inventory", async () => 
     ({ method, path }) => `${method} ${path}`,
   ).sort();
   assert.deepEqual(actual, expected);
+});
+
+test("S2-02 normative response schema exactly matches static Transport schema", async () => {
+  const contract = await loadContract();
+  const components = contract.components as JsonObject;
+  const schemas = components.schemas as Record<string, JsonObject>;
+  function dereference(value: unknown): unknown {
+    if (Array.isArray(value)) return value.map(dereference);
+    if (typeof value !== "object" || value === null) return value;
+    const object = value as JsonObject;
+    if (typeof object.$ref === "string") return dereference(schemas[object.$ref.split("/").at(-1)!]);
+    return Object.fromEntries(Object.entries(object).map(([key, child]) => [key, dereference(child)]));
+  }
+  assert.deepEqual(dereference(schemas.EventRecommendations), eventRecommendationsSchema);
+  const paths = contract.paths as Record<string, JsonObject>;
+  const operation = paths["/v1/recommendations/events"]!.get as JsonObject;
+  assert.equal(operation.requestBody, undefined);
+  assert.deepEqual(operation.parameters, [{ name: "view", in: "query", required: true,
+    schema: { type: "string", enum: ["home", "all"] },
+    description: "Exactly one value; missing, duplicate or invalid query parameters yield REQUEST_INVALID." }]);
 });
 
 test("OpenAPI success statuses match the implemented route inventory", async () => {
@@ -54,7 +75,7 @@ test("OpenAPI protects every route and scopes Idempotency-Key to commands", asyn
     const hasKey = parameters.some(
       (parameter) => parameter.$ref === "#/components/parameters/IdempotencyKey",
     );
-    assert.equal(hasKey, route.method === "PUT" || route.method === "POST");
+    assert.equal(hasKey, route.requiresIdempotencyKey);
   }
 });
 
@@ -66,8 +87,12 @@ test("OpenAPI schemas reject undeclared fields and list every approved error", a
   for (const name of [
     "CompleteOnboardingRequest",
     "CreateCheckInRequest",
+    "ReplaceOwnInterestsRequest",
     "Account",
     "CheckIn",
+    "InterestTagSummary",
+    "SelectedInterestTag",
+    "OwnInterests",
     "ErrorEnvelope",
   ]) {
     assert.equal(schemas[name]?.additionalProperties, false, name);
@@ -90,7 +115,13 @@ test("OpenAPI public schemas contain no trusted internal identity fields", async
   const components = contract.components as JsonObject;
   const schemas = components.schemas as Record<string, JsonObject>;
 
-  for (const name of ["Account", "CheckIn"]) {
+  for (const name of [
+    "Account",
+    "CheckIn",
+    "InterestTagSummary",
+    "SelectedInterestTag",
+    "OwnInterests",
+  ]) {
     const properties = schemas[name]?.properties as JsonObject;
     assert.equal("accountId" in properties, false);
     assert.equal("firebaseUid" in properties, false);

@@ -1,4 +1,8 @@
 export const APP_FAILURE_CATALOGUE = {
+  REQUEST_INVALID: {
+    statusCode: 400,
+    message: "Request parameters are invalid.",
+  },
   AUTH_REQUIRED: {
     statusCode: 401,
     message: "Your session has expired. Sign in again.",
@@ -30,6 +34,14 @@ export const APP_FAILURE_CATALOGUE = {
   CHECKIN_UNAVAILABLE: {
     statusCode: 404,
     message: "This Check-in is unavailable.",
+  },
+  INTEREST_SELECTION_INVALID: {
+    statusCode: 422,
+    message: "Choose up to 10 available interests and try again.",
+  },
+  INTEREST_REVISION_PRECONDITION_FAILED: {
+    statusCode: 412,
+    message: "Your interests changed. Reload them before saving again.",
   },
   IDEMPOTENCY_KEY_INVALID: {
     statusCode: 400,

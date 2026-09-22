@@ -1,0 +1,74 @@
+{
+  "manifestVersion": "s2-event-demo-v1",
+  "documents": [
+    {
+      "path": "interest_tags/interest_community",
+      "data": {
+        "displayName": "Community",
+        "lifecycleState": "active",
+        "revision": 1
+      }
+    },
+    {
+      "path": "interest_tags/interest_music",
+      "data": {
+        "displayName": "Music",
+        "lifecycleState": "active",
+        "revision": 1
+      }
+    },
+    {
+      "path": "events/s2_demo_community_early",
+      "data": {
+        "title": "Synthetic Community Meetup",
+        "active": true,
+        "published": true,
+        "startAt": "2026-10-15T09:00:00Z",
+        "endAt": "2026-10-15T11:00:00Z",
+        "interestTagIds": [
+          "interest_community"
+        ]
+      }
+    },
+    {
+      "path": "events/s2_demo_music_early",
+      "data": {
+        "title": "Synthetic Music Session",
+        "active": true,
+        "published": true,
+        "startAt": "2026-10-16T09:00:00Z",
+        "endAt": "2026-10-16T11:00:00Z",
+        "interestTagIds": [
+          "interest_music"
+        ]
+      }
+    },
+    {
+      "path": "events/s2_demo_community_music",
+      "data": {
+        "title": "Synthetic Community Music Forum",
+        "active": true,
+        "published": true,
+        "startAt": "2026-10-18T09:00:00Z",
+        "endAt": "2026-10-18T11:00:00Z",
+        "interestTagIds": [
+          "interest_community",
+          "interest_music"
+        ]
+      }
+    },
+    {
+      "path": "events/s2_demo_community_late",
+      "data": {
+        "title": "Synthetic Community Workshop",
+        "active": true,
+        "published": true,
+        "startAt": "2026-10-20T09:00:00Z",
+        "endAt": "2026-10-20T11:00:00Z",
+        "interestTagIds": [
+          "interest_community"
+        ]
+      }
+    }
+  ]
+}

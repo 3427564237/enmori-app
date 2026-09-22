@@ -1,4 +1,7 @@
 import { pathToFileURL } from "node:url";
+import { RecommendEvents } from "../event-recommendations/application/recommend-events.js";
+import { FirebaseAdminEventReadGateway } from "../event-recommendations/infrastructure/event-read-gateway.js";
+import { FirestoreEventRecommendationRepository } from "../event-recommendations/infrastructure/firestore-event-recommendation-repository.js";
 
 import {
   deleteApp,
@@ -11,6 +14,10 @@ import type { FastifyInstance } from "fastify";
 
 import { CreateCheckIn } from "../check-ins/application/create-check-in.js";
 import { GetCheckIn } from "../check-ins/application/get-check-in.js";
+import { GetInterestTags } from "../interests/application/get-interest-tags.js";
+import { GetOwnInterests } from "../interests/application/get-own-interests.js";
+import { ReplaceOwnInterests } from "../interests/application/replace-own-interests.js";
+import { FirestoreInterestRepository } from "../interests/infrastructure/firestore-interest-repository.js";
 import { FirestoreCheckInRepository } from "../check-ins/infrastructure/firestore-check-in-repository.js";
 import { CompleteOnboarding } from "../onboarding/application/complete-onboarding.js";
 import { GetOnboarding } from "../onboarding/application/get-onboarding.js";
@@ -43,9 +50,13 @@ async function createControlledRuntime(
     );
     const onboardingRepository = new FirestoreOnboardingRepository(gateway);
     const checkInRepository = new FirestoreCheckInRepository(gateway);
+    const interestRepository = new FirestoreInterestRepository(gateway);
     const clock = new SystemClock();
     const ids = new CryptoOpaqueIdGenerator();
     const app = await buildApp({
+      recommendEvents: new RecommendEvents(new FirestoreEventRecommendationRepository(
+        new FirebaseAdminEventReadGateway(getFirestore(firebaseApp)),
+      ), clock),
       identityVerifier: new FirebaseIdentityVerifier(getAuth(firebaseApp)),
       completeOnboarding: new CompleteOnboarding(
         onboardingRepository,
@@ -55,6 +66,9 @@ async function createControlledRuntime(
       getOnboarding: new GetOnboarding(onboardingRepository),
       createCheckIn: new CreateCheckIn(checkInRepository, clock, ids),
       getCheckIn: new GetCheckIn(checkInRepository),
+      getInterestTags: new GetInterestTags(interestRepository),
+      getOwnInterests: new GetOwnInterests(interestRepository),
+      replaceOwnInterests: new ReplaceOwnInterests(interestRepository),
     });
     return { app, firebaseApp };
   } catch (error: unknown) {
