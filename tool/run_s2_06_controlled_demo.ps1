@@ -52,7 +52,7 @@ function Export-GateEvidence {
     $raw = (& $Adb -s $Serial shell run-as com.enmori.app cat "$coordinationDirectory/s2-06-result.json") -join [Environment]::NewLine
     if ($LASTEXITCODE -ne 0) { throw 'Gate evidence is unavailable.' }
     $parsed = $raw | ConvertFrom-Json
-    if ($parsed.rows.PSObject.Properties.Count -ne 8 -or $null -eq $parsed.assertions) {
+    if (@($parsed.rows.PSObject.Properties).Count -ne 8 -or $null -eq $parsed.assertions) {
         throw 'Gate evidence schema is incomplete.'
     }
     $raw | Set-Content -LiteralPath (Join-Path $outPath 'gate-result-sanitized.json')
