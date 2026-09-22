@@ -1,0 +1,952 @@
+{
+  "appSource": "cdd0b9dad5705e4ac9887efe2cd86d3c07b7f4b4",
+  "startedUtc": "2026-09-22T14:15:37.702101Z",
+  "endedUtc": "2026-09-22T14:16:41.15116Z",
+  "rows": {
+    "S2-06-01": "Pass",
+    "S2-06-02": "Pass",
+    "S2-06-03": "Pass",
+    "S2-06-04": "Pass",
+    "S2-06-05": "Pass",
+    "S2-06-06": "Pass",
+    "S2-06-07": "Pass",
+    "S2-06-08": "Pass"
+  },
+  "assertions": [
+    {
+      "row": "S2-06-01",
+      "assertion": "visible_route-register",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "visible_r6-register-email",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "visible_r6-register-password",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "visible_r6-register-confirm-password",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "visible_r6-register-submit",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "visible_route-onboarding",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "real_observed_authenticated_session",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "visible_r6-onboarding-username",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "visible_r6-onboarding-username-continue",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "visible_r6-initial-choice-info-continue",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "visible_r6-initial-choice-reject",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "visible_route-check-in",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "protected_later_onboarding_completed",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "independent_protected_onboarding_read",
+      "pass": true
+    },
+    {
+      "row": "S2-06-01",
+      "assertion": "initial_choice_private_contract",
+      "pass": true
+    },
+    {
+      "row": "S2-06-02",
+      "assertion": "visible_r6-check-in-note",
+      "pass": true
+    },
+    {
+      "row": "S2-06-02",
+      "assertion": "visible_r6-check-in-create",
+      "pass": true
+    },
+    {
+      "row": "S2-06-02",
+      "assertion": "visible_r6-check-in-committed",
+      "pass": true
+    },
+    {
+      "row": "S2-06-02",
+      "assertion": "note_create_success",
+      "pass": true
+    },
+    {
+      "row": "S2-06-02",
+      "assertion": "visible_r6-check-in-confirm",
+      "pass": true
+    },
+    {
+      "row": "S2-06-02",
+      "assertion": "visible_r6-check-in-confirmed",
+      "pass": true
+    },
+    {
+      "row": "S2-06-02",
+      "assertion": "owned_later_note_matches_create",
+      "pass": true
+    },
+    {
+      "row": "S2-06-02",
+      "assertion": "independent_owned_note_read",
+      "pass": true
+    },
+    {
+      "row": "S2-06-02",
+      "assertion": "visible_r6-return-home-inline",
+      "pass": true
+    },
+    {
+      "row": "S2-06-02",
+      "assertion": "visible_route-home",
+      "pass": true
+    },
+    {
+      "row": "S2-06-02",
+      "assertion": "visible_event-recommendations-empty",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_edit-interests-button",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_interest-option-interest_community",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_interest-option-interest_community",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_interest-option-interest_music",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_interest-save",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_interest-save-success",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "interest_save_revision_and_selection",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "independent_own_interest_read_matches_save",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "own_interest_read_reaches_backend",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_interest-done",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_event-recommendation-s2_demo_community_music",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_edit-interests-button",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_interest-option-interest_community",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "editor_later_read_selected_interest_community",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "editor_later_read_selected_interest_music",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "editor_later_revision_matches",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_interest-save",
+      "pass": true
+    },
+    {
+      "row": "S2-06-03",
+      "assertion": "visible_interest-save-success",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "visible_interest-done",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "visible_event-recommendation-s2_demo_community_music",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "fresh_post_save_home_http_request",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "own_backend_asof_and_items",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "approved_fixture_count_and_ranking",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "fixtures_future_at_actual_server_asof",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "ui_state_from_this_response",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "rendered_card_count",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "rendered_order_and_title_0",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "rendered_time_and_match_reason_0",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "rendered_order_and_title_1",
+      "pass": true
+    },
+    {
+      "row": "S2-06-04",
+      "assertion": "rendered_time_and_match_reason_1",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "visible_event-recommendations-see-all",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "visible_route-event-recommendations",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "visible_event-recommendation-s2_demo_community_late",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "separate_all_http_request",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "own_backend_asof_and_items",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "approved_fixture_count_and_ranking",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "fixtures_future_at_actual_server_asof",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "ui_state_from_this_response",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "rendered_card_count",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "rendered_order_and_title_0",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "rendered_time_and_match_reason_0",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "rendered_order_and_title_1",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "rendered_time_and_match_reason_1",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "rendered_order_and_title_2",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "rendered_time_and_match_reason_2",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "rendered_order_and_title_3",
+      "pass": true
+    },
+    {
+      "row": "S2-06-05",
+      "assertion": "rendered_time_and_match_reason_3",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "visible_route-home",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "visible_edit-interests-button",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "visible_interest-clear",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "visible_interest-clear",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "visible_interest-save",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "visible_interest-save-success",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "visible_interest-done",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "visible_event-recommendations-empty",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "successful_empty_home_response",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "approved_empty_copy",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "no_stale_cards_or_dependency_error",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "visible_event-recommendations-see-all-empty",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "visible_route-event-recommendations",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "visible_event-recommendations-empty",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "independent_successful_empty_all_response",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "approved_empty_copy",
+      "pass": true
+    },
+    {
+      "row": "S2-06-06",
+      "assertion": "no_stale_cards_or_dependency_error",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "visible_route-home",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "visible_edit-interests-button",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "visible_interest-option-interest_community",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "visible_interest-option-interest_community",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "visible_interest-option-interest_music",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "visible_interest-save",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "visible_interest-save-success",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "visible_interest-done",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "visible_event-recommendation-s2_demo_community_music",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "host_ack_radios_off",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "visible_event-recommendations-see-all",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "visible_event-recommendations-error",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "explicit_retry_visible",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "offline_is_error_not_empty_or_stale",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "safe_public_error_copy",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "no_vendor_token_endpoint_or_stack_in_error_ui",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "no_successful_http_during_outage",
+      "pass": true
+    },
+    {
+      "row": "S2-06-07",
+      "assertion": "no_hidden_retry_during_five_second_observation",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "host_ack_radios_restored",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "restored_private_https_both_401_auth_required",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "error_retained_until_explicit_retry",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "visible_event-recommendations-retry",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "visible_event-recommendation-s2_demo_community_late",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "explicit_retry_new_successful_request",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "own_backend_asof_and_items",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "approved_fixture_count_and_ranking",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "fixtures_future_at_actual_server_asof",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "ui_state_from_this_response",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "rendered_card_count",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "rendered_order_and_title_0",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "rendered_time_and_match_reason_0",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "rendered_order_and_title_1",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "rendered_time_and_match_reason_1",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "rendered_order_and_title_2",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "rendered_time_and_match_reason_2",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "rendered_order_and_title_3",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "rendered_time_and_match_reason_3",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "success_replaces_error",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "saved_interests_preserved_after_recovery",
+      "pass": true
+    },
+    {
+      "row": "S2-06-08",
+      "assertion": "visible_event-recommendation-s2_demo_community_music",
+      "pass": true
+    }
+  ],
+  "uiEvidence": {
+    "S2-06-01": [
+      "authenticated",
+      "onboarding_completed",
+      "check_in_route"
+    ],
+    "S2-06-02": [
+      "note_create_success",
+      "owned_later_read_success",
+      "home_route"
+    ],
+    "S2-06-03": [
+      "interest_save_success",
+      "later_read_matches",
+      "reopened_both_selected"
+    ],
+    "S2-06-04": [
+      "home_route",
+      "top_two",
+      "backend_order",
+      "title_time_match_reason"
+    ],
+    "S2-06-05": [
+      "all_route",
+      "four_items",
+      "independent_response",
+      "backend_order"
+    ],
+    "S2-06-06": [
+      "home_and_all_successful_empty",
+      "required_empty_copy",
+      "no_error_or_stale_cards"
+    ],
+    "S2-06-07": [
+      "safe_unavailable",
+      "retry_visible",
+      "no_empty_or_stale",
+      "no_hidden_retry"
+    ],
+    "S2-06-08": [
+      "explicit_retry_success",
+      "four_items",
+      "saved_interests_retained"
+    ]
+  },
+  "failureBoundary": "backend_transport",
+  "requests": [
+    {
+      "sequence": 1,
+      "operation": "onboarding_read",
+      "startedUtc": "2026-09-22T14:15:44.785155Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 2,
+      "operation": "onboarding_write",
+      "startedUtc": "2026-09-22T14:15:47.615866Z",
+      "status": 201,
+      "transportFailed": false
+    },
+    {
+      "sequence": 3,
+      "operation": "onboarding_read",
+      "startedUtc": "2026-09-22T14:15:48.125966Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 4,
+      "operation": "onboarding_read",
+      "startedUtc": "2026-09-22T14:15:48.921847Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 5,
+      "operation": "note_create",
+      "startedUtc": "2026-09-22T14:15:50.185684Z",
+      "status": 201,
+      "transportFailed": false
+    },
+    {
+      "sequence": 6,
+      "operation": "note_read",
+      "startedUtc": "2026-09-22T14:15:51.078169Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 7,
+      "operation": "event_home",
+      "startedUtc": "2026-09-22T14:15:52.205379Z",
+      "status": 200,
+      "transportFailed": false,
+      "asOf": "2026-09-22T14:15:52.463Z",
+      "itemCount": 0
+    },
+    {
+      "sequence": 8,
+      "operation": "interests_read",
+      "startedUtc": "2026-09-22T14:15:53.200638Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 9,
+      "operation": "interest_catalogue",
+      "startedUtc": "2026-09-22T14:15:53.204678Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 10,
+      "operation": "interests_write",
+      "startedUtc": "2026-09-22T14:15:55.470225Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 11,
+      "operation": "interests_read",
+      "startedUtc": "2026-09-22T14:15:56.261975Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 12,
+      "operation": "event_home",
+      "startedUtc": "2026-09-22T14:15:57.108717Z",
+      "status": 200,
+      "transportFailed": false,
+      "asOf": "2026-09-22T14:15:57.473Z",
+      "itemCount": 2
+    },
+    {
+      "sequence": 13,
+      "operation": "interest_catalogue",
+      "startedUtc": "2026-09-22T14:15:58.270916Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 14,
+      "operation": "interests_read",
+      "startedUtc": "2026-09-22T14:15:58.280831Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 15,
+      "operation": "interests_write",
+      "startedUtc": "2026-09-22T14:15:59.310822Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 16,
+      "operation": "event_home",
+      "startedUtc": "2026-09-22T14:16:00.435243Z",
+      "status": 200,
+      "transportFailed": false,
+      "asOf": "2026-09-22T14:16:00.74Z",
+      "itemCount": 2
+    },
+    {
+      "sequence": 17,
+      "operation": "event_all",
+      "startedUtc": "2026-09-22T14:16:01.599264Z",
+      "status": 200,
+      "transportFailed": false,
+      "asOf": "2026-09-22T14:16:01.925Z",
+      "itemCount": 4
+    },
+    {
+      "sequence": 18,
+      "operation": "event_home",
+      "startedUtc": "2026-09-22T14:16:02.663668Z",
+      "status": 200,
+      "transportFailed": false,
+      "asOf": "2026-09-22T14:16:02.907Z",
+      "itemCount": 2
+    },
+    {
+      "sequence": 19,
+      "operation": "interest_catalogue",
+      "startedUtc": "2026-09-22T14:16:03.167872Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 20,
+      "operation": "interests_read",
+      "startedUtc": "2026-09-22T14:16:03.17271Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 21,
+      "operation": "interests_write",
+      "startedUtc": "2026-09-22T14:16:04.665315Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 22,
+      "operation": "event_home",
+      "startedUtc": "2026-09-22T14:16:05.52347Z",
+      "status": 200,
+      "transportFailed": false,
+      "asOf": "2026-09-22T14:16:05.771Z",
+      "itemCount": 0
+    },
+    {
+      "sequence": 23,
+      "operation": "event_all",
+      "startedUtc": "2026-09-22T14:16:06.432355Z",
+      "status": 200,
+      "transportFailed": false,
+      "asOf": "2026-09-22T14:16:06.758Z",
+      "itemCount": 0
+    },
+    {
+      "sequence": 24,
+      "operation": "event_home",
+      "startedUtc": "2026-09-22T14:16:07.312429Z",
+      "status": 200,
+      "transportFailed": false,
+      "asOf": "2026-09-22T14:16:07.573Z",
+      "itemCount": 0
+    },
+    {
+      "sequence": 25,
+      "operation": "interests_read",
+      "startedUtc": "2026-09-22T14:16:07.826725Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 26,
+      "operation": "interest_catalogue",
+      "startedUtc": "2026-09-22T14:16:07.828117Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 27,
+      "operation": "interests_write",
+      "startedUtc": "2026-09-22T14:16:09.816673Z",
+      "status": 200,
+      "transportFailed": false
+    },
+    {
+      "sequence": 28,
+      "operation": "event_home",
+      "startedUtc": "2026-09-22T14:16:10.898756Z",
+      "status": 200,
+      "transportFailed": false,
+      "asOf": "2026-09-22T14:16:11.18Z",
+      "itemCount": 2
+    },
+    {
+      "sequence": 29,
+      "operation": "event_all",
+      "startedUtc": "2026-09-22T14:16:13.396807Z",
+      "status": null,
+      "transportFailed": false
+    },
+    {
+      "sequence": 30,
+      "operation": "event_all",
+      "startedUtc": "2026-09-22T14:16:39.812783Z",
+      "status": 200,
+      "transportFailed": false,
+      "asOf": "2026-09-22T14:16:40.276Z",
+      "itemCount": 4
+    },
+    {
+      "sequence": 31,
+      "operation": "interests_read",
+      "startedUtc": "2026-09-22T14:16:40.588195Z",
+      "status": 200,
+      "transportFailed": false
+    }
+  ]
+}

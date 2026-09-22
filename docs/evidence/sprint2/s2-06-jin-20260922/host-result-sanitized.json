@@ -1,0 +1,14 @@
+{
+  "startedUtc": "2026-09-22T14:14:58.6777177Z",
+  "appBase": "cdd0b9dad5705e4ac9887efe2cd86d3c07b7f4b4",
+  "testHead": "9724bad7ed8cdcef30d6ab43baccca939415d9f5",
+  "avd": "enmori-validation-api36",
+  "api": "36",
+  "wifiOriginal": "1",
+  "mobileDataOriginal": "1",
+  "radiosInterrupted": true,
+  "radiosRestored": true,
+  "evidenceExported": true,
+  "flutterExitCode": 0,
+  "endedUtc": "2026-09-22T14:16:44.2217453Z"
+}
