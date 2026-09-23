@@ -1,5 +1,9 @@
 # Project Context — Evidence Extraction
 
+## Current Sprint planning delta — 2026-09-13
+
+[S-PM-0913-SPRINT2](decisions/2026-09-13-sprint2-scope-capacity-contract.md) selects own interests → real Backend Event recommendations as Sprint 2's user Increment, with separate internal Friend-ranking and AI-runtime components. The confirmed 104h allocation includes 10h buffer; JIN/DU have no required proxy Android-device testing. This adds no full AI/Friend user capability or Release completion claim. Sprint 1 was accepted at merged `31bdb785`; its deferred/Pending evidence remains unchanged. The following extraction is retained as source history; the [new execution plan](planning/2026-09-13-sprint2-plan.md) governs the bounded Sprint 2 assignment.
+
 ## 1. Status and interpretation rules
 
 This is a source-grounded extraction from the project-records repository at commit `5d4ac26`, the PM-supplied COMP3851A report S-FR1, and the confirmed PM decision records listed in `docs/SOURCE_MAP.md`, including the project-wide governance correction S-PM-0902-GOV. It is not an implementation plan. Source IDs refer to `docs/SOURCE_MAP.md`.

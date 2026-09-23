@@ -1,5 +1,9 @@
 # Project Source Map
 
+## Sprint 2 planning update — 2026-09-13
+
+- **S-PM-0913-SPRINT2:** [Confirmed Sprint 2 scope, capacity and minimum contract](decisions/2026-09-13-sprint2-scope-capacity-contract.md). LI confirms the Event main flow, internal-only AI/Friend components, own-interest cardinality, synthetic-data boundary and 104h Sprint-specific capacity. [Execution plan](planning/2026-09-13-sprint2-plan.md) and [publication payloads](planning/2026-09-13-sprint2-publication-preview.md) preserve ownership, different review and explicit device workload. This is a PM source, not Sponsor approval, implementation evidence or external publication. Earlier extraction and scope records below remain historical within their stated dates.
+
 ## 1. Extraction record
 
 - Source repository: `https://github.com/3427564237/nexus-five-project-records`
