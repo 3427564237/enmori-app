@@ -4,7 +4,7 @@
 - **Status:** Confirmed planning direction by LI HOURUI; not a product-contract, `Ready`, implementation, or acceptance decision
 - **Decision date:** 2026-09-24
 - **Decision owner:** LI HOURUI, ENMORI PM
-- **Scope:** Sprint 3 target and team ownership only
+- **Scope:** Sprint 3 target, team ownership, and Event-source direction only
 - **Baseline:** remote `main` `432f5285966a6c2705473be21a2652ca2869520a`; [Q04-D inventory](../superpowers/specs/2026-09-02-q04-d-inventory-content-acceptance-draft.md)
 - **Execution handoff:** [Sprint 3 coverage and evidence map](../../ASTRA_HANDOFF_S2_VISUAL_GAP_PREP_20260923.md)
 
@@ -18,11 +18,13 @@ LI assigns one vertical module per member, including its frontend, backend, nece
 |---|---|---|
 | LI | Account, onboarding, own Profile, Settings, shared Home/router integration | DU |
 | JIN | Friend lifecycle, Friend Recommendation, Friends Activity, and related Home content | SHI |
-| SHI | Event detail, participation, external-registration return, and related Home content | ZHOU |
+| SHI | Third-party-sourced Event data, detail, participation, external-registration return, and related Home content | ZHOU |
 | DU | Check-in, Footprint, Calendar, and related Home content | LI |
 | ZHOU | AI Conversation, Persona, and related Home content | JIN |
 
 LI coordinates frequent combined-tree checks. JIN performs the cross-feature verification gate; LI independently reviews JIN's gate record and any JIN-authored evidence. Owners use the current approved Flutter, Backend, data, privacy, and review boundaries. This direction does not create a new architecture, endpoint, schema, dependency, or deployment decision.
+
+For Sprint 3, LI clarifies that the Event information shown before registration is to originate from an approved real third-party event website or its permitted API/feed, with the app consuming it through the ENMORI Backend. Manually invented Event content or the Sprint 2 synthetic fixture alone does not satisfy this Sprint 3 source target. The original Sprint 2 business requirements allowed an approved external source, API, or mock API; [S-PM-0913-SPRINT2](2026-09-13-sprint2-scope-capacity-contract.md) deliberately selected synthetic data for that accepted increment and is unchanged historically. This direction does not approve a particular provider, extraction method, content-use permission, refresh behavior, field mapping, or physical Backend contract. SHI and LI must settle the smallest applicable source and data contract before treating that integration as `Ready`; SHI may continue independent approved Event work in parallel.
 
 ## Authority and supersession boundary
 
