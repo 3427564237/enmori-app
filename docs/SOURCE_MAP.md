@@ -1,5 +1,10 @@
 # Project Source Map
 
+## Sprint planning policy update — 2026-09-24
+
+- **S-PM-0924-SPRINT-PLANNING:** [Confirmed prospective planning policy](decisions/2026-09-24-sprint-planning-estimation-policy.md). From Sprint 3 onward, LI removes fixed individual/team hour ceilings, task-hour estimates, and Story Points from planning and `Ready`; actual hours are recorded only after work. Authoritative scope, review, testing, platform evidence, and truthful status remain required. Earlier Sprint 1 and Sprint 2 allocations retain their historical meaning. This process decision does not approve the five Q04-D prototype-only routes or any product implementation.
+- **S-PM-0924-SPRINT3-COVERAGE:** [Confirmed Sprint 3 target and vertical ownership direction](decisions/2026-09-24-sprint3-figma-coverage-ownership.md). LI selects all 42 Figma Version 5 routes as a reachable functional-coverage target and assigns LI/JIN/SHI/DU/ZHOU one full-stack feature area each. The five Q04-D prototype-only routes still require separate product decisions before affected `Ready`; the target alone proves no implementation, visual readiness, Sprint acceptance, or Week 9 Release-priority change.
+
 ## Sprint 2 planning update — 2026-09-13
 
 - **S-PM-0913-SPRINT2:** [Confirmed Sprint 2 scope, capacity and minimum contract](decisions/2026-09-13-sprint2-scope-capacity-contract.md). LI confirms the Event main flow, internal-only AI/Friend components, own-interest cardinality, synthetic-data boundary and 104h Sprint-specific capacity. [Execution plan](planning/2026-09-13-sprint2-plan.md) and [publication payloads](planning/2026-09-13-sprint2-publication-preview.md) preserve ownership, different review and explicit device workload. This is a PM source, not Sponsor approval, implementation evidence or external publication. Earlier extraction and scope records below remain historical within their stated dates.
