@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:enmori/app/app.dart';
 import 'package:enmori/app/providers.dart';
 import 'package:enmori/app/router/app_router.dart';
 import 'package:enmori/core/result/result.dart';
@@ -90,6 +91,41 @@ void main() {
       EventRecommendationView.all,
       EventRecommendationView.home,
     ]);
+  });
+
+  testWidgets('session expiry during See All keeps the sign-in route', (
+    tester,
+  ) async {
+    final repository = _DelayedSeeAllRepository();
+    var gate = RouterGateState.authenticated;
+    final container = ProviderContainer(
+      overrides: [
+        routerGateProvider.overrideWith((ref) => gate),
+        eventRecommendationRepositoryProvider.overrideWithValue(repository),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(container: container, child: const EnmoriApp()),
+    );
+    await _pumpFrames(tester);
+    await _openSeeAll(tester, emptyHome: true);
+
+    gate = RouterGateState.signInRequired;
+    container.invalidate(routerGateProvider);
+    await _pumpFrames(tester);
+    expect(find.byKey(const Key('route-sign-in')), findsOneWidget);
+
+    repository.pending.complete(Success(testEventRecommendations()));
+    await _pumpFrames(tester);
+
+    expect(find.byKey(const Key('route-sign-in')), findsOneWidget);
+    expect(find.byKey(const Key('route-home')), findsNothing);
+    expect(repository.views, [
+      EventRecommendationView.home,
+      EventRecommendationView.all,
+    ]);
+    expect(tester.takeException(), isNull);
   });
 }
 
