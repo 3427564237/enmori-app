@@ -1,10 +1,12 @@
 # LI first usable Profile slice — approval preview
 
-**Status: Proposed / Pending LI approval.** This file proposes one bounded UI slice; it is not implementation authorization. Owner LI, different reviewer DU, parent [#44](https://github.com/3427564237/enmori-app/issues/44), kickoff [#45](https://github.com/3427564237/enmori-app/issues/45).
+**Status: Approved for bounded implementation on 2026-09-30.** Originally Proposed / Pending LI approval; LI's explicit confirmation is retained in [S-PM-0930-OWN-PROFILE-01](../decisions/2026-09-30-own-profile-first-slice-approval.md). Owner LI, different reviewer DU, parent [#44](https://github.com/3427564237/enmori-app/issues/44), kickoff [#45](https://github.com/3427564237/enmori-app/issues/45). Approval does not establish implementation completion or independent review.
 
 ## Proposed result
 
 An authenticated, onboarded ordinary member opens **My profile** from Home, sees their canonical Username and their own saved Interests, opens the existing Interest editor, and returns to the profile and Home safely. This is a usable initial part of `own-profile`, not completion of Profile editing or Settings.
+
+LI's supplied Profile screenshots also show account presentation/editing, Footprint, history/calendar, privacy/consent settings, an AI entry and logout. These remain traceable later feature/contract work; omitting them from this first slice is sequencing, not a decision to remove them. The existing history naming decision uses Footprint rather than a duplicate Check-in Timeline feature. LI's [functional-coverage clarification](../decisions/2026-09-30-sprint3-practical-delivery.md) permits justified layout/navigation simplification but identifies no specific feature for cancellation.
 
 Use the existing architecture and read/write contracts. No Backend/API/Firestore/dependency change is proposed. Approval is needed for this exact minimal surface and navigation/content contract because Q04-D accepts the route inventory, not every Profile field/action.
 

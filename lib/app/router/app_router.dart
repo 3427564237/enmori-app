@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/account/account_providers.dart';
 import '../../features/account/presentation/onboarding_page.dart';
+import '../../features/account/presentation/own_profile_page.dart';
 import '../../features/auth/auth_providers.dart';
 import '../../features/auth/presentation/registration_page.dart';
 import '../../features/auth/presentation/sign_in_page.dart';
@@ -22,6 +23,7 @@ abstract final class AppRoutes {
   static const signIn = '/sign-in';
   static const onboarding = '/onboarding';
   static const home = '/home';
+  static const profile = '/profile';
   static const checkIn = '/check-in';
   static const interests = '/interests';
   static const eventRecommendations = '/events';
@@ -34,6 +36,8 @@ abstract final class AppRoutes {
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  // An account-owned route stack must not survive an identity replacement.
+  ref.watch(currentAuthSubjectProvider);
   final refresh = RouterRefreshNotifier(ref);
   final router = GoRouter(
     initialLocation: AppRoutes.startup,
@@ -73,6 +77,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.home,
         builder: (context, state) => HomeShellPage(
           onStartCheckIn: () => context.go(AppRoutes.checkIn),
+          onOpenProfile: () async {
+            final subject = ref.read(currentAuthSubjectProvider);
+            await context.push<void>(AppRoutes.profile);
+            if (!context.mounted ||
+                ref.read(routerGateProvider) != RouterGateState.authenticated ||
+                ref.read(currentAuthSubjectProvider) != subject) {
+              return;
+            }
+            ref
+                .read(eventRecommendationsControllerProvider.notifier)
+                .load(view: EventRecommendationView.home);
+          },
           onEditInterests: () async {
             final saved = await context.push<bool>(AppRoutes.interests);
             if (saved == true) {
@@ -90,6 +106,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ref
                 .read(eventRecommendationsControllerProvider.notifier)
                 .load(view: EventRecommendationView.home);
+          },
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => OwnProfilePage(
+          onEditInterests: () async {
+            await context.push<bool>(AppRoutes.interests);
           },
         ),
       ),

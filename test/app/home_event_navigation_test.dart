@@ -4,6 +4,7 @@ import 'package:enmori/app/app.dart';
 import 'package:enmori/app/providers.dart';
 import 'package:enmori/app/router/app_router.dart';
 import 'package:enmori/core/result/result.dart';
+import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 import 'package:enmori/features/event_recommendations/event_recommendations_providers.dart';
 import 'package:flutter/material.dart';
@@ -101,6 +102,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         routerGateProvider.overrideWith((ref) => gate),
+        currentAuthSubjectProvider.overrideWithValue('member-a'),
         eventRecommendationRepositoryProvider.overrideWithValue(repository),
       ],
     );
@@ -142,6 +144,7 @@ Future<void> _pumpRouter(
   final container = ProviderContainer(
     overrides: [
       routerGateProvider.overrideWithValue(RouterGateState.authenticated),
+      currentAuthSubjectProvider.overrideWithValue('member-a'),
       eventRecommendationRepositoryProvider.overrideWithValue(repository),
     ],
   );
@@ -166,6 +169,7 @@ Future<void> _openSeeAll(WidgetTester tester, {required bool emptyHome}) async {
     ),
   );
   await tester.ensureVisible(action);
+  await tester.pump();
   await tester.tap(action);
   await _pumpFrames(tester);
   expect(find.byKey(const Key('route-event-recommendations')), findsOneWidget);
