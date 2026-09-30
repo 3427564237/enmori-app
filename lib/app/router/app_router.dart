@@ -81,7 +81,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   .load(view: EventRecommendationView.home);
             }
           },
-          onSeeAllEvents: () => context.go(AppRoutes.eventRecommendations),
+          onSeeAllEvents: () async {
+            await context.push<void>(AppRoutes.eventRecommendations);
+            if (!context.mounted ||
+                ref.read(routerGateProvider) != RouterGateState.authenticated) {
+              return;
+            }
+            ref
+                .read(eventRecommendationsControllerProvider.notifier)
+                .load(view: EventRecommendationView.home);
+          },
         ),
       ),
       GoRoute(
