@@ -1,6 +1,6 @@
 # LI → DU: one bounded Profile and navigation review packet
 
-**Status:** Prepared locally; DU has not reviewed it. Owner LI HOURUI, assigned different reviewer DU KUN. Task [#45](https://github.com/3427564237/enmori-app/issues/45).
+**Status:** Published in [Draft PR #50](https://github.com/3427564237/enmori-app/pull/50) after LI explicitly instructed “提交gh”; DU has not reviewed it. Owner LI HOURUI, assigned different reviewer DU KUN. Task [#45](https://github.com/3427564237/enmori-app/issues/45).
 
 ## Exact review scope
 
@@ -30,4 +30,4 @@ That paragraph describes preparation commit `5dbe841`. The later approved Profil
 
 Use the owner results and environment in [the current checkpoint](2026-09-30-li-start.md), preserving its local-test versus published-head distinction. There is no need to review each preparatory note separately or reapprove unchanged business rules. Recheck the base/diff if #42 merges and #43 is retargeted.
 
-LI explicitly confirmed the first Profile preview, and the implementation plus owner evidence is now included here. The full local Flutter suite passes 113/113 and pinned analysis reports no issues. DU review is still Not Run; this packet has not been published or sent to DU. Do not infer approval from owner checks or a model audit. Real Backend/device execution, cross-feature gates, merge, acceptance and Done remain independently recorded.
+LI explicitly confirmed the first Profile preview, and the implementation plus owner evidence is now included here. The full local Flutter suite passes 113/113 and pinned analysis reports no issues. At the earlier local checkpoint, this packet was not published; LI subsequently authorized publication and it is now included in Draft PR #50, stacked on #43. DU review is still Not Run; no separate reviewer message or review request was sent. Do not infer approval from owner checks or a model audit. Real Backend/device execution, cross-feature gates, merge, acceptance and Done remain independently recorded.
