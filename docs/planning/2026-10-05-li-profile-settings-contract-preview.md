@@ -1,5 +1,7 @@
 # LI Profile and Settings — bounded contract for approval
 
+**Subsequent implementation evidence:** the approved owner increment has been implemented and verified locally in the [Profile/Settings execution packet](../evidence/sprint3/2026-10-05-li-profile-settings.md). The original proposal and pre-execution Not Run wording below are retained as history; DU's new implementation/evidence review remains Pending.
+
 **Status: Approved for bounded implementation.** LI explicitly confirmed the proposal at `88165421aaf292f04d43cd7cd42083ffc3a9a437`; [S-PM-1005-LI-PROFILE-SETTINGS](../decisions/2026-10-05-li-profile-settings-approval.md) preserves the confirmation and scope. Original proposal wording below is retained. Owner LI HOURUI, independent reviewer DU KUN, under [#45](https://github.com/3427564237/enmori-app/issues/45). This is the next usable Account/Profile/Settings increment after the [approved own Username/Interests slice](../decisions/2026-09-30-own-profile-first-slice-approval.md).
 
 ## Result and sources

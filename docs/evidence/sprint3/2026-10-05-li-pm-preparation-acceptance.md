@@ -1,5 +1,7 @@
 # LI PM acceptance — Sprint 3 preparation
 
+**Subsequent disposition:** LI confirmed the exact action package; the approved publication, merges and preparation closures are complete. See the [execution/readback record](2026-10-05-li-pm-preparation-execution.md). The pre-action assessment below is retained with its original snapshot boundaries.
+
 Owner/operator: LI HOURUI. Date: 5 October 2026, Asia/Singapore. LI instructed completion of the remaining LI/PM Sprint 3 work. This record performs the delegated PM acceptance assessment of other owners' preparation, following their assigned independent reviews. Publication, merge, Issue closure and Project changes await action-time approval.
 
 ## Accepted preparation scope

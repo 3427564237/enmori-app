@@ -1,5 +1,7 @@
 # LI remaining Sprint 3 actions — concrete approval package
 
+**Subsequent disposition:** LI explicitly confirmed this exact package. The approval is durable under [S-PM-1005-LI-PROFILE-SETTINGS](../decisions/2026-10-05-li-profile-settings-approval.md); the authorized external preparation batch is complete in the [execution record](../evidence/sprint3/2026-10-05-li-pm-preparation-execution.md). The original reviewable proposal and comment drafts below are retained.
+
 Prepared 5 October 2026. This package follows the completed [PM acceptance assessment](../evidence/sprint3/2026-10-05-li-pm-preparation-acceptance.md). It contains exact intended external actions and the next LI contract; no external mutation has occurred in preparing it.
 
 ## Proposed execution batch

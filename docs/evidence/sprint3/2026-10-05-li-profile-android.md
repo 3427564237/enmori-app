@@ -1,5 +1,7 @@
 # LI own Profile Android and real Backend verification — 2026-10-05
 
+**Subsequent independent disposition:** DU [approved this prior test/runner/evidence delta](https://github.com/3427564237/enmori-app/pull/50#pullrequestreview-5407782515) at exact head `daca5e3a60696c411290451346a8ce8db9d1de20`. The later [Profile/Settings packet](2026-10-05-li-profile-settings.md) records the final live refresh and the separate new implementation/review boundary. Original execution-time Pending statements below are retained as history.
+
 Owner/executor: LI HOURUI. Task: [#45](https://github.com/3427564237/enmori-app/issues/45). Assigned different reviewer: DU KUN. Scope is the [approved first own Profile increment](../../decisions/2026-09-30-own-profile-first-slice-approval.md), not full Profile/Settings or Sprint acceptance.
 
 ## Source and review boundaries
