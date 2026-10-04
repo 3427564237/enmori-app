@@ -8,7 +8,7 @@ Owner/executor: LI HOURUI. Task: [#45](https://github.com/3427564237/enmori-app/
 - DU approved that exact head on 4 October. The review explicitly covers the bounded own-Profile/navigation increment over #43, and excludes predecessor acceptance and real Backend/device execution.
 - Additional test/runner source: `92212487daa31f8f8f799f0c5366199761d614ad`, based directly on that reviewed head. Product `lib/`, Backend source, API, manifests, dependencies and lockfiles are unchanged by this increment.
 - Existing stacked chain: #42 `479619e8d124f3342458506fc145dc4bfbe3f483` → #43 `27b899fe93066298bd36d4d5dadf0f90a374a50d` → #50. #43 has no formal review in the 5 October snapshot. This execution is owner evidence and cannot supply that independent approval.
-- The new test/runner/evidence diff is local pending publication and DU disposition. Existing approval remains evidence for its exact historical scope; it is not relabelled as review of these additions.
+- LI explicitly confirmed publication to PR #50 and synchronization of Issue #45 on 5 October. This test/runner/evidence follow-up is the authorized publication packet; its new DU disposition remains Pending. Existing approval remains evidence for its exact historical scope; it is not relabelled as review of these additions.
 
 ## Isolated environment and reproduction
 
