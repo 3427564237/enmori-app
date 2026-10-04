@@ -1,4 +1,8 @@
 export const ROUTE_INVENTORY = [
+  { method: "GET", path: "/v1/me/profile", successStatuses: [200], requiresIdempotencyKey: false },
+  { method: "PUT", path: "/v1/me/profile", successStatuses: [200], requiresIdempotencyKey: false },
+  { method: "GET", path: "/v1/me/settings", successStatuses: [200], requiresIdempotencyKey: false },
+  { method: "PUT", path: "/v1/me/settings", successStatuses: [200], requiresIdempotencyKey: false },
   {
     method: "GET",
     path: "/v1/recommendations/events",

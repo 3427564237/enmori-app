@@ -1,4 +1,20 @@
 export const APP_FAILURE_CATALOGUE = {
+  PROFILE_INVALID: {
+    statusCode: 422,
+    message: "Use a display name of 1–50 characters or leave it unset, and choose a valid Profile visibility.",
+  },
+  PROFILE_REVISION_PRECONDITION_FAILED: {
+    statusCode: 412,
+    message: "Your profile changed. Reload it before saving again.",
+  },
+  SETTINGS_INVALID: {
+    statusCode: 422,
+    message: "Choose valid privacy and data-use settings.",
+  },
+  SETTINGS_REVISION_PRECONDITION_FAILED: {
+    statusCode: 412,
+    message: "Your settings changed. Reload them before saving again.",
+  },
   REQUEST_INVALID: {
     statusCode: 400,
     message: "Request parameters are invalid.",

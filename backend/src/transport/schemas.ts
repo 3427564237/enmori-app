@@ -1,6 +1,10 @@
 import type { FastifySchema } from "fastify";
 
 export const approvedFailureCodes = [
+  "PROFILE_INVALID",
+  "PROFILE_REVISION_PRECONDITION_FAILED",
+  "SETTINGS_INVALID",
+  "SETTINGS_REVISION_PRECONDITION_FAILED",
   "REQUEST_INVALID",
   "AUTH_REQUIRED",
   "AUTH_FORBIDDEN",
@@ -37,7 +41,7 @@ export const accountSchema = {
       type: "string",
       enum: ["accepted", "rejected"],
     },
-    checkInVisibility: { type: "string", enum: ["public", "private"] },
+    checkInVisibility: { type: "string", enum: ["public", "private", "friends_only"] },
     onboardingCompletedAt: utcTimestamp,
   },
 } as const;

@@ -69,6 +69,7 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
   const { FirebaseIdentityVerifier } = await load('shared/infrastructure/firebase/firebase-identity-verifier');
   const { FirestoreOnboardingRepository } = await load('onboarding/infrastructure/firestore-onboarding-repository');
   const { FirestoreInterestRepository } = await load('interests/infrastructure/firestore-interest-repository');
+  const { FirestoreAccountPreferencesRepository } = await load('account/infrastructure/firestore-account-preferences-repository');
   const { FirestoreCheckInRepository } = await load('check-ins/infrastructure/firestore-check-in-repository');
   const { FirestoreEventRecommendationRepository } = await load('event-recommendations/infrastructure/firestore-event-recommendation-repository');
   const { FirebaseAdminEventReadGateway } = await load('event-recommendations/infrastructure/event-read-gateway');
@@ -92,6 +93,7 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
     const use = async (path, name, ...args) => new (await load(path))[name](...args);
     const completeOnboarding = await use('onboarding/application/complete-onboarding', 'CompleteOnboarding', onboarding, clock, ids);
     app = await buildApp({
+      accountPreferences: await use('account/application/own-account-preferences', 'OwnAccountPreferences', new FirestoreAccountPreferencesRepository(gateway)),
       identityVerifier: new FirebaseIdentityVerifier(auth), completeOnboarding,
       getOnboarding: await use('onboarding/application/get-onboarding', 'GetOnboarding', onboarding),
       getInterestTags: await use('interests/application/get-interest-tags', 'GetInterestTags', interests),
@@ -146,6 +148,14 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
     const stored = (await firestore.doc(`account_interests/${accountId}`).get()).data();
     assert.deepEqual(stored, { interestTagIds: [], revision: 3 });
     console.log('S3_PROFILE_PERSISTED_EMPTY_REVISION_3: Pass');
+    const account = (await firestore.doc(`accounts/${accountId}`).get()).data();
+    assert.equal(account.displayName, 'LI fixture');
+    assert.equal(account.profileVisibility, 'friends_only');
+    assert.equal(account.profileRevision, 1);
+    assert.equal(account.checkInVisibility, 'friends_only');
+    assert.equal(account.optionalProcessingConsent, 'rejected');
+    assert.equal(account.settingsRevision, 5);
+    console.log('S3_PROFILE_SETTINGS_PERSISTED_REVISIONS_1_5: Pass');
   } finally {
     if (server) { server.closeAllConnections(); await new Promise((done) => server.close(done)); }
     if (app) await app.close();

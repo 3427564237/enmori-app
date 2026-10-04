@@ -155,7 +155,7 @@ export function parseAccountProjection(
     canonicalUsername.value !== username ||
     (optionalProcessingConsent !== "accepted" &&
       optionalProcessingConsent !== "rejected") ||
-    (checkInVisibility !== "public" && checkInVisibility !== "private") ||
+    (checkInVisibility !== "public" && checkInVisibility !== "private" && checkInVisibility !== "friends_only") ||
     !isUtcIsoInstant(onboardingCompletedAt)
   ) {
     return undefined;

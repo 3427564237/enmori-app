@@ -173,6 +173,12 @@ final class BackendApiClient {
     }
 
     final kind = switch (code) {
+      'PROFILE_INVALID' => AppFailureKind.profileInvalid,
+      'PROFILE_REVISION_PRECONDITION_FAILED' =>
+        AppFailureKind.profileRevisionPreconditionFailed,
+      'SETTINGS_INVALID' => AppFailureKind.settingsInvalid,
+      'SETTINGS_REVISION_PRECONDITION_FAILED' =>
+        AppFailureKind.settingsRevisionPreconditionFailed,
       'AUTH_REQUIRED' => AppFailureKind.authRequired,
       'AUTH_FORBIDDEN' => AppFailureKind.authForbidden,
       'USERNAME_INVALID' => AppFailureKind.usernameInvalid,

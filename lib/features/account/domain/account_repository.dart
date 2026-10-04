@@ -4,7 +4,7 @@ enum InitialChoice { accept, reject }
 
 enum OptionalProcessingConsent { accepted, rejected }
 
-enum CheckInVisibility { public, private }
+enum CheckInVisibility { public, private, friendsOnly }
 
 final class ProductAccount {
   const ProductAccount({
