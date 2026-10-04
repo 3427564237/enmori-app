@@ -1,5 +1,7 @@
 # LI → DU: one bounded Profile and navigation review packet
 
+**5 October update:** DU approved PR #50 at `acc6763b8b2cc53dc67b38a4a7c7a3fa7ff4ebf5`. [The new Android/Backend execution record](2026-10-05-li-profile-android.md) reports the additional owner verification; its new test/evidence diff awaits DU disposition. The dated preparation/publication snapshot below is retained as history; its earlier Not Run/Pending wording does not replace the new exact-scope results.
+
 **Status:** Published in [Draft PR #50](https://github.com/3427564237/enmori-app/pull/50) after LI explicitly instructed “提交gh”; DU has not reviewed it. Owner LI HOURUI, assigned different reviewer DU KUN. Task [#45](https://github.com/3427564237/enmori-app/issues/45).
 
 ## Exact review scope
