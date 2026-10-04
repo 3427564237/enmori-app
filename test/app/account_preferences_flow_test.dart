@@ -65,35 +65,85 @@ void main() {
       expect(h.prefs.settingsSaveCount, 2);
     },
   );
+  testWidgets('stale save requires explicit reload and emits no success', (
+    tester,
+  ) async {
+    final h = await start(tester);
+    await tap(tester, 'profile-edit');
+    h.prefs.saveFailure = const AppFailure(
+      kind: AppFailureKind.profileRevisionPreconditionFailed,
+      message: 'private vendor detail',
+    );
+    await tap(tester, 'profile-save');
+    expect(find.byKey(const Key('preferences-save-success')), findsNothing);
+    expect(find.text('private vendor detail'), findsNothing);
+    expect(
+      tester
+          .widget<FilledButton>(find.byKey(const Key('profile-save')))
+          .onPressed,
+      isNull,
+    );
+    h.prefs.profile = const OwnProfile(
+      username: 'member_a',
+      displayName: 'Current',
+      visibility: ProfileVisibility.public,
+      revision: 5,
+    );
+    h.prefs.saveFailure = null;
+    await tap(tester, 'preferences-reload');
+    expect(find.text('Current'), findsOneWidget);
+    await tap(tester, 'profile-save');
+    expect(h.prefs.profileRevisions, [0, 5]);
+  });
   testWidgets(
-    'stale or uncertain save requires explicit reload and emits no success',
+    'invalid input retains edits; uncertain commit never retries without reload',
     (tester) async {
       final h = await start(tester);
       await tap(tester, 'profile-edit');
+      await tester.enterText(
+        find.byKey(const Key('profile-display-name')),
+        'Draft',
+      );
       h.prefs.saveFailure = const AppFailure(
-        kind: AppFailureKind.profileRevisionPreconditionFailed,
+        kind: AppFailureKind.profileInvalid,
         message: 'private vendor detail',
       );
       await tap(tester, 'profile-save');
+      expect(find.text('Draft'), findsOneWidget);
+      expect(
+        tester
+            .widget<FilledButton>(find.byKey(const Key('profile-save')))
+            .onPressed,
+        isNotNull,
+      );
+      // The server may have committed even when the response was lost.
+      h.prefs.profile = const OwnProfile(
+        username: 'member_a',
+        displayName: 'Committed',
+        visibility: ProfileVisibility.private,
+        revision: 1,
+      );
+      h.prefs.saveFailure = const AppFailure(
+        kind: AppFailureKind.serviceUnavailable,
+        message: 'private vendor detail',
+      );
+      await tap(tester, 'profile-save');
+      await frames(tester);
       expect(find.byKey(const Key('preferences-save-success')), findsNothing);
       expect(find.text('private vendor detail'), findsNothing);
+      expect(h.prefs.profileRevisions, [0, 0]);
       expect(
         tester
             .widget<FilledButton>(find.byKey(const Key('profile-save')))
             .onPressed,
         isNull,
       );
-      h.prefs.profile = const OwnProfile(
-        username: 'member_a',
-        displayName: 'Current',
-        visibility: ProfileVisibility.public,
-        revision: 5,
-      );
-      h.prefs.saveFailure = null;
       await tap(tester, 'preferences-reload');
-      expect(find.text('Current'), findsOneWidget);
+      expect(find.text('Committed'), findsOneWidget);
+      expect(h.prefs.profileRevisions, [0, 0]);
+      h.prefs.saveFailure = null;
       await tap(tester, 'profile-save');
-      expect(h.prefs.profileRevisions, [0, 5]);
+      expect(h.prefs.profileRevisions, [0, 0, 1]);
     },
   );
   testWidgets(
