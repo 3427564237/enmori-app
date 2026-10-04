@@ -1,6 +1,6 @@
 # LI Profile and Settings — bounded contract for approval
 
-**Status: Proposed; implementation approval Pending.** Owner LI HOURUI, independent reviewer DU KUN, under [#45](https://github.com/3427564237/enmori-app/issues/45). This is the next usable Account/Profile/Settings increment after the [approved own Username/Interests slice](../decisions/2026-09-30-own-profile-first-slice-approval.md). The proposal fixes the API/data/UI choices needed to implement it; it does not become authority merely by being written.
+**Status: Approved for bounded implementation.** LI explicitly confirmed the proposal at `88165421aaf292f04d43cd7cd42083ffc3a9a437`; [S-PM-1005-LI-PROFILE-SETTINGS](../decisions/2026-10-05-li-profile-settings-approval.md) preserves the confirmation and scope. Original proposal wording below is retained. Owner LI HOURUI, independent reviewer DU KUN, under [#45](https://github.com/3427564237/enmori-app/issues/45). This is the next usable Account/Profile/Settings increment after the [approved own Username/Interests slice](../decisions/2026-09-30-own-profile-first-slice-approval.md).
 
 ## Result and sources
 
