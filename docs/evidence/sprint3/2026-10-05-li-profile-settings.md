@@ -1,5 +1,7 @@
 # LI own Profile/Settings implementation and owner evidence — 2026-10-05
 
+**Subsequent publication:** LI explicitly confirmed this verified packet; the source/tests/evidence are now published to #50 at `4977f05db1d678f7f07ea1021cced44aa573a3ba`, and #45 has been synchronized. See the [publication/readback record](2026-10-05-li-profile-settings-publication.md). The original local-before-publication snapshot below is preserved.
+
 Owner/executor: LI HOURUI. Issue: [#45](https://github.com/3427564237/enmori-app/issues/45). Assigned independent reviewer: DU KUN. Authority: [S-PM-1005-LI-PROFILE-SETTINGS](../../decisions/2026-10-05-li-profile-settings-approval.md) and the exact linked approved contract. This is a focused owner implementation/review packet, not whole-module or Sprint acceptance.
 
 ## Implemented behavior
