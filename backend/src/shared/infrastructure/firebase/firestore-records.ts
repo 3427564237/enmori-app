@@ -184,5 +184,8 @@ export function parseCheckInProjection(
   ) {
     return undefined;
   }
-  return { checkInId, note: normalizedNote.value, createdAt };
+  if (Object.hasOwn(data, "checkInVisibility") &&
+    data.checkInVisibility !== "private" && data.checkInVisibility !== "friends_only" && data.checkInVisibility !== "public") return undefined;
+  return { checkInId, note: normalizedNote.value, createdAt,
+    ...(Object.hasOwn(data, "checkInVisibility") ? { checkInVisibility: data.checkInVisibility as "private" | "friends_only" | "public" } : {}) };
 }

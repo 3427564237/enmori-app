@@ -182,6 +182,7 @@ function checkInResponse(checkIn: CheckInProjection): CheckInProjection {
     checkInId: checkIn.checkInId,
     note: checkIn.note,
     createdAt: checkIn.createdAt,
+    ...(checkIn.checkInVisibility === undefined ? {} : { checkInVisibility: checkIn.checkInVisibility }),
   };
 }
 

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/presentation/command_state.dart';
 import '../../../core/result/result.dart';
 import '../domain/check_in_repository.dart';
+import '../../account/domain/account_repository.dart';
 import 'check_in_controller.dart';
 
 enum _CheckInAction { create, read }
@@ -155,7 +156,13 @@ final class _CheckInComposerPageState
       icon: confirmed ? Icons.verified : Icons.task_alt,
       title: confirmed ? 'Saved Check-in confirmed.' : 'Check-in saved.',
       body:
-          '${checkIn.note}\nSaved at ${checkIn.createdAt.toUtc().toIso8601String()}',
+          '${checkIn.note}\nSaved at ${checkIn.createdAt.toUtc().toIso8601String()}'
+          '${switch (checkIn.checkInVisibility) {
+            CheckInVisibility.private => '\nVisibility: Private',
+            CheckInVisibility.friendsOnly => '\nVisibility: Friends-only',
+            CheckInVisibility.public => '\nVisibility: Public',
+            null => '',
+          }}',
       action: confirmed
           ? OutlinedButton.icon(
               key: const Key('r6-return-home-inline'),
@@ -270,7 +277,13 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
                 icon: Icons.verified,
                 title: 'Saved Check-in confirmed.',
                 body:
-                    '${value.note}\nSaved at ${value.createdAt.toUtc().toIso8601String()}',
+                    '${value.note}\nSaved at ${value.createdAt.toUtc().toIso8601String()}'
+                    '${switch (value.checkInVisibility) {
+                      CheckInVisibility.private => '\nVisibility: Private',
+                      CheckInVisibility.friendsOnly => '\nVisibility: Friends-only',
+                      CheckInVisibility.public => '\nVisibility: Public',
+                      null => '',
+                    }}',
               )
             else if (state case CommandFailed<CheckIn>(:final failure))
               _ResultPanel(

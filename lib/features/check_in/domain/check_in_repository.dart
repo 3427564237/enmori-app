@@ -1,4 +1,5 @@
 import '../../../core/result/result.dart';
+import '../../account/domain/account_repository.dart';
 
 import 'package:characters/characters.dart';
 
@@ -7,11 +8,13 @@ final class CheckIn {
     required this.checkInId,
     required this.note,
     required this.createdAt,
+    this.checkInVisibility,
   });
 
   final String checkInId;
   final String note;
   final DateTime createdAt;
+  final CheckInVisibility? checkInVisibility;
 }
 
 abstract interface class CheckInRepository {

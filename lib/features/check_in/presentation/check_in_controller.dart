@@ -53,7 +53,7 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
       note: normalized,
       idempotencyKey: _createIdempotencyKey!,
     );
-    if (operation != _operation) return;
+    if (!ref.mounted || operation != _operation) return;
     state = switch (result) {
       Success<CheckIn>(:final value) => CommandSucceeded(value),
       Failure<CheckIn>(:final failure) => CommandFailed(failure),
@@ -72,7 +72,7 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
     final operation = ++_operation;
     state = const CommandPending();
     final result = await command();
-    if (operation != _operation) return;
+    if (!ref.mounted || operation != _operation) return;
     state = switch (result) {
       Success<CheckIn>(:final value) => CommandSucceeded(value),
       Failure<CheckIn>(:final failure) => CommandFailed(failure),

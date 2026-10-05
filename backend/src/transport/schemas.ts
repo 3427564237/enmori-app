@@ -51,6 +51,7 @@ export const checkInSchema = {
   additionalProperties: false,
   required: ["checkInId", "note", "createdAt"],
   properties: {
+    checkInVisibility: { type: "string", enum: ["private", "friends_only", "public"] },
     checkInId: { type: "string", minLength: 1 },
     note: { type: "string" },
     createdAt: utcTimestamp,

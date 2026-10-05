@@ -765,6 +765,15 @@
           },
           "createdAt": {
             "$ref": "#/components/schemas/UtcTimestamp"
+          },
+          "checkInVisibility": {
+            "type": "string",
+            "enum": [
+              "private",
+              "friends_only",
+              "public"
+            ],
+            "description": "Creation-time Account default; omitted only for legacy records. Owner-only metadata."
           }
         }
       },
