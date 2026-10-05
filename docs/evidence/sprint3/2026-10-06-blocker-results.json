@@ -1,0 +1,51 @@
+{
+  "executed_at": "2026-10-06 Asia/Singapore",
+  "code_commit": "562229d4859feacd5b87644393bdc2a93280a544",
+  "checkin_commit": "97d102d",
+  "base_pr50_commit": "497dc1661105f8212f7a0987655ff48aa1a7627e",
+  "initial_status": "Not Run",
+  "environment": "isolated Firebase Auth/Firestore + Android emulator-5554 API 36 x86_64",
+  "checks": {
+    "backend": {
+      "passed": 312,
+      "failed": 0
+    },
+    "emulator": {
+      "passed": 37,
+      "failed": 0
+    },
+    "flutter_analysis": {
+      "issues": 0
+    },
+    "flutter_tests": {
+      "passed": 141,
+      "failed": 0
+    },
+    "android_chain": {
+      "passed": 1,
+      "failed": 0,
+      "markers": [
+        "S3_CHECKIN_ANDROID_THREE_SNAPSHOTS: Pass",
+        "S3_EVENT_HOME_ALL_DETAIL_COPY: Pass",
+        "S3_FRIEND_TWO_ACCOUNT_DECLINE_ACCEPT_REREAD: Pass",
+        "S3_CHECKIN_THREE_SNAPSHOTS_FRIEND_ACCEPTED_EVENT_DETAIL_COMPATIBLE: Pass"
+      ]
+    }
+  },
+  "android_apk_sha256": "2f87cebbf80957ca5e3c7204ee33b9169572ad3de6df22ab904882852ca2c058",
+  "log_sha256": {
+    "backend": "279c609a2c34766bdfcdd7ccd098625d28c83292c6043ef2a3c06e7faed751ed",
+    "emulator": "d7735c48d9b503b84fe3a139996f754e239c391a71f8bde47857eb7907f5b6e6",
+    "analysis": "a0cedded082bc54800dca8793cfea9b51edc21cad7c39e6435b0c993e42fdb1c",
+    "flutter": "5204a825d6d9d8d5734ffadb809508c0e640a526dafd94e35f2846fdf1849b0b",
+    "android": "c52e467b411d2ed10fcba2a5ef5af272cef5ee94648ef79835136b0d0d79e11f"
+  },
+  "independent_reviews": {
+    "DU_CheckIn": "Not Run",
+    "SHI_Friend": "Not Run",
+    "ZHOU_Event": "Not Run"
+  },
+  "publication": "Pending action-time confirmation",
+  "merge": "Not Run",
+  "UAT": "Not Run"
+}
