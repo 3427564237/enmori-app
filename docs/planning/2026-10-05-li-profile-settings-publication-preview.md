@@ -1,5 +1,7 @@
 # LI verified Profile/Settings publication preview — 2026-10-05
 
+**Subsequent authorization:** LI confirmed publication of this exact packet at `f7f1097a6fe4604bd9591721c34e972f1a9c5d24`. [S-PM-1005-LI-PROFILE-SETTINGS-PUBLICATION](../decisions/2026-10-05-li-profile-settings-publication-approval.md) records the authorization. The original preview below is retained; authorization does not supply DU review or merge/acceptance.
+
 The approved implementation is complete locally with source `e6f72b9123e79045d7c1c0cc1cd58a8198275434` and verification-only follow-up `b752ee04ae4a65785a9235b0df284df10ecb9dfb`. The [execution/evidence packet](../evidence/sprint3/2026-10-05-li-profile-settings.md) and [PM preparation execution](../evidence/sprint3/2026-10-05-li-pm-preparation-execution.md) are concrete reviewable artifacts. The last authorized documentation publication is `7e24396135ce41c94873da05f59af033c4035dee`.
 
 LI's existing action-time GitHub confirmation preference applies to this new source/evidence publication. The previously approved package explicitly authorized implementation locally and publication of its preparation/decision documents; it did not merge or accept LI's resulting new code.
