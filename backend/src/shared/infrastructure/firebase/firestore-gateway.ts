@@ -1,3 +1,4 @@
+import { FieldPath } from "firebase-admin/firestore";
 import type {
   DocumentData,
   Firestore,
@@ -15,6 +16,8 @@ export interface FirestoreTransactionGateway {
   list(collectionPath: string): Promise<readonly StoredDocumentEntry[]>;
   create(path: string, data: StoredDocument): void;
   set(path: string, data: StoredDocument): void;
+  delete?(path: string): void;
+  listPage?(collectionPath: string, afterId: string | undefined, limit: number): Promise<readonly StoredDocumentEntry[]>;
 }
 
 export interface FirestoreGateway {
@@ -48,6 +51,14 @@ class FirebaseAdminTransactionGateway
       id: document.id,
       data: { ...document.data() },
     }));
+  }
+
+  public delete(path: string): void { this.transaction.delete(this.firestore.doc(path)); }
+  public async listPage(collectionPath: string, afterId: string | undefined, limit: number): Promise<readonly StoredDocumentEntry[]> {
+    let query = this.firestore.collection(collectionPath).orderBy(FieldPath.documentId()).limit(limit);
+    if (afterId !== undefined) query = query.startAfter(afterId);
+    const snapshot = await this.transaction.get(query);
+    return snapshot.docs.map(doc => ({ id: doc.id, data: { ...doc.data() } }));
   }
 
   public create(path: string, data: StoredDocument): void {

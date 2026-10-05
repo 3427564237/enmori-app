@@ -7,6 +7,8 @@ final class HomeShellPage extends StatelessWidget {
     required this.onStartCheckIn,
     this.onEditInterests,
     this.onOpenProfile,
+    this.onOpenFriends,
+    this.onOpenEvent,
     required this.onSeeAllEvents,
     super.key,
   });
@@ -14,6 +16,8 @@ final class HomeShellPage extends StatelessWidget {
   final VoidCallback onStartCheckIn;
   final VoidCallback? onEditInterests;
   final VoidCallback? onOpenProfile;
+  final VoidCallback? onOpenFriends;
+  final void Function(String)? onOpenEvent;
   final VoidCallback onSeeAllEvents;
 
   @override
@@ -49,13 +53,23 @@ final class HomeShellPage extends StatelessWidget {
               icon: const Icon(Icons.person_outline),
               label: const Text('My profile'),
             ),
+            if (onOpenFriends != null)
+              OutlinedButton.icon(
+                key: const Key('home-friends'),
+                onPressed: onOpenFriends,
+                icon: const Icon(Icons.people_outline),
+                label: const Text('Friends'),
+              ),
             const SizedBox(height: 32),
             Text(
               'Events for you',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
-            EventRecommendationsSection(onSeeAll: onSeeAllEvents),
+            EventRecommendationsSection(
+              onSeeAll: onSeeAllEvents,
+              onOpenEvent: onOpenEvent,
+            ),
           ],
         ),
       ),

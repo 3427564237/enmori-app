@@ -15,6 +15,9 @@ test("maps the approved error catalogue to exact HTTP statuses", () => {
       ]),
     ),
     {
+      ADD_FRIEND_TARGET_UNAVAILABLE: 404,
+      FRIEND_REQUEST_UNAVAILABLE: 404,
+      EVENT_UNAVAILABLE: 404,
       PROFILE_INVALID: 422,
       PROFILE_REVISION_PRECONDITION_FAILED: 412,
       SETTINGS_INVALID: 422,

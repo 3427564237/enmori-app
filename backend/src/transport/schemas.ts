@@ -1,6 +1,9 @@
 import type { FastifySchema } from "fastify";
 
 export const approvedFailureCodes = [
+  "ADD_FRIEND_TARGET_UNAVAILABLE",
+  "FRIEND_REQUEST_UNAVAILABLE",
+  "EVENT_UNAVAILABLE",
   "PROFILE_INVALID",
   "PROFILE_REVISION_PRECONDITION_FAILED",
   "SETTINGS_INVALID",
