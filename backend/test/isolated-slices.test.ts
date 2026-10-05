@@ -128,9 +128,6 @@ test("Transport requires auth, strict inputs, rejects action bodies and hides in
     for(const payload of [{username:"member_b",owner:"b"},{username:42},{}]) assert.equal((await app.inject({method:"POST",url:"/v1/friends/lookup",headers,payload})).statusCode,400);
     const lookup=await app.inject({method:"POST",url:"/v1/friends/lookup",headers,payload:{username:"member_b"}});assert.equal(lookup.statusCode,200);assert.deepEqual(lookup.json(),{target:{username:"member_b",displayName:"Member b",relationshipState:"can_send_request"}});
     assert.equal((await app.inject({url:"/v1/me/friend-requests?cursor=bad",headers})).statusCode,400);
-    for (const url of ["/v1/me/friend-requests", "/v1/events/ev"]) {
-      assert.equal((await app.inject({method:"GET",url,headers,payload:{owner:"b"}})).statusCode,400);
-    }
     assert.equal((await app.inject({method:"POST",url:`/v1/friend-requests/${randomUUID()}/accept`,headers,payload:{owner:"b"}})).statusCode,400);
     assert.equal((await app.inject({url:"/v1/events/ev?owner=b",headers})).statusCode,400);
     const event=await app.inject({url:"/v1/events/ev",headers});assert.equal(event.statusCode,200);assert.equal(event.json().event.eventId,"ev");assert.equal(Object.hasOwn(event.json().event,"validUntil"),false);

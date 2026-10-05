@@ -144,6 +144,10 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
       startAt, endAt, interestTagIds: ['interest_music'],
     });
     await batch.commit();
+    const fixtureFriends = await use('friends/application/friend-requests', 'FriendRequests',
+      await use('friends/infrastructure/firestore-friend-repository', 'FirestoreFriendRepository', gateway, clock), clock);
+    const fixtureLookup = await fixtureFriends.lookup({firebaseUid:uid}, secondUsername);
+    assert.equal(fixtureLookup.ok, true, 'Seeded Friend target must be available before Android starts');
     const cert = join(directory, 'certificate.pem'), key = join(directory, 'key.pem');
     await run('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', key,
       '-out', cert, '-days', '1', '-subj', '/CN=ENMORI isolated test',

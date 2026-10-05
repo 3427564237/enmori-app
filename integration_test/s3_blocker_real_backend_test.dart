@@ -180,7 +180,11 @@ void main() {
         await _wait(tester, find.byKey(const Key('settings-visibility')));
         await _tap(tester, 'settings-visibility');
         await tester.tap(find.text(label).last);
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(
+          const Duration(milliseconds: 100),
+          EnginePhase.sendSemanticsUpdate,
+          const Duration(seconds: 5),
+        );
         await _tap(tester, 'settings-save');
         await _wait(tester, find.byKey(const Key('preferences-save-success')));
         expect(
@@ -190,9 +194,17 @@ void main() {
           visibility,
         );
         await tester.pageBack();
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(
+          const Duration(milliseconds: 100),
+          EnginePhase.sendSemanticsUpdate,
+          const Duration(seconds: 5),
+        );
         await tester.pageBack();
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(
+          const Duration(milliseconds: 100),
+          EnginePhase.sendSemanticsUpdate,
+          const Duration(seconds: 5),
+        );
         await _wait(tester, find.byKey(const Key('route-home')));
         await _tap(tester, 'r6-new-check-in-button');
         await _wait(tester, find.byKey(const Key('r6-check-in-note')));
@@ -241,20 +253,33 @@ void main() {
       await _tap(tester, 'event-detail-copy-link');
       await _wait(tester, find.text('Link copied.'));
       await tester.pageBack();
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 5),
+      );
       await _tap(tester, 'event-recommendations-see-all');
       await _wait(tester, find.byKey(const Key('route-event-recommendations')));
       await _tap(tester, 'event-recommendation-s3_profile_event');
       await _wait(tester, find.byKey(const Key('event-detail-title')));
       await tester.pageBack();
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 5),
+      );
       await tester.pageBack();
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 5),
+      );
       debugPrint('S3_EVENT_HOME_ALL_DETAIL_COPY: Pass');
       const secondUsername = String.fromEnvironment(
             'ENMORI_TEST_SECOND_USERNAME',
           ),
           secondEmail = String.fromEnvironment('ENMORI_TEST_SECOND_EMAIL');
+      expect(secondUsername, matches(RegExp(r'^peer_[0-9a-f]{12}$')));
       Future<void> switchUser(String email) async {
         await _tap(tester, 'my-profile-button');
         await _tap(tester, 'profile-settings');
@@ -272,8 +297,24 @@ void main() {
       Future<void> findAndSend() async {
         await _tap(tester, 'home-friends');
         await _wait(tester, find.text('No current friend requests.'));
+        while (scope.read(friendControllerProvider).busy) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        expect(
+          tester
+              .widget<TextField>(find.byKey(const Key('friend-username')))
+              .enabled,
+          isTrue,
+        );
         await tester.enterText(
           find.byKey(const Key('friend-username')),
+          secondUsername,
+        );
+        expect(
+          tester
+              .widget<TextField>(find.byKey(const Key('friend-username')))
+              .controller!
+              .text,
           secondUsername,
         );
         await _tap(tester, 'friend-lookup');
@@ -287,7 +328,11 @@ void main() {
           await tester.pump(const Duration(milliseconds: 100));
         }
         final lookedUp = scope.read(friendControllerProvider);
-        expect(lookedUp.failure, isNull);
+        expect(
+          lookedUp.failure,
+          isNull,
+          reason: '${lookedUp.failure?.kind}: ${lookedUp.failure?.message}',
+        );
         expect(lookedUp.target?.relationship, RelationshipState.canSendRequest);
         await tester.scrollUntilVisible(
           find.byKey(const Key('friend-send')),
@@ -302,7 +347,11 @@ void main() {
         await _tap(tester, 'friend-send');
         await _wait(tester, find.text('Request sent'));
         await tester.pageBack();
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(
+          const Duration(milliseconds: 100),
+          EnginePhase.sendSemanticsUpdate,
+          const Duration(seconds: 5),
+        );
       }
 
       await findAndSend();
@@ -313,7 +362,11 @@ void main() {
       await _tap(tester, 'friend-decline-${firstRequest.requestRef}');
       await _wait(tester, find.text('Friend request declined.'));
       await tester.pageBack();
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 5),
+      );
       await switchUser(fixtureEmail);
       await findAndSend();
       await switchUser(secondEmail);
@@ -324,10 +377,17 @@ void main() {
       await _tap(tester, 'friend-accept-${freshRequest.requestRef}');
       await _wait(tester, find.text('Friend request accepted.'));
       await tester.pageBack();
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 100),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 5),
+      );
       await switchUser(fixtureEmail);
       await _tap(tester, 'home-friends');
       await _wait(tester, find.text('No current friend requests.'));
+      while (scope.read(friendControllerProvider).busy) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
       await tester.enterText(
         find.byKey(const Key('friend-username')),
         secondUsername,
@@ -355,14 +415,22 @@ Future<void> _tap(WidgetTester tester, String key) async {
   final finder = find.byKey(Key(key));
   await _wait(tester, finder);
   FocusManager.instance.primaryFocus?.unfocus();
-  await tester.pumpAndSettle();
+  await tester.pumpAndSettle(
+    const Duration(milliseconds: 100),
+    EnginePhase.sendSemanticsUpdate,
+    const Duration(seconds: 5),
+  );
   final keyboardDeadline = DateTime.now().add(const Duration(seconds: 5));
   while (tester.view.viewInsets.bottom > 0 &&
       DateTime.now().isBefore(keyboardDeadline)) {
     await tester.pump(const Duration(milliseconds: 100));
   }
   await Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
-  await tester.pumpAndSettle();
+  await tester.pumpAndSettle(
+    const Duration(milliseconds: 100),
+    EnginePhase.sendSemanticsUpdate,
+    const Duration(seconds: 5),
+  );
   await tester.tap(finder);
   await tester.pump();
 }
