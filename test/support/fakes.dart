@@ -26,6 +26,8 @@ final class FakeAuthRepository implements AuthRepository {
   final _sessions = StreamController<AuthSession>.broadcast();
   Result<void> registerResult = const Success(null);
   Result<void> signInResult = const Success(null);
+  Result<void> signOutResult = const Success(null);
+  int signOutCount = 0;
   Completer<Result<void>>? pendingSignIn;
   Result<String> tokenResult = const Success('test-token');
   int registerCount = 0;
@@ -38,6 +40,15 @@ final class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<Result<String>> getIdToken() async => tokenResult;
+
+  @override
+  Future<Result<void>> signOut() async {
+    signOutCount++;
+    if (signOutResult is Success<void>) {
+      emit(const AuthSessionUnauthenticated());
+    }
+    return signOutResult;
+  }
 
   @override
   Future<Result<void>> register({

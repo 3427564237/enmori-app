@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-05",
+  "timezone": "Asia/Singapore",
+  "executor": "LI HOURUI",
+  "authority": "S-PM-1005-LI-PROFILE-SETTINGS",
+  "implementationAndAndroidSource": "e6f72b9123e79045d7c1c0cc1cd58a8198275434",
+  "finalVerificationSource": "b752ee04ae4a65785a9235b0df284df10ecb9dfb",
+  "publishedDocumentationHead": "7e24396135ce41c94873da05f59af033c4035dee",
+  "backendRuntime": "Node 24.19.0 / pnpm 11.19.0",
+  "flutter": "3.47.2",
+  "dart": "3.13.2",
+  "platform": "Android Emulator 16 / API 36 / x86_64",
+  "firebaseProject": "demo-enmori-rmvp01a-r10",
+  "backendTests": {
+    "result": "Pass",
+    "tests": 286
+  },
+  "firebaseEmulatorTests": {
+    "result": "Pass",
+    "tests": 28
+  },
+  "flutterTests": {
+    "result": "Pass",
+    "tests": 126
+  },
+  "analysis": "Pass",
+  "androidIntegrationScenario": {
+    "result": "Pass",
+    "tests": 1
+  },
+  "persistedInterestsEmptyRevision3": "Pass",
+  "persistedProfileRevision1AndSettingsRevision5": "Pass",
+  "apkSha256": "de0678aa8e91a78828acaaa50b608eb2e3f9db31e6e6aa9b5e6bcbf5e063d915",
+  "newImplementationPublication": "Pending specific confirmation",
+  "newImplementationIndependentReview": "Pending DU",
+  "predecessorIndependentReview": "Pending DU",
+  "combinedGate": "Not Run",
+  "UAT": "Not Run",
+  "release": "Not Run",
+  "priorFirstProfileEvidenceReview": {
+    "result": "Approved",
+    "reviewer": "DU KUN",
+    "head": "daca5e3a60696c411290451346a8ce8db9d1de20",
+    "reviewId": 5407782515,
+    "scope": "Prior first-Profile Android test/runner/evidence only"
+  }
+}

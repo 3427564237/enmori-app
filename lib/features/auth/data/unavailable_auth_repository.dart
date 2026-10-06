@@ -13,6 +13,9 @@ final class UnavailableAuthRepository implements AuthRepository {
   Future<Result<String>> getIdToken() async => const Failure(_failure);
 
   @override
+  Future<Result<void>> signOut() async => const Failure(_failure);
+
+  @override
   Future<Result<void>> register({
     required String email,
     required String password,

@@ -291,6 +291,7 @@ test("R13 accept create, exact retry, changed-Note conflict and later owner read
     .doc(`check_ins/${String(created.checkInId)}`)
     .get();
   assert.deepEqual(Object.keys(stored.data() ?? {}).sort(), [
+    "checkInVisibility",
     "createdAt",
     "note",
     "ownerAccountId",

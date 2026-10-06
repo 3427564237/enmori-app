@@ -21,6 +21,17 @@ final backendApiClientProvider = Provider<BackendApiClient>((ref) {
   return client;
 });
 
+// Navigation intent only. AuthRepository's observed session still controls the gate.
+final signOutEntryProvider = NotifierProvider<SignOutEntry, bool>(
+  SignOutEntry.new,
+);
+
+final class SignOutEntry extends Notifier<bool> {
+  @override
+  bool build() => false;
+  void requested(bool value) => state = value;
+}
+
 enum RouterGateState {
   resolving,
   unauthenticated,

@@ -3,12 +3,13 @@ import { err, ok, type Result } from "../../shared/domain/result.js";
 
 export type InitialChoice = "accept" | "reject";
 export type OptionalProcessingConsent = "accepted" | "rejected";
-export type CheckInVisibility = "public" | "private";
+export type CheckInVisibility = "public" | "private" | "friends_only";
+export type InitialCheckInVisibility = "public" | "private";
 
 export interface InitialChoiceProjection {
   readonly initialChoice: InitialChoice;
   readonly optionalProcessingConsent: OptionalProcessingConsent;
-  readonly checkInVisibility: CheckInVisibility;
+  readonly checkInVisibility: InitialCheckInVisibility;
 }
 
 export function deriveInitialChoice(

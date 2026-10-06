@@ -3,6 +3,8 @@ import Fastify, {
   type FastifyRequest,
 } from "fastify";
 import type { RecommendEvents } from "../event-recommendations/application/recommend-events.js";
+import type { OwnAccountPreferences } from "../account/application/own-account-preferences.js";
+import { registerAccountPreferencesRoutes } from "../account/transport/register-routes.js";
 import { registerEventRecommendationRoute } from "../event-recommendations/transport/register-route.js";
 import type { AppFailureCode } from "../shared/application/app-failure.js";
 import { sendFailureCode } from "../transport/error-response.js";
@@ -12,7 +14,8 @@ import {
 } from "../transport/register-routes.js";
 
 export async function buildApp(
-  dependencies: R4RouteDependencies & { readonly recommendEvents?: Pick<RecommendEvents, "execute"> },
+  dependencies: R4RouteDependencies & { readonly recommendEvents?: Pick<RecommendEvents, "execute">;
+    readonly accountPreferences?: OwnAccountPreferences },
 ): Promise<FastifyInstance> {
   const app = Fastify({
     logger: false,
@@ -26,6 +29,9 @@ export async function buildApp(
   });
 
   await registerR4Routes(app, dependencies);
+  if (dependencies.accountPreferences !== undefined) {
+    await registerAccountPreferencesRoutes(app, dependencies.identityVerifier, dependencies.accountPreferences);
+  }
   if (dependencies.recommendEvents !== undefined) {
     await registerEventRecommendationRoute(app, {
       identityVerifier: dependencies.identityVerifier,
@@ -53,6 +59,12 @@ function validationFailureCode(
     if (context === "headers") return "IDEMPOTENCY_KEY_INVALID";
 
     const route = request.routeOptions.url;
+    if (route === "/v1/me/profile" || route === "/v1/me/settings") {
+      const validation = fastifyError.validation as readonly { readonly keyword?: string }[] | undefined;
+      const malformed = validation === undefined || validation.some((item) =>
+        item.keyword === "type" || item.keyword === "required" || item.keyword === "additionalProperties");
+      return malformed ? "REQUEST_INVALID" : route === "/v1/me/profile" ? "PROFILE_INVALID" : "SETTINGS_INVALID";
+    }
     if (context === "querystring" && route === "/v1/recommendations/events") {
       return "REQUEST_INVALID";
     }

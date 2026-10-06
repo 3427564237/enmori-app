@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:enmori/core/presentation/command_state.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/check_in/check_in_providers.dart';
@@ -50,4 +52,43 @@ void main() {
     expect(repository.createdNotes, ['A controlled test note.']);
     expect(container.read(checkInControllerProvider), isA<CommandSucceeded>());
   });
+
+  for (final create in [false, true]) {
+    test(
+      'discard pending ${create ? "create" : "read"} after disposal',
+      () async {
+        final repository = _PendingCheckInRepository();
+        final container = ProviderContainer(
+          overrides: [checkInRepositoryProvider.overrideWithValue(repository)],
+        );
+        final controller = container.read(checkInControllerProvider.notifier);
+        final operation = create
+            ? controller.create(note: 'Synthetic note')
+            : controller.readPersisted(checkInId: 'synthetic');
+        container.dispose();
+        repository.pending.complete(
+          Success(
+            CheckIn(
+              checkInId: 'synthetic',
+              note: 'Synthetic note',
+              createdAt: DateTime.utc(2026),
+            ),
+          ),
+        );
+        await expectLater(operation, completes);
+      },
+    );
+  }
+}
+
+final class _PendingCheckInRepository implements CheckInRepository {
+  final pending = Completer<Result<CheckIn>>();
+  @override
+  Future<Result<CheckIn>> create({
+    required String note,
+    required String idempotencyKey,
+  }) => pending.future;
+  @override
+  Future<Result<CheckIn>> readOwned({required String checkInId}) =>
+      pending.future;
 }

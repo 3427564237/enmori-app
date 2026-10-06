@@ -339,6 +339,7 @@ test("Firestore Emulator creates and privately reads the approved Check-in recor
       ownerAccountId: "controlled-account-001",
       note: "Controlled R10 persisted note",
       createdAt: "2026-09-05T01:00:00.000Z",
+      checkInVisibility: "public",
     },
   );
   assert.equal((await firestore.collection("check_ins").get()).size, 1);

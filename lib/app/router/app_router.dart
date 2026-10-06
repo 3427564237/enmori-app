@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/account/account_providers.dart';
 import '../../features/account/presentation/onboarding_page.dart';
+import '../../features/account/presentation/own_profile_page.dart';
+import '../../features/account/presentation/account_preferences_page.dart';
+import '../../features/account/presentation/account_preferences_controller.dart';
+import '../../core/result/result.dart';
 import '../../features/auth/auth_providers.dart';
 import '../../features/auth/presentation/registration_page.dart';
 import '../../features/auth/presentation/sign_in_page.dart';
@@ -22,6 +26,9 @@ abstract final class AppRoutes {
   static const signIn = '/sign-in';
   static const onboarding = '/onboarding';
   static const home = '/home';
+  static const profile = '/profile';
+  static const profileEdit = '/profile/edit';
+  static const settings = '/settings';
   static const checkIn = '/check-in';
   static const interests = '/interests';
   static const eventRecommendations = '/events';
@@ -34,6 +41,8 @@ abstract final class AppRoutes {
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  // An account-owned route stack must not survive an identity replacement.
+  ref.watch(currentAuthSubjectProvider);
   final refresh = RouterRefreshNotifier(ref);
   final router = GoRouter(
     initialLocation: AppRoutes.startup,
@@ -41,6 +50,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) => redirectFor(
       gate: ref.read(routerGateProvider),
       location: state.matchedLocation,
+      signedOutEntry: ref.read(signOutEntryProvider),
     ),
     routes: [
       GoRoute(
@@ -73,6 +83,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.home,
         builder: (context, state) => HomeShellPage(
           onStartCheckIn: () => context.go(AppRoutes.checkIn),
+          onOpenProfile: () async {
+            final subject = ref.read(currentAuthSubjectProvider);
+            await context.push<void>(AppRoutes.profile);
+            if (!context.mounted ||
+                ref.read(routerGateProvider) != RouterGateState.authenticated ||
+                ref.read(currentAuthSubjectProvider) != subject) {
+              return;
+            }
+            ref
+                .read(eventRecommendationsControllerProvider.notifier)
+                .load(view: EventRecommendationView.home);
+          },
           onEditInterests: () async {
             final saved = await context.push<bool>(AppRoutes.interests);
             if (saved == true) {
@@ -90,6 +112,42 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ref
                 .read(eventRecommendationsControllerProvider.notifier)
                 .load(view: EventRecommendationView.home);
+          },
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => OwnProfilePage(
+          onEditProfile: () async {
+            await context.push<void>(AppRoutes.profileEdit);
+          },
+          onOpenSettings: () async {
+            await context.push<void>(AppRoutes.settings);
+          },
+          onEditInterests: () async {
+            await context.push<bool>(AppRoutes.interests);
+          },
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.profileEdit,
+        builder: (context, state) =>
+            const AccountPreferencesPage(view: PreferencesView.profile),
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        builder: (context, state) => AccountPreferencesPage(
+          view: PreferencesView.settings,
+          onEditProfile: () async {
+            await context.push<void>(AppRoutes.profileEdit);
+          },
+          onSignOut: () async {
+            final entry = ref.read(signOutEntryProvider.notifier);
+            final auth = ref.read(authRepositoryProvider);
+            entry.requested(true);
+            final result = await auth.signOut();
+            if (result is Failure<void>) entry.requested(false);
+            return result;
           },
         ),
       ),
@@ -142,13 +200,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return router;
 });
 
-String? redirectFor({required RouterGateState gate, required String location}) {
+String? redirectFor({
+  required RouterGateState gate,
+  required String location,
+  bool signedOutEntry = false,
+}) {
   return switch (gate) {
     RouterGateState.resolving =>
       location == AppRoutes.startup ? null : AppRoutes.startup,
     RouterGateState.unauthenticated =>
       location == AppRoutes.register || location == AppRoutes.signIn
           ? null
+          : signedOutEntry
+          ? AppRoutes.signIn
           : AppRoutes.register,
     RouterGateState.signInRequired =>
       location == AppRoutes.signIn ? null : AppRoutes.signIn,
@@ -177,6 +241,9 @@ String? redirectFor({required RouterGateState gate, required String location}) {
 
 final class RouterRefreshNotifier extends ChangeNotifier {
   RouterRefreshNotifier(Ref ref) {
+    ref.listen<bool>(signOutEntryProvider, (previous, next) {
+      if (previous != next) notifyListeners();
+    });
     ref.listen<RouterGateState>(routerGateProvider, (previous, next) {
       if (previous != next) notifyListeners();
     });

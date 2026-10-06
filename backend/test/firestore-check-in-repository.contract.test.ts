@@ -56,12 +56,14 @@ test("check-in create atomically writes the approved record and idempotency resu
       checkInId: "controlled-check-in-001",
       note: "A controlled check-in",
       createdAt: "2026-09-05T02:00:00.000Z",
+      checkInVisibility: "public",
     },
   });
   assert.deepEqual(gateway.read("check_ins/controlled-check-in-001"), {
     ownerAccountId: "controlled-account-001",
     note: "A controlled check-in",
     createdAt: "2026-09-05T02:00:00.000Z",
+    checkInVisibility: "public",
   });
   assert.equal(gateway.entries().length, 4);
   assert.equal(
@@ -239,4 +241,29 @@ test("owned read fails closed for an invalid stored Note", async () => {
     }),
     { kind: "dependency_unavailable" },
   );
+});
+
+for (const visibility of ["private", "friends_only", "public"] as const) {
+  test(`snapshot ${visibility} survives later Settings edits, read and replay`, async () => {
+    const gateway = new InMemoryFirestoreGateway({ ...ACCOUNT_SEED,
+      "accounts/controlled-account-001": { ...ACCOUNT_SEED["accounts/controlled-account-001"], checkInVisibility: visibility } });
+    const repo = new FirestoreCheckInRepository(gateway);
+    const created = await repo.create(command());
+    assert.equal(created.kind, "created");
+    await gateway.runTransaction(async tx => { tx.set("accounts/controlled-account-001", { ...ACCOUNT_SEED["accounts/controlled-account-001"], checkInVisibility: visibility === "private" ? "public" : "private" }); });
+    const replay = await repo.create(command());
+    assert.equal(replay.kind, "replayed");
+    if (replay.kind === "replayed") assert.equal(replay.checkIn.checkInVisibility, visibility);
+    const read = await repo.findOwned({ firebaseUid: FIREBASE_UID, checkInId: "controlled-check-in-001" });
+    if (read.kind !== "found") assert.fail("owned read failed");
+    assert.equal(read.checkIn.checkInVisibility, visibility);
+  });
+}
+test("invalid present Check-in visibility fails closed without rewriting legacy data", async () => {
+  for (const visibility of [null, "unknown", 0]) {
+    const gateway = new InMemoryFirestoreGateway({ ...ACCOUNT_SEED, "check_ins/bad": { ownerAccountId: "controlled-account-001", note: "Legacy", createdAt: "2026-09-05T04:00:00.000Z", checkInVisibility: visibility } });
+    const before = gateway.entries();
+    assert.deepEqual(await new FirestoreCheckInRepository(gateway).findOwned({ firebaseUid: FIREBASE_UID, checkInId: "bad" }), { kind: "dependency_unavailable" });
+    assert.deepEqual(gateway.entries(), before);
+  }
 });

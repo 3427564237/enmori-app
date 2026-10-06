@@ -1,4 +1,8 @@
 enum AppFailureKind {
+  profileInvalid,
+  profileRevisionPreconditionFailed,
+  settingsInvalid,
+  settingsRevisionPreconditionFailed,
   authRequired,
   authForbidden,
   authenticationInvalid,
