@@ -48,8 +48,8 @@ final class BackendApiClient {
 
   Future<Result<JsonObject>> post(
     String path, {
-    required JsonObject body,
-    required String idempotencyKey,
+    JsonObject? body,
+    String? idempotencyKey,
   }) => _send('POST', path, body: body, idempotencyKey: idempotencyKey);
 
   void close() => _httpClient.close();
@@ -173,6 +173,10 @@ final class BackendApiClient {
     }
 
     final kind = switch (code) {
+      'ADD_FRIEND_TARGET_UNAVAILABLE' =>
+        AppFailureKind.addFriendTargetUnavailable,
+      'FRIEND_REQUEST_UNAVAILABLE' => AppFailureKind.friendRequestUnavailable,
+      'EVENT_UNAVAILABLE' => AppFailureKind.eventUnavailable,
       'PROFILE_INVALID' => AppFailureKind.profileInvalid,
       'PROFILE_REVISION_PRECONDITION_FAILED' =>
         AppFailureKind.profileRevisionPreconditionFailed,

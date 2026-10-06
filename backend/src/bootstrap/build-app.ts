@@ -1,3 +1,7 @@
+import { registerIsolatedSlices } from "../transport/register-isolated-slices.js";
+import { requireControlledEmulatorEnvironment } from "../shared/infrastructure/firebase/controlled-emulator-environment.js";
+import type { FriendRequests } from "../friends/application/friend-requests.js";
+import type { GetEventDetail } from "../event-detail/application/get-event-detail.js";
 import Fastify, {
   type FastifyInstance,
   type FastifyRequest,
@@ -15,7 +19,8 @@ import {
 
 export async function buildApp(
   dependencies: R4RouteDependencies & { readonly recommendEvents?: Pick<RecommendEvents, "execute">;
-    readonly accountPreferences?: OwnAccountPreferences },
+    readonly accountPreferences?: OwnAccountPreferences;
+    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail } },
 ): Promise<FastifyInstance> {
   const app = Fastify({
     logger: false,
@@ -38,6 +43,10 @@ export async function buildApp(
       recommendEvents: dependencies.recommendEvents,
     });
   }
+  if (dependencies.isolatedSlices !== undefined) {
+    requireControlledEmulatorEnvironment(dependencies.isolatedSlices.environment);
+    await registerIsolatedSlices(app, dependencies.identityVerifier, dependencies.isolatedSlices.friends, dependencies.isolatedSlices.eventDetail);
+  }
   await app.ready();
   return app;
 }
@@ -59,6 +68,7 @@ function validationFailureCode(
     if (context === "headers") return "IDEMPOTENCY_KEY_INVALID";
 
     const route = request.routeOptions.url;
+    if (route?.startsWith("/v1/friend") || route === "/v1/me/friend-requests" || route === "/v1/events/:eventId") return "REQUEST_INVALID";
     if (route === "/v1/me/profile" || route === "/v1/me/settings") {
       const validation = fastifyError.validation as readonly { readonly keyword?: string }[] | undefined;
       const malformed = validation === undefined || validation.some((item) =>

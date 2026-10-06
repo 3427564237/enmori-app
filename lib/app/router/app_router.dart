@@ -17,6 +17,8 @@ import '../../features/event_recommendations/presentation/event_recommendations_
 import '../../features/event_recommendations/presentation/event_recommendations_page.dart';
 import '../../features/interests/presentation/interest_editor_page.dart';
 import '../home_shell_page.dart';
+import '../../features/event_detail/presentation/event_detail_page.dart';
+import '../../features/friends/presentation/friend_page.dart';
 import '../providers.dart';
 import '../route_status_pages.dart';
 
@@ -43,6 +45,7 @@ abstract final class AppRoutes {
 final appRouterProvider = Provider<GoRouter>((ref) {
   // An account-owned route stack must not survive an identity replacement.
   ref.watch(currentAuthSubjectProvider);
+  final isolatedSlices = ref.watch(isolatedSlicesEnabledProvider);
   final refresh = RouterRefreshNotifier(ref);
   final router = GoRouter(
     initialLocation: AppRoutes.startup,
@@ -53,6 +56,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       signedOutEntry: ref.read(signOutEntryProvider),
     ),
     routes: [
+      if (isolatedSlices)
+        GoRoute(
+          path: '/friends',
+          builder: (context, state) => const FriendPage(),
+        ),
+      if (isolatedSlices)
+        GoRoute(
+          path: '/events/:eventId',
+          builder: (context, state) =>
+              EventDetailPage(eventId: state.pathParameters['eventId'] ?? ''),
+        ),
       GoRoute(
         path: AppRoutes.startup,
         builder: (context, state) => const StartupPage(),
@@ -83,6 +97,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.home,
         builder: (context, state) => HomeShellPage(
           onStartCheckIn: () => context.go(AppRoutes.checkIn),
+          onOpenFriends: isolatedSlices
+              ? () => context.push<void>('/friends')
+              : null,
+          onOpenEvent: isolatedSlices
+              ? (id) => context.push<void>('/events/${Uri.encodeComponent(id)}')
+              : null,
           onOpenProfile: () async {
             final subject = ref.read(currentAuthSubjectProvider);
             await context.push<void>(AppRoutes.profile);
@@ -153,7 +173,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.eventRecommendations,
-        builder: (context, state) => const EventRecommendationsPage(),
+        builder: (context, state) => EventRecommendationsPage(
+          onOpenEvent: isolatedSlices
+              ? (id) => context.push<void>('/events/${Uri.encodeComponent(id)}')
+              : null,
+        ),
       ),
       GoRoute(
         path: AppRoutes.checkIn,

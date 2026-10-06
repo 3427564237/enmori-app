@@ -497,6 +497,567 @@
           }
         }
       }
+    },
+    "/v1/friends/lookup": {
+      "post": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Requires validated isolated Emulator composition. Not wired in controlled-demo or production.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful isolated synthetic result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "target"
+                  ],
+                  "properties": {
+                    "target": {
+                      "$ref": "#/components/schemas/FriendTarget"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FriendUsernameRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/friend-requests": {
+      "post": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Requires validated isolated Emulator composition. Not wired in controlled-demo or production.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful isolated synthetic result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "target"
+                  ],
+                  "properties": {
+                    "target": {
+                      "$ref": "#/components/schemas/FriendTarget"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FriendUsernameRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/friend-requests": {
+      "get": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Requires validated isolated Emulator composition. Not wired in controlled-demo or production.",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque bounded-scan continuation; empty filtered pages may still have nextCursor."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful isolated synthetic result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendInbox"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/friend-requests/{requestRef}/accept": {
+      "post": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Requires validated isolated Emulator composition. Not wired in controlled-demo or production.",
+        "parameters": [
+          {
+            "name": "requestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful isolated synthetic result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendAction"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/friend-requests/{requestRef}/decline": {
+      "post": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Requires validated isolated Emulator composition. Not wired in controlled-demo or production.",
+        "parameters": [
+          {
+            "name": "requestRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful isolated synthetic result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendAction"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/events/{eventId}": {
+      "get": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Requires validated isolated Emulator composition. Not wired in controlled-demo or production.",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful isolated synthetic result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "event"
+                  ],
+                  "properties": {
+                    "event": {
+                      "$ref": "#/components/schemas/EventDetail"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -862,6 +1423,9 @@
               "code": {
                 "type": "string",
                 "enum": [
+              "ADD_FRIEND_TARGET_UNAVAILABLE",
+              "FRIEND_REQUEST_UNAVAILABLE",
+              "EVENT_UNAVAILABLE",
                   "PROFILE_INVALID",
                   "PROFILE_REVISION_PRECONDITION_FAILED",
                   "SETTINGS_INVALID",
@@ -891,6 +1455,151 @@
                 "minLength": 1
               }
             }
+          }
+        }
+      },
+      "FriendTarget": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "username",
+          "displayName",
+          "relationshipState"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "relationshipState": {
+            "type": "string",
+            "enum": [
+              "self",
+              "already_friends",
+              "outgoing_request_pending",
+              "incoming_request_pending",
+              "can_send_request"
+            ]
+          }
+        }
+      },
+      "EventDetail": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eventId",
+          "title",
+          "startAt",
+          "externalSourceUrl"
+        ],
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "startAt": {
+            "type": "string"
+          },
+          "externalSourceUrl": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "endAt": {
+            "type": "string"
+          },
+          "locationLabel": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "categoryLabel": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "shortDescription": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        }
+      },
+      "FriendInbox": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "requests",
+          "nextCursor"
+        ],
+        "properties": {
+          "requests": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "username",
+                "displayName",
+                "requestRef"
+              ],
+              "properties": {
+                "username": {
+                  "type": "string"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "requestRef": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "FriendAction": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "declined"
+            ]
+          }
+        }
+      },
+      "FriendUsernameRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
           }
         }
       }
