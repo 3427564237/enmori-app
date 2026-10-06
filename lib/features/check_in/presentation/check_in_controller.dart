@@ -21,6 +21,8 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
   late IdempotencyKeyGenerator _keyGenerator;
   String? _authSubject;
 
+  int get operationToken => _operation;
+
   @override
   CommandState<CheckIn> build() {
     _repository = ref.watch(checkInRepositoryProvider);
@@ -79,8 +81,17 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
     };
   }
 
-  void abandon({bool resetState = true}) {
-    _operation++;
-    if (resetState) state = const CommandIdle();
+  void abandon([int? operation]) {
+    if (operation != null && operation != _operation) return;
+    final abandonedOperation = ++_operation;
+    // Invalidate synchronously; defer UI notification until route disposal ends.
+    // Retain the create Note/key because the server may already have committed.
+    Future<void>.microtask(() {
+      if (ref.mounted &&
+          abandonedOperation == _operation &&
+          state is CommandPending<CheckIn>) {
+        state = const CommandIdle();
+      }
+    });
   }
 }

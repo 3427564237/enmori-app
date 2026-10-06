@@ -26,6 +26,7 @@ final class _CheckInComposerPageState
   CheckIn? _committedCheckIn;
   _CheckInAction? _lastAction;
   String? _noteErrorText;
+  int? _activeOperation;
 
   @override
   void initState() {
@@ -36,7 +37,7 @@ final class _CheckInComposerPageState
   @override
   void dispose() {
     _noteController.dispose();
-    Future<void>.microtask(() => _controller.abandon(resetState: false));
+    if (_activeOperation case final operation?) _controller.abandon(operation);
     super.dispose();
   }
 
@@ -191,14 +192,14 @@ final class _CheckInComposerPageState
       return;
     }
     _lastAction = _CheckInAction.create;
-    ref.read(checkInControllerProvider.notifier).create(note: normalized);
+    _controller.create(note: normalized);
+    _activeOperation = _controller.operationToken;
   }
 
   void _confirm(CheckIn checkIn) {
     _lastAction = _CheckInAction.read;
-    ref
-        .read(checkInControllerProvider.notifier)
-        .readPersisted(checkInId: checkIn.checkInId);
+    _controller.readPersisted(checkInId: checkIn.checkInId);
+    _activeOperation = _controller.operationToken;
   }
 
   String _createFailureCopy(AppFailureKind kind) {
@@ -240,6 +241,7 @@ final class SavedCheckInPage extends ConsumerStatefulWidget {
 
 final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
   late final CheckInController _controller;
+  int? _activeOperation;
 
   @override
   void initState() {
@@ -250,7 +252,7 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
 
   @override
   void dispose() {
-    Future<void>.microtask(() => _controller.abandon(resetState: false));
+    if (_activeOperation case final operation?) _controller.abandon(operation);
     super.dispose();
   }
 
@@ -313,9 +315,8 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
 
   void _readPersisted() {
     if (!mounted) return;
-    ref
-        .read(checkInControllerProvider.notifier)
-        .readPersisted(checkInId: widget.checkInId);
+    _controller.readPersisted(checkInId: widget.checkInId);
+    _activeOperation = _controller.operationToken;
   }
 
   String _confirmationFailureCopy(AppFailureKind kind) {
