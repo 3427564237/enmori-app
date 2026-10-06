@@ -2,7 +2,7 @@
 
 ## Process identity
 
-ENMORI uses Scrum-inspired planning with PM direct assignment. Members surface feasibility, dependency, and capacity conflicts; LI HOURUI retains final priority, assignment, and Sprint-scope acceptance authority.
+ENMORI uses Scrum-inspired planning with PM direct assignment. Members surface feasibility, dependency, and availability conflicts; LI HOURUI retains final priority, assignment, and Sprint-scope acceptance authority.
 
 ## Skill operators and invocation
 
@@ -14,23 +14,23 @@ All five members retain this Skill so its team rules and output formats are shar
 - No member may self-assign, reprioritize, expand Sprint scope, change external state, or write GitHub/Notion planning state without LI's exact approval of the current preview.
 - During ordinary coding, follow the assigned Issue, reviewer chain, `AGENTS.md`, and only the applicable implementation/test Skills.
 
-## Team and capacity
+## Team and workload
 
-| Member | Default direction | Sprint capacity |
-| --- | --- | ---: |
-| LI HOURUI | PM; Flutter frontend and AI support | 20h |
-| SHI ZHENGQI | DPM; backend | 20h |
-| JIN ZIHAN | Testing lead; strategy, automation, integration, UAT | 20h |
-| ZHOU YAOYIN | AI, algorithms, Qwen/Ollama, approved backend integration | 20h |
-| DU KUN | UI/UX, Flutter UI, macOS/iOS device validation | 20h |
+| Member | Default direction |
+| --- | --- |
+| LI HOURUI | PM; Flutter frontend and AI support |
+| SHI ZHENGQI | DPM; backend |
+| JIN ZIHAN | Testing lead; strategy, automation, integration, UAT |
+| ZHOU YAOYIN | AI, algorithms, Qwen/Ollama, approved backend integration |
+| DU KUN | UI/UX, Flutter UI, macOS/iOS device validation |
 
-The Sprint ceiling is 100h. All implementation, PM, meeting, review, test, documentation, and rework hours count. Warn at exactly 100h because no buffer exists; do not reduce capacity automatically. Reject a higher total or a member above 20h unless LI explicitly changes that Sprint's capacity.
+From Sprint 3 onward there is no fixed individual or team hour ceiling. Plan around actual availability, skill fit, dependencies, review, and a runnable Sprint outcome. Members record actual hours after work for retrospective or course evidence, not as a planned capacity or readiness measure. See [S-PM-0924-SPRINT-PLANNING](../../../../docs/decisions/2026-09-24-sprint-planning-estimation-policy.md).
 
-Where one approved PBI contains legitimate, non-duplicative work that can be decomposed across all five members, keep proposed member workload approximately balanced. Balance does not require artificial equality and must not invent or broaden scope, assign work outside competence, duplicate evidence, permit self-review, or weaken dependency/platform gates. Record an evidence-based reason and obtain explicit PM acceptance for any material imbalance. This prospective rule is introduced by S-PM-0903-RMVP01A-STAFF-REV; it was not part of the earlier policy.
+Distribute legitimate work reasonably across suitable members. Balance does not require artificial equality and must not invent or broaden scope, assign work outside competence, duplicate evidence, permit self-review, or weaken dependency/platform gates. Explain material imbalances to LI, who accepts the assignment. The balance rule began with S-PM-0903-RMVP01A-STAFF-REV; the later process change above removes its hour-based envelope without rewriting that historical decision.
 
-## Estimation and Ready
+## Ready
 
-Use Story Points 1, 2, 3, 5, or 8. Split anything larger than 8. Every task has estimated hours. A PBI is Ready only with an evidence-backed source, testable acceptance criteria, scope boundary, resolved affected blockers, dependencies, accepted Points, estimated task hours, PM-assigned owner, different reviewer, and platform/device gates.
+Do not require task-hour estimates or Story Points. Split a task when its scope, review, or integration is difficult to manage, not because of a numeric threshold. A PBI is Ready only with an evidence-backed source, testable acceptance criteria, scope boundary, resolved affected blockers, known dependencies, PM-assigned owner, different reviewer, and applicable platform/device gates.
 
 ## Workflow and WIP
 
