@@ -1,0 +1,87 @@
+{
+  "recordedAtUtc": "2026-10-06T11:46:26Z",
+  "executor": "LI/Codex local early combined checks",
+  "initialStateForAllChecks": "Not Run",
+  "branch": "souma/s3-joint-validation-20261006",
+  "executedProductCommit": "e029f51cf0db6bca7064634ebe351470e878a804",
+  "sources": {
+    "main": "281c16b07a64633dea083808f9b8a3a567d7e6c4",
+    "pr50": "ec59a166f8901932bf9453ee49d7b51e671d32e4",
+    "pr54": "9cfb9a9e23d4a589e59c40cde78cceadd617cd70"
+  },
+  "environment": {
+    "node": "24.19.0",
+    "pnpm": "11.19.0",
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "firebaseProject": "demo-enmori-rmvp01a-r10",
+    "emulatorExecution": "serial auth9099/firestore8080",
+    "android": "enmori_s2_api36, emulator-5554, API36, swiftshader"
+  },
+  "checks": {
+    "compositionAndBlobEquality": {
+      "status": "Pass",
+      "changedExecutableBlobsVsPr54": [
+        "lib/features/check_in/presentation/check_in_controller.dart",
+        "lib/features/check_in/presentation/check_in_page.dart",
+        "test/features/check_in_pending_recovery_test.dart"
+      ],
+      "allChangedBlobsEqualPr50": true
+    },
+    "backend": {
+      "status": "Pass",
+      "passed": 313,
+      "failed": 0,
+      "exitCode": 0
+    },
+    "flutterAnalyze": {
+      "status": "Pass",
+      "issues": 0,
+      "exitCode": 0
+    },
+    "flutter": {
+      "status": "Pass",
+      "passed": 155,
+      "failed": 0,
+      "exitCode": 0
+    },
+    "firebaseEmulator": {
+      "status": "Pass",
+      "passed": 37,
+      "failed": 0,
+      "exitCode": 0
+    },
+    "android": {
+      "status": "Pass",
+      "passed": 1,
+      "failed": 0,
+      "exitCode": 0,
+      "passMarkers": [
+        "S3_CHECKIN_ANDROID_THREE_SNAPSHOTS",
+        "S3_EVENT_HOME_ALL_DETAIL_COPY",
+        "S3_FRIEND_TWO_ACCOUNT_DECLINE_ACCEPT_REREAD",
+        "S3_CHECKIN_THREE_SNAPSHOTS_FRIEND_ACCEPTED_EVENT_DETAIL_COMPATIBLE"
+      ],
+      "apkSha256": "365da73cf73a3dd80d67f43cf0106ab5ae40b20f5e5f45fde330e76e38c036ca",
+      "artifactDisposition": "Ignored local test APK only; ephemeral fixture credentials; do not distribute"
+    }
+  },
+  "cleanup": {
+    "runnerExitedAndEmulatorsStopped": true,
+    "ownedAndroidAvdStopped": true,
+    "fixtureDirectoryRemovedByRunnerFinally": true,
+    "firestoreExported": false
+  },
+  "remaining": {
+    "duPr43Review": "Pending",
+    "pr42ApplicableReviewAcceptanceBasis": "Unverified; no human GitHub review found",
+    "jinCombinedGate": "Not Run",
+    "liReviewOfJinEvidence": "Not Run",
+    "jointIndependentDisposition": "Not Run",
+    "publication": "Not Run",
+    "merge": "Not Run",
+    "sprintAcceptance": "Not Run",
+    "uat": "Not Run",
+    "release": "Not Run"
+  }
+}
