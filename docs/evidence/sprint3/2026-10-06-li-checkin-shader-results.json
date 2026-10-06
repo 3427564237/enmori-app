@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-06 Asia/Singapore",
+  "checkin_source_commit": "d54a04f8ea092aafd0a8ad7bd4bebd1e814105c5",
+  "checkin_base": "97d102de34dc457bbcb8f7154471ff1dea8efa7c",
+  "checkin_before": {
+    "pass": 0,
+    "fail": 5
+  },
+  "checkin_after": {
+    "pass": 5,
+    "fail": 0
+  },
+  "checkin_full_flutter": {
+    "pass": 133,
+    "fail": 0
+  },
+  "checkin_backend": {
+    "pass": 290,
+    "fail": 0
+  },
+  "analysis_issues": 0,
+  "shader_checked_head": "9cfb9a9e23d4a589e59c40cde78cceadd617cd70",
+  "shader_clean_friend": {
+    "pass": 3,
+    "fail": 0
+  },
+  "shader_clean_full_flutter": {
+    "pass": 150,
+    "fail": 0
+  },
+  "shader_preflight": {
+    "sdk_root": "/home/miku/fvm/versions/3.47.2",
+    "framework_shader": {
+      "exists": true,
+      "bytes": 3873,
+      "sha256": "4dd56d9448e5a3589847a32117cb376849b42efb89d3025f3459be4e41467823"
+    },
+    "compiled_test_shader": {
+      "exists": true,
+      "bytes": 13472,
+      "sha256": "ae7b534a900971131e73bf9cee9b038b5bb9450a582a516c9dc5ab3c43c75f3a"
+    },
+    "flutter_package_root_uri": "file:///home/miku/fvm/versions/3.47.2/packages/flutter"
+  },
+  "DU_new_head_review": "Not Run",
+  "SHI_independent_shader_gap": "Pending",
+  "ZHOU_event_9cfb9a9": "Approved scope only",
+  "publication": "Pending action-time confirmation",
+  "new_head_android": "Not Run",
+  "log_sha256": {
+    "enmori-checkin-pending-reproduced.log": "fa3ae81faf086c86b3f78765a1032ca61310d882347c957f695b0421feba8fb4",
+    "enmori-checkin-pending-fixed.log": "610dd0e20e63a29b80f55c818fcb1c49098693de6686adaf0a30128c2fc518d6",
+    "enmori-checkin-recovery-flutter-final.log": "de8fccca4561eae9ed1f9eadcd5089a1346d8d75c955f6f239779e7aa8760cc0",
+    "enmori-checkin-recovery-analysis-final.log": "9ca612b075a2beb62cb4b09daa9055ddc5529e9f06bd42b8e7d59dc7d1c41fa8",
+    "enmori-checkin-recovery-backend.log": "b3ed057f25e4cff10fe5717284f29b9e63ebe5f367472e76b9f4be7e87b987e6",
+    "enmori-shader-clean-friend.log": "c2b09e797c0bc088fe6dccfe558d7c292adb37ef555ee98a3c8479c818939268",
+    "enmori-shader-clean-flutter.log": "b2623f81693eefc40a9b89f2b7e2ca64ff5e1a958df6f0a1e8e8f12942198cb0"
+  }
+}
