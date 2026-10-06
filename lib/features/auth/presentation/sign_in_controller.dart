@@ -16,6 +16,8 @@ final class SignInController extends Notifier<CommandState<void>> {
 
   @override
   CommandState<void> build() {
+    ref.watch(currentAuthSubjectProvider);
+    _operation++;
     _repository = ref.watch(authRepositoryProvider);
     return const CommandIdle();
   }
@@ -24,7 +26,7 @@ final class SignInController extends Notifier<CommandState<void>> {
     final operation = ++_operation;
     state = const CommandPending();
     final result = await _repository.signIn(email: email, password: password);
-    if (operation != _operation) return;
+    if (!ref.mounted || operation != _operation) return;
     state = switch (result) {
       Success<void>() => const CommandSucceeded(null),
       Failure<void>(:final failure) => CommandFailed(failure),

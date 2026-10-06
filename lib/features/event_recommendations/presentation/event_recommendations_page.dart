@@ -9,9 +9,14 @@ const eventEmptyTitle = 'No event recommendations right now';
 const eventEmptyBody = 'Update your interests or check again later.';
 
 final class EventRecommendationsSection extends ConsumerStatefulWidget {
-  const EventRecommendationsSection({required this.onSeeAll, super.key});
+  const EventRecommendationsSection({
+    required this.onSeeAll,
+    this.onOpenEvent,
+    super.key,
+  });
 
   final VoidCallback onSeeAll;
+  final void Function(String)? onOpenEvent;
 
   @override
   ConsumerState<EventRecommendationsSection> createState() =>
@@ -49,12 +54,14 @@ final class _EventRecommendationsSectionState
       onRetry: _load,
       onSeeAll: widget.onSeeAll,
       home: true,
+      onOpenEvent: widget.onOpenEvent,
     );
   }
 }
 
 final class EventRecommendationsPage extends ConsumerStatefulWidget {
-  const EventRecommendationsPage({super.key});
+  const EventRecommendationsPage({this.onOpenEvent, super.key});
+  final void Function(String)? onOpenEvent;
 
   @override
   ConsumerState<EventRecommendationsPage> createState() =>
@@ -99,7 +106,11 @@ final class _EventRecommendationsPageState
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 16),
-            _RecommendationContent(state: state, onRetry: _load),
+            _RecommendationContent(
+              state: state,
+              onRetry: _load,
+              onOpenEvent: widget.onOpenEvent,
+            ),
           ],
         ),
       ),
@@ -113,12 +124,14 @@ final class _RecommendationContent extends StatelessWidget {
     required this.onRetry,
     this.onSeeAll,
     this.home = false,
+    this.onOpenEvent,
   });
 
   final AsyncValue<EventRecommendationResponse> state;
   final VoidCallback onRetry;
   final VoidCallback? onSeeAll;
   final bool home;
+  final void Function(String)? onOpenEvent;
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +172,7 @@ final class _RecommendationContent extends StatelessWidget {
             : _RecommendationList(
                 items: home ? value.items.take(2).toList() : value.items,
                 onSeeAll: onSeeAll,
+                onOpenEvent: onOpenEvent,
               ),
     };
   }
@@ -175,9 +189,14 @@ final class _RecommendationContent extends StatelessWidget {
 }
 
 final class _RecommendationList extends StatelessWidget {
-  const _RecommendationList({required this.items, this.onSeeAll});
+  const _RecommendationList({
+    required this.items,
+    this.onSeeAll,
+    this.onOpenEvent,
+  });
 
   final List<EventRecommendation> items;
+  final void Function(String)? onOpenEvent;
   final VoidCallback? onSeeAll;
 
   @override
@@ -191,6 +210,9 @@ final class _RecommendationList extends StatelessWidget {
             child: Card(
               child: ListTile(
                 key: Key('event-recommendation-${item.eventId}'),
+                onTap: onOpenEvent == null
+                    ? null
+                    : () => onOpenEvent!(item.eventId),
                 title: Text(item.title),
                 subtitle: Text(
                   '${_formatTime(item.startAt)} to ${_formatTime(item.endAt)}\n'

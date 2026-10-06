@@ -1,4 +1,10 @@
 export const ROUTE_INVENTORY = [
+  { method: "POST", path: "/v1/friends/lookup", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "POST", path: "/v1/friend-requests", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "GET", path: "/v1/me/friend-requests", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "POST", path: "/v1/friend-requests/{requestRef}/accept", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "POST", path: "/v1/friend-requests/{requestRef}/decline", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "GET", path: "/v1/events/{eventId}", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
   { method: "GET", path: "/v1/me/profile", successStatuses: [200], requiresIdempotencyKey: false },
   { method: "PUT", path: "/v1/me/profile", successStatuses: [200], requiresIdempotencyKey: false },
   { method: "GET", path: "/v1/me/settings", successStatuses: [200], requiresIdempotencyKey: false },

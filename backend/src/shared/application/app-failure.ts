@@ -1,4 +1,7 @@
 export const APP_FAILURE_CATALOGUE = {
+  ADD_FRIEND_TARGET_UNAVAILABLE: { statusCode: 404, message: "This person is unavailable." },
+  FRIEND_REQUEST_UNAVAILABLE: { statusCode: 404, message: "This friend request is unavailable." },
+  EVENT_UNAVAILABLE: { statusCode: 404, message: "This event is unavailable." },
   PROFILE_INVALID: {
     statusCode: 422,
     message: "Use a display name of 1–50 characters or leave it unset, and choose a valid Profile visibility.",

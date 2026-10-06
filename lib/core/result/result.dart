@@ -1,4 +1,7 @@
 enum AppFailureKind {
+  addFriendTargetUnavailable,
+  friendRequestUnavailable,
+  eventUnavailable,
   profileInvalid,
   profileRevisionPreconditionFailed,
   settingsInvalid,

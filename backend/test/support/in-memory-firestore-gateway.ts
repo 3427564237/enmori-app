@@ -42,6 +42,12 @@ export class InMemoryFirestoreGateway implements FirestoreGateway {
             data: copyDocument(document),
           }));
       },
+      delete: path => { candidate.delete(path); },
+      listPage: async (collection, afterId, limit) => [...candidate.entries()]
+        .filter(([path]) => path.startsWith(`${collection}/`) && !path.slice(collection.length + 1).includes("/"))
+        .map(([path, data]) => ({ id: path.slice(collection.length + 1), data: copyDocument(data) }))
+        .filter(entry => afterId === undefined || entry.id > afterId)
+        .sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0).slice(0, limit),
       create: (path, document) => {
         if (candidate.has(path)) throw new Error("document already exists");
         candidate.set(path, copyDocument(document));
