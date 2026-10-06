@@ -28,7 +28,10 @@ final class BackendEventDetailRepository implements EventDetailRepository {
       'shortDescription',
     ];
     bool text(Object? v, int max) =>
-        v is String && v.trim().isNotEmpty && v.runes.length <= max;
+        v is String &&
+        v.trim().isNotEmpty &&
+        !v.runes.any((rune) => rune >= 0xd800 && rune <= 0xdfff) &&
+        v.runes.length <= max;
     if (value is! Map<String, dynamic> ||
         value.keys.any((key) => !fields.contains(key)) ||
         value['eventId'] != eventId ||

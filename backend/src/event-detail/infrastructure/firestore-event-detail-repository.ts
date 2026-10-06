@@ -2,8 +2,18 @@ import { ok, err } from "../../shared/domain/result.js";
 import type { Clock } from "../../shared/ports/clock.js";
 import type { FirestoreGateway, StoredDocument } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId, parseAuthBinding, parseAccountProjection, isSafeDocumentId } from "../../shared/infrastructure/firebase/firestore-records.js";
-import { parseEventInstant } from "../../event-recommendations/infrastructure/event-records.js";
 import type { EventDetail, EventDetailRepository } from "../ports/event-detail-repository.js";
+/** Detail's storage boundary retains the approved calendar-exact nanosecond contract. */
+function parseEventInstant(value: unknown): bigint | undefined {
+  if (typeof value !== "string") return undefined;
+  const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,9}))?Z$/.exec(value);
+  if (match === null) return undefined;
+  const whole = new Date(`${match[1]}Z`);
+  if (!Number.isFinite(whole.getTime()) || whole.toISOString().slice(0, 19) !== match[1]) {
+    return undefined;
+  }
+  return BigInt(whole.getTime()) * 1_000_000n + BigInt((match[2] ?? "").padEnd(9, "0"));
+}
 function text(value: unknown, max: number): value is string {
   return typeof value === "string" && value.isWellFormed() && value.trim().length > 0 && [...value].length <= max;
 }

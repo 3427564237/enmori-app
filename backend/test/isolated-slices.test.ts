@@ -13,6 +13,19 @@ import { GetEventDetail } from "../src/event-detail/application/get-event-detail
 import { buildApp } from "../src/bootstrap/build-app.js";
 import { targetSchema, eventDetailSchema, friendInboxSchema, friendActionSchema } from "../src/transport/register-isolated-slices.js";
 
+test("Event Detail keeps calendar-exact UTC and nanosecond ordering without recommendation Infrastructure", () => {
+  const record = {title:"Synthetic",startAt:"2026-10-06T00:00:00.000000001Z",endAt:"2026-10-06T00:00:00.000000002Z",externalSourceUrl:"https://example.invalid/synthetic-event",available:true,validUntil:"2026-10-07T00:00:00Z"};
+  const urls = [record.externalSourceUrl], now = BigInt(new Date("2026-10-05T00:00:00Z").getTime()) * 1000000n;
+  assert.notEqual(parseEventDetail("ev",record,urls,now),undefined);
+  for (const field of ["startAt","endAt","validUntil"] as const) {
+    for (const invalid of ["2026-02-30T00:00:00Z","2026-10-06T00:00:00.1234567890Z","2026-10-06T00:00:00+00:00"]) {
+      assert.equal(parseEventDetail("ev",{...record,[field]:invalid},urls,now),undefined);
+    }
+  }
+  assert.equal(parseEventDetail("ev",{...record,endAt:record.startAt},urls,now),undefined);
+  assert.equal(parseEventDetail("ev",{...record,endAt:"2026-10-06T00:00:00.000000000Z"},urls,now),undefined);
+});
+
 const instant = "2026-10-05T00:00:00.000Z", sourceUrl = "https://example.invalid/synthetic-event";
 const base = { optionalProcessingConsent:"rejected", checkInVisibility:"private", onboardingCompletedAt:instant, profileVisibility:"private",profileRevision:1 };
 const seed = () => Object.fromEntries([
