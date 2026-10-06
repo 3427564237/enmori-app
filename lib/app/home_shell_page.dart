@@ -6,12 +6,14 @@ final class HomeShellPage extends StatelessWidget {
   const HomeShellPage({
     required this.onStartCheckIn,
     this.onEditInterests,
+    this.onOpenProfile,
     required this.onSeeAllEvents,
     super.key,
   });
 
   final VoidCallback onStartCheckIn;
   final VoidCallback? onEditInterests;
+  final VoidCallback? onOpenProfile;
   final VoidCallback onSeeAllEvents;
 
   @override
@@ -39,6 +41,13 @@ final class HomeShellPage extends StatelessWidget {
               onPressed: onEditInterests,
               icon: const Icon(Icons.interests_outlined),
               label: const Text('Edit interests'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              key: const Key('my-profile-button'),
+              onPressed: onOpenProfile,
+              icon: const Icon(Icons.person_outline),
+              label: const Text('My profile'),
             ),
             const SizedBox(height: 32),
             Text(

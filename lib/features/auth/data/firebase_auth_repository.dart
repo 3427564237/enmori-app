@@ -9,6 +9,28 @@ final class FirebaseAuthRepository implements AuthRepository {
   final FirebaseAuth _firebaseAuth;
 
   @override
+  Future<Result<void>> signOut() async {
+    try {
+      await _firebaseAuth.signOut();
+      return const Success(null);
+    } on FirebaseException {
+      return const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'Could not sign out. Try again.',
+        ),
+      );
+    } catch (_) {
+      return const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'Could not sign out. Try again.',
+        ),
+      );
+    }
+  }
+
+  @override
   Stream<AuthSession> watchSession() async* {
     yield const AuthSessionInitializing();
     yield* _firebaseAuth.userChanges().map<AuthSession>((user) {

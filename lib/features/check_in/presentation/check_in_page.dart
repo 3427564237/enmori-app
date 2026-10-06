@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/presentation/command_state.dart';
 import '../../../core/result/result.dart';
 import '../domain/check_in_repository.dart';
+import '../../account/domain/account_repository.dart';
 import 'check_in_controller.dart';
 
 enum _CheckInAction { create, read }
@@ -25,6 +26,7 @@ final class _CheckInComposerPageState
   CheckIn? _committedCheckIn;
   _CheckInAction? _lastAction;
   String? _noteErrorText;
+  int? _activeOperation;
 
   @override
   void initState() {
@@ -35,7 +37,7 @@ final class _CheckInComposerPageState
   @override
   void dispose() {
     _noteController.dispose();
-    Future<void>.microtask(() => _controller.abandon(resetState: false));
+    if (_activeOperation case final operation?) _controller.abandon(operation);
     super.dispose();
   }
 
@@ -155,7 +157,13 @@ final class _CheckInComposerPageState
       icon: confirmed ? Icons.verified : Icons.task_alt,
       title: confirmed ? 'Saved Check-in confirmed.' : 'Check-in saved.',
       body:
-          '${checkIn.note}\nSaved at ${checkIn.createdAt.toUtc().toIso8601String()}',
+          '${checkIn.note}\nSaved at ${checkIn.createdAt.toUtc().toIso8601String()}'
+          '${switch (checkIn.checkInVisibility) {
+            CheckInVisibility.private => '\nVisibility: Private',
+            CheckInVisibility.friendsOnly => '\nVisibility: Friends-only',
+            CheckInVisibility.public => '\nVisibility: Public',
+            null => '',
+          }}',
       action: confirmed
           ? OutlinedButton.icon(
               key: const Key('r6-return-home-inline'),
@@ -184,14 +192,14 @@ final class _CheckInComposerPageState
       return;
     }
     _lastAction = _CheckInAction.create;
-    ref.read(checkInControllerProvider.notifier).create(note: normalized);
+    _controller.create(note: normalized);
+    _activeOperation = _controller.operationToken;
   }
 
   void _confirm(CheckIn checkIn) {
     _lastAction = _CheckInAction.read;
-    ref
-        .read(checkInControllerProvider.notifier)
-        .readPersisted(checkInId: checkIn.checkInId);
+    _controller.readPersisted(checkInId: checkIn.checkInId);
+    _activeOperation = _controller.operationToken;
   }
 
   String _createFailureCopy(AppFailureKind kind) {
@@ -233,6 +241,7 @@ final class SavedCheckInPage extends ConsumerStatefulWidget {
 
 final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
   late final CheckInController _controller;
+  int? _activeOperation;
 
   @override
   void initState() {
@@ -243,7 +252,7 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
 
   @override
   void dispose() {
-    Future<void>.microtask(() => _controller.abandon(resetState: false));
+    if (_activeOperation case final operation?) _controller.abandon(operation);
     super.dispose();
   }
 
@@ -270,7 +279,13 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
                 icon: Icons.verified,
                 title: 'Saved Check-in confirmed.',
                 body:
-                    '${value.note}\nSaved at ${value.createdAt.toUtc().toIso8601String()}',
+                    '${value.note}\nSaved at ${value.createdAt.toUtc().toIso8601String()}'
+                    '${switch (value.checkInVisibility) {
+                      CheckInVisibility.private => '\nVisibility: Private',
+                      CheckInVisibility.friendsOnly => '\nVisibility: Friends-only',
+                      CheckInVisibility.public => '\nVisibility: Public',
+                      null => '',
+                    }}',
               )
             else if (state case CommandFailed<CheckIn>(:final failure))
               _ResultPanel(
@@ -300,9 +315,8 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
 
   void _readPersisted() {
     if (!mounted) return;
-    ref
-        .read(checkInControllerProvider.notifier)
-        .readPersisted(checkInId: widget.checkInId);
+    _controller.readPersisted(checkInId: widget.checkInId);
+    _activeOperation = _controller.operationToken;
   }
 
   String _confirmationFailureCopy(AppFailureKind kind) {

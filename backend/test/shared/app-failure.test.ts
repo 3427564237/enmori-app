@@ -15,6 +15,10 @@ test("maps the approved error catalogue to exact HTTP statuses", () => {
       ]),
     ),
     {
+      PROFILE_INVALID: 422,
+      PROFILE_REVISION_PRECONDITION_FAILED: 412,
+      SETTINGS_INVALID: 422,
+      SETTINGS_REVISION_PRECONDITION_FAILED: 412,
       REQUEST_INVALID: 400,
       AUTH_REQUIRED: 401,
       AUTH_FORBIDDEN: 403,

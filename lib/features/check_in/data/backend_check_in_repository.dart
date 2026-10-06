@@ -2,6 +2,7 @@ import '../../../core/network/backend_api_client.dart';
 import '../../../core/network/utc_timestamp_parser.dart';
 import '../../../core/result/result.dart';
 import '../domain/check_in_repository.dart';
+import '../../account/domain/account_repository.dart';
 
 final class BackendCheckInRepository implements CheckInRepository {
   BackendCheckInRepository(this._client);
@@ -46,8 +47,22 @@ final class BackendCheckInRepository implements CheckInRepository {
       return _invalidCheckIn();
     }
 
+    final visibility = switch (checkIn['checkInVisibility']) {
+      'private' => CheckInVisibility.private,
+      'friends_only' => CheckInVisibility.friendsOnly,
+      'public' => CheckInVisibility.public,
+      _ => null,
+    };
+    if (checkIn.containsKey('checkInVisibility') && visibility == null) {
+      return _invalidCheckIn();
+    }
     return Success(
-      CheckIn(checkInId: checkInId, note: note, createdAt: parsedTime),
+      CheckIn(
+        checkInId: checkInId,
+        note: note,
+        createdAt: parsedTime,
+        checkInVisibility: visibility,
+      ),
     );
   }
 

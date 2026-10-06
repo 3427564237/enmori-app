@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/account/account_providers.dart';
+import '../features/account/account_preferences_providers.dart';
+import '../features/account/data/backend_account_preferences_repository.dart';
 import '../features/account/data/backend_account_repository.dart';
 import '../features/auth/auth_providers.dart';
 import '../features/auth/data/firebase_auth_repository.dart';
@@ -40,6 +42,11 @@ Future<void> bootstrap() async {
   runApp(
     ProviderScope(
       overrides: [
+        accountPreferencesRepositoryProvider.overrideWith(
+          (ref) => BackendAccountPreferencesRepository(
+            ref.watch(backendApiClientProvider),
+          ),
+        ),
         authRepositoryProvider.overrideWithValue(
           firebaseReady
               ? FirebaseAuthRepository(FirebaseAuth.instance)

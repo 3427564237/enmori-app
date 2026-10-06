@@ -5,7 +5,7 @@ import type {
   AccountProjection,
 } from "../application/onboarding-model.js";
 import type {
-  CheckInVisibility,
+  InitialCheckInVisibility,
   OptionalProcessingConsent,
 } from "../domain/initial-choice.js";
 
@@ -32,7 +32,7 @@ export interface CompleteOnboardingCommand {
   readonly firebaseUid: string;
   readonly canonicalUsername: CanonicalUsername;
   readonly optionalProcessingConsent: OptionalProcessingConsent;
-  readonly checkInVisibility: CheckInVisibility;
+  readonly checkInVisibility: InitialCheckInVisibility;
   readonly idempotencyKey: IdempotencyKey;
   readonly currentInstant?: string;
   readonly creation?: OnboardingCreationCandidate;

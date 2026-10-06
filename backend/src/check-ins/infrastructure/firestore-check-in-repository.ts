@@ -161,6 +161,7 @@ export class FirestoreCheckInRepository implements CheckInRepository {
           ownerAccountId: accountId,
           note: command.note,
           createdAt: creation.createdAt,
+          checkInVisibility: parseAccountProjection(account)!.checkInVisibility,
         };
         const idempotency: IdempotencyRecord = {
           scope: accountId,
@@ -183,6 +184,7 @@ export class FirestoreCheckInRepository implements CheckInRepository {
             checkInId: creation.checkInId,
             note: command.note,
             createdAt: creation.createdAt,
+          checkInVisibility: parseAccountProjection(account)!.checkInVisibility,
           },
         };
       });

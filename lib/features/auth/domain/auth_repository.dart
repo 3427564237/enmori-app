@@ -32,4 +32,5 @@ abstract interface class AuthRepository {
   });
 
   Future<Result<String>> getIdToken();
+  Future<Result<void>> signOut();
 }

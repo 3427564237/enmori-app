@@ -21,6 +21,8 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
   late IdempotencyKeyGenerator _keyGenerator;
   String? _authSubject;
 
+  int get operationToken => _operation;
+
   @override
   CommandState<CheckIn> build() {
     _repository = ref.watch(checkInRepositoryProvider);
@@ -53,7 +55,7 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
       note: normalized,
       idempotencyKey: _createIdempotencyKey!,
     );
-    if (operation != _operation) return;
+    if (!ref.mounted || operation != _operation) return;
     state = switch (result) {
       Success<CheckIn>(:final value) => CommandSucceeded(value),
       Failure<CheckIn>(:final failure) => CommandFailed(failure),
@@ -72,15 +74,24 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
     final operation = ++_operation;
     state = const CommandPending();
     final result = await command();
-    if (operation != _operation) return;
+    if (!ref.mounted || operation != _operation) return;
     state = switch (result) {
       Success<CheckIn>(:final value) => CommandSucceeded(value),
       Failure<CheckIn>(:final failure) => CommandFailed(failure),
     };
   }
 
-  void abandon({bool resetState = true}) {
-    _operation++;
-    if (resetState) state = const CommandIdle();
+  void abandon([int? operation]) {
+    if (operation != null && operation != _operation) return;
+    final abandonedOperation = ++_operation;
+    // Invalidate synchronously; defer UI notification until route disposal ends.
+    // Retain the create Note/key because the server may already have committed.
+    Future<void>.microtask(() {
+      if (ref.mounted &&
+          abandonedOperation == _operation &&
+          state is CommandPending<CheckIn>) {
+        state = const CommandIdle();
+      }
+    });
   }
 }

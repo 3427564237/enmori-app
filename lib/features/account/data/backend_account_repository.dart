@@ -72,6 +72,7 @@ final class BackendAccountRepository implements AccountRepository {
     final parsedVisibility = switch (visibility) {
       'public' => CheckInVisibility.public,
       'private' => CheckInVisibility.private,
+      'friends_only' => CheckInVisibility.friendsOnly,
       _ => null,
     };
     final parsedTime = tryParseUtcTimestamp(completedAt);
