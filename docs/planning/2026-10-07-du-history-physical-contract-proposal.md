@@ -33,19 +33,31 @@ This proposal makes physical choices for review. H1-H7 product direction is alre
 
 The device's current IANA zone is captured when entering the date view. The UI uses that same zone for date selection and display. Changing date or zone discards the cursor and starts a fresh first-page request.
 
-### Civil-day conversion
+### Civil-day conversion and canonical UTC strings
 
-Use the server, not client arithmetic, to derive the half-open interval:
+Use the server, not client arithmetic, to derive the half-open interval from the selected date and IANA zone. Pin one byte representation for persisted values, query bounds and cursor tuples:
 
 ```
-startUtc = start of date in timeZone, converted to UTC
-endUtc   = start of the next civil date in timeZone, converted to UTC
+canonicalUtc = YYYY-MM-DDTHH:mm:ss.sssZ
+```
+
+For supported four-digit UTC years, format every instant as exactly three fractional digits and `Z`, equivalent to the current writer's `Date.toISOString()` representation. In particular, never serialize a zero-fraction boundary as `...T00:00:00Z`; it must be `...T00:00:00.000Z`. The same canonical formatter is used for both query bounds and the cursor's `lastCreatedAt`. Do not use Temporal's variable-precision `toString()` output directly as a Firestore string bound.
+
+```
+startUtc = canonical fixed-millisecond instant at the first valid time of the selected civil date
+endUtc   = canonical fixed-millisecond instant at the first valid time of the next civil date
 createdAt >= startUtc AND createdAt < endUtc
 ```
 
-Do not calculate `endUtc = startUtc + 24 hours`; a local day may be 23 or 25 hours. Validate the date and IANA zone before opening a transaction. Return only UTC source timestamps; the client formats them using the captured zone.
+Use Temporal's date-to-zoned-date-time start-of-day behavior. If midnight is in a gap, the boundary is the first valid instant of that civil date; if midnight is ambiguous, use Temporal's specified compatible disambiguation. Do not substitute a fixed 24-hour duration. If an entire civil date was skipped by a zone transition, its start equals the next date's start; after current authorization succeeds, return `200 { checkIns: [], nextCursor: null }` without a Check-in query.
 
-**Dependency recommendation:** add exactly pinned `@js-temporal/polyfill@0.5.1` to the backend only, using Temporal `PlainDate`/zoned conversion for deterministic civil-day boundaries. The current root manifest pins Node/pnpm and has no time-zone dependency. This is a proposed production dependency, not an installed or tested one; LI must approve it. The library publishes the TC39 Temporal polyfill and its current release list is documented at [js-temporal/temporal-polyfill releases](https://github.com/js-temporal/temporal-polyfill/releases). If LI rejects a new dependency, do not substitute handwritten offset arithmetic; bring forward the smallest reviewed alternative and its DST test evidence.
+The API accepts civil years `0001` through `9999`, but the computed lower bound must itself be representable as a four-digit canonical UTC instant. If a zone/date conversion underflows before year 0001, reject it as `400 REQUEST_INVALID`. If the next-day upper bound exceeds the maximum four-digit UTC year (for example, `9999-12-31` in a negative-offset zone), omit only the upper Firestore range predicate: the audited storage invariant permits only four-digit UTC years, so no valid stored value can be at or beyond that expanded-year bound. Do not serialize an expanded year and compare it lexically with four-digit strings.
+
+**Storage compatibility gate:** the inspected authoritative writer uses fixed-millisecond `Date.toISOString()`, but the parser accepts optional/variable fractional precision and source inspection does not prove live records conform. Before implementation, an authorized read-only audit must confirm every in-scope `createdAt` is canonical fixed-millisecond UTC and within the supported four-digit year range. If any valid legacy value is non-canonical, stop; do not skip, normalize, or silently migrate it. Request a separately approved compatible query/data strategy.
+
+The device's current IANA zone is captured when entering the date view. The UI uses that same zone for selection and formatting. Changing date or zone discards the cursor and starts a fresh first-page request. Return the canonical UTC source timestamp; do not return a local timestamp.
+
+**Dependency recommendation:** add exactly pinned `@js-temporal/polyfill@0.5.1` to the backend only, using Temporal `PlainDate`/zoned conversion for deterministic civil-day boundaries. This is a proposed production dependency, not an installed or tested one; LI must approve it. See [js-temporal/temporal-polyfill releases](https://github.com/js-temporal/temporal-polyfill/releases). If LI rejects a new dependency, do not substitute handwritten offset arithmetic; bring forward the smallest reviewed alternative and DST evidence.
 
 ### Success response
 
@@ -112,22 +124,34 @@ Return the first 20. If a 21st exists, encode the last returned row (the 20th) a
 
 **Required timestamp-format gate:** the inspected parser accepts UTC strings with optional or variable fractional precision, while Firestore stores `createdAt` as a string. Lexicographic string range/order is reliable only if persisted values have a uniform sortable representation. Before implementation, run a read-only audit of existing records and verify the authoritative writer's exact serialization. If any valid legacy values are non-canonical or lack fixed precision, stop: this proposed string query cannot silently skip, normalize, or misorder them. LI must approve a minimal data-compatible alternative (or a separately scoped migration) before code. Do not add a timestamp field or migrate data under this proposal.
 
-### Bounded reads
+### Bounded reads and staged authority checks
 
-A successful page reads the current auth binding and account plus at most 21 matching Check-in documents per transaction attempt. This is an application-level document bound, not a promise about billed index-entry reads or transaction retries. Record actual Emulator/Firestore evidence for document/query behavior and retries; do not claim an exact total billing bound without provider evidence. There is no scan over all of an owner's history and no client-selectable limit.
+For an authenticated valid request, resolve the current UID binding and account in the same fresh transaction as the later Check-in query. A successful page reads those two authority documents plus at most 21 matching Check-in documents per transaction attempt. This is an application-level document bound, not a promise about billed index-entry reads or transaction retries. There is no owner-wide scan and no client-selectable limit.
+
+Perform cursor processing in these stages:
+
+1. Fastify authentication runs first. Missing/invalid bearer identity returns `401 AUTH_REQUIRED` without parsing a cursor.
+2. After authentication, validate query syntax/date/zone and cursor wire format, AES-GCM tag, version and expiry locally. Malformed, tampered, expired or unsupported cursors return `400 REQUEST_INVALID` before any repository/Firestore read.
+3. For a locally valid request/cursor, resolve current UID binding and account. Missing onboarding binding returns `409 ONBOARDING_REQUIRED`; malformed/unavailable authority data returns the existing generic `503 SERVICE_UNAVAILABLE`. These authority reads take precedence over comparing a valid cursor's owner claim.
+4. Compare the decrypted cursor's owner, date, zone, UTC bounds and version with the resolved current account and request. A mismatch returns generic `400 REQUEST_INVALID` and performs zero Check-in reads/query. The required current binding/account reads are allowed.
+5. Only after those checks, execute the bounded Check-in query in the same transaction. Do not weaken current authorization to make cursor rejection appear to have zero total repository access.
+
+This order avoids data access for locally invalid tokens while ensuring every page revalidates current authority. Generic public errors do not reveal whether a different account or record exists.
 
 ## 4. Cursor contract
 
 Recommend a stateless authenticated-encryption cursor rather than a raw Firestore ID, unsigned cursor, database path, or server-side pagination session.
 
-- Encoding: base64url of version/key ID, 96-bit nonce, AES-256-GCM ciphertext, and authentication tag.
-- Encrypted payload: version, internal owner account ID, civil date, IANA zone, computed UTC start/end, last returned `createdAt`, last returned `checkInId`, and expiry.
-- Bind every page to the currently resolved owner, date, zone, range and cursor version. Reject a mismatch, malformed encoding, failed authentication tag, invalid timestamp/ID, or expiry as `400 REQUEST_INVALID`; do not query Firestore on a rejected token.
-- Proposed lifetime: 15 minutes from first-page issuance. Key rotation invalidates outstanding cursors. Missing/unreadable key is `503 SERVICE_UNAVAILABLE`, not an empty list or invalid-user error.
-- Proposed runtime secret: one dedicated 32-byte key from the approved secret manager, exposed to the controlled backend as `ENMORI_CHECKIN_HISTORY_CURSOR_KEY`; never commit it, place it in Flutter configuration, or reuse Firebase credentials. LI must approve the secret name, provisioning/rotation owner and deployment process before implementation.
-- Use Node's built-in `node:crypto`; no crypto dependency is proposed.
+- Encoding: base64url of version, 96-bit nonce, AES-256-GCM ciphertext and authentication tag. A key ID is unnecessary for the proposed single in-memory process key.
+- Encrypted payload: version, internal owner account ID, civil date, IANA zone, canonical fixed-millisecond UTC start/end (or the explicit terminal-upper-bound marker), last returned canonical `createdAt`, last returned `checkInId`, and expiry.
+- Every page binds the token to the currently resolved owner, date, zone, range and version. Local malformed encoding, failed authentication tag, invalid payload shape, unsupported version or expiry returns `400 REQUEST_INVALID` before Firestore. After current authority is resolved, an owner/date/zone/range mismatch returns the same generic code and zero Check-in query/read; the two required authority reads may occur.
+- Proposed lifetime: 15 minutes from first-page issuance. A cursor rejected after expiry requires Reload from page one.
+- **Exact available-runtime key candidate for LI approval:** generate one 32-byte key with Node's built-in `randomBytes(32)` when the existing single controlled Backend process starts; retain it only in process memory and inject it directly into the history use case. Do not add an environment variable, file, external secret manager, credential, repository secret, or new infrastructure. The current controlled runtime is a single LI-hosted process and already uses Node's built-in crypto.
+- Process restart/redeploy intentionally invalidates outstanding cursors; the client handles the generic invalid-cursor response by clearing the cursor and offering/retrying a fresh first-page read. This is acceptable for a short-lived continuation token and avoids persistent key provisioning/rotation. The 15-minute expiry still applies within a process.
+- This candidate is not valid for multiple concurrent Backend processes/replicas. If the approved topology changes, stop and obtain LI approval for a shared protected key source before enabling multi-instance traffic. Do not invent a secret-manager integration.
+- Use Node's built-in `node:crypto`; no crypto dependency is proposed. LI approval is still required for this key lifecycle and restart behavior before implementation.
 
-The exact key envelope/key-ID handling and expiry source must be tested. Existing injected Clock is preferred for expiry tests. If a stateless encrypted cursor cannot be supported by the controlled runtime's secret-management process, stop for LI's choice; do not fall back to a general cursor table or leak cursor claims.
+The exact cursor tests must use the injected key/Clock ports. Missing key should be impossible after successful startup; fail startup closed if secure key generation fails rather than accepting requests or returning an empty list.
 
 ## 5. Concurrency, ownership, legacy data and UI cache
 
@@ -143,25 +167,27 @@ The exact key envelope/key-ID handling and expiry source must be tested. Existin
 ### Contract and parser tests
 
 - Exact success envelope, 0/20 items, next-cursor presence only after lookahead, fixed server limit, unknown/duplicate parameters, and rejection of client owner/UTC-range/limit inputs.
-- Real dates, invalid/leap dates, invalid and offset-only zones, UTC/local day boundaries, zone changes, and DST spring-forward/fall-back (23-hour and 25-hour local dates).
-- All public error codes/statuses above; no raw exception or provider message; `Cache-Control: no-store` on every path.
-- Cursor round trip, tamper, truncation, malformed base64url, expiry, unsupported version/key ID, wrong owner/date/zone/range, invalid embedded ID/time, and key missing/rotation behavior. Assert rejected cursors do not access the repository.
+- Canonical serialization tests for persisted values, both query bounds and cursor tuple: `.000Z` and `.500Z` compare and filter correctly; start is inclusive; prior-millisecond values are excluded; next civil-day midnight `.000Z` is excluded. Noncanonical stored precision is blocked by the read-only audit, never normalized in the query.
+- Real/leap/invalid dates, invalid and offset-only zones, lower-bound year underflow rejection, `9999-12-31` upper-bound omission for expanded next year, zone changes, DST spring-forward/fall-back (23/25-hour dates), midnight gap and overlap, and a fully skipped date such as `Pacific/Apia` 2011-12-30 producing an authorized empty result without a Check-in query.
+- Error precedence: unauthenticated request returns 401 before cursor parsing; authenticated malformed/tampered/expired cursor performs zero repository/Firestore reads; missing onboarding plus a locally valid cursor returns 409 before cursor-owner comparison; wrong-owner/date/zone cursor allows only current UID-binding/account reads then returns 400 with zero Check-in query; matching cursor performs current authority reads and then the bounded query.
+- All public error codes/statuses above; no raw exception/provider message; `Cache-Control: no-store` on every path.
 
 ### Repository and Emulator tests
 
 - Owner A cannot read Owner B's data; owner ID always comes from Auth binding, including when client query parameters try to override it.
-- Date range is start-inclusive/end-exclusive and matches the selected IANA civil day, including DST; public ordering matches `createdAt DESC, checkInId DESC` for exact ties.
+- Date range is start-inclusive/end-exclusive and matches the selected IANA civil day after fixed-millisecond canonical formatting; public order matches `createdAt DESC, checkInId DESC` for exact ties.
 - Exactly the matching first 20 are returned; 21st triggers a cursor, continuation has no duplicate and does not claim a frozen snapshot.
 - Insert-newer, delete-boundary/delete-row, auth-binding change, and permission/account change between pages require fresh authorization and cannot disclose data.
-- Empty result is success; Firestore failure, missing index, invalid record and transaction retry are not empty success. Valid legacy visibility omission stays absent; invalid-present visibility and malformed record fail closed.
-- Verify the approved composite index in the Firebase Emulator, document/read counts available from the harness, and the timestamp-format audit against a sanitized representative dataset. Record retry and index-entry caveats.
+- Empty result is success; Firestore failure, missing index, invalid record and transaction retry are not empty success. Valid legacy visibility omission stays absent; invalid-present visibility and malformed records fail closed.
+- Verify the approved composite index in the Firebase Emulator and record actual query/document counts available from the harness, transaction retries and index-entry caveats. Before any runtime data access, run the separately authorized counts-only timestamp-format audit; do not export Notes, IDs, paths or raw records.
+- Cursor key tests cover per-process generation/use, process-restart invalidation and clean first-page recovery. Multi-process behavior is out of scope and must be disabled unless a shared key contract is separately approved.
 
 ### Flutter/Android evidence after code approval
 
 - Build the exact reviewed Flutter/backend contract head; record Git SHA, build command/config identity and APK SHA-256. No secrets in build args, logs, screenshots or evidence.
-- On a dedicated Android Emulator first, sign in with a local synthetic account, create/use owned Check-ins, exercise selected date, empty date, 20+ page continuation, reload, zone/date reset, session/account change, and recoverable network/backend failure and retry. Confirm UI clears stale rows and never maps dependency failure to empty success.
-- Then execute the same approved flows on the available Android device against the approved HTTPS runtime. Capture sanitized screenshots and UI/semantics evidence mapped to the exact APK SHA and backend head. Keep real credentials local; do not upload tokens, cursor plaintext, notes or raw logs.
-- Report Backend contract tests, Emulator, Android device, and any unrun cases separately as Pass/Fail/Blocked/Not Run. Emulator evidence does not substitute for Android device evidence; document-only review does not substitute for either.
+- On a dedicated Android Emulator first, sign in with a local synthetic account, create/use owned Check-ins, exercise selected date, empty date, 20+ page continuation, reload, zone/date reset, session/account change, recoverable network/backend failure and retry. Confirm UI clears stale rows and never maps dependency failure to empty success.
+- Then execute the same approved flows on the available Android device against the approved HTTPS runtime. Capture sanitized screenshots and UI/semantics evidence mapped to the exact APK SHA and Backend head. Keep real credentials local; do not upload tokens, cursor plaintext, notes or raw logs.
+- Report Backend contract tests, Emulator, Android device and every unrun case separately as Pass/Fail/Blocked/Not Run. Emulator evidence does not substitute for Android device evidence; document-only review does not substitute for either.
 
 ## 7. Decisions requested from LI
 
@@ -170,10 +196,10 @@ Please approve or return a focused change request on this exact physical contrac
 1. `GET /v1/me/check-ins`, required `date` + `timeZone`, optional opaque `cursor`, no caller limit/owner/range.
 2. Response shape and the exact reuse of approved CheckIn projection including stored optional visibility.
 3. Server-side Temporal civil-day calculation and the proposed pinned backend-only `@js-temporal/polyfill@0.5.1` dependency.
-4. Owner/date/time query, order, 21-row lookahead and composite index; specifically the uniform UTC-string timestamp audit gate.
-5. AES-256-GCM stateless owner/date/zone-bound cursor, 15-minute expiry, dedicated secret-manager key and key rotation behavior.
+4. Owner/date/time query, order, 21-row lookahead and composite index; specifically the fixed `.sssZ` representation for storage, derived bounds and cursor tuple, terminal-year rule, DST/skip-day behavior, and counts-only audit gate.
+5. AES-256-GCM stateless owner/date/zone-bound cursor, 15-minute expiry, and the proposed per-process in-memory Node CSPRNG key with restart invalidation and single-process topology constraint.
 6. Existing public error codes, fail-closed data handling and `Cache-Control: no-store`.
-7. The staged Backend/Emulator/Android evidence plan and minimal feature-local repository/route integration.
+7. Staged Backend/Emulator/Android evidence plan and the staged validation/auth precedence, including zero Check-in query (not zero authority reads) for a valid wrong-owner cursor.
 
 No code or Firestore index should be changed before this approval. If the timestamp audit finds mixed legacy representations, that is a precise implementation blocker requiring a separate approved query/data strategy.
 
