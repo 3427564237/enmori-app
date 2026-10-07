@@ -1,6 +1,6 @@
 # LI next-read decisions — one bounded confirmation
 
-Status: **Proposed; no new product/physical contract is approved by this document.** Exact sources: DU #56 `d1ed3f0ab78c7af267b28988bfcbeff1453eafac`, SHI #57 `9850aa8ed5c655c018c006684c5a627d4f2a1cca`, and JIN #58 `2cdf7315a3f088a090f1e24a287bfc53506a0447`. Preparation acceptance and archiving stay separate from implementing these choices. Existing owners/reviewers remain DU/LI, SHI/ZHOU and JIN/SHI.
+Status: **Historical preview; LI confirmed option A on 7 October 2026.** The controlling [durable A decision](../decisions/2026-10-07-li-next-read-option-a.md) defines the approved scope and remaining gates. The original proposed choices below are preserved; this preview is not independently authoritative. Exact sources: DU #56 `d1ed3f0ab78c7af267b28988bfcbeff1453eafac`, SHI #57 `9850aa8ed5c655c018c006684c5a627d4f2a1cca`, and JIN #58 `2cdf7315a3f088a090f1e24a287bfc53506a0447`. Preparation acceptance and archiving stay separate from implementing these choices. Existing owners/reviewers remain DU/LI, SHI/ZHOU and JIN/SHI.
 
 ## Recommended history product choices
 
