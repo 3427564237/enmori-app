@@ -1,6 +1,6 @@
 # LI history physical-contract decision — revised #59
 
-Status: **Proposed; awaiting explicit LI selection.** Source: DU #59 `f075c0f11dc50ce58e4116d53d794fa53f4f26d4`, base/main `ba94368b655c1d8885093ff1cf2a38c65400b8c2`. H1–H7 remain confirmed by [S-PM-1007-LI-NEXT-READ-A](../decisions/2026-10-07-li-next-read-option-a.md). This is a new physical-contract confirmation, not a repeat of that earlier A selection.
+Status: **Historical preview; LI selected A on 7 October 2026.** The controlling [physical A decision](../decisions/2026-10-07-li-history-physical-option-a.md) approves the exact contract and isolated boundary; the original alternatives below remain historical. Source: DU #59 `f075c0f11dc50ce58e4116d53d794fa53f4f26d4`, base/main `ba94368b655c1d8885093ff1cf2a38c65400b8c2`. H1–H7 remain confirmed by [S-PM-1007-LI-NEXT-READ-A](../decisions/2026-10-07-li-next-read-option-a.md). This is a new physical-contract confirmation, not a repeat of that earlier A selection.
 
 ## Reviewed exact candidate
 
