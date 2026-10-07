@@ -27,4 +27,4 @@ No product/runtime tests were run for these document-only archives. Prior actual
 
 ## Publication
 
-The #48 acceptance and #58 review-request URLs above were published and read back. Parent #44's current checkpoint and a consolidated preparation/decision update are prepared for publication; their readback remains **Not Run** until execution. This document and the decision preview are reviewable records, not a new physical-contract decision.
+The #48 acceptance and #58 review-request URLs above were published and read back. The [parent #44 consolidated preparation/decision update](https://github.com/3427564237/enmori-app/issues/44#issuecomment-6033493101) is now published; its full body and LI author readback match. #44's body retains its original baseline and marks the previous checkpoint historical, with the latest #48 acceptance/next gates appended; full body readback matches. The published packet is pinned at `fe1da7957493bfb154fb4fe9e8f3bf36de9471ef`. This document and the decision preview remain reviewable records, not a new physical-contract decision.
