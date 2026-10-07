@@ -2,6 +2,8 @@
 
 Scope: current submitted PM work and the existing Sprint 3 module assignments. Publication authority is [S-PM-1007-LI-PM-CHECKPOINT](../../decisions/2026-10-07-li-pm-checkpoint-authorization.md). This checkpoint preserves the [completed limited closeout](2026-10-07-li-pm-closeout-execution.md), approved implementation sources, owner/reviewer topology and remaining product gates. It makes no new API/storage/model/provider decision.
 
+Historical checkpoint: the later [preparation closeout](2026-10-07-li-next-preparation-closeout.md) records receipt/review/archive of #56/#57 and acceptance of #48. The missing-artifact and Open/Ready observations below describe the earlier inspection, not the latest state.
+
 ## Completed current PM work
 
 - The three approved isolated increments, predecessors #42/#43/#50/#54, JIN gate and LI terminal evidence review are complete for their stated scopes. #45 was accepted and closed as preparation, Project Done.
