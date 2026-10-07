@@ -106,6 +106,22 @@ test("Emulator failed transaction commits neither acceptance nor either pointer"
  assert.equal((await firestore.collection("friend_inboxes/b/requests").get()).size,1);
 });
 
+test("Emulator racing Profile visibility and requester eligibility changes are reread on a fresh list", async () => {
+ await friends.lookup("a","member_b",true); assert.equal((await friends.act("b",await ref(),"accept")).ok,true);
+ await firestore.doc("accounts/b").update({profileVisibility:"public"});
+ const [racingPage] = await Promise.all([friends.listFriends("a"),firestore.doc("accounts/b").update({profileVisibility:"private"})]);
+ if (!racingPage.ok) assert.fail();
+ assert.ok(racingPage.value.friends.length === 0 || racingPage.value.friends.length === 1);
+ assert.deepEqual(await friends.listFriends("a"),ok({friends:[],nextCursor:null}));
+ await firestore.doc("accounts/b").update({profileVisibility:"friends_only"});
+ const [racingOwner] = await Promise.all([friends.listFriends("a"),firestore.doc("friend_access/a").update({eligibilityState:"temporary-ineligible"})]);
+ assert.ok(racingOwner.ok || racingOwner.failure === "forbidden");
+ const measured = measuredGateway(gateway), fresh = new FirestoreFriendRepository(measured.gateway,clock);
+ assert.deepEqual(await fresh.listFriends("a"),err("forbidden"));
+ assert.equal(measured.attempts[0]!.queries,0);
+ assert.equal(measured.attempts[0]!.paths.some(path=>path.startsWith("friend_pairs/")),false);
+});
+
 test("Emulator My Friends ordering and 106-read ceiling hold per SDK transaction attempt including retry", async () => {
  const batch = firestore.batch(); for (const [path,data] of Object.entries(myFriendsSeed(42))) batch.set(firestore.doc(path),data); await batch.commit();
  let first = true;
@@ -124,6 +140,7 @@ test("Emulator My Friends ordering and 106-read ceiling hold per SDK transaction
   assert.equal(attempt.queries,1); assert.equal(attempt.scanned,21); assert.equal(attempt.paths.length+attempt.scanned,106);
   assert.equal(attempt.paths.some(path=>path.includes("target_22")),false);
  }
+ console.log(JSON.stringify({case:"my-friends-read-bound",transactionAttempts:measured.attempts.length,readsPerAttempt:measured.attempts.map(attempt=>attempt.paths.length+attempt.scanned),retry:"injected-ABORTED"}));
  const protect = firestore.batch(); for(let n=1;n<=20;n++) protect.update(firestore.doc(`accounts/target_${n}`),{profileVisibility:"private"}); await protect.commit();
  assert.deepEqual(await friends.listFriends("owner"),ok({friends:[],nextCursor:Buffer.from(entryRef(20)).toString("base64url")}));
  assert.deepEqual(await friends.listFriends("owner",Buffer.from(entryRef(1001)).toString("base64url")),err("invalid_input"));

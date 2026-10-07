@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { createServer } from 'node:https';
 import { once } from 'node:events';
@@ -70,6 +70,7 @@ try {
 } finally {
   if (server) { server.closeAllConnections(); await new Promise(done => server.close(done)); }
   if (app) await app.close();
+  for (const name of ['android-fixture.json', 'test-key.pem', 'test-certificate.pem']) rmSync(join(directory, name), { force: true });
   for (const uid of ['owner', 'target_1']) await auth.deleteUser(uid).catch(() => {});
   await deleteApp(firebase);
 }

@@ -52,6 +52,6 @@ if (mode === '--backend-child') {
   } finally {
     const child = relative(parent, realpathSync(directory));
     assert.ok(child && !child.startsWith('..') && !isAbsolute(child));
-    rmSync(directory, { recursive: true, force: true });
+    rmSync(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   }
 }

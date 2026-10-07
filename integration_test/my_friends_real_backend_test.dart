@@ -28,7 +28,7 @@ class ControlledNetwork extends http.BaseClient {
   bool fail = false;
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
-    if (fail) throw const SocketException('Synthetic offline test');
+    if (fail) throw http.ClientException('Synthetic offline test');
     return delegate.send(request);
   }
 
