@@ -30,3 +30,12 @@ Owners should supply only the exact operation/field/storage/error/concurrency/ve
 ## Prepared concentrated requests
 
 One parent #44 checkpoint/update addresses the existing named owners and one focused #48 request addresses DU's missing material. Each asks for exact artifact/head, actual blocker, recommended next choice and expected delivery. Preserve completed approvals, original Issue startup narrative and historical failures. Record actual published URLs/readback after execution; new follow-up publication begins Not Run.
+
+## Publication executed and read back
+
+- [Focused DU #48 request](https://github.com/3427564237/enmori-app/issues/48#issuecomment-6030076869) published; full body/author readback matches the prepared request.
+- [Parent #44 concentrated owner checkpoint/reminder](https://github.com/3427564237/enmori-app/issues/44#issuecomment-6030080157) published; full body/author readback matches.
+- #44's original startup body remains under a historical heading with the current 7 October checkpoint appended; exact updated body verified.
+- #55 merge/main/tree readback matches the archive recorded above. Existing Project states remain #44 Backlog, #48 Ready, and #45/#46/#47/#49 preparation Done; only the intended parent narrative and two comments were updated in this publication phase.
+
+All currently submitted/reviewable PM archive work and this authorized follow-up batch are complete. DU's missing #48 artifact and the next feature-specific physical/product/provider proposals remain owner deliverables or competent decision dependencies. Their absence is not reported as completed review, approval or implementation. No full module/Sprint/UAT/Release acceptance was performed.
