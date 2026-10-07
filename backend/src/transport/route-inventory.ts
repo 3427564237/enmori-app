@@ -1,4 +1,5 @@
 export const ROUTE_INVENTORY = [
+  { method: "GET", path: "/v1/me/friends", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
   { method: "POST", path: "/v1/friends/lookup", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
   { method: "POST", path: "/v1/friend-requests", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
   { method: "GET", path: "/v1/me/friend-requests", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },

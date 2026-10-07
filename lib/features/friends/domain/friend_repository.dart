@@ -34,7 +34,19 @@ final class FriendInbox {
 }
 
 abstract interface class FriendRepository {
+  Future<Result<MyFriendsPage>> listFriends({String? cursor});
   Future<Result<FriendTarget>> lookup(String username, {bool send = false});
   Future<Result<FriendInbox>> inbox({String? cursor});
   Future<Result<String>> act(String requestRef, {required bool accept});
+}
+
+final class MyFriend {
+  const MyFriend({required this.username, required this.displayName});
+  final String username, displayName;
+}
+
+final class MyFriendsPage {
+  const MyFriendsPage({required this.friends, this.nextCursor});
+  final List<MyFriend> friends;
+  final String? nextCursor;
 }

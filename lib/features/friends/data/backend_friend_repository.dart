@@ -5,6 +5,50 @@ import '../domain/friend_repository.dart';
 final class BackendFriendRepository implements FriendRepository {
   BackendFriendRepository(this.client);
   final BackendApiClient client;
+  @override
+  Future<Result<MyFriendsPage>> listFriends({String? cursor}) async {
+    final result = await client.get(
+      '/v1/me/friends${cursor == null ? '' : '?cursor=${Uri.encodeQueryComponent(cursor)}'}',
+    );
+    if (result case Failure<JsonObject>(:final failure)) {
+      return Failure(failure);
+    }
+    final data = (result as Success<JsonObject>).value;
+    final rows = data['friends'], next = data['nextCursor'];
+    if (data.length != 2 ||
+        !data.containsKey('nextCursor') ||
+        rows is! List ||
+        rows.length > 20 ||
+        (next != null &&
+            (next is! String ||
+                !RegExp(r'^[A-Za-z0-9_-]{48}$').hasMatch(next)))) {
+      return invalid();
+    }
+    final friends = <MyFriend>[];
+    for (final row in rows) {
+      if (row is! Map<String, dynamic> ||
+          row.length != 2 ||
+          row['username'] is! String ||
+          row['displayName'] is! String ||
+          (row['username'] as String).isEmpty ||
+          (row['displayName'] as String).isEmpty) {
+        return invalid();
+      }
+      friends.add(
+        MyFriend(
+          username: row['username'] as String,
+          displayName: row['displayName'] as String,
+        ),
+      );
+    }
+    return Success(
+      MyFriendsPage(
+        friends: List.unmodifiable(friends),
+        nextCursor: next as String?,
+      ),
+    );
+  }
+
   Failure<T> invalid<T>() => Failure<T>(
     const AppFailure(
       kind: AppFailureKind.unexpected,

@@ -5,14 +5,14 @@ import type { Clock } from "../../shared/ports/clock.js";
 import type { FirestoreGateway, FirestoreTransactionGateway, StoredDocument } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId, parseAuthBinding, parseAccountProjection, isSafeDocumentId, sha256, isUtcIsoInstant } from "../../shared/infrastructure/firebase/firestore-records.js";
 import { parseOwnProfile } from "../../account/infrastructure/firestore-account-preferences-repository.js";
-import type { FriendRepository, FriendResult, FriendTarget, FriendInbox, RelationshipState } from "../ports/friend-repository.js";
+import type { FriendRepository, FriendResult, FriendTarget, FriendInbox, MyFriendsPage, RelationshipState } from "../ports/friend-repository.js";
 
 import { isRequestRef, decodeFriendCursor } from "../domain/request-reference.js";
 const lifetime = 30 * 24 * 60 * 60 * 1000;
 export const friendPairKey = (a: string, b: string): string => sha256(JSON.stringify([a, b].sort()));
 interface Member { id: string; data: StoredDocument }
 interface Pending { requestRef: string; senderAccountId: string; recipientAccountId: string; createdAt: string; expiresAt: string }
-interface Pair { accountIds: string[]; blockedByAccountIds: string[]; friendship: boolean; pending: Pending | null }
+interface Pair { accountIds: string[]; blockedByAccountIds: string[]; friendship: boolean; pending: Pending | null; listRefs?: Record<string, string> }
 function parsePair(data: StoredDocument | undefined, a: string, b: string): Pair | undefined {
   if (data === undefined || !Array.isArray(data.accountIds) || JSON.stringify(data.accountIds) !== JSON.stringify([a,b].sort()) ||
     !Array.isArray(data.blockedByAccountIds) || !data.blockedByAccountIds.every(id => typeof id === "string" && (data.accountIds as unknown[]).includes(id)) ||
@@ -26,9 +26,26 @@ function parsePair(data: StoredDocument | undefined, a: string, b: string): Pair
       !isUtcIsoInstant(p.createdAt) || !isUtcIsoInstant(p.expiresAt) || new Date(p.expiresAt).getTime() - new Date(p.createdAt).getTime() !== lifetime || data.friendship) return undefined;
     pending = p as unknown as Pending;
   }
-  return { accountIds: [...data.accountIds] as string[], blockedByAccountIds: [...data.blockedByAccountIds] as string[], friendship: data.friendship, pending };
+  const pair: Pair = { accountIds: [...data.accountIds] as string[], blockedByAccountIds: [...data.blockedByAccountIds] as string[], friendship: data.friendship, pending };
+  if (Object.hasOwn(data, "listRefs")) {
+    const refs = data.listRefs;
+    if (!data.friendship || refs === null || typeof refs !== "object" || Array.isArray(refs) ||
+      JSON.stringify(Object.keys(refs).sort()) !== JSON.stringify(pair.accountIds) ||
+      !Object.values(refs).every(ref => typeof ref === "string" && isRequestRef(ref)) || new Set(Object.values(refs)).size !== 2) return undefined;
+    pair.listRefs = { ...refs } as Record<string, string>;
+  }
+  return pair;
 }
 const inboxPath = (accountId: string, ref: string) => `friend_inboxes/${accountId}/requests/${ref}`;
+const listPath = (accountId: string, ref: string) => `friend_lists/${accountId}/members/${ref}`;
+const initialized = (data: StoredDocument | undefined): boolean => data?.initialized === true && Object.keys(data).length === 1;
+const validPointer = (data: StoredDocument | undefined): data is StoredDocument & { pairKey: string } =>
+  data !== undefined && Object.keys(data).length === 1 && typeof data.pairKey === "string" && /^[0-9a-f]{64}$/.test(data.pairKey);
+function eligibility(data: StoredDocument | undefined): "eligible" | "temporary-ineligible" | "permanently-deleted" | undefined {
+  if (data === undefined || Object.keys(data).length !== 1) return undefined;
+  const state = data.eligibilityState;
+  return state === "eligible" || state === "temporary-ineligible" || state === "permanently-deleted" ? state : undefined;
+}
 export class FirestoreFriendRepository implements FriendRepository {
   public constructor(private readonly firestore: FirestoreGateway, private readonly clock: Clock) {}
   private now(): number { const now = this.clock.now(); if (!now.ok || !Number.isFinite(now.value.getTime())) throw new Error("unavailable clock"); return now.value.getTime(); }
@@ -109,6 +126,49 @@ export class FirestoreFriendRepository implements FriendRepository {
       return ok({ requests, nextCursor: rows.length > 20 ? Buffer.from(rows[19]!.id).toString("base64url") : null });
     }); } catch { return err("dependency_unavailable"); }
   }
+  public async listFriends(uid: string, cursor?: string): Promise<FriendResult<MyFriendsPage>> {
+    const after = cursor === undefined ? undefined : decodeFriendCursor(cursor);
+    if (cursor !== undefined && after === undefined) return err("invalid_input");
+    try { return await this.firestore.runTransaction(async tx => {
+      // Current requester authority must be established before any target read.
+      const bindingId = createAuthBindingDocumentId(uid);
+      if (bindingId === undefined) return err("dependency_unavailable");
+      const binding = await tx.get(`auth_bindings/${bindingId}`);
+      if (binding === undefined) return err("onboarding_required");
+      const ownerId = parseAuthBinding(binding);
+      if (ownerId === undefined) return err("dependency_unavailable");
+      const owner = await tx.get(`accounts/${ownerId}`);
+      const ownerAccess = eligibility(await tx.get(`friend_access/${ownerId}`));
+      if (owner === undefined || parseAccountProjection(owner) === undefined || ownerAccess === undefined) return err("dependency_unavailable");
+      if (ownerAccess !== "eligible") return err("forbidden");
+      if (!initialized(await tx.get(`friend_lists/${ownerId}`)) || tx.listPage === undefined) return err("dependency_unavailable");
+      if (after !== undefined && !validPointer(await tx.get(listPath(ownerId, after)))) return err("invalid_input");
+      const rows = await tx.listPage(`friend_lists/${ownerId}/members`, after, 21);
+      const friends: { username: string; displayName: string }[] = [];
+      for (const row of rows.slice(0, 20)) {
+        if (!isRequestRef(row.id) || !validPointer(row.data)) return err("dependency_unavailable");
+        const stored = await tx.get(`friend_pairs/${row.data.pairKey}`);
+        const ids = stored?.accountIds;
+        if (!Array.isArray(ids) || ids.length !== 2 || !ids.includes(ownerId)) return err("dependency_unavailable");
+        const targetId: unknown = ids.find(id => id !== ownerId);
+        if (typeof targetId !== "string" || !isSafeDocumentId(targetId)) return err("dependency_unavailable");
+        const pair = parsePair(stored, ownerId, targetId);
+        if (pair === undefined || !pair.friendship || friendPairKey(ownerId, targetId) !== row.data.pairKey || pair.listRefs?.[ownerId] !== row.id) return err("dependency_unavailable");
+        if (pair.blockedByAccountIds.length !== 0) continue;
+        const access = eligibility(await tx.get(`friend_access/${targetId}`));
+        if (access === undefined) return err("dependency_unavailable");
+        if (access !== "eligible") continue;
+        const account = await tx.get(`accounts/${targetId}`);
+        const profile = account === undefined ? undefined : parseOwnProfile(account);
+        if (profile === undefined) return err("dependency_unavailable");
+        const reservation = await tx.get(`username_reservations/${profile.username}`);
+        if (reservation?.accountId !== targetId) return err("dependency_unavailable");
+        if (profile.profileVisibility === "private" || profile.displayName === null) continue;
+        friends.push({ username: profile.username, displayName: profile.displayName });
+      }
+      return ok({ friends, nextCursor: rows.length > 20 ? Buffer.from(rows[19]!.id).toString("base64url") : null });
+    }); } catch { return err("dependency_unavailable"); }
+  }
   public async act(uid: string, requestRef: string, action: "accept" | "decline"): Promise<FriendResult<{ result: "accepted" | "declined" }>> {
     try { return await this.firestore.runTransaction(async tx => {
       const own = await this.owner(tx, uid); if (!own.ok) return own;
@@ -124,7 +184,16 @@ export class FirestoreFriendRepository implements FriendRepository {
       if (this.now() >= new Date(pending.expiresAt).getTime()) {
         tx.set(path, { ...pair, pending: null }); tx.delete(pointerPath); return err("request_unavailable");
       }
-      tx.set(path, { ...pair, pending: null, friendship: action === "accept" }); tx.delete(pointerPath);
+      let listRefs: Record<string, string> | undefined;
+      if (action === "accept") {
+        // Initialization is an explicit fixture completeness assertion, never repaired on read/accept.
+        for (const id of pair.accountIds) if (!initialized(await tx.get(`friend_lists/${id}`))) throw new Error("uninitialized friend list");
+        listRefs = Object.fromEntries(pair.accountIds.map(id => [id, randomUUID()]));
+        if (new Set(Object.values(listRefs)).size !== 2) throw new Error("reference collision");
+        for (const id of pair.accountIds) if (await tx.get(listPath(id, listRefs[id]!)) !== undefined) throw new Error("reference collision");
+        for (const id of pair.accountIds) tx.create(listPath(id, listRefs[id]!), { pairKey: pointer.pairKey });
+      }
+      tx.set(path, { ...pair, pending: null, friendship: action === "accept", ...(listRefs === undefined ? {} : { listRefs }) }); tx.delete(pointerPath);
       return ok({ result: action === "accept" ? "accepted" : "declined" });
     }); } catch { return err("dependency_unavailable"); }
   }
@@ -139,7 +208,11 @@ export class FirestoreFriendRepository implements FriendRepository {
       const blocks = change.blockedByAccountIds ?? pair.blockedByAccountIds;
       const consume = blocks.length > 0 || change.permanentlyDeletedAccountId !== undefined;
       if (consume && pair.pending !== null) tx.delete(inboxPath(pair.pending.recipientAccountId, pair.pending.requestRef));
-      tx.set(path, { ...pair, blockedByAccountIds: blocks, pending: consume ? null : pair.pending });
+      if (change.permanentlyDeletedAccountId !== undefined && pair.listRefs !== undefined) {
+        for (const id of pair.accountIds) tx.delete(listPath(id, pair.listRefs[id]!));
+        const { listRefs: _removed, ...retained } = pair;
+        tx.set(path, { ...retained, blockedByAccountIds: blocks, pending: consume ? null : pair.pending });
+      } else tx.set(path, { ...pair, blockedByAccountIds: blocks, pending: consume ? null : pair.pending });
     });
   }
 }

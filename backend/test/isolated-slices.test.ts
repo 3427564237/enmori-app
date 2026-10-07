@@ -34,6 +34,7 @@ const seed = () => Object.fromEntries([
     [`accounts/${id}`,{...base,username:`member_${id}`,displayName:`Member ${id}`}],
     [`username_reservations/member_${id}`,{accountId:id}],
     [`friend_access/${id}`,{eligibilityState:"eligible"}],
+    [`friend_lists/${id}`,{initialized:true}],
   ] as const),
   [`friend_pairs/${friendPairKey("a","b")}`,{accountIds:["a","b"],blockedByAccountIds:[],friendship:false,pending:null}],
 ]);

@@ -5,7 +5,8 @@ import '../domain/friend_repository.dart';
 import 'friend_controller.dart';
 
 final class FriendPage extends ConsumerStatefulWidget {
-  const FriendPage({super.key});
+  const FriendPage({super.key, this.onOpenMyFriends});
+  final VoidCallback? onOpenMyFriends;
   @override
   ConsumerState<FriendPage> createState() => _FriendPageState();
 }
@@ -38,6 +39,12 @@ final class _FriendPageState extends ConsumerState<FriendPage> {
           key: const Key('route-friends'),
           padding: const EdgeInsets.all(24),
           children: [
+            if (widget.onOpenMyFriends != null)
+              OutlinedButton(
+                key: const Key('open-my-friends'),
+                onPressed: widget.onOpenMyFriends,
+                child: const Text('My Friends'),
+              ),
             TextField(
               key: const Key('friend-username'),
               controller: _username,
