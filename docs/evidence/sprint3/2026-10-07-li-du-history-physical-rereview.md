@@ -12,4 +12,4 @@ Source: [confirmed H1–H7](../../decisions/2026-10-07-li-next-read-option-a.md)
 
 The exact document-only merge was rehearsed: tree `dcc0a7bd1e887aa7ec5ac98e8d49576170901b64`, only this proposal added. No merge performed. The proposed options explicitly distinguish isolated complete-audit proof from real/demo dataset compatibility and keep promotion gated.
 
-Formal review and thread-resolution operations were published/read back. Parent #44 decision-preview/current-state update is prepared; publication/readback remains **Not Run** until executed. No new physical decision is recorded as confirmed.
+Formal review and thread-resolution operations were published/read back. [Parent #44 technical-review/decision-preview update](https://github.com/3427564237/enmori-app/issues/44#issuecomment-6036119182) is now published; full comment body/LI author and appended parent-body readback match. The reviewed packet is pinned at `f996d7fce5d8ecf1caff65441c832e1d86bff091`; this receipt update changes no review conclusion or choice. No new physical decision is recorded as confirmed.
