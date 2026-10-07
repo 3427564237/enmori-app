@@ -1,0 +1,15 @@
+# LI revised DU history proposal review — 7 October 2026
+
+Source: [confirmed H1–H7](../../decisions/2026-10-07-li-next-read-option-a.md). This review supersedes only the current unresolved R1/R2 observations in the [prior exact-head review](2026-10-07-li-du-history-physical-review.md); its original findings and evidence remain historical. The [physical A/B/C decision preview](../../planning/2026-10-07-li-history-physical-decision-preview.md) is still Proposed.
+
+- New exact #59 head `f075c0f11dc50ce58e4116d53d794fa53f4f26d4`, unchanged base/main `ba94368b655c1d8885093ff1cf2a38c65400b8c2`; one 219-line planning file; revision +53/-27 lines, no code/API/index/dependency/runtime edits.
+- [LI technical proposal Approval](https://github.com/3427564237/enmori-app/pull/59#pullrequestreview-5441004323) applies to that exact head. R1 canonical UTC boundary/cursor and year/DST/skip-day handling and R2 authority-versus-query validation stages are resolved. Both LI-authored finding threads were marked resolved and mutation results read back. No new blocking technical finding; approval grants no physical implementation, merge or deployment authority by itself.
+- The candidate now supplies a concrete single-process startup-memory CSPRNG key lifecycle with 15-minute cursor expiry and restart recovery; no persistent secret provisioning is needed for that candidate. Residual estimate wording about secret provisioning is a nonblocking historical inconsistency, not a new review loop.
+- Six intentional metadata hard-break lines 3–8 are the only trailing whitespace. Default diff-check flags them; no default clean-whitespace claim for DU's document. Own evidence/preview links and whitespace are checked separately.
+- Primary Temporal source and Node 24 crypto documentation were checked. Firebase's [official Emulator limitation](https://firebase.google.com/docs/emulator-suite/connect_firestore#how_the_cloud_firestore_emulator_differs_from_production) means valid Emulator queries do not prove compound-index availability. This is an evidence boundary, not authority to deploy an index or access a live datastore.
+- No package installation, timestamp audit, private/real/demo record read, credential/configuration change, product test or merge occurred. Every new Backend/Emulator/Flutter/Android/real-index result remains **Not Run**.
+- #59 stays Draft pending LI physical choice; #48 stays Closed/completed and preparation-only Done. #58 remains at its approved candidate head with no SHI review; no unchanged-review reminder is republished for it.
+
+The exact document-only merge was rehearsed: tree `dcc0a7bd1e887aa7ec5ac98e8d49576170901b64`, only this proposal added. No merge performed. The proposed options explicitly distinguish isolated complete-audit proof from real/demo dataset compatibility and keep promotion gated.
+
+Formal review and thread-resolution operations were published/read back. Parent #44 decision-preview/current-state update is prepared; publication/readback remains **Not Run** until executed. No new physical decision is recorded as confirmed.

@@ -2,6 +2,8 @@
 
 7 October 2026, Asia/Singapore. Owner DU; independent reviewer LI. LI's prior PM instruction to complete current PM work/reviews and the confirmed [H1–H7 / option A](../../decisions/2026-10-07-li-next-read-option-a.md) authorize this scoped review and focused publication, not physical implementation approval.
 
+Historical review: [the revised-head re-review](2026-10-07-li-du-history-physical-rereview.md) resolves R1/R2. The earlier findings below describe `4d981ad6`, not the revised head; physical approval remains a separate decision.
+
 ## Exact artifact and conclusion
 
 - PR #59 head `4d981ad66bac75269baf05fdc6776c4ed4caf228`, base/main `ba94368b655c1d8885093ff1cf2a38c65400b8c2`; one new planning Markdown document, 193 lines. No executable/API/index/dependency/runtime files changed.
