@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../../core/network/backend_api_client.dart';
 import '../../../core/result/result.dart';
 import '../domain/friend_repository.dart';
@@ -5,6 +7,55 @@ import '../domain/friend_repository.dart';
 final class BackendFriendRepository implements FriendRepository {
   BackendFriendRepository(this.client);
   final BackendApiClient client;
+  static final _usernamePattern = RegExp(
+    r'^[a-z0-9](?!.*__)[a-z0-9_]{1,28}[a-z0-9]$',
+  );
+  static const _reservedUsernames = {
+    'admin',
+    'administrator',
+    'support',
+    'system',
+    'moderator',
+    'root',
+    'enmori',
+  };
+  static final _unsafeName = RegExp(
+    r'[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]',
+    unicode: true,
+  );
+  static final _cursorPattern = RegExp(r'^[A-Za-z0-9_-]{48}$');
+  static final _entryReferencePattern = RegExp(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+  );
+
+  // Response values must already be canonical; do not normalize server data.
+  static bool _validUsername(String value) {
+    final match = _usernamePattern.firstMatch(value);
+    return match != null &&
+        match.end == value.length &&
+        !_reservedUsernames.contains(value) &&
+        !value.startsWith('enmori_');
+  }
+
+  static bool _validDisplayName(String value) =>
+      value.isNotEmpty &&
+      value.trim() == value &&
+      value.runes.length <= 50 &&
+      !value.runes.any((rune) => rune >= 0xd800 && rune <= 0xdfff) &&
+      !_unsafeName.hasMatch(value);
+
+  static bool _validCursor(String value) {
+    if (value.length != 48 || !_cursorPattern.hasMatch(value)) return false;
+    try {
+      final reference = utf8.decode(base64Url.decode(value));
+      return reference.length == 36 &&
+          _entryReferencePattern.hasMatch(reference) &&
+          base64Url.encode(utf8.encode(reference)) == value;
+    } on FormatException {
+      return false;
+    }
+  }
+
   @override
   Future<Result<MyFriendsPage>> listFriends({String? cursor}) async {
     final result = await client.get(
@@ -19,9 +70,7 @@ final class BackendFriendRepository implements FriendRepository {
         !data.containsKey('nextCursor') ||
         rows is! List ||
         rows.length > 20 ||
-        (next != null &&
-            (next is! String ||
-                !RegExp(r'^[A-Za-z0-9_-]{48}$').hasMatch(next)))) {
+        (next != null && (next is! String || !_validCursor(next)))) {
       return invalid();
     }
     final friends = <MyFriend>[];
@@ -30,8 +79,8 @@ final class BackendFriendRepository implements FriendRepository {
           row.length != 2 ||
           row['username'] is! String ||
           row['displayName'] is! String ||
-          (row['username'] as String).isEmpty ||
-          (row['displayName'] as String).isEmpty) {
+          !_validUsername(row['username'] as String) ||
+          !_validDisplayName(row['displayName'] as String)) {
         return invalid();
       }
       friends.add(
