@@ -73,7 +73,8 @@ test("OpenAPI protects every route and scopes Idempotency-Key to commands", asyn
     const operation = paths[route.path]?.[route.method.toLowerCase()] as JsonObject;
     const parameters = (operation.parameters ?? []) as JsonObject[];
     const hasKey = parameters.some(
-      (parameter) => parameter.$ref === "#/components/parameters/IdempotencyKey",
+      (parameter) => parameter.$ref === "#/components/parameters/IdempotencyKey" ||
+        parameter.$ref === "#/components/parameters/PersonaIdempotencyKey",
     );
     assert.equal(hasKey, route.requiresIdempotencyKey);
   }

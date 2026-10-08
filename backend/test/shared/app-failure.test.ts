@@ -15,6 +15,11 @@ test("maps the approved error catalogue to exact HTTP statuses", () => {
       ]),
     ),
     {
+      PERSONA_INVALID: 422,
+      PERSONA_UNAVAILABLE: 404,
+      PERSONA_LIMIT_REACHED: 409,
+      PERSONA_COMMAND_CONFLICT: 409,
+      PERSONA_REVISION_PRECONDITION_FAILED: 412,
       ADD_FRIEND_TARGET_UNAVAILABLE: 404,
       FRIEND_REQUEST_UNAVAILABLE: 404,
       EVENT_UNAVAILABLE: 404,

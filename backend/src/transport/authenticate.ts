@@ -1,7 +1,6 @@
 import type {
   FastifyReply,
   FastifyRequest,
-  onRequestHookHandler,
 } from "fastify";
 import type {
   AuthPrincipal,
@@ -19,7 +18,7 @@ const BEARER_PATTERN = /^Bearer ([^\s,]+)$/;
 
 export function buildAuthenticate(
   identityVerifier: IdentityVerifier,
-): onRequestHookHandler {
+): (request: FastifyRequest, reply: FastifyReply) => Promise<void> {
   return async function authenticate(
     request: FastifyRequest,
     reply: FastifyReply,
