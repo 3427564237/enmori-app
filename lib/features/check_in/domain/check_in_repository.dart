@@ -17,6 +17,13 @@ final class CheckIn {
   final CheckInVisibility? checkInVisibility;
 }
 
+final class CheckInHistoryPage {
+  const CheckInHistoryPage({required this.checkIns, required this.nextCursor});
+
+  final List<CheckIn> checkIns;
+  final String? nextCursor;
+}
+
 abstract interface class CheckInRepository {
   Future<Result<CheckIn>> create({
     required String note,
@@ -24,6 +31,12 @@ abstract interface class CheckInRepository {
   });
 
   Future<Result<CheckIn>> readOwned({required String checkInId});
+
+  Future<Result<CheckInHistoryPage>> readOwnForDate({
+    required String date,
+    required String timeZone,
+    String? cursor,
+  });
 }
 
 Result<String> normalizeCheckInNote(String input) {

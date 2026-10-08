@@ -354,6 +354,89 @@ void main() {
       );
     });
 
+    test(
+      'reads a paged own-date history through the approved contract',
+      () async {
+        late http.Request captured;
+        final client = _client((request) async {
+          captured = request;
+          return http.Response(
+            jsonEncode({
+              'checkIns': [
+                {
+                  'checkInId': 'opaque-1',
+                  'note': 'Private note',
+                  'createdAt': '2026-10-07T02:00:00.500Z',
+                  'checkInVisibility': 'private',
+                },
+              ],
+              'nextCursor': 'opaque-cursor',
+            }),
+            200,
+          );
+        });
+        final repository = BackendCheckInRepository(client);
+        final result = await repository.readOwnForDate(
+          date: '2026-10-07',
+          timeZone: 'Asia/Singapore',
+          cursor: 'opaque/cursor',
+        );
+        client.close();
+
+        expect(captured.method, 'GET');
+        expect(captured.url.path, '/v1/me/check-ins');
+        expect(captured.url.queryParameters, {
+          'date': '2026-10-07',
+          'timeZone': 'Asia/Singapore',
+          'cursor': 'opaque/cursor',
+        });
+        final page = (result as Success<CheckInHistoryPage>).value;
+        expect(page.checkIns.single.checkInId, 'opaque-1');
+        expect(
+          page.checkIns.single.checkInVisibility,
+          CheckInVisibility.private,
+        );
+        expect(page.nextCursor, 'opaque-cursor');
+      },
+    );
+
+    test(
+      'history parser rejects noncanonical timestamp and oversized page',
+      () async {
+        for (final body in [
+          {
+            'checkIns': [
+              {
+                'checkInId': 'x',
+                'note': 'n',
+                'createdAt': '2026-10-07T02:00:00Z',
+              },
+            ],
+            'nextCursor': null,
+          },
+          {
+            'checkIns': List.generate(
+              21,
+              (_) => {
+                'checkInId': 'x',
+                'note': 'n',
+                'createdAt': '2026-10-07T02:00:00.000Z',
+              },
+            ),
+            'nextCursor': null,
+          },
+        ]) {
+          final client = _client(
+            (_) async => http.Response(jsonEncode(body), 200),
+          );
+          final result = await BackendCheckInRepository(client)
+              .readOwnForDate(date: '2026-10-07', timeZone: 'Asia/Singapore');
+          client.close();
+          expect(result, isA<Failure<CheckInHistoryPage>>());
+        }
+      },
+    );
+
     test('maps the stable privacy-safe unavailable failure', () async {
       final client = _client(
         (request) async => http.Response(

@@ -11,6 +11,29 @@
     }
   ],
   "paths": {
+    "/v1/me/check-ins": {
+      "get": {
+        "operationId": "listOwnCheckInsForDate",
+        "description": "Reads the authenticated owner's Check-ins for one IANA civil date. Fixed page size of 20; cursor expires after 15 minutes. Every response uses Cache-Control: no-store.",
+        "parameters": [
+          { "name": "date", "in": "query", "required": true, "schema": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" } },
+          { "name": "timeZone", "in": "query", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128 }, "description": "Recognized IANA time-zone identifier; numeric offsets and abbreviations are rejected." },
+          { "name": "cursor", "in": "query", "required": false, "schema": { "type": "string", "minLength": 1, "maxLength": 4096 }, "description": "Opaque encrypted continuation token bound to the current owner and query." }
+        ],
+        "responses": {
+          "200": {
+            "description": "At most 20 owned Check-ins in descending creation-time and opaque-ID order.",
+            "headers": { "Cache-Control": { "schema": { "type": "string", "const": "no-store" } } },
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CheckInHistoryPage" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/AuthRequired" },
+          "403": { "$ref": "#/components/responses/AuthForbidden" },
+          "409": { "$ref": "#/components/responses/OnboardingRequired" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+        }
+      }
+    },
     "/v1/me/onboarding": {
       "put": {
         "operationId": "completeOnboarding",
@@ -1336,6 +1359,15 @@
             ],
             "description": "Creation-time Account default; omitted only for legacy records. Owner-only metadata."
           }
+        }
+      },
+      "CheckInHistoryPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["checkIns", "nextCursor"],
+        "properties": {
+          "checkIns": { "type": "array", "maxItems": 20, "items": { "$ref": "#/components/schemas/CheckIn" } },
+          "nextCursor": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] }
         }
       },
       "InterestTagSummary": {

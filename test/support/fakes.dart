@@ -138,6 +138,10 @@ final class FakeCheckInRepository implements CheckInRepository {
     readIds.add(checkInId);
     return readResult;
   }
+
+  @override
+  Future<Result<CheckInHistoryPage>> readOwnForDate({required String date, required String timeZone, String? cursor}) async =>
+      const Success(CheckInHistoryPage(checkIns: [], nextCursor: null));
 }
 
 final class FakeInterestRepository implements InterestRepository {
