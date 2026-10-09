@@ -36,6 +36,13 @@ final class _DelayedCheckIns implements CheckInRepository {
     return pending.future;
   }
 
+  @override
+  Future<Result<CheckInHistoryPage>> readOwnForDate({
+    required String date,
+    required String timeZone,
+    String? cursor,
+  }) async => const Success(CheckInHistoryPage(checkIns: [], nextCursor: null));
+
   void finishRemaining() {
     for (final pending in [...creates, ...reads]) {
       if (!pending.isCompleted) pending.complete(Success(testCheckIn()));

@@ -2,6 +2,7 @@ import { registerIsolatedSlices } from "../transport/register-isolated-slices.js
 import { requireControlledEmulatorEnvironment } from "../shared/infrastructure/firebase/controlled-emulator-environment.js";
 import type { FriendRequests } from "../friends/application/friend-requests.js";
 import type { GetEventDetail } from "../event-detail/application/get-event-detail.js";
+import type { ListOwnCheckInsForDate } from "../check-ins/application/check-in-history.js";
 import Fastify, {
   type FastifyInstance,
   type FastifyRequest,
@@ -20,7 +21,7 @@ import {
 export async function buildApp(
   dependencies: R4RouteDependencies & { readonly recommendEvents?: Pick<RecommendEvents, "execute">;
     readonly accountPreferences?: OwnAccountPreferences;
-    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail } },
+    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute"> } },
 ): Promise<FastifyInstance> {
   const app = Fastify({
     logger: false,
@@ -45,7 +46,7 @@ export async function buildApp(
   }
   if (dependencies.isolatedSlices !== undefined) {
     requireControlledEmulatorEnvironment(dependencies.isolatedSlices.environment);
-    await registerIsolatedSlices(app, dependencies.identityVerifier, dependencies.isolatedSlices.friends, dependencies.isolatedSlices.eventDetail);
+    await registerIsolatedSlices(app, dependencies.identityVerifier, dependencies.isolatedSlices.friends, dependencies.isolatedSlices.eventDetail, dependencies.isolatedSlices.checkInHistory);
   }
   await app.ready();
   return app;
@@ -76,6 +77,9 @@ function validationFailureCode(
       return malformed ? "REQUEST_INVALID" : route === "/v1/me/profile" ? "PROFILE_INVALID" : "SETTINGS_INVALID";
     }
     if (context === "querystring" && route === "/v1/recommendations/events") {
+      return "REQUEST_INVALID";
+    }
+    if (context === "querystring" && route === "/v1/me/check-ins") {
       return "REQUEST_INVALID";
     }
     if (request.method === "PUT" && route === "/v1/me/onboarding") {

@@ -42,6 +42,12 @@ export const ROUTE_INVENTORY = [
   },
   {
     method: "GET",
+    path: "/v1/me/check-ins",
+    successStatuses: [200],
+    requiresIdempotencyKey: false,
+  },
+  {
+    method: "GET",
     path: "/v1/interest-tags",
     successStatuses: [200],
     requiresIdempotencyKey: false,

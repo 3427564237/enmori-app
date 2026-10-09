@@ -130,8 +130,11 @@ const environment={ENMORI_ENVIRONMENT:"test",ENMORI_CONTROLLED_PROFILE_DIRECTORY
 const unavailable={execute:async()=>err(appFailure("SERVICE_UNAVAILABLE"))};
 function dependencies() { return {identityVerifier:{verifyIdToken:async(token:string)=>token==="invalid" ? {kind:"invalid" as const} : {kind:"verified" as const,principal:{firebaseUid:token}}},completeOnboarding:unavailable,getOnboarding:unavailable,createCheckIn:unavailable,getCheckIn:unavailable,getInterestTags:unavailable,getOwnInterests:unavailable,replaceOwnInterests:unavailable}; }
 test("isolated routes require explicit safe composition; ordinary build has none",async()=>{
-  const plain=await buildApp(dependencies());try{assert.equal((await plain.inject({url:"/v1/events/ev"})).statusCode,404);}finally{await plain.close();}
-  await assert.rejects(buildApp({...dependencies(),isolatedSlices:{environment:{...environment,ENMORI_ENVIRONMENT:"controlled-demo"}}}));
+  const plain=await buildApp(dependencies());try{
+    assert.equal((await plain.inject({url:"/v1/events/ev"})).statusCode,404);
+    assert.equal((await plain.inject({url:"/v1/me/check-ins?date=2026-10-07&timeZone=Asia%2FSingapore"})).statusCode,404);
+  }finally{await plain.close();}
+  await assert.rejects(buildApp({...dependencies(),isolatedSlices:{environment:{...environment,ENMORI_ENVIRONMENT:"controlled-demo"},checkInHistory:unavailable}}));
 });
 test("Transport requires auth, strict inputs, rejects action bodies and hides internal/protected data",async()=>{
   const f=fixture();await f.gateway.runTransaction(async tx=>tx.create("event_details/ev",detail));

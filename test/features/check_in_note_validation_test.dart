@@ -91,4 +91,10 @@ final class _PendingCheckInRepository implements CheckInRepository {
   @override
   Future<Result<CheckIn>> readOwned({required String checkInId}) =>
       pending.future;
+  @override
+  Future<Result<CheckInHistoryPage>> readOwnForDate({
+    required String date,
+    required String timeZone,
+    String? cursor,
+  }) async => const Success(CheckInHistoryPage(checkIns: [], nextCursor: null));
 }
