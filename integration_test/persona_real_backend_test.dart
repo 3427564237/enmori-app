@@ -413,6 +413,19 @@ Future<void> _cancelWithKeyboard(
 }) async {
   final invoker = find.byKey(Key(invokerKey));
   await _settle(tester);
+  // Large text can put this ListView child beyond the lazy viewport cache.
+  // A wait cannot construct it: scroll the actual management list first.
+  if (invoker.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      invoker,
+      200,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('route-persona-management')),
+        matching: find.byType(Scrollable),
+      ),
+      maxScrolls: 20,
+    );
+  }
   await _visible(tester, invoker);
   await tester.ensureVisible(invoker);
   await _settle(tester);
