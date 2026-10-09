@@ -11,6 +11,7 @@ const PAGE_SIZE = 20;
 const CURSOR_LIFETIME_MS = 15 * 60 * 1000;
 const CIVIL_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const OFFSET_ZONE = /^[+-]\d{2}:?\d{2}$/;
+const SINGLE_COMPONENT_IANA_ALIASES = new Set(["Singapore", "Japan", "Portugal"]);
 
 export interface CheckInHistoryPage {
   readonly checkIns: readonly CheckInProjection[];
@@ -37,13 +38,13 @@ function parseCivilDay(dateInput: string, zoneInput: string): CivilDay | undefin
   if (
     match === null ||
     OFFSET_ZONE.test(zoneInput) ||
-    (zoneInput !== "UTC" && !zoneInput.includes("/"))
+    (zoneInput !== "UTC" && !zoneInput.includes("/") && !SINGLE_COMPONENT_IANA_ALIASES.has(zoneInput))
   ) return undefined;
   try {
     const date = Temporal.PlainDate.from(dateInput, { overflow: "reject" });
     if (date.year < 1 || date.year > 9999 || date.toString() !== dateInput) return undefined;
     const zone = Temporal.Now.zonedDateTimeISO(zoneInput).timeZoneId;
-    if (zone !== zoneInput) return undefined;
+    if (zone !== zoneInput && !SINGLE_COMPONENT_IANA_ALIASES.has(zoneInput)) return undefined;
     const nextDate = date.add({ days: 1 });
     const start = date.toZonedDateTime(zone).toInstant();
     const end = nextDate.toZonedDateTime(zone).toInstant();

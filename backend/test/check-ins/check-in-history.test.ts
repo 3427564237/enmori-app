@@ -122,7 +122,8 @@ test("skipped civil day returns authorized empty without a Check-in query", asyn
 
 test("invalid dates, numeric offsets and zone abbreviations fail before repository access", async () => {
   let calls = 0;
-  const useCase = new ListOwnCheckInsForDate({ listForDate: async () => { calls += 1; return { kind: "page", accountId, rows: [] }; } }, { decode: () => undefined, encode: () => "unused" }, clock());
+  const acceptedZones: string[] = [];
+  const useCase = new ListOwnCheckInsForDate({ listForDate: async query => { calls += 1; acceptedZones.push(query.timeZone); return { kind: "page", accountId, rows: [] }; } }, { decode: () => undefined, encode: () => "unused" }, clock());
   for (const input of [
     { date: "2026-02-30", timeZone: zone },
     { date, timeZone: "+08:00" },
@@ -136,11 +137,12 @@ test("invalid dates, numeric offsets and zone abbreviations fail before reposito
     if (!result.ok) assert.equal(result.failure.code, "REQUEST_INVALID");
   }
   assert.equal(calls, 0);
-  for (const timeZone of ["Asia/Singapore", "US/Eastern", "UTC"]) {
+  for (const timeZone of ["Asia/Singapore", "US/Eastern", "UTC", "Singapore", "Japan", "Portugal"]) {
     const result = await useCase.execute({ principal: { firebaseUid: uid }, date, timeZone });
     assert.equal(result.ok, true);
   }
-  assert.equal(calls, 3);
+  assert.equal(calls, 6);
+  assert.deepEqual(acceptedZones.slice(-3), ["Singapore", "Japan", "Portugal"]);
 });
 
 test("history repository binds cursor to current authority before querying Check-ins", async () => {
