@@ -1,4 +1,10 @@
 enum AppFailureKind {
+  requestInvalid,
+  personaInvalid,
+  personaUnavailable,
+  personaLimitReached,
+  personaCommandConflict,
+  personaRevisionPreconditionFailed,
   addFriendTargetUnavailable,
   friendRequestUnavailable,
   eventUnavailable,

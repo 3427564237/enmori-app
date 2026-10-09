@@ -33,7 +33,11 @@ final class FirebaseAuthRepository implements AuthRepository {
   @override
   Stream<AuthSession> watchSession() async* {
     yield const AuthSessionInitializing();
-    yield* _firebaseAuth.userChanges().map<AuthSession>((user) {
+    // Token/profile refresh does not begin a new authenticated session. Observe
+    // authentication changes so a refresh cannot discard in-flight feature
+    // commands; observed signout and subsequent same-UID login still emit a
+    // distinct AuthSessionAuthenticated instance.
+    yield* _firebaseAuth.authStateChanges().map<AuthSession>((user) {
       if (user == null) {
         return const AuthSessionUnauthenticated();
       }

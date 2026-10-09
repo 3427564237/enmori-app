@@ -1,0 +1,72 @@
+{
+  "sourceCommit": "af56e6ea979039102eff1a2fd52d974f484fc8a3",
+  "previousReviewedHead": "17aa358fe86032ef501a356783a49787c28cb64e",
+  "previousManualSource": "82d8e890d71e21bfafc712b205d5d271dd5e1d0f",
+  "userReport": {
+    "method": "User explicitly reported TalkBack testing",
+    "passedItems": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      7
+    ],
+    "item4": "Operation passed; selected versus active announcement unclear",
+    "attributedTo": "User report on previous APK, not independently heard by agent"
+  },
+  "humanRetest": "Item 4 pending on refreshed APK",
+  "physicalKeyboard": "Not Run",
+  "source": [
+    {
+      "path": "lib/features/personas/presentation/persona_management_page.dart",
+      "sha256": "fd086112e5b0a3c293bfd949ac830b6557d75583ed97846136fba1ca22554ba2"
+    },
+    {
+      "path": "test/features/personas/persona_accessibility_test.dart",
+      "sha256": "895455481bc6e0a506e25cf712758a8626027e1257556ce8615ff97b7f28a8fc"
+    }
+  ],
+  "verification": {
+    "regressionReproduced": "Two tests failed before correction",
+    "affectedWidgetTestsPassed": 22,
+    "analysis": "No issues found",
+    "guardedApkInstall": "Pass",
+    "apkSha256": "e2e74ad02669b2db549ef10b515a261fb289bad37b47b8fe36fd18cd270c95b6",
+    "installedAt": "2026-10-09T13:06:58.851Z",
+    "nativeAndroidTree": "Pass for selected and unselected inactive Persona; selected flag belongs to button, activation value independent",
+    "audibleTalkBackRetest": "Pending",
+    "originalSessionExpiry": "2026-10-09T14:12:57.151Z"
+  },
+  "localArtifacts": [
+    {
+      "localArtifact": "widget-before.log",
+      "sha256": "d84bd477d37c472d322d28f97f892c634c8a8bcfdff51e911d78a8043c89f5fd"
+    },
+    {
+      "localArtifact": "widget-after.log",
+      "sha256": "0d1629d1d330381d0499cd1d7b678092f72c26c800c73b9d9f0919f08f91463b"
+    },
+    {
+      "localArtifact": "analyze.log",
+      "sha256": "129e6a85f8e5458e489f2f895dcd2b7f076a9c6ca23174b00da711cd72783ecd"
+    },
+    {
+      "localArtifact": "android-build-install.log",
+      "sha256": "d77631d101ba1be1f533801dcd519d4191b715c59dee26c63f3043ce76ffd44a"
+    },
+    {
+      "localArtifact": "installed-build.json",
+      "sha256": "2256738a30b2c9c2772c0ccbd1066808c444da294d3c7c92a7db1c59e7433cdb"
+    },
+    {
+      "localArtifact": "device-unselected.xml",
+      "sha256": "b7e5aafab2597aaaba48b431b155c266e07624334eb376e1918df3033cc299f3"
+    },
+    {
+      "localArtifact": "device-selected.xml",
+      "sha256": "176a94eabe20231db406cbd985d4fced47d4f852931f338ef559048cecd0e872"
+    }
+  ],
+  "uploadedRawArtifacts": false
+}
