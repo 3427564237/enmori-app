@@ -11,6 +11,86 @@
     }
   ],
   "paths": {
+    "/v1/me/friends": {
+      "get": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Isolated-only current accepted friends. At most 20 pointers plus one lookahead; rows are purpose-filtered. Empty pages may continue. No real-account activation or Profile action.",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque bounded-scan continuation; empty filtered pages may still have nextCursor."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful isolated synthetic result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyFriendsPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "listMyFriends"
+      }
+    },
     "/v1/me/onboarding": {
       "put": {
         "operationId": "completeOnboarding",
@@ -1081,6 +1161,46 @@
       }
     },
     "schemas": {
+      "MyFriendsPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "friends",
+          "nextCursor"
+        ],
+        "properties": {
+          "friends": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "username",
+                "displayName"
+              ],
+              "properties": {
+                "username": {
+                  "type": "string"
+                },
+                "displayName": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
       "OwnProfile": {
         "type": "object",
         "additionalProperties": false,

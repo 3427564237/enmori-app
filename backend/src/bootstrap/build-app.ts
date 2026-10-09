@@ -68,7 +68,7 @@ function validationFailureCode(
     if (context === "headers") return "IDEMPOTENCY_KEY_INVALID";
 
     const route = request.routeOptions.url;
-    if (route?.startsWith("/v1/friend") || route === "/v1/me/friend-requests" || route === "/v1/events/:eventId") return "REQUEST_INVALID";
+    if (route?.startsWith("/v1/friend") || route === "/v1/me/friend-requests" || route === "/v1/me/friends" || route === "/v1/events/:eventId") return "REQUEST_INVALID";
     if (route === "/v1/me/profile" || route === "/v1/me/settings") {
       const validation = fastifyError.validation as readonly { readonly keyword?: string }[] | undefined;
       const malformed = validation === undefined || validation.some((item) =>

@@ -14,11 +14,21 @@ export const eventDetailSchema = { type: "object", additionalProperties: false, 
 export const friendInboxSchema = { type: "object", additionalProperties: false, required: ["requests","nextCursor"], properties: {
   requests: { type: "array", maxItems: 20, items: { type: "object", additionalProperties: false, required: ["username","displayName","requestRef"], properties: { username: { type:"string" }, displayName: { type:"string" }, requestRef: { type:"string" } } } }, nextCursor: { anyOf: [{type:"string"},{type:"null"}] } } } as const;
 export const friendActionSchema = { type: "object", additionalProperties: false, required: ["result"], properties: { result: { type:"string", enum:["accepted","declined"] } } } as const;
+export const myFriendsSchema = { type: "object", additionalProperties: false, required: ["friends", "nextCursor"], properties: {
+  friends: { type: "array", maxItems: 20, items: { type: "object", additionalProperties: false, required: ["username", "displayName"], properties: { username: { type: "string" }, displayName: { type: "string" } } } },
+  nextCursor: { anyOf: [{ type: "string" }, { type: "null" }] } } } as const;
 function responses(success: unknown) { return { 200: success, 400:errorEnvelopeSchema,401:errorEnvelopeSchema,403:errorEnvelopeSchema,404:errorEnvelopeSchema,409:errorEnvelopeSchema,503:errorEnvelopeSchema }; }
 const emptyQuery = { type:"object", additionalProperties:false, properties:{} };
 export async function registerIsolatedSlices(app: FastifyInstance, identity: IdentityVerifier, friends?: FriendRequests, events?: GetEventDetail): Promise<void> {
   const authenticate = buildAuthenticate(identity);
   if (friends !== undefined) {
+    app.get<{Querystring:{cursor?:string}}>("/v1/me/friends", {onRequest:authenticate, schema:{querystring:{type:"object",additionalProperties:false,properties:{cursor:{type:"string"}}},response:{200:myFriendsSchema,400:errorEnvelopeSchema,401:errorEnvelopeSchema,403:errorEnvelopeSchema,409:errorEnvelopeSchema,503:errorEnvelopeSchema}}}, async(request,reply) => {
+      const params = new URL(request.url, "http://localhost").searchParams;
+      if ([...params.keys()].some(key => key !== "cursor") || params.getAll("cursor").length > 1 ||
+        (request.query.cursor !== undefined && decodeFriendCursor(request.query.cursor) === undefined)) return sendFailureCode(request,reply,"REQUEST_INVALID");
+      const result = await friends.listFriends(requirePrincipal(request),request.query.cursor);
+      return result.ok ? reply.send(result.value) : sendFailure(request,reply,result.failure);
+    });
     for (const [path, send] of [["/v1/friends/lookup", false], ["/v1/friend-requests", true]] as const) {
       const schema: FastifySchema = { querystring:emptyQuery, body: { type:"object", additionalProperties:false, required:["username"], properties:{username:{type:"string"}} }, response: responses({ type:"object", additionalProperties:false, required:["target"], properties:{target:targetSchema} }) };
       app.post<{Body:{username:string}}>(path, {onRequest:authenticate, schema}, async (request,reply) => {

@@ -3,11 +3,11 @@ import { err, type Result } from "../../shared/domain/result.js";
 import type { Clock } from "../../shared/ports/clock.js";
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
 import { canonicalizeUsername } from "../../onboarding/domain/username.js";
-import type { FriendRepository, FriendResult, FriendTarget, FriendInbox } from "../ports/friend-repository.js";
+import type { FriendRepository, FriendResult, FriendTarget, FriendInbox, MyFriendsPage } from "../ports/friend-repository.js";
 
 function mapped<T>(result: FriendResult<T>): Result<T, AppFailure> {
   if (result.ok) return result;
-  const codes = { onboarding_required: "ONBOARDING_REQUIRED", forbidden: "AUTH_FORBIDDEN", target_unavailable: "ADD_FRIEND_TARGET_UNAVAILABLE", request_unavailable: "FRIEND_REQUEST_UNAVAILABLE", dependency_unavailable: "SERVICE_UNAVAILABLE" } as const;
+  const codes = { onboarding_required: "ONBOARDING_REQUIRED", forbidden: "AUTH_FORBIDDEN", target_unavailable: "ADD_FRIEND_TARGET_UNAVAILABLE", request_unavailable: "FRIEND_REQUEST_UNAVAILABLE", invalid_input: "REQUEST_INVALID", dependency_unavailable: "SERVICE_UNAVAILABLE" } as const;
   return err(appFailure(codes[result.failure]));
 }
 export class FriendRequests {
@@ -30,6 +30,9 @@ export class FriendRequests {
   }
   public async inbox(principal: AuthPrincipal, cursor?: string): Promise<Result<FriendInbox, AppFailure>> {
     return mapped(await this.repository.inbox(principal.firebaseUid, cursor));
+  }
+  public async listFriends(principal: AuthPrincipal, cursor?: string): Promise<Result<MyFriendsPage, AppFailure>> {
+    return mapped(await this.repository.listFriends(principal.firebaseUid, cursor));
   }
   public async act(principal: AuthPrincipal, ref: string, action: "accept" | "decline") {
     return mapped(await this.repository.act(principal.firebaseUid, ref, action));

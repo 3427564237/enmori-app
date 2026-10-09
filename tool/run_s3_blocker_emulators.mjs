@@ -132,6 +132,7 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
     for (const [id,name] of [[accountId,'Member A'],[secondAccountId,'Member B']]) {
       batch.update(firestore.doc(`accounts/${id}`),{displayName:name,profileVisibility:'private',profileRevision:1});
       batch.create(firestore.doc(`friend_access/${id}`),{eligibilityState:'eligible'});
+      batch.create(firestore.doc(`friend_lists/${id}`),{initialized:true});
     }
     batch.create(firestore.doc(`friend_pairs/${friendPairKey(accountId,secondAccountId)}`),{accountIds:[accountId,secondAccountId].sort(),blockedByAccountIds:[],friendship:false,pending:null});
     const startAt=new Date(Date.now()+86400000).toISOString(),endAt=new Date(Date.now()+172800000).toISOString();

@@ -19,6 +19,7 @@ import '../../features/interests/presentation/interest_editor_page.dart';
 import '../home_shell_page.dart';
 import '../../features/event_detail/presentation/event_detail_page.dart';
 import '../../features/friends/presentation/friend_page.dart';
+import '../../features/friends/presentation/my_friends_page.dart';
 import '../providers.dart';
 import '../route_status_pages.dart';
 
@@ -59,7 +60,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isolatedSlices)
         GoRoute(
           path: '/friends',
-          builder: (context, state) => const FriendPage(),
+          builder: (context, state) => FriendPage(
+            onOpenMyFriends: () => context.push<void>('/friends/list'),
+          ),
+        ),
+      if (isolatedSlices)
+        GoRoute(
+          path: '/friends/list',
+          builder: (context, state) => const MyFriendsListPage(),
         ),
       if (isolatedSlices)
         GoRoute(

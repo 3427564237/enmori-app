@@ -21,6 +21,9 @@ import { FirebaseIdentityVerifier } from "../src/shared/infrastructure/firebase/
 import { buildApp } from "../src/bootstrap/build-app.js";
 import { ok,err } from "../src/shared/domain/result.js";
 import { appFailure } from "../src/shared/application/app-failure.js";
+import { myFriendsSeed, measuredGateway, entryRef } from "../test/support/my-friends-fixture.js";
+import type { FirestoreGateway } from "../src/shared/infrastructure/firebase/firestore-gateway.js";
+import { Buffer } from "node:buffer";
 
 const env=requireControlledEmulatorEnvironment(process.env);assert.equal(env.projectId,"demo-enmori-rmvp01a-r10");
 const firebase=initializeApp({projectId:env.projectId},"s3-blocker-emulator"),auth=getAuth(firebase),firestore=getFirestore(firebase),gateway=new FirebaseAdminFirestoreGateway(firestore);
@@ -36,6 +39,7 @@ beforeEach(async()=>{
   await firestore.doc(`auth_bindings/${createAuthBindingDocumentId(id)}`).create({accountId:id});
   await firestore.doc(`accounts/${id}`).create({username:`member_${id}`,displayName:`Member ${id}`,profileVisibility:"private",profileRevision:1,optionalProcessingConsent:"rejected",checkInVisibility:"private",onboardingCompletedAt:instant});
   await firestore.doc(`username_reservations/member_${id}`).create({accountId:id});await firestore.doc(`friend_access/${id}`).create({eligibilityState:"eligible"});
+  await firestore.doc(`friend_lists/${id}`).create({initialized:true});
   const response=await fetch(`http://${env.authHost}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=controlled-emulator-key`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email,password,returnSecureToken:true})});assert.equal(response.ok,true);tokens[id]=(await response.json() as {idToken:string}).idToken;
  }
  await firestore.doc(`friend_pairs/${friendPairKey("a","b")}`).create({accountIds:["a","b"],blockedByAccountIds:[],friendship:false,pending:null});
@@ -60,6 +64,90 @@ for(const kind of ["block","delete"] as const) test(`Emulator ${kind}/accept rac
  await friends.lookup("a","member_b",true);const requestRef=await ref();
  const [accepted]=await Promise.all([friends.act("b",requestRef,"accept"),friends.setFixtureProtection("a","b",kind==="block" ? {blockedByAccountIds:["a"]} : {permanentlyDeletedAccountId:"a"})]);
  const state=await pair();assert.equal(state.pending,null);assert.equal(state.friendship,accepted.ok);assert.equal((await firestore.collection("friend_inboxes/b/requests").get()).size,0);assert.equal((await friends.lookup("b","member_a",false)).ok,false);
+ for (const id of ["a", "b"]) assert.equal((await firestore.collection(`friend_lists/${id}/members`).get()).size, kind === "block" && accepted.ok ? 1 : 0);
+});
+
+test("Emulator My Friends acceptance atomically creates both pointers, fresh privacy and eligibility apply on each page", async () => {
+ await friends.lookup("a", "member_b", true); const requestRef = await ref();
+ assert.deepEqual(await friends.act("b", requestRef, "accept"), ok({result:"accepted"}));
+ const state = await pair(); assert.notEqual(state.listRefs.a, state.listRefs.b);
+ for (const id of ["a", "b"]) {
+  const rows = await firestore.collection(`friend_lists/${id}/members`).get(); assert.equal(rows.size,1);
+  assert.equal(rows.docs[0]!.id,state.listRefs[id]); assert.deepEqual(rows.docs[0]!.data(),{pairKey:friendPairKey("a","b")});
+ }
+ assert.deepEqual(await friends.act("b",requestRef,"accept"),err("request_unavailable"));
+ assert.deepEqual(await friends.listFriends("a"),ok({friends:[],nextCursor:null}));
+ await firestore.doc("accounts/b").update({profileVisibility:"friends_only"});
+ const api = await app(); try {
+  const reply = await api.inject({url:"/v1/me/friends",headers:{authorization:`Bearer ${tokens.a}`}});
+  assert.equal(reply.statusCode,200); assert.deepEqual(reply.json(),{friends:[{username:"member_b",displayName:"Member b"}],nextCursor:null});
+ } finally {await api.close();}
+ for (const blocked of ["a","b"]) {
+  await friends.setFixtureProtection("a","b",{blockedByAccountIds:[blocked]});
+  assert.deepEqual(await friends.listFriends("a"),ok({friends:[],nextCursor:null}));
+  await friends.setFixtureProtection("a","b",{blockedByAccountIds:[]});
+ }
+ await firestore.doc("accounts/b").update({displayName:null});
+ assert.deepEqual(await friends.listFriends("a"),ok({friends:[],nextCursor:null}));
+ await friends.setFixtureProtection("a","b",{permanentlyDeletedAccountId:"b"});
+ for (const id of ["a","b"]) assert.equal((await firestore.collection(`friend_lists/${id}/members`).get()).size,0);
+ assert.equal((await pair()).listRefs,undefined); assert.equal((await pair()).friendship,true);
+});
+
+test("Emulator failed transaction commits neither acceptance nor either pointer", async () => {
+ await friends.lookup("a","member_b",true); const requestRef = await ref();
+ const failing: FirestoreGateway = {runTransaction: work => gateway.runTransaction(async tx => {
+  await work(tx); throw new Error("synthetic non-retryable commit abort");
+ })};
+ const rejected = new FirestoreFriendRepository(failing,clock);
+ assert.deepEqual(await rejected.act("b",requestRef,"accept"),err("dependency_unavailable"));
+ assert.equal((await pair()).friendship,false); assert.equal((await pair()).pending.requestRef,requestRef);
+ for (const id of ["a","b"]) assert.equal((await firestore.collection(`friend_lists/${id}/members`).get()).size,0);
+ assert.equal((await firestore.collection("friend_inboxes/b/requests").get()).size,1);
+});
+
+test("Emulator racing Profile visibility and requester eligibility changes are reread on a fresh list", async () => {
+ await friends.lookup("a","member_b",true); assert.equal((await friends.act("b",await ref(),"accept")).ok,true);
+ await firestore.doc("accounts/b").update({profileVisibility:"public"});
+ const [racingPage] = await Promise.all([friends.listFriends("a"),firestore.doc("accounts/b").update({profileVisibility:"private"})]);
+ if (!racingPage.ok) assert.fail();
+ assert.ok(racingPage.value.friends.length === 0 || racingPage.value.friends.length === 1);
+ assert.deepEqual(await friends.listFriends("a"),ok({friends:[],nextCursor:null}));
+ await firestore.doc("accounts/b").update({profileVisibility:"friends_only"});
+ const [racingOwner] = await Promise.all([friends.listFriends("a"),firestore.doc("friend_access/a").update({eligibilityState:"temporary-ineligible"})]);
+ assert.ok(racingOwner.ok || racingOwner.failure === "forbidden");
+ const measured = measuredGateway(gateway), fresh = new FirestoreFriendRepository(measured.gateway,clock);
+ assert.deepEqual(await fresh.listFriends("a"),err("forbidden"));
+ assert.equal(measured.attempts[0]!.queries,0);
+ assert.equal(measured.attempts[0]!.paths.some(path=>path.startsWith("friend_pairs/")),false);
+});
+
+test("Emulator My Friends ordering and 106-read ceiling hold per SDK transaction attempt including retry", async () => {
+ const batch = firestore.batch(); for (const [path,data] of Object.entries(myFriendsSeed(42))) batch.set(firestore.doc(path),data); await batch.commit();
+ let first = true;
+ const retrying: FirestoreGateway = {runTransaction: work => gateway.runTransaction(async tx => {
+  const result = await work(tx);
+  if (first) {first=false; throw Object.assign(new Error("synthetic ABORTED to exercise SDK retry"),{code:10});}
+  return result;
+ })};
+ const measured = measuredGateway(retrying), repo = new FirestoreFriendRepository(measured.gateway,clock);
+ const cursor = Buffer.from(entryRef(1)).toString("base64url");
+ const page = await repo.listFriends("owner",cursor); if (!page.ok) assert.fail();
+ assert.deepEqual(page.value.friends.map(row=>row.username),Array.from({length:20},(_,i)=>`member_target_${i+2}`));
+ assert.equal(page.value.nextCursor,Buffer.from(entryRef(21)).toString("base64url"));
+ assert.equal(measured.attempts.length,2);
+ for (const attempt of measured.attempts) {
+  assert.equal(attempt.queries,1); assert.equal(attempt.scanned,21); assert.equal(attempt.paths.length+attempt.scanned,106);
+  assert.equal(attempt.paths.some(path=>path.includes("target_22")),false);
+ }
+ console.log(JSON.stringify({case:"my-friends-read-bound",transactionAttempts:measured.attempts.length,readsPerAttempt:measured.attempts.map(attempt=>attempt.paths.length+attempt.scanned),retry:"injected-ABORTED"}));
+ const protect = firestore.batch(); for(let n=1;n<=20;n++) protect.update(firestore.doc(`accounts/target_${n}`),{profileVisibility:"private"}); await protect.commit();
+ assert.deepEqual(await friends.listFriends("owner"),ok({friends:[],nextCursor:Buffer.from(entryRef(20)).toString("base64url")}));
+ assert.deepEqual(await friends.listFriends("owner",Buffer.from(entryRef(1001)).toString("base64url")),err("invalid_input"));
+ await firestore.doc(`friend_lists/owner/members/${entryRef(1)}`).delete();
+ assert.deepEqual(await friends.listFriends("owner",cursor),err("invalid_input"));
+ await firestore.doc("friend_lists/owner").delete();
+ assert.deepEqual(await friends.listFriends("owner"),err("dependency_unavailable"));
 });
 test("Emulator exact expiry and temporarily unavailable recipient never create false friendship",async()=>{
  await friends.lookup("a","member_b",true);const requestRef=await ref();now=new Date("2026-11-04T00:00:00.000Z");
