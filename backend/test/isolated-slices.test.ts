@@ -65,89 +65,92 @@ test("send does not duplicate/cross-accept; recipient alone accepts once; fresh 
   const reverse=await f.repo.lookup("b","member_a",true); if(!reverse.ok) assert.fail(); assert.equal(reverse.value.relationshipState,"incoming_request_pending");
   assert.equal(await reference(f),ref);
   assert.deepEqual(await f.repo.act("a",ref,"accept"),err("request_unavailable"));
-  assert.deepEqual(await-yã»h‘éì¶»§q«^tŸK]WÛ[Z]žÝ]Nˆž‹œ™\X]
-ŒJ_K[šÛ›ÝÛ—ÙšY[žÜ›ÝšY\”^[ØYžß_K™[[Ý™YžØ]˜Z[X›N™˜[Ù_K^\™YžÝ˜[Y[[š[œÝ[K˜YÝ[YNžÜÝ\]ˆŒŒ‹L‹LÌŒŒˆŸKØØ][Û—Û[Z]žÛØØ][Û“X™[ˆž‹œ™\X]
-ŒJ__JJHÂˆ\Ý
-]™[]Z[™Z™XÝÈ	ÛX™[HÚ]Ý]ÚY[š[™È™XÛÛ[Y[™][ÛœØ
-
-OO˜\ÜÙ\™\]X[
-\œÙQ]™[]Z[
-™]ˆ‹Ë‹‹™]Z[‹‹˜Ú[™Ù_KÜÛÝ\˜ÙU\›KšYÒ[
-™]È]J[œÝ[
-K™Ù][YJ
-JJŒLŠK[™Yš[™Y
-JNÂŸB\Ý
-‘]™[]Z[Ý\ÜÈÛZ]Y[™™\Ù\™\È˜[›ÜÙXÛÛ™ÛÝ\˜ÙH[YH[™ØØ[\ˆ^[Z]È‹\Þ[˜Ê
-OOžÂˆÛÛœÝYš^\™J
-NÈ]ØZ]‹™Ø]]Ø^Kœ[•˜[œØXÝ[ÛŠ\Þ[˜ÈO˜Ü™X]J™]™[Ù]Z[ËÙ]ˆ‹Ë‹‹™]Z[]Nˆ¼'æ ‹œ™\X]
-Œ
-_JJNÂˆÛÛœÝ™\Ý[X]ØZ]™]Èš\™\ÝÜ™Q]™[]Z[™\ÜÚ]ÜžJ‹™Ø]]Ø^K‹˜ÛØÚËÜÛÝ\˜ÙU\›JKœ™XY
-˜H‹™]ˆŠNÈYŠ\™\Ý[›ÚÊH\ÜÙ\™˜Z[
-
-NÂˆ\ÜÙ\™\]X[
-™\Ý[˜[YKœÝ\]]Z[œÝ\]
-NØ\ÜÙ\™\]X[
-Øš™XÝš\ÓÝÛŠ™\Ý[˜[YK™[™]ŠK˜[ÙJNÈ\ÜÙ\™\]X[
-Øš™XÝš\ÓÝÛŠ™\Ý[˜[YK˜]˜Z[X›HŠK˜[ÙJNÂŸJNÂ˜ÛÛœÝ[š\›Û›Y[^ÑS“SÔ’WÑS•’T“Ó“QS•ˆ\Ý‹S“SÔ’WÐÓÓ•“ÓQÔ“Ñ’SWÑT‘PÕÔ–Nˆ‹Ý\Ú\ÛÛ]Y\ÛXÙ\Ë]\Ý‹ÓQNˆ‹Ý\Ú\ÛÛ]Y\ÛXÙ\Ë]\Ý‹TÑT”“Ñ’SNˆ‹Ý\Ú\ÛÛ]Y\ÛXÙ\Ë]\Ý‹TUNˆ‹Ý\Ú\ÛÛ]Y\ÛXÙ\Ë]\Ý‹×ÐÓÓ‘’Q×ÒÓQNˆ‹Ý\Ú\ÛÛ]Y\ÛXÙ\Ë]\Ý‹ÐÓÕQÔ“Ò‘PÕˆ™[[ËY[›[ÜšK\›]œXK\ŒL‹’T‘PTÑWÐUUÑSUSUÔ—ÒÔÕˆŒLËŒŒŒNŽLNH‹’T‘TÕÔ‘WÑSUSUÔ—ÒÔÕˆŒLËŒŒŒNŽŸNÂ˜ÛÛœÝ[˜]˜Z[X›O^Ù^XÝ]N˜\Þ[˜Ê
-OO™\œŠ\˜Z[\™J”ÑT•’PÑWÕSURSP“HŠJ_NÂ™[˜Ý[Ûˆ\[™[˜ÚY\Ê
-HÈ™]\›ˆÚY[]U™\šYšY\ŽžÝ™\šYžRYÚÙ[Ž˜\Þ[˜ÊÚÙ[ŽœÝš[™ÊOOÚÙ[OOHš[˜[YˆÈÚÚ[™ˆš[˜[Yˆ\ÈÛÛœÝHˆÚÚ[™ˆ™\šYšYYˆ\ÈÛÛœÝš[˜Ú\[žÙš\™X˜\ÙUZYÚÙ[Ÿ__KÛÛ\]SÛ˜›Ø\™[™Î[˜]˜Z[X›KÙ]Û˜›Ø\™[™Î[˜]˜Z[X›KÜ™X]PÚXÚÒ[Ž[˜]˜Z[X›KÙ]ÚXÚÒ[Ž[˜]˜Z[X›KÙ][\™\ÝYÜÎ[˜]˜Z[X›KÙ]ÝÛ’[\™\ÝÎ[˜]˜Z[X›K™\XÙSÝÛ’[\™\ÝÎ[˜]˜Z[X›_NÈB\Ý
-š\ÛÛ]Y›Ý]\È™\]Z\™H^XÚ]ØY™HÛÛ\ÜÚ][ÛŽÈÜ™[˜\žHZ[\È›Û™H‹\Þ[˜Ê
-OOžÂˆÛÛœÝZ[X]ØZ]Z[\
-\[™[˜ÚY\Ê
-JNÝž^Âˆ\ÜÙ\™\]X[
-
-]ØZ]Z[‹š[š™XÝ
-Ý\›ˆ‹ÝŒKÙ]™[ËÙ]ˆŸJJKœÝ]\ÐÛÙK
-NÂˆ\ÜÙ\™\]X[
-
-]ØZ]Z[‹š[š™XÝ
-Ý\›ˆ‹ÝŒKÛYKØÚXÚËZ[œÏÙ]OLŒ‹LLLÉ[YV›Û™OP\ÚXIL‘”Ú[™Ø\Ü™HŸJJKœÝ]\ÐÛÙK
-NÂˆYš[˜[^Ø]ØZ]Z[‹˜ÛÜÙJ
-NßBˆ]ØZ]\ÜÙ\œ™Z™XÝÊZ[\
-Ë‹‹™\[™[˜ÚY\Ê
-K\ÛÛ]YÛXÙ\ÎžÙ[š\›Û›Y[žË‹‹™[š\›Û›Y[S“SÔ’WÑS•’T“Ó“QS•ˆ˜ÛÛ›ÛYY[[ÈŸKÚXÚÒ[’\ÝÜžN[˜]˜Z[X›__JJNÂŸJNÂ\Ý
-•˜[œÜÜ™\]Z\™\È]]ÝšXÝ[œ]Ë™Z™XÝÈXÝ[Ûˆ›ÙY\È[™Y\È[\›˜[Ü›ÝXÝY]H‹\Þ[˜Ê
-OOžÂˆÛÛœÝYš^\™J
-NØ]ØZ]‹™Ø]]Ø^Kœ[•˜[œØXÝ[ÛŠ\Þ[˜ÈO˜Ü™X]J™]™[Ù]Z[ËÙ]ˆ‹]Z[
-JNÂˆÛÛœÝ\X]ØZ]Z[\
-Ë‹‹™\[™[˜ÚY\Ê
-K\ÛÛ]YÛXÙ\ÎžÙ[š\›Û›Y[œšY[™Î™‹˜\]™[]Z[›™]ÈÙ]]™[]Z[
-™]Èš\™\ÝÜ™Q]™[]Z[™\ÜÚ]ÜžJ‹™Ø]]Ø^K‹˜ÛØÚËÜÛÝ\˜ÙU\›JJ__JNÂˆžHÂˆÛÛœÝXY\œÏ^Ø]]Üš^˜][ÛŽˆ™X\™\ˆHŸNÂˆ\ÜÙ\™\]X[
-
-]ØZ]\š[š™XÝ
-ÛY]Ùˆ”ÔÕ‹\›ˆ‹ÝŒKÙœšY[™ËÛÛÚÝ\‹^[ØYžÝ\Ù\›˜[YNˆ›Y[X™\—ØˆŸ_JJKœÝ]\ÐÛÙKJNÂˆ›ÜŠÛÛœÝ^[ØYÙˆÞÝ\Ù\›˜[YNˆ›Y[X™\—Øˆ‹ÝÛ™\Žˆ˜ˆŸKÝ\Ù\›˜[YNŸKßWJH\ÜÙ\™\]X[
-
-]ØZ]\š[š™XÝ
-ÛY]Ùˆ”ÔÕ‹\›ˆ‹ÝŒKÙœšY[™ËÛÛÚÝ\‹XY\œË^[ØYJJKœÝ]\ÐÛÙK
-NÂˆÛÛœÝÛÚÝ\X]ØZ]\š[š™XÝ
-ÛY]Ùˆ”ÔÕ‹\›ˆ‹ÝŒKÙœšY[™ËÛÛÚÝ\‹XY\œË^[ØYžÝ\Ù\›˜[YNˆ›Y[X™\—ØˆŸ_JNØ\ÜÙ\™\]X[
-ÛÚÝ\œÝ]\ÐÛÙKŒ
-NØ\ÜÙ\™Y\\]X[
-ÛÚÝ\šœÛÛŠ
-KÝ\™Ù]žÝ\Ù\›˜[YNˆ›Y[X™\—Øˆ‹\Ü^S˜[YNˆ“Y[X™\ˆˆ‹™[][ÛœÚ\Ý]Nˆ˜Ø[—ÜÙ[™Ü™\]Y\ÝŸ_JNÂˆ\ÜÙ\™\]X[
-
-]ØZ]\š[š™XÝ
-Ý\›ˆ‹ÝŒKÛYKÙœšY[™\™\]Y\ÝÏØÝ\œÛÜX˜Y‹XY\œßJJKœÝ]\ÐÛÙK
-NÂˆ\ÜÙ\™\]X[
-
-]ØZ]\š[š™XÝ
-ÛY]Ùˆ”ÔÕ‹\›˜ÝŒKÙœšY[™\™\]Y\ÝËÉÜ˜[™ÛUURQ
-
-_KØXØÙ\XY\œË^[ØYžÛÝÛ™\Žˆ˜ˆŸ_JJKœÝ]\ÐÛÙK
-NÂˆ\ÜÙ\™\]X[
-
-]ØZ]\š[š™XÝ
-Ý\›ˆ‹ÝŒKÙ]™[ËÙ]ÛÝÛ™\Xˆ‹XY\œßJJKœÝ]\ÐÛÙK
-NÂˆÛÛœÝ]™[X]ØZ]\š[š™XÝ
-Ý\›ˆ‹ÝŒKÙ]™[ËÙ]ˆ‹XY\œßJNØ\ÜÙ\™\]X[
-]™[œÝ]\ÐÛÙKŒ
-NØ\ÜÙ\™\]X[
-]™[šœÛÛŠ
-K™]™[™]™[Y™]ˆŠNØ\ÜÙ\™\]X[
-Øš™XÝš\ÓÝÛŠ]™[šœÛÛŠ
-K™]™[˜[Y[[ŠK˜[ÙJNÂˆHš[˜[HØ]ØZ]\˜ÛÜÙJ
-NßBŸJNÂ\Ý
-››Ü›X]]™H\ÛÛ]YØÚ[X\ÈX]Ú˜[œÜÜ[™\ØÜšX™HH™\ÝšXÝYXÝ]˜][Ûˆ‹\Þ[˜Ê
-OOžÂˆÛÛœÝ\OR”ÓÓ‹œ\œÙJ]ØZ]™XYš[J˜\KÛÜ[˜\KšœÛÛˆ‹]ŽŠJNÂˆ›ÜŠÛÛœÝÛ˜[YKØÚ[XWHÙˆØš™XÝ™[šY\ÊÑœšY[™\™Ù]\™Ù]ØÚ[XK]™[]Z[™]™[]Z[ØÚ[XKœšY[™[˜›Þ™œšY[™[˜›ÞØÚ[XKœšY[™XÝ[ÛŽ™œšY[™XÝ[Û”ØÚ[X_JJH\ÜÙ\™Y\\]X[
-\K˜ÛÛ\Û™[ËœØÚ[X\ÖÛ˜[YWKØÚ[XJNÂˆ›ÜŠÛÛœÝ]ÙˆÈ‹ÝŒKÙœšY[™ËÛÛÚÝ\‹‹ÝŒKÙœšY[™\™\]Y\ÝÈ‹‹ÝŒKÛYKÙœšY[™\™\]Y\ÝÈ‹‹ÝŒKÙœšY[™\™\]Y\ÝËÞÜ™\]Y\Ý™YŸKØXØÙ\‹‹ÝŒKÙœšY[™\™\]Y\ÝËÞÜ™\]Y\Ý™YŸKÙXÛ[™H‹‹ÝŒKÙ]™[ËÞÙ]™[YH—JH›ÜŠÛÛœÝÜ\˜][ÛˆÙˆØš™XÝ˜[Y\Ê\Kœ]ÖÜ]JH\È™XÛÜ™Ýš[™Ë[šÛ›ÝÛ–×JH\ÜÙ\™\]X[
-Ü\˜][Û–ÈžY[›[ÜšKY[š\›Û›Y[—Kš\ÛÛ]YY[][]ÜˆŠNÂŸJNÂ
+  assert.deepEqual(await f.repo.act("c",ref,"accept"),err("request_unavailable"));
+  assert.deepEqual(await f.repo.act("b",ref,"accept"),ok({result:"accepted"}));
+  assert.deepEqual(await f.repo.act("b",ref,"accept"),err("request_unavailable"));
+  assert.deepEqual(await f.repo.lookup("a","member_b",false),ok({username:"member_b",displayName:"Member b",relationshipState:"already_friends"}));
+  assert.deepEqual(await f.repo.inbox("b"),ok({requests:[],nextCursor:null}));
+});
+test("decline permits a new reference; stale reference never acts on replacement",async()=>{
+  const f=fixture(); await f.repo.lookup("a","member_b",true); const old=await reference(f);
+  assert.deepEqual(await f.repo.act("b",old,"decline"),ok({result:"declined"}));
+  await f.repo.lookup("a","member_b",true); const fresh=await reference(f); assert.notEqual(old,fresh);
+  assert.deepEqual(await f.repo.act("b",old,"accept"),err("request_unavailable")); assert.equal(await reference(f),fresh);
+});
+test("30-day expiry is enforced on read without writes and exactly at action boundary",async()=>{
+  const f=fixture(); await f.repo.lookup("a","member_b",true); const ref=await reference(f);
+  f.setTime("2026-11-03T23:59:59.999Z"); assert.equal(await reference(f),ref);
+  f.setTime("2026-11-04T00:00:00.000Z"); const before=f.gateway.entries();
+  assert.deepEqual(await f.repo.inbox("b"),ok({requests:[],nextCursor:null})); assert.deepEqual(f.gateway.entries(),before);
+  assert.deepEqual(await f.repo.act("b",ref,"accept"),err("request_unavailable"));
+  await f.repo.lookup("a","member_b",true); assert.notEqual(await reference(f),ref);
+});
+test("either-direction block consumes pending; unblock does not revive; temporary ineligibility retains it",async()=>{
+  const f=fixture(); await f.repo.lookup("a","member_b",true); const ref=await reference(f);
+  await f.repo.setFixtureProtection("a","b",{blockedByAccountIds:["b"]});
+  assert.deepEqual(await f.repo.act("b",ref,"accept"),err("request_unavailable"));
+  assert.deepEqual(await f.repo.lookup("a","member_b",false),err("target_unavailable"));
+  await f.repo.setFixtureProtection("a","b",{blockedByAccountIds:[]}); assert.deepEqual(await f.repo.inbox("b"),ok({requests:[],nextCursor:null}));
+  await f.repo.lookup("a","member_b",true); const fresh=await reference(f);
+  await f.repo.setFixtureProtection("a","b",{temporaryAccountId:"a"});
+  assert.deepEqual(await f.repo.act("b",fresh,"accept"),err("request_unavailable"));
+  assert.notEqual(f.gateway.read(`friend_pairs/${friendPairKey("a","b")}`)!.pending,null);
+  await f.repo.setFixtureProtection("a","b",{permanentlyDeletedAccountId:"a"});
+  assert.equal(f.gateway.read(`friend_pairs/${friendPairKey("a","b")}`)!.pending,null);
+});
+test("bounded filtered pages keep continuation; no terminal history or broad unbounded list",async()=>{
+  const f=fixture(); const refs=Array.from({length:21},()=>randomUUID()).sort();
+  await f.gateway.runTransaction(async tx => { for(const ref of refs) tx.create(`friend_inboxes/b/requests/${ref}`,{pairKey:friendPairKey("a","b")}); });
+  const page=await f.repo.inbox("b");if(!page.ok) assert.fail();assert.deepEqual(page.value.requests,[]);assert.notEqual(page.value.nextCursor,null);
+  const last=await f.repo.inbox("b",page.value.nextCursor!);assert.deepEqual(last,ok({requests:[],nextCursor:null}));
+});
+test("requester limits use uniform protected errors, reset and respect requester authorization",async()=>{
+  for(const send of [false,true]) {
+    const f=fixture();for(let i=0;i<(send?10:30);i++) assert.equal((await f.app.lookup({firebaseUid:"a"},"member_b",send)).ok,true);
+    assert.deepEqual(await f.app.lookup({firebaseUid:"a"},"member_b",send),err(appFailure("ADD_FRIEND_TARGET_UNAVAILABLE")));
+    f.setTime("2026-10-05T00:01:00.000Z");assert.equal((await f.app.lookup({firebaseUid:"a"},"member_b",send)).ok,true);
+    await f.repo.setFixtureProtection("a","b",{temporaryAccountId:"a"});assert.deepEqual(await f.app.lookup({firebaseUid:"a"},"member_b",send),err(appFailure("AUTH_FORBIDDEN")));
+  }
+});
+test("failed dependencies never become successful empty requests or events",async()=>{
+  const f=fixture(),bad=new FailingFirestoreGateway();
+  assert.deepEqual(await new FirestoreFriendRepository(bad,f.clock).inbox("a"),err("dependency_unavailable"));
+  assert.deepEqual(await new FirestoreEventDetailRepository(bad,f.clock,[sourceUrl]).read("a","ev"),err("dependency_unavailable"));
+});
+for(const [label,change] of Object.entries({end_before_start:{endAt:instant},null_end:{endAt:null},unapproved_link:{externalSourceUrl:"https://example.invalid/other"},unsafe_link:{externalSourceUrl:"http://example.invalid/synthetic-event"},title_limit:{title:"x".repeat(201)},unknown_field:{providerPayload:{}},removed:{available:false},expired:{validUntil:instant},bad_time:{startAt:"2026-02-30T00:00:00Z"},location_limit:{locationLabel:"x".repeat(201)}})) {
+  test(`Event Detail rejects ${label} without widening recommendations`,()=>assert.equal(parseEventDetail("ev",{...detail,...change},[sourceUrl],BigInt(new Date(instant).getTime())*1000000n),undefined));
+}
+test("Event Detail supports omitted end, preserves nanosecond source time and scalar text limits",async()=>{
+  const f=fixture(); await f.gateway.runTransaction(async tx=>tx.create("event_details/ev",{...detail,title:"ðŸ˜€".repeat(200)}));
+  const result=await new FirestoreEventDetailRepository(f.gateway,f.clock,[sourceUrl]).read("a","ev"); if(!result.ok) assert.fail();
+  assert.equal(result.value.startAt,detail.startAt);assert.equal(Object.hasOwn(result.value,"endAt"),false); assert.equal(Object.hasOwn(result.value,"available"),false);
+});
+const environment={ENMORI_ENVIRONMENT:"test",ENMORI_CONTROLLED_PROFILE_DIRECTORY:"/tmp/isolated-slices-test",HOME:"/tmp/isolated-slices-test",USERPROFILE:"/tmp/isolated-slices-test",APPDATA:"/tmp/isolated-slices-test",XDG_CONFIG_HOME:"/tmp/isolated-slices-test",GCLOUD_PROJECT:"demo-enmori-rmvp01a-r10",FIREBASE_AUTH_EMULATOR_HOST:"127.0.0.1:9099",FIRESTORE_EMULATOR_HOST:"127.0.0.1:8080"};
+const unavailable={execute:async()=>err(appFailure("SERVICE_UNAVAILABLE"))};
+function dependencies() { return {identityVerifier:{verifyIdToken:async(token:string)=>token==="invalid" ? {kind:"invalid" as const} : {kind:"verified" as const,principal:{firebaseUid:token}}},completeOnboarding:unavailable,getOnboarding:unavailable,createCheckIn:unavailable,getCheckIn:unavailable,getInterestTags:unavailable,getOwnInterests:unavailable,replaceOwnInterests:unavailable}; }
+test("isolated routes require explicit safe composition; ordinary build has none",async()=>{
+  const plain=await buildApp(dependencies());try{
+    assert.equal((await plain.inject({url:"/v1/events/ev"})).statusCode,404);
+    assert.equal((await plain.inject({url:"/v1/me/check-ins?date=2026-10-07&timeZone=Asia%2FSingapore"})).statusCode,404);
+  }finally{await plain.close();}
+  await assert.rejects(buildApp({...dependencies(),isolatedSlices:{environment:{...environment,ENMORI_ENVIRONMENT:"controlled-demo"},checkInHistory:unavailable}}));
+});
+test("Transport requires auth, strict inputs, rejects action bodies and hides internal/protected data",async()=>{
+  const f=fixture();await f.gateway.runTransaction(async tx=>tx.create("event_details/ev",detail));
+  const app=await buildApp({...dependencies(),isolatedSlices:{environment,friends:f.app,eventDetail:new GetEventDetail(new FirestoreEventDetailRepository(f.gateway,f.clock,[sourceUrl]))}});
+  try {
+    const headers={authorization:"Bearer a"};
+    assert.equal((await app.inject({method:"POST",url:"/v1/friends/lookup",payload:{username:"member_b"}})).statusCode,401);
+    for(const payload of [{username:"member_b",owner:"b"},{username:42},{}]) assert.equal((await app.inject({method:"POST",url:"/v1/friends/lookup",headers,payload})).statusCode,400);
+    const lookup=await app.inject({method:"POST",url:"/v1/friends/lookup",headers,payload:{username:"member_b"}});assert.equal(lookup.statusCode,200);assert.deepEqual(lookup.json(),{target:{username:"member_b",displayName:"Member b",relationshipState:"can_send_request"}});
+    assert.equal((await app.inject({url:"/v1/me/friend-requests?cursor=bad",headers})).statusCode,400);
+    assert.equal((await app.inject({method:"POST",url:`/v1/friend-requests/${randomUUID()}/accept`,headers,payload:{owner:"b"}})).statusCode,400);
+    assert.equal((await app.inject({url:"/v1/events/ev?owner=b",headers})).statusCode,400);
+    const event=await app.inject({url:"/v1/events/ev",headers});assert.equal(event.statusCode,200);assert.equal(event.json().event.eventId,"ev");assert.equal(Object.hasOwn(event.json().event,"validUntil"),false);
+  } finally {await app.close();}
+});
+test("normative isolated schemas match Transport and describe the restricted activation",async()=>{
+ const api=JSON.parse(await readFile("api/openapi.json","utf8"));
+ for(const [name,schema] of Object.entries({FriendTarget:targetSchema,EventDetail:eventDetailSchema,FriendInbox:friendInboxSchema,FriendAction:friendActionSchema})) assert.deepEqual(api.components.schemas[name],schema);
+ for(const path of ["/v1/friends/lookup","/v1/friend-requests","/v1/me/friend-requests","/v1/friend-requests/{requestRef}/accept","/v1/friend-requests/{requestRef}/decline","/v1/events/{eventId}"]) for(const operation of Object.values(api.paths[path]) as Record<string,unknown>[]) assert.equal(operation["x-enmori-environment"],"isolated-emulator");
+});
