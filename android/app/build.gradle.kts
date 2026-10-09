@@ -4,6 +4,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// The isolated Persona harness opts in for its debug APK only. A separate
+// application ID prevents Flutter's test installer from replacing the real app.
+val personaAndroidTestFlag = providers.environmentVariable("ENMORI_PERSONA_ANDROID_TEST").orNull
+check(personaAndroidTestFlag == null || personaAndroidTestFlag == "true") {
+    "ENMORI_PERSONA_ANDROID_TEST must be absent or exactly true"
+}
+
 android {
     namespace = "com.enmori.app"
     compileSdk = flutter.compileSdkVersion
@@ -30,6 +37,11 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            if (personaAndroidTestFlag == "true") {
+                applicationIdSuffix = ".personatest"
+            }
+        }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.

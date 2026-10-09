@@ -4,7 +4,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- Firebase Auth Emulator is HTTP-only on the Android host-loopback alias.
-         Keep this exception debug-only and restricted to that exact address. -->
+    <!-- Firebase Auth Emulator is HTTP-only. Debug permits only the Emulator
+         host alias and USB adb-reverse loopback, never arbitrary hosts. -->
     <application android:networkSecurityConfig="@xml/emulator_network_security_config" />
 </manifest>
