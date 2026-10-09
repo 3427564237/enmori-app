@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
 import { randomBytes } from "node:crypto";
 import test from "node:test";
 import { ListOwnCheckInsForDate } from "../../src/check-ins/application/check-in-history.js";
@@ -198,7 +199,9 @@ test("AES-GCM cursor is opaque, tamper-resistant, expiring and process-local", (
   const token = first.encode(cursor());
   assert.equal(token.includes(accountId), false);
   assert.deepEqual(first.decode(token, fixedNow), cursor());
-  assert.equal(first.decode(`${token.slice(0, -1)}A`, fixedNow), undefined);
+  const tampered = Buffer.from(token, "base64url");
+  tampered[tampered.length - 1] = tampered[tampered.length - 1]! ^ 1;
+  assert.equal(first.decode(tampered.toString("base64url"), fixedNow), undefined);
   assert.equal(first.decode(token, new Date("2026-10-08T00:10:00.000Z")), undefined);
   assert.equal(new AesGcmHistoryCursorCodec(randomBytes(32)).decode(token, fixedNow), undefined);
 });
