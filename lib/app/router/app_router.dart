@@ -69,12 +69,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     if (canNavigatePersona(context)) context.push<void>(path);
   }
 
-  void backFromPersona(BuildContext context) {
+  void backFromPersona(
+    BuildContext context, {
+    String fallback = AppRoutes.personas,
+  }) {
     if (!canNavigatePersona(context)) return;
     if (context.canPop()) {
       context.pop();
     } else {
-      context.go(AppRoutes.personas);
+      context.go(fallback);
     }
   }
 
@@ -94,7 +97,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           builder: (context, state) => personaPages.overview(
             context,
             onManage: () => openPersona(context, AppRoutes.managePersonas),
-            onBack: () => backFromPersona(context),
+            onBack: () => backFromPersona(context, fallback: AppRoutes.home),
           ),
         ),
         GoRoute(

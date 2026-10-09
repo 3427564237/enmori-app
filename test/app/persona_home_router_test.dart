@@ -202,6 +202,8 @@ void main() {
     await tester.pumpAndSettle();
     await _tap(tester, 'test-back');
     expect(fixture.router.state.uri.path, AppRoutes.personas);
+    await _tap(tester, 'test-back');
+    expect(fixture.router.state.uri.path, AppRoutes.home);
     expect(tester.takeException(), isNull);
   });
 
