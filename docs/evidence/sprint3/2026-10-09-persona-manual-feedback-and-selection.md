@@ -2,6 +2,8 @@
 
 Recorded 9 October 2026 (UTC+08:00), after the [initial PR #72 handoff](2026-10-09-zhou-persona-review-handoff.md). This is user-reported ordinary-touch feedback and owner verification, not a JIN review or LI acceptance decision.
 
+Later checkpoint: [actual user-reported TalkBack results and selection/activation speech correction](2026-10-09-persona-talkback-selection-follow-up.md). The pending/Not Run statements below describe this earlier checkpoint, not the later report.
+
 ## User-reported results and test method
 
 The user reported all seven checklist items as passing, with a visual improvement requested on item 4: make the selected button or region stand out more clearly from `Select`. When asked about the test method, the user explicitly clarified that these were **ordinary touchscreen checks without TalkBack**. Therefore none of the results below establishes audible reading, accessibility-focus traversal, speech announcements or physical-keyboard behavior.
