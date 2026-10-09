@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,6 +22,7 @@ import '../../features/friends/presentation/friend_page.dart';
 import '../../features/friends/presentation/my_friends_page.dart';
 import '../providers.dart';
 import '../route_status_pages.dart';
+import 'isolated_persona_pages.dart';
 
 abstract final class AppRoutes {
   static const startup = '/startup';
@@ -30,6 +31,12 @@ abstract final class AppRoutes {
   static const onboarding = '/onboarding';
   static const home = '/home';
   static const profile = '/profile';
+  static const personas = '/personas';
+  static const managePersonas = '/personas/manage';
+  static const newPersona = '/personas/new';
+
+  static String editPersona(String personaId) =>
+      '/personas/${Uri.encodeComponent(personaId)}/edit';
   static const profileEdit = '/profile/edit';
   static const settings = '/settings';
   static const checkIn = '/check-in';
@@ -45,8 +52,32 @@ abstract final class AppRoutes {
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   // An account-owned route stack must not survive an identity replacement.
-  ref.watch(currentAuthSubjectProvider);
+  final routeSubject = ref.watch(currentAuthSubjectProvider);
   final isolatedSlices = ref.watch(isolatedSlicesEnabledProvider);
+  final personaPages = isolatedSlices
+      ? ref.watch(isolatedPersonaPagesProvider)
+      : null;
+
+  bool canNavigatePersona(BuildContext context) =>
+      context.mounted &&
+      ref.mounted &&
+      routeSubject != null &&
+      ref.read(currentAuthSubjectProvider) == routeSubject &&
+      ref.read(routerGateProvider) == RouterGateState.authenticated;
+
+  void openPersona(BuildContext context, String path) {
+    if (canNavigatePersona(context)) context.push<void>(path);
+  }
+
+  void backFromPersona(BuildContext context) {
+    if (!canNavigatePersona(context)) return;
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.personas);
+    }
+  }
+
   final refresh = RouterRefreshNotifier(ref);
   final router = GoRouter(
     initialLocation: AppRoutes.startup,
@@ -57,6 +88,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       signedOutEntry: ref.read(signOutEntryProvider),
     ),
     routes: [
+      if (personaPages != null) ...[
+        GoRoute(
+          path: AppRoutes.personas,
+          builder: (context, state) => personaPages.overview(
+            context,
+            onManage: () => openPersona(context, AppRoutes.managePersonas),
+            onBack: () => backFromPersona(context),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.managePersonas,
+          builder: (context, state) => personaPages.management(
+            context,
+            onCreate: () => openPersona(context, AppRoutes.newPersona),
+            onEdit: (id) => openPersona(context, AppRoutes.editPersona(id)),
+            onBack: () => backFromPersona(context),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.newPersona,
+          builder: (context, state) => personaPages.create(
+            context,
+            onBack: () => backFromPersona(context),
+          ),
+        ),
+        GoRoute(
+          path: '/personas/:personaId/edit',
+          builder: (context, state) => personaPages.edit(
+            context,
+            personaId: state.pathParameters['personaId'] ?? '',
+            onBack: () => backFromPersona(context),
+          ),
+        ),
+      ],
       if (isolatedSlices)
         GoRoute(
           path: '/friends',
@@ -105,6 +170,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.home,
         builder: (context, state) => HomeShellPage(
           onStartCheckIn: () => context.go(AppRoutes.checkIn),
+          onManagePersonas: personaPages != null
+              ? () => openPersona(context, AppRoutes.personas)
+              : null,
           onOpenFriends: isolatedSlices
               ? () => context.push<void>('/friends')
               : null,

@@ -8,6 +8,7 @@ final class HomeShellPage extends StatelessWidget {
     this.onEditInterests,
     this.onOpenProfile,
     this.onOpenFriends,
+    this.onManagePersonas,
     this.onOpenEvent,
     required this.onSeeAllEvents,
     super.key,
@@ -17,6 +18,7 @@ final class HomeShellPage extends StatelessWidget {
   final VoidCallback? onEditInterests;
   final VoidCallback? onOpenProfile;
   final VoidCallback? onOpenFriends;
+  final VoidCallback? onManagePersonas;
   final void Function(String)? onOpenEvent;
   final VoidCallback onSeeAllEvents;
 
@@ -59,6 +61,13 @@ final class HomeShellPage extends StatelessWidget {
                 onPressed: onOpenFriends,
                 icon: const Icon(Icons.people_outline),
                 label: const Text('Friends'),
+              ),
+            if (onManagePersonas != null)
+              OutlinedButton.icon(
+                key: const Key('home-manage-personas'),
+                onPressed: onManagePersonas,
+                icon: const Icon(Icons.manage_accounts_outlined),
+                label: const Text('Manage Personas'),
               ),
             const SizedBox(height: 32),
             Text(
