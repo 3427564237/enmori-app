@@ -1,0 +1,46 @@
+{
+  "sourceCommit": "82d8e890d71e21bfafc712b205d5d271dd5e1d0f",
+  "previousManualSource": "5e8f8007e5de846b9d9331b1211f15332e911564",
+  "userReport": "Ordinary touchscreen items 1-7 reported Pass; no TalkBack used; item 4 requested clearer highlight",
+  "humanHighlightRetest": "Pending",
+  "talkBack": "Not Run",
+  "physicalKeyboard": "Not Run",
+  "source": {
+    "path": "lib/features/personas/presentation/persona_management_page.dart",
+    "sha256": "b7715745b4b099872621bff775c4db6a66fde7e3e5970859f774997e20ee8927"
+  },
+  "verification": {
+    "existingWidgetTestsPassed": 21,
+    "analysis": "No issues found",
+    "guardedApkInstall": "Pass",
+    "deviceVisualInspection": "Select becomes filled, bordered and checkmarked Selected; Inactive remains; no activation performed",
+    "apkSha256": "7219b6ad47ef738bef1b061a10a853b099fabb4795a1604cb6ef3507d18ca8eb"
+  },
+  "localArtifacts": [
+    {
+      "localArtifact": "widget-regression.log",
+      "sha256": "290e920ae1c93441661e7d61c4e30bc237938ccae634b4501e340f36b26f6a02"
+    },
+    {
+      "localArtifact": "analyze.log",
+      "sha256": "2d451ee6711f6f35f9075c42c82b931eb04b0e5f3927a311d67379c39974e03e"
+    },
+    {
+      "localArtifact": "android-build-install.log",
+      "sha256": "36544d00861d5d30c8d00894a8a19e6785fadf0a9d8ac0affc1676b421229774"
+    },
+    {
+      "localArtifact": "installed-build.json",
+      "sha256": "13e9af4a7e87327d70f946939a8202219af803720c51313a0919c9496a4ad811"
+    },
+    {
+      "localArtifact": "device-unselected.png",
+      "sha256": "9399e888cbadde503f708d5cddcedc9ae4e9cad5e0130b7faa3a51b6780066a8"
+    },
+    {
+      "localArtifact": "device-selected.png",
+      "sha256": "82079161f2b7faf997962fede1f8ae56a3a2f1e7689078d80ca4bd60f4288e9e"
+    }
+  ],
+  "uploadedRawArtifacts": false
+}

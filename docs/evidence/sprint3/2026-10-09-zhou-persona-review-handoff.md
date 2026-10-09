@@ -2,6 +2,8 @@
 
 Owner execution on 9 October 2026 (UTC+08:00), for [#68](https://github.com/3427564237/enmori-app/issues/68). This is a bounded implementation handoff for independent review and acceptance, not an approval record.
 
+Subsequent [ordinary-touch user feedback and selected-state visual correction](2026-10-09-persona-manual-feedback-and-selection.md) are recorded separately. The automated results and source identities below remain their original checkpoint; TalkBack and independent acceptance are not inferred from the later touchscreen report.
+
 ## Source and authority
 
 Implementation commit: `7e09e7844cdf4e5835120f5ae7eb43b4cbd3db99`. Final integration-test commit: `ab69c03641647f649eb148e094bb7fed3aec1ef0`, which only adds scrolling to a lazily constructed test target. The subsequent evidence-only commit does not change that executable source. The [source and evidence manifest](2026-10-09-zhou-persona-review-manifest.json) binds the files and retained logs by SHA-256.
