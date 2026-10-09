@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-10-09T11:59:39.562Z",
+  "sourceCommit": "ab69c03641647f649eb148e094bb7fed3aec1ef0",
+  "baseCommit": "f646e26d30547ca9abe8084daedeebe803b1d3f4",
+  "scope": "Isolated Persona P08 / Issue 68, owner-side evidence; independent review and acceptance pending",
+  "tools": {
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "node": "24.19.0",
+    "pnpm": "11.19.0"
+  },
+  "device": {
+    "model": "Samsung SM-A736B",
+    "android": 15,
+    "api": 35,
+    "serialPublished": false
+  },
+  "checks": {
+    "flutterTests": {
+      "passed": 307,
+      "failed": 0,
+      "command": "flutter test --no-pub --reporter expanded --concurrency 1",
+      "sourceBinding": "Product and test/ files identical to sourceCommit; subsequent change only in integration_test/ tested on hardware"
+    },
+    "analysis": "No issues found",
+    "androidNormal": "1/1 Pass",
+    "androidLargeText": "1/1 Pass; effective 16sp 32.0",
+    "hostPersistence": "Both runs Pass: owner empty/revision4, peer empty/revision0",
+    "talkBackAudible": "Not Run; LI acceptance item",
+    "physicalKeyboard": "Not Run; injected keyboard events tested"
+  },
+  "sources": [
+    {
+      "path": "android/app/build.gradle.kts",
+      "gitBlob": "1dd9b45b837fffa66166706f526d995fb57dbe11",
+      "testedWorkingFileSha256": "6d4f4dea8beeb450637e6522ac96e3d1868950f1a36fd419211c7b03c7dab0d6"
+    },
+    {
+      "path": "android/app/src/debug/AndroidManifest.xml",
+      "gitBlob": "528f7d44a35c9d31724ae8562491cac48e2560fa",
+      "testedWorkingFileSha256": "3ffc8017a81d1f6cd10b2d78ebae516d49d53d339eba83dce4e350b2f4539516"
+    },
+    {
+      "path": "android/app/src/debug/res/xml/emulator_network_security_config.xml",
+      "gitBlob": "55d2c6c628c545031fc76ead648becc00c859be0",
+      "testedWorkingFileSha256": "513fdcdbfcba14e1247fb6aa2b94b3b56449e9fb607452052d4a0cf49dc5a3c1"
+    },
+    {
+      "path": "integration_test/persona_real_backend_test.dart",
+      "gitBlob": "ffaffcdec62901602810dba4ccfe75692b5046f8",
+      "testedWorkingFileSha256": "107c29df64248c4f7555d6a57c15127df297b4a88b4b52c52759cf29072ac032"
+    },
+    {
+      "path": "lib/core/network/backend_api_client.dart",
+      "gitBlob": "e7e9d2aa427219438f25c9503393e2588cf647c0",
+      "testedWorkingFileSha256": "f778252727238441d41bc434d22739dd54d277d8bf1bac07d8d8e221c1c3d8d7"
+    },
+    {
+      "path": "lib/core/result/result.dart",
+      "gitBlob": "40b036d5cfaeda704e1df083d7af1e1215c2ddf3",
+      "testedWorkingFileSha256": "64a1fa1200af196125ea8fae3a8ac8088ac652c3aab7c1e500d4fedcb77864c2"
+    },
+    {
+      "path": "lib/features/auth/data/firebase_auth_repository.dart",
+      "gitBlob": "85d9d8ff1b86b4b877d7d6ec8ebb07f7a94041e6",
+      "testedWorkingFileSha256": "5941ec337fe7c2948ab4b577063674a987ead4b794688313d87fc118b5b364a1"
+    },
+    {
+      "path": "lib/features/personas/data/backend_persona_repository.dart",
+      "gitBlob": "5ae8af8284bd95ec3c80f490fdf11d9dc96eef13",
+      "testedWorkingFileSha256": "33666fa710a4ae090afe1bd3bf0f6751ca40074f6198468f353619f7a64b43f1"
+    },
+    {
+      "path": "lib/features/personas/domain/persona.dart",
+      "gitBlob": "6b0ca576db75eb60bad93518db1292b9a4199064",
+      "testedWorkingFileSha256": "78e05b82eb5420f6a1de8c79c360cc0a5b7b18dfdd7f96ac13262ee93b7867b3"
+    },
+    {
+      "path": "lib/features/personas/domain/persona_repository.dart",
+      "gitBlob": "64310323f15d239199a8db7a6635173575ac7f18",
+      "testedWorkingFileSha256": "8883dea2e252b1ff9814b9c25b039135a33949f41cc8b014d18beb24794b05b4"
+    },
+    {
+      "path": "lib/features/personas/domain/persona_session.dart",
+      "gitBlob": "718fbf8e6e7582ce1f6537651b8f784b5c8421f7",
+      "testedWorkingFileSha256": "4901ff4878f89deb7c703f4a61cbbc5c7473179db46ca73acee0c6617b3a799d"
+    },
+    {
+      "path": "lib/features/personas/persona_providers.dart",
+      "gitBlob": "b723da4b7dca4501080fad8b8aebf0b8dd007e93",
+      "testedWorkingFileSha256": "a9e0a7460f46d8515529f1b86a2b70d6bc1604570e0ca4711a71a8adfba2d278"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_editor_page.dart",
+      "gitBlob": "ce2732e3a149996619f27a260fb8b570b3610d88",
+      "testedWorkingFileSha256": "77d8db387567031ad95512535dc2af99ba1a219a52f3b39ff44e9866879baa86"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_management_page.dart",
+      "gitBlob": "4be197a5c3b2a962b1b41ac1c71ad0fb9106dc66",
+      "testedWorkingFileSha256": "ba29328a22a934edaba3c656c064089d472165e254c82b5d9d42a9fd728d0ea1"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_overview_page.dart",
+      "gitBlob": "c7b06a472d7fbb9a791ea996693dd22d185847f0",
+      "testedWorkingFileSha256": "8a2ae45dd019d704b49fb7a636235e17c653dfb79e5a08345e20aa6bcd0742e9"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_page_parts.dart",
+      "gitBlob": "55996993308767453c6854df611d32b5d5a8488e",
+      "testedWorkingFileSha256": "10007310c9d4665665c065e73d404a6f32b9279ea0989a0d45581ff549548dff"
+    },
+    {
+      "path": "test/features/auth/firebase_auth_session_test.dart",
+      "gitBlob": "bb3ab452771fd8041053b3951ebffec4a58186a2",
+      "testedWorkingFileSha256": "d1496f396daf981fb017d0b91ce1629accac7208cd4fbdffe76b705cb826b033"
+    },
+    {
+      "path": "test/features/personas/backend_persona_repository_test.dart",
+      "gitBlob": "1fe27b979fdf314f8a7247ef175da4e4074c80f6",
+      "testedWorkingFileSha256": "6f6ff828efabfcdd26bc7cd14a1dbaff3f1ccc698dd14dd95965f81d5dd530ef"
+    },
+    {
+      "path": "test/features/personas/persona_accessibility_test.dart",
+      "gitBlob": "70b863adebfaf8bebe8668437f5191104e83b4b0",
+      "testedWorkingFileSha256": "75dae69e00297ad1919a1f20f7abc1bc0ef1927a5a4a841e30fec3b9e49b5bd4"
+    },
+    {
+      "path": "test/features/personas/persona_client_session_test.dart",
+      "gitBlob": "5bcd47bf5ac647f5cce0b5fcac4aebfc3525e7bc",
+      "testedWorkingFileSha256": "fe77f647e53cb6de57f3281a1c80aadb51f1e45f4151103a17d7f674541a21d4"
+    },
+    {
+      "path": "test/features/personas/persona_pages_test.dart",
+      "gitBlob": "0f8cb7ef77a48c6f4b43f92a465281592a0f9e7f",
+      "testedWorkingFileSha256": "d83f1fac86ef19815f21377e4645ab83b100b71736b59ed3e38420a8605b72db"
+    },
+    {
+      "path": "test/features/personas/persona_providers_test.dart",
+      "gitBlob": "39c73060d8827ff4d1e2899ae42b256973129dc0",
+      "testedWorkingFileSha256": "481156a7eaf6ed9195efb00dd29787a58d63da0c66f42f82fec67179ccf64e1e"
+    },
+    {
+      "path": "test/features/personas/persona_session_adversarial_test.dart",
+      "gitBlob": "5f137c13ad578bafba9692055afaeaf7b0575893",
+      "testedWorkingFileSha256": "9e3bf6f794076c96b5658877845cfefa3b02801679831a2387075ffc3c9f6085"
+    },
+    {
+      "path": "test/features/personas/persona_session_test.dart",
+      "gitBlob": "0b3585d8808f0c3d95d276eabb1a34648261ba87",
+      "testedWorkingFileSha256": "4cadd717ed679250591cfd0cc26b051e67fb25b0b0caa8d1415c84fa4b903531"
+    },
+    {
+      "path": "tool/persona_android_fixture.mjs",
+      "gitBlob": "c871b07936322bab09aa7aedc4386bbada2f22b1",
+      "testedWorkingFileSha256": "fc5c66d445b3bb07a63d190d922dd3813fc8c3e1bbea19466010ce351f96d8fc"
+    },
+    {
+      "path": "tool/run_persona_android_emulators.mjs",
+      "gitBlob": "09caf65000ae0d0582215c613070543b9bb2f042",
+      "testedWorkingFileSha256": "2233e90708279327242e493c37e7a2418ba08e9e24acae83ed57cb060f33cd8c"
+    }
+  ],
+  "localLogs": [
+    {
+      "localArtifact": "flutter-regression.log",
+      "sha256": "b18123afcf4877320bc1657c2de9d9a10932b2fe1ff477bf656b336c0fd9707a"
+    },
+    {
+      "localArtifact": "analysis-final.log",
+      "sha256": "9a9d35ce9d6fac973a72f078461e18cde1f1c7f2ae7fa7a5916ae87adef4b99a"
+    },
+    {
+      "localArtifact": "format-final.log",
+      "sha256": "9ad1c753282532f79429feac0b337a83ea058b0b6fa9dcfbebb3f1bc4eaa5824"
+    },
+    {
+      "localArtifact": "pc13-normal.log",
+      "sha256": "3c2d7416063c5634cd3e758edcf6d0655a2351e717d8713b02977856487a9334"
+    },
+    {
+      "localArtifact": "pc13-large.log",
+      "sha256": "365c3adab584ef1bc68eb696c0305a27516547fbe70b8643a31229a4c8c2d542"
+    },
+    {
+      "localArtifact": "ordinary-build.log",
+      "sha256": "2d34103f5016624c02a790d410081815b58cd837295f0fc018169d2c27820c77"
+    },
+    {
+      "localArtifact": "ordinary-package.txt",
+      "sha256": "cf175887d36137068ef4f1e72ef698f4b7e9d71e5f89c910efa865af2e2c780e"
+    },
+    {
+      "localArtifact": "cleanup-state.json",
+      "sha256": "09573046a7b757bf89dd17ab2fd1ded8d87dc312336a493aface9d08f185e398"
+    },
+    {
+      "localArtifact": "pc13-large-before-scroll.log",
+      "sha256": "831370f950acde2ca4c13779ef4ebc6e3cd01bfe379de0dd7994a1153ea9184a"
+    },
+    {
+      "localArtifact": "flutter-cache-failure-excerpt.txt",
+      "sha256": "aa52fff9cf1f506598b2c3e38455779062da4c283eb09d625953f594abadd850"
+    }
+  ],
+  "localApks": [
+    {
+      "localArtifact": "persona-tested-normal.apk",
+      "sha256": "aaf9a3f1c28bcaf03043c82f9f656a6171411cadef1b13ff350ea23b88d8fe94",
+      "bytes": 167369691,
+      "applicationId": "com.enmori.app.personatest",
+      "uploaded": false
+    },
+    {
+      "localArtifact": "persona-tested-large.apk",
+      "sha256": "dc49cc8a9d7774bea7df9295dd186a2b9fa79beec012838b356299ee7c53a1b8",
+      "bytes": 167369675,
+      "applicationId": "com.enmori.app.personatest",
+      "uploaded": false
+    }
+  ],
+  "priorRegressionLogs": [
+    {
+      "localArtifact": "persona-backend-regression.log",
+      "sha256": "09265aab4399b87a73c7015d3ab2be083ba2a97700d57fa711a284ac90e0929b",
+      "attribution": "Earlier same-day run; unchanged Backend source in base; not rerun at publication checkpoint"
+    },
+    {
+      "localArtifact": "persona-backend-emulator-regression.log",
+      "sha256": "17a946217115faa90b05890f11f3391bd4515b4899e7fe4ea50d4bd131d372fa",
+      "attribution": "Earlier same-day run; unchanged Backend source in base; not rerun at publication checkpoint"
+    }
+  ],
+  "cleanup": {
+    "fontScale": "1.0",
+    "accessibilityEnabled": "0",
+    "enabledAccessibilityServices": "null",
+    "touchExplorationEnabled": "0",
+    "remainingReverseMappings": 0,
+    "listeningFixturePorts": 0,
+    "remainingCurrentRunProfiles": 0,
+    "historicalKotlinLogResidue": "Preserved in earlier run directory; not included in current-run cleanup assertion"
+  }
+}

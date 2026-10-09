@@ -1,0 +1,76 @@
+Selected actual execution lines. Source: ab69c03641647f649eb148e094bb7fed3aec1ef0
+Raw logs and APKs remain local; hashes are in the manifest.
+
+flutter-regression.log
+00:30 +307: All tests passed!
+
+analysis-final.log
+Analyzing lib, test, integration_test...
+No issues found!
+
+format-final.log
+Formatted 21 files (0 changed) in 0.09 seconds.
+
+pc13-normal.log
+PERSONA_ANDROID_DEDICATED_TEST_PACKAGE_PREFLIGHT: Pass
+PC13: owner authenticated
+PC13 accessibility: overview labels and Android tap targets passed
+PC13 accessibility: management labels and Android tap targets passed
+PC13 accessibility: create editor labels and Android tap targets passed
+PC13 accessibility: effective 16sp size = 16.0
+PC13 accessibility: invalid Name is labeled and focused
+PC13 accessibility: saved create editor labels and Android tap targets passed
+PC13: create confirmed
+PC13 accessibility: overview labels and Android tap targets passed
+PC13 accessibility: management labels and Android tap targets passed
+PC13 accessibility: edit editor labels and Android tap targets passed
+PC13: persisted reread and edit confirmed
+PC13 accessibility: activation confirmation labels and Android tap targets passed
+PC13 accessibility: activation confirmation Cancel autofocus, Tab/Shift+Tab loop, Enter cancel and restored invoker focus passed without mutations
+PC13: explicit activation confirmed
+PC13 accessibility: overview labels and Android tap targets passed
+PC13 accessibility: management labels and Android tap targets passed
+PC13: second-owner isolation confirmed
+PC13 accessibility: overview labels and Android tap targets passed
+PC13 accessibility: management labels and Android tap targets passed
+PC13 accessibility: active deletion confirmation labels and Android tap targets passed
+PC13 accessibility: active deletion confirmation Cancel autofocus, Tab/Shift+Tab loop, Enter cancel and restored invoker focus passed without mutations
+PC13 accessibility: no-Active overview labels and Android tap targets passed
+PC13: active deletion and no-Active state confirmed
+PC13 accessibility: Android semantics and injected keyboard checks completed; audible TalkBack was not tested
+00:33 +1: All tests passed!
+PERSONA_PC13_ANDROID_TWO_OWNERS_PERSISTED_ACTIVE_DELETE_REVISION_4: Pass
+
+pc13-large.log
+PERSONA_ANDROID_DEDICATED_TEST_PACKAGE_PREFLIGHT: Pass
+PC13: owner authenticated
+PC13 accessibility: overview labels and Android tap targets passed
+PC13 accessibility: management labels and Android tap targets passed
+PC13 accessibility: create editor labels and Android tap targets passed
+PC13 accessibility: effective 16sp size = 32.0
+PC13 accessibility: invalid Name is labeled and focused
+PC13 accessibility: saved create editor labels and Android tap targets passed
+PC13: create confirmed
+PC13 accessibility: overview labels and Android tap targets passed
+PC13 accessibility: management labels and Android tap targets passed
+PC13 accessibility: edit editor labels and Android tap targets passed
+PC13: persisted reread and edit confirmed
+PC13 accessibility: activation confirmation labels and Android tap targets passed
+PC13 accessibility: activation confirmation Cancel autofocus, Tab/Shift+Tab loop, Enter cancel and restored invoker focus passed without mutations
+PC13: explicit activation confirmed
+PC13 accessibility: overview labels and Android tap targets passed
+PC13 accessibility: management labels and Android tap targets passed
+PC13: second-owner isolation confirmed
+PC13 accessibility: overview labels and Android tap targets passed
+PC13 accessibility: management labels and Android tap targets passed
+PC13 accessibility: active deletion confirmation labels and Android tap targets passed
+PC13 accessibility: active deletion confirmation Cancel autofocus, Tab/Shift+Tab loop, Enter cancel and restored invoker focus passed without mutations
+PC13 accessibility: no-Active overview labels and Android tap targets passed
+PC13: active deletion and no-Active state confirmed
+PC13 accessibility: Android semantics and injected keyboard checks completed; audible TalkBack was not tested
+00:34 +1: All tests passed!
+PERSONA_PC13_ANDROID_TWO_OWNERS_PERSISTED_ACTIVE_DELETE_REVISION_4: Pass
+
+ordinary-package.txt
+package: name='com.enmori.app' versionCode='1' versionName='1.0.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+launchable-activity: name='com.enmori.app.MainActivity'  label='' icon=''
