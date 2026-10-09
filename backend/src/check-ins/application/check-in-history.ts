@@ -34,7 +34,11 @@ function canonicalUtc(instant: Temporal.Instant): string | undefined {
 
 function parseCivilDay(dateInput: string, zoneInput: string): CivilDay | undefined {
   const match = CIVIL_DATE.exec(dateInput);
-  if (match === null || OFFSET_ZONE.test(zoneInput) || zoneInput.length === 0) return undefined;
+  if (
+    match === null ||
+    OFFSET_ZONE.test(zoneInput) ||
+    (zoneInput !== "UTC" && !zoneInput.includes("/"))
+  ) return undefined;
   try {
     const date = Temporal.PlainDate.from(dateInput, { overflow: "reject" });
     if (date.year < 1 || date.year > 9999 || date.toString() !== dateInput) return undefined;

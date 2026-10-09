@@ -120,15 +120,27 @@ test("skipped civil day returns authorized empty without a Check-in query", asyn
   assert.equal(calls, 1);
 });
 
-test("invalid civil date or numeric-offset zone fails before repository access", async () => {
+test("invalid dates, numeric offsets and zone abbreviations fail before repository access", async () => {
   let calls = 0;
   const useCase = new ListOwnCheckInsForDate({ listForDate: async () => { calls += 1; return { kind: "page", accountId, rows: [] }; } }, { decode: () => undefined, encode: () => "unused" }, clock());
-  for (const input of [{ date: "2026-02-30", timeZone: zone }, { date, timeZone: "+08:00" }, { date, timeZone: "Not/AZone" }]) {
+  for (const input of [
+    { date: "2026-02-30", timeZone: zone },
+    { date, timeZone: "+08:00" },
+    { date, timeZone: "Not/AZone" },
+    { date, timeZone: "EST" },
+    { date, timeZone: "MST" },
+    { date, timeZone: "CET" },
+  ]) {
     const result = await useCase.execute({ principal: { firebaseUid: uid }, ...input });
     assert.equal(result.ok, false);
     if (!result.ok) assert.equal(result.failure.code, "REQUEST_INVALID");
   }
   assert.equal(calls, 0);
+  for (const timeZone of ["Asia/Singapore", "US/Eastern", "UTC"]) {
+    const result = await useCase.execute({ principal: { firebaseUid: uid }, date, timeZone });
+    assert.equal(result.ok, true);
+  }
+  assert.equal(calls, 3);
 });
 
 test("history repository binds cursor to current authority before querying Check-ins", async () => {

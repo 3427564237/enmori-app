@@ -437,6 +437,65 @@ void main() {
       },
     );
 
+    test('history parser rejects Notes outside the normalized 1-500 grapheme projection', () async {
+      for (final note in [
+        '',
+        '   ',
+        ' A note ',
+        List.filled(501, '😀').join(),
+      ]) {
+        final client = _client(
+          (_) async => http.Response.bytes(
+            utf8.encode(
+              jsonEncode({
+                'checkIns': [
+                  {
+                    'checkInId': 'opaque-1',
+                    'note': note,
+                    'createdAt': '2026-10-07T02:00:00.500Z',
+                  },
+                ],
+                'nextCursor': null,
+              }),
+            ),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          ),
+        );
+
+        final result = await BackendCheckInRepository(client)
+            .readOwnForDate(date: '2026-10-07', timeZone: 'Asia/Singapore');
+        client.close();
+        expect(result, isA<Failure<CheckInHistoryPage>>());
+      }
+
+      final client = _client(
+        (_) async => http.Response.bytes(
+          utf8.encode(
+            jsonEncode({
+              'checkIns': [
+                {
+                  'checkInId': 'opaque-1',
+                  'note': List.filled(500, '😀').join(),
+                  'createdAt': '2026-10-07T02:00:00.500Z',
+                },
+              ],
+              'nextCursor': null,
+            }),
+          ),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        ),
+      );
+      final result = await BackendCheckInRepository(client)
+          .readOwnForDate(date: '2026-10-07', timeZone: 'Asia/Singapore');
+      client.close();
+      expect(
+        (result as Success<CheckInHistoryPage>).value.checkIns.single.note,
+        List.filled(500, '😀').join(),
+      );
+    });
+
     test('maps the stable privacy-safe unavailable failure', () async {
       final client = _client(
         (request) async => http.Response(
