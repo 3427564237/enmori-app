@@ -138,6 +138,7 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final state = ref.watch(personaSessionControllerProvider);
     final controller = ref.read(personaSessionControllerProvider.notifier);
     final collection = state.collection;
@@ -242,11 +243,33 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                                             () => _selected = persona.personaId,
                                           )
                                         : null,
-                                    child: Text(
-                                      _selected == persona.personaId
-                                          ? 'Selected'
-                                          : 'Select',
-                                    ),
+                                    style: _selected == persona.personaId
+                                        ? OutlinedButton.styleFrom(
+                                            backgroundColor:
+                                                colors.primaryContainer,
+                                            foregroundColor:
+                                                colors.onPrimaryContainer,
+                                            side: BorderSide(
+                                              color: colors.primary,
+                                              width: 2,
+                                            ),
+                                          )
+                                        : null,
+                                    child: _selected == persona.personaId
+                                        ? const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              ExcludeSemantics(
+                                                child: Icon(
+                                                  Icons.check,
+                                                  size: 18,
+                                                ),
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text('Selected'),
+                                            ],
+                                          )
+                                        : const Text('Select'),
                                   ),
                                 ),
                                 OutlinedButton(
