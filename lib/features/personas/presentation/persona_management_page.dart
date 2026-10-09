@@ -226,35 +226,49 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                               collection.activePersonaId == persona.personaId
                                   ? 'Active'
                                   : 'Inactive',
+                              semanticsLabel:
+                                  collection.activePersonaId ==
+                                      persona.personaId
+                                  ? 'Current activation status: Active'
+                                  : 'Current activation status: Inactive',
                             ),
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
                               children: [
-                                Semantics(
-                                  selected: _selected == persona.personaId,
-                                  child: OutlinedButton(
-                                    key: Key(
-                                      'persona-select-${persona.personaId}',
-                                    ),
-                                    onPressed: enabled
-                                        ? () => setState(
-                                            () => _selected = persona.personaId,
-                                          )
-                                        : null,
-                                    style: _selected == persona.personaId
-                                        ? OutlinedButton.styleFrom(
-                                            backgroundColor:
-                                                colors.primaryContainer,
-                                            foregroundColor:
-                                                colors.onPrimaryContainer,
-                                            side: BorderSide(
-                                              color: colors.primary,
-                                              width: 2,
-                                            ),
-                                          )
-                                        : null,
+                                OutlinedButton(
+                                  key: Key(
+                                    'persona-select-${persona.personaId}',
+                                  ),
+                                  onPressed: enabled
+                                      ? () => setState(
+                                          () => _selected = persona.personaId,
+                                        )
+                                      : null,
+                                  style: _selected == persona.personaId
+                                      ? OutlinedButton.styleFrom(
+                                          backgroundColor:
+                                              colors.primaryContainer,
+                                          foregroundColor:
+                                              colors.onPrimaryContainer,
+                                          side: BorderSide(
+                                            color: colors.primary,
+                                            width: 2,
+                                          ),
+                                        )
+                                      : null,
+                                  child: Semantics(
+                                    selected: _selected == persona.personaId,
+                                    label: _selected == persona.personaId
+                                        ? 'Selected for activation: ${persona.fields.displayName}'
+                                        : 'Select for activation: ${persona.fields.displayName}',
+                                    value:
+                                        collection.activePersonaId ==
+                                            persona.personaId
+                                        ? 'Currently active'
+                                        : 'Not active',
+                                    excludeSemantics: true,
                                     child: _selected == persona.personaId
                                         ? const Row(
                                             mainAxisSize: MainAxisSize.min,

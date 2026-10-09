@@ -1,4 +1,4 @@
-import 'dart:ui' show Tristate;
+import 'dart:ui' show SemanticsAction, Tristate;
 
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/personas/domain/persona.dart';
@@ -120,10 +120,18 @@ void main() {
       final selected = tester.getSemantics(
         find.byKey(Key('persona-select-${_persona.personaId}')),
       );
-      // Flutter merges the explicit selected state into the enclosing row.
-      // The row still exposes Inactive independently of local selection.
-      expect(selected.parent?.flagsCollection.isSelected, Tristate.isTrue);
-      expect(selected.parent?.label, contains('Inactive'));
+      expect(selected.flagsCollection.isSelected, Tristate.isTrue);
+      expect(selected.label, 'Selected for activation: Guide');
+      expect(selected.value, 'Not active');
+      expect(selected.flagsCollection.isButton, isTrue);
+      expect(
+        selected.parent?.flagsCollection.isSelected,
+        isNot(Tristate.isTrue),
+      );
+      expect(
+        selected.parent?.label,
+        contains('Current activation status: Inactive'),
+      );
       expect(find.text('Inactive'), findsOneWidget);
       final activate = find.byKey(const Key('persona-activate'));
       await _focusByTraversal(tester, activate);
@@ -135,6 +143,119 @@ void main() {
       await tester.pumpAndSettle();
       expect(repository.activations, 0);
       expect(_ownsPrimaryFocus(tester, activate), isTrue);
+    },
+  );
+
+  testWidgets(
+    'spoken selection changes without changing either Persona activation status',
+    (tester) async {
+      tester.view.physicalSize = const Size(800, 1100);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final activePersona = Persona(
+        personaId: 'b' * 64,
+        fields: const PersonaFields(
+          displayName: 'Companion',
+          tone: PersonaTone.warm,
+          responseLength: PersonaResponseLength.concise,
+          formatStyle: PersonaFormatStyle.plain,
+        ),
+        createdAt: _persona.createdAt,
+        updatedAt: _persona.updatedAt,
+        revision: 1,
+      );
+      final repository = _Repository(
+        items: [_persona, activePersona],
+        activePersonaId: activePersona.personaId,
+      );
+      await _pump(
+        tester,
+        repository,
+        PersonaManagementPage(onCreate: () {}, onEdit: (_) {}, onBack: () {}),
+      );
+      final inactiveButton = find.byKey(
+        Key('persona-select-${_persona.personaId}'),
+      );
+      final activeButton = find.byKey(
+        Key('persona-select-${activePersona.personaId}'),
+      );
+      expect(
+        tester.getSemantics(inactiveButton).label,
+        'Select for activation: Guide',
+      );
+      expect(tester.getSemantics(inactiveButton).value, 'Not active');
+      expect(
+        tester.getSemantics(activeButton).label,
+        'Select for activation: Companion',
+      );
+      expect(tester.getSemantics(activeButton).value, 'Currently active');
+      await _focusByTraversal(tester, inactiveButton);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(_ownsPrimaryFocus(tester, inactiveButton), isTrue);
+      final selectedInactive = tester.getSemantics(inactiveButton);
+      final unselectedActive = tester.getSemantics(activeButton);
+      expect(selectedInactive.label, 'Selected for activation: Guide');
+      expect(selectedInactive.value, 'Not active');
+      expect(selectedInactive.flagsCollection.isButton, isTrue);
+      expect(
+        selectedInactive.getSemanticsData().hasAction(SemanticsAction.tap),
+        isTrue,
+      );
+      expect(selectedInactive.flagsCollection.isSelected, Tristate.isTrue);
+      expect(unselectedActive.label, 'Select for activation: Companion');
+      expect(unselectedActive.value, 'Currently active');
+      expect(unselectedActive.flagsCollection.isButton, isTrue);
+      expect(
+        unselectedActive.getSemanticsData().hasAction(SemanticsAction.tap),
+        isTrue,
+      );
+      expect(unselectedActive.flagsCollection.isSelected, Tristate.isFalse);
+      expect(
+        selectedInactive.parent?.label,
+        contains('Current activation status: Inactive'),
+      );
+      expect(
+        unselectedActive.parent?.label,
+        contains('Current activation status: Active'),
+      );
+      expect(
+        selectedInactive.parent?.flagsCollection.isSelected,
+        isNot(Tristate.isTrue),
+      );
+      unselectedActive.owner!.performAction(
+        unselectedActive.id,
+        SemanticsAction.tap,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSemantics(inactiveButton).label,
+        'Select for activation: Guide',
+      );
+      expect(
+        tester.getSemantics(inactiveButton).flagsCollection.isSelected,
+        Tristate.isFalse,
+      );
+      expect(tester.getSemantics(inactiveButton).value, 'Not active');
+      expect(
+        tester.getSemantics(activeButton).label,
+        'Selected for activation: Companion',
+      );
+      expect(
+        tester.getSemantics(activeButton).flagsCollection.isSelected,
+        Tristate.isTrue,
+      );
+      expect(tester.getSemantics(activeButton).value, 'Currently active');
+      expect(
+        tester.getSemantics(inactiveButton).parent?.label,
+        contains('Current activation status: Inactive'),
+      );
+      expect(
+        tester.getSemantics(activeButton).parent?.label,
+        contains('Current activation status: Active'),
+      );
+      expect(repository.activations, 0);
     },
   );
 
@@ -268,13 +389,24 @@ final _persona = Persona(
 );
 
 final class _Repository implements PersonaRepository {
+  _Repository({List<Persona>? items, this.activePersonaId})
+    : items = items ?? [_persona];
+
+  final List<Persona> items;
+  final String? activePersonaId;
   int creates = 0;
   int activations = 0;
   int deletions = 0;
   @override
   Future<Result<PersonaCollection>> readAll({
     bool Function()? isEligible,
-  }) async => Success(PersonaCollection(items: [_persona], stateRevision: 1));
+  }) async => Success(
+    PersonaCollection(
+      items: items,
+      stateRevision: 1,
+      activePersonaId: activePersonaId,
+    ),
+  );
   @override
   Future<Result<PersonaMutation>> readOne(
     String personaId, {
