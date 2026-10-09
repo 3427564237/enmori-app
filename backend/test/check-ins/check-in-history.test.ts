@@ -131,18 +131,27 @@ test("invalid dates, numeric offsets and zone abbreviations fail before reposito
     { date, timeZone: "EST" },
     { date, timeZone: "MST" },
     { date, timeZone: "CET" },
+    { date, timeZone: "EET" },
+    { date, timeZone: "HST" },
+    { date, timeZone: "MET" },
+    { date, timeZone: "WET" },
+    { date, timeZone: "GMT" },
   ]) {
     const result = await useCase.execute({ principal: { firebaseUid: uid }, ...input });
     assert.equal(result.ok, false);
     if (!result.ok) assert.equal(result.failure.code, "REQUEST_INVALID");
   }
   assert.equal(calls, 0);
-  for (const timeZone of ["Asia/Singapore", "US/Eastern", "UTC", "Singapore", "Japan", "Portugal"]) {
+  const backwardCompatibleAliases = [
+    "Cuba", "Egypt", "Eire", "Hongkong", "Iceland", "Iran", "Israel", "Jamaica",
+    "Japan", "Kwajalein", "Libya", "Navajo", "Poland", "Portugal", "Singapore", "Turkey", "W-SU",
+  ];
+  for (const timeZone of ["Asia/Singapore", "US/Eastern", "UTC", ...backwardCompatibleAliases]) {
     const result = await useCase.execute({ principal: { firebaseUid: uid }, date, timeZone });
     assert.equal(result.ok, true);
   }
-  assert.equal(calls, 6);
-  assert.deepEqual(acceptedZones.slice(-3), ["Singapore", "Japan", "Portugal"]);
+  assert.equal(calls, 20);
+  assert.deepEqual(acceptedZones.slice(-backwardCompatibleAliases.length), backwardCompatibleAliases);
 });
 
 test("history repository binds cursor to current authority before querying Check-ins", async () => {
