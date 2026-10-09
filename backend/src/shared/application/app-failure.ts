@@ -1,4 +1,9 @@
 export const APP_FAILURE_CATALOGUE = {
+  PERSONA_INVALID: { statusCode: 422, message: "Use a name of 1–50 characters, valid style options and valid versions." },
+  PERSONA_UNAVAILABLE: { statusCode: 404, message: "This Persona is unavailable." },
+  PERSONA_LIMIT_REACHED: { statusCode: 409, message: "You can save up to 5 Personas. Delete one before creating another." },
+  PERSONA_COMMAND_CONFLICT: { statusCode: 409, message: "This create request conflicts with an earlier operation. Reload before continuing." },
+  PERSONA_REVISION_PRECONDITION_FAILED: { statusCode: 412, message: "Your Personas changed. Reload them before trying again." },
   ADD_FRIEND_TARGET_UNAVAILABLE: { statusCode: 404, message: "This person is unavailable." },
   FRIEND_REQUEST_UNAVAILABLE: { statusCode: 404, message: "This friend request is unavailable." },
   EVENT_UNAVAILABLE: { statusCode: 404, message: "This event is unavailable." },
