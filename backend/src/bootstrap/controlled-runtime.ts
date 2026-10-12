@@ -16,11 +16,15 @@ import type { FastifyInstance } from "fastify";
 
 import { CreateCheckIn } from "../check-ins/application/create-check-in.js";
 import { GetCheckIn } from "../check-ins/application/get-check-in.js";
+import { ListOwnCheckInsForDate } from "../check-ins/application/check-in-history.js";
 import { GetInterestTags } from "../interests/application/get-interest-tags.js";
 import { GetOwnInterests } from "../interests/application/get-own-interests.js";
 import { ReplaceOwnInterests } from "../interests/application/replace-own-interests.js";
 import { FirestoreInterestRepository } from "../interests/infrastructure/firestore-interest-repository.js";
 import { FirestoreCheckInRepository } from "../check-ins/infrastructure/firestore-check-in-repository.js";
+import { FirestoreCheckInHistoryRepository } from "../check-ins/infrastructure/firestore-check-in-history-repository.js";
+import { FirebaseAdminCheckInHistoryGateway } from "../check-ins/infrastructure/firebase-admin-check-in-history-gateway.js";
+import { createHistoryCursorCodec } from "../check-ins/infrastructure/aes-gcm-history-cursor-codec.js";
 import { CompleteOnboarding } from "../onboarding/application/complete-onboarding.js";
 import { GetOnboarding } from "../onboarding/application/get-onboarding.js";
 import { FirestoreOnboardingRepository } from "../onboarding/infrastructure/firestore-onboarding-repository.js";
@@ -69,6 +73,11 @@ async function createControlledRuntime(
       getOnboarding: new GetOnboarding(onboardingRepository),
       createCheckIn: new CreateCheckIn(checkInRepository, clock, ids),
       getCheckIn: new GetCheckIn(checkInRepository),
+      listOwnCheckInsForDate: new ListOwnCheckInsForDate(
+        new FirestoreCheckInHistoryRepository(new FirebaseAdminCheckInHistoryGateway(getFirestore(firebaseApp))),
+        createHistoryCursorCodec(),
+        clock,
+      ),
       getInterestTags: new GetInterestTags(interestRepository),
       getOwnInterests: new GetOwnInterests(interestRepository),
       replaceOwnInterests: new ReplaceOwnInterests(interestRepository),

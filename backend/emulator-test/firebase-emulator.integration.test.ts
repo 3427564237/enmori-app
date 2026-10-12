@@ -8,6 +8,10 @@ import { getAuth, type Auth } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
 import { FirestoreCheckInRepository } from "../src/check-ins/infrastructure/firestore-check-in-repository.js";
+import { FirestoreCheckInHistoryRepository } from "../src/check-ins/infrastructure/firestore-check-in-history-repository.js";
+import { FirebaseAdminCheckInHistoryGateway } from "../src/check-ins/infrastructure/firebase-admin-check-in-history-gateway.js";
+import { ListOwnCheckInsForDate } from "../src/check-ins/application/check-in-history.js";
+import { createHistoryCursorCodec } from "../src/check-ins/infrastructure/aes-gcm-history-cursor-codec.js";
 import { FirestoreInterestRepository } from "../src/interests/infrastructure/firestore-interest-repository.js";
 import { normalizeNote } from "../src/check-ins/domain/note.js";
 import { FirestoreOnboardingRepository } from "../src/onboarding/infrastructure/firestore-onboarding-repository.js";
@@ -16,6 +20,16 @@ import { validateIdempotencyKey } from "../src/shared/domain/idempotency-key.js"
 import { requireControlledEmulatorEnvironment } from "../src/shared/infrastructure/firebase/controlled-emulator-environment.js";
 import { FirebaseIdentityVerifier } from "../src/shared/infrastructure/firebase/firebase-identity-verifier.js";
 import { FirebaseAdminFirestoreGateway } from "../src/shared/infrastructure/firebase/firestore-gateway.js";
+import { buildApp } from "../src/bootstrap/build-app.js";
+import { CompleteOnboarding } from "../src/onboarding/application/complete-onboarding.js";
+import { GetOnboarding } from "../src/onboarding/application/get-onboarding.js";
+import { CreateCheckIn } from "../src/check-ins/application/create-check-in.js";
+import { GetCheckIn } from "../src/check-ins/application/get-check-in.js";
+import { GetInterestTags } from "../src/interests/application/get-interest-tags.js";
+import { GetOwnInterests } from "../src/interests/application/get-own-interests.js";
+import { ReplaceOwnInterests } from "../src/interests/application/replace-own-interests.js";
+import { SystemClock } from "../src/shared/infrastructure/system-clock.js";
+import { CryptoOpaqueIdGenerator } from "../src/shared/infrastructure/crypto-opaque-id-generator.js";
 
 const environment = requireControlledEmulatorEnvironment(process.env);
 const FIREBASE_UID = "controlled-r10-member-001";
@@ -203,6 +217,130 @@ test("fixture reset clears Auth and Firestore Emulator state", async () => {
 
   await assert.rejects(auth.getUser(FIREBASE_UID), { code: "auth/user-not-found" });
   assert.equal((await firestore.doc("accounts/reset-proof").get()).exists, false);
+});
+
+test("S3-04 history audit 2026-10-08 covers the complete synthetic Check-in dataset", async () => {
+  const dataset = [
+    { id: "s3-04-history-audit-001", createdAt: "2026-10-07T23:59:59.000Z" },
+    { id: "s3-04-history-audit-002", createdAt: "2026-10-08T00:00:00.001Z" },
+    { id: "s3-04-history-audit-003", createdAt: "2026-10-08T12:34:56.789Z" },
+    { id: "s3-04-history-audit-004", createdAt: "2026-10-08T23:59:59.999Z" },
+    { id: "s3-04-history-audit-005", createdAt: "2026-10-09T00:00:00.000Z" },
+  ] as const;
+  for (const [index, item] of dataset.entries()) {
+    await firestore.doc(`check_ins/${item.id}`).create({
+      ownerAccountId: "s3-04-history-audit-account",
+      note: `Synthetic audit fixture ${index + 1}`,
+      createdAt: item.createdAt,
+    });
+  }
+
+  const expectedCount = dataset.length;
+  const counts = {
+    total: 0,
+    string: 0,
+    canonicalFixedMillisecondUtc: 0,
+    otherStringFormat: 0,
+    nonString: 0,
+    years: {} as Record<string, number>,
+  };
+  let pages = 0;
+  let afterId: string | undefined;
+  const pageSize = 2;
+  while (true) {
+    let query = firestore.collection("check_ins")
+      .orderBy("__name__")
+      .limit(pageSize);
+    if (afterId !== undefined) query = query.startAfter(afterId);
+    const page = await query.get();
+    if (page.empty) break;
+    pages += 1;
+    for (const document of page.docs) {
+      counts.total += 1;
+      const value: unknown = document.get("createdAt");
+      if (typeof value !== "string") {
+        counts.nonString += 1;
+        continue;
+      }
+      counts.string += 1;
+      const canonical = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) &&
+        Number.isFinite(Date.parse(value)) &&
+        new Date(value).toISOString() === value;
+      if (canonical) {
+        counts.canonicalFixedMillisecondUtc += 1;
+        const year = value.slice(0, 4);
+        counts.years[year] = (counts.years[year] ?? 0) + 1;
+      } else {
+        counts.otherStringFormat += 1;
+      }
+    }
+    afterId = page.docs.at(-1)!.id;
+  }
+
+  assert.equal(counts.total, expectedCount);
+  assert.equal(counts.string, expectedCount);
+  assert.equal(counts.canonicalFixedMillisecondUtc, expectedCount);
+  assert.equal(counts.otherStringFormat, 0);
+  assert.equal(counts.nonString, 0);
+  assert.equal(pages, 3);
+  console.log(JSON.stringify({
+    audit: "S3-04-history-createdAt-compatibility",
+    dataset: "S3-04-history-audit-2026-10-08",
+    scope: "demo-enmori-rmvp01a-r10 isolated Auth/Firestore Emulator only",
+    counts,
+    pages,
+    pageSize,
+    coverage: `${counts.total}/${expectedCount}`,
+    passed: true,
+  }));
+});
+
+test("History API pages the isolated synthetic owner data through Auth and Firestore Emulator", async () => {
+  const token = await createControlledUser({ uid: FIREBASE_UID, email: "history.member@example.invalid" });
+  await onboarding.complete(onboardingCommand());
+  const syntheticRows = Array.from({ length: 21 }, (_, index) => ({
+    id: `history-synthetic-${String(index + 1).padStart(3, "0")}`,
+    createdAt: `2026-09-05T01:${String(index).padStart(2, "0")}:00.000Z`,
+    note: `Synthetic history item ${index + 1}`,
+  }));
+  for (const row of syntheticRows) {
+    await firestore.doc(`check_ins/${row.id}`).create({ ownerAccountId: "controlled-account-001", note: row.note, createdAt: row.createdAt, checkInVisibility: "private" });
+  }
+
+  const clock = new SystemClock();
+  const ids = new CryptoOpaqueIdGenerator();
+  const checkInRepository = new FirestoreCheckInRepository(new FirebaseAdminFirestoreGateway(firestore));
+  const app = await buildApp({
+    identityVerifier: new FirebaseIdentityVerifier(auth),
+    completeOnboarding: new CompleteOnboarding(onboarding, clock, ids),
+    getOnboarding: new GetOnboarding(onboarding),
+    createCheckIn: new CreateCheckIn(checkInRepository, clock, ids),
+    getCheckIn: new GetCheckIn(checkInRepository),
+    getInterestTags: new GetInterestTags(interests),
+    getOwnInterests: new GetOwnInterests(interests),
+    replaceOwnInterests: new ReplaceOwnInterests(interests),
+    listOwnCheckInsForDate: new ListOwnCheckInsForDate(
+      new FirestoreCheckInHistoryRepository(new FirebaseAdminCheckInHistoryGateway(firestore)),
+      createHistoryCursorCodec(),
+      clock,
+    ),
+  });
+  try {
+    const first = await app.inject({ method: "GET", url: "/v1/me/check-ins?date=2026-09-05&timeZone=UTC", headers: { authorization: `Bearer ${token}` } });
+    assert.equal(first.statusCode, 200);
+    assert.equal(first.headers["cache-control"], "no-store");
+    const firstBody = first.json() as { checkIns: Array<{ checkInId: string }>; nextCursor: string | null };
+    assert.equal(firstBody.checkIns.length, 20);
+    assert.notEqual(firstBody.nextCursor, null);
+    const second = await app.inject({ method: "GET", url: `/v1/me/check-ins?date=2026-09-05&timeZone=UTC&cursor=${encodeURIComponent(firstBody.nextCursor!)}`, headers: { authorization: `Bearer ${token}` } });
+    assert.equal(second.statusCode, 200);
+    const secondBody = second.json() as { checkIns: Array<{ checkInId: string }>; nextCursor: string | null };
+    assert.equal(secondBody.checkIns.length, 1);
+    assert.equal(secondBody.nextCursor, null);
+    assert.equal(new Set([...firstBody.checkIns, ...secondBody.checkIns].map(row => row.checkInId)).size, 21);
+  } finally {
+    await app.close();
+  }
 });
 
 test("Auth Emulator verifies ordinary and Admin-claimed principals without promoting claims", async () => {

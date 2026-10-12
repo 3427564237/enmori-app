@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "check_ins",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerAccountId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" },
+        { "fieldPath": "__name__", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
