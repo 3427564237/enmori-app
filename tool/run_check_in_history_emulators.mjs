@@ -12,7 +12,7 @@ import {
 
 assert.equal(process.version, 'v24.19.0', 'Use the pinned Backend runtime');
 const serial = process.argv.at(-1);
-assert.match(serial ?? '', /^emulator-\d+$/, 'A dedicated Android Emulator is required');
+assert.match(serial ?? '', /^[A-Za-z0-9._:-]+$/, 'An authorized Android device is required');
 
 function run(program, args, options = {}) {
   return new Promise((resolveRun, reject) => {
@@ -41,6 +41,7 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
     env.CI = 'true';
     env.FIREBASE_CLI_DISABLE_USAGE = 'true';
     env.FIREBASE_EMULATORS_PATH = process.env.FIREBASE_EMULATORS_PATH ?? join(process.env.HOME, '.cache/firebase/emulators');
+    env.ENMORI_CAPTURE_DEVICE_SCREENSHOTS = process.env.ENMORI_CAPTURE_DEVICE_SCREENSHOTS ?? 'false';
     env.ENMORI_TEST_PRIVATE_DIRECTORY = privateDirectory;
     env.LOCALAPPDATA = join(privateDirectory, 'localappdata');
     mkdirSync(env.LOCALAPPDATA);
@@ -76,7 +77,8 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
   for (const name of ['ENMORI_TEST_PRIVATE_DIRECTORY', 'ENMORI_TEST_FLUTTER',
     'ENMORI_TEST_ADB', 'ANDROID_HOME', 'JAVA_HOME', 'PUB_CACHE', 'GRADLE_USER_HOME',
     'GIT_CONFIG_COUNT', 'GIT_CONFIG_KEY_0', 'GIT_CONFIG_VALUE_0', 'LOCALAPPDATA',
-    'DART_TEST_CONFIG', 'ProgramFiles(x86)', 'JAVA_TOOL_OPTIONS', 'ANDROID_USER_HOME']) {
+    'DART_TEST_CONFIG', 'ProgramFiles(x86)', 'JAVA_TOOL_OPTIONS', 'ANDROID_USER_HOME',
+    'ENMORI_CAPTURE_DEVICE_SCREENSHOTS']) {
     env[name] = process.env[name];
   }
   await run(process.execPath, [resolve('tool/run_check_in_history_emulators.mjs'), '--isolated', serial], { env });
@@ -87,9 +89,11 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
   assert.equal(directory, process.env.ENMORI_CONTROLLED_PROFILE_DIRECTORY);
   const adb = process.env.ENMORI_TEST_ADB;
   const api = Number(capture(adb, ['-s', serial, 'shell', 'getprop', 'ro.build.version.sdk']));
-  assert.equal(api, 36, 'Use the isolated API 36 AVD');
+  const isEmulator = capture(adb, ['-s', serial, 'shell', 'getprop', 'ro.kernel.qemu']) === '1';
+  assert.ok(api >= 35, 'Android API 35 or newer is required');
+  if (isEmulator) assert.equal(api, 36, 'Use the isolated API 36 AVD');
   const zone = capture(adb, ['-s', serial, 'shell', 'getprop', 'persist.sys.timezone']);
-  assert.ok(zone.length > 0 && zone.includes('/'), 'The AVD must expose a regional IANA zone');
+  assert.ok(zone.length > 0 && zone.includes('/'), 'The device must expose a regional IANA zone');
   const dateParts = new Intl.DateTimeFormat('en-CA', {
     timeZone: zone,
     year: 'numeric', month: '2-digit', day: '2-digit',
@@ -144,6 +148,7 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
   let app;
   let server;
   let accountId;
+  const reversedPorts = [];
   try {
     const gateway = new FirebaseAdminFirestoreGateway(firestore);
     const onboarding = new FirestoreOnboardingRepository(gateway);
@@ -217,14 +222,21 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
     server = createServer({ key: readFileSync(key), cert: readFileSync(certificate) }, app.routing);
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');
+    const apiPort = server.address().port;
+    const existingReverses = capture(adb, ['-s', serial, 'reverse', '--list']);
+    for (const port of [9099, apiPort]) {
+      assert.ok(!existingReverses.includes(`tcp:${port}`), `ADB reverse port ${port} is already in use`);
+      await run(adb, ['-s', serial, 'reverse', `tcp:${port}`, `tcp:${port}`]);
+      reversedPorts.push(port);
+    }
     const configuration = join(directory, 'fixture.json');
     writeFileSync(configuration, JSON.stringify({
-      ENMORI_API_BASE_URL: `https://10.0.2.2:${server.address().port}`,
+      ENMORI_API_BASE_URL: `https://127.0.0.1:${apiPort}`,
       ENMORI_FIREBASE_API_KEY: 'controlled-emulator-key',
       ENMORI_FIREBASE_APP_ID: '1:1234567890:android:historytest',
       ENMORI_FIREBASE_MESSAGING_SENDER_ID: '1234567890',
       ENMORI_FIREBASE_PROJECT_ID: environment.projectId,
-      ENMORI_FIREBASE_AUTH_EMULATOR_HOST: '10.0.2.2',
+      ENMORI_FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1',
       ENMORI_FIREBASE_AUTH_EMULATOR_PORT: '9099',
       ENMORI_TEST_EMAIL: email,
       ENMORI_TEST_PASSWORD: password,
@@ -233,11 +245,36 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
       ENMORI_TEST_TLS_CERTIFICATE_BASE64: readFileSync(certificate).toString('base64'),
     }), { mode: 0o600 });
 
-    await run(process.env.ENMORI_TEST_FLUTTER, [
-      'test', 'integration_test/s3_check_in_history_real_backend_test.dart',
-      '-d', serial, '--no-pub', '--reporter', 'expanded',
-      `--dart-define-from-file=${configuration}`,
-    ], { env: { ...process.env, JAVA_HOME: process.env.JAVA_HOME, ANDROID_HOME: process.env.ANDROID_HOME },
+    const captureScreenshots = process.env.ENMORI_CAPTURE_DEVICE_SCREENSHOTS === 'true';
+    const testTarget = 'integration_test/s3_check_in_history_real_backend_test.dart';
+    const flutter = process.env.ENMORI_TEST_FLUTTER;
+    const defines = [`--dart-define-from-file=${configuration}`];
+    if (captureScreenshots) {
+      await run(flutter, [
+        'build', 'apk', '--debug', '--no-pub', `--target=${testTarget}`,
+        ...defines,
+        '--dart-define=ENMORI_CAPTURE_DEVICE_SCREENSHOTS=true',
+        ...(isEmulator ? [] : ['--android-project-arg=historyTestApplicationIdSuffix=.historytest']),
+      ], {
+        env: {
+          ...process.env,
+          JAVA_HOME: process.env.JAVA_HOME,
+          ANDROID_HOME: process.env.ANDROID_HOME,
+          ...(isEmulator ? {} : { ORG_GRADLE_PROJECT_historyTestApplicationIdSuffix: '.historytest' }),
+        },
+        shell: process.platform === 'win32' });
+      if (!isEmulator) {
+        const metadata = JSON.parse(readFileSync(resolve('build/app/outputs/apk/debug/output-metadata.json'), 'utf8'));
+        assert.equal(metadata.applicationId, 'com.enmori.app.historytest', 'Do not install the test APK over the app package');
+      }
+    }
+    const flutterArgs = captureScreenshots
+      ? ['drive', '--driver=test_driver/integration_test.dart', `--target=${testTarget}`,
+        `--use-application-binary=${resolve('build/app/outputs/flutter-apk/app-debug.apk')}`,
+        '-d', serial, '--no-pub', '--timeout=180']
+      : ['test', testTarget, '-d', serial, '--no-pub', '--reporter', 'expanded', ...defines];
+    await run(flutter, flutterArgs, {
+      env: { ...process.env, JAVA_HOME: process.env.JAVA_HOME, ANDROID_HOME: process.env.ANDROID_HOME },
       shell: process.platform === 'win32' });
 
     const snapshot = await firestore.collection('check_ins').where('ownerAccountId', '==', accountId).get();
@@ -251,6 +288,9 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
     assert.deepEqual(returned, records);
     console.log(`S3_HISTORY_HOST_READBACK_PASS ownerRows=${snapshot.size} date=${date} zone=${zone}`);
   } finally {
+    for (const port of reversedPorts.reverse()) {
+      await run(adb, ['-s', serial, 'reverse', '--remove', `tcp:${port}`]).catch(() => {});
+    }
     if (server) {
       server.closeAllConnections();
       await new Promise((done) => server.close(done));
@@ -268,3 +308,4 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
     await deleteApp(firebase);
   }
 }
+
