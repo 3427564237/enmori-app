@@ -48,6 +48,25 @@ Input construction/checkpoint collaborators must observe cancellation and
 dispose request-only data. This component neither claims to stop an uncooperative
 model process nor makes that process's resources safe by clearing a timer.
 
+## Approved internal Application extension
+
+Issue [#78](https://github.com/3427564237/enmori-app/issues/78), released by
+[S-PM-1012-LI-FRIEND-SEARCH-INTERNAL-AI-A](../../../docs/decisions/2026-10-12-li-friend-search-and-internal-ai-approval.md),
+adds `submitApplication` to this same scheduler. Its synchronous factory captures
+the start view after capacity reservation, before any queue wait. The Application
+holds its per-user slot through validation, message commit and sink acceptance;
+generation settlement still frees the shared lane for another user.
+
+`RuntimeApplicationControl.effect` fences each actual synthetic atomic effect.
+Only `complete` in the delivery phase performs guarded sink acceptance and
+terminal success. Application outcomes contain no candidate text. Terminal
+disposal clears work and candidate holders; a pending generation is quarantined
+until its transport actually settles. The existing `submit` component API and
+its structural-candidate-only success remain supported and independently tested.
+
+See [internal Conversation lifecycle](../ai-conversation/README.md) for the
+handwritten fake-Port orchestration. This extension has no Bootstrap wiring.
+
 ## Parsing and interpretation
 
 `parseOutput` uses fatal UTF-8 decoding and the exact two-string-property Q31
@@ -66,12 +85,12 @@ classifier. `invalid_output` never returns the rejected content.
 
 ## Explicit integration obligations
 
-No model input/output token limit, loaded model/digest identity, complete
-semantic policy, data authorization/revalidation, Conversation/Persona lifecycle,
-fallback, persistence or pre-delivery acceptance is implemented here. The
-injected checkpoint can demonstrate budget/cancellation/failure propagation;
-its fake success is not evidence for those later gates. It must not persist or
-deliver a candidate as a side effect.
+Real model input/output token enforcement, loaded model/digest verification,
+semantic safety, distributed authority reads, real persistence and network
+delivery remain outside this module. The approved Application extension exercises
+its lifecycle with explicit fakes. Fake success is not evidence for those real
+integration gates. The original component `checkCandidate` hook still must not
+persist or deliver a candidate as a side effect.
 
 A later product integration must keep the authoritative application terminal
 boundary across its complete processing/persistence/delivery flow and implement

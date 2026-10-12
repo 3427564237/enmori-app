@@ -11,6 +11,99 @@
     }
   ],
   "paths": {
+    "/v1/me/friends/search": {
+      "get": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "FS01-FS05: requester authorization precedes input validation. Reject Cc/Cf/Zl/Zp and malformed Unicode before ECMAScript trim, NFC, locale-independent lowercase, NFC; require 1-50 normalized Unicode scalars. Substring matches current authorized DisplayName only. Scan 20 owner entries plus one unexpanded lookahead; never scan to fill. Filtered empty pages may continue. Current authority is reread transactionally before matching; missing/malformed authority fails the page. No writes or ordinary/real-account enablement.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Single DisplayName query, normalized by FS01. Duplicate and unknown query fields are invalid. No Username fallback.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Single canonical unpadded base64url UTF-8 JSON with exact ordered keys {v:1,q:<normalized query>,after:<canonical UUID-v4>}. Query must match and entry must still exist in the authenticated owner initialized index. Untrusted continuation, not authority or a snapshot.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful isolated synthetic result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyFriendsPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "searchMyFriends",
+        "summary": "Search authorized My Friends by DisplayName in an isolated Emulator"
+      }
+    },
     "/v1/me/personas": {
       "get": {
         "x-enmori-environment": "isolated-emulator",

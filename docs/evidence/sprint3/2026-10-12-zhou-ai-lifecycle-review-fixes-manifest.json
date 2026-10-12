@@ -1,0 +1,878 @@
+{
+  "recordedAtSGT": "2026-10-12T10:22:34.2548767+08:00",
+  "sourceHead": "141d120ab12468cd0b0b05cd7288d474d07724e5",
+  "sourceTree": "85176748c968be76c6ecbfad091c90d2da8164a8",
+  "branch": "codex/zhou-ai-lifecycle-local-20261012",
+  "previousDeliveryHead": "7ddf803a165504f7493e2e1465de12374970d1cc",
+  "scope": [
+    "C04/LC08 unresolved write and immediate Retry fence",
+    "Q17 optional Check-In fields"
+  ],
+  "toolchain": {
+    "node": "24.19.0",
+    "pnpm": "11.19.0",
+    "typescript": "7.0.2",
+    "dependenciesChanged": false
+  },
+  "finalVerification": {
+    "command": "pnpm backend:verify",
+    "runner": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\verify.ps1",
+    "runnerSha256": "f38fbd792f5954f53036dca0fc3e47dd5d8d0daa857112668cdda589a9d178d2",
+    "log": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\backend-verify-final-02.log",
+    "exitCode": 0,
+    "tests": 512,
+    "passed": 512,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "existingTests": 465,
+    "addedAcknowledgmentTests": 25,
+    "addedQ17Tests": 22
+  },
+  "baselineReproductions": [
+    {
+      "name": "ack-before-fix-02.log",
+      "passed": 2,
+      "failed": 10,
+      "exitCode": 1
+    },
+    {
+      "name": "q17-before-tests.log",
+      "passed": 7,
+      "failed": 15,
+      "exitCode": 1
+    }
+  ],
+  "trackedVerificationInputs": [
+    {
+      "path": "api/openapi.json",
+      "gitBlob": "4a4c77d44407011aea71724949dde0c88158ae4f",
+      "workingFileSha256": "e2bd7cbf5139691988d4f974a7f52ceb4d5c03e19c9b70722617f0f5bf330b6c"
+    },
+    {
+      "path": "backend/src/account/application/account-model.ts",
+      "gitBlob": "164573c1eda4f29244dc61d2ecb63600d07647ee",
+      "workingFileSha256": "966f4c0c3fff60012e276030a2c76e35b22f9a1f09f95319362b95a9f8a1a4d7"
+    },
+    {
+      "path": "backend/src/account/application/own-account-preferences.ts",
+      "gitBlob": "b9efd97cc5fafe7d95c0d7c1322975902960b55c",
+      "workingFileSha256": "c359ed6bcab2f96f13b6f1590390dcef30fd1411f00e80d4281a73e86218b4fd"
+    },
+    {
+      "path": "backend/src/account/domain/profile-values.ts",
+      "gitBlob": "4916dd5ff9f4fabe1f5b8054a571933bf0afa735",
+      "workingFileSha256": "fb7fcd714f1a57f7c7e2a19b16141371273aa3417c25d798bb89a0ef221ccafe"
+    },
+    {
+      "path": "backend/src/account/infrastructure/firestore-account-preferences-repository.ts",
+      "gitBlob": "d2a416f9babf2f4c910448f259c6dd65bddf34c0",
+      "workingFileSha256": "2c89a9ffbd3675db5c3e5925b1b4bacc97d720ebd6b1fd2b142bb0c63b55f86a"
+    },
+    {
+      "path": "backend/src/account/ports/account-preferences-repository.ts",
+      "gitBlob": "b7191d3764ee4d4787da7f87822c174a5cc42682",
+      "workingFileSha256": "498d777b9031b19adfaeaa1215a272c2e1f71691783adccf6034fdc06a85d482"
+    },
+    {
+      "path": "backend/src/account/transport/register-routes.ts",
+      "gitBlob": "71d3f3f23f3ded7e90f76df9b7450d3528eef4c6",
+      "workingFileSha256": "5e9b1bb4ef740fa5fd560fa9f053a2529b4be11f0b7c861e08d873e917be7f73"
+    },
+    {
+      "path": "backend/src/account/transport/schemas.ts",
+      "gitBlob": "bd3ec7d4c6340d9996d3a9d93db1c01be3220724",
+      "workingFileSha256": "f8228f768971d042b62f19c55ebb45a941dd7ad2bd74e0247af2b2f4e07c9a5a"
+    },
+    {
+      "path": "backend/src/ai-conversation/README.md",
+      "gitBlob": "5c1d12c9a7a962511f6b1ab1b00dcef41ec92999",
+      "workingFileSha256": "6b9dbbd254b698f29bd1d3b18d3335d6d96aeabd13d32a968756971f4da0ddb6"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/capture-context.ts",
+      "gitBlob": "fc72f57fcc6d2a123420dbf5b2cae1937c49849b",
+      "workingFileSha256": "24ac21102b157b955ea7dd806f9cb1cde4ceb4b9e93ded71ff6245b819beb1e8"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/conversation-application.ts",
+      "gitBlob": "abc697cddbf41cbfea22e7b351ace4f69cd70e48",
+      "workingFileSha256": "bbf578882b6d468391e7d37adf44a31c6156db87ee60cd4ee8e72e5d3b4fa22d"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/conversation-lifecycle.ts",
+      "gitBlob": "04046741b66d126a9359daf4009986ce90a7fbcf",
+      "workingFileSha256": "1a6b3d6a83a4412ce17cf17d2948500edb34bb9c08e9c7a843a018dc82738fbd"
+    },
+    {
+      "path": "backend/src/ai-runtime/README.md",
+      "gitBlob": "bf90c0d056ace2f6bf7201136b908fa007c2269f",
+      "workingFileSha256": "898b0146c55ae3f2ef3287aa9baac55e8fa42001284cd8ca327d9c08879ecc73"
+    },
+    {
+      "path": "backend/src/ai-runtime/application/bounded-ai-runtime.ts",
+      "gitBlob": "c2069af04847245502f9c58be5e1e23ce6dede23",
+      "workingFileSha256": "6b2689f8e07c6a93457a9742c4839b96ae371a8ff76b35fca24507ad2e4848ca"
+    },
+    {
+      "path": "backend/src/ai-runtime/domain/parse-output.ts",
+      "gitBlob": "065c3692b75ed3800f4d7a19df9a856f305f5dc8",
+      "workingFileSha256": "53e53f2cc735599f3ebb431bf40a5002339e95e33ab3050aa10eba377bb91c25"
+    },
+    {
+      "path": "backend/src/ai-runtime/infrastructure/monotonic-runtime-clock.ts",
+      "gitBlob": "e6745c2de3f47ec4917bdd336d19ef8d211078b3",
+      "workingFileSha256": "2a03b1aed9489059100fdcc9362659c12f7b535dd488bf2001b115b51b8132d5"
+    },
+    {
+      "path": "backend/src/ai-runtime/ports/generation-transport.ts",
+      "gitBlob": "d5eee6c7394a9eaf9d1c1901ba1d196813ff8f72",
+      "workingFileSha256": "49e4b67f24eff04286ebd717a5dece28ae0cfdaabd81ff3c65d9b4604106f007"
+    },
+    {
+      "path": "backend/src/ai-runtime/ports/runtime-clock.ts",
+      "gitBlob": "9562024b27c38a628c1ddb0de66dd4c7ab6c77b2",
+      "workingFileSha256": "a4f1a242414046d7d68d20c51e1d6b5fc777acad71b4f6cb84e22762f94f40c0"
+    },
+    {
+      "path": "backend/src/bootstrap/build-app.ts",
+      "gitBlob": "5c0fac99f696981b0c7596c5e6c9580b2831a94f",
+      "workingFileSha256": "081b9f1b21694cab4b7a8d12033b9824fe4ae809d208ba10ed84907982c4334b"
+    },
+    {
+      "path": "backend/src/bootstrap/controlled-runtime-configuration.ts",
+      "gitBlob": "bc41425bcba7d74e559ce90a8d96448370d553cd",
+      "workingFileSha256": "282326bf2962fb5b30cf9d5b717898a5d7604a7748cec231f9844954de506708"
+    },
+    {
+      "path": "backend/src/bootstrap/controlled-runtime.ts",
+      "gitBlob": "373c96c22dc714bc3a89dded88e5f2c77a9d787e",
+      "workingFileSha256": "9f7148a828b624a0b0448123264554d5f4afbed589b786093d4d011ac0521bbf"
+    },
+    {
+      "path": "backend/src/check-ins/application/check-in-history.ts",
+      "gitBlob": "acac8e10dbc02cb682d26d0c5d2542d9a06245cf",
+      "workingFileSha256": "dd0494666a6e2afaac34ffe874ed0fe977767eb45922640bd84c74bdd89b12ee"
+    },
+    {
+      "path": "backend/src/check-ins/application/check-in-model.ts",
+      "gitBlob": "01b7c945058ff58740b8d1acb96865a51c14193f",
+      "workingFileSha256": "33be53485a0652020e3938cba18bf39dc4d0ac290c7e6e1fbf58b5c38bd4cac4"
+    },
+    {
+      "path": "backend/src/check-ins/application/create-check-in.ts",
+      "gitBlob": "1eda67886d10965fcdbbe159556f8094e77375b0",
+      "workingFileSha256": "64e53a4b30992cf2792da925f1320825573591b63c272ca30455ada4c8c5a583"
+    },
+    {
+      "path": "backend/src/check-ins/application/get-check-in.ts",
+      "gitBlob": "65f63213c89813beb9fe72cfa70b3d48566a2c50",
+      "workingFileSha256": "af9e475438769c369df42711cc12b2121a81a0ae2a12b30a3c10530f2cfff92d"
+    },
+    {
+      "path": "backend/src/check-ins/domain/note.ts",
+      "gitBlob": "96620dee4cd12a7e265288ba1e5258e386bfcf1b",
+      "workingFileSha256": "f2a2688b97ffc42df3f855803280e9a0eb6ea589b501810e766711b83c6f316b"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/aes-gcm-history-cursor-codec.ts",
+      "gitBlob": "da82e4a28de6429fe3fea24efffe226c57479157",
+      "workingFileSha256": "5e915ff381eb30fbdaecf525db315633d0ec205a6209c048c10632ddcebfb570"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/firebase-admin-check-in-history-gateway.ts",
+      "gitBlob": "a3f996c5baf8995f80e079034eaaf717d89944dc",
+      "workingFileSha256": "ca66b2ae3bebab52a42a0a50a68bfb9c88fb2aba6ec05b873199daf33f11172d"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/firestore-check-in-history-repository.ts",
+      "gitBlob": "be22d7071af34a5f42e79f86903c215b37c74950",
+      "workingFileSha256": "658492db675613ea5628486f9eaeed9291972cecab05f95f4ca44957f6a1a79f"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/firestore-check-in-repository.ts",
+      "gitBlob": "0aa699ae54d2c4d4f05cfc043e13875d9f198e9d",
+      "workingFileSha256": "c18d75490c975300957db9557e3d6112361aa73453d8a45467c573250eb44b51"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-history-cursor.ts",
+      "gitBlob": "1d1b14636186becb765572fc301e62fdc3cd72aa",
+      "workingFileSha256": "1a3189116bfe7ca581049286f8cd5785535e80af7288d5103a4ace5c8d404d37"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-history-firestore-gateway.ts",
+      "gitBlob": "ed40d0f4e273398bb846e5f28a7a5624919fec2b",
+      "workingFileSha256": "f295fdc633b29107d9e417642443781ff2c36dcf7b54d80693845b6b2541e285"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-history-repository.ts",
+      "gitBlob": "408600c50ce200c8e76ee738252c238ec0e76bfb",
+      "workingFileSha256": "97892bdafc9711ed6e5e237d9e60a4af90c170caa1ae26c7b97e4d3611dabd16"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-repository.ts",
+      "gitBlob": "1ed0ad02e608b3fd22878cdbf02c13531334feda",
+      "workingFileSha256": "73cc30a0724e0c77f1b6e30d96c106b345b67aee81edfd451c0a17c451caffe8"
+    },
+    {
+      "path": "backend/src/event-detail/application/get-event-detail.ts",
+      "gitBlob": "45850ab54972b0f5f6a6852a2a42e04f228623be",
+      "workingFileSha256": "310d88826c38e161ddd81b2d79db2c0d49f32b5eb9330123d3cfe10b406e76ed"
+    },
+    {
+      "path": "backend/src/event-detail/infrastructure/firestore-event-detail-repository.ts",
+      "gitBlob": "b14e5c10c3798e7dacca219f399de801def65c92",
+      "workingFileSha256": "280595f58d2662a5afa30dbb9ff16082fe22024e57c8dd5b510a2e0b07ab8411"
+    },
+    {
+      "path": "backend/src/event-detail/ports/event-detail-repository.ts",
+      "gitBlob": "29f97ba04a911b03e84a2396bd0f4ef3e17b8671",
+      "workingFileSha256": "1422348b83bf5e121bf1b6fbc7267f6a83309cfa2d5eb104c4dd4fb8fe3251c3"
+    },
+    {
+      "path": "backend/src/event-recommendations/application/recommend-events.ts",
+      "gitBlob": "ab9077fc0a017648c87d87deeb85bfe59c4cb1aa",
+      "workingFileSha256": "e8b321e04186bba58ff792a447befec5722e446c33638d5cf3ab9eff67177256"
+    },
+    {
+      "path": "backend/src/event-recommendations/domain/rank-events.ts",
+      "gitBlob": "7b8840d376de3e5883b935de773b275535e35797",
+      "workingFileSha256": "d615645153e14846508c6b5e8da295d5f0bbcd19a185bf0132adc12554fa5ce0"
+    },
+    {
+      "path": "backend/src/event-recommendations/infrastructure/event-read-gateway.ts",
+      "gitBlob": "d174fa8fea4a83e0406d145da86a216ee5868c54",
+      "workingFileSha256": "a2f80569f8f0f00e97c9b0a24fbd96eb49b92299f27f640fa5c7f276ec6063cf"
+    },
+    {
+      "path": "backend/src/event-recommendations/infrastructure/event-records.ts",
+      "gitBlob": "49649f0f2dac12caba6e7d290b8b4ed200bb6be1",
+      "workingFileSha256": "8ae39a4546bfa12ff2cd5732a401112d14bf8e3a7af723b48fc22a6c352d7ea6"
+    },
+    {
+      "path": "backend/src/event-recommendations/infrastructure/firestore-event-recommendation-repository.ts",
+      "gitBlob": "859d9b1bb3df1cadb9a3685cfec2e939e90f583b",
+      "workingFileSha256": "05581e12c6d495c538b9c4b615144e12ab3abf99be0cd9d9ec3b197ca261f5f8"
+    },
+    {
+      "path": "backend/src/event-recommendations/infrastructure/run-s2-demo-initializer.ts",
+      "gitBlob": "69fe87a3dd446ef3e77da7190a9d1ca647815472",
+      "workingFileSha256": "2bffbfe217f46b565a7b6c259893bd1eab1dd24ade305d988ad8e420c71869f6"
+    },
+    {
+      "path": "backend/src/event-recommendations/infrastructure/s2-demo-initializer.ts",
+      "gitBlob": "cabf88e4b553cbb463655d9435403220736b8fdf",
+      "workingFileSha256": "8473765116cfa36a3a5c3e0520463cc5373d60aa1bca795e24976435061926e0"
+    },
+    {
+      "path": "backend/src/event-recommendations/ports/event-recommendation-repository.ts",
+      "gitBlob": "7ecf3a15e5a0f9ace419cdc9d875b5a36d596c9e",
+      "workingFileSha256": "22840b9f445197f095d4c26f0f68619d7bddb3a8d2026d8205b6a5ef4e413c85"
+    },
+    {
+      "path": "backend/src/event-recommendations/transport/register-route.ts",
+      "gitBlob": "01192fc80a73ba5d96f7bfe60c3d08df798b11d4",
+      "workingFileSha256": "660e9a1a6fecc8f5f9fc1d18c703c3f61c30ae5a6cd9aff8ecd12b563ad85ff0"
+    },
+    {
+      "path": "backend/src/event-recommendations/transport/schemas.ts",
+      "gitBlob": "92cb4ecb59b3685388af31861f7ff4fe45b4c537",
+      "workingFileSha256": "903d4cda860ed2fd6fedbe2f10a3335f62cab633c685b7a4dbdfdcd902450ec5"
+    },
+    {
+      "path": "backend/src/friend-recommendations/domain/friend-ranking.ts",
+      "gitBlob": "e9aa149fda3c68e3379f4344dda1fdfe3e8a218e",
+      "workingFileSha256": "7bc9402198443a8df5033705042e7b64845f9329f46ca7a43c785b5e0a675558"
+    },
+    {
+      "path": "backend/src/friends/application/friend-requests.ts",
+      "gitBlob": "5b5fa1bab112af0fb2b63a5f180e3028659e02a4",
+      "workingFileSha256": "a592c3ebc0c0b86208ba01352cc6c96e0e3b42e5a6af0fb3ac0b9d0104428037"
+    },
+    {
+      "path": "backend/src/friends/domain/request-reference.ts",
+      "gitBlob": "3daf6eb1f04fa70a458ba5a0b0f25d5b8d3e293a",
+      "workingFileSha256": "03028ac73b1245b595827cc1861bf729f7294232869de8b1c9964943241e8cad"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/firestore-friend-repository.ts",
+      "gitBlob": "77413e6539bd655216299739696c6eef713becaf",
+      "workingFileSha256": "6fc583bf82f121ee7c20873b69ea71e6d018fd41389f461f5b37701eee1fea61"
+    },
+    {
+      "path": "backend/src/friends/ports/friend-repository.ts",
+      "gitBlob": "53f90fb7c313d847ad59b4992aab7234bb4168d9",
+      "workingFileSha256": "0c25e38701bd2623c239a1548f6c528f68f9e6c6ca3c4538c1fa2309664f056f"
+    },
+    {
+      "path": "backend/src/interests/application/get-interest-tags.ts",
+      "gitBlob": "21c09e8400228b8873ed8bef304737a6128489c6",
+      "workingFileSha256": "ddf3c4d7339e2860ff87d4e1389466532e2d0415318ab536c81cdc3e1fc946c3"
+    },
+    {
+      "path": "backend/src/interests/application/get-own-interests.ts",
+      "gitBlob": "a69d27c0cca1f28ec49f85456ec20809d8bc936e",
+      "workingFileSha256": "5e6027499b7571c193387d433ce357e77284ac12be836d47bb8053097a861e7a"
+    },
+    {
+      "path": "backend/src/interests/application/interest-model.ts",
+      "gitBlob": "202625a8304fe051782f894e5756504333c37886",
+      "workingFileSha256": "8ad37da9f15876dadfb9c700dd093571813e2ab69e2473f011d1fb42e7ed0899"
+    },
+    {
+      "path": "backend/src/interests/application/replace-own-interests.ts",
+      "gitBlob": "859d087cf81583484483da725719492a8525e6ac",
+      "workingFileSha256": "553f3dba1ce4c4330de3adcd73ce86ce456e68fa57a1cc242eb48df2095c340c"
+    },
+    {
+      "path": "backend/src/interests/infrastructure/firestore-interest-repository.ts",
+      "gitBlob": "fa4cc2b21a2c1dd5f443d21af103cc8c39aa5f4f",
+      "workingFileSha256": "e834911033be8ee008c1a510b2c22f83405ef5c9543701b605bde235a8222a05"
+    },
+    {
+      "path": "backend/src/interests/ports/interest-repository.ts",
+      "gitBlob": "3e2a736d92e55935f552bef56d74818b93d88aaf",
+      "workingFileSha256": "96c498e79b5dbc8c809979af476a48046a699c6187667113abff07cff32f5a12"
+    },
+    {
+      "path": "backend/src/onboarding/application/complete-onboarding.ts",
+      "gitBlob": "4fab8d1730c93ce050d5f70bea8b5d842c2ca553",
+      "workingFileSha256": "d133516432aff5b3c321574254f3443a66e6bed60a8daa6b7b0c30af8a85b087"
+    },
+    {
+      "path": "backend/src/onboarding/application/get-onboarding.ts",
+      "gitBlob": "010614191fdc27b3a55f957bb103242e11dc3973",
+      "workingFileSha256": "ad83dc4ab1764669ec24ba30db03d8637a0b6e848bad71aa5181e7c6da029165"
+    },
+    {
+      "path": "backend/src/onboarding/application/onboarding-model.ts",
+      "gitBlob": "e232b45b6f8a96e591e0e17e7d246ad291003abb",
+      "workingFileSha256": "b63b6cf76e58508e69a0a05b7bab3ecb7b27c88eb25d52e4e551f6bbc22374ed"
+    },
+    {
+      "path": "backend/src/onboarding/domain/initial-choice.ts",
+      "gitBlob": "0658ba252fe4b9251c67a6a89bc073a3e1bb727b",
+      "workingFileSha256": "fe2c0414de7439c3626839164e8180e367cd6b64b48598490a95dd0466dbbd5c"
+    },
+    {
+      "path": "backend/src/onboarding/domain/username.ts",
+      "gitBlob": "7262dfb31c5607faf7e1cd24c2c3b623ee0bc50c",
+      "workingFileSha256": "b87e8897db41547f18111669cb75d5d5f2b01477acc01b358e7f028c20dd486e"
+    },
+    {
+      "path": "backend/src/onboarding/infrastructure/firestore-onboarding-repository.ts",
+      "gitBlob": "0ce76deec049ba5a7e9778e55d25f4e372c46a4e",
+      "workingFileSha256": "530ae751d218e92ca969346b0106db9a60fc5da255cb3be044524cba50602572"
+    },
+    {
+      "path": "backend/src/onboarding/ports/onboarding-repository.ts",
+      "gitBlob": "417979117d11d244acccc69a68aa8331fef4a11b",
+      "workingFileSha256": "886475d9857984f931187b15c07349a2f8b201be64117af5f9aa803873cc2e87"
+    },
+    {
+      "path": "backend/src/personas/README.md",
+      "gitBlob": "3307eb61759ef10c962934d4bd239f6cba6ccc30",
+      "workingFileSha256": "f0bf352f3c30e79279e957aadc4011383e36883723c0e115094ebc85dbb06451"
+    },
+    {
+      "path": "backend/src/personas/application/own-personas.ts",
+      "gitBlob": "d12bb9c20b7552ca95d545b76b5cd19350f45237",
+      "workingFileSha256": "a9e1990090e19827f3371067d40e0dbe268e442cdafced0b863ba668f5342a6a"
+    },
+    {
+      "path": "backend/src/personas/application/persona-model.ts",
+      "gitBlob": "4d1d674790a008e2a07216129cc99dbd39501dd3",
+      "workingFileSha256": "33156aa3da81c42cf3dab82dc13b7642561fcab82608e384870547a050ef3f19"
+    },
+    {
+      "path": "backend/src/personas/domain/persona-values.ts",
+      "gitBlob": "18e0fa66c57629fb0e147ae387d1ee4045d65c6a",
+      "workingFileSha256": "3da4807089249a8dfadf50dd5d69a7ad11cd605d700e2851b0d3d0dab7dcfd27"
+    },
+    {
+      "path": "backend/src/personas/infrastructure/firestore-persona-repository.ts",
+      "gitBlob": "4f7c552058c0a3c263fddc5fa83d560785a90874",
+      "workingFileSha256": "ee70fcd0df225d7d348a729a98710d3a0c42d2e3677f7ae190c36c5b678fdc98"
+    },
+    {
+      "path": "backend/src/personas/ports/persona-repository.ts",
+      "gitBlob": "334493b700f1c61005e3f2df1f0cb989393e1ea7",
+      "workingFileSha256": "05158b04b5613882cc3623b6be10bc0e14ffb78e0be097d1d5f0e025fb00dd80"
+    },
+    {
+      "path": "backend/src/personas/transport/framework-errors.ts",
+      "gitBlob": "0e539208d552f3425e92e6e675a282ef21447ff2",
+      "workingFileSha256": "5c432b4ecf99af468cee32d22ff56d48eb460036cac71c2a5e49bb55abb7673e"
+    },
+    {
+      "path": "backend/src/personas/transport/register-routes.ts",
+      "gitBlob": "4051dd105718471a0cc83e3387cecfddeedd7ecd",
+      "workingFileSha256": "2129558240aabc2af4f65108b46cd1970fdb183e8afd5300c838374d76616973"
+    },
+    {
+      "path": "backend/src/personas/transport/schemas.ts",
+      "gitBlob": "bbd467220a5e999b925d07b2bc4ba2229a58a324",
+      "workingFileSha256": "3e0ad5c7e4f137f3f117495c3ca5dfb0dd54f0a92b40dc279ff50cfc70a9791e"
+    },
+    {
+      "path": "backend/src/shared/application/app-failure.ts",
+      "gitBlob": "65a6795b287ac736822fc848ac0959fec19964a3",
+      "workingFileSha256": "3095c2b3ef33d70009a946cd1fba9518d42343c897ed3da682f5b85fb997d9d5"
+    },
+    {
+      "path": "backend/src/shared/application/authoritative-values.ts",
+      "gitBlob": "2a5943265a0ce6966c9841a019ba9f6946d7e3de",
+      "workingFileSha256": "4a90f73d23aaa3d5bbcf04bca3938c89889265fe0a0cab2a952b89ceb5839c40"
+    },
+    {
+      "path": "backend/src/shared/domain/idempotency-key.ts",
+      "gitBlob": "4b7523f9579ed50f1823e9141ef3330634fffb1f",
+      "workingFileSha256": "17b4cdab80f9c53f746b1a3b39b8afe7af923581ee2c74391cae1943560647f4"
+    },
+    {
+      "path": "backend/src/shared/domain/result.ts",
+      "gitBlob": "93a215aee3f6bdfa99ecc37eea5f220da494423b",
+      "workingFileSha256": "0e8c6e70cdac11edc7f74249cbdca5071d9bce6d8b4837ba558ef25ada02c587"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/crypto-opaque-id-generator.ts",
+      "gitBlob": "5e5bcdeb3db1312a2d685dd65b6225f02ffdc92c",
+      "workingFileSha256": "f363c9de73b3c142ed70efd37b843727d693e83e8cb76d34058389ac4f99de76"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/controlled-emulator-environment.ts",
+      "gitBlob": "5073f0d591e3d222deb69e6708a9c736ee4c4891",
+      "workingFileSha256": "371a29de22b76a4407e4ff5e49d041c2fe954d256384b49c4c50c8782a9130ab"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firebase-identity-verifier.ts",
+      "gitBlob": "e50d988bbc677516502b3263bb44c6939abe8b5d",
+      "workingFileSha256": "fe27e7a36a9b0865016af62584fad4da39be79c64ab91b5c565f16c5ca32d8e9"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-gateway.ts",
+      "gitBlob": "09c17c6776d056774319ebef7949b701726ffdce",
+      "workingFileSha256": "6bb5d2711035415521bb06df5acd12d95efae26305e85409de6b3a631f707bde"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-records.ts",
+      "gitBlob": "0008fa6834bc85749e69205aedaa7d39a66b9615",
+      "workingFileSha256": "ce0e9d519915e785fcdfb9e71b8b2958cfbbe0c7e3ec4891abdb47704cdfc0cb"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/system-clock.ts",
+      "gitBlob": "0c3f89c8802aaed37651295671a5f39c50e49253",
+      "workingFileSha256": "d68980e9d252f3c927bd17e345e3ea840ffaeb469bc56c5ea7e189306c6c70d6"
+    },
+    {
+      "path": "backend/src/shared/ports/clock.ts",
+      "gitBlob": "22969c5ceccb0f3b0469f15e377734e8000b749f",
+      "workingFileSha256": "491c36ff7234c5302362cfda9b544562335b36d0c1db136d388341043b2f91ad"
+    },
+    {
+      "path": "backend/src/shared/ports/dependency-failure.ts",
+      "gitBlob": "c3389ab0fd8d5ee8d0fbd00bb30db2b9d1ec21ad",
+      "workingFileSha256": "92291dc7a220b9154e66b09b24a3a7cffc02dfac7e87a7e2cbc731a0cb34d1fe"
+    },
+    {
+      "path": "backend/src/shared/ports/identity-verifier.ts",
+      "gitBlob": "a7a49d86d0324dd3e4e5623d8079b27cd32007cf",
+      "workingFileSha256": "7ce9116409f0239b7d1f7e22c4f69118d933ab643653a879fc68682c4c8db96d"
+    },
+    {
+      "path": "backend/src/shared/ports/opaque-id-generator.ts",
+      "gitBlob": "fe1b92ab0c1b0a31fe9e10804f816ccd6c33c1cd",
+      "workingFileSha256": "ee166a7c3d7901861d74c1d24b7583d9824f7e8c69e8a06b4bfdceca1c70d06e"
+    },
+    {
+      "path": "backend/src/transport/authenticate.ts",
+      "gitBlob": "46672cc8f9a1cfda329f91b11f650e6eed1d0554",
+      "workingFileSha256": "87c1562db8eb46c7061430a5397d68594fe45535f684c950899a975fa18a0c12"
+    },
+    {
+      "path": "backend/src/transport/error-response.ts",
+      "gitBlob": "3fe6c8cb18e72784d47ebdaf71e88e4f7a12a1f9",
+      "workingFileSha256": "213ae8c0774ba7ec3194b8c3607bac0e2490dbc92ac970c1d9d7df9df006614e"
+    },
+    {
+      "path": "backend/src/transport/register-isolated-slices.ts",
+      "gitBlob": "7fcfd26a6fbe7a04c2e4ab879f10dedae007249b",
+      "workingFileSha256": "4a7a408a8cc27bd3f89333ab8203cb764484d30f1e547cb4b276393762e7afaf"
+    },
+    {
+      "path": "backend/src/transport/register-routes.ts",
+      "gitBlob": "9c9d70a7b477280db5567b7007e921e6b2178a4b",
+      "workingFileSha256": "8f54395e5a2b90ec593cb15ce1db0ac09e3badb054ee07536cdb0d58d16f415b"
+    },
+    {
+      "path": "backend/src/transport/route-inventory.ts",
+      "gitBlob": "a0a47086502d3847651eaee9076d891f4cde367f",
+      "workingFileSha256": "adc56a830382e4dc398763957eaf548c88f12ea666ea20649afd6737d946279d"
+    },
+    {
+      "path": "backend/src/transport/schemas.ts",
+      "gitBlob": "18f60a05b224f2e9fcd8fff515d26489aad4873a",
+      "workingFileSha256": "df721a6ea5409b67a2ffd08fba030e6327779aec0437b7feca13cf9a99415097"
+    },
+    {
+      "path": "backend/test/account-preferences-transport.test.ts",
+      "gitBlob": "fe1debbb5f59c202c48ca99cc15797a360f9d427",
+      "workingFileSha256": "d05f646d277eb42fa4a4585b0704d56ec02fb5954f858aa88cfb34dc24cfd5eb"
+    },
+    {
+      "path": "backend/test/account-preferences.test.ts",
+      "gitBlob": "f5565b5c0fc86c94b76a5aecda9e865fb053350b",
+      "workingFileSha256": "378179cd72b0061eb6dce85a5c41b4117aacc967e78bc67742ebd3069e5ced0c"
+    },
+    {
+      "path": "backend/test/ai-conversation/acknowledgment-races.test.ts",
+      "gitBlob": "502723df36f6ec509c4e38aaf65027d971babef2",
+      "workingFileSha256": "4cf79c91e197cda1b69321aa5511049da542e3ab2f49639d82bb380f89658c2e"
+    },
+    {
+      "path": "backend/test/ai-conversation/capture-context.test.ts",
+      "gitBlob": "f86ae48a955dc3c6841d61b202b0bccd8bd20373",
+      "workingFileSha256": "d6848af64feae36e6e7ae8db2354da3365b34809f954218a8e2d87c99d6e9ee5"
+    },
+    {
+      "path": "backend/test/ai-conversation/fakes.ts",
+      "gitBlob": "12006e7ce09d69fb4e0eb40f9d490d07a5c33160",
+      "workingFileSha256": "abf140bd70425430ef7d9334dd9383dae05dc1285d2ea08c60d2feeaf47b6f7f"
+    },
+    {
+      "path": "backend/test/ai-conversation/lifecycle.test.ts",
+      "gitBlob": "b7f57600f144e0f0e6376fb171fa9296d4d2c2ac",
+      "workingFileSha256": "8edf5689fdddebc04bbd5e3d2e9eeeb559d52d22c6fbe83bc4c5a61dae1e3f59"
+    },
+    {
+      "path": "backend/test/ai-runtime/bounded-ai-runtime.test.ts",
+      "gitBlob": "a5b5612cf877ad18b60fa556579b249ed532e64a",
+      "workingFileSha256": "95dabe75a90686fec98c448a20000d5f6695407199a3a7186e7afabdb867666b"
+    },
+    {
+      "path": "backend/test/ai-runtime/monotonic-runtime-clock.test.ts",
+      "gitBlob": "6ba8efd54fd18e3c7499c609f8f16c4f4199b2ef",
+      "workingFileSha256": "2c5e2a0791d35caefe4b5a313e3a73ccd0a774578351aec7896b674c222713b5"
+    },
+    {
+      "path": "backend/test/ai-runtime/parse-output.test.ts",
+      "gitBlob": "4f66c464098faa69314a926cfa98c462eac59658",
+      "workingFileSha256": "e58950f818a0c56f700f5919c9d67c3cb08ebec926d8c30a081126e30c134674"
+    },
+    {
+      "path": "backend/test/ai-runtime/runtime-application.test.ts",
+      "gitBlob": "28865fe02a450d4a9ef074cae9b32532fe0f4f86",
+      "workingFileSha256": "a070e20fe53ef57ba060145e0c913b53716f30ac435ddcd6453c9cd46d5b2988"
+    },
+    {
+      "path": "backend/test/ai-runtime/support.ts",
+      "gitBlob": "8aa831ed6175f61beee503105019810ccdb66f3c",
+      "workingFileSha256": "1cdf78c2b820158251102934da2462231661c0080c389b7bdc5458a0c57664f0"
+    },
+    {
+      "path": "backend/test/check-ins/check-in-history.test.ts",
+      "gitBlob": "b9f5a33177137bd1960e990213bf4c3be31573d4",
+      "workingFileSha256": "c099fbe3d45f206d67fa23c6efaa54e17ac717d4047eabb44b774f66beb60810"
+    },
+    {
+      "path": "backend/test/check-ins/check-in-use-cases.test.ts",
+      "gitBlob": "7b1e73273a049ef9bb48ff4f6d7bf2d851156d28",
+      "workingFileSha256": "f029f8ec80f81ec9168892d1a168e8c88bb07369b2fe796c22e9db4773a69190"
+    },
+    {
+      "path": "backend/test/check-ins/note.test.ts",
+      "gitBlob": "7c274afeb184b778f8977d5504021d5edd5ff2ff",
+      "workingFileSha256": "e03841ec7b377e34b849bd74619135b544161d50138c7a66dccc6ab18ccee8ac"
+    },
+    {
+      "path": "backend/test/contract/openapi.test.ts",
+      "gitBlob": "8ef349b86efbe5c8bb19b8d0e7f17614d0622fee",
+      "workingFileSha256": "4d5e1adb3bc2be1632d6a728ee82d855cb96b3d1d19ca7c0905b1a6798d9557e"
+    },
+    {
+      "path": "backend/test/controlled-emulator-environment.test.ts",
+      "gitBlob": "ba98888617aa341c0610933551995b10c0482d71",
+      "workingFileSha256": "7b05ff2ba6a1d977f3f6f8116099fdc20efb52d930f7d003b3b23b00c8e25425"
+    },
+    {
+      "path": "backend/test/controlled-runtime-configuration.test.ts",
+      "gitBlob": "39932a4fb501d6da5da58f3ae3b1e6cfc4f383b4",
+      "workingFileSha256": "0675e9a1b0d2f1d28b07a5113809f1984b586e80630f7fc73ded4d64c4f2cd0b"
+    },
+    {
+      "path": "backend/test/event-recommendations/demo-manifest.test.ts",
+      "gitBlob": "cf61e89d87b8d753f3c2cfd029e4e7c37ef84fdc",
+      "workingFileSha256": "8ac759b9a0ae77147e98d03664d3364ab6c7ff30c8eba15f1150a50afcd9be22"
+    },
+    {
+      "path": "backend/test/event-recommendations/event-records.test.ts",
+      "gitBlob": "a27ac75db4f7b477d5403a5a0316288328e13e69",
+      "workingFileSha256": "52c8e610c4c55c9e9f72e38f5d78bfc06fd664a80d533fd17448e0fde53b06fa"
+    },
+    {
+      "path": "backend/test/event-recommendations/firestore-event-repository.test.ts",
+      "gitBlob": "b04a06d7715ffb968db25dbc9b73a42bd1ade9f5",
+      "workingFileSha256": "6b3d345e5415c0dcc4c6da0c776e24cc5a97128b5a40e949d8bcf4669b7dda77"
+    },
+    {
+      "path": "backend/test/event-recommendations/rank-events.test.ts",
+      "gitBlob": "e36ce9577e7913f0f7749b32bc4c99963ab81468",
+      "workingFileSha256": "e663ab9b1baa4be6ba19fd428cbffe29a720cdfa51332cdb1870e048d2b28f58"
+    },
+    {
+      "path": "backend/test/event-recommendations/recommend-events.test.ts",
+      "gitBlob": "075239315cef845c96b152893f967c45358fd83e",
+      "workingFileSha256": "8d8a81a4b7aa8c75b597bf4c0fbddec28c41c39d8f4eeacf3721a685d295bdc9"
+    },
+    {
+      "path": "backend/test/event-recommendations/s2-demo-initializer.test.ts",
+      "gitBlob": "2663946618046d3dd55b5f87b7d9057e7f74ac2a",
+      "workingFileSha256": "a903ab7b1ecefa2a7471b17847850768542c69d6fc30a3f9130d40d76452f854"
+    },
+    {
+      "path": "backend/test/event-recommendations/transport.test.ts",
+      "gitBlob": "fdcae742d106e037db9770cef7b38744c0cd6f97",
+      "workingFileSha256": "3baafb63b4ab5d0af83e6d4422ecc8a5c92efc5246e0a6d76754e52f6437b785"
+    },
+    {
+      "path": "backend/test/firebase-identity-verifier.contract.test.ts",
+      "gitBlob": "a8a28146003389d949961c1b3de3f0b923c8ba3f",
+      "workingFileSha256": "68b8975661493f177c891a174d155db2524779e2fdf96f713d02d241cc62dfbc"
+    },
+    {
+      "path": "backend/test/firestore-check-in-repository.contract.test.ts",
+      "gitBlob": "10c8f0cb04dfa3618d2c4cc94e0a12c483224e2c",
+      "workingFileSha256": "cdc16a58af1f8dd03660b80c3b5bc869dd019572912428bf4dd478eb7521ac8b"
+    },
+    {
+      "path": "backend/test/firestore-interest-repository.contract.test.ts",
+      "gitBlob": "e4b0c67bbcd35689d6af6472667580c6f8aa9b94",
+      "workingFileSha256": "a7f0667af1186229520cd5ba50be3ef3e0fa2eb2ec2df39b492e4d5dd3ee9750"
+    },
+    {
+      "path": "backend/test/firestore-onboarding-repository.contract.test.ts",
+      "gitBlob": "5ce3f353bcab1dcc854304c1f0a06dd003cc7c60",
+      "workingFileSha256": "41370f58ad37647f839d52b521b813b5a105eeee049ff1c869ce6de7c7816f4e"
+    },
+    {
+      "path": "backend/test/firestore-records.contract.test.ts",
+      "gitBlob": "2c654b440e28634630a90362f3021429ebcbfdcf",
+      "workingFileSha256": "8527310a9ad79796b76f77f1f1c4376d6b9c17555791482de1fe0a2637f26a89"
+    },
+    {
+      "path": "backend/test/friend-recommendations/friend-ranking.test.ts",
+      "gitBlob": "42e3d302d44ffde887a5da51f7e5f093ac67814d",
+      "workingFileSha256": "852477232c164ca9a025bc3dd96639e0970784f3cf763fc5f797adde26c76ec8"
+    },
+    {
+      "path": "backend/test/interests/interest-use-cases.test.ts",
+      "gitBlob": "c115d8c96152e7a033baaf71d62cf2904d286cef",
+      "workingFileSha256": "8b6cae61d2878f062a3408bf83167498758f37affd2bcaa611800dc9e0ae6ddb"
+    },
+    {
+      "path": "backend/test/isolated-slices.test.ts",
+      "gitBlob": "1e5a68ff30f4945448c01a500449174ae71972cd",
+      "workingFileSha256": "ad02322f08cf2cfde9de6f67c483beb2150037775c790ad844675037e448ccdb"
+    },
+    {
+      "path": "backend/test/my-friends.test.ts",
+      "gitBlob": "5e782ed4fe78204cb31926739895cd8b01fdf88a",
+      "workingFileSha256": "71484433e20c7da7827fda0310e71edfdd4ab0501e4290d4e3e3023e50abea0d"
+    },
+    {
+      "path": "backend/test/onboarding/onboarding-use-cases.test.ts",
+      "gitBlob": "7d6a39c257b66a9f0f0b74f0e3c90995816bf61e",
+      "workingFileSha256": "7eff7dc88b3c1175f8d3add31e87063acb2213e62cd09089372dea3652f98494"
+    },
+    {
+      "path": "backend/test/onboarding/username.test.ts",
+      "gitBlob": "41daccc898543f1d9f458e1877b2eabc4ddc5fca",
+      "workingFileSha256": "fd27a9c34860e54646eb1ca94448d7c0c5fc80729b9ce355eae04850b319585c"
+    },
+    {
+      "path": "backend/test/personas/core.test.ts",
+      "gitBlob": "3bbcf86bcef19f01403061f17fc709aca7f528b1",
+      "workingFileSha256": "be7965ff3640cb32a92413f887093b60831b2fd93156c15168a30162463be67b"
+    },
+    {
+      "path": "backend/test/personas/transport.test.ts",
+      "gitBlob": "e178ca7e1ee49008185c6bbf5bee22b9d1e39f5c",
+      "workingFileSha256": "f9070f95452e4bbf2ffbd511b671ae0ad6b06134740b76ee72850a50e0474adc"
+    },
+    {
+      "path": "backend/test/runtime-adapters.contract.test.ts",
+      "gitBlob": "608b1176cec7ad56bc63949dbeb4b421a5b01ef6",
+      "workingFileSha256": "a9ff2a280cf3589cf9240a9dc2de012f3a3ecec175cb8e2019788b38435c454b"
+    },
+    {
+      "path": "backend/test/shared/app-failure.test.ts",
+      "gitBlob": "e5dcfcd2cea52e2e15fbdb65186c962707f77c46",
+      "workingFileSha256": "79d25a6be51b5b049023d8fd44c6d4d6ffa3925206d5a438f94fbdc58c083214"
+    },
+    {
+      "path": "backend/test/shared/authoritative-values.test.ts",
+      "gitBlob": "8cb1146a291f1415495e6770f5ad588694c746d1",
+      "workingFileSha256": "0ade0427220d1495009495b27c5f45a59558f40b62a806b58c5f01b83896119c"
+    },
+    {
+      "path": "backend/test/smoke/toolchain.test.ts",
+      "gitBlob": "003fcaad82eb32ef446a7a035687615ce2913f01",
+      "workingFileSha256": "6c7fecc6848169d00bc53ac71736081ff1591774e56445145cfb43717e7b8160"
+    },
+    {
+      "path": "backend/test/support/event-repository-contract.ts",
+      "gitBlob": "2256c4f1f94a27413b9a6bfa7c4730ebc65a9fa8",
+      "workingFileSha256": "8582d4f028cf0cf1a1cc8457d5a3c7ded31043c6c7f545636079cef61a907c8e"
+    },
+    {
+      "path": "backend/test/support/in-memory-firestore-gateway.ts",
+      "gitBlob": "0898a74c1f2d7960cc3438d34e318facc17dc36e",
+      "workingFileSha256": "a712859467aeca026580c6c63b3e5abc2f39270889373aac74af25084d8bcf9d"
+    },
+    {
+      "path": "backend/test/support/my-friends-fixture.ts",
+      "gitBlob": "9e33d8e6e0e22da85b34ce808ef3c7dceec24285",
+      "workingFileSha256": "46e930a973ac4d5784a3d79917f890ea86bbb4dec61a1dd2c04af64a350041de"
+    },
+    {
+      "path": "backend/test/support/persona-repository-contract.ts",
+      "gitBlob": "64e28beaede4537cd08b5568a5e8b3ca3e625c99",
+      "workingFileSha256": "27d1efd0f030a69d96905148b244d18fb053cd855ba83cf9503685721b893b17"
+    },
+    {
+      "path": "backend/test/transport/routes.test.ts",
+      "gitBlob": "ee03a2731f0b9fa3f8358e701dfb3de279a6e322",
+      "workingFileSha256": "7478a218ac8911135cf580321239549bb70b2a173119835117c2df8124f4ecd2"
+    },
+    {
+      "path": "backend/tsconfig.json",
+      "gitBlob": "572834ba99fa1f80e61d419317113be1678e67df",
+      "workingFileSha256": "6222c9778fb737eb0cffd8a635e52afbcc7e67f4e1faff27cc42446476975852"
+    },
+    {
+      "path": "package.json",
+      "gitBlob": "29dfaec7b84e61c6adda06f03bb833e65f30f1d5",
+      "workingFileSha256": "294606089e27f91b7101d62c4aab30b032ea47bcd5913287c447f12296822bf0"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "gitBlob": "c5ba2bc1905864af343e2186db093503f38d4e51",
+      "workingFileSha256": "2db26b46c583886ef4db5b58258b78cedd325dd3bf4e469e380a62f2a3321351"
+    }
+  ],
+  "rawLogsKeptInDrafts": [
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\ack-after-fix-build.log",
+      "sha256": "da24d015c7fe07bb9b62a7d5f0e49c07c1f5ab7752e74bebb7a547b25d33bf3e",
+      "bytes": 51
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\ack-after-fix.log",
+      "sha256": "a281ca1765f015c2d8dbbd8feb5ac25c499aaf9a8034a38e98ab3a18f5f89a0b",
+      "bytes": 8872
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\ack-before-fix-02.log",
+      "sha256": "75e2a525adddede3fcbf0f45889cc5bdd528e0f05ae96117800e46e2aa638816",
+      "bytes": 10730
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\ack-before-fix.log",
+      "sha256": "64a79c9509055e7981558075f450818a0b9165390927cc32af196a9c79be7127",
+      "bytes": 9545
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\backend-verify-console.log",
+      "sha256": "7224cbc4d815802e2341ee946e4acc1983dffab85b977e1ee92f18797702829b",
+      "bytes": 44420
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\backend-verify-final-02-console.log",
+      "sha256": "bf84bebc274d23304d5258e6928aee0ac1abcaac07605bdff0a959c8e463bfad",
+      "bytes": 45403
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\backend-verify-final-02.log",
+      "sha256": "ed354beb2d3b4be1af4cd045b25a4bf298551ab02808f8a0de156970e3900dcc",
+      "bytes": 45415
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\backend-verify-final.log",
+      "sha256": "989665fd30d6cc6010221ba3205c3798b4080a1b54423c937c0c093e7f45412d",
+      "bytes": 44432
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\before-fix-build-02.log",
+      "sha256": "da24d015c7fe07bb9b62a7d5f0e49c07c1f5ab7752e74bebb7a547b25d33bf3e",
+      "bytes": 51
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\before-fix-build.log",
+      "sha256": "da24d015c7fe07bb9b62a7d5f0e49c07c1f5ab7752e74bebb7a547b25d33bf3e",
+      "bytes": 51
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\q17-after-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\q17-after-tests.log",
+      "sha256": "66073d70023b0bf7aac4346c34cf206baea9ea0009328b51e09b39f61e2e0968",
+      "bytes": 1925
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\q17-before-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\q17-before-tests.log",
+      "sha256": "8bb2428e19d55da043e37eac7f10216fbed26104944bf656c390213f73b4d391",
+      "bytes": 18880
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-12-zhou-ai-lifecycle-review-fixes\\q17-lifecycle-regression.log",
+      "sha256": "6357acfb3eacb0cbebc23b1b82e94a10a6e4e5e2ce70f0b18dab12f10466af6f",
+      "bytes": 7630
+    }
+  ],
+  "preservedHistoricalUntrackedFiles": [
+    {
+      "path": "docs/decisions/2026-10-09-li-persona-p08-isolated-flow-approval.md",
+      "sha256": "24b014e0cddd67be6281a588d2a861a1130cc79e075ea378f8fd010b46aaa6ce"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-android-selfcheck-source-manifest.json",
+      "sha256": "b71c5962853292754f459a167bc8b76316f13366ae265fe6fff189324f495e94"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-android-selfcheck.md",
+      "sha256": "bfcce0f4014aba79292c393f9db5f5684d078ad09a31479be2a35f7a3bc89698"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-local-implementation.md",
+      "sha256": "a8e28f9f87deb1378a3133d397f49ecfc3941bd4f88d36fff8160d257ba65d4e"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-local-source-manifest.json",
+      "sha256": "a47cc82cc2537d361dccda65984abefae72800ff8ad02bdbcfd8ea8fe3134600"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-p08-implementation-release.md",
+      "sha256": "3560f64b68bae3cfecfe34cc05bd367d4373e558f5e9d578c0f33ff80e7096b9"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-pc13-local-harness.md",
+      "sha256": "556671badcaaad4b6ed12e50e8d2ee23aa41584374bd27bd87d09eed2764af8a"
+    }
+  ],
+  "boundaries": {
+    "uploaded": false,
+    "syntheticOnly": true,
+    "jinImplementationReview": "Not performed",
+    "liImplementationAcceptance": "Not performed",
+    "realModelsAndData": "Not Run",
+    "publicApiInfrastructureFlutterDependenciesChanged": false
+  }
+}
