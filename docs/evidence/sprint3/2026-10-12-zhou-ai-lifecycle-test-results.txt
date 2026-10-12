@@ -1,8 +1,3 @@
-Published verification excerpt; original raw log remains in local drafts.
-Source: 141d120ab12468cd0b0b05cd7288d474d07724e5
-Original log SHA-256: ed354beb2d3b4be1af4cd045b25a4bf298551ab02808f8a0de156970e3900dcc
-Selection: command lines, passing test names, totals, and recorded process exit code only.
-
 $ pnpm backend:build && pnpm backend:test
 $ tsc --project backend/tsconfig.json
 $ node --test "backend/dist/test/**/*.test.js"

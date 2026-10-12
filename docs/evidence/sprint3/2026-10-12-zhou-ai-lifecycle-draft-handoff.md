@@ -16,8 +16,8 @@ is superseded only for this requested Draft handoff.
 - Corrected executable source: `141d120ab12468cd0b0b05cd7288d474d07724e5`;
   tree `85176748c968be76c6ecbfad091c90d2da8164a8`.
 - Fixed-source evidence commit: `c2c197a1638cce1f69b55b4a9001267f5d704c53`.
-  The subsequent handoff commit adds only this index and the published test
-  excerpt; executable verification inputs remain identical to `141d120`.
+  Subsequent handoff commits only add/update this index and the published test
+  transcript; executable verification inputs remain identical to `141d120`.
 
 This is a stacked implementation PR based on #76, so its diff isolates the
 approved lifecycle, corrections and evidence. It does not merge or alter the
@@ -27,12 +27,13 @@ candidate branch, the main branch, #78 status or any Project status.
 
 - [Corrected behavior, failure reproductions and final verification](2026-10-12-zhou-ai-lifecycle-review-fixes.md).
 - [Exact-source and raw-log hashes](2026-10-12-zhou-ai-lifecycle-review-fixes-manifest.json).
-- [Published command/test-result excerpt](2026-10-12-zhou-ai-lifecycle-test-results.txt):
-  512 passing case lines, full-run totals and recorded exit code. This is an
-  allowlisted excerpt of the actual final raw log, not a new run. It contains
-  command lines, test names and counts, excluding unrelated process output.
-  Original log SHA-256 is embedded in its header and in the manifest. Excerpt
-  SHA-256: `65f26618f1f1c5ac37e52b190da397564e452e10347c30f167de9ea4fa134cbc`.
+- [Published command/test-result transcript](2026-10-12-zhou-ai-lifecycle-test-results.txt):
+  512 passing case lines, full-run totals and recorded exit code. The complete
+  final log was inspected before this exact copy was promoted to formal evidence;
+  it contains command lines, test names, counts and the exit code, with no local
+  paths or detected credential material. This is the recorded run, not a rerun.
+  Its SHA-256 matches the original raw-log entry in the manifest:
+  `ed354beb2d3b4be1af4cd045b25a4bf298551ab02808f8a0de156970e3900dcc`.
 - [C01–C07 / LC01–LC16 lifecycle evidence](2026-10-12-zhou-ai-lifecycle-local.md),
   with an explicit correction notice retaining the earlier 465-case history.
 
@@ -45,8 +46,9 @@ pnpm backend:verify
 
 Strict compile and all **512 tests pass**, exit **0**, with no failed, cancelled
 or skipped tests. This includes 25 new acknowledgment-race cases and 22 Q17 cases
-in addition to the earlier 465. The local wrappers and failed/passing raw logs
-remain separately under `D:/3851 AI/drafts/`; they are not prerequisites for a
+in addition to the earlier 465. The original raw logs and local wrappers remain
+separately under `D:/3851 AI/drafts/`; only the inspected final transcript is
+promoted above. The local wrappers are not prerequisites for a
 reviewer using the pinned repository commands. No dependency was added or changed.
 
 ## Requested decisions
