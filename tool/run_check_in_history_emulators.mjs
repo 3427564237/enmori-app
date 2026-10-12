@@ -44,8 +44,11 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
     env.ENMORI_TEST_PRIVATE_DIRECTORY = privateDirectory;
     env.LOCALAPPDATA = join(privateDirectory, 'localappdata');
     mkdirSync(env.LOCALAPPDATA);
-    const androidUserHome = resolve('.codex-appdata/android-user-home');
-    mkdirSync(androidUserHome, { recursive: true });
+    env.DART_TEST_CONFIG = join(privateDirectory, 'DartTest.yaml');
+    writeFileSync(env.DART_TEST_CONFIG, '');
+    env['ProgramFiles(x86)'] ??= 'C:\\Program Files (x86)';
+    const androidUserHome = join(privateDirectory, 'android-user-home');
+    mkdirSync(androidUserHome);
     env.JAVA_TOOL_OPTIONS = `-Duser.home=${androidUserHome.replaceAll('\\', '/')}`;
     env.ANDROID_USER_HOME = androidUserHome;
     env.ENMORI_TEST_FLUTTER = realpathSync(process.env.ENMORI_TEST_FLUTTER);
@@ -73,7 +76,7 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
   for (const name of ['ENMORI_TEST_PRIVATE_DIRECTORY', 'ENMORI_TEST_FLUTTER',
     'ENMORI_TEST_ADB', 'ANDROID_HOME', 'JAVA_HOME', 'PUB_CACHE', 'GRADLE_USER_HOME',
     'GIT_CONFIG_COUNT', 'GIT_CONFIG_KEY_0', 'GIT_CONFIG_VALUE_0', 'LOCALAPPDATA',
-    'JAVA_TOOL_OPTIONS', 'ANDROID_USER_HOME']) {
+    'DART_TEST_CONFIG', 'ProgramFiles(x86)', 'JAVA_TOOL_OPTIONS', 'ANDROID_USER_HOME']) {
     env[name] = process.env[name];
   }
   await run(process.execPath, [resolve('tool/run_check_in_history_emulators.mjs'), '--isolated', serial], { env });
@@ -196,6 +199,13 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
     const storePassword = randomUUID();
     const keytool = join(process.env.JAVA_HOME, 'bin', 'keytool.exe');
     const java = join(process.env.JAVA_HOME, 'bin', 'java.exe');
+    await run(keytool, [
+      '-genkeypair', '-alias', 'AndroidDebugKey', '-keyalg', 'RSA', '-keysize', '2048',
+      '-validity', '10000', '-storetype', 'JKS',
+      '-keystore', join(process.env.ANDROID_USER_HOME, 'debug.keystore'),
+      '-storepass', 'android', '-keypass', 'android',
+      '-dname', 'CN=Android Debug,O=Android,C=US', '-noprompt',
+    ], { stdio: 'ignore' });
     await run(keytool, [
       '-genkeypair', '-alias', 'history-test', '-keyalg', 'RSA', '-keysize', '2048',
       '-validity', '1', '-storetype', 'PKCS12', '-keystore', keystore,

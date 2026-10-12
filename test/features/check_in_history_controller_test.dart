@@ -232,28 +232,25 @@ void main() {
     },
   );
 
-  test(
-    'session replacement clears state and ignores prior response',
-    () async {
-      sessions.add(AuthSessionAuthenticated(subject: 'owner-a'));
-      await _drain();
-      expect(repository.calls, hasLength(2));
-      repository.responses.first.complete(Success(_page([_entry('stale')])));
-      await _drain();
-      expect(container.read(checkInHistoryControllerProvider).entries, isEmpty);
-      repository.responses.last.complete(
-        Success(_page([_entry('fresh-session')])),
-      );
-      await _drain();
-      expect(
-        container
-            .read(checkInHistoryControllerProvider)
-            .entries
-            .single
-            .checkIn
-            .checkInId,
-        'fresh-session',
-      );
-    },
-  );
+  test('session replacement clears state and ignores prior response', () async {
+    sessions.add(AuthSessionAuthenticated(subject: 'owner-a'));
+    await _drain();
+    expect(repository.calls, hasLength(2));
+    repository.responses.first.complete(Success(_page([_entry('stale')])));
+    await _drain();
+    expect(container.read(checkInHistoryControllerProvider).entries, isEmpty);
+    repository.responses.last.complete(
+      Success(_page([_entry('fresh-session')])),
+    );
+    await _drain();
+    expect(
+      container
+          .read(checkInHistoryControllerProvider)
+          .entries
+          .single
+          .checkIn
+          .checkInId,
+      'fresh-session',
+    );
+  });
 }

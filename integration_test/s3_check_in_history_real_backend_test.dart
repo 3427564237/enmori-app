@@ -92,7 +92,7 @@ void main() {
     final client = BackendApiClient(
       parseApprovedBackendBaseUri(apiBaseUrl),
       () async {
-        final token = await auth.currentUser?.getIdToken(true);
+        final token = await auth.currentUser?.getIdToken();
         return token == null
             ? const Failure(
                 AppFailure(
@@ -161,8 +161,18 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('history-next-page')));
     await tester.tap(find.byKey(const Key('history-next-page')));
     await tester.pump();
-    await _waitUntil(tester, () => observed.records.length > readsBeforeNext);
+    await _waitUntil(tester, () {
+      return observed.records.length > readsBeforeNext &&
+          container.read(checkInHistoryControllerProvider).phase ==
+              CheckInHistoryPhase.ready;
+    });
     final nextPage = container.read(checkInHistoryControllerProvider);
+    expect(
+      observed.records.last.hasCursor,
+      isTrue,
+      reason:
+          'Next request must carry the opaque page cursor; sequence=${observed.records.map((record) => record.hasCursor).toList()}',
+    );
     expect(
       nextPage.phase,
       CheckInHistoryPhase.ready,
@@ -185,37 +195,73 @@ void main() {
 
     final today = DateTime.parse('${expectedDate}T00:00:00Z');
     final previousDay = today.subtract(const Duration(days: 1));
+    final readsBeforePreviousDay = observed.records.length;
     await tester.tap(find.byKey(const Key('history-select-date')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('${previousDay.day}').last);
-    await tester.pump();
-    await _wait(tester, find.byKey(const Key('history-empty')));
-    expect(
-      observed.records.last.date,
-      _dateText(previousDay),
+    final previousDayFinder = find.descendant(
+      of: find.byType(CalendarDatePicker),
+      matching: find.text('${previousDay.day}'),
     );
+    expect(previousDayFinder, findsOneWidget);
+    await tester.tap(previousDayFinder);
+    await tester.tap(find.text('OK'));
+    await tester.pump();
+    await _waitUntil(
+      tester,
+      () {
+        final current = container.read(checkInHistoryControllerProvider);
+        return observed.records.length > readsBeforePreviousDay &&
+            current.phase != CheckInHistoryPhase.loading;
+      },
+      diagnostic: () {
+        final current = container.read(checkInHistoryControllerProvider);
+        return 'phase=${current.phase} selected=${current.selectedDate} '
+            'requests=${observed.records.map((record) => '${record.date}/${record.status}').toList()}';
+      },
+    );
+    final previousDayState = container.read(checkInHistoryControllerProvider);
+    expect(
+      previousDayState.phase,
+      CheckInHistoryPhase.ready,
+      reason: 'Previous-day request result: ${observed.records.last.status}',
+    );
+    expect(_dateText(previousDayState.selectedDate!), _dateText(previousDay));
+    expect(previousDayState.entries, isEmpty);
+    expect(find.byKey(const Key('history-empty')), findsOneWidget);
+    expect(observed.records.last.date, _dateText(previousDay));
     expect(observed.records.last.zone, expectedZone);
     expect(find.byKey(const Key('history-entry-history_00')), findsNothing);
 
+    final readsBeforeToday = observed.records.length;
     await tester.tap(find.byKey(const Key('history-select-date')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('${today.day}').last);
+    final todayFinder = find.descendant(
+      of: find.byType(CalendarDatePicker),
+      matching: find.text('${today.day}'),
+    );
+    expect(todayFinder, findsOneWidget);
+    await tester.tap(todayFinder);
+    await tester.tap(find.text('OK'));
     await tester.pump();
-    await _wait(tester, find.byKey(const Key('history-entry-history_00')));
+    await _waitUntil(tester, () {
+      final current = container.read(checkInHistoryControllerProvider);
+      return observed.records.length > readsBeforeToday &&
+          current.phase == CheckInHistoryPhase.ready;
+    });
     expect(observed.records.last.date, expectedDate);
     expect(observed.records.last.hasCursor, isFalse);
     expect(find.byKey(const Key('history-entry-history_20')), findsNothing);
 
     await tester.tap(find.byKey(const Key('history-entry-history_00')));
     expect(openedId, 'history_00');
-    expect(
-      observed.records.every((request) => request.status == 200),
-      isTrue,
-    );
-    expect(
-      observed.records.map((request) => request.date),
-      [expectedDate, expectedDate, expectedDate, _dateText(previousDay), expectedDate],
-    );
+    expect(observed.records.every((request) => request.status == 200), isTrue);
+    expect(observed.records.map((request) => request.date), [
+      expectedDate,
+      expectedDate,
+      expectedDate,
+      _dateText(previousDay),
+      expectedDate,
+    ]);
     debugPrint(
       'S3_HISTORY_ANDROID_PASS zone=$expectedZone date=$expectedDate reads=${observed.records.length} pages=20+2',
     );
@@ -239,11 +285,18 @@ Future<void> _wait(WidgetTester tester, Finder finder) async {
   await tester.pump();
 }
 
-Future<void> _waitUntil(WidgetTester tester, bool Function() condition) async {
+Future<void> _waitUntil(
+  WidgetTester tester,
+  bool Function() condition, {
+  String Function()? diagnostic,
+}) async {
   final deadline = DateTime.now().add(const Duration(seconds: 30));
   while (!condition()) {
     if (DateTime.now().isAfter(deadline)) {
-      throw TestFailure('Timed out waiting for the history request to finish.');
+      throw TestFailure(
+        'Timed out waiting for the history request to finish. '
+        '${diagnostic?.call() ?? ''}',
+      );
     }
     await tester.pump(const Duration(milliseconds: 100));
   }
