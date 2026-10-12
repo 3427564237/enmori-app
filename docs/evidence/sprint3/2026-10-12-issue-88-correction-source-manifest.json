@@ -1,0 +1,210 @@
+{
+  "issue": "https://github.com/3427564237/enmori-app/issues/83",
+  "pullRequest": "https://github.com/3427564237/enmori-app/pull/88",
+  "review": "https://github.com/3427564237/enmori-app/pull/88#pullrequestreview-5489746491",
+  "reviewedOldHead": "a58bdb5ddce44029e1b83dffc53c7f659c235d99",
+  "implementationCommit": "2b4290b470a026e20b73e09dce10cae46af2f147",
+  "implementationTree": "876549d84effa0e04fea9539b6a2425527b57b42",
+  "recordedAtSgt": "2026-10-12T19:16:18+08:00",
+  "sourceBinding": "Working-byte snapshot taken before final full tests/build; all 25 hashes verified unchanged before source commit and manifest creation. Evidence commit modifies docs only. Git blobs and local working-byte SHA-256 values differ in purpose.",
+  "sourceFiles": [
+    {
+      "path": ".fvmrc",
+      "gitBlob": "e4d3c12ba6b5d2d8aa826f6a17991244de812d7d",
+      "testedWorkingFileSha256": "f35519711e24b639f1ca79cfa7847307ba6b75f0b6d1d76734ecc9f2cf0cceb0"
+    },
+    {
+      "path": "android/app/build.gradle.kts",
+      "gitBlob": "1dd9b45b837fffa66166706f526d995fb57dbe11",
+      "testedWorkingFileSha256": "6d4f4dea8beeb450637e6522ac96e3d1868950f1a36fd419211c7b03c7dab0d6"
+    },
+    {
+      "path": "android/gradle.properties",
+      "gitBlob": "e96108cfe4c4d200adab58b532e95774c88e485b",
+      "testedWorkingFileSha256": "7714698de712a7872e371f0dbae626c255fc83ac1c15e52e7cd9fcaa241b5092"
+    },
+    {
+      "path": "docs/decisions/2026-10-12-li-isolated-note-conversation-conditional-a.md",
+      "gitBlob": "2303f75ac646daeb7df8b036c8c62c8f73fecb4e",
+      "testedWorkingFileSha256": "16c446f80c3a062da0f9448de32e20f51ffbeb5f7e5fd3b8947c516c0dfef8d6"
+    },
+    {
+      "path": "docs/decisions/2026-10-12-li-parallel-delivery-reissue.md",
+      "gitBlob": "79bffd6a8c2fa74bdddf1efe76ace7ee15ae7b52",
+      "testedWorkingFileSha256": "2a8f7bb9b1e6b3e371ce8bb02a2737eb55c30b77ac455f797f91e84309fb7df0"
+    },
+    {
+      "path": "lib/ai_conversation_harness.dart",
+      "gitBlob": "b905191b1e7ad3ca82f5756101299d0c7a894726",
+      "testedWorkingFileSha256": "4e11dfa0c33ce62525d7cb14516f644f8d30a7447e8bb7ddc9ce64330cacc499"
+    },
+    {
+      "path": "lib/core/result/result.dart",
+      "gitBlob": "f452a4ed4a78c25a2bef118e649cbc1cdc6adffc",
+      "testedWorkingFileSha256": "e1f084cc3e441c4a06d0e3ab64ba9c58c2e9b06f1d588ee1db5cfac83c194be2"
+    },
+    {
+      "path": "lib/features/ai_conversation/ai_conversation_providers.dart",
+      "gitBlob": "424ceda0e989313f6d24cfd116a5ccf370af571d",
+      "testedWorkingFileSha256": "6cca368e08c83745d8d9741acf8912f36cc1483f07ee25d4844ca37cf091d2ac"
+    },
+    {
+      "path": "lib/features/ai_conversation/data/ai_wire_repository.dart",
+      "gitBlob": "82c4391c7df184ec66b9d5892b6bb27dd4bfaba0",
+      "testedWorkingFileSha256": "53e929231c060a17e3470ea06be04bf30af4cef9afb9fd1a4cd0394f3973c1cf"
+    },
+    {
+      "path": "lib/features/ai_conversation/data/ai_wire_transport.dart",
+      "gitBlob": "aed5b0756f263c947c4d42f59f144e407eb88ebd",
+      "testedWorkingFileSha256": "a503d56af669ab2449eb7f02d1b78d8de3d1d569a04c8a45af34cb6e59573492"
+    },
+    {
+      "path": "lib/features/ai_conversation/domain/ai_conversation_repository.dart",
+      "gitBlob": "327ff62e1794241ff654a7f553f147f28c59a685",
+      "testedWorkingFileSha256": "eb4ee4b54f7e64f497e7672d3feeabe9022727f0ebc3b6bbc39989d45cbc69bf"
+    },
+    {
+      "path": "lib/features/ai_conversation/domain/ai_conversation.dart",
+      "gitBlob": "b965cc068db01c27060bc1f24f2b5214d1df3c64",
+      "testedWorkingFileSha256": "b06819510d89b0827564d332ee2dca617efcab8bc9ed9e6767098f7cf2bd9b35"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "gitBlob": "829bc6c9d3257beccd1f98c29d614ad074724b4c",
+      "testedWorkingFileSha256": "7e33411717dec4ed0d57b11402a91f992c4559f5e9dea4e3be568fb13edb1a5e"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_state.dart",
+      "gitBlob": "65243dc89bcbc28194936eeb697db11431577cda",
+      "testedWorkingFileSha256": "4834a5ec26b94b68dfbb7db0a1eeba941aec8ef0855cd0082d434dc928917f51"
+    },
+    {
+      "path": "lib/harness/ai_conversation/ai_conversation_harness_app.dart",
+      "gitBlob": "2b68ef54ab0b863b1433d5aa40eabfb7c278ce0c",
+      "testedWorkingFileSha256": "5dd73bb021cd4f9c46fd3aabc96457462930d00de16c0daa23af1b52d70bab61"
+    },
+    {
+      "path": "lib/harness/ai_conversation/synthetic_ai_transport.dart",
+      "gitBlob": "4bd4551011596b0dc9f09de8e0d5ea96df09bd55",
+      "testedWorkingFileSha256": "e51db18d82dd52c10f7d9ac634f79c3788b2b1170d4e41dd2dc216423ed0cdc0"
+    },
+    {
+      "path": "lib/harness/ai_conversation/synthetic_auth_repository.dart",
+      "gitBlob": "dd4c4be3fd5c47def930fa4d3603a470068c52a7",
+      "testedWorkingFileSha256": "e471ec76701798dd9f4a0a5a96122f91bdd06cc2c7804be72e97093fc1df9e35"
+    },
+    {
+      "path": "pubspec.lock",
+      "gitBlob": "424ccbbdc1144256f7af0648e589feb3923c549a",
+      "testedWorkingFileSha256": "774e3ce672777e779ddfbd80440e47c9ccf0cdf8a86ae2c09d4e4fe4e5c73b82"
+    },
+    {
+      "path": "pubspec.yaml",
+      "gitBlob": "52106a6fcd6595a35c51b01cc5b1e3d7237448ab",
+      "testedWorkingFileSha256": "01b6fa4cd7931fd29d258281da78579ba81a085c658143e6b5a83c2a13050c80"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_controller_test.dart",
+      "gitBlob": "21815d8f2ddc388a72bb189cc09ca830328f4092",
+      "testedWorkingFileSha256": "ee7fca8b5c6f736846a89bedfdf490a9e12f7b970815e2f382989ea1a7e2e268"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "gitBlob": "23ae25ab316e3f954280985a6bae3c2d124461d7",
+      "testedWorkingFileSha256": "156d05d0ed5874bfd351d5ad1e4b1ad7ee94d8b85364ba321cb15dc069530a7a"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_recovery_test.dart",
+      "gitBlob": "b5a1f36f4ad1b1fdf17f7160e4dd64f4af788aa1",
+      "testedWorkingFileSha256": "d1136357e6ad95aaace3cc69d53c33e924a704307c950796862ff98d7ab32e64"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_review_regression_test.dart",
+      "gitBlob": "b5ee39443af8b4772cacea5ea0b29a2d80ccc8be",
+      "testedWorkingFileSha256": "5456e72bdaf2a19b2d9597dbc84c2a870b070d9015dd4696c61e8ab468f38a03"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_wire_client_test.dart",
+      "gitBlob": "b8aa9a610431d76443d37e1cf60f883ef0e0016b",
+      "testedWorkingFileSha256": "c9acca76750c0e5dd4360db5b67a5c5fe8afe772efb92c9626be97dab1b55e40"
+    },
+    {
+      "path": "test/harness/ai_conversation_harness_test.dart",
+      "gitBlob": "e1dfeb321a197406d971961c2934df9a7379264b",
+      "testedWorkingFileSha256": "011d28f1bfd9bf68d2e7e8dc651bdda81f95bdbdfbfa696815304291b7bc0457"
+    }
+  ],
+  "checks": {
+    "finalRegressionFile": "25/25 Pass",
+    "flutterFull": "443/443 Pass = original 418 plus 25 new regressions, no double count",
+    "originalDevelopmentReproduction": "Initial 14-test development checkpoint on old production code: 3 Pass, 11 Fail; this was not the final 25-test file",
+    "intermediateAdditionalBoundaries": "3 extra probes before the final defensive patch: 0 Pass, 3 Fail; not final implementation",
+    "flutterAnalyze": "Pass, no issues",
+    "dartFormat": "18 files, 0 changed",
+    "sourceDiffCheck": "Pass working/staged checks",
+    "androidSyntheticHarnessBuild": "Pass with existing process-only compiler flags; warnings retained",
+    "deviceInteraction": "Not Run",
+    "realBackendStorageContextModel": "Not Run",
+    "sharedComposition": "Not Run here",
+    "jinRereview": "Pending",
+    "liBoundedAcceptance": "Pending"
+  },
+  "transcripts": [
+    {
+      "rawLocalPath": "D:\\3851 AI\\drafts\\issue88-correction\\review-regressions-before.txt",
+      "rawSha256": "9af87dd581199b3be48234e004dce1a29b7d2a0450f525f2353a65d45f6b27cb",
+      "publishedPath": "docs/evidence/sprint3/transcripts/issue88-correction/review-regressions-before.txt",
+      "publishedSha256": "c04d889cd7a3fe719a6c828230396810fbb622de7b2be9198337e6e091a1f607",
+      "conversion": "Decoded shell output exported to UTF-8 without BOM, LF, no trailing horizontal whitespace and one final newline; raw and published hashes recorded separately."
+    },
+    {
+      "rawLocalPath": "D:\\3851 AI\\drafts\\issue88-correction\\additional-boundaries-before.txt",
+      "rawSha256": "a522cd14a84c8a1540069d97b96be26b16e847e81d0739cbfe4b7e66a6ff1cff",
+      "publishedPath": "docs/evidence/sprint3/transcripts/issue88-correction/additional-boundaries-before.txt",
+      "publishedSha256": "eee96e861c89288979fad47b5fa26078f74deca0052cf2dfff63559de35dd991",
+      "conversion": "Decoded shell output exported to UTF-8 without BOM, LF, no trailing horizontal whitespace and one final newline; raw and published hashes recorded separately."
+    },
+    {
+      "rawLocalPath": "D:\\3851 AI\\drafts\\issue88-correction\\review-regressions-final.txt",
+      "rawSha256": "301c60617e2fca2cd8fbb6d493d7ff5fb162bc2645969eae7e43e23694d19af5",
+      "publishedPath": "docs/evidence/sprint3/transcripts/issue88-correction/review-regressions-final.txt",
+      "publishedSha256": "283eb26f25967fb987c2640c50c4f99ebc63743cd78d2aa746f165c0e6538ad6",
+      "conversion": "Decoded shell output exported to UTF-8 without BOM, LF, no trailing horizontal whitespace and one final newline; raw and published hashes recorded separately."
+    },
+    {
+      "rawLocalPath": "D:\\3851 AI\\drafts\\issue88-correction\\flutter-full.txt",
+      "rawSha256": "115b2470e8b34b5e90a711c5ea74f3ea071817fda812526efd4f10b25e7074d9",
+      "publishedPath": "docs/evidence/sprint3/transcripts/issue88-correction/flutter-full.txt",
+      "publishedSha256": "6f31db4900e2ecfa4c42737ba71361323aec0eea4b3e6881f4c9f43c1b9dc52f",
+      "conversion": "Decoded shell output exported to UTF-8 without BOM, LF, no trailing horizontal whitespace and one final newline; raw and published hashes recorded separately."
+    },
+    {
+      "rawLocalPath": "D:\\3851 AI\\drafts\\issue88-correction\\flutter-analyze.txt",
+      "rawSha256": "ff50630681dccda573365b3482161e8680ada0145955da2fd6b01b2bfab46d69",
+      "publishedPath": "docs/evidence/sprint3/transcripts/issue88-correction/flutter-analyze.txt",
+      "publishedSha256": "683a654637776074c01bd83a813455a8e2981ead188074d8c8a41d3d5b4346ac",
+      "conversion": "Decoded shell output exported to UTF-8 without BOM, LF, no trailing horizontal whitespace and one final newline; raw and published hashes recorded separately."
+    },
+    {
+      "rawLocalPath": "D:\\3851 AI\\drafts\\issue88-correction\\format-diff-check.txt",
+      "rawSha256": "3323dfc6f885ca1983bd9d39bb2250c9e68f5512cebeb96b646f3bf2ee3542c3",
+      "publishedPath": "docs/evidence/sprint3/transcripts/issue88-correction/format-diff-check.txt",
+      "publishedSha256": "1abfc77002f3cda8c0d003b0b03d661be123fc76b3402c63374e166767a49851",
+      "conversion": "Decoded shell output exported to UTF-8 without BOM, LF, no trailing horizontal whitespace and one final newline; raw and published hashes recorded separately."
+    },
+    {
+      "rawLocalPath": "D:\\3851 AI\\drafts\\issue88-correction\\android-build-final.txt",
+      "rawSha256": "494f67f786dded32368227d2f6743ae71650d15e30d0608bc78d2b6069205097",
+      "publishedPath": "docs/evidence/sprint3/transcripts/issue88-correction/android-build-final.txt",
+      "publishedSha256": "f7478ed814dd6d961caabc69b575fc2875fa8de1e148e07bd45b96e2a3789145",
+      "conversion": "Decoded shell output exported to UTF-8 without BOM, LF, no trailing horizontal whitespace and one final newline; raw and published hashes recorded separately."
+    }
+  ],
+  "localApk": {
+    "path": "D:\\3851 AI\\formal\\enmori-app\\build\\app\\outputs\\flutter-apk\\app-debug.apk",
+    "bytes": 175388579,
+    "sha256": "dc317645e1a467c8f6e4a8562ec1a6e7517ecf7824d706327a13c207a6f269c3",
+    "target": "lib/ai_conversation_harness.dart",
+    "distribution": "Local executable only; not committed and not evidence of a device run or real model/storage."
+  }
+}

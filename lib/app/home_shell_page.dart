@@ -9,6 +9,8 @@ final class HomeShellPage extends StatelessWidget {
     this.onOpenProfile,
     this.onOpenFriends,
     this.onManagePersonas,
+    this.onOpenHistory,
+    this.onOpenAi,
     this.onOpenEvent,
     required this.onSeeAllEvents,
     super.key,
@@ -19,6 +21,8 @@ final class HomeShellPage extends StatelessWidget {
   final VoidCallback? onOpenProfile;
   final VoidCallback? onOpenFriends;
   final VoidCallback? onManagePersonas;
+  final VoidCallback? onOpenHistory;
+  final VoidCallback? onOpenAi;
   final void Function(String)? onOpenEvent;
   final VoidCallback onSeeAllEvents;
 
@@ -68,6 +72,20 @@ final class HomeShellPage extends StatelessWidget {
                 onPressed: onManagePersonas,
                 icon: const Icon(Icons.manage_accounts_outlined),
                 label: const Text('Manage Personas'),
+              ),
+            if (onOpenHistory != null)
+              OutlinedButton.icon(
+                key: const Key('home-check-in-history'),
+                onPressed: onOpenHistory,
+                icon: const Icon(Icons.history),
+                label: const Text('Check-in history'),
+              ),
+            if (onOpenAi != null)
+              OutlinedButton.icon(
+                key: const Key('home-ai-conversation'),
+                onPressed: onOpenAi,
+                icon: const Icon(Icons.chat_outlined),
+                label: const Text('AI conversation'),
               ),
             const SizedBox(height: 32),
             Text(

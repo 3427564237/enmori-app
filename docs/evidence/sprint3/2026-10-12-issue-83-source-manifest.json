@@ -1,0 +1,185 @@
+{
+  "issue": "https://github.com/3427564237/enmori-app/issues/83",
+  "implementationCommit": "deffe041b2713aec28e04b8dbb509dc553db2e40",
+  "implementationTree": "997be8e1aa5ca69bd29a11f35ea9823a2b5fe5f3",
+  "baseCommit": "2f00a6c7ab686ffba2429a4dc74761b12a04d3a5",
+  "recordedAtSgt": "2026-10-12T18:31:25+08:00",
+  "sourceBinding": "All code tests/build executed on these working file bytes before the implementation commit; subsequent evidence commit changes docs only. Git blobs and working-byte hashes are distinct.",
+  "sourceFiles": [
+    {
+      "path": ".fvmrc",
+      "gitBlob": "e4d3c12ba6b5d2d8aa826f6a17991244de812d7d",
+      "testedWorkingFileSha256": "f35519711e24b639f1ca79cfa7847307ba6b75f0b6d1d76734ecc9f2cf0cceb0"
+    },
+    {
+      "path": "android/app/build.gradle.kts",
+      "gitBlob": "1dd9b45b837fffa66166706f526d995fb57dbe11",
+      "testedWorkingFileSha256": "6d4f4dea8beeb450637e6522ac96e3d1868950f1a36fd419211c7b03c7dab0d6"
+    },
+    {
+      "path": "android/gradle.properties",
+      "gitBlob": "e96108cfe4c4d200adab58b532e95774c88e485b",
+      "testedWorkingFileSha256": "7714698de712a7872e371f0dbae626c255fc83ac1c15e52e7cd9fcaa241b5092"
+    },
+    {
+      "path": "docs/decisions/2026-10-12-li-isolated-note-conversation-conditional-a.md",
+      "gitBlob": "2303f75ac646daeb7df8b036c8c62c8f73fecb4e",
+      "testedWorkingFileSha256": "16c446f80c3a062da0f9448de32e20f51ffbeb5f7e5fd3b8947c516c0dfef8d6"
+    },
+    {
+      "path": "docs/decisions/2026-10-12-li-parallel-delivery-reissue.md",
+      "gitBlob": "79bffd6a8c2fa74bdddf1efe76ace7ee15ae7b52",
+      "testedWorkingFileSha256": "2a8f7bb9b1e6b3e371ce8bb02a2737eb55c30b77ac455f797f91e84309fb7df0"
+    },
+    {
+      "path": "lib/ai_conversation_harness.dart",
+      "gitBlob": "b905191b1e7ad3ca82f5756101299d0c7a894726",
+      "testedWorkingFileSha256": "4e11dfa0c33ce62525d7cb14516f644f8d30a7447e8bb7ddc9ce64330cacc499"
+    },
+    {
+      "path": "lib/core/result/result.dart",
+      "gitBlob": "f452a4ed4a78c25a2bef118e649cbc1cdc6adffc",
+      "testedWorkingFileSha256": "e1f084cc3e441c4a06d0e3ab64ba9c58c2e9b06f1d588ee1db5cfac83c194be2"
+    },
+    {
+      "path": "lib/features/ai_conversation/ai_conversation_providers.dart",
+      "gitBlob": "9b8e15e23eb1be6e50190fa109b7f07f91d28438",
+      "testedWorkingFileSha256": "b9c670d8b23d7b8a809c7ca489cd9c108b1213f25862c011d5afbac5e4ff7dc4"
+    },
+    {
+      "path": "lib/features/ai_conversation/data/ai_wire_repository.dart",
+      "gitBlob": "82c4391c7df184ec66b9d5892b6bb27dd4bfaba0",
+      "testedWorkingFileSha256": "53e929231c060a17e3470ea06be04bf30af4cef9afb9fd1a4cd0394f3973c1cf"
+    },
+    {
+      "path": "lib/features/ai_conversation/data/ai_wire_transport.dart",
+      "gitBlob": "aed5b0756f263c947c4d42f59f144e407eb88ebd",
+      "testedWorkingFileSha256": "a503d56af669ab2449eb7f02d1b78d8de3d1d569a04c8a45af34cb6e59573492"
+    },
+    {
+      "path": "lib/features/ai_conversation/domain/ai_conversation_repository.dart",
+      "gitBlob": "327ff62e1794241ff654a7f553f147f28c59a685",
+      "testedWorkingFileSha256": "eb4ee4b54f7e64f497e7672d3feeabe9022727f0ebc3b6bbc39989d45cbc69bf"
+    },
+    {
+      "path": "lib/features/ai_conversation/domain/ai_conversation.dart",
+      "gitBlob": "b965cc068db01c27060bc1f24f2b5214d1df3c64",
+      "testedWorkingFileSha256": "b06819510d89b0827564d332ee2dca617efcab8bc9ed9e6767098f7cf2bd9b35"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "gitBlob": "829bc6c9d3257beccd1f98c29d614ad074724b4c",
+      "testedWorkingFileSha256": "7e33411717dec4ed0d57b11402a91f992c4559f5e9dea4e3be568fb13edb1a5e"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_state.dart",
+      "gitBlob": "65243dc89bcbc28194936eeb697db11431577cda",
+      "testedWorkingFileSha256": "4834a5ec26b94b68dfbb7db0a1eeba941aec8ef0855cd0082d434dc928917f51"
+    },
+    {
+      "path": "lib/harness/ai_conversation/ai_conversation_harness_app.dart",
+      "gitBlob": "2b68ef54ab0b863b1433d5aa40eabfb7c278ce0c",
+      "testedWorkingFileSha256": "5dd73bb021cd4f9c46fd3aabc96457462930d00de16c0daa23af1b52d70bab61"
+    },
+    {
+      "path": "lib/harness/ai_conversation/synthetic_ai_transport.dart",
+      "gitBlob": "4bd4551011596b0dc9f09de8e0d5ea96df09bd55",
+      "testedWorkingFileSha256": "e51db18d82dd52c10f7d9ac634f79c3788b2b1170d4e41dd2dc216423ed0cdc0"
+    },
+    {
+      "path": "lib/harness/ai_conversation/synthetic_auth_repository.dart",
+      "gitBlob": "dd4c4be3fd5c47def930fa4d3603a470068c52a7",
+      "testedWorkingFileSha256": "e471ec76701798dd9f4a0a5a96122f91bdd06cc2c7804be72e97093fc1df9e35"
+    },
+    {
+      "path": "pubspec.lock",
+      "gitBlob": "424ccbbdc1144256f7af0648e589feb3923c549a",
+      "testedWorkingFileSha256": "774e3ce672777e779ddfbd80440e47c9ccf0cdf8a86ae2c09d4e4fe4e5c73b82"
+    },
+    {
+      "path": "pubspec.yaml",
+      "gitBlob": "52106a6fcd6595a35c51b01cc5b1e3d7237448ab",
+      "testedWorkingFileSha256": "01b6fa4cd7931fd29d258281da78579ba81a085c658143e6b5a83c2a13050c80"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_controller_test.dart",
+      "gitBlob": "21815d8f2ddc388a72bb189cc09ca830328f4092",
+      "testedWorkingFileSha256": "ee7fca8b5c6f736846a89bedfdf490a9e12f7b970815e2f382989ea1a7e2e268"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "gitBlob": "23ae25ab316e3f954280985a6bae3c2d124461d7",
+      "testedWorkingFileSha256": "156d05d0ed5874bfd351d5ad1e4b1ad7ee94d8b85364ba321cb15dc069530a7a"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_recovery_test.dart",
+      "gitBlob": "b5a1f36f4ad1b1fdf17f7160e4dd64f4af788aa1",
+      "testedWorkingFileSha256": "d1136357e6ad95aaace3cc69d53c33e924a704307c950796862ff98d7ab32e64"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_wire_client_test.dart",
+      "gitBlob": "b8aa9a610431d76443d37e1cf60f883ef0e0016b",
+      "testedWorkingFileSha256": "c9acca76750c0e5dd4360db5b67a5c5fe8afe772efb92c9626be97dab1b55e40"
+    },
+    {
+      "path": "test/harness/ai_conversation_harness_test.dart",
+      "gitBlob": "e1dfeb321a197406d971961c2934df9a7379264b",
+      "testedWorkingFileSha256": "011d28f1bfd9bf68d2e7e8dc651bdda81f95bdbdfbfa696815304291b7bc0457"
+    }
+  ],
+  "checks": {
+    "flutterFull": "418/418 Pass",
+    "newTestsIncluded": 110,
+    "wire": 32,
+    "controller": 28,
+    "recovery": 17,
+    "page": 23,
+    "harness": 10,
+    "flutterAnalyze": "Pass, no issues",
+    "changedDartFormat": "17 files, 0 changed",
+    "gitDiffCheck": "Pass",
+    "androidInitial": "Failed: cross-volume Kotlin incremental cache",
+    "androidFinal": "Pass: existing process-scoped nonincremental/in-process flags",
+    "deviceRun": "Not Run",
+    "realBackendPersistenceModel": "Not Run",
+    "independentJinReview": "Pending",
+    "liAcceptance": "Pending"
+  },
+  "transcripts": [
+    {
+      "rawLocalPath": "D:\\3851 AI\\drafts\\issue83\\android-build-final.txt",
+      "rawSha256": "ea6904c0ed498f85098bbcd6e7a19126b88351b3bcae2b3623923141ce117478",
+      "publishedPath": "docs/evidence/sprint3/transcripts/issue83/android-build-final.txt",
+      "publishedSha256": "87d07bcefa21e269ed717002d59cb6d993d1501ece4abedc6e496a2220b88a90",
+      "conversion": "Export decoded shell transcript as UTF-8 without BOM, LF newlines, remove trailing horizontal whitespace and keep one final newline; raw and published hashes are separately recorded."
+    },
+    {
+      "rawLocalPath": "D:\\3851 AI\\drafts\\issue83\\android-build.txt",
+      "rawSha256": "3dad6b89a94a4d4ab2bbe875c7b43123c8c15126e28068d0c2a79421646c3d07",
+      "publishedPath": "docs/evidence/sprint3/transcripts/issue83/android-build-initial.txt",
+      "publishedSha256": "340cab861b08ce2a7b05d71ab00fa19e89dc1032735a2bd2ce84650d7e07b15e",
+      "conversion": "Export decoded shell transcript as UTF-8 without BOM, LF newlines, remove trailing horizontal whitespace and keep one final newline; raw and published hashes are separately recorded."
+    },
+    {
+      "rawLocalPath": "D:\\3851 AI\\drafts\\issue83\\flutter-analyze.txt",
+      "rawSha256": "d95f8bcd469bece3a4fd372060d53bf289112911e18fe98bebe64b08c8bd7c9d",
+      "publishedPath": "docs/evidence/sprint3/transcripts/issue83/flutter-analyze.txt",
+      "publishedSha256": "5a7c2ac6a18a7c8f2efbe833c4829831e7a8b0aa1b88e76af98d8062875fad19",
+      "conversion": "Export decoded shell transcript as UTF-8 without BOM, LF newlines, remove trailing horizontal whitespace and keep one final newline; raw and published hashes are separately recorded."
+    },
+    {
+      "rawLocalPath": "D:\\3851 AI\\drafts\\issue83\\flutter-full.txt",
+      "rawSha256": "35f954dbbdcff51b4cd4ed41928d69ab06a0daa8e929cc246f14730b979daaa2",
+      "publishedPath": "docs/evidence/sprint3/transcripts/issue83/flutter-full.txt",
+      "publishedSha256": "d15bf0f22de4b2300b9ae77f5870cccce74ab4d5b9df4f2b83fb4a973f19ea5b",
+      "conversion": "Export decoded shell transcript as UTF-8 without BOM, LF newlines, remove trailing horizontal whitespace and keep one final newline; raw and published hashes are separately recorded."
+    }
+  ],
+  "localApk": {
+    "path": "D:\\3851 AI\\formal\\enmori-app\\build\\app\\outputs\\flutter-apk\\app-debug.apk",
+    "bytes": 157431980,
+    "sha256": "c83cf40ad3a05ce9d3b8845a87336560f00ae469c19691df561b2bcdd05b4155",
+    "target": "lib/ai_conversation_harness.dart",
+    "distribution": "Local build artifact; not committed or represented as a device run."
+  }
+}

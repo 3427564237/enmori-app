@@ -1,0 +1,420 @@
+00:00 +0: loading D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart
+00:00 +0: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:00 +1: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:00 +2: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:00 +3: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:00 +4: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:01 +5: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:01 +6: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:01 +7: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:01 +8: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:01 +9: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:01 +10: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:01 +11: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:01 +12: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:01 +13: D:/3851 AI/formal/enmori-app/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:01 +14: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:01 +15: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:01 +16: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:01 +17: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:01 +18: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:01 +19: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:01 +20: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:01 +21: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:01 +22: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:01 +23: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:01 +24: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:01 +25: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:02 +26: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:02 +27: D:/3851 AI/formal/enmori-app/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:02 +28: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +29: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +30: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +31: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +32: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +33: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +34: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +35: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +36: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +37: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +38: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +39: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +40: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +41: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +42: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +43: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +44: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +45: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +46: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +47: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +48: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +49: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +50: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +51: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +52: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +53: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +54: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +55: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +56: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +57: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +58: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +59: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +60: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +61: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +62: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +63: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +64: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +65: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +66: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +67: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +68: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +69: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +70: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +71: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +72: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +73: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +74: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +75: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +76: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +77: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +78: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +79: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:02 +80: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Settings independently saves Friends-only with rejected optional processing
+00:02 +81: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Settings independently saves Friends-only with rejected optional processing
+00:02 +82: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Settings independently saves Friends-only with rejected optional processing
+00:02 +83: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Settings independently saves Friends-only with rejected optional processing
+00:02 +84: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Settings independently saves Friends-only with rejected optional processing
+00:02 +85: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: Settings independently saves Friends-only with rejected optional processing
+00:02 +86: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +87: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +88: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +89: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +90: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +91: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +92: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +93: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +94: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +95: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +96: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +97: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +98: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +99: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +100: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +101: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +102: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +103: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +104: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +105: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +106: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +107: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +108: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +109: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +110: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +111: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +112: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +113: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +114: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:02 +115: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:03 +116: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:03 +117: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:03 +118: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:03 +119: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:03 +120: D:/3851 AI/formal/enmori-app/test/app/recovery_flow_test.dart: AUTH_REQUIRED sign-in reloads completed onboarding
+00:03 +121: D:/3851 AI/formal/enmori-app/test/app/recovery_flow_test.dart: AUTH_REQUIRED sign-in reloads completed onboarding
+00:03 +122: D:/3851 AI/formal/enmori-app/test/app/recovery_flow_test.dart: AUTH_REQUIRED sign-in reloads completed onboarding
+00:03 +123: D:/3851 AI/formal/enmori-app/test/app/recovery_flow_test.dart: AUTH_REQUIRED sign-in reloads completed onboarding
+00:03 +124: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +125: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +126: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +127: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +128: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +129: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +130: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +131: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +132: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +133: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +134: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +135: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +136: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +137: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +138: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +139: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +140: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +141: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +142: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +143: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +144: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +145: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +146: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: saved interests are reread after editor system Back and refresh Home
+00:03 +147: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: invalid input retains edits; uncertain commit never retries without reload
+00:03 +148: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: invalid input retains edits; uncertain commit never retries without reload
+00:03 +149: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: invalid input retains edits; uncertain commit never retries without reload
+00:03 +150: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: invalid input retains edits; uncertain commit never retries without reload
+00:03 +151: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: invalid input retains edits; uncertain commit never retries without reload
+00:03 +152: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: invalid input retains edits; uncertain commit never retries without reload
+00:03 +153: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: back confirms and leaves before navigation
+00:03 +154: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: back confirms and leaves before navigation
+00:03 +155: D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_page_test.dart: back confirms and leaves before navigation
+00:03 +156: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: account replacement removes old stack and old callbacks
+00:03 +157: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: account replacement removes old stack and old callbacks
+00:03 +158: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: account replacement removes old stack and old callbacks
+00:03 +159: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: account replacement removes old stack and old callbacks
+00:03 +160: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: account replacement removes old stack and old callbacks
+00:03 +161: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: account replacement removes old stack and old callbacks
+00:03 +162: D:/3851 AI/formal/enmori-app/test/app/persona_home_router_test.dart: account replacement removes old stack and old callbacks
+00:03 +163: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: cancelling an unsaved edit neither mutates nor reports a save
+00:03 +164: D:/3851 AI/formal/enmori-app/test/app/own_profile_flow_test.dart: cancelling an unsaved edit neither mutates nor reports a save
+00:03 +165: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: successful mutation followed by read failure is not reported saved; reload recovers
+00:03 +166: D:/3851 AI/formal/enmori-app/test/app/account_preferences_flow_test.dart: successful mutation followed by read failure is not reported saved; reload recovers
+00:03 +167: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:03 +168: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:03 +169: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:03 +170: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:03 +171: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:03 +172: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +173: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +174: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +175: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +176: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +177: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +178: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +179: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +180: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +181: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +182: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +183: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +184: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +185: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +186: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +187: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +188: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +189: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +190: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +191: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +192: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +193: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +194: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +195: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +196: D:/3851 AI/formal/enmori-app/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:04 +197: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +198: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +199: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +200: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +201: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +202: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +203: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +204: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +205: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +206: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +207: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +208: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +209: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +210: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:04 +211: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +212: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +213: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +214: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +215: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +216: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +217: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +218: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +219: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +220: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +221: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +222: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +223: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +224: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +225: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +226: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +227: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +228: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +229: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +230: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +231: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +232: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +233: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +234: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +235: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +236: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +237: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +238: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +239: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +240: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +241: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +242: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +243: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +244: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +245: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +246: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +247: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +248: D:/3851 AI/formal/enmori-app/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:05 +249: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +250: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +251: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +252: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +253: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +254: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +255: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +256: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +257: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +258: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +259: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +260: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +261: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +262: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +263: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +264: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +265: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +266: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +267: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +268: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +269: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +270: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +271: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +272: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +273: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +274: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +275: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +276: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +277: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +278: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +279: D:/3851 AI/formal/enmori-app/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:05 +280: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +281: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +282: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +283: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +284: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +285: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +286: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +287: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +288: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +289: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +290: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +291: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +292: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +293: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +294: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +295: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +296: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +297: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +298: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +299: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +300: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +301: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +302: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +303: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +304: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +305: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +306: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +307: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +308: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +309: D:/3851 AI/formal/enmori-app/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:05 +310: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:05 +311: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:05 +312: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:05 +313: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:05 +314: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:05 +315: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +316: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +317: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +318: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +319: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +320: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +321: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +322: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +323: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +324: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +325: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +326: D:/3851 AI/formal/enmori-app/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:06 +327: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +328: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +329: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +330: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +331: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +332: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +333: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +334: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +335: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +336: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +337: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +338: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +339: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +340: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +341: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +342: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +343: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +344: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +345: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +346: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +347: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +348: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +349: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +350: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +351: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +352: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +353: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:06 +354: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: initial load failure never masquerades as empty or no Active
+00:07 +355: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: keyboard traverses form in visual order and submits validation
+00:07 +356: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: keyboard traverses form in visual order and submits validation
+00:07 +357: D:/3851 AI/formal/enmori-app/test/features/personas/persona_accessibility_test.dart: keyboard traverses form in visual order and submits validation
+00:07 +358: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +359: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +360: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +361: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +362: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +363: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +364: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +365: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +366: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +367: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +368: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +369: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +370: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +371: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +372: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +373: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +374: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +375: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +376: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +377: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +378: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +379: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:07 +380: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:07 +381: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:07 +382: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:07 +383: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:07 +384: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:07 +385: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:07 +386: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:08 +387: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:08 +388: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:08 +389: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:08 +390: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:08 +391: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:08 +392: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:08 +393: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:08 +394: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:08 +395: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:08 +396: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: uncertain create recovery 412 closes retry and requires explicit disposition
+00:08 +397: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: uncertain create recovery 412 closes retry and requires explicit disposition
+00:08 +398: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: uncertain create recovery 412 closes retry and requires explicit disposition
+00:08 +399: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: late onboarding response is ignored after page exit
+00:08 +400: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: late create success updates a mounted form after rendering and leaves it clean
+00:08 +401: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: onboarding enforces approved Username boundaries
+00:08 +402: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: onboarding enforces approved Username boundaries
+00:08 +403: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: same UID new observed session clears the previous private draft
+00:08 +404: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: same UID new observed session clears the previous private draft
+00:09 +405: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: onboarding failure retains selected choice and offers retry
+00:09 +406: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: onboarding failure retains selected choice and offers retry
+00:09 +407: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: edit saves explicit fields and keeps successful form clean on Back
+00:09 +408: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: note-only Check-in blocks invalid note before repository create
+00:09 +409: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: small phone, landscape, dark mode and enlarged text stay scrollable
+00:09 +410: D:/3851 AI/formal/enmori-app/test/features/personas/persona_pages_test.dart: small phone, landscape, dark mode and enlarged text stay scrollable
+00:09 +411: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: note-only Check-in shows committed and confirmed states
+00:09 +412: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: confirmation failure maps copy and exposes retry
+00:09 +413: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: registration uses the approved public error catalogue
+00:09 +414: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: onboarding maps AUTH_REQUIRED to public copy
+00:09 +415: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: onboarding maps AUTH_FORBIDDEN to public copy
+00:09 +416: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: onboarding maps SERVICE_UNAVAILABLE to public copy
+00:09 +417: D:/3851 AI/formal/enmori-app/test/features/rmvp01a_r6_pages_test.dart: Check-in uses protected and service public errors
+00:09 +418: All tests passed!

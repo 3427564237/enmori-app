@@ -1,0 +1,27 @@
+00:00 +0: loading D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart
+00:00 +0: R1 actual wire: fresh U plus available assistant revokes Retry
+00:00 +1: R1 actual wire: older user_saved cannot reopen Retry after newer available assistant page
+00:00 +2: R1 actual wire: newer delayed available assistant page revokes an earlier completed user_saved read
+00:00 +3: R1 actual wire: paged available assistant then overlapping U cannot restore Retry
+00:00 +4: R1 control: fresh user_saved clarifies history-only available assistant without inventing a permanent pair
+00:00 +5: R1 control: explicit assistant_saved available assistant is not undone by a subsequent user_saved
+00:00 +6: R1 actual wire: fresh U plus tombstone revokes Retry
+00:00 +7: R1 actual wire: older user_saved cannot reopen Retry after newer tombstone page
+00:00 +8: R1 actual wire: newer delayed tombstone page revokes an earlier completed user_saved read
+00:00 +9: R1 actual wire: paged tombstone then overlapping U cannot restore Retry
+00:00 +10: R1 control: fresh user_saved clarifies history-only tombstone without inventing a permanent pair
+00:00 +11: R1 control: explicit assistant_saved tombstone is not undone by a subsequent user_saved
+00:00 +12: R1 control: explicit execute pair survives a contradictory user_saved
+00:00 +13: R1 control: abandoned older user_saved cannot reopen an explicit assistant_saved pair
+00:00 +14: R1 control: assistant explicitly belonging to another U does not block the current U
+00:00 +15: R1 control: independent new Send no_effect is not blocked by older U0 A0 history
+00:00 +16: R1 retained evidence: clearing a conflicting history page cannot let an old user_saved reopen Retry
+00:00 +17: R2 pair integrity: a new Send cannot reassign an already accepted assistant to another U
+00:00 +18: R2 pair integrity: assistant_saved cannot attach a second assistant to accepted U
+00:00 +19: R1 control: a valid user-only page preserves Retry eligibility
+00:00 +20: R1 control: an older unrelated assistant page does not consume U
+00:00 +21: R2 actual wire: Retry rejects different ID and preserves only original U
+00:00 +22: R2 actual wire: Retry rejects changed sequence and preserves only original U
+00:00 +23: R2 actual wire: Retry rejects changed timestamp and preserves only original U
+00:00 +24: R2 control actual wire: same U Retry succeeds uniquely with original timestamp
+00:00 +25: All tests passed!
