@@ -21,8 +21,7 @@ import {
 export async function buildApp(
   dependencies: R4RouteDependencies & { readonly recommendEvents?: Pick<RecommendEvents, "execute">;
     readonly accountPreferences?: OwnAccountPreferences;
-    readonly listOwnCheckInsForDate?: Pick<ListOwnCheckInsForDate, "execute">;
-    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail } },
+    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute"> } },
 ): Promise<FastifyInstance> {
   const app = Fastify({
     logger: false,
@@ -47,7 +46,7 @@ export async function buildApp(
   }
   if (dependencies.isolatedSlices !== undefined) {
     requireControlledEmulatorEnvironment(dependencies.isolatedSlices.environment);
-    await registerIsolatedSlices(app, dependencies.identityVerifier, dependencies.isolatedSlices.friends, dependencies.isolatedSlices.eventDetail);
+    await registerIsolatedSlices(app, dependencies.identityVerifier, dependencies.isolatedSlices.friends, dependencies.isolatedSlices.eventDetail, dependencies.isolatedSlices.checkInHistory);
   }
   await app.ready();
   return app;
@@ -98,3 +97,4 @@ function validationFailureCode(
   }
   return "SERVICE_UNAVAILABLE";
 }
+

@@ -120,15 +120,38 @@ test("skipped civil day returns authorized empty without a Check-in query", asyn
   assert.equal(calls, 1);
 });
 
-test("invalid civil date or numeric-offset zone fails before repository access", async () => {
+test("invalid dates, numeric offsets and zone abbreviations fail before repository access", async () => {
   let calls = 0;
-  const useCase = new ListOwnCheckInsForDate({ listForDate: async () => { calls += 1; return { kind: "page", accountId, rows: [] }; } }, { decode: () => undefined, encode: () => "unused" }, clock());
-  for (const input of [{ date: "2026-02-30", timeZone: zone }, { date, timeZone: "+08:00" }, { date, timeZone: "Not/AZone" }]) {
+  const acceptedZones: string[] = [];
+  const useCase = new ListOwnCheckInsForDate({ listForDate: async query => { calls += 1; acceptedZones.push(query.timeZone); return { kind: "page", accountId, rows: [] }; } }, { decode: () => undefined, encode: () => "unused" }, clock());
+  for (const input of [
+    { date: "2026-02-30", timeZone: zone },
+    { date, timeZone: "+08:00" },
+    { date, timeZone: "Not/AZone" },
+    { date, timeZone: "EST" },
+    { date, timeZone: "MST" },
+    { date, timeZone: "CET" },
+    { date, timeZone: "EET" },
+    { date, timeZone: "HST" },
+    { date, timeZone: "MET" },
+    { date, timeZone: "WET" },
+    { date, timeZone: "GMT" },
+  ]) {
     const result = await useCase.execute({ principal: { firebaseUid: uid }, ...input });
     assert.equal(result.ok, false);
     if (!result.ok) assert.equal(result.failure.code, "REQUEST_INVALID");
   }
   assert.equal(calls, 0);
+  const backwardCompatibleAliases = [
+    "Cuba", "Egypt", "Eire", "Hongkong", "Iceland", "Iran", "Israel", "Jamaica",
+    "Japan", "Kwajalein", "Libya", "Navajo", "Poland", "Portugal", "Singapore", "Turkey", "W-SU",
+  ];
+  for (const timeZone of ["Asia/Singapore", "US/Eastern", "UTC", ...backwardCompatibleAliases]) {
+    const result = await useCase.execute({ principal: { firebaseUid: uid }, date, timeZone });
+    assert.equal(result.ok, true);
+  }
+  assert.equal(calls, 20);
+  assert.deepEqual(acceptedZones.slice(-backwardCompatibleAliases.length), backwardCompatibleAliases);
 });
 
 test("history repository binds cursor to current authority before querying Check-ins", async () => {
@@ -175,7 +198,8 @@ test("AES-GCM cursor is opaque, tamper-resistant, expiring and process-local", (
   const token = first.encode(cursor());
   assert.equal(token.includes(accountId), false);
   assert.deepEqual(first.decode(token, fixedNow), cursor());
-  assert.equal(first.decode(`${token.slice(0, -1)}A`, fixedNow), undefined);
+  const tampered = `${token.slice(0, 8)}${token[8] === "A" ? "B" : "A"}${token.slice(9)}`;
+  assert.equal(first.decode(tampered, fixedNow), undefined);
   assert.equal(first.decode(token, new Date("2026-10-08T00:10:00.000Z")), undefined);
   assert.equal(new AesGcmHistoryCursorCodec(randomBytes(32)).decode(token, fixedNow), undefined);
 });
@@ -199,3 +223,4 @@ test("continuation cursors keep the first-page-anchored expiry", async () => {
   assert.equal(emitted[0]?.expiresAt, "2026-10-08T00:15:00.000Z");
   assert.equal(emitted[1]?.expiresAt, emitted[0]?.expiresAt);
 });
+

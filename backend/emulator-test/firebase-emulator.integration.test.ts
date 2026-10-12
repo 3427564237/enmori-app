@@ -319,11 +319,14 @@ test("History API pages the isolated synthetic owner data through Auth and Fires
     getInterestTags: new GetInterestTags(interests),
     getOwnInterests: new GetOwnInterests(interests),
     replaceOwnInterests: new ReplaceOwnInterests(interests),
-    listOwnCheckInsForDate: new ListOwnCheckInsForDate(
-      new FirestoreCheckInHistoryRepository(new FirebaseAdminCheckInHistoryGateway(firestore)),
-      createHistoryCursorCodec(),
-      clock,
-    ),
+    isolatedSlices: {
+      environment: process.env,
+      checkInHistory: new ListOwnCheckInsForDate(
+        new FirestoreCheckInHistoryRepository(new FirebaseAdminCheckInHistoryGateway(firestore)),
+        createHistoryCursorCodec(),
+        clock,
+      ),
+    },
   });
   try {
     const first = await app.inject({ method: "GET", url: "/v1/me/check-ins?date=2026-09-05&timeZone=UTC", headers: { authorization: `Bearer ${token}` } });
@@ -655,3 +658,4 @@ test("Firestore Emulator serializes a concurrent Tag deactivation and new assign
     assert.deepEqual(persisted.value, { interestTags: [], revision: 0 });
   }
 });
+

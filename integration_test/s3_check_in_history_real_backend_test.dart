@@ -59,9 +59,12 @@ void main() {
     final uri = Uri.parse(apiBaseUrl);
     if (projectId != 'demo-enmori-rmvp01a-r10' ||
         authHost != '127.0.0.1' ||
-        authPort != 9099 ||
+        authPort < 20000 ||
+        authPort >= 60000 ||
         uri.scheme != 'https' ||
-        uri.host != '127.0.0.1') {
+        uri.host != '127.0.0.1' ||
+        uri.port < 20000 ||
+        uri.port >= 60000) {
       throw StateError('Controlled Android/Firebase Emulator required.');
     }
 

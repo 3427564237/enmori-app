@@ -1,8 +1,10 @@
+import 'package:characters/characters.dart';
+
 import '../../../core/network/backend_api_client.dart';
 import '../../../core/network/utc_timestamp_parser.dart';
 import '../../../core/result/result.dart';
-import '../domain/check_in_repository.dart';
 import '../../account/domain/account_repository.dart';
+import '../domain/check_in_repository.dart';
 
 final class BackendCheckInRepository implements CheckInRepository {
   BackendCheckInRepository(this._client);
@@ -89,6 +91,9 @@ final class BackendCheckInRepository implements CheckInRepository {
       if (checkInId is! String ||
           checkInId.isEmpty ||
           note is! String ||
+          note.trim() != note ||
+          note.characters.isEmpty ||
+          note.characters.length > 500 ||
           parsedTime == null ||
           parsedTime.toIso8601String() != createdAt) {
         return _invalidHistory();
@@ -164,3 +169,4 @@ final class BackendCheckInRepository implements CheckInRepository {
     ),
   );
 }
+

@@ -3,11 +3,11 @@ package com.enmori.app
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import java.text.ParsePosition
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -15,7 +15,7 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/time_zone")
             .setMethodCallHandler { call, result ->
                 if (call.method == "ianaTimeZone") {
-                    val zone = ZoneId.systemDefault().id
+                    val zone = TimeZone.getDefault().id
                     if (isApprovedIanaZone(zone)) result.success(zone)
                     else result.error("ZONE_UNAVAILABLE", "Device IANA time zone is unavailable.", null)
                 } else if (call.method == "currentDate") {
@@ -23,7 +23,7 @@ class MainActivity : FlutterActivity() {
                     if (zone == null || !isApprovedIanaZone(zone)) {
                         result.error("ZONE_INVALID", "The captured device time zone is invalid.", null)
                     } else {
-                        result.success(LocalDate.now(ZoneId.of(zone)).toString())
+                        result.success(format("yyyy-MM-dd", zone, Date()))
                     }
                 } else if (call.method == "formatInstants") {
                     val zone = call.argument<String>("timeZone")
@@ -31,8 +31,12 @@ class MainActivity : FlutterActivity() {
                     if (zone == null || !isApprovedIanaZone(zone) || instants == null) {
                         result.error("FORMAT_INVALID", "Check-in times could not be formatted.", null)
                     } else {
-                        val formatter = DateTimeFormatter.ofPattern("EEE, d MMM · HH:mm", Locale.ENGLISH)
-                        result.success(instants.map { Instant.parse(it).atZone(ZoneId.of(zone)).format(formatter) })
+                        val dates = instants.mapNotNull(::parseInstant)
+                        if (dates.size != instants.size) {
+                            result.error("FORMAT_INVALID", "A check-in time is invalid.", null)
+                        } else {
+                            result.success(dates.map { format("EEE, d MMM '·' HH:mm", zone, it) })
+                        }
                     }
                 } else {
                     result.notImplemented()
@@ -41,9 +45,36 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun isApprovedIanaZone(zone: String): Boolean {
-        val rejectedAbbreviations = setOf("CET", "EET", "EST", "GMT", "HST", "MET", "MST", "WET")
-        return zone in ZoneId.getAvailableZoneIds() &&
+        return zone in TimeZone.getAvailableIDs() &&
             !zone.matches(Regex("^[+-]\\d{2}:?\\d{2}$")) &&
-            zone !in rejectedAbbreviations
+            zone !in rejectedTimeZoneAbbreviations
+    }
+
+    private fun format(pattern: String, zone: String, date: Date): String =
+        SimpleDateFormat(pattern, Locale.ENGLISH).apply {
+            timeZone = TimeZone.getTimeZone(zone)
+            isLenient = false
+        }.format(date)
+
+    private fun parseInstant(value: String): Date? {
+        for (pattern in instantPatterns) {
+            val parser = SimpleDateFormat(pattern, Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+                isLenient = false
+            }
+            val position = ParsePosition(0)
+            val parsed = parser.parse(value, position)
+            if (parsed != null && position.index == value.length) return parsed
+        }
+        return null
+    }
+
+    private companion object {
+        val rejectedTimeZoneAbbreviations = setOf("CET", "EET", "EST", "GMT", "HST", "MET", "MST", "WET")
+        val instantPatterns = listOf(
+            "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+            "yyyy-MM-dd'T'HH:mm:ssX",
+        )
     }
 }
+

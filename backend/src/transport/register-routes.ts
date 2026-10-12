@@ -1,7 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { CreateCheckIn } from "../check-ins/application/create-check-in.js";
 import type { GetCheckIn } from "../check-ins/application/get-check-in.js";
-import type { ListOwnCheckInsForDate } from "../check-ins/application/check-in-history.js";
 import type { CompleteOnboarding } from "../onboarding/application/complete-onboarding.js";
 import type { GetOnboarding } from "../onboarding/application/get-onboarding.js";
 import type { GetInterestTags } from "../interests/application/get-interest-tags.js";
@@ -17,7 +16,6 @@ import {
   completeOnboardingSchema,
   createCheckInSchema,
   getCheckInSchema,
-  getCheckInHistorySchema,
   getOnboardingSchema,
   getInterestTagsSchema,
   getOwnInterestsSchema,
@@ -30,7 +28,6 @@ export interface R4RouteDependencies {
   readonly getOnboarding: Pick<GetOnboarding, "execute">;
   readonly createCheckIn: Pick<CreateCheckIn, "execute">;
   readonly getCheckIn: Pick<GetCheckIn, "execute">;
-  readonly listOwnCheckInsForDate?: Pick<ListOwnCheckInsForDate, "execute">;
   readonly getInterestTags: Pick<GetInterestTags, "execute">;
   readonly getOwnInterests: Pick<GetOwnInterests, "execute">;
   readonly replaceOwnInterests: Pick<ReplaceOwnInterests, "execute">;
@@ -132,29 +129,6 @@ export async function registerR4Routes(
     },
   );
 
-  if (dependencies.listOwnCheckInsForDate !== undefined) {
-    app.get<{ Querystring: { date: string; timeZone: string; cursor?: string } }>(
-      "/v1/me/check-ins",
-      {
-        schema: getCheckInHistorySchema,
-        onRequest: [async (_request, reply) => { reply.header("Cache-Control", "no-store"); }, authenticate],
-      },
-      async (request, reply) => {
-        const result = await dependencies.listOwnCheckInsForDate!.execute({
-          principal: requirePrincipal(request),
-          date: request.query.date,
-          timeZone: request.query.timeZone,
-          ...(request.query.cursor === undefined ? {} : { cursor: request.query.cursor }),
-        });
-        if (!result.ok) return sendFailure(request, reply, result.failure);
-        return reply.code(200).send({
-          checkIns: result.value.checkIns.map(checkInResponse),
-          nextCursor: result.value.nextCursor,
-        });
-      },
-    );
-  }
-
   app.get(
     "/v1/interest-tags",
     { schema: getInterestTagsSchema, onRequest: authenticate },
@@ -224,3 +198,4 @@ function interestsResponse(
     revision: interests.revision,
   };
 }
+

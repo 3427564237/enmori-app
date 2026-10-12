@@ -164,7 +164,10 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
       getOnboarding: new GetOnboarding(onboarding),
       createCheckIn: new CreateCheckIn(checkIns, clock, ids),
       getCheckIn: new GetCheckIn(checkIns),
-      listOwnCheckInsForDate: new ListOwnCheckInsForDate(history, createHistoryCursorCodec(), clock),
+      isolatedSlices: {
+        environment: process.env,
+        checkInHistory: new ListOwnCheckInsForDate(history, createHistoryCursorCodec(), clock),
+      },
       getInterestTags: new GetInterestTags(interests),
       getOwnInterests: new GetOwnInterests(interests),
       replaceOwnInterests: new ReplaceOwnInterests(interests),
@@ -224,20 +227,31 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
     await once(server, 'listening');
     const apiPort = server.address().port;
     const existingReverses = capture(adb, ['-s', serial, 'reverse', '--list']);
-    for (const port of [9099, apiPort]) {
-      assert.ok(!existingReverses.includes(`tcp:${port}`), `ADB reverse port ${port} is already in use`);
-      await run(adb, ['-s', serial, 'reverse', `tcp:${port}`, `tcp:${port}`]);
-      reversedPorts.push(port);
+    const occupiedDevicePorts = new Set(
+      [...existingReverses.matchAll(/tcp:(\d+)\s+tcp:\d+/g)].map((match) => Number(match[1])),
+    );
+    let nextDevicePort = 20000;
+    const allocateDevicePort = () => {
+      while (occupiedDevicePorts.has(nextDevicePort)) nextDevicePort += 1;
+      const port = nextDevicePort++;
+      occupiedDevicePorts.add(port);
+      return port;
+    };
+    const authDevicePort = allocateDevicePort();
+    const apiDevicePort = allocateDevicePort();
+    for (const [devicePort, hostPort] of [[authDevicePort, 9099], [apiDevicePort, apiPort]]) {
+      await run(adb, ['-s', serial, 'reverse', `tcp:${devicePort}`, `tcp:${hostPort}`]);
+      reversedPorts.push(devicePort);
     }
     const configuration = join(directory, 'fixture.json');
     writeFileSync(configuration, JSON.stringify({
-      ENMORI_API_BASE_URL: `https://127.0.0.1:${apiPort}`,
+      ENMORI_API_BASE_URL: `https://127.0.0.1:${apiDevicePort}`,
       ENMORI_FIREBASE_API_KEY: 'controlled-emulator-key',
       ENMORI_FIREBASE_APP_ID: '1:1234567890:android:historytest',
       ENMORI_FIREBASE_MESSAGING_SENDER_ID: '1234567890',
       ENMORI_FIREBASE_PROJECT_ID: environment.projectId,
       ENMORI_FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1',
-      ENMORI_FIREBASE_AUTH_EMULATOR_PORT: '9099',
+      ENMORI_FIREBASE_AUTH_EMULATOR_PORT: String(authDevicePort),
       ENMORI_TEST_EMAIL: email,
       ENMORI_TEST_PASSWORD: password,
       ENMORI_EXPECTED_DEVICE_ZONE: zone,

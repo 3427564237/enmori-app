@@ -11,6 +11,7 @@ const PAGE_SIZE = 20;
 const CURSOR_LIFETIME_MS = 15 * 60 * 1000;
 const CIVIL_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const OFFSET_ZONE = /^[+-]\d{2}:?\d{2}$/;
+const TIME_ZONE_ABBREVIATIONS = new Set(["CET", "EET", "EST", "GMT", "HST", "MET", "MST", "WET"]);
 
 export interface CheckInHistoryPage {
   readonly checkIns: readonly CheckInProjection[];
@@ -34,7 +35,11 @@ function canonicalUtc(instant: Temporal.Instant): string | undefined {
 
 function parseCivilDay(dateInput: string, zoneInput: string): CivilDay | undefined {
   const match = CIVIL_DATE.exec(dateInput);
-  if (match === null || OFFSET_ZONE.test(zoneInput) || zoneInput.length === 0) return undefined;
+  if (
+    match === null ||
+    OFFSET_ZONE.test(zoneInput) ||
+    TIME_ZONE_ABBREVIATIONS.has(zoneInput)
+  ) return undefined;
   try {
     const date = Temporal.PlainDate.from(dateInput, { overflow: "reject" });
     if (date.year < 1 || date.year > 9999 || date.toString() !== dateInput) return undefined;
@@ -111,3 +116,4 @@ export class ListOwnCheckInsForDate {
 }
 
 export type CheckInHistoryResult = Result<CheckInHistoryPage, AppFailure>;
+

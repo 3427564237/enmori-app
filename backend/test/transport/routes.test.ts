@@ -69,6 +69,18 @@ const commandHeaders = {
   "idempotency-key": "A".repeat(22),
 };
 
+const isolatedEnvironment = {
+  ENMORI_ENVIRONMENT: "test",
+  ENMORI_CONTROLLED_PROFILE_DIRECTORY: "/tmp/history-route-test",
+  APPDATA: "/tmp/history-route-test",
+  HOME: "/tmp/history-route-test",
+  USERPROFILE: "/tmp/history-route-test",
+  XDG_CONFIG_HOME: "/tmp/history-route-test",
+  GCLOUD_PROJECT: "demo-enmori-rmvp01a-r10",
+  FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099",
+  FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080",
+} as NodeJS.ProcessEnv;
+
 test("PUT onboarding maps the approved payload and created projection", async () => {
   const input: unknown[] = [];
   const deps = dependencies();
@@ -102,11 +114,14 @@ test("Check-in history authenticates before parsing and marks every response no-
   let calls = 0;
   const deps = {
     ...dependencies(),
-    listOwnCheckInsForDate: { execute: async (input: { readonly principal: { readonly firebaseUid: string }; readonly date: string; readonly timeZone: string; readonly cursor?: string }) => {
-      calls += 1;
-      assert.deepEqual(input, { principal: { firebaseUid: "firebase-1" }, date: "2026-10-07", timeZone: "Asia/Singapore" });
-      return ok({ checkIns: [checkIn], nextCursor: null });
-    } },
+    isolatedSlices: {
+      environment: isolatedEnvironment,
+      checkInHistory: { execute: async (input: { readonly principal: { readonly firebaseUid: string }; readonly date: string; readonly timeZone: string; readonly cursor?: string }) => {
+        calls += 1;
+        assert.deepEqual(input, { principal: { firebaseUid: "firebase-1" }, date: "2026-10-07", timeZone: "Asia/Singapore" });
+        return ok({ checkIns: [checkIn], nextCursor: null });
+      } },
+    },
   };
   const app = await buildApp(deps);
   test.after(() => app.close());
@@ -592,3 +607,4 @@ test("unknown exceptions return a generic safe 503 and keep the app live", async
 function responseText(response: { body: string }): string {
   return response.body;
 }
+
