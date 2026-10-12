@@ -38,7 +38,9 @@ try {
   }
   const firebaseToolsVersion = readJson("node_modules/firebase-tools/package.json").version;
   const firebaseAdminVersion = readJson("node_modules/firebase-admin/package.json").version;
-  const requireAdmin = createRequire(join(root, "node_modules/firebase-admin/package.json"));
+  // Resolve the real SDK entry before locating its pnpm-linked dependency.
+  const requireRoot = createRequire(import.meta.url);
+  const requireAdmin = createRequire(requireRoot.resolve("firebase-admin/app"));
   const firestoreVersion = JSON.parse(readFileSync(requireAdmin.resolve("@google-cloud/firestore/package.json"), "utf8")).version;
   if (firebaseToolsVersion !== manifest.devDependencies["firebase-tools"] ||
       firebaseAdminVersion !== manifest.dependencies["firebase-admin"] || firestoreVersion !== "8.7.1") {
