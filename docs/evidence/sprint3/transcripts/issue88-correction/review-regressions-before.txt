@@ -1,0 +1,296 @@
+00:00 +0: loading D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart
+00:00 +0: R1 actual wire: fresh U plus available assistant revokes Retry
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: false
+  Actual: <true>
+A saved assistant consumes the original user target even without text.
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:80:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 80
+The test description was:
+  R1 actual wire: fresh U plus available assistant revokes Retry
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -1: R1 actual wire: fresh U plus available assistant revokes Retry [E]
+  Test failed. See exception logs above.
+  The test description was: R1 actual wire: fresh U plus available assistant revokes Retry
+
+00:00 +0 -1: R1 actual wire: older user_saved cannot reopen Retry after newer available assistant page
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: false
+  Actual: <true>
+The older operation observation cannot erase accepted assistant evidence.
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:107:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 107
+The test description was:
+  R1 actual wire: older user_saved cannot reopen Retry after newer available assistant page
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -2: R1 actual wire: older user_saved cannot reopen Retry after newer available assistant page [E]
+  Test failed. See exception logs above.
+  The test description was: R1 actual wire: older user_saved cannot reopen Retry after newer available assistant page
+
+00:00 +0 -2: R1 actual wire: newer delayed available assistant page revokes an earlier completed user_saved read
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: false
+  Actual: <true>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:143:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 143
+The test description was:
+  R1 actual wire: newer delayed available assistant page revokes an earlier completed user_saved
+  read
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -3: R1 actual wire: newer delayed available assistant page revokes an earlier completed user_saved read [E]
+  Test failed. See exception logs above.
+  The test description was: R1 actual wire: newer delayed available assistant page revokes an earlier completed user_saved read
+
+00:00 +0 -3: R1 actual wire: paged available assistant then overlapping U cannot restore Retry
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: false
+  Actual: <true>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:170:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 170
+The test description was:
+  R1 actual wire: paged available assistant then overlapping U cannot restore Retry
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -4: R1 actual wire: paged available assistant then overlapping U cannot restore Retry [E]
+  Test failed. See exception logs above.
+  The test description was: R1 actual wire: paged available assistant then overlapping U cannot restore Retry
+
+00:00 +0 -4: R1 actual wire: fresh U plus tombstone revokes Retry
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: false
+  Actual: <true>
+A saved assistant consumes the original user target even without text.
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:80:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 80
+The test description was:
+  R1 actual wire: fresh U plus tombstone revokes Retry
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -5: R1 actual wire: fresh U plus tombstone revokes Retry [E]
+  Test failed. See exception logs above.
+  The test description was: R1 actual wire: fresh U plus tombstone revokes Retry
+
+00:00 +0 -5: R1 actual wire: older user_saved cannot reopen Retry after newer tombstone page
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: false
+  Actual: <true>
+The older operation observation cannot erase accepted assistant evidence.
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:107:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 107
+The test description was:
+  R1 actual wire: older user_saved cannot reopen Retry after newer tombstone page
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -6: R1 actual wire: older user_saved cannot reopen Retry after newer tombstone page [E]
+  Test failed. See exception logs above.
+  The test description was: R1 actual wire: older user_saved cannot reopen Retry after newer tombstone page
+
+00:00 +0 -6: R1 actual wire: newer delayed tombstone page revokes an earlier completed user_saved read
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: false
+  Actual: <true>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:143:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 143
+The test description was:
+  R1 actual wire: newer delayed tombstone page revokes an earlier completed user_saved read
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -7: R1 actual wire: newer delayed tombstone page revokes an earlier completed user_saved read [E]
+  Test failed. See exception logs above.
+  The test description was: R1 actual wire: newer delayed tombstone page revokes an earlier completed user_saved read
+
+00:00 +0 -7: R1 actual wire: paged tombstone then overlapping U cannot restore Retry
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: false
+  Actual: <true>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:170:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 170
+The test description was:
+  R1 actual wire: paged tombstone then overlapping U cannot restore Retry
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -8: R1 actual wire: paged tombstone then overlapping U cannot restore Retry [E]
+  Test failed. See exception logs above.
+  The test description was: R1 actual wire: paged tombstone then overlapping U cannot restore Retry
+
+00:00 +0 -8: R1 control: a valid user-only page preserves Retry eligibility
+00:00 +1 -8: R1 control: an older unrelated assistant page does not consume U
+00:00 +2 -8: R2 actual wire: Retry rejects different ID and preserves only original U
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: AiConversationPhase:<AiConversationPhase.unknown>
+  Actual: AiConversationPhase:<AiConversationPhase.success>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:231:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 231
+The test description was:
+  R2 actual wire: Retry rejects different ID and preserves only original U
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +2 -9: R2 actual wire: Retry rejects different ID and preserves only original U [E]
+  Test failed. See exception logs above.
+  The test description was: R2 actual wire: Retry rejects different ID and preserves only original U
+
+00:00 +2 -9: R2 actual wire: Retry rejects changed sequence and preserves only original U
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: an object with length of <1>
+  Actual: []
+   Which: has length of <0>
+Reject the entire inconsistent reply before mutating known saved content.
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:235:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 235
+The test description was:
+  R2 actual wire: Retry rejects changed sequence and preserves only original U
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +2 -10: R2 actual wire: Retry rejects changed sequence and preserves only original U [E]
+  Test failed. See exception logs above.
+  The test description was: R2 actual wire: Retry rejects changed sequence and preserves only original U
+
+00:00 +2 -10: R2 actual wire: Retry rejects changed timestamp and preserves only original U
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: an object with length of <1>
+  Actual: []
+   Which: has length of <0>
+Reject the entire inconsistent reply before mutating known saved content.
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:235:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 235
+The test description was:
+  R2 actual wire: Retry rejects changed timestamp and preserves only original U
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +2 -11: R2 actual wire: Retry rejects changed timestamp and preserves only original U [E]
+  Test failed. See exception logs above.
+  The test description was: R2 actual wire: Retry rejects changed timestamp and preserves only original U
+
+00:00 +2 -11: R2 control actual wire: same U Retry succeeds uniquely with original timestamp
+00:00 +3 -11: Some tests failed.
+
+Failing tests:
+  D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart: R1 actual wire: fresh U plus available assistant revokes Retry
+  D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart: R1 actual wire: fresh U plus tombstone revokes Retry
+  D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart: R1 actual wire: newer delayed available assistant page revokes an earlier completed user_saved read
+  D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart: R1 actual wire: newer delayed tombstone page revokes an earlier completed user_saved read
+  ... and 7 more

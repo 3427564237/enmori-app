@@ -1,0 +1,83 @@
+00:00 +0: loading D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart
+00:00 +0: R1 retained evidence: clearing a conflicting history page cannot let an old user_saved reopen Retry
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: AiConversationPhase:<AiConversationPhase.unknown>
+  Actual: AiConversationPhase:<AiConversationPhase.idle>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:354:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 354
+The test description was:
+  R1 retained evidence: clearing a conflicting history page cannot let an old user_saved reopen
+  Retry
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -1: R1 retained evidence: clearing a conflicting history page cannot let an old user_saved reopen Retry [E]
+  Test failed. See exception logs above.
+  The test description was: R1 retained evidence: clearing a conflicting history page cannot let an old user_saved reopen Retry
+
+00:00 +0 -1: R2 pair integrity: a new Send cannot reassign an already accepted assistant to another U
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: AiConversationPhase:<AiConversationPhase.unknown>
+  Actual: AiConversationPhase:<AiConversationPhase.success>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:381:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 381
+The test description was:
+  R2 pair integrity: a new Send cannot reassign an already accepted assistant to another U
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -2: R2 pair integrity: a new Send cannot reassign an already accepted assistant to another U [E]
+  Test failed. See exception logs above.
+  The test description was: R2 pair integrity: a new Send cannot reassign an already accepted assistant to another U
+
+00:00 +0 -2: R2 pair integrity: assistant_saved cannot attach a second assistant to accepted U
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: AiConversationPhase:<AiConversationPhase.unknown>
+  Actual: AiConversationPhase:<AiConversationPhase.success>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart:412:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/3851%20AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart line 412
+The test description was:
+  R2 pair integrity: assistant_saved cannot attach a second assistant to accepted U
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -3: R2 pair integrity: assistant_saved cannot attach a second assistant to accepted U [E]
+  Test failed. See exception logs above.
+  The test description was: R2 pair integrity: assistant_saved cannot attach a second assistant to accepted U
+
+00:00 +0 -3: Some tests failed.
+
+Failing tests:
+  D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart: R1 retained evidence: clearing a conflicting history page cannot let an old user_saved reopen Retry
+  D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart: R2 pair integrity: a new Send cannot reassign an already accepted assistant to another U
+  D:/3851 AI/formal/enmori-app/test/features/ai_conversation/ai_conversation_review_regression_test.dart: R2 pair integrity: assistant_saved cannot attach a second assistant to accepted U
