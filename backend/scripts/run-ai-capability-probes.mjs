@@ -74,7 +74,7 @@ try {
   env.FIREBASE_CLI_DISABLE_USAGE = "true";
   env.FIREBASE_EMULATORS_PATH = cache;
   phase = "emulators";
-  const command = `"${process.execPath}" "${join(root, "backend/capability-probes/run.mjs")}"`;
+  const command = `"${process.execPath}" "${join(root, "backend/scripts/run-ai-capability-worker.mjs")}"`;
   const args = [join(root, "node_modules/firebase-tools/lib/bin/firebase.js"),
     "emulators:exec", "--project", "demo-enmori-rmvp01a-r10",
     "--only", "auth,firestore", "--config", join(root, "firebase.json"),
