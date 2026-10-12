@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 1,
+  "recordedOn": "2026-10-11",
+  "timezone": "Asia/Singapore",
+  "owner": "ZHOU YAOYIN",
+  "assignment": "https://github.com/3427564237/enmori-app/issues/68",
+  "instruction": "https://github.com/3427564237/enmori-app/issues/44#issuecomment-6097828815",
+  "status": "local-owner-report-only",
+  "noUpload": true,
+  "acceptedCandidate": "0839c46b865bb6092020ad0ae77e17922ea40eb0",
+  "executableSource": "af56e6ea979039102eff1a2fd52d974f484fc8a3",
+  "finalGateEvidence": "c3e1f84bd305093ffe7f4d6d83b6df3d0289baa5",
+  "acceptance": {
+    "commit": "aaf94e1e0518c227ebcefb67b92be3e86b75672d",
+    "sourceId": "S-PM-1010-LI-FINAL-ISOLATED-CANDIDATE-ACCEPTANCE",
+    "decisionPath": "docs/decisions/2026-10-10-li-final-isolated-candidate-acceptance.md",
+    "gitBlob": "ddacc55a5a158857d844939407087d674f7aeaed",
+    "sourceUrl": "https://github.com/3427564237/enmori-app/blob/aaf94e1e0518c227ebcefb67b92be3e86b75672d/docs/decisions/2026-10-10-li-final-isolated-candidate-acceptance.md",
+    "review": "https://github.com/3427564237/enmori-app/pull/73#pullrequestreview-5479046298"
+  },
+  "inventoryPath": "docs/evidence/ui/figma-make-v5/Q04-C_ROUTE_STATE_MATRIX.md",
+  "mappings": [
+    {
+      "routeId": "ai-customize",
+      "inventoryNumber": 29,
+      "mappingId": "M23",
+      "stateIds": [
+        "NS31"
+      ],
+      "deliveryStatus": "accepted-isolated",
+      "implementedRoutes": [
+        "/personas"
+      ],
+      "sourcePaths": [
+        "lib/features/personas/presentation/persona_overview_page.dart",
+        "lib/features/personas/persona_providers.dart",
+        "lib/features/personas/domain/persona_session.dart"
+      ],
+      "testPaths": [
+        "test/features/personas/persona_pages_test.dart",
+        "test/features/personas/persona_session_test.dart",
+        "test/features/personas/persona_accessibility_test.dart",
+        "integration_test/persona_real_backend_test.dart"
+      ],
+      "remaining": [
+        "ordinary-runtime-enablement",
+        "global-visual-accessibility-conformance"
+      ]
+    },
+    {
+      "routeId": "persona-management",
+      "inventoryNumber": 41,
+      "mappingId": "M24",
+      "stateIds": [
+        "NS31",
+        "NS32",
+        "NS33"
+      ],
+      "deliveryStatus": "accepted-isolated",
+      "implementedRoutes": [
+        "/personas/manage"
+      ],
+      "sourcePaths": [
+        "lib/features/personas/presentation/persona_management_page.dart",
+        "lib/features/personas/domain/persona_session.dart",
+        "lib/features/personas/data/backend_persona_repository.dart"
+      ],
+      "testPaths": [
+        "test/features/personas/persona_pages_test.dart",
+        "test/features/personas/persona_session_test.dart",
+        "test/features/personas/persona_accessibility_test.dart",
+        "integration_test/persona_real_backend_test.dart",
+        "test/features/personas/persona_client_session_test.dart",
+        "test/features/personas/persona_session_adversarial_test.dart"
+      ],
+      "remaining": [
+        "templates-duplication-roleplay-model-preview-outside-scope",
+        "ordinary-runtime-enablement"
+      ]
+    },
+    {
+      "routeId": "edit-persona",
+      "inventoryNumber": 42,
+      "mappingId": "M25",
+      "stateIds": [
+        "NS32",
+        "NS34"
+      ],
+      "deliveryStatus": "accepted-isolated",
+      "implementedRoutes": [
+        "/personas/new",
+        "/personas/:personaId/edit"
+      ],
+      "sourcePaths": [
+        "lib/features/personas/presentation/persona_editor_page.dart",
+        "lib/features/personas/presentation/persona_page_parts.dart",
+        "lib/features/personas/domain/persona.dart"
+      ],
+      "testPaths": [
+        "test/features/personas/persona_pages_test.dart",
+        "test/features/personas/persona_session_test.dart",
+        "test/features/personas/persona_accessibility_test.dart",
+        "integration_test/persona_real_backend_test.dart",
+        "test/features/personas/backend_persona_repository_test.dart",
+        "test/features/personas/persona_providers_test.dart"
+      ],
+      "remaining": [
+        "model-preview-outside-scope",
+        "ordinary-runtime-enablement"
+      ]
+    },
+    {
+      "routeId": "ai-assistant",
+      "inventoryNumber": 30,
+      "mappingId": "M26",
+      "stateIds": [
+        "NS35",
+        "NS36",
+        "NS37"
+      ],
+      "deliveryStatus": "not-approved",
+      "implementedRoutes": [],
+      "sourcePaths": [],
+      "testPaths": [],
+      "remaining": [
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08-M26",
+        "model-host-execution-authority"
+      ],
+      "note": "The internal S2 runtime is separately bounded infrastructure, not M26 delivery."
+    },
+    {
+      "routeId": "ai-limited",
+      "inventoryNumber": 32,
+      "mappingId": "M26",
+      "stateIds": [
+        "NS35",
+        "NS36",
+        "NS37"
+      ],
+      "deliveryStatus": "not-approved",
+      "implementedRoutes": [],
+      "sourcePaths": [],
+      "testPaths": [],
+      "remaining": [
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08-M26"
+      ],
+      "note": "Consent/authority-limited M26 presentation; listed NS35–NS37 are the shared M26 operational requirements, not an invented consent NS ID or Persona-error mapping."
+    },
+    {
+      "routeId": "ai-safety",
+      "inventoryNumber": 31,
+      "mappingId": "M27",
+      "stateIds": [],
+      "deliveryStatus": "prototype-only",
+      "implementedRoutes": [],
+      "sourcePaths": [],
+      "testPaths": [],
+      "remaining": [
+        "M27-production-surface-placement-content-authority"
+      ],
+      "note": "Original ID retained. No standalone production surface or invented state ID is authorized."
+    }
+  ],
+  "sharedHandoff": {
+    "owner": "LI HOURUI",
+    "reviewer": "DU KUN",
+    "source": "f646e26d30547ca9abe8084daedeebe803b1d3f4",
+    "sourcePaths": [
+      "lib/app/home_shell_page.dart",
+      "lib/app/router/app_router.dart",
+      "lib/app/router/isolated_persona_pages.dart"
+    ],
+    "testPaths": [
+      "test/app/persona_home_router_test.dart"
+    ],
+    "featureComposition": "integration_test/persona_real_backend_test.dart",
+    "ordinaryBuildEnabled": false
+  },
+  "evidence": [
+    {
+      "executor": "ZHOU/owner",
+      "source": "ab69c03641647f649eb148e094bb7fed3aec1ef0",
+      "type": "historical-full-and-device",
+      "results": "307 Flutter; physical API35 Persona 1/1 at 1.0 and 1/1 at 2.0; historical results not rerun today",
+      "path": "docs/evidence/sprint3/2026-10-09-zhou-persona-review-handoff.md"
+    },
+    {
+      "executor": "ZHOU/owner",
+      "source": "af56e6ea979039102eff1a2fd52d974f484fc8a3",
+      "type": "affected-tests-and-native-semantics",
+      "results": "22 affected tests and analysis Pass; native Android tree Pass, not audible verification",
+      "path": "docs/evidence/sprint3/2026-10-09-persona-talkback-selection-follow-up.md"
+    },
+    {
+      "executor": "human-user",
+      "source": "82d8e890d71e21bfafc712b205d5d271dd5e1d0f",
+      "type": "audible-talkback",
+      "passedItems": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7
+      ],
+      "url": "https://github.com/3427564237/enmori-app/pull/72#issuecomment-6081846892"
+    },
+    {
+      "executor": "human-user",
+      "source": "af56e6ea979039102eff1a2fd52d974f484fc8a3",
+      "type": "audible-talkback-retest",
+      "passedItems": [
+        4
+      ],
+      "apkSha256": "e2e74ad02669b2db549ef10b515a261fb289bad37b47b8fe36fd18cd270c95b6",
+      "url": "https://github.com/3427564237/enmori-app/pull/72#issuecomment-6081846892"
+    },
+    {
+      "executor": "JIN",
+      "source": "0839c46b865bb6092020ad0ae77e17922ea40eb0",
+      "type": "final-combined-execution",
+      "results": "Backend 366/366; real Emulator 71/71; Flutter 308/308; analysis; separate Persona and My Friends/Profile Android 1/1 each with independent host persistence; retained failed first cleanup",
+      "url": "https://github.com/3427564237/enmori-app/blob/c3e1f84bd305093ffe7f4d6d83b6df3d0289baa5/docs/evidence/sprint3/2026-10-10-jin-final-isolated-candidate-gate.md"
+    },
+    {
+      "executor": "LI",
+      "source": "0839c46b865bb6092020ad0ae77e17922ea40eb0",
+      "type": "final-evidence-review",
+      "results": "APPROVED; source/document checks, no repeated product/device execution for this supplement",
+      "url": "https://github.com/3427564237/enmori-app/pull/73#pullrequestreview-5479046298"
+    }
+  ],
+  "nextArtifact": "docs/planning/2026-10-11-zhou-next-ai-decision-inputs.md",
+  "feasibility": {
+    "originalTarget": "2026-10-11",
+    "targetChanged": false,
+    "isolatedP08": "Accepted before target",
+    "ownerPacket": "Local delivery on 2026-10-11; exact timestamp and packet commit recorded in receipt",
+    "publication": "Not scheduled under current no-upload instruction",
+    "remainingM26M27": "No supported full-delivery ETA until competent decisions and bounded assignment; original target retained",
+    "wholeProductPercentage": null
+  },
+  "unverifiedLimits": [
+    "physical-keyboard",
+    "iOS",
+    "global-visual-accessibility-conformance"
+  ],
+  "productTestsRerunThisTask": false,
+  "independentReviewClaimedForThisPacket": false,
+  "deliveryReceipt": "D:/3851 AI/formal/evidence/2026-10-11-zhou-local-handoff-receipt.json"
+}
