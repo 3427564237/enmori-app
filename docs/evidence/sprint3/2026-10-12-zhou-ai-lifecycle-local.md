@@ -1,5 +1,11 @@
 # ZHOU internal AI lifecycle — local delivery for Issue #78
 
+**Historical checkpoint:** later review found an unresolved-Retry race and
+incorrectly required Q17 optional fields despite the passing tests below.
+See [the local fixes and expanded verification](2026-10-12-zhou-ai-lifecycle-review-fixes.md)
+for the current source and corrected coverage. This original record and its
+manifest remain preserved; their pass alone does not prove those two behaviors.
+
 Recorded 12 October 2026, SGT (UTC+08:00). Owner: ZHOU. **Local implementation
 and owner verification complete; no upload, independent JIN implementation
 review or LI implementation acceptance has occurred.** This is not M26/M27,
