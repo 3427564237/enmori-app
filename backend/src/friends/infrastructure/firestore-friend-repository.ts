@@ -1,3 +1,4 @@
+import { normalizeFriendDisplayName, parseFriendSearchInput, encodeFriendSearchCursor } from "../domain/friend-search.js";
 import { randomUUID } from "node:crypto";
 import { Buffer } from "node:buffer";
 import { ok, err } from "../../shared/domain/result.js";
@@ -126,9 +127,15 @@ export class FirestoreFriendRepository implements FriendRepository {
       return ok({ requests, nextCursor: rows.length > 20 ? Buffer.from(rows[19]!.id).toString("base64url") : null });
     }); } catch { return err("dependency_unavailable"); }
   }
+  public async searchFriends(uid: string, input: unknown): Promise<FriendResult<MyFriendsPage>> {
+    return this.readFriends(uid, undefined, { input });
+  }
   public async listFriends(uid: string, cursor?: string): Promise<FriendResult<MyFriendsPage>> {
-    const after = cursor === undefined ? undefined : decodeFriendCursor(cursor);
-    if (cursor !== undefined && after === undefined) return err("invalid_input");
+    return this.readFriends(uid, cursor);
+  }
+  private async readFriends(uid: string, cursor?: string, search?: { input: unknown }): Promise<FriendResult<MyFriendsPage>> {
+    const listAfter = cursor === undefined ? undefined : decodeFriendCursor(cursor);
+    if (cursor !== undefined && listAfter === undefined) return err("invalid_input");
     try { return await this.firestore.runTransaction(async tx => {
       // Current requester authority must be established before any target read.
       const bindingId = createAuthBindingDocumentId(uid);
@@ -141,6 +148,10 @@ export class FirestoreFriendRepository implements FriendRepository {
       const ownerAccess = eligibility(await tx.get(`friend_access/${ownerId}`));
       if (owner === undefined || parseAccountProjection(owner) === undefined || ownerAccess === undefined) return err("dependency_unavailable");
       if (ownerAccess !== "eligible") return err("forbidden");
+      // Validate search input after current requester authority, before target reads.
+      const parsed = search === undefined ? undefined : parseFriendSearchInput(search.input);
+      if (search !== undefined && parsed === undefined) return err("invalid_input");
+      const after = parsed?.after ?? listAfter;
       if (!initialized(await tx.get(`friend_lists/${ownerId}`)) || tx.listPage === undefined) return err("dependency_unavailable");
       if (after !== undefined && !validPointer(await tx.get(listPath(ownerId, after)))) return err("invalid_input");
       const rows = await tx.listPage(`friend_lists/${ownerId}/members`, after, 21);
@@ -164,9 +175,10 @@ export class FirestoreFriendRepository implements FriendRepository {
         const reservation = await tx.get(`username_reservations/${profile.username}`);
         if (reservation?.accountId !== targetId) return err("dependency_unavailable");
         if (profile.profileVisibility === "private" || profile.displayName === null) continue;
+        if (parsed !== undefined && !normalizeFriendDisplayName(profile.displayName).includes(parsed.q)) continue;
         friends.push({ username: profile.username, displayName: profile.displayName });
       }
-      return ok({ friends, nextCursor: rows.length > 20 ? Buffer.from(rows[19]!.id).toString("base64url") : null });
+      return ok({ friends, nextCursor: rows.length > 20 ? (parsed === undefined ? Buffer.from(rows[19]!.id).toString("base64url") : encodeFriendSearchCursor(parsed.q, rows[19]!.id)) : null });
     }); } catch { return err("dependency_unavailable"); }
   }
   public async act(uid: string, requestRef: string, action: "accept" | "decline"): Promise<FriendResult<{ result: "accepted" | "declined" }>> {

@@ -31,6 +31,9 @@ export class FriendRequests {
   public async inbox(principal: AuthPrincipal, cursor?: string): Promise<Result<FriendInbox, AppFailure>> {
     return mapped(await this.repository.inbox(principal.firebaseUid, cursor));
   }
+  public async searchFriends(principal: AuthPrincipal, input: unknown): Promise<Result<MyFriendsPage, AppFailure>> {
+    return mapped(await this.repository.searchFriends(principal.firebaseUid, input));
+  }
   public async listFriends(principal: AuthPrincipal, cursor?: string): Promise<Result<MyFriendsPage, AppFailure>> {
     return mapped(await this.repository.listFriends(principal.firebaseUid, cursor));
   }

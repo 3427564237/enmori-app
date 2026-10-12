@@ -56,10 +56,50 @@ final class BackendFriendRepository implements FriendRepository {
     }
   }
 
+  // Search continuation is opaque authority-wise; preserve the server's Unicode
+  // normalization and reject malformed envelopes without reimplementing NFC.
+  static bool _validSearchCursor(String value) {
+    if (value.isEmpty ||
+        value.length > 512 ||
+        !RegExp(r'^[A-Za-z0-9_-]+$').hasMatch(value)) {
+      return false;
+    }
+    try {
+      final data = jsonDecode(
+        utf8.decode(base64Url.decode(base64Url.normalize(value))),
+      );
+      if (data is! Map<String, dynamic> ||
+          data.length != 3 ||
+          data['v'] != 1 ||
+          data['q'] is! String ||
+          !_validDisplayName(data['q'] as String) ||
+          data['after'] is! String ||
+          (data['after'] as String).length != 36 ||
+          !_entryReferencePattern.hasMatch(data['after'] as String)) {
+        return false;
+      }
+      final canonical = jsonEncode({
+        'v': 1,
+        'q': data['q'],
+        'after': data['after'],
+      });
+      return base64Url.encode(utf8.encode(canonical)).replaceAll('=', '') ==
+          value;
+    } on FormatException {
+      return false;
+    }
+  }
+
   @override
-  Future<Result<MyFriendsPage>> listFriends({String? cursor}) async {
+  Future<Result<MyFriendsPage>> listFriends({
+    String? cursor,
+    String? query,
+  }) async {
     final result = await client.get(
-      '/v1/me/friends${cursor == null ? '' : '?cursor=${Uri.encodeQueryComponent(cursor)}'}',
+      Uri(
+        path: query == null ? '/v1/me/friends' : '/v1/me/friends/search',
+        queryParameters: {'q': ?query, 'cursor': ?cursor},
+      ).toString(),
     );
     if (result case Failure<JsonObject>(:final failure)) {
       return Failure(failure);
@@ -70,7 +110,11 @@ final class BackendFriendRepository implements FriendRepository {
         !data.containsKey('nextCursor') ||
         rows is! List ||
         rows.length > 20 ||
-        (next != null && (next is! String || !_validCursor(next)))) {
+        (next != null &&
+            (next is! String ||
+                !(query == null
+                    ? _validCursor(next)
+                    : _validSearchCursor(next))))) {
       return invalid();
     }
     final friends = <MyFriend>[];

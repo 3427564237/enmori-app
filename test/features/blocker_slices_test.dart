@@ -56,8 +56,10 @@ final class FakeEvents implements EventDetailRepository {
 
 final class FakeFriends implements FriendRepository {
   @override
-  Future<Result<MyFriendsPage>> listFriends({String? cursor}) async =>
-      const Success(MyFriendsPage(friends: []));
+  Future<Result<MyFriendsPage>> listFriends({
+    String? cursor,
+    String? query,
+  }) async => const Success(MyFriendsPage(friends: []));
   Completer<Result<FriendTarget>>? pending;
   List<FriendRequest> requests = [
     const FriendRequest(

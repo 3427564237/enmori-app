@@ -42,7 +42,10 @@ class Friends implements FriendRepository {
   Completer<Result<MyFriendsPage>>? pending;
   final cursors = <String?>[];
   @override
-  Future<Result<MyFriendsPage>> listFriends({String? cursor}) async {
+  Future<Result<MyFriendsPage>> listFriends({
+    String? cursor,
+    String? query,
+  }) async {
     cursors.add(cursor);
     return pending?.future ?? response;
   }
