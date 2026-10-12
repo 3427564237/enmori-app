@@ -53,6 +53,11 @@ class AiConversationController extends Notifier<AiConversationState> {
   final Set<_ReadTask> _reads = {};
   final Map<String, int> _messageVersions = {};
   final Set<String> _tombstones = {};
+  // Only explicit execute/readback pairs establish assistant ownership. History
+  // order alone cannot identify a reply's user when earlier inputs are retried.
+  final Map<String, String> _assistantUsers = {};
+  final Map<String, int> _assistantObservations = {};
+  int _assistantRevision = 0;
   int _requestNumber = 0;
   int _commandVersion = 0;
   AiMessage? _retryUser;
@@ -69,6 +74,9 @@ class AiConversationController extends Notifier<AiConversationState> {
     _alive = true;
     _messageVersions.clear();
     _tombstones.clear();
+    _assistantUsers.clear();
+    _assistantObservations.clear();
+    _assistantRevision = 0;
     _retryUser = null;
     ref.onDispose(_shutdown);
     final phase = !_memory.authenticated
@@ -151,16 +159,16 @@ class AiConversationController extends Notifier<AiConversationState> {
       _show(state.phase, message: 'Enter the same saved message to retry.');
       return;
     }
-    await _start(text, userMessageId: user.messageId);
+    await _start(text, retryUser: user);
   }
 
-  Future<void> _start(String text, {String? userMessageId}) {
+  Future<void> _start(String text, {AiMessage? retryUser}) {
     if (!_validInput(text)) {
       _show(state.phase, message: 'Enter 1–2400 characters of valid text.');
       return Future.value();
     }
     _invalidateReads();
-    if (userMessageId != null) _memory.unresolved = true;
+    if (retryUser != null) _memory.unresolved = true;
     _retryUser = null;
     final attempt = _Attempt(
       epoch: _epoch,
@@ -169,7 +177,9 @@ class AiConversationController extends Notifier<AiConversationState> {
       started: _now(),
       text: text,
       conversationId: _memory.established ? _memory.conversationId : null,
-      userMessageId: userMessageId,
+      userMessageId: retryUser?.messageId,
+      userSequence: retryUser?.sequence,
+      userPersistedAt: retryUser?.persistedAt,
     );
     _attempt = attempt;
     attempt.prepareTimer = Timer(const Duration(seconds: 15), () {
@@ -228,6 +238,8 @@ class AiConversationController extends Notifier<AiConversationState> {
       attempt.prepareTimer?.cancel();
       _memory.conversationId = attempt.ticket!.conversationId;
       _memory.operationId = attempt.ticket!.operationId;
+      _memory.operationUserId = attempt.userMessageId;
+      _memory.operationHasAssistant = false;
       _memory.unresolved = true;
       attempt.dispatched = true;
       attempt.executeStarted = _now();
@@ -253,6 +265,13 @@ class AiConversationController extends Notifier<AiConversationState> {
       }
       switch (reply) {
         case Success<AiReply>(:final value):
+          // Reject the whole response before releasing protection or merging any
+          // row. A valid UUID and matching text do not prove this is the Retry U.
+          if (!attempt.matchesUser(value.userMessage) ||
+              !_consistentPair(value.userMessage, value.assistantMessage)) {
+            _failed(attempt, _unknown);
+            return;
+          }
           _finish(attempt);
           _memory.established = true;
           _memory.unresolved = false;
@@ -260,6 +279,7 @@ class AiConversationController extends Notifier<AiConversationState> {
             value.userMessage,
             value.assistantMessage,
           ], ++_requestNumber)) {
+            _recordPair(value.userMessage, value.assistantMessage);
             _show(AiConversationPhase.success);
           }
         case Failure<AiReply>(:final failure):
@@ -458,6 +478,7 @@ class AiConversationController extends Notifier<AiConversationState> {
     final epoch = _epoch;
     final command = _commandVersion;
     final number = ++_requestNumber;
+    final assistantRevision = _assistantRevision;
     final repository = _repository!;
     final result = await _ordinary(
       (token, abort) => repository.readOperation(
@@ -477,11 +498,22 @@ class AiConversationController extends Notifier<AiConversationState> {
       case Success<AiReadback>(:final value):
         _retryUser = null;
         _memory.unresolved = true;
+        final user = value.userMessage;
+        if (user != null &&
+            _memory.operationUserId != null &&
+            _memory.operationUserId != user.messageId) {
+          _show(AiConversationPhase.unknown);
+          break;
+        }
         switch (value.state) {
           case AiOutcomeState.active:
           case AiOutcomeState.unresolved:
             _show(AiConversationPhase.unknown);
           case AiOutcomeState.noEffect:
+            if (_memory.operationUserId != null) {
+              _show(AiConversationPhase.unknown);
+              break;
+            }
             _memory.unresolved = false;
             if (!_memory.established) {
               _memory.conversationId = null;
@@ -491,13 +523,26 @@ class AiConversationController extends Notifier<AiConversationState> {
           case AiOutcomeState.userSaved:
             _memory.established = true;
             if (_merge([value.userMessage!], number)) {
+              final user = value.userMessage!;
+              if (_memory.operationHasAssistant ||
+                  _assistantUsers.containsValue(user.messageId) ||
+                  _newAssistantSince(user, assistantRevision)) {
+                _show(AiConversationPhase.unknown);
+                break;
+              }
+              _memory.operationUserId = user.messageId;
               _retryUser = value.userMessage;
               _memory.unresolved = false;
               _show(AiConversationPhase.idle);
             }
           case AiOutcomeState.assistantSaved:
+            if (!_consistentPair(value.userMessage!, value.assistantMessage!)) {
+              _show(AiConversationPhase.unknown);
+              break;
+            }
             _memory.established = true;
             if (_merge([value.userMessage!, value.assistantMessage!], number)) {
+              _recordPair(value.userMessage!, value.assistantMessage!);
               _memory.unresolved = false;
               _show(AiConversationPhase.success);
             }
@@ -534,7 +579,7 @@ class AiConversationController extends Notifier<AiConversationState> {
         _failure(failure);
       case Success<AiMessagePage>(:final value):
         _memory.established = true;
-        if (_merge(value.messages, number)) {
+        if (_merge(value.messages, number, fromHistory: true)) {
           state = _snapshot(
             state.phase,
             messages: state.messages,
@@ -551,10 +596,50 @@ class AiConversationController extends Notifier<AiConversationState> {
       identical(epoch, _epoch) &&
       command == _commandVersion;
 
-  bool _merge(Iterable<AiMessage> incoming, int number) {
+  bool _relevantAssistant(AiMessage assistant, AiMessage user) =>
+      assistant.role == AiRole.assistant &&
+      assistant.sequence > user.sequence &&
+      (_assistantUsers[assistant.messageId] == null ||
+          _assistantUsers[assistant.messageId] == user.messageId);
+
+  bool _newAssistantSince(AiMessage user, int revision) => state.messages.any(
+    (message) =>
+        _relevantAssistant(message, user) &&
+        (_assistantObservations[message.messageId] ?? 0) > revision,
+  );
+
+  void _recordPair(AiMessage user, AiMessage assistant) {
+    _assistantUsers[assistant.messageId] = user.messageId;
+    _memory.operationUserId = user.messageId;
+    _memory.operationHasAssistant = true;
+  }
+
+  bool _consistentPair(AiMessage user, AiMessage assistant) =>
+      (_assistantUsers[assistant.messageId] == null ||
+          _assistantUsers[assistant.messageId] == user.messageId) &&
+      !_assistantUsers.entries.any(
+        (pair) =>
+            pair.value == user.messageId && pair.key != assistant.messageId,
+      );
+
+  bool _invalidMerge() {
+    // A cleared display must not erase the fence against older readbacks.
+    _invalidateReads();
+    _retryUser = null;
+    _memory.unresolved = true;
+    _show(AiConversationPhase.unknown, clear: true);
+    return false;
+  }
+
+  bool _merge(
+    Iterable<AiMessage> incoming,
+    int number, {
+    bool fromHistory = false,
+  }) {
     final messages = {
       for (final message in state.messages) message.messageId: message,
     };
+    final newAssistants = <AiMessage>[];
     for (final message in incoming) {
       final previous = messages[message.messageId];
       if (previous != null &&
@@ -562,9 +647,7 @@ class AiConversationController extends Notifier<AiConversationState> {
               previous.sequence != message.sequence ||
               previous.persistedAt != message.persistedAt ||
               (message.role == AiRole.user && previous.text != message.text))) {
-        _memory.unresolved = true;
-        _show(AiConversationPhase.unknown, clear: true);
-        return false;
+        return _invalidMerge();
       }
       if (message.availability == AiAvailability.available &&
           (_messageVersions[message.messageId] ?? 0) > number) {
@@ -573,6 +656,12 @@ class AiConversationController extends Notifier<AiConversationState> {
       if (_tombstones.contains(message.messageId) &&
           message.availability == AiAvailability.available) {
         continue;
+      }
+      if (message.role == AiRole.assistant &&
+          (previous == null ||
+              (previous.availability == AiAvailability.available &&
+                  message.availability == AiAvailability.unavailable))) {
+        newAssistants.add(message);
       }
       if (message.availability == AiAvailability.unavailable) {
         _tombstones.add(message.messageId);
@@ -583,12 +672,22 @@ class AiConversationController extends Notifier<AiConversationState> {
     final ordered = messages.values.toList()
       ..sort((a, b) => a.sequence.compareTo(b.sequence));
     if (ordered.map((m) => m.sequence).toSet().length != ordered.length) {
-      _memory.unresolved = true;
-      _show(AiConversationPhase.unknown, clear: true);
-      return false;
+      return _invalidMerge();
+    }
+    var phase = state.phase;
+    if (fromHistory) {
+      for (final assistant in newAssistants) {
+        _assistantObservations[assistant.messageId] = ++_assistantRevision;
+        final user = _retryUser;
+        if (user != null && _relevantAssistant(assistant, user)) {
+          _retryUser = null;
+          _memory.unresolved = true;
+          phase = AiConversationPhase.unknown;
+        }
+      }
     }
     state = _snapshot(
-      state.phase,
+      phase,
       messages: ordered,
       nextCursor: state.nextCursor,
       statusMessage: state.statusMessage,
@@ -687,6 +786,8 @@ final class _Memory {
   final Object key = Object();
   String? conversationId;
   String? operationId;
+  String? operationUserId;
+  bool operationHasAssistant = false;
   bool unresolved = false;
   bool established = false;
   bool deleting = false;
@@ -702,6 +803,8 @@ final class _Attempt {
     required this.text,
     this.conversationId,
     this.userMessageId,
+    this.userSequence,
+    this.userPersistedAt,
   });
   final Object epoch;
   final AiConversationRepository repository;
@@ -709,6 +812,15 @@ final class _Attempt {
   final Duration started;
   final String? conversationId;
   final String? userMessageId;
+  final int? userSequence;
+  final DateTime? userPersistedAt;
+  bool matchesUser(AiMessage user) =>
+      userMessageId == null ||
+      (user.messageId == userMessageId &&
+          user.sequence == userSequence &&
+          user.persistedAt == userPersistedAt &&
+          user.role == AiRole.user &&
+          user.availability == AiAvailability.available);
   final AiAbortSignal abort = AiAbortSignal();
   final Completer<void> ended = Completer<void>();
   String? text;
