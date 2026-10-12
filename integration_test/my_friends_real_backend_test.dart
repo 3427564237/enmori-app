@@ -47,7 +47,9 @@ Future<void> until(WidgetTester tester, bool Function() condition) async {
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   testWidgets(
-    'two-account My Friends acceptance, pages, privacy, unset name, reload and error recovery use real Backend',
+    const bool.fromEnvironment('ENMORI_TEST_SEARCH')
+        ? 'isolated DisplayName search, empty continuation, Clear, reload, focus and semantics use real Backend'
+        : 'two-account My Friends acceptance, pages, privacy, unset name, reload and error recovery use real Backend',
     (tester) async {
       const url = String.fromEnvironment('ENMORI_API_BASE_URL');
       const password = String.fromEnvironment('ENMORI_TEST_PASSWORD');
@@ -159,6 +161,99 @@ void main() {
       }
 
       await signIn(true);
+      if (const bool.fromEnvironment('ENMORI_TEST_SEARCH')) {
+        await openList();
+        final search = find.byKey(const Key('my-friends-search'));
+        final field = find.byKey(const Key('my-friends-search-query'));
+        final clear = find.byKey(const Key('my-friends-clear-search'));
+        final reload = find.byKey(const Key('my-friends-reload'));
+        await tester.tap(search);
+        await until(
+          tester,
+          () => scope.read(myFriendsControllerProvider).queryError != null,
+        );
+        expect(tester.widget<TextField>(field).focusNode!.hasFocus, true);
+        await tester.enterText(field, 'TARGET_42');
+        await tester.ensureVisible(search);
+        await tester.tap(search);
+        await until(
+          tester,
+          () => scope.read(myFriendsControllerProvider).loaded,
+        );
+        expect(find.text('No matching friends on this page.'), findsOneWidget);
+        final semantics = tester.ensureSemantics();
+        try {
+          for (final control in [
+            search,
+            clear,
+            reload,
+            find.byKey(const Key('my-friends-next')),
+          ]) {
+            await tester.ensureVisible(control);
+            expect(tester.getSize(control).height, greaterThanOrEqualTo(48));
+            expect(tester.getSemantics(control).label, isNotEmpty);
+          }
+        } finally {
+          semantics.dispose();
+        }
+        for (var page = 0; page < 2; page++) {
+          expect(scope.read(myFriendsControllerProvider).nextCursor, isNotNull);
+          final next = find.byKey(const Key('my-friends-next'));
+          await tester.ensureVisible(next);
+          await tester.tap(next);
+          await until(
+            tester,
+            () => scope.read(myFriendsControllerProvider).loaded,
+          );
+          if (page == 0) {
+            expect(
+              find.text('No matching friends on this page.'),
+              findsOneWidget,
+            );
+          }
+        }
+        expect(
+          scope.read(myFriendsControllerProvider).friends.single.username,
+          'member_target_42',
+        );
+        expect(find.text('Member target_42'), findsOneWidget);
+        expect(scope.read(myFriendsControllerProvider).nextCursor, isNull);
+        await tester.ensureVisible(reload);
+        await tester.tap(reload);
+        await until(
+          tester,
+          () => scope.read(myFriendsControllerProvider).loaded,
+        );
+        expect(scope.read(myFriendsControllerProvider).friends, isEmpty);
+        expect(scope.read(myFriendsControllerProvider).query, 'TARGET_42');
+        await tester.tap(clear);
+        await until(
+          tester,
+          () => scope.read(myFriendsControllerProvider).loaded,
+        );
+        expect(tester.widget<TextField>(field).controller!.text, '');
+        expect(scope.read(myFriendsControllerProvider).friends.length, 20);
+        await tester.tap(reload);
+        await until(
+          tester,
+          () => scope.read(myFriendsControllerProvider).loaded,
+        );
+        expect(
+          scope.read(myFriendsControllerProvider).friends.first.username,
+          'member_target_1',
+        );
+        expect(
+          find.descendant(
+            of: find.byType(Card),
+            matching: find.byType(InkWell),
+          ),
+          findsNothing,
+        );
+        debugPrint(
+          'MY_FRIENDS_SEARCH_ANDROID_CONTINUATION_CLEAR_RELOAD_SEMANTICS_FOCUS: Pass',
+        );
+        return;
+      }
       final request = await repository.lookup('member_target_1', send: true);
       expect(
         (request as Success<FriendTarget>).value.relationship,

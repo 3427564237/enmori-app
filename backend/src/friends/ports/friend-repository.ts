@@ -9,6 +9,7 @@ export interface FriendRepository {
   authorize(uid: string): Promise<FriendResult<void>>;
   lookup(uid: string, username: string, send: boolean): Promise<FriendResult<FriendTarget>>;
   inbox(uid: string, cursor?: string): Promise<FriendResult<FriendInbox>>;
+  searchFriends(uid: string, input: unknown): Promise<FriendResult<MyFriendsPage>>;
   listFriends(uid: string, cursor?: string): Promise<FriendResult<MyFriendsPage>>;
   act(uid: string, requestRef: string, action: "accept" | "decline"): Promise<FriendResult<{ readonly result: "accepted" | "declined" }>>;
 }

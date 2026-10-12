@@ -193,3 +193,49 @@ test("Emulator Detail uses isolated separate records, rejects expired/unsafe dat
   await auth.updateUser("a",{disabled:true});assert.equal((await api.inject({url:"/v1/events/ev",headers})).statusCode,403);
  }finally{await api.close();}
 });
+
+
+test("Emulator FS03 search covers 0/20/21, empty continuations, actual 106 gets and SDK retry", async () => {
+ const {encodeFriendSearchCursor}=await import("../src/friends/domain/friend-search.js");
+ for(const count of [0,20,21,42]){
+  await reset();const batch=firestore.batch();for(const [path,data] of Object.entries(myFriendsSeed(count)))batch.set(firestore.doc(path),data);await batch.commit();
+  const result=await friends.searchFriends("owner",{q:"member"});if(!result.ok)assert.fail();
+  assert.equal(result.value.friends.length,Math.min(count,20));assert.equal(result.value.nextCursor,count>20?encodeFriendSearchCursor("member",entryRef(20)):null);
+ }
+ const q="target_42";let page=await friends.searchFriends("owner",{q});if(!page.ok)assert.fail();
+ assert.deepEqual(page.value,{friends:[],nextCursor:encodeFriendSearchCursor(q,entryRef(20))});
+ let first=true;const retrying:FirestoreGateway={runTransaction:work=>gateway.runTransaction(async tx=>{const result=await work(tx);if(first){first=false;throw Object.assign(new Error("synthetic ABORTED"),{code:10});}return result;})};
+ const measured=measuredGateway(retrying),repo=new FirestoreFriendRepository(measured.gateway,clock);
+ page=await repo.searchFriends("owner",{q,cursor:page.value.nextCursor});if(!page.ok)assert.fail();
+ assert.deepEqual(page.value,{friends:[],nextCursor:encodeFriendSearchCursor(q,entryRef(40))});
+ assert.equal(measured.attempts.length,2);
+ for(const attempt of measured.attempts){assert.equal(attempt.queries,1);assert.equal(attempt.scanned,21);assert.equal(attempt.paths.length+attempt.scanned,106);assert.equal(attempt.paths.some(p=>p.includes("target_41")),false);}
+ console.log(JSON.stringify({case:"friend-search-read-bound",transactionAttempts:measured.attempts.length,readsPerAttempt:measured.attempts.map(a=>a.paths.length+a.scanned),retry:"injected-ABORTED"}));
+ page=await friends.searchFriends("owner",{q,cursor:page.value.nextCursor});if(!page.ok)assert.fail();assert.deepEqual(page.value,{friends:[{username:"member_target_42",displayName:"Member target_42"}],nextCursor:null});
+ const before=(await firestore.collection("friend_pairs").get()).docs.map(d=>d.data());
+ const aborting:FirestoreGateway={runTransaction:work=>gateway.runTransaction(async tx=>{await work(tx);throw new Error("synthetic nonretryable abort");})};
+ assert.deepEqual(await new FirestoreFriendRepository(aborting,clock).searchFriends("owner",{q:"member"}),err("dependency_unavailable"));
+ assert.deepEqual((await firestore.collection("friend_pairs").get()).docs.map(d=>d.data()),before);
+ await firestore.doc("friend_access/target_1").delete();assert.deepEqual(await friends.searchFriends("owner",{q:"no match"}),err("dependency_unavailable"));
+});
+
+test("Emulator FS04 current authorization and concurrent rename/privacy/blocks/eligibility remain coherent",async()=>{
+ await friends.lookup("a","member_b",true);assert.equal((await friends.act("b",await ref(),"accept")).ok,true);
+ await firestore.doc("accounts/b").update({profileVisibility:"friends_only",displayName:"Alice"});
+ const api=await app();try{
+  const response=await api.inject({url:"/v1/me/friends/search?q=ALICE",headers:{authorization:`Bearer ${tokens.a}`}});
+  assert.equal(response.statusCode,200);assert.deepEqual(response.json(),{friends:[{username:"member_b",displayName:"Alice"}],nextCursor:null});
+ }finally{await api.close();}
+ for(const kind of ["rename","privacy","block-owner","block-target","eligibility"]){
+  await firestore.doc("accounts/b").update({profileVisibility:"friends_only",displayName:"Alice"});
+  await firestore.doc("friend_access/b").set({eligibilityState:"eligible"});
+  await friends.setFixtureProtection("a","b",{blockedByAccountIds:[]});
+  const mutation=kind==="rename"?()=>firestore.doc("accounts/b").update({displayName:"Bob"}):kind==="privacy"?()=>firestore.doc("accounts/b").update({profileVisibility:"private"}):kind==="eligibility"?()=>firestore.doc("friend_access/b").set({eligibilityState:"temporary-ineligible"}):()=>friends.setFixtureProtection("a","b",{blockedByAccountIds:[kind==="block-owner"?"a":"b"]});
+  const [racing]=await Promise.all([friends.searchFriends("a",{q:"alice"}),mutation()]);
+  if(!racing.ok)assert.fail();assert.ok(racing.value.friends.length<=1);if(racing.value.friends.length)assert.equal(racing.value.friends[0]!.displayName,"Alice");
+  assert.deepEqual(await friends.searchFriends("a",{q:"alice"}),ok({friends:[],nextCursor:null}));
+ }
+ await firestore.doc("friend_access/a").set({eligibilityState:"temporary-ineligible"});
+ const measured=measuredGateway(gateway),repo=new FirestoreFriendRepository(measured.gateway,clock);
+ assert.deepEqual(await repo.searchFriends("a",{}),err("forbidden"));assert.equal(measured.attempts[0]!.queries,0);
+});
