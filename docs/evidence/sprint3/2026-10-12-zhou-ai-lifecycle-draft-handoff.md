@@ -29,10 +29,13 @@ candidate branch, the main branch, #78 status or any Project status.
 - [Exact-source and raw-log hashes](2026-10-12-zhou-ai-lifecycle-review-fixes-manifest.json).
 - [Published command/test-result transcript](2026-10-12-zhou-ai-lifecycle-test-results.txt):
   512 passing case lines, full-run totals and recorded exit code. The complete
-  final log was inspected before this exact copy was promoted to formal evidence;
+  final log was inspected before it was promoted to formal evidence;
   it contains command lines, test names, counts and the exit code, with no local
   paths or detected credential material. This is the recorded run, not a rerun.
-  Its SHA-256 matches the original raw-log entry in the manifest:
+  Git normalizes the original Windows CRLF line endings to LF; all lines and
+  results are unchanged. Published LF blob SHA-256:
+  `04f954326e837f09324665e0911af394e8911767e72d83dc110a9d6664653540`.
+  Original local CRLF log SHA-256, as recorded in the manifest:
   `ed354beb2d3b4be1af4cd045b25a4bf298551ab02808f8a0de156970e3900dcc`.
 - [C01–C07 / LC01–LC16 lifecycle evidence](2026-10-12-zhou-ai-lifecycle-local.md),
   with an explicit correction notice retaining the earlier 465-case history.
