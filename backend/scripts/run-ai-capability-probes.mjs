@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
+import { createRequire } from "node:module";
 import { homedir, tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,6 +36,14 @@ try {
   if (process.version !== `v${manifest.engines.node}`) {
     throw new Error("locked_node_mismatch");
   }
+  const firebaseToolsVersion = readJson("node_modules/firebase-tools/package.json").version;
+  const firebaseAdminVersion = readJson("node_modules/firebase-admin/package.json").version;
+  const requireAdmin = createRequire(join(root, "node_modules/firebase-admin/package.json"));
+  const firestoreVersion = JSON.parse(readFileSync(requireAdmin.resolve("@google-cloud/firestore/package.json"), "utf8")).version;
+  if (firebaseToolsVersion !== manifest.devDependencies["firebase-tools"] ||
+      firebaseAdminVersion !== manifest.dependencies["firebase-admin"] || firestoreVersion !== "8.7.1") {
+    throw new Error("locked_sdk_mismatch");
+  }
   const versions = readJson("node_modules/firebase-tools/lib/emulator/downloadableEmulatorInfo.json");
   const cache = process.env.FIREBASE_EMULATORS_PATH ?? join(homedir(), ".cache", "firebase", "emulators");
   const jar = join(cache, versions.firestore.downloadPathRelativeToCacheDir);
@@ -47,7 +56,7 @@ try {
     throw new Error("existing_port_occupied");
   }
   emit({ probe: "launcher-preflight", outcome: "pass", node: process.version,
-    firebaseTools: readJson("node_modules/firebase-tools/package.json").version,
+    firebaseTools: firebaseToolsVersion, firebaseAdmin: firebaseAdminVersion, firestoreSdk: firestoreVersion,
     firestoreEmulator: versions.firestore.version, existingJarChecksumVerified: true,
     requiredPortsInitiallyFree: true });
 
@@ -103,7 +112,7 @@ try {
     cliExitCode: exitCode, reports, childReportsComplete, requiredPortsFreeAfter: portsFreeAfter });
   process.exitCode = exitCode === 0 && childReportsComplete && portsFreeAfter ? 0 : 1;
 } catch (error) {
-  const approvedReasons = new Set(["locked_node_mismatch", "existing_emulator_cache_required",
+  const approvedReasons = new Set(["locked_node_mismatch", "locked_sdk_mismatch", "existing_emulator_cache_required",
     "existing_emulator_cache_checksum_mismatch", "existing_port_occupied"]);
   emit({ probe: "launcher", outcome: "fail", phase,
     category: approvedReasons.has(error?.message) ? error.message : "launcher_failure" });
