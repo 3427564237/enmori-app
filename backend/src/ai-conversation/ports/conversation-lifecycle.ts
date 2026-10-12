@@ -16,10 +16,10 @@ export interface PersonaProjection {
 }
 export interface CheckInProjection {
   readonly occurredAt: string;
-  readonly noteText: string;
-  readonly moodLabel: string;
-  readonly activityLabel: string;
-  readonly weatherConditionLabel: string;
+  readonly noteText?: string;
+  readonly moodLabel?: string;
+  readonly activityLabel?: string;
+  readonly weatherConditionLabel?: string;
 }
 export interface SourceProvenance { readonly sourceType: "check_in"; readonly sourceId: string }
 /** Capture returns only purpose-authorized eligible sources, before queueing. */

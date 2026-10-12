@@ -1,5 +1,6 @@
 import type { CapturedContext, PersonaProjection, StartView } from "../ports/conversation-lifecycle.js";
 
+const optionalCheckInFields = ["noteText", "moodLabel", "activityLabel", "weatherConditionLabel"] as const;
 function text(value: unknown): value is string { return typeof value === "string" && value.isWellFormed(); }
 /** Reject local-time ambiguity; normalize explicit instants to UTC for the projection. */
 function utcInstant(value: unknown): number {
@@ -26,14 +27,17 @@ export function captureContext(view: StartView, asOf: string, currentMessage: st
   }
   const selected = view.checkIns.filter(({ source, projection }) => {
     if (source.sourceType !== "check_in" || !text(source.sourceId) || !source.sourceId
-      || ![projection.noteText, projection.moodLabel, projection.activityLabel, projection.weatherConditionLabel].every(text)) throw new Error("unavailable");
+      || !optionalCheckInFields.every((field) => !Object.hasOwn(projection, field) || text(projection[field]))) throw new Error("unavailable");
     const time = utcInstant(projection.occurredAt);
     return time <= instant && time >= instant - 7 * 86_400_000;
   }).sort((a, b) => Date.parse(b.projection.occurredAt) - Date.parse(a.projection.occurredAt)
     || (a.source.sourceId < b.source.sourceId ? -1 : a.source.sourceId > b.source.sourceId ? 1 : 0)).slice(0, 5);
   const checkIns = Object.freeze(selected.map(({ projection: p }) => Object.freeze({
-    occurredAt: new Date(utcInstant(p.occurredAt)).toISOString(), noteText: p.noteText, moodLabel: p.moodLabel,
-    activityLabel: p.activityLabel, weatherConditionLabel: p.weatherConditionLabel,
+    occurredAt: new Date(utcInstant(p.occurredAt)).toISOString(),
+    ...(Object.hasOwn(p, "noteText") && p.noteText !== undefined ? { noteText: p.noteText } : {}),
+    ...(Object.hasOwn(p, "moodLabel") && p.moodLabel !== undefined ? { moodLabel: p.moodLabel } : {}),
+    ...(Object.hasOwn(p, "activityLabel") && p.activityLabel !== undefined ? { activityLabel: p.activityLabel } : {}),
+    ...(Object.hasOwn(p, "weatherConditionLabel") && p.weatherConditionLabel !== undefined ? { weatherConditionLabel: p.weatherConditionLabel } : {}),
   })));
   const provenance = Object.freeze(selected.map(({ source }) => Object.freeze({ sourceType: "check_in" as const, sourceId: source.sourceId })));
   return Object.freeze({ asOf: new Date(instant).toISOString(), usedPersona: view.persona?.ref, provenance,

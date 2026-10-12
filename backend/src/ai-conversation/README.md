@@ -21,7 +21,8 @@ wired into Bootstrap, public routes, Flutter, Firestore or a real model host.
   original monotonic budget and immutable authoritative start view before queueing.
   Q17 selects only authorized, eligible Check-Ins in the inclusive seven-day UTC
   window, at most five, newest first with stable ID tie-breaking. Only the five
-  approved fields reach the model. Q19 copies only the four Persona projection
+  approved fields reach the model; the four optional text/label fields remain
+  omitted when absent. Q19 copies only the four Persona projection
   fields; a captured default remains default despite later activation.
 - After queueing and fake input gates, a guarded user-message effect atomically
   records the saved message, effect proof and UTC retention anchor. A second
@@ -38,7 +39,11 @@ wired into Bootstrap, public routes, Flutter, Firestore or a real model host.
   terminal previous command, resolved effects and no accepted assistant. It
   captures fresh context and capacity/budget, without appending or restamping the
   original user message or recovering saved history as model input.
-- Unknown acknowledgment terminates and fences the old operation. Explicit
+- Every started store call is marked unresolved before the Port can execute.
+  A live, consistent acknowledgment resolves it; if it becomes terminal while
+  pending, only authoritative readback can resolve it. A saved-user target guard
+  prevents an older capability from bypassing a later unresolved retry attempt.
+  Unknown acknowledgment terminates and fences the old operation. Explicit
   `reconcile` reads authoritative, content-free effect status only after that
   fence. A late unknown acknowledgment cannot undo a completed readback. No
   automatic retry, HTTP idempotency protocol or durable receipt is introduced.

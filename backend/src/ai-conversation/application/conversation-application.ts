@@ -27,7 +27,6 @@ interface CommandState {
   control: RuntimeApplicationControl | undefined;
   effects: EffectReadback;
   uncertain: boolean;
-  reconciled: boolean;
   terminal: boolean;
   disposeCount: number;
   retryTarget: SavedUserRef | undefined;
@@ -36,6 +35,8 @@ interface CommandState {
 /** Internal fake-Port Application only; intentionally absent from Bootstrap. */
 export class ConversationApplication {
   private readonly commands = new WeakMap<ConversationCommand, CommandState>();
+  /** Content-free target guard: an older capability cannot evade a later unresolved attempt. */
+  private readonly unresolvedWrites = new WeakMap<SavedUserRef, CommandState>();
   constructor(private readonly runtime: BoundedAiRuntime<ConversationInput>, private readonly sources: ConversationSources,
     private readonly messages: ConversationMessageStore, private readonly gates: ConversationGates,
     private readonly sink: ConversationDeliverySink) {}
@@ -51,7 +52,7 @@ export class ConversationApplication {
     this.commands.set(command, { caller: Object.freeze({ owner: caller.owner, session: caller.session }), conversation, previous,
       effect: Object.freeze({}), processing: { input, context: undefined, candidate: undefined, unwatch: undefined },
       admission: undefined, control: undefined, effects: { user: undefined, assistant: false }, uncertain: false,
-      reconciled: false, terminal: false, disposeCount: 0, retryTarget: undefined });
+      terminal: false, disposeCount: 0, retryTarget: undefined });
     return command;
   }
 
@@ -106,9 +107,8 @@ export class ConversationApplication {
     try {
       const result = await this.messages.readback(state.effect, caller, state.conversation);
       if (!result) return "unavailable";
+      this.resolveWrite(state);
       state.effects = result;
-      state.reconciled = true;
-      state.uncertain = false;
       return "resolved";
     } catch { return "unavailable"; }
   }
@@ -127,8 +127,18 @@ export class ConversationApplication {
     return admission;
   }
   private retryEligible(s: CommandState): boolean {
-    return !!s.retryTarget && !!s.processing && this.messages.retryEligible(s.caller, s.conversation, s.retryTarget,
+    return !!s.retryTarget && !this.unresolvedWrites.has(s.retryTarget) && !!s.processing && this.messages.retryEligible(s.caller, s.conversation, s.retryTarget,
       s.processing.input, this.sources.utcNow());
+  }
+  private beginWrite(s: CommandState): void {
+    // This must precede invoking the Port, including its synchronous effects or throws.
+    s.uncertain = true;
+    if (s.effects.user) this.unresolvedWrites.set(s.effects.user, s);
+  }
+  private resolveWrite(s: CommandState): void {
+    const target = s.effects.user;
+    if (target && this.unresolvedWrites.get(target) === s) this.unresolvedWrites.delete(target);
+    s.uncertain = false;
   }
   private authority(s: CommandState): boolean {
     return !!s.processing?.context && this.sources.authorized(s.caller, s.conversation)
@@ -178,15 +188,18 @@ export class ConversationApplication {
       s.effects = { user: s.retryTarget, assistant: false };
       return;
     }
+    this.beginWrite(s);
     const acknowledgment = await this.messages.user(s.effect, s.caller, s.conversation, (commit) => {
       this.guarded(s, () => {
         const target = commit(s.processing!.input, this.sources.utcNow());
         s.effects = { user: target, assistant: false };
+        this.unresolvedWrites.set(target, s);
         return ok(undefined);
       });
     }, s.control!);
-    if (acknowledgment === "unknown" && !s.reconciled) s.uncertain = true;
+    // After terminal, only fenced readback resolves uncertainty; late acks cannot change it.
     if (!s.control!.live()) return;
+    if ((acknowledgment === "confirmed" && s.effects.user) || (acknowledgment === "absent" && !s.effects.user)) this.resolveWrite(s);
     if (acknowledgment !== "confirmed" || !s.effects.user) s.control!.fail("dependency_unavailable");
   }
   private async check(s: CommandState): Promise<void> {
@@ -198,6 +211,7 @@ export class ConversationApplication {
   }
   private async commitAndDeliver(s: CommandState): Promise<void> {
     if (!s.effects.user || !s.processing?.candidate || !this.guarded(s, () => ok(undefined)).ok) return;
+    this.beginWrite(s);
     const acknowledgment = await this.messages.assistant(s.effect, s.caller, s.conversation, s.effects.user, (commit) => {
       this.guarded(s, () => {
         const context = s.processing!.context!;
@@ -208,8 +222,8 @@ export class ConversationApplication {
         return ok(undefined);
       });
     }, s.control!);
-    if (acknowledgment === "unknown" && !s.reconciled) s.uncertain = true;
     if (!s.control!.live()) return;
+    if ((acknowledgment === "confirmed" && s.effects.assistant) || (acknowledgment === "absent" && !s.effects.assistant)) this.resolveWrite(s);
     if (acknowledgment !== "confirmed" || !s.effects.assistant) { s.control!.fail("dependency_unavailable"); return; }
     const delivered = await this.sink.deliver((accept) => {
       s.control!.complete(() => {
