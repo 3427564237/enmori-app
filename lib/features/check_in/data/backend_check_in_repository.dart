@@ -169,4 +169,3 @@ final class BackendCheckInRepository implements CheckInRepository {
     ),
   );
 }
-

@@ -607,4 +607,3 @@ test("unknown exceptions return a generic safe 503 and keep the app live", async
 function responseText(response: { body: string }): string {
   return response.body;
 }
-

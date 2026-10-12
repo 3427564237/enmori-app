@@ -116,4 +116,3 @@ export class ListOwnCheckInsForDate {
 }
 
 export type CheckInHistoryResult = Result<CheckInHistoryPage, AppFailure>;
-

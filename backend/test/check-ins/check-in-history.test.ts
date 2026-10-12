@@ -223,4 +223,3 @@ test("continuation cursors keep the first-page-anchored expiry", async () => {
   assert.equal(emitted[0]?.expiresAt, "2026-10-08T00:15:00.000Z");
   assert.equal(emitted[1]?.expiresAt, emitted[0]?.expiresAt);
 });
-

@@ -410,4 +410,3 @@ final class _ObservedHistoryClient extends http.BaseClient {
     super.close();
   }
 }
-

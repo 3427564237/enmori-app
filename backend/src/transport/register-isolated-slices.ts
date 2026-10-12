@@ -73,4 +73,3 @@ export async function registerIsolatedSlices(app: FastifyInstance, identity: Ide
     );
   }
 }
-

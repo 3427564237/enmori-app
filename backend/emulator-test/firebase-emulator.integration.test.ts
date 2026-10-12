@@ -658,4 +658,3 @@ test("Firestore Emulator serializes a concurrent Tag deactivation and new assign
     assert.deepEqual(persisted.value, { interestTags: [], revision: 0 });
   }
 });
-

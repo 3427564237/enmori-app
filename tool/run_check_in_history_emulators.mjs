@@ -322,4 +322,3 @@ if (!['--fixture', '--isolated'].includes(process.argv[2])) {
     await deleteApp(firebase);
   }
 }
-

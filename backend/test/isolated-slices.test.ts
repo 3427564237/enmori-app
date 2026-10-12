@@ -154,4 +154,3 @@ test("normative isolated schemas match Transport and describe the restricted act
  for(const [name,schema] of Object.entries({FriendTarget:targetSchema,EventDetail:eventDetailSchema,FriendInbox:friendInboxSchema,FriendAction:friendActionSchema})) assert.deepEqual(api.components.schemas[name],schema);
  for(const path of ["/v1/friends/lookup","/v1/friend-requests","/v1/me/friend-requests","/v1/friend-requests/{requestRef}/accept","/v1/friend-requests/{requestRef}/decline","/v1/events/{eventId}"]) for(const operation of Object.values(api.paths[path]) as Record<string,unknown>[]) assert.equal(operation["x-enmori-environment"],"isolated-emulator");
 });
-

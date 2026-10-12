@@ -198,4 +198,3 @@ function interestsResponse(
     revision: interests.revision,
   };
 }
-

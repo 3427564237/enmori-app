@@ -32,4 +32,3 @@ Three captured screens show the first page, second page, and selected-date empty
 - Accessibility-specific evidence: **Not Run — Deferred by S-SPONSOR-0910-RMVP01A-A11Y-DEFER**.
 - UAT and Release: **Not Run**. No release, deployment, production API, or real user data was accessed.
 - PR remains Draft/Open; no merge, Issue state, or project board change was made.
-
