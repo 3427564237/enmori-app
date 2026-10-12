@@ -4,13 +4,11 @@ import 'dart:io';
 import 'package:enmori/core/network/backend_api_client.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
-import 'package:enmori/features/auth/data/firebase_auth_repository.dart';
+import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/check_in/check_in_providers.dart';
 import 'package:enmori/features/check_in/data/backend_check_in_repository.dart';
 import 'package:enmori/features/check_in/presentation/check_in_history_controller.dart';
 import 'package:enmori/features/check_in/presentation/check_in_history_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,17 +17,16 @@ import 'package:http/io_client.dart';
 import 'package:integration_test/integration_test.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('isolated Android owner-date Footprint read and paging', (
     tester,
   ) async {
+    const captureScreenshots = bool.fromEnvironment(
+      'ENMORI_CAPTURE_DEVICE_SCREENSHOTS',
+    );
     const apiBaseUrl = String.fromEnvironment('ENMORI_API_BASE_URL');
     const apiKey = String.fromEnvironment('ENMORI_FIREBASE_API_KEY');
-    const appId = String.fromEnvironment('ENMORI_FIREBASE_APP_ID');
-    const senderId = String.fromEnvironment(
-      'ENMORI_FIREBASE_MESSAGING_SENDER_ID',
-    );
     const projectId = String.fromEnvironment('ENMORI_FIREBASE_PROJECT_ID');
     const email = String.fromEnvironment('ENMORI_TEST_EMAIL');
     const password = String.fromEnvironment('ENMORI_TEST_PASSWORD');
@@ -40,7 +37,7 @@ void main() {
     );
     const authHost = String.fromEnvironment(
       'ENMORI_FIREBASE_AUTH_EMULATOR_HOST',
-      defaultValue: '10.0.2.2',
+      defaultValue: '127.0.0.1',
     );
     const authPort = int.fromEnvironment(
       'ENMORI_FIREBASE_AUTH_EMULATOR_PORT',
@@ -50,8 +47,6 @@ void main() {
     for (final (name, value) in [
       ('ENMORI_API_BASE_URL', apiBaseUrl),
       ('ENMORI_FIREBASE_API_KEY', apiKey),
-      ('ENMORI_FIREBASE_APP_ID', appId),
-      ('ENMORI_FIREBASE_MESSAGING_SENDER_ID', senderId),
       ('ENMORI_FIREBASE_PROJECT_ID', projectId),
       ('ENMORI_TEST_EMAIL', email),
       ('ENMORI_TEST_PASSWORD', password),
@@ -63,26 +58,33 @@ void main() {
     }
     final uri = Uri.parse(apiBaseUrl);
     if (projectId != 'demo-enmori-rmvp01a-r10' ||
-        authHost != '10.0.2.2' ||
+        authHost != '127.0.0.1' ||
         authPort != 9099 ||
         uri.scheme != 'https' ||
-        uri.host != '10.0.2.2') {
+        uri.host != '127.0.0.1') {
       throw StateError('Controlled Android/Firebase Emulator required.');
     }
 
-    final firebaseApp = await Firebase.initializeApp(
-      name: 's3-check-in-history-test',
-      options: const FirebaseOptions(
-        apiKey: apiKey,
-        appId: appId,
-        messagingSenderId: senderId,
-        projectId: projectId,
+    final signInResponse = await http.post(
+      Uri(
+        scheme: 'http',
+        host: authHost,
+        port: authPort,
+        path: '/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',
+        queryParameters: {'key': apiKey},
       ),
+      headers: const {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+        'returnSecureToken': true,
+      }),
     );
-    addTearDown(firebaseApp.delete);
-    final auth = FirebaseAuth.instanceFor(app: firebaseApp);
-    await auth.useAuthEmulator(authHost, authPort);
-    await auth.signInWithEmailAndPassword(email: email, password: password);
+    expect(signInResponse.statusCode, 200, reason: signInResponse.body);
+    final authResponse =
+        jsonDecode(signInResponse.body) as Map<String, dynamic>;
+    final idToken = authResponse['idToken'] as String;
+    final subject = authResponse['localId'] as String;
 
     final securityContext = SecurityContext(withTrustedRoots: false)
       ..setTrustedCertificatesBytes(base64Decode(certificate));
@@ -91,23 +93,15 @@ void main() {
     );
     final client = BackendApiClient(
       parseApprovedBackendBaseUri(apiBaseUrl),
-      () async {
-        final token = await auth.currentUser?.getIdToken();
-        return token == null
-            ? const Failure(
-                AppFailure(
-                  kind: AppFailureKind.authRequired,
-                  message: 'The controlled owner session is unavailable.',
-                ),
-              )
-            : Success(token);
-      },
+      () async => Success(idToken),
       httpClient: observed,
     );
     addTearDown(client.close);
     final container = ProviderContainer(
       overrides: [
-        authRepositoryProvider.overrideWithValue(FirebaseAuthRepository(auth)),
+        authRepositoryProvider.overrideWithValue(
+          _ControlledAuthRepository(subject),
+        ),
         checkInRepositoryProvider.overrideWithValue(
           BackendCheckInRepository(client),
         ),
@@ -129,6 +123,10 @@ void main() {
         ),
       ),
     );
+    if (captureScreenshots) {
+      debugPrint('S3_HISTORY_SCREENSHOT_CAPTURE_ENABLED');
+      await binding.convertFlutterSurfaceToImage();
+    }
 
     await _wait(tester, find.byKey(const Key('history-entry-history_00')));
     final state = container.read(checkInHistoryControllerProvider);
@@ -156,6 +154,10 @@ void main() {
       displayedTime,
       matches(RegExp(r'^[A-Z][a-z]{2}, \d{1,2} [A-Z][a-z]{2} · \d{2}:\d{2}')),
     );
+    if (captureScreenshots) {
+      await tester.pumpAndSettle();
+      await binding.takeScreenshot('s3_history_first_page');
+    }
 
     final readsBeforeNext = observed.records.length;
     await tester.ensureVisible(find.byKey(const Key('history-next-page')));
@@ -184,6 +186,10 @@ void main() {
     expect(observed.records.last.hasCursor, isTrue);
     expect(observed.records.last.status, 200);
     expect(find.byKey(const Key('history-next-page')), findsNothing);
+    if (captureScreenshots) {
+      await tester.pumpAndSettle();
+      await binding.takeScreenshot('s3_history_next_page');
+    }
 
     await tester.tap(find.byKey(const Key('history-reload')));
     await tester.pump();
@@ -231,6 +237,10 @@ void main() {
     expect(observed.records.last.date, _dateText(previousDay));
     expect(observed.records.last.zone, expectedZone);
     expect(find.byKey(const Key('history-entry-history_00')), findsNothing);
+    if (captureScreenshots) {
+      await tester.pumpAndSettle();
+      await binding.takeScreenshot('s3_history_previous_day_empty');
+    }
 
     final readsBeforeToday = observed.records.length;
     await tester.tap(find.byKey(const Key('history-select-date')));
@@ -267,6 +277,39 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+}
+
+final class _ControlledAuthRepository implements AuthRepository {
+  const _ControlledAuthRepository(this._subject);
+
+  final String _subject;
+
+  @override
+  Stream<AuthSession> watchSession() =>
+      Stream.value(AuthSessionAuthenticated(subject: _subject));
+
+  @override
+  Future<Result<String>> getIdToken() => Future.error(
+    UnsupportedError('ID tokens are supplied by the test client.'),
+  );
+
+  @override
+  Future<Result<void>> register({
+    required String email,
+    required String password,
+  }) => Future.error(UnsupportedError('Registration is outside this test.'));
+
+  @override
+  Future<Result<void>> signIn({
+    required String email,
+    required String password,
+  }) => Future.error(
+    UnsupportedError('Sign-in is performed against Auth Emulator.'),
+  );
+
+  @override
+  Future<Result<void>> signOut() =>
+      Future.error(UnsupportedError('Sign-out is outside this test.'));
 }
 
 String _dateText(DateTime date) =>
@@ -364,3 +407,4 @@ final class _ObservedHistoryClient extends http.BaseClient {
     super.close();
   }
 }
+
