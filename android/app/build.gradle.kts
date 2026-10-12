@@ -4,6 +4,9 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val historyTestApplicationIdSuffix =
+    project.findProperty("historyTestApplicationIdSuffix")?.toString()
+
 android {
     namespace = "com.enmori.app"
     compileSdk = flutter.compileSdkVersion
@@ -30,6 +33,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            if (historyTestApplicationIdSuffix != null) {
+                require(historyTestApplicationIdSuffix == ".historytest")
+                applicationIdSuffix = historyTestApplicationIdSuffix
+            }
+        }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
@@ -47,3 +56,4 @@ kotlin {
 flutter {
     source = "../.."
 }
+
