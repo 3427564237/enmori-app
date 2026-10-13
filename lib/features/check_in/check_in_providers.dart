@@ -1,23 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
 
 import '../../core/result/result.dart';
 import 'domain/check_in_repository.dart';
+import 'history_device_port.dart';
 
 final checkInRepositoryProvider = Provider<CheckInRepository>(
   (ref) => const _UnavailableCheckInRepository(),
 );
 
-final deviceIanaTimeZoneProvider = FutureProvider<String>((ref) async {
-  final zone = await const MethodChannel('com.enmori.app/time_zone')
-      .invokeMethod<String>('ianaTimeZone');
-  if (zone == null ||
-      zone.isEmpty ||
-      RegExp(r'^[+-]\d{2}:?\d{2}$').hasMatch(zone)) {
-    throw StateError('Device IANA time zone is unavailable.');
-  }
-  return zone;
-});
+final historyDevicePortProvider = Provider<HistoryDevicePort>(
+  (ref) => const AndroidHistoryDevicePort(),
+);
 
 final class _UnavailableCheckInRepository implements CheckInRepository {
   const _UnavailableCheckInRepository();

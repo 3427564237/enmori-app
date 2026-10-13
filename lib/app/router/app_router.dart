@@ -13,6 +13,7 @@ import '../../features/auth/domain/auth_repository.dart';
 import '../../features/auth/presentation/registration_page.dart';
 import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/check_in/presentation/check_in_page.dart';
+import '../../features/check_in/presentation/check_in_history_controller.dart';
 import '../../features/event_recommendations/domain/event_recommendation_repository.dart';
 import '../../features/event_recommendations/presentation/event_recommendations_controller.dart';
 import '../../features/event_recommendations/presentation/event_recommendations_page.dart';
@@ -149,11 +150,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           builder: (context, state) => historyPage.build(
             context,
             onBack: () => backFromShared(context, AppRoutes.checkInHistory),
-            onOpenSavedCheckIn: (id) => openShared(
-              context,
-              AppRoutes.checkInHistory,
-              AppRoutes.savedCheckIn(id),
-            ),
+            onOpenSavedCheckIn: (id) async {
+              if (!canNavigateShared(context, AppRoutes.checkInHistory)) return;
+              await context.push<void>(AppRoutes.savedCheckIn(id));
+              if (canNavigateShared(context, AppRoutes.checkInHistory) &&
+                  ref.exists(checkInHistoryControllerProvider)) {
+                await ref
+                    .read(checkInHistoryControllerProvider.notifier)
+                    .reload();
+              }
+            },
           ),
         ),
       if (aiPage != null)
