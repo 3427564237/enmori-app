@@ -250,10 +250,12 @@ final class _Fixture {
               },
             }, 503);
           }
-          if (request.url.queryParameters['date'] == '2026-10-12')
+          if (request.url.queryParameters['date'] == '2026-10-12') {
             return _json({'checkIns': <Object>[], 'nextCursor': null});
-          if (request.url.queryParameters.containsKey('cursor'))
+          }
+          if (request.url.queryParameters.containsKey('cursor')) {
             return _page('Next synthetic Note');
+          }
           return _page('First synthetic Note', cursor: 'synthetic-cursor');
         case '/v1/check-ins/chk_shared':
           savedReads++;

@@ -153,6 +153,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             onOpenSavedCheckIn: (id) async {
               if (!canNavigateShared(context, AppRoutes.checkInHistory)) return;
               await context.push<void>(AppRoutes.savedCheckIn(id));
+              if (!context.mounted || !ref.mounted) return;
               if (canNavigateShared(context, AppRoutes.checkInHistory) &&
                   ref.exists(checkInHistoryControllerProvider)) {
                 await ref
