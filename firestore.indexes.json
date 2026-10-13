@@ -10,5 +10,11 @@
       ]
     }
   ],
-  "fieldOverrides": []
+  "fieldOverrides": [
+    {
+      "collectionGroup": "accounts",
+      "fieldPath": "purposeRevocationGeneration",
+      "indexes": []
+    }
+  ]
 }

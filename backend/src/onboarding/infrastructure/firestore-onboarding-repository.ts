@@ -5,6 +5,7 @@ import type {
 } from "../ports/onboarding-repository.js";
 import { dependencyUnavailable } from "../../shared/ports/dependency-failure.js";
 import { IDEMPOTENCY_WINDOW_MILLISECONDS } from "../../shared/application/authoritative-values.js";
+import { requireControlledEmulatorEnvironment } from "../../shared/infrastructure/firebase/controlled-emulator-environment.js";
 import type {
   FirestoreGateway,
   FirestoreTransactionGateway,
@@ -101,7 +102,12 @@ async function replayCompletedOnboarding(input: {
 }
 
 export class FirestoreOnboardingRepository implements OnboardingRepository {
-  public constructor(private readonly firestore: FirestoreGateway) {}
+  private readonly isolatedAiPurpose: boolean;
+  public constructor(private readonly firestore: FirestoreGateway,
+    isolatedAiEnvironment?: Readonly<Record<string, string | undefined>>) {
+    this.isolatedAiPurpose = isolatedAiEnvironment !== undefined;
+    if (isolatedAiEnvironment !== undefined) requireControlledEmulatorEnvironment(isolatedAiEnvironment);
+  }
 
   public async complete(
     command: CompleteCommand,
@@ -187,6 +193,7 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
           optionalProcessingConsent: command.optionalProcessingConsent,
           checkInVisibility: command.checkInVisibility,
           onboardingCompletedAt: creation.onboardingCompletedAt,
+          ...(this.isolatedAiPurpose ? { purposeRevocationGeneration: 0 } : {}),
         };
         const idempotency: IdempotencyRecord = {
           scope: command.firebaseUid,
