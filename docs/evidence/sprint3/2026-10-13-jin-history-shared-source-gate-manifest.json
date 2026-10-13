@@ -1,0 +1,609 @@
+{
+  "schemaVersion": 1,
+  "draft": false,
+  "recordedAtSgt": "2026-10-13T23:20:20.844624+08:00",
+  "head": "bfee3639ede6e2f406ea5253db523110545c7671",
+  "tree": "4adc2ea32a09f8393cf2110f7c05eef6a197d42c",
+  "executable": "8b7698d7f6cbfa8c282b74ca52b0d66e06eda4a2",
+  "base": "9a4931dd9c04db75ca466d7c17f978329a252256",
+  "productSourceUnmodifiedByGate": true,
+  "excludedContributions": [
+    "#95",
+    "#96"
+  ],
+  "sourceChecks": {
+    "file": {
+      "path": "source-checks.json",
+      "sha256": "0c5976414b30781e3a15acbed7849a19b11c227dc09aac835fc1f0a1a44ff7c4",
+      "bytes": 2937,
+      "lastWriteSgt": "2026-10-13T22:44:03.910264+08:00"
+    },
+    "ownerManifestBindings": 10,
+    "copiedDUBlobs": 6,
+    "archiveExact": 56,
+    "archiveCRLFEquivalent": 794,
+    "operations": 27,
+    "schemas": 33,
+    "defaultDisabled": true
+  },
+  "compiledBackendEquivalence": {
+    "file": {
+      "path": "compiled-backend-equivalence.json",
+      "sha256": "240e0474f2cda57f0609981e1317d413459a1dd557bb74afc12395f52196deac",
+      "bytes": 24454,
+      "lastWriteSgt": "2026-10-13T22:54:56.977604+08:00"
+    },
+    "recheckedCompiledFiles": 435,
+    "byteIdentical": true
+  },
+  "newGateFixtures": [
+    {
+      "publicationPath": "tool/jin_history_shared_gate.mjs",
+      "workingSha256": "bb94251f59ed13133cdd260b4c54d6482d3c7c92a02b5c8543ae78d05d301720",
+      "gitNormalizedSha256": "c119c988e3f8ce82257340cd417515fea82ea8b6ed07383d1ae052933ae2a59d",
+      "gitNormalizedBlob": "fde928ede246d77c0ef6f0b2f2cd76fe223f8e8a",
+      "workingBytes": 21669,
+      "gitNormalizedBytes": 21306,
+      "androidFixtureCopyEquivalent": true
+    },
+    {
+      "publicationPath": "integration_test/jin_history_shared_real_backend_test.dart",
+      "workingSha256": "5db2869f6c13259ed52963c5b8b35a9e3f63ee4ef8bc43988d11c629fc3b1a86",
+      "gitNormalizedSha256": "eba0652071b6a9c00988309973223aa002a509675a7a64338ecc8cf3b0bf6a16",
+      "gitNormalizedBlob": "a5a19287ea83b95d265c783a4805d1671676e69c",
+      "workingBytes": 16038,
+      "gitNormalizedBytes": 15597,
+      "androidFixtureCopyEquivalent": true
+    },
+    {
+      "publicationPath": "tool/ExportPkcs12Pem.java",
+      "workingSha256": "250e5a8717a1b3ff0a5b61982f04ca9cce4870872253debcb20f6b32fdfd27fd",
+      "gitNormalizedSha256": "331cdf0afa82114f9c8e98d48f3de16c8b7891bcd8a8ee27557beff8773c66aa",
+      "gitNormalizedBlob": "2c4acac6f8fdb487e0340881fa5c1908a03dc9c9",
+      "workingBytes": 1289,
+      "gitNormalizedBytes": 1258,
+      "androidFixtureCopyEquivalent": true,
+      "copiedFromAccepted89": "6ef6978c4dcdba79b66c781ba99d851aa4e26955"
+    }
+  ],
+  "checks": {
+    "backend": {
+      "status": "Pass",
+      "outerExit": 0,
+      "log": {
+        "path": "backend-full.log",
+        "sha256": "d9b8f9a55eef4921b2eb630401635c5a6e262cb55443c3e0bf938cd446b0db4d",
+        "bytes": 47633,
+        "lastWriteSgt": "2026-10-13T22:43:03.869302+08:00"
+      },
+      "exitFile": {
+        "path": "backend-exit.txt",
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T22:43:04.082834+08:00"
+      },
+      "verifiedMarkers": [
+        "tests 543",
+        "pass 543",
+        "fail 0",
+        "cancelled 0",
+        "skipped 0",
+        "todo 0"
+      ],
+      "cases": 543
+    },
+    "emulator": {
+      "status": "Pass",
+      "outerExit": 0,
+      "log": {
+        "path": "emulators.log",
+        "sha256": "5701e4a7ba781f928202bf8a8ef876b92298b4429634c27f83f4c9afa54ca2f6",
+        "bytes": 10357,
+        "lastWriteSgt": "2026-10-13T22:47:27.953686+08:00"
+      },
+      "exitFile": {
+        "path": "emulators-exit.txt",
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T22:47:28.001998+08:00"
+      },
+      "verifiedMarkers": [
+        "pass 73",
+        "fail 0",
+        "cancelled 0",
+        "skipped 0",
+        "todo 0",
+        "Script exited successfully (code 0)",
+        "JIN isolated launcher temporary profile removed."
+      ],
+      "cases": 73,
+      "actualAuthFirestore": true
+    },
+    "flutter": {
+      "status": "Pass",
+      "outerExit": 0,
+      "log": {
+        "path": "flutter-full.log",
+        "sha256": "ca548ab14d321ebe4b49fef4a38edb4bc0ea1b429633d24d000a1a7a9d63ea44",
+        "bytes": 119344,
+        "lastWriteSgt": "2026-10-13T22:45:17.060168+08:00"
+      },
+      "exitFile": {
+        "path": "flutter-exit.txt",
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T22:45:17.530009+08:00"
+      },
+      "verifiedMarkers": [
+        "+489: All tests passed!"
+      ],
+      "cases": 489
+    },
+    "analysis": {
+      "status": "Pass",
+      "outerExit": 0,
+      "log": {
+        "path": "analysis.log",
+        "sha256": "9a9d35ce9d6fac973a72f078461e18cde1f1c7f2ae7fa7a5916ae87adef4b99a",
+        "bytes": 60,
+        "lastWriteSgt": "2026-10-13T22:46:34.065306+08:00"
+      },
+      "exitFile": {
+        "path": "analysis-exit.txt",
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T22:46:34.306706+08:00"
+      },
+      "verifiedMarkers": [
+        "No issues found!"
+      ],
+      "scope": "lib test integration_test"
+    },
+    "sharedHistorySynthetic": {
+      "status": "Pass",
+      "outerExit": 0,
+      "log": {
+        "path": "android-history-synthetic.log",
+        "sha256": "e06c1757c9b66bf13f79c65f61e7137fb20d3994afc70f241ef6301c1f1d9e73",
+        "bytes": 1984,
+        "lastWriteSgt": "2026-10-13T22:49:54.366541+08:00"
+      },
+      "exitFile": {
+        "path": "android-history-synthetic-exit.txt",
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T22:49:54.711871+08:00"
+      },
+      "verifiedMarkers": [
+        "+7: All tests passed!"
+      ],
+      "cases": 7,
+      "persistence": "synthetic transport",
+      "overlapsFlutterCases": true
+    },
+    "sharedAiSynthetic": {
+      "status": "Pass",
+      "outerExit": 0,
+      "log": {
+        "path": "android-ai-synthetic.log",
+        "sha256": "8a490eeb3f0885580ba7182888d0f47fedde05f3d7b5982d95dddba90f3cff77",
+        "bytes": 1749,
+        "lastWriteSgt": "2026-10-13T22:52:29.605176+08:00"
+      },
+      "exitFile": {
+        "path": "android-ai-synthetic-exit.txt",
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T22:52:29.837250+08:00"
+      },
+      "verifiedMarkers": [
+        "+7: All tests passed!"
+      ],
+      "cases": 7,
+      "persistence": "synthetic transport",
+      "overlapsFlutterCases": true
+    },
+    "sharedHistoryReal": {
+      "status": "Pass",
+      "outerExit": 0,
+      "log": {
+        "path": "android-history-real.log",
+        "sha256": "7b305981c330a9d596480d5686adf3fd082bd4e0ddec02754956726cfb280bd0",
+        "bytes": 6181,
+        "lastWriteSgt": "2026-10-13T23:04:07.524632+08:00"
+      },
+      "exitFile": {
+        "path": "android-history-real-exit.txt",
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T23:04:07.640835+08:00"
+      },
+      "verifiedMarkers": [
+        "+1: All tests passed!",
+        "S3_HISTORY_HOST_READBACK_PASS ownerRows=22",
+        "JIN_HISTORY_OWN_ONBOARDING_RECEIPT_REMOVED observedBefore=true",
+        "JIN_HISTORY_CLEANUP_AUTH0_ALL_COLLECTIONS_EMPTY",
+        "JIN_HISTORY_TEST_PACKAGE_AND_REVERSES_ABSENT",
+        "Script exited successfully (code 0)",
+        "JIN_HISTORY_PRIVATE_PROFILE_REMOVED"
+      ],
+      "cases": 1,
+      "listReads": 6,
+      "savedItemReads": 1,
+      "hostUnchangedOwnRows": 22,
+      "actualAuthHttpsBackendFirestore": true,
+      "receiptCleanup": true,
+      "limit": "Known owned fixture cleanup; not universal orphan-descendant or product cleanup SLA proof"
+    },
+    "format": {
+      "status": "Pass",
+      "files": 9,
+      "changed": 0,
+      "exitFromSourceChecks": 0,
+      "log": {
+        "path": "format.log",
+        "sha256": "d47ac24f778bf1878de0df1f7f3b32a50a665ffd502d45f5bb06c2d4dd9f891e",
+        "bytes": 47,
+        "lastWriteSgt": "2026-10-13T22:44:03.400967+08:00"
+      }
+    },
+    "newFixtureAnalysis": {
+      "status": "Pass",
+      "log": {
+        "path": "fixture-analysis.log",
+        "sha256": "e7c01c08b6ad2597fcbb2655a3065b20f0c4d0918e0fb798470b2e5c3532863d",
+        "bytes": 74,
+        "lastWriteSgt": "2026-10-13T22:46:27.049382+08:00"
+      },
+      "deviceEvidence": false
+    },
+    "androidSearch": {
+      "status": "Pass",
+      "cases": 1,
+      "outerExit": 0,
+      "log": {
+        "path": "android-search.log",
+        "sha256": "446a35cce443363abc48b285bce45713d7ab4d2933a920abdbe957a89d582fac",
+        "bytes": 4542,
+        "lastWriteSgt": "2026-10-13T23:06:37.663635+08:00"
+      },
+      "exitFile": {
+        "path": "android-search-exit.txt",
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T23:06:37.840259+08:00"
+      },
+      "verifiedMarkers": [
+        "+1: All tests passed!",
+        "MY_FRIENDS_SEARCH_ANDROID_CONTINUATION_CLEAR_RELOAD_SEMANTICS_FOCUS: Pass",
+        "\"documents\":341,\"result\":\"Pass\"",
+        "Script exited successfully (code 0)"
+      ],
+      "unchangedDocuments": 341,
+      "actualAuthHttpsBackendFirestore": true,
+      "package": "com.enmori.app",
+      "teardownLimit": "Auth delete attempted by existing wrapper; no new Auth0/empty-store assertion. Volatile Emulator process and fresh profile disposed; final packages verified separately."
+    },
+    "androidFriends": {
+      "status": "Pass",
+      "cases": 1,
+      "outerExit": 0,
+      "log": {
+        "path": "android-friends.log",
+        "sha256": "e2877a1455b91d67f7533d2f283029e4963f0a08ed6643e7d190c0c67c4fa6ab",
+        "bytes": 4691,
+        "lastWriteSgt": "2026-10-13T23:09:24.588458+08:00"
+      },
+      "exitFile": {
+        "path": "android-friends-exit.txt",
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T23:09:24.804638+08:00"
+      },
+      "verifiedMarkers": [
+        "+1: All tests passed!",
+        "MY_FRIENDS_ANDROID_TWO_ACCOUNT_ACCEPT_PAGING_PRIVACY_UNSET_RELOAD_ERROR: Pass",
+        "MY_FRIENDS_ANDROID_TWO_ACCOUNTS_ATOMIC_POINTER_READBACK: Pass",
+        "Script exited successfully (code 0)"
+      ],
+      "atomicFriendshipAndBothPointers": true,
+      "actualAuthHttpsBackendFirestore": true,
+      "package": "com.enmori.app",
+      "teardownLimit": "Existing fixture closes server/SDK and attempts Auth deletion; final isolated process/profile/package disposal does not claim an empty-store readback."
+    },
+    "androidPersona": {
+      "status": "Pass",
+      "cases": 1,
+      "outerExit": 0,
+      "log": {
+        "path": "android-persona.log",
+        "sha256": "122f0bf9e8b8f38ee457db981f4d10aaa46ed0b0d1cd17f3f6117b621b3b2c33",
+        "bytes": 5782,
+        "lastWriteSgt": "2026-10-13T23:14:20.632967+08:00"
+      },
+      "exitFile": {
+        "path": "android-persona-exit.txt",
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T23:14:20.861142+08:00"
+      },
+      "verifiedMarkers": [
+        "+1: All tests passed!",
+        "PERSONA_PC13_ANDROID_TWO_OWNERS_PERSISTED_ACTIVE_DELETE_REVISION_4: Pass",
+        "Script exited successfully (code 0)"
+      ],
+      "ownerRevision": 4,
+      "peerRevision": 0,
+      "bothPersonaCollectionsEmpty": true,
+      "actualAuthHttpsBackendFirestore": true,
+      "package": "com.enmori.app.personatest"
+    },
+    "finalCleanup": {
+      "status": "Pass",
+      "record": {
+        "path": "cleanup.json",
+        "sha256": "63daa253f308983c50cd9199eafb8c8b5412fce34fbecf77afc7c3d5c76c5eea",
+        "bytes": 1486,
+        "lastWriteSgt": "2026-10-13T23:16:19.417958+08:00"
+      },
+      "limits": "Settings/package/map assertions were before shutdown, not queried from a stopped device. Subsequent separate readback confirms settled AVD, ports and profiles; initial cleanup command remains exit1. This is not product source-cleanup SLA proof; Gradle/adb shared daemons not killed or claimed owned."
+    },
+    "newFixtureFormat": {
+      "status": "Pass",
+      "exit": 0,
+      "files": 1,
+      "changed": 0,
+      "log": {
+        "path": "fixture-format.log",
+        "sha256": "47de15ebbbc6c3e89c7accd61e1b14c4ea84897df9343831f457dd227a01cf30",
+        "bytes": 47,
+        "lastWriteSgt": "2026-10-13T23:17:41.617457+08:00"
+      },
+      "earlierAttempt": "Sandboxed Dart CLI resolvedExecutable initialization failed before formatting; unchanged non-writing command passed outside the restricted process. Earlier subcommand exit was not separately captured."
+    }
+  },
+  "retainedFailures": [
+    {
+      "status": "Fail",
+      "outerExit": 1,
+      "reason": "Native regional-IANA guard rejects GMT before SDK fixture initialization",
+      "innerScenarioPassed": false,
+      "log": {
+        "path": "android-history-real-zone-rejection.log",
+        "sha256": "f4efba6d02dc396e83a111f2580f7c7f309e41199da51b5c8e0746e264aa89ef",
+        "bytes": 3820,
+        "lastWriteSgt": "2026-10-13T22:54:28.109229+08:00"
+      },
+      "exitFile": {
+        "path": "android-history-real-zone-rejection-exit.txt",
+        "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T22:54:28.152472+08:00"
+      },
+      "retained": true
+    },
+    {
+      "status": "Fail",
+      "outerExit": 1,
+      "reason": "Scenario and host22 passed; omitted owned onboarding receipt caused full cleanup failure",
+      "innerScenarioPassed": true,
+      "log": {
+        "path": "android-history-real-cleanup-failure.log",
+        "sha256": "dbd11b621cbaea9290955431562eee2c2134853b9d416d5fff18abd5578bf803",
+        "bytes": 8200,
+        "lastWriteSgt": "2026-10-13T22:59:17.494788+08:00"
+      },
+      "exitFile": {
+        "path": "android-history-real-cleanup-failure-exit.txt",
+        "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+        "bytes": 3,
+        "lastWriteSgt": "2026-10-13T22:59:17.522934+08:00"
+      },
+      "retained": true
+    },
+    {
+      "status": "Fail",
+      "outerExit": 1,
+      "reason": "Initial final-cleanup command checked adb disappearance before asynchronous teardown settled",
+      "record": {
+        "path": "cleanup-first-failure.txt",
+        "sha256": "69e476f37df18b14aa831bc0ba6809c46d87bd5492a88ba7c89f68a86002fa5a",
+        "bytes": 621,
+        "lastWriteSgt": "2026-10-13T23:16:10.269665+08:00"
+      },
+      "recordType": "Transcribed actual tool failure, not raw process transcript",
+      "resolution": "Separate final readback exit0 confirms settled AVD/ports/profiles; original exit1 remains."
+    }
+  ],
+  "whitespace": {
+    "exact87To94Exit": 0,
+    "inheritedRangeExit": 2,
+    "retainedException": "docs/decisions/2026-10-12-li-friend-search-and-internal-ai-approval.md:56 new blank line at EOF",
+    "log": {
+      "path": "inherited-whitespace.log",
+      "sha256": "4b7a2595bec66b9abc86520393e84bc16831b48f4a61497be97af1cb4c6473f0",
+      "bytes": 98,
+      "lastWriteSgt": "2026-10-13T22:44:03.790538+08:00"
+    }
+  },
+  "environment": {
+    "scope": "dedicated owned API36 AVD; no physical user device",
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "pnpm": "11.19.0",
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "java": "21.0.12.1",
+    "fixedDemoProject": true,
+    "loopbackOnly": true,
+    "ordinaryEnabled": false,
+    "deviceApi": 36,
+    "dedicatedAvdOnly": true,
+    "historyZoneDuringRealRun": "Asia/Singapore",
+    "restoredZone": "GMT",
+    "restoredAutomaticZone": "1"
+  },
+  "finalCleanup": {
+    "status": "Pass",
+    "recordedAtSgt": "2026-10-13T23:16:19.3471269+08:00",
+    "scope": "Task-owned dedicated API36 AVD only",
+    "finalReadbackExit": 0,
+    "originalCleanupInvocationExit": 1,
+    "retainedFailure": "Immediate adb-list absence assertion raced asynchronous device teardown after owned launcher process had settled",
+    "preShutdownEvidence": "cleanup_gate.ps1 reached only its final line-63 adb-list assertion: prior checked package/reverse/forward absence, GMT/automatic-zone1/font1.0 readback, free ports and no current fixture profiles all passed. Counts of any removed packages/forwards were not separately captured.",
+    "preShutdownScriptSha256": "df9ece94cfa0df299d0102d0534a8fbdb7d98a170339c7438369c4fcb0210a46",
+    "restoredZone": "GMT",
+    "restoredAutomaticZone": "1",
+    "fontScale": "1.0",
+    "packagesAfter": "",
+    "reverseAfter": "",
+    "ownedForwardMappingsAfter": 0,
+    "freeLoopbackPorts": [
+      8080,
+      9099,
+      4400,
+      4500,
+      9150
+    ],
+    "currentFixtureProfilesRemaining": 0,
+    "ownedAvdProcessSettled": true,
+    "ownedAvdAbsent": true,
+    "physicalDeviceTouched": false,
+    "unrelatedProcessesStopped": false,
+    "limits": "Settings/package/map assertions were before shutdown, not queried from a stopped device. Subsequent separate readback confirms settled AVD, ports and profiles; initial cleanup command remains exit1. This is not product source-cleanup SLA proof; Gradle/adb shared daemons not killed or claimed owned."
+  },
+  "reviewGates": {
+    "shiNewCompositionAndFixtures": "Pending",
+    "liIndependentEvidenceReviewAndAcceptance": "Pending"
+  },
+  "timeAttribution": "Log and exit file lastWriteSgt values are filesystem timestamps, not claimed exact execution start/end timestamps.",
+  "privacy": {
+    "rawLogsPublished": false,
+    "rawIdsIncluded": false,
+    "tokensIncluded": false,
+    "privateKeysIncluded": false,
+    "credentialsIncluded": false,
+    "noteContentsIncluded": false,
+    "metadataOnly": true
+  },
+  "limitations": [
+    "No artificial sum of overlapping Flutter/device cases",
+    "Separate fixtures are not an all-feature Android flow",
+    "API24/25 and human accessibility not run",
+    "No real AI persistence/model/store/cleanup proof",
+    "No task closure/merge/board/runtime enablement/completion claim"
+  ],
+  "publicationIdentity": "The containing Git commit identifies this evidence and the three fixture additions; product source remains the pinned head above.",
+  "dependencyCleanup": {
+    "sharedCachePreserved": true,
+    "removedJunctions": [
+      "build/jin-pr94-gate/source/node_modules",
+      "build/jin-pr94-gate/current/source/node_modules"
+    ],
+    "recordedAtSgt": "2026-10-13T23:16:43.4801957+08:00",
+    "record": {
+      "path": "dependency-cleanup.json",
+      "sha256": "87c3c065797fd30d9f3b9e0da222577fc11315835388b496e4096e72ea3a36e0",
+      "bytes": 229,
+      "lastWriteSgt": "2026-10-13T23:16:43.533454+08:00"
+    }
+  },
+  "emulatorLauncher": {
+    "file": {
+      "path": "source/build/jin-guarded-emulators.mjs",
+      "sha256": "cfb9f93d61b342d79190bb3694fd146b826728108c6ea07e4a2202ddda558bc6",
+      "bytes": 1968,
+      "lastWriteSgt": "2026-10-09T16:24:23.381557+08:00"
+    },
+    "command": "node build/jin-guarded-emulators.mjs",
+    "reproduction": "Exact launcher text reproduced in accompanying evidence document; fixed demo project and existing guard."
+  },
+  "fixtureSyntax": {
+    "status": "Pass",
+    "command": "node --check tool/jin_history_shared_gate.mjs",
+    "exit": 0,
+    "afterReceiptFix": true
+  },
+  "retainedWarnings": [
+    {
+      "run": "Search",
+      "condition": "Flutter teardown attempted com.enmori.app.personatest uninstall and emitted DELETE_FAILED_INTERNAL_ERROR; actual built test APK was com.enmori.app. Wrapper and scenario exited0; not a successful uninstall claim."
+    },
+    {
+      "run": "My Friends",
+      "condition": "Initial install rejected the previous owned Search com.enmori.app debug signature; Flutter then uninstalled that owned package and installed this run. Entire invocation ultimately exited0; first install failure retained."
+    },
+    {
+      "run": "Builds",
+      "condition": "Existing Kotlin Gradle Plugin and SDK XML warnings retained; no dependency upgrade performed."
+    }
+  ],
+  "apks": [
+    {
+      "path": "history-synthetic.apk",
+      "sha256": "078cf7062741399f2ccc5cc896d85c58e1d402cdf175118098274c74e99824ee",
+      "bytes": 79851760,
+      "lastWriteSgt": "2026-10-13T22:48:27.932610+08:00",
+      "package": "com.enmori.app.personatest",
+      "targetSdk": 36,
+      "identityTool": "locked aapt2 dump badging",
+      "fingerprintType": "retained local output APK; not installed APK extraction"
+    },
+    {
+      "path": "ai-synthetic.apk",
+      "sha256": "007d1b297ccdce2c46e3744bda8514102e633798e939c003a6c3a2e69a8e26c3",
+      "bytes": 107509119,
+      "lastWriteSgt": "2026-10-13T22:51:24.489154+08:00",
+      "package": "com.enmori.app.personatest",
+      "targetSdk": 36,
+      "identityTool": "locked aapt2 dump badging",
+      "fingerprintType": "retained local output APK; not installed APK extraction"
+    },
+    {
+      "path": "history-real.apk",
+      "sha256": "87b276c49c0fd58beb67c37cbbfddf97dde666bc0fe7ec9dfd28838b59ec704c",
+      "bytes": 167088288,
+      "lastWriteSgt": "2026-10-13T23:03:37.609761+08:00",
+      "package": "com.enmori.app.personatest",
+      "targetSdk": 36,
+      "identityTool": "locked aapt2 dump badging",
+      "fingerprintType": "retained local output APK; not installed APK extraction"
+    },
+    {
+      "path": "search.apk",
+      "sha256": "46dcdf2db5c7c12b9fb1c2fd3b7da627a857d6d5d5b5097319364851f082bcfe",
+      "bytes": 80089872,
+      "lastWriteSgt": "2026-10-13T23:06:02.590189+08:00",
+      "package": "com.enmori.app",
+      "targetSdk": 36,
+      "identityTool": "locked aapt2 dump badging",
+      "fingerprintType": "retained local output APK; not installed APK extraction"
+    },
+    {
+      "path": "friends.apk",
+      "sha256": "5bfce62f23981f125045b32f36a07d6b36814f10d859be27b937042a449a44b4",
+      "bytes": 80089872,
+      "lastWriteSgt": "2026-10-13T23:08:36.085688+08:00",
+      "package": "com.enmori.app",
+      "targetSdk": 36,
+      "identityTool": "locked aapt2 dump badging",
+      "fingerprintType": "retained local output APK; not installed APK extraction"
+    },
+    {
+      "path": "persona.apk",
+      "sha256": "7637b73d79ec86feaeb9fd501b693b01079113db3a39513c1305b575633044b6",
+      "bytes": 167406460,
+      "lastWriteSgt": "2026-10-13T23:13:09.094100+08:00",
+      "package": "com.enmori.app.personatest",
+      "targetSdk": 36,
+      "identityTool": "locked aapt2 dump badging",
+      "fingerprintType": "retained local output APK; not installed APK extraction"
+    }
+  ],
+  "boundaries": {
+    "realHistoryUserSession": "Actual Emulator token sign-in with controlled session observer; not full production Auth lifecycle",
+    "savedReturn": "programmatic router.pop plus fresh reread, not hardware Back",
+    "emulatorSecurityRules": "Admin SDK trusted Backend authorization tests; not client Firestore rules acceptance",
+    "capabilityOrAiProducersIntegrated": false
+  }
+}
