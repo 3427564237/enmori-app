@@ -1,5 +1,9 @@
 # ZHOU S3 AI 审批状态与下一阶段合同候选
 
+## 当前集中包入口（2026-10-13）
+
+当前阅读入口为 [剩余 N02／F03／unknown／来源清理合同集中包](2026-10-13-zhou-real-ai-remaining-contract-packet.md)。[四项 F01 规则已决定](../decisions/2026-10-13-li-delegated-f01-b-c-d-selection.md)，[#92 能力证据已限定验收](../decisions/2026-10-12-li-ai-capability-slice-acceptance.md)，不再重复确认；剩余精确物理／生产者选择和未证实保证见新包。[本轮本地开发指令](../decisions/2026-10-13-user-zhou-local-ai-development-scope.md)授权可分离规则的本地开发与审查，并禁止上传。以下 10 月 12 日入口及原合同保留为历史，不扩大其原批准范围。
+
 ## 当前实施补充入口（2026-10-12，保留原送审正文）
 
 真实 AI 后续方案见 [F01／N02／F03／unknown／来源清理实施候选](2026-10-12-zhou-real-ai-slice-closure-proposal.md)。用户于2026-10-12明确授权上传本补充及此阅读入口，作为Draft文档送审；补充仍待批准，不释放真实适配实施。LI 条件 A 已选择部分设计及 F02；#88 398f81c 已获 JIN／LI 限定组件批准，但不解除真实存储／上下文／恢复出口／完整清理门槛，具体来源和差异见补充。
