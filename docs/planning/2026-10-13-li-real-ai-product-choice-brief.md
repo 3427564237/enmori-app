@@ -1,6 +1,6 @@
 # Human LI product choices — real AI persistence boundary
 
-Status: decision brief only; no new human selection or implementation release.
+Status: historical decision brief; all four rows subsequently selected by the agent under LI's explicit delegation, recorded in the [durable decision](../decisions/2026-10-13-li-delegated-f01-b-c-d-selection.md). No implementation release follows from this brief.
 Prepared13 October2026 SGT in response to “有什么我能做的工作了吗”.
 
 This condenses the already reviewed
