@@ -68,6 +68,26 @@ model identity, semantic safety classifier or real distributed transaction.
 Physical schemas, public recovery semantics and production adapters require their
 own approved scope. This slice changes no dependencies or public API.
 
+## Selected real-effect policies — local and unwired
+
+The [13 October F01 decision](../../../docs/decisions/2026-10-13-li-delegated-f01-b-c-d-selection.md)
+selects the isolated real-adapter semantics separately from this strict fake Port.
+Under the [local development instruction](../../../docs/decisions/2026-10-13-user-zhou-local-ai-development-scope.md),
+`domain/real-effect-expiry.ts` evaluates full-precision retention mathematics and
+`application/real-write-control.ts` tracks local terminal/durable-close observations
+and checks the original guard after each fresh external Auth observation. Neither
+is wired into the existing Application, Infrastructure, Bootstrap, HTTP or Flutter.
+They hold no content, perform no I/O themselves and grant no write/read permission.
+
+Missing existing lineage is unavailable, never an implicit first message; a late
+copy cannot establish a retention anchor. An unknown barrier cannot mean rollback,
+and a closed barrier still needs authoritative effect/readback proof. Callers must
+dispose Application content immediately on local terminal and synchronously
+recheck the original guard before actual SDK handoff. SDK retention/destruction,
+wire dispatch, commit ordering and complete cleanup remain unproved here.
+Their physical and producer mapping belongs to the
+[remaining concentrated contract packet](../../../docs/planning/2026-10-13-zhou-real-ai-remaining-contract-packet.md).
+
 Run `pnpm backend:verify` using the repository-pinned Node 24.19.0 and pnpm
 11.19.0. Lifecycle tests are named with LC identifiers; runtime and parser
 regressions remain under `backend/test/ai-runtime/`.
