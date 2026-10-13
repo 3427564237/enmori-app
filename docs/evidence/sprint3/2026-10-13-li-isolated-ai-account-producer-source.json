@@ -1,0 +1,54 @@
+{
+  "source": "c866eae8e266fcecb3ff035102d188a6c0a6c912",
+  "base": "110eda443fbe101608c6aa6df551e52b6a18da5a",
+  "files": [
+    {
+      "path": "backend/emulator-test/isolated-ai-account-producer.integration.test.ts",
+      "gitBlob": "09e9800258ba7a14d50115a54e25ce65003d0ac3",
+      "sha256": "9a296c6229cc3644634ff1d77c4de7b7a6de69a8dd2a173f26a76da0056f7ab3"
+    },
+    {
+      "path": "backend/scripts/run-isolated-ai-account-producer-worker.mjs",
+      "gitBlob": "ff1c847408068728f1e3974ccac52eb3efda9d1c",
+      "sha256": "d745c5b00e6a6d9cc813ecb9ee3233ab7c1a61f0533e322b4efff03a0ac2fc99"
+    },
+    {
+      "path": "backend/scripts/run-isolated-ai-account-producer.mjs",
+      "gitBlob": "f80051a8c5a6d27eb8226134689556430e3fe192",
+      "sha256": "d2e583fd6957312d11fdaa4f8a67af3ca8580df80d069e8904deca71eaae93b5"
+    },
+    {
+      "path": "backend/src/account/domain/purpose-revocation-generation.ts",
+      "gitBlob": "f0ad5ac73105dc713dea8ba9fc7db572969034f6",
+      "sha256": "4b460e949df0f9b717775f6b89c320f3d23eb1a17046f57e24be631d6cf28e6b"
+    },
+    {
+      "path": "backend/src/account/infrastructure/firestore-account-preferences-repository.ts",
+      "gitBlob": "c9c34ec072ba7d8c7430194e41d21183e9c3c6df",
+      "sha256": "9447ec74c9abd9b4633d8b2c661f136a3159f56696730d6f6ac174f6cece8fb0"
+    },
+    {
+      "path": "backend/src/onboarding/infrastructure/firestore-onboarding-repository.ts",
+      "gitBlob": "9efb1efaaf61a2fcdb0268210266e858f8c30f52",
+      "sha256": "57adc8649fe35a8281c7eda27caf479150ef11e9756cc01d2fa78fc2ac5bac09"
+    },
+    {
+      "path": "backend/test/isolated-ai-account-producer.test.ts",
+      "gitBlob": "cc1aa77d81022c4695508a1309b3313884728b02",
+      "sha256": "a9fb4776dca09322f89c6de97fa2d40fc458a7b8106d590b58a3810db117726c"
+    },
+    {
+      "path": "docs/decisions/2026-10-13-li-remaining-isolated-ai-contract-a.md",
+      "gitBlob": "965457097426d044f930cacfed8b8a2e36038cb0",
+      "sha256": "42dd1f1f55a405ad13b0ad489bc193253b5638b525d68e0087154167aa238929"
+    },
+    {
+      "path": "docs/planning/2026-10-13-li-remaining-ai-choice-preview.md",
+      "gitBlob": "605ae1f126bf19ec92e4af2ab272a2b743f8a5b8",
+      "sha256": "7ed146c477a096ae21d304daf2e12ad84f3adbbdf96b8abee2edb576fed10cdd"
+    }
+  ],
+  "backendPassed": 550,
+  "emulatorPassed": 3,
+  "ownerEvidenceOnly": true
+}
