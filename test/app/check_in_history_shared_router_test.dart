@@ -6,6 +6,7 @@ import 'package:enmori/app/isolated_history_home_app.dart';
 import 'package:enmori/app/providers.dart';
 import 'package:enmori/app/router/app_router.dart';
 import 'package:enmori/core/network/backend_api_client.dart';
+import 'package:enmori/features/account/account_providers.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/check_in/history_device_port.dart';
 import 'package:enmori/features/check_in/presentation/check_in_history_page.dart';
@@ -169,7 +170,13 @@ Future<_Fixture> _pump(
   await _frames(tester);
   f.auth.emit(AuthSessionAuthenticated(subject: 'shared-owner'));
   await _frames(tester);
-  expect(f.router.state.uri.path, AppRoutes.home);
+  expect(
+    f.router.state.uri.path,
+    AppRoutes.home,
+    reason:
+        'Synthetic onboarding gate: '
+        '${f.scope.read(onboardingStatusProvider('shared-owner'))}',
+  );
   return f;
 }
 
@@ -224,8 +231,9 @@ final class _Fixture {
     Uri.parse('https://127.0.0.1:24443'),
     auth.getIdToken,
     httpClient: MockClient((request) async {
-      expect(request.method, 'GET');
-      expect(request.headers['Authorization'], 'Bearer test-token');
+      // HTTP callbacks can run while a live-device pump is in progress.
+      expectSync(request.method, 'GET');
+      expectSync(request.headers['Authorization'], 'Bearer test-token');
       switch (request.url.path) {
         case '/v1/me/onboarding':
           return _json({
