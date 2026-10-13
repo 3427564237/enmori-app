@@ -1,0 +1,157 @@
+{
+  "source": "8b7698d7f6cbfa8c282b74ca52b0d66e06eda4a2",
+  "initialReviewedHead": "8189ac5383a6dd44c01329b38470bf548e489b39",
+  "base": "9a4931dd9c04db75ca466d7c17f978329a252256",
+  "newExecutableFiles": [
+    "test/app/check_in_history_shared_router_test.dart"
+  ],
+  "files": [
+    {
+      "path": "android/app/src/main/kotlin/com/enmori/app/MainActivity.kt",
+      "gitBlob": "06ee9bf185605af9540265b55c82ce82ca5eb98c",
+      "sha256": "3d28ef3d75ea21058d3e22464b635f530c6c29c191b846321f13ba47532f1314"
+    },
+    {
+      "path": "integration_test/history_shared_router_flow_test.dart",
+      "gitBlob": "9ce62dad733e7b9e861421b81e51ac00968a85d5",
+      "sha256": "f2a94b261f7132cbbc5910a2e6cb7fd52ee0d975b2e29b1858fe18c4dc9646f7"
+    },
+    {
+      "path": "lib/app/isolated_history_home_app.dart",
+      "gitBlob": "a801ac700e891a7e972e22fc789b4a4ca2c62cc7",
+      "sha256": "cd69e4b2204e993cb1a1f304197deaa7d8bb658dded4a6f62e0abccdd6bb5ea6"
+    },
+    {
+      "path": "lib/app/router/app_router.dart",
+      "gitBlob": "3ec88e4ece77f1b6945f97a1b8cdc3b03ec6d840",
+      "sha256": "781b87caae9fd6d5c37a5437909a7d51d5170a74b6550301542a53e79c562ae9"
+    },
+    {
+      "path": "lib/features/check_in/check_in_providers.dart",
+      "gitBlob": "6de1948dfb107e854eba5fdc16313b75d4bcb2ff",
+      "sha256": "ae62a153b978fa40548a3f5780b34baecbfd9c660b1626a2b4dd46a61710ef98"
+    },
+    {
+      "path": "lib/features/check_in/history_device_port.dart",
+      "gitBlob": "ac36056b41ebc83f1b748a4dea88687b762b30d5",
+      "sha256": "de3af128788b8822f6518df014317ef4dcadbc4046865a87872979c3c729424c"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_history_controller.dart",
+      "gitBlob": "90bdfe45b7bb8e1e0a98b679adb3cb03420bda12",
+      "sha256": "484888335dd8dc1a6e9140aa536289eba52f0d726d5a8e9bfec602bb46bef0ae"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_history_page.dart",
+      "gitBlob": "294436ffee010bd973729fe0e67741cc064c77ca",
+      "sha256": "1546572eed8f3176fb9f3ed050c270dfbc1980299d553a9ae3349540dcfffc1c"
+    },
+    {
+      "path": "test/app/check_in_history_shared_router_test.dart",
+      "gitBlob": "5e67b475451f6a7af777e686a0d11a37c032bf6e",
+      "sha256": "78bccbba9c99bad8a7c2c4694c7e155edb91ec71f1009ea444254f25e931d61b"
+    },
+    {
+      "path": "test/features/check_in_history_controller_test.dart",
+      "gitBlob": "e61fb1ce2a16997ed62e074443ed4ff7401e391c",
+      "sha256": "aab273a5c303fba5691c6cd09db4a08e1b8c3c047e18b846cd808b8afa504376"
+    }
+  ],
+  "fullHost": {
+    "passed": 489,
+    "failed": 0,
+    "exitCode": 0
+  },
+  "analysis": {
+    "issues": 0,
+    "exitCode": 0
+  },
+  "device": {
+    "source": "8b7698d7f6cbfa8c282b74ca52b0d66e06eda4a2",
+    "startedAtSGT": "2026-10-13T18:58:21.565548+08:00",
+    "finishedAtSGT": "2026-10-13T19:00:26.879068+08:00",
+    "exitCode": 0,
+    "appVerboseRelaunch": true,
+    "globalSettingsChanged": false,
+    "package": "com.enmori.app.personatest",
+    "model": "V2405A",
+    "android": "16",
+    "api": "36",
+    "size": "Physical size: 1260x2800",
+    "fontScale": "1.0",
+    "awake": true,
+    "keyguardShowing": false,
+    "passed": 7,
+    "failed": 0,
+    "fixtures": "synthetic Auth/HTTP/device zone-time-format"
+  },
+  "cleanup": {
+    "testPackageAbsent": true,
+    "testProcessAbsent": true,
+    "ordinaryPackageMetadataUnchanged": true,
+    "ownedVMForwardsAbsent": true,
+    "ownedInstallerMarkerRemoved": true,
+    "globalLogControl": "no",
+    "apk": {
+      "package": "com.enmori.app.personatest",
+      "sha256": "d50af31d561f0c8bc9d7721bd6480f6cb39504bbf57f0dd972f27307644a419a",
+      "bytes": 167035943
+    }
+  },
+  "priorDeviceAttempts": [
+    {
+      "source": "8189ac5383a6dd44c01329b38470bf548e489b39",
+      "exitCode": 1,
+      "result": "interrupted before VM discovery; no tests ran"
+    },
+    {
+      "source": "8189ac5383a6dd44c01329b38470bf548e489b39",
+      "exitCode": 1,
+      "passed": 0,
+      "failed": 7,
+      "reason": "guarded expect in HTTP callback overlapped live pump"
+    },
+    {
+      "sourceBase": "8189ac5383a6dd44c01329b38470bf548e489b39",
+      "diagnosticDelta": "onboarding-state assertion reason",
+      "exitCode": 1,
+      "passed": 0,
+      "failed": 1
+    }
+  ],
+  "receipts": [
+    {
+      "privateReceipt": "device-tests-private.log",
+      "sha256": "0c5d64ede47327703aa431121c4df601f71c1df4aad4a6ddc8ecf18216ac3ecd"
+    },
+    {
+      "privateReceipt": "device-retry-private.log",
+      "sha256": "59b020f6f56038855e96100c7ab35d3630dc6cebbb165a8fd9cc9ac55ef511d9"
+    },
+    {
+      "privateReceipt": "device-diagnostic-private.log",
+      "sha256": "8c2c69382c99d8cc3312888e3c4a582b2a885e751e71bcd9b8e6a6a021ad32c8"
+    },
+    {
+      "privateReceipt": "final-host-tests-private.log",
+      "sha256": "250942446a91cef4f3e4246aa1196b8651784519d8a96ba3842f849191c1cb6f"
+    },
+    {
+      "privateReceipt": "final-analysis-private.log",
+      "sha256": "d6604c3c60a416ede338f408f5b0b211140341dda4ff086f469ae39e09b63df0"
+    },
+    {
+      "privateReceipt": "device-final-private.log",
+      "sha256": "70b7ea9bcfc72dc8ab8bc07796a54c396fa658684d1be6f5d94a2d4e3e257c33"
+    },
+    {
+      "privateReceipt": "device-final-completion.json",
+      "sha256": "8a29f7d2abc0b547f2afbcdbe7e6966cf7c3671c717248c8081c6dfe021fe60c"
+    },
+    {
+      "privateReceipt": "device-final-cleanup.json",
+      "sha256": "1d08ebb39b01335489698f677fa64b765c048ee3654f05a3471301993a359e4f"
+    }
+  ],
+  "evidenceFilesExcludedFromCodeBinding": true
+}
