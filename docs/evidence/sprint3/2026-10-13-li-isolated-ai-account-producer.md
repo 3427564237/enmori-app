@@ -30,6 +30,14 @@ changes preserve all existing fields. No new API or error code.
 The new pure policy is Account-owned; no Domain import of Firebase. Infrastructure
 still uses the existing transaction gateway and failure/result mapping.
 
+The selected Account generation index exclusion is declared in
+`firestore.indexes.json` as the single new accounts/purposeRevocationGeneration
+field override with no indexes. Existing History index declarations are retained.
+This is a versioned declaration only, not index deployment or Emulator/cloud
+index-enforcement evidence. It was added after the actual c866eae execution;
+all seven executable/test/launcher inputs remain byte-identical. JSON shape and
+preservation of the existing indexes were checked separately.
+
 ## Complete observed Account-parent writer inventory
 
 | Observed writer or path | Handoff / guarantee in this source |

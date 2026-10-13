@@ -50,5 +50,10 @@
   ],
   "backendPassed": 550,
   "emulatorPassed": 3,
-  "ownerEvidenceOnly": true
+  "ownerEvidenceOnly": true,
+  "laterSelectedIndexDeclaration": {
+    "path": "firestore.indexes.json",
+    "sha256": "fcf1841de27ddd31a1248f4188f4d699b08bdd260a03c6d1af9f628abadd023f",
+    "testedSeparately": "JSON shape and unchanged existing index inventory; no index deployment/enforcement claim"
+  }
 }
