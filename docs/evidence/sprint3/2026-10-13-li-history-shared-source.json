@@ -1,0 +1,62 @@
+{
+  "source": "447c03776110e20fa718f0fbbea03e023060d265",
+  "base": "9a4931dd9c04db75ca466d7c17f978329a252256",
+  "files": [
+    {
+      "path": "android/app/src/main/kotlin/com/enmori/app/MainActivity.kt",
+      "gitBlob": "06ee9bf185605af9540265b55c82ce82ca5eb98c",
+      "sha256": "3d28ef3d75ea21058d3e22464b635f530c6c29c191b846321f13ba47532f1314"
+    },
+    {
+      "path": "integration_test/history_shared_router_flow_test.dart",
+      "gitBlob": "9ce62dad733e7b9e861421b81e51ac00968a85d5",
+      "sha256": "f2a94b261f7132cbbc5910a2e6cb7fd52ee0d975b2e29b1858fe18c4dc9646f7"
+    },
+    {
+      "path": "lib/app/isolated_history_home_app.dart",
+      "gitBlob": "a801ac700e891a7e972e22fc789b4a4ca2c62cc7",
+      "sha256": "cd69e4b2204e993cb1a1f304197deaa7d8bb658dded4a6f62e0abccdd6bb5ea6"
+    },
+    {
+      "path": "lib/app/router/app_router.dart",
+      "gitBlob": "3ec88e4ece77f1b6945f97a1b8cdc3b03ec6d840",
+      "sha256": "781b87caae9fd6d5c37a5437909a7d51d5170a74b6550301542a53e79c562ae9"
+    },
+    {
+      "path": "lib/features/check_in/check_in_providers.dart",
+      "gitBlob": "6de1948dfb107e854eba5fdc16313b75d4bcb2ff",
+      "sha256": "ae62a153b978fa40548a3f5780b34baecbfd9c660b1626a2b4dd46a61710ef98"
+    },
+    {
+      "path": "lib/features/check_in/history_device_port.dart",
+      "gitBlob": "ac36056b41ebc83f1b748a4dea88687b762b30d5",
+      "sha256": "de3af128788b8822f6518df014317ef4dcadbc4046865a87872979c3c729424c"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_history_controller.dart",
+      "gitBlob": "90bdfe45b7bb8e1e0a98b679adb3cb03420bda12",
+      "sha256": "484888335dd8dc1a6e9140aa536289eba52f0d726d5a8e9bfec602bb46bef0ae"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_history_page.dart",
+      "gitBlob": "294436ffee010bd973729fe0e67741cc064c77ca",
+      "sha256": "1546572eed8f3176fb9f3ed050c270dfbc1980299d553a9ae3349540dcfffc1c"
+    },
+    {
+      "path": "test/app/check_in_history_shared_router_test.dart",
+      "gitBlob": "4bdc671cbd22ac37252931931eb04b257f7def84",
+      "sha256": "4a1a62037f975110c8a1394de27d56f532ce4f5053dcbb4c17b1d99b81da434b"
+    },
+    {
+      "path": "test/features/check_in_history_controller_test.dart",
+      "gitBlob": "e61fb1ce2a16997ed62e074443ed4ff7401e391c",
+      "sha256": "aab273a5c303fba5691c6cd09db4a08e1b8c3c047e18b846cd808b8afa504376"
+    }
+  ],
+  "flutter": {
+    "passed": 489,
+    "failed": 0
+  },
+  "android": "APK build only; device Not Run",
+  "evidenceFilesExcludedFromCodeBinding": true
+}
