@@ -127,3 +127,10 @@ refreshes the scoped review. Prior product tests remain executions at9e2a057
 with this explicit content-equivalence check, not tests relabelled to6ef6978.
 Four functional findings remain resolved; all runtime/Release limits and the
 unperformed shared History integration remain as above.
+
+The passing whitespace check here is the exact9e2a057→6ef6978 delta. A separate
+main-f46a903→current full-baseline check still fails for pre-existing CRLF
+trailing whitespace and an EOF blank line in android/app/build.gradle.kts,
+unchanged by this cleanup. Do not describe the entire PR baseline as whitespace
+Pass. This inherited style exception is nonblocking and changes no finding,
+approval scope or platform/runtime claim.
