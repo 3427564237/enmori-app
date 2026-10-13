@@ -1,0 +1,685 @@
+{
+  "recordedAt": "2026-10-13T11:34:01.279Z",
+  "scope": "S-USER-1013-ZHOU-REVIEW-PUBLICATION",
+  "baselineHead": "110eda443fbe101608c6aa6df551e52b6a18da5a",
+  "baselineTree": "9b7ac0fde80c676af88ed0b5f888b9a7c4a39383",
+  "branch": "codex/zhou-ra-reader-local-20261013",
+  "sourceFilesUnchangedFromExecutedSnapshots": 34,
+  "importedAccountApprovalBlob": "c64e3b7d7655fb1a4ee6930a18ca20dafe7d33d0",
+  "manifestSelfExcluded": true,
+  "exactPublicationHeadLocation": "Draft PR and #83/#44 handoff; all files are available at that exact head",
+  "formalJinReviewForNewDelta": "pending",
+  "liAcceptanceForNewDelta": "pending",
+  "runtimeEnabled": false,
+  "realReaderStoreCleanupWired": false,
+  "historicalManifests": [
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "workingSha256": "e0b8276dfc08fadc3ee1f962b397a5588cd0c9994b3082833a1b3461fd8d93cb"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "workingSha256": "45f81940ada3920261b2b18a7b69bda9e61e65a0f59d36bc6c770aa0cd4d8e3f"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "backend/capability-probes/fence-initialization-run.mjs",
+      "workingSha256": "2362467f86df341b30423df9e8dfa3577ef60cc8107e293e2410fe91adb99ef3",
+      "gitBlob": "28cdadda6b7aba79029bd3f46a6b1196e95ed69b",
+      "repositoryBytesSha256": "2362467f86df341b30423df9e8dfa3577ef60cc8107e293e2410fe91adb99ef3",
+      "workingBytes": 3567,
+      "repositoryBytes": 3567,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/capability-probes/fence-initialization.mjs",
+      "workingSha256": "31cc2345f380a184e7a5b74a920e82ca492ca9b34b9c8c330a2523956c566d2e",
+      "gitBlob": "7e52d1dc04ad644b2ce6fef776cb58f01778b5fb",
+      "repositoryBytesSha256": "31cc2345f380a184e7a5b74a920e82ca492ca9b34b9c8c330a2523956c566d2e",
+      "workingBytes": 11894,
+      "repositoryBytes": 11894,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/capability-probes/followup-run.mjs",
+      "workingSha256": "4d2224fe86eafd03121e669b74e5d11c8aa4fec24ac9d9421b34d936f937cafa",
+      "gitBlob": "d74c5b1ac762e18cad685618e4e66df4644457e7",
+      "repositoryBytesSha256": "4d2224fe86eafd03121e669b74e5d11c8aa4fec24ac9d9421b34d936f937cafa",
+      "workingBytes": 3534,
+      "repositoryBytes": 3534,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/capability-probes/followup.firebase.json",
+      "workingSha256": "95a390e85caadd6507d1ad03f8c4b9f7586561f73efb4b71d5bedb0cce66ccfe",
+      "gitBlob": "d71e77726932528a38a5a38e4e88dd52f3d7f057",
+      "repositoryBytesSha256": "95a390e85caadd6507d1ad03f8c4b9f7586561f73efb4b71d5bedb0cce66ccfe",
+      "workingBytes": 363,
+      "repositoryBytes": 363,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/capability-probes/followup.firestore.indexes.json",
+      "workingSha256": "d9a767ae482d2447d0539cbaff2029448aa6c833844b3050184c0455ce41e8c8",
+      "gitBlob": "24f78a8115287ef78d07f6183dfa05ff06a24f3b",
+      "repositoryBytesSha256": "d9a767ae482d2447d0539cbaff2029448aa6c833844b3050184c0455ce41e8c8",
+      "workingBytes": 428,
+      "repositoryBytes": 428,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/capability-probes/group-pagination.mjs",
+      "workingSha256": "af990a55c8496242f32a3b13b962a46c25a9c7a899b99b1e083bb540b4775622",
+      "gitBlob": "2af414622eccf559c418b3ccfd4051ee6da006cb",
+      "repositoryBytesSha256": "af990a55c8496242f32a3b13b962a46c25a9c7a899b99b1e083bb540b4775622",
+      "workingBytes": 7642,
+      "repositoryBytes": 7642,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/scripts/run-ai-fence-initialization-probes.mjs",
+      "workingSha256": "d6a1510273ad190c0bb298eb442bf325ea909ef64f49a55fdbe308d17a21efc6",
+      "gitBlob": "0c77b9e15095857ff6f73524a3b7d3fec2e99b55",
+      "repositoryBytesSha256": "d6a1510273ad190c0bb298eb442bf325ea909ef64f49a55fdbe308d17a21efc6",
+      "workingBytes": 9444,
+      "repositoryBytes": 9444,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/scripts/run-ai-fence-initialization-worker.mjs",
+      "workingSha256": "b0bdb5f8a97b409ffee1b0717c3a02a181919ae599bd9a6885e6e6a1bdff434c",
+      "gitBlob": "8151295ee3107360464b52cf96175722ad3a860f",
+      "repositoryBytesSha256": "b0bdb5f8a97b409ffee1b0717c3a02a181919ae599bd9a6885e6e6a1bdff434c",
+      "workingBytes": 1931,
+      "repositoryBytes": 1931,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/scripts/run-ai-followup-capability-probes.mjs",
+      "workingSha256": "b81de1e746848da7264e2ad65af33258795b980ad2a2e26ef2d0012d11c29747",
+      "gitBlob": "cc094c8cc0f2cf0ee07f0a4c495880d9a0f4747d",
+      "repositoryBytesSha256": "b81de1e746848da7264e2ad65af33258795b980ad2a2e26ef2d0012d11c29747",
+      "workingBytes": 8579,
+      "repositoryBytes": 8579,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/scripts/run-ai-followup-capability-worker.mjs",
+      "workingSha256": "e48ce71acb6d167800aebd7ac2a4cb31a7d234ae0073e41a55c925ab867b8570",
+      "gitBlob": "3823aeb08dfd3a56f244468e7a72adeb1433e08c",
+      "repositoryBytesSha256": "e48ce71acb6d167800aebd7ac2a4cb31a7d234ae0073e41a55c925ab867b8570",
+      "workingBytes": 1910,
+      "repositoryBytes": 1910,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/src/ai-conversation/README.md",
+      "workingSha256": "896792fbe20b8d5f694fdf627c7c80706e6c079d59f6ca3a68ddef3eb00a5ef7",
+      "gitBlob": "7d8d2e0171b10b449369db7e060921f1fd614dc5",
+      "repositoryBytesSha256": "896792fbe20b8d5f694fdf627c7c80706e6c079d59f6ca3a68ddef3eb00a5ef7",
+      "workingBytes": 9050,
+      "repositoryBytes": 9050,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/src/ai-conversation/application/real-context-reader.ts",
+      "workingSha256": "d70807cd4a5173e2eb25bef7b8f16f8cc96727fddd1b00b57405cbc7a19cc45e",
+      "gitBlob": "1bcfdcca2c570a362f9263e14c2b18749e8ea1c9",
+      "repositoryBytesSha256": "d70807cd4a5173e2eb25bef7b8f16f8cc96727fddd1b00b57405cbc7a19cc45e",
+      "workingBytes": 16361,
+      "repositoryBytes": 16361,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/src/ai-conversation/domain/canonical-ai-message-location.ts",
+      "workingSha256": "294c3d888175979cb639d05b7ab1c4567e8103b04fe21b89f15d09dfdecf2775",
+      "gitBlob": "91d57d1022345de44426dc0c0ecfd7d17dec26c0",
+      "repositoryBytesSha256": "294c3d888175979cb639d05b7ab1c4567e8103b04fe21b89f15d09dfdecf2775",
+      "workingBytes": 1765,
+      "repositoryBytes": 1765,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/src/ai-conversation/domain/real-retention-resolver.ts",
+      "workingSha256": "093c35153ad1862bf6416319730be0d2019fd92ae36d41ca938a0aa78b5091a3",
+      "gitBlob": "2fc26b0151693dafee570d614026a5f7717e0284",
+      "repositoryBytesSha256": "093c35153ad1862bf6416319730be0d2019fd92ae36d41ca938a0aa78b5091a3",
+      "workingBytes": 10425,
+      "repositoryBytes": 10425,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/real-context-reader.ts",
+      "workingSha256": "b15366eb2332191a2d7c38e878c7ee6c384e24e1ecf70e5548b4d4b211ae8d02",
+      "gitBlob": "a1fbfb63da3376837f90005780210965961be26c",
+      "repositoryBytesSha256": "b15366eb2332191a2d7c38e878c7ee6c384e24e1ecf70e5548b4d4b211ae8d02",
+      "workingBytes": 5932,
+      "repositoryBytes": 5932,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/test/ai-conversation/canonical-ai-message-location.test.ts",
+      "workingSha256": "fd8ff81a5ee9713a2a5fc1c2ab2248cef61e415bee6b4d3c70a641265c7ee2c8",
+      "gitBlob": "6435926cfb31181c2828f0552695005f7ba5327a",
+      "repositoryBytesSha256": "fd8ff81a5ee9713a2a5fc1c2ab2248cef61e415bee6b4d3c70a641265c7ee2c8",
+      "workingBytes": 4117,
+      "repositoryBytes": 4117,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/test/ai-conversation/real-context-reader.test.ts",
+      "workingSha256": "71437277c7abe8c81a3329ec70e9ff5876f23eae1cff77926eb44f7e01741cf2",
+      "gitBlob": "d57ffea83a705504a6d7bb95c00909a5554266c3",
+      "repositoryBytesSha256": "71437277c7abe8c81a3329ec70e9ff5876f23eae1cff77926eb44f7e01741cf2",
+      "workingBytes": 25161,
+      "repositoryBytes": 25161,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "backend/test/ai-conversation/real-retention-resolver.test.ts",
+      "workingSha256": "94b34fd353fbce2adebb9e03e08f0d28d1922a705ce5e0d5fe5f5b5f84cd6914",
+      "gitBlob": "0b5370ff4324eecefaa9dbf6ffc737ef4da93c45",
+      "repositoryBytesSha256": "94b34fd353fbce2adebb9e03e08f0d28d1922a705ce5e0d5fe5f5b5f84cd6914",
+      "workingBytes": 18104,
+      "repositoryBytes": 18104,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/decisions/2026-10-13-li-account-producer-component-acceptance.md",
+      "workingSha256": "486c88de8e9f5ca2f4b16f805dee4ef022c445784903ec181f31dafe8af41b72",
+      "gitBlob": "c64e3b7d7655fb1a4ee6930a18ca20dafe7d33d0",
+      "repositoryBytesSha256": "486c88de8e9f5ca2f4b16f805dee4ef022c445784903ec181f31dafe8af41b72",
+      "workingBytes": 3363,
+      "repositoryBytes": 3363,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/decisions/2026-10-13-li-ai-policy-component-acceptance.md",
+      "workingSha256": "ed35097a4e38b05c0edc5aa4dcd9d5edaa166390b54320c62b1978671661a2c7",
+      "gitBlob": "518d1a14474a1dd6cb5c216e45fbe007e96a6ca4",
+      "repositoryBytesSha256": "b0091254e9b56f0f15cbabfb55375a8b1d7fe5a42c283cff9c2c7673be1eca69",
+      "workingBytes": 2907,
+      "repositoryBytes": 2861,
+      "workingBytesEqualRepositoryBytes": false
+    },
+    {
+      "path": "docs/decisions/2026-10-13-li-remaining-isolated-ai-contract-a.md",
+      "workingSha256": "9b7e1b01a4d05c1b93cec1506a3007dc93fb53511f9a07a23e2383eb95f72863",
+      "gitBlob": "965457097426d044f930cacfed8b8a2e36038cb0",
+      "repositoryBytesSha256": "42dd1f1f55a405ad13b0ad489bc193253b5638b525d68e0087154167aa238929",
+      "workingBytes": 7034,
+      "repositoryBytes": 6941,
+      "workingBytesEqualRepositoryBytes": false
+    },
+    {
+      "path": "docs/decisions/2026-10-13-user-du-handoff-independent-ai-local.md",
+      "workingSha256": "7871b6792ad46bbee402c2dccb102b33a1c94b55a490320d0a4e64af50b820ee",
+      "gitBlob": "c7480b8bc357819172fe7176ec09a4102ad90d37",
+      "repositoryBytesSha256": "7871b6792ad46bbee402c2dccb102b33a1c94b55a490320d0a4e64af50b820ee",
+      "workingBytes": 2636,
+      "repositoryBytes": 2636,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/decisions/2026-10-13-user-zhou-local-ai-development-scope.md",
+      "workingSha256": "c026f49bd37f3aa665b1c059dcd6d40bd4f347d2a534edd97fff23e033777017",
+      "gitBlob": "d637623381329b0924cb8c36f416eca3e96bb2b2",
+      "repositoryBytesSha256": "c026f49bd37f3aa665b1c059dcd6d40bd4f347d2a534edd97fff23e033777017",
+      "workingBytes": 4531,
+      "repositoryBytes": 4531,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/decisions/2026-10-13-user-zhou-review-publication.md",
+      "workingSha256": "b9405f6af2d8768ec830451641e6bee57e2a26f0d35f737a13d991f8d76f2b7b",
+      "gitBlob": "9f3ad77e658f5d560bfa8abba1d9ee062010adf9",
+      "repositoryBytesSha256": "b9405f6af2d8768ec830451641e6bee57e2a26f0d35f737a13d991f8d76f2b7b",
+      "workingBytes": 2101,
+      "repositoryBytes": 2101,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-device-notice-ra-followup.md",
+      "workingSha256": "f93fdcd21f262a9e58e7a78dff671004c39170f910dfffa77d8f7d74f76f0b2f",
+      "gitBlob": "257bbfad30a82e3f81e86777d1a02544b5a2d69d",
+      "repositoryBytesSha256": "f93fdcd21f262a9e58e7a78dff671004c39170f910dfffa77d8f7d74f76f0b2f",
+      "workingBytes": 5341,
+      "repositoryBytes": 5341,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-development.md",
+      "workingSha256": "6f95d1b1ed6b8d74090079d7fbc9b95878c0e4f28b51605bc5bc7a14d4212365",
+      "gitBlob": "562748251bb5943ab115f87f860b9429522afae8",
+      "repositoryBytesSha256": "6f95d1b1ed6b8d74090079d7fbc9b95878c0e4f28b51605bc5bc7a14d4212365",
+      "workingBytes": 11422,
+      "repositoryBytes": 11422,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-review.md",
+      "workingSha256": "9b6e9e18d6a43cd3a4b8423a7ba98d1a3f1a7eab482e4c3f507e5ecbd175091c",
+      "gitBlob": "9372c6f38f4fb292832704989c3d5d75fccd7a4c",
+      "repositoryBytesSha256": "9b6e9e18d6a43cd3a4b8423a7ba98d1a3f1a7eab482e4c3f507e5ecbd175091c",
+      "workingBytes": 5197,
+      "repositoryBytes": 5197,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "workingSha256": "45f81940ada3920261b2b18a7b69bda9e61e65a0f59d36bc6c770aa0cd4d8e3f",
+      "gitBlob": "02527cfa3003b3360388c72babae9cbbf9163b19",
+      "repositoryBytesSha256": "b470d5389ac87e605bed1302c1242f2ed20978969f3c939be5c4f66bd7cd79bc",
+      "workingBytes": 15315,
+      "repositoryBytes": 14979,
+      "workingBytesEqualRepositoryBytes": false
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-development.md",
+      "workingSha256": "a1fb457b0bfeb76ad5354697c0c574372d84b1154ecbed90411aec8958ba7b32",
+      "gitBlob": "c0f573320815cba5ee56debc746e22305c124cb9",
+      "repositoryBytesSha256": "a1fb457b0bfeb76ad5354697c0c574372d84b1154ecbed90411aec8958ba7b32",
+      "workingBytes": 7680,
+      "repositoryBytes": 7680,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-review.md",
+      "workingSha256": "b1fab45df19ee6d7f7526584213a8612fcb833d1a0a44d23ce0dac2130c7b4ec",
+      "gitBlob": "0904693e7b5d1bc116194f16b9166fe56c65a5bb",
+      "repositoryBytesSha256": "b1fab45df19ee6d7f7526584213a8612fcb833d1a0a44d23ce0dac2130c7b4ec",
+      "workingBytes": 11530,
+      "repositoryBytes": 11530,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "workingSha256": "e0b8276dfc08fadc3ee1f962b397a5588cd0c9994b3082833a1b3461fd8d93cb",
+      "gitBlob": "7771eb15f715d926670a824e1c29c58d074d1efd",
+      "repositoryBytesSha256": "0e7bc4300507b9fbd133de28baa8b7c10e1b3a488c35cf89f7137f043d780576",
+      "workingBytes": 12140,
+      "repositoryBytes": 11873,
+      "workingBytesEqualRepositoryBytes": false
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-reader-producer-prerequisites.md",
+      "workingSha256": "b6e7a8e2c94caeb6d74f773b83857d93734cce15e82c34333062a068ed027853",
+      "gitBlob": "023281642452f07f81a251a6bdc9aa081e6415a0",
+      "repositoryBytesSha256": "b6e7a8e2c94caeb6d74f773b83857d93734cce15e82c34333062a068ed027853",
+      "workingBytes": 16040,
+      "repositoryBytes": 16040,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication.md",
+      "workingSha256": "924d108608f946455d579f4f4849d57d17c3eb4100244e09d0d5e8ba6af260f1",
+      "gitBlob": "419f9b73caea9bdd5e96fa022593744841942e69",
+      "repositoryBytesSha256": "924d108608f946455d579f4f4849d57d17c3eb4100244e09d0d5e8ba6af260f1",
+      "workingBytes": 6562,
+      "repositoryBytes": 6562,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/README.md",
+      "workingSha256": "eda39daf409f08e651ddf3c0f38bd7a9c54c6cf3264753cc91c4fac2d5b9b180",
+      "gitBlob": "95df24eda61df94df44ddc77b35b077ec4ad333e",
+      "repositoryBytesSha256": "eda39daf409f08e651ddf3c0f38bd7a9c54c6cf3264753cc91c4fac2d5b9b180",
+      "workingBytes": 12440,
+      "repositoryBytes": 12440,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/evidence-copy-manifest.json",
+      "workingSha256": "f76b6dd314f4b80efb6c204dc8cf984b111d509df543471a337b1b9f316769f6",
+      "gitBlob": "84ba041025a27f255664c03db12d325706ba1393",
+      "repositoryBytesSha256": "f76b6dd314f4b80efb6c204dc8cf984b111d509df543471a337b1b9f316769f6",
+      "workingBytes": 35715,
+      "repositoryBytes": 35715,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/backend-build-final.txt",
+      "workingSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "repositoryBytesSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "workingBytes": 0,
+      "repositoryBytes": 0,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/backend-tests-final.txt",
+      "workingSha256": "8bccc4d31645806cc145ac36c42a821121e73dfd45ea2d9e7b17d26fa9b7f893",
+      "gitBlob": "ad2ef5b0254fa253b4b85a5747e892616525b2d8",
+      "repositoryBytesSha256": "8bccc4d31645806cc145ac36c42a821121e73dfd45ea2d9e7b17d26fa9b7f893",
+      "workingBytes": 54413,
+      "repositoryBytes": 54413,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/canonical-location-review-probes.mjs",
+      "workingSha256": "97a7ae6844da23f23bed580010039d4e7042d50cd69460e8e2a5a5fb7b9665e6",
+      "gitBlob": "134c32bd669fcf64929af1ae296d0c17ea792cb4",
+      "repositoryBytesSha256": "97a7ae6844da23f23bed580010039d4e7042d50cd69460e8e2a5a5fb7b9665e6",
+      "workingBytes": 5043,
+      "repositoryBytes": 5043,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/canonical-location-review-results.txt",
+      "workingSha256": "76a4cc75f4564615ecbda662c5e18a5b66e3d75f6efb7139a42651c7a9ac16da",
+      "gitBlob": "6fc1fb7205a787ecedb65d1643af006d3cffbc4f",
+      "repositoryBytesSha256": "76a4cc75f4564615ecbda662c5e18a5b66e3d75f6efb7139a42651c7a9ac16da",
+      "workingBytes": 904,
+      "repositoryBytes": 904,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/fence-probes-first.txt",
+      "workingSha256": "d56615786471108c2b84853f83aa2321a8ac478210239ff2a788c307eeddc694",
+      "gitBlob": "1fc749686aeab91451f9c62a613f83e051939b58",
+      "repositoryBytesSha256": "d56615786471108c2b84853f83aa2321a8ac478210239ff2a788c307eeddc694",
+      "workingBytes": 4273,
+      "repositoryBytes": 4273,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/fence-runner-negative-review-results.txt",
+      "workingSha256": "bad45ad65860d591accf2c5687bf429c71257bd5eef0cda2c0f8227569f899cd",
+      "gitBlob": "b1b5a571a5850240052b82d2d88693b201bb0857",
+      "repositoryBytesSha256": "bad45ad65860d591accf2c5687bf429c71257bd5eef0cda2c0f8227569f899cd",
+      "workingBytes": 706,
+      "repositoryBytes": 706,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/fence-runner-negative-review.mjs",
+      "workingSha256": "cfb2d34b84be3c14464c93873e488e75ab4ee07118ed3b0bba5b09de8444ac71",
+      "gitBlob": "e7f82fed4e751ceeff1f50fdd921f4a6e9bc1e41",
+      "repositoryBytesSha256": "cfb2d34b84be3c14464c93873e488e75ab4ee07118ed3b0bba5b09de8444ac71",
+      "workingBytes": 2253,
+      "repositoryBytes": 2253,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/query-probes-negative-guard.txt",
+      "workingSha256": "42c3b662efea07164ff5a41f440958e17369c93eb7e846f91a13d423816435c9",
+      "gitBlob": "f9d3edf1e5802a6ff0e8d1e94819eaf58c739928",
+      "repositoryBytesSha256": "42c3b662efea07164ff5a41f440958e17369c93eb7e846f91a13d423816435c9",
+      "workingBytes": 372,
+      "repositoryBytes": 372,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/query-probes.txt",
+      "workingSha256": "48ba1657418bbbdab0d4e9647454a6895ccdc0954398f7bd8961bfa3403bbf56",
+      "gitBlob": "f43b95f1fdd7104d5d3f99c0e16ffe26c5469cf6",
+      "repositoryBytesSha256": "48ba1657418bbbdab0d4e9647454a6895ccdc0954398f7bd8961bfa3403bbf56",
+      "workingBytes": 3465,
+      "repositoryBytes": 3465,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/query-runner-negative-review-results.txt",
+      "workingSha256": "226d0877c6507c8269134687759f0d63bd1157374ebb64ee80ffabfe9c0bb20b",
+      "gitBlob": "a60e2f5064559c92bbdd024c5de92abb3937647f",
+      "repositoryBytesSha256": "226d0877c6507c8269134687759f0d63bd1157374ebb64ee80ffabfe9c0bb20b",
+      "workingBytes": 703,
+      "repositoryBytes": 703,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/query-runner-negative-review.mjs",
+      "workingSha256": "19eab7bc6eb271532c0012e2719c4f21d6ff0ebc2e84243716938890a24edb81",
+      "gitBlob": "a8c7762f7c0edb29ecb9e5cdf28f90571201f87f",
+      "repositoryBytesSha256": "19eab7bc6eb271532c0012e2719c4f21d6ff0ebc2e84243716938890a24edb81",
+      "workingBytes": 2246,
+      "repositoryBytes": 2246,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/retention-review-probes.mjs",
+      "workingSha256": "0c38a936a6a54e1412c7f7e48adb0ff6fc3e41c9368e0469ad034d6d1b188ce1",
+      "gitBlob": "f8225fe147c499d8228510a0f437a75f847ae942",
+      "repositoryBytesSha256": "0c38a936a6a54e1412c7f7e48adb0ff6fc3e41c9368e0469ad034d6d1b188ce1",
+      "workingBytes": 3232,
+      "repositoryBytes": 3232,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/independent/retention-review-results.txt",
+      "workingSha256": "c17939f028e8dd6775dc6861da379c039152568f54590efe3d6b4a0543662381",
+      "gitBlob": "92847986354ffabce751ae0364707863b93f3dc3",
+      "repositoryBytesSha256": "c17939f028e8dd6775dc6861da379c039152568f54590efe3d6b4a0543662381",
+      "workingBytes": 1737,
+      "repositoryBytes": 1737,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/mobile/ra-feature-suite.log",
+      "workingSha256": "32da2743f4d4a4f5178f84f394148b6df9819a7787a740a7a12a63a4174297c3",
+      "gitBlob": "c82d0faa08ac8d46c87fae76599988df52e321c3",
+      "repositoryBytesSha256": "32da2743f4d4a4f5178f84f394148b6df9819a7787a740a7a12a63a4174297c3",
+      "workingBytes": 21068,
+      "repositoryBytes": 21068,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/mobile/ra-history-tombstone-red.log",
+      "workingSha256": "39adf1a46b14c89cf77eba532ee28b0172cce0c3a649d3c8df60fe372e7eba15",
+      "gitBlob": "dd6a45fcf9350ac76808cd534673f2f2c882bfa0",
+      "repositoryBytesSha256": "39adf1a46b14c89cf77eba532ee28b0172cce0c3a649d3c8df60fe372e7eba15",
+      "workingBytes": 3213,
+      "repositoryBytes": 3213,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/ra-reader/android-build-final.txt",
+      "workingSha256": "aa23848501930feae84bc81c30a41a3c02f434ce60095527b732633d875ea53f",
+      "gitBlob": "97a2ee5f9d0aad7033af9e663bf66e89e115daf2",
+      "repositoryBytesSha256": "aa23848501930feae84bc81c30a41a3c02f434ce60095527b732633d875ea53f",
+      "workingBytes": 22582,
+      "repositoryBytes": 22582,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/ra-reader/android-harness-build-final.txt",
+      "workingSha256": "4d0cfc50bea6d139a27b0a5523cd8621250c18b883c998ad81ff7d1245fc16db",
+      "gitBlob": "a7bde49e86c119f87b17c7113b4f61f2a53d60b8",
+      "repositoryBytesSha256": "4d0cfc50bea6d139a27b0a5523cd8621250c18b883c998ad81ff7d1245fc16db",
+      "workingBytes": 1498,
+      "repositoryBytes": 1498,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/ra-reader/backend-build-final.txt",
+      "workingSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "repositoryBytesSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "workingBytes": 0,
+      "repositoryBytes": 0,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/ra-reader/backend-tests-final.txt",
+      "workingSha256": "c662903eddc0d7b22839aa3ff7173cbd4f4456894ca5a20b1111476deda96cf6",
+      "gitBlob": "59915d8ede09c7ae33320dfd89affd2425e7cbdc",
+      "repositoryBytesSha256": "c662903eddc0d7b22839aa3ff7173cbd4f4456894ca5a20b1111476deda96cf6",
+      "workingBytes": 50646,
+      "repositoryBytes": 50646,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/ra-reader/backend-tests-intermediate-571.txt",
+      "workingSha256": "d1e4645dd099e4427406ab9ec658ca21c961a315fe743bcc92dfc3ccb744a940",
+      "gitBlob": "65486a74f384114d8bcfbee16961014890432549",
+      "repositoryBytesSha256": "d1e4645dd099e4427406ab9ec658ca21c961a315fe743bcc92dfc3ccb744a940",
+      "workingBytes": 50569,
+      "repositoryBytes": 50569,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/ra-reader/dart-format-final.txt",
+      "workingSha256": "e35cc67189067fff287814965bc8ce96608865b33292bb946adb5643de9688d0",
+      "gitBlob": "090283ca7e6387631f2ada34ae094fa473c89210",
+      "repositoryBytesSha256": "e35cc67189067fff287814965bc8ce96608865b33292bb946adb5643de9688d0",
+      "workingBytes": 47,
+      "repositoryBytes": 47,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/ra-reader/flutter-analyze-final.txt",
+      "workingSha256": "83edfbe256b9c2cb946bd80f3547dd81ddc43bbb93f3db4e33ea4d19cb197ab9",
+      "gitBlob": "d95de2c5d5059a0810b42222618ec8636da3ac5b",
+      "repositoryBytesSha256": "83edfbe256b9c2cb946bd80f3547dd81ddc43bbb93f3db4e33ea4d19cb197ab9",
+      "workingBytes": 96,
+      "repositoryBytes": 96,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/ra-reader/flutter-tests-final.txt",
+      "workingSha256": "7ea81eebb8d2dfa85814753024e6a1aa03bacc0c04b193b908456c7f9d117316",
+      "gitBlob": "6b135c3b652c01a52d5e9c082c6e7ee870a6b9b5",
+      "repositoryBytesSha256": "7ea81eebb8d2dfa85814753024e6a1aa03bacc0c04b193b908456c7f9d117316",
+      "workingBytes": 63273,
+      "repositoryBytes": 63273,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/ra-reader/reader-rollback-probe-green.txt",
+      "workingSha256": "e544516032adeed1000f93e5fa0d66d8c5d03a565d44c169aad470185b2c1d71",
+      "gitBlob": "492c5dc9a670258167e49ea6d14475954d0afffb",
+      "repositoryBytesSha256": "e544516032adeed1000f93e5fa0d66d8c5d03a565d44c169aad470185b2c1d71",
+      "workingBytes": 54,
+      "repositoryBytes": 54,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/ra-reader/reader-rollback-probe-red.txt",
+      "workingSha256": "2ce4c9d9121b22ce597041a8898265f2f698a57650f2918506001978956f65cc",
+      "gitBlob": "c5e41da264e536d6e807a729c606af6f91cf8cb5",
+      "repositoryBytesSha256": "2ce4c9d9121b22ce597041a8898265f2f698a57650f2918506001978956f65cc",
+      "workingBytes": 442,
+      "repositoryBytes": 442,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-review-publication/ra-reader/reader-rollback-probe.mjs",
+      "workingSha256": "b8af86d1c00f2ac5cf727305c1a98a4baa2d448207ef53b8fc12e45a7b38fd56",
+      "gitBlob": "a0550c899bdd129873986a1c3c1d63e2abe27318",
+      "repositoryBytesSha256": "b8af86d1c00f2ac5cf727305c1a98a4baa2d448207ef53b8fc12e45a7b38fd56",
+      "workingBytes": 1570,
+      "repositoryBytes": 1570,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/planning/2026-10-13-du-note-time-identity-handoff-requirements.md",
+      "workingSha256": "90e971b5a2dd53b0771c660062beeda57d63c45988b6808a849ca64e8ac699fc",
+      "gitBlob": "c7374bf6a666d3696d362826dbd068eba87f2e79",
+      "repositoryBytesSha256": "90e971b5a2dd53b0771c660062beeda57d63c45988b6808a849ca64e8ac699fc",
+      "workingBytes": 19918,
+      "repositoryBytes": 19918,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "docs/planning/2026-10-13-li-remaining-ai-choice-preview.md",
+      "workingSha256": "4919a89dc2c19ad18e79016a34694756b1a218e0df1506bec09d3f6563823997",
+      "gitBlob": "605ae1f126bf19ec92e4af2ab272a2b743f8a5b8",
+      "repositoryBytesSha256": "7ed146c477a096ae21d304daf2e12ad84f3adbbdf96b8abee2edb576fed10cdd",
+      "workingBytes": 5268,
+      "repositoryBytes": 5199,
+      "workingBytesEqualRepositoryBytes": false
+    },
+    {
+      "path": "lib/features/ai_conversation/ai_conversation_providers.dart",
+      "workingSha256": "c1c272e7c84564ba1dab35d054d53656e9efc63c39edd10a6d92d7bef773f483",
+      "gitBlob": "c1538f21a04b2ff2884df4a7a5f56d9ddaee5419",
+      "repositoryBytesSha256": "c1c272e7c84564ba1dab35d054d53656e9efc63c39edd10a6d92d7bef773f483",
+      "workingBytes": 31148,
+      "repositoryBytes": 31148,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "workingSha256": "9c1f4c7ccb90f23f6454dd347b8fe47ab08f00de932df36296b64cd3830d137a",
+      "gitBlob": "e6c942c56347af87ed8ba69ee471f4b553dd5806",
+      "repositoryBytesSha256": "9c1f4c7ccb90f23f6454dd347b8fe47ab08f00de932df36296b64cd3830d137a",
+      "workingBytes": 16295,
+      "repositoryBytes": 16295,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_state.dart",
+      "workingSha256": "2672f5e106a07dfedb86e3d0fa3318e21f0f89a718014dbf7a06a5f782e7501e",
+      "gitBlob": "9856c3bf39b51333229f0cb0d6aef995bb79c3e2",
+      "repositoryBytesSha256": "2672f5e106a07dfedb86e3d0fa3318e21f0f89a718014dbf7a06a5f782e7501e",
+      "workingBytes": 1310,
+      "repositoryBytes": 1310,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "workingSha256": "4da8e22232e5cb15d6c40a89e158d24f652c0f07aafbb721165341f946ab5b65",
+      "gitBlob": "aec4279cd7cb457e49b85f4884df77e6e4160a1c",
+      "repositoryBytesSha256": "4da8e22232e5cb15d6c40a89e158d24f652c0f07aafbb721165341f946ab5b65",
+      "workingBytes": 21671,
+      "repositoryBytes": 21671,
+      "workingBytesEqualRepositoryBytes": true
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_recovery_test.dart",
+      "workingSha256": "1edcd6c302f933b69b7d2e885a40e6a4dbc447fa9843595f02ad4ff6c9ac781a",
+      "gitBlob": "9582ae06ebaaa91644916def9e6aa50be3f53cd4",
+      "repositoryBytesSha256": "1edcd6c302f933b69b7d2e885a40e6a4dbc447fa9843595f02ad4ff6c9ac781a",
+      "workingBytes": 38382,
+      "repositoryBytes": 38382,
+      "workingBytesEqualRepositoryBytes": true
+    }
+  ],
+  "excludedPreexistingPersonaArtifacts": [
+    {
+      "path": "docs/decisions/2026-10-09-li-persona-p08-isolated-flow-approval.md",
+      "gitBlob": "bbdcdc085c0835aa5857beafa328b1d7ba92dc10",
+      "sha256": "24b014e0cddd67be6281a588d2a861a1130cc79e075ea378f8fd010b46aaa6ce"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-android-selfcheck-source-manifest.json",
+      "gitBlob": "a7ab865904d838cc9016cf5694d80052ba744f04",
+      "sha256": "b71c5962853292754f459a167bc8b76316f13366ae265fe6fff189324f495e94"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-android-selfcheck.md",
+      "gitBlob": "0f81f0c1a4ff25f5de2056e589a245807db187fb",
+      "sha256": "bfcce0f4014aba79292c393f9db5f5684d078ad09a31479be2a35f7a3bc89698"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-local-implementation.md",
+      "gitBlob": "7c8fa18a0a7f9df59d9e23c09375071bed23adec",
+      "sha256": "a8e28f9f87deb1378a3133d397f49ecfc3941bd4f88d36fff8160d257ba65d4e"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-local-source-manifest.json",
+      "gitBlob": "b2c9c82229b864ee250f8de280a08ab4f5f92329",
+      "sha256": "a47cc82cc2537d361dccda65984abefae72800ff8ad02bdbcfd8ea8fe3134600"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-p08-implementation-release.md",
+      "gitBlob": "dd88a9e84702a5125ccca8531e7e47041b41e910",
+      "sha256": "3560f64b68bae3cfecfe34cc05bd367d4373e558f5e9d578c0f33ff80e7096b9"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-pc13-local-harness.md",
+      "gitBlob": "2b07329d59dbc64ffd2c22d9cbb09b5e990a7523",
+      "sha256": "556671badcaaad4b6ed12e50e8d2ee23aa41584374bd27bd87d09eed2764af8a"
+    }
+  ],
+  "results": {
+    "backend": 610,
+    "flutterPreviousUnchangedSource": 459,
+    "querySafeReports": 16,
+    "fenceSafeReports": 16,
+    "android": "synthetic harness compilation only; no device run",
+    "checksRepeatedForPublication": false
+  },
+  "byteHashConvention": "workingSha256 hashes original local bytes; repositoryBytesSha256 hashes Git-canonical bytes served by GitHub. core.autocrlf may normalize CRLF. gitBlob identifies the canonical Git object."
+}

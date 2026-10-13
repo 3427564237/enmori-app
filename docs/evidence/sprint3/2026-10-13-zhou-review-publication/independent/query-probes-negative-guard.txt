@@ -1,0 +1,2 @@
+AI_FOLLOWUP_REPORT {"probe":"suite-failure","outcome":"fail","phase":"guard","category":"controlled_environment_rejected","dependencyCode":null}
+AI_FOLLOWUP_REPORT {"probe":"suite","outcome":"fail","scope":"bounded-group-keyset-query-observations","capabilityGuarantee":false,"productAdapterImplemented":false,"cloudIndexEnforcementProved":false,"cleanupSlaProved":false}

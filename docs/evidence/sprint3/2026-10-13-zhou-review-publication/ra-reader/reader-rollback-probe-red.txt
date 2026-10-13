@@ -1,0 +1,20 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'denied'
+- 'unavailable'
+
+    at file:///<DRAFTS_ROOT>/2026-10-13-ra-reader-local/reader-rollback-probe.mjs:25:8 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'denied',
+  expected: 'unavailable',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

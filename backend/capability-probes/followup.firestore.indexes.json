@@ -1,0 +1,13 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    { "collectionGroup": "conversations", "fieldPath": "*", "indexes": [] },
+    { "collectionGroup": "messages", "fieldPath": "*", "indexes": [] },
+    { "collectionGroup": "message_sources", "fieldPath": "*", "indexes": [] },
+    {
+      "collectionGroup": "messages",
+      "fieldPath": "sequence",
+      "indexes": [{ "queryScope": "COLLECTION", "order": "DESCENDING" }]
+    }
+  ]
+}
