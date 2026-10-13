@@ -282,6 +282,22 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                       child: const Text('Check result'),
                     ),
                   ],
+                  if (state.canLeaveWithoutRetrying) ...[
+                    const SizedBox(height: 12),
+                    const Text(
+                      'We may not be able to confirm whether this message was '
+                      'saved. You can leave without retrying it. Leaving does '
+                      'not delete saved messages.',
+                      key: Key('ai-recovery-explanation'),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      key: const Key('ai-leave-without-retrying'),
+                      style: _buttonStyle,
+                      onPressed: () => unawaited(_navigate(widget.onBack)),
+                      child: const Text('Leave without retrying'),
+                    ),
+                  ],
                   if (!contentHidden) ...[
                     if (state.conversationId != null) ...[
                       const SizedBox(height: 12),

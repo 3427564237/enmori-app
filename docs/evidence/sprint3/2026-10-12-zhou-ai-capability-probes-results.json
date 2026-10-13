@@ -1,0 +1,429 @@
+{
+  "schemaVersion": 1,
+  "authority": {
+    "decision": "S-PM-1012-LI-AI-CAPABILITY-VERIFICATION-ONLY",
+    "url": "https://github.com/3427564237/enmori-app/blob/0f65bc84a883b7aa92648ed8f36565b71cb1c520/docs/decisions/2026-10-12-li-real-ai-capability-verification-only.md",
+    "proposalHead": "99583d6bd601ba51c577d46901b3e07e389e6fd8",
+    "slice": "A only"
+  },
+  "executedSource": {
+    "head": "2a64f705a61505e34976f86fff41e74b2c65b843",
+    "tree": "f83b230bdfccad55e3ea678566118c94fb00b916",
+    "base": "99583d6bd601ba51c577d46901b3e07e389e6fd8",
+    "files": [
+      {
+        "path": "backend/capability-probes/commit-order.mjs",
+        "gitBlob": "cba5e195931cfc3c4add49b2380c0908cbae1088",
+        "sha256GitBlobBytes": "d5acb5405ccda5195ab73b8f768e22aec1d2a8deb2fc9bd453b8dd0e2bf10698"
+      },
+      {
+        "path": "backend/capability-probes/read-view.mjs",
+        "gitBlob": "8cfd42c9d11a20f567b67a390ba271dd238a619a",
+        "sha256GitBlobBytes": "8ff548679f548d7a4d67794530d62d09cf15964f454f7f640dd91e14a5040e18"
+      },
+      {
+        "path": "backend/capability-probes/run.mjs",
+        "gitBlob": "f26965bc65d52d94624035ea525c2f73d6e2e0db",
+        "sha256GitBlobBytes": "cbb5e96df212f5af5d40334b5a0ea6ad6b4aff1cfe3738f294b95290d8dcf623"
+      },
+      {
+        "path": "backend/scripts/run-ai-capability-probes.mjs",
+        "gitBlob": "e12d7dbafa80838ad22361a4f03859d3fd3b68d1",
+        "sha256GitBlobBytes": "45465357e663da43b0384a0e144f38cdee9e8019968211edb9f36d82bbb27393"
+      },
+      {
+        "path": "backend/scripts/run-ai-capability-worker.mjs",
+        "gitBlob": "f8ed6a254e2b2b50b55d509aa67f81a436533af3",
+        "sha256GitBlobBytes": "416a68629ff4a70335d3a009d17dd0fd6ab2759637323be993c518a5e9706e52"
+      }
+    ]
+  },
+  "checks": {
+    "nodeSyntax": "5/5 Pass",
+    "strictBackendBuild": {
+      "command": "node node_modules/typescript/bin/tsc --project backend/tsconfig.json",
+      "exitCode": 0,
+      "note": "Existing TypeScript boundary; the separate mjs probes are checked by node --check and actual execution."
+    },
+    "finalSourceNegativeGuard": {
+      "command": "node backend/capability-probes/run.mjs",
+      "exitCode": 1,
+      "expected": true,
+      "phase": "guard",
+      "category": "controlled_environment_rejected",
+      "emulatorReadsOrWritesStarted": false
+    },
+    "initialIncompleteModuleCheck": {
+      "command": "node backend/capability-probes/run.mjs",
+      "exitCode": 1,
+      "errorCode": "ERR_MODULE_NOT_FOUND",
+      "scope": "Uncommitted preparation; sibling module not yet present; no Emulator execution."
+    }
+  },
+  "runs": [
+    {
+      "id": "01",
+      "exitCode": 1,
+      "sourceHead": "928937ff322e8a29f8e66b07fe03a61dc601ec63",
+      "startedUtc": "2026-10-12T15:16:32.8066288Z",
+      "command": "node backend/scripts/run-ai-capability-probes.mjs",
+      "finishedUtc": "2026-10-12T15:16:32.8733078Z",
+      "reports": [
+        {
+          "probe": "launcher",
+          "outcome": "fail",
+          "phase": "preflight",
+          "category": "launcher_failure"
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "sourceHead": "d598cc498daf8525a8eae55975b16f72b41c3d44",
+      "startedUtc": "2026-10-12T15:17:16.1517476Z",
+      "finishedUtc": "2026-10-12T15:17:23.3438332Z",
+      "command": "node backend/scripts/run-ai-capability-probes.mjs",
+      "exitCode": 1,
+      "reports": [
+        {
+          "probe": "launcher-preflight",
+          "outcome": "pass",
+          "node": "v24.19.0",
+          "firebaseTools": "15.29.0",
+          "firebaseAdmin": "14.3.0",
+          "firestoreSdk": "8.7.1",
+          "firestoreEmulator": "1.22.0",
+          "existingJarChecksumVerified": true,
+          "requiredPortsInitiallyFree": true
+        },
+        {
+          "probe": "suite-failure",
+          "outcome": "fail",
+          "phase": "guard",
+          "category": "controlled_environment_rejected",
+          "dependencyCode": null
+        },
+        {
+          "probe": "suite",
+          "outcome": "fail",
+          "scope": "four-synthetic-capability-experiments",
+          "capabilityGuarantee": false,
+          "productAdapterImplemented": false
+        },
+        {
+          "probe": "launcher-shutdown",
+          "outcome": "pass",
+          "cliExitCode": 1,
+          "reports": 2,
+          "childReportsComplete": false,
+          "requiredPortsFreeAfter": true
+        },
+        {
+          "probe": "profile-cleanup",
+          "outcome": "pass"
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "command": "node backend/scripts/run-ai-capability-probes.mjs",
+      "sourceHead": "2a64f705a61505e34976f86fff41e74b2c65b843",
+      "startedUtc": "2026-10-12T15:18:21.0944948Z",
+      "finishedUtc": "2026-10-12T15:18:33.4298352Z",
+      "exitCode": 0,
+      "reports": [
+        {
+          "probe": "launcher-preflight",
+          "outcome": "pass",
+          "node": "v24.19.0",
+          "firebaseTools": "15.29.0",
+          "firebaseAdmin": "14.3.0",
+          "firestoreSdk": "8.7.1",
+          "firestoreEmulator": "1.22.0",
+          "existingJarChecksumVerified": true,
+          "requiredPortsInitiallyFree": true
+        },
+        {
+          "probe": "environment-guard",
+          "outcome": "pass",
+          "synthetic": true,
+          "loopbackOnly": true,
+          "isolatedCredentialProfile": true,
+          "ambientCredentialsRemoved": true,
+          "liveModelCalls": 0
+        },
+        {
+          "probe": "initial-empty-state",
+          "outcome": "pass",
+          "firestoreTopLevelCollections": 0,
+          "authUsers": 0,
+          "furtherAuthPage": false
+        },
+        {
+          "probe": "read_view_server_read_time",
+          "status": "supported",
+          "reason": "historical_view_observed",
+          "attempts": 1,
+          "mutationAcknowledged": true,
+          "historicalDocumentsMatch": true,
+          "historicalQueryMatches": true,
+          "historicalQueryRows": 2,
+          "latestDocuments": 3,
+          "transactionReadTimesMatch": true,
+          "latestMutationConfirmed": true,
+          "usedLatestFallback": false,
+          "provesCloudSupport": false,
+          "provesProductAuthority": false
+        },
+        {
+          "probe": "read_view_server_read_time_cleanup",
+          "status": "observed_empty",
+          "attemptedDocumentDeletes": 3,
+          "observedResidualRows": 0
+        },
+        {
+          "probe": "read_view_backend_utc",
+          "status": "supported",
+          "reason": "historical_view_observed",
+          "attempts": 1,
+          "mutationAcknowledged": true,
+          "historicalDocumentsMatch": true,
+          "historicalQueryMatches": true,
+          "historicalQueryRows": 2,
+          "latestDocuments": 3,
+          "transactionReadTimesMatch": true,
+          "latestMutationConfirmed": true,
+          "usedLatestFallback": false,
+          "provesCloudSupport": false,
+          "provesProductAuthority": false
+        },
+        {
+          "probe": "read_view_backend_utc_cleanup",
+          "status": "observed_empty",
+          "attemptedDocumentDeletes": 3,
+          "observedResidualRows": 0
+        },
+        {
+          "probe": "metadata_identity_precision",
+          "status": "supported",
+          "reason": "metadata_identity_observed",
+          "sameDocumentIdentity": true,
+          "createTimeUnchangedAfterUpdate": true,
+          "updateTimeDidNotRegress": true,
+          "readDidNotChangeUpdateTime": true,
+          "readTimesConsistent": true,
+          "updateTimeAdvanced": true,
+          "updateMinusCreateNanoseconds": "7651000",
+          "firstReadMinusCreateNanoseconds": "4651000",
+          "secondReadMinusUpdateNanoseconds": "12681000",
+          "repeatedReadDeltaNanoseconds": "3000000",
+          "createMetadataSubMicrosecondRemainder": 0,
+          "updateMetadataSubMicrosecondRemainder": 0,
+          "readMetadataSubMicrosecondRemainder": 0,
+          "createMetadataSubMillisecondRemainder": 188000,
+          "updateMetadataSubMillisecondRemainder": 839000,
+          "writeResultMatchesCreateMetadata": true,
+          "writeResultMatchesUpdateMetadata": true,
+          "serverTimestampTransformUsed": false,
+          "provesPhysicalCommitInstant": false,
+          "provesControllableOneNanosecondCommit": false
+        },
+        {
+          "probe": "metadata_identity_precision_cleanup",
+          "status": "observed_empty",
+          "attemptedDocumentDeletes": 1,
+          "observedResidualRows": 0
+        },
+        {
+          "probe": "commit-order-marker-before-call",
+          "markerSequence": 1,
+          "sdkCallSequence": 2,
+          "ackSequence": 3,
+          "persistedEffects": 1,
+          "localMarkerCancelsSdk": false
+        },
+        {
+          "probe": "commit-order-marker-after-call-return",
+          "sdkPromiseReturnedSequence": 1,
+          "markerSequence": 2,
+          "ackObservedSequence": 3,
+          "persistedEffects": 1,
+          "wireDispatchObserved": false,
+          "serverCommitVsLocalMarkerOrderProved": false,
+          "ackLossInjected": false
+        },
+        {
+          "probe": "commit-order-callback-held",
+          "callbackReadySequence": 1,
+          "markerSequence": 2,
+          "callbackReleasedSequence": 3,
+          "ackSequence": 4,
+          "callbackAttempts": 1,
+          "persistedEffects": 1,
+          "commitInvokedAfterMarker": true,
+          "commitRpcAlreadyIssuedAtMarker": false
+        },
+        {
+          "probe": "writer-before-barrier",
+          "markerSequence": 2,
+          "barrierAckSequence": 3,
+          "writerCompletionSequence": 1,
+          "writerAttempts": 1,
+          "persistedEffects": 1,
+          "barrierConfirmedClosed": true
+        },
+        {
+          "probe": "barrier-before-writer",
+          "markerSequence": 1,
+          "barrierAckSequence": 2,
+          "writerCompletionSequence": 3,
+          "writerAttempts": 1,
+          "persistedEffects": 0,
+          "barrierConfirmedClosed": true
+        },
+        {
+          "probe": "commit-order-scope",
+          "elapsedMs": 199.011,
+          "ackLossInjected": false,
+          "atomicLocalCancellationProved": false,
+          "arbitraryConcurrentBarrierOrderingProved": false,
+          "f01ClosureProved": false
+        },
+        {
+          "probe": "commit-order-cleanup",
+          "pendingSettled": 7,
+          "deletedDocuments": 6,
+          "remainingDocuments": 0
+        },
+        {
+          "probe": "transaction-retry-max-1",
+          "maxAttempts": 1,
+          "callbackAttempts": [
+            1,
+            1
+          ],
+          "successfulCommits": 1,
+          "durableCounterValues": [
+            1,
+            1
+          ],
+          "observedRejectedCodes": [
+            10
+          ],
+          "retryCallbacksObserved": 0,
+          "actualConflictObserved": true,
+          "elapsedMs": 2068.899
+        },
+        {
+          "probe": "transaction-retry-max-3",
+          "maxAttempts": 3,
+          "callbackAttempts": [
+            2,
+            1
+          ],
+          "successfulCommits": 2,
+          "durableCounterValues": [
+            2,
+            2
+          ],
+          "observedRejectedCodes": [],
+          "retryCallbacksObserved": 1,
+          "actualConflictObserved": true,
+          "elapsedMs": 3078.187
+        },
+        {
+          "probe": "transaction-retry-scope",
+          "maxAttemptsOptionsAccepted": [
+            1,
+            3
+          ],
+          "callbackCountSeparateFromDurableCommitCount": true,
+          "ackLossInjected": false,
+          "ackLossResolutionProved": false,
+          "maxAttemptsOneCancelsPendingRpcProved": false,
+          "f01ClosureProved": false
+        },
+        {
+          "probe": "transaction-retry-cleanup",
+          "pendingSettled": 4,
+          "deletedDocuments": 4,
+          "remainingDocuments": 0
+        },
+        {
+          "probe": "final-empty-state",
+          "outcome": "pass",
+          "firestoreTopLevelCollections": 0,
+          "authUsers": 0,
+          "furtherAuthPage": false
+        },
+        {
+          "probe": "sdk-shutdown",
+          "outcome": "pass"
+        },
+        {
+          "probe": "suite",
+          "outcome": "pass",
+          "scope": "four-synthetic-capability-experiments",
+          "capabilityGuarantee": false,
+          "productAdapterImplemented": false
+        },
+        {
+          "probe": "worker-profile-cleanup",
+          "outcome": "pass"
+        },
+        {
+          "probe": "launcher-shutdown",
+          "outcome": "pass",
+          "cliExitCode": 0,
+          "reports": 23,
+          "childReportsComplete": true,
+          "requiredPortsFreeAfter": true
+        },
+        {
+          "probe": "profile-cleanup",
+          "outcome": "pass"
+        }
+      ]
+    }
+  ],
+  "retainedFailures": [
+    {
+      "run": "01",
+      "phase": "preflight",
+      "category": "launcher_failure",
+      "rootCause": "MODULE_NOT_FOUND when resolving the transitive SDK from the pnpm symlink instead of its resolved SDK entry.",
+      "emulatorsStarted": false
+    },
+    {
+      "run": "02",
+      "phase": "guard",
+      "category": "controlled_environment_rejected",
+      "rootCause": "Locked Firebase CLI injects FIREBASE_CONFIG into its command child; the unchanged guard rejects it. The existing allowlist builder is now reapplied before the probe child starts.",
+      "fourProbesRun": false,
+      "portsAndProfileCleaned": true
+    }
+  ],
+  "classification": {
+    "experimentsExecuted": 4,
+    "invocationExitCode": 0,
+    "fixedReadTime": "Observed supported in two synthetic Emulator cases only",
+    "immutableCreateTime": "Observed on one created/updated synthetic document; microsecond granularity in these metadata samples",
+    "localCancellation": "Local marker alone did not cancel SDK writes; strict no-late-effect semantics remain unproved",
+    "transactionRetry": "Real ABORTED conflict and one callback retry observed; callback count and durable commit count recorded separately",
+    "cleanup": "17 own fixture documents observed removed; final Firestore collections 0 and Auth users 0; both profiles removed; required ports free",
+    "suitePassMeans": "Experiments and observed cleanup completed; no universal capability or product guarantee"
+  },
+  "notProvedOrNotRun": [
+    "Actual wire dispatch at the local marker",
+    "Lost/ambiguous ACK injection and authoritative recovery",
+    "Arbitrary concurrent writer/barrier ordering",
+    "Strict F01 zero remote effect after local terminal",
+    "Cloud historical-view support",
+    "Physical commit instant or controllable 1ns commits",
+    "Real product store/reader/routes",
+    "Producer/schema/index changes",
+    "Android/device/live-model execution",
+    "Slices B/C/D/E",
+    "JIN review and LI evidence assessment"
+  ]
+}
