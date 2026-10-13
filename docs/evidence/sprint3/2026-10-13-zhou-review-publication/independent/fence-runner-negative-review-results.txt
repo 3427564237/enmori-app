@@ -1,0 +1,15 @@
+✔ fence runner rejects non-test mode before SDK initialization (359.2219ms)
+✔ fence runner rejects conflicting projects before SDK initialization (340.8831ms)
+✔ fence runner rejects cloud project before SDK initialization (343.911ms)
+✔ fence runner rejects remote Firestore endpoint before SDK initialization (345.7744ms)
+✔ fence runner rejects wrong fixed loopback port before SDK initialization (345.2778ms)
+✔ fence runner rejects ambient credential material before SDK initialization (345.127ms)
+✔ fence runner rejects profile mismatch before SDK initialization (344.4714ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2473.2717

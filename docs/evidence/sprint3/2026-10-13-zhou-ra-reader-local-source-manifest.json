@@ -1,0 +1,267 @@
+{
+  "recordedAt": "2026-10-13T18:02:47.1211732+08:00",
+  "scope": "S-USER-1013-ZHOU-RA-READER-LOCAL; S-PM-1013-LI-REMAINING-AI-A section4/5 local increment",
+  "repository": "D:\\3851 AI\\formal\\enmori-app",
+  "branch": "codex/zhou-ra-reader-local-20261013",
+  "baselineHead": "110eda443fbe101608c6aa6df551e52b6a18da5a",
+  "baselineTree": "9b7ac0fde80c676af88ed0b5f888b9a7c4a39383",
+  "localWorkingTreeOnly": true,
+  "newCommit": false,
+  "uploaded": false,
+  "formalJinReviewForThisDelta": false,
+  "liAcceptanceForThisDelta": false,
+  "runtimeEnabled": false,
+  "realReaderAdapterWired": false,
+  "environment": {
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "flutter": "3.47.2",
+    "dart": "3.13.2"
+  },
+  "authority": [
+    {
+      "ref": "72c027933d4b3ac1a95e25dc733619a6c63522b6",
+      "file": "docs/decisions/2026-10-13-li-remaining-isolated-ai-contract-a.md",
+      "blob": "965457097426d044f930cacfed8b8a2e36038cb0"
+    },
+    {
+      "ref": "72c027933d4b3ac1a95e25dc733619a6c63522b6",
+      "file": "docs/planning/2026-10-13-li-remaining-ai-choice-preview.md",
+      "blob": "605ae1f126bf19ec92e4af2ab272a2b743f8a5b8"
+    },
+    {
+      "ref": "278f4cece57c21a1c7ea6a2135d0934e425f1e90",
+      "file": "docs/decisions/2026-10-13-li-ai-policy-component-acceptance.md",
+      "blob": "518d1a14474a1dd6cb5c216e45fbe007e96a6ca4"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "backend/src/ai-conversation/README.md",
+      "gitBlob": "7d8d2e0171b10b449369db7e060921f1fd614dc5",
+      "sha256": "896792fbe20b8d5f694fdf627c7c80706e6c079d59f6ca3a68ddef3eb00a5ef7"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/real-context-reader.ts",
+      "gitBlob": "1bcfdcca2c570a362f9263e14c2b18749e8ea1c9",
+      "sha256": "d70807cd4a5173e2eb25bef7b8f16f8cc96727fddd1b00b57405cbc7a19cc45e"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/real-context-reader.ts",
+      "gitBlob": "a1fbfb63da3376837f90005780210965961be26c",
+      "sha256": "b15366eb2332191a2d7c38e878c7ee6c384e24e1ecf70e5548b4d4b211ae8d02"
+    },
+    {
+      "path": "backend/test/ai-conversation/real-context-reader.test.ts",
+      "gitBlob": "d57ffea83a705504a6d7bb95c00909a5554266c3",
+      "sha256": "71437277c7abe8c81a3329ec70e9ff5876f23eae1cff77926eb44f7e01741cf2"
+    },
+    {
+      "path": "lib/features/ai_conversation/ai_conversation_providers.dart",
+      "gitBlob": "c1538f21a04b2ff2884df4a7a5f56d9ddaee5419",
+      "sha256": "c1c272e7c84564ba1dab35d054d53656e9efc63c39edd10a6d92d7bef773f483"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "gitBlob": "e6c942c56347af87ed8ba69ee471f4b553dd5806",
+      "sha256": "9c1f4c7ccb90f23f6454dd347b8fe47ab08f00de932df36296b64cd3830d137a"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_state.dart",
+      "gitBlob": "9856c3bf39b51333229f0cb0d6aef995bb79c3e2",
+      "sha256": "2672f5e106a07dfedb86e3d0fa3318e21f0f89a718014dbf7a06a5f782e7501e"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "gitBlob": "aec4279cd7cb457e49b85f4884df77e6e4160a1c",
+      "sha256": "4da8e22232e5cb15d6c40a89e158d24f652c0f07aafbb721165341f946ab5b65"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_recovery_test.dart",
+      "gitBlob": "9582ae06ebaaa91644916def9e6aa50be3f53cd4",
+      "sha256": "1edcd6c302f933b69b7d2e885a40e6a4dbc447fa9843595f02ad4ff6c9ac781a"
+    },
+    {
+      "path": "docs/decisions/2026-10-13-user-zhou-local-ai-development-scope.md",
+      "gitBlob": "d637623381329b0924cb8c36f416eca3e96bb2b2",
+      "sha256": "c026f49bd37f3aa665b1c059dcd6d40bd4f347d2a534edd97fff23e033777017"
+    },
+    {
+      "path": "docs/decisions/2026-10-13-li-remaining-isolated-ai-contract-a.md",
+      "gitBlob": "965457097426d044f930cacfed8b8a2e36038cb0",
+      "sha256": "9b7e1b01a4d05c1b93cec1506a3007dc93fb53511f9a07a23e2383eb95f72863"
+    },
+    {
+      "path": "docs/decisions/2026-10-13-li-ai-policy-component-acceptance.md",
+      "gitBlob": "518d1a14474a1dd6cb5c216e45fbe007e96a6ca4",
+      "sha256": "ed35097a4e38b05c0edc5aa4dcd9d5edaa166390b54320c62b1978671661a2c7"
+    },
+    {
+      "path": "docs/planning/2026-10-13-li-remaining-ai-choice-preview.md",
+      "gitBlob": "605ae1f126bf19ec92e4af2ab272a2b743f8a5b8",
+      "sha256": "4919a89dc2c19ad18e79016a34694756b1a218e0df1506bec09d3f6563823997"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-development.md",
+      "gitBlob": "c0f573320815cba5ee56debc746e22305c124cb9",
+      "sha256": "a1fb457b0bfeb76ad5354697c0c574372d84b1154ecbed90411aec8958ba7b32"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-review.md",
+      "gitBlob": "0904693e7b5d1bc116194f16b9166fe56c65a5bb",
+      "sha256": "b1fab45df19ee6d7f7526584213a8612fcb833d1a0a44d23ce0dac2130c7b4ec"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-reader-producer-prerequisites.md",
+      "gitBlob": "023281642452f07f81a251a6bdc9aa081e6415a0",
+      "sha256": "b6e7a8e2c94caeb6d74f773b83857d93734cce15e82c34333062a068ed027853"
+    }
+  ],
+  "excludedPreexistingPersonaArtifacts": [
+    {
+      "path": "docs/decisions/2026-10-09-li-persona-p08-isolated-flow-approval.md",
+      "gitBlob": "bbdcdc085c0835aa5857beafa328b1d7ba92dc10",
+      "sha256": "24b014e0cddd67be6281a588d2a861a1130cc79e075ea378f8fd010b46aaa6ce"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-android-selfcheck-source-manifest.json",
+      "gitBlob": "a7ab865904d838cc9016cf5694d80052ba744f04",
+      "sha256": "b71c5962853292754f459a167bc8b76316f13366ae265fe6fff189324f495e94"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-android-selfcheck.md",
+      "gitBlob": "0f81f0c1a4ff25f5de2056e589a245807db187fb",
+      "sha256": "bfcce0f4014aba79292c393f9db5f5684d078ad09a31479be2a35f7a3bc89698"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-local-implementation.md",
+      "gitBlob": "7c8fa18a0a7f9df59d9e23c09375071bed23adec",
+      "sha256": "a8e28f9f87deb1378a3133d397f49ecfc3941bd4f88d36fff8160d257ba65d4e"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-local-source-manifest.json",
+      "gitBlob": "b2c9c82229b864ee250f8de280a08ab4f5f92329",
+      "sha256": "a47cc82cc2537d361dccda65984abefae72800ff8ad02bdbcfd8ea8fe3134600"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-p08-implementation-release.md",
+      "gitBlob": "dd88a9e84702a5125ccca8531e7e47041b41e910",
+      "sha256": "3560f64b68bae3cfecfe34cc05bd367d4373e558f5e9d578c0f33ff80e7096b9"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-pc13-local-harness.md",
+      "gitBlob": "2b07329d59dbc64ffd2c22d9cbb09b5e990a7523",
+      "sha256": "556671badcaaad4b6ed12e50e8d2ee23aa41584374bd27bd87d09eed2764af8a"
+    }
+  ],
+  "manifestSelfExcluded": true,
+  "commands": [
+    "node node_modules/typescript/bin/tsc --project backend/tsconfig.json",
+    "node --test --test-reporter=spec backend/dist/test/**/*.test.js",
+    "fvm flutter test --reporter expanded",
+    "fvm flutter analyze --no-pub",
+    "fvm dart format --output=none --set-exit-if-changed [5 changed Dart files]",
+    "fvm flutter build apk --debug --no-pub --target lib/ai_conversation_harness.dart --android-project-arg=kotlin.incremental=false --android-project-arg=kotlin.compiler.execution.strategy=in-process",
+    "node D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\reader-rollback-probe.mjs",
+    "git diff --check"
+  ],
+  "logs": [
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\backend-build-final.txt",
+      "executor": "root",
+      "outcome": "pass",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\backend-tests-final.txt",
+      "executor": "root",
+      "outcome": "572/572 pass; includes30 reader cases",
+      "sha256": "4bad94d195802101b8e1dff8043a2afc6a9f71cb7335a7fa861b5b83062f9176"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\backend-tests-intermediate-571.txt",
+      "executor": "root",
+      "outcome": "historical571/571 before READER-01 regression",
+      "sha256": "936d54da5f4c095251a6cce065563495d2f02f7947d9b64816323c4ea51f811a"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\flutter-tests-final.txt",
+      "executor": "root",
+      "outcome": "459/459 pass",
+      "sha256": "d79bf260351f93dcd8ec633fd8b7a9c36274c9878ea40f7bd75e655a5ac3b686"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\flutter-analyze-final.txt",
+      "executor": "root",
+      "outcome": "pass; no issues",
+      "sha256": "d8f7d2b3443ee9e633e732a9fad37f92ef7ae0e655cf954bd46028759fba17b0"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\dart-format-final.txt",
+      "executor": "root",
+      "outcome": "pass;5 files/0 changes",
+      "sha256": "16e7bf504e422b5bef8a9a6a6c0131e1427936e923959c761c2f6d075de9c659"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\android-build-final.txt",
+      "executor": "root",
+      "outcome": "initial ordinary APK fail; Kotlin cross-drive incremental cache",
+      "sha256": "61afcfc7062a3bf5b3a94b527be76cf1e55e35312b0352e655f025d6b92584c3"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\android-harness-build-final.txt",
+      "executor": "root",
+      "outcome": "pass; synthetic AI harness compile only",
+      "sha256": "8a727ee3b44713e1a145c73a22baec0b3436f5ba836e336a544323746d3c8619"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\reader-rollback-probe.mjs",
+      "executor": "root",
+      "outcome": "independent synthetic reproduction source",
+      "sha256": "b8af86d1c00f2ac5cf727305c1a98a4baa2d448207ef53b8fc12e45a7b38fd56"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\reader-rollback-probe-red.txt",
+      "executor": "root",
+      "outcome": "fail on previously compiled reader; denied != unavailable",
+      "sha256": "5330d15f5112b21b433ad5f7e6a33fb3aafdd5fcf2128e53eceafa643a340ad7"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-ra-reader-local\\reader-rollback-probe-green.txt",
+      "executor": "root",
+      "outcome": "pass after READER-01 fix; not additional suite count",
+      "sha256": "f8350e33c7874b24dd37befef0b40b339a55f87c9fe524a4b800f230b19c7c5d"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\ra-history-tombstone-red.log",
+      "executor": "mobile implementation agent",
+      "outcome": "initial regression0/1 fail before tombstone lifetime fix",
+      "sha256": "ab82e71d25e06c3655b741d5b506a9edd1b059ae44ac7c08ca57251789a48150"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\ra-feature-suite.log",
+      "executor": "mobile implementation agent",
+      "outcome": "141/141 pass;16 new R-A cases included in full459",
+      "sha256": "743249c698973f2a26a4941076285c1ba2080bcd36b52ca32c761fcc308fa818"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "D:\\3851 AI\\formal\\enmori-app\\build\\app\\outputs\\flutter-apk\\app-debug.apk",
+      "bytes": 175391346,
+      "sha256": "946b73d8e4b2757b4ed0974d8dae5196f2a52cf333b6510693d671948384ad03",
+      "purpose": "synthetic AI harness compilation only; not uploaded, deployed or device-tested"
+    }
+  ],
+  "notRun": [
+    "new real datastore/Emulator probes",
+    "real reader/store/cleanup integration",
+    "new device flow",
+    "live model",
+    "shared-source JIN combination gate"
+  ],
+  "remainingProducerFacts": [
+    "all applicable Note/time inventory canonical UTC millisecond and immutable",
+    "permanent deletion/maintenance no-restore/no-source-ID-reuse execution guarantee"
+  ]
+}

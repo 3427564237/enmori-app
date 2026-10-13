@@ -1,0 +1,15 @@
+✔ query runner rejects non-test mode before SDK initialization (487ms)
+✔ query runner rejects conflicting projects before SDK initialization (360.4429ms)
+✔ query runner rejects cloud project before SDK initialization (354.5843ms)
+✔ query runner rejects remote Firestore endpoint before SDK initialization (347.5994ms)
+✔ query runner rejects wrong fixed loopback port before SDK initialization (360.6566ms)
+✔ query runner rejects ambient credential material before SDK initialization (352.2778ms)
+✔ query runner rejects profile mismatch before SDK initialization (354.2162ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2667.0264
