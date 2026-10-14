@@ -1,0 +1,951 @@
+{
+  "status": "JIN execution delivered for independent review; not PM acceptance",
+  "recordedSgt": "2026-10-14T12:09:52.016206+08:00",
+  "source": {
+    "accountMerge": "4812ea42e483e84d9e94ce5c8b06b55c4b829739",
+    "accountTree": "835c5c07dc65372f094e75755491e17959f0c287",
+    "executable": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+    "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+    "manualProductEdits": false,
+    "acceptedInputHeads": [
+      "c5bc9457d09a758c97a9afc46880065a63ef461f",
+      "72c027933d4b3ac1a95e25dc733619a6c63522b6",
+      "67056c778a03595c386a69ec7ea33046fdd4205d"
+    ],
+    "directParents": [
+      "4812ea42e483e84d9e94ce5c8b06b55c4b829739",
+      "67056c778a03595c386a69ec7ea33046fdd4205d"
+    ],
+    "accountMergeParents": [
+      "c5bc9457d09a758c97a9afc46880065a63ef461f",
+      "72c027933d4b3ac1a95e25dc733619a6c63522b6"
+    ]
+  },
+  "acceptedInputReadback": {
+    "readAtSgt": "2026-10-14T11:52:00.4747954+08:00",
+    "items": [
+      {
+        "baseRefName": "codex/zhou-ai-contract-local-20261013",
+        "headRefName": "souma/li-ai-account-producer-20261013",
+        "headRefOid": "72c027933d4b3ac1a95e25dc733619a6c63522b6",
+        "isDraft": true,
+        "number": 95,
+        "reviewDecision": "APPROVED",
+        "state": "OPEN",
+        "url": "https://github.com/3427564237/enmori-app/pull/95"
+      },
+      {
+        "baseRefName": "codex/zhou-ai-contract-local-20261013",
+        "headRefName": "codex/zhou-ra-reader-local-20261013",
+        "headRefOid": "67056c778a03595c386a69ec7ea33046fdd4205d",
+        "isDraft": true,
+        "number": 96,
+        "reviewDecision": "APPROVED",
+        "state": "OPEN",
+        "url": "https://github.com/3427564237/enmori-app/pull/96"
+      },
+      {
+        "baseRefName": "souma/issue85-history-shared-20261013",
+        "headRefName": "codex/jin-issue84-history-gate-20261013",
+        "headRefOid": "c5bc9457d09a758c97a9afc46880065a63ef461f",
+        "isDraft": true,
+        "number": 97,
+        "reviewDecision": "APPROVED",
+        "state": "OPEN",
+        "url": "https://github.com/3427564237/enmori-app/pull/97"
+      }
+    ]
+  },
+  "acceptedInputUnion": {
+    "files": 949,
+    "identitySha256": "df084bf662d55a3a2babd0c449befdf360c94bf342b81c027ad913da76ec2824",
+    "allInputsAncestors": true,
+    "manualProductEdits": false,
+    "definition": "Git ls-tree -r c58a4e5 stdout, decoded and stripped then UTF-8; mode/blob/path preserved"
+  },
+  "executionBindings": {
+    "trackedFiles": 949,
+    "exact": 58,
+    "crlfEquivalent": 891,
+    "allMatched": true,
+    "privateBindingManifestSha256": "cd3c9fc8a733843626f1c61c0d1320a2ca763c644c9be629db68996e3f899639"
+  },
+  "toolchain": {
+    "node": "24.19.0",
+    "pnpm": "11.19.0",
+    "typescript": "7.0.2",
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "java": "Temurin 21.0.12.1+1",
+    "firebaseAdmin": "14.3.0",
+    "firestoreSDK": "8.7.1",
+    "firebaseCLI": "15.29.0",
+    "firestoreEmulator": "1.22.0",
+    "android": "owned API36 AVD, no physical device"
+  },
+  "verification": {
+    "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+    "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+    "recordedAtSgt": "2026-10-14T11:40:56.955874+08:00",
+    "executions": {
+      "verify-backend-build": {
+        "exit": 0,
+        "endedSgt": "2026-10-14T11:28:45.1948036+08:00",
+        "command": "node24.19.0 pnpm11.19.0 backend:build",
+        "startedSgt": "2026-10-14T11:28:37.4063573+08:00",
+        "logSha256": "64442C1EE9A1BA72F58DD2DA2018C6FFA120428BBBCE9E0F2C09EF4014A16375",
+        "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+        "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+        "elapsedSecondsFromRecordedTimes": 7.788446
+      },
+      "verify-backend-full": {
+        "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+        "command": "node24.19.0 pnpm11.19.0 backend:test",
+        "exit": 0,
+        "logSha256": "A5D5F7936BB0FA068007B6F33FD0478D113869CC662C1109395B31EE10E98AD7",
+        "startedSgt": "2026-10-14T11:29:20.5596274+08:00",
+        "endedSgt": "2026-10-14T11:29:34.9787037+08:00",
+        "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+        "elapsedSecondsFromRecordedTimes": 14.419076
+      },
+      "verify-flutter-pub-get": {
+        "command": "dart flutter_tools.snapshot pub get --offline --enforce-lockfile",
+        "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+        "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+        "startedSgt": "2026-10-14T11:28:36.8950106+08:00",
+        "endedSgt": "2026-10-14T11:28:53.1697172+08:00",
+        "exit": 0,
+        "logSha256": "C083F9CE64654CAA4975B431C9E24916BD2B0AF137A60F0E49F45DFB26FEE81C",
+        "elapsedSecondsFromRecordedTimes": 16.274707
+      },
+      "verify-flutter-full": {
+        "logSha256": "EBABDC92B73EB61784DF7DCF3D10DFDCE3BB585DFA703D5E7859D8BCB2A36EBD",
+        "startedSgt": "2026-10-14T11:30:00.5730569+08:00",
+        "exit": 1,
+        "endedSgt": "2026-10-14T11:31:33.6910801+08:00",
+        "command": "dart flutter_tools.snapshot test --no-pub --reporter expanded",
+        "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+        "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+        "elapsedSecondsFromRecordedTimes": 93.118024
+      },
+      "verify-dart-analysis": {
+        "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+        "logSha256": "9A9D35CE9D6FAC973A72F078461E18CDE1F1C7F2AE7FA7A5916AE87ADEF4B99A",
+        "exit": 0,
+        "command": "dart analyze --fatal-infos lib test integration_test",
+        "startedSgt": "2026-10-14T11:30:14.9460920+08:00",
+        "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+        "endedSgt": "2026-10-14T11:31:38.7361953+08:00",
+        "elapsedSecondsFromRecordedTimes": 83.790103
+      },
+      "verify-dart-format": {
+        "exit": 0,
+        "endedSgt": "2026-10-14T11:30:43.3428883+08:00",
+        "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+        "command": "dart format --output=none --set-exit-if-changed <five changed Dart files>",
+        "startedSgt": "2026-10-14T11:30:42.4026692+08:00",
+        "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+        "logSha256": "3881533370380998F03D04E082D7962A819CE7E521161FE911E3E6FE6E666E7A",
+        "files": [
+          "lib/features/ai_conversation/ai_conversation_providers.dart",
+          "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+          "lib/features/ai_conversation/presentation/ai_conversation_state.dart",
+          "test/features/ai_conversation/ai_conversation_page_test.dart",
+          "test/features/ai_conversation/ai_conversation_recovery_test.dart"
+        ],
+        "elapsedSecondsFromRecordedTimes": 0.940219
+      },
+      "verify-persona-focused": {
+        "exit": 0,
+        "purpose": "Focused unchanged-source diagnosis of first full suite failure",
+        "startedSgt": "2026-10-14T11:32:13.6293504+08:00",
+        "logSha256": "295CCC82010CF99F738439EED05721C47B58B4C61C79643DB2B285AA54D86277",
+        "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+        "endedSgt": "2026-10-14T11:32:20.6808405+08:00",
+        "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+        "command": "dart flutter_tools.snapshot test --no-pub --reporter expanded test/features/personas/persona_client_session_test.dart",
+        "elapsedSecondsFromRecordedTimes": 7.05149
+      },
+      "verify-flutter-serial": {
+        "startedSgt": "2026-10-14T11:36:38.6312806+08:00",
+        "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+        "command": "dart flutter_tools.snapshot test --no-pub --reporter expanded --concurrency=1",
+        "backendAgentPortReleaseReceived": true,
+        "concurrency": 1,
+        "exit": 0,
+        "endedSgt": "2026-10-14T11:39:34.5284667+08:00",
+        "purpose": "One unchanged-source full suite comparison after explicit Emulator teardown",
+        "elapsedSeconds": 175.8971861,
+        "priorFullFailureRetained": true,
+        "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+        "logSha256": "1A4AE2ACBD3C1FAD5E9F24AB3D1D38E3225F7954FC4C5CF7C140E45D4546EA72",
+        "elapsedSecondsFromRecordedTimes": 175.897186
+      }
+    },
+    "results": {
+      "strictBackendBuild": "Pass",
+      "backendFull": {
+        "pass": 649,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "exit": 0
+      },
+      "flutterFirstFull": {
+        "pass": 504,
+        "fail": 1,
+        "exit": 1
+      },
+      "focusedPersonaFile": {
+        "pass": 4,
+        "fail": 0,
+        "exit": 0,
+        "doesNotReplaceFailedFullRun": true
+      },
+      "fatalInfoAnalysis": "Pass lib/test/integration_test",
+      "changedDartNonWritingFormat": "Pass 5 files, 0 changes",
+      "flutterSingleConcurrencyComparison": {
+        "exit": 0,
+        "successfulFinalCounter": 505,
+        "sameSource": true,
+        "commandDifference": "--concurrency=1",
+        "firstFailureRetained": true,
+        "causeConfirmed": false
+      }
+    },
+    "failure": {
+      "path": "test/features/personas/persona_client_session_test.dart",
+      "line": 58,
+      "case": "real client/session: timeout -> recovery 412 -> original late 201 (headers)",
+      "exception": "Null check operator used on a null value",
+      "retainedFirstRun": true,
+      "sourceChanged": false,
+      "inference": "Test applies 40ms timeout to initial load, does not assert load succeeded, then dereferences pendingCreate after create can return false on unavailable collection. Initial-load timeout under concurrent execution is a plausible cause, not proven by the first transcript."
+    },
+    "productEdits": false,
+    "sharedNodeModulesRemoved": false,
+    "comparisonConclusion": "Same-source default-concurrency full invocation failed 504/1, unchanged focused file passed 4/4, and one full --concurrency=1 invocation after Emulator teardown passed 505/505. These are three distinct invocations; repeats are not added as unique cases. No product/test source changed. Timing/load explanation remains inference, not a proven root cause.",
+    "archiveInputBindings": {
+      "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+      "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+      "checkedAtSgt": "2026-10-14T11:40:56.585889+08:00",
+      "trackedFiles": 949,
+      "exact": 58,
+      "crlfEquivalent": 891,
+      "allMatched": true
+    },
+    "executionAttribution": "JIN host execution; internal parallel workers are not SHI or LI independent review"
+  },
+  "emulator": {
+    "instrumentation": [
+      {
+        "sha256": "94db443e00872689865a6740de33abbfcc729dcd66143afbebf30456844760c1",
+        "file": "source/build/jin-actual-gateway-binding.mjs"
+      },
+      {
+        "sha256": "78c95a18b5c60beda6bc996e9fad64ddee4ccc9f780a5ee6bf3603b8abb2264c",
+        "file": "source/build/jin-emulator-worker.mjs"
+      },
+      {
+        "sha256": "7f5f55b49916cac392309661901177ac99362ebaed75380ef41c3cced94f5b7e",
+        "file": "source/build/jin-guarded-emulators.mjs"
+      }
+    ],
+    "todo": 0,
+    "logSha256": "d1d60e9f7bc324f421d7f4620b544e552d9d252c28ec8d22307f59029c1354a5",
+    "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+    "workerProfileRemoved": true,
+    "requiredPortsFree": true,
+    "skipped": 0,
+    "completedSgt": "2026-10-14T11:36:14.8041837+08:00",
+    "failureReason": "Windows absolute --import argument rejected before test modules loaded; corrected to file URL; product source unchanged",
+    "startedSgt": "2026-10-14T11:33:30.5469542+08:00",
+    "attempt": 2,
+    "retainedFailedAttempt": "emulator-attempt01",
+    "failed": 0,
+    "limits": [
+      "Read-only diagnostic uses locked SDK internal settings; no settings mutation or extra I/O",
+      "All original runTransaction calls preserved via Reflect.apply with original this/args/result, no retry intervention",
+      "Failure latch prevents caught audit assertion from being accepted as a business dependency result",
+      "Gateway call counts are diagnostic observations, not additional tests",
+      "No real AI reader/store/cleanup/runtime/index/cloud/model enabled"
+    ],
+    "tests": 76,
+    "source": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+    "outerProfileRemoved": true,
+    "cancelled": 0,
+    "gatewayBindingRecords": [
+      {
+        "kind": "other-regression",
+        "checkedTransactionCalls": 6,
+        "sameValidatedProjectAndLoopbackEndpoint": true,
+        "sslFalse": true
+      },
+      {
+        "kind": "other-regression",
+        "checkedTransactionCalls": 110,
+        "sameValidatedProjectAndLoopbackEndpoint": true,
+        "sslFalse": true
+      },
+      {
+        "kind": "other-regression",
+        "checkedTransactionCalls": 8,
+        "sameValidatedProjectAndLoopbackEndpoint": true,
+        "sslFalse": true
+      },
+      {
+        "kind": "other-regression",
+        "checkedTransactionCalls": 29,
+        "sameValidatedProjectAndLoopbackEndpoint": true,
+        "sslFalse": true
+      },
+      {
+        "kind": "isolated-ai-account-producer",
+        "checkedTransactionCalls": 8,
+        "sameValidatedProjectAndLoopbackEndpoint": true,
+        "sslFalse": true
+      },
+      {
+        "kind": "other-regression",
+        "checkedTransactionCalls": 208,
+        "sameValidatedProjectAndLoopbackEndpoint": true,
+        "sslFalse": true
+      },
+      {
+        "kind": "other-regression",
+        "checkedTransactionCalls": 25,
+        "sameValidatedProjectAndLoopbackEndpoint": true,
+        "sslFalse": true
+      },
+      {
+        "kind": "other-regression",
+        "checkedTransactionCalls": 4,
+        "sameValidatedProjectAndLoopbackEndpoint": true,
+        "sslFalse": true
+      }
+    ],
+    "passed": 76,
+    "producerTestsIncluded": 3,
+    "requiredPorts": [
+      8080,
+      9099,
+      4400,
+      4500,
+      9150
+    ],
+    "exitCode": 0
+  },
+  "contracts": {
+    "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+    "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+    "checkedAtSgt": "2026-10-14T11:46:37.271762+08:00",
+    "scope": "Independent read-only Git-object, normative API, route-inventory, error/security and production composition check; no product test rerun.",
+    "commands": [
+      "git ls-tree -rz --full-tree <head and three accepted inputs>",
+      "git show <ref>:<path>",
+      "git merge-base --is-ancestor <accepted-input> <head>",
+      "python check_source_contracts.py (assertions over immutable blobs)"
+    ],
+    "acceptedInputs": {
+      "97": "c5bc9457d09a758c97a9afc46880065a63ef461f",
+      "95": "72c027933d4b3ac1a95e25dc733619a6c63522b6",
+      "96": "67056c778a03595c386a69ec7ea33046fdd4205d"
+    },
+    "sourceUnion": {
+      "recursiveFiles": 949,
+      "exactAcceptedInputPathBlobModeUnion": true,
+      "allInputPathsRetained": true,
+      "allAcceptedInputsAncestors": true,
+      "novelManualProductBlobCount": 0
+    },
+    "normativeApi": {
+      "byteIdenticalTo97": true,
+      "sha256": "e861bdf695febdae7c6c185724cf3db0038fe2ffab479c35d52107e483fe5415",
+      "operations": 27,
+      "uniqueInventoryEntries": 27,
+      "matchingSuccessStatusEntries": 30,
+      "schemas": 33,
+      "errorCodes": 26,
+      "errorResponseEnvelopeReferences": 153,
+      "allLocalRefsResolve": 224,
+      "uniqueLocalRefs": 52,
+      "globalAndEveryEffectiveOperationSecurity": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "Firebase ID token"
+        }
+      },
+      "idempotencyHeadersMatchEveryInventoryEntry": true,
+      "operationsAndSuccess": [
+        {
+          "method": "POST",
+          "path": "/v1/check-ins",
+          "successStatuses": [
+            200,
+            201
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/check-ins/{checkInId}",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/events/{eventId}",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/v1/friend-requests",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/v1/friend-requests/{requestRef}/accept",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/v1/friend-requests/{requestRef}/decline",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/v1/friends/lookup",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/interest-tags",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me/check-ins",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me/friend-requests",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me/friends",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me/friends/search",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me/interests",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/me/interests",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me/onboarding",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/me/onboarding",
+          "successStatuses": [
+            200,
+            201
+          ]
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/me/persona-selection",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me/personas",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/v1/me/personas",
+          "successStatuses": [
+            200,
+            201
+          ]
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/me/personas/{personaId}",
+          "successStatuses": [
+            204
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me/personas/{personaId}",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/me/personas/{personaId}",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me/profile",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/me/profile",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/me/settings",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/me/settings",
+          "successStatuses": [
+            200
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/v1/recommendations/events",
+          "successStatuses": [
+            200
+          ]
+        }
+      ]
+    },
+    "unchanged97Boundaries": [
+      "api/openapi.json",
+      "backend/src/transport/route-inventory.ts",
+      "backend/src/transport/schemas.ts",
+      "backend/src/shared/application/app-failure.ts",
+      "backend/src/transport/error-response.ts",
+      "backend/src/bootstrap/build-app.ts",
+      "backend/src/bootstrap/controlled-runtime.ts",
+      "backend/src/shared/infrastructure/firebase/controlled-emulator-environment.ts",
+      "backend/src/shared/infrastructure/firebase/firestore-gateway.ts",
+      "lib/main.dart",
+      "lib/app/providers.dart",
+      "package.json",
+      "pnpm-lock.yaml",
+      "pubspec.yaml",
+      "pubspec.lock",
+      "firebase.json",
+      "android/app/build.gradle.kts"
+    ],
+    "indexDeclarationMatches95": true,
+    "indexDeploymentPerformed": false,
+    "productionComposition": {
+      "ordinaryFlutterIsolatedFeatureDefault": false,
+      "ordinaryControlledRuntimePassesIsolatedSlices": false,
+      "ordinaryAccountConstructorsOmitIsolatedAiEnvironment": true,
+      "isolatedAccountGenerationRequiresValidatedExplicitEnvironment": true,
+      "preparedReaderProductionAdapterExists": false,
+      "preparedPolicyImportsRemainInnerOnly": [
+        {
+          "path": "backend/src/ai-conversation/application/real-context-reader.ts",
+          "module": "../domain/real-effect-expiry.js"
+        },
+        {
+          "path": "backend/src/ai-conversation/application/real-context-reader.ts",
+          "module": "../ports/real-context-reader.js"
+        },
+        {
+          "path": "backend/src/ai-conversation/domain/real-retention-resolver.ts",
+          "module": "./real-effect-expiry.js"
+        },
+        {
+          "path": "backend/src/ai-conversation/ports/real-context-reader.ts",
+          "module": "../domain/real-effect-expiry.js"
+        }
+      ],
+      "preparedReaderOrCleanupWiredToBootstrapTransport": false,
+      "publicAiOperationsAdded": false,
+      "noteReaderOrCompleteCleanupProof": false
+    },
+    "limits": [
+      "Static source/contract result only, not a new runtime execution or product acceptance",
+      "Accepted isolated Account producer writes are exercised by the separate actual Emulator gate; ordinary runtime does not opt them in",
+      "Index declaration equality does not deploy or prove cloud enforcement",
+      "Prepared reader, retention/path policy helpers remain unwired; real Note adapter, complete store/cleanup and live model are not proved by the union"
+    ],
+    "blockingFindings": [],
+    "allAssertionsPassed": true,
+    "checkerHistory": "Initial local assertion assumed inline response objects; preserved API uses component response refs. Checker was corrected to resolve those refs. No product change or product failure."
+  },
+  "whitespace": {
+    "sourceRange": "c5bc9457d09a758c97a9afc46880065a63ef461f..c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+    "codeDeltaExit": 0,
+    "fullDeltaExit": 2
+  },
+  "android": [
+    {
+      "source": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+      "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+      "mode": "history-synthetic",
+      "startedSgt": "2026-10-14T11:48:04.8048284+08:00",
+      "endedSgt": "2026-10-14T11:49:53.0979854+08:00",
+      "exit": 0,
+      "cleanup": true,
+      "removedOwnedPackages": [],
+      "logSha256": "0a70a705df76166f6cf16583f076b1e4b0bd50f86632a05702b7497b9db3c380",
+      "apkSha256": "a1f93ffbd6045318bfb4eb4f8622a01df47a0e9f5c8d9fa2c15626ff4b1ae6cf",
+      "device": "enmori-validation-api36/emulator-5554",
+      "physicalDeviceTouched": false,
+      "cases": 7,
+      "synthetic": true,
+      "hostMarkers": {},
+      "apkFingerprintScope": "local final output APK; no independently fetched installed APK hash",
+      "retainedFlutterUninstallWarning": false
+    },
+    {
+      "source": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+      "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+      "mode": "ai-synthetic",
+      "startedSgt": "2026-10-14T11:50:22.4430942+08:00",
+      "endedSgt": "2026-10-14T11:52:03.9692945+08:00",
+      "exit": 0,
+      "cleanup": true,
+      "removedOwnedPackages": [],
+      "logSha256": "9d97422d2edbe8d50a34428e17390c9648802a86d3aa5b821e7f4d57eb69ca6f",
+      "apkSha256": "369074d64c82c32c1dea41e99a0519dd2e06f63a4012fd982206b7922f1c3b61",
+      "device": "enmori-validation-api36/emulator-5554",
+      "physicalDeviceTouched": false,
+      "cases": 7,
+      "synthetic": true,
+      "hostMarkers": {},
+      "apkFingerprintScope": "local final output APK; no independently fetched installed APK hash",
+      "retainedFlutterUninstallWarning": false
+    },
+    {
+      "source": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+      "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+      "mode": "ra-synthetic",
+      "startedSgt": "2026-10-14T11:41:55.3867169+08:00",
+      "endedSgt": "2026-10-14T11:46:20.7749607+08:00",
+      "exit": 0,
+      "cleanup": true,
+      "removedOwnedPackages": [
+        "com.enmori.app.personatest"
+      ],
+      "logSha256": "76c41340a790653ead5295c238f7fb8613516a5eaa5c7d16b5d99157b8db6a3d",
+      "apkSha256": "29444902ba8f49c08832c2c18e5f0ccd2d212a0a2c67fd17dde30dcaa46295dd",
+      "device": "enmori-validation-api36/emulator-5554",
+      "physicalDeviceTouched": false,
+      "cases": 1,
+      "synthetic": true,
+      "hostMarkers": {
+        "JIN_RA_SHARED_EXIT_REENTRY_SESSION_PROTECTION": true
+      },
+      "apkFingerprintScope": "local final output APK; no independently fetched installed APK hash",
+      "retainedFlutterUninstallWarning": true
+    },
+    {
+      "source": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+      "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+      "mode": "history-real",
+      "startedSgt": "2026-10-14T11:52:34.2065130+08:00",
+      "endedSgt": "2026-10-14T11:56:58.3182494+08:00",
+      "exit": 0,
+      "cleanup": true,
+      "removedOwnedPackages": [],
+      "logSha256": "922d8e77845076cc9761181b1fcb6fa4d3b5f7dd542a4c7ee9dd3ae8972d21dd",
+      "apkSha256": "e4df7f108c54365aa3fbfa6e34a4fbbbfb02dda8ee6a9784a914a38c060f5a4b",
+      "device": "enmori-validation-api36/emulator-5554",
+      "physicalDeviceTouched": false,
+      "cases": 1,
+      "synthetic": false,
+      "hostMarkers": {
+        "S3_HISTORY_HOST_READBACK_PASS": true,
+        "JIN_HISTORY_PRIVATE_PROFILE_REMOVED": true,
+        "JIN_HISTORY_CLEANUP_AUTH0_ALL_COLLECTIONS_EMPTY": true
+      },
+      "apkFingerprintScope": "local final output APK; no independently fetched installed APK hash",
+      "retainedFlutterUninstallWarning": false
+    },
+    {
+      "source": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+      "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+      "mode": "search",
+      "startedSgt": "2026-10-14T11:57:20.0214171+08:00",
+      "endedSgt": "2026-10-14T11:59:12.4073258+08:00",
+      "exit": 0,
+      "cleanup": true,
+      "removedOwnedPackages": [
+        "com.enmori.app"
+      ],
+      "logSha256": "26bfdfabe0d1f43418cdfdaef01c879cf7f100c5a7f9c0b4675db0c759f3c66b",
+      "apkSha256": "5ed485839d3996ca589c2dc8571086cd35c84b3d9e50b2d2544132d9e16c2f81",
+      "device": "enmori-validation-api36/emulator-5554",
+      "physicalDeviceTouched": false,
+      "cases": 1,
+      "synthetic": false,
+      "hostMarkers": {
+        "MY_FRIENDS_SEARCH_ANDROID_UNCHANGED_PERSISTENCE": true
+      },
+      "apkFingerprintScope": "local final output APK; no independently fetched installed APK hash",
+      "retainedFlutterUninstallWarning": true
+    },
+    {
+      "source": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+      "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+      "mode": "friends",
+      "startedSgt": "2026-10-14T11:59:37.1664306+08:00",
+      "endedSgt": "2026-10-14T12:01:32.0301231+08:00",
+      "exit": 0,
+      "cleanup": true,
+      "removedOwnedPackages": [],
+      "logSha256": "de3670b470420ca7408081ef9430760033a1c818cdc0a7c75332bb1231881ba9",
+      "apkSha256": "762537d7fbd07a0f2f9e3a9483bc74ff8a897940621afafef4dcd22b2e632c89",
+      "device": "enmori-validation-api36/emulator-5554",
+      "physicalDeviceTouched": false,
+      "cases": 1,
+      "synthetic": false,
+      "hostMarkers": {
+        "MY_FRIENDS_ANDROID_TWO_ACCOUNTS_ATOMIC_POINTER_READBACK": true
+      },
+      "apkFingerprintScope": "local final output APK; no independently fetched installed APK hash",
+      "retainedFlutterUninstallWarning": false
+    },
+    {
+      "source": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+      "tree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+      "mode": "persona",
+      "startedSgt": "2026-10-14T12:01:56.5398206+08:00",
+      "endedSgt": "2026-10-14T12:06:02.0364957+08:00",
+      "exit": 0,
+      "cleanup": true,
+      "removedOwnedPackages": [],
+      "logSha256": "a378e0aad8f21784107bc2b8c9e5893e2732ddad0fe6dd9e4cdb2e06fd7c3782",
+      "apkSha256": "63ab84652618495a15a9c2757bb6e9263324db8b6609f6734b1988402c2f63b5",
+      "device": "enmori-validation-api36/emulator-5554",
+      "physicalDeviceTouched": false,
+      "cases": 1,
+      "synthetic": false,
+      "hostMarkers": {
+        "PERSONA_PC13_ANDROID_TWO_OWNERS_PERSISTED_ACTIVE_DELETE_REVISION_4": true
+      },
+      "apkFingerprintScope": "local final output APK; no independently fetched installed APK hash",
+      "retainedFlutterUninstallWarning": false
+    }
+  ],
+  "newGateFixtures": [
+    {
+      "publicationPath": "integration_test/jin_ra_shared_gate_test.dart",
+      "executionSha256": "6f264b5dd368901aa24993509e61934af0b76df069b524ae03863497c20117c9",
+      "gitNormalizedSha256": "6f264b5dd368901aa24993509e61934af0b76df069b524ae03863497c20117c9",
+      "gitBlob": "77a275536b29fb3e637ddc24cca7cbd9069f6de8"
+    },
+    {
+      "publicationPath": "docs/evidence/sprint3/fixtures/2026-10-14-jin-next-gate/jin-actual-gateway-binding.mjs",
+      "executionSha256": "94db443e00872689865a6740de33abbfcc729dcd66143afbebf30456844760c1",
+      "gitNormalizedSha256": "94db443e00872689865a6740de33abbfcc729dcd66143afbebf30456844760c1",
+      "gitBlob": "3e5270ccefac7695095e7f09a2c905e414e98f6c"
+    },
+    {
+      "publicationPath": "docs/evidence/sprint3/fixtures/2026-10-14-jin-next-gate/jin-emulator-worker.mjs",
+      "executionSha256": "78c95a18b5c60beda6bc996e9fad64ddee4ccc9f780a5ee6bf3603b8abb2264c",
+      "gitNormalizedSha256": "78c95a18b5c60beda6bc996e9fad64ddee4ccc9f780a5ee6bf3603b8abb2264c",
+      "gitBlob": "d721bc4656535d5fa27a6bbb7308f28ebd38015d"
+    },
+    {
+      "publicationPath": "docs/evidence/sprint3/fixtures/2026-10-14-jin-next-gate/jin-guarded-emulators.mjs",
+      "executionSha256": "7f5f55b49916cac392309661901177ac99362ebaed75380ef41c3cced94f5b7e",
+      "gitNormalizedSha256": "7f5f55b49916cac392309661901177ac99362ebaed75380ef41c3cced94f5b7e",
+      "gitBlob": "92169bce65178cd492b2cb2dcbebc09e1748b0eb"
+    }
+  ],
+  "newGateFixtureChecks": {
+    "recordedSgt": "2026-10-14T11:58:03.3021989+08:00",
+    "formatExit": 0,
+    "syntax": [
+      {
+        "exit": 0,
+        "file": "jin-actual-gateway-binding.mjs"
+      },
+      {
+        "exit": 0,
+        "file": "jin-emulator-worker.mjs"
+      },
+      {
+        "exit": 0,
+        "file": "jin-guarded-emulators.mjs"
+      }
+    ]
+  },
+  "newGateDartAnalysis": {
+    "head": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+    "startedSgt": "2026-10-14T11:36:38.2296332+08:00",
+    "finishedSgt": "2026-10-14T11:36:45.8320311+08:00",
+    "command": "dart analyze --fatal-infos integration_test/jin_ra_shared_gate_test.dart",
+    "exit": 0,
+    "logSha256": "51315624381CDA39BD6A25B33AADD2E47DA7610097DBCA3F1F362AA8A2AE3061"
+  },
+  "prepublicationInputCheck": {
+    "changedVersionedPaths": 104,
+    "highSignalMatches": 0,
+    "authorityLinksVerified": 3,
+    "privateReportSha256": "b409d857320f6e3078bf0c2aa894d63fe0ac0a03f8f386db6d9a1b4a7b797196",
+    "scope": "bounded lexical scan of the accepted-input delta; not exhaustive secret detection"
+  },
+  "hostExecutionWrapper": {
+    "sha256": "35e9a039a517a086e49153eb30ed7653e4cca6af2e3ec881a303729e30c4068b",
+    "published": false,
+    "scope": "owner-local pinned tool paths and dedicated-AVD guard; all first executions use this same version"
+  },
+  "androidInitial": {
+    "recordedSgt": "2026-10-14T11:41:28.5309218+08:00",
+    "avd": "enmori-validation-api36\n\nOK",
+    "boot": "1",
+    "packages": "",
+    "zone": "GMT",
+    "autoTimeZone": "1",
+    "font": "1.0",
+    "reverse": "",
+    "forward": ""
+  },
+  "androidCompiledDistCopy": {
+    "source": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+    "status": "Pass",
+    "compiledFiles": 477
+  },
+  "cleanup": {
+    "source": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+    "startedSgt": "2026-10-14T12:06:19.7441488+08:00",
+    "serial": "emulator-5554",
+    "avd": "enmori-validation-api36",
+    "physicalDeviceTouched": false,
+    "sharedAdbOrGradleStopped": false,
+    "status": "Pass",
+    "exit": 0,
+    "settingsRestored": {
+      "zone": "GMT",
+      "autoTimeZone": "1",
+      "font": "1.0"
+    },
+    "removedTaskForwards": [
+      "tcp:58934",
+      "tcp:50619",
+      "tcp:51418",
+      "tcp:63712",
+      "tcp:55341",
+      "tcp:59829",
+      "tcp:53968"
+    ],
+    "remainingTaskProfiles": [],
+    "requiredPorts": [
+      {
+        "loopbackBindPassed": true,
+        "port": 8080
+      },
+      {
+        "loopbackBindPassed": true,
+        "port": 9099
+      },
+      {
+        "loopbackBindPassed": true,
+        "port": 4400
+      },
+      {
+        "loopbackBindPassed": true,
+        "port": 4500
+      },
+      {
+        "loopbackBindPassed": true,
+        "port": 9150
+      }
+    ],
+    "ownedAvdDeviceAndLauncherAbsent": true,
+    "endedSgt": "2026-10-14T12:06:27.0395712+08:00",
+    "adbQueriesAndActions": 22,
+    "everyRecordedAdbExitZero": true,
+    "privateReceiptSha256": "4a6c0d98268e82a825e96fcff66dfb07db62864d1dc243d0d873b43d7ca87706"
+  },
+  "inheritedCapabilityReports": "Accepted #92/#96 experiments remain attributed historical observations; no fresh capability-probe run is claimed by this combination gate.",
+  "retainedFailures": [
+    "Default-concurrency full Flutter 504 pass / 1 fail / exit1 at unchanged Persona pendingCreate null assertion; focused4 and later serial505 do not erase it. 40ms initial-load timeout/parallel load explanation remains an inference.",
+    "First Emulator attempt failed before product modules loaded: Windows --import path was not a file URL. Corrected only the execution worker, second full attempt76/76/outer0.",
+    "Accepted-input full-delta whitespace exit2: five whitespace findings in inherited #96 evidence; executable-code delta exit0. No historical artifact rewritten.",
+    "First AVD readiness read encountered offline during boot; no test ran then. Subsequent boot1 and all settings/package/map reads exit0 before execution.",
+    "Flutter internal teardown may attempt uninstall of absent ordinary package and report DELETE_FAILED_INTERNAL_ERROR; each wrapper later verified actual package removal and empty package/reverse inventory with exit0. Counts and logs are per invocation."
+  ],
+  "reviewPath": {
+    "compositionAndNewFixtures": "SHI pending",
+    "jinEvidence": "LI pending",
+    "pmAcceptance": "pending"
+  },
+  "notProved": [
+    "real AI model/store/context/reader/cleanup wiring",
+    "Account producer in ordinary/real-account runtime",
+    "cloud/index deployment or index enforcement",
+    "permanent deleted Note identifier non-reuse/restore guarantee",
+    "one all-feature Android journey",
+    "physical hardware Back/production Auth/API24-25/human accessibility/UAT/Release",
+    "whole module/42-route38-state/Sprint completion"
+  ],
+  "privateArtifacts": "Raw logs, APKs, local profiles and preparation scripts are not committed; only non-content identities and reproduction fixtures are published."
+}
