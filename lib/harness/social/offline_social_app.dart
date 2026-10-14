@@ -349,14 +349,17 @@ GoRouter _router(
       GoRoute(
         path: AppRoutes.eventRecommendations,
         builder: (context, _) => EventRecommendationsPage(
+          syntheticPreview: true,
           onOpenEvent: (id) =>
               context.push<void>('/events/${Uri.encodeComponent(id)}'),
         ),
       ),
       GoRoute(
         path: '/events/:eventId',
-        builder: (_, state) =>
-            EventDetailPage(eventId: state.pathParameters['eventId']!),
+        builder: (_, state) => EventDetailPage(
+          eventId: state.pathParameters['eventId']!,
+          syntheticPreview: true,
+        ),
       ),
       GoRoute(
         path: AppRoutes.aiAssistant,
@@ -371,6 +374,11 @@ GoRouter _router(
           onBack: () => back(context),
           onOpenSettings: () {
             if (current()) context.push<void>(AppRoutes.settings);
+          },
+          onOpenPersonas: () {
+            if (context.mounted && current()) {
+              context.push<void>(AppRoutes.managePersonas);
+            }
           },
         ),
       ),
