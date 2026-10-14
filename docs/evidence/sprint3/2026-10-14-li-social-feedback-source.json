@@ -1,18 +1,19 @@
 {
-  "source": "9d9d13e1c6174b04e4c8bb478ed7783f78f276fc",
-  "tree": "9c41f0898da71b3b0b4a0876f5d6174fb3e9a4f1",
+  "source": "ee57d20688f2e6ae45f4a558c257ca35d3f36224",
+  "tree": "377e37f7895313d8d1c022c3f2378d51b370b07f",
   "review_base": "ffb8e1122f48e5e9ccab5a53a4f3d2785e2c9156",
   "input_blobs": {
-    "docs/decisions/2026-10-14-li-social-feedback-navigation.md": "71cd79df8cf1858db79cc2c35afb7103fcdaf40f",
+    "docs/decisions/2026-10-14-li-social-feedback-navigation.md": "b5e6f3dcbd3d2ab1fa52949f5ab247ba13fd1df0",
     "lib/features/ai_conversation/presentation/ai_conversation_page.dart": "83b76b90de2f7a0aa917db49ff3c7bdd64093414",
     "lib/features/check_in/presentation/check_in_page.dart": "4189a59ba4e66b46eac38ea3d967a97c77373cbd",
+    "lib/features/friends/presentation/my_friends_page.dart": "db65fd335188d21f3e4ffa8b23cbe3ab7762cc96",
     "lib/harness/social/offline_setup_auth_repository.dart": "4f0b65b9a338d21d8c4e43bb099c3baa91914ad2",
-    "lib/harness/social/offline_social_app.dart": "a907c0d948678b5761775e7b75496bcc142ef9da",
+    "lib/harness/social/offline_social_app.dart": "6bb654897915e6ab417241b38e54ac912cc6f812",
     "lib/harness/social/offline_social_pages.dart": "9860d45e9e30405a7c0f06c089f6447c4576c5ad",
     "test/features/ai_conversation/ai_conversation_page_test.dart": "36bf2161a847b439a3601f209966f6268d9d50df",
     "test/harness/social/offline_account_setup_test.dart": "9388176875233aae584604dd342e54477aecac9c",
     "test/harness/social/offline_social_app_test.dart": "27d360a6e18bf26a468433227a835adf0e044b4d",
-    "test/harness/social/offline_social_feedback_test.dart": "32f46707da6da515f2283c603f73c6d7338393db"
+    "test/harness/social/offline_social_feedback_test.dart": "89bf141f9e92beaa4ec4b28ba06e5a034759e359"
   },
   "validation": {
     "full_flutter": {
@@ -28,7 +29,7 @@
     },
     "format": {
       "exit": 0,
-      "files": 11,
+      "files": 12,
       "changes": 0
     },
     "diff_check": {
@@ -51,8 +52,8 @@
   },
   "apk": {
     "filename": "ENMORI-Social-Feedback-20261014-arm64.apk",
-    "sha256": "b61701908b0f101998cdbb7b8c0e8cfd3fbd5e59cf24f7dec7e7889b60d4acc6",
-    "bytes": 121519597,
+    "sha256": "50b1fd65ca69af43a3f753aee4bc9f7fb28bca527e1b57101880e015df4f3b57",
+    "bytes": 121520514,
     "package": "com.enmori.app.personatest",
     "version_code": 2001,
     "version_name": "1.0.0",
@@ -122,6 +123,10 @@
       "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
       "bytes": 58
     },
+    "li-social-feedback-analysis-final-source.log": {
+      "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
+      "bytes": 58
+    },
     "li-social-feedback-analysis-final.log": {
       "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
       "bytes": 58
@@ -138,11 +143,19 @@
       "sha256": "78594d4e5b7ada076762354a3527ed6e258ec5c6c5a6fd5e72662417e1d9898c",
       "bytes": 1503
     },
+    "li-social-feedback-apk-final-source.log": {
+      "sha256": "fef9bd9fcc50d79432c7cbe1fc511b3705872472f782654c9e9b4873c982c3ec",
+      "bytes": 1503
+    },
     "li-social-feedback-apk.log": {
       "sha256": "5e2502ce2242aa75b9b550625d35b8b65bbef46d8f962c6b4a24cc10d1c3a01d",
       "bytes": 1753
     },
     "li-social-feedback-badging-delivery.log": {
+      "sha256": "0338c7a2ec9d043604df5fe19ed00a0e7f1d003a45e8019d63f2e01103616fa0",
+      "bytes": 4698
+    },
+    "li-social-feedback-badging-final-source.log": {
       "sha256": "0338c7a2ec9d043604df5fe19ed00a0e7f1d003a45e8019d63f2e01103616fa0",
       "bytes": 4698
     },
@@ -170,6 +183,10 @@
       "sha256": "48ce15c5c9f98db1eb6059a00c5a46ed349ffa216780a9acf56212e5d55af9ba",
       "bytes": 48
     },
+    "li-social-feedback-format-final-source.log": {
+      "sha256": "8780398bcb07521c69da42c7cd8e6124063ee2abc3a9b9417b9b8af2493b7e88",
+      "bytes": 48
+    },
     "li-social-feedback-format.log": {
       "sha256": "48ce15c5c9f98db1eb6059a00c5a46ed349ffa216780a9acf56212e5d55af9ba",
       "bytes": 48
@@ -177,6 +194,10 @@
     "li-social-feedback-full-delivery.log": {
       "sha256": "d9fd80330eb8ead8f8766844df1476e8b77deb027bb83f2d6f7cd3c6cbd0481e",
       "bytes": 99598
+    },
+    "li-social-feedback-full-final-source.log": {
+      "sha256": "3bf99239e9679d94138751bbaa99e719f9bbe854bf99d2ff54ca65bf40186edb",
+      "bytes": 99240
     },
     "li-social-feedback-full-final.log": {
       "sha256": "44c07d688a768c89f55e8430bd9ca74066185650bb61b90eb90ab322ee2bf7cf",
@@ -190,11 +211,19 @@
       "sha256": "60548f73c2f05998662902a14606690b555516b3b7d3cd7792f9aacb2596f4eb",
       "bytes": 13913
     },
+    "li-social-feedback-manifest-final-source.log": {
+      "sha256": "60548f73c2f05998662902a14606690b555516b3b7d3cd7792f9aacb2596f4eb",
+      "bytes": 13913
+    },
     "li-social-feedback-manifest.log": {
       "sha256": "60548f73c2f05998662902a14606690b555516b3b7d3cd7792f9aacb2596f4eb",
       "bytes": 13913
     },
     "li-social-feedback-raster-delivery.log": {
+      "sha256": "66d99062132b5b374974f082b816b12827cd9d8c24f1d3f556aa47041d1fa198",
+      "bytes": 248
+    },
+    "li-social-feedback-raster-final-source.log": {
       "sha256": "66d99062132b5b374974f082b816b12827cd9d8c24f1d3f556aa47041d1fa198",
       "bytes": 248
     },
@@ -207,6 +236,10 @@
       "bytes": 248
     },
     "li-social-feedback-signature-delivery.log": {
+      "sha256": "91925cfb114d718962d9f0748b1addef1dec90079d3f752180a6b597f46db44c",
+      "bytes": 777
+    },
+    "li-social-feedback-signature-final-source.log": {
       "sha256": "91925cfb114d718962d9f0748b1addef1dec90079d3f752180a6b597f46db44c",
       "bytes": 777
     },

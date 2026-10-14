@@ -11,8 +11,8 @@ Authority: [human feedback and bounded implementation record](../../decisions/20
 Pending under the retained Profile/Settings/Add Friend contracts. This change
 creates no real public Profile API or additional permitted fields.
 
-Executable **9d9d13e1c6174b04e4c8bb478ed7783f78f276fc**, tree
-**9c41f0898da71b3b0b4a0876f5d6174fb3e9a4f1**. Pinned review base is unchanged
+Executable **ee57d20688f2e6ae45f4a558c257ca35d3f36224**, tree
+**377e37f7895313d8d1c022c3f2378d51b370b07f**. Pinned review base is unchanged
 #100 **ffb8e1122f48e5e9ccab5a53a4f3d2785e2c9156**; #98/#100 source/review
 packets are preserved. [Exact inputs, command/log/image/APK fingerprints](2026-10-14-li-social-feedback-source.json)
 attribute this new contribution separately from all prior gates.
@@ -33,7 +33,7 @@ attribute this new contribution separately from all prior gates.
   sample visibility and one character count. Approved Note-only1–500 validation,
   creation-time visibility, pending/failure and explicit separate saved-read
   confirmation are retained. No Mood/photo/location or social Note read is added.
-- Home/Friends cards open an explicitly synthetic identity profile with only
+- Home/Friends cards and filtered search results open an explicitly synthetic identity profile with only
   existing DisplayName/Username and the derived name-initial avatar. Current
   friend removal and unknown Username show unavailable; Back pops or returns
   Home through the existing observed-session guard. No bio/contact/Interests/
@@ -52,7 +52,7 @@ scripted interaction, without enabling Firebase/Auth/provider/model access.
 The earlier #100 tests covered scripted AI only through the pre-onboarded entry;
 this missing consumer-chain coverage is corrected and disclosed here.
 
-Only opt-in presentation hooks, shared offline composition, the sample Auth and
+Only opt-in AI/Note/friend-search presentation hooks, shared offline composition, the sample Auth and
 focused tests change. AI controller/Domain/reader/real asynchronous Application,
 History/Calendar, ordinary Bootstrap/router, Backend/API/platform/dependencies
 retain their prior bytes. LI's new visual delta does not compete with owners'
@@ -64,7 +64,7 @@ real feature implementation. No new readiness claim follows from these inputs.
 | --- | --- |
 | Full Flutter, default concurrency | **537/537, exit0**, includes12 new cases |
 | Fatal-info analysis of lib/test/integration_test | No issues, exit0 |
-| Non-writing format of11 affected/harness Dart files | Zero changes, exit0 |
+| Non-writing format of12 affected/harness Dart files | Zero changes, exit0 |
 | Exact contribution whitespace | Pass, exit0 |
 | New-entry ARM64 debug APK | Build exit0; v2 signature verifies |
 | Manifest | Isolated `.personatest`, debuggable, min24/target36, no testOnly attribute |
@@ -75,7 +75,9 @@ confirm, Account-entry scripted request/reply, minimum-profile navigation and
 removal/unknown failures, guarded no-stack return, retained friend search,
 Me entry removal, Note save vs explicit confirmation and the sample token fence.
 Focused/raster cases overlap the537 and are not added to it. The final new
-source rechecks followed the analysis-style and profile-return corrections.
+source rechecks followed the analysis-style, profile-return and filtered-friend
+entry corrections. Search results use the same minimum profile and preserve
+the filtered search when returning.
 
 Preserved initial failures: the narrow keyboard probe initially selected multiple
 Scrollables; it now targets the actual conversation scrollable. A missing test
@@ -109,7 +111,7 @@ physical phone photography or human accessibility proof.
 
 Local APK, Chinese instructions, images and checksum are in the primary workspace:
 `build/distributions/social-feedback-20261014/ENMORI-Social-Feedback-20261014-arm64.apk`.
-SHA256 **b61701908b0f101998cdbb7b8c0e8cfd3fbd5e59cf24f7dec7e7889b60d4acc6**.
+SHA256 **50b1fd65ca69af43a3f753aee4bc9f7fb28bca527e1b57101880e015df4f3b57**.
 Package `com.enmori.app.personatest`, ARM64, versionCode2001/version1.0.0,
 min24/target36. No APK/signing material/private raw logs are publicly uploaded.
 Physical installation/run, new real Backend/Emulator/model gate, API24/25,
