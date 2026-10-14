@@ -328,7 +328,10 @@ export class FirestoreConversationStore implements RealConversationStore {
       if (!exact(effect, ["kind", "userMessageId"], ["assistantMessageId"]) || effect.kind !== t.kind || effect.userMessageId !== t.userMessageId) refuse("unavailable");
       const user = this.requireUser(inv, t.userMessageId);
       const fence = await tx.get(fencePath(t));
-      if (fence === undefined || !this.fenceMatches(fence, t) || fence.state !== "closed") return { state: "unresolved" };
+      if (fence !== undefined && (!this.fenceMatches(fence, t) || fence.state !== "closed")) return { state: "unresolved" };
+      // A normally retired guard leaves a canonical effect and a settled U.
+      // Absence alone never proves no effect or authorizes clearing a claim.
+      if(fence===undefined&&user.data.pendingOperationId!==undefined)return {state:"unresolved"};
       // Reading old A must NEVER clear B or grant C. A closed barrier cannot settle B.
       if (user.data.pendingOperationId !== undefined && user.data.pendingOperationId !== t.operationId) return { state: "unresolved" };
       const assistant = await this.pair(tx, t, inv, user);
@@ -339,6 +342,29 @@ export class FirestoreConversationStore implements RealConversationStore {
       }
       return assistant === undefined ? { state: "user_saved", user: this.message(user) }
         : { state: "assistant_saved", user: this.message(user), assistant };
+    });
+  }
+
+  async retireOperation(t:OperationTarget,epoch:RuntimeEpoch,originalSettled:()=>boolean):Promise<StoreResult<void>>{
+    return this.run(async tx=>{
+      requireTarget(t);await this.epoch(tx,epoch);if(!tx.delete)refuse("unavailable");
+      const fence=await tx.get(fencePath(t));if(!fence)return;
+      if(!this.fenceMatches(fence,t))refuse("unavailable");
+      const previousEpoch=fence.processEpoch!==epoch.processEpoch;
+      if(!previousEpoch&&(fence.state!=="closed"||!originalSettled()))refuse("conflict");
+      const inv=await this.inventory(tx,t),effect=await tx.get(effectPath(t));
+      if(effect!==undefined&&(!exact(effect,["kind","userMessageId"],["assistantMessageId"])||effect.kind!==t.kind||effect.userMessageId!==t.userMessageId))refuse("unavailable");
+      const user=inv?.rows.find(row=>row.id===t.userMessageId);
+      if(user&&user.data.role!=="user")refuse("unavailable");
+      if(effect!==undefined&&(!user||user.data.role!=="user"))refuse("unavailable");
+      const assistant=user&&inv?await this.pair(tx,t,inv,user):undefined;
+      if(effect?.assistantMessageId!==undefined&&effect.assistantMessageId!==assistant?.messageId)refuse("unavailable");
+      if(user?.data.pendingOperationId===t.operationId&&effect===undefined)refuse("unavailable");
+      if(!previousEpoch&&!originalSettled())refuse("conflict");
+      // Do not clear B while retiring A. A current original needs synchronous
+      // settlement proof; a previous original cannot pass the confirmed epoch.
+      if(user?.data.pendingOperationId===t.operationId){const {pendingOperationId:_claim,...settled}=user.data;tx.set(userPath(t),settled);}
+      tx.delete(fencePath(t));
     });
   }
 

@@ -11,6 +11,8 @@ import { FirestoreConversationCleanup } from "../src/ai-conversation/infrastruct
 import { FirestoreConversationMaintenance } from "../src/ai-conversation/infrastructure/firestore-conversation-maintenance.js";
 import type { ConversationQuiescence } from "../src/ai-conversation/ports/conversation-cleanup.js";
 import type { RuntimeEpoch } from "../src/ai-conversation/ports/real-conversation-store.js";
+import { retirePreviousConversationEpoch } from "../src/ai-conversation/infrastructure/firestore-conversation-restart.js";
+import { createAuthBindingDocumentId } from "../src/shared/infrastructure/firebase/firestore-records.js";
 
 const env=requireControlledEmulatorEnvironment(process.env);
 const app=initializeApp({projectId:env.projectId},`ai-maintenance-${randomUUID()}`);
@@ -150,4 +152,60 @@ test("actual noncanonical group ancestor is reported and retained while later le
   const result=await components().maintenance.sourceSweep(epoch);
   assert.equal(result.complete,false);assert.ok(result.failures>0);assert.equal(result.changed,1);
   assert.equal((await db.doc(bad).get()).exists,true);assert.equal((await db.doc(`${row.base}/message_sources/${row.a}`).get()).exists,false);
+});
+
+test("actual normal fence retirement requires closed and settled original, keeps canonical outcome, cannot reopen old effect",async()=>{
+  const row=await pair(),operationId=randomUUID(),uid=`maintenance-${randomUUID()}`;
+  const target={ownerAccountId:owner,conversationId:row.cid,userMessageId:row.u,operationId,kind:"send" as const,targetKind:"reserved_new" as const};
+  await set(`auth_bindings/${createAuthBindingDocumentId(uid)!}`,{accountId:owner});
+  await set(`${row.base}/effects/${operationId}`,{kind:"send",userMessageId:row.u,assistantMessageId:row.a});
+  await db.doc(`${row.base}/messages/${row.u}`).update({pendingOperationId:operationId});
+  const fence=`ai_operation_fences/${operationId}`;
+  await set(fence,{ownerAccountId:owner,conversationId:row.cid,userMessageId:row.u,kind:"send",targetKind:"reserved_new",processEpoch:epoch.processEpoch,revision:2,state:"closed"});
+  const store=new FirestoreConversationStore(gateway,process.env,now);
+  assert.equal((await store.retireOperation(target,epoch,()=>false)).kind,"conflict");assert.equal((await db.doc(fence).get()).exists,true);
+  assert.equal((await store.retireOperation(target,epoch,()=>true)).kind,"confirmed");assert.equal((await db.doc(fence).get()).exists,false);
+  assert.equal((await db.doc(`${row.base}/messages/${row.u}`).get()).data()!.pendingOperationId,undefined);
+  const outcome=await store.readOutcome({firebaseUid:uid},target);assert.equal(outcome.kind,"confirmed");
+  if(outcome.kind==="confirmed")assert.equal(outcome.value.state,"assistant_saved");
+  // This test's verifier is a clearly synthetic authority fake; transaction and
+  // binding are actual SDK. Separate store fixtures cover real Firebase Auth.
+  assert.equal((await store.initializeOperation(target,epoch,{principal:{firebaseUid:uid},current:()=>true,
+    dependencies:{ownerId:owner,purpose:"checkin_conversation",purposeRevocationGeneration:2,usedPersonaId:undefined,sources:[]},
+    verifyCurrentAuth:async()=>({kind:"verified",principal:{firebaseUid:uid}})})).kind,"conflict");
+});
+
+test("actual retirement of old A never clears B's pending ownership or makes old A readback resolved",async()=>{
+  const row=await pair(),a=randomUUID(),b=randomUUID(),uid=`maintenance-${randomUUID()}`;
+  const target={ownerAccountId:owner,conversationId:row.cid,userMessageId:row.u,operationId:a,kind:"send" as const,targetKind:"reserved_new" as const};
+  await set(`auth_bindings/${createAuthBindingDocumentId(uid)!}`,{accountId:owner});
+  await set(`${row.base}/effects/${a}`,{kind:"send",userMessageId:row.u});
+  await db.doc(`${row.base}/messages/${row.u}`).update({pendingOperationId:b});
+  await set(`ai_operation_fences/${a}`,{ownerAccountId:owner,conversationId:row.cid,userMessageId:row.u,kind:"send",targetKind:"reserved_new",processEpoch:epoch.processEpoch,revision:2,state:"closed"});
+  const store=new FirestoreConversationStore(gateway,process.env,now);
+  assert.equal((await store.retireOperation(target,epoch,()=>true)).kind,"confirmed");
+  assert.equal((await db.doc(`${row.base}/messages/${row.u}`).get()).data()!.pendingOperationId,b);
+  assert.deepEqual(await store.readOutcome({firebaseUid:uid},target),{kind:"confirmed",value:{state:"unresolved"}});
+});
+
+test("actual confirmed new epoch retires previous controls across pages and settles only canonical old claims",async()=>{
+  const row=await pair(),operationId=randomUUID(),oldEpoch=epoch;
+  const store=new FirestoreConversationStore(gateway,process.env,now);
+  await db.doc(`${row.base}/messages/${row.u}`).update({pendingOperationId:operationId});
+  await set(`${row.base}/effects/${operationId}`,{kind:"send",userMessageId:row.u,assistantMessageId:row.a});
+  const fences=[];
+  for(let i=0;i<28;i++){
+    const id=i===0?operationId:randomUUID(),fence=`ai_operation_fences/${id}`;fences.push(fence);
+    await set(fence,{ownerAccountId:owner,conversationId:i===0?row.cid:randomUUID(),userMessageId:i===0?row.u:randomUUID(),
+      kind:"send",targetKind:"reserved_new",processEpoch:oldEpoch.processEpoch,revision:1,state:"open"});
+  }
+  const start=await store.startEpoch(randomUUID());assert.equal(start.kind,"confirmed");if(start.kind!=="confirmed")return;epoch=start.value;
+  const result=await retirePreviousConversationEpoch(gateway,store,epoch,process.env);
+  assert.deepEqual(result,{complete:true,inspected:28,retired:28,failures:0});
+  for(const path of fences)assert.equal((await db.doc(path).get()).exists,false);
+  assert.equal((await db.doc(`${row.base}/messages/${row.u}`).get()).data()!.pendingOperationId,undefined);
+  assert.equal((await db.doc(`${row.base}/effects/${operationId}`).get()).exists,true);
+  assert.equal((await db.doc(`${row.base}/messages/${row.u}`).get()).createTime!.isEqual(row.original.createTime!),true);
+  assert.equal((await store.closeOperation({ownerAccountId:owner,conversationId:row.cid,userMessageId:row.u,operationId,kind:"send",targetKind:"reserved_new"},oldEpoch)).kind,"terminated");
+  assert.equal((await db.doc(`ai_operation_fences/${operationId}`).get()).exists,false);
 });

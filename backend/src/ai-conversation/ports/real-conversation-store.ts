@@ -78,6 +78,11 @@ export interface RealConversationStore {
   readPendingUser(operation: OpenOperation, authority: OriginalWriteAuthority): Promise<StoreResult<StoredUserIdentity>>;
   /** Synchronously end the original Application BEFORE invoking this method. */
   closeOperation(target: OperationTarget, epoch: RuntimeEpoch): Promise<StoreResult<void>>;
+  /** No TTL. Current-epoch removal additionally requires actual original ticket /
+   * initialization/content I/O disposal and settlement held throughout this call.
+   * A confirmed newer epoch independently fences all previous-epoch DB effects;
+   * it never proves remote model termination or recovers a control capability. */
+  retireOperation(target:OperationTarget,epoch:RuntimeEpoch,originalSettled:()=>boolean):Promise<StoreResult<void>>;
   /** Only after a definite assistant ACK while the original request is still current. */
   settleAcknowledgedAssistant(operation: OpenOperation,
     authority: OriginalWriteAuthority): Promise<StoreResult<void>>;
