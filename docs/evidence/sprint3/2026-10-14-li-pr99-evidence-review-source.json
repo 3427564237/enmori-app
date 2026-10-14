@@ -1,0 +1,56 @@
+{
+  "recordedUtc": "2026-10-14T07:28:18.068775+00:00",
+  "reviewer": "LI independent source/evidence review",
+  "syntaxNode": "v24.19.0",
+  "head": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+  "tree": "12308b7cc5901dc2d622a34d11a465e310d0a0bf",
+  "product": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+  "productTree": "4393ec335c4c0724cee8f6193912e4902decbd15",
+  "checks": [
+    "two independent merge-tree reconstructions match actual two-parent commits",
+    "949-file exact path/blob/mode union, all input ancestors, inventory SHA256",
+    "six publication-only additions; four fixture byte identities; three Node syntax checks",
+    "eight protected source files equal #97, index equals #95, API27/schema33",
+    "owner manifest preserves first Flutter failure, seven separate source-bound Android invocations and whitespace exception",
+    "new publication and inherited executable delta whitespace clean; full historical delta not relabelled"
+  ],
+  "fixtures": [
+    {
+      "path": "integration_test/jin_ra_shared_gate_test.dart",
+      "gitBlob": "77a275536b29fb3e637ddc24cca7cbd9069f6de8",
+      "sha256": "6f264b5dd368901aa24993509e61934af0b76df069b524ae03863497c20117c9",
+      "bytes": 7096
+    },
+    {
+      "path": "docs/evidence/sprint3/fixtures/2026-10-14-jin-next-gate/jin-actual-gateway-binding.mjs",
+      "gitBlob": "3e5270ccefac7695095e7f09a2c905e414e98f6c",
+      "sha256": "94db443e00872689865a6740de33abbfcc729dcd66143afbebf30456844760c1",
+      "bytes": 1972
+    },
+    {
+      "path": "docs/evidence/sprint3/fixtures/2026-10-14-jin-next-gate/jin-emulator-worker.mjs",
+      "gitBlob": "d721bc4656535d5fa27a6bbb7308f28ebd38015d",
+      "sha256": "78c95a18b5c60beda6bc996e9fad64ddee4ccc9f780a5ee6bf3603b8abb2264c",
+      "bytes": 1260
+    },
+    {
+      "path": "docs/evidence/sprint3/fixtures/2026-10-14-jin-next-gate/jin-guarded-emulators.mjs",
+      "gitBlob": "92169bce65178cd492b2cb2dcbebc09e1748b0eb",
+      "sha256": "7f5f55b49916cac392309661901177ac99362ebaed75380ef41c3cced94f5b7e",
+      "bytes": 3228
+    }
+  ],
+  "ownerCounts": {
+    "backend": 649,
+    "emulator": 76,
+    "flutterFirst": "504/1/exit1",
+    "flutterSerial": "505/0/exit0"
+  },
+  "notRunByLi": [
+    "Backend/Flutter product suites",
+    "actual SDK/Emulator",
+    "Android or physical phone",
+    "private artifact rehash"
+  ],
+  "residual": "Original Flutter root cause remains unconfirmed; no blanket green gate or reliability closure."
+}
