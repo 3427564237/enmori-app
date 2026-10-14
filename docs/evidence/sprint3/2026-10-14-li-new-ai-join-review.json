@@ -1,0 +1,80 @@
+{
+  "reviewer": "LI",
+  "zhouHead": "6c62bdf33748d15d25d10eb0a6c505030e04aaa5",
+  "jinHead": "71dfa60266bebd5f38dfef97d020214e5e5b7703",
+  "jinProduct": "96c0b70b3d5d7d8c806b6797f72f2b250f106b91",
+  "results": {
+    "zhouBackend": 774,
+    "zhouFlutterFocused": 8,
+    "zhouScopedAnalysis": "Pass",
+    "jinBackend": 798,
+    "jinActualIsolatedEmulator": 129,
+    "jinOuterExit": 0,
+    "failCancelSkipTodo": 0,
+    "workerAndOuterProfilesRemoved": true,
+    "fiveRequiredPortsFree": true
+  },
+  "localLogFingerprints": [
+    {
+      "label": "107Backend",
+      "bytes": 72444,
+      "sha256": "ec0d98ea893ae2b39dd73625137bafb5641e100fcf1cbc40d952f3fbbe648284",
+      "rawLogPublished": false
+    },
+    {
+      "label": "105Build",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rawLogPublished": false
+    },
+    {
+      "label": "105Backend",
+      "bytes": 75100,
+      "sha256": "a6046252f196cb5159dc45be7a648dd17f9446031a6911fe9474769775d61526",
+      "rawLogPublished": false
+    },
+    {
+      "label": "105Emulator",
+      "bytes": 18557,
+      "sha256": "5b957828db1aa2951050466281d9c399f4312e930f7b79691219fcfaf93a0be6",
+      "rawLogPublished": false
+    }
+  ],
+  "actualTokenizer": {
+    "source": "71dfa60266bebd5f38dfef97d020214e5e5b7703",
+    "actualProductSource": "96c0b70b3d5d7d8c806b6797f72f2b250f106b91",
+    "completePromptCount": 247,
+    "fullFramingAndUnicodeRoundTrip": true,
+    "injectedRoleControlsEscaped": true,
+    "actualRawTokenizerBoundaryCounts": [
+      4096,
+      4097
+    ],
+    "preAbortedCounterRejected": true,
+    "providerCalls": 0,
+    "productWrites": 0,
+    "promptOrTokenIdsRetained": false,
+    "modelGeneration": "Not Run",
+    "semanticPolicy": "Not established",
+    "limitation": "Raw boundary checks test tokenizer counts only, not an Application-valid complete input. Profile/file binding is not proof that the model is currently loaded or immutable."
+  },
+  "reviewerInitialFailure": "Incorrect Flutter suite path; corrected run 8/8.",
+  "realModelApplication": "Not Run",
+  "newDevice": "Not Run",
+  "jinCodeReview": "SHI required for later source; not replaced by LI evidence replay",
+  "actualModelOperator": {
+    "source": "71dfa60266bebd5f38dfef97d020214e5e5b7703",
+    "actualProductSource": "96c0b70b3d5d7d8c806b6797f72f2b250f106b91",
+    "scope": "One synthetic operator preload if needed and one actual adapter generation; no application/store/semantic composition",
+    "productWrites": 0,
+    "rawResponseRetained": false,
+    "promptRetained": false,
+    "zeroContentPreloadMs": 6760,
+    "completeInputTokens": 193,
+    "elapsedMs": 2525,
+    "adapterState": "stopped",
+    "structuredGrammarAccepted": true,
+    "semanticPolicy": "Not executed"
+  },
+  "zhouFormalReview": "https://github.com/3427564237/enmori-app/pull/107#pullrequestreview-5519290009"
+}
