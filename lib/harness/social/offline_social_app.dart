@@ -278,7 +278,15 @@ GoRouter _router(
       ),
       GoRoute(
         path: '/friends/list',
-        builder: (_, _) => const MyFriendsListPage(),
+        builder: (context, _) => MyFriendsListPage(
+          onOpenFriend: (username) {
+            if (context.mounted &&
+                current() &&
+                GoRouter.of(context).state.uri.path == '/friends/list') {
+              context.push<void>(offlineFriendProfilePath(username));
+            }
+          },
+        ),
       ),
       GoRoute(
         path: '/friends/:username/profile',

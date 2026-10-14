@@ -199,6 +199,11 @@ void main() {
       await tap(tester, 'my-friends-search');
       expect(find.text('Jamie · Sample'), findsOneWidget);
       expect(find.text('Alex · Sample'), findsNothing);
+      await tap(tester, 'my-friend-profile-jamie_sample');
+      expect(find.text('@jamie_sample'), findsOneWidget);
+      await tap(tester, 'offline-friend-back');
+      expect(find.byKey(const Key('route-my-friends')), findsOneWidget);
+      expect(find.text('Alex · Sample'), findsNothing);
       await tester.tap(find.byTooltip('Back'));
       await tester.pumpAndSettle();
       await tap(tester, 'social-nav-me');

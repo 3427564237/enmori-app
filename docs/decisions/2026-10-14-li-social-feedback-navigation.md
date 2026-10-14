@@ -43,7 +43,7 @@ affected real-data behaviours remain Pending, localized to that projection.
 
 All new runtime effects stay in the explicit offline composition. LI owns this
 shared UI contribution. Minimal opt-in presentation hooks to existing AI/Note
-pages support that composition; controller, reader, real asynchronous
+pages plus the existing friend-search view support that composition; controller, reader, real asynchronous
 Application and Backend ownership remain with their assigned owners. This is
 not a competing rewrite of ZHOU's AI or DU's History/Calendar work.
 

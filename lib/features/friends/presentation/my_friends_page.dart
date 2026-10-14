@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'my_friends_controller.dart';
 
 final class MyFriendsListPage extends ConsumerStatefulWidget {
-  const MyFriendsListPage({super.key});
+  const MyFriendsListPage({this.onOpenFriend, super.key});
+  final ValueChanged<String>? onOpenFriend;
 
   @override
   ConsumerState<MyFriendsListPage> createState() => _MyFriendsListPageState();
@@ -116,16 +117,24 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
               ),
             for (final friend in state.friends)
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(friend.displayName),
-                      Text('Username: ${friend.username}'),
-                    ],
-                  ),
-                ),
+                child: widget.onOpenFriend != null
+                    ? ListTile(
+                        key: Key('my-friend-profile-${friend.username}'),
+                        title: Text(friend.displayName),
+                        subtitle: Text('Username: ${friend.username}'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => widget.onOpenFriend?.call(friend.username),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(friend.displayName),
+                            Text('Username: ${friend.username}'),
+                          ],
+                        ),
+                      ),
               ),
             if (state.nextCursor != null)
               OutlinedButton(
