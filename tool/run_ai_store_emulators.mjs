@@ -8,6 +8,7 @@ import { resolve, join, relative, isAbsolute } from 'node:path';
 import { createServer } from 'node:net';
 import { buildControlledEmulatorTestEnvironment } from '../backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js';
 assert.equal(process.version,'v24.19.0');
+assert.ok(process.argv.slice(2).length===0 || (process.argv.length===3 && process.argv[2]==='--coordinator-only'));
 const readJson=path=>JSON.parse(readFileSync(path,'utf8'));
 const required = createRequire(import.meta.url);
 const adminRequire = createRequire(required.resolve('firebase-admin/app'));
@@ -29,7 +30,7 @@ try {
   },directory);
   env.CI='true';env.FIREBASE_CLI_DISABLE_USAGE='true';env.FIREBASE_EMULATORS_PATH=process.env.FIREBASE_EMULATORS_PATH;
   const quote=value=>'"'+value.replaceAll('"','\\"')+'"';
-  const command=[process.execPath,resolve('tool/ai_store_emulator_worker.mjs')].map(quote).join(' ');
+  const command=[process.execPath,resolve('tool/ai_store_emulator_worker.mjs'),...process.argv.slice(2)].map(quote).join(' ');
   const code=await new Promise((done,reject)=>{const child=spawn(process.execPath,[
     resolve('node_modules/firebase-tools/lib/bin/firebase.js'),'emulators:exec','--project','demo-enmori-rmvp01a-r10',
     '--only','auth,firestore','--config','firebase.json','--non-interactive',command,
