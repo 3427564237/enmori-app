@@ -12,11 +12,13 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
   const EventRecommendationsSection({
     required this.onSeeAll,
     this.onOpenEvent,
+    this.syntheticPreview = false,
     super.key,
   });
 
   final VoidCallback onSeeAll;
   final void Function(String)? onOpenEvent;
+  final bool syntheticPreview;
 
   @override
   ConsumerState<EventRecommendationsSection> createState() =>
@@ -55,13 +57,19 @@ final class _EventRecommendationsSectionState
       onSeeAll: widget.onSeeAll,
       home: true,
       onOpenEvent: widget.onOpenEvent,
+      syntheticPreview: widget.syntheticPreview,
     );
   }
 }
 
 final class EventRecommendationsPage extends ConsumerStatefulWidget {
-  const EventRecommendationsPage({this.onOpenEvent, super.key});
+  const EventRecommendationsPage({
+    this.onOpenEvent,
+    this.syntheticPreview = false,
+    super.key,
+  });
   final void Function(String)? onOpenEvent;
+  final bool syntheticPreview;
 
   @override
   ConsumerState<EventRecommendationsPage> createState() =>
@@ -110,6 +118,7 @@ final class _EventRecommendationsPageState
               state: state,
               onRetry: _load,
               onOpenEvent: widget.onOpenEvent,
+              syntheticPreview: widget.syntheticPreview,
             ),
           ],
         ),
@@ -125,17 +134,19 @@ final class _RecommendationContent extends StatelessWidget {
     this.onSeeAll,
     this.home = false,
     this.onOpenEvent,
+    this.syntheticPreview = false,
   });
 
   final AsyncValue<EventRecommendationResponse> state;
   final VoidCallback onRetry;
   final VoidCallback? onSeeAll;
   final bool home;
+  final bool syntheticPreview;
   final void Function(String)? onOpenEvent;
 
   @override
   Widget build(BuildContext context) {
-    return switch (state) {
+    final content = switch (state) {
       AsyncLoading<EventRecommendationResponse>() => const _StatusPanel(
         key: Key('event-recommendations-loading'),
         title: 'Loading event recommendations',
@@ -175,6 +186,25 @@ final class _RecommendationContent extends StatelessWidget {
                 onOpenEvent: onOpenEvent,
               ),
     };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (syntheticPreview) ...[
+          const Card(
+            key: Key('event-synthetic-notice'),
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Synthetic Event preview — examples only. '
+                'No real registration or participation.',
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        content,
+      ],
+    );
   }
 
   String _errorCopy(Object error) {
@@ -214,6 +244,14 @@ final class _RecommendationList extends StatelessWidget {
                     ? null
                     : () => onOpenEvent!(item.eventId),
                 title: Text(item.title),
+                leading: Icon(
+                  Icons.event_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                trailing: onOpenEvent == null
+                    ? null
+                    : const Icon(Icons.chevron_right),
+                contentPadding: const EdgeInsets.all(16),
                 subtitle: Text(
                   '${_formatTime(item.startAt)} to ${_formatTime(item.endAt)}\n'
                   'Matches: ${item.matchedInterests.map((interest) => interest.displayName).join(', ')}',

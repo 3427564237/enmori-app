@@ -7,8 +7,13 @@ import '../domain/event_detail_repository.dart';
 import 'event_detail_controller.dart';
 
 final class EventDetailPage extends ConsumerStatefulWidget {
-  const EventDetailPage({required this.eventId, super.key});
+  const EventDetailPage({
+    required this.eventId,
+    this.syntheticPreview = false,
+    super.key,
+  });
   final String eventId;
+  final bool syntheticPreview;
   @override
   ConsumerState<EventDetailPage> createState() => _EventDetailPageState();
 }
@@ -34,6 +39,19 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage> {
           key: const Key('route-event-detail'),
           padding: const EdgeInsets.all(24),
           children: [
+            if (widget.syntheticPreview) ...[
+              const Card(
+                key: Key('event-detail-synthetic-notice'),
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'Synthetic Event preview — examples only. '
+                    'No real organiser, registration or participation.',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             switch (state) {
               AsyncLoading<EventDetail>() => Semantics(
                 liveRegion: true,
@@ -68,9 +86,21 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 16),
-                  Text('Starts: ${value.startAt.toLocal()}'),
-                  Text(
-                    'Ends: ${value.endAt?.toLocal().toString() ?? 'Not provided'}',
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.schedule),
+                          const SizedBox(height: 8),
+                          Text('Starts: ${value.startAt.toLocal()}'),
+                          Text(
+                            'Ends: ${value.endAt?.toLocal().toString() ?? 'Not provided'}',
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text('Location: ${value.locationLabel ?? 'Not provided'}'),
