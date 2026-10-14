@@ -281,6 +281,13 @@ GoRouter _router(
         builder: (_, _) => const MyFriendsListPage(),
       ),
       GoRoute(
+        path: '/friends/:username/profile',
+        builder: (_, state) => OfflineFriendProfilePage(
+          store: store,
+          username: state.pathParameters['username'] ?? '',
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.profileEdit,
         builder: (_, _) =>
             const AccountPreferencesPage(view: PreferencesView.profile),
@@ -302,8 +309,11 @@ GoRouter _router(
       ),
       GoRoute(
         path: AppRoutes.checkIn,
-        builder: (context, _) =>
-            CheckInComposerPage(onReturnHome: () => back(context)),
+        builder: (context, _) => CheckInComposerPage(
+          socialStyle: true,
+          visibility: store.settings.checkInVisibility,
+          onReturnHome: () => back(context),
+        ),
       ),
       GoRoute(
         path: '/check-in/:checkInId',
@@ -342,6 +352,13 @@ GoRouter _router(
       GoRoute(
         path: AppRoutes.aiAssistant,
         builder: (context, _) => AiConversationPage(
+          socialStyle: true,
+          navigationBarBuilder: (navigate) => OfflineSocialNavigation(
+            selectedIndex: 3,
+            onSelected: (index) => navigate(() {
+              if (context.mounted && current()) selectSocialTab(context, index);
+            }),
+          ),
           onBack: () => back(context),
           onOpenSettings: () {
             if (current()) context.push<void>(AppRoutes.settings);

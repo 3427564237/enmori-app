@@ -16,11 +16,16 @@ final class AiConversationPage extends ConsumerWidget {
   const AiConversationPage({
     required this.onBack,
     required this.onOpenSettings,
+    this.socialStyle = false,
+    this.navigationBarBuilder,
     super.key,
   });
 
   final VoidCallback onBack;
   final VoidCallback onOpenSettings;
+  final bool socialStyle;
+  final Widget Function(ValueChanged<VoidCallback> navigate)?
+  navigationBarBuilder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => _ConversationPage(
@@ -29,6 +34,8 @@ final class AiConversationPage extends ConsumerWidget {
     ),
     onBack: onBack,
     onOpenSettings: onOpenSettings,
+    socialStyle: socialStyle,
+    navigationBarBuilder: navigationBarBuilder,
   );
 }
 
@@ -36,11 +43,16 @@ final class _ConversationPage extends ConsumerStatefulWidget {
   const _ConversationPage({
     required this.onBack,
     required this.onOpenSettings,
+    this.socialStyle = false,
+    this.navigationBarBuilder,
     super.key,
   });
 
   final VoidCallback onBack;
   final VoidCallback onOpenSettings;
+  final bool socialStyle;
+  final Widget Function(ValueChanged<VoidCallback> navigate)?
+  navigationBarBuilder;
 
   @override
   ConsumerState<_ConversationPage> createState() => _ConversationPageState();
@@ -220,6 +232,10 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         state.phase == AiConversationPhase.deleted ||
         state.phase == AiConversationPhase.unauthenticated;
 
+    if (widget.socialStyle) {
+      return _socialScaffold(state, status, contentHidden, hasText);
+    }
+
     return PopScope<void>(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -389,6 +405,286 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       ),
     );
   }
+
+  Widget _socialScaffold(
+    AiConversationState state,
+    String? status,
+    bool contentHidden,
+    bool hasText,
+  ) {
+    final content = <Widget>[
+      if (state.messages.isEmpty && !contentHidden) ...[
+        const SizedBox(height: 28),
+        Center(
+          child: Container(
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: Icon(
+              Icons.auto_awesome_outlined,
+              size: 38,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'A little space for you',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -.6),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          'Write a message whenever you feel ready.',
+          textAlign: TextAlign.center,
+          style: TextStyle(height: 1.6),
+        ),
+        const SizedBox(height: 28),
+      ],
+      if (status != null)
+        Semantics(
+          key: const Key('ai-status'),
+          liveRegion: true,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(status, style: const TextStyle(height: 1.5)),
+            ),
+          ),
+        ),
+      if (state.canCancel)
+        _socialAction('ai-cancel', 'Cancel', _controller.cancel),
+      if (state.canCheckResult &&
+          state.phase != AiConversationPhase.idle &&
+          state.phase != AiConversationPhase.success)
+        _socialAction(
+          'ai-check-result',
+          'Check result',
+          state.readBusy ? null : () => unawaited(_controller.checkResult()),
+        ),
+      if (state.canLeaveWithoutRetrying) ...[
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 12),
+          child: Text(
+            'We may not be able to confirm whether this message was '
+            'saved. You can leave without retrying it. Leaving does '
+            'not delete saved messages.',
+            key: Key('ai-recovery-explanation'),
+          ),
+        ),
+        _socialAction(
+          'ai-leave-without-retrying',
+          'Leave without retrying',
+          () => unawaited(_navigate(widget.onBack)),
+        ),
+      ],
+      if (!contentHidden) ...[
+        for (final message in state.messages)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 7),
+            child: _MessageTile(message: message, bubble: true),
+          ),
+      ],
+      if (state.phase == AiConversationPhase.deleteUnknown)
+        _socialAction(
+          'ai-check-delete',
+          'Check again',
+          state.readBusy
+              ? null
+              : () => unawaited(_controller.deleteConversation()),
+        ),
+    ];
+    final composer = Padding(
+      key: const Key('ai-pinned-composer'),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: TextField(
+                  key: const Key('ai-message-input'),
+                  controller: _message,
+                  focusNode: _messageFocus,
+                  enabled: state.canSend || state.canRetry,
+                  minLines: 1,
+                  maxLines: 4,
+                  onChanged: (_) => setState(() {}),
+                  decoration: const InputDecoration(
+                    labelText: 'Message',
+                    hintText: 'Write a message…',
+                    alignLabelWithHint: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              FilledButton(
+                key: const Key('ai-send'),
+                style: _buttonStyle,
+                onPressed: state.canSend && hasText
+                    ? () => _submit(retry: false)
+                    : null,
+                child: Semantics(
+                  label: 'Send message',
+                  child: const ExcludeSemantics(
+                    child: Icon(Icons.arrow_upward),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (state.canRetry)
+            _socialAction(
+              'ai-retry',
+              'Retry',
+              hasText ? () => _submit(retry: true) : null,
+            ),
+        ],
+      ),
+    );
+    return PopScope<void>(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) unawaited(_navigate(widget.onBack));
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: widget.navigationBarBuilder == null,
+          leading: widget.navigationBarBuilder == null
+              ? IconButton(
+                  key: const Key('ai-back'),
+                  tooltip: 'Back',
+                  onPressed: () => unawaited(_navigate(widget.onBack)),
+                  icon: const Icon(Icons.arrow_back),
+                )
+              : null,
+          title: const Text('AI companion'),
+          actions: [
+            if (state.canCheckResult ||
+                (!contentHidden && state.conversationId != null))
+              PopupMenuButton<String>(
+                key: const Key('ai-conversation-actions'),
+                tooltip: 'Conversation actions',
+                onSelected: _selectSocialAction,
+                itemBuilder: (context) => [
+                  if (state.canCheckResult)
+                    PopupMenuItem(
+                      value: 'check',
+                      key: const Key('ai-check-result-menu'),
+                      enabled: !state.readBusy,
+                      child: const Text('Check result'),
+                    ),
+                  if (!contentHidden && state.conversationId != null)
+                    PopupMenuItem(
+                      value: 'reload',
+                      key: const Key('ai-reload-messages'),
+                      enabled: !state.readBusy,
+                      child: const Text('Reload messages'),
+                    ),
+                  if (!contentHidden && state.nextCursor != null)
+                    PopupMenuItem(
+                      value: 'earlier',
+                      key: const Key('ai-load-earlier'),
+                      enabled: !state.readBusy,
+                      child: const Text('Load earlier messages'),
+                    ),
+                  if (!contentHidden && state.canDelete)
+                    const PopupMenuItem(
+                      value: 'delete',
+                      key: Key('ai-delete'),
+                      child: Text('Delete conversation'),
+                    ),
+                ],
+              ),
+            IconButton(
+              key: const Key('ai-settings'),
+              tooltip: 'Settings',
+              onPressed: () => unawaited(_navigate(widget.onOpenSettings)),
+              icon: const Icon(Icons.tune),
+            ),
+          ],
+        ),
+        body: SafeArea(
+          top: false,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Very small keyboard/large-text viewports must keep the input
+                  // reachable by scrolling instead of overflowing a fixed Column.
+                  if (constraints.maxHeight < 260) {
+                    return ListView(
+                      key: const Key('route-ai-conversation'),
+                      padding: const EdgeInsets.all(16),
+                      children: [...content, if (!contentHidden) composer],
+                    );
+                  }
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: ListView(
+                          key: const Key('route-ai-conversation'),
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                          children: content,
+                        ),
+                      ),
+                      if (!contentHidden) composer,
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+        bottomNavigationBar: widget.navigationBarBuilder?.call(
+          (navigate) => unawaited(_navigate(navigate)),
+        ),
+      ),
+    );
+  }
+
+  void _selectSocialAction(String action) {
+    if (!_ownsCurrentSession || _confirming || _leaving) return;
+    final state = ref.read(aiConversationControllerProvider);
+    final hidden = {
+      AiConversationPhase.deleting,
+      AiConversationPhase.deleteUnknown,
+      AiConversationPhase.deleted,
+      AiConversationPhase.unauthenticated,
+    }.contains(state.phase);
+    switch (action) {
+      case 'check':
+        if (state.canCheckResult && !state.readBusy)
+          unawaited(_controller.checkResult());
+      case 'reload':
+        if (!hidden && state.conversationId != null && !state.readBusy) {
+          unawaited(_controller.loadMessages());
+        }
+      case 'earlier':
+        if (!hidden && !state.readBusy && state.nextCursor != null) {
+          unawaited(_controller.loadMessages(before: state.nextCursor));
+        }
+      case 'delete':
+        if (!hidden && state.canDelete) unawaited(_delete());
+    }
+  }
+
+  Widget _socialAction(String key, String label, VoidCallback? action) =>
+      Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: OutlinedButton(
+          key: Key(key),
+          style: _buttonStyle,
+          onPressed: action,
+          child: Text(label),
+        ),
+      );
 }
 
 String? _statusCopy(AiConversationPhase phase) => switch (phase) {
@@ -415,35 +711,94 @@ String? _statusCopy(AiConversationPhase phase) => switch (phase) {
 };
 
 final class _MessageTile extends StatelessWidget {
-  const _MessageTile({required this.message});
+  const _MessageTile({required this.message, this.bubble = false});
 
   final AiMessage message;
+  final bool bubble;
 
   @override
-  Widget build(BuildContext context) => Card(
-    key: ValueKey('ai-message-${message.messageId}'),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            message.role == AiRole.user ? 'You' : 'AI',
-            style: Theme.of(context).textTheme.labelLarge,
+  Widget build(BuildContext context) {
+    if (bubble) {
+      final fromUser = message.role == AiRole.user;
+      final time = message.persistedAt.toUtc();
+      final clock =
+          '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} UTC';
+      return Align(
+        alignment: fromUser ? Alignment.centerRight : Alignment.centerLeft,
+        child: FractionallySizedBox(
+          widthFactor: .88,
+          child: Container(
+            key: ValueKey('ai-message-${message.messageId}'),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: fromUser
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Colors.white,
+              border: fromUser
+                  ? null
+                  : Border.all(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(fromUser ? 20 : 5),
+                topRight: Radius.circular(fromUser ? 5 : 20),
+                bottomLeft: const Radius.circular(20),
+                bottomRight: const Radius.circular(20),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  fromUser ? 'You' : 'AI',
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  message.availability == AiAvailability.unavailable
+                      ? 'This reply is no longer available.'
+                      : message.text ?? '',
+                  style: const TextStyle(height: 1.6),
+                ),
+                const SizedBox(height: 10),
+                Semantics(
+                  label: 'Saved at ${time.toIso8601String()}',
+                  child: Text(
+                    clock,
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            message.availability == AiAvailability.unavailable
-                ? 'This reply is no longer available.'
-                : message.text ?? '',
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message.persistedAt.toUtc().toIso8601String(),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
+        ),
+      );
+    }
+    return Card(
+      key: ValueKey('ai-message-${message.messageId}'),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              message.role == AiRole.user ? 'You' : 'AI',
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message.availability == AiAvailability.unavailable
+                  ? 'This reply is no longer available.'
+                  : message.text ?? '',
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message.persistedAt.toUtc().toIso8601String(),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

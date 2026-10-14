@@ -2,11 +2,126 @@ import 'dart:async';
 
 import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
 import 'package:enmori/features/ai_conversation/presentation/ai_conversation_page.dart';
+import 'package:enmori/harness/social/offline_social_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final destination in [0, 1, 2, 4]) {
+    testWidgets(
+      'social AI tab $destination passes through cancel/leave before navigation',
+      (tester) async {
+        final controller = _PageController(
+          _state(phase: AiConversationPhase.waiting, canCancel: true),
+        );
+        await _pump(
+          tester,
+          controller,
+          socialStyle: true,
+          navigationBarBuilder: (navigate) => OfflineSocialNavigation(
+            selectedIndex: 3,
+            onSelected: (index) =>
+                navigate(() => controller.events.add('tab-$index')),
+          ),
+        );
+        await _tap(tester, 'social-nav-ai');
+        expect(controller.events, isEmpty);
+        expect(find.text('Stay'), findsNothing);
+        final key = ['home', 'friends', 'check-in', 'ai', 'me'][destination];
+        await _tap(tester, 'social-nav-$key');
+        expect(find.text('Request cancel and leave'), findsOneWidget);
+        await tester.tap(find.text('Stay'));
+        await tester.pumpAndSettle();
+        expect(controller.events, isEmpty);
+        await _tap(tester, 'social-nav-$key');
+        await _tap(tester, 'ai-confirm-leave');
+        expect(controller.events, ['leave', 'tab-$destination']);
+        expect(controller.sent, isEmpty);
+      },
+    );
+  }
+
+  testWidgets(
+    'social AI keeps private content and input hidden for terminal states',
+    (tester) async {
+      for (final phase in [
+        AiConversationPhase.deleting,
+        AiConversationPhase.deleteUnknown,
+        AiConversationPhase.deleted,
+        AiConversationPhase.unauthenticated,
+      ]) {
+        final controller = _PageController(
+          _state(
+            phase: phase,
+            messages: [
+              _message('private', 1, AiRole.user, 'Private hidden draft'),
+            ],
+          ),
+        );
+        await _pump(tester, controller, socialStyle: true);
+        expect(
+          find.text('Private hidden draft'),
+          findsNothing,
+          reason: phase.name,
+        );
+        expect(find.byKey(const Key('ai-message-input')), findsNothing);
+        expect(find.byKey(const Key('ai-send')), findsNothing);
+        if (phase == AiConversationPhase.deleteUnknown) {
+          expect(find.byKey(const Key('ai-check-delete')), findsOneWidget);
+        }
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+      }
+    },
+  );
+
+  testWidgets(
+    'social AI input stays reachable with keyboard and 2x text on a narrow phone',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetViewInsets);
+      final semantics = tester.ensureSemantics();
+      try {
+        final controller = _PageController(_state(canSend: true));
+        await _pump(
+          tester,
+          controller,
+          socialStyle: true,
+          textScale: 2,
+          navigationBarBuilder: (navigate) =>
+              OfflineSocialNavigation(selectedIndex: 3, onSelected: (_) {}),
+        );
+        final input = find.byKey(const Key('ai-message-input'));
+        await tester.scrollUntilVisible(
+          input,
+          200,
+          scrollable: find
+              .descendant(
+                of: find.byKey(const Key('route-ai-conversation')),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        await tester.pumpAndSettle();
+        await tester.enterText(input, 'Keyboard-safe input');
+        await _tap(tester, 'ai-send');
+        expect(controller.sent, ['Keyboard-safe input']);
+        expect(
+          find.byKey(const Key('social-bottom-navigation')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      } finally {
+        semantics.dispose();
+      }
+    },
+  );
+
   testWidgets('Send needs input and Cancel dispatches synchronously', (
     tester,
   ) async {
@@ -535,6 +650,8 @@ Future<void> _pump(
   VoidCallback? onBack,
   VoidCallback? onSettings,
   double textScale = 1,
+  bool socialStyle = false,
+  Widget Function(ValueChanged<VoidCallback>)? navigationBarBuilder,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -550,6 +667,8 @@ Future<void> _pump(
         home: AiConversationPage(
           onBack: onBack ?? () {},
           onOpenSettings: onSettings ?? () {},
+          socialStyle: socialStyle,
+          navigationBarBuilder: navigationBarBuilder,
         ),
       ),
     ),
