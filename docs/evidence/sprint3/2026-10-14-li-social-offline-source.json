@@ -1,0 +1,207 @@
+{
+  "recordedAtSgt": "2026-10-14T11:53:12.730639+08:00",
+  "executable": "303d052257f3ee7f02dc8c6772efc0f4015c6a58",
+  "tree": "6b7540ce983830d9b78ef3df462222fad560d70b",
+  "base": "2406bc88abf227c665e3b7e3e8a4d37c1ed1325c",
+  "scope": "Explicit process-local synthetic social harness; ordinary app/router/bootstrap and Backend unchanged",
+  "entry": "lib/social_offline_harness.dart",
+  "sourceBindings": [
+    {
+      "path": "lib/social_offline_harness.dart",
+      "sha256": "64a6ed3dc26bdbfa1c69f2fececa29869da3f7b44ce27395342ec51400e847c7",
+      "bytes": 187,
+      "gitBlob": "8caf7d8a462aeaaa640d52b9822ea6d07885e8aa"
+    },
+    {
+      "path": "lib/harness/social/offline_social_pages.dart",
+      "sha256": "f1790ee4062b841484de79a14b65f217049cec84ab5117fd54660a2c7b131e4b",
+      "bytes": 20867,
+      "gitBlob": "221955ffc7f529d51e3e8a4e22cf0b2fd5851b39"
+    },
+    {
+      "path": "lib/harness/social/offline_social_store.dart",
+      "sha256": "358a135579892dd17621c151c2a1c0e6ddf02dabf9abba12bbacc354aa1ba6a6",
+      "bytes": 21887,
+      "gitBlob": "5365e9fa434aecda902d690d2a09cddbbc822089"
+    },
+    {
+      "path": "lib/harness/social/offline_social_app.dart",
+      "sha256": "1aa7d79b4e1f0b1ccd9b7ce21c93d3323239e44e034b272a32f5803794dbaa06",
+      "bytes": 12109,
+      "gitBlob": "3c40eab254c74c6aa698c9ef50c9226355c44858"
+    },
+    {
+      "path": "test/harness/social/offline_social_store_test.dart",
+      "sha256": "c301d54e28d37c7557653fc79950a34e03f6402aa7e9f01eafb9c4068c3ce327",
+      "bytes": 6690,
+      "gitBlob": "77e783cab052b3c191361c047bb40f32ce861be1"
+    },
+    {
+      "path": "test/harness/social/offline_social_app_test.dart",
+      "sha256": "df728e35db341ab51f699722eba6510c71cbaa7dbc61974e14a803abe0bfde41",
+      "bytes": 9371,
+      "gitBlob": "277f245906a1a9cf7ed1588d652f4f034be8dfb0"
+    }
+  ],
+  "flutter": {
+    "passed": 517,
+    "exit": 0,
+    "newCasesIncluded": 12,
+    "overlapNotAdded": true
+  },
+  "analysis": {
+    "issues": 0,
+    "exit": 0
+  },
+  "format": {
+    "files": 6,
+    "changed": 0,
+    "exit": 0
+  },
+  "android": {
+    "buildExit": 0,
+    "package": "com.enmori.app.personatest",
+    "versionCode": 2001,
+    "minSdk": 24,
+    "targetSdk": 36,
+    "abi": "arm64-v8a",
+    "signatureVerified": true,
+    "testOnly": false,
+    "deviceExecution": "Not Run; adb had no attached device",
+    "apk": {
+      "path": "ENMORI-Social-Offline-20261014-arm64.apk",
+      "sha256": "42a4910b24991847e4040aa579f1f9f7706d0396ec7d2f99d544834b424bca88",
+      "bytes": 121350961
+    }
+  },
+  "failureHistory": [
+    "Initial parser/type/style analysis failures, corrected before runtime",
+    "focused-first: 6 pass / 3 fail; artwork overflow, tap timing and mistaken create-vs-confirm test expectation",
+    "focused-second: 8 pass / 1 fail, profile header overflow at320px/1.5 text",
+    "layout diagnostic identified exact Profile Row",
+    "font capture waited in fake async; interrupted exit130, corrected using tester.runAsync",
+    "focused-final: 10 pass / 1 fail, test incorrectly expected Persona editor auto-return; corrected to existing explicit Back",
+    "focused-verified: 11/11 pass; later cursor test included in full517"
+  ],
+  "receipts": [
+    {
+      "path": "build/li-social-offline/flutter-full.log",
+      "sha256": "4e0e0e260d995150d09a3718270f8fc102fec0256628e45dbdec22cbcb07f43e",
+      "bytes": 90151
+    },
+    {
+      "path": "build/li-social-offline/flutter-full-exit.txt",
+      "sha256": "19eaf43821a7660ec323a87c8457bf74823beb296c39f5e01aa8a683aa50f061",
+      "bytes": 7
+    },
+    {
+      "path": "build/li-social-offline/analysis-clean.log",
+      "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
+      "bytes": 58
+    },
+    {
+      "path": "build/li-social-offline/analysis-clean-exit.txt",
+      "sha256": "19eaf43821a7660ec323a87c8457bf74823beb296c39f5e01aa8a683aa50f061",
+      "bytes": 7
+    },
+    {
+      "path": "build/li-social-offline/format-check.log",
+      "sha256": "c62f0e99b6b1b8d78cee6bd090c47ad964d71d0d37e589eaa92ff23fa69d2227",
+      "bytes": 47
+    },
+    {
+      "path": "build/li-social-offline/android-build.log",
+      "sha256": "5fa1cf920e3b72777c2f8f9974ad740cf5db8963e221bf76a25f64ba6ca4754f",
+      "bytes": 1753
+    },
+    {
+      "path": "build/li-social-offline/android-build-exit.txt",
+      "sha256": "19eaf43821a7660ec323a87c8457bf74823beb296c39f5e01aa8a683aa50f061",
+      "bytes": 7
+    },
+    {
+      "path": "build/li-social-offline/apk-badging.txt",
+      "sha256": "0338c7a2ec9d043604df5fe19ed00a0e7f1d003a45e8019d63f2e01103616fa0",
+      "bytes": 4698
+    },
+    {
+      "path": "build/li-social-offline/apk-signature.txt",
+      "sha256": "b0a1af67205efcd284e5bbae691ebf4a0d296b4fcae02cd28e7e0509d0e0efbc",
+      "bytes": 343
+    },
+    {
+      "path": "build/li-social-offline/focused-first.log",
+      "sha256": "66b713dbe9053e2dbe6a0e6a92084b2b599edc8b3f73b7634994e09cd5025e08",
+      "bytes": 15185
+    },
+    {
+      "path": "build/li-social-offline/focused-second.log",
+      "sha256": "bd4965db2c434ff7b64976934be9f9ea597c3693618a2e35449a008a53e21d51",
+      "bytes": 3815
+    },
+    {
+      "path": "build/li-social-offline/layout-diagnostic.log",
+      "sha256": "85aa7efe59ee08c0416a8870ade926084efc60bdff463caa8071af9255f513cf",
+      "bytes": 5437
+    },
+    {
+      "path": "build/li-social-offline/focused-third.log",
+      "sha256": "5b237fa46596283190d0fb6b26790f1e83fe6a53af94295c4cd12b3eca6212d1",
+      "bytes": 1779
+    },
+    {
+      "path": "build/li-social-offline/focused-final.log",
+      "sha256": "510f83f4459d47776a5e33dc978c14fd68697654b456e6d001b05cd85a11f835",
+      "bytes": 4395
+    },
+    {
+      "path": "build/li-social-offline/focused-verified.log",
+      "sha256": "b222d4de8c0734e8f2c41d7e8e002561ceae59a400b553be9e185e628e0b3ba9",
+      "bytes": 2195
+    }
+  ],
+  "renders": {
+    "type": "Actual Flutter widget-test raster captures, not physical phone/browser screenshots",
+    "dimensions": [
+      780,
+      1688
+    ],
+    "viewport": [
+      390,
+      844
+    ],
+    "font": "Optional system Inter and existing Flutter MaterialIcons loaded only for capture; not app dependencies",
+    "newHubNarrowTextCheck": "320x640 /1.5x, no overflow; does not prove all leaf pages or human accessibility",
+    "images": [
+      {
+        "path": "build/li-social-offline/screens/home.png",
+        "sha256": "c48b1812bb97c2e416505da3534f486ec46a7b18d4070dbad9927a9b52018e27",
+        "bytes": 164584
+      },
+      {
+        "path": "build/li-social-offline/screens/profile.png",
+        "sha256": "8815f94897a1199684b15f597e5d2c9c1d82e0d3b604e6bf4f94734b865674be",
+        "bytes": 110828
+      },
+      {
+        "path": "build/li-social-offline/screens/friends.png",
+        "sha256": "233b2041b480526a440640f10bf28a915827fb4ce8501a1aa73a7017435842e5",
+        "bytes": 154855
+      }
+    ]
+  },
+  "review": {
+    "DU": "Pending; new LI code not self-approved",
+    "JINchangedCandidateGate": "Not Run; #97 remains unchanged/excluded",
+    "wholeS3UatRelease": "Unproved"
+  },
+  "boundaries": {
+    "remoteBackendConfigured": false,
+    "firebaseInitialized": false,
+    "liveModel": false,
+    "newDependencies": false,
+    "diskPersistence": false,
+    "realProviderEventOrRegistration": false,
+    "normalAppChanged": false
+  }
+}
