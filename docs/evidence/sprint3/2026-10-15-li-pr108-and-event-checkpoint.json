@@ -1,0 +1,75 @@
+{
+  "reviewer": "LI",
+  "head": "c1060448e53034a297c9f5da536c991ca900505a",
+  "product": "098d6517ba7d08a58c190c43b5fecf9f59615a40",
+  "independentBackend": 873,
+  "independentActualIsolatedEmulator": 132,
+  "emulatorOuterExit": 0,
+  "failCancelSkipTodo": 0,
+  "profilesRemoved": true,
+  "fiveRequiredPortsFree": true,
+  "independentFlutterFocused": 14,
+  "scopedAnalysis": "Pass",
+  "formalReview": "https://github.com/3427564237/enmori-app/pull/108#pullrequestreview-5521308725",
+  "localLogFingerprints": [
+    {
+      "label": "108Backend",
+      "bytes": 82440,
+      "sha256": "7fe26c4f12498baaea8fb6a9013a9d36dc53b2681b6694d5a6c7cc8443fbccd3",
+      "rawLogPublished": false
+    },
+    {
+      "label": "108Emulator",
+      "bytes": 19147,
+      "sha256": "a6d7186c5f7002a6927451200f20ee0809c74437c9ce0f5014f1fa10b541a8d4",
+      "rawLogPublished": false
+    }
+  ],
+  "actualControlledPacket": {
+    "source": "c1060448e53034a297c9f5da536c991ca900505a",
+    "product": "098d6517ba7d08a58c190c43b5fecf9f59615a40",
+    "policy": "bounded_routine_summary_v1",
+    "executedAtUtc": "2026-10-14T16:32:27.096Z",
+    "realModelAndTokenizer": true,
+    "authAndStore": "Synthetic owned empty-Note fixture",
+    "rawResponseRetained": false,
+    "productWrites": 0,
+    "zeroContentPreloadMs": 4472,
+    "report": {
+      "modelState": "stopped",
+      "modelDispatches": 1,
+      "runtime": {
+        "admission": "open",
+        "quarantined": false,
+        "queued": 0,
+        "nonTerminal": 0
+      },
+      "scope": "synthetic-auth-empty-note-memory-store-complete-body-sink",
+      "semanticGate": "explicitly-injected",
+      "completeInputTokenCounts": [
+        185
+      ],
+      "results": [
+        {
+          "index": 0,
+          "result": "failure",
+          "failure": "AI_REPLY_REJECTED",
+          "elapsedMs": 3031.9473080000007,
+          "usersCommitted": 1,
+          "assistantsCommitted": 0,
+          "bodiesAccepted": 0,
+          "syntheticRetentionAnchor": "user",
+          "inputAvailableBeforeGeneration": true,
+          "candidateAvailableBeforeCheck": true,
+          "borrowedGettersRevoked": true,
+          "originalCapabilityRevoked": true
+        }
+      ],
+      "localContentHoldersCleared": true
+    }
+  },
+  "restartR1": "SHI Changes Requested5521128730 remains; source inspected, counterexample not rerun by LI",
+  "event109": "Exact718da394 docs-only candidate; human selection and ZHOU technical review pending",
+  "realModelSuccessfulSemanticAcceptance": false,
+  "newDevice": "Not Run"
+}
