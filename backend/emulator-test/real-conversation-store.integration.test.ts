@@ -12,7 +12,15 @@ import { FirebaseIdentityVerifier } from "../src/shared/infrastructure/firebase/
 import { FirestoreConversationStore } from "../src/ai-conversation/infrastructure/firestore-conversation-store.js";
 import { FirestoreConversationCleanup } from "../src/ai-conversation/infrastructure/firestore-conversation-cleanup.js";
 import type { ConversationQuiescence } from "../src/ai-conversation/ports/conversation-cleanup.js";
-import type { StoreResult, OperationTarget, OpenOperation, OriginalWriteAuthority, RuntimeEpoch } from "../src/ai-conversation/ports/real-conversation-store.js";
+import { AsyncFirestoreConversationStore } from "../src/ai-conversation/infrastructure/async-firestore-conversation-store.js";
+import { FirebaseAdminAsyncConversationAuthority } from "../src/ai-conversation/infrastructure/firebase-admin-async-conversation-authority.js";
+import { FirebaseAdminRealContextReader } from "../src/ai-conversation/infrastructure/firebase-admin-real-context-reader.js";
+import { AsyncConversationApplication } from "../src/ai-conversation/application/async-conversation-application.js";
+import { AuthorizedAsyncConversationGenerationTransport } from "../src/ai-conversation/application/async-conversation-generation-transport.js";
+import { BoundedAiRuntime } from "../src/ai-runtime/application/bounded-ai-runtime.js";
+import { MonotonicRuntimeClock } from "../src/ai-runtime/infrastructure/monotonic-runtime-clock.js";
+import type { AsyncConversationIdentity, AsyncDeliveryMessage } from "../src/ai-conversation/ports/async-conversation.js";
+import type { StoredUserIdentity, StoreResult, OperationTarget, OpenOperation, OriginalWriteAuthority, RuntimeEpoch } from "../src/ai-conversation/ports/real-conversation-store.js";
 import { buildApp } from "../src/bootstrap/build-app.js";
 import { err } from "../src/shared/domain/result.js";
 import { appFailure } from "../src/shared/application/app-failure.js";
@@ -57,6 +65,11 @@ const settledFixture:ConversationQuiescence={withTargetClosed:async <T>(o:string
   for(const target of targets.filter(t=>t.conversationId===c))confirmed(await store.closeOperation(target,epoch));
   return {kind:"settled",value:await work()};
 }};
+async function identityOf(op: OperationTarget): Promise<StoredUserIdentity> {
+  const row=await firestore.doc(user(op)).get(); assert.equal(row.exists,true);
+  return {messageId:op.userMessageId,sequence:row.data()!.sequence as number,
+    persistedAt:{seconds:row.createTime!.seconds,nanoseconds:row.createTime!.nanoseconds}};
+}
 async function saved(t = target()): Promise<OpenOperation> {
   const op = confirmed(await store.initializeOperation(t, epoch, authority()));
   confirmed(await store.saveUser(op, () => "Synthetic user message", authority())); return op;
@@ -89,7 +102,7 @@ after(async () => {
     }
     for (const t of targets) { await firestore.doc(`ai_operation_fences/${t.operationId}`).delete();
       assert.equal((await firestore.doc(`ai_operation_fences/${t.operationId}`).get()).exists, false); }
-    for (const path of [binding, accountPath, "ai_runtime_fence/current"]) {
+    for (const path of [binding, `${accountPath}/persona_state/current`, accountPath, "ai_runtime_fence/current", "ai_cleanup_progress/source_sweep"]) {
       await firestore.doc(path).delete(); assert.equal((await firestore.doc(path).get()).exists, false);
     }
     await auth.deleteUser(uid); await assert.rejects(auth.getUser(uid)); token = "";
@@ -120,11 +133,11 @@ test("all-pending A -> B -> C: old A cannot clear B; accepted pair is visible th
   const a = await saved(); confirmed(await store.closeOperation(a, epoch));
   assert.equal(confirmed(await store.readOutcome({ firebaseUid: uid }, a)).state, "user_saved");
   const b = confirmed(await store.initializeOperation(retry(a), epoch, authority()));
-  confirmed(await store.claimRetry(b, () => "Synthetic user message", authority()));
+  confirmed(await store.claimRetry(b, () => "Synthetic user message", await identityOf(b), authority()));
   const before = await firestore.doc(user(a)).get();
   assert.equal(confirmed(await store.readOutcome({ firebaseUid: uid }, a)).state, "unresolved");
   const c = confirmed(await store.initializeOperation(retry(a), epoch, authority()));
-  assert.equal((await store.claimRetry(c, () => "Synthetic user message", authority())).kind, "conflict");
+  assert.equal((await store.claimRetry(c, () => "Synthetic user message", await identityOf(c), authority())).kind, "conflict");
   const id = await assistant(b);
   assert.equal(confirmed(await store.readOutcome({ firebaseUid: uid }, a)).state, "unresolved");
   confirmed(await store.closeOperation(b, epoch));
@@ -132,7 +145,7 @@ test("all-pending A -> B -> C: old A cannot clear B; accepted pair is visible th
   const fromA = confirmed(await store.readOutcome({ firebaseUid: uid }, a));
   assert.equal(fromA.state, "assistant_saved"); if (fromA.state === "assistant_saved") assert.equal(fromA.assistant.messageId, id);
   assert.equal((await firestore.doc(user(a)).get()).createTime!.isEqual(before.createTime!), true);
-  assert.equal((await store.claimRetry(c, () => "Synthetic user message", authority())).kind, "conflict");
+  assert.equal((await store.claimRetry(c, () => "Synthetic user message", await identityOf(c), authority())).kind, "conflict");
 });
 test("cancel before initialization leaves closed placeholder and late initialization never opens it", async () => {
   const t = target(); confirmed(await store.closeOperation(t, epoch));
@@ -196,7 +209,7 @@ test("single-attempt concurrent retries grant at most one claim; settled explici
     }
   }};
   const raceStore=new FirestoreConversationStore(observed,process.env);
-  const results = await Promise.all([raceStore.claimRetry(b, () => "Synthetic user message", authority()), raceStore.claimRetry(c, () => "Synthetic user message", authority())]);
+  const results = await Promise.all([raceStore.claimRetry(b, () => "Synthetic user message", await identityOf(b), authority()), raceStore.claimRetry(c, () => "Synthetic user message", await identityOf(c), authority())]);
   const winners=results.filter(r=>r.kind==="confirmed").length;
   assert.ok(winners<=1);assert.ok(results.every(r=>["confirmed","conflict","unresolved"].includes(r.kind)));
   // maxAttempts:1 permits both real competing transactions to be ABORTED. Do
@@ -214,7 +227,7 @@ test("single-attempt concurrent retries grant at most one claim; settled explici
   if(pending!==undefined)confirmed(await store.readOutcome({firebaseUid:uid},pending===b.operationId?b:c));
   assert.equal(confirmed(await store.readOutcome({firebaseUid:uid},a)).state,"user_saved");
   const d=confirmed(await store.initializeOperation(retry(a),epoch,authority()));
-  confirmed(await store.claimRetry(d,()=>"Synthetic user message",authority()));
+  confirmed(await store.claimRetry(d,()=>"Synthetic user message",await identityOf(d),authority()));
   assert.equal((await firestore.doc(user(a)).get()).data()!.pendingOperationId,d.operationId);
   console.info("JIN_AI_CLAIM_RACE",JSON.stringify({confirmed:winners,sdkAborted:sdkCodes.length,explicitSettledControl:1}));
 });
@@ -230,7 +243,7 @@ test("canonical assistant tombstone occupies original U and cannot be retried", 
     assert.equal(outcome.assistant.availability, "unavailable"); assert.equal(Object.hasOwn(outcome.assistant, "text"), false);
   }
   const r = confirmed(await store.initializeOperation(retry(op), epoch, authority()));
-  assert.equal((await store.claimRetry(r, () => "Synthetic user message", authority())).kind, "conflict");
+  assert.equal((await store.claimRetry(r, () => "Synthetic user message", await identityOf(r), authority())).kind, "conflict");
 });
 test("missing provenance and corrupt retention lineage fail closed without removing original content", async () => {
   const op = await saved(), id = await assistant(op); confirmed(await store.closeOperation(op, epoch));
@@ -292,6 +305,60 @@ test("expiry rechecks the complete current anchor and refuses stale-cutoff delet
   const expired=Math.ceil(last.toMillis())+90*86400000+1;
   assert.deepEqual(await new FirestoreConversationCleanup(gateway,process.env,q,()=>expired).expireKnown(owner,op.conversationId,epoch),{kind:"deleted"});
   assert.equal(quiesced,1);assert.equal((await firestore.doc(parent(op)).get()).exists,false);
+});
+
+test("Retry rejects changed immutable original-user metadata in the actual claim transaction",async()=>{
+  const a=await saved();confirmed(await store.closeOperation(a,epoch));confirmed(await store.readOutcome({firebaseUid:uid},a));
+  const b=confirmed(await store.initializeOperation(retry(a),epoch,authority())), actual=await identityOf(a);
+  assert.equal((await store.claimRetry(b,()=>"Synthetic user message",{...actual,persistedAt:{...actual.persistedAt,seconds:actual.persistedAt.seconds+1}},authority())).kind,"conflict");
+  assert.equal((await firestore.doc(user(a)).get()).data()!.pendingOperationId,undefined);
+  assert.equal((await firestore.doc(`${parent(a)}/effects/${b.operationId}`).get()).exists,false);
+  confirmed(await store.closeOperation(b,epoch));
+  const c=confirmed(await store.initializeOperation(retry(a),epoch,authority()));
+  confirmed(await store.claimRetry(c,()=>"Synthetic user message",actual,authority()));
+});
+
+test("actual Auth and fixed/current SDK reader join ZHOU async Application to real store with explicitly fake Qwen and gates",async()=>{
+  const targetOp=target(), session={}, tokenInstance={}, originalRequest={};let active=true, modelCalls=0;
+  const identity:AsyncConversationIdentity={principal:{firebaseUid:uid},ownerId:owner,session,tokenInstance,originalRequest};
+  await firestore.doc(`${accountPath}/persona_state/current`).set({stateRevision:0,livePersonaIds:[]});
+  const same=(i:AsyncConversationIdentity)=>active&&i.ownerId===owner&&i.principal.firebaseUid===uid&&i.session===session&&i.tokenInstance===tokenInstance&&i.originalRequest===originalRequest;
+  const authz=new FirebaseAdminAsyncConversationAuthority(firestore,{current:same,verify:async()=>verifier.verifyIdToken(token)},process.env);
+  const clock=new MonotonicRuntimeClock();
+  const reads=new FirebaseAdminRealContextReader(firestore,{controlledEnvironment:process.env,monotonicNow:()=>clock.now(),
+    originalAuthority:{verify:async c=>{
+      if(!active||c.ownerId!==owner||c.session!==session||c.originalRequest!==originalRequest)return {kind:"terminated"};
+      const v=await verifier.verifyIdToken(token);return v.kind==="verified"?{kind:"read",value:v.principal}:{kind:"denied"};
+    }},
+    // Complete OWNED fixture inventory: zero Notes for this random owner; this
+    // test creates none and never restores/reuses IDs. No operational DU grant.
+    notePrerequisites:{firestore,sourceReferences:["backend/emulator-test/real-conversation-store.integration.test.ts#actual-empty-source-async-join"],
+      completeCanonicalUtcInventory:true,immutableOwnerNoteAndTime:true,permanentDeletion:true,noRestoreOrIdReuse:true}});
+  const bridge=new AsyncFirestoreConversationStore(store,epoch,authz);
+  const model=new AuthorizedAsyncConversationGenerationTransport({generate:async input=>{
+    modelCalls++;assert.deepEqual(input.checkIns,[]);assert.equal(input.currentMessage,"Explicit synthetic async join");
+    return Buffer.from(JSON.stringify({schemaVersion:"ai_assistant_message_v1",message:"Explicit fake Qwen reply"}));
+  }});
+  const runtime=new BoundedAiRuntime(clock,model), deliveries:AsyncDeliveryMessage[]=[];
+  const application=new AsyncConversationApplication(runtime,authz,reads,bridge,
+    // Synthetic gate fakes are NOT actual tokenizer/semantic/model evidence.
+    {beforeGeneration:async()=>({ok:true,value:undefined}),candidate:async()=>({ok:true,value:undefined})},
+    {deliver:async(_context,revalidate,event)=>{if(!await revalidate())return "refused";event(value=>deliveries.push(value));return "accepted";}},
+    {monotonicNow:()=>clock.now(),utcNow:()=>{const ms=Date.now(),seconds=Math.floor(ms/1000);return {seconds,nanoseconds:(ms-seconds*1000)*1000000};}});
+  const command=application.create({identity,operation:targetOp,text:"Explicit synthetic async join"});
+  const admission=await application.dispatch(command);assert.equal(admission.accepted,true);if(!admission.accepted)return;
+  assert.deepEqual(await admission.request.outcome,{ok:true,value:undefined});
+  assert.equal(modelCalls,1);assert.equal(deliveries.length,1);assert.equal(application.inspect(command)!.processing,false);
+  // Await the Application's actual original closure; no fixture guess that an
+  // outcome promise alone means its asynchronous control barrier settled.
+  assert.equal((await application.cancel(command,identity)).kind,"closed");active=false;
+  const row=(await firestore.doc(user(targetOp)).get()).data()!;
+  assert.equal(row.text,"Explicit synthetic async join");assert.equal(row.pendingOperationId,undefined);
+  assert.equal(row.acceptedAssistantMessageId,deliveries[0]!.assistantMessageId);
+  const reply=(await firestore.doc(`${parent(targetOp)}/messages/${row.acceptedAssistantMessageId as string}`).get()).data()!;
+  assert.equal(reply.text,"Explicit fake Qwen reply");assert.equal(reply.sequence,2);
+  assert.equal(confirmed(await store.readOutcome({firebaseUid:uid},targetOp)).state,"assistant_saved");
+  assert.equal(runtime.state.nonTerminal,0);assert.equal(runtime.state.quarantined,false);
 });
 
 test("retained orphan under absent parent cannot be recreated as reserved_new", async () => {
