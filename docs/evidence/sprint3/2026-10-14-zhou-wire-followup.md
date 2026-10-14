@@ -83,6 +83,15 @@ It does not authorize a Windows model deployment here or erase prior Not Run
 observations. DU has approved #106 at exact `a0ceb620`, review `5516453059`;
 the shared UI/571/APK attribution remains LI's separate source.
 
+At the later #105 comment `6167072595`, LI reported that the controlled Linux
+host/model/tokenizer is actually prepared and one synthetic operator generation
+passed its reported checks. [Sanitized owner evidence](https://github.com/3427564237/enmori-app/blob/d381cdf73405844d3a0056291bfc33ea2aeb076d/docs/evidence/sprint3/2026-10-14-li-real-host-deployment.md)
+is separate from this Windows run; the actual joined real-model Application and
+Q31 gate remain pending. The unchanged updated host/content decision is copied
+from `d381cdf73405844d3a0056291bfc33ea2aeb076d`, retaining its preceding Git history.
+It adds the human's bounded provider-registration/Firebase-reuse preparation
+selection; no such real-project/provider operation was executed by ZHOU here.
+
 ## What the new Zhou implementation does
 
 - `ApplicationConversationOperations` implements selected N01:15s preparation,
@@ -184,7 +193,7 @@ Final strict compile, focused tests and the root full runs above actually passed
 | Complete operational Note/time/deletion/nonreuse facts | DU. Holds dependent real Note capture/current/source transactions and cleanup; this fixture is no substitute. |
 | General authoritative verify-target/Retry/history/readback suppliers and full production cleanup I/O coordinator | JIN-owned combination, using Zhou's published consumer/lease. Absent suppliers stay unavailable; this packet's one-pair fixture is not general completion. |
 | New JIN code/source sweep/restart/normal fence retirement and whole-service evidence | JIN implementation; SHI independent code review; LI evidence/disposition. Root pass is not review substitution or full operational acceptance. |
-| Controlled Linux9B/digest/tokenizer/Q31 and real content/provider prerequisites | LI host setup, JIN adapter, respective producers. No live model or real-user content was run here. |
+| Controlled Linux real-model Application/Q31 and real content/provider prerequisites | LI's host/model/tokenizer preparation now has separate operator evidence; JIN's real adapter/joined gate and respective content producers continue. No live model or real-user content was run here. |
 | Shared installable candidate, physical device/API24/25/manual accessibility/UAT/Release | Respective assigned owners; Not Run by this packet. LI's existing571/APK result retains its own source. |
 
 LI reviews #107's new source and composition. Draft/Open, main/Issues/Project

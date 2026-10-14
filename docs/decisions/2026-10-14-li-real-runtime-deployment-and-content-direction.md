@@ -50,3 +50,20 @@ provisioning, account signup/terms acceptance, or bypassing third-party licences
 Keep source PRs Draft/Open, main/Issues/Project states unchanged. Real-service
 execution, device, all42/38-state, Sprint/UAT/Release acceptance require their
 actual evidence. The prior target is retained without a feasibility promise.
+
+## Confirmed environment follow-up
+
+Human LI subsequently selected **"没有，请带我开通并配置"** for the existing
+Ticketmaster Discovery route, and **"复用已有受控项目"** for Firebase.
+Assist the human with official developer registration and a mode0600 local key
+file; the human completes mailbox verification and provider terms acceptance.
+The first provider operation remains the existing bounded Singapore search
+(size3, no pagination) and at most one corresponding Detail field-presence probe
+after the human has saved a key and confirmed the applicable terms. No real
+import/mapping/storage/removal policy is silently selected before actual evidence.
+
+Reuse the exact previously approved controlled Firebase target from the existing
+private configuration; read-only credential/runtime preflight is now authorized.
+Do not select the CLI's possibly different default project, create a new project,
+reset fixtures, register people or copy their credentials. Real Friend test flows
+use voluntary authenticated test users and the existing privacy/API contracts.
