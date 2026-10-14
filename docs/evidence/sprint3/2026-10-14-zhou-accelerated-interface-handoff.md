@@ -2,8 +2,8 @@
 
 Owner: ZHOU. New-delta independent reviewer: LI. Base: accepted #96
 `67056c778a03595c386a69ec7ea33046fdd4205d`. This is the thin interface
-publication requested by [S-PM-1014-LI-AI-ACCELERATION](../decisions/2026-10-14-li-ai-acceleration-and-target.md)
-and [the parallel package](../planning/2026-10-14-li-ai-accelerated-delivery-plan.md).
+publication requested by [S-PM-1014-LI-AI-ACCELERATION](../../decisions/2026-10-14-li-ai-acceleration-and-target.md)
+and [the parallel package](../../planning/2026-10-14-li-ai-accelerated-delivery-plan.md).
 It does not claim the storage adapter or complete journey has been implemented.
 
 ## Concrete boundaries
