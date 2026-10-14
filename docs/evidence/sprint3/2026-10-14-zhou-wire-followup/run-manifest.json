@@ -1,0 +1,195 @@
+{
+  "owner": "ZHOU",
+  "reviewer": "LI",
+  "sourceCommit": "788155808e021087ae0cea1e04441289434d2f5f",
+  "sourceTree": "438eb6989acbad06ab063af4efdc29360380b62e",
+  "upstreamJin": "f887524075469f55db7d6a862804470158ce0d4e",
+  "reviewedZhouInput": "1af4d391546cbb456988da526f37109f86671638",
+  "sharedAiPageInput": "a0ceb620b465847feb04815f389b2c94d9d73cd5",
+  "normalizedSourceCount": 376,
+  "normalizedInputsSha256": "ccbcace56524379a04e714ba32bb5967c3fa0d076265f82c7a09e23e6ff4c042",
+  "immutableInputsMatchedBeforeAndAfterGuardedRun": true,
+  "environment": {
+    "mode": "isolated test",
+    "project": "demo-enmori-rmvp01a-r10",
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "firebaseAdmin": "14.3.0",
+    "firestoreSdk": "8.7.1",
+    "firebaseCli": "15.29.0",
+    "cachedFirestoreJar": "1.22.0",
+    "flutter": "3.47.2",
+    "dart": "3.13.2"
+  },
+  "runs": [
+    {
+      "command": "node node_modules/typescript/bin/tsc --project backend/tsconfig.json",
+      "source": "788155808e021087ae0cea1e04441289434d2f5f",
+      "exit": 0,
+      "artifact": "788-compile.log",
+      "emptyOutputExpected": true
+    },
+    {
+      "command": "node --test \"backend/dist/test/**/*.test.js\"",
+      "source": "788155808e021087ae0cea1e04441289434d2f5f",
+      "exit": 0,
+      "passed": 774,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "artifact": "788-backend-774.log"
+    },
+    {
+      "command": "FIREBASE_EMULATORS_PATH=C:/Users/ASUS/.cache/firebase/emulators node tool/run_ai_store_emulators.mjs",
+      "source": "788155808e021087ae0cea1e04441289434d2f5f",
+      "outerExit": 0,
+      "workerExit": 0,
+      "passed": 119,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "artifact": "788-emulator-119.log",
+      "profilesRemoved": true,
+      "requiredPortsFreed": true,
+      "newZhouSdkCases": 8,
+      "newZhouSdkCasesIncludedInTotal": true
+    },
+    {
+      "command": "fvm flutter test --no-pub",
+      "source": "75d27278cde4b192171ad8c060106ac303965457",
+      "exit": 0,
+      "passed": 537,
+      "artifact": "75d-mobile-537.log",
+      "flutterAndProbeInputsUnchangedThroughFinalSource": true
+    },
+    {
+      "command": "fvm flutter analyze --no-pub",
+      "source": "75d27278cde4b192171ad8c060106ac303965457",
+      "exit": 0,
+      "issues": 0,
+      "artifact": "75d-flutter-analyze.log",
+      "flutterAndProbeInputsUnchangedThroughFinalSource": true
+    }
+  ],
+  "actualHttpJourney": {
+    "client": "pinned standalone Dart CLI",
+    "backend": "actual JIN Fastify routes",
+    "identity": "actual Firebase Auth",
+    "orchestration": "actual Zhou consumer/executor/Application",
+    "context": "actual fixed/current SDK reader with complete EMPTY owned synthetic Note inventory",
+    "persistenceAndPair": "actual JIN AsyncFirestoreConversationStore and RealStore",
+    "sink": "actual complete-body HTTP sink",
+    "steps": [
+      "prepare",
+      "execute",
+      "readOutcome",
+      "readMessages",
+      "deleteConversation"
+    ],
+    "qwenAndGates": "explicit fakes",
+    "ordinaryReaders": "test suppliers for one known canonical pair, using actual RealStore",
+    "cleanup": "actual registry lease and tracked actual Store I/O plus actual FirestoreCleanup, fixture only",
+    "tokenChannel": "private child stdin only",
+    "contentOrBusinessIdsPrinted": false,
+    "socketClosed": true
+  },
+  "notClaimed": [
+    "general production paging/coordinator",
+    "operational Note producer guarantees",
+    "real model/tokenizer/semantic validation",
+    "real-user content",
+    "physical mobile device",
+    "cleanup SLA",
+    "independent LI or SHI approval",
+    "whole module/Sprint/UAT/Release"
+  ],
+  "earlierRun": {
+    "source": "a296a63d30b47f0bb7560504f880862735ed028c",
+    "backend": 761,
+    "emulator": 110,
+    "pairAndSink": "test-only/in-process before actual production pair/HTTP supplier",
+    "captures": "capture01 taken during earlier guarded invocation; capture02 after completion",
+    "resultsNotTransferredToLaterExecutableInputs": true
+  },
+  "intermediateFailures": {
+    "attribution": "agent reports; raw invocation bytes not preserved",
+    "staleOld15TestRunNotAcceptedAfterCompilerFailure": true,
+    "detailsInEvidenceIndex": true
+  },
+  "artifacts": [
+    {
+      "path": "788-inputs-before.json",
+      "bytes": 157680,
+      "rawSha256": "e0011a3b368e2297db26002cb6e47fe4e6d2914f92014077b48dd16aed7aba08",
+      "normalizedSha256": "e0011a3b368e2297db26002cb6e47fe4e6d2914f92014077b48dd16aed7aba08"
+    },
+    {
+      "path": "788-inputs-after.json",
+      "bytes": 157680,
+      "rawSha256": "e6f637e9479d1ea818f15b9cbf3a9da1703897757f610cd7e222ec13e800e134",
+      "normalizedSha256": "e6f637e9479d1ea818f15b9cbf3a9da1703897757f610cd7e222ec13e800e134"
+    },
+    {
+      "path": "788-backend-774.log",
+      "bytes": 71674,
+      "rawSha256": "c08b791eed7356207af94be37259ef57d52fd2cee1341969c82887d7ced1e9c8",
+      "normalizedSha256": "6aed4b5cd37934e6f2c962e8c6fce99be07cbdde3c086c51deb84c0e69396b43"
+    },
+    {
+      "path": "788-emulator-119.log",
+      "bytes": 17517,
+      "rawSha256": "2717a82a43e4a02712aad87ac1d011a173bd084c0e4adce24a6ec1f00ec36847",
+      "normalizedSha256": "d33c10790558e40ef9575df55ca9d83ad80bbba220dbc72358c326765667cc82"
+    },
+    {
+      "path": "788-compile.log",
+      "bytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalizedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "75d-mobile-537.log",
+      "bytes": 105367,
+      "rawSha256": "002c0f3889d46eb21ee959c8cd44f5920e2f0385fe9c6db72e8c7c2662085a8f",
+      "normalizedSha256": "5c9d3202c5a0452997a4ca051a79f81a4f0864582ef61b9fb15327971e24e9f1"
+    },
+    {
+      "path": "75d-flutter-analyze.log",
+      "bytes": 99,
+      "rawSha256": "4814cd2295fe532357437e9a8a1d4c97a95d3ae7c16eccb984696238b6dc2962",
+      "normalizedSha256": "c2c1117d2f1a97eb67ad77d4047fd92aa2a08689efa92101cf698ff6e9ab11b3"
+    },
+    {
+      "path": "a296-inputs-capture01.json",
+      "bytes": 155522,
+      "rawSha256": "81db4a975dab59678ea2ddd36f32515c6b14dd1c02a8969ce08be4a7a6dd14b2",
+      "normalizedSha256": "81db4a975dab59678ea2ddd36f32515c6b14dd1c02a8969ce08be4a7a6dd14b2"
+    },
+    {
+      "path": "a296-inputs-capture02.json",
+      "bytes": 155522,
+      "rawSha256": "a54735de107c31ad80198e96f45f47014aabc9bdca1679ec0d611d5627923aa4",
+      "normalizedSha256": "a54735de107c31ad80198e96f45f47014aabc9bdca1679ec0d611d5627923aa4"
+    },
+    {
+      "path": "a296-backend-761.log",
+      "bytes": 70196,
+      "rawSha256": "f8131945b33c3de08504cc2ceb092118c1f5eab218c2a558edf4ac88a6d30dc1",
+      "normalizedSha256": "2eb2282560c224adc4ad19adce07b3237145e6dd05a8c7d4edc4f3439dfb9ad4"
+    },
+    {
+      "path": "a296-emulator-110.log",
+      "bytes": 16266,
+      "rawSha256": "432897b026e1d5d4087a3af9cb8779c43926d1f5f647796a8d8258114c488911",
+      "normalizedSha256": "8571bfb299ef445ea068356cdab6b7816e6b9e647eba01c67c42fe13a4160ccc"
+    },
+    {
+      "path": "capture-inputs.mjs",
+      "bytes": 2610,
+      "rawSha256": "3fdfe140e85abcd2ba81a838243e0ab34f5006440f47323259594143beb62c8a",
+      "normalizedSha256": "3fdfe140e85abcd2ba81a838243e0ab34f5006440f47323259594143beb62c8a"
+    }
+  ]
+}
