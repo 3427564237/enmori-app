@@ -47,6 +47,28 @@ export interface ConversationOperationClock extends RuntimeClock {
   /** Display-only preparation expiry. Monotonic time controls validity. */
   utcMilliseconds(): number;
 }
+/** Trusted content-free target admission coordination, never a public DTO.
+ * This proves ONLY registry dispatch/closure bookkeeping. JIN must ALSO await
+ * actual initialized/in-flight SDK I/O before cleanup or an orphan work callback.
+ * A cancelled outcome, model abort, or closed registry is not SDK settlement. */
+export interface ConversationTargetLease {
+  readonly ownerAccountId: string;
+  readonly conversationId: string;
+  readonly mode: "closed" | "idle";
+  current(): boolean;
+  /** Idempotent matching release; keep held through the coordinator's work. */
+  release(): void;
+}
+export type ConversationTargetLeaseResult = { readonly kind: "acquired"; readonly lease: ConversationTargetLease }
+  | { readonly kind: "unresolved" };
+export interface ConversationOperationQuiescence {
+  /** Locks admission SYNCHRONOUSLY before its first await. closed disposes all
+   * matching tickets; idle waits live commands without cancelling them. Unknown
+   * barriers yield no lease and retain only a content-free admission hold until
+   * a subsequent explicit acquisition proves resolution. No automatic retry. */
+  acquireTargetLease(ownerAccountId: string, conversationId: string,
+    mode: "closed" | "idle"): Promise<ConversationTargetLeaseResult>;
+}
 export interface ExecutedConversation {
   readonly operationId: string;
   readonly conversationId: string;
