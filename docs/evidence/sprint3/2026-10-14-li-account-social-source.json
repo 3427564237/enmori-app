@@ -1,0 +1,143 @@
+{
+  "source": "48112ccb71e80e9210e2a5a0e6efa193183ad6d5",
+  "tree": "95d1c5e9ae89e8d1e58a2cf0d9d824dba1bf04d9",
+  "review_base": "1cc52800e7d51320d6b97c76b5b6e2ee3f9dcba0",
+  "input_files": {
+    "lib/features/account/presentation/onboarding_page.dart": "f52177695d0fd2c61f53e600d10f2ef0411306d1",
+    "lib/harness/social/offline_setup_auth_repository.dart": "508dcde99beab708b9804bb4dd800207f5dabdae",
+    "lib/harness/social/offline_social_app.dart": "99bfc80b1e7ac3c59f04682c44400349802c454e",
+    "lib/harness/social/offline_social_store.dart": "b7f23cd6dde1860c8ad9c62fcd6675bea648f685",
+    "lib/social_account_harness.dart": "624900cd7ec6dadb62f0bb9bd08fb8ee09b1ed8f",
+    "test/harness/social/offline_account_setup_test.dart": "fc93e870905a09eec144fced867306cb28163c62"
+  },
+  "validation": {
+    "full_flutter": {
+      "passed": 525,
+      "failed": 0,
+      "exit": 0,
+      "new_cases_included": 8,
+      "default_concurrency": true
+    },
+    "analysis": {
+      "exit": 0,
+      "issues": 0
+    },
+    "format": {
+      "exit": 0,
+      "files": 7,
+      "changes": 0
+    },
+    "android_build": {
+      "exit": 0,
+      "entry": "lib/social_account_harness.dart"
+    },
+    "signature": {
+      "exit": 0,
+      "verified_v2": true
+    },
+    "source_diff_check": {
+      "exit": 0
+    }
+  },
+  "apk": {
+    "filename": "ENMORI-Account-Social-Offline-20261014-arm64.apk",
+    "sha256": "234caaaca01b3ca18e521ea31558dd97cb625dcab3434a998870825748bb2bad",
+    "bytes": 93861972,
+    "package": "com.enmori.app.personatest",
+    "abi": "arm64-v8a",
+    "min_sdk": 24,
+    "target_sdk": 36,
+    "version_code": 2001,
+    "version_name": "1.0.0",
+    "debuggable": true,
+    "test_only": false,
+    "local_distribution": "/home/miku/Documents/ChatGPT/ENMORI/build/distributions/account-social-offline-20261014"
+  },
+  "logs": {
+    "li-account-social-analysis-final.log": {
+      "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
+      "bytes": 58
+    },
+    "li-account-social-analysis-initial.log": {
+      "sha256": "cff9107d087d9f3273495fc2e324750539c38e98db3cbb15b393a89926b0bfd3",
+      "bytes": 618
+    },
+    "li-account-social-analysis-second.log": {
+      "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
+      "bytes": 58
+    },
+    "li-account-social-android-manifest.log": {
+      "sha256": "60548f73c2f05998662902a14606690b555516b3b7d3cd7792f9aacb2596f4eb",
+      "bytes": 13913
+    },
+    "li-account-social-apk.log": {
+      "sha256": "ea53a60ba280fec613e7d951ae357ec0798896a1c492b8539f869c1c535ab4f1",
+      "bytes": 1753
+    },
+    "li-account-social-badging.log": {
+      "sha256": "0338c7a2ec9d043604df5fe19ed00a0e7f1d003a45e8019d63f2e01103616fa0",
+      "bytes": 4698
+    },
+    "li-account-social-focused-final.log": {
+      "sha256": "75f3a034f18d6d465a62cf33874136cb827f2f52da82ab76874ffa8923e6da89",
+      "bytes": 9314
+    },
+    "li-account-social-focused-fourth.log": {
+      "sha256": "93185cca99ced6455c2211096b415ab91c93c7d1c8373d92407ee5dadec5f5dc",
+      "bytes": 3953
+    },
+    "li-account-social-focused-initial.log": {
+      "sha256": "e90a7228c57ed9c761b81799a781313a8abed69cf277fa7f982593134234a0ce",
+      "bytes": 7509
+    },
+    "li-account-social-focused-second.log": {
+      "sha256": "f47977d9bc63a83f9ecf9c9dca6bf962425699b997316728d902278e05e6d879",
+      "bytes": 17008
+    },
+    "li-account-social-focused-third.log": {
+      "sha256": "975a9092c02f496cc7b923746cc8206f1febd414c3c2a18e398403ad8ada5cd6",
+      "bytes": 8366
+    },
+    "li-account-social-format.log": {
+      "sha256": "58dca27652e488f0ebbee6e9be715fc6eb0e5fb68ad2778b8b09aa75a838b7dc",
+      "bytes": 47
+    },
+    "li-account-social-full.log": {
+      "sha256": "7e5310bac3b4ccc1bc6af101244600859385371fab757fa16cbbab10c25d656e",
+      "bytes": 94848
+    },
+    "li-account-social-pub.log": {
+      "sha256": "d4cb7a3c68b4133b4f6e58c67ff5bfd13725d8021e930388cdc98da8a575919d",
+      "bytes": 68
+    },
+    "li-account-social-signature.log": {
+      "sha256": "91925cfb114d718962d9f0748b1addef1dec90079d3f752180a6b597f46db44c",
+      "bytes": 777
+    },
+    "li-account-social-username-green.log": {
+      "sha256": "6477d2dc5c0fc9a6cf7013f0b9217366355d3993d7c6817ba161f25083264c8c",
+      "bytes": 247
+    },
+    "li-account-social-username-red.log": {
+      "sha256": "237939a4a510a937d4a6f9d3247cd57d47aeadad6609e7d5b119e187ba2d8006",
+      "bytes": 2679
+    },
+    "li-account-social-username-red2.log": {
+      "sha256": "a9b8e7b3452b9701a013290add6ee1e688a224d500e160e8e2a73e09193a757c",
+      "bytes": 2341
+    },
+    "li-account-social-username-red3.log": {
+      "sha256": "e9075747e0808cec363f57ed8a326df6c11788631e5d5ffbc13a6aa8ab8f4b97",
+      "bytes": 2332
+    }
+  },
+  "not_run": [
+    "physical install/run",
+    "new combined persistence/device gate",
+    "real Auth/Backend/model",
+    "API24/25 execution",
+    "manual accessibility",
+    "UAT/Release"
+  ],
+  "review": "DU pending; owner tests do not constitute independent acceptance"
+}

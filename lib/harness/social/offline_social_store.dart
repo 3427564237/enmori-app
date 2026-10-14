@@ -15,7 +15,8 @@ import '../../features/personas/domain/persona_repository.dart';
 
 /// Process-local, explicitly synthetic fixtures. Never composed by Bootstrap.
 final class OfflineSocialStore extends ChangeNotifier {
-  OfflineSocialStore({DateTime? now}) : now = now ?? DateTime.now().toUtc() {
+  OfflineSocialStore({DateTime? now, this.onboardingCompleted = true})
+    : now = now ?? DateTime.now().toUtc() {
     notes.add(
       CheckIn(
         checkInId: 'offline_note_1',
@@ -42,6 +43,9 @@ final class OfflineSocialStore extends ChangeNotifier {
   }
 
   final DateTime now;
+  bool onboardingCompleted;
+  ({String key, String username, InitialChoice choice, ProductAccount account})?
+  onboardingReceipt;
   OwnProfile profile = const OwnProfile(
     username: 'offline_member',
     displayName: 'Your Name',
@@ -116,24 +120,97 @@ final class OfflineAccountRepository implements AccountRepository {
   final OfflineSocialStore store;
   @override
   Future<Result<OnboardingStatus>> readOnboardingStatus() async => Success(
-    OnboardingCompleted(
-      ProductAccount(
-        username: store.profile.username,
-        optionalProcessingConsent: store.settings.consent,
-        checkInVisibility: store.settings.checkInVisibility,
-        onboardingCompletedAt: store.now,
-      ),
-    ),
+    store.onboardingCompleted
+        ? OnboardingCompleted(
+            ProductAccount(
+              username: store.profile.username,
+              optionalProcessingConsent: store.settings.consent,
+              checkInVisibility: store.settings.checkInVisibility,
+              onboardingCompletedAt: store.now,
+            ),
+          )
+        : const OnboardingRequired(),
   );
   @override
   Future<Result<ProductAccount>> completeOnboarding({
     required String username,
     required InitialChoice initialChoice,
     required String idempotencyKey,
-  }) async => _failure(
-    AppFailureKind.onboardingConflict,
-    'This offline sample account is already onboarded.',
-  );
+  }) async {
+    // Mirror the approved Q18-B input projection only; this process-local
+    // fixture does not reserve a globally unique Username or prove Firestore.
+    final canonical = username
+        .replaceAll(RegExp(r'^ +| +$'), '')
+        .replaceAllMapped(RegExp('[A-Z]'), (match) => match[0]!.toLowerCase());
+    const reserved = {
+      'admin',
+      'administrator',
+      'support',
+      'system',
+      'moderator',
+      'root',
+      'enmori',
+    };
+    if (!RegExp(r'^[a-z0-9](?!.*__)[a-z0-9_]{1,28}[a-z0-9]$')
+            .hasMatch(canonical) ||
+        reserved.contains(canonical) ||
+        canonical.startsWith('enmori_')) {
+      return _failure(
+        AppFailureKind.usernameInvalid,
+        'Choose a valid Username.',
+      );
+    }
+    if (!RegExp(r'^[A-Za-z0-9_-]{22,64}$').hasMatch(idempotencyKey)) {
+      return _failure(
+        AppFailureKind.idempotencyKeyInvalid,
+        'Invalid request key.',
+      );
+    }
+    final receipt = store.onboardingReceipt;
+    if (receipt != null && receipt.key == idempotencyKey) {
+      if (receipt.username != canonical || receipt.choice != initialChoice) {
+        return _failure(AppFailureKind.idempotencyConflict, 'Request changed.');
+      }
+      return Success(receipt.account);
+    }
+    if (store.onboardingCompleted) {
+      return _failure(
+        AppFailureKind.onboardingConflict,
+        'This offline sample account is already onboarded.',
+      );
+    }
+    final accepted = initialChoice == InitialChoice.accept;
+    final account = ProductAccount(
+      username: canonical,
+      optionalProcessingConsent: accepted
+          ? OptionalProcessingConsent.accepted
+          : OptionalProcessingConsent.rejected,
+      checkInVisibility: accepted
+          ? CheckInVisibility.public
+          : CheckInVisibility.private,
+      onboardingCompletedAt: store.now,
+    );
+    store.profile = OwnProfile(
+      username: canonical,
+      displayName: null,
+      visibility: ProfileVisibility.private,
+      revision: 0,
+    );
+    store.settings = OwnSettings(
+      checkInVisibility: account.checkInVisibility,
+      consent: account.optionalProcessingConsent,
+      revision: 0,
+    );
+    store.onboardingCompleted = true;
+    store.onboardingReceipt = (
+      key: idempotencyKey,
+      username: canonical,
+      choice: initialChoice,
+      account: account,
+    );
+    store.changed();
+    return Success(account);
+  }
 }
 
 final class OfflinePreferencesRepository
