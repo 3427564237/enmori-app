@@ -173,14 +173,40 @@ test("SDK acknowledged commit with deliberately discarded ACK remains unresolved
   confirmed(await store.closeOperation(op, epoch));
   assert.equal(confirmed(await store.readOutcome({ firebaseUid: uid }, op)).state, "user_saved");
 });
-test("concurrent retries contend on canonical U and only one obtains pending authority", async () => {
+test("single-attempt concurrent retries grant at most one claim; settled explicit control still succeeds", async () => {
   const a = await saved(); confirmed(await store.closeOperation(a, epoch)); confirmed(await store.readOutcome({ firebaseUid: uid }, a));
   const b = confirmed(await store.initializeOperation(retry(a), epoch, authority()));
   const c = confirmed(await store.initializeOperation(retry(a), epoch, authority()));
-  const results = await Promise.all([store.claimRetry(b, () => "Synthetic user message", authority()), store.claimRetry(c, () => "Synthetic user message", authority())]);
-  assert.equal(results.filter(r => r.kind === "confirmed").length, 1);
-  assert.equal(results.filter(r => r.kind === "conflict" || r.kind === "unresolved").length, 1);
-  assert.ok([b.operationId, c.operationId].includes((await firestore.doc(user(a)).get()).data()!.pendingOperationId as string));
+  const sdkCodes:number[]=[];
+  const observed:FirestoreGateway={runTransaction:async <T>(work:(tx:FirestoreTransactionGateway)=>Promise<T>,options?:{readonly maxAttempts:1}):Promise<T>=>{
+    try{return await gateway.runTransaction(work,options);}catch(error){
+      const code=(error as {code?:unknown}).code;
+      if(typeof code==="number")sdkCodes.push(code);
+      throw error;
+    }
+  }};
+  const raceStore=new FirestoreConversationStore(observed,process.env);
+  const results = await Promise.all([raceStore.claimRetry(b, () => "Synthetic user message", authority()), raceStore.claimRetry(c, () => "Synthetic user message", authority())]);
+  const winners=results.filter(r=>r.kind==="confirmed").length;
+  assert.ok(winners<=1);assert.ok(results.every(r=>["confirmed","conflict","unresolved"].includes(r.kind)));
+  // maxAttempts:1 permits both real competing transactions to be ABORTED. Do
+  // not demand automatic retry/liveness that the selected contract forbids.
+  assert.equal(results.filter(r=>r.kind==="unresolved").length,sdkCodes.length);
+  assert.ok(sdkCodes.every(code=>code===10));
+  const pending=(await firestore.doc(user(a)).get()).data()!.pendingOperationId;
+  if(winners===1)assert.equal(pending,[b,c][results.findIndex(r=>r.kind==="confirmed")]!.operationId);
+  else assert.equal(pending,undefined);
+  const effects=await firestore.collection(`${parent(a)}/effects`).get();
+  assert.equal(effects.docs.filter(d=>d.id===b.operationId||d.id===c.operationId).length,winners);
+  // Resolve original writers before a separately explicit retry. No automatic
+  // retry or test-only relaxation of canonical U/closed-fence rules.
+  confirmed(await store.closeOperation(b,epoch));confirmed(await store.closeOperation(c,epoch));
+  if(pending!==undefined)confirmed(await store.readOutcome({firebaseUid:uid},pending===b.operationId?b:c));
+  assert.equal(confirmed(await store.readOutcome({firebaseUid:uid},a)).state,"user_saved");
+  const d=confirmed(await store.initializeOperation(retry(a),epoch,authority()));
+  confirmed(await store.claimRetry(d,()=>"Synthetic user message",authority()));
+  assert.equal((await firestore.doc(user(a)).get()).data()!.pendingOperationId,d.operationId);
+  console.info("JIN_AI_CLAIM_RACE",JSON.stringify({confirmed:winners,sdkAborted:sdkCodes.length,explicitSettledControl:1}));
 });
 test("canonical assistant tombstone occupies original U and cannot be retried", async () => {
   const op = await saved(), id = await assistant(op);
