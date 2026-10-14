@@ -1,8 +1,24 @@
-import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
+import type { AuthPrincipal, IdentityVerificationResult } from "../../shared/ports/identity-verifier.js";
 import type { RuntimeClock } from "../../ai-runtime/ports/runtime-clock.js";
-import type { AsyncCloseObservation, AsyncConversationIdentity, AsyncOperation, AsyncSavedUser } from "./async-conversation.js";
+import type { AsyncCloseObservation, AsyncConversationIdentity, AsyncEffectContext, AsyncOperation, AsyncSavedUser } from "./async-conversation.js";
 import type { ConversationCaller, ConversationReadback, ConversationResult } from "./conversation-operations.js";
 import type { StoredConversationMessage } from "./real-conversation-store.js";
+import type { PresentationMetadata } from "./conversation-lifecycle.js";
+
+export interface RequestOriginalConversationIdentity {
+  current(identity: AsyncConversationIdentity): boolean;
+  verify(identity: AsyncConversationIdentity): Promise<IdentityVerificationResult>;
+}
+/** JIN's guarded projection of the actual settled canonical pair, including its
+ * selected presentation. Fresh owner/source/full-precision expiry/all-pending
+ * checks are mandatory; no inferred IDs, timestamp or cached body. */
+export interface AsyncAcknowledgedConversationPair {
+  read(context: AsyncEffectContext): Promise<ConversationResult<{
+    readonly user: StoredConversationMessage;
+    readonly assistant: StoredConversationMessage;
+    readonly presentation: PresentationMetadata;
+  }>>;
+}
 
 /** Ordinary actions have their own 15s budget; never extend the original AI request. */
 export interface ConversationOrdinaryContext {
@@ -43,6 +59,10 @@ export interface ConversationExecutionDelivery {
   readonly signal: AbortSignal;
   current(): boolean;
   readonly acceptCompleteBody?: (pair: ExecutedConversation) => boolean;
+  /** Synchronous actual runtime-terminal notification, after a successful sink
+   * effect or on failure. Disposes outer request holders before outcome resumes;
+   * never confers HTTP delivery rights or starts a new asynchronous close. */
+  readonly onTerminal?: () => void;
 }
 export interface ConversationExecution {
   /** Begins the unchanged AsyncConversationApplication once, including preaccept. */
@@ -69,6 +89,7 @@ export interface ConversationOperationReaders {
   verifyTarget?(context: ConversationOrdinaryContext, conversationId: string,
     userMessageId?: string): Promise<ConversationResult<void>>;
   retryUser?(context: ConversationOrdinaryContext, operation: AsyncOperation,
+    /** Compare the authoritative original U text; refuse accepted/tombstone or ANY pending claim. */
     text: () => string | undefined): Promise<ConversationResult<StoredConversationMessage>>;
   readOutcome?(context: ConversationOrdinaryContext, conversationId: string,
     operationId: string, original?: AsyncOperation): Promise<ConversationResult<ConversationReadback>>;
