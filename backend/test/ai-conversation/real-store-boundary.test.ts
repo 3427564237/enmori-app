@@ -67,7 +67,7 @@ test("terminal during fresh Auth never borrows user/reply text or dispatches a t
   const text=()=>{borrowed++;return "synthetic";};
   assert.equal((await store.saveUser(op,text,a)).kind,"terminated");
   live=true;
-  assert.equal((await store.claimRetry({...op,kind:"retry",targetKind:"existing"},text,a)).kind,"terminated");
+  assert.equal((await store.claimRetry({...op,kind:"retry",targetKind:"existing"},text,{messageId:target.userMessageId,sequence:1,persistedAt:{seconds:1,nanoseconds:0}},a)).kind,"terminated");
   live=true;
   assert.equal((await store.saveAssistant(op,()=>{borrowed++;return {messageId:randomUUID(),text:"synthetic",presentation:{presentationMode:"default"}};},a)).kind,"terminated");
   assert.equal(borrowed,0); assert.equal(transactions,0);

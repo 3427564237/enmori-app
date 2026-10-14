@@ -45,6 +45,11 @@ export interface StoredConversationMessage {
   readonly availability: "available" | "unavailable";
   readonly text?: string;
 }
+export interface StoredUserIdentity {
+  readonly messageId: string;
+  readonly sequence: number;
+  readonly persistedAt: FullPrecisionInstant;
+}
 export type SavedOperationOutcome =
   | { readonly state: "unresolved" }
   | { readonly state: "user_saved"; readonly user: StoredConversationMessage }
@@ -64,11 +69,13 @@ export interface RealConversationStore {
   /** Borrow only at guarded SDK submission; the supplier returns undefined after terminal disposal. */
   saveUser(operation: OpenOperation, text: () => string | undefined,
     authority: OriginalWriteAuthority): Promise<StoreResult<void>>;
-  claimRetry(operation: OpenOperation, explicitText: () => string | undefined,
+  claimRetry(operation: OpenOperation, explicitText: () => string | undefined, expectedUser: StoredUserIdentity,
     authority: OriginalWriteAuthority): Promise<StoreResult<void>>;
   saveAssistant(operation: OpenOperation, input: () => {
     readonly messageId: string; readonly text: string; readonly presentation: PresentationMetadata;
-  } | undefined, authority: OriginalWriteAuthority): Promise<StoreResult<void>>;
+  } | undefined, authority: OriginalWriteAuthority, expectedUser?: StoredUserIdentity): Promise<StoreResult<void>>;
+  /** Immutable user metadata after a definite own user/claim ACK; no content replay. */
+  readPendingUser(operation: OpenOperation, authority: OriginalWriteAuthority): Promise<StoreResult<StoredUserIdentity>>;
   /** Synchronously end the original Application BEFORE invoking this method. */
   closeOperation(target: OperationTarget, epoch: RuntimeEpoch): Promise<StoreResult<void>>;
   /** Only after a definite assistant ACK while the original request is still current. */
