@@ -72,6 +72,89 @@ Future<void> capture(WidgetTester tester, String name) async {
 
 void main() {
   testWidgets(
+    'shared AI tab protects draft before opening reviewed Persona management',
+    (tester) async {
+      final store = OfflineSocialStore();
+      addTearDown(store.dispose);
+      await start(tester, store);
+      await tap(tester, 'social-nav-ai');
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(AiConversationPage)),
+      );
+      final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+      expect(bar.selectedIndex, 3);
+      await tester.enterText(
+        find.byKey(const Key('ai-message-input')),
+        'An unsaved sample',
+      );
+      await tap(tester, 'ai-personas');
+      expect(find.text('Discard unsaved changes?'), findsOneWidget);
+      await tester.tap(find.text('Keep editing'));
+      await tester.pumpAndSettle();
+      expect(find.text('An unsaved sample'), findsOneWidget);
+      expect(
+        container
+            .read(appRouterProvider)
+            .routeInformationProvider
+            .value
+            .uri
+            .path,
+        AppRoutes.aiAssistant,
+      );
+      await tap(tester, 'ai-personas');
+      await tap(tester, 'ai-confirm-discard');
+      expect(find.byKey(const Key('route-persona-management')), findsOneWidget);
+      expect(
+        container
+            .read(appRouterProvider)
+            .routerDelegate
+            .currentConfiguration
+            .last
+            .matchedLocation,
+        AppRoutes.managePersonas,
+      );
+      expect(find.text('An unsaved sample'), findsNothing);
+      await tap(tester, 'persona-back');
+      expect(find.byKey(const Key('route-ai-conversation')), findsOneWidget);
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        3,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'shared Event list and detail explicitly opt into synthetic notice',
+    (tester) async {
+      final store = OfflineSocialStore();
+      addTearDown(store.dispose);
+      await start(tester, store);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(OfflineSocialHub)),
+      );
+      container
+          .read(appRouterProvider)
+          .push<void>(AppRoutes.eventRecommendations);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('event-synthetic-notice')), findsOneWidget);
+      final item = find.text(store.events.first.title);
+      await tester.ensureVisible(item);
+      await tester.tap(item);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('event-detail-synthetic-notice')),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(
+          'No real organiser, registration or participation.',
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
     'chat action menu preserves delete confirmation and immediate content hiding',
     (tester) async {
       final store = OfflineSocialStore();

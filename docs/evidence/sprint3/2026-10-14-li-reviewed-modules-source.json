@@ -1,0 +1,144 @@
+{
+  "executableCommit": "962d485e5225f49d6c89933c91562167e842c21d",
+  "executableTree": "eda88e8dde7328b2fcf7146398e839b8cc74cf66",
+  "base": "31b7adb0860b4b81e80086151cea79d9ed3f14e4",
+  "entrypoint": "lib/social_account_harness.dart",
+  "apk": {
+    "file": "ENMORI-Reviewed-Modules-20261014-arm64.apk",
+    "sha256": "5c452d6aa836ad0daeedef2f08e6c19b995ae664c96b65d4168e70766079180e",
+    "bytes": 121525450
+  },
+  "imports": {
+    "1af4d391546cbb456988da526f37109f86671638": [
+      {
+        "path": "lib/ai_persona_harness.dart",
+        "unchangedImportedBytes": true,
+        "combinedSha256": "887fc1fa651b6152f14971b148ac05d4b55d4050e91cb83bf486d21e89762292"
+      },
+      {
+        "path": "lib/features/ai_conversation/data/ai_wire_transport.dart",
+        "unchangedImportedBytes": true,
+        "combinedSha256": "3806631f83b20a78620b5b5e8fb0a4474b77a5631f8403f787aecdf0be391dce"
+      },
+      {
+        "path": "lib/features/ai_conversation/data/http_ai_wire_transport.dart",
+        "unchangedImportedBytes": true,
+        "combinedSha256": "c31535bdd4f95ae3ac61099e6a9a8a7b8e9af0efd381bce394fa6681c22563c8"
+      },
+      {
+        "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+        "unchangedImportedBytes": false,
+        "combinedSha256": "b171df7f955a101a7dc22115defeb99187a030a75ae1275a8996172fcfcd601f"
+      },
+      {
+        "path": "lib/harness/ai_persona/ai_persona_harness_app.dart",
+        "unchangedImportedBytes": true,
+        "combinedSha256": "78c869780bf6c48bbd970f58ab4d7d4a5e6e92280a92382963ee989228147266"
+      },
+      {
+        "path": "lib/harness/ai_persona/synthetic_persona_repository.dart",
+        "unchangedImportedBytes": true,
+        "combinedSha256": "82e9462ba153f6d5bcc7cbed4b6f74a3bf4201b6ca4dfe86fdb91cd4a37434f4"
+      },
+      {
+        "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+        "unchangedImportedBytes": false,
+        "combinedSha256": "3adfc672a51d1de26ef8d103593ca7e34bb6f71b0e14926c03c8a493f2956c1f"
+      },
+      {
+        "path": "test/features/ai_conversation/http_ai_wire_transport_test.dart",
+        "unchangedImportedBytes": true,
+        "combinedSha256": "dc241db4362cec3235d744349e712cc73e34530880f15bd1e6d4dfefe90f8195"
+      },
+      {
+        "path": "test/harness/ai_persona_harness_test.dart",
+        "unchangedImportedBytes": true,
+        "combinedSha256": "9e7673d56690cf1fd4cd910b03bbfeccc3715c5428536a7ba545886ce733c95f"
+      }
+    ],
+    "4190047a3cab78242b534077cc9b3dde81acc803": [
+      {
+        "path": "lib/features/event_detail/presentation/event_detail_page.dart",
+        "unchangedImportedBytes": true,
+        "combinedSha256": "31d7a41de7371bd7740aefa11307b7c85afcd318f2ded9418ededb43e348e445"
+      },
+      {
+        "path": "lib/features/event_recommendations/presentation/event_recommendations_page.dart",
+        "unchangedImportedBytes": true,
+        "combinedSha256": "d6fad7beb051d8bcf95ea35245e686acf690da414e8dfa5f8032f535e7240212"
+      },
+      {
+        "path": "test/features/event_social_preview_test.dart",
+        "unchangedImportedBytes": true,
+        "combinedSha256": "bd5ae489e19a907b11d69f06778fa863f79bbbed9be5a0132c8cbfc808d7f32e"
+      }
+    ]
+  },
+  "localRawLogs": {
+    "li-reviewed-modules-analysis-final.txt": {
+      "sha256": "bf99b5ccd87f105dfebee1cf139afc9cb94194dbecc2e10c6ced68787aa4f3d8",
+      "bytes": 163
+    },
+    "li-reviewed-modules-analysis.txt": {
+      "sha256": "9d46fab2ba3b8c22c45814acf0fee0ca37b5cc9b36c36dd50970dee75e271a0b",
+      "bytes": 96
+    },
+    "li-reviewed-modules-apk-manifest.txt": {
+      "sha256": "0338c7a2ec9d043604df5fe19ed00a0e7f1d003a45e8019d63f2e01103616fa0",
+      "bytes": 4698
+    },
+    "li-reviewed-modules-apk-signature.txt": {
+      "sha256": "91925cfb114d718962d9f0748b1addef1dec90079d3f752180a6b597f46db44c",
+      "bytes": 777
+    },
+    "li-reviewed-modules-apk.txt": {
+      "sha256": "8fb262a30e957074b82ecdd99e11726bbe3f9789841ed1d4df789e6cc7a0b010",
+      "bytes": 1570
+    },
+    "li-reviewed-modules-correction.txt": {
+      "sha256": "c0c15347af426c48f1b87e449dd81c254a01d764502abac358ba8f8d07c03adc",
+      "bytes": 2316
+    },
+    "li-reviewed-modules-correction2.txt": {
+      "sha256": "2df5b0b3446fcf5ccb689ca16e09358bd74f9f1f71daaa47c329509642da6813",
+      "bytes": 241
+    },
+    "li-reviewed-modules-focused.txt": {
+      "sha256": "e4db3966d5980424456192b34ffb6bfa8cbd3a9cf923ffa8ef9a9133a212ac6c",
+      "bytes": 16513
+    },
+    "li-reviewed-modules-format.txt": {
+      "sha256": "24b390438f0520af484101e7b816f6a21bfad7343e107566583c062bcc9ea6b4",
+      "bytes": 48
+    },
+    "li-reviewed-modules-full-final.txt": {
+      "sha256": "9653f1fff59f17d2f6ea02bd0e344a7157fc717ec3f17eae674b0ae5fd9b71cc",
+      "bytes": 105157
+    },
+    "li-reviewed-modules-full.txt": {
+      "sha256": "b70b96a46e7c1a5b07e7728a7ce7580d6c5495388e15b28c35f9800f74010c74",
+      "bytes": 112899
+    }
+  },
+  "results": {
+    "flutter": {
+      "pass": 571,
+      "fail": 0,
+      "exit": 0
+    },
+    "analysis": "PASS",
+    "format": "PASS",
+    "apkCompile": "PASS",
+    "signature": "PASS"
+  },
+  "notRun": [
+    "Backend combined path",
+    "Emulator",
+    "real HTTP composition",
+    "real model",
+    "physical Android installation",
+    "manual accessibility",
+    "UAT",
+    "Release"
+  ]
+}
