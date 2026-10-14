@@ -154,6 +154,17 @@ test("actual noncanonical group ancestor is reported and retained while later le
   assert.equal((await db.doc(bad).get()).exists,true);assert.equal((await db.doc(`${row.base}/message_sources/${row.a}`).get()).exists,false);
 });
 
+test("actual absent-parent orphans trigger whole cleanup and continue all targets in the same source sweep",async()=>{
+  const first=await pair(),second=await pair();await db.doc(first.base).delete();await db.doc(second.base).delete();
+  const result=await components().maintenance.sourceSweep(epoch);
+  assert.equal(result.complete,true);assert.equal(result.changed,2);assert.equal(result.failures,0);
+  for(const row of [first,second]){
+    assert.equal((await db.collection(`${row.base}/messages`).get()).empty,true);
+    assert.equal((await db.collection(`${row.base}/message_sources`).get()).empty,true);
+  }
+  assert.equal((await db.doc(progress).get()).exists,false);
+});
+
 test("actual normal fence retirement requires closed and settled original, keeps canonical outcome, cannot reopen old effect",async()=>{
   const row=await pair(),operationId=randomUUID(),uid=`maintenance-${randomUUID()}`;
   const target={ownerAccountId:owner,conversationId:row.cid,userMessageId:row.u,operationId,kind:"send" as const,targetKind:"reserved_new" as const};

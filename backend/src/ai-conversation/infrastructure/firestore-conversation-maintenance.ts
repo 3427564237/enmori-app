@@ -146,9 +146,10 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
     const result={complete:false,inspected:0,changed:0,failures:0,expiredOrInvalidCheckpoint:false};
     if(this.running){result.failures++;return result;}this.running=true;
     try{
-      const started=await this.begin(epoch);let progress=started.progress;const guard=started.guard;
+      const started=await this.begin(epoch);let progress=started.progress,guard=started.guard;
       result.expiredOrInvalidCheckpoint=started.reset;if(started.reset)result.failures++;
-      for(;;){
+      if(progress.hadFailure)result.failures++; // Retain a resumed earlier failed batch across a whole-delete restart.
+      sweep:for(;;){
         const page=await this.page(guard,progress);let failed=false;
         for(const path of page){result.inspected++;
           try{
@@ -161,8 +162,13 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
               const removed=await this.cleanup.expireKnown(at.ownerAccountId,at.conversationId,epoch);
               if(removed.kind==="deleted")result.changed++;else if(removed.kind!=="live"){failed=true;result.failures++;}
               // Whole deletion changes cleanupGeneration and clears progress.
-              // Do not recreate an old path-bearing checkpoint. Next run heads.
-              if(removed.kind==="deleted")return result;
+              // A NEW generation-bound checkpoint restarts at head within this
+              // run; do not restore an old cursor or defer each orphan an hour.
+              if(removed.kind==="deleted"){
+                const restarted=await this.begin(epoch);guard=restarted.guard;progress=restarted.progress;
+                if(restarted.reset){result.expiredOrInvalidCheckpoint=true;result.failures++;}
+                continue sweep;
+              }
             }
           }catch{failed=true;result.failures++;}
         }
