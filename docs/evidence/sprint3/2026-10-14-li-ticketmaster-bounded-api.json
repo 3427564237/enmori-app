@@ -1,0 +1,118 @@
+{
+  "executedAtUtc": "2026-10-14T11:32:47.322322+00:00",
+  "scope": "Singapore future non-test Event search size3, no pagination; at most one corresponding Detail",
+  "requests": [
+    {
+      "operation": "SG search",
+      "httpStatus": 200,
+      "failureCategory": null
+    },
+    {
+      "operation": "one corresponding Detail",
+      "httpStatus": 200,
+      "failureCategory": null
+    }
+  ],
+  "rawContentRetained": false,
+  "productWrites": 0,
+  "credentialPublished": false,
+  "authenticationAccepted": true,
+  "pageTotalElements": 83,
+  "returnedEvents": 3,
+  "samples": [
+    {
+      "sample": 1,
+      "occurrenceIdPresent": true,
+      "titlePresent": true,
+      "completeOrderedTime": false,
+      "futureStart": true,
+      "startUncertain": false,
+      "eventTimeZonePresent": true,
+      "statusCode": "onsale",
+      "countryCodes": [
+        "SG"
+      ],
+      "sourceUrlHttps": true,
+      "sourceUrlHost": "ticketmaster.sg",
+      "venuePresent": true,
+      "classificationsPresent": true,
+      "documentedMusicSegmentObserved": true,
+      "startTimezoneAwareParsed": true,
+      "endTimezoneAwareParsed": false
+    },
+    {
+      "sample": 2,
+      "occurrenceIdPresent": true,
+      "titlePresent": true,
+      "completeOrderedTime": false,
+      "futureStart": true,
+      "startUncertain": false,
+      "eventTimeZonePresent": true,
+      "statusCode": "onsale",
+      "countryCodes": [
+        "SG"
+      ],
+      "sourceUrlHttps": true,
+      "sourceUrlHost": "ticketmaster.sg",
+      "venuePresent": true,
+      "classificationsPresent": true,
+      "documentedMusicSegmentObserved": true,
+      "startTimezoneAwareParsed": true,
+      "endTimezoneAwareParsed": false
+    },
+    {
+      "sample": 3,
+      "occurrenceIdPresent": true,
+      "titlePresent": true,
+      "completeOrderedTime": false,
+      "futureStart": true,
+      "startUncertain": false,
+      "eventTimeZonePresent": true,
+      "statusCode": "onsale",
+      "countryCodes": [
+        "SG"
+      ],
+      "sourceUrlHttps": true,
+      "sourceUrlHost": "ticketmaster.sg",
+      "venuePresent": true,
+      "classificationsPresent": true,
+      "documentedMusicSegmentObserved": true,
+      "startTimezoneAwareParsed": true,
+      "endTimezoneAwareParsed": false
+    }
+  ],
+  "recommendationCompleteTimeSamples": 0,
+  "detail": {
+    "sample": "detail1",
+    "occurrenceIdPresent": true,
+    "titlePresent": true,
+    "completeOrderedTime": false,
+    "futureStart": true,
+    "startUncertain": false,
+    "eventTimeZonePresent": true,
+    "statusCode": "onsale",
+    "countryCodes": [
+      "SG"
+    ],
+    "sourceUrlHttps": true,
+    "sourceUrlHost": "ticketmaster.sg",
+    "venuePresent": true,
+    "classificationsPresent": true,
+    "documentedMusicSegmentObserved": true,
+    "sameOccurrenceId": true,
+    "startTimezoneAwareParsed": true,
+    "endTimezoneAwareParsed": false
+  },
+  "validationLimit": "Field-presence/operator parse only; no approved Z-terminated nanosecond-safe UTC, Unicode, complete URL policy or attribution validation",
+  "searchQueryWithoutCredential": {
+    "countryCode": "SG",
+    "size": 3,
+    "sort": "date,asc",
+    "startDateTime": "2026-10-14T11:32:47Z",
+    "includeTBA": "no",
+    "includeTBD": "no",
+    "includeTest": "no"
+  },
+  "mappingM02Approved": false,
+  "independentReview": "Pending ZHOU"
+}

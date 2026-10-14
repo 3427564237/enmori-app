@@ -62,6 +62,12 @@ The first provider operation remains the existing bounded Singapore search
 after the human has saved a key and confirmed the applicable terms. No real
 import/mapping/storage/removal policy is silently selected before actual evidence.
 
+Human LI subsequently replied **"以保存"** after the local key/terms instructions.
+The local file confirmed a nonempty key and human-set terms acceptance. The
+authorized bounded operation is now executed; see the [authenticated evidence](../evidence/sprint3/2026-10-14-li-ticketmaster-bounded-api.md).
+This confirms setup and the probe scope only. It does not approve mapping M02,
+a browse route, a recommendation-rule change, or production storage/retention.
+
 Reuse the exact previously approved controlled Firebase target from the existing
 private configuration; read-only credential/runtime preflight is now authorized.
 Do not select the CLI's possibly different default project, create a new project,
