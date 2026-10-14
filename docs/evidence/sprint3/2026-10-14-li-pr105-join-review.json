@@ -1,0 +1,66 @@
+{
+  "reviewHead": "d17432d292b18f06101170ed086f3e4ef83b8444",
+  "testedProduct": "3ebb88a33dd2fb3d8348979ff5fa713a95470278",
+  "testedTree": "5b4f12b20def7657c5ef530f688e5286c7e95123",
+  "reviewer": "LI",
+  "node": "24.19.0",
+  "typescript": "7.0.2",
+  "existingJava": "25.0.4.1",
+  "results": {
+    "backendFinal": {
+      "pass": 706,
+      "fail": 0,
+      "exit": 0
+    },
+    "emulator": {
+      "pass": 103,
+      "fail": 0,
+      "exit": 0
+    },
+    "compile": {
+      "exit": 0
+    },
+    "prematureBackend": {
+      "pass": 654,
+      "fail": 0,
+      "exit": 0,
+      "acceptedAsFullRun": false,
+      "reason": "test invocation started before the compiler process completion was awaited"
+    }
+  },
+  "bindings": "eight blob and SHA256 bindings / merge parent and tested tree verified",
+  "api": "old27 path/schema/security objects preserved;33 operations now",
+  "logs": {
+    "li-pr105-join-backend-final.txt": {
+      "bytes": 64921,
+      "sha256": "47c2efe0bd03ba6f8e7a42fc5bf275187ed179b369a8edd242da40b61bc641e1"
+    },
+    "li-pr105-join-backend-incomplete.txt": {
+      "bytes": 60254,
+      "sha256": "58ec560e1c325e9080eb55920e20b5c2cd315474a24b5b0b6ea5e935af551f4a"
+    },
+    "li-pr105-join-emulator.txt": {
+      "bytes": 15102,
+      "sha256": "646626d351c4d2d03d6c7fbf26865f6331a9bb22c55e3340ac0fe9b440c5003f"
+    },
+    "li-pr105-join-backend.txt": {
+      "bytes": 60254,
+      "sha256": "58ec560e1c325e9080eb55920e20b5c2cd315474a24b5b0b6ea5e935af551f4a"
+    },
+    "li-pr105-join-build.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "notRun": [
+    "Flutter combined tree",
+    "Android combined tree",
+    "actual Qwen",
+    "complete six-operation network journey",
+    "full source sweeps/startup runner",
+    "long-duration cleanup SLA",
+    "manual accessibility",
+    "UAT",
+    "Release"
+  ]
+}
