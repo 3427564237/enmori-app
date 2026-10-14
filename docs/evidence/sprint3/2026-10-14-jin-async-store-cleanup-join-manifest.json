@@ -1,0 +1,112 @@
+{
+  "testedSource": "3ebb88a33dd2fb3d8348979ff5fa713a95470278",
+  "tree": "5b4f12b20def7657c5ef530f688e5286c7e95123",
+  "merge": "010d69f172b57f0bb518ab923c97ac8ef0ba4f72",
+  "inputs": [
+    "784ed9a34f565083a3bc7d4fe2e70c960b117f90",
+    "1af4d391546cbb456988da526f37109f86671638"
+  ],
+  "newJinBindings": [
+    {
+      "path": "backend/emulator-test/real-conversation-store.integration.test.ts",
+      "blob": "b27008da29a2acbcc1828acb62dc09d83faa04b0",
+      "sha256": "13e624ea423a5405c627856c784b7cf3d38e37da84daf6191115a47cf636ffb4"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/async-firestore-conversation-store.ts",
+      "blob": "58c14778654ae18fc3d2f1c40f1f2ca7c0404563",
+      "sha256": "274e4d49a120de66a46ec4b05ff504c6d126d72cba5e6f5783f5baf83558d540"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-cleanup.ts",
+      "blob": "a994639836932443178101c55e1839df9752ee9d",
+      "sha256": "402664f556509248c2350827a9be5c41ba65fdecaf6cd7c328d448ae74191381"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-store.ts",
+      "blob": "ca760c925fe305d35d9fb672d5952576789c4b0c",
+      "sha256": "c436f1fc693c08d11f99eab93b3df509e0ed8bffac9068213cbaf3748e503e13"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/conversation-cleanup.ts",
+      "blob": "858b679bc8eabd16f7f15385b62723e1e666f88b",
+      "sha256": "0cde486b69de9a1296755f4ba8d9206316d38a71c77cc7aea24136c9630f013c"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/real-conversation-store.ts",
+      "blob": "017ca8496d617e7a55db6d2b4003058e15cb6cb5",
+      "sha256": "3a9962668a51f29d76ab843bc21bd3ef529c72d05a88f4553722ffde149ac537"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-gateway.ts",
+      "blob": "be45273700cbf7166e8d679a5413cea62f58dd0b",
+      "sha256": "64ec0e20f43b78f091d0bbc186b963e01a7c96e15f8e98b29b8671dd260ae374"
+    },
+    {
+      "path": "backend/test/ai-conversation/real-store-boundary.test.ts",
+      "blob": "77b30efd5dc6179158eefc246b9b0737a10df101",
+      "sha256": "1b97b5a08bc5af6e904aaf2c0da30398e3d6748cfd0d03ba1d9f60bb0ccd013f"
+    }
+  ],
+  "privateLogs": [
+    {
+      "file": "cleanup-backend01.log",
+      "bytes": 64249,
+      "sha256": "f21876a50244283283232609033c995f533a75c2fac28789f2d32bb5db292580"
+    },
+    {
+      "file": "cleanup-build01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "cleanup-emulator01.log",
+      "bytes": 15166,
+      "sha256": "8e689bf1e0055701362a6e8878915cc5ff4f71482bf19dba697c2df9cf3d0480"
+    },
+    {
+      "file": "bridge-backend01.log",
+      "bytes": 64250,
+      "sha256": "1d2886d0be539414442f6634f4a829c9aac512d6ab7557c4de243914e2453aad"
+    },
+    {
+      "file": "bridge-build01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "bridge-emulator01.log",
+      "bytes": 15408,
+      "sha256": "437ef4329950a3fb3bc99ff007f3a1e858886f2732f7c273d7e197e7e808c203"
+    }
+  ],
+  "results": {
+    "backend": {
+      "pass": 706,
+      "fail": 0,
+      "exit": 0
+    },
+    "emulator": {
+      "pass": 103,
+      "fail": 0,
+      "exit": 0
+    },
+    "initialCleanupOnly": {
+      "source": "4d9a782a51d86c0cd42d5d0ce6c3d0cc49ebf4f6",
+      "backendPass": 706,
+      "emulatorPass": 101
+    }
+  },
+  "actualModel": false,
+  "modelAndSemanticGates": "explicit test doubles",
+  "noteInventory": "owned empty synthetic fixture only",
+  "notRun": [
+    "complete six-operation controller/network/device journey",
+    "full source sweeps/restart/normal fence retirement",
+    "startup/hourly runner",
+    "Flutter on combined tree",
+    "Android on combined tree",
+    "D1-A model",
+    "long-duration cleanup SLA"
+  ]
+}
