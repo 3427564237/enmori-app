@@ -100,7 +100,9 @@ export interface NoteModelContext {
 }
 
 /**
- * Prepared boundary only; no real adapter is supplied by this increment.
+ * Prepared boundary delivered in #96. The 14 October accelerated increment
+ * supplies a separate isolated SDK reader implementation, still unwired and
+ * subject to the producer prerequisites below; the Port semantics are unchanged.
  *
  * The caller has already verified original Auth/session, minimal owner/purpose
  * and admission. acceptedAt/deadline/asOf are captured in ONE acceptance event;

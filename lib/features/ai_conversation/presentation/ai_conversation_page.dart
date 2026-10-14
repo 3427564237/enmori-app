@@ -9,18 +9,25 @@ Widget buildAiConversationPage(
   BuildContext context, {
   required VoidCallback onBack,
   required VoidCallback onOpenSettings,
-}) => AiConversationPage(onBack: onBack, onOpenSettings: onOpenSettings);
+  VoidCallback? onOpenPersonas,
+}) => AiConversationPage(
+  onBack: onBack,
+  onOpenSettings: onOpenSettings,
+  onOpenPersonas: onOpenPersonas,
+);
 
 /// LI supplies navigation; the feature retains request and session ownership.
 final class AiConversationPage extends ConsumerWidget {
   const AiConversationPage({
     required this.onBack,
     required this.onOpenSettings,
+    this.onOpenPersonas,
     super.key,
   });
 
   final VoidCallback onBack;
   final VoidCallback onOpenSettings;
+  final VoidCallback? onOpenPersonas;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => _ConversationPage(
@@ -29,6 +36,7 @@ final class AiConversationPage extends ConsumerWidget {
     ),
     onBack: onBack,
     onOpenSettings: onOpenSettings,
+    onOpenPersonas: onOpenPersonas,
   );
 }
 
@@ -36,11 +44,13 @@ final class _ConversationPage extends ConsumerStatefulWidget {
   const _ConversationPage({
     required this.onBack,
     required this.onOpenSettings,
+    this.onOpenPersonas,
     super.key,
   });
 
   final VoidCallback onBack;
   final VoidCallback onOpenSettings;
+  final VoidCallback? onOpenPersonas;
 
   @override
   ConsumerState<_ConversationPage> createState() => _ConversationPageState();
@@ -98,20 +108,36 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       mounted &&
       ref.read(aiConversationControllerProvider).sessionKey == _sessionKey;
 
-  Future<void> _navigate(VoidCallback navigate) async {
+  Future<void> _navigate(
+    VoidCallback navigate, {
+    bool explicitUnknownExit = false,
+  }) async {
     if (!_ownsCurrentSession || _confirming || _leaving) return;
     final state = ref.read(aiConversationControllerProvider);
-    if (state.canCancel) {
+    if (state.canCancel || (!explicitUnknownExit && state.isBusy)) {
       _confirming = true;
       final leave = await _confirm(
-        message: 'Leave this conversation?',
+        message: state.canCancel
+            ? 'Leave this conversation?'
+            : 'The request may still complete. Leave this screen?',
         keepLabel: 'Stay',
-        actionLabel: 'Request cancel and leave',
+        actionLabel: state.canCancel ? 'Request cancel and leave' : 'Leave',
         actionKey: 'ai-confirm-leave',
       );
       if (!_ownsCurrentSession) return;
       _confirming = false;
       if (!leave) return;
+    } else if (!explicitUnknownExit && _message.text.isNotEmpty) {
+      _confirming = true;
+      final discard = await _confirm(
+        message: 'Discard unsaved changes?',
+        keepLabel: 'Keep editing',
+        actionLabel: 'Discard',
+        actionKey: 'ai-confirm-discard',
+      );
+      if (!_ownsCurrentSession) return;
+      _confirming = false;
+      if (!discard) return;
     }
     if (!_ownsCurrentSession || _leaving) return;
     _leaving = true;
@@ -234,6 +260,13 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             icon: const Icon(Icons.arrow_back),
           ),
           actions: [
+            if (widget.onOpenPersonas case final openPersonas?)
+              IconButton(
+                key: const Key('ai-personas'),
+                tooltip: 'Manage Personas',
+                onPressed: () => unawaited(_navigate(openPersonas)),
+                icon: const Icon(Icons.person_outline),
+              ),
             IconButton(
               key: const Key('ai-settings'),
               tooltip: 'Settings',
@@ -294,7 +327,9 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                     OutlinedButton(
                       key: const Key('ai-leave-without-retrying'),
                       style: _buttonStyle,
-                      onPressed: () => unawaited(_navigate(widget.onBack)),
+                      onPressed: () => unawaited(
+                        _navigate(widget.onBack, explicitUnknownExit: true),
+                      ),
                       child: const Text('Leave without retrying'),
                     ),
                   ],
