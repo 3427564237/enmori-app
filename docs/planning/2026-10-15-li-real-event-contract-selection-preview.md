@@ -2,6 +2,9 @@
 
 Date: 2026-10-15 (SGT). **Human selection Pending; this preview grants no implementation or provider-display permission.**
 
+Subsequent human answer: **"批准 EB01–EB06，EB07先仅复制链接（推荐）"**.
+The later [confirmed decision](../decisions/2026-10-15-li-real-event-contract-selection.md) resolves the human selection for the exact packet. The original Pending text above is retained as preview history; technical review and actual provider/display gates remain separately required.
+
 Human LI confirmed real list/Detail with existing recommendations preserved in [S-PM-1014-LI-REAL-EVENT-BROWSE](../decisions/2026-10-14-li-real-event-browse-direction.md), while retaining the concrete interface proposal for review. SHI now supplies [Draft #109](https://github.com/3427564237/enmori-app/pull/109), exact `718da39440a6a3d67cce5ad9a3efbbb7f5acbc40`: [EB01–EB07 source](https://github.com/3427564237/enmori-app/blob/718da39440a6a3d67cce5ad9a3efbbb7f5acbc40/docs/planning/2026-10-15-shi-real-event-browse-contract-candidate.md). ZHOU's independent technical review is currently Pending; LI's present examination is not substituted for it.
 
 ## Concrete recommended implementation selection

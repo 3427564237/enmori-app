@@ -1,5 +1,9 @@
 # Project Source Map
 
+## Real Event interface selection — 2026-10-15
+
+- **S-PM-1015-LI-REAL-EVENT-CONTRACT:** [Confirmed real Event browse/Detail interface selection](decisions/2026-10-15-li-real-event-contract-selection.md). Human LI approves exact #109 EB01–EB06 and EB07 copy-link only: separate activity routes/two protected Backend reads, transient SG first batch20, strict occurrence/source projection, no database/cache/pagination, memory-only5min and explicit missing end. Existing Home/See All recommendation rules remain. This resolves the concrete choices reserved by S-PM-1014-LI-REAL-EVENT-BROWSE; ZHOU technical review, provider display/link permission, actual validation and runtime/device acceptance remain separate.
+
 ## Sprint planning updates — 2026-09-24–25
 
 - **S-PM-0925-S3EVENT-CRITERIA:** [Confirmed Event source criteria](decisions/2026-09-25-sprint3-event-source-criteria.md). LI accepts all publicly participable activity types, including paid concerts and sports, superseding the earlier community-only fit assumption without changing source priority. Title, start time, and an openable third-party activity/registration link require real source evidence; an Event page with onward registration is sufficient. Event Detail may mark missing location, category, short description or end time; a missing end time still excludes the activity from existing Home/See All recommendations. A small explicit source-category-to-ENMORI-Interest-Tag table is approved in principle, while its actual entries remain unapproved.
