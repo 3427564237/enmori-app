@@ -55,6 +55,11 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
     return {schemaVersion:1,revision:r.revision,phase,startedAt,resumeUntil,hadFailure:r.hadFailure,
       ...(r.lastDocumentName===undefined?{}:{lastDocumentName:r.lastDocumentName as string})};
   }
+  private sameProgress(actual:Progress,expected:Progress):boolean{
+    return actual.revision===expected.revision&&actual.phase===expected.phase&&actual.lastDocumentName===expected.lastDocumentName&&
+      actual.hadFailure===expected.hadFailure&&compareInstant(actual.startedAt,expected.startedAt)===0&&
+      compareInstant(actual.resumeUntil,expected.resumeUntil)===0;
+  }
   private async begin(epoch:RuntimeEpoch){
     return this.tx(async tx=>{
       const cleanupGeneration=await this.runtime(tx,epoch),row=await tx.get(PROGRESS),previous=this.parseProgress(row),now=this.now();
@@ -69,7 +74,7 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
     return this.tx(async tx=>{
       await this.runtime(tx,guard.epoch,guard.cleanupGeneration);
       const current=this.parseProgress(await tx.get(PROGRESS));
-      if(!current||current.revision!==progress.revision||compareInstant(this.now(),current.resumeUntil)>=0||!tx.listGroupPage)unavailable();
+      if(!current||!this.sameProgress(current,progress)||compareInstant(this.now(),current.resumeUntil)>=0||!tx.listGroupPage)unavailable();
       return (await tx.listGroupPage(progress.phase,progress.lastDocumentName,25)).map(row=>row.path);
     });
   }
@@ -77,7 +82,7 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
     await this.tx(async tx=>{
       await this.runtime(tx,guard.epoch,guard.cleanupGeneration);
       const actual=this.parseProgress(await tx.get(PROGRESS));
-      if(!actual||actual.revision!==previous.revision||compareInstant(this.now(),actual.resumeUntil)>=0||!tx.delete)unavailable();
+      if(!actual||!this.sameProgress(actual,previous)||compareInstant(this.now(),actual.resumeUntil)>=0||!tx.delete)unavailable();
       if(next)tx.set(PROGRESS,{...next});else tx.delete(PROGRESS);
     });
   }

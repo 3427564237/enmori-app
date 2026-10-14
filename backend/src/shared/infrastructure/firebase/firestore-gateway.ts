@@ -27,6 +27,7 @@ export interface FirestoreTransactionGateway {
   listPage?(collectionPath: string, afterId: string | undefined, limit: number): Promise<readonly StoredDocumentEntry[]>;
   listWherePage?(collectionPath: string, equal: Readonly<Record<string, string>>, afterId: string | undefined, limit: number): Promise<readonly StoredDocumentEntry[]>;
   listGroupPage?(collectionId: string, afterPath: string | undefined, limit: number): Promise<readonly (StoredDocumentSnapshot & { readonly path: string })[]>;
+  listMessagePage?(collectionPath:string,before:number|undefined):Promise<readonly StoredDocumentSnapshot[]>;
 }
 
 export interface FirestoreGateway {
@@ -111,6 +112,14 @@ class FirebaseAdminTransactionGateway
       this.firestore.doc(path),
       data as DocumentData,
     );
+  }
+  public async listMessagePage(collectionPath:string,before:number|undefined):Promise<readonly StoredDocumentSnapshot[]>{
+    if(!/^accounts\/[^/]+\/conversations\/[^/]+\/messages$/.test(collectionPath)||
+      (before!==undefined&&(!Number.isSafeInteger(before)||before<1)))throw new Error("Invalid bounded message query");
+    let query=this.firestore.collection(collectionPath).orderBy("sequence","desc").limit(20);
+    if(before!==undefined)query=query.where("sequence","<",before);
+    const page=await this.transaction.get(query);
+    return page.docs.map(doc=>({id:doc.id,data:{...doc.data()},createTime:{seconds:doc.createTime.seconds,nanoseconds:doc.createTime.nanoseconds}}));
   }
 
   public set(path: string, data: StoredDocument): void {

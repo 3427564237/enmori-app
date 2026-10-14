@@ -13,6 +13,7 @@ import type { ConversationQuiescence } from "../src/ai-conversation/ports/conver
 import type { RuntimeEpoch } from "../src/ai-conversation/ports/real-conversation-store.js";
 import { retirePreviousConversationEpoch } from "../src/ai-conversation/infrastructure/firestore-conversation-restart.js";
 import { createAuthBindingDocumentId } from "../src/shared/infrastructure/firebase/firestore-records.js";
+import { FirestoreConversationOperationReaders } from "../src/ai-conversation/infrastructure/firestore-conversation-operation-readers.js";
 
 const env=requireControlledEmulatorEnvironment(process.env);
 const app=initializeApp({projectId:env.projectId},`ai-maintenance-${randomUUID()}`);
@@ -125,6 +126,22 @@ test("actual whole delete between page read and advance invalidates old checkpoi
   assert.equal((await components().maintenance.sourceSweep(epoch)).complete,true);
 });
 
+test("actual replacement checkpoint with reused revision cannot be overwritten or deleted by the earlier scan",async()=>{
+  let replaced=false,clock=Date.now()+10_000;let replacement:Record<string,unknown>|undefined;
+  const raced:FirestoreGateway={runTransaction:async(work,options)=>{
+    let page=false;
+    const value=await gateway.runTransaction(tx=>work({get:tx.get.bind(tx),list:tx.list.bind(tx),set:tx.set.bind(tx),create:tx.create.bind(tx),
+      delete:tx.delete!.bind(tx),listSnapshots:tx.listSnapshots!.bind(tx),listGroupPage:async(...args)=>{page=true;return tx.listGroupPage!(...args);}}),options);
+    if(page&&!replaced){replaced=true;clock+=1000;const seconds=Math.floor(clock/1000),nanoseconds:(number)=(clock-seconds*1000)*1000000;
+      replacement={schemaVersion:1,revision:1,phase:"messages",startedAt:{seconds,nanoseconds},
+        resumeUntil:{seconds:seconds+86400,nanoseconds},hadFailure:false};await db.doc(progress).set(replacement);clock+=1000;}
+    return value;
+  }};
+  const result=await components(raced,idle,()=>clock).maintenance.sourceSweep(epoch);
+  assert.equal(replaced,true);assert.equal(result.complete,false);assert.ok(result.failures>0);
+  assert.deepEqual((await db.doc(progress).get()).data(),replacement);
+});
+
 test("actual complete-reference cursor survives deletion and duplicate IDs across parents",async()=>{
   const duplicate=randomUUID(),first=await pair(),second=await pair();
   const a=`${first.base}/message_sources/${duplicate}`,b=`${second.base}/message_sources/${duplicate}`;
@@ -219,4 +236,57 @@ test("actual confirmed new epoch retires previous controls across pages and sett
   assert.equal((await db.doc(`${row.base}/messages/${row.u}`).get()).createTime!.isEqual(row.original.createTime!),true);
   assert.equal((await store.closeOperation({ownerAccountId:owner,conversationId:row.cid,userMessageId:row.u,operationId,kind:"send",targetKind:"reserved_new"},oldEpoch)).kind,"terminated");
   assert.equal((await db.doc(`ai_operation_fences/${operationId}`).get()).exists,false);
+});
+
+async function readers(){
+  const uid=`maintenance-${randomUUID()}`;await set(`auth_bindings/${createAuthBindingDocumentId(uid)!}`,{accountId:owner});
+  const store=new FirestoreConversationStore(gateway,process.env,now),c={principal:{firebaseUid:uid},ownerId:owner,signal:new AbortController().signal,current:()=>true};
+  return {c,store,readers:new FirestoreConversationOperationReaders(store,components().cleanup,epoch)};
+}
+test("actual ordinary message query uses DESC limit20, returns ASC with precise continuation, and verifies owner first",async()=>{
+  const f=await readers(),cid=randomUUID(),base=`accounts/${owner}/conversations/${cid}`;let previous:{seconds:number;nanoseconds:number}|undefined;
+  let latest="";
+  for(let sequence=1;sequence<=21;sequence++){
+    latest=randomUUID();await set(`${base}/messages/${latest}`,{role:"user",sequence,text:"Synthetic historical message",
+      ...(previous?{appendBefore:{seconds:previous.seconds+90*86400,nanoseconds:previous.nanoseconds}}:{})});
+    const snapshot=await db.doc(`${base}/messages/${latest}`).get();previous={seconds:snapshot.createTime!.seconds,nanoseconds:snapshot.createTime!.nanoseconds};
+  }
+  await set(base,{state:"live",lifecycleVersion:1,nextSequence:22,latestMessageId:latest});
+  const page=await f.readers.listMessages(f.c,cid,undefined);assert.equal(page.kind,"success");if(page.kind!=="success")return;
+  assert.deepEqual(page.value.messages.map(m=>m.sequence),Array.from({length:20},(_,i)=>i+2));assert.equal(page.value.nextBefore,2);
+  const tail=await f.readers.listMessages(f.c,cid,2);assert.equal(tail.kind,"success");if(tail.kind!=="success")return;
+  assert.deepEqual(tail.value.messages.map(m=>m.sequence),[1]);assert.equal(tail.value.nextBefore,undefined);
+  assert.deepEqual(await f.readers.listMessages({...f.c,principal:{firebaseUid:"unbound"}},cid,undefined),{kind:"failure",code:"AUTH_FORBIDDEN"});
+  assert.deepEqual(await f.readers.listMessages({...f.c,current:()=>false},cid,undefined),{kind:"failure",code:"AI_UNAVAILABLE"});
+});
+
+test("actual ordinary Retry and page keep canonical accepted/tombstone and unproved provenance protection",async()=>{
+  const f=await readers(),row=await pair();
+  assert.deepEqual(await f.readers.retryUser(f.c,{operationId:randomUUID(),conversationId:row.cid,userMessageId:row.u,kind:"retry",targetKind:"existing"},()=>"Synthetic original"),
+    {kind:"failure",code:"AI_OPERATION_CONFLICT"});
+  assert.equal((await f.readers.listMessages(f.c,row.cid,undefined)).kind,"success");
+  await db.doc(`${row.base}/message_sources/${row.a}`).set({sources:[{sourceType:"check_in",sourceId:"unproved"}],purposeRevocationGeneration:2});
+  assert.equal((await f.readers.listMessages(f.c,row.cid,undefined)).kind,"failure");
+  assert.equal((await db.doc(`${row.base}/messages/${row.a}`).get()).data()!.text,"Synthetic reply");
+});
+
+test("actual no-effect readback requires original reserved-new identity, closed matching guard and full absence",async()=>{
+  const f=await readers(),operation={operationId:randomUUID(),conversationId:randomUUID(),userMessageId:randomUUID(),kind:"send" as const,targetKind:"reserved_new" as const};
+  const path=`ai_operation_fences/${operation.operationId}`;await set(path,{ownerAccountId:owner,conversationId:operation.conversationId,
+    userMessageId:operation.userMessageId,kind:"send",targetKind:"reserved_new",processEpoch:epoch.processEpoch,revision:1,state:"closed"});
+  assert.deepEqual(await f.readers.readOutcome(f.c,operation.conversationId,operation.operationId,operation),{kind:"success",value:{operationId:operation.operationId,state:"no_effect"}});
+  assert.deepEqual(await f.readers.readOutcome(f.c,operation.conversationId,operation.operationId),{kind:"failure",code:"CONVERSATION_UNAVAILABLE"});
+  await db.doc(path).update({state:"open"});
+  assert.equal((await f.readers.readOutcome(f.c,operation.conversationId,operation.operationId,operation)).kind,"failure");
+});
+
+test("actual ordinary readback derives canonical pair from immutable effects after control retirement, and Delete uses whole cleanup",async()=>{
+  const f=await readers(),row=await pair(),operationId=randomUUID();
+  await set(`${row.base}/effects/${operationId}`,{kind:"send",userMessageId:row.u,assistantMessageId:row.a});
+  const read=await f.readers.readOutcome(f.c,row.cid,operationId);assert.equal(read.kind,"success");
+  if(read.kind==="success")assert.equal(read.value.state,"assistant_saved");
+  assert.deepEqual(await f.readers.deleteConversation(f.c,row.cid),{kind:"success",value:undefined});
+  assert.equal((await db.doc(row.base).get()).exists,false);
+  assert.equal((await db.collection(`${row.base}/messages`).get()).empty,true);
+  assert.equal((await db.collection(`${row.base}/effects`).get()).empty,true);
 });

@@ -9,10 +9,12 @@ import type { RealConversationStore, StoreResult, StoreFailure, RuntimeEpoch, Op
   OpenOperation, OriginalWriteAuthority, StoredConversationMessage, StoredUserIdentity, SavedOperationOutcome } from "../ports/real-conversation-store.js";
 import type { PresentationMetadata } from "../ports/conversation-lifecycle.js";
 import { normalizePersonaInput } from "../../personas/domain/persona-values.js";
+import type { ConversationReadback } from "../ports/conversation-operations.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const RUNTIME = "ai_runtime_fence/current";
-const parentPath = (t: OperationTarget): string => `accounts/${t.ownerAccountId}/conversations/${t.conversationId}`;
+type Location=Pick<OperationTarget,"ownerAccountId"|"conversationId">;
+const parentPath = (t: Location): string => `accounts/${t.ownerAccountId}/conversations/${t.conversationId}`;
 const userPath = (t: OperationTarget): string => `${parentPath(t)}/messages/${t.userMessageId}`;
 const effectPath = (t: OperationTarget): string => `${parentPath(t)}/effects/${t.operationId}`;
 const fencePath = (t: OperationTarget): string => `ai_operation_fences/${t.operationId}`;
@@ -133,7 +135,7 @@ export class FirestoreConversationStore implements RealConversationStore {
     if (row.processEpoch !== op.epoch.processEpoch || row.state !== "open" || row.revision !== op.revision) refuse("terminated");
     await this.authority(tx, op, a);
   }
-  private async inventory(tx: Tx, target: OperationTarget): Promise<Inventory | undefined> {
+  private async inventory(tx: Tx, target: Location): Promise<Inventory | undefined> {
     const parent = await tx.get(parentPath(target));
     if (parent === undefined) {
       // A missing parent cannot hide retained children and become a fresh target.
@@ -296,7 +298,7 @@ export class FirestoreConversationStore implements RealConversationStore {
       tx.set(fencePath(t), { ...row, state: "closed", revision: row.revision + 1 });
     });
   }
-  private async pair(tx: Tx, t: OperationTarget, inv: Inventory, user: Snapshot): Promise<StoredConversationMessage | undefined> {
+  private async pair(tx: Tx, t: Location, inv: Inventory, user: Snapshot): Promise<StoredConversationMessage | undefined> {
     const id = user.data.acceptedAssistantMessageId;
     if (id === undefined) return undefined;
     const assistant = inv.rows.find(r => r.id === id);
@@ -396,6 +398,66 @@ export class FirestoreConversationStore implements RealConversationStore {
       if (user.data.pendingOperationId !== op.operationId || effect === undefined ||
           !exact(effect, ["kind", "userMessageId"], ["assistantMessageId"]) || effect.kind !== op.kind || effect.userMessageId !== user.id) refuse("conflict");
       current(a); return { messageId: user.id, sequence: user.data.sequence as number, persistedAt: user.createTime };
+    });
+  }
+
+  private readCurrent(current:()=>boolean):void{if(!current())refuse("terminated");}
+  private location(owner:string,id:string):Location{if(!UUID.test(owner)||!UUID.test(id))refuse("unavailable");return {ownerAccountId:owner,conversationId:id};}
+  async verifyOwnedTarget(principal:AuthPrincipal,owner:string,id:string,userId:string|undefined,current:()=>boolean):Promise<StoreResult<void>>{
+    return this.run(async tx=>{this.readCurrent(current);const location=this.location(owner,id);await this.owner(tx,principal,owner);
+      const inv=await this.inventory(tx,location);if(!inv)refuse("conversation_unavailable");
+      if(userId!==undefined)this.requireUser(inv,userId);this.readCurrent(current);
+    });
+  }
+  async readRetryUser(principal:AuthPrincipal,owner:string,id:string,userId:string,borrow:()=>string|undefined,current:()=>boolean):Promise<StoreResult<StoredConversationMessage>>{
+    return this.run(async tx=>{this.readCurrent(current);const location=this.location(owner,id),account=await this.owner(tx,principal,owner);
+      if(account.optionalProcessingConsent!=="accepted")refuse("denied");
+      const inv=await this.inventory(tx,location);if(!inv)refuse("conversation_unavailable");
+      const user=this.requireUser(inv,userId);this.readCurrent(current);
+      if(user.data.pendingOperationId!==undefined||user.data.acceptedAssistantMessageId!==undefined||borrow()!==user.data.text)refuse("conflict");
+      return this.message(user);
+    });
+  }
+  async listOwnedMessages(principal:AuthPrincipal,owner:string,id:string,before:number|undefined,current:()=>boolean):Promise<StoreResult<{
+    readonly messages:readonly StoredConversationMessage[];readonly nextBefore?:number;
+  }>>{
+    return this.run(async tx=>{this.readCurrent(current);const location=this.location(owner,id);await this.owner(tx,principal,owner);
+      const inv=await this.inventory(tx,location);if(!inv)refuse("conversation_unavailable");if(!tx.listMessagePage)refuse("unavailable");
+      const page=await tx.listMessagePage(`${parentPath(location)}/messages`,before),messages:StoredConversationMessage[]=[];
+      for(const row of [...page].reverse()){
+        if(!inv.rows.some(m=>m.id===row.id&&m.data.sequence===row.data.sequence))refuse("unavailable");
+        if(row.data.role==="user")messages.push(this.message(row));else{
+          const user=this.requireUser(inv,row.data.replyToUserMessageId as string),a=await this.pair(tx,location,inv,user);
+          if(!a||a.messageId!==row.id)refuse("unavailable");messages.push(a);
+        }
+      }
+      this.readCurrent(current);const first=messages[0]?.sequence;
+      return {messages,...(first!==undefined&&inv.rows.some(r=>(r.data.sequence as number)<first)?{nextBefore:first}:{})};
+    });
+  }
+  async readOwnedOutcome(principal:AuthPrincipal,owner:string,id:string,operationId:string,original:Omit<OperationTarget,"ownerAccountId">|undefined,
+    current:()=>boolean):Promise<StoreResult<ConversationReadback>>{
+    return this.run(async tx=>{
+      this.readCurrent(current);const location=this.location(owner,id);if(!UUID.test(operationId))refuse("unavailable");await this.owner(tx,principal,owner);
+      const inv=await this.inventory(tx,location),effect=await tx.get(`${parentPath(location)}/effects/${operationId}`),fence=await tx.get(`ai_operation_fences/${operationId}`);
+      this.readCurrent(current);
+      if(!inv){
+        if(original&&original.operationId===operationId&&original.conversationId===id&&original.targetKind==="reserved_new"&&effect===undefined&&
+          fence&&this.fenceMatches(fence,{...original,ownerAccountId:owner})&&fence.state==="closed")return {operationId,state:"no_effect"};
+        refuse("conversation_unavailable");
+      }
+      if(!effect)return {operationId,state:"unresolved"};
+      if(!exact(effect,["kind","userMessageId"],["assistantMessageId"])||!["send","retry"].includes(String(effect.kind))||typeof effect.userMessageId!=="string"||!UUID.test(effect.userMessageId))refuse("unavailable");
+      const target:OperationTarget={...location,operationId,userMessageId:effect.userMessageId,kind:effect.kind as "send"|"retry",
+        targetKind:fence?.targetKind==="reserved_new"?"reserved_new":"existing"};
+      const user=this.requireUser(inv,target.userMessageId);
+      if(fence&&(!this.fenceMatches(fence,target)||fence.state!=="closed"))return {operationId,state:"unresolved"};
+      if(user.data.pendingOperationId!==undefined&&(user.data.pendingOperationId!==operationId||!fence))return {operationId,state:"unresolved"};
+      const a=await this.pair(tx,target,inv,user);
+      if(effect.assistantMessageId!==undefined&&effect.assistantMessageId!==a?.messageId)refuse("unavailable");
+      this.readCurrent(current);
+      if(user.data.pendingOperationId===operationId){const {pendingOperationId:_claim,...settled}=user.data;tx.set(userPath(target),settled);}
+      return a?{operationId,state:"assistant_saved",userMessage:this.message(user),assistantMessage:a}:{operationId,state:"user_saved",userMessage:this.message(user)};
     });
   }
 }
