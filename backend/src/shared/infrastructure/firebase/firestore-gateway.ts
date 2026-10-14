@@ -25,6 +25,8 @@ export interface FirestoreTransactionGateway {
   set(path: string, data: StoredDocument): void;
   delete?(path: string): void;
   listPage?(collectionPath: string, afterId: string | undefined, limit: number): Promise<readonly StoredDocumentEntry[]>;
+  listWherePage?(collectionPath: string, equal: Readonly<Record<string, string>>, afterId: string | undefined, limit: number): Promise<readonly StoredDocumentEntry[]>;
+  listGroupPage?(collectionId: string, afterPath: string | undefined, limit: number): Promise<readonly (StoredDocumentSnapshot & { readonly path: string })[]>;
 }
 
 export interface FirestoreGateway {
@@ -82,6 +84,26 @@ class FirebaseAdminTransactionGateway
     if (afterId !== undefined) query = query.startAfter(afterId);
     const snapshot = await this.transaction.get(query);
     return snapshot.docs.map(doc => ({ id: doc.id, data: { ...doc.data() } }));
+  }
+
+  public async listWherePage(collectionPath: string, equal: Readonly<Record<string,string>>, afterId: string | undefined, limit: number): Promise<readonly StoredDocumentEntry[]> {
+    if(!Number.isInteger(limit)||limit<1||limit>25)throw new Error("Invalid bounded query");
+    let query = this.firestore.collection(collectionPath).orderBy(FieldPath.documentId()).limit(limit);
+    for(const [field,value] of Object.entries(equal))query=query.where(field,"==",value);
+    if(afterId!==undefined)query=query.startAfter(afterId);
+    const snapshot=await this.transaction.get(query);
+    return snapshot.docs.map(doc=>({id:doc.id,data:{...doc.data()}}));
+  }
+
+  public async listGroupPage(collectionId: string, afterPath: string | undefined, limit: number): Promise<readonly (StoredDocumentSnapshot & {readonly path:string})[]> {
+    if(!["conversations","messages","message_sources"].includes(collectionId)||!Number.isInteger(limit)||limit<1||limit>25)throw new Error("Invalid bounded group query");
+    let query=this.firestore.collectionGroup(collectionId).orderBy(FieldPath.documentId()).limit(limit);
+    // Complete DocumentReference, including a deleted cursor document, never a
+    // bare duplicated message ID or a mutable document snapshot.
+    if(afterPath!==undefined)query=query.startAfter(this.firestore.doc(afterPath));
+    const snapshot=await this.transaction.get(query);
+    return snapshot.docs.map(doc=>({id:doc.id,path:doc.ref.path,data:{...doc.data()},
+      createTime:{seconds:doc.createTime.seconds,nanoseconds:doc.createTime.nanoseconds}}));
   }
 
   public create(path: string, data: StoredDocument): void {

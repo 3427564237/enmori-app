@@ -10,6 +10,8 @@ import { requireControlledEmulatorEnvironment } from "../src/shared/infrastructu
 import { createAuthBindingDocumentId } from "../src/shared/infrastructure/firebase/firestore-records.js";
 import { FirebaseIdentityVerifier } from "../src/shared/infrastructure/firebase/firebase-identity-verifier.js";
 import { FirestoreConversationStore } from "../src/ai-conversation/infrastructure/firestore-conversation-store.js";
+import { FirestoreConversationCleanup } from "../src/ai-conversation/infrastructure/firestore-conversation-cleanup.js";
+import type { ConversationQuiescence } from "../src/ai-conversation/ports/conversation-cleanup.js";
 import type { StoreResult, OperationTarget, OpenOperation, OriginalWriteAuthority, RuntimeEpoch } from "../src/ai-conversation/ports/real-conversation-store.js";
 import { buildApp } from "../src/bootstrap/build-app.js";
 import { err } from "../src/shared/domain/result.js";
@@ -47,6 +49,14 @@ function retry(original: OperationTarget): OperationTarget {
 }
 const parent = (t: OperationTarget): string => `accounts/${owner}/conversations/${t.conversationId}`;
 const user = (t: OperationTarget): string => `${parent(t)}/messages/${t.userMessageId}`;
+// This fixture has no HTTP ticket registry or detached work. Every preceding
+// store call was awaited. Close all known original operations before cleanup.
+// Production composition must supply its actual admission/I/O coordinator.
+const settledFixture:ConversationQuiescence={withTargetClosed:async <T>(o:string,c:string,work:()=>Promise<T>)=>{
+  assert.equal(o,owner);
+  for(const target of targets.filter(t=>t.conversationId===c))confirmed(await store.closeOperation(target,epoch));
+  return {kind:"settled",value:await work()};
+}};
 async function saved(t = target()): Promise<OpenOperation> {
   const op = confirmed(await store.initializeOperation(t, epoch, authority()));
   confirmed(await store.saveUser(op, () => "Synthetic user message", authority())); return op;
@@ -242,6 +252,46 @@ test("runtime restart epoch closes old content authority without pretending mode
   const old = await saved(); epoch = confirmed(await store.startEpoch(randomUUID()));
   assert.equal((await store.saveAssistant(old, () => ({ messageId: randomUUID(), text: "old process", presentation: { presentationMode: "default" } }), authority())).kind, "terminated");
   assert.equal((await firestore.collection(`${parent(old)}/messages`).get()).size, 1);
+});
+
+test("whole delete removes multi-page children, all fences and progress before parent and advances ABA generation",async()=>{
+  const op=await saved();await assistant(op);
+  for(let n=0;n<27;n++)await firestore.doc(`${parent(op)}/effects/${randomUUID()}`).create({kind:"send",userMessageId:op.userMessageId});
+  const before=(await firestore.doc("ai_runtime_fence/current").get()).data()!.cleanupGeneration;
+  await firestore.doc("ai_cleanup_progress/source_sweep").set({schemaVersion:1,revision:1,phase:"messages",lastDocumentName:user(op),startedAt:{seconds:1,nanoseconds:0},resumeUntil:{seconds:86401,nanoseconds:0},hadFailure:false});
+  const cleanup=new FirestoreConversationCleanup(gateway,process.env,settledFixture);
+  assert.deepEqual(await cleanup.deleteOwned({firebaseUid:uid},owner,op.conversationId,epoch),{kind:"deleted"});
+  for(const c of ["messages","message_sources","effects"])assert.equal((await firestore.collection(`${parent(op)}/${c}`).get()).empty,true);
+  assert.equal((await firestore.doc(parent(op)).get()).exists,false);
+  assert.equal((await firestore.doc(`ai_operation_fences/${op.operationId}`).get()).exists,false);
+  assert.equal((await firestore.doc("ai_cleanup_progress/source_sweep").get()).exists,false);
+  assert.equal((await firestore.doc("ai_runtime_fence/current").get()).data()!.cleanupGeneration,before+1);
+  assert.equal((await store.saveUser(op,()=>"must not recreate",authority())).kind,"unavailable");
+});
+
+test("unsettled deletion remains unresolved/inaccessible, preserves children, and resumes after actual fixture settlement",async()=>{
+  const op=await saved();await assistant(op);let calls=0;
+  const cleanup=new FirestoreConversationCleanup(gateway,process.env,{withTargetClosed:async()=>{calls++;return {kind:"unresolved"};}});
+  assert.deepEqual(await cleanup.deleteOwned({firebaseUid:peer},owner,op.conversationId,epoch),{kind:"denied"});assert.equal(calls,0);
+  assert.deepEqual(await cleanup.deleteOwned({firebaseUid:uid},owner,op.conversationId,epoch),{kind:"unresolved"});assert.equal(calls,1);
+  assert.equal((await firestore.doc(parent(op)).get()).data()!.state,"deleting");
+  assert.equal((await firestore.doc(user(op)).get()).exists,true);
+  assert.equal((await store.readOutcome({firebaseUid:uid},op)).kind,"conversation_unavailable");
+  assert.deepEqual(await new FirestoreConversationCleanup(gateway,process.env,settledFixture).deleteOwned({firebaseUid:uid},owner,op.conversationId,epoch),{kind:"deleted"});
+});
+
+test("expiry rechecks the complete current anchor and refuses stale-cutoff deletion before original deadline",async()=>{
+  const op=await saved(), first=(await firestore.doc(user(op)).get()).createTime!;
+  const id=await assistant(op), last=(await firestore.doc(`${parent(op)}/messages/${id}`).get()).createTime!;
+  assert.ok(last.toMillis()>first.toMillis()+1);
+  const oldCutoff=Math.ceil(first.toMillis())+90*86400000+1;
+  let quiesced=0;
+  const q:ConversationQuiescence={withTargetClosed:async <T>(o:string,c:string,work:()=>Promise<T>)=>{quiesced++;return settledFixture.withTargetClosed(o,c,work);}};
+  assert.deepEqual(await new FirestoreConversationCleanup(gateway,process.env,q,()=>oldCutoff).expireKnown(owner,op.conversationId,epoch),{kind:"live"});
+  assert.equal(quiesced,0);assert.equal((await firestore.doc(parent(op)).get()).data()!.state,"live");
+  const expired=Math.ceil(last.toMillis())+90*86400000+1;
+  assert.deepEqual(await new FirestoreConversationCleanup(gateway,process.env,q,()=>expired).expireKnown(owner,op.conversationId,epoch),{kind:"deleted"});
+  assert.equal(quiesced,1);assert.equal((await firestore.doc(parent(op)).get()).exists,false);
 });
 
 test("retained orphan under absent parent cannot be recreated as reserved_new", async () => {
