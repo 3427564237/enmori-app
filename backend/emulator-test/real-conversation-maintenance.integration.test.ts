@@ -301,6 +301,7 @@ test("actual general isolated composition traverses all six HTTP operations, ind
   const auth=getAuth(app),uid=`jin-composition-${randomUUID()}`,email=`${uid}@example.invalid`,password=`Synthetic_${randomUUID()}`;
   let token="",server:Awaited<ReturnType<typeof buildApp>>|undefined,joined:Awaited<ReturnType<typeof createIsolatedConversationComposition>>|undefined;
   const targetIds=new Set<string>(),operationIds=new Set<string>(),reports:boolean[]=[],retirements:boolean[]=[];let modelCalls=0,scheduled=0,stopped=0;
+  let retirementObserved!:()=>void;const retirementCompletion=new Promise<void>(resolve=>{retirementObserved=resolve;});
   await auth.createUser({uid,email,password});
   try {
     const signed=await fetch(`http://${env.authHost}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=controlled-emulator-key`,
@@ -314,7 +315,7 @@ test("actual general isolated composition traverses all six HTTP operations, ind
         completeCanonicalUtcInventory:true,immutableOwnerNoteAndTime:true,permanentDeletion:true,noRestoreOrIdReuse:true},
       transport:{generate:async input=>{assert.equal(input.checkIns.length,0);modelCalls++;return Buffer.from(JSON.stringify({schemaVersion:"ai_assistant_message_v1",message:"Synthetic coordinator reply"}));}},
       gates:{beforeGeneration:async()=>({ok:true,value:undefined}),candidate:async()=>({ok:true,value:undefined})},
-      report:(_phase,result)=>reports.push(result.complete),reportRetirement:ok=>retirements.push(ok),
+      report:(_phase,result)=>reports.push(result.complete),reportRetirement:ok=>{retirements.push(ok);retirementObserved();},
       schedule:{every:(interval,_tick)=>{assert.equal(interval,3600000);scheduled++;return ()=>{stopped++;};}}});
     epoch=joined.epoch;assert.equal(joined.restart.complete,true);assert.deepEqual(reports,[true,true]);assert.equal(scheduled,1);
     const unused={execute:async()=>err(appFailure("SERVICE_UNAVAILABLE"))};
@@ -327,7 +328,12 @@ test("actual general isolated composition traverses all six HTTP operations, ind
     const sent=await server.inject({method:"POST",url:`/v1/me/ai/operations/${p.operationId}/execute`,headers:{...headers,"ai-operation-key":p.operationKey},payload:{text:"Synthetic SDK coordinator input"}});
     assert.equal(sent.statusCode,200);assert.equal(modelCalls,1);
     const pair=sent.json<{userMessage:{messageId:string;persistedAt:string};assistantMessage:{messageId:string}}>();
-    await new Promise<void>(resolve=>setImmediate(resolve));await joined.io.settled(owner,p.conversationId);await new Promise<void>(resolve=>setImmediate(resolve));
+    // Complete-body HTTP acceptance precedes terminal close/retirement. Await
+    // the actual adapter completion, never infer it from an empty instant or tick.
+    let retirementTimer:ReturnType<typeof setTimeout>|undefined;
+    try{await Promise.race([retirementCompletion,new Promise<never>((_resolve,reject)=>{retirementTimer=setTimeout(()=>reject(new Error("Retirement completion unavailable")),15000);})]);}
+    finally{if(retirementTimer)clearTimeout(retirementTimer);}
+    await joined.io.settled(owner,p.conversationId);
     assert.equal(joined.io.idle(owner,p.conversationId),true);assert.deepEqual(retirements,[true]);
     assert.equal((await db.doc(`ai_operation_fences/${p.operationId}`).get()).exists,false);
     const base=`accounts/${owner}/conversations/${p.conversationId}`;
