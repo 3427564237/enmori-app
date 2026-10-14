@@ -1,0 +1,15 @@
+{"review":"canonical-location-only","sourceGitBlob":"91d57d1022345de44426dc0c0ecfd7d17dec26c0","sourceSha256":"294c3d888175979cb639d05b7ab1c4567e8103b04fe21b89f15d09dfdecf2775","node":"v24.19.0"}
+✔ all four UUID variants are accepted without losing exact ID identity (1.0381ms)
+✔ noncanonical ID spellings cannot be cleaned, decoded or Unicode-normalized (0.2976ms)
+✔ relative structure does not accept database names, encoded ancestors, traversal or suffix repair (0.1212ms)
+✔ same leaf under each distinct owner, conversation and collection remains a distinct location (0.1252ms)
+✔ unknown input never invokes coercion and an invalid group cannot bypass its own check (0.1184ms)
+✔ output is immutable structural identity only, with no implicit authority or existence (0.2681ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 94.0334

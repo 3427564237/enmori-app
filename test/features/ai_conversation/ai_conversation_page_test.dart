@@ -348,6 +348,111 @@ void main() {
   });
 
   testWidgets(
+    'R-A explains unknown and clears private display and draft before leaving',
+    (tester) async {
+      final controller = _PageController(_state(canSend: true));
+      late TextEditingController draft;
+      await _pump(
+        tester,
+        controller,
+        onBack: () {
+          expect(draft.text, isEmpty);
+          expect(controller.view.messages, isEmpty);
+          expect(controller.view.canSend, isFalse);
+          controller.events.add('back');
+        },
+      );
+      await tester.enterText(
+        find.byKey(const Key('ai-message-input')),
+        'private unsent draft',
+      );
+      draft = tester
+          .widget<TextField>(find.byKey(const Key('ai-message-input')))
+          .controller!;
+      controller.publish(
+        _state(
+          phase: AiConversationPhase.unknown,
+          conversationId: 'conversation',
+          messages: [_message('user', 1, AiRole.user, 'saved private text')],
+          canCheckResult: true,
+          canLeaveWithoutRetrying: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          'We couldn’t confirm the result. Check saved messages before trying again.',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          'We may not be able to confirm whether this message was saved. '
+          'You can leave without retrying it. Leaving does not delete saved messages.',
+        ),
+        findsOneWidget,
+      );
+      await _tap(tester, 'ai-leave-without-retrying');
+      expect(controller.events, ['leave', 'back']);
+      expect(find.text('saved private text'), findsNothing);
+      expect(find.text('Conversation deleted.'), findsNothing);
+      expect(find.byKey(const Key('ai-retry')), findsNothing);
+      expect(controller.sent, isEmpty);
+      expect(controller.retried, isEmpty);
+      expect(controller.checks, 0);
+      expect(controller.deletes, 0);
+    },
+  );
+
+  testWidgets(
+    'R-A exit stays reachable during a result read at 2x text on a small screen',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final semantics = tester.ensureSemantics();
+      try {
+        final controller = _PageController(
+          _state(
+            phase: AiConversationPhase.unknown,
+            conversationId: 'conversation',
+            canLeaveWithoutRetrying: true,
+            readBusy: true,
+          ),
+        );
+        await _pump(tester, controller, textScale: 2);
+        final exit = find.byKey(const Key('ai-leave-without-retrying'));
+        await tester.scrollUntilVisible(
+          exit,
+          200,
+          scrollable: find
+              .descendant(
+                of: find.byKey(const Key('route-ai-conversation')),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        await tester.ensureVisible(exit);
+        await tester.pumpAndSettle();
+        expect(find.bySemanticsLabel('Leave without retrying'), findsOneWidget);
+        expect(tester.getSize(exit).height, greaterThanOrEqualTo(48));
+        expect(tester.getSize(exit).width, greaterThanOrEqualTo(48));
+        expect(tester.widget<OutlinedButton>(exit).onPressed, isNotNull);
+        expect(tester.takeException(), isNull);
+        await _tap(tester, 'ai-leave-without-retrying');
+        expect(controller.events, ['leave']);
+        expect(controller.checks, 0);
+        expect(controller.sent, isEmpty);
+        expect(controller.retried, isEmpty);
+        expect(tester.takeException(), isNull);
+      } finally {
+        semantics.dispose();
+      }
+    },
+  );
+
+  testWidgets(
     'small screen at 2x text keeps labeled Cancel reachable at 48dp',
     (tester) async {
       tester.view.physicalSize = const Size(320, 640);
@@ -389,7 +494,9 @@ AiConversationState _state({
   bool canRetry = false,
   bool canCheckResult = false,
   bool canCancel = false,
+  bool canLeaveWithoutRetrying = false,
   bool canDelete = false,
+  bool readBusy = false,
 }) => AiConversationState(
   sessionKey: sessionKey,
   phase: phase,
@@ -400,7 +507,9 @@ AiConversationState _state({
   canRetry: canRetry,
   canCheckResult: canCheckResult,
   canCancel: canCancel,
+  canLeaveWithoutRetrying: canLeaveWithoutRetrying,
   canDelete: canDelete,
+  readBusy: readBusy,
 );
 
 AiMessage _message(
@@ -489,6 +598,8 @@ class _PageController extends AiConversationController {
   @override
   AiConversationState build() => initial;
 
+  AiConversationState get view => state;
+
   void publish(AiConversationState next) => state = next;
 
   @override
@@ -509,7 +620,14 @@ class _PageController extends AiConversationController {
   @override
   void leave() {
     events.add('leave');
-    state = _state(canSend: true);
+    state = state.canLeaveWithoutRetrying
+        ? _state(
+            phase: AiConversationPhase.unknown,
+            conversationId: state.conversationId,
+            canCheckResult: true,
+            canLeaveWithoutRetrying: true,
+          )
+        : _state(canSend: true);
   }
 
   @override

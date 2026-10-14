@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
 import 'package:enmori/features/ai_conversation/domain/ai_conversation_repository.dart';
+import 'package:enmori/features/ai_conversation/presentation/ai_conversation_page.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -351,6 +353,486 @@ void main() {
       expect(r.state.phase, AiConversationPhase.deleted);
     },
   );
+
+  testWidgets(
+    'R-A stops concurrent result/history reads without accepting their late success',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      r.repo.executeResult = Future.value(const Failure(_unknown));
+      await r.controller.send('note');
+      final session = r.state.sessionKey;
+      final target = r.state.conversationId;
+      r.repo.messagesResult = Future.value(
+        Success(AiMessagePage(messages: [_user])),
+      );
+      await r.controller.loadMessages();
+      expect(r.state.messages.single.text, 'note');
+
+      final outcome = Completer<Result<AiReadback>>();
+      final history = Completer<Result<AiMessagePage>>();
+      r.repo.operationResult = outcome.future;
+      r.repo.messagesResult = history.future;
+      final checking = r.controller.checkResult();
+      final loading = r.controller.loadMessages();
+      await tester.pump();
+      expect(r.state.readBusy, isTrue);
+      expect(r.state.canLeaveWithoutRetrying, isTrue);
+      r.controller.leave();
+      expect(r.repo.operationReads.single.abort.isAborted, isTrue);
+      expect(r.repo.messageReads.last.abort.isAborted, isTrue);
+      expect(r.state.messages, isEmpty);
+      expect(r.state.phase, AiConversationPhase.unknown);
+      expect(r.state.canSend, isFalse);
+      expect(r.state.canRetry, isFalse);
+      outcome.complete(
+        Success(
+          AiReadback(
+            operationId: 'A',
+            state: AiOutcomeState.userSaved,
+            userMessage: _user,
+          ),
+        ),
+      );
+      history.complete(Success(AiMessagePage(messages: [_user, _assistant])));
+      await Future.wait([checking, loading]);
+      await tester.pump();
+      expect(r.state.messages, isEmpty);
+      expect(r.state.canSend, isFalse);
+      expect(r.state.canRetry, isFalse);
+
+      r.container.invalidate(aiConversationControllerProvider);
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(r.state.sessionKey, same(session));
+      expect(r.state.conversationId, target);
+      expect(r.state.phase, AiConversationPhase.unknown);
+      expect(r.state.canLeaveWithoutRetrying, isTrue);
+      await r.controller.send('note');
+      await r.controller.retry('note');
+      expect(r.repo.prepares, hasLength(1));
+      expect(r.repo.executes, hasLength(1));
+      expect(r.repo.operationReads, hasLength(1));
+      expect(r.repo.deletes, isEmpty);
+      r.repo.operationResult = null;
+      r.repo.readState = AiOutcomeState.userSaved;
+      await r.controller.checkResult();
+      expect(r.repo.operationReads.last.operationId, 'A');
+      expect(r.state.canRetry, isTrue);
+      expect(r.state.canLeaveWithoutRetrying, isFalse);
+      expect(r.state.messages.single.persistedAt, _user.persistedAt);
+    },
+  );
+
+  testWidgets(
+    'R-A exit is unavailable during execute, then available after local cancel',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      final response = Completer<Result<AiReply>>();
+      r.repo.executeResult = response.future;
+      final sending = r.controller.send('note');
+      expect(r.state.canLeaveWithoutRetrying, isFalse);
+      await tester.pump();
+      expect(r.state.phase, AiConversationPhase.waiting);
+      expect(r.state.canLeaveWithoutRetrying, isFalse);
+      r.controller.cancel();
+      await sending;
+      expect(r.state.canLeaveWithoutRetrying, isTrue);
+      r.controller.leave();
+      response.complete(
+        Success(
+          AiReply(
+            operationId: 'A',
+            conversationId: 'conversation-A',
+            userMessage: _user,
+            assistantMessage: _assistant,
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(r.state.phase, AiConversationPhase.unknown);
+      expect(r.state.messages, isEmpty);
+      expect(r.state.canSend, isFalse);
+      expect(r.state.canRetry, isFalse);
+      expect(r.repo.cancels, hasLength(1));
+    },
+  );
+
+  for (final drift in ['id', 'sequence', 'persistedAt']) {
+    testWidgets(
+      'R-A retains original U $drift guard across same-session recreation',
+      (tester) async {
+        final r = await _Rig.create(tester);
+        await r.userSaved();
+        r.controller.leave();
+        r.container.invalidate(aiConversationControllerProvider);
+        await tester.pump(const Duration(milliseconds: 1));
+        final changed = AiMessage(
+          messageId: drift == 'id' ? 'replacement-user' : _user.messageId,
+          sequence: drift == 'sequence' ? 3 : _user.sequence,
+          role: AiRole.user,
+          persistedAt: drift == 'persistedAt'
+              ? _user.persistedAt.add(const Duration(seconds: 1))
+              : _user.persistedAt,
+          availability: AiAvailability.available,
+          text: _user.text,
+        );
+        r.repo.operationResult = Future.value(
+          Success(
+            AiReadback(
+              operationId: 'A',
+              state: AiOutcomeState.userSaved,
+              userMessage: changed,
+            ),
+          ),
+        );
+        await r.controller.checkResult();
+        expect(r.state.phase, AiConversationPhase.unknown);
+        expect(r.state.messages, isEmpty);
+        expect(r.state.canRetry, isFalse);
+        expect(r.state.canSend, isFalse);
+        expect(r.state.canLeaveWithoutRetrying, isTrue);
+        await r.controller.retry('note');
+        expect(r.repo.prepares, hasLength(1));
+        r.repo.operationResult = null;
+        await r.controller.checkResult();
+        expect(r.state.canRetry, isTrue);
+        expect(r.state.messages.single.messageId, _user.messageId);
+        expect(r.state.messages.single.sequence, _user.sequence);
+        expect(r.state.messages.single.persistedAt, _user.persistedAt);
+      },
+    );
+  }
+
+  testWidgets(
+    'R-A leave preserves known tombstones when a later ordinary read returns stale text',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      await r.controller.send('note');
+      r.repo.messagesResult = Future.value(
+        Success(AiMessagePage(messages: [_tombstone])),
+      );
+      await r.controller.loadMessages();
+      r.repo.executeResult = Future.value(const Failure(_unknown));
+      await r.controller.send('another note');
+      expect(r.state.canLeaveWithoutRetrying, isTrue);
+      r.controller.leave();
+      expect(r.state.messages, isEmpty);
+      r.container.invalidate(aiConversationControllerProvider);
+      await tester.pump(const Duration(milliseconds: 1));
+      r.repo.messagesResult = Future.value(
+        Success(AiMessagePage(messages: [_assistant, _user])),
+      );
+      await r.controller.loadMessages();
+      expect(r.state.messages.any((m) => m.text == 'reply'), isFalse);
+      expect(r.state.messages.map((m) => m.messageId), ['user', 'assistant']);
+      expect(r.state.messages.last.availability, AiAvailability.unavailable);
+      expect(r.state.canSend, isFalse);
+      expect(r.state.canRetry, isFalse);
+      expect(r.repo.executes, hasLength(2));
+    },
+  );
+
+  testWidgets(
+    'R-A history-only tombstone survives recreation without an explicit pair',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      r.repo.executeResult = Future.value(const Failure(_unknown));
+      await r.controller.send('note');
+      r.repo.messagesResult = Future.value(
+        Success(AiMessagePage(messages: [_tombstone])),
+      );
+      await r.controller.loadMessages();
+      expect(r.state.messages.single.availability, AiAvailability.unavailable);
+      r.controller.leave();
+      r.container.invalidate(aiConversationControllerProvider);
+      await tester.pump(const Duration(milliseconds: 1));
+      r.repo.messagesResult = Future.value(
+        Success(AiMessagePage(messages: [_assistant, _user])),
+      );
+      await r.controller.loadMessages();
+      expect(r.state.messages.map((m) => m.messageId), ['user', 'assistant']);
+      expect(r.state.messages.last.availability, AiAvailability.unavailable);
+      expect(r.state.messages.last.text, isNull);
+      expect(r.state.canRetry, isFalse);
+      expect(r.state.canSend, isFalse);
+      expect(r.repo.executes, hasLength(1));
+    },
+  );
+
+  testWidgets(
+    'R-A a known tombstone cannot return as user text after recreation',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      r.repo.executeResult = Future.value(const Failure(_unknown));
+      await r.controller.send('note');
+      r.repo.messagesResult = Future.value(
+        Success(AiMessagePage(messages: [_tombstone])),
+      );
+      await r.controller.loadMessages();
+      r.controller.leave();
+      r.container.invalidate(aiConversationControllerProvider);
+      await tester.pump(const Duration(milliseconds: 1));
+      r.repo.messagesResult = Future.value(
+        Success(
+          AiMessagePage(
+            messages: [
+              AiMessage(
+                messageId: _assistant.messageId,
+                sequence: _assistant.sequence,
+                role: AiRole.user,
+                persistedAt: _assistant.persistedAt,
+                availability: AiAvailability.available,
+                text: 'reply',
+              ),
+            ],
+          ),
+        ),
+      );
+      await r.controller.loadMessages();
+      expect(r.state.messages, isEmpty);
+      expect(r.state.phase, AiConversationPhase.unknown);
+      expect(r.state.canRetry, isFalse);
+      expect(r.state.canSend, isFalse);
+    },
+  );
+
+  testWidgets(
+    'R-A tombstone IDs do not cross into a replacement auth session',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      await r.controller.send('note');
+      r.repo.messagesResult = Future.value(
+        Success(AiMessagePage(messages: [_tombstone])),
+      );
+      await r.controller.loadMessages();
+      r.controller.leave();
+      final previousSession = r.state.sessionKey;
+      r.auth.sessions.add(
+        AuthSessionAuthenticated(subject: 'same-session-owner'),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(r.state.sessionKey, isNot(same(previousSession)));
+      expect(r.state.messages, isEmpty);
+      expect(r.state.conversationId, isNull);
+      expect(r.state.canLeaveWithoutRetrying, isFalse);
+      expect(r.repo.executes, hasLength(1));
+      // Deliberately reuse synthetic IDs to prove no prior session guard leaks.
+      await r.controller.send('note');
+      expect(r.state.messages.last.messageId, _assistant.messageId);
+      expect(r.state.messages.last.availability, AiAvailability.available);
+      expect(r.state.messages.last.text, 'reply');
+      expect(r.repo.executes, hasLength(2));
+    },
+  );
+
+  testWidgets(
+    'R-A current target tombstone survives recreation and stale available readback',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      await r.controller.send('note');
+      r.repo.messagesResult = Future.value(
+        Success(AiMessagePage(messages: [_tombstone])),
+      );
+      await r.controller.loadMessages();
+      r.repo.operationResult = Future.value(const Failure(_unknown));
+      await r.controller.checkResult();
+      expect(r.state.canLeaveWithoutRetrying, isTrue);
+      r.controller.leave();
+      r.container.invalidate(aiConversationControllerProvider);
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(r.state.messages, isEmpty);
+      r.repo.messagesResult = Future.value(
+        Success(AiMessagePage(messages: [_assistant, _user])),
+      );
+      await r.controller.loadMessages();
+      expect(r.state.messages.map((m) => m.messageId), ['user', 'assistant']);
+      expect(r.state.messages.last.availability, AiAvailability.unavailable);
+      expect(r.state.messages.last.text, isNull);
+      expect(r.state.canRetry, isFalse);
+      r.repo.operationResult = Future.value(
+        Success(
+          AiReadback(
+            operationId: 'A',
+            state: AiOutcomeState.assistantSaved,
+            userMessage: _user,
+            assistantMessage: _assistant,
+          ),
+        ),
+      );
+      await r.controller.checkResult();
+      expect(r.state.messages.last.availability, AiAvailability.unavailable);
+      expect(r.state.messages.last.text, isNull);
+      expect(r.state.canRetry, isFalse);
+      expect(r.repo.executes, hasLength(1));
+    },
+  );
+
+  for (final drift in ['sequence', 'persistedAt']) {
+    testWidgets(
+      'R-A ordinary history cannot change original U $drift after exit',
+      (tester) async {
+        final r = await _Rig.create(tester);
+        await r.userSaved();
+        r.controller.leave();
+        r.container.invalidate(aiConversationControllerProvider);
+        await tester.pump(const Duration(milliseconds: 1));
+        r.repo.messagesResult = Future.value(
+          Success(
+            AiMessagePage(
+              messages: [
+                AiMessage(
+                  messageId: _user.messageId,
+                  sequence: drift == 'sequence' ? 3 : _user.sequence,
+                  role: AiRole.user,
+                  persistedAt: drift == 'persistedAt'
+                      ? _user.persistedAt.add(const Duration(seconds: 1))
+                      : _user.persistedAt,
+                  availability: AiAvailability.available,
+                  text: _user.text,
+                ),
+              ],
+            ),
+          ),
+        );
+        await r.controller.loadMessages();
+        expect(r.state.messages, isEmpty);
+        expect(r.state.phase, AiConversationPhase.unknown);
+        expect(r.state.canSend, isFalse);
+        expect(r.state.canRetry, isFalse);
+      },
+    );
+  }
+
+  testWidgets(
+    'R-A target guard survives actual route disposal and same-session re-entry',
+    (tester) async {
+      final auth = _Auth();
+      final repo = _Repository()
+        ..executeResult = Future.value(const Failure(_unknown));
+      addTearDown(() => unawaited(auth.sessions.close()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(auth),
+            aiConversationRepositoryProvider.overrideWithValue(repo),
+            aiConversationNowProvider.overrideWithValue(() => Duration.zero),
+            aiConversationUtcNowProvider.overrideWithValue(() => _date),
+          ],
+          child: MaterialApp(
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  child: const Text('Open synthetic conversation'),
+                  onPressed: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (routeContext) => AiConversationPage(
+                        onBack: () => Navigator.of(routeContext).pop(),
+                        onOpenSettings: () {},
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Open synthetic conversation'));
+      await tester.pumpAndSettle();
+      auth.sessions.add(
+        AuthSessionAuthenticated(subject: 'same-session-owner'),
+      );
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(AiConversationPage)),
+      );
+      final original = container.read(
+        aiConversationControllerProvider.notifier,
+      );
+      expect(container.read(aiConversationControllerProvider).canSend, isTrue);
+      await original.send('note');
+      await tester.pumpAndSettle();
+      expect(repo.executes, hasLength(1));
+      expect(
+        container
+            .read(aiConversationControllerProvider)
+            .canLeaveWithoutRetrying,
+        isTrue,
+      );
+      final session = container
+          .read(aiConversationControllerProvider)
+          .sessionKey;
+      final exit = find.byKey(const Key('ai-leave-without-retrying'));
+      await tester.ensureVisible(exit);
+      await tester.tap(exit);
+      await tester.pumpAndSettle();
+      expect(find.byType(AiConversationPage), findsNothing);
+      expect(find.text('Open synthetic conversation'), findsOneWidget);
+
+      await tester.tap(find.text('Open synthetic conversation'));
+      await tester.pumpAndSettle();
+      final returned = container.read(aiConversationControllerProvider);
+      expect(
+        container.read(aiConversationControllerProvider.notifier),
+        isNot(same(original)),
+      );
+      expect(returned.sessionKey, same(session));
+      expect(returned.phase, AiConversationPhase.unknown);
+      expect(returned.conversationId, 'conversation-A');
+      expect(returned.canSend, isFalse);
+      expect(returned.canRetry, isFalse);
+      expect(returned.canLeaveWithoutRetrying, isTrue);
+      expect(repo.prepares, hasLength(1));
+      expect(repo.executes, hasLength(1));
+      expect(repo.operationReads, isEmpty);
+      expect(repo.messageReads, hasLength(1));
+      expect(repo.deletes, isEmpty);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+    },
+  );
+
+  testWidgets(
+    'R-A a replacement session cannot adopt an old recovery response',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      await r.userSaved();
+      final session = r.state.sessionKey;
+      final oldResult = Completer<Result<AiReadback>>();
+      r.repo.operationResult = oldResult.future;
+      final reading = r.controller.checkResult();
+      await tester.pump();
+      r.controller.leave();
+      r.auth.sessions.add(
+        AuthSessionAuthenticated(subject: 'same-session-owner'),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(r.state.sessionKey, isNot(same(session)));
+      expect(r.state.conversationId, isNull);
+      expect(r.state.messages, isEmpty);
+      expect(r.state.canCheckResult, isFalse);
+      expect(r.state.canRetry, isFalse);
+      expect(r.state.canLeaveWithoutRetrying, isFalse);
+      oldResult.complete(
+        Success(
+          AiReadback(
+            operationId: 'A',
+            state: AiOutcomeState.userSaved,
+            userMessage: _user,
+          ),
+        ),
+      );
+      await reading;
+      await tester.pump();
+      expect(r.state.conversationId, isNull);
+      expect(r.state.messages, isEmpty);
+      expect(r.state.canRetry, isFalse);
+      expect(r.repo.prepares, hasLength(1));
+      expect(r.repo.operationReads, hasLength(2));
+    },
+  );
 }
 
 AiTicket _ticket(String operation, String conversation) => AiTicket(
@@ -481,6 +963,7 @@ final class _Repository implements AiConversationRepository {
   Future<Result<AiTicket>>? prepareResult;
   Future<Result<AiReply>>? executeResult;
   Future<Result<AiMessagePage>>? messagesResult;
+  Future<Result<AiReadback>>? operationResult;
   Result<void> deleteResult = const Success(null);
   AiOutcomeState readState = AiOutcomeState.unresolved;
 
@@ -550,13 +1033,14 @@ final class _Repository implements AiConversationRepository {
         operationId: operationId,
       ),
     );
-    return Success(
-      AiReadback(
-        operationId: operationId,
-        state: readState,
-        userMessage: readState == AiOutcomeState.userSaved ? _user : null,
-      ),
-    );
+    return operationResult ??
+        Success(
+          AiReadback(
+            operationId: operationId,
+            state: readState,
+            userMessage: readState == AiOutcomeState.userSaved ? _user : null,
+          ),
+        );
   }
 
   @override

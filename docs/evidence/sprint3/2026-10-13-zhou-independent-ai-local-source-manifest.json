@@ -1,0 +1,336 @@
+{
+  "recordedAt": "2026-10-13T19:10:43.5659716+08:00",
+  "scope": "S-USER-1013-DU-HANDOFF-ZHOU-INDEPENDENT-LOCAL; selected N02 3.2/C-A 6.1 + named bounded group/initialization/epoch probes",
+  "repository": "D:\\3851 AI\\formal\\enmori-app",
+  "branch": "codex/zhou-ra-reader-local-20261013",
+  "baselineHead": "110eda443fbe101608c6aa6df551e52b6a18da5a",
+  "baselineTree": "9b7ac0fde80c676af88ed0b5f888b9a7c4a39383",
+  "localWorkingTreeOnly": true,
+  "newCommit": false,
+  "uploaded": false,
+  "formalJinReviewForThisDelta": false,
+  "liAcceptanceForThisDelta": false,
+  "runtimeEnabled": false,
+  "realReaderStoreCleanupWired": false,
+  "manifestSelfExcluded": true,
+  "authority": [
+    {
+      "ref": "72c027933d4b3ac1a95e25dc733619a6c63522b6",
+      "file": "docs/decisions/2026-10-13-li-remaining-isolated-ai-contract-a.md",
+      "blob": "965457097426d044f930cacfed8b8a2e36038cb0"
+    },
+    {
+      "ref": "110eda443fbe101608c6aa6df551e52b6a18da5a",
+      "file": "docs/planning/2026-10-13-zhou-real-ai-remaining-contract-packet.md",
+      "blob": "019cf329753ee18f02724ecb29c0cf61359a277d"
+    },
+    {
+      "ref": "278f4cece57c21a1c7ea6a2135d0934e425f1e90",
+      "file": "docs/decisions/2026-10-13-li-ai-policy-component-acceptance.md",
+      "blob": "518d1a14474a1dd6cb5c216e45fbe007e96a6ca4"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "backend/src/ai-conversation/domain/canonical-ai-message-location.ts",
+      "gitBlob": "91d57d1022345de44426dc0c0ecfd7d17dec26c0",
+      "sha256": "294c3d888175979cb639d05b7ab1c4567e8103b04fe21b89f15d09dfdecf2775"
+    },
+    {
+      "path": "backend/src/ai-conversation/domain/real-retention-resolver.ts",
+      "gitBlob": "2fc26b0151693dafee570d614026a5f7717e0284",
+      "sha256": "093c35153ad1862bf6416319730be0d2019fd92ae36d41ca938a0aa78b5091a3"
+    },
+    {
+      "path": "backend/test/ai-conversation/canonical-ai-message-location.test.ts",
+      "gitBlob": "6435926cfb31181c2828f0552695005f7ba5327a",
+      "sha256": "fd8ff81a5ee9713a2a5fc1c2ab2248cef61e415bee6b4d3c70a641265c7ee2c8"
+    },
+    {
+      "path": "backend/test/ai-conversation/real-retention-resolver.test.ts",
+      "gitBlob": "0b5370ff4324eecefaa9dbf6ffc737ef4da93c45",
+      "sha256": "94b34fd353fbce2adebb9e03e08f0d28d1922a705ce5e0d5fe5f5b5f84cd6914"
+    },
+    {
+      "path": "backend/scripts/run-ai-followup-capability-probes.mjs",
+      "gitBlob": "cc094c8cc0f2cf0ee07f0a4c495880d9a0f4747d",
+      "sha256": "b81de1e746848da7264e2ad65af33258795b980ad2a2e26ef2d0012d11c29747"
+    },
+    {
+      "path": "backend/scripts/run-ai-followup-capability-worker.mjs",
+      "gitBlob": "3823aeb08dfd3a56f244468e7a72adeb1433e08c",
+      "sha256": "e48ce71acb6d167800aebd7ac2a4cb31a7d234ae0073e41a55c925ab867b8570"
+    },
+    {
+      "path": "backend/capability-probes/followup-run.mjs",
+      "gitBlob": "d74c5b1ac762e18cad685618e4e66df4644457e7",
+      "sha256": "4d2224fe86eafd03121e669b74e5d11c8aa4fec24ac9d9421b34d936f937cafa"
+    },
+    {
+      "path": "backend/capability-probes/group-pagination.mjs",
+      "gitBlob": "2af414622eccf559c418b3ccfd4051ee6da006cb",
+      "sha256": "af990a55c8496242f32a3b13b962a46c25a9c7a899b99b1e083bb540b4775622"
+    },
+    {
+      "path": "backend/capability-probes/followup.firebase.json",
+      "gitBlob": "d71e77726932528a38a5a38e4e88dd52f3d7f057",
+      "sha256": "95a390e85caadd6507d1ad03f8c4b9f7586561f73efb4b71d5bedb0cce66ccfe"
+    },
+    {
+      "path": "backend/capability-probes/followup.firestore.indexes.json",
+      "gitBlob": "24f78a8115287ef78d07f6183dfa05ff06a24f3b",
+      "sha256": "d9a767ae482d2447d0539cbaff2029448aa6c833844b3050184c0455ce41e8c8"
+    },
+    {
+      "path": "backend/scripts/run-ai-fence-initialization-probes.mjs",
+      "gitBlob": "0c77b9e15095857ff6f73524a3b7d3fec2e99b55",
+      "sha256": "d6a1510273ad190c0bb298eb442bf325ea909ef64f49a55fdbe308d17a21efc6"
+    },
+    {
+      "path": "backend/scripts/run-ai-fence-initialization-worker.mjs",
+      "gitBlob": "8151295ee3107360464b52cf96175722ad3a860f",
+      "sha256": "b0bdb5f8a97b409ffee1b0717c3a02a181919ae599bd9a6885e6e6a1bdff434c"
+    },
+    {
+      "path": "backend/capability-probes/fence-initialization-run.mjs",
+      "gitBlob": "28cdadda6b7aba79029bd3f46a6b1196e95ed69b",
+      "sha256": "2362467f86df341b30423df9e8dfa3577ef60cc8107e293e2410fe91adb99ef3"
+    },
+    {
+      "path": "backend/capability-probes/fence-initialization.mjs",
+      "gitBlob": "7e52d1dc04ad644b2ce6fef776cb58f01778b5fb",
+      "sha256": "31cc2345f380a184e7a5b74a920e82ca492ca9b34b9c8c330a2523956c566d2e"
+    },
+    {
+      "path": "docs/decisions/2026-10-13-user-du-handoff-independent-ai-local.md",
+      "gitBlob": "c7480b8bc357819172fe7176ec09a4102ad90d37",
+      "sha256": "7871b6792ad46bbee402c2dccb102b33a1c94b55a490320d0a4e64af50b820ee"
+    },
+    {
+      "path": "docs/planning/2026-10-13-du-note-time-identity-handoff-requirements.md",
+      "gitBlob": "c7374bf6a666d3696d362826dbd068eba87f2e79",
+      "sha256": "90e971b5a2dd53b0771c660062beeda57d63c45988b6808a849ca64e8ac699fc"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-development.md",
+      "gitBlob": "562748251bb5943ab115f87f860b9429522afae8",
+      "sha256": "6f95d1b1ed6b8d74090079d7fbc9b95878c0e4f28b51605bc5bc7a14d4212365"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-review.md",
+      "gitBlob": "9372c6f38f4fb292832704989c3d5d75fccd7a4c",
+      "sha256": "9b6e9e18d6a43cd3a4b8423a7ba98d1a3f1a7eab482e4c3f507e5ecbd175091c"
+    }
+  ],
+  "currentBuildDependencyDigests": [
+    {
+      "path": "package.json",
+      "sha256": "294606089e27f91b7101d62c4aab30b032ea47bcd5913287c447f12296822bf0"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "2db26b46c583886ef4db5b58258b78cedd325dd3bf4e469e380a62f2a3321351"
+    },
+    {
+      "path": "backend/tsconfig.json",
+      "sha256": "6222c9778fb737eb0cffd8a635e52afbcc7e67f4e1faff27cc42446476975852"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/controlled-emulator-environment.ts",
+      "sha256": "371a29de22b76a4407e4ff5e49d041c2fe954d256384b49c4c50c8782a9130ab"
+    },
+    {
+      "path": "backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js",
+      "sha256": "1f87c0161cafa621e2e9731e70e11f1ff5fb577255adda84a2e0c0562ba5aa32"
+    },
+    {
+      "path": "backend/dist/src/ai-conversation/domain/canonical-ai-message-location.js",
+      "sha256": "9151675f1d66e9144a5c298387538ec0439ad7db5d503e21bf354e5b4ba5ecec"
+    }
+  ],
+  "previousSnapshot": {
+    "path": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+    "sha256": "e0b8276dfc08fadc3ee1f962b397a5588cd0c9994b3082833a1b3461fd8d93cb",
+    "sourceFilesVerifiedUnchanged": 16,
+    "flutterResultsArePreviousExecution": true
+  },
+  "excludedPreexistingPersonaArtifacts": [
+    {
+      "path": "docs/decisions/2026-10-09-li-persona-p08-isolated-flow-approval.md",
+      "gitBlob": "bbdcdc085c0835aa5857beafa328b1d7ba92dc10",
+      "sha256": "24b014e0cddd67be6281a588d2a861a1130cc79e075ea378f8fd010b46aaa6ce"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-android-selfcheck-source-manifest.json",
+      "gitBlob": "a7ab865904d838cc9016cf5694d80052ba744f04",
+      "sha256": "b71c5962853292754f459a167bc8b76316f13366ae265fe6fff189324f495e94"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-android-selfcheck.md",
+      "gitBlob": "0f81f0c1a4ff25f5de2056e589a245807db187fb",
+      "sha256": "bfcce0f4014aba79292c393f9db5f5684d078ad09a31479be2a35f7a3bc89698"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-local-implementation.md",
+      "gitBlob": "7c8fa18a0a7f9df59d9e23c09375071bed23adec",
+      "sha256": "a8e28f9f87deb1378a3133d397f49ecfc3941bd4f88d36fff8160d257ba65d4e"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-local-source-manifest.json",
+      "gitBlob": "b2c9c82229b864ee250f8de280a08ab4f5f92329",
+      "sha256": "a47cc82cc2537d361dccda65984abefae72800ff8ad02bdbcfd8ea8fe3134600"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-p08-implementation-release.md",
+      "gitBlob": "dd88a9e84702a5125ccca8531e7e47041b41e910",
+      "sha256": "3560f64b68bae3cfecfe34cc05bd367d4373e558f5e9d578c0f33ff80e7096b9"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-09-persona-pc13-local-harness.md",
+      "gitBlob": "2b07329d59dbc64ffd2c22d9cbb09b5e990a7523",
+      "sha256": "556671badcaaad4b6ed12e50e8d2ee23aa41584374bd27bd87d09eed2764af8a"
+    }
+  ],
+  "bindings": {
+    "queryOwnerExecutedSourceBlobs": {
+      "backend/scripts/run-ai-followup-capability-probes.mjs": "cc094c8cc0f2cf0ee07f0a4c495880d9a0f4747d",
+      "backend/scripts/run-ai-followup-capability-worker.mjs": "3823aeb08dfd3a56f244468e7a72adeb1433e08c",
+      "backend/capability-probes/followup-run.mjs": "d74c5b1ac762e18cad685618e4e66df4644457e7",
+      "backend/capability-probes/group-pagination.mjs": "2af414622eccf559c418b3ccfd4051ee6da006cb",
+      "backend/capability-probes/followup.firestore.indexes.json": "24f78a8115287ef78d07f6183dfa05ff06a24f3b",
+      "backend/capability-probes/followup.firebase.json": "d71e77726932528a38a5a38e4e88dd52f3d7f057",
+      "backend/src/ai-conversation/domain/canonical-ai-message-location.ts": "91d57d1022345de44426dc0c0ecfd7d17dec26c0"
+    },
+    "queryTranscriptEmbeddedRuntimeDigest": false,
+    "queryPastDistIdentityIndependentlyProved": false,
+    "queryOwnerAttributionAndCurrentSourceConsistencyConfirmed": true,
+    "fenceActualPreStartupInputs": [
+      {
+        "path": "backend/scripts/run-ai-fence-initialization-probes.mjs",
+        "sha256": "d6a1510273ad190c0bb298eb442bf325ea909ef64f49a55fdbe308d17a21efc6"
+      },
+      {
+        "path": "backend/scripts/run-ai-fence-initialization-worker.mjs",
+        "sha256": "b0bdb5f8a97b409ffee1b0717c3a02a181919ae599bd9a6885e6e6a1bdff434c"
+      },
+      {
+        "path": "backend/capability-probes/fence-initialization-run.mjs",
+        "sha256": "2362467f86df341b30423df9e8dfa3577ef60cc8107e293e2410fe91adb99ef3"
+      },
+      {
+        "path": "backend/capability-probes/fence-initialization.mjs",
+        "sha256": "31cc2345f380a184e7a5b74a920e82ca492ca9b34b9c8c330a2523956c566d2e"
+      },
+      {
+        "path": "backend/capability-probes/followup.firebase.json",
+        "sha256": "95a390e85caadd6507d1ad03f8c4b9f7586561f73efb4b71d5bedb0cce66ccfe"
+      },
+      {
+        "path": "backend/capability-probes/followup.firestore.indexes.json",
+        "sha256": "d9a767ae482d2447d0539cbaff2029448aa6c833844b3050184c0455ce41e8c8"
+      },
+      {
+        "path": "backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js",
+        "sha256": "1f87c0161cafa621e2e9731e70e11f1ff5fb577255adda84a2e0c0562ba5aa32"
+      }
+    ],
+    "fenceActualPreStartupInputsVerified": true
+  },
+  "actualResults": {
+    "strictCompilerExit": 0,
+    "backendSuiteExit": 0,
+    "backendTests": 610,
+    "passed": 610,
+    "failed": 0,
+    "newResolverTests": 29,
+    "newCanonicalPathTests": 9,
+    "queryBatchExit": 0,
+    "queryBatchSafeReports": 16,
+    "queryOwnedReferences": 151,
+    "sameLeafCoverageGroups": [
+      "messages",
+      "message_sources"
+    ],
+    "initializationBatchExit": 0,
+    "initializationSafeReports": 16,
+    "initializationOwnedReferences": 4,
+    "independentCanonicalProbeGroups": 6,
+    "independentRetentionBoundaryScenarios": 170,
+    "independentQueryRunnerNegativeGroups": 7,
+    "independentFenceRunnerNegativeGroups": 7,
+    "syntheticOnly": true,
+    "modelCalls": 0,
+    "requiredPortsReleased": [
+      "8080",
+      "9099",
+      "4400",
+      "4500"
+    ]
+  },
+  "evidence": [
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\backend-build-final.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\backend-tests-final.txt",
+      "sha256": "465d55c1f0bf20e7451f6e1fce84c99adc93ad252cbb9e4399d0e22b4084b605"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\query-probes.txt",
+      "sha256": "71c73b762675c34cfe36824e18c411838260e11d132d4afe574a9dfffdca2ca9"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\query-probes-negative-guard.txt",
+      "sha256": "df662b99bb3b0c76d6c9b9a3298587c28515e272ed55fe876a7795d302cda7c0"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\fence-probes-first.txt",
+      "sha256": "8e8daa91c9f92743a7ee2ffb1e30b67117924192f10138016918795a25e5fc90"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\canonical-location-review-probes.mjs",
+      "sha256": "09af9f874681f69bc628f329bc257bc2a7e5ef7f4b053963965c92317150f9e6"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\canonical-location-review-results.txt",
+      "sha256": "0dd216296824461f78d8bd80fd62a2d252b83db5be4a213de916111d59d1b378"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\retention-review-probes.mjs",
+      "sha256": "720c458b52c7b82b4510c1f063b463738fd35e10a2304d26487a0660c9a1e983"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\retention-review-results.txt",
+      "sha256": "8be8cda81baacde39ced076a0dfdcc9b47faad0e5fff91840d4cdd2e28770c9a"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\query-runner-negative-review.mjs",
+      "sha256": "e05d83cec51327583abba3d9bdc93a32c22314a31874b6b7b74527b503f3684c"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\query-runner-negative-review-results.txt",
+      "sha256": "d4537176a694903cf212d0a6f0a7fc0a8070521a7f45d4632bd8b11720e44754"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\fence-runner-negative-review.mjs",
+      "sha256": "ae0ac83cdc755895d1312bf384a499a1592a6e114956526e5c655bde46b6b959"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\fence-runner-negative-review-results.txt",
+      "sha256": "79ecb3ebddd3ae1f227f78affb99b6ac3a9f4321c4cfa71276ec1310fee11dd9"
+    },
+    {
+      "path": "D:\\3851 AI\\drafts\\2026-10-13-independent-ai-local\\write-source-manifest.ps1",
+      "sha256": "660e0b7e564724eb70cf055c4e4b64426620108b853ba5da8880bef7875201f8"
+    }
+  ],
+  "notRunOrUnproved": [
+    "real Note adapter/DU inventory and permanent deletion/nonreuse guarantees",
+    "product message-store/HTTP/complete source cleanup composition",
+    "network ACK-loss/wire commit dispatch/SDK byte destruction/arbitrary concurrency",
+    "cloud or Emulator index-policy enforcement/deployment",
+    "production cleanup capacity/SLA/unresolved-control release",
+    "new Flutter/device/API24/25/accessibility/UAT/Release/shared-source JIN gate/live model"
+  ]
+}

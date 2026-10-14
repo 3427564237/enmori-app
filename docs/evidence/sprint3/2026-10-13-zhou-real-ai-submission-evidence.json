@@ -1,0 +1,348 @@
+{
+  "kind": "authorized-review-submission-source-and-results",
+  "preparedAt": "2026-10-13T07:18:23.623Z",
+  "timezone": "Asia/Singapore",
+  "humanAuthorization": {
+    "sourceId": "S-USER-1013-ZHOU-REVIEW-UPLOAD",
+    "instruction": "现在将剩余合同集中包、本地源码和测试证据上传给 JIN 和 LI 审核，附上精确 head 和证据链接；未获批准前不要合并、关闭任务或变更看板。",
+    "durableTrail": "docs/decisions/2026-10-13-user-zhou-local-ai-development-scope.md"
+  },
+  "repository": "3427564237/enmori-app",
+  "reviewBranch": "codex/zhou-ai-contract-local-20261013",
+  "base": {
+    "pullRequest": 92,
+    "branch": "codex/zhou-ai-capability-probes-20261012",
+    "head": "029437c5939bfb50643254a7a976bf7fc70c8c12"
+  },
+  "reviewHeadAndTreeLocation": "Exact newly created commit head/tree in the Draft PR body and verified handoff comments; excluded here to avoid circular self SHA",
+  "allowlist": [
+    "backend/src/ai-conversation/README.md",
+    "backend/src/ai-conversation/domain/real-effect-expiry.ts",
+    "backend/src/ai-conversation/application/real-write-control.ts",
+    "backend/test/ai-conversation/real-effect-expiry.test.ts",
+    "backend/test/ai-conversation/real-write-control.test.ts",
+    "docs/decisions/2026-10-13-li-delegated-f01-b-c-d-selection.md",
+    "docs/planning/2026-10-13-li-real-ai-product-choice-brief.md",
+    "docs/decisions/2026-10-12-li-ai-capability-slice-acceptance.md",
+    "docs/planning/2026-10-12-li-ai-producer-and-shared-entry-handoff-draft.md",
+    "docs/decisions/2026-10-12-li-real-ai-capability-verification-only.md",
+    "docs/decisions/2026-10-13-user-zhou-local-ai-development-scope.md",
+    "docs/planning/2026-10-12-zhou-conversation-persistence-mobile-contract-candidate.md",
+    "docs/planning/2026-10-12-zhou-real-ai-slice-closure-proposal.md",
+    "docs/planning/2026-10-13-zhou-real-ai-remaining-contract-packet.md",
+    "docs/evidence/sprint3/2026-10-13-zhou-real-ai-local-contract-and-policy-evidence.md",
+    "docs/evidence/sprint3/2026-10-13-zhou-real-ai-local-technical-review.md",
+    "docs/evidence/sprint3/2026-10-13-zhou-real-ai-local-source-manifest.json",
+    "docs/evidence/sprint3/2026-10-13-zhou-real-ai-backend-tests-intermediate.txt",
+    "docs/evidence/sprint3/2026-10-13-zhou-real-ai-backend-tests-final.txt",
+    "docs/evidence/sprint3/2026-10-13-zhou-real-ai-submission-evidence.json"
+  ],
+  "selfExcludedFromHashes": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-submission-evidence.json",
+  "sourceFiles": [
+    {
+      "path": "backend/src/ai-conversation/README.md",
+      "normalizedGitBlob": "75dc46b29a388285bf364868e7336f8cb41b7497",
+      "workingCopySha256": "c8affd476a0413d056cac5554fc447c3f06e2ef8aea1c202342e4321717dbf86"
+    },
+    {
+      "path": "backend/src/ai-conversation/domain/real-effect-expiry.ts",
+      "normalizedGitBlob": "0b21dd0ba37182a7f7951470868ffc6649de7203",
+      "workingCopySha256": "2d0c09c7ecb65c3eedebb31aeaadf536d6f67b096cb951c384ec2830a77853be"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/real-write-control.ts",
+      "normalizedGitBlob": "ac61bc94cb1895e31d9bff95b81881cca59a06bc",
+      "workingCopySha256": "e9fe28257cd2a74e19f7ce368e5a80cdc66de4c65df470e29ee0b51a5a39a78a"
+    },
+    {
+      "path": "backend/test/ai-conversation/real-effect-expiry.test.ts",
+      "normalizedGitBlob": "ee46ac12078a6e56ee05b778b3e94bf73a72b9f3",
+      "workingCopySha256": "529c799dc18ac5e81ec6525cf0af24e72b2eb0e593ba360340cf2c71ee576897"
+    },
+    {
+      "path": "backend/test/ai-conversation/real-write-control.test.ts",
+      "normalizedGitBlob": "ceef99124f557f5b7c0fcdb64786d6f9211c7116",
+      "workingCopySha256": "a70a4d321645fe07d5de267f015f584f74d086c29bc565c6129bf335e31e6926"
+    },
+    {
+      "path": "docs/decisions/2026-10-13-li-delegated-f01-b-c-d-selection.md",
+      "normalizedGitBlob": "566f48b64712f89cd919ec4b483c6b92d259c004",
+      "workingCopySha256": "155cb00f4b80938c6e3e4de4e5f5d9ad1604178957fd45cf4a6af811ecc95a1b"
+    },
+    {
+      "path": "docs/planning/2026-10-13-li-real-ai-product-choice-brief.md",
+      "normalizedGitBlob": "bb0f69f23dc61f0a883a4286d890b6581e8fdc27",
+      "workingCopySha256": "76d3a13d200a5c9eb958fb18df0669844bbcd5357d7f771c5dcf3395461ab982"
+    },
+    {
+      "path": "docs/decisions/2026-10-12-li-ai-capability-slice-acceptance.md",
+      "normalizedGitBlob": "c2b5335317d209ffda48b17a36f3569a1a4dae02",
+      "workingCopySha256": "67230a7883c34ac2347785f0181e981746a933b4900d28114dedb1385a8dd34a"
+    },
+    {
+      "path": "docs/planning/2026-10-12-li-ai-producer-and-shared-entry-handoff-draft.md",
+      "normalizedGitBlob": "1c10740a4e10f309574dd43f436c675408ba7d4c",
+      "workingCopySha256": "f453bbd9ed7f6aa8eccd9b6ccca3f3e9ceec9a2b8885e8698e5383538426e094"
+    },
+    {
+      "path": "docs/decisions/2026-10-12-li-real-ai-capability-verification-only.md",
+      "normalizedGitBlob": "f40242b5e23a7dab8ea16063bebb8043233ea30d",
+      "workingCopySha256": "49b61c9c692a71a7b9c7f38f21fe19d4407d9e75597ecd8871136427270f7c5d"
+    },
+    {
+      "path": "docs/decisions/2026-10-13-user-zhou-local-ai-development-scope.md",
+      "normalizedGitBlob": "532685214fdb03328eac100a02b124af6e651735",
+      "workingCopySha256": "c9da15584fde64a4f18a43f48067065a39d26175c739e041e2425c90c5467bd6"
+    },
+    {
+      "path": "docs/planning/2026-10-12-zhou-conversation-persistence-mobile-contract-candidate.md",
+      "normalizedGitBlob": "40524a7666fd2e22156b5cc252ca2f5adfc243a6",
+      "workingCopySha256": "985be2efb7165d5d9b9c5ba1fb7de9169f8991f2c771276e31cd70b55ae41ef5"
+    },
+    {
+      "path": "docs/planning/2026-10-12-zhou-real-ai-slice-closure-proposal.md",
+      "normalizedGitBlob": "f510ee1a744e301c204528d5d2cf01058d39ee86",
+      "workingCopySha256": "eaf2d1137f8486494e62ccc544768456b4ba3caeb7fda8793f6da954520e2e6e"
+    },
+    {
+      "path": "docs/planning/2026-10-13-zhou-real-ai-remaining-contract-packet.md",
+      "normalizedGitBlob": "019cf329753ee18f02724ecb29c0cf61359a277d",
+      "workingCopySha256": "74339d98df008aabbae90d3dc448ee5b43f3c83a7b40ab3de67166664246d893"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-local-contract-and-policy-evidence.md",
+      "normalizedGitBlob": "58d2ecbd58665f6bb98f7acab4412559d6fee42a",
+      "workingCopySha256": "f40c08204ce370612d2e30c1a06072a173d415f8e8f039dc07c19c6a3ce77b66"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-local-technical-review.md",
+      "normalizedGitBlob": "cf638953091d2851061f208ca7361f43f9743a96",
+      "workingCopySha256": "e5a3fa69bd5e28483b951e5104ce6e991285a9fbd3a72c57722ae3560376b757"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-local-source-manifest.json",
+      "normalizedGitBlob": "4e60079f3c3381a0b785837d0ae2792cd49c5f55",
+      "workingCopySha256": "4b4fb8b0ab022df21329204f204c0ae5299b907a55603dc06014601b430c650a"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-backend-tests-intermediate.txt",
+      "normalizedGitBlob": "a83b3a6fc777f41333852b95407b9b82ce6f8530",
+      "workingCopySha256": "d62c094977a21afe7bfd2ed65ab19f74a5b00349a0313225797d284aa1fbb52a"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-backend-tests-final.txt",
+      "normalizedGitBlob": "89ec55b6b9aeaf9c5137fbe38272532285a49b77",
+      "workingCopySha256": "b2d920cd9c774b3dbb6d05a7714e02ea8b030d803a227a82a257ddb92afe7577"
+    }
+  ],
+  "testedCodeBinding": [
+    {
+      "path": "backend/src/ai-conversation/domain/real-effect-expiry.ts",
+      "normalizedGitBlob": "0b21dd0ba37182a7f7951470868ffc6649de7203",
+      "unchangedFromFinalLocalTest": true
+    },
+    {
+      "path": "backend/src/ai-conversation/application/real-write-control.ts",
+      "normalizedGitBlob": "ac61bc94cb1895e31d9bff95b81881cca59a06bc",
+      "unchangedFromFinalLocalTest": true
+    },
+    {
+      "path": "backend/test/ai-conversation/real-effect-expiry.test.ts",
+      "normalizedGitBlob": "ee46ac12078a6e56ee05b778b3e94bf73a72b9f3",
+      "unchangedFromFinalLocalTest": true
+    },
+    {
+      "path": "backend/test/ai-conversation/real-write-control.test.ts",
+      "normalizedGitBlob": "ceef99124f557f5b7c0fcdb64786d6f9211c7116",
+      "unchangedFromFinalLocalTest": true
+    }
+  ],
+  "preservedLocalBodies": [
+    {
+      "path": "docs/planning/2026-10-13-zhou-real-ai-remaining-contract-packet.md",
+      "originalNormalizedGitBlob": "40f1f8c830edfc7b28b2ff6465b8ae886d5f6948",
+      "reconstructedOriginalBlob": "40f1f8c830edfc7b28b2ff6465b8ae886d5f6948",
+      "unchanged": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-local-contract-and-policy-evidence.md",
+      "originalNormalizedGitBlob": "0e1aa6a7d0fc708e53c9a8091d9e26ca02929668",
+      "reconstructedOriginalBlob": "0e1aa6a7d0fc708e53c9a8091d9e26ca02929668",
+      "unchanged": true
+    },
+    {
+      "path": "docs/decisions/2026-10-13-user-zhou-local-ai-development-scope.md",
+      "originalNormalizedGitBlob": "3e7c6831690b92d504bb66a97dea1577aebb24f5",
+      "reconstructedOriginalBlob": "3e7c6831690b92d504bb66a97dea1577aebb24f5",
+      "unchanged": true
+    }
+  ],
+  "originalPreCommitManifest": {
+    "path": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-local-source-manifest.json",
+    "status": "Historical local-only snapshot; noNewCommit=true is not the publication status",
+    "sha256": "4b4fb8b0ab022df21329204f204c0ae5299b907a55603dc06014601b430c650a"
+  },
+  "importedAuthority": [
+    {
+      "path": "docs/decisions/2026-10-13-li-delegated-f01-b-c-d-selection.md",
+      "sourceCommit": "20ff6cfc01ec0caaa7f811ec3d9d4eec547f2072",
+      "expectedGitBlob": "566f48b64712f89cd919ec4b483c6b92d259c004",
+      "actualGitBlob": "566f48b64712f89cd919ec4b483c6b92d259c004",
+      "matches": true
+    },
+    {
+      "path": "docs/planning/2026-10-13-li-real-ai-product-choice-brief.md",
+      "sourceCommit": "20ff6cfc01ec0caaa7f811ec3d9d4eec547f2072",
+      "expectedGitBlob": "bb0f69f23dc61f0a883a4286d890b6581e8fdc27",
+      "actualGitBlob": "bb0f69f23dc61f0a883a4286d890b6581e8fdc27",
+      "matches": true
+    },
+    {
+      "path": "docs/decisions/2026-10-12-li-ai-capability-slice-acceptance.md",
+      "sourceCommit": "20ff6cfc01ec0caaa7f811ec3d9d4eec547f2072",
+      "expectedGitBlob": "c2b5335317d209ffda48b17a36f3569a1a4dae02",
+      "actualGitBlob": "c2b5335317d209ffda48b17a36f3569a1a4dae02",
+      "matches": true
+    },
+    {
+      "path": "docs/planning/2026-10-12-li-ai-producer-and-shared-entry-handoff-draft.md",
+      "sourceCommit": "20ff6cfc01ec0caaa7f811ec3d9d4eec547f2072",
+      "expectedGitBlob": "1c10740a4e10f309574dd43f436c675408ba7d4c",
+      "actualGitBlob": "1c10740a4e10f309574dd43f436c675408ba7d4c",
+      "matches": true
+    },
+    {
+      "path": "docs/decisions/2026-10-12-li-real-ai-capability-verification-only.md",
+      "sourceCommit": "20ff6cfc01ec0caaa7f811ec3d9d4eec547f2072",
+      "expectedGitBlob": "f40242b5e23a7dab8ea16063bebb8043233ea30d",
+      "actualGitBlob": "f40242b5e23a7dab8ea16063bebb8043233ea30d",
+      "matches": true
+    }
+  ],
+  "logExports": [
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-backend-tests-intermediate.txt",
+      "originalLocalFileName": "backend-tests.log",
+      "originalRawSha256": "7cb37f756649b86d66f35d5e3d365602a6203f44b856b337cc3f763acf473854",
+      "publishedUtf8LfSha256": "d62c094977a21afe7bfd2ed65ab19f74a5b00349a0313225797d284aa1fbb52a",
+      "normalization": "Decode original host encoding; remove BOM; normalize CRLF to LF; no result lines removed"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-backend-tests-final.txt",
+      "originalLocalFileName": "backend-tests-final.log",
+      "originalRawSha256": "3e10be78683cbc6acf8bb7b4433387332712f9c643ede6743cd340a37eaf27b1",
+      "publishedUtf8LfSha256": "b2d920cd9c774b3dbb6d05a7714e02ea8b030d803a227a82a257ddb92afe7577",
+      "normalization": "Decode original host encoding; remove BOM; normalize CRLF to LF; no result lines removed"
+    }
+  ],
+  "actualTests": {
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "build": {
+      "command": "node node_modules/typescript/bin/tsc --project backend/tsconfig.json",
+      "result": "PASS after final source fix on 13 October; no code changed during publication preparation"
+    },
+    "newPolicySuites": {
+      "tests": 30,
+      "pass": 30,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "ownerAndIndependentLocalReviewer": "Both passed the two new suites; independent local review is not JIN formal review"
+    },
+    "finalBackend": {
+      "command": "node --test --test-reporter=spec 'backend/dist/test/**/*.test.js'",
+      "startedAt": "2026-10-13T15:06:10.9233509+08:00",
+      "finishedAt": "2026-10-13T15:06:12.4659638+08:00",
+      "exitCode": 0,
+      "tests": 542,
+      "pass": 542,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "log": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-backend-tests-final.txt"
+    },
+    "intermediateBackend": {
+      "command": "node --test --test-reporter=spec 'backend/dist/test/**/*.test.js'",
+      "startedAt": "2026-10-13T14:59:32.6825272+08:00",
+      "finishedAt": "2026-10-13T14:59:34.2145430+08:00",
+      "exitCode": 0,
+      "tests": 539,
+      "pass": 539,
+      "fail": 0,
+      "status": "Before source-review Auth-terminal fix and three added adversarial tests; not the final reviewed code",
+      "log": "docs/evidence/sprint3/2026-10-13-zhou-real-ai-backend-tests-intermediate.txt"
+    },
+    "intermediateNewPolicySuite": "27/27 passed before the source-review fix; not final snapshot"
+  },
+  "sourceReviewCorrections": [
+    "Known Auth loss/unavailable/malformed result and original-guard loss latch terminal; regrant cannot reopen the old request",
+    "Explicit original expiry+24h completion deadline",
+    "NC11 no late execute after any Cancel",
+    "NC12 messageId merging and original U identity/time/sequence stability",
+    "Expiry Delete explicitly reuses whole-delete complete fencing/settlement/child cleanup"
+  ],
+  "localVerificationToolFailures": {
+    "attempts": [
+      {
+        "result": "failed-before-manifest-write",
+        "cause": "URL pathname retained %20 in the Windows filesystem path",
+        "observed": "ENOENT opening D:\\3851%20AI\\drafts\\2026-10-13-ai-contract-local\\backend-tests-final.log",
+        "fix": "Use node:url fileURLToPath(import.meta.url); existing log path confirmed present"
+      },
+      {
+        "result": "failed-before-manifest-write",
+        "errors": [
+          "Imported acceptance document linked to missing local 2026-10-12-li-real-ai-capability-verification-only.md",
+          "First Git status row lost its initial status space through trim(), yielding a false unexpected ackend path"
+        ],
+        "fix": "Import the exact source dependency from 20ff6cfc; preserve leading status columns with trimEnd()"
+      }
+    ],
+    "backendTestFailure": false,
+    "finalLocalChecksPassed": true
+  },
+  "publicationChecks": {
+    "testedCodeUnchanged": "4/4 exact raw SHA256 and normalized Git blobs",
+    "importedAuthorityUnchanged": "5/5 exact Git blobs",
+    "historicalLocalBodiesPreserved": "3/3 reconstructed normalized blobs",
+    "sourceLinksChecked": 104,
+    "gitDiffCheck": "PASS",
+    "changeAllowlist": "PASS",
+    "highSignalSecretScan": "PASS for exported logs; independent reviewer checked original 17 files and local evidence files",
+    "initialStaging": "Generic *.log ignore blocked two exports; use existing evidence-transcript .txt convention, no force-add or ignore-rule change",
+    "errors": []
+  },
+  "excludedPreExistingUntrackedFiles": [
+    "docs/decisions/2026-10-09-li-persona-p08-isolated-flow-approval.md",
+    "docs/evidence/sprint3/2026-10-09-persona-android-selfcheck-source-manifest.json",
+    "docs/evidence/sprint3/2026-10-09-persona-android-selfcheck.md",
+    "docs/evidence/sprint3/2026-10-09-persona-local-implementation.md",
+    "docs/evidence/sprint3/2026-10-09-persona-local-source-manifest.json",
+    "docs/evidence/sprint3/2026-10-09-persona-p08-implementation-release.md",
+    "docs/evidence/sprint3/2026-10-09-persona-pc13-local-harness.md"
+  ],
+  "reviewRequestedFrom": {
+    "JIN": "chuxi12483468",
+    "LI": "3427564237"
+  },
+  "formalApprovalStatus": "Pending for this new packet and source; four F01 product rows selected and #92 bounded evidence accepted remain resolved",
+  "notRun": [
+    "new Emulator/SDK probes",
+    "Cloud or live model",
+    "Flutter/Android",
+    "real Auth-to-commit race",
+    "real ACK-loss readback",
+    "arbitrary concurrent barrier",
+    "same-U real store CAS",
+    "full deletion/cleanup runner or original-expiry+24h SLA"
+  ],
+  "prohibitedActions": [
+    "merge",
+    "Issue/task closure",
+    "Project/board transition",
+    "runtime/schema/index enabling",
+    "claim whole S3/UAT/Release completion"
+  ]
+}

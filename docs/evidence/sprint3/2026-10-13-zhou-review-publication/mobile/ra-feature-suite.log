@@ -1,0 +1,171 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (109.0.0 available)
+  analyzer 13.3.0 (14.5.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  cupertino_ui 1.0.2 (1.1.2 available)
+  firebase_auth 6.6.1 (6.7.0 available)
+  firebase_auth_platform_interface 9.0.7 (9.1.0 available)
+  firebase_auth_web 6.2.7 (6.3.0 available)
+  firebase_core 4.14.0 (4.15.0 available)
+  firebase_core_web 3.11.0 (3.12.0 available)
+  flutter_riverpod 3.4.2 (3.4.3 available)
+  frontend_server_client 4.0.0 (4.1.0 available)
+  go_router 18.0.1 (18.0.2 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  material_ui 1.1.1 (1.6.0 available)
+  meta 1.18.3 (1.19.0 available)
+  package_config 2.2.0 (3.0.0 available)
+  platform 3.1.6 (3.2.0 available)
+  riverpod 3.4.2 (3.4.3 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+  vector_math 2.4.0 (2.4.3 available)
+  webdriver 3.1.0 (3.2.0 available)
+Got dependencies!
+23 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading <REPO_ROOT>/test/features/ai_conversation/ai_conversation_controller_test.dart
+00:00 +0: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_controller_test.dart: ordinary composition disables AI without a transport
+00:00 +1: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +2: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +3: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +4: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +5: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +6: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +7: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +8: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +9: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +10: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +11: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +12: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +13: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +14: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +15: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +16: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +17: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +18: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +19: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +20: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +21: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +22: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +23: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +24: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +25: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +26: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +27: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +28: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +29: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +30: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +31: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +32: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +33: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +34: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +35: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +36: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +37: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +38: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +39: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +40: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +41: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +42: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +43: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +44: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +45: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +46: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +47: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +48: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +49: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +50: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +51: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +52: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +53: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +54: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +55: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +56: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +57: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +58: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +59: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +60: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +61: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +62: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +63: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +64: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +65: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +66: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +67: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +68: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +69: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +70: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +71: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +72: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +73: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +74: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +75: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +76: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +77: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +78: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +79: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +80: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +81: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +82: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +83: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +84: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +85: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +86: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +87: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +88: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +89: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +90: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +91: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +92: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +93: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +94: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +95: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +96: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +97: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +98: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +99: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +100: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +101: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +102: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +103: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +104: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +105: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +106: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +107: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +108: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +109: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +110: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +111: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +112: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +113: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +114: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:00 +115: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:01 +116: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:01 +117: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:01 +118: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:01 +119: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:01 +120: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: inactive preserves work; paused and detached request cancellation
+00:01 +121: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: inactive preserves work; paused and detached request cancellation
+00:01 +122: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: disposal synchronously detaches without a provider write
+00:01 +123: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: session replacement removes the composer draft
+00:01 +124: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: same-session auth rejection clears the draft before recovery
+00:01 +125: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: limited displays non-content state without auto retry
+00:01 +126: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: busy displays non-content state without auto retry
+00:01 +127: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: unavailable displays non-content state without auto retry
+00:01 +128: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: rejected displays non-content state without auto retry
+00:01 +129: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: timedOut displays non-content state without auto retry
+00:01 +130: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: unknown displays non-content state without auto retry
+00:01 +131: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: authorityChanged displays non-content state without auto retry
+00:01 +132: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: deleted displays non-content state without auto retry
+00:01 +133: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: unauthenticated displays non-content state without auto retry
+00:01 +134: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Retry requires newly entered text and preserves displayed user time
+00:01 +135: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: messages are plain text and a tombstone removes existing content
+00:01 +136: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: Delete requires confirmation, hides immediately and Check again only deletes
+00:01 +137: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: ordinary reads and outcome checks do not resend
+00:01 +138: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: R-A explains unknown and clears private display and draft before leaving
+00:01 +139: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: R-A exit stays reachable during a result read at 2x text on a small screen
+00:02 +140: <REPO_ROOT>/test/features/ai_conversation/ai_conversation_page_test.dart: small screen at 2x text keeps labeled Cancel reachable at 48dp
+00:02 +141: All tests passed!
