@@ -59,12 +59,22 @@ complete Note inventory is empty. No operational DU source guarantee follows.
 
 ## Verification and retained failures
 
-Final source, counts, selected input hashes, commands and exit codes are recorded
-in the adjacent run manifest. Backend/Flutter/SDK counts overlap with their
+Final executable source is `098d6517ba7d08a58c190c43b5fecf9f59615a40`, tree
+`a5437ea9a44c1d9455717807bf3c0dd76cd5abb7`. Exact commands and log fingerprints
+are in the [run manifest](2026-10-14-zhou-real-chat-increment/run-manifest.json).
+All396 selected tracked verification inputs matched normalized immutable Git
+blobs; before/after hashes across final Backend and SDK runs are identical.
+Backend/Flutter/SDK counts overlap with their
 focused suites and are never added together.
 
+- Final strict compile: Pass. Full Backend **873/873**, actual guarded Emulator
+  **132/132**, both exit0, fail/cancel/skip/todo0. Both private profiles removed
+  and five required ports freed. Semantic subset44/44 and packet31/31 are included
+  in873; the three new actual Persona/AI cases are included in132.
 - Full Flutter: **546/546**, default concurrency, exit0. Full fatal-info analysis:
   exit0/no issues. New network composition subset:9/9 (3 existing +6 new).
+  These ran at the working source later committed as `af77d758684117afe3ed1ad8d797acfed1ef9ee3`;
+  all147 selected Flutter inputs remain unchanged at098d651, verified separately.
 - Initial full Backend checkpoint:870/870, exit0, before the later defensive
   fresh-candidate/own-data-property checks. The final run supersedes only the
   affected source evidence; it does not erase that checkpoint.
@@ -87,10 +97,20 @@ focused suites and are never added together.
   content. A second audit identified defensive fresh-candidate/own-property
   validation gaps outside the current frozen Application input boundary; those
   were hardened with regression coverage. These audits are not LI approval.
+  The first defensive test-fixture literal failed TS2353 and prevented emit;
+  the following old41-case output is stale and not new proof. Explicit test-only
+  malformed-value typing then allowed a fresh strict compile and44-case run.
+  Agent intermediate compiler/style diagnostic messages are recorded here;
+  only the adjacent named raw run logs are claimed as retained raw artifacts.
 
 Public adjacent raw logs contain only synthetic test material and non-content
 observations. Original failed logs are retained. Actual identity/model/tokenizer
 details, credentials and user content are not in this package.
+Source/docs/JSON whitespace checks pass. Full raw-log whitespace checking retains
+three original padding findings (two in the failed SDK log and one analyzer
+progress line); raw bytes were preserved, so an all-file whitespace Pass is not
+claimed. Sensitive-token/key pattern matches were reviewed before publication;
+the only broad-pattern matches were two test names about malformed credentials.
 
 ## LI/JIN integration handoff
 

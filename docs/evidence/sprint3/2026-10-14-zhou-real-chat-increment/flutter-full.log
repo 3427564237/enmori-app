@@ -1,0 +1,576 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (109.0.0 available)
+  analyzer 13.3.0 (14.5.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  cupertino_ui 1.0.2 (1.1.2 available)
+  firebase_auth 6.6.1 (6.7.0 available)
+  firebase_auth_platform_interface 9.0.7 (9.1.0 available)
+  firebase_auth_web 6.2.7 (6.3.0 available)
+  firebase_core 4.14.0 (4.15.0 available)
+  firebase_core_web 3.11.0 (3.12.0 available)
+  flutter_riverpod 3.4.2 (3.4.3 available)
+  frontend_server_client 4.0.0 (4.1.0 available)
+  go_router 18.0.1 (18.0.2 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  material_ui 1.1.1 (1.6.0 available)
+  meta 1.18.3 (1.19.0 available)
+  package_config 2.2.0 (3.0.0 available)
+  platform 3.1.6 (3.2.0 available)
+  riverpod 3.4.2 (3.4.3 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+  vector_math 2.4.0 (2.4.3 available)
+  webdriver 3.1.0 (3.2.0 available)
+Got dependencies!
+23 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading D:/3851/test/app/account_preferences_flow_test.dart
+00:00 +0: D:/3851/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:01 +1: D:/3851/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:01 +2: D:/3851/test/app/check_in_history_shared_router_test.dart: real History builder and Backend repositories run through Home
+00:01 +3: D:/3851/test/app/check_in_history_shared_router_test.dart: real History builder and Backend repositories run through Home
+00:01 +4: D:/3851/test/app/ai_conversation_shared_router_test.dart: real wire success survives Back and explicit authorized reread
+00:01 +5: D:/3851/test/app/account_preferences_flow_test.dart: Settings independently saves Friends-only with rejected optional processing
+00:01 +6: D:/3851/test/app/account_preferences_flow_test.dart: Settings independently saves Friends-only with rejected optional processing
+00:01 +7: D:/3851/test/app/check_in_history_shared_router_test.dart: Next replaces page, Reload restores first, chosen date is sent
+00:01 +8: D:/3851/test/app/check_in_history_shared_router_test.dart: Next replaces page, Reload restores first, chosen date is sent
+00:01 +9: D:/3851/test/app/check_in_history_shared_router_test.dart: Next replaces page, Reload restores first, chosen date is sent
+00:01 +10: D:/3851/test/app/check_in_history_shared_router_test.dart: Next replaces page, Reload restores first, chosen date is sent
+00:01 +11: D:/3851/test/app/check_in_history_shared_router_test.dart: Next replaces page, Reload restores first, chosen date is sent
+00:01 +12: D:/3851/test/app/ai_conversation_shared_router_test.dart: pending real page owns exit before shared navigation (false)
+00:01 +13: D:/3851/test/app/ai_conversation_shared_router_test.dart: pending real page owns exit before shared navigation (false)
+00:01 +14: D:/3851/test/app/ai_conversation_shared_router_test.dart: pending real page owns exit before shared navigation (false)
+00:02 +15: D:/3851/test/app/account_preferences_flow_test.dart: invalid input retains edits; uncertain commit never retries without reload
+00:02 +16: D:/3851/test/app/history_ai_home_router_test.dart: History saved ID is encoded once and uses existing owner read
+00:02 +17: D:/3851/test/app/check_in_history_shared_router_test.dart: pending History is discarded on session change (false)
+00:02 +18: D:/3851/test/app/check_in_history_shared_router_test.dart: pending History is discarded on session change (false)
+00:02 +19: D:/3851/test/app/ai_conversation_shared_router_test.dart: pending real page owns exit before shared navigation (true)
+00:02 +20: D:/3851/test/app/ai_conversation_shared_router_test.dart: pending real page owns exit before shared navigation (true)
+00:02 +21: D:/3851/test/app/ai_conversation_shared_router_test.dart: pending real page owns exit before shared navigation (true)
+00:02 +22: D:/3851/test/app/account_preferences_flow_test.dart: disposed pending save cannot update another account or restore the old route
+00:02 +23: D:/3851/test/app/check_in_history_shared_router_test.dart: pending History is discarded on session change (true)
+00:02 +24: D:/3851/test/app/check_in_history_shared_router_test.dart: pending History is discarded on session change (true)
+00:02 +25: D:/3851/test/app/ai_conversation_shared_router_test.dart: session replacement/logout clears actual pending page (false)
+00:02 +26: D:/3851/test/app/ai_conversation_shared_router_test.dart: session replacement/logout clears actual pending page (false)
+00:02 +27: D:/3851/test/app/account_preferences_flow_test.dart: signout failure retains session; successful observed signout reaches Sign in
+00:02 +28: D:/3851/test/app/account_preferences_flow_test.dart: signout failure retains session; successful observed signout reaches Sign in
+00:02 +29: D:/3851/test/app/check_in_history_shared_router_test.dart: dependency error stays failure until explicit Retry
+00:02 +30: D:/3851/test/app/ai_conversation_shared_router_test.dart: session replacement/logout clears actual pending page (true)
+00:02 +31: D:/3851/test/app/ai_conversation_shared_router_test.dart: session replacement/logout clears actual pending page (true)
+00:02 +32: D:/3851/test/app/ai_conversation_shared_router_test.dart: session replacement/logout clears actual pending page (true)
+00:02 +33: D:/3851/test/app/ai_conversation_shared_router_test.dart: session replacement/logout clears actual pending page (true)
+00:02 +34: D:/3851/test/app/ai_conversation_shared_router_test.dart: session replacement/logout clears actual pending page (true)
+00:02 +35: D:/3851/test/app/account_preferences_flow_test.dart: Settings remains reachable on a small phone with 2x text
+00:02 +36: D:/3851/test/app/history_ai_home_router_test.dart: new observed session resets stack and callbacks (member-a)
+00:02 +37: D:/3851/test/app/history_ai_home_router_test.dart: new observed session resets stack and callbacks (member-b)
+00:03 +38: D:/3851/test/app/history_ai_home_router_test.dart: observed logout removes owned page and callback (false)
+00:03 +39: D:/3851/test/app/history_ai_home_router_test.dart: observed logout removes owned page and callback (true)
+00:03 +40: D:/3851/test/app/home_event_navigation_test.dart: See All has a back action and returning recomputes Home
+00:03 +41: D:/3851/test/app/home_event_navigation_test.dart: See All has a back action and returning recomputes Home
+00:03 +42: D:/3851/test/app/home_event_navigation_test.dart: See All has a back action and returning recomputes Home
+00:03 +43: D:/3851/test/app/home_event_navigation_test.dart: See All has a back action and returning recomputes Home
+00:03 +44: D:/3851/test/app/home_event_navigation_test.dart: See All has a back action and returning recomputes Home
+00:03 +45: D:/3851/test/app/home_event_navigation_test.dart: See All has a back action and returning recomputes Home
+00:03 +46: D:/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +47: D:/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +48: D:/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +49: D:/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +50: D:/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +51: D:/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +52: D:/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:04 +53: D:/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:04 +54: D:/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:04 +55: D:/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:04 +56: D:/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +57: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +58: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +59: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +60: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +61: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +62: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +63: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +64: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +65: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +66: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +67: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +68: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +69: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +70: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +71: D:/3851/test/app/rmvp01a_flow_integration_test.dart: observed auth, onboarding, create and later-read cross the R1 boundaries
+00:05 +72: D:/3851/test/app/recovery_flow_test.dart: existing-email registration offers executable sign-in
+00:05 +73: D:/3851/test/app/own_profile_flow_test.dart: cancelling an unsaved edit neither mutates nor reports a save
+00:05 +74: D:/3851/test/app/own_profile_flow_test.dart: cancelling an unsaved edit neither mutates nor reports a save
+00:05 +75: D:/3851/test/app/persona_home_router_test.dart: account replacement removes old stack and old callbacks
+00:05 +76: D:/3851/test/app/recovery_flow_test.dart: AUTH_REQUIRED sign-in reloads incomplete onboarding
+00:05 +77: D:/3851/test/app/own_profile_flow_test.dart: failed read hides raw errors and explicit Retry recovers
+00:05 +78: D:/3851/test/app/persona_home_router_test.dart: disposed page callback and auth-loss callback cannot navigate
+00:05 +79: D:/3851/test/app/recovery_flow_test.dart: AUTH_REQUIRED sign-in reloads completed onboarding
+00:05 +80: D:/3851/test/app/own_profile_flow_test.dart: only the latest overlapping read may update Profile
+00:05 +81: D:/3851/test/app/persona_home_router_test.dart: form owns discard confirmation before invoking router Back
+00:06 +82: D:/3851/test/app/persona_home_router_test.dart: form owns discard confirmation before invoking router Back
+00:06 +83: D:/3851/test/app/persona_home_router_test.dart: form owns discard confirmation before invoking router Back
+00:06 +84: D:/3851/test/app/recovery_flow_test.dart: late Sign-in failure cannot update state or leave the destination
+00:06 +85: D:/3851/test/app/own_profile_flow_test.dart: switching accounts discards the previous Profile read and return callback
+00:06 +86: D:/3851/test/app/own_profile_flow_test.dart: switching accounts discards the previous Profile read and return callback
+00:06 +87: D:/3851/test/app/own_profile_flow_test.dart: switching accounts discards the previous Profile read and return callback
+00:06 +88: D:/3851/test/app/own_profile_flow_test.dart: switching accounts discards the previous Profile read and return callback
+00:06 +89: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: ordinary composition disables AI without a transport
+00:06 +90: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: ordinary composition disables AI without a transport
+00:06 +91: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: ordinary composition disables AI without a transport
+00:06 +92: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +93: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +94: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +95: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +96: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +97: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +98: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +99: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +100: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +101: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +102: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +103: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +104: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +105: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +106: D:/3851/test/app/own_profile_flow_test.dart: auth loss while editor saves cannot restore Profile or reload Home
+00:06 +107: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: ordinary token cannot dispatch after monotonic 15-second limit
+00:06 +108: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: ordinary full body cannot beat a delayed deadline timer
+00:06 +109: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: delete hides immediately; unknown repeats DELETE until confirmed success
+00:06 +110: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: navigation clears data and cancels; returning to retained page can read again
+00:06 +111: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: route recreation retains references, never message bodies or ticket keys
+00:06 +112: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: invalid scalar text never requests a token or operation
+00:06 +113: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: aiContextNotPermitted maps safely and never automatically resends
+00:06 +114: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: aiBusy maps safely and never automatically resends
+00:06 +115: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: aiUnavailable maps safely and never automatically resends
+00:06 +116: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: aiReplyRejected maps safely and never automatically resends
+00:06 +117: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: aiAuthorityChanged maps safely and never automatically resends
+00:06 +118: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: authRequired maps safely and never automatically resends
+00:06 +119: D:/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: unexpected maps safely and never automatically resends
+00:06 +120: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +121: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +122: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +123: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +124: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +125: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +126: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +127: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +128: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +129: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +130: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +131: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +132: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +133: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +134: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +135: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +136: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +137: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +138: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +139: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +140: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +141: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +142: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +143: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +144: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +145: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +146: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +147: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +148: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +149: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +150: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +151: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +152: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +153: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +154: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +155: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +156: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +157: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +158: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +159: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +160: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +161: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +162: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +163: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +164: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +165: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +166: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +167: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +168: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +169: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +170: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +171: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +172: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +173: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +174: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +175: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +176: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +177: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +178: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +179: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +180: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +181: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +182: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +183: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +184: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +185: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +186: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +187: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +188: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +189: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +190: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +191: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +192: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +193: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +194: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +195: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +196: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +197: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +198: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +199: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +200: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +201: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +202: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +203: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +204: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +205: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +206: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +207: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +208: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +209: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +210: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +211: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +212: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +213: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +214: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +215: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +216: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +217: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +218: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +219: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +220: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +221: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +222: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +223: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +224: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +225: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +226: D:/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +227: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: back preserves a draft until discard is confirmed
+00:08 +228: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: settings preserves a draft until discard is confirmed
+00:08 +229: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: settings preserves a draft until discard is confirmed
+00:08 +230: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: settings preserves a draft until discard is confirmed
+00:08 +231: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: settings preserves a draft until discard is confirmed
+00:08 +232: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: settings preserves a draft until discard is confirmed
+00:08 +233: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: settings preserves a draft until discard is confirmed
+00:08 +234: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: settings preserves a draft until discard is confirmed
+00:08 +235: D:/3851/test/features/auth/firebase_auth_session_test.dart: same UID relogin rejects an already-dispatched late create response
+00:08 +236: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: personas preserves a draft until discard is confirmed
+00:08 +237: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: personas preserves a draft until discard is confirmed
+00:08 +238: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: personas preserves a draft until discard is confirmed
+00:08 +239: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: personas preserves a draft until discard is confirmed
+00:08 +240: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: personas preserves a draft until discard is confirmed
+00:08 +241: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: personas preserves a draft until discard is confirmed
+00:08 +242: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona callback is omitted without a composed destination
+00:08 +243: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: same-UID session replacement invalidates a pending discard
+00:08 +244: D:/3851/test/features/backend_repositories_test.dart: BackendApiClient rejects non-HTTPS configuration before token or request
+00:08 +245: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:08 +246: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:08 +247: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:09 +248: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:09 +249: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:09 +250: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:09 +251: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:09 +252: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:09 +253: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:09 +254: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:09 +255: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:09 +256: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:09 +257: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending success work
+00:09 +258: D:/3851/test/features/backend_repositories_test.dart: BackendCheckInRepository reads a paged own-date history through the approved contract
+00:09 +259: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +260: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +261: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +262: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +263: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +264: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +265: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +266: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +267: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +268: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +269: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +270: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +271: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona navigation confirms pending deleting work
+00:09 +272: D:/3851/test/features/blocker_slices_test.dart: Check-in parser preserves three snapshots, legacy omission, rejects null/invalid values
+00:09 +273: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona return keeps private input empty and never resends
+00:09 +274: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona return keeps private input empty and never resends
+00:09 +275: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona return keeps private input empty and never resends
+00:09 +276: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona return keeps private input empty and never resends
+00:09 +277: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona return keeps private input empty and never resends
+00:09 +278: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona return keeps private input empty and never resends
+00:09 +279: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona return keeps private input empty and never resends
+00:09 +280: D:/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona return keeps private input empty and never resends
+00:09 +281: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +282: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +283: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +284: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +285: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +286: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +287: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +288: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +289: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +290: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +291: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +292: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:10 +293: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:10 +294: D:/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:10 +295: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +296: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +297: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +298: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +299: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +300: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +301: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +302: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +303: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +304: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +305: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +306: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +307: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +308: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +309: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +310: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +311: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +312: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +313: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +314: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +315: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +316: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +317: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +318: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +319: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +320: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +321: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +322: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +323: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +324: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +325: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +326: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +327: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +328: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +329: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +330: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +331: D:/3851/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:11 +332: D:/3851/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:11 +333: D:/3851/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:11 +334: D:/3851/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:11 +335: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending saved read; composer can save and late read cannot overwrite
+00:11 +336: D:/3851/test/features/event_recommendations_page_test.dart: See All makes its own complete request and preserves order
+00:11 +337: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending composer confirmation; composer can save and late read cannot overwrite
+00:11 +338: D:/3851/test/features/check_in_pending_recovery_test.dart: leave pending composer confirmation; composer can save and late read cannot overwrite
+00:11 +339: D:/3851/test/features/event_recommendations_page_test.dart: request failure exposes a stable retry action
+00:11 +340: D:/3851/test/features/event_recommendations_page_test.dart: request failure exposes a stable retry action
+00:11 +341: D:/3851/test/features/check_in_pending_recovery_test.dart: departing saved page cannot cancel the replacement page read
+00:11 +342: D:/3851/test/features/friend_search_test.dart: query edits/submission invalidate late responses and cursor; Next replaces; Reload and Clear restart
+00:11 +343: D:/3851/test/features/event_recommendations_page_test.dart: saving Interests returns Home with a fresh recommendation request
+00:11 +344: D:/3851/test/features/event_recommendations_page_test.dart: saving Interests returns Home with a fresh recommendation request
+00:11 +345: D:/3851/test/features/event_recommendations_page_test.dart: saving Interests returns Home with a fresh recommendation request
+00:11 +346: D:/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +347: D:/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +348: D:/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +349: D:/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +350: D:/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +351: D:/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +352: D:/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +353: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +354: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +355: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +356: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +357: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +358: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +359: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +360: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +361: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +362: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +363: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +364: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +365: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +366: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +367: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +368: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +369: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +370: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +371: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +372: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +373: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +374: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +375: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +376: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +377: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +378: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +379: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +380: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +381: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +382: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +383: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +384: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +385: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +386: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +387: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +388: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +389: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +390: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +391: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +392: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +393: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +394: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +395: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +396: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +397: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +398: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +399: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +400: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +401: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +402: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +403: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +404: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +405: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +406: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +407: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +408: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +409: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +410: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +411: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +412: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +413: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +414: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:12 +415: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:13 +416: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:13 +417: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:13 +418: D:/3851/test/features/interest_editor_page_test.dart: Home exposes the Interest editor entry
+00:13 +419: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +420: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +421: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +422: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +423: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +424: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +425: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +426: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +427: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +428: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +429: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +430: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +431: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +432: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +433: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +434: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +435: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +436: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +437: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +438: D:/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +439: D:/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:13 +440: D:/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:13 +441: D:/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:13 +442: D:/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +443: D:/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +444: D:/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +445: D:/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +446: D:/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +447: D:/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +448: D:/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +449: D:/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +450: D:/3851/test/features/personas/persona_pages_test.dart: initial load failure never masquerades as empty or no Active
+00:14 +451: D:/3851/test/features/personas/persona_pages_test.dart: initial load failure never masquerades as empty or no Active
+00:15 +452: D:/3851/test/features/personas/persona_pages_test.dart: initial load failure never masquerades as empty or no Active
+00:15 +453: D:/3851/test/features/personas/persona_pages_test.dart: initial load failure never masquerades as empty or no Active
+00:15 +454: D:/3851/test/features/personas/persona_pages_test.dart: initial load failure never masquerades as empty or no Active
+00:15 +455: D:/3851/test/features/personas/persona_pages_test.dart: initial load failure never masquerades as empty or no Active
+00:15 +456: D:/3851/test/features/personas/persona_pages_test.dart: initial load failure never masquerades as empty or no Active
+00:15 +457: D:/3851/test/features/personas/persona_pages_test.dart: initial load failure never masquerades as empty or no Active
+00:15 +458: D:/3851/test/features/personas/persona_pages_test.dart: initial load failure never masquerades as empty or no Active
+00:15 +459: D:/3851/test/features/personas/persona_pages_test.dart: initial load failure never masquerades as empty or no Active
+00:15 +460: D:/3851/test/features/personas/persona_accessibility_test.dart: selection semantics remains separate from Active and activation cancel restores focus
+00:15 +461: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:15 +462: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:15 +463: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:15 +464: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:15 +465: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:15 +466: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:15 +467: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:16 +468: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:16 +469: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:16 +470: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:16 +471: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:16 +472: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:16 +473: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:16 +474: D:/3851/test/features/personas/persona_pages_test.dart: selection and cancelled confirmation never activate
+00:16 +475: D:/3851/test/features/personas/persona_accessibility_test.dart: dirty exit defaults to Keep editing and returns focus without losing draft
+00:16 +476: D:/3851/test/features/personas/persona_pages_test.dart: capacity disables create and delete Active needs explicit confirmation
+00:16 +477: D:/3851/test/features/personas/persona_pages_test.dart: capacity disables create and delete Active needs explicit confirmation
+00:16 +478: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +479: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +480: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +481: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +482: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +483: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +484: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +485: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +486: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +487: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +488: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:17 +489: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:17 +490: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:17 +491: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:17 +492: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +493: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +494: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +495: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +496: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +497: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +498: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +499: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +500: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +501: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +502: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +503: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +504: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +505: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +506: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +507: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +508: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +509: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +510: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +511: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +512: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +513: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +514: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +515: D:/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:18 +516: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:19 +517: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:19 +518: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:19 +519: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:19 +520: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:19 +521: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:19 +522: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:19 +523: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:19 +524: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:19 +525: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:19 +526: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:20 +527: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:20 +528: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:20 +529: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:20 +530: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:20 +531: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:20 +532: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:20 +533: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:21 +534: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:21 +535: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:21 +536: D:/3851/test/harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards
+00:21 +537: D:/3851/test/harness/ai_persona_harness_test.dart: draft guard prevents navigation until explicit discard
+00:21 +538: D:/3851/test/harness/ai_persona_harness_test.dart: draft guard prevents navigation until explicit discard
+00:21 +539: D:/3851/test/harness/ai_network_persona_harness_test.dart: AI Persona detour cancels original attempt, hides late output and requires explicit readback
+00:21 +540: D:/3851/test/harness/ai_persona_harness_test.dart: Persona detour cancels only the active attempt and never resumes it
+00:21 +541: D:/3851/test/harness/ai_network_persona_harness_test.dart: same UID replacement clears Persona draft and ignores old create completion
+00:21 +542: D:/3851/test/harness/ai_network_persona_harness_test.dart: same UID replacement clears Persona draft and ignores old create completion
+00:21 +543: D:/3851/test/harness/ai_network_persona_harness_test.dart: caller Persona callback remains the navigation boundary
+00:21 +544: D:/3851/test/harness/ai_network_persona_harness_test.dart: label rebuild preserves Persona draft while replacing the client resets its session
+00:22 +545: D:/3851/test/harness/ai_network_persona_harness_test.dart: explicit AI HTTP loopback never bypasses Persona HTTPS authority
+00:22 +546: All tests passed!

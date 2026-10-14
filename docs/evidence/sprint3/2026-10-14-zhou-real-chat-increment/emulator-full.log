@@ -1,0 +1,176 @@
+JIN_NEXT_EMULATOR_PREFLIGHT_LOCKED_STACK_CACHE_PORTS_PASS
+[36m[1mi  emulators:[22m[39m Starting emulators: auth, firestore
+[36m[1mi  emulators:[22m[39m Detected demo project ID "demo-enmori-rmvp01a-r10", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+[33m[1m!  firestore:[22m[39m Did not find a Cloud Firestore rules file specified in a firebase.json config file.
+[33m[1m!  firestore:[22m[39m The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration.
+[36m[1mi  firestore:[22m[39m Firestore Emulator logging to [1mfirestore-debug.log[22m
+[32m[1m+  firestore:[22m[39m Firestore Emulator was started in standard edition.
+[32m[1m+  firestore:[22m[39m Firestore Emulator UI websocket is running on 9150.
+[36m[1mi [22m[39m Running script: [1m"C:\Users\ASUS\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" "D:\3851\tool\ai_store_emulator_worker.mjs"[22m
+✔ real transaction races commit once, preserve independent resources and isolate another Account (8505.2999ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"other-regression","checkedTransactionCalls":6,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+✔ AI context Emulator: minimal preaccept denial and omitted source prerequisites submit no Note query (582.5838ms)
+✔ AI context Emulator: fixed asOf survives acknowledged cross-document mutations and page25 keyset (439.6284ms)
+✔ AI context Emulator: Prepared reader projects only complete legal first-five Notes and original Persona (356.9435ms)
+✔ AI context Emulator: current permits edit/switch/visibility, detects permanent used-source/Persona deletion (432.5494ms)
+✔ AI context Emulator: unavailable future readTime has no latest fallback or content query (6811.3008ms)
+✔ AI context Emulator: original token is reverified after user disable, before any DB content read (107.3675ms)
+✔ Emulator concurrent same/opposite sends produce one pending and one inbox reference (3364.3587ms)
+✔ Emulator accept/decline race has one winner and stale references cannot consume replacement (3684.4426ms)
+✔ Emulator block/accept race preserves the committed transition boundary (555.8261ms)
+✔ Emulator delete/accept race preserves the committed transition boundary (578.2608ms)
+✔ Emulator My Friends acceptance atomically creates both pointers, fresh privacy and eligibility apply on each page (1832.7616ms)
+✔ Emulator failed transaction commits neither acceptance nor either pointer (647.7133ms)
+✔ Emulator racing Profile visibility and requester eligibility changes are reread on a fresh list (932.4971ms)
+{"case":"my-friends-read-bound","transactionAttempts":2,"readsPerAttempt":[106,106],"retry":"injected-ABORTED"}
+✔ Emulator My Friends ordering and 106-read ceiling hold per SDK transaction attempt including retry (5293.2614ms)
+✔ Emulator exact expiry and temporarily unavailable recipient never create false friendship (908.6184ms)
+✔ Emulator authenticated Friend HTTP chain protects identity and supports accept/re-read (1068.5227ms)
+✔ Emulator Check-in snapshots Settings in the same transaction and retains old/replayed/legacy values (1228.8224ms)
+✔ Emulator overlapping Settings/save takes one consistent value, leaves each old snapshot stable (234.6108ms)
+✔ Emulator Detail uses isolated separate records, rejects expired/unsafe data and no recommendation mutation (444.0946ms)
+{"case":"friend-search-read-bound","transactionAttempts":2,"readsPerAttempt":[106,106],"retry":"injected-ABORTED"}
+✔ Emulator FS03 search covers 0/20/21, empty continuations, actual 106 gets and SDK retry (10076.0605ms)
+✔ Emulator FS04 current authorization and concurrent rename/privacy/blocks/eligibility remain coherent (1974.4568ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"other-regression","checkedTransactionCalls":110,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+✔ combined isolated app retains all three reads, Persona persistence and owner isolation (1158.1212ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"other-regression","checkedTransactionCalls":8,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+✔ actual fresh Auth and SDK owner resolution separates current purpose from ordinary owner actions (197.191ms)
+✔ actual unbound and corrupted completed-account inventory fail closed (106.1273ms)
+✔ actual disabled-user fresh Auth is refused without granting completed-owner authority (31.8929ms)
+✔ abort while actual binding I/O settles prevents subsequent account read or authority success (60.3976ms)
+✔ test mode uses loopback-only Auth and Firestore demo resources (23.422ms)
+✔ fixture reset clears Auth and Firestore Emulator state (139.835ms)
+{"audit":"S3-04-history-createdAt-compatibility","dataset":"S3-04-history-audit-2026-10-08","scope":"demo-enmori-rmvp01a-r10 isolated Auth/Firestore Emulator only","counts":{"total":5,"string":5,"canonicalFixedMillisecondUtc":5,"otherStringFormat":0,"nonString":0,"years":{"2026":5}},"pages":3,"pageSize":2,"coverage":"5/5","passed":true}
+✔ S3-04 history audit 2026-10-08 covers the complete synthetic Check-in dataset (92.0859ms)
+✔ History API pages the isolated synthetic owner data through Auth and Firestore Emulator (361.16ms)
+✔ Auth Emulator verifies ordinary and Admin-claimed principals without promoting claims (59.8594ms)
+✔ Auth Emulator fails closed for malformed, expired, disabled and revoked identity (1176.7734ms)
+✔ Firestore Emulator atomically persists only the approved onboarding records (167.4055ms)
+✔ Firestore Emulator preserves atomic exact retry under concurrent onboarding (2923.6296ms)
+✔ Firestore Emulator creates and privately reads the approved Check-in record (511.2828ms)
+✔ Firestore Emulator saves and later reads an account-isolated Interest selection (352.062ms)
+✔ Firestore Emulator prevents two stale-revision updates from overwriting (3205.0455ms)
+✔ Firestore Emulator enforces Inactive assignment against current persisted state (371.5134ms)
+✔ Firestore Emulator serializes a concurrent Tag deactivation and new assignment (219.5666ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"other-regression","checkedTransactionCalls":29,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+✔ isolated real Auth and onboarding initialize the Account generation atomically (270.2295ms)
+✔ real concurrent withdrawal commits one settings revision and one revocation (3361.1474ms)
+✔ real regrant and Profile replacement preserve withdrawal history; stale save is read-only (231.3207ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"isolated-ai-account-producer","checkedTransactionCalls":8,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+✔ PC01 actual Firebase identity rejects absent, malformed, expired, disabled and revoked sessions before Persona access (1401.0997ms)
+✔ PC01 current binding and completed Account are validated before any Persona get (564.8043ms)
+✔ PC01/PC04 real Admin claims and identical keys never cross owner partitions (503.4239ms)
+✔ PC02 authenticated invalid activation IDs and malformed values never reach Firestore (437.861ms)
+✔ PC01/PC02 actual Auth precedes malformed Persona URL rejection without Firestore access (145.1282ms)
+✔ PC03 initialized empty set is distinct from missing, malformed, incomplete and orphaned state (1406.9645ms)
+✔ PC04/PC05 fifth creation replays before capacity; normalized conflict and different-key races cannot overwrite (5105.0488ms)
+✔ PC05 actual concurrent identical command commits once and same open command with changed input conflicts (3794.2742ms)
+✔ PC06 real pre-commit interruption is atomic and an identical retry creates at the original revision (319.0936ms)
+✔ PC06 real commit with lost completion replays unchanged; later mutation closes recovery (588.4809ms)
+✔ PC07 every subsequent effective owner mutation closes original creation without restoring deleted content (1556.1846ms)
+✔ PC07/PC09 valid same-value edit and already-Active confirmation preserve the latest create window (730.0555ms)
+✔ PC08 deleting Active clears without replacement, frees capacity and repeat-delete ignores stale supplied versions (1683.1644ms)
+✔ PC09 real competing edits commit once and stale target preconditions cannot bypass same-value checks (3704.8494ms)
+✔ PC03 actual concurrent reads remain coherent across create, edit, activation and deletion commits (743.6398ms)
+✔ PC10 owner and target overflow fail without partial writes while current reads and no-ops succeed (1169.1452ms)
+✔ PC10 derived candidate orphan and full-ID collision checks precede stale and capacity outcomes (914.4ms)
+✔ PC10 measured logical-get ceilings are eight/nine per actual SDK attempt, with retry accounting separate (2213.6185ms)
+✔ PC14 live persistence and permanent deletion retain only approved records and content-free owner state (423.7587ms)
+✔ actual Persona Emulator Port contract: PC03/04/08 complete set, duplicate names and inactive creation (712.3444ms)
+✔ actual Persona Emulator Port contract: PC04/05 fifth create replays before capacity and unequal fields conflict (1170.8055ms)
+✔ actual Persona Emulator Port contract: PC05/07/09 no-op preserves replay, effective edit and restored fields close it (1012.6036ms)
+✔ actual Persona Emulator Port contract: PC07/08/09 activation no-op preserves replay, delete Active clears without replacement (1703.8868ms)
+✔ actual Persona Emulator Port contract: PC01/04 owner identity isolates the same key and foreign IDs (977.2107ms)
+✔ actual Persona Emulator Port contract: PC01/03 missing state is unavailable and is never initialized (478.3775ms)
+✔ actual Persona Emulator Port contract: PC03/10 corrupt live member and invalid Active fail closed (435.5641ms)
+Persona Emulator transaction counts {"transactionCalls":208,"transactionAttempts":216,"retriedCalls":8,"maximumGets":9,"collectionScans":0}; SDK retries are separate attempts, not a billing/runtime bound
+✔ actual Persona Emulator Port contract: PC10 overflow blocks effects but allows reads, no-ops and absent repeat deletion (1164.0744ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"other-regression","checkedTransactionCalls":208,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+✔ R13 accept create, exact retry, changed-Note conflict and later owner read (586.8208ms)
+✔ R13 reject path preserves onboarding exact-retry and conflict semantics (262.0253ms)
+✔ R13 identity, validation, incomplete onboarding and privacy-safe negative paths fail closed (447.7213ms)
+✔ X-01 expired identity fails closed on a protected operation (34.0857ms)
+✔ S2-01 real Auth, Fastify and Firestore flow saves ten Interests and reads them later (931.7456ms)
+✔ R13-T12 cancellation aborts the client response and exact retry reconciles the authoritative result (737.7567ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"other-regression","checkedTransactionCalls":25,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+✔ actual source sweep crosses 25-row pages, revokes all references, preserves immutable U and tombstone slots (8061.1229ms)
+✔ actual source sweep preserves missing/rollback/unproved sources and reports incomplete without fabricated empty authority (1369.2948ms)
+✔ actual tombstone residual and absent-message provenance cleanup require settled target proof (1173.8872ms)
+✔ actual expired checkpoint restarts at head and reports its failure instead of silently extending retention (522.9221ms)
+✔ actual whole delete between page read and advance invalidates old checkpoint and cannot recreate it (1065.9497ms)
+✔ actual replacement checkpoint with reused revision cannot be overwritten or deleted by the earlier scan (165.9163ms)
+✔ actual complete-reference cursor survives deletion and duplicate IDs across parents (241.9586ms)
+✔ actual expiry sweep discovers multiple parents and deletes whole targets without renewal (1394.3507ms)
+✔ actual noncanonical group ancestor is reported and retained while later legal targets are still inspected (487.0693ms)
+✔ actual absent-parent orphans trigger whole cleanup and continue all targets in the same source sweep (1864.8818ms)
+✔ actual normal fence retirement requires closed and settled original, keeps canonical outcome, cannot reopen old effect (513.6385ms)
+✔ actual retirement of old A never clears B's pending ownership or makes old A readback resolved (377.0734ms)
+✔ actual confirmed new epoch retires previous controls across pages and settles only canonical old claims (4117.92ms)
+✔ actual ordinary message query uses DESC limit20, returns ASC with precise continuation, and verifies owner first (948.1529ms)
+✔ actual ordinary Retry and page keep canonical accepted/tombstone and unproved provenance protection (363.8192ms)
+✔ actual no-effect readback requires original reserved-new identity, closed matching guard and full absence (434.2004ms)
+✔ actual ordinary readback derives canonical pair from immutable effects after control retirement, and Delete uses whole cleanup (859.5141ms)
+✔ actual general isolated composition traverses all six HTTP operations, independent canonical readers, normal retirement and SDK-settled whole cleanup (3454.8059ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"other-regression","checkedTransactionCalls":271,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+✔ actual Auth -> first user -> assistant -> definite ACK -> ordinary readback preserves immutable records (1222.2891ms)
+✔ all-pending A -> B -> C: old A cannot clear B; accepted pair is visible through both effects (1631.3427ms)
+✔ cancel before initialization leaves closed placeholder and late initialization never opens it (109.3488ms)
+✔ closed fence prevents a later assistant and does not turn saved user into no_effect (428.2254ms)
+✔ foreign verified identity cannot read or write another owner's target (329.8931ms)
+✔ fresh Auth await cannot dispatch content after original cancellation (326.2046ms)
+✔ revocation generation regrant cannot reauthorize old captured authority (382.3427ms)
+✔ unproved nonempty Note authority refuses effect rather than fabricating empty sources (81.3397ms)
+✔ SDK acknowledged commit with deliberately discarded ACK remains unresolved until barrier/readback (472.1532ms)
+JIN_AI_CLAIM_RACE {"confirmed":1,"sdkAborted":0,"explicitSettledControl":1}
+✔ single-attempt concurrent retries grant at most one claim; settled explicit control still succeeds (1275.957ms)
+✔ canonical assistant tombstone occupies original U and cannot be retried (714.5728ms)
+✔ missing provenance and corrupt retention lineage fail closed without removing original content (619.4291ms)
+✔ original expiry denies read and append; no request-clock extension or deleting resurrection (466.0459ms)
+✔ runtime restart epoch closes old content authority without pretending model termination (273.9511ms)
+✔ whole delete removes multi-page children, all fences and progress before parent and advances ABA generation (1452.0033ms)
+✔ unsettled deletion remains unresolved/inaccessible, preserves children, and resumes after actual fixture settlement (1241.6115ms)
+✔ expiry rechecks the complete current anchor and refuses stale-cutoff deletion before original deadline (1297.5521ms)
+✔ Retry rejects changed immutable original-user metadata in the actual claim transaction (909.0429ms)
+✔ actual Auth and fixed/current SDK reader join ZHOU async Application to real store with explicitly fake Qwen and gates (1359.6474ms)
+✔ retained orphan under absent parent cannot be recreated as reserved_new (140.234ms)
+✔ actual Auth -> six-route isolated Fastify boundary -> real store with explicitly fake orchestration and reply (1244.7842ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"other-regression","checkedTransactionCalls":160,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+✔ real Auth/Firestore Emulator Port contract: persisted eligibility, exact future precision and complete order (286.7781ms)
+✔ real Auth/Firestore Emulator Port contract: missing own selection is successful empty (118.5167ms)
+✔ real Auth/Firestore Emulator Port contract: missing or invalid binding/account cannot read another selection (115.637ms)
+✔ real Auth/Firestore Emulator Port contract: invalid own selection fails closed, not fabricated empty (112.3472ms)
+✔ real Auth/Firestore Emulator Port contract: new requests observe tag deactivation, restore and label rename (284.5096ms)
+✔ real Auth/Firestore Emulator Port contract: invalid server asOf fails closed (65.9836ms)
+✔ real Auth + persisted API returns Home/All and isolates own selection (393.8461ms)
+✔ real persisted API rereads inputs and recaptures independent asOf (347.6826ms)
+✔ real Event API missing/malformed/expired/disabled/revoked identity fails closed (1201.9416ms)
+✔ approved initializer is create-only, atomic and race safe in the isolated Emulator (11069.6526ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"other-regression","checkedTransactionCalls":4,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+✔ actual N01 consumer and executor Send accept one complete pair, consume once and allow fresh owner read (1534.1779ms)
+✔ missing actual complete-body or canonical-pair capabilities cause zero effects and zero model calls (217.8747ms)
+✔ prepared trusted Cancel terminates without context capture, durable effects or generation (116.2246ms)
+✔ actual Dart HTTP client traverses N01 Auth, consumer, executor, SDK storage, canonical history and complete deletion (3783.1838ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"other-regression","checkedTransactionCalls":32,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+✔ actual Persona HTTP edit/active switch leaves the accepted AI snapshot fixed and subsequent requests capture the new selection (5227.908ms)
+✔ actual permanent deletion of the used Persona rejects a late AI reply without A or retention advance and preserves the original U (1883.3299ms)
+✔ actual joined candidate rejection creates no assistant/provenance and advances no anchor beyond the already committed user (1634.8678ms)
+JIN_ACTUAL_GATEWAY_BINDING {"kind":"other-regression","checkedTransactionCalls":65,"sameValidatedProjectAndLoopbackEndpoint":true,"sslFalse":true}
+ℹ tests 132
+ℹ suites 0
+ℹ pass 132
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 184603.954
+JIN_NEXT_EMULATOR_WORKER_PROFILE_REMOVED
+[32m[1m+ [22m[39m Script exited successfully (code 0)
+[36m[1mi  emulators:[22m[39m Shutting down emulators.
+[36m[1mi  firestore:[22m[39m Stopping Firestore Emulator
+[33m[1m! [22m[39m Firestore Emulator has exited upon receiving signal: SIGINT
+[36m[1mi  auth:[22m[39m Stopping Authentication Emulator
+[36m[1mi  hub:[22m[39m Stopping emulator hub
+[36m[1mi  logging:[22m[39m Stopping Logging Emulator
+JIN_NEXT_EMULATOR_OUTER_PROFILE_REMOVED
+JIN_NEXT_EMULATOR_REQUIRED_PORTS_FREE

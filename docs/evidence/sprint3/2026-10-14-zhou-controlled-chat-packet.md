@@ -77,11 +77,22 @@ fixture only**, and no production Note-authority claim is made.
 ```javascript
 import { startControlledChatPacket } from
   "./backend/dist/test/zhou-controlled-chat-packet.js";
+import { boundedConversationSemanticCandidate } from
+  "./backend/dist/src/ai-conversation/application/bounded-conversation-semantic-policy.js";
 
-// binding, counter and gates come from LI's reviewed private host composition.
+// binding and counter come from LI's reviewed private host composition.
 // They are not request fields, environment guesses, copied secrets or fake CI
 // acceptance decisions. Omit http and clock for the actual existing local host
 // and the existing monotonic clock implementation.
+const gates = {
+  // This checks only a still-live borrowed context. The actual JIN compiler
+  // performs matching-tokenizer COMPLETE input accounting before generation.
+  beforeGeneration: async (input, budget) =>
+    !budget.signal.aborted && budget.remainingMs() > 0 && input() !== undefined
+      ? { ok: true, value: undefined }
+      : { ok: false, failure: "stale_authority" },
+  candidate: boundedConversationSemanticCandidate,
+};
 const packet = startControlledChatPacket({ binding, counter, gates });
 const report = await packet.outcome;
 console.log(JSON.stringify(report)); // content-free, bounded observations only
