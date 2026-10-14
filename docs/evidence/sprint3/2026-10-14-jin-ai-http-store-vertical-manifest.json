@@ -1,0 +1,194 @@
+{
+  "testedSource": "973b78ef0a849027c3439f8c754def63f174f17b",
+  "tree": "3f836022220d39b5313c91df919669e5a05731ee",
+  "bindings": [
+    {
+      "path": "backend/src/ai-conversation/ports/real-conversation-store.ts",
+      "gitBlob": "575c49d0bd5067e8c19624c1b1d6e6043d3384ad",
+      "normalizedSha256": "c500a13dcbb037e1ca4c3973392a1b2fabbd724848929c0f1f533ac68713aece"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-gateway.ts",
+      "gitBlob": "8565292b0a26a25613960d5305218df496078593",
+      "normalizedSha256": "451a4777d9318e4a0ebbdca8c948251cb95c2d5b79c89a3d8c78f99470f8350c"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-store.ts",
+      "gitBlob": "df689576b98bec7e60632f0ac205847239e02558",
+      "normalizedSha256": "9ee1480122146444349e0fdb85841ab0c1602f90157b54192e33390544669787"
+    },
+    {
+      "path": "backend/emulator-test/real-conversation-store.integration.test.ts",
+      "gitBlob": "55d8fe16526a512b329351eccccdbd818b8c794b",
+      "normalizedSha256": "c3fe88e7d3ace82195bf375c2ef2da4820f53f54e43278afbbac0c333d01c858"
+    },
+    {
+      "path": "backend/test/ai-conversation/real-store-boundary.test.ts",
+      "gitBlob": "35ac5778f974d027fa002536d4a60f0f3046cad2",
+      "normalizedSha256": "29c525e719706aa736679d7457f187687df347c760b2e96ceac02367a06cbb6a"
+    },
+    {
+      "path": "tool/run_ai_store_emulators.mjs",
+      "gitBlob": "eaf0786cd405218e6fa5e3e417226354fa6014d5",
+      "normalizedSha256": "6ec55deb68bc4b5248b2dfdc4ff42edd0a324c57d736e01f113dca556187dffa"
+    },
+    {
+      "path": "tool/ai_store_emulator_worker.mjs",
+      "gitBlob": "5f36af589a1d798429453fefffa2a0a81659c22b",
+      "normalizedSha256": "888e0aa06dc12487d7f4c4be26f558baa82354bc5ad0e8500efe1076fcc22da7"
+    },
+    {
+      "path": "tool/ai_store_gateway_binding.mjs",
+      "gitBlob": "3e5270ccefac7695095e7f09a2c905e414e98f6c",
+      "normalizedSha256": "94db443e00872689865a6740de33abbfcc729dcd66143afbebf30456844760c1"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/conversation-operations.ts",
+      "gitBlob": "c6645a827263382192170ace5a2a0d08cd010f4c",
+      "normalizedSha256": "ba4f4b8f9f5974a8ff25f33ab8c1041c9926d9ee1866b87e9f05c637dfdc72a4"
+    },
+    {
+      "path": "backend/src/ai-conversation/transport/register-routes.ts",
+      "gitBlob": "1fdf34a9f31674365e54793c7e3185cf8dfcbc1c",
+      "normalizedSha256": "15d23051c2a49198f9a2da8d97ddec89d197ba05386f8c574e887def33a45ed1"
+    },
+    {
+      "path": "backend/src/bootstrap/build-app.ts",
+      "gitBlob": "9d7cca539856ee2e114d9e1e66e9a126ebf89eda",
+      "normalizedSha256": "385d3086016047d6042b56061dc080745fc787a3bcea083dd77aecff50354f74"
+    },
+    {
+      "path": "backend/src/transport/route-inventory.ts",
+      "gitBlob": "3bda8871ae3567b8f395327c743e83c58b704e64",
+      "normalizedSha256": "b6b3ca0af52c8482922a91fe66fcb1c8617bded71a7455f4aa8654c9c9be3b2b"
+    },
+    {
+      "path": "backend/test/ai-conversation/transport.test.ts",
+      "gitBlob": "eff575c63fbc87943bee966509b4e4bb328687c2",
+      "normalizedSha256": "a4ba442f8ac2fe90f7cd7c409175211c37a343d42616b95f098bdb15323447b0"
+    },
+    {
+      "path": "api/openapi.json",
+      "gitBlob": "c32dd7a15f14bcf70cd010dbe76412d6d1a3e456",
+      "normalizedSha256": "9c0ad89a8f745be540f288f78881fb12e4b179e6c01aa769242f844fde7c3842"
+    }
+  ],
+  "privateLogs": [
+    {
+      "file": "http-backend01.log",
+      "bytes": 59590,
+      "sha256": "6faeca98888d1c0ad7055be977c2ba5085d46c49f869a26dace4109803c1861e"
+    },
+    {
+      "file": "http-backend02.log",
+      "bytes": 59609,
+      "sha256": "2e4868a6e623dc235d32f86ccf98cdf6c86553b377052e259c5b881eeae38651"
+    },
+    {
+      "file": "http-backend03.log",
+      "bytes": 59652,
+      "sha256": "8af7784d0cbdcee109dd17c45ea9706c315523f0218c636a28fa95e0da15bbb4"
+    },
+    {
+      "file": "http-backend04.log",
+      "bytes": 59787,
+      "sha256": "9cb62edaf43e477a80eb5c140be67cda4eaa82fd5da7fe5192ab624c3d791a62"
+    },
+    {
+      "file": "http-backend05.log",
+      "bytes": 59784,
+      "sha256": "2b98be2a0108755a308bf1bbc8eea52c42b22066280524892a165d8834621b96"
+    },
+    {
+      "file": "http-build01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "http-build02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "http-build03.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "http-build04.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "http-build05.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "http-build06.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "http-emulator01.log",
+      "bytes": 13971,
+      "sha256": "cd148c3b97bc7f66ff5d0e4e16459c3bf9790ec5a6ace251414a315d0b72295b"
+    },
+    {
+      "file": "http-emulator02.log",
+      "bytes": 13969,
+      "sha256": "1187211e8c18cdff3c2dab375cce9b962a68051a723b715b48f5621879a70d85"
+    },
+    {
+      "file": "http-emulator03.log",
+      "bytes": 15247,
+      "sha256": "7cbc0183f37592494008f9842260606cd75a4c028aaa47bde3c467920ed8c580"
+    },
+    {
+      "file": "http-emulator04.log",
+      "bytes": 14066,
+      "sha256": "3940e6d0d44d2c99ff411afb76b6360047929c47279fd0b67861606395c7902d"
+    },
+    {
+      "file": "http-focused01.log",
+      "bytes": 1223,
+      "sha256": "106f44ab063df43a9439c8b470b73dd5be3e94f80541a38687947195c05c40b5"
+    }
+  ],
+  "final": {
+    "backend": {
+      "pass": 666,
+      "fail": 0,
+      "exit": 0
+    },
+    "emulator": {
+      "pass": 92,
+      "fail": 0,
+      "exit": 0,
+      "storeCasesIncluded": 16
+    },
+    "claimRace": {
+      "confirmed": 0,
+      "sdkAborted10": 2,
+      "laterExplicitSettledControl": 1
+    },
+    "profilesRemoved": 2,
+    "requiredPortsFree": 5
+  },
+  "retainedFailure": {
+    "source": "83f153c8e9aafb3c70ba72eff972d815d5fc04c5",
+    "invocation": "http-emulator03.log",
+    "pass": 91,
+    "fail": 1,
+    "exit": 1,
+    "observed": "zero confirmations against incorrect exactly-one assertion; old run did not capture SDK code"
+  },
+  "notRun": [
+    "actual async Application bridge",
+    "complete real six-operation lifecycle",
+    "product cleanup runner",
+    "Flutter",
+    "Android",
+    "D1-A actual model"
+  ]
+}
