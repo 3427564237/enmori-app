@@ -1,4 +1,11 @@
 export const ROUTE_INVENTORY = [
+  { method: "POST", path: "/v1/me/ai/operations", successStatuses: [201], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "POST", path: "/v1/me/ai/operations/{operationId}/execute", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "POST", path: "/v1/me/ai/operations/{operationId}/cancel", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "GET", path: "/v1/me/conversations/{conversationId}/operations/{operationId}", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "GET", path: "/v1/me/conversations/{conversationId}/messages", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "DELETE", path: "/v1/me/conversations/{conversationId}", successStatuses: [204], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "GET", path: "/v1/me/friends/search", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
   { method: "GET", path: "/v1/me/friends", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
   { method: "GET", path: "/v1/me/personas", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
   { method: "GET", path: "/v1/me/personas/{personaId}", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },

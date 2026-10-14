@@ -11,6 +11,99 @@
     }
   ],
   "paths": {
+    "/v1/me/friends/search": {
+      "get": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "FS01-FS05: requester authorization precedes input validation. Reject Cc/Cf/Zl/Zp and malformed Unicode before ECMAScript trim, NFC, locale-independent lowercase, NFC; require 1-50 normalized Unicode scalars. Substring matches current authorized DisplayName only. Scan 20 owner entries plus one unexpanded lookahead; never scan to fill. Filtered empty pages may continue. Current authority is reread transactionally before matching; missing/malformed authority fails the page. No writes or ordinary/real-account enablement.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Single DisplayName query, normalized by FS01. Duplicate and unknown query fields are invalid. No Username fallback.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Single canonical unpadded base64url UTF-8 JSON with exact ordered keys {v:1,q:<normalized query>,after:<canonical UUID-v4>}. Query must match and entry must still exist in the authenticated owner initialized index. Untrusted continuation, not authority or a snapshot.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful isolated synthetic result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyFriendsPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "searchMyFriends",
+        "summary": "Search authorized My Friends by DisplayName in an isolated Emulator"
+      }
+    },
     "/v1/me/personas": {
       "get": {
         "x-enmori-environment": "isolated-emulator",
@@ -783,14 +876,54 @@
       "get": {
         "operationId": "recommendEvents",
         "description": "Authenticated independent request-time computation. Exactly one view, no unknown query parameters or body. Server asOf, full Q03 ordering before Home Top 2. No history, pagination continuity or fallback.",
-        "parameters": [{"name": "view", "in": "query", "required": true, "schema": {"type": "string", "enum": ["home", "all"]}, "description": "Exactly one value; missing, duplicate or invalid query parameters yield REQUEST_INVALID."}],
+        "parameters": [
+          {
+            "name": "view",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "home",
+                "all"
+              ]
+            },
+            "description": "Exactly one value; missing, duplicate or invalid query parameters yield REQUEST_INVALID."
+          }
+        ],
         "responses": {
-          "200": {"description": "Ordered recommendations, including successful empty items", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/EventRecommendations"}}}},
-          "400": {"description": "REQUEST_INVALID: Event query parameters only", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorEnvelope"}}}},
-          "401": {"$ref": "#/components/responses/AuthRequired"},
-          "403": {"$ref": "#/components/responses/AuthForbidden"},
-          "409": {"$ref": "#/components/responses/OnboardingRequired"},
-          "503": {"$ref": "#/components/responses/ServiceUnavailable"}
+          "200": {
+            "description": "Ordered recommendations, including successful empty items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventRecommendations"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "REQUEST_INVALID: Event query parameters only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthForbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/OnboardingRequired"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
         }
       }
     },
@@ -847,7 +980,9 @@
                 "$ref": "#/components/schemas/ReplaceOwnInterestsRequest"
               },
               "example": {
-                "interestTagIds": ["interest_community"],
+                "interestTagIds": [
+                  "interest_community"
+                ],
                 "expectedRevision": 0
               }
             }
@@ -882,7 +1017,16 @@
       "get": {
         "operationId": "getOwnProfile",
         "responses": {
-          "400": {"description": "REQUEST_INVALID: no query fields or owner selectors are accepted", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorEnvelope"}}}},
+          "400": {
+            "description": "REQUEST_INVALID: no query fields or owner selectors are accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
           "200": {
             "description": "Canonical authenticated owner profile",
             "content": {
@@ -998,7 +1142,16 @@
       "get": {
         "operationId": "getOwnSettings",
         "responses": {
-          "400": {"description": "REQUEST_INVALID: no query fields or owner selectors are accepted", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ErrorEnvelope"}}}},
+          "400": {
+            "description": "REQUEST_INVALID: no query fields or owner selectors are accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
           "200": {
             "description": "Canonical authenticated owner settings",
             "content": {
@@ -1676,21 +1829,72 @@
         "operationId": "listOwnCheckInsForDate",
         "description": "Reads the authenticated owner's Check-ins for one IANA civil date. Fixed page size of 20; cursor expires after 15 minutes. Every response uses Cache-Control: no-store.",
         "parameters": [
-          { "name": "date", "in": "query", "required": true, "schema": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" } },
-          { "name": "timeZone", "in": "query", "required": true, "schema": { "type": "string", "minLength": 1, "maxLength": 128 }, "description": "Recognized IANA time-zone identifier; numeric offsets and abbreviations are rejected." },
-          { "name": "cursor", "in": "query", "required": false, "schema": { "type": "string", "minLength": 1, "maxLength": 4096 }, "description": "Opaque encrypted continuation token bound to the current owner and query." }
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          },
+          {
+            "name": "timeZone",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "description": "Recognized IANA time-zone identifier; numeric offsets and abbreviations are rejected."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "description": "Opaque encrypted continuation token bound to the current owner and query."
+          }
         ],
         "responses": {
           "200": {
             "description": "At most 20 owned Check-ins in descending creation-time and opaque-ID order.",
-            "headers": { "Cache-Control": { "schema": { "type": "string", "const": "no-store" } } },
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CheckInHistoryPage" } } }
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckInHistoryPage"
+                }
+              }
+            }
           },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "401": { "$ref": "#/components/responses/AuthRequired" },
-          "403": { "$ref": "#/components/responses/AuthForbidden" },
-          "409": { "$ref": "#/components/responses/OnboardingRequired" },
-          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthForbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/OnboardingRequired"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
         }
       }
     },
@@ -1772,6 +1976,830 @@
           }
         },
         "operationId": "listMyFriends"
+      }
+    },
+    "/v1/me/ai/operations": {
+      "post": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Request-only 15-second preparation, at most one unconsumed ticket per owner. No text/context read, accepted slot, parent creation or persistence. IDs reserved by Backend. Auth precedes input validation. Unknown/duplicate query fields and undeclared body fields are rejected. Existing ordinary/controlled-demo composition does not register this operation.",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Confirmed selected result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreparedConversationOperation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "description": "Maximum 16384 UTF-8 bytes.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrepareConversationOperation"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/ai/operations/{operationId}/execute": {
+      "post": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Single consumption after body validation using exact original verified token and key. Complete response only; no 202/background generation or duplicate response replay. Original 60/5/45 budgets; terminal/disconnected request receives no late response. Auth precedes input validation. Unknown/duplicate query fields and undeclared body fields are rejected. Existing ordinary/controlled-demo composition does not register this operation.",
+        "parameters": [
+          {
+            "name": "operationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "AI-Operation-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 43,
+              "pattern": "^[A-Za-z0-9_-]{43}$",
+              "description": "Exactly 32 random bytes, canonical unpadded base64url. Original verified token instance required. Never persisted or logged."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmed selected result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationExecuteResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "description": "Maximum 16384 UTF-8 bytes.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteConversationOperation"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/ai/operations/{operationId}/cancel": {
+      "post": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "No body. Cancel only original token/key operation; synchronous Application closure before asynchronous durable fence. Terminal confirmation requires confirmed barrier, not model stop or no-effect. Unknown is AI_OUTCOME_UNRESOLVED. Auth precedes input validation. Unknown/duplicate query fields and undeclared body fields are rejected. Existing ordinary/controlled-demo composition does not register this operation.",
+        "parameters": [
+          {
+            "name": "operationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "AI-Operation-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 43,
+              "pattern": "^[A-Za-z0-9_-]{43}$",
+              "description": "Exactly 32 random bytes, canonical unpadded base64url. Original verified token instance required. Never persisted or logged."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmed selected result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationCancelResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/conversations/{conversationId}/operations/{operationId}": {
+      "get": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Current owner token, no operation key/body. Canonical accepted pair and all pending same-U operations govern outcome; closed old A cannot clear B. Tombstone occupies assistant slot. Absent storage alone never proves no_effect. No generation. Auth precedes input validation. Unknown/duplicate query fields and undeclared body fields are rejected. Existing ordinary/controlled-demo composition does not register this operation.",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "operationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmed selected result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationOperationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/conversations/{conversationId}/messages": {
+      "get": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Current owner, no body/key. Latest eligible 20 then ascending sequence for display; revalidate whole Conversation expiry and current source authority on every page. Tombstones omit text. No cross-conversation discovery. Auth precedes input validation. Unknown/duplicate query fields and undeclared body fields are rejected. Existing ordinary/controlled-demo composition does not register this operation.",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "description": "Canonical unpadded base64url UTF-8 JSON with exactly ordered {v:1,before:<positive safe integer>}; decode/reencode exactly, no extra keys. Not authority or snapshot."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmed selected result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationMessagePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/conversations/{conversationId}": {
+      "delete": {
+        "x-enmori-environment": "isolated-emulator",
+        "description": "No body/key. Whole permanent deletion with all effects fenced and target children/controls removed, parent last. Confirmed own absence is idempotent. Unknown deletion never returns 204; does not remove Persona or Check-in. Auth precedes input validation. Unknown/duplicate query fields and undeclared body fields are rejected. Existing ordinary/controlled-demo composition does not register this operation.",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Confirmed selected result"
+          },
+          "400": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -2328,7 +3356,11 @@
         "properties": {
           "checkInVisibility": {
             "type": "string",
-            "enum": ["private", "friends_only", "public"]
+            "enum": [
+              "private",
+              "friends_only",
+              "public"
+            ]
           },
           "optionalProcessingConsent": {
             "type": "string",
@@ -2405,26 +3437,90 @@
           }
         }
       },
-      "EventUtcTimestamp": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$"},
+      "EventUtcTimestamp": {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$"
+      },
       "MatchedInterest": {
-        "type": "object", "additionalProperties": false, "required": ["interestTagId", "displayName"],
-        "properties": {"interestTagId": {"type": "string", "minLength": 1}, "displayName": {"type": "string", "minLength": 1}}
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "interestTagId",
+          "displayName"
+        ],
+        "properties": {
+          "interestTagId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
       },
       "EventRecommendationItem": {
-        "type": "object", "additionalProperties": false,
-        "required": ["eventId", "title", "startAt", "endAt", "matchedInterests", "reasonCode"],
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eventId",
+          "title",
+          "startAt",
+          "endAt",
+          "matchedInterests",
+          "reasonCode"
+        ],
         "properties": {
-          "eventId": {"type": "string", "minLength": 1}, "title": {"type": "string", "minLength": 1},
-          "startAt": {"$ref": "#/components/schemas/EventUtcTimestamp"}, "endAt": {"$ref": "#/components/schemas/EventUtcTimestamp"},
-          "matchedInterests": {"type": "array", "minItems": 1, "items": {"$ref": "#/components/schemas/MatchedInterest"}},
-          "reasonCode": {"type": "string", "const": "interest_match"}
+          "eventId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "startAt": {
+            "$ref": "#/components/schemas/EventUtcTimestamp"
+          },
+          "endAt": {
+            "$ref": "#/components/schemas/EventUtcTimestamp"
+          },
+          "matchedInterests": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/MatchedInterest"
+            }
+          },
+          "reasonCode": {
+            "type": "string",
+            "const": "interest_match"
+          }
         }
       },
       "EventRecommendations": {
-        "type": "object", "additionalProperties": false, "required": ["asOf", "formulaVersion", "items"],
-        "properties": {"asOf": {"$ref": "#/components/schemas/EventUtcTimestamp"},
-          "formulaVersion": {"type": "string", "const": "event_recommendation_v1"},
-          "items": {"type": "array", "items": {"$ref": "#/components/schemas/EventRecommendationItem"}}}
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "asOf",
+          "formulaVersion",
+          "items"
+        ],
+        "properties": {
+          "asOf": {
+            "$ref": "#/components/schemas/EventUtcTimestamp"
+          },
+          "formulaVersion": {
+            "type": "string",
+            "const": "event_recommendation_v1"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventRecommendationItem"
+            }
+          }
+        }
       },
       "CompleteOnboardingRequest": {
         "type": "object",
@@ -2503,7 +3599,11 @@
           },
           "checkInVisibility": {
             "type": "string",
-            "enum": ["public", "private", "friends_only"]
+            "enum": [
+              "public",
+              "private",
+              "friends_only"
+            ]
           },
           "onboardingCompletedAt": {
             "$ref": "#/components/schemas/UtcTimestamp"
@@ -2577,7 +3677,10 @@
           },
           "lifecycleState": {
             "type": "string",
-            "enum": ["active", "inactive"]
+            "enum": [
+              "active",
+              "inactive"
+            ]
           }
         }
       },
@@ -2625,19 +3728,19 @@
               "code": {
                 "type": "string",
                 "enum": [
-              "ADD_FRIEND_TARGET_UNAVAILABLE",
-              "FRIEND_REQUEST_UNAVAILABLE",
-              "EVENT_UNAVAILABLE",
+                  "ADD_FRIEND_TARGET_UNAVAILABLE",
+                  "FRIEND_REQUEST_UNAVAILABLE",
+                  "EVENT_UNAVAILABLE",
                   "PROFILE_INVALID",
                   "PROFILE_REVISION_PRECONDITION_FAILED",
                   "SETTINGS_INVALID",
                   "SETTINGS_REVISION_PRECONDITION_FAILED",
                   "PERSONA_INVALID",
-              "PERSONA_UNAVAILABLE",
-              "PERSONA_LIMIT_REACHED",
-              "PERSONA_COMMAND_CONFLICT",
-              "PERSONA_REVISION_PRECONDITION_FAILED",
-              "REQUEST_INVALID",
+                  "PERSONA_UNAVAILABLE",
+                  "PERSONA_LIMIT_REACHED",
+                  "PERSONA_COMMAND_CONFLICT",
+                  "PERSONA_REVISION_PRECONDITION_FAILED",
+                  "REQUEST_INVALID",
                   "AUTH_REQUIRED",
                   "AUTH_FORBIDDEN",
                   "USERNAME_INVALID",
@@ -2813,10 +3916,29 @@
       "CheckInHistoryPage": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["checkIns", "nextCursor"],
+        "required": [
+          "checkIns",
+          "nextCursor"
+        ],
         "properties": {
-          "checkIns": { "type": "array", "maxItems": 20, "items": { "$ref": "#/components/schemas/CheckIn" } },
-          "nextCursor": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] }
+          "checkIns": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/CheckIn"
+            }
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
         }
       },
       "MyFriendsPage": {
@@ -2858,6 +3980,413 @@
             ]
           }
         }
+      },
+      "ConversationError": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "error",
+          "requestId"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "REQUEST_INVALID",
+                  "AUTH_REQUIRED",
+                  "AUTH_FORBIDDEN",
+                  "ONBOARDING_REQUIRED",
+                  "AI_CONTEXT_NOT_PERMITTED",
+                  "CONVERSATION_UNAVAILABLE",
+                  "AI_OPERATION_UNAVAILABLE",
+                  "AI_OPERATION_CONFLICT",
+                  "REQUEST_TOO_LARGE",
+                  "AI_INPUT_INVALID",
+                  "AI_BUSY",
+                  "AI_UNAVAILABLE",
+                  "AI_REPLY_REJECTED",
+                  "AI_AUTHORITY_CHANGED",
+                  "AI_OUTCOME_UNRESOLVED"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
+          "requestId": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "PrepareConversationOperation": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "purpose"
+            ],
+            "properties": {
+              "kind": {
+                "const": "send"
+              },
+              "purpose": {
+                "const": "checkin_conversation"
+              },
+              "conversationId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "purpose",
+              "conversationId",
+              "userMessageId"
+            ],
+            "properties": {
+              "kind": {
+                "const": "retry"
+              },
+              "purpose": {
+                "const": "checkin_conversation"
+              },
+              "conversationId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "userMessageId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              }
+            }
+          }
+        ]
+      },
+      "PreparedConversationOperation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operationId",
+          "operationKey",
+          "conversationId",
+          "preparationExpiresAt"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "operationKey": {
+            "type": "string",
+            "minLength": 43,
+            "maxLength": 43,
+            "pattern": "^[A-Za-z0-9_-]{43}$",
+            "description": "Exactly 32 random bytes, canonical unpadded base64url. Original verified token instance required. Never persisted or logged."
+          },
+          "conversationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "preparationExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ConversationUserMessage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "messageId",
+          "sequence",
+          "role",
+          "persistedAt",
+          "availability",
+          "text"
+        ],
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "role": {
+            "const": "user"
+          },
+          "persistedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "availability": {
+            "const": "available"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2400,
+            "description": "Well-formed Unicode, 1-2400 scalars, not whitespace-only. Preserve supplied text; no truncation."
+          }
+        }
+      },
+      "ConversationAvailableAssistant": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "messageId",
+          "sequence",
+          "role",
+          "persistedAt",
+          "availability",
+          "text"
+        ],
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "role": {
+            "const": "assistant"
+          },
+          "persistedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "availability": {
+            "const": "available"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2400,
+            "description": "Well-formed Unicode, 1-2400 scalars, not whitespace-only. Preserve supplied text; no truncation."
+          }
+        }
+      },
+      "ConversationAssistant": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ConversationAvailableAssistant"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "messageId",
+              "sequence",
+              "role",
+              "persistedAt",
+              "availability"
+            ],
+            "properties": {
+              "messageId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "sequence": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "role": {
+                "const": "assistant"
+              },
+              "persistedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "availability": {
+                "const": "unavailable"
+              }
+            }
+          }
+        ]
+      },
+      "ConversationMessage": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ConversationUserMessage"
+          },
+          {
+            "$ref": "#/components/schemas/ConversationAssistant"
+          }
+        ]
+      },
+      "ExecuteConversationOperation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2400,
+            "description": "Well-formed Unicode, 1-2400 scalars, not whitespace-only. Preserve supplied text; no truncation."
+          }
+        }
+      },
+      "ConversationExecuteResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operationId",
+          "conversationId",
+          "userMessage",
+          "assistantMessage"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "conversationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "userMessage": {
+            "$ref": "#/components/schemas/ConversationUserMessage"
+          },
+          "assistantMessage": {
+            "$ref": "#/components/schemas/ConversationAvailableAssistant"
+          }
+        }
+      },
+      "ConversationCancelResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operationId",
+          "state"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "state": {
+            "const": "terminal"
+          }
+        }
+      },
+      "ConversationOperationResult": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "operationId",
+              "state"
+            ],
+            "properties": {
+              "operationId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "state": {
+                "enum": [
+                  "active",
+                  "no_effect",
+                  "unresolved"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "operationId",
+              "state",
+              "userMessage"
+            ],
+            "properties": {
+              "operationId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "state": {
+                "const": "user_saved"
+              },
+              "userMessage": {
+                "$ref": "#/components/schemas/ConversationUserMessage"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "operationId",
+              "state",
+              "userMessage",
+              "assistantMessage"
+            ],
+            "properties": {
+              "operationId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "state": {
+                "const": "assistant_saved"
+              },
+              "userMessage": {
+                "$ref": "#/components/schemas/ConversationUserMessage"
+              },
+              "assistantMessage": {
+                "$ref": "#/components/schemas/ConversationAssistant"
+              }
+            }
+          }
+        ]
+      },
+      "ConversationMessagePage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "messages"
+        ],
+        "properties": {
+          "messages": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/ConversationMessage"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "description": "Canonical unpadded base64url UTF-8 JSON with exactly ordered {v:1,before:<positive safe integer>}; decode/reencode exactly, no extra keys. Not authority or snapshot."
+          }
+        }
       }
     },
     "responses": {
@@ -2868,9 +4397,13 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["account"],
+              "required": [
+                "account"
+              ],
               "properties": {
-                "account": { "$ref": "#/components/schemas/Account" }
+                "account": {
+                  "$ref": "#/components/schemas/Account"
+                }
               }
             }
           }
@@ -2883,9 +4416,13 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["account"],
+              "required": [
+                "account"
+              ],
               "properties": {
-                "account": { "$ref": "#/components/schemas/Account" }
+                "account": {
+                  "$ref": "#/components/schemas/Account"
+                }
               }
             }
           }
@@ -2900,16 +4437,29 @@
                 {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": ["status"],
-                  "properties": { "status": { "const": "required" } }
+                  "required": [
+                    "status"
+                  ],
+                  "properties": {
+                    "status": {
+                      "const": "required"
+                    }
+                  }
                 },
                 {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": ["status", "account"],
+                  "required": [
+                    "status",
+                    "account"
+                  ],
                   "properties": {
-                    "status": { "const": "completed" },
-                    "account": { "$ref": "#/components/schemas/Account" }
+                    "status": {
+                      "const": "completed"
+                    },
+                    "account": {
+                      "$ref": "#/components/schemas/Account"
+                    }
                   }
                 }
               ]
@@ -2924,9 +4474,13 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["checkIn"],
+              "required": [
+                "checkIn"
+              ],
               "properties": {
-                "checkIn": { "$ref": "#/components/schemas/CheckIn" }
+                "checkIn": {
+                  "$ref": "#/components/schemas/CheckIn"
+                }
               }
             }
           }
@@ -2939,9 +4493,13 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["checkIn"],
+              "required": [
+                "checkIn"
+              ],
               "properties": {
-                "checkIn": { "$ref": "#/components/schemas/CheckIn" }
+                "checkIn": {
+                  "$ref": "#/components/schemas/CheckIn"
+                }
               }
             }
           }
@@ -2954,9 +4512,13 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["checkIn"],
+              "required": [
+                "checkIn"
+              ],
               "properties": {
-                "checkIn": { "$ref": "#/components/schemas/CheckIn" }
+                "checkIn": {
+                  "$ref": "#/components/schemas/CheckIn"
+                }
               }
             }
           }
@@ -2969,7 +4531,9 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["interestTags"],
+              "required": [
+                "interestTags"
+              ],
               "properties": {
                 "interestTags": {
                   "type": "array",
@@ -2989,7 +4553,9 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["interests"],
+              "required": [
+                "interests"
+              ],
               "properties": {
                 "interests": {
                   "$ref": "#/components/schemas/OwnInterests"
@@ -3003,7 +4569,9 @@
         "description": "Invalid onboarding request or Idempotency-Key",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+            "schema": {
+              "$ref": "#/components/schemas/ErrorEnvelope"
+            }
           }
         }
       },
@@ -3011,7 +4579,9 @@
         "description": "Invalid Check-in request or Idempotency-Key",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+            "schema": {
+              "$ref": "#/components/schemas/ErrorEnvelope"
+            }
           }
         }
       },
@@ -3019,7 +4589,9 @@
         "description": "Authentication is missing, malformed, or expired",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+            "schema": {
+              "$ref": "#/components/schemas/ErrorEnvelope"
+            }
           }
         }
       },
@@ -3027,7 +4599,9 @@
         "description": "The verified identity is revoked or disabled",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+            "schema": {
+              "$ref": "#/components/schemas/ErrorEnvelope"
+            }
           }
         }
       },
@@ -3035,7 +4609,9 @@
         "description": "Onboarding, Username, or idempotency conflict",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+            "schema": {
+              "$ref": "#/components/schemas/ErrorEnvelope"
+            }
           }
         }
       },
@@ -3043,7 +4619,9 @@
         "description": "Incomplete onboarding or idempotency conflict",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+            "schema": {
+              "$ref": "#/components/schemas/ErrorEnvelope"
+            }
           }
         }
       },
@@ -3051,7 +4629,9 @@
         "description": "Product Account onboarding is incomplete",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+            "schema": {
+              "$ref": "#/components/schemas/ErrorEnvelope"
+            }
           }
         }
       },
@@ -3059,7 +4639,9 @@
         "description": "Missing and non-owned Check-ins are indistinguishable",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+            "schema": {
+              "$ref": "#/components/schemas/ErrorEnvelope"
+            }
           }
         }
       },
@@ -3067,7 +4649,9 @@
         "description": "Interest selection violates cardinality, uniqueness, existence or lifecycle rules",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+            "schema": {
+              "$ref": "#/components/schemas/ErrorEnvelope"
+            }
           }
         }
       },
@@ -3075,7 +4659,9 @@
         "description": "Expected Interest selection revision is stale and a fresh read is required",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+            "schema": {
+              "$ref": "#/components/schemas/ErrorEnvelope"
+            }
           }
         }
       },
@@ -3083,7 +4669,9 @@
         "description": "Affected controlled dependency unavailable",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+            "schema": {
+              "$ref": "#/components/schemas/ErrorEnvelope"
+            }
           }
         }
       }

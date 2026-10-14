@@ -19,13 +19,13 @@ const androidVariables = ['ENMORI_TEST_FLUTTER_DART', 'ENMORI_TEST_FLUTTER_SNAPS
 if (mode === '--backend-child') {
   const env = buildControlledEmulatorTestEnvironment(process.env, process.env.ENMORI_CONTROLLED_PROFILE_DIRECTORY);
   await run(process.execPath, ['--test', '--test-concurrency=1', 'backend/dist/emulator-test/blocker-slices.integration.test.js'], env);
-} else if (mode === '--android-child') {
+} else if (mode === '--android-child' || mode === '--android-search-child') {
   const env = buildControlledEmulatorTestEnvironment(process.env, process.env.ENMORI_CONTROLLED_PROFILE_DIRECTORY);
   for (const key of androidVariables) if (process.env[key]) env[key] = process.env[key];
-  await run(process.execPath, [resolve('tool/my_friends_android_fixture.mjs'), process.argv[3]], env);
+  await run(process.execPath, [resolve('tool/my_friends_android_fixture.mjs'), process.argv[3], ...(mode === '--android-search-child' ? ['--search'] : [])], env);
 } else {
-  assert.ok(mode === '--backend' || mode === '--android');
-  if (mode === '--android') assert.match(process.argv[3] ?? '', /^emulator-\d+$/);
+  assert.ok(mode === '--backend' || mode === '--android' || mode === '--android-search');
+  if (mode !== '--backend') assert.match(process.argv[3] ?? '', /^emulator-\d+$/);
   for (const port of [8080, 9099]) {
     await new Promise((done, reject) => {
       const server = createServer(); server.once('error', reject);
@@ -44,7 +44,7 @@ if (mode === '--backend-child') {
     for (const key of androidVariables) if (process.env[key]) env[key] = process.env[key];
     const script = resolve('tool/run_my_friends_emulators.mjs');
     assert.equal(script.includes('"'), false);
-    const args = mode === '--android' ? `--android-child ${process.argv[3]}` : '--backend-child';
+    const args = mode !== '--backend' ? `${mode}-child ${process.argv[3]}` : '--backend-child';
     const shellQuote = value => `'${value.replaceAll("'", "'\\''")}'`;
     const command = process.platform === 'win32' ? `node "${script}" ${args}` : `${shellQuote(process.execPath)} ${shellQuote(script)} ${args}`;
     await run(process.execPath, [resolve('node_modules/firebase-tools/lib/bin/firebase.js'), 'emulators:exec',

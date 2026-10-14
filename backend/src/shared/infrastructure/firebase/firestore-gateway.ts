@@ -11,8 +11,15 @@ export interface StoredDocumentEntry {
   readonly data: StoredDocument;
 }
 
+/** Immutable service metadata, not a stored application timestamp field. */
+export interface StoredDocumentSnapshot extends StoredDocumentEntry {
+  readonly createTime: { readonly seconds: number; readonly nanoseconds: number };
+}
+
 export interface FirestoreTransactionGateway {
   get(path: string): Promise<StoredDocument | undefined>;
+  getSnapshot?(path: string): Promise<StoredDocumentSnapshot | undefined>;
+  listSnapshots?(collectionPath: string): Promise<readonly StoredDocumentSnapshot[]>;
   list(collectionPath: string): Promise<readonly StoredDocumentEntry[]>;
   create(path: string, data: StoredDocument): void;
   set(path: string, data: StoredDocument): void;
@@ -23,6 +30,7 @@ export interface FirestoreTransactionGateway {
 export interface FirestoreGateway {
   runTransaction<T>(
     work: (transaction: FirestoreTransactionGateway) => Promise<T>,
+    options?: { readonly maxAttempts: 1 },
   ): Promise<T>;
 }
 
@@ -39,6 +47,21 @@ class FirebaseAdminTransactionGateway
     if (!snapshot.exists) return undefined;
     const data = snapshot.data();
     return data === undefined ? undefined : { ...data };
+  }
+
+  public async getSnapshot(path: string): Promise<StoredDocumentSnapshot | undefined> {
+    const snapshot = await this.transaction.get(this.firestore.doc(path));
+    const data = snapshot.data(), created = snapshot.createTime;
+    if (!snapshot.exists) return undefined;
+    if (data === undefined || created === undefined) throw new Error("Required immutable metadata unavailable");
+    return { id: snapshot.id, data: { ...data },
+      createTime: { seconds: created.seconds, nanoseconds: created.nanoseconds } };
+  }
+
+  public async listSnapshots(collectionPath: string): Promise<readonly StoredDocumentSnapshot[]> {
+    const snapshot = await this.transaction.get(this.firestore.collection(collectionPath));
+    return snapshot.docs.map(document => ({ id: document.id, data: { ...document.data() },
+      createTime: { seconds: document.createTime.seconds, nanoseconds: document.createTime.nanoseconds } }));
   }
 
   public async list(
@@ -81,9 +104,11 @@ export class FirebaseAdminFirestoreGateway implements FirestoreGateway {
 
   public runTransaction<T>(
     work: (transaction: FirestoreTransactionGateway) => Promise<T>,
+    options?: { readonly maxAttempts: 1 },
   ): Promise<T> {
-    return this.firestore.runTransaction((transaction) =>
-      work(new FirebaseAdminTransactionGateway(this.firestore, transaction)),
-    );
+    const callback = (transaction: Transaction): Promise<T> =>
+      work(new FirebaseAdminTransactionGateway(this.firestore, transaction));
+    return options === undefined ? this.firestore.runTransaction(callback)
+      : this.firestore.runTransaction(callback, options);
   }
 }

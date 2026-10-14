@@ -23,6 +23,21 @@ const emptyQuery = { type:"object", additionalProperties:false, properties:{} };
 export async function registerIsolatedSlices(app: FastifyInstance, identity: IdentityVerifier, friends?: FriendRequests, events?: GetEventDetail, checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">): Promise<void> {
   const authenticate = buildAuthenticate(identity);
   if (friends !== undefined) {
+    // Keep raw input validation after requester authorization in the transaction.
+    app.get("/v1/me/friends/search", { onRequest: authenticate, schema: { response: {200:myFriendsSchema,400:errorEnvelopeSchema,401:errorEnvelopeSchema,403:errorEnvelopeSchema,409:errorEnvelopeSchema,503:errorEnvelopeSchema} } }, async (request, reply) => {
+      let input: Record<string, unknown> = Object.create(null);
+      try {
+        const raw = request.url.includes("?") ? request.url.slice(request.url.indexOf("?") + 1) : "";
+        for (const field of raw ? raw.split("&") : []) {
+          const index = field.indexOf("="), decode = (value: string) => decodeURIComponent(value.replaceAll("+", " "));
+          const key = decode(index < 0 ? field : field.slice(0, index));
+          const value = decode(index < 0 ? "" : field.slice(index + 1));
+          input[key] = Object.hasOwn(input, key) ? [input[key], value] : value;
+        }
+      } catch { input = {}; } // malformed UTF-8/escaping is still validated after owner authority
+      const result = await friends.searchFriends(requirePrincipal(request), input);
+      return result.ok ? reply.send(result.value) : sendFailure(request, reply, result.failure);
+    });
     app.get<{Querystring:{cursor?:string}}>("/v1/me/friends", {onRequest:authenticate, schema:{querystring:{type:"object",additionalProperties:false,properties:{cursor:{type:"string"}}},response:{200:myFriendsSchema,400:errorEnvelopeSchema,401:errorEnvelopeSchema,403:errorEnvelopeSchema,409:errorEnvelopeSchema,503:errorEnvelopeSchema}}}, async(request,reply) => {
       const params = new URL(request.url, "http://localhost").searchParams;
       if ([...params.keys()].some(key => key !== "cursor") || params.getAll("cursor").length > 1 ||

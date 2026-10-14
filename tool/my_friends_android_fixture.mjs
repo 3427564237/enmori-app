@@ -25,6 +25,8 @@ import { appFailure } from '../backend/dist/src/shared/application/app-failure.j
 
 const env = requireControlledEmulatorEnvironment(process.env);
 assert.equal(env.projectId, 'demo-enmori-rmvp01a-r10');
+const search = process.argv[3] === '--search';
+assert.ok(process.argv[3] === undefined || search);
 const serial = process.argv[2]; assert.match(serial ?? '', /^emulator-\d+$/);
 const directory = process.env.ENMORI_CONTROLLED_PROFILE_DIRECTORY;
 const firebase = initializeApp({ projectId: env.projectId }, 'my-friends-android');
@@ -40,8 +42,10 @@ try {
   const password = `${randomUUID()}Aa1!`;
   for (const [uid, email] of [['owner', 'my-friends-owner@example.invalid'], ['target_1', 'my-friends-peer@example.invalid']]) await auth.createUser({ uid, email, password });
   const seed = myFriendsSeed(42), pairKey = friendPairKey('owner', 'target_1');
-  seed[`friend_pairs/${pairKey}`] = { accountIds: ['owner', 'target_1'], blockedByAccountIds: [], friendship: false, pending: null };
-  delete seed[`friend_lists/owner/members/${entryRef(1)}`]; delete seed[`friend_lists/target_1/members/${entryRef(1001)}`];
+  if (!search) {
+    seed[`friend_pairs/${pairKey}`] = { accountIds: ['owner', 'target_1'], blockedByAccountIds: [], friendship: false, pending: null };
+    delete seed[`friend_lists/owner/members/${entryRef(1)}`]; delete seed[`friend_lists/target_1/members/${entryRef(1001)}`];
+  }
   const batch = firestore.batch(); for (const [path, data] of Object.entries(seed)) batch.create(firestore.doc(path), data); await batch.commit();
   const gateway = new FirebaseAdminFirestoreGateway(firestore), clock = new SystemClock();
   const unavailable = { execute: async () => err(appFailure('SERVICE_UNAVAILABLE')) };
@@ -58,7 +62,7 @@ try {
   server = createServer({ key: readFileSync(key), cert: readFileSync(cert) }, app.routing);
   server.listen(0, '127.0.0.1'); await once(server, 'listening');
   const configuration = join(directory, 'android-fixture.json');
-  writeFileSync(configuration, JSON.stringify({ ENMORI_API_BASE_URL: `https://10.0.2.2:${server.address().port}`,
+  writeFileSync(configuration, JSON.stringify({ ENMORI_TEST_SEARCH: search, ENMORI_API_BASE_URL: `https://10.0.2.2:${server.address().port}`,
     ENMORI_TEST_PASSWORD: password, ENMORI_TEST_TLS_CERTIFICATE_BASE64: readFileSync(cert).toString('base64') }), { mode: 0o600 });
   assert.ok(process.env.ENMORI_TEST_FLUTTER_DART && process.env.ENMORI_TEST_FLUTTER_SNAPSHOT);
   await run(process.env.ENMORI_TEST_FLUTTER_DART, [process.env.ENMORI_TEST_FLUTTER_SNAPSHOT, 'test',
@@ -66,7 +70,13 @@ try {
   const pair = (await firestore.doc(`friend_pairs/${pairKey}`).get()).data();
   assert.equal(pair.friendship, true); assert.equal(pair.pending, null);
   for (const id of ['owner', 'target_1']) assert.equal((await firestore.doc(`friend_lists/${id}/members/${pair.listRefs[id]}`).get()).exists, true);
-  console.log('MY_FRIENDS_ANDROID_TWO_ACCOUNTS_ATOMIC_POINTER_READBACK: Pass');
+  if (search) {
+    // Independent host reread of every seeded authority/Profile/pair/pointer:
+    // search, continuation, reload and Clear must not mutate any saved record.
+    const snapshot = await firestore.getAll(...Object.keys(seed).map(path => firestore.doc(path)));
+    for (let i=0;i<snapshot.length;i++) assert.deepEqual(snapshot[i].data(),Object.values(seed)[i]);
+    console.log(JSON.stringify({case:'MY_FRIENDS_SEARCH_ANDROID_UNCHANGED_PERSISTENCE',documents:snapshot.length,result:'Pass'}));
+  } else console.log('MY_FRIENDS_ANDROID_TWO_ACCOUNTS_ATOMIC_POINTER_READBACK: Pass');
 } finally {
   if (server) { server.closeAllConnections(); await new Promise(done => server.close(done)); }
   if (app) await app.close();

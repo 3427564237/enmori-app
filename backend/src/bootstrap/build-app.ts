@@ -1,4 +1,6 @@
 import { registerIsolatedSlices } from "../transport/register-isolated-slices.js";
+import { registerConversationRoutes } from "../ai-conversation/transport/register-routes.js";
+import type { ConversationOperations } from "../ai-conversation/ports/conversation-operations.js";
 import { registerPersonaRoutes, type PersonaOperations } from "../personas/transport/register-routes.js";
 import { buildPersonaFrameworkErrors } from "../personas/transport/framework-errors.js";
 import { requireControlledEmulatorEnvironment } from "../shared/infrastructure/firebase/controlled-emulator-environment.js";
@@ -23,7 +25,7 @@ import {
 export async function buildApp(
   dependencies: R4RouteDependencies & { readonly recommendEvents?: Pick<RecommendEvents, "execute">;
     readonly accountPreferences?: OwnAccountPreferences;
-    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations } },
+    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly conversations?: ConversationOperations } },
 ): Promise<FastifyInstance> {
   if (dependencies.isolatedSlices !== undefined) {
     requireControlledEmulatorEnvironment(dependencies.isolatedSlices.environment);
@@ -57,6 +59,9 @@ export async function buildApp(
     if (dependencies.isolatedSlices.personas !== undefined) {
       await registerPersonaRoutes(app, dependencies.identityVerifier, dependencies.isolatedSlices.personas);
     }
+    if (dependencies.isolatedSlices.conversations !== undefined) {
+      await registerConversationRoutes(app, dependencies.identityVerifier, dependencies.isolatedSlices.conversations);
+    }
   }
   await app.ready();
   return app;
@@ -79,7 +84,7 @@ function validationFailureCode(
     if (context === "headers") return "IDEMPOTENCY_KEY_INVALID";
 
     const route = request.routeOptions.url;
-    if (route?.startsWith("/v1/friend") || route === "/v1/me/friend-requests" || route === "/v1/me/friends" || route === "/v1/events/:eventId") return "REQUEST_INVALID";
+    if (route?.startsWith("/v1/friend") || route === "/v1/me/friend-requests" || route === "/v1/me/friends" || route === "/v1/me/friends/search" || route === "/v1/events/:eventId") return "REQUEST_INVALID";
     if (route === "/v1/me/profile" || route === "/v1/me/settings") {
       const validation = fastifyError.validation as readonly { readonly keyword?: string }[] | undefined;
       const malformed = validation === undefined || validation.some((item) =>

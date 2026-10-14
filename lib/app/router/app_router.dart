@@ -9,9 +9,11 @@ import '../../features/account/presentation/account_preferences_page.dart';
 import '../../features/account/presentation/account_preferences_controller.dart';
 import '../../core/result/result.dart';
 import '../../features/auth/auth_providers.dart';
+import '../../features/auth/domain/auth_repository.dart';
 import '../../features/auth/presentation/registration_page.dart';
 import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/check_in/presentation/check_in_page.dart';
+import '../../features/check_in/presentation/check_in_history_controller.dart';
 import '../../features/event_recommendations/domain/event_recommendation_repository.dart';
 import '../../features/event_recommendations/presentation/event_recommendations_controller.dart';
 import '../../features/event_recommendations/presentation/event_recommendations_page.dart';
@@ -23,6 +25,7 @@ import '../../features/friends/presentation/my_friends_page.dart';
 import '../providers.dart';
 import '../route_status_pages.dart';
 import 'isolated_persona_pages.dart';
+import 'isolated_history_ai_pages.dart';
 
 abstract final class AppRoutes {
   static const startup = '/startup';
@@ -40,6 +43,8 @@ abstract final class AppRoutes {
   static const profileEdit = '/profile/edit';
   static const settings = '/settings';
   static const checkIn = '/check-in';
+  static const checkInHistory = '/check-ins/history';
+  static const aiAssistant = '/ai-assistant';
   static const interests = '/interests';
   static const eventRecommendations = '/events';
   static const unavailable = '/unavailable';
@@ -57,6 +62,54 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final personaPages = isolatedSlices
       ? ref.watch(isolatedPersonaPagesProvider)
       : null;
+  final historyPage = isolatedSlices
+      ? ref.watch(isolatedHistoryPageProvider)
+      : null;
+  final aiPage = isolatedSlices
+      ? ref.watch(isolatedAiConversationPageProvider)
+      : null;
+
+  // Observe same-UID replacement only for an available shared feature. Existing
+  // compositions retain their auth dependency path when no page is supplied.
+  final routeSession = historyPage != null || aiPage != null
+      ? ref.watch(
+          authSessionProvider.select(
+            (value) => switch (value) {
+              AsyncData<AuthSession>(
+                value: final AuthSessionAuthenticated session,
+              ) =>
+                session,
+              _ => null,
+            },
+          ),
+        )
+      : null;
+
+  bool canNavigateShared(BuildContext context, String sourcePath) =>
+      context.mounted &&
+      ref.mounted &&
+      routeSubject != null &&
+      routeSession != null &&
+      identical(ref.read(authSessionProvider).asData?.value, routeSession) &&
+      ref.read(currentAuthSubjectProvider) == routeSubject &&
+      ref.read(routerGateProvider) == RouterGateState.authenticated &&
+      ref.read(isolatedSlicesEnabledProvider) &&
+      GoRouter.of(context).state.uri.path == sourcePath;
+
+  void openShared(BuildContext context, String sourcePath, String destination) {
+    if (canNavigateShared(context, sourcePath)) {
+      context.push<void>(destination);
+    }
+  }
+
+  void backFromShared(BuildContext context, String sourcePath) {
+    if (!canNavigateShared(context, sourcePath)) return;
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.home);
+    }
+  }
 
   bool canNavigatePersona(BuildContext context) =>
       context.mounted &&
@@ -91,6 +144,35 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       signedOutEntry: ref.read(signOutEntryProvider),
     ),
     routes: [
+      if (historyPage != null)
+        GoRoute(
+          path: AppRoutes.checkInHistory,
+          builder: (context, state) => historyPage.build(
+            context,
+            onBack: () => backFromShared(context, AppRoutes.checkInHistory),
+            onOpenSavedCheckIn: (id) async {
+              if (!canNavigateShared(context, AppRoutes.checkInHistory)) return;
+              await context.push<void>(AppRoutes.savedCheckIn(id));
+              if (!context.mounted || !ref.mounted) return;
+              if (canNavigateShared(context, AppRoutes.checkInHistory) &&
+                  ref.exists(checkInHistoryControllerProvider)) {
+                await ref
+                    .read(checkInHistoryControllerProvider.notifier)
+                    .reload();
+              }
+            },
+          ),
+        ),
+      if (aiPage != null)
+        GoRoute(
+          path: AppRoutes.aiAssistant,
+          builder: (context, state) => aiPage.build(
+            context,
+            onBack: () => backFromShared(context, AppRoutes.aiAssistant),
+            onOpenSettings: () =>
+                openShared(context, AppRoutes.aiAssistant, AppRoutes.settings),
+          ),
+        ),
       if (personaPages != null) ...[
         GoRoute(
           path: AppRoutes.personas,
@@ -173,6 +255,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.home,
         builder: (context, state) => HomeShellPage(
           onStartCheckIn: () => context.go(AppRoutes.checkIn),
+          onOpenHistory: historyPage != null
+              ? () => openShared(
+                  context,
+                  AppRoutes.home,
+                  AppRoutes.checkInHistory,
+                )
+              : null,
+          onOpenAi: aiPage != null
+              ? () => openShared(context, AppRoutes.home, AppRoutes.aiAssistant)
+              : null,
           onManagePersonas: personaPages != null
               ? () => openPersona(context, AppRoutes.personas)
               : null,
