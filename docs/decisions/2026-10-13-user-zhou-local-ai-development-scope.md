@@ -23,3 +23,32 @@ It does not change product choices, select remaining N02/F03/R-A/C-A terms,
 release dependent adapters, or authorize merging, task closure or board changes.
 The earlier local instruction and local-only evidence remain historical records;
 their authorship and test results are not rewritten as formal review approval.
+
+## Subsequent local R-A / reader instruction — 13 October 2026
+
+- Source ID: S-USER-1013-ZHOU-RA-READER-LOCAL.
+- Direct current instruction: “ZHOU，并行 继续 R-A 未知结果退出增量，准备 reader；PM 选择已解除，无需重复等待。继续完成zhou剩余开发先在本地进行不要上传”.
+- Local branch: `codex/zhou-ra-reader-local-20261013`, based on accepted #93
+  `110eda443fbe101608c6aa6df551e52b6a18da5a`.
+
+This instruction restores the no-upload boundary for this new batch, superseding
+only the previous batch's publication permission. Local implementation, tests and
+independent local review may proceed. Do not push, publish comments or review
+requests, merge, close tasks, change the board, or enable a runtime here. This
+batch is kept as an uncommitted working-tree snapshot for local review.
+
+The earlier N02/F03/R-A/C-A unselected observations above are historical. The
+[formal Remaining A decision](2026-10-13-li-remaining-isolated-ai-contract-a.md),
+source `72c027933d4b3ac1a95e25dc733619a6c63522b6`, selects #93 packet sections
+3–6 and releases separable R-A immediately. The
+[policy acceptance](2026-10-13-li-ai-policy-component-acceptance.md), source
+`278f4cece57c21a1c7ea6a2135d0934e425f1e90`, retains #93 JIN/LI approvals at
+their exact source. These imported formal records retain their exact Git blob
+content; the checkout applies its existing Windows line-ending normalization.
+Do not ask for those selections or unchanged component reviews again.
+
+Prepare the selected reader boundaries and tests concurrently. Actual producer,
+fixed-view and effect capability evidence still controls its dependent wiring;
+missing producer facts do not reopen the PM choice or block R-A. ZHOU's local
+verification is neither JIN's formal code review nor LI's acceptance of this new
+working tree. DU/JIN/LI assignments and the shared integration gate stay separate.

@@ -1,0 +1,832 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-13T11:29:01.506Z",
+  "purpose": "Authorized review-publication preparation; copies of actual earlier local execution evidence, not new validation or formal JIN/LI acceptance.",
+  "publicationPerformedByThisStep": false,
+  "sourceAliases": {
+    "RA_READER_DRAFTS": "Local drafts/2026-10-13-ra-reader-local",
+    "INDEPENDENT_DRAFTS": "Local drafts/2026-10-13-independent-ai-local",
+    "MOBILE_DRAFTS": "Local drafts root; only the two named R-A logs",
+    "REPOSITORY_BUILD_OUTPUT": "Local repository build output; excluded binary"
+  },
+  "textPolicy": {
+    "encoding": "UTF-8 without BOM",
+    "lineEndings": "LF",
+    "pathPlaceholders": [
+      "<REPO_ROOT>",
+      "<DRAFTS_ROOT>",
+      "<USER_PROFILE>"
+    ],
+    "normalization": "Only local-path replacement, BOM removal and CRLF/lone-CR to LF. No failure/result/timing/count rewrite. Matched original path values are represented by SHA256 rather than republished.",
+    "publishedShaMeaning": "SHA256 of prepared UTF-8/LF bytes. Git web raw downloads should have these canonical bytes; a CRLF-converting local checkout must hash canonical LF text for comparison.",
+    "urlAndProbeInputPolicy": "Protocol prefixes, adversarial URL test inputs, assertion values and report fields remain unchanged; only exact local-root/profile paths are substituted."
+  },
+  "historicalSourceManifests": [
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "sha256": "e0b8276dfc08fadc3ee1f962b397a5588cd0c9994b3082833a1b3461fd8d93cb",
+      "notModified": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "sha256": "45f81940ada3920261b2b18a7b69bda9e61e65a0f59d36bc6c770aa0cd4d8e3f",
+      "notModified": true
+    }
+  ],
+  "evidenceFiles": [
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "originalRelativePath": "android-build-final.txt",
+      "publishedPath": "ra-reader/android-build-final.txt",
+      "kind": "execution-log",
+      "description": "Historical failing ordinary APK build: Kotlin incremental cross-drive cache. Filename does not mean success.",
+      "originalSha256": "61afcfc7062a3bf5b3a94b527be76cf1e55e35312b0352e655f025d6b92584c3",
+      "originalBytes": 22993,
+      "publishedSha256": "aa23848501930feae84bc81c30a41a3c02f434ce60095527b732633d875ea53f",
+      "publishedBytes": 22582,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [
+          {
+            "rule": "repository-root",
+            "replacement": "<REPO_ROOT>",
+            "count": 11,
+            "matchedValueSha256": [
+              "7dd200c17d3347513a9b62ddf21c1b0e9ad92dd417b6a885343f68e56becac70"
+            ]
+          },
+          {
+            "rule": "user-profile",
+            "replacement": "<USER_PROFILE>",
+            "count": 7,
+            "matchedValueSha256": [
+              "b82d6a9ef8914427199567525d6b665c96d93a803c38fb7ea9080090c419478f",
+              "36acc44e7b2ddd20893af3231488f976d804b601fa60afe7f6305cb84f17eb51"
+            ]
+          }
+        ],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 231,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "originalRelativePath": "android-harness-build-final.txt",
+      "publishedPath": "ra-reader/android-harness-build-final.txt",
+      "kind": "execution-log",
+      "description": "Successful synthetic AI harness compilation only; no device execution.",
+      "originalSha256": "8a727ee3b44713e1a145c73a22baec0b3436f5ba836e336a544323746d3c8619",
+      "originalBytes": 1513,
+      "publishedSha256": "4d0cfc50bea6d139a27b0a5523cd8621250c18b883c998ad81ff7d1245fc16db",
+      "publishedBytes": 1498,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [
+          {
+            "rule": "user-profile",
+            "replacement": "<USER_PROFILE>",
+            "count": 1,
+            "matchedValueSha256": [
+              "b82d6a9ef8914427199567525d6b665c96d93a803c38fb7ea9080090c419478f"
+            ]
+          }
+        ],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 16,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "originalRelativePath": "backend-build-final.txt",
+      "publishedPath": "ra-reader/backend-build-final.txt",
+      "kind": "execution-log",
+      "description": "Empty successful strict compiler transcript; exit0 is attributed to historical owner manifest, not inferred from empty bytes.",
+      "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "originalBytes": 0,
+      "publishedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publishedBytes": 0,
+      "byteForByteIdentical": true,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 0,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "originalRelativePath": "backend-tests-final.txt",
+      "publishedPath": "ra-reader/backend-tests-final.txt",
+      "kind": "execution-log",
+      "description": "Historical 572/572 Backend suite; includes30 reader cases.",
+      "originalSha256": "4bad94d195802101b8e1dff8043a2afc6a9f71cb7335a7fa861b5b83062f9176",
+      "originalBytes": 51226,
+      "publishedSha256": "c662903eddc0d7b22839aa3ff7173cbd4f4456894ca5a20b1111476deda96cf6",
+      "publishedBytes": 50646,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 580,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "originalRelativePath": "backend-tests-intermediate-571.txt",
+      "publishedPath": "ra-reader/backend-tests-intermediate-571.txt",
+      "kind": "execution-log",
+      "description": "Historical 571/571 development checkpoint before reader rollback regression.",
+      "originalSha256": "936d54da5f4c095251a6cce065563495d2f02f7947d9b64816323c4ea51f811a",
+      "originalBytes": 51148,
+      "publishedSha256": "d1e4645dd099e4427406ab9ec658ca21c961a315fe743bcc92dfc3ccb744a940",
+      "publishedBytes": 50569,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 579,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "originalRelativePath": "dart-format-final.txt",
+      "publishedPath": "ra-reader/dart-format-final.txt",
+      "kind": "execution-log",
+      "description": "Five changed Dart files, zero formatting changes.",
+      "originalSha256": "16e7bf504e422b5bef8a9a6a6c0131e1427936e923959c761c2f6d075de9c659",
+      "originalBytes": 48,
+      "publishedSha256": "e35cc67189067fff287814965bc8ce96608865b33292bb946adb5643de9688d0",
+      "publishedBytes": 47,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 1,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "originalRelativePath": "flutter-analyze-final.txt",
+      "publishedPath": "ra-reader/flutter-analyze-final.txt",
+      "kind": "execution-log",
+      "description": "Historical Flutter analysis: no issues.",
+      "originalSha256": "d8f7d2b3443ee9e633e732a9fad37f92ef7ae0e655cf954bd46028759fba17b0",
+      "originalBytes": 98,
+      "publishedSha256": "83edfbe256b9c2cb946bd80f3547dd81ddc43bbb93f3db4e33ea4d19cb197ab9",
+      "publishedBytes": 96,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 2,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "originalRelativePath": "flutter-tests-final.txt",
+      "publishedPath": "ra-reader/flutter-tests-final.txt",
+      "kind": "execution-log",
+      "description": "Historical full Flutter suite459/459 on unchanged client inputs.",
+      "originalSha256": "d79bf260351f93dcd8ec633fd8b7a9c36274c9878ea40f7bd75e655a5ac3b686",
+      "originalBytes": 71582,
+      "publishedSha256": "7ea81eebb8d2dfa85814753024e6a1aa03bacc0c04b193b908456c7f9d117316",
+      "publishedBytes": 63273,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [
+          {
+            "rule": "repository-root",
+            "replacement": "<REPO_ROOT>",
+            "count": 460,
+            "matchedValueSha256": [
+              "dbe1287ba7b7f937356a0db8b59c2b091e8635344a05d9ba69d70b7c9aab77f4"
+            ]
+          }
+        ],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 489,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "originalRelativePath": "reader-rollback-probe-green.txt",
+      "publishedPath": "ra-reader/reader-rollback-probe-green.txt",
+      "kind": "execution-log",
+      "description": "Historical GREEN after reader correction; not an additional repository suite test.",
+      "originalSha256": "f8350e33c7874b24dd37befef0b40b339a55f87c9fe524a4b800f230b19c7c5d",
+      "originalBytes": 55,
+      "publishedSha256": "e544516032adeed1000f93e5fa0d66d8c5d03a565d44c169aad470185b2c1d71",
+      "publishedBytes": 54,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 1,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "originalRelativePath": "reader-rollback-probe-red.txt",
+      "publishedPath": "ra-reader/reader-rollback-probe-red.txt",
+      "kind": "execution-log",
+      "description": "Expected historical RED on pre-fix compiled reader: denied differs from unavailable.",
+      "originalSha256": "5330d15f5112b21b433ad5f7e6a33fb3aafdd5fcf2128e53eceafa643a340ad7",
+      "originalBytes": 468,
+      "publishedSha256": "2ce4c9d9121b22ce597041a8898265f2f698a57650f2918506001978956f65cc",
+      "publishedBytes": 442,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [
+          {
+            "rule": "drafts-root",
+            "replacement": "<DRAFTS_ROOT>",
+            "count": 1,
+            "matchedValueSha256": [
+              "4a449f78d32bc90e4afe1110cd4ab15276e30544d59fb39924bd6e77ef7ea6e7"
+            ]
+          }
+        ],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 20,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "originalRelativePath": "reader-rollback-probe.mjs",
+      "publishedPath": "ra-reader/reader-rollback-probe.mjs",
+      "kind": "review-script",
+      "description": "Original reproduction source: relative import depends on original drafts layout; relocated copy has not been rerun.",
+      "originalSha256": "b8af86d1c00f2ac5cf727305c1a98a4baa2d448207ef53b8fc12e45a7b38fd56",
+      "originalBytes": 1570,
+      "publishedSha256": "b8af86d1c00f2ac5cf727305c1a98a4baa2d448207ef53b8fc12e45a7b38fd56",
+      "publishedBytes": 1570,
+      "byteForByteIdentical": true,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 0,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "backend-build-final.txt",
+      "publishedPath": "independent/backend-build-final.txt",
+      "kind": "execution-log",
+      "description": "Empty final successful strict compiler transcript; owner manifest records exit0.",
+      "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "originalBytes": 0,
+      "publishedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publishedBytes": 0,
+      "byteForByteIdentical": true,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 0,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "backend-tests-final.txt",
+      "publishedPath": "independent/backend-tests-final.txt",
+      "kind": "execution-log",
+      "description": "Final local Backend suite610/610; includes previous572 plus resolver29 and canonical-path9.",
+      "originalSha256": "465d55c1f0bf20e7451f6e1fce84c99adc93ad252cbb9e4399d0e22b4084b605",
+      "originalBytes": 55031,
+      "publishedSha256": "8bccc4d31645806cc145ac36c42a821121e73dfd45ea2d9e7b17d26fa9b7f893",
+      "publishedBytes": 54413,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 618,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "canonical-location-review-probes.mjs",
+      "publishedPath": "independent/canonical-location-review-probes.mjs",
+      "kind": "review-script",
+      "description": "Independent six-group direct-TS probe script; local absolute source path redacted in this copy.",
+      "originalSha256": "09af9f874681f69bc628f329bc257bc2a7e5ef7f4b053963965c92317150f9e6",
+      "originalBytes": 5060,
+      "publishedSha256": "97a7ae6844da23f23bed580010039d4e7042d50cd69460e8e2a5a5fb7b9665e6",
+      "publishedBytes": 5043,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [
+          {
+            "rule": "repository-root",
+            "replacement": "<REPO_ROOT>",
+            "count": 1,
+            "matchedValueSha256": [
+              "dbe1287ba7b7f937356a0db8b59c2b091e8635344a05d9ba69d70b7c9aab77f4"
+            ]
+          }
+        ],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 0,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "independent local reviewer",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "canonical-location-review-results.txt",
+      "publishedPath": "independent/canonical-location-review-results.txt",
+      "kind": "execution-log",
+      "description": "Independent canonical-location probes6/6; separate from610.",
+      "originalSha256": "0dd216296824461f78d8bd80fd62a2d252b83db5be4a213de916111d59d1b378",
+      "originalBytes": 919,
+      "publishedSha256": "76a4cc75f4564615ecbda662c5e18a5b66e3d75f6efb7139a42651c7a9ac16da",
+      "publishedBytes": 904,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 15,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "independent local reviewer",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "fence-probes-first.txt",
+      "publishedPath": "independent/fence-probes-first.txt",
+      "kind": "execution-log",
+      "description": "Owner real bounded initialization run:16 safe reports/exit0; seven pre-startup input digests retained verbatim.",
+      "originalSha256": "8e8daa91c9f92743a7ee2ffb1e30b67117924192f10138016918795a25e5fc90",
+      "originalBytes": 4289,
+      "publishedSha256": "d56615786471108c2b84853f83aa2321a8ac478210239ff2a788c307eeddc694",
+      "publishedBytes": 4273,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 16,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "fence-runner-negative-review-results.txt",
+      "publishedPath": "independent/fence-runner-negative-review-results.txt",
+      "kind": "execution-log",
+      "description": "Independent initialization negative guard groups7/7; expected child exit1, no Emulator run.",
+      "originalSha256": "79ecb3ebddd3ae1f227f78affb99b6ac3a9f4321c4cfa71276ec1310fee11dd9",
+      "originalBytes": 721,
+      "publishedSha256": "bad45ad65860d591accf2c5687bf429c71257bd5eef0cda2c0f8227569f899cd",
+      "publishedBytes": 706,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 15,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "independent local reviewer",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "fence-runner-negative-review.mjs",
+      "publishedPath": "independent/fence-runner-negative-review.mjs",
+      "kind": "review-script",
+      "description": "Independent initialization-runner seven-group negative probe; machine paths redacted.",
+      "originalSha256": "ae0ac83cdc755895d1312bf384a499a1592a6e114956526e5c655bde46b6b959",
+      "originalBytes": 2275,
+      "publishedSha256": "cfb2d34b84be3c14464c93873e488e75ab4ee07118ed3b0bba5b09de8444ac71",
+      "publishedBytes": 2253,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [
+          {
+            "rule": "repository-root",
+            "replacement": "<REPO_ROOT>",
+            "count": 1,
+            "matchedValueSha256": [
+              "dbe1287ba7b7f937356a0db8b59c2b091e8635344a05d9ba69d70b7c9aab77f4"
+            ]
+          },
+          {
+            "rule": "drafts-root",
+            "replacement": "<DRAFTS_ROOT>",
+            "count": 1,
+            "matchedValueSha256": [
+              "865cfadf092e9e68eb3d9f8aba88c76d8b9531eadbd91eff21563b61aa0ef8a0"
+            ]
+          }
+        ],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 1,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "independent local reviewer",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "query-probes-negative-guard.txt",
+      "publishedPath": "independent/query-probes-negative-guard.txt",
+      "kind": "execution-log",
+      "description": "Owner direct runner negative guard: expected exit1 before SDK initialization.",
+      "originalSha256": "df662b99bb3b0c76d6c9b9a3298587c28515e272ed55fe876a7795d302cda7c0",
+      "originalBytes": 374,
+      "publishedSha256": "42c3b662efea07164ff5a41f440958e17369c93eb7e846f91a13d423816435c9",
+      "publishedBytes": 372,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 2,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "query-probes.txt",
+      "publishedPath": "independent/query-probes.txt",
+      "kind": "execution-log",
+      "description": "Owner real bounded query run:16 safe reports/exit0; after-run source attribution, no embedded input digests.",
+      "originalSha256": "71c73b762675c34cfe36824e18c411838260e11d132d4afe574a9dfffdca2ca9",
+      "originalBytes": 3481,
+      "publishedSha256": "48ba1657418bbbdab0d4e9647454a6895ccdc0954398f7bd8961bfa3403bbf56",
+      "publishedBytes": 3465,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 16,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "root",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "query-runner-negative-review-results.txt",
+      "publishedPath": "independent/query-runner-negative-review-results.txt",
+      "kind": "execution-log",
+      "description": "Independent query negative guard groups7/7; expected child exit1, no Emulator run.",
+      "originalSha256": "d4537176a694903cf212d0a6f0a7fc0a8070521a7f45d4632bd8b11720e44754",
+      "originalBytes": 718,
+      "publishedSha256": "226d0877c6507c8269134687759f0d63bd1157374ebb64ee80ffabfe9c0bb20b",
+      "publishedBytes": 703,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 15,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "independent local reviewer",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "query-runner-negative-review.mjs",
+      "publishedPath": "independent/query-runner-negative-review.mjs",
+      "kind": "review-script",
+      "description": "Independent query-runner seven-group negative probe; machine paths redacted.",
+      "originalSha256": "e05d83cec51327583abba3d9bdc93a32c22314a31874b6b7b74527b503f3684c",
+      "originalBytes": 2267,
+      "publishedSha256": "19eab7bc6eb271532c0012e2719c4f21d6ff0ebc2e84243716938890a24edb81",
+      "publishedBytes": 2246,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [
+          {
+            "rule": "repository-root",
+            "replacement": "<REPO_ROOT>",
+            "count": 1,
+            "matchedValueSha256": [
+              "dbe1287ba7b7f937356a0db8b59c2b091e8635344a05d9ba69d70b7c9aab77f4"
+            ]
+          },
+          {
+            "rule": "drafts-root",
+            "replacement": "<DRAFTS_ROOT>",
+            "count": 1,
+            "matchedValueSha256": [
+              "865cfadf092e9e68eb3d9f8aba88c76d8b9531eadbd91eff21563b61aa0ef8a0"
+            ]
+          }
+        ],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 0,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "independent local reviewer",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "retention-review-probes.mjs",
+      "publishedPath": "independent/retention-review-probes.mjs",
+      "kind": "review-script",
+      "description": "Retained original executed JavaScript body plus explanatory header added afterward; run as stdin from repository root. Publication changes only paths in header and text encoding/newlines.",
+      "originalSha256": "720c458b52c7b82b4510c1f063b463738fd35e10a2304d26487a0660c9a1e983",
+      "originalBytes": 3253,
+      "publishedSha256": "0c38a936a6a54e1412c7f7e48adb0ff6fc3e41c9368e0469ad034d6d1b188ce1",
+      "publishedBytes": 3232,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [
+          {
+            "rule": "repository-root",
+            "replacement": "<REPO_ROOT>",
+            "count": 1,
+            "matchedValueSha256": [
+              "dbe1287ba7b7f937356a0db8b59c2b091e8635344a05d9ba69d70b7c9aab77f4"
+            ]
+          },
+          {
+            "rule": "drafts-root",
+            "replacement": "<DRAFTS_ROOT>",
+            "count": 1,
+            "matchedValueSha256": [
+              "865cfadf092e9e68eb3d9f8aba88c76d8b9531eadbd91eff21563b61aa0ef8a0"
+            ]
+          }
+        ],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 0,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "independent local reviewer",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "originalRelativePath": "retention-review-results.txt",
+      "publishedPath": "independent/retention-review-results.txt",
+      "kind": "execution-log",
+      "description": "Saved original tool stdout/provenance for170 BigInt boundary scenarios; not170 test cases or a later rerun.",
+      "originalSha256": "8be8cda81baacde39ced076a0dfdcc9b47faad0e5fff91840d4cdd2e28770c9a",
+      "originalBytes": 1758,
+      "publishedSha256": "c17939f028e8dd6775dc6861da379c039152568f54590efe3d6b4a0543662381",
+      "publishedBytes": 1737,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [
+          {
+            "rule": "repository-root",
+            "replacement": "<REPO_ROOT>",
+            "count": 1,
+            "matchedValueSha256": [
+              "7dd200c17d3347513a9b62ddf21c1b0e9ad92dd417b6a885343f68e56becac70"
+            ]
+          },
+          {
+            "rule": "drafts-root",
+            "replacement": "<DRAFTS_ROOT>",
+            "count": 1,
+            "matchedValueSha256": [
+              "865cfadf092e9e68eb3d9f8aba88c76d8b9531eadbd91eff21563b61aa0ef8a0"
+            ]
+          }
+        ],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 0,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-independent-ai-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "independent local reviewer",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "MOBILE_DRAFTS",
+      "originalRelativePath": "ra-feature-suite.log",
+      "publishedPath": "mobile/ra-feature-suite.log",
+      "kind": "execution-log",
+      "description": "Author141/141 AI feature suite with16 new R-A cases; subset of459, not added to it.",
+      "originalSha256": "743249c698973f2a26a4941076285c1ba2080bcd36b52ca32c761fcc308fa818",
+      "originalBytes": 23653,
+      "publishedSha256": "32da2743f4d4a4f5178f84f394148b6df9819a7787a740a7a12a63a4174297c3",
+      "publishedBytes": 21068,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [
+          {
+            "rule": "repository-root",
+            "replacement": "<REPO_ROOT>",
+            "count": 142,
+            "matchedValueSha256": [
+              "dbe1287ba7b7f937356a0db8b59c2b091e8635344a05d9ba69d70b7c9aab77f4"
+            ]
+          }
+        ],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 171,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "mobile implementation agent",
+      "publishedCopyExecuted": false
+    },
+    {
+      "sourceAlias": "MOBILE_DRAFTS",
+      "originalRelativePath": "ra-history-tombstone-red.log",
+      "publishedPath": "mobile/ra-history-tombstone-red.log",
+      "kind": "execution-log",
+      "description": "Initial history-only tombstone regression RED0/1; pre-fix development checkpoint, not final test file replay.",
+      "originalSha256": "ab82e71d25e06c3655b741d5b506a9edd1b059ae44ac7c08ca57251789a48150",
+      "originalBytes": 3343,
+      "publishedSha256": "39adf1a46b14c89cf77eba532ee28b0172cce0c3a649d3c8df60fe372e7eba15",
+      "publishedBytes": 3213,
+      "byteForByteIdentical": false,
+      "transformations": {
+        "pathReplacements": [
+          {
+            "rule": "repository-root",
+            "replacement": "<REPO_ROOT>",
+            "count": 2,
+            "matchedValueSha256": [
+              "2b6e978318132ed695f0aa37f8c3b153e690449ba4e31f496fe3a76ef9e86ece"
+            ]
+          },
+          {
+            "rule": "repository-root",
+            "replacement": "<REPO_ROOT>",
+            "count": 2,
+            "matchedValueSha256": [
+              "dbe1287ba7b7f937356a0db8b59c2b091e8635344a05d9ba69d70b7c9aab77f4"
+            ]
+          }
+        ],
+        "utf8BomRemoved": false,
+        "crlfPairsConvertedToLf": 58,
+        "loneCrConvertedToLf": 0
+      },
+      "historicalManifest": "docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-source-manifest.json",
+      "historicalManifestShaMatched": true,
+      "originalExecutor": "mobile implementation agent",
+      "publishedCopyExecuted": false
+    }
+  ],
+  "excluded": [
+    {
+      "sourceAlias": "RA_READER_DRAFTS",
+      "relativePath": "write-local-manifest.ps1",
+      "originalSha256": "e399cd7bcae98da8200e8d6e1fca4098d1db8861299fbbbdea0c28f105c04eb2",
+      "originalBytes": 7853,
+      "reason": "Local manifest-writing helper; intentionally not published or executed."
+    },
+    {
+      "sourceAlias": "INDEPENDENT_DRAFTS",
+      "relativePath": "write-source-manifest.ps1",
+      "originalSha256": "660e0b7e564724eb70cf055c4e4b64426620108b853ba5da8880bef7875201f8",
+      "originalBytes": 9405,
+      "reason": "Local manifest-writing helper; intentionally not published or executed."
+    },
+    {
+      "sourceAlias": "REPOSITORY_BUILD_OUTPUT",
+      "relativePath": "build/app/outputs/flutter-apk/app-debug.apk",
+      "originalSha256": "946b73d8e4b2757b4ed0974d8dae5196f2a52cf333b6510693d671948384ad03",
+      "originalBytes": 175391346,
+      "reason": "175391346-byte APK excluded. Historical manifest metadata reused; binary not recopied or revalidated in this publication pass."
+    }
+  ],
+  "unavailableEvidence": [
+    {
+      "item": "Initial resolver focused28/29 attempt",
+      "status": "Author-reported in existing development record; original transcript unavailable. No replacement log or old full-source snapshot fabricated."
+    },
+    {
+      "item": "Exact full pre-fix Dart test-source checkpoint for RED",
+      "status": "Only retained RED transcript is published. Do not claim final test file reproduced that prior failure."
+    }
+  ],
+  "scan": {
+    "scope": "All26 source inputs and prepared copies; filenames/outcomes additionally reviewed against historical manifests.",
+    "credentialPatternMatches": 0,
+    "emailPatternMatches": 0,
+    "remainingAbsoluteWindowsPathMatches": 0,
+    "categories": [
+      "privateKey",
+      "jwt",
+      "githubToken",
+      "googleApiKey",
+      "bearerValue",
+      "credentialJson",
+      "email"
+    ],
+    "manualClassification": "Credential names in negative tests are synthetic marker/guard checks, not credentials. Test labels and fixture constants are synthetic. Git/source SHA values are not content hashes of user data.",
+    "limitation": "Pattern and contextual scan, not a universal proof that arbitrary secrets can never occur."
+  },
+  "summary": {
+    "evidenceFiles": 26,
+    "publishedBytes": 294405,
+    "unchangedFiles": 3,
+    "changedFiles": 23,
+    "testsRerun": 0,
+    "emulatorRuns": 0,
+    "externalWrites": 0
+  },
+  "manifestSelfExcluded": true,
+  "readmeHashRecordedByParentPublicationManifest": true,
+  "copyValidation": {
+    "originalAndPublishedDigestChecks": 26,
+    "allSafeReportLinesIdentical": 34,
+    "adversarialUrlInputsPreserved": true,
+    "reviewScriptSyntaxChecks": 5,
+    "syntaxChecksExecuteProbeBodies": false,
+    "publicationFilesScanned": 28,
+    "credentialPatternMatches": 0,
+    "emailPatternMatches": 0,
+    "absoluteWindowsPathMatches": 0,
+    "testsRerun": 0,
+    "emulatorRuns": 0
+  }
+}

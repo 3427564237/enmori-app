@@ -88,6 +88,47 @@ wire dispatch, commit ordering and complete cleanup remain unproved here.
 Their physical and producer mapping belongs to the
 [remaining concentrated contract packet](../../../docs/planning/2026-10-13-zhou-real-ai-remaining-contract-packet.md).
 
+## Selected F03 prepared reader — local and unwired
+
+The [formal Remaining A selection](../../../docs/decisions/2026-10-13-li-remaining-isolated-ai-contract-a.md)
+now selects that packet's sections 3–6 inside the synthetic Note-only boundary.
+The earlier unselected observations remain historical. This local increment adds
+`ports/real-context-reader.ts` and `application/real-context-reader.ts`; it does
+not replace the existing synchronous fake Sources/effect Port.
+
+`PreparedRealContextReader` receives the already accepted, trusted original
+context, a read Port, the original monotonic clock and continuation guard.
+`prepare()` returns a non-content status and reads authority before Persona or
+Note content. All view envelopes must retain the same identity and exact
+seconds/nanoseconds `asOf`. Selection keeps the inclusive seven-day bounds,
+time DESC / opaque ID ASC, page25 and at most five eligible Notes. Only
+`occurredAt`/`noteText` and the four Q19 Persona fields enter the model projection;
+source IDs/versions and revocation generation remain separate request-only
+dependencies. Complete legal Persona membership is required even for default.
+
+`revalidate()` consumes a fresh current observation: withdrawal/regrant generation
+increase, used-source invalidity or used-Persona deletion ends this request;
+missing/corrupt/rollback evidence is unavailable. Persona edit/switch and allowed
+visibility-only changes do not recapture or automatically revoke its snapshot.
+The result is not a lease or proof of a future database commit/model dispatch.
+Actual F01/F03 effect boundaries still need their own fresh checks.
+
+`dispose()` synchronously clears reader-owned content, dependencies, original
+context/clock/guard and pending completion. Already opened content-free handles
+are closed immediately; a late opening handle is closed without reading content.
+Close does not prove SDK settlement or supplier buffer destruction. Borrowed
+projections must be released by the caller at its original terminal. The runtime
+continues to own the unchanged 60/5/45 budgets and terminal AbortSignal; this
+reader starts no new budget, timer, automatic retry or acceptance event.
+
+No real implementation of this Port, datastore access or runtime wiring is
+supplied here. The [producer prerequisite audit](../../../docs/evidence/sprint3/2026-10-13-zhou-reader-producer-prerequisites.md)
+binds the reviewed LI producer and the remaining DU source facts. A real adapter
+must prove the same-database fixed `readTime`, original Auth/session, complete
+canonical time inventory, source identity/no-restore guarantees and current
+authority checks. Unit fakes cannot prove those properties. R-A and reader local
+evidence is [recorded separately](../../../docs/evidence/sprint3/2026-10-13-zhou-ra-reader-local-development.md).
+
 Run `pnpm backend:verify` using the repository-pinned Node 24.19.0 and pnpm
 11.19.0. Lifecycle tests are named with LC identifiers; runtime and parser
 regressions remain under `backend/test/ai-runtime/`.

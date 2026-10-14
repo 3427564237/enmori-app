@@ -1,0 +1,21 @@
+Independent local reviewer evidence; not formal JIN acceptance.
+
+Provenance: copied from the retained functions.exec / exec_command tool result for the original execution. This is not a newly generated run or a reconstructed success claim.
+Original tool chunk_id: 7d4274
+Original tool exit_code: 0
+Original tool wall_time_seconds: 0.2484964
+Original working directory: <REPO_ROOT>
+Original execution: the exact JavaScript body now saved in retention-review-probes.mjs was supplied as a PowerShell literal here-string piped to node --input-type=module.
+Saved script addition: explanatory comment header only; the executed JavaScript body is retained unchanged.
+Input source: backend/src/ai-conversation/domain/real-retention-resolver.ts
+Input source Git blob: 2fc26b0151693dafee570d614026a5f7717e0284
+The source blob was checked again before saving this evidence and remains unchanged.
+
+Original stdout (verbatim JSON line):
+{"review":"independent-bigint-boundary-probes","checks":170,"outcome":"pass","sdkCalls":0,"fileWrites":0}
+
+Reproduction command (PowerShell, from the original working directory):
+Get-Content -LiteralPath '<DRAFTS_ROOT>/2026-10-13-independent-ai-local/retention-review-probes.mjs' -Raw | node --input-type=module
+
+The saved script must run as stdin from the repository directory, because its unchanged relative import was originally resolved there. No supplementary execution was performed while saving this retained output.
+The 170 count denotes checked boundary scenarios, not 170 node:test cases or separate SDK experiments. The original probe imported TypeScript source directly and made no SDK calls or file writes. Saving these two evidence files is a subsequent, explicitly authorized documentation action.

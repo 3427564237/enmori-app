@@ -28,9 +28,11 @@ final aiConversationUtcNowProvider = Provider<DateTime Function()>(
       () => DateTime.now().toUtc(),
 );
 
-// Only opaque references/status survive route disposal, never messages, input,
-// tokens or ticket keys. A new observed session (including the same UID) replaces
-// this record; the app-owned Auth provider remains the sole session observer.
+// Only target/operation references, status, the original U's non-content identity
+// and known tombstone IDs for this session's current conversation survive route
+// disposal, never messages, input, tokens or keys.
+// A new observed session (including the same UID) replaces this record; the
+// app-owned Auth provider remains the sole session observer. No disk restoration.
 final _memoryProvider = Provider<_Memory>((ref) {
   final auth = ref.watch(authSessionProvider).asData?.value;
   return _Memory(auth is AuthSessionAuthenticated);
@@ -52,7 +54,6 @@ class AiConversationController extends Notifier<AiConversationState> {
   _Attempt? _attempt;
   final Set<_ReadTask> _reads = {};
   final Map<String, int> _messageVersions = {};
-  final Set<String> _tombstones = {};
   // Only explicit execute/readback pairs establish assistant ownership. History
   // order alone cannot identify a reply's user when earlier inputs are retried.
   final Map<String, String> _assistantUsers = {};
@@ -73,8 +74,12 @@ class AiConversationController extends Notifier<AiConversationState> {
     _epoch = Object();
     _alive = true;
     _messageVersions.clear();
-    _tombstones.clear();
     _assistantUsers.clear();
+    final assistant = _memory.operationAssistantId;
+    final user = _memory.operationUserId;
+    if (assistant != null && user != null) {
+      _assistantUsers[assistant] = user;
+    }
     _assistantObservations.clear();
     _assistantRevision = 0;
     _retryUser = null;
@@ -127,6 +132,16 @@ class AiConversationController extends Notifier<AiConversationState> {
           ready && !terminalView && !_memory.unresolved && _retryUser != null,
       canCheckResult: ready && hasTarget && _memory.operationId != null,
       canCancel: available && generating,
+      // R-A can stop an ordinary read too; readBusy must not trap the user in
+      // recovery. Only an already dispatched target has this unknown-result exit.
+      canLeaveWithoutRetrying:
+          available &&
+          hasTarget &&
+          _memory.operationId != null &&
+          _memory.unresolved &&
+          !generating &&
+          !_memory.deleting &&
+          phase != AiConversationPhase.unauthenticated,
       canDelete:
           available &&
           hasTarget &&
@@ -239,7 +254,10 @@ class AiConversationController extends Notifier<AiConversationState> {
       _memory.conversationId = attempt.ticket!.conversationId;
       _memory.operationId = attempt.ticket!.operationId;
       _memory.operationUserId = attempt.userMessageId;
+      _memory.operationUserSequence = attempt.userSequence;
+      _memory.operationUserPersistedAt = attempt.userPersistedAt;
       _memory.operationHasAssistant = false;
+      _memory.operationAssistantId = null;
       _memory.unresolved = true;
       attempt.dispatched = true;
       attempt.executeStarted = _now();
@@ -499,9 +517,7 @@ class AiConversationController extends Notifier<AiConversationState> {
         _retryUser = null;
         _memory.unresolved = true;
         final user = value.userMessage;
-        if (user != null &&
-            _memory.operationUserId != null &&
-            _memory.operationUserId != user.messageId) {
+        if (user != null && !_memory.matchesOperationUser(user)) {
           _show(AiConversationPhase.unknown);
           break;
         }
@@ -530,7 +546,7 @@ class AiConversationController extends Notifier<AiConversationState> {
                 _show(AiConversationPhase.unknown);
                 break;
               }
-              _memory.operationUserId = user.messageId;
+              _memory.recordOperationUser(user);
               _retryUser = value.userMessage;
               _memory.unresolved = false;
               _show(AiConversationPhase.idle);
@@ -610,8 +626,9 @@ class AiConversationController extends Notifier<AiConversationState> {
 
   void _recordPair(AiMessage user, AiMessage assistant) {
     _assistantUsers[assistant.messageId] = user.messageId;
-    _memory.operationUserId = user.messageId;
+    _memory.recordOperationUser(user);
     _memory.operationHasAssistant = true;
+    _memory.operationAssistantId = assistant.messageId;
   }
 
   bool _consistentPair(AiMessage user, AiMessage assistant) =>
@@ -640,7 +657,28 @@ class AiConversationController extends Notifier<AiConversationState> {
       for (final message in state.messages) message.messageId: message,
     };
     final newAssistants = <AiMessage>[];
-    for (final message in incoming) {
+    for (final incomingMessage in incoming) {
+      final unavailable = _memory.tombstones.contains(
+        incomingMessage.messageId,
+      );
+      if (unavailable && incomingMessage.role != AiRole.assistant) {
+        return _invalidMerge();
+      }
+      // Clearing private content cannot release a known unavailable ID within
+      // this session/conversation, including one observed only through history.
+      final message = unavailable
+          ? AiMessage(
+              messageId: incomingMessage.messageId,
+              sequence: incomingMessage.sequence,
+              role: incomingMessage.role,
+              persistedAt: incomingMessage.persistedAt,
+              availability: AiAvailability.unavailable,
+            )
+          : incomingMessage;
+      if (message.messageId == _memory.operationUserId &&
+          !_memory.matchesOperationUser(message)) {
+        return _invalidMerge();
+      }
       final previous = messages[message.messageId];
       if (previous != null &&
           (previous.role != message.role ||
@@ -653,18 +691,15 @@ class AiConversationController extends Notifier<AiConversationState> {
           (_messageVersions[message.messageId] ?? 0) > number) {
         continue;
       }
-      if (_tombstones.contains(message.messageId) &&
-          message.availability == AiAvailability.available) {
-        continue;
-      }
       if (message.role == AiRole.assistant &&
           (previous == null ||
               (previous.availability == AiAvailability.available &&
                   message.availability == AiAvailability.unavailable))) {
         newAssistants.add(message);
       }
-      if (message.availability == AiAvailability.unavailable) {
-        _tombstones.add(message.messageId);
+      if (message.role == AiRole.assistant &&
+          message.availability == AiAvailability.unavailable) {
+        _memory.tombstones.add(message.messageId);
       }
       messages[message.messageId] = message;
       _messageVersions[message.messageId] = number;
@@ -784,14 +819,38 @@ final class _Memory {
   _Memory(this.authenticated);
   final bool authenticated;
   final Object key = Object();
-  String? conversationId;
+  String? _conversationId;
+  String? get conversationId => _conversationId;
+  set conversationId(String? value) {
+    if (value != _conversationId) tombstones.clear();
+    _conversationId = value;
+  }
+
+  final Set<String> tombstones = {};
   String? operationId;
   String? operationUserId;
+  int? operationUserSequence;
+  DateTime? operationUserPersistedAt;
   bool operationHasAssistant = false;
+  String? operationAssistantId;
   bool unresolved = false;
   bool established = false;
   bool deleting = false;
   bool deleted = false;
+
+  void recordOperationUser(AiMessage user) {
+    operationUserId = user.messageId;
+    operationUserSequence = user.sequence;
+    operationUserPersistedAt = user.persistedAt;
+  }
+
+  bool matchesOperationUser(AiMessage user) =>
+      operationUserId == null ||
+      (operationUserId == user.messageId &&
+          operationUserSequence == user.sequence &&
+          operationUserPersistedAt == user.persistedAt &&
+          user.role == AiRole.user &&
+          user.availability == AiAvailability.available);
 }
 
 final class _Attempt {
