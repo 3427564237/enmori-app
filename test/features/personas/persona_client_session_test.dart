@@ -35,14 +35,17 @@ http.StreamedResponse reply(int status, Object body) => http.StreamedResponse(
 
 void main() {
   for (final delayedBody in [false, true]) {
-    test('real client/session: timeout -> recovery 412 -> original late '
-        '201 (${delayedBody ? 'body' : 'headers'})', () async {
+    testWidgets('real client/session: timeout -> recovery 412 -> original late '
+        '201 (${delayedBody ? 'body' : 'headers'})', (tester) async {
       final transport = _Transport(delayedBody: delayedBody);
+      var tokens = 0;
       final client = BackendApiClient(
         Uri.parse('https://example.test'),
-        () async => const Success('synthetic-token'),
+        () async {
+          tokens++;
+          return const Success('synthetic-token');
+        },
         httpClient: transport,
-        operationTimeout: const Duration(milliseconds: 40),
       );
       final session = PersonaSession(
         BackendPersonaRepository(client),
@@ -52,27 +55,57 @@ void main() {
         session.dispose();
         client.close();
       });
-      await session.load();
-      expect(await session.create(fields), isFalse);
+      await _loadCurrent(tester, session, transport);
+      expect(tokens, 1);
+      bool? created;
+      final creating = session.create(fields).then((value) => created = value);
+      await tester.pump();
+      // A failed load or token wait can return false without any dispatch.
+      // Prove dispatch before advancing the real client's foreground timer.
+      expect(transport.posts, hasLength(1));
+      expect(tokens, 2);
+      expect(created, isNull);
+      expect(session.state.pendingCreate?.status, PersonaCreateStatus.waiting);
+      await tester.pump(defaultBackendOperationTimeout);
+      expect(created, isFalse);
+      await creating;
       expect(
-        session.state.pendingCreate!.status,
+        session.state.pendingCreate?.status,
         PersonaCreateStatus.uncertain,
       );
-      await session.retryCreate();
-      await Future<void>.delayed(Duration.zero);
+      final retrying = session.retryCreate();
+      await tester.pump();
       expect(
-        session.state.pendingCreate!.status,
+        session.state.pendingCreate?.status,
         PersonaCreateStatus.recoveryClosed,
+      );
+      await retrying;
+      expect(
+        session.state.failure?.kind,
+        AppFailureKind.personaRevisionPreconditionFailed,
       );
       expect(session.state.confirmedWriteCount, 0);
       expect(transport.posts.length, 2);
       expect(transport.posts[0].headers['Idempotency-Key'], key);
+      expect(transport.posts[1].headers['Idempotency-Key'], key);
       expect(transport.posts[0].body, transport.posts[1].body);
+      expect(jsonDecode(transport.posts[0].body), {
+        'displayName': 'Guide',
+        'tone': 'neutral',
+        'responseLength': 'balanced',
+        'formatStyle': 'plain',
+        'expectedStateRevision': 0,
+      });
+      expect(tokens, 3);
+      expect(transport.gets, 1);
       final confirmed = session.changes.firstWhere(
         (s) => s.isCurrent && s.pendingCreate == null,
       );
       transport.release();
-      await confirmed.timeout(const Duration(seconds: 2));
+      await tester.pump();
+      expect(session.state.isCurrent, isTrue);
+      expect(session.state.pendingCreate, isNull);
+      await confirmed;
       expect(session.state.lastConfirmedCreateKey, key);
       expect(session.state.confirmedWriteCount, 1);
       expect(
@@ -84,10 +117,14 @@ void main() {
         2,
         reason: 'Independent reread after commit proof',
       );
+      expect(tokens, 4);
+      expect(transport.posts, hasLength(2));
     });
   }
 
-  test('session end during real token wait prevents dispatch', () async {
+  testWidgets('session end during real token wait prevents dispatch', (
+    tester,
+  ) async {
     final token = Completer<Result<String>>();
     final transport = _Transport(delayedBody: false);
     var tokens = 0;
@@ -97,7 +134,6 @@ void main() {
           ? Future.value(const Success('synthetic'))
           : token.future,
       httpClient: transport,
-      operationTimeout: const Duration(milliseconds: 60),
     );
     final session = PersonaSession(
       BackendPersonaRepository(client),
@@ -107,12 +143,132 @@ void main() {
       session.dispose();
       client.close();
     });
-    await session.load();
+    await _loadCurrent(tester, session, transport);
     final creating = session.create(fields);
+    await tester.pump();
+    expect(tokens, 2, reason: 'Create is actually waiting for its token');
+    expect(session.state.pendingCreate?.status, PersonaCreateStatus.waiting);
+    expect(transport.posts, isEmpty);
     session.dispose();
     token.complete(const Success('old-session-token'));
+    await tester.pump();
     expect(await creating, isFalse);
     expect(transport.posts, isEmpty);
+    expect(session.state.pendingCreate, isNull);
+    expect(session.state.confirmedWriteCount, 0);
+  });
+
+  for (final timesOut in [true, false]) {
+    testWidgets('initial read ${timesOut ? 'timeout' : 'rejection'} prevents '
+        'create until a fresh successful load', (tester) async {
+      final firstRead = Completer<http.StreamedResponse>();
+      final transport = _Transport(
+        delayedBody: false,
+        firstRead: firstRead.future,
+      );
+      final client = BackendApiClient(
+        Uri.parse('https://example.test'),
+        () async => const Success('synthetic'),
+        httpClient: transport,
+      );
+      final session = PersonaSession(
+        BackendPersonaRepository(client),
+        newKey: () => key,
+      );
+      addTearDown(() {
+        session.dispose();
+        client.close();
+      });
+      var loaded = false;
+      final loading = session.load().then((_) => loaded = true);
+      await tester.pump();
+      expect(transport.gets, 1);
+      expect(loaded, isFalse);
+      expect(session.state.canStartNewCreate, isFalse);
+      expect(await session.create(fields), isFalse);
+      expect(transport.posts, isEmpty);
+      if (timesOut) {
+        await tester.pump(defaultBackendOperationTimeout);
+      } else {
+        firstRead.complete(
+          reply(503, {
+            'error': {
+              'code': 'SERVICE_UNAVAILABLE',
+              'message': 'Unavailable',
+              'requestId': 'synthetic-request',
+            },
+          }),
+        );
+        await tester.pump();
+      }
+      expect(loaded, isTrue);
+      await loading;
+      expect(session.state.failure?.kind, AppFailureKind.serviceUnavailable);
+      expect(session.state.isCurrent, isFalse);
+      expect(await session.create(fields), isFalse);
+      expect(session.state.pendingCreate, isNull);
+      expect(transport.posts, isEmpty);
+      expect(session.state.confirmedWriteCount, 0);
+      if (timesOut) {
+        firstRead.complete(
+          reply(200, {
+            'personas': {'items': [], 'stateRevision': 0},
+          }),
+        );
+        await tester.pump();
+        expect(
+          session.state.isCurrent,
+          isFalse,
+          reason: 'Late initial GET is not a fresh load',
+        );
+        expect(session.state.canStartNewCreate, isFalse);
+      }
+      await _loadCurrent(tester, session, transport, expectedGets: 2);
+      expect(session.state.pendingCreate, isNull);
+      expect(transport.posts, isEmpty);
+    });
+  }
+
+  testWidgets('create token timeout has no dispatch or uncertain command; '
+      'late token cannot dispatch', (tester) async {
+    final token = Completer<Result<String>>();
+    var tokens = 0;
+    final transport = _Transport(delayedBody: false);
+    final client = BackendApiClient(
+      Uri.parse('https://example.test'),
+      () => ++tokens == 1
+          ? Future.value(const Success('synthetic'))
+          : token.future,
+      httpClient: transport,
+    );
+    final session = PersonaSession(
+      BackendPersonaRepository(client),
+      newKey: () => key,
+    );
+    addTearDown(() {
+      session.dispose();
+      client.close();
+    });
+    await _loadCurrent(tester, session, transport);
+    bool? created;
+    final creating = session.create(fields).then((value) => created = value);
+    await tester.pump();
+    expect(tokens, 2);
+    expect(created, isNull);
+    expect(session.state.pendingCreate?.status, PersonaCreateStatus.waiting);
+    expect(transport.posts, isEmpty);
+    await tester.pump(defaultBackendOperationTimeout);
+    expect(created, isFalse);
+    await creating;
+    expect(session.state.pendingCreate, isNull);
+    expect(session.state.failure?.kind, AppFailureKind.serviceUnavailable);
+    expect(session.state.confirmedWriteCount, 0);
+    expect(transport.posts, isEmpty);
+    token.complete(const Success('late-synthetic'));
+    await tester.pump();
+    expect(transport.posts, isEmpty);
+    expect(session.state.pendingCreate, isNull);
+    expect(session.state.confirmedWriteCount, 0);
   });
 
   test(
@@ -141,9 +297,33 @@ void main() {
   );
 }
 
+// Fake time drives timeout events; the HTTP client/repository/session are real.
+// Assert setup separately so a read failure cannot masquerade as a create timeout.
+Future<void> _loadCurrent(
+  WidgetTester tester,
+  PersonaSession session,
+  _Transport transport, {
+  int expectedGets = 1,
+}) async {
+  var loaded = false;
+  final loading = session.load().then((_) => loaded = true);
+  await tester.pump();
+  expect(loaded, isTrue, reason: 'Initial read must settle before create');
+  expect(session.state.failure, isNull);
+  expect(session.state.isCurrent, isTrue);
+  expect(session.state.canStartNewCreate, isTrue);
+  expect(session.state.collection?.stateRevision, 0);
+  expect(session.state.collection?.items, isEmpty);
+  expect(session.state.pendingCreate, isNull);
+  expect(transport.gets, expectedGets);
+  expect(transport.posts, isEmpty);
+  await loading;
+}
+
 final class _Transport extends http.BaseClient {
-  _Transport({required this.delayedBody});
+  _Transport({required this.delayedBody, this.firstRead});
   final bool delayedBody;
+  final Future<http.StreamedResponse>? firstRead;
   bool immediate = false;
   bool committed = false;
   int gets = 0;
@@ -154,6 +334,7 @@ final class _Transport extends http.BaseClient {
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     if (request.method == 'GET') {
       gets++;
+      if (gets == 1 && firstRead != null) return firstRead!;
       return reply(200, {
         'personas': {
           'items': committed ? [row] : [],
