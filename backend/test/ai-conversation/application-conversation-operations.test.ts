@@ -55,7 +55,7 @@ function fixture(includeReaders = true) {
     dispose: () => { if (!disposed) { disposed = true; disposals++; } } };
   } };
   const app = new ApplicationConversationOperations({ resolve: async (_caller, required) => {
-    modes.push(required); return required && !purpose ? { kind: "failure", code: "AI_CONTEXT_NOT_PERMITTED" } : good({ ownerId: owner });
+    modes.push(required); return required && !purpose ? { kind: "failure", code: "AI_CONTEXT_NOT_PERMITTED" } : good({ ownerId: _caller.principal.firebaseUid === "second-owner" ? id(9) : owner });
   } }, { uuid: () => id(next++), operationKey: () => "A".repeat(43) }, clock, executor, readers);
   const delivery = (controller = new AbortController()): ConversationExecutionDelivery => ({ signal: controller.signal, current: () => !controller.signal.aborted,
     acceptCompleteBody: pair => { accepted.push(pair); return true; } });
@@ -284,4 +284,94 @@ test("fresh Auth failures use selected stable errors and create neither ticket n
     const f = fixture(); f.setAuth(async () => ({ kind }));
     assert.deepEqual(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation" }), { kind: "failure", code }); assert.equal(f.counts().creates, 0);
   }
+});
+
+test("closed target lease invalidates an awaiting prepare even if its old target read returns after release", async () => {
+  const f = fixture(), pending = deferred<ConversationResult<void>>(); let reading = false;
+  f.readers.verifyTarget = async (_context, conversation) => { if (conversation !== existing) return good(undefined); reading = true; return pending.promise; };
+  const preparing = f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing }); await until(() => reading);
+  const acquisition = await f.app.acquireTargetLease(owner, existing, "closed"); assert.equal(acquisition.kind, "acquired");
+  if (acquisition.kind !== "acquired") return;
+  assert.deepEqual(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing }), bad("AI_OPERATION_CONFLICT"));
+  // Revoking the pending target frees its one-owner reservation, so an unrelated
+  // target can still prepare while this target remains held.
+  assert.equal((await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: id(8) })).kind, "success");
+  acquisition.lease.release(); pending.resolve(good(undefined));
+  assert.deepEqual(await preparing, bad("AI_OPERATION_CONFLICT")); assert.equal(f.counts().creates, 0);
+});
+test("idle target lease blocks publication after an awaited target read and does not revoke other targets", async () => {
+  const f = fixture(), pending = deferred<ConversationResult<void>>(); let reading = false;
+  f.readers.verifyTarget = async () => { reading = true; return pending.promise; };
+  const preparing = f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing }); await until(() => reading);
+  const acquired = await f.app.acquireTargetLease(owner, existing, "idle"); assert.equal(acquired.kind, "acquired"); if (acquired.kind !== "acquired") return;
+  pending.resolve(good(undefined)); assert.deepEqual(await preparing, bad("AI_OPERATION_CONFLICT"));
+  assert.equal(f.counts().cancels, 0); acquired.lease.release();
+  assert.equal((await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing })).kind, "success");
+});
+test("idle lease blocks a prepared execute without consuming it; closed lease irreversibly cancels it", async () => {
+  for (const mode of ["idle", "closed"] as const) {
+    const f = fixture(), ticket = value(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing }));
+    const acquired = await f.app.acquireTargetLease(owner, existing, mode); assert.equal(acquired.kind, "acquired"); if (acquired.kind !== "acquired") continue;
+    assert.deepEqual(await f.execute(ticket), mode === "idle" ? bad("AI_OPERATION_CONFLICT") : { kind: "failure", code: "AI_OPERATION_UNAVAILABLE" });
+    assert.equal(f.counts().creates, 0); assert.equal(f.counts().cancels, 0); acquired.lease.release();
+    assert.equal((await f.execute(ticket)).kind, mode === "idle" ? "success" : "failure");
+  }
+});
+test("closed lease synchronously disposes active target then waits matching close AND dispatch bookkeeping", async () => {
+  const f = fixture(), ticket = value(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing })),
+    result = deferred<ConversationResult<ExecutedConversation>>(), closed = deferred<AsyncCloseObservation>();
+  let late: ExecutedConversation | undefined; let dispatchDelivery: ConversationExecutionDelivery | undefined;
+  f.setExecute((input, delivery) => { late = f.makePair(input); dispatchDelivery = delivery; return result.promise; }); f.setClose(() => closed.promise);
+  const execution = f.execute(ticket); await until(() => f.inputs.length === 1);
+  let acquired = false; const acquiring = f.app.acquireTargetLease(owner, existing, "closed").then(v => { acquired = true; return v; });
+  assert.equal(f.inputs[0]!.text(), undefined); assert.equal(f.counts().disposals, 1); assert.equal(f.counts().cancels, 1);
+  assert.equal(dispatchDelivery!.acceptCompleteBody!(late!), false);
+  closed.resolve({ kind: "closed", operationId: ticket.operationId, conversationId: existing }); await Promise.resolve(); assert.equal(acquired, false);
+  result.resolve(good(late!)); assert.deepEqual(await execution, { kind: "terminated" });
+  const lease = await acquiring; assert.equal(lease.kind, "acquired"); if (lease.kind === "acquired") lease.lease.release();
+  assert.equal(f.accepted.length, 0); assert.equal(f.counts().cancels, 1);
+});
+test("idle lease drains a live command without cancellation and keeps new admissions closed through work", async () => {
+  const f = fixture(), ticket = value(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing })),
+    ready = deferred<void>();
+  f.setExecute(async (input, delivery) => { await ready.promise; const body = f.makePair(input); assert.equal(delivery.acceptCompleteBody?.(body), true); return good(body); });
+  const execution = f.execute(ticket); await until(() => f.inputs.length === 1);
+  let acquired = false; const acquiring = f.app.acquireTargetLease(owner, existing, "idle").then(v => { acquired = true; return v; });
+  assert.equal(f.inputs[0]!.text(), f.savedUser.text); assert.equal(f.counts().disposals, 0); assert.equal(f.counts().cancels, 0);
+  assert.deepEqual(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing }), bad("AI_OPERATION_CONFLICT"));
+  assert.equal(acquired, false); ready.resolve(); assert.equal((await execution).kind, "success");
+  const held = await acquiring; assert.equal(held.kind, "acquired"); if (held.kind !== "acquired") return;
+  assert.equal(held.lease.current(), true); assert.equal(f.accepted.length, 1);
+  assert.deepEqual(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing }), bad("AI_OPERATION_CONFLICT"));
+  held.lease.release(); assert.equal(held.lease.current(), false);
+  assert.equal((await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing })).kind, "success");
+});
+test("target lease is owner-scoped and a second owner can prepare and execute the same opaque conversation ID", async () => {
+  const f = fixture(), held = await f.app.acquireTargetLease(owner, existing, "closed"); assert.equal(held.kind, "acquired"); if (held.kind !== "acquired") return;
+  const other = f.call("b".repeat(64), "second-owner"), ticket = value(await f.app.prepare(other, { kind: "send", purpose: "checkin_conversation", conversationId: existing }));
+  assert.equal((await f.execute(ticket, f.delivery(), other)).kind, "success"); assert.equal(f.inputs[0]!.identity.ownerId, id(9));
+  assert.equal(held.lease.current(), true); held.lease.release();
+});
+test("unresolved close yields no usable lease, keeps admission held, and recovers only on an explicit acquisition", async () => {
+  const f = fixture(), ticket = value(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing })),
+    result = deferred<ConversationResult<ExecutedConversation>>();
+  f.setExecute(() => result.promise); f.setClose(async () => ({ kind: "unresolved" }));
+  const execution = f.execute(ticket); await until(() => f.inputs.length === 1); const acquisition = f.app.acquireTargetLease(owner, existing, "closed");
+  result.resolve(bad("AI_OUTCOME_UNRESOLVED")); await execution; assert.deepEqual(await acquisition, { kind: "unresolved" });
+  assert.equal(f.counts().cancels, 1);
+  assert.deepEqual(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing }), bad("AI_OPERATION_CONFLICT"));
+  assert.equal(f.counts().cancels, 1); f.setClose(async input => ({ kind: "closed", operationId: input.operation.operationId, conversationId: existing }));
+  const recovered = await f.app.acquireTargetLease(owner, existing, "closed"); assert.equal(recovered.kind, "acquired"); if (recovered.kind !== "acquired") return;
+  assert.equal(f.counts().cancels, 2); recovered.lease.release();
+  assert.equal((await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing })).kind, "success");
+});
+test("concurrent/invalid acquisition has no lease and idempotent old release cannot clear a newer target hold", async () => {
+  const f = fixture(), first = f.app.acquireTargetLease(owner, existing, "idle");
+  assert.deepEqual(await f.app.acquireTargetLease(owner, existing, "closed"), { kind: "unresolved" });
+  const original = await first; assert.equal(original.kind, "acquired"); if (original.kind !== "acquired") return;
+  assert.deepEqual(await f.app.acquireTargetLease("bad-owner", existing, "closed"), { kind: "unresolved" });
+  original.lease.release(); const fresh = await f.app.acquireTargetLease(owner, existing, "closed"); assert.equal(fresh.kind, "acquired"); if (fresh.kind !== "acquired") return;
+  original.lease.release(); assert.equal(fresh.lease.current(), true);
+  assert.deepEqual(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing }), bad("AI_OPERATION_CONFLICT"));
+  fresh.lease.release(); fresh.lease.release(); assert.equal(fresh.lease.current(), false);
 });

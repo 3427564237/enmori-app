@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
+import { spawn } from "node:child_process";
+import { createConnection } from "node:net";
 import { after, before, test } from "node:test";
 import { deleteApp, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
@@ -12,12 +14,13 @@ import { FirebaseAdminAsyncConversationAuthority } from "../src/ai-conversation/
 import { FirebaseAdminConversationOperationAuthority } from "../src/ai-conversation/infrastructure/firebase-admin-conversation-operation-authority.js";
 import { FirebaseAdminRealContextReader } from "../src/ai-conversation/infrastructure/firebase-admin-real-context-reader.js";
 import { FirestoreConversationStore } from "../src/ai-conversation/infrastructure/firestore-conversation-store.js";
-import type { AsyncEffectContext } from "../src/ai-conversation/ports/async-conversation.js";
-import type { AsyncAcknowledgedConversationPair,
+import { FirestoreConversationCleanup } from "../src/ai-conversation/infrastructure/firestore-conversation-cleanup.js";
+import type {
   ConversationOperationReaders, ExecutedConversation, RequestOriginalConversationIdentity } from "../src/ai-conversation/ports/application-conversation-operations.js";
-import type { ConversationCaller, ConversationReadback, ConversationResult,
+import type { ConversationQuiescence } from "../src/ai-conversation/ports/conversation-cleanup.js";
+import type { ConversationCaller, ConversationOperations, ConversationReadback, ConversationResult,
   PreparedConversationOperation } from "../src/ai-conversation/ports/conversation-operations.js";
-import type { OpenOperation, OriginalWriteAuthority, RealConversationStore,
+import type { OpenOperation, RealConversationStore,
   RuntimeEpoch, StoreResult } from "../src/ai-conversation/ports/real-conversation-store.js";
 import { BoundedAiRuntime } from "../src/ai-runtime/application/bounded-ai-runtime.js";
 import { MonotonicRuntimeClock } from "../src/ai-runtime/infrastructure/monotonic-runtime-clock.js";
@@ -25,10 +28,13 @@ import { requireControlledEmulatorEnvironment } from "../src/shared/infrastructu
 import { FirebaseIdentityVerifier } from "../src/shared/infrastructure/firebase/firebase-identity-verifier.js";
 import { FirebaseAdminFirestoreGateway } from "../src/shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId } from "../src/shared/infrastructure/firebase/firestore-records.js";
+import { buildApp } from "../src/bootstrap/build-app.js";
+import { appFailure } from "../src/shared/application/app-failure.js";
+import { err } from "../src/shared/domain/result.js";
 
 // Controlled, OWNED synthetic inventory only. This suite does not establish DU's
-// operational Note guarantees, actual Qwen/tokenizer behavior, a production pair
-// provider, the six HTTP routes, device display, cleanup SLA or Release readiness.
+// operational Note guarantees, actual Qwen/tokenizer behavior, full production
+// history/delete providers, device display, cleanup SLA or Release readiness.
 const env = requireControlledEmulatorEnvironment(process.env);
 assert.equal(env.projectId, "demo-enmori-rmvp01a-r10");
 const firebase = initializeApp({ projectId: env.projectId }, `zhou-n01-${randomUUID()}`);
@@ -40,9 +46,10 @@ const accountPath = `accounts/${owner}`;
 const clock = new MonotonicRuntimeClock();
 const opened = new Map<string, OpenOperation>();
 const closing = new Map<string, Promise<StoreResult<void>>>();
-const prepared: PreparedConversationOperation[] = [];
+const issuedStoreIo = new Set<Promise<unknown>>();
+const prepared: Pick<PreparedConversationOperation, "operationId" | "conversationId">[] = [];
 const fixtureDocuments: string[] = [];
-let store: FirestoreConversationStore, epoch: RuntimeEpoch, token = "", modelCalls = 0, runtimeOwned = false, authOwned = false;
+let store: FirestoreConversationStore, epoch: RuntimeEpoch, token = "", modelCalls = 0, activeModels = 0, runtimeOwned = false, authOwned = false;
 const check = (value: boolean, message: string): void => assert.equal(value, true, message);
 function confirmed<T>(result: StoreResult<T>): T {
   assert.equal(result.kind, "confirmed");
@@ -72,80 +79,45 @@ const effectClock = { monotonicNow: () => clock.now(), utcNow: () => {
 // It also exposes the actual closure promise so outcome is checked after the
 // Application's own durable barrier, rather than a fixture-invented close.
 function observedStore(): RealConversationStore {
+  const track = <T>(promise: Promise<T>): Promise<T> => {
+    issuedStoreIo.add(promise); void promise.then(() => issuedStoreIo.delete(promise), () => issuedStoreIo.delete(promise));
+    return promise;
+  };
   return new Proxy(store, { get(target, property, receiver) {
     if (property === "initializeOperation") return async (...args: Parameters<RealConversationStore["initializeOperation"]>) => {
-      const result = await target.initializeOperation(...args);
+      const result = await track(target.initializeOperation(...args));
       if (result.kind === "confirmed") opened.set(result.value.operationId, result.value);
       return result;
     };
     if (property === "closeOperation") return (...args: Parameters<RealConversationStore["closeOperation"]>) => {
-      const result = target.closeOperation(...args); closing.set(args[0].operationId, result); return result;
+      const result = track(target.closeOperation(...args)); closing.set(args[0].operationId, result); return result;
     };
     const value: unknown = Reflect.get(target, property, receiver);
-    return typeof value === "function" ? value.bind(target) : value;
+    return typeof value === "function" ? (...args: unknown[]) => track(value.apply(target, args) as Promise<unknown>) : value;
   } });
 }
-function live(context: AsyncEffectContext, original: RequestOriginalConversationIdentity): boolean {
-  return original.current(context.identity) && context.originalCurrent() && !context.budget.signal.aborted &&
-    clock.now() < context.budget.deadline;
-}
-function writeAuthority(context: AsyncEffectContext, original: RequestOriginalConversationIdentity): OriginalWriteAuthority | undefined {
-  const dependencies = context.dependencies();
-  if (!dependencies || !live(context, original)) return undefined;
-  return { principal: context.identity.principal, dependencies, current: () => live(context, original),
-    verifyCurrentAuth: async () => {
-      const observed = await original.verify(context.identity);
-      if (!live(context, original)) return { kind: "denied" };
-      return observed.kind === "verified" ? observed :
-        { kind: observed.kind === "dependency_unavailable" ? "unavailable" : "denied" };
-    } };
-}
-function testOnlyPairProvider(original: RequestOriginalConversationIdentity): AsyncAcknowledgedConversationPair {
-  return { read: async context => {
-    const operation = opened.get(context.operation.operationId), authority = writeAuthority(context, original);
-    if (!operation || !authority) return { kind: "failure", code: "AI_UNAVAILABLE" };
-    const first = await store.readAcknowledgedPair(operation, authority);
-    if (first.kind !== "confirmed" || !live(context, original)) return { kind: "failure", code: "AI_UNAVAILABLE" };
-    // Presentation is read from the real accepted assistant record. Fresh Auth,
-    // original/deadline checks before/after this SDK read, then another actual
-    // canonical pair/source/expiry/all-pending check prevent a guessed projection.
-    const verified = await authority.verifyCurrentAuth();
-    if (verified.kind !== "verified" || !live(context, original)) return { kind: "failure", code: "AI_UNAVAILABLE" };
-    const snapshot = await firestore.doc(`${parentPath(operation.conversationId)}/messages/${first.value.assistant.messageId}`).get();
-    if (!live(context, original) || !snapshot.exists) return { kind: "failure", code: "AI_UNAVAILABLE" };
-    const record = snapshot.data();
-    if (!record || record.presentationMode !== "default" || record.presentationProjectionVersion !== undefined ||
-        record.replyToUserMessageId !== operation.userMessageId || record.text !== first.value.assistant.text ||
-        snapshot.createTime?.seconds !== first.value.assistant.persistedAt.seconds ||
-        snapshot.createTime?.nanoseconds !== first.value.assistant.persistedAt.nanoseconds)
-      return { kind: "failure", code: "AI_UNAVAILABLE" };
-    const current = await store.readAcknowledgedPair(operation, authority);
-    if (current.kind !== "confirmed" || !live(context, original) ||
-        current.value.assistant.messageId !== first.value.assistant.messageId ||
-        current.value.user.persistedAt.seconds !== first.value.user.persistedAt.seconds ||
-        current.value.user.persistedAt.nanoseconds !== first.value.user.persistedAt.nanoseconds)
-      return { kind: "failure", code: "AI_UNAVAILABLE" };
-    return { kind: "success", value: { ...current.value, presentation: { presentationMode: record.presentationMode } } };
-  } };
-}
-
 const ordinaryReaders: ConversationOperationReaders = { readOutcome: async (context, conversationId, operationId, descriptor) => {
   // Content-free original public descriptors in this owned fixture permit a
   // normal fresh owner read after the consumer has scrubbed its completed ticket.
   const target = descriptor && { ...descriptor, ownerAccountId: context.ownerId } || opened.get(operationId);
   if (!target || target.conversationId !== conversationId || target.ownerAccountId !== context.ownerId || !context.current())
     return { kind: "failure", code: "AI_OUTCOME_UNRESOLVED" };
-  const observed = await store.readOutcome(context.principal, target);
+  const barrier = closing.get(operationId); if (barrier) await barrier;
+  if (!context.current()) return { kind: "failure", code: "AI_OUTCOME_UNRESOLVED" };
+  const observed = await observedStore().readOutcome(context.principal, target);
   if (!context.current() || observed.kind !== "confirmed") return { kind: "failure", code: "AI_OUTCOME_UNRESOLVED" };
   const value: ConversationReadback = observed.value.state === "unresolved" ? { operationId, state: "unresolved" } :
     observed.value.state === "user_saved" ? { operationId, state: "user_saved", userMessage: observed.value.user } :
       { operationId, state: "assistant_saved", userMessage: observed.value.user, assistantMessage: observed.value.assistant };
   return { kind: "success", value };
 } };
-function composition(includePair = true): { operations: ApplicationConversationOperations; runtime: BoundedAiRuntime<Parameters<AuthorizedAsyncConversationGenerationTransport["generate"]>[0]> } {
+function composition(includePair = true, additionalReaders: ConversationOperationReaders = {}): { operations: ApplicationConversationOperations; runtime: BoundedAiRuntime<Parameters<AuthorizedAsyncConversationGenerationTransport["generate"]>[0]> } {
   const model = new AuthorizedAsyncConversationGenerationTransport({ generate: async input => {
-    modelCalls++; check(input.checkIns.length === 0, "Owned empty-source projection must stay empty");
-    return Buffer.from(JSON.stringify({ schemaVersion: "ai_assistant_message_v1", message: "Controlled synthetic Qwen reply" }));
+    modelCalls++; activeModels++;
+    try {
+      check(input.checkIns.length === 0, "Owned empty-source projection must stay empty");
+      return Buffer.from(JSON.stringify({ schemaVersion: "ai_assistant_message_v1", message: "Controlled synthetic Qwen reply" }));
+    } finally { activeModels--; }
   } });
   const runtime = new BoundedAiRuntime(clock, model);
   const executor = new AsyncConversationOperationExecutor({ runtime, clock: effectClock,
@@ -157,15 +129,15 @@ function composition(includePair = true): { operations: ApplicationConversationO
         monotonicNow: () => clock.now(), originalAuthority: { verify: original.verifyRead },
         notePrerequisites: { firestore, sourceReferences: ["backend/emulator-test/zhou-n01-application-store.integration.test.ts#owned-empty-inventory"],
           completeCanonicalUtcInventory: true, immutableOwnerNoteAndTime: true, permanentDeletion: true, noRestoreOrIdReuse: true } });
-      return { authority, reads, store: new AsyncFirestoreConversationStore(observedStore(), epoch, authority),
-        ...(includePair ? { acknowledgedPair: testOnlyPairProvider(original) } : {}) };
+      const bridge = new AsyncFirestoreConversationStore(observedStore(), epoch, authority);
+      return { authority, reads, store: bridge, ...(includePair ? { acknowledgedPair: bridge } : {}) };
     } });
   return { operations: new ApplicationConversationOperations(new FirebaseAdminConversationOperationAuthority(firestore, process.env, () => clock.now()),
-    { uuid: randomUUID, operationKey: () => randomBytes(32).toString("base64url") }, operationClock, executor, ordinaryReaders), runtime };
+    { uuid: randomUUID, operationKey: () => randomBytes(32).toString("base64url") }, operationClock, executor, { ...ordinaryReaders, ...additionalReaders }), runtime };
 }
 async function prepare(operations: ApplicationConversationOperations): Promise<PreparedConversationOperation> {
   const value = successful(await operations.prepare(originalCaller(), { kind: "send", purpose: "checkin_conversation" }));
-  prepared.push(value); return value;
+  prepared.push({ operationId: value.operationId, conversationId: value.conversationId }); return value;
 }
 async function noEffects(value: PreparedConversationOperation): Promise<void> {
   check(!(await firestore.doc(parentPath(value.conversationId)).get()).exists, "Unavailable/cancelled preparation must not create parent");
@@ -288,4 +260,140 @@ test("prepared trusted Cancel terminates without context capture, durable effect
     { signal: controller.signal, current: () => true, acceptCompleteBody: () => { throw new Error("Cancelled preparation must never reach sink"); } });
   check(execute.kind === "failure" && execute.code === "AI_OPERATION_UNAVAILABLE", "Cancelled preparation must refuse execution");
   assert.equal(runtime.state.nonTerminal, 0);
+});
+
+async function dartProbe(baseUri: string): Promise<{ readonly code: number | null; readonly output: unknown; readonly stderrEmpty: boolean }> {
+  // Existing cached locked SDK only; token bytes are confined to the child pipe.
+  // Never put them in argv/environment/files and never forward raw child output.
+  const child = spawn("C:/Users/ASUS/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart.exe",
+    ["run", "tool/ai_wire_controlled_probe.dart", "--isolated-loopback", `--base-uri=${baseUri}`, "--fixture-source=actual-N01-Auth-store-probe"],
+    { cwd: process.cwd(), env: process.env, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
+  let stdout = "", stderrBytes = 0;
+  child.stdout.setEncoding("utf8"); child.stdout.on("data", (value: string) => {
+    stdout += value; if (stdout.length > 32_768) child.kill();
+  });
+  child.stderr.on("data", (value: Buffer) => { stderrBytes += value.length; });
+  const timer = setTimeout(() => child.kill(), 120_000);
+  try {
+    const result = new Promise<number | null>((resolve, reject) => {
+      child.once("error", () => reject(new Error("Controlled cached Dart child could not start")));
+      child.once("close", code => resolve(code));
+      child.stdin.once("error", () => { /* Child completion reports a sanitized failure. */ });
+    });
+    child.stdin.end(`${token}\n`);
+    const code = await result;
+    let output: unknown;
+    try { output = JSON.parse(stdout.trim()); }
+    catch { throw new Error("Controlled Dart probe emitted invalid non-content JSON"); }
+    return { code, output, stderrEmpty: stderrBytes === 0 };
+  } finally { clearTimeout(timer); child.stdin.destroy(); }
+}
+async function listenerClosed(port: number): Promise<boolean> {
+  return new Promise(resolve => {
+    const socket = createConnection({ host: "127.0.0.1", port });
+    const done = (closed: boolean): void => { socket.destroy(); resolve(closed); };
+    socket.once("connect", () => done(false)); socket.once("error", () => done(true)); socket.setTimeout(1000, () => done(false));
+  });
+}
+
+test("actual Dart HTTP client traverses N01 Auth, consumer, executor, SDK storage, canonical history and complete deletion", async () => {
+  const beforeCalls = modelCalls, observedRequests: string[] = [];
+  let consumer: ApplicationConversationOperations;
+  let runtime: ReturnType<typeof composition>["runtime"];
+  let storedMetadataChecked = false, cleanupChecked = false;
+  // Explicit TEST-ONLY ordinary suppliers for the one known owned canonical
+  // pair. This is not a production history paginator or arbitrary-target lookup.
+  const readers: ConversationOperationReaders = {
+    listMessages: async (context, conversationId, beforeSequence) => {
+      if (beforeSequence !== undefined || context.ownerId !== owner || !context.current()) return { kind: "failure", code: "AI_UNAVAILABLE" };
+      const target = [...opened.values()].find(value => value.conversationId === conversationId && value.ownerAccountId === context.ownerId);
+      if (!target) return { kind: "failure", code: "CONVERSATION_UNAVAILABLE" };
+      const barrier = closing.get(target.operationId); if (!barrier) return { kind: "failure", code: "AI_OUTCOME_UNRESOLVED" };
+      confirmed(await barrier);
+      const result = await observedStore().readOutcome(context.principal, target);
+      if (!context.current() || result.kind !== "confirmed" || result.value.state !== "assistant_saved") return { kind: "failure", code: "AI_OUTCOME_UNRESOLVED" };
+      return { kind: "success", value: { messages: [result.value.user, result.value.assistant] } };
+    },
+    deleteConversation: async (context, conversationId) => {
+      if (context.ownerId !== owner || !context.current()) return { kind: "failure", code: "AI_UNAVAILABLE" };
+      const target = [...opened.values()].find(value => value.conversationId === conversationId && value.ownerAccountId === context.ownerId);
+      if (!target) return { kind: "failure", code: "CONVERSATION_UNAVAILABLE" };
+      const barrier = closing.get(target.operationId); if (!barrier) return { kind: "failure", code: "AI_OUTCOME_UNRESOLVED" };
+      confirmed(await barrier);
+      const result = await observedStore().readOutcome(context.principal, target);
+      if (!context.current() || result.kind !== "confirmed" || result.value.state !== "assistant_saved") return { kind: "failure", code: "AI_OUTCOME_UNRESOLVED" };
+      // Check actual authoritative U/A metadata BEFORE physical deletion. The
+      // CLI checks matching wire projections; the store keeps full nanoseconds.
+      const user = await firestore.doc(`${parentPath(conversationId)}/messages/${result.value.user.messageId}`).get();
+      const assistant = await firestore.doc(`${parentPath(conversationId)}/messages/${result.value.assistant.messageId}`).get();
+      storedMetadataChecked = context.current() && user.exists && assistant.exists &&
+        user.createTime!.seconds === result.value.user.persistedAt.seconds && user.createTime!.nanoseconds === result.value.user.persistedAt.nanoseconds &&
+        assistant.createTime!.seconds === result.value.assistant.persistedAt.seconds && assistant.createTime!.nanoseconds === result.value.assistant.persistedAt.nanoseconds &&
+        user.data()!.pendingOperationId === undefined && user.data()!.acceptedAssistantMessageId === result.value.assistant.messageId;
+      check(storedMetadataChecked, "HTTP journey must preserve settled full-precision canonical metadata");
+      // Actual upper admission lease + ALL issued RealStore promises. This is a
+      // narrow owned-fixture coordinator, not proof of JIN's general production
+      // I/O coordinator, restart handling or all targets' cleanup guarantees.
+      const quiescence: ConversationQuiescence = { withTargetClosed: async <T>(requestedOwner: string, requestedConversation: string, work: () => Promise<T>) => {
+        if (requestedOwner !== owner || requestedConversation !== conversationId) return { kind: "unresolved" };
+        const acquired = await consumer.acquireTargetLease(requestedOwner, requestedConversation, "closed");
+        if (acquired.kind !== "acquired") return { kind: "unresolved" };
+        try {
+          await Promise.all([...issuedStoreIo]);
+          if (!acquired.lease.current() || issuedStoreIo.size !== 0 || activeModels !== 0 || runtime.state.nonTerminal !== 0 ||
+              runtime.state.admission !== "open" || runtime.state.quarantined) return { kind: "unresolved" };
+          const originalClose = closing.get(target.operationId);
+          if (!originalClose || (await originalClose).kind !== "confirmed" || !acquired.lease.current()) return { kind: "unresolved" };
+          return { kind: "settled", value: await work() };
+        } finally { acquired.lease.release(); }
+      } };
+      const cleanup = new FirestoreConversationCleanup(new FirebaseAdminFirestoreGateway(firestore), process.env, quiescence);
+      const deleted = await cleanup.deleteOwned(context.principal, owner, conversationId, epoch);
+      if (deleted.kind !== "deleted" || !context.current()) return { kind: "failure", code: "AI_OUTCOME_UNRESOLVED" };
+      check(!(await firestore.doc(parentPath(conversationId)).get()).exists, "HTTP deletion must remove owned parent before returning success");
+      for (const child of ["messages", "message_sources", "effects"])
+        check((await firestore.collection(`${parentPath(conversationId)}/${child}`).get()).empty, "HTTP deletion must remove every owned child collection");
+      check(!(await firestore.doc(`ai_operation_fences/${target.operationId}`).get()).exists, "HTTP deletion must remove the settled owned operation fence");
+      cleanupChecked = true; return { kind: "success", value: undefined };
+    },
+  };
+  ({ operations: consumer, runtime } = composition(true, readers));
+  // Preserve actual transport and consumer paths; this wrapper observes only
+  // fixed operation labels and records content-free own teardown identifiers.
+  const operations: ConversationOperations = {
+    prepare: async (request, input) => {
+      observedRequests.push("prepare"); const result = await consumer.prepare(request, input);
+      if (result.kind === "success") prepared.push({ operationId: result.value.operationId, conversationId: result.value.conversationId });
+      return result;
+    },
+    execute: (request, input, delivery) => { observedRequests.push("execute"); return consumer.execute(request, input, delivery); },
+    cancel: (request, input) => { observedRequests.push("cancel"); return consumer.cancel(request, input); },
+    readOutcome: (request, conversationId, operationId) => { observedRequests.push("readOutcome"); return consumer.readOutcome(request, conversationId, operationId); },
+    listMessages: (request, conversationId, beforeSequence) => { observedRequests.push("readMessages"); return consumer.listMessages(request, conversationId, beforeSequence); },
+    deleteConversation: (request, conversationId) => { observedRequests.push("deleteConversation"); return consumer.deleteConversation(request, conversationId); },
+  };
+  const unused = { execute: async () => err(appFailure("SERVICE_UNAVAILABLE")) };
+  const app = await buildApp({ identityVerifier: verifier, completeOnboarding: unused, getOnboarding: unused,
+    createCheckIn: unused, getCheckIn: unused, getInterestTags: unused, getOwnInterests: unused, replaceOwnInterests: unused,
+    isolatedSlices: { environment: process.env, conversations: operations } });
+  let port = 0;
+  try {
+    const address = await app.listen({ host: "127.0.0.1", port: 0 });
+    const base = new URL(address); check(base.hostname === "127.0.0.1", "Controlled HTTP listener must use numeric loopback"); port = Number(base.port);
+    const result = await dartProbe(address);
+    assert.equal(result.code, 0); check(result.stderrEmpty, "Controlled Dart probe must emit no stderr");
+    const output = result.output as Record<string, unknown>;
+    check(!!output && typeof output === "object" && !Array.isArray(output) && Object.keys(output).length === 5,
+      "Dart probe must emit only its fixed non-content observation schema");
+    check(output.fixtureSource === "actual-N01-Auth-store-probe" && output.result === "pass" && output.operatorFixtureCleanupRequired === false,
+      "Dart probe must confirm successful explicit own fixture cleanup");
+    const expected = ["prepare", "execute", "readOutcome", "readMessages", "deleteConversation"];
+    check(Array.isArray(output.steps) && output.steps.length === expected.length &&
+      output.steps.every((step, index) => step === `${expected[index]}:pass`), "Dart probe must pass the complete five-operation journey");
+    check(observedRequests.length === expected.length && observedRequests.every((step, index) => step === expected[index]),
+      "Actual HTTP server must traverse each selected journey operation exactly once");
+    check(storedMetadataChecked && cleanupChecked, "Backend must independently verify actual SDK metadata and complete own deletion");
+    assert.equal(modelCalls - beforeCalls, 1); assert.equal(activeModels, 0); assert.equal(issuedStoreIo.size, 0); assert.equal(runtime.state.nonTerminal, 0);
+  } finally { await app.close(); }
+  check(port > 0 && await listenerClosed(port), "Owned actual HTTP listener must close after journey");
 });

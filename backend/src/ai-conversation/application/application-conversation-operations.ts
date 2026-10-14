@@ -3,7 +3,8 @@ import type { ConversationCaller, ConversationFailureCode, ConversationOperation
   ConversationResult, PrepareConversation, PreparedConversationOperation } from "../ports/conversation-operations.js";
 import type { ConversationExecution, ConversationExecutionDelivery, ConversationOperationAuthority,
   ConversationOperationClock, ConversationOperationExecutor, ConversationOperationIdentifiers,
-  ConversationOperationReaders, ConversationOrdinaryContext, ExecutedConversation } from "../ports/application-conversation-operations.js";
+  ConversationOperationReaders, ConversationOperationQuiescence, ConversationOrdinaryContext,
+  ConversationTargetLeaseResult, ExecutedConversation } from "../ports/application-conversation-operations.js";
 import type { StoredConversationMessage } from "../ports/real-conversation-store.js";
 
 const uuid = (v: unknown): v is string => typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(v);
@@ -30,7 +31,10 @@ interface Ticket {
   barrier: "closed" | "unresolved";
   closing: Promise<boolean> | undefined;
   closePending: boolean;
+  dispatchSettled: Promise<void> | undefined;
 }
+interface TargetHold { readonly mode: "closed" | "idle"; status: "acquiring" | "leased" | "failed" }
+interface PendingPreparation { readonly ownerId: string; readonly conversationId: string; revoked: boolean; release(): void }
 function stored(v: StoredConversationMessage): boolean {
   if (!v || !uuid(v.messageId) || !Number.isSafeInteger(v.sequence) || v.sequence < 1 ||
       !v.persistedAt || !Number.isSafeInteger(v.persistedAt.seconds) || !Number.isInteger(v.persistedAt.nanoseconds) ||
@@ -52,9 +56,11 @@ function sameMessage(a: StoredConversationMessage, b: StoredConversationMessage)
 /** Selected N01 consumer; no vendor imports, durable receipt, replay or default success.
  * JIN supplies the concrete executor/store/HTTP sink and authoritative readers.
  * A token-bound control scope is not a new Firebase login/session protocol. */
-export class ApplicationConversationOperations implements ConversationOperations {
+export class ApplicationConversationOperations implements ConversationOperations, ConversationOperationQuiescence {
   private readonly tickets = new Map<string, Ticket>();
   private readonly preparedOwners = new Map<string, object>();
+  private readonly targetHolds = new Map<string, TargetHold>();
+  private readonly pendingPreparations = new Set<PendingPreparation>();
   constructor(private readonly authority: ConversationOperationAuthority,
     private readonly identifiers: ConversationOperationIdentifiers, private readonly clock: ConversationOperationClock,
     private readonly executor: ConversationOperationExecutor, private readonly readers: ConversationOperationReaders = {}) {}
@@ -64,21 +70,32 @@ export class ApplicationConversationOperations implements ConversationOperations
         !(input.kind === "send" && (input.conversationId === undefined || uuid(input.conversationId)) ||
           input.kind === "retry" && uuid(input.conversationId) && uuid(input.userMessageId))) return Promise.resolve(failure("REQUEST_INVALID"));
     return this.ordinary(caller, true, async context => {
+      if (input.conversationId !== undefined && this.targetHeld(context.ownerId, input.conversationId)) return failure("AI_OPERATION_CONFLICT");
       const prior = this.preparedOwners.get(context.ownerId);
       if (prior !== undefined) return failure("AI_OPERATION_CONFLICT");
       const reservation = Object.freeze({}); this.preparedOwners.set(context.ownerId, reservation);
-      const release = (): void => { if (this.preparedOwners.get(context.ownerId) === reservation) this.preparedOwners.delete(context.ownerId); };
+      let pending: PendingPreparation | undefined;
+      const release = (): void => {
+        if (this.preparedOwners.get(context.ownerId) === reservation) this.preparedOwners.delete(context.ownerId);
+        if (pending) this.pendingPreparations.delete(pending);
+      };
+      if (input.conversationId !== undefined) {
+        pending = { ownerId: context.ownerId, conversationId: input.conversationId, revoked: false, release };
+        this.pendingPreparations.add(pending);
+      }
       context.signal.addEventListener("abort", release, { once: true });
       try {
         if (input.conversationId !== undefined) {
           if (!this.readers.verifyTarget) return failure("AI_UNAVAILABLE");
           const target = await this.readers.verifyTarget(context, input.conversationId, input.kind === "retry" ? input.userMessageId : undefined);
           if (!context.current()) return failure("AI_UNAVAILABLE");
+          if (pending?.revoked || this.targetHeld(context.ownerId, input.conversationId)) return failure("AI_OPERATION_CONFLICT");
           if (target.kind !== "success") return target;
         }
         const operationId = this.identifiers.uuid(), conversationId = input.conversationId ?? this.identifiers.uuid(),
           userMessageId = input.kind === "retry" ? input.userMessageId : this.identifiers.uuid(), operationKey = this.identifiers.operationKey();
         const now = this.clock.now(), utc = this.clock.utcMilliseconds();
+        if (pending?.revoked || this.targetHeld(context.ownerId, conversationId)) return failure("AI_OPERATION_CONFLICT");
         if (!context.current() || !uuid(operationId) || !uuid(conversationId) || !uuid(userMessageId) ||
             operationId === conversationId || operationId === userMessageId || conversationId === userMessageId ||
             !key(operationKey) || this.tickets.has(operationId) || !Number.isFinite(now) || !Number.isSafeInteger(utc) ||
@@ -88,7 +105,7 @@ export class ApplicationConversationOperations implements ConversationOperations
             targetKind: input.kind === "send" && input.conversationId === undefined ? "reserved_new" : "existing" }),
           session: Object.freeze({}), tokenIdentity: Object.freeze({}), digest: caller.tokenInstance, key: operationKey,
           phase: "prepared", deliveryAbandoned: false, expiresAt: now + 15_000, stopExpiry: () => {}, processing: undefined, caller: undefined,
-          identity: undefined, execution: undefined, barrier: "closed", closing: undefined, closePending: false };
+          identity: undefined, execution: undefined, barrier: "closed", closing: undefined, closePending: false, dispatchSettled: undefined };
         const preparationExpiresAt = new Date(utc + 15_000).toISOString();
         this.tickets.set(operationId, ticket); this.preparedOwners.set(context.ownerId, ticket);
         ticket.stopExpiry = this.clock.at(ticket.expiresAt, () => { if (ticket.phase === "prepared") this.forget(ticket); });
@@ -105,6 +122,7 @@ export class ApplicationConversationOperations implements ConversationOperations
     if (!validText(input.text)) return Promise.resolve(failure("AI_INPUT_INVALID"));
     const ticket = this.lookup(caller, input.operationId, input.operationKey);
     if (!ticket) return Promise.resolve(failure("AI_OPERATION_UNAVAILABLE"));
+    if (this.targetHeld(ticket.ownerId, ticket.operation.conversationId)) return Promise.resolve(failure("AI_OPERATION_CONFLICT"));
     if (ticket.phase !== "prepared") return Promise.resolve(failure("AI_OPERATION_CONFLICT"));
     if (!this.preparedCurrent(ticket)) { this.forget(ticket); return Promise.resolve(failure("AI_OPERATION_UNAVAILABLE")); }
     // Old Transport cannot satisfy F02. Preserve the prepared ticket for the real
@@ -116,11 +134,13 @@ export class ApplicationConversationOperations implements ConversationOperations
     ticket.processing = { text: input.text }; ticket.caller = caller;
     ticket.identity = Object.freeze({ principal: Object.freeze({ firebaseUid: ticket.uid }), ownerId: ticket.ownerId,
       session: ticket.session, tokenInstance: ticket.tokenIdentity, originalRequest: Object.freeze({}) });
-    return this.run(ticket, delivery);
+    let settled!: () => void;
+    ticket.dispatchSettled = new Promise<void>(resolve => { settled = resolve; });
+    return this.run(ticket, delivery).finally(settled);
   }
   private async run(ticket: Ticket, delivery: ConversationExecutionDelivery): Promise<ConversationResult<ExecutedConversation>> {
     let acceptedPair: ExecutedConversation | undefined;
-    const alive = (): boolean => ticket.phase === "running" && !!ticket.processing && this.deliveryCurrent(delivery);
+    const alive = (): boolean => ticket.phase === "running" && !!ticket.processing && this.targetAllowsDispatch(ticket) && this.deliveryCurrent(delivery);
     const abort = (): void => { this.terminal(ticket); void this.close(ticket); };
     delivery.signal.addEventListener("abort", abort, { once: true });
     try {
@@ -263,6 +283,50 @@ export class ApplicationConversationOperations implements ConversationOperations
       }
       return result;
     });
+  }
+
+  async acquireTargetLease(ownerAccountId: string, conversationId: string,
+    mode: "closed" | "idle"): Promise<ConversationTargetLeaseResult> {
+    if (!uuid(ownerAccountId) || !uuid(conversationId) || (mode !== "closed" && mode !== "idle")) return { kind: "unresolved" };
+    const target = this.targetKey(ownerAccountId, conversationId), previous = this.targetHolds.get(target);
+    if (previous && previous.status !== "failed") return { kind: "unresolved" };
+    // No yielding operation occurs before the target admission hold is installed.
+    // A later explicit attempt may replace a failed content-free hold; no timer or
+    // background retry releases it and no old lease can release this generation.
+    const hold: TargetHold = { mode, status: "acquiring" }; this.targetHolds.set(target, hold);
+    const matching = [...this.tickets.values()].filter(t => t.ownerId === ownerAccountId && t.operation.conversationId === conversationId);
+    const formerlyTerminal = new Set(matching.filter(t => t.phase === "terminal"));
+    if (mode === "closed") {
+      for (const pending of this.pendingPreparations) {
+        if (pending.ownerId === ownerAccountId && pending.conversationId === conversationId) { pending.revoked = true; pending.release(); }
+      }
+      // Revoke every matching local writer before starting ANY close transaction.
+      for (const ticket of matching) this.terminal(ticket);
+    }
+    try {
+      const closing = matching.map(ticket => mode === "closed" || formerlyTerminal.has(ticket) ? this.close(ticket, true) : undefined);
+      await Promise.all(matching.map(ticket => ticket.dispatchSettled));
+      const barriers = await Promise.all(matching.map((ticket, i) => closing[i] ??
+        (ticket.phase === "prepared" ? Promise.resolve(true) : this.close(ticket))));
+      if (barriers.some(confirmed => !confirmed) || this.targetHolds.get(target) !== hold) {
+        hold.status = "failed"; return { kind: "unresolved" };
+      }
+      hold.status = "leased";
+      return { kind: "acquired", lease: Object.freeze({ ownerAccountId, conversationId, mode,
+        current: () => this.targetHolds.get(target) === hold && hold.status === "leased",
+        release: () => { if (this.targetHolds.get(target) === hold && hold.status === "leased") this.targetHolds.delete(target); } }) };
+    } catch {
+      hold.status = "failed"; return { kind: "unresolved" };
+    }
+  }
+
+  private targetKey(ownerAccountId: string, conversationId: string): string { return `${ownerAccountId}/${conversationId}`; }
+  private targetHeld(ownerAccountId: string, conversationId: string): boolean { return this.targetHolds.has(this.targetKey(ownerAccountId, conversationId)); }
+  private targetAllowsDispatch(ticket: Ticket): boolean {
+    const hold = this.targetHolds.get(this.targetKey(ticket.ownerId, ticket.operation.conversationId));
+    // An idle acquisition drains already running commands without revoking them;
+    // every new execute is separately refused before its synchronous consumption.
+    return hold === undefined || (hold.mode === "idle" && hold.status === "acquiring");
   }
 
   private lookup(caller: ConversationCaller, operationId: string, operationKey: string): Ticket | undefined {
