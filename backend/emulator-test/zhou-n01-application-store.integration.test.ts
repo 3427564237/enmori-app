@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createConnection } from "node:net";
 import { after, before, test } from "node:test";
 import { deleteApp, initializeApp } from "firebase-admin/app";
@@ -265,7 +265,13 @@ test("prepared trusted Cancel terminates without context capture, durable effect
 async function dartProbe(baseUri: string): Promise<{ readonly code: number | null; readonly output: unknown; readonly stderrEmpty: boolean }> {
   // Existing cached locked SDK only; token bytes are confined to the child pipe.
   // Never put them in argv/environment/files and never forward raw child output.
-  const child = spawn("C:/Users/ASUS/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart.exe",
+  // JIN integration-only portability: operator PATH supplies its already pinned
+  // SDK. Verify BEFORE sending a token; no install, download or alternate version.
+  const executable=process.platform==="win32"?"dart.exe":"dart";
+  const version=spawnSync(executable,["--version"],{encoding:"utf8",windowsHide:true,timeout:10000,maxBuffer:4096});
+  check(version.status===0&&!version.error&&/^Dart SDK version: 3\.13\.2(?:\s|$)/.test(`${version.stdout}${version.stderr}`.trim()),
+    "Existing pinned Dart3.13.2 must be supplied on the controlled runtime PATH");
+  const child = spawn(executable,
     ["run", "tool/ai_wire_controlled_probe.dart", "--isolated-loopback", `--base-uri=${baseUri}`, "--fixture-source=actual-N01-Auth-store-probe"],
     { cwd: process.cwd(), env: process.env, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
   let stdout = "", stderrBytes = 0;
