@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { AsyncConversationOperationExecutor, type AsyncConversationExecutionProviders } from "../../src/ai-conversation/application/async-conversation-operation-executor.js";
+import { ApplicationConversationOperations } from "../../src/ai-conversation/application/application-conversation-operations.js";
 import type { AsyncAcknowledgedConversationPair, ExecutedConversation, RequestOriginalConversationIdentity } from "../../src/ai-conversation/ports/application-conversation-operations.js";
 import type { AsyncConversationAuthority } from "../../src/ai-conversation/ports/async-conversation.js";
 import type { IdentityVerificationResult } from "../../src/shared/ports/identity-verifier.js";
+import type { RealContextReadPort } from "../../src/ai-conversation/ports/real-context-reader.js";
 import { valid } from "../ai-runtime/support.js";
 import { deferred, fixture, id, operation, timestamp, until } from "./async-conversation-fakes.js";
 
@@ -12,6 +14,7 @@ function setup(options: { sink?: boolean; pair?: boolean } = {}) {
   const f = fixture(), controller = new AbortController(), accepted: ExecutedConversation[] = [];
   let canonicalAssistant = "", textCalls = 0, authCalls = 0, pairCalls = 0, originals: RequestOriginalConversationIdentity[] = [];
   let current = true, verification: IdentityVerificationResult = { kind: "verified", principal: f.who.principal };
+  let verificationHook: (() => Promise<IdentityVerificationResult>) | undefined;
   let pairHook: ((pair: Pair) => Promise<Awaited<ReturnType<AsyncAcknowledgedConversationPair["read"]>>>) | undefined;
   let sinkHook: ((body: ExecutedConversation) => boolean) | undefined, terminalHook: (() => void) | undefined, terminals = 0;
   f.store.assistantHook = async (context, user, getter) => {
@@ -45,7 +48,7 @@ function setup(options: { sink?: boolean; pair?: boolean } = {}) {
     gates: f.gates, clock: { monotonicNow: () => f.clock.now(), utcNow: () => ({ ...timestamp }) } };
   const executor = new AsyncConversationOperationExecutor(providers);
   const create = (op = operation(), text = "Synthetic current input", retryUser?: Parameters<typeof executor.create>[0]["retryUser"]) => executor.create({ identity: f.who,
-    operation: op, text: () => { textCalls++; return text; }, verifyCurrentAuth: async () => { authCalls++; return verification; },
+    operation: op, text: () => { textCalls++; return text; }, verifyCurrentAuth: async () => { authCalls++; return verificationHook ? verificationHook() : verification; },
     ...(retryUser ? { retryUser } : {}) }, { signal: controller.signal, current: () => current,
       onTerminal: () => { terminals++; terminalHook?.(); },
       ...(options.sink === false ? {} : { acceptCompleteBody: (body: ExecutedConversation) => {
@@ -54,8 +57,9 @@ function setup(options: { sink?: boolean; pair?: boolean } = {}) {
   const finish = async (handle: ReturnType<typeof create>, message = "A quiet moment.") => {
     const result = handle.dispatch(); await until(() => f.calls.length === 1); f.calls[0]!.completion.resolve(valid(message)); return result;
   };
-  return { f, create, finish, providers, accepted, controller, originals,
+  return { f, create, finish, executor, providers, accepted, controller, originals,
     setCurrent: (value: boolean) => { current = value; }, setVerification: (value: IdentityVerificationResult) => { verification = value; },
+    setVerificationHook: (value: typeof verificationHook) => { verificationHook = value; },
     setPairHook: (value: typeof pairHook) => { pairHook = value; }, setSinkHook: (value: typeof sinkHook) => { sinkHook = value; },
     setTerminalHook: (value: typeof terminalHook) => { terminalHook = value; },
     counts: () => ({ textCalls, authCalls, pairCalls }), terminals: () => terminals };
@@ -200,4 +204,88 @@ test("Retry projects the original authoritative U sequence and nanosecond anchor
   assert.deepEqual({ messageId: result.value.userMessage.messageId, sequence: result.value.userMessage.sequence,
     persistedAt: result.value.userMessage.persistedAt }, original);
   assert.equal(s.f.store.rows.size, 1); assert.equal(s.f.store.rows.get(op.userMessageId)!.user, original);
+});
+test("actual inner N01 consumer and executor join with explicit fake Ports and synchronously scrub the outer ticket", async () => {
+  const s = setup(), sink: ExecutedConversation[] = []; let next = 500, scrubbed = 0;
+  const consumer = new ApplicationConversationOperations({ resolve: async () => ({ kind: "success", value: { ownerId: id(1) } }) },
+    { uuid: () => id(next++), operationKey: () => "A".repeat(43) },
+    { now: () => s.f.clock.now(), at: (time, wake) => s.f.clock.at(time, wake), utcMilliseconds: () => timestamp.seconds * 1000 },
+    { create: (input, delivery) => s.executor.create(input, { ...delivery, onTerminal: () => {
+      delivery.onTerminal?.(); scrubbed++; assert.equal(input.text(), undefined);
+    } }) });
+  const caller = { principal: s.f.who.principal, tokenInstance: "a".repeat(64),
+    verifyCurrentAuth: async () => ({ kind: "verified" as const, principal: s.f.who.principal }) };
+  const preparation = await consumer.prepare(caller, { kind: "send", purpose: "checkin_conversation" });
+  assert.equal(preparation.kind, "success"); if (preparation.kind !== "success") return;
+  assert.equal(s.f.calls.length, 0); assert.equal(s.f.store.calls.length, 0);
+  const result = consumer.execute(caller, { operationId: preparation.value.operationId, operationKey: preparation.value.operationKey,
+    text: "Explicit coupled synthetic input" }, { signal: s.controller.signal, current: () => true,
+    acceptCompleteBody: body => { assert.equal(s.f.runtime.state.nonTerminal, 1); sink.push(body); return true; } });
+  await until(() => s.f.calls.length === 1); s.f.calls[0]!.completion.resolve(valid());
+  const completed = await result; assert.equal(completed.kind, "success"); if (completed.kind !== "success") return;
+  assert.deepEqual(completed.value, sink[0]); assert.equal(completed.value.userMessage.text, "Explicit coupled synthetic input");
+  assert.equal(scrubbed, 1); assert.equal(s.f.runtime.state.nonTerminal, 0); assert.equal(sink.length, 1);
+});
+test("read capability is bound before the underlying reader's first fresh verification", async () => {
+  const s = setup(), factory = s.providers.ports; let verified = 0;
+  const executor = new AsyncConversationOperationExecutor({ ...s.providers, ports: original => {
+    const ports = factory(original), reads = ports.reads;
+    const authorizedReads: RealContextReadPort = {
+      openStart: async context => { assert.deepEqual(await original.verifyRead(context), { kind: "read", value: context.principal });
+        verified++; return reads.openStart(context); },
+      readCurrent: (context, dependencies) => reads.readCurrent(context, dependencies),
+    };
+    return { ...ports, reads: authorizedReads };
+  } });
+  const handle = executor.create({ identity: s.f.who, operation: operation(), text: () => "Synthetic current input",
+    verifyCurrentAuth: async () => ({ kind: "verified", principal: s.f.who.principal }) },
+    { signal: s.controller.signal, current: () => true, acceptCompleteBody: body => { s.accepted.push(body); return true; } });
+  assert.equal((await s.finish(handle)).kind, "success"); assert.equal(verified, 1);
+});
+test("only the exact approved read context can borrow the original token verifier", async () => {
+  const s = setup(), handle = s.create(), result = handle.dispatch(); await until(() => s.f.calls.length === 1);
+  const context = s.f.reads.opened[0]!, original = s.originals[0]!;
+  assert.deepEqual(await original.verifyRead(context), { kind: "read", value: s.f.who.principal });
+  const calls = s.counts().authCalls;
+  for (const lookalike of [context, { ...context, session: {} }, { ...context, originalRequest: {} },
+    { ...context, principal: { firebaseUid: "replacement" } }, { ...context, deadline: context.deadline + 1 },
+    { ...context, signal: new AbortController().signal }]) {
+    assert.deepEqual(await original.verifyRead({ ...lookalike }), { kind: "denied" });
+  }
+  assert.equal(s.counts().authCalls, calls);
+  assert.deepEqual(await original.verify({ ...s.f.who, tokenInstance: {} }), { kind: "invalid" });
+  assert.equal(s.counts().authCalls, calls);
+  await handle.cancel(); s.f.calls[0]!.completion.resolve(valid()); assert.deepEqual(await result, { kind: "terminated" });
+});
+test("read verifier maps fresh identity failures and refuses replacement/aborted original control", async () => {
+  const s = setup(), handle = s.create(), result = handle.dispatch(); await until(() => s.f.calls.length === 1);
+  const context = s.f.reads.opened[0]!, original = s.originals[0]!;
+  for (const kind of ["invalid", "forbidden", "dependency_unavailable"] as const) {
+    s.setVerification({ kind }); assert.deepEqual(await original.verifyRead(context),
+      { kind: kind === "dependency_unavailable" ? "unavailable" : "denied" });
+  }
+  s.setVerification({ kind: "verified", principal: { firebaseUid: "replacement" } });
+  assert.deepEqual(await original.verifyRead(context), { kind: "denied" });
+  s.setCurrent(false); const calls = s.counts().authCalls;
+  assert.deepEqual(await original.verifyRead(context), { kind: "terminated" }); assert.equal(s.counts().authCalls, calls);
+  s.controller.abort(); assert.deepEqual(await original.verifyRead(context), { kind: "terminated" });
+  s.f.calls[0]!.completion.resolve(valid()); assert.deepEqual(await result, { kind: "terminated" });
+});
+test("late verification after synchronous read-context disposal cannot reauthorize an SDK read", async () => {
+  const s = setup(), handle = s.create(), result = handle.dispatch(); await until(() => s.f.calls.length === 1);
+  const context = s.f.reads.opened[0]!, original = s.originals[0]!, pending = deferred<IdentityVerificationResult>();
+  s.setVerificationHook(() => pending.promise);
+  const read = original.verifyRead(context); s.controller.abort();
+  assert.deepEqual(await original.verifyRead(context), { kind: "terminated" });
+  pending.resolve({ kind: "verified", principal: s.f.who.principal }); assert.deepEqual(await read, { kind: "terminated" });
+  s.f.calls[0]!.completion.resolve(valid()); assert.deepEqual(await result, { kind: "terminated" });
+});
+test("read verification cannot outlive its accepted deadline or tolerate a monotonic rollback", async () => {
+  for (const instant of [-1, 60_000]) {
+    const s = setup(), handle = s.create(), result = handle.dispatch(); await until(() => s.f.calls.length === 1);
+    const context = s.f.reads.opened[0]!, original = s.originals[0]!, calls = s.counts().authCalls;
+    s.f.clock.time = instant;
+    assert.deepEqual(await original.verifyRead(context), { kind: "terminated" }); assert.equal(s.counts().authCalls, calls);
+    await handle.cancel(); s.f.calls[0]!.completion.resolve(valid()); assert.deepEqual(await result, { kind: "terminated" });
+  }
 });

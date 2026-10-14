@@ -4,10 +4,14 @@ import type { AsyncCloseObservation, AsyncConversationIdentity, AsyncEffectConte
 import type { ConversationCaller, ConversationReadback, ConversationResult } from "./conversation-operations.js";
 import type { StoredConversationMessage } from "./real-conversation-store.js";
 import type { PresentationMetadata } from "./conversation-lifecycle.js";
+import type { AcceptedContextRead, ContextReadResult } from "./real-context-reader.js";
 
 export interface RequestOriginalConversationIdentity {
   current(identity: AsyncConversationIdentity): boolean;
   verify(identity: AsyncConversationIdentity): Promise<IdentityVerificationResult>;
+  /** Only the exact approved Application start context, under its original
+   * token instance and runtime budget. No reusable identity or write permit. */
+  verifyRead(context: AcceptedContextRead): Promise<ContextReadResult<AuthPrincipal>>;
 }
 /** JIN's guarded projection of the actual settled canonical pair, including its
  * selected presentation. Fresh owner/source/full-precision expiry/all-pending
