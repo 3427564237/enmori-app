@@ -6,6 +6,8 @@
 - Confirmed human answer: **"批准 EB01–EB06，EB07先仅复制链接（推荐）"**.
 - Status: confirmed PM interface/implementation-scope selection; independent technical review and actual provider/runtime acceptance remain separate.
 
+Later human instruction **"直接跳转打开比较好吧"** is recorded in [S-PM-1015-LI-EVENT-EXTERNAL-OPEN](2026-10-15-li-event-external-open-selection.md). It prospectively selects direct external opening with auxiliary copying and supersedes only EB07's copy-only restriction below. The original selection text is retained for history; EB01–EB06 and all remaining boundaries still apply.
+
 ## Exact selected sources and supersession
 
 This adopts EB01–EB06 of SHI's [#109 candidate at exact718da39440a6a3d67cce5ad9a3efbbb7f5acbc40](https://github.com/3427564237/enmori-app/blob/718da39440a6a3d67cce5ad9a3efbbb7f5acbc40/docs/planning/2026-10-15-shi-real-event-browse-contract-candidate.md), with EB07 limited to **copying the validated source URL**. The selected candidate's source validation, first-batch/missing-field UI text, failure/privacy boundaries and ownership apply to these rows. The external-browser option is not selected. No later candidate change is automatically approved.

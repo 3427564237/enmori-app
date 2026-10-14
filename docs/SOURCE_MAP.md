@@ -2,6 +2,8 @@
 
 ## Real Event interface selection — 2026-10-15
 
+- **S-PM-1015-LI-EVENT-EXTERNAL-OPEN:** [Confirmed direct external-browser action](decisions/2026-10-15-li-event-external-open-selection.md). Human LI chooses explicit direct source-page opening as the primary EB07 action, with copying auxiliary; this supersedes only the copy-only restriction in the earlier row selection. Opening/returning does not set Going or prove registration. Provider rights, technical/platform evidence and all EB01–EB06 rules remain separate; no new package is selected.
+
 - **S-PM-1015-LI-REAL-EVENT-CONTRACT:** [Confirmed real Event browse/Detail interface selection](decisions/2026-10-15-li-real-event-contract-selection.md). Human LI approves exact #109 EB01–EB06 and EB07 copy-link only: separate activity routes/two protected Backend reads, transient SG first batch20, strict occurrence/source projection, no database/cache/pagination, memory-only5min and explicit missing end. Existing Home/See All recommendation rules remain. This resolves the concrete choices reserved by S-PM-1014-LI-REAL-EVENT-BROWSE; ZHOU technical review, provider display/link permission, actual validation and runtime/device acceptance remain separate.
 
 ## Sprint planning updates — 2026-09-24–25
