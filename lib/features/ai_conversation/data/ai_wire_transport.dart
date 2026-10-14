@@ -26,7 +26,7 @@ final class AiWireResponse {
 /// A response settles only after its complete body has arrived.
 /// Implementations must observe [AiWireRequest.abort] throughout dispatch/body
 /// reception, cancel that request only, and never close a shared client.
-/// No real network implementation is released by the isolated client slice.
+/// Explicit network composition is owned by the selected isolated app boundary.
 abstract interface class AiWireTransport {
   Future<AiWireResponse> send(AiWireRequest request);
 }

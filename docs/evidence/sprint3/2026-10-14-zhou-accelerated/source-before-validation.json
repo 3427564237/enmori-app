@@ -1,0 +1,1536 @@
+{
+  "capturedAt": "2026-10-14T08:28:13.048Z",
+  "head": "ddd991f82458da949bd29daa43134833e8e5b2a9",
+  "files": [
+    {
+      "path": ".fvmrc",
+      "bytes": 27,
+      "sha256": "f35519711e24b639f1ca79cfa7847307ba6b75f0b6d1d76734ecc9f2cf0cceb0"
+    },
+    {
+      "path": "analysis_options.yaml",
+      "bytes": 1544,
+      "sha256": "5ce9d1d7c7345fed2bcb3084f0cdd282a3ad4cd856cfb4a9ac87fc9b6a8130e8"
+    },
+    {
+      "path": "backend/tsconfig.json",
+      "bytes": 655,
+      "sha256": "6222c9778fb737eb0cffd8a635e52afbcc7e67f4e1faff27cc42446476975852"
+    },
+    {
+      "path": "backend/emulator-test/account-preferences.integration.test.ts",
+      "bytes": 5721,
+      "sha256": "d2a3da56c524aa46513ae7d5dce1037a6e945722b5c8da6001d86c36de2edf66"
+    },
+    {
+      "path": "backend/emulator-test/blocker-slices.integration.test.ts",
+      "bytes": 19816,
+      "sha256": "1d10480f0028f96ce417e765473ae51b4e8b264745ed0112e701419f7a3ae123"
+    },
+    {
+      "path": "backend/emulator-test/combined-read-slices.integration.test.ts",
+      "bytes": 8951,
+      "sha256": "64a9204355ad86cdcc2e99bbefcd92f9be7570914719f90cf28e6cf6d75965be"
+    },
+    {
+      "path": "backend/emulator-test/firebase-emulator.integration.test.ts",
+      "bytes": 25239,
+      "sha256": "2902d7f9f6c2c27baff5734f1a34843ad92602bbe0bd5d212fe134cda46492de"
+    },
+    {
+      "path": "backend/emulator-test/personas.integration.test.ts",
+      "bytes": 39595,
+      "sha256": "b7b7d80fd65c5204d3130d05b927fd1afdd54d98866a0160388ef165e50193f3"
+    },
+    {
+      "path": "backend/emulator-test/r13-cross-boundary.integration.test.ts",
+      "bytes": 21831,
+      "sha256": "14db3f7b7c40abd65ae0f594cb42cf60f8d1709f1520df87960d6443175a4d6b"
+    },
+    {
+      "path": "backend/emulator-test/s2-event-recommendations.integration.test.ts",
+      "bytes": 10879,
+      "sha256": "e0316b3b6ce0d554d185dceecd888ebb07c48f18f9d876a47cde54eafef5459a"
+    },
+    {
+      "path": "backend/src/account/application/account-model.ts",
+      "bytes": 767,
+      "sha256": "966f4c0c3fff60012e276030a2c76e35b22f9a1f09f95319362b95a9f8a1a4d7"
+    },
+    {
+      "path": "backend/src/account/application/own-account-preferences.ts",
+      "bytes": 3232,
+      "sha256": "c359ed6bcab2f96f13b6f1590390dcef30fd1411f00e80d4281a73e86218b4fd"
+    },
+    {
+      "path": "backend/src/account/domain/profile-values.ts",
+      "bytes": 759,
+      "sha256": "fb7fcd714f1a57f7c7e2a19b16141371273aa3417c25d798bb89a0ef221ccafe"
+    },
+    {
+      "path": "backend/src/account/infrastructure/firestore-account-preferences-repository.ts",
+      "bytes": 5661,
+      "sha256": "2c89a9ffbd3675db5c3e5925b1b4bacc97d720ebd6b1fd2b142bb0c63b55f86a"
+    },
+    {
+      "path": "backend/src/account/ports/account-preferences-repository.ts",
+      "bytes": 938,
+      "sha256": "498d777b9031b19adfaeaa1215a272c2e1f71691783adccf6034fdc06a85d482"
+    },
+    {
+      "path": "backend/src/account/transport/register-routes.ts",
+      "bytes": 2368,
+      "sha256": "5e9b1bb4ef740fa5fd560fa9f053a2529b4be11f0b7c861e08d873e917be7f73"
+    },
+    {
+      "path": "backend/src/account/transport/schemas.ts",
+      "bytes": 2401,
+      "sha256": "f8228f768971d042b62f19c55ebb45a941dd7ad2bd74e0247af2b2f4e07c9a5a"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/async-conversation-application.ts",
+      "bytes": 21119,
+      "sha256": "8d0dfe237f5b73bbf566f56eda06c6b9ac9b52e75c7917d70c42d915bdb981cc"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/async-conversation-generation-transport.ts",
+      "bytes": 1660,
+      "sha256": "f6c06bf29dcc9fb0a9105750bd5a4bed8347f9d4c660c7ff46b9dfdabe8d1be5"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/capture-context.ts",
+      "bytes": 3503,
+      "sha256": "00ea2400f865824f1b14fae1916cbd30903db54d6769f837eba1951b38a08b3d"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/conversation-application.ts",
+      "bytes": 13604,
+      "sha256": "006a10fcc2597bc89e57757d31c9683e0c91a2a64e0bb3723b82ecc1cf053dd1"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/real-context-reader.ts",
+      "bytes": 16654,
+      "sha256": "0104eb6cc7eeb0ef6285bbb64917321e67c82325efd221f4eed2258d4c96784b"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/real-write-control.ts",
+      "bytes": 3344,
+      "sha256": "a9cf32c960b9259b08282f53ff7784a62ffb3d668809c0f9410f6b26b605f34e"
+    },
+    {
+      "path": "backend/src/ai-conversation/domain/canonical-ai-message-location.ts",
+      "bytes": 1803,
+      "sha256": "cad78ef644d0331d7a1f763748ab0e0745cac1a46e3140691ca671bfb2065fd9"
+    },
+    {
+      "path": "backend/src/ai-conversation/domain/real-effect-expiry.ts",
+      "bytes": 5250,
+      "sha256": "725b5ae302ae06b928000f1f350e02ae16284ddd64677f41482b5ade311ce598"
+    },
+    {
+      "path": "backend/src/ai-conversation/domain/real-retention-resolver.ts",
+      "bytes": 10649,
+      "sha256": "c5ebc64b5e2dcc86635fca0497d94c2886e5aeccd3fbc84639d643d519d5e20a"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firebase-admin-async-conversation-authority.ts",
+      "bytes": 3840,
+      "sha256": "c7b5b462f3d608f64068b0f4b7dd7176ae51f945dc735c9320570f0ca9022eb1"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firebase-admin-real-context-reader.ts",
+      "bytes": 17802,
+      "sha256": "489ea09507bcd152966c2ccecf38b134b52397400d101e58d2d6949574a1dc32"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/isolated-context-firestore.ts",
+      "bytes": 1176,
+      "sha256": "62e55ff6810f258922d05ae20b8f66fe8d14ad424f859f42543bf300baeb9403"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/real-context-records.ts",
+      "bytes": 5473,
+      "sha256": "89d05ecbdbaaf59c12ec4eb05bdec693f3b55d9c7e07c62c4161bcdf2586b622"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/async-conversation.ts",
+      "bytes": 7434,
+      "sha256": "4d01e8b0609b369320e2a1c3f8c7c3680d283450ccd2952f30b8542aeada8aff"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/conversation-lifecycle.ts",
+      "bytes": 5136,
+      "sha256": "4f635fcd62017feab7d86427b4ab40b1b4e8c54e7c25872821252e82a1f59fff"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/real-context-reader.ts",
+      "bytes": 6068,
+      "sha256": "6534e60b5526ef9c05d63f8512aac8e95a933d48a042b5cc45471c17671d61b7"
+    },
+    {
+      "path": "backend/src/ai-runtime/application/bounded-ai-runtime.ts",
+      "bytes": 17685,
+      "sha256": "6b2689f8e07c6a93457a9742c4839b96ae371a8ff76b35fca24507ad2e4848ca"
+    },
+    {
+      "path": "backend/src/ai-runtime/domain/parse-output.ts",
+      "bytes": 3719,
+      "sha256": "53e53f2cc735599f3ebb431bf40a5002339e95e33ab3050aa10eba377bb91c25"
+    },
+    {
+      "path": "backend/src/ai-runtime/infrastructure/monotonic-runtime-clock.ts",
+      "bytes": 716,
+      "sha256": "2a03b1aed9489059100fdcc9362659c12f7b535dd488bf2001b115b51b8132d5"
+    },
+    {
+      "path": "backend/src/ai-runtime/ports/generation-transport.ts",
+      "bytes": 815,
+      "sha256": "49e4b67f24eff04286ebd717a5dece28ae0cfdaabd81ff3c65d9b4604106f007"
+    },
+    {
+      "path": "backend/src/ai-runtime/ports/runtime-clock.ts",
+      "bytes": 268,
+      "sha256": "a4f1a242414046d7d68d20c51e1d6b5fc777acad71b4f6cb84e22762f94f40c0"
+    },
+    {
+      "path": "backend/src/bootstrap/build-app.ts",
+      "bytes": 5342,
+      "sha256": "081b9f1b21694cab4b7a8d12033b9824fe4ae809d208ba10ed84907982c4334b"
+    },
+    {
+      "path": "backend/src/bootstrap/controlled-runtime-configuration.ts",
+      "bytes": 1736,
+      "sha256": "282326bf2962fb5b30cf9d5b717898a5d7604a7748cec231f9844954de506708"
+    },
+    {
+      "path": "backend/src/bootstrap/controlled-runtime.ts",
+      "bytes": 5301,
+      "sha256": "9f7148a828b624a0b0448123264554d5f4afbed589b786093d4d011ac0521bbf"
+    },
+    {
+      "path": "backend/src/check-ins/application/check-in-history.ts",
+      "bytes": 5093,
+      "sha256": "dd0494666a6e2afaac34ffe874ed0fe977767eb45922640bd84c74bdd89b12ee"
+    },
+    {
+      "path": "backend/src/check-ins/application/check-in-model.ts",
+      "bytes": 200,
+      "sha256": "33be53485a0652020e3938cba18bf39dc4d0ac290c7e6e1fbf58b5c38bd4cac4"
+    },
+    {
+      "path": "backend/src/check-ins/application/create-check-in.ts",
+      "bytes": 2802,
+      "sha256": "64e53a4b30992cf2792da925f1320825573591b63c272ca30455ada4c8c5a583"
+    },
+    {
+      "path": "backend/src/check-ins/application/get-check-in.ts",
+      "bytes": 1168,
+      "sha256": "af9e475438769c369df42711cc12b2121a81a0ae2a12b30a3c10530f2cfff92d"
+    },
+    {
+      "path": "backend/src/check-ins/domain/note.ts",
+      "bytes": 759,
+      "sha256": "f2a2688b97ffc42df3f855803280e9a0eb6ea589b501810e766711b83c6f316b"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/aes-gcm-history-cursor-codec.ts",
+      "bytes": 3345,
+      "sha256": "5e915ff381eb30fbdaecf525db315633d0ec205a6209c048c10632ddcebfb570"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/firebase-admin-check-in-history-gateway.ts",
+      "bytes": 1972,
+      "sha256": "ca66b2ae3bebab52a42a0a50a68bfb9c88fb2aba6ec05b873199daf33f11172d"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/firestore-check-in-history-repository.ts",
+      "bytes": 3224,
+      "sha256": "658492db675613ea5628486f9eaeed9291972cecab05f95f4ca44957f6a1a79f"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/firestore-check-in-repository.ts",
+      "bytes": 8659,
+      "sha256": "c18d75490c975300957db9557e3d6112361aa73453d8a45467c573250eb44b51"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-history-cursor.ts",
+      "bytes": 229,
+      "sha256": "1a3189116bfe7ca581049286f8cd5785535e80af7288d5103a4ace5c8d404d37"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-history-firestore-gateway.ts",
+      "bytes": 682,
+      "sha256": "f295fdc633b29107d9e417642443781ff2c36dcf7b54d80693845b6b2541e285"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-history-repository.ts",
+      "bytes": 1110,
+      "sha256": "97892bdafc9711ed6e5e237d9e60a4af90c170caa1ae26c7b97e4d3611dabd16"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-repository.ts",
+      "bytes": 2243,
+      "sha256": "73cc30a0724e0c77f1b6e30d96c106b345b67aee81edfd451c0a17c451caffe8"
+    },
+    {
+      "path": "backend/src/event-detail/application/get-event-detail.ts",
+      "bytes": 802,
+      "sha256": "310d88826c38e161ddd81b2d79db2c0d49f32b5eb9330123d3cfe10b406e76ed"
+    },
+    {
+      "path": "backend/src/event-detail/infrastructure/firestore-event-detail-repository.ts",
+      "bytes": 4440,
+      "sha256": "280595f58d2662a5afa30dbb9ff16082fe22024e57c8dd5b510a2e0b07ab8411"
+    },
+    {
+      "path": "backend/src/event-detail/ports/event-detail-repository.ts",
+      "bytes": 520,
+      "sha256": "1422348b83bf5e121bf1b6fbc7267f6a83309cfa2d5eb104c4dd4fb8fe3251c3"
+    },
+    {
+      "path": "backend/src/event-recommendations/application/recommend-events.ts",
+      "bytes": 3267,
+      "sha256": "e8b321e04186bba58ff792a447befec5722e446c33638d5cf3ab9eff67177256"
+    },
+    {
+      "path": "backend/src/event-recommendations/domain/rank-events.ts",
+      "bytes": 3249,
+      "sha256": "d615645153e14846508c6b5e8da295d5f0bbcd19a185bf0132adc12554fa5ce0"
+    },
+    {
+      "path": "backend/src/event-recommendations/infrastructure/event-read-gateway.ts",
+      "bytes": 969,
+      "sha256": "a2f80569f8f0f00e97c9b0a24fbd96eb49b92299f27f640fa5c7f276ec6063cf"
+    },
+    {
+      "path": "backend/src/event-recommendations/infrastructure/event-records.ts",
+      "bytes": 3505,
+      "sha256": "8ae39a4546bfa12ff2cd5732a401112d14bf8e3a7af723b48fc22a6c352d7ea6"
+    },
+    {
+      "path": "backend/src/event-recommendations/infrastructure/firestore-event-recommendation-repository.ts",
+      "bytes": 3238,
+      "sha256": "05581e12c6d495c538b9c4b615144e12ab3abf99be0cd9d9ec3b197ca261f5f8"
+    },
+    {
+      "path": "backend/src/event-recommendations/infrastructure/run-s2-demo-initializer.ts",
+      "bytes": 1710,
+      "sha256": "2bffbfe217f46b565a7b6c259893bd1eab1dd24ade305d988ad8e420c71869f6"
+    },
+    {
+      "path": "backend/src/event-recommendations/infrastructure/s2-demo-initializer.ts",
+      "bytes": 6592,
+      "sha256": "8473765116cfa36a3a5c3e0520463cc5373d60aa1bca795e24976435061926e0"
+    },
+    {
+      "path": "backend/src/event-recommendations/ports/event-recommendation-repository.ts",
+      "bytes": 2098,
+      "sha256": "22840b9f445197f095d4c26f0f68619d7bddb3a8d2026d8205b6a5ef4e413c85"
+    },
+    {
+      "path": "backend/src/event-recommendations/transport/register-route.ts",
+      "bytes": 2351,
+      "sha256": "660e9a1a6fecc8f5f9fc1d18c703c3f61c30ae5a6cd9aff8ecd12b563ad85ff0"
+    },
+    {
+      "path": "backend/src/event-recommendations/transport/schemas.ts",
+      "bytes": 1690,
+      "sha256": "903d4cda860ed2fd6fedbe2f10a3335f62cab633c685b7a4dbdfdcd902450ec5"
+    },
+    {
+      "path": "backend/src/friend-recommendations/domain/friend-ranking.ts",
+      "bytes": 5863,
+      "sha256": "7bc9402198443a8df5033705042e7b64845f9329f46ca7a43c785b5e0a675558"
+    },
+    {
+      "path": "backend/src/friends/application/friend-requests.ts",
+      "bytes": 2818,
+      "sha256": "a592c3ebc0c0b86208ba01352cc6c96e0e3b42e5a6af0fb3ac0b9d0104428037"
+    },
+    {
+      "path": "backend/src/friends/domain/request-reference.ts",
+      "bytes": 486,
+      "sha256": "03028ac73b1245b595827cc1861bf729f7294232869de8b1c9964943241e8cad"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/firestore-friend-repository.ts",
+      "bytes": 18551,
+      "sha256": "6fc583bf82f121ee7c20873b69ea71e6d018fd41389f461f5b37701eee1fea61"
+    },
+    {
+      "path": "backend/src/friends/ports/friend-repository.ts",
+      "bytes": 1395,
+      "sha256": "0c25e38701bd2623c239a1548f6c528f68f9e6c6ca3c4538c1fa2309664f056f"
+    },
+    {
+      "path": "backend/src/interests/application/get-interest-tags.ts",
+      "bytes": 971,
+      "sha256": "ddf3c4d7339e2860ff87d4e1389466532e2d0415318ab536c81cdc3e1fc946c3"
+    },
+    {
+      "path": "backend/src/interests/application/get-own-interests.ts",
+      "bytes": 964,
+      "sha256": "5e6027499b7571c193387d433ce357e77284ac12be836d47bb8053097a861e7a"
+    },
+    {
+      "path": "backend/src/interests/application/interest-model.ts",
+      "bytes": 433,
+      "sha256": "8ad37da9f15876dadfb9c700dd093571813e2ab69e2473f011d1fb42e7ed0899"
+    },
+    {
+      "path": "backend/src/interests/application/replace-own-interests.ts",
+      "bytes": 2170,
+      "sha256": "553f3dba1ce4c4330de3adcd73ce86ce456e68fa57a1cc242eb48df2095c340c"
+    },
+    {
+      "path": "backend/src/interests/infrastructure/firestore-interest-repository.ts",
+      "bytes": 9378,
+      "sha256": "e834911033be8ee008c1a510b2c22f83405ef5c9543701b605bde235a8222a05"
+    },
+    {
+      "path": "backend/src/interests/ports/interest-repository.ts",
+      "bytes": 1068,
+      "sha256": "96c498e79b5dbc8c809979af476a48046a699c6187667113abff07cff32f5a12"
+    },
+    {
+      "path": "backend/src/onboarding/application/complete-onboarding.ts",
+      "bytes": 3327,
+      "sha256": "d133516432aff5b3c321574254f3443a66e6bed60a8daa6b7b0c30af8a85b087"
+    },
+    {
+      "path": "backend/src/onboarding/application/get-onboarding.ts",
+      "bytes": 978,
+      "sha256": "ad83dc4ab1764669ec24ba30db03d8637a0b6e848bad71aa5181e7c6da029165"
+    },
+    {
+      "path": "backend/src/onboarding/application/onboarding-model.ts",
+      "bytes": 505,
+      "sha256": "b63b6cf76e58508e69a0a05b7bab3ecb7b27c88eb25d52e4e551f6bbc22374ed"
+    },
+    {
+      "path": "backend/src/onboarding/domain/initial-choice.ts",
+      "bytes": 1130,
+      "sha256": "fe2c0414de7439c3626839164e8180e367cd6b64b48598490a95dd0466dbbd5c"
+    },
+    {
+      "path": "backend/src/onboarding/domain/username.ts",
+      "bytes": 963,
+      "sha256": "b87e8897db41547f18111669cb75d5d5f2b01477acc01b358e7f028c20dd486e"
+    },
+    {
+      "path": "backend/src/onboarding/infrastructure/firestore-onboarding-repository.ts",
+      "bytes": 9246,
+      "sha256": "530ae751d218e92ca969346b0106db9a60fc5da255cb3be044524cba50602572"
+    },
+    {
+      "path": "backend/src/onboarding/ports/onboarding-repository.ts",
+      "bytes": 2587,
+      "sha256": "886475d9857984f931187b15c07349a2f8b201be64117af5f9aa803873cc2e87"
+    },
+    {
+      "path": "backend/src/personas/application/own-personas.ts",
+      "bytes": 4480,
+      "sha256": "a9e1990090e19827f3371067d40e0dbe268e442cdafced0b863ba668f5342a6a"
+    },
+    {
+      "path": "backend/src/personas/application/persona-model.ts",
+      "bytes": 1144,
+      "sha256": "33156aa3da81c42cf3dab82dc13b7642561fcab82608e384870547a050ef3f19"
+    },
+    {
+      "path": "backend/src/personas/domain/persona-values.ts",
+      "bytes": 1880,
+      "sha256": "3da4807089249a8dfadf50dd5d69a7ad11cd605d700e2851b0d3d0dab7dcfd27"
+    },
+    {
+      "path": "backend/src/personas/infrastructure/firestore-persona-repository.ts",
+      "bytes": 14566,
+      "sha256": "ee70fcd0df225d7d348a729a98710d3a0c42d2e3677f7ae190c36c5b678fdc98"
+    },
+    {
+      "path": "backend/src/personas/ports/persona-repository.ts",
+      "bytes": 1107,
+      "sha256": "05158b04b5613882cc3623b6be10bc0e14ffb78e0be097d1d5f0e025fb00dd80"
+    },
+    {
+      "path": "backend/src/personas/transport/framework-errors.ts",
+      "bytes": 3109,
+      "sha256": "5c432b4ecf99af468cee32d22ff56d48eb460036cac71c2a5e49bb55abb7673e"
+    },
+    {
+      "path": "backend/src/personas/transport/register-routes.ts",
+      "bytes": 7005,
+      "sha256": "2129558240aabc2af4f65108b46cd1970fdb183e8afd5300c838374d76616973"
+    },
+    {
+      "path": "backend/src/personas/transport/schemas.ts",
+      "bytes": 5159,
+      "sha256": "3e0ad5c7e4f137f3f117495c3ca5dfb0dd54f0a92b40dc279ff50cfc70a9791e"
+    },
+    {
+      "path": "backend/src/shared/application/app-failure.ts",
+      "bytes": 3414,
+      "sha256": "3095c2b3ef33d70009a946cd1fba9518d42343c897ed3da682f5b85fb997d9d5"
+    },
+    {
+      "path": "backend/src/shared/application/authoritative-values.ts",
+      "bytes": 1499,
+      "sha256": "4a90f73d23aaa3d5bbcf04bca3938c89889265fe0a0cab2a952b89ceb5839c40"
+    },
+    {
+      "path": "backend/src/shared/domain/idempotency-key.ts",
+      "bytes": 560,
+      "sha256": "17b4cdab80f9c53f746b1a3b39b8afe7af923581ee2c74391cae1943560647f4"
+    },
+    {
+      "path": "backend/src/shared/domain/result.ts",
+      "bytes": 308,
+      "sha256": "0e8c6e70cdac11edc7f74249cbdca5071d9bce6d8b4837ba558ef25ada02c587"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/crypto-opaque-id-generator.ts",
+      "bytes": 538,
+      "sha256": "f363c9de73b3c142ed70efd37b843727d693e83e8cb76d34058389ac4f99de76"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/controlled-emulator-environment.ts",
+      "bytes": 5104,
+      "sha256": "371a29de22b76a4407e4ff5e49d041c2fe954d256384b49c4c50c8782a9130ab"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firebase-identity-verifier.ts",
+      "bytes": 1655,
+      "sha256": "fe27e7a36a9b0865016af62584fad4da39be79c64ab91b5c565f16c5ca32d8e9"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-gateway.ts",
+      "bytes": 3042,
+      "sha256": "6bb5d2711035415521bb06df5acd12d95efae26305e85409de6b3a631f707bde"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-records.ts",
+      "bytes": 6073,
+      "sha256": "ce0e9d519915e785fcdfb9e71b8b2958cfbbe0c7e3ec4891abdb47704cdfc0cb"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/system-clock.ts",
+      "bytes": 550,
+      "sha256": "d68980e9d252f3c927bd17e345e3ea840ffaeb469bc56c5ea7e189306c6c70d6"
+    },
+    {
+      "path": "backend/src/shared/ports/clock.ts",
+      "bytes": 286,
+      "sha256": "491c36ff7234c5302362cfda9b544562335b36d0c1db136d388341043b2f91ad"
+    },
+    {
+      "path": "backend/src/shared/ports/dependency-failure.ts",
+      "bytes": 434,
+      "sha256": "92291dc7a220b9154e66b09b24a3a7cffc02dfac7e87a7e2cbc731a0cb34d1fe"
+    },
+    {
+      "path": "backend/src/shared/ports/identity-verifier.ts",
+      "bytes": 467,
+      "sha256": "7ce9116409f0239b7d1f7e22c4f69118d933ab643653a879fc68682c4c8db96d"
+    },
+    {
+      "path": "backend/src/shared/ports/opaque-id-generator.ts",
+      "bytes": 300,
+      "sha256": "ee166a7c3d7901861d74c1d24b7583d9824f7e8c69e8a06b4bfdceca1c70d06e"
+    },
+    {
+      "path": "backend/src/transport/authenticate.ts",
+      "bytes": 1696,
+      "sha256": "87c1562db8eb46c7061430a5397d68594fe45535f684c950899a975fa18a0c12"
+    },
+    {
+      "path": "backend/src/transport/error-response.ts",
+      "bytes": 756,
+      "sha256": "213ae8c0774ba7ec3194b8c3607bac0e2490dbc92ac970c1d9d7df9df006614e"
+    },
+    {
+      "path": "backend/src/transport/register-isolated-slices.ts",
+      "bytes": 8200,
+      "sha256": "4a7a408a8cc27bd3f89333ab8203cb764484d30f1e547cb4b276393762e7afaf"
+    },
+    {
+      "path": "backend/src/transport/register-routes.ts",
+      "bytes": 7368,
+      "sha256": "8f54395e5a2b90ec593cb15ce1db0ac09e3badb054ee07536cdb0d58d16f415b"
+    },
+    {
+      "path": "backend/src/transport/route-inventory.ts",
+      "bytes": 3516,
+      "sha256": "adc56a830382e4dc398763957eaf548c88f12ea666ea20649afd6737d946279d"
+    },
+    {
+      "path": "backend/src/transport/schemas.ts",
+      "bytes": 8032,
+      "sha256": "df721a6ea5409b67a2ffd08fba030e6327779aec0437b7feca13cf9a99415097"
+    },
+    {
+      "path": "backend/test/account-preferences-transport.test.ts",
+      "bytes": 4515,
+      "sha256": "d05f646d277eb42fa4a4585b0704d56ec02fb5954f858aa88cfb34dc24cfd5eb"
+    },
+    {
+      "path": "backend/test/account-preferences.test.ts",
+      "bytes": 7423,
+      "sha256": "378179cd72b0061eb6dce85a5c41b4117aacc967e78bc67742ebd3069e5ced0c"
+    },
+    {
+      "path": "backend/test/ai-conversation/acknowledgment-races.test.ts",
+      "bytes": 15300,
+      "sha256": "da14f8c15f1a6dd1ff1ad13958eb561f12ed31eb4829f13024bcf761c0c93ba2"
+    },
+    {
+      "path": "backend/test/ai-conversation/async-conversation-application.test.ts",
+      "bytes": 18897,
+      "sha256": "ab057b3bc8118a06007d20a1b99b1350d5b0420fd0dc1dbb46bd5a9915714329"
+    },
+    {
+      "path": "backend/test/ai-conversation/async-conversation-fakes.ts",
+      "bytes": 12812,
+      "sha256": "bc0a3d546decc3eb8b0232efd0525977d2bb653e551cf9d7812be6706033a045"
+    },
+    {
+      "path": "backend/test/ai-conversation/canonical-ai-message-location.test.ts",
+      "bytes": 4187,
+      "sha256": "ffe1ae4ef8243d0bfb98df99334884ad27a3607b7ee47d97d8bc43c7cf8b655d"
+    },
+    {
+      "path": "backend/test/ai-conversation/capture-context.test.ts",
+      "bytes": 4321,
+      "sha256": "4558fe507cfe9b40fb4448fa96d0fbcad42b3bd7488e8dbd595680f7a930aa6e"
+    },
+    {
+      "path": "backend/test/ai-conversation/fakes.ts",
+      "bytes": 23349,
+      "sha256": "2af853e7b7e56525273a0c46d37c8a66fb8ebf2d37fa35e988c0a7fd7b75b8f9"
+    },
+    {
+      "path": "backend/test/ai-conversation/firebase-admin-real-context-reader.test.ts",
+      "bytes": 20435,
+      "sha256": "efaa405129ee03bea8558b9beb02f6c7412479eea59df768c6d4bf3399237e29"
+    },
+    {
+      "path": "backend/test/ai-conversation/lifecycle.test.ts",
+      "bytes": 33282,
+      "sha256": "018212c76aa7f036db7d2e285d9f492ded20cbe4255c027e201bd81a21c20b5a"
+    },
+    {
+      "path": "backend/test/ai-conversation/real-context-reader.test.ts",
+      "bytes": 25564,
+      "sha256": "ace8c13b3aa26f91b28388c30a58ba72225cbffbe96113e60f0ece9ef064c2b4"
+    },
+    {
+      "path": "backend/test/ai-conversation/real-effect-expiry.test.ts",
+      "bytes": 7110,
+      "sha256": "d21cf9e8651c4c4db6fab63881987f879b0a8d48f8240403b0570cfca2af29ac"
+    },
+    {
+      "path": "backend/test/ai-conversation/real-retention-resolver.test.ts",
+      "bytes": 18484,
+      "sha256": "829dfcf69561e4fd3778d43f29bd43a2f1659931d379fd5f53976bbee7260683"
+    },
+    {
+      "path": "backend/test/ai-conversation/real-write-control.test.ts",
+      "bytes": 8150,
+      "sha256": "5af22e99bda1be2b2cad2da6b842833a689a84ff518fa6328865816a6cf28a11"
+    },
+    {
+      "path": "backend/test/ai-runtime/bounded-ai-runtime.test.ts",
+      "bytes": 18009,
+      "sha256": "95dabe75a90686fec98c448a20000d5f6695407199a3a7186e7afabdb867666b"
+    },
+    {
+      "path": "backend/test/ai-runtime/monotonic-runtime-clock.test.ts",
+      "bytes": 984,
+      "sha256": "2c5e2a0791d35caefe4b5a313e3a73ccd0a774578351aec7896b674c222713b5"
+    },
+    {
+      "path": "backend/test/ai-runtime/parse-output.test.ts",
+      "bytes": 5168,
+      "sha256": "e58950f818a0c56f700f5919c9d67c3cb08ebec926d8c30a081126e30c134674"
+    },
+    {
+      "path": "backend/test/ai-runtime/runtime-application.test.ts",
+      "bytes": 22094,
+      "sha256": "ed3e1daf69539057daa4dcbfea1db80dddb96dfa61ba6c261223f61d1effe57a"
+    },
+    {
+      "path": "backend/test/ai-runtime/support.ts",
+      "bytes": 2728,
+      "sha256": "1cdf78c2b820158251102934da2462231661c0080c389b7bdc5458a0c57664f0"
+    },
+    {
+      "path": "backend/test/check-ins/check-in-history.test.ts",
+      "bytes": 12627,
+      "sha256": "c099fbe3d45f206d67fa23c6efaa54e17ac717d4047eabb44b774f66beb60810"
+    },
+    {
+      "path": "backend/test/check-ins/check-in-use-cases.test.ts",
+      "bytes": 5468,
+      "sha256": "f029f8ec80f81ec9168892d1a168e8c88bb07369b2fe796c22e9db4773a69190"
+    },
+    {
+      "path": "backend/test/check-ins/note.test.ts",
+      "bytes": 850,
+      "sha256": "e03841ec7b377e34b849bd74619135b544161d50138c7a66dccc6ab18ccee8ac"
+    },
+    {
+      "path": "backend/test/contract/openapi.test.ts",
+      "bytes": 5489,
+      "sha256": "4d5e1adb3bc2be1632d6a728ee82d855cb96b3d1d19ca7c0905b1a6798d9557e"
+    },
+    {
+      "path": "backend/test/controlled-emulator-environment.test.ts",
+      "bytes": 5003,
+      "sha256": "7b05ff2ba6a1d977f3f6f8116099fdc20efb52d930f7d003b3b23b00c8e25425"
+    },
+    {
+      "path": "backend/test/controlled-runtime-configuration.test.ts",
+      "bytes": 1341,
+      "sha256": "0675e9a1b0d2f1d28b07a5113809f1984b586e80630f7fc73ded4d64c4f2cd0b"
+    },
+    {
+      "path": "backend/test/event-recommendations/demo-manifest.test.ts",
+      "bytes": 950,
+      "sha256": "8ac759b9a0ae77147e98d03664d3364ab6c7ff30c8eba15f1150a50afcd9be22"
+    },
+    {
+      "path": "backend/test/event-recommendations/event-records.test.ts",
+      "bytes": 2513,
+      "sha256": "52c8e610c4c55c9e9f72e38f5d78bfc06fd664a80d533fd17448e0fde53b06fa"
+    },
+    {
+      "path": "backend/test/event-recommendations/firestore-event-repository.test.ts",
+      "bytes": 2773,
+      "sha256": "6b3d345e5415c0dcc4c6da0c776e24cc5a97128b5a40e949d8bcf4669b7dda77"
+    },
+    {
+      "path": "backend/test/event-recommendations/rank-events.test.ts",
+      "bytes": 4207,
+      "sha256": "e663ab9b1baa4be6ba19fd428cbffe29a720cdfa51332cdb1870e048d2b28f58"
+    },
+    {
+      "path": "backend/test/event-recommendations/recommend-events.test.ts",
+      "bytes": 8749,
+      "sha256": "8d8a81a4b7aa8c75b597bf4c0fbddec28c41c39d8f4eeacf3721a685d295bdc9"
+    },
+    {
+      "path": "backend/test/event-recommendations/s2-demo-initializer.test.ts",
+      "bytes": 1688,
+      "sha256": "a903ab7b1ecefa2a7471b17847850768542c69d6fc30a3f9130d40d76452f854"
+    },
+    {
+      "path": "backend/test/event-recommendations/transport.test.ts",
+      "bytes": 6271,
+      "sha256": "3baafb63b4ab5d0af83e6d4422ecc8a5c92efc5246e0a6d76754e52f6437b785"
+    },
+    {
+      "path": "backend/test/firebase-identity-verifier.contract.test.ts",
+      "bytes": 2732,
+      "sha256": "68b8975661493f177c891a174d155db2524779e2fdf96f713d02d241cc62dfbc"
+    },
+    {
+      "path": "backend/test/firestore-check-in-repository.contract.test.ts",
+      "bytes": 10021,
+      "sha256": "cdc16a58af1f8dd03660b80c3b5bc869dd019572912428bf4dd478eb7521ac8b"
+    },
+    {
+      "path": "backend/test/firestore-interest-repository.contract.test.ts",
+      "bytes": 6886,
+      "sha256": "a7f0667af1186229520cd5ba50be3ef3e0fa2eb2ec2df39b492e4d5dd3ee9750"
+    },
+    {
+      "path": "backend/test/firestore-onboarding-repository.contract.test.ts",
+      "bytes": 9990,
+      "sha256": "41370f58ad37647f839d52b521b813b5a105eeee049ff1c869ce6de7c7816f4e"
+    },
+    {
+      "path": "backend/test/firestore-records.contract.test.ts",
+      "bytes": 3697,
+      "sha256": "8527310a9ad79796b76f77f1f1c4376d6b9c17555791482de1fe0a2637f26a89"
+    },
+    {
+      "path": "backend/test/friend-recommendations/friend-ranking.test.ts",
+      "bytes": 11115,
+      "sha256": "852477232c164ca9a025bc3dd96639e0970784f3cf763fc5f797adde26c76ec8"
+    },
+    {
+      "path": "backend/test/interests/interest-use-cases.test.ts",
+      "bytes": 4761,
+      "sha256": "8b6cae61d2878f062a3408bf83167498758f37affd2bcaa611800dc9e0ae6ddb"
+    },
+    {
+      "path": "backend/test/isolated-slices.test.ts",
+      "bytes": 14686,
+      "sha256": "ad02322f08cf2cfde9de6f67c483beb2150037775c790ad844675037e448ccdb"
+    },
+    {
+      "path": "backend/test/my-friends.test.ts",
+      "bytes": 11921,
+      "sha256": "71484433e20c7da7827fda0310e71edfdd4ab0501e4290d4e3e3023e50abea0d"
+    },
+    {
+      "path": "backend/test/onboarding/onboarding-use-cases.test.ts",
+      "bytes": 6490,
+      "sha256": "7eff7dc88b3c1175f8d3add31e87063acb2213e62cd09089372dea3652f98494"
+    },
+    {
+      "path": "backend/test/onboarding/username.test.ts",
+      "bytes": 1841,
+      "sha256": "fd27a9c34860e54646eb1ca94448d7c0c5fc80729b9ce355eae04850b319585c"
+    },
+    {
+      "path": "backend/test/personas/core.test.ts",
+      "bytes": 20158,
+      "sha256": "be7965ff3640cb32a92413f887093b60831b2fd93156c15168a30162463be67b"
+    },
+    {
+      "path": "backend/test/personas/transport.test.ts",
+      "bytes": 27214,
+      "sha256": "f9070f95452e4bbf2ffbd511b671ae0ad6b06134740b76ee72850a50e0474adc"
+    },
+    {
+      "path": "backend/test/runtime-adapters.contract.test.ts",
+      "bytes": 1375,
+      "sha256": "a9ff2a280cf3589cf9240a9dc2de012f3a3ecec175cb8e2019788b38435c454b"
+    },
+    {
+      "path": "backend/test/shared/app-failure.test.ts",
+      "bytes": 2235,
+      "sha256": "79d25a6be51b5b049023d8fd44c6d4d6ffa3925206d5a438f94fbdc58c083214"
+    },
+    {
+      "path": "backend/test/shared/authoritative-values.test.ts",
+      "bytes": 1871,
+      "sha256": "0ade0427220d1495009495b27c5f45a59558f40b62a806b58c5f01b83896119c"
+    },
+    {
+      "path": "backend/test/smoke/toolchain.test.ts",
+      "bytes": 182,
+      "sha256": "6c7fecc6848169d00bc53ac71736081ff1591774e56445145cfb43717e7b8160"
+    },
+    {
+      "path": "backend/test/support/event-repository-contract.ts",
+      "bytes": 6833,
+      "sha256": "8582d4f028cf0cf1a1cc8457d5a3c7ded31043c6c7f545636079cef61a907c8e"
+    },
+    {
+      "path": "backend/test/support/in-memory-firestore-gateway.ts",
+      "bytes": 3228,
+      "sha256": "a712859467aeca026580c6c63b3e5abc2f39270889373aac74af25084d8bcf9d"
+    },
+    {
+      "path": "backend/test/support/my-friends-fixture.ts",
+      "bytes": 3014,
+      "sha256": "46e930a973ac4d5784a3d79917f890ea86bbb4dec61a1dd2c04af64a350041de"
+    },
+    {
+      "path": "backend/test/support/persona-repository-contract.ts",
+      "bytes": 12930,
+      "sha256": "27d1efd0f030a69d96905148b244d18fb053cd855ba83cf9503685721b893b17"
+    },
+    {
+      "path": "backend/test/transport/routes.test.ts",
+      "bytes": 19819,
+      "sha256": "7478a218ac8911135cf580321239549bb70b2a173119835117c2df8124f4ecd2"
+    },
+    {
+      "path": "integration_test/my_friends_real_backend_test.dart",
+      "bytes": 10235,
+      "sha256": "e7f33a26222073fa55e04ef4a66da2c217a3206c7508582f2a4c2e5db5890e51"
+    },
+    {
+      "path": "integration_test/persona_real_backend_test.dart",
+      "bytes": 20685,
+      "sha256": "3cf531bf5519c9b820e7f2214078bf433de637bad3929244949203926fda49bb"
+    },
+    {
+      "path": "integration_test/r6_surface_device_evidence_test.dart",
+      "bytes": 5107,
+      "sha256": "440979309415a44d258db481a5277168cfca4aa55130409852a91c3e07cb75fe"
+    },
+    {
+      "path": "integration_test/rmvp01a_client_flow_test.dart",
+      "bytes": 2739,
+      "sha256": "494f190fccbc3376754c49b85cdfc4c2ee942d781989907ba086d1de549b5d86"
+    },
+    {
+      "path": "integration_test/s2_06_controlled_demo_test.dart",
+      "bytes": 31866,
+      "sha256": "e3851fc227bd63ad87fcceb51b68f58cbbdc2fd4795f4b274b00b90db226f5ac"
+    },
+    {
+      "path": "integration_test/s2_interest_real_backend_test.dart",
+      "bytes": 8029,
+      "sha256": "ea14fa8ce405b372179510e636aada776a42c66defd8b72a1cf058ed42720693"
+    },
+    {
+      "path": "integration_test/s3_blocker_real_backend_test.dart",
+      "bytes": 19639,
+      "sha256": "67bd9c44c62738a7fc78ac0bfece9706765fd5d857e6d6b3e5be8702d1d287e0"
+    },
+    {
+      "path": "integration_test/s3_own_profile_real_backend_test.dart",
+      "bytes": 17489,
+      "sha256": "bff1ab965c5767cc649625c60151bb880950f148c226405728377514680dd450"
+    },
+    {
+      "path": "lib/ai_conversation_harness.dart",
+      "bytes": 255,
+      "sha256": "8c1a464e83ee0a70e3e36c907080ae1379751bef0f5b89f293eb427545300b9c"
+    },
+    {
+      "path": "lib/ai_persona_harness.dart",
+      "bytes": 223,
+      "sha256": "887fc1fa651b6152f14971b148ac05d4b55d4050e91cb83bf486d21e89762292"
+    },
+    {
+      "path": "lib/app/app.dart",
+      "bytes": 720,
+      "sha256": "0c55975771bd88859bfc166299200d74f8819f0a0702dffeb4dbb649020c0861"
+    },
+    {
+      "path": "lib/app/bootstrap.dart",
+      "bytes": 4620,
+      "sha256": "1a9b1f5f61d8e9052d1cd8108cacfa14a8fd4216718856dd7745934401e15c24"
+    },
+    {
+      "path": "lib/app/home_shell_page.dart",
+      "bytes": 3091,
+      "sha256": "9a1c6fcff7cc0a8c5dded36c2be25a4c4f267e8d6a5c784c0ce61790a1cd528e"
+    },
+    {
+      "path": "lib/app/providers.dart",
+      "bytes": 3323,
+      "sha256": "1cf23510a16602fed1ee9a5882f65966042c5ebc36e6aefdeec884985d818940"
+    },
+    {
+      "path": "lib/app/route_status_pages.dart",
+      "bytes": 2779,
+      "sha256": "6290e8e7b74751f57833970d8bb7687d807c16579781f12e0af9bc0244ffda86"
+    },
+    {
+      "path": "lib/app/router/app_router.dart",
+      "bytes": 13231,
+      "sha256": "114894682c0552d2bc0158f621941881fe13e3a400bb7527a257a8640044f6b9"
+    },
+    {
+      "path": "lib/app/router/isolated_persona_pages.dart",
+      "bytes": 1438,
+      "sha256": "9ed5445924c0f5340924c7525b16a5a33a5241257d18b18f1df931b56f76bd74"
+    },
+    {
+      "path": "lib/core/network/backend_api_client.dart",
+      "bytes": 17321,
+      "sha256": "f778252727238441d41bc434d22739dd54d277d8bf1bac07d8d8e221c1c3d8d7"
+    },
+    {
+      "path": "lib/core/network/idempotency_key_generator.dart",
+      "bytes": 502,
+      "sha256": "dbc8d442799d1931f0447c09b747092d73416c48bb048671c8152e4c51ec84cd"
+    },
+    {
+      "path": "lib/core/network/idempotency_key_provider.dart",
+      "bytes": 229,
+      "sha256": "866680b9fc409491819f485ca4d81bf7bdc769823e2cf933c91ab0fca91434a7"
+    },
+    {
+      "path": "lib/core/network/utc_timestamp_parser.dart",
+      "bytes": 278,
+      "sha256": "81d6acdcfd31bda07aac78dd283b16244784f6bafe1931b0cace13cf93485650"
+    },
+    {
+      "path": "lib/core/presentation/command_state.dart",
+      "bytes": 520,
+      "sha256": "4ba6d36848c77d705d9be013f8ebde6d16857536091a758d79f23a0f64847a8c"
+    },
+    {
+      "path": "lib/core/result/result.dart",
+      "bytes": 1475,
+      "sha256": "e1f084cc3e441c4a06d0e3ab64ba9c58c2e9b06f1d588ee1db5cfac83c194be2"
+    },
+    {
+      "path": "lib/features/account/account_preferences_providers.dart",
+      "bytes": 1755,
+      "sha256": "0a7ba4d08cde2f297bcd4fa158d8241f5757fca62f7e6e87538837b01ffe2e9e"
+    },
+    {
+      "path": "lib/features/account/account_providers.dart",
+      "bytes": 1103,
+      "sha256": "1a3abf0839cc193597c60d071eeb118f36231e5ec84417b94e1fdd6661045c95"
+    },
+    {
+      "path": "lib/features/account/data/backend_account_preferences_repository.dart",
+      "bytes": 5017,
+      "sha256": "f08b59a344fab0edab382cae2d6c858b9547efce57caa6a70870378cd842dcd8"
+    },
+    {
+      "path": "lib/features/account/data/backend_account_repository.dart",
+      "bytes": 3401,
+      "sha256": "0d43963bfcf6ffda5f07af3d0a6ce168fd2260f2a91b845da1857fc806be677a"
+    },
+    {
+      "path": "lib/features/account/domain/account_preferences_repository.dart",
+      "bytes": 1209,
+      "sha256": "58f2fcdf4c860d490a5639803e0b7eccca56e02ed896015ce4fcee08034bd258"
+    },
+    {
+      "path": "lib/features/account/domain/account_repository.dart",
+      "bytes": 1193,
+      "sha256": "74204646db082788b9b927c60d274b56b80e7ab3328aaaa4cf2b371492cf254f"
+    },
+    {
+      "path": "lib/features/account/presentation/account_preferences_controller.dart",
+      "bytes": 5363,
+      "sha256": "bddf689539ca837308ac530e8c9a6341a73d58d64cd7bf58c8dda5e79f8487eb"
+    },
+    {
+      "path": "lib/features/account/presentation/account_preferences_page.dart",
+      "bytes": 10827,
+      "sha256": "eb4676dec6456fc950dbc225cccceab09ee3d16ef143a733ed64aeaf9d60b155"
+    },
+    {
+      "path": "lib/features/account/presentation/onboarding_controller.dart",
+      "bytes": 2542,
+      "sha256": "3e675cf7eec63239d95a91ff6b31706e713d78b427363c8113d4db337fff596f"
+    },
+    {
+      "path": "lib/features/account/presentation/onboarding_page.dart",
+      "bytes": 11066,
+      "sha256": "41d92b5e7c9944241bfc5eb8247e4d53eb622513e91e88cf4d448a473ef29493"
+    },
+    {
+      "path": "lib/features/account/presentation/own_profile_controller.dart",
+      "bytes": 2505,
+      "sha256": "80abfa0eb2b7e33f7bbce5f28001137f8d799bba5c7902472228abe492f64062"
+    },
+    {
+      "path": "lib/features/account/presentation/own_profile_page.dart",
+      "bytes": 6917,
+      "sha256": "4c7631d7eb1e888d5861484f81785d434a8d337bc550460cdad553171de9bb91"
+    },
+    {
+      "path": "lib/features/ai_conversation/ai_conversation_providers.dart",
+      "bytes": 32081,
+      "sha256": "54f3be6962e4ff97b787b9822586023be016563c3adbe66d22070d8cb59fc2fc"
+    },
+    {
+      "path": "lib/features/ai_conversation/data/ai_wire_repository.dart",
+      "bytes": 17328,
+      "sha256": "ee48075da2a3b3e2cccddc6b8c8c511fb7098c04d78da56abebe7545296dc886"
+    },
+    {
+      "path": "lib/features/ai_conversation/data/ai_wire_transport.dart",
+      "bytes": 981,
+      "sha256": "e37ae32941e2f43a1cb9d782e738f630fb0ffd2729a742d8475e09152c409c05"
+    },
+    {
+      "path": "lib/features/ai_conversation/data/http_ai_wire_transport.dart",
+      "bytes": 4256,
+      "sha256": "c31535bdd4f95ae3ac61099e6a9a8a7b8e9af0efd381bce394fa6681c22563c8"
+    },
+    {
+      "path": "lib/features/ai_conversation/domain/ai_conversation.dart",
+      "bytes": 2091,
+      "sha256": "8265ab147d261e34ba89e019209bb1abaab723ee8fe9a4a66a88d9cce221aa7d"
+    },
+    {
+      "path": "lib/features/ai_conversation/domain/ai_conversation_repository.dart",
+      "bytes": 1204,
+      "sha256": "6ab7ea3bb9cd99869df0e465c7575b82906b1546d7fd12d23bead13f4f082483"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "bytes": 18018,
+      "sha256": "d6fa87e5e17cbfbd3739425cdc50af1405e9ab626dbf870a042d86ca2ce024f5"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_state.dart",
+      "bytes": 1365,
+      "sha256": "a588d9e35aa39a1b267be4e675722a29cb29f3d5bc675ddb23e7b93de925fba0"
+    },
+    {
+      "path": "lib/features/auth/auth_providers.dart",
+      "bytes": 630,
+      "sha256": "eddce3f89a388ee6efb7ac42132eae8005e4a703487b93db0972b1b029e8ac2f"
+    },
+    {
+      "path": "lib/features/auth/data/firebase_auth_repository.dart",
+      "bytes": 4668,
+      "sha256": "5941ec337fe7c2948ab4b577063674a987ead4b794688313d87fc118b5b364a1"
+    },
+    {
+      "path": "lib/features/auth/data/unavailable_auth_repository.dart",
+      "bytes": 906,
+      "sha256": "ea424c86ec63587beaa30b1d0601e5a7e1f299daec0e45b154dd41abd4964686"
+    },
+    {
+      "path": "lib/features/auth/domain/auth_repository.dart",
+      "bytes": 827,
+      "sha256": "ce3f2c5caded82d364eb0943a5f423bf6e2c0614b2464405c852ccd66a3cea50"
+    },
+    {
+      "path": "lib/features/auth/presentation/registration_controller.dart",
+      "bytes": 1251,
+      "sha256": "9628d8765d15cea2cd508f26bf52b9e90cda09e36f9ce9966819c75e211580c1"
+    },
+    {
+      "path": "lib/features/auth/presentation/registration_page.dart",
+      "bytes": 11090,
+      "sha256": "c99a7910c102b044ab45f9f8d975b1f47a613dff2e0cc5d4405c77ac95adf3e0"
+    },
+    {
+      "path": "lib/features/auth/presentation/sign_in_controller.dart",
+      "bytes": 1286,
+      "sha256": "83f3f6aafe2799af65718cc1e101e68844ef7bf4e92fff4983769a5c421f9a6d"
+    },
+    {
+      "path": "lib/features/auth/presentation/sign_in_page.dart",
+      "bytes": 6447,
+      "sha256": "fe3bd6e771eb66a0a44314aa8a3b868d90b6d629860dc1cf926a943e4cddb940"
+    },
+    {
+      "path": "lib/features/check_in/check_in_providers.dart",
+      "bytes": 1459,
+      "sha256": "3e47856400d329e7fb82824e4c65953bb620ee3b8195c94c62ad3d87da2e8d46"
+    },
+    {
+      "path": "lib/features/check_in/data/backend_check_in_repository.dart",
+      "bytes": 5724,
+      "sha256": "c89a676d2d20b61189a0f45ca50039b62a9ddb4209fdeb1b3ee33c23db81760b"
+    },
+    {
+      "path": "lib/features/check_in/domain/check_in_repository.dart",
+      "bytes": 1373,
+      "sha256": "70125a5c738ebaef2231f4a3e043d9c2e8b36454822c9196226321766d6f402c"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_controller.dart",
+      "bytes": 3425,
+      "sha256": "abfb20d3e871f1adecdf637d2708573142dd1bd94af8e1955295a8c5b448b01f"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_page.dart",
+      "bytes": 13683,
+      "sha256": "e620a646da0e0fc008c0f91946c7dec20d41e5a6be06daaaa3afb7335b5e9324"
+    },
+    {
+      "path": "lib/features/event_detail/data/backend_event_detail_repository.dart",
+      "bytes": 3858,
+      "sha256": "b58b0544f83c0fc56b481c07f47963f9b9050abc94a2da766642fce0e6db74b4"
+    },
+    {
+      "path": "lib/features/event_detail/domain/event_detail_repository.dart",
+      "bytes": 651,
+      "sha256": "e9760d88b4be8e4bf054c8739255ad6fbcd5c939ad4bca5b70447617a5de0ee9"
+    },
+    {
+      "path": "lib/features/event_detail/event_detail_providers.dart",
+      "bytes": 353,
+      "sha256": "04f275826852a753071384f22f9308281e99a9b2536773689101ecac1fa362fb"
+    },
+    {
+      "path": "lib/features/event_detail/presentation/event_detail_controller.dart",
+      "bytes": 1380,
+      "sha256": "682348de760119b885a7e78a6723c473c82a4b6ab53688d966427f7cd38b8368"
+    },
+    {
+      "path": "lib/features/event_detail/presentation/event_detail_page.dart",
+      "bytes": 4637,
+      "sha256": "18e1fded8c2a06dcd5a6ec5381810134cab9d1490d2abf743ed30a4aa6bd760e"
+    },
+    {
+      "path": "lib/features/event_recommendations/data/backend_event_recommendation_repository.dart",
+      "bytes": 3422,
+      "sha256": "f5eb1624e3bfc80a8241334e9e6676c3abba610254c433cb403514199cfbecc2"
+    },
+    {
+      "path": "lib/features/event_recommendations/domain/event_recommendation_repository.dart",
+      "bytes": 1169,
+      "sha256": "917d564dce5d9be46ee3e03e50d6815ee00f7edc0b82e67d2db232312fdb9435"
+    },
+    {
+      "path": "lib/features/event_recommendations/event_recommendations_providers.dart",
+      "bytes": 799,
+      "sha256": "8f0e7a2fe253bf30f99ade517aee5fe6dcff6b36d605cf34c486ca3434d9b95c"
+    },
+    {
+      "path": "lib/features/event_recommendations/presentation/event_recommendations_controller.dart",
+      "bytes": 1588,
+      "sha256": "3bbf7cd9194fc2ae91812aa5640c57a6c7ad252d18262852d18c52bae68820e0"
+    },
+    {
+      "path": "lib/features/event_recommendations/presentation/event_recommendations_page.dart",
+      "bytes": 8655,
+      "sha256": "65320ec311200244aadb512d7ff95c40ff41e901248b59c944aeba7a7f08c233"
+    },
+    {
+      "path": "lib/features/friends/data/backend_friend_repository.dart",
+      "bytes": 6832,
+      "sha256": "e017e52e18e8d60884f4346c92ececd53ee85e33b21e219477801e602b11ff04"
+    },
+    {
+      "path": "lib/features/friends/domain/friend_repository.dart",
+      "bytes": 1412,
+      "sha256": "1e9f0dcd5455e856c54e98c645c75f6f7d48832aeea30dad50057092683a5c2a"
+    },
+    {
+      "path": "lib/features/friends/friend_providers.dart",
+      "bytes": 326,
+      "sha256": "e437f98692ed17581b6e2e57b87400b0cfdd5eeda8aa3b1759d1b045343f1f39"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_controller.dart",
+      "bytes": 4323,
+      "sha256": "64ea0bbf53faacecd10310aa633702d69c9d3d54a2ea00c957da52d34b4ba039"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_page.dart",
+      "bytes": 6032,
+      "sha256": "89af31f8c339ae37ca34dc1fb91f64a7ebc47804b527caad0bea918197cf7e71"
+    },
+    {
+      "path": "lib/features/friends/presentation/my_friends_controller.dart",
+      "bytes": 1806,
+      "sha256": "1aea1b19a168595c987a39c56e26f3e0098e50d1796b1e796768cafdf7311a43"
+    },
+    {
+      "path": "lib/features/friends/presentation/my_friends_page.dart",
+      "bytes": 2975,
+      "sha256": "8809789abce5647e3546d27324c0255c0513242a6edf9207f8f441bbec908e2f"
+    },
+    {
+      "path": "lib/features/interests/data/backend_interest_repository.dart",
+      "bytes": 3998,
+      "sha256": "2f06098beb66fab30f5f3e05c2dffc029eaf75f403aa1d3005cf113657b1e02d"
+    },
+    {
+      "path": "lib/features/interests/domain/interest_repository.dart",
+      "bytes": 1086,
+      "sha256": "9b4a769d4ee4c63d69480042c7887526abf3a349157f354d7fa5ddede9de84fd"
+    },
+    {
+      "path": "lib/features/interests/interests_providers.dart",
+      "bytes": 983,
+      "sha256": "01aee747de17c7cc4198da9aec1784ee00407f95c61fd69771eab1a237fb2564"
+    },
+    {
+      "path": "lib/features/interests/presentation/interest_editor_controller.dart",
+      "bytes": 8725,
+      "sha256": "0790deba816ec8945b1bbfe3bb25b9d7492ecf03f7f02edc05ba44429c8c29fd"
+    },
+    {
+      "path": "lib/features/interests/presentation/interest_editor_page.dart",
+      "bytes": 7587,
+      "sha256": "75ebdc81b9b680160d364a9667119169e24d638b326bc88faa9b13b269be3ca8"
+    },
+    {
+      "path": "lib/features/personas/data/backend_persona_repository.dart",
+      "bytes": 11540,
+      "sha256": "759bc3da4db1e3636a1939875e1be592c97d65b5fba783ea81301319d33ef539"
+    },
+    {
+      "path": "lib/features/personas/domain/persona.dart",
+      "bytes": 3865,
+      "sha256": "c64682caf4f2406a5303caee1988c5f0f92b624864af468c84e90b390e328856"
+    },
+    {
+      "path": "lib/features/personas/domain/persona_repository.dart",
+      "bytes": 1467,
+      "sha256": "3e9ad1c40a9484dc282572d53a544b1117a04d41a829829581ba91d39f778065"
+    },
+    {
+      "path": "lib/features/personas/domain/persona_session.dart",
+      "bytes": 14889,
+      "sha256": "7e4ecb438382d0f902fa2c6b1f1a17f600dbe48a06702ffa5503eba7bd4105c6"
+    },
+    {
+      "path": "lib/features/personas/persona_providers.dart",
+      "bytes": 4743,
+      "sha256": "e8f6b876a57f9ec39d1d575758272ac13e50a486a553d676eb8a22b55864a366"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_editor_page.dart",
+      "bytes": 17433,
+      "sha256": "f3e012299404cf8f1257b1aad4846255a0ae1cbf1a46eda998e646c8be7c407f"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_management_page.dart",
+      "bytes": 13827,
+      "sha256": "1272e17680bcfe79aa7bd9ca043acd48fd10acbcb72da482c30c3a37034db688"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_overview_page.dart",
+      "bytes": 3840,
+      "sha256": "79d60186405de599a8be04154a86378d9ee14c56c59552ec26e06022fa00a9a0"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_page_parts.dart",
+      "bytes": 7727,
+      "sha256": "82a119bd7fb02903284bbb98bbc2ecaf1debe839894c3560c13bca03c1203ced"
+    },
+    {
+      "path": "lib/harness/ai_conversation/ai_conversation_harness_app.dart",
+      "bytes": 8353,
+      "sha256": "7fa411ebb76cead92b13c1ffba8affcc3bdad4ec348d00f8bfbd6d449b07c754"
+    },
+    {
+      "path": "lib/harness/ai_conversation/synthetic_ai_transport.dart",
+      "bytes": 11660,
+      "sha256": "0d93325d61f68d07f0d970217bea1ad97ae26c0c89aaecdabf6116733b7ff77d"
+    },
+    {
+      "path": "lib/harness/ai_conversation/synthetic_auth_repository.dart",
+      "bytes": 2171,
+      "sha256": "9b2899d820578f40f4c90ba35862d7ba0d78fba87ff3af5aa8de4a89dd73e94a"
+    },
+    {
+      "path": "lib/harness/ai_persona/ai_persona_harness_app.dart",
+      "bytes": 6254,
+      "sha256": "78c869780bf6c48bbd970f58ab4d7d4a5e6e92280a92382963ee989228147266"
+    },
+    {
+      "path": "lib/harness/ai_persona/synthetic_persona_repository.dart",
+      "bytes": 5716,
+      "sha256": "82e9462ba153f6d5bcc7cbed4b6f74a3bf4201b6ca4dfe86fdb91cd4a37434f4"
+    },
+    {
+      "path": "lib/main.dart",
+      "bytes": 69,
+      "sha256": "edb6e8c3d610ee21750869313daff3f9936a3cc31846685cf6f848dabd18f36a"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1157,
+      "sha256": "294606089e27f91b7101d62c4aab30b032ea47bcd5913287c447f12296822bf0"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 199897,
+      "sha256": "2db26b46c583886ef4db5b58258b78cedd325dd3bf4e469e380a62f2a3321351"
+    },
+    {
+      "path": "pubspec.lock",
+      "bytes": 20646,
+      "sha256": "774e3ce672777e779ddfbd80440e47c9ccf0cdf8a86ae2c09d4e4fe4e5c73b82"
+    },
+    {
+      "path": "pubspec.yaml",
+      "bytes": 4138,
+      "sha256": "01b6fa4cd7931fd29d258281da78579ba81a085c658143e6b5a83c2a13050c80"
+    },
+    {
+      "path": "test/app/account_preferences_flow_test.dart",
+      "bytes": 11114,
+      "sha256": "9a77ab9b6318b9124efa6134c8d7e3a2baad9798fbb39d2b866be1ffcb114725"
+    },
+    {
+      "path": "test/app/home_event_navigation_test.dart",
+      "bytes": 6580,
+      "sha256": "eed049b04bc6c066f77d0fa4c7d6c24c5bd4bd316e22aa4a6e43ed2c8c3b3ff7"
+    },
+    {
+      "path": "test/app/own_profile_flow_test.dart",
+      "bytes": 13917,
+      "sha256": "90603c637c8387b5cf08d350afea8d6f36f6d4477f000f792717a4e41529f898"
+    },
+    {
+      "path": "test/app/persona_home_router_test.dart",
+      "bytes": 14848,
+      "sha256": "0f8e16d07155decf43666890ce98d15ca99aa2703e73f59eb0e94fb43bd1288e"
+    },
+    {
+      "path": "test/app/recovery_flow_test.dart",
+      "bytes": 9795,
+      "sha256": "7ceb2a36ee2515eca70159d1d462e4fceb00586a5572dc40991d61407956fd6f"
+    },
+    {
+      "path": "test/app/rmvp01a_flow_integration_test.dart",
+      "bytes": 2784,
+      "sha256": "10ad8e203ae96046cbba80eda341c356aaa7d53a8814e2dd545834153ddd416e"
+    },
+    {
+      "path": "test/app/router/app_router_test.dart",
+      "bytes": 2359,
+      "sha256": "e5dc70ff44b47a0983a5411bfad2d0b363190b0cb0b0f920954b058f9fd25f47"
+    },
+    {
+      "path": "test/core/network/idempotency_key_generator_test.dart",
+      "bytes": 479,
+      "sha256": "6ff540d250d54e5f9bbd206c8d15c044553425075ee2ae694dc66b8cfc925451"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_controller_test.dart",
+      "bytes": 23920,
+      "sha256": "3477f44041a12b352ffb2eee37c37dbaab5dd04f53699447c760dd68af422650"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "bytes": 27039,
+      "sha256": "7d3a30b911345d25cee7d2d893ba4193abf1dd4ef94eb447144898c379cbf3f7"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_recovery_test.dart",
+      "bytes": 39449,
+      "sha256": "6e09620c5dcf93c7a91c9b5fa2464b13f2d3f3a36014d241edca2f0da4ce50b3"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_review_regression_test.dart",
+      "bytes": 24666,
+      "sha256": "425834d816df126db4337a02f1e908ba8d238fd04eb738e0caacd9be97a00a49"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_wire_client_test.dart",
+      "bytes": 27931,
+      "sha256": "e8691ddca7e30863a97ecc57c556864c45f64d0c752d7489c2b29b3d1e64726b"
+    },
+    {
+      "path": "test/features/ai_conversation/http_ai_wire_transport_test.dart",
+      "bytes": 10430,
+      "sha256": "dc241db4362cec3235d744349e712cc73e34530880f15bd1e6d4dfefe90f8195"
+    },
+    {
+      "path": "test/features/auth/firebase_auth_session_test.dart",
+      "bytes": 11330,
+      "sha256": "5bbf54b8699b12467352680ce697ad2e522515982508e3f6740ca5d2eba53c3e"
+    },
+    {
+      "path": "test/features/backend_account_preferences_test.dart",
+      "bytes": 6656,
+      "sha256": "0cdb668398f214739b290b1b3d653e2a2b0743b55024b89300f8c89769e37609"
+    },
+    {
+      "path": "test/features/backend_repositories_test.dart",
+      "bytes": 28242,
+      "sha256": "0f92c310391cf984b6e99fa94c88c71a170dcb5a5173ef1fede9256c6d49fa6a"
+    },
+    {
+      "path": "test/features/blocker_slices_test.dart",
+      "bytes": 15288,
+      "sha256": "7ea7a79bc25232615dfb40f7410182f02e46aeca1319475ed6e73b50d25c6c83"
+    },
+    {
+      "path": "test/features/check_in_note_validation_test.dart",
+      "bytes": 3554,
+      "sha256": "3e9dd2ccda94248d6fe7776e94ef005173cfff80ef9e7d2a4c803f10dc7bb98b"
+    },
+    {
+      "path": "test/features/check_in_pending_recovery_test.dart",
+      "bytes": 8489,
+      "sha256": "a2ccf9dc2cd48b1f742bfea7771351f4687fa809d599b8febb23a0c952dbb06f"
+    },
+    {
+      "path": "test/features/controller_cancellation_test.dart",
+      "bytes": 8091,
+      "sha256": "81084b6e6cc2612256a8d8879484d78c274663b9d9f4e62def028363184a4724"
+    },
+    {
+      "path": "test/features/event_detail_unicode_test.dart",
+      "bytes": 2108,
+      "sha256": "0bb6608452fd891e84897096c86d9c33ca2fa16d652bad062a330d2f4d77c933"
+    },
+    {
+      "path": "test/features/event_recommendations_page_test.dart",
+      "bytes": 6888,
+      "sha256": "5c57a3252b9b716bc81bb3f4b3f921b5952ddb79711c7a9d61a71cccc6bb683b"
+    },
+    {
+      "path": "test/features/interest_editor_controller_test.dart",
+      "bytes": 7045,
+      "sha256": "0f599cb965c30b40b22d2fc62d065e5f45e056033fd3275c78ce0296a99341ea"
+    },
+    {
+      "path": "test/features/interest_editor_page_test.dart",
+      "bytes": 7832,
+      "sha256": "4af2c547096b8ec2a09a605ed33deeb7956520402037acf9391c697885a7c954"
+    },
+    {
+      "path": "test/features/my_friends_parser_test.dart",
+      "bytes": 7531,
+      "sha256": "f635227467a3f676da863df4af462c1113bb1dd2c00ad7a03b9e994a3b25e55b"
+    },
+    {
+      "path": "test/features/my_friends_test.dart",
+      "bytes": 9094,
+      "sha256": "59bca0e40f47b993be833effba4ab7ddd0198f143f430e3852ba1e8a037cf8db"
+    },
+    {
+      "path": "test/features/personas/backend_persona_repository_test.dart",
+      "bytes": 21182,
+      "sha256": "2cc2e7c492bb2faab83692832a831c6b1eeee72ba2a7a755ef8f683d282941f9"
+    },
+    {
+      "path": "test/features/personas/persona_accessibility_test.dart",
+      "bytes": 15873,
+      "sha256": "fb9780575be8ee76ce264707319cb1981388c1916d67dd0257d15d52a78fe468"
+    },
+    {
+      "path": "test/features/personas/persona_client_session_test.dart",
+      "bytes": 6376,
+      "sha256": "a4a2be6aab08ebdcf873ac51f22adcd59a38f7db94ddc05fc6dae8a13312b158"
+    },
+    {
+      "path": "test/features/personas/persona_pages_test.dart",
+      "bytes": 25930,
+      "sha256": "da300f2126a72bdfba1989f652e26b133f679bfd65ca9b1e3a806a00e855d32c"
+    },
+    {
+      "path": "test/features/personas/persona_providers_test.dart",
+      "bytes": 5348,
+      "sha256": "ae19292323a6d22a1eca3e0789ffd6392cabb1da54b4c2357ccfa42c57afab35"
+    },
+    {
+      "path": "test/features/personas/persona_session_adversarial_test.dart",
+      "bytes": 10038,
+      "sha256": "056b228660f04806f4311efa0d8b7e459b334c970daf6e77026d79d746eda704"
+    },
+    {
+      "path": "test/features/personas/persona_session_test.dart",
+      "bytes": 12511,
+      "sha256": "37178a01b23f056cd72d66a368233b3e7a0cea6b31574f549f31bf82416fb924"
+    },
+    {
+      "path": "test/features/rmvp01a_r6_pages_test.dart",
+      "bytes": 21364,
+      "sha256": "a7f93e43fc7ba9fc763940af265f4049142f70d43120ade53be1c3889724488e"
+    },
+    {
+      "path": "test/features/sign_in_lifecycle_test.dart",
+      "bytes": 2774,
+      "sha256": "923a808aefe0296da0cebecbc3b9f8c189087a2b1d4222645036a6a7c70cfba3"
+    },
+    {
+      "path": "test/harness/ai_conversation_harness_test.dart",
+      "bytes": 12029,
+      "sha256": "3464a45e6b50ef678bb9d971edae185fb834f4855be609dc1a91f3be49068997"
+    },
+    {
+      "path": "test/harness/ai_persona_harness_test.dart",
+      "bytes": 8044,
+      "sha256": "9e7673d56690cf1fd4cd910b03bbfeccc3715c5428536a7ba545886ce733c95f"
+    },
+    {
+      "path": "test/support/fake_account_preferences.dart",
+      "bytes": 2458,
+      "sha256": "28656ff2a0126abaf4a9812bdf9a9dd5c048bb08b44e07cdc109a1af480327d2"
+    },
+    {
+      "path": "test/support/fakes.dart",
+      "bytes": 9123,
+      "sha256": "03ad80e805301096325ff3eb28c5e283a0a7a0074a2838c4403ed9dec91a9ae9"
+    },
+    {
+      "path": "test/tool/environment_check_test.dart",
+      "bytes": 8555,
+      "sha256": "8528b9239319cc6f9747ba0676f5286a8c7d362ae358ccf6fdc472421eb6b836"
+    },
+    {
+      "path": "test/widget_test.dart",
+      "bytes": 1417,
+      "sha256": "dee0c4889bd5787b3b2ab273bbd15a3eba20956851c368a4758beeb92acb3e95"
+    }
+  ]
+}
