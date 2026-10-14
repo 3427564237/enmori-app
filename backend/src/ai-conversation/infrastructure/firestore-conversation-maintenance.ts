@@ -6,6 +6,7 @@ import { parseCanonicalAiMessageLocation, type CanonicalAiMessageCollection } fr
 import { resolveRealRetention } from "../domain/real-retention-resolver.js";
 import { parseReadAuthority, parseReadInstant, compareInstant } from "./real-context-records.js";
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
+import type { ConversationMaintenance, MaintenanceResult } from "../ports/conversation-maintenance.js";
 
 const RUNTIME="ai_runtime_fence/current", PROGRESS="ai_cleanup_progress/source_sweep";
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -25,10 +26,9 @@ interface Progress {
   readonly schemaVersion:1;readonly revision:number;readonly phase:CanonicalAiMessageCollection;
   readonly lastDocumentName?:string;readonly startedAt:FullPrecisionInstant;readonly resumeUntil:FullPrecisionInstant;readonly hadFailure:boolean;
 }
-export interface MaintenanceResult {readonly complete:boolean;readonly inspected:number;readonly changed:number;readonly failures:number;readonly expiredOrInvalidCheckpoint:boolean;}
 
 /** One explicitly isolated service entry; no ordinary runtime enablement. */
-export class FirestoreConversationMaintenance {
+export class FirestoreConversationMaintenance implements ConversationMaintenance {
   private running=false;
   private lastNow=Number.NEGATIVE_INFINITY;
   constructor(private readonly gateway:FirestoreGateway, environment:Readonly<Record<string,string|undefined>>,

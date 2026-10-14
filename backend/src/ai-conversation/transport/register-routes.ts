@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { IdentityVerifier } from "../../shared/ports/identity-verifier.js";
-import type { ConversationOperations, ConversationCaller, ConversationFailureCode, PrepareConversation, ConversationResult } from "../ports/conversation-operations.js";
+import type { ConversationOperations, ConversationCaller, ConversationFailureCode, PrepareConversation, ConversationResult, ExecutedConversationPair } from "../ports/conversation-operations.js";
 import type { StoredConversationMessage } from "../ports/real-conversation-store.js";
 
 const ID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -111,18 +111,37 @@ export async function registerConversationRoutes(app: FastifyInstance, identity:
     if (!clean(request) || !uuid(request.params.operationId) || !operationKey(key) || !record(b) || !keys(b, ["text"]) || typeof b.text !== "string") return failure(request, reply, "REQUEST_INVALID");
     if (!b.text.isWellFormed() || b.text.trim().length === 0 || [...b.text].length > 2400) return failure(request, reply, "AI_INPUT_INVALID");
     const controller = new AbortController();
+    let accepted=false;
+    const current=()=>!controller.signal.aborted&&!reply.raw.destroyed;
+    const project=(v:ExecutedConversationPair)=>{
+      if(v.operationId!==request.params.operationId||!uuid(v.conversationId)||v.userMessage.role!=="user"||
+        v.assistantMessage.role!=="assistant"||v.userMessage.messageId===v.assistantMessage.messageId||
+        v.userMessage.sequence>=v.assistantMessage.sequence||v.assistantMessage.availability!=="available")throw new Error("Invalid inner execution pair");
+      return {operationId:v.operationId,conversationId:v.conversationId,userMessage:message(v.userMessage),assistantMessage:message(v.assistantMessage)};
+    };
+    const acceptCompleteBody=(value:ExecutedConversationPair):boolean=>{
+      if(accepted||reply.sent||!current())return false;
+      let bytes:Buffer;try{bytes=Buffer.from(JSON.stringify(project(value)),"utf8");}catch{return false;}
+      if(accepted||reply.sent||!current())return false;
+      try{
+        // The complete serialized body enters the actual response sink in this
+        // non-yielding event. No asynchronous onSend hook/queued later send may
+        // stand in for F02 acceptance. This is not proof of client receipt.
+        reply.hijack();
+        for(const [name,value] of Object.entries(reply.getHeaders()))if(value!==undefined)reply.raw.setHeader(name,value);
+        reply.raw.setHeader("content-type","application/json; charset=utf-8");reply.raw.setHeader("cache-control","no-store");
+        reply.raw.setHeader("content-length",bytes.length);reply.raw.writeHead(200);
+        reply.raw.end(bytes);accepted=true;return true;
+      }catch{controller.abort();reply.raw.destroy();return false;}
+    };
     const disconnected = (): void => { if (!reply.raw.writableEnded) controller.abort(); };
     request.raw.once("aborted", disconnected); reply.raw.once("close", disconnected);
     try {
       const result = await operations.execute(caller(request), { operationId: request.params.operationId, operationKey: key, text: b.text },
-        { signal: controller.signal, current: () => !controller.signal.aborted && !reply.raw.destroyed });
+        { signal: controller.signal, current, acceptCompleteBody });
+      if(accepted||reply.sent)return reply;
       if (controller.signal.aborted) { reply.hijack(); reply.raw.destroy(); return reply; }
-      return deliver(request, reply, result, 200, v => {
-        if (v.operationId !== request.params.operationId || !uuid(v.conversationId) || v.userMessage.role !== "user" ||
-            v.assistantMessage.role !== "assistant" || v.userMessage.messageId === v.assistantMessage.messageId ||
-            v.userMessage.sequence >= v.assistantMessage.sequence || v.assistantMessage.availability !== "available") throw new Error("Invalid inner execution pair");
-        return { operationId: v.operationId, conversationId: v.conversationId, userMessage: message(v.userMessage), assistantMessage: message(v.assistantMessage) };
-      });
+      return deliver(request, reply, result, 200, project);
     } finally { request.raw.off("aborted", disconnected); reply.raw.off("close", disconnected); }
   });
   app.post<{ Params: { operationId: string } }>("/v1/me/ai/operations/:operationId/cancel", options, async (request, reply) => {

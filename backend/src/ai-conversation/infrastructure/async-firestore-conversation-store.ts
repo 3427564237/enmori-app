@@ -3,6 +3,9 @@ import type { AsyncConversationStore, AsyncConversationAuthority, AsyncConversat
   AsyncEffectContext, AsyncSavedUser, AsyncFenceObservation, AsyncUserWriteObservation, AsyncAssistantWriteObservation,
   AsyncClaimSettlement, AsyncCloseObservation, AsyncReadbackObservation } from "../ports/async-conversation.js";
 import type { AcceptedAssistant } from "../ports/conversation-lifecycle.js";
+import type { ConversationResult } from "../ports/conversation-operations.js";
+import type { PresentationMetadata } from "../ports/conversation-lifecycle.js";
+import type { StoredConversationMessage } from "../ports/real-conversation-store.js";
 import type { RealConversationStore, RuntimeEpoch, OperationTarget, OpenOperation, OriginalWriteAuthority, StoreResult } from "../ports/real-conversation-store.js";
 
 /** Concrete adapter between ZHOU #103's async Port and JIN's N02 transactions. */
@@ -24,6 +27,21 @@ export class AsyncFirestoreConversationStore implements AsyncConversationStore {
   }
   private failed(result:Exclude<StoreResult<unknown>,{kind:"confirmed"}>):{kind:"unknown"}|{kind:"rejected";failure:"stale_authority"|"dependency_unavailable"}{
     return result.kind==="unresolved"?{kind:"unknown"}:{kind:"rejected",failure:result.kind==="unavailable"?"dependency_unavailable":"stale_authority"};
+  }
+  /** #107 supplier seam: freshly guarded canonical pair/presentation, not a
+   * reflection of the private OpenOperation or a cached/guessed response body. */
+  async read(context:AsyncEffectContext):Promise<ConversationResult<{
+    readonly user:StoredConversationMessage;readonly assistant:StoredConversationMessage;readonly presentation:PresentationMetadata;
+  }>>{
+    try{
+      const op=this.opened.get(context),authority=this.writeAuthority(context);
+      if(!op||!authority)return {kind:"failure",code:"AI_AUTHORITY_CHANGED"};
+      const pair=await this.store.readAcknowledgedPair(op,authority);
+      if(!context.originalCurrent()||!this.authority.current(context.identity))return {kind:"failure",code:"AI_AUTHORITY_CHANGED"};
+      if(pair.kind!=="confirmed")return {kind:"failure",code:pair.kind==="unresolved"?"AI_OUTCOME_UNRESOLVED":
+        pair.kind==="denied"||pair.kind==="terminated"?"AI_AUTHORITY_CHANGED":"AI_UNAVAILABLE"};
+      return {kind:"success",value:pair.value};
+    }catch{return {kind:"failure",code:"AI_UNAVAILABLE"};}
   }
   async open(context:AsyncEffectContext):Promise<AsyncFenceObservation>{
     try{

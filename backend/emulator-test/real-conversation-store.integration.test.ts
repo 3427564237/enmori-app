@@ -19,7 +19,7 @@ import { AsyncConversationApplication } from "../src/ai-conversation/application
 import { AuthorizedAsyncConversationGenerationTransport } from "../src/ai-conversation/application/async-conversation-generation-transport.js";
 import { BoundedAiRuntime } from "../src/ai-runtime/application/bounded-ai-runtime.js";
 import { MonotonicRuntimeClock } from "../src/ai-runtime/infrastructure/monotonic-runtime-clock.js";
-import type { AsyncConversationIdentity, AsyncDeliveryMessage } from "../src/ai-conversation/ports/async-conversation.js";
+import type { AsyncConversationIdentity, AsyncDeliveryMessage, AsyncEffectContext } from "../src/ai-conversation/ports/async-conversation.js";
 import type { StoredUserIdentity, StoreResult, OperationTarget, OpenOperation, OriginalWriteAuthority, RuntimeEpoch } from "../src/ai-conversation/ports/real-conversation-store.js";
 import { buildApp } from "../src/bootstrap/build-app.js";
 import { err } from "../src/shared/domain/result.js";
@@ -340,15 +340,25 @@ test("actual Auth and fixed/current SDK reader join ZHOU async Application to re
     return Buffer.from(JSON.stringify({schemaVersion:"ai_assistant_message_v1",message:"Explicit fake Qwen reply"}));
   }});
   const runtime=new BoundedAiRuntime(clock,model), deliveries:AsyncDeliveryMessage[]=[];
+  let lastContext:AsyncEffectContext|undefined;
   const application=new AsyncConversationApplication(runtime,authz,reads,bridge,
     // Synthetic gate fakes are NOT actual tokenizer/semantic/model evidence.
     {beforeGeneration:async()=>({ok:true,value:undefined}),candidate:async()=>({ok:true,value:undefined})},
-    {deliver:async(_context,revalidate,event)=>{if(!await revalidate())return "refused";event(value=>deliveries.push(value));return "accepted";}},
+    {deliver:async(context,revalidate,event)=>{
+      lastContext=context;const pair=await bridge.read(context);assert.equal(pair.kind,"success");
+      if(pair.kind!=="success")return "refused";
+      assert.deepEqual(pair.value.presentation,{presentationMode:"default"});
+      assert.equal(pair.value.user.text,"Explicit synthetic async join");assert.equal(pair.value.assistant.text,"Explicit fake Qwen reply");
+      if(!await revalidate())return "refused";event(value=>{
+        assert.equal(value.assistantMessageId,pair.value.assistant.messageId);assert.equal(value.user.sequence,pair.value.user.sequence);
+        assert.deepEqual(value.user.persistedAt,pair.value.user.persistedAt);deliveries.push(value);
+      });return "accepted";}},
     {monotonicNow:()=>clock.now(),utcNow:()=>{const ms=Date.now(),seconds=Math.floor(ms/1000);return {seconds,nanoseconds:(ms-seconds*1000)*1000000};}});
   const command=application.create({identity,operation:targetOp,text:"Explicit synthetic async join"});
   const admission=await application.dispatch(command);assert.equal(admission.accepted,true);if(!admission.accepted)return;
   assert.deepEqual(await admission.request.outcome,{ok:true,value:undefined});
   assert.equal(modelCalls,1);assert.equal(deliveries.length,1);assert.equal(application.inspect(command)!.processing,false);
+  assert.deepEqual(await bridge.read(lastContext!),{kind:"failure",code:"AI_AUTHORITY_CHANGED"});
   // Await the Application's actual original closure; no fixture guess that an
   // outcome promise alone means its asynchronous control barrier settled.
   assert.equal((await application.cancel(command,identity)).kind,"closed");active=false;
@@ -388,7 +398,10 @@ test("actual Auth -> six-route isolated Fastify boundary -> real store with expl
       confirmed(await store.settleAcknowledgedAssistant(op, a));
       const pair = confirmed(await store.readAcknowledgedPair(op, a));
       assert.equal(delivery.current(), true);
-      return { kind: "success", value: { operationId: t.operationId, conversationId: t.conversationId, userMessage: pair.user, assistantMessage: pair.assistant } };
+      const value={operationId:t.operationId,conversationId:t.conversationId,userMessage:pair.user,assistantMessage:pair.assistant};
+      assert.equal(delivery.acceptCompleteBody!(value),true);
+      assert.equal(delivery.acceptCompleteBody!(value),false);
+      return { kind: "success", value };
     },
     cancel: unavailable, listMessages: unavailable, deleteConversation: unavailable,
     readOutcome: async caller => { const outcome = confirmed(await store.readOutcome(caller.principal, t));
