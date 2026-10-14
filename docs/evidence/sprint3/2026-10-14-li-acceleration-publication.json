@@ -1,0 +1,71 @@
+{
+  "recordedUtc": "2026-10-14T07:31:30.995184+00:00",
+  "authorityCommit": "948579ec82b2c5363ab2b3b2ea353ca652020f07",
+  "liReview": {
+    "id": 5514473188,
+    "url": "https://github.com/3427564237/enmori-app/pull/99#pullrequestreview-5514473188",
+    "commit": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+    "state": "APPROVED",
+    "bodySha256": "8749b7dc36c6e905426cf355a6884bd987805fb08a4f4c34e16bca1f98347418",
+    "readback": true
+  },
+  "followups": [
+    {
+      "issue": 84,
+      "id": 6163254828,
+      "url": "https://github.com/3427564237/enmori-app/issues/84#issuecomment-6163254828",
+      "readback": true
+    },
+    {
+      "issue": 83,
+      "id": 6163255338,
+      "url": "https://github.com/3427564237/enmori-app/issues/83#issuecomment-6163255338",
+      "readback": true
+    },
+    {
+      "issue": 82,
+      "id": 6163255805,
+      "url": "https://github.com/3427564237/enmori-app/issues/82#issuecomment-6163255805",
+      "readback": true
+    },
+    {
+      "issue": 85,
+      "id": 6163256354,
+      "url": "https://github.com/3427564237/enmori-app/issues/85#issuecomment-6163256354",
+      "readback": true
+    },
+    {
+      "issue": 44,
+      "id": 6163256920,
+      "url": "https://github.com/3427564237/enmori-app/issues/44#issuecomment-6163256920",
+      "readback": true
+    }
+  ],
+  "parentBody": {
+    "url": "https://github.com/3427564237/enmori-app/issues/44",
+    "readback": true,
+    "state": "open",
+    "updated_at": "2026-10-14T07:31:02Z"
+  },
+  "prs": [
+    {
+      "headRefOid": "948579ec82b2c5363ab2b3b2ea353ca652020f07",
+      "isDraft": true,
+      "number": 66,
+      "state": "OPEN"
+    },
+    {
+      "headRefOid": "1cc52800e7d51320d6b97c76b5b6e2ee3f9dcba0",
+      "isDraft": true,
+      "number": 98,
+      "state": "OPEN"
+    },
+    {
+      "headRefOid": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+      "isDraft": true,
+      "number": 99,
+      "state": "OPEN"
+    }
+  ],
+  "limits": "Publication/source checks only; no new product/model/device run, merge, closure or Project transition. #99 first Flutter failure remains open. Teammate acknowledgement/ETA not yet received."
+}

@@ -5,6 +5,7 @@
 - Exact review head: `e84b23cd82eeda039f2bef9fa455909e9f39cc87`.
 - Review tree: `12308b7cc5901dc2d622a34d11a465e310d0a0bf`.
 - Executed product: `c58a4e56968e52296f13fa322c45b34bd1b3e30b`, tree `4393ec335c4c0724cee8f6193912e4902decbd15`.
+- Published LI scoped review: [APPROVE5514473188](https://github.com/3427564237/enmori-app/pull/99#pullrequestreview-5514473188), exact head above; body/commit/state read back.
 
 Accept the exact accepted-input composition and the submitted evidence **within
 their disclosed successful groups and limitations**. LI's independent evidence
