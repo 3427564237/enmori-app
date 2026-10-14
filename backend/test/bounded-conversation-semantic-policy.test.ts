@@ -107,3 +107,56 @@ test("terminal or changed holders during a synchronous gate cannot receive old-c
   assert.deepEqual(await boundedConversationSemanticCandidate(() => input, () => { remaining = 0; return output; }, budget(undefined, () => remaining)),
     { ok: false, failure: "stale_authority" });
 });
+
+test("fresh candidate shape changes cannot borrow an earlier valid acceptance", async () => {
+  const malformed: OutputCandidate[] = [
+    { ...output, extra: "synthetic" } as OutputCandidate,
+    Object.create(output) as OutputCandidate,
+    Object.defineProperty({ ...output }, "message", { get: () => { throw new Error("must not invoke"); } }),
+  ];
+  for (const fresh of malformed) {
+    let reads = 0;
+    assert.deepEqual(await boundedConversationSemanticCandidate(() => input, () => ++reads === 1 ? output : fresh, budget()),
+      { ok: false, failure: "stale_authority" });
+  }
+});
+
+test("required projection fields must be own data properties and never invoke accessors", async () => {
+  let accessorReads = 0;
+  const accessor = () => { accessorReads++; return "今天读书了。"; };
+  const accessorNote = Object.defineProperty({ occurredAt: "2026-10-14T00:00:00.000Z", noteText: "昨天散步了。" }, "noteText", { get: accessor });
+  const accessorPersona = Object.defineProperty({ schemaVersion: "persona_presentation_v1", tone: "neutral", responseLength: "concise", formatStyle: "plain" }, "formatStyle", { get: accessor });
+  const accessorNotes: unknown[] = [];
+  Object.defineProperty(accessorNotes, "0", { get: accessor, enumerable: true, configurable: true });
+  const malformed: ConversationInput[] = [
+    Object.create(input) as ConversationInput,
+    Object.assign(Object.create({ currentMessage: input.currentMessage }), { checkIns: [], persona: undefined }) as ConversationInput,
+    Object.defineProperty({ ...input }, "currentMessage", { get: accessor }),
+    Object.defineProperty({ ...input }, "checkIns", { get: accessor }),
+    Object.defineProperty({ ...input }, "persona", { get: accessor }),
+    { ...input, checkIns: [Object.create({ occurredAt: "2026-10-14T00:00:00.000Z", noteText: "昨天散步了。" })] },
+    { ...input, checkIns: [accessorNote] },
+    { ...input, persona: accessorPersona } as ConversationInput,
+    { ...input, checkIns: accessorNotes } as unknown as ConversationInput,
+  ];
+  for (const projection of malformed) {
+    assert.deepEqual(await boundedConversationSemanticCandidate(() => projection, () => output, budget()),
+      { ok: false, failure: "unsafe_output" });
+  }
+  const malformedCandidates = [Object.create(output) as OutputCandidate,
+    Object.defineProperty({ ...output }, "schemaVersion", { get: accessor }),
+    Object.defineProperty({ ...output }, "message", { get: accessor })];
+  for (const candidate of malformedCandidates) {
+    assert.deepEqual(await boundedConversationSemanticCandidate(() => input, () => candidate, budget()),
+      { ok: false, failure: "unsafe_output" });
+  }
+  assert.equal(accessorReads, 0);
+});
+
+test("absent optional Persona never reads an inherited accessor", async () => {
+  let reads = 0;
+  const prototype = Object.defineProperty({}, "persona", { get: () => { reads++; throw new Error("must not invoke"); } });
+  const projection = Object.assign(Object.create(prototype), { currentMessage: input.currentMessage, checkIns: [] }) as ConversationInput;
+  assert.deepEqual(await boundedConversationSemanticCandidate(() => projection, () => output, budget()), { ok: true, value: undefined });
+  assert.equal(reads, 0);
+});

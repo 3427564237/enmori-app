@@ -187,12 +187,18 @@ test("actual permanent deletion of the used Persona rejects a late AI reply with
     const a = await f.create(warm, 0), revision = await f.activate(a, a.stateRevision), ticket = await f.prepare();
     const executing = f.execute(ticket); await bounded(started.promise);
     const base = `${f.account}/conversations/${ticket.conversationId}`, before = (await f.db.doc(base).get()).data()!;
+    const originalUser = (await f.db.collection(`${base}/messages`).get()).docs[0]!;
+    assert.equal(before.latestMessageId, originalUser.id);
     const removed = await f.request("DELETE", `/v1/me/personas/${a.persona.personaId}`, { expectedRevision: 1, expectedStateRevision: revision });
-    assert.equal(removed.statusCode, 204); release.resolve(); const reply = await bounded(executing);
-    assert.equal(reply.statusCode, 409); assert.equal(reply.json().error.code, "AI_AUTHORITY_CHANGED"); await f.settled(ticket);
+    assert.equal(removed.statusCode, 204); release.resolve();
+    // Q31-D stale authority is a terminal no-content/no-late-delivery result.
+    // The actual HTTP sink closes; it must not deliver a fabricated error body.
+    await assert.rejects(bounded(executing), { code: "LIGHT_ECONNRESET" }); await f.settled(ticket);
     const messages = await f.db.collection(`${base}/messages`).get(); assert.equal(messages.size, 1);
     assert.equal(messages.docs[0]!.data().role, "user"); assert.equal(messages.docs[0]!.data().text, "今天读书了。");
-    assert.deepEqual((await f.db.doc(base).get()).data()!.lastPersistedMessageAt, before.lastPersistedMessageAt);
+    assert.equal((await f.db.doc(base).get()).data()!.latestMessageId, before.latestMessageId);
+    assert.equal(messages.docs[0]!.id, originalUser.id);
+    assert.equal(messages.docs[0]!.createTime!.isEqual(originalUser.createTime!), true);
     const read = await f.request("GET", `/v1/me/conversations/${ticket.conversationId}/operations/${ticket.operationId}`);
     assert.equal(read.statusCode, 200); assert.equal(read.json().state, "user_saved"); assert.equal(Object.hasOwn(read.json(), "assistantMessage"), false);
   } finally { release.resolve(); await f.cleanup(); }
@@ -206,9 +212,12 @@ test("actual joined candidate rejection creates no assistant/provenance and adva
     assert.equal(reply.statusCode, 502); assert.equal(reply.json().error.code, "AI_REPLY_REJECTED"); await f.settled(ticket);
     const base = `${f.account}/conversations/${ticket.conversationId}`, messages = await f.db.collection(`${base}/messages`).get();
     assert.equal(messages.size, 1); const u = messages.docs[0]!; assert.equal(u.data().role, "user");
-    assert.deepEqual((await f.db.doc(base).get()).data()!.lastPersistedMessageAt, { seconds: u.createTime!.seconds, nanoseconds: u.createTime!.nanoseconds });
+    // Remaining-A stores the latest-message pointer; Q14's anchor is resolved
+    // from this U's authoritative full-precision createTime, not a new field.
+    assert.equal((await f.db.doc(base).get()).data()!.latestMessageId, u.id);
     assert.equal((await f.db.collection(`${base}/message_sources`).get()).empty, true);
     const read = await f.request("GET", `/v1/me/conversations/${ticket.conversationId}/operations/${ticket.operationId}`);
     assert.equal(read.statusCode, 200); assert.equal(read.json().state, "user_saved");
+    assert.equal(read.json().userMessage.messageId, u.id);
   } finally { await f.cleanup(); }
 });

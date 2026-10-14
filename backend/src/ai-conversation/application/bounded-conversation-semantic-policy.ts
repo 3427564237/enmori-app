@@ -17,21 +17,35 @@ const englishRoutine = new RegExp(`^(?:I ${englishAction}(?: today| yesterday| t
 
 const record = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
-const fields = (value: Record<string, unknown>, allowed: readonly string[]): boolean =>
-  Reflect.ownKeys(value).every(key => typeof key === "string" && allowed.includes(key));
+function fields(value: object, allowed: readonly string[], required: readonly string[]): boolean {
+  // Product projections are data, not object behavior. Do not read an accessor
+  // or satisfy a required property through a prototype while checking a shape.
+  return required.every(key => Object.hasOwn(value, key)) && Reflect.ownKeys(value).every(key => {
+    if (typeof key !== "string" || !allowed.includes(key)) return false;
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    return descriptor !== undefined && Object.hasOwn(descriptor, "value");
+  });
+}
+const ownPersona = (value: ConversationInput): ConversationInput["persona"] =>
+  Object.getOwnPropertyDescriptor(value, "persona")?.value as ConversationInput["persona"];
 const text = (value: unknown): value is string => typeof value === "string" && value.isWellFormed();
 
 function validInput(value: ConversationInput): boolean {
-  if (!record(value) || !fields(value, ["currentMessage", "checkIns", "persona"]) ||
+  if (!record(value) || !fields(value, ["currentMessage", "checkIns", "persona"], ["currentMessage", "checkIns"]) ||
       !text(value.currentMessage) || !value.currentMessage || !Array.isArray(value.checkIns) || value.checkIns.length > 5) return false;
   // This increment is explicitly Note-only. An unexpected projected field is
   // not silently ignored, and unavailable/malformed context is not an empty set.
-  for (const note of value.checkIns) {
-    if (!record(note) || !fields(note, ["occurredAt", "noteText"]) ||
+  const arrayFields = ["length"];
+  for (let index = 0; index < value.checkIns.length; index++) arrayFields.push(String(index));
+  if (!fields(value.checkIns, arrayFields, arrayFields)) return false;
+  for (let index = 0; index < value.checkIns.length; index++) {
+    const note = value.checkIns[index];
+    if (!record(note) || !fields(note, ["occurredAt", "noteText"], ["occurredAt", "noteText"]) ||
         !text(note.occurredAt) || !note.occurredAt || !text(note.noteText) || !note.noteText) return false;
   }
-  const persona = value.persona;
-  return persona === undefined || (record(persona) && fields(persona, ["schemaVersion", "tone", "responseLength", "formatStyle"]) &&
+  const persona = ownPersona(value);
+  return persona === undefined || (record(persona) && fields(persona, ["schemaVersion", "tone", "responseLength", "formatStyle"],
+    ["schemaVersion", "tone", "responseLength", "formatStyle"]) &&
     persona.schemaVersion === "persona_presentation_v1" &&
     ["neutral", "warm", "encouraging"].includes(persona.tone) &&
     ["concise", "balanced", "detailed"].includes(persona.responseLength) &&
@@ -56,21 +70,25 @@ function attributed(line: string, input: ConversationInput): boolean {
   for (const prefix of ["你的记录提到：", "Your check-in mentions: "]) {
     if (line.startsWith(prefix)) {
       const source = line.slice(prefix.length);
-      return routine(source) && input.checkIns.some(note => source === note.noteText);
+      if (!routine(source)) return false;
+      for (let index = 0; index < input.checkIns.length; index++) {
+        if (source === input.checkIns[index]!.noteText) return true;
+      }
+      return false;
     }
   }
   return false;
 }
 
 function accepts(input: ConversationInput, output: OutputCandidate): boolean {
-  if (!validInput(input) || !record(output) || !fields(output, ["schemaVersion", "message"]) ||
+  if (!validInput(input) || !record(output) || !fields(output, ["schemaVersion", "message"], ["schemaVersion", "message"]) ||
       output.schemaVersion !== "ai_assistant_message_v1" || !text(output.message) || !output.message ||
       [...output.message].length > 2400) return false;
   const lines = output.message.split("\n");
   if (lines.length === 1 && !lines[0]!.startsWith("- ")) return attributed(lines[0]!, input);
   // Textual bullets are presentation only, and require the captured authorized
   // Persona projection. No default style, arbitrary Markdown or extra footer.
-  return input.persona?.formatStyle === "bulleted" &&
+  return ownPersona(input)?.formatStyle === "bulleted" &&
     lines.every(line => line.startsWith("- ") && attributed(line.slice(2), input));
 }
 
@@ -85,9 +103,11 @@ function current(budget: RequestBudget): boolean {
 function sameInput(first: ConversationInput, fresh: ConversationInput): boolean {
   if (!validInput(first) || !validInput(fresh) || first.currentMessage !== fresh.currentMessage ||
       first.checkIns.length !== fresh.checkIns.length) return false;
-  if (!first.checkIns.every((note, index) => note.occurredAt === fresh.checkIns[index]!.occurredAt &&
-      note.noteText === fresh.checkIns[index]!.noteText)) return false;
-  const a = first.persona, b = fresh.persona;
+  for (let index = 0; index < first.checkIns.length; index++) {
+    const note = first.checkIns[index]!;
+    if (note.occurredAt !== fresh.checkIns[index]!.occurredAt || note.noteText !== fresh.checkIns[index]!.noteText) return false;
+  }
+  const a = ownPersona(first), b = ownPersona(fresh);
   return a === undefined ? b === undefined : b !== undefined && a.schemaVersion === b.schemaVersion &&
     a.tone === b.tone && a.responseLength === b.responseLength && a.formatStyle === b.formatStyle;
 }
@@ -115,7 +135,7 @@ export const boundedConversationSemanticCandidate: ConversationGates["candidate"
     const freshProjection = input(), freshCandidate = output();
     if (freshProjection === undefined || freshCandidate === undefined || !current(budget)) return Promise.resolve(err("stale_authority"));
     if (!accepted) return Promise.resolve(err("unsafe_output"));
-    if (!sameInput(projection, freshProjection) || candidate.schemaVersion !== freshCandidate.schemaVersion ||
+    if (!accepts(freshProjection, freshCandidate) || !sameInput(projection, freshProjection) || candidate.schemaVersion !== freshCandidate.schemaVersion ||
         candidate.message !== freshCandidate.message) return Promise.resolve(err("stale_authority"));
     return Promise.resolve(ok(undefined));
   } catch { return Promise.resolve(err("stale_authority")); }
