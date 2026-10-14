@@ -1,0 +1,539 @@
+00:00 +0: loading C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/account_preferences_flow_test.dart
+00:00 +0: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:02 +1: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/account_preferences_flow_test.dart: Profile editor saves then rereads canonical fields; unsaved Back never writes
+00:02 +2: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/check_in_history_shared_router_test.dart: real History builder and Backend repositories run through Home
+00:02 +3: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/check_in_history_shared_router_test.dart: real History builder and Backend repositories run through Home
+00:03 +4: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/check_in_history_shared_router_test.dart: real History builder and Backend repositories run through Home
+00:03 +5: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/check_in_history_shared_router_test.dart: real History builder and Backend repositories run through Home
+00:03 +6: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/home_event_navigation_test.dart: See All has a back action and returning recomputes Home
+00:03 +7: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/home_event_navigation_test.dart: See All has a back action and returning recomputes Home
+00:03 +8: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:03 +9: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +10: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +11: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +12: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +13: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +14: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +15: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +16: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +17: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +18: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +19: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +20: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +21: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +22: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/own_profile_flow_test.dart: Profile stays scrollable on a small phone with enlarged text
+00:04 +23: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:04 +24: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:04 +25: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +26: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +27: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +28: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +29: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +30: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +31: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +32: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +33: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +34: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +35: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +36: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +37: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +38: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +39: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +40: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +41: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +42: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +43: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +44: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +45: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +46: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +47: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +48: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +49: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +50: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +51: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +52: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +53: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +54: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +55: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +56: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +57: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +58: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +59: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +60: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +61: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +62: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +63: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +64: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +65: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +66: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +67: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +68: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +69: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +70: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +71: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +72: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +73: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +74: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +75: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +76: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +77: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +78: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +79: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:05 +80: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +81: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +82: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +83: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +84: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +85: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +86: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +87: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +88: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +89: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +90: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +91: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +92: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +93: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +94: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +95: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +96: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +97: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +98: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +99: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +100: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: missing auth configuration is not presented as transient retry
+00:06 +101: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:06 +102: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads
+00:06 +103: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +104: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +105: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +106: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +107: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +108: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +109: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +110: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +111: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +112: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +113: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +114: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +115: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +116: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +117: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +118: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +119: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +120: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +121: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +122: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +123: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +124: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +125: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +126: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +127: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +128: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +129: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +130: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +131: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +132: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +133: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +134: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +135: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +136: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +137: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +138: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +139: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +140: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +141: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +142: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +143: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +144: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +145: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +146: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +147: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +148: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +149: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +150: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +151: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +152: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +153: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +154: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +155: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +156: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +157: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +158: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +159: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +160: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +161: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +162: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +163: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +164: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +165: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +166: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +167: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +168: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +169: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +170: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:06 +171: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +172: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +173: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +174: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +175: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +176: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +177: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +178: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +179: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +180: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +181: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +182: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +183: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +184: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +185: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +186: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +187: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +188: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +189: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +190: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +191: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:07 +192: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: existing-email registration offers executable sign-in
+00:07 +193: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: existing-email registration offers executable sign-in
+00:07 +194: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: existing-email registration offers executable sign-in
+00:07 +195: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: existing-email registration offers executable sign-in
+00:07 +196: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/app/recovery_flow_test.dart: existing-email registration offers executable sign-in
+00:07 +197: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +198: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +199: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +200: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +201: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +202: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +203: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +204: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +205: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +206: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +207: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +208: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +209: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +210: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +211: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +212: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +213: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +214: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +215: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +216: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +217: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:07 +218: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +219: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +220: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +221: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +222: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +223: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +224: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +225: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +226: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +227: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +228: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +229: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +230: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +231: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +232: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +233: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +234: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +235: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +236: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +237: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +238: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +239: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +240: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +241: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +242: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +243: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +244: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +245: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +246: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +247: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +248: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +249: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +250: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +251: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +252: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:08 +253: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:09 +254: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:09 +255: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:09 +256: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:09 +257: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/ai_conversation/ai_conversation_recovery_test.dart: R-A target guard survives actual route disposal and same-session re-entry
+00:09 +258: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +259: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +260: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +261: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +262: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +263: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +264: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +265: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +266: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +267: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +268: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +269: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +270: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +271: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +272: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +273: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +274: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +275: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +276: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:09 +277: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:10 +278: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:10 +279: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data
+00:10 +280: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +281: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +282: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +283: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +284: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +285: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +286: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +287: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +288: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +289: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +290: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +291: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +292: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +293: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +294: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +295: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +296: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +297: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:10 +298: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +299: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +300: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +301: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +302: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +303: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +304: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +305: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +306: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +307: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +308: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +309: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +310: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +311: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +312: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +313: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +314: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +315: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/check_in_pending_recovery_test.dart: leave pending create; reopen same Note replays; late result is ignored
+00:11 +316: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:11 +317: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:11 +318: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:11 +319: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:11 +320: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:11 +321: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:11 +322: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/event_recommendations_page_test.dart: Home keeps Backend order and presents only its Top 2
+00:11 +323: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:11 +324: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:11 +325: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:11 +326: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:11 +327: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:11 +328: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:11 +329: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:11 +330: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:11 +331: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:11 +332: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +333: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +334: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +335: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +336: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +337: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +338: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +339: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +340: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +341: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +342: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +343: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +344: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +345: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +346: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +347: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +348: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +349: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +350: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +351: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +352: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +353: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +354: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +355: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +356: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +357: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +358: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +359: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +360: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +361: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +362: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +363: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +364: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +365: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +366: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +367: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +368: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +369: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +370: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +371: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +372: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +373: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +374: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +375: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +376: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +377: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +378: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +379: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +380: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +381: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +382: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +383: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +384: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +385: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +386: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +387: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +388: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +389: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +390: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +391: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +392: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +393: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +394: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +395: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +396: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +397: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +398: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +399: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +400: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +401: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +402: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +403: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +404: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +405: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +406: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +407: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +408: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +409: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +410: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +411: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +412: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +413: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +414: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +415: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:12 +416: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:13 +417: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:13 +418: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:13 +419: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:13 +420: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:13 +421: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/friend_search_test.dart: Search/Clear/Next/Reload render server pages, blank query focuses input, controls are labelled and 48dp
+00:13 +422: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +423: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +424: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +425: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +426: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +427: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +428: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +429: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +430: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +431: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +432: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +433: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +434: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +435: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +436: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +437: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +438: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +439: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +440: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +441: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +442: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +443: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +444: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +445: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +446: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +447: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +448: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +449: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +450: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +451: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:13 +452: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/my_friends_test.dart: filtered empty pages retain Next; errors are not empty success; rows have no action
+00:14 +453: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +454: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +455: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +456: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +457: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +458: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +459: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +460: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +461: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/personas/persona_accessibility_test.dart: structured fields expose their labels and invalid Name receives focus
+00:14 +462: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +463: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +464: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +465: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +466: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +467: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +468: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +469: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +470: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +471: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +472: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +473: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:14 +474: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +475: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +476: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +477: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +478: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +479: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +480: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +481: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +482: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +483: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +484: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +485: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +486: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +487: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +488: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +489: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +490: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +491: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +492: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +493: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +494: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:15 +495: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +496: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +497: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +498: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +499: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +500: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +501: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +502: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +503: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +504: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:16 +505: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:17 +506: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:17 +507: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: R6 surfaces render at approved bounds and text scales
+00:17 +508: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:17 +509: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:17 +510: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:17 +511: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:17 +512: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:17 +513: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:17 +514: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:18 +515: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:18 +516: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:18 +517: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:18 +518: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/personas/persona_pages_test.dart: late create success updates a mounted form after rendering and leaves it clean
+00:18 +519: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: onboarding failure retains selected choice and offers retry
+00:18 +520: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: draft guard prevents navigation until explicit discard
+00:18 +521: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: draft guard prevents navigation until explicit discard
+00:18 +522: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: draft guard prevents navigation until explicit discard
+00:18 +523: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: draft guard prevents navigation until explicit discard
+00:18 +524: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: draft guard prevents navigation until explicit discard
+00:18 +525: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/personas/persona_pages_test.dart: same UID new observed session clears the previous private draft
+00:19 +526: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: confirmation failure maps copy and exposes retry
+00:19 +527: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: Persona detour cancels only the active attempt and never resumes it
+00:19 +528: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: Persona detour cancels only the active attempt and never resumes it
+00:19 +529: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: Persona detour cancels only the active attempt and never resumes it
+00:19 +530: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: registration uses the approved public error catalogue
+00:19 +531: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: registration uses the approved public error catalogue
+00:19 +532: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:19 +533: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:19 +534: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:19 +535: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:19 +536: C:/Users/ASUS/.codex/worktrees/zhou-ai-store-followup-1014/3851/test/features/rmvp01a_r6_pages_test.dart: Check-in uses protected and service public errors
+00:20 +537: All tests passed!
