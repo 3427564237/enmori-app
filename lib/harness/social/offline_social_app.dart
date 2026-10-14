@@ -282,9 +282,10 @@ GoRouter _router(
       ),
       GoRoute(
         path: '/friends/:username/profile',
-        builder: (_, state) => OfflineFriendProfilePage(
+        builder: (context, state) => OfflineFriendProfilePage(
           store: store,
           username: state.pathParameters['username'] ?? '',
+          onBack: () => back(context),
         ),
       ),
       GoRoute(

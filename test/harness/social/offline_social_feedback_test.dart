@@ -237,6 +237,8 @@ void main() {
         find.byKey(const Key('offline-friend-unavailable')),
         findsOneWidget,
       );
+      await tap(tester, 'offline-friend-back');
+      expect(find.byType(OfflineSocialHub), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

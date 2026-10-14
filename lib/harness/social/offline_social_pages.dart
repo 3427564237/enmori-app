@@ -532,10 +532,12 @@ final class OfflineFriendProfilePage extends StatelessWidget {
   const OfflineFriendProfilePage({
     required this.store,
     required this.username,
+    required this.onBack,
     super.key,
   });
   final OfflineSocialStore store;
   final String username;
+  final VoidCallback onBack;
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: store,
@@ -544,7 +546,15 @@ final class OfflineFriendProfilePage extends StatelessWidget {
           .where((f) => f.username == username)
           .firstOrNull;
       return Scaffold(
-        appBar: AppBar(title: const Text('Sample profile')),
+        appBar: AppBar(
+          leading: IconButton(
+            key: const Key('offline-friend-back'),
+            tooltip: 'Back',
+            onPressed: onBack,
+            icon: const Icon(Icons.arrow_back),
+          ),
+          title: const Text('Sample profile'),
+        ),
         body: SafeArea(
           child: Align(
             alignment: Alignment.topCenter,
