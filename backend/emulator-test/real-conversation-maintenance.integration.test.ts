@@ -14,6 +14,12 @@ import type { RuntimeEpoch } from "../src/ai-conversation/ports/real-conversatio
 import { retirePreviousConversationEpoch } from "../src/ai-conversation/infrastructure/firestore-conversation-restart.js";
 import { createAuthBindingDocumentId } from "../src/shared/infrastructure/firebase/firestore-records.js";
 import { FirestoreConversationOperationReaders } from "../src/ai-conversation/infrastructure/firestore-conversation-operation-readers.js";
+import { createIsolatedConversationComposition } from "../src/bootstrap/isolated-conversation-composition.js";
+import { buildApp } from "../src/bootstrap/build-app.js";
+import { getAuth } from "firebase-admin/auth";
+import { FirebaseIdentityVerifier } from "../src/shared/infrastructure/firebase/firebase-identity-verifier.js";
+import { err } from "../src/shared/domain/result.js";
+import { appFailure } from "../src/shared/application/app-failure.js";
 
 const env=requireControlledEmulatorEnvironment(process.env);
 const app=initializeApp({projectId:env.projectId},`ai-maintenance-${randomUUID()}`);
@@ -289,4 +295,67 @@ test("actual ordinary readback derives canonical pair from immutable effects aft
   assert.equal((await db.doc(row.base).get()).exists,false);
   assert.equal((await db.collection(`${row.base}/messages`).get()).empty,true);
   assert.equal((await db.collection(`${row.base}/effects`).get()).empty,true);
+});
+
+test("actual general isolated composition traverses all six HTTP operations, independent canonical readers, normal retirement and SDK-settled whole cleanup",async()=>{
+  const auth=getAuth(app),uid=`jin-composition-${randomUUID()}`,email=`${uid}@example.invalid`,password=`Synthetic_${randomUUID()}`;
+  let token="",server:Awaited<ReturnType<typeof buildApp>>|undefined,joined:Awaited<ReturnType<typeof createIsolatedConversationComposition>>|undefined;
+  const targetIds=new Set<string>(),operationIds=new Set<string>(),reports:boolean[]=[],retirements:boolean[]=[];let modelCalls=0,scheduled=0,stopped=0;
+  await auth.createUser({uid,email,password});
+  try {
+    const signed=await fetch(`http://${env.authHost}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=controlled-emulator-key`,
+      {method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email,password,returnSecureToken:true})});
+    assert.equal(signed.status,200);token=(await signed.json() as {idToken:string}).idToken;
+    await set(`auth_bindings/${createAuthBindingDocumentId(uid)}`,{accountId:owner});
+    await set(`accounts/${owner}/persona_state/current`,{stateRevision:0,livePersonaIds:[]});
+    assert.equal((await db.collection("check_ins").where("ownerAccountId","==",owner).get()).empty,true);
+    joined=await createIsolatedConversationComposition({firestore:db,environment:process.env,
+      notePrerequisites:{firestore:db,sourceReferences:["real-conversation-maintenance.integration.test.ts#owned-empty-inventory"],
+        completeCanonicalUtcInventory:true,immutableOwnerNoteAndTime:true,permanentDeletion:true,noRestoreOrIdReuse:true},
+      transport:{generate:async input=>{assert.equal(input.checkIns.length,0);modelCalls++;return Buffer.from(JSON.stringify({schemaVersion:"ai_assistant_message_v1",message:"Synthetic coordinator reply"}));}},
+      gates:{beforeGeneration:async()=>({ok:true,value:undefined}),candidate:async()=>({ok:true,value:undefined})},
+      report:(_phase,result)=>reports.push(result.complete),reportRetirement:ok=>retirements.push(ok),
+      schedule:{every:(interval,_tick)=>{assert.equal(interval,3600000);scheduled++;return ()=>{stopped++;};}}});
+    epoch=joined.epoch;assert.equal(joined.restart.complete,true);assert.deepEqual(reports,[true,true]);assert.equal(scheduled,1);
+    const unused={execute:async()=>err(appFailure("SERVICE_UNAVAILABLE"))};
+    server=await buildApp({identityVerifier:new FirebaseIdentityVerifier(auth),completeOnboarding:unused,getOnboarding:unused,
+      createCheckIn:unused,getCheckIn:unused,getInterestTags:unused,getOwnInterests:unused,replaceOwnInterests:unused,
+      isolatedSlices:{environment:process.env,conversations:joined.operations}});
+    const headers={authorization:`Bearer ${token}`};
+    const prep=await server.inject({method:"POST",url:"/v1/me/ai/operations",headers,payload:{kind:"send",purpose:"checkin_conversation"}});
+    assert.equal(prep.statusCode,201);const p=prep.json<{operationId:string;conversationId:string;operationKey:string}>();targetIds.add(p.conversationId);operationIds.add(p.operationId);
+    const sent=await server.inject({method:"POST",url:`/v1/me/ai/operations/${p.operationId}/execute`,headers:{...headers,"ai-operation-key":p.operationKey},payload:{text:"Synthetic SDK coordinator input"}});
+    assert.equal(sent.statusCode,200);assert.equal(modelCalls,1);
+    const pair=sent.json<{userMessage:{messageId:string;persistedAt:string};assistantMessage:{messageId:string}}>();
+    await new Promise<void>(resolve=>setImmediate(resolve));await joined.io.settled(owner,p.conversationId);await new Promise<void>(resolve=>setImmediate(resolve));
+    assert.equal(joined.io.idle(owner,p.conversationId),true);assert.deepEqual(retirements,[true]);
+    assert.equal((await db.doc(`ai_operation_fences/${p.operationId}`).get()).exists,false);
+    const base=`accounts/${owner}/conversations/${p.conversationId}`;
+    const u=await db.doc(`${base}/messages/${pair.userMessage.messageId}`).get();assert.equal(u.exists,true);
+    assert.equal(u.data()!.acceptedAssistantMessageId,pair.assistantMessage.messageId);assert.equal(u.data()!.pendingOperationId,undefined);
+    const read=await server.inject({method:"GET",url:`/v1/me/conversations/${p.conversationId}/operations/${p.operationId}`,headers});
+    assert.equal(read.statusCode,200);assert.equal(read.json().state,"assistant_saved");
+    const page=await server.inject({method:"GET",url:`/v1/me/conversations/${p.conversationId}/messages`,headers});
+    assert.equal(page.statusCode,200);assert.equal(page.json().messages.length,2);assert.equal(page.json().messages[0].persistedAt,pair.userMessage.persistedAt);
+    assert.equal((await db.doc(u.ref.path).get()).createTime!.isEqual(u.createTime!),true);
+    const otherPrep=await server.inject({method:"POST",url:"/v1/me/ai/operations",headers,payload:{kind:"send",purpose:"checkin_conversation",conversationId:p.conversationId}});
+    assert.equal(otherPrep.statusCode,201);const other=otherPrep.json<{operationId:string;operationKey:string}>();operationIds.add(other.operationId);
+    const cancelled=await server.inject({method:"POST",url:`/v1/me/ai/operations/${other.operationId}/cancel`,headers:{...headers,"ai-operation-key":other.operationKey}});
+    assert.equal(cancelled.statusCode,200);assert.equal(cancelled.json().state,"terminal");assert.equal(modelCalls,1);
+    const deleted=await server.inject({method:"DELETE",url:`/v1/me/conversations/${p.conversationId}`,headers});assert.equal(deleted.statusCode,204);
+    assert.equal((await db.doc(base).get()).exists,false);
+    for(const collection of ["messages","message_sources","effects"])assert.equal((await db.collection(`${base}/${collection}`).get()).empty,true);
+    assert.equal((await db.collection("ai_operation_fences").where("ownerAccountId","==",owner).get()).empty,true);
+    assert.equal((await db.doc(progress).get()).exists,false);assert.equal(joined.runtime.state.nonTerminal,0);assert.equal(joined.runtime.state.quarantined,false);
+  }finally{
+    await joined?.stopAdmissionAndMaintenance();await server?.close();if(joined)assert.equal(stopped,1);
+    // Inspect and remove only this owned test's targets even after an assertion fails.
+    for(const cid of targetIds){
+      await joined?.io.settled(owner,cid);
+      const base=`accounts/${owner}/conversations/${cid}`;paths.add(base);
+      for(const collection of ["messages","message_sources","effects"])for(const row of (await db.collection(`${base}/${collection}`).get()).docs)paths.add(row.ref.path);
+    }
+    for(const id of operationIds)paths.add(`ai_operation_fences/${id}`);
+    token="";await auth.deleteUser(uid);await assert.rejects(auth.getUser(uid));
+  }
 });
