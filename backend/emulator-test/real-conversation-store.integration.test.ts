@@ -11,6 +11,10 @@ import { createAuthBindingDocumentId } from "../src/shared/infrastructure/fireba
 import { FirebaseIdentityVerifier } from "../src/shared/infrastructure/firebase/firebase-identity-verifier.js";
 import { FirestoreConversationStore } from "../src/ai-conversation/infrastructure/firestore-conversation-store.js";
 import type { StoreResult, OperationTarget, OpenOperation, OriginalWriteAuthority, RuntimeEpoch } from "../src/ai-conversation/ports/real-conversation-store.js";
+import { buildApp } from "../src/bootstrap/build-app.js";
+import { err } from "../src/shared/domain/result.js";
+import { appFailure } from "../src/shared/application/app-failure.js";
+import type { ConversationOperations } from "../src/ai-conversation/ports/conversation-operations.js";
 
 const env = requireControlledEmulatorEnvironment(process.env);
 assert.equal(env.projectId, "demo-enmori-rmvp01a-r10");
@@ -45,11 +49,11 @@ const parent = (t: OperationTarget): string => `accounts/${owner}/conversations/
 const user = (t: OperationTarget): string => `${parent(t)}/messages/${t.userMessageId}`;
 async function saved(t = target()): Promise<OpenOperation> {
   const op = confirmed(await store.initializeOperation(t, epoch, authority()));
-  confirmed(await store.saveUser(op, "Synthetic user message", authority())); return op;
+  confirmed(await store.saveUser(op, () => "Synthetic user message", authority())); return op;
 }
 async function assistant(op: OpenOperation): Promise<string> {
   const id = randomUUID();
-  confirmed(await store.saveAssistant(op, { messageId: id, text: "Synthetic accepted reply", presentation: { presentationMode: "default" } }, authority()));
+  confirmed(await store.saveAssistant(op, () => ({ messageId: id, text: "Synthetic accepted reply", presentation: { presentationMode: "default" } }), authority()));
   return id;
 }
 before(async () => {
@@ -90,6 +94,8 @@ test("actual Auth -> first user -> assistant -> definite ACK -> ordinary readbac
   const id = await assistant(op);
   assert.equal((await firestore.doc(user(op)).get()).data()!.pendingOperationId, op.operationId);
   confirmed(await store.settleAcknowledgedAssistant(op, authority()));
+  const acknowledged = confirmed(await store.readAcknowledgedPair(op, authority()));
+  assert.equal(acknowledged.assistant.messageId, id);
   confirmed(await store.closeOperation(op, epoch));
   const result = confirmed(await store.readOutcome({ firebaseUid: uid }, op));
   assert.equal(result.state, "assistant_saved");
@@ -98,17 +104,17 @@ test("actual Auth -> first user -> assistant -> definite ACK -> ordinary readbac
   assert.deepEqual(result.user.persistedAt, { seconds: original.createTime!.seconds, nanoseconds: original.createTime!.nanoseconds });
   assert.deepEqual((await firestore.doc(`${parent(op)}/message_sources/${id}`).get()).data(), { sources: [] });
   assert.equal((await firestore.doc(user(op)).get()).createTime!.isEqual(original.createTime!), true);
-  assert.equal(freshChecks - beforeChecks, 3);
+  assert.equal(freshChecks - beforeChecks, 4);
 });
 test("all-pending A -> B -> C: old A cannot clear B; accepted pair is visible through both effects", async () => {
   const a = await saved(); confirmed(await store.closeOperation(a, epoch));
   assert.equal(confirmed(await store.readOutcome({ firebaseUid: uid }, a)).state, "user_saved");
   const b = confirmed(await store.initializeOperation(retry(a), epoch, authority()));
-  confirmed(await store.claimRetry(b, "Synthetic user message", authority()));
+  confirmed(await store.claimRetry(b, () => "Synthetic user message", authority()));
   const before = await firestore.doc(user(a)).get();
   assert.equal(confirmed(await store.readOutcome({ firebaseUid: uid }, a)).state, "unresolved");
   const c = confirmed(await store.initializeOperation(retry(a), epoch, authority()));
-  assert.equal((await store.claimRetry(c, "Synthetic user message", authority())).kind, "conflict");
+  assert.equal((await store.claimRetry(c, () => "Synthetic user message", authority())).kind, "conflict");
   const id = await assistant(b);
   assert.equal(confirmed(await store.readOutcome({ firebaseUid: uid }, a)).state, "unresolved");
   confirmed(await store.closeOperation(b, epoch));
@@ -116,7 +122,7 @@ test("all-pending A -> B -> C: old A cannot clear B; accepted pair is visible th
   const fromA = confirmed(await store.readOutcome({ firebaseUid: uid }, a));
   assert.equal(fromA.state, "assistant_saved"); if (fromA.state === "assistant_saved") assert.equal(fromA.assistant.messageId, id);
   assert.equal((await firestore.doc(user(a)).get()).createTime!.isEqual(before.createTime!), true);
-  assert.equal((await store.claimRetry(c, "Synthetic user message", authority())).kind, "conflict");
+  assert.equal((await store.claimRetry(c, () => "Synthetic user message", authority())).kind, "conflict");
 });
 test("cancel before initialization leaves closed placeholder and late initialization never opens it", async () => {
   const t = target(); confirmed(await store.closeOperation(t, epoch));
@@ -126,25 +132,25 @@ test("cancel before initialization leaves closed placeholder and late initializa
 });
 test("closed fence prevents a later assistant and does not turn saved user into no_effect", async () => {
   const op = await saved(); confirmed(await store.closeOperation(op, epoch));
-  assert.equal((await store.saveAssistant(op, { messageId: randomUUID(), text: "late", presentation: { presentationMode: "default" } }, authority())).kind, "terminated");
+  assert.equal((await store.saveAssistant(op, () => ({ messageId: randomUUID(), text: "late", presentation: { presentationMode: "default" } }), authority())).kind, "terminated");
   assert.equal(confirmed(await store.readOutcome({ firebaseUid: uid }, op)).state, "user_saved");
 });
 test("foreign verified identity cannot read or write another owner's target", async () => {
   const op = await saved();
   assert.equal((await store.readOutcome({ firebaseUid: peer }, op)).kind, "denied");
-  assert.equal((await store.saveAssistant(op, { messageId: randomUUID(), text: "wrong owner", presentation: { presentationMode: "default" } },
+  assert.equal((await store.saveAssistant(op, () => ({ messageId: randomUUID(), text: "wrong owner", presentation: { presentationMode: "default" } }),
     { ...authority(), principal: { firebaseUid: peer } })).kind, "denied");
 });
 test("fresh Auth await cannot dispatch content after original cancellation", async () => {
   const op = await saved(); let active = true;
   const a = { ...authority(), current: () => active, verifyCurrentAuth: async () => { active = false;
     return { kind: "verified" as const, principal: { firebaseUid: uid } }; } };
-  assert.equal((await store.saveAssistant(op, { messageId: randomUUID(), text: "late", presentation: { presentationMode: "default" } }, a)).kind, "terminated");
+  assert.equal((await store.saveAssistant(op, () => ({ messageId: randomUUID(), text: "late", presentation: { presentationMode: "default" } }), a)).kind, "terminated");
   assert.equal((await firestore.collection(`${parent(op)}/messages`).get()).size, 1);
 });
 test("revocation generation regrant cannot reauthorize old captured authority", async () => {
   const op = await saved(); await firestore.doc(accountPath).update({ purposeRevocationGeneration: 1 });
-  try { assert.equal((await store.saveAssistant(op, { messageId: randomUUID(), text: "stale", presentation: { presentationMode: "default" } }, authority())).kind, "denied"); }
+  try { assert.equal((await store.saveAssistant(op, () => ({ messageId: randomUUID(), text: "stale", presentation: { presentationMode: "default" } }), authority())).kind, "denied"); }
   finally { await firestore.doc(accountPath).set(account); }
 });
 test("unproved nonempty Note authority refuses effect rather than fabricating empty sources", async () => {
@@ -161,7 +167,7 @@ test("SDK acknowledged commit with deliberately discarded ACK remains unresolved
   } };
   const uncertain = new FirestoreConversationStore(lostAck, process.env);
   const op = confirmed(await uncertain.initializeOperation(t, epoch, authority())); discard = true;
-  assert.equal((await uncertain.saveUser(op, "Synthetic user message", authority())).kind, "unresolved");
+  assert.equal((await uncertain.saveUser(op, () => "Synthetic user message", authority())).kind, "unresolved");
   assert.equal((await firestore.doc(user(op)).get()).exists, true);
   assert.equal(confirmed(await store.readOutcome({ firebaseUid: uid }, op)).state, "unresolved");
   confirmed(await store.closeOperation(op, epoch));
@@ -171,7 +177,7 @@ test("concurrent retries contend on canonical U and only one obtains pending aut
   const a = await saved(); confirmed(await store.closeOperation(a, epoch)); confirmed(await store.readOutcome({ firebaseUid: uid }, a));
   const b = confirmed(await store.initializeOperation(retry(a), epoch, authority()));
   const c = confirmed(await store.initializeOperation(retry(a), epoch, authority()));
-  const results = await Promise.all([store.claimRetry(b, "Synthetic user message", authority()), store.claimRetry(c, "Synthetic user message", authority())]);
+  const results = await Promise.all([store.claimRetry(b, () => "Synthetic user message", authority()), store.claimRetry(c, () => "Synthetic user message", authority())]);
   assert.equal(results.filter(r => r.kind === "confirmed").length, 1);
   assert.equal(results.filter(r => r.kind === "conflict" || r.kind === "unresolved").length, 1);
   assert.ok([b.operationId, c.operationId].includes((await firestore.doc(user(a)).get()).data()!.pendingOperationId as string));
@@ -188,7 +194,7 @@ test("canonical assistant tombstone occupies original U and cannot be retried", 
     assert.equal(outcome.assistant.availability, "unavailable"); assert.equal(Object.hasOwn(outcome.assistant, "text"), false);
   }
   const r = confirmed(await store.initializeOperation(retry(op), epoch, authority()));
-  assert.equal((await store.claimRetry(r, "Synthetic user message", authority())).kind, "conflict");
+  assert.equal((await store.claimRetry(r, () => "Synthetic user message", authority())).kind, "conflict");
 });
 test("missing provenance and corrupt retention lineage fail closed without removing original content", async () => {
   const op = await saved(), id = await assistant(op); confirmed(await store.closeOperation(op, epoch));
@@ -208,6 +214,62 @@ test("original expiry denies read and append; no request-clock extension or dele
 });
 test("runtime restart epoch closes old content authority without pretending model termination", async () => {
   const old = await saved(); epoch = confirmed(await store.startEpoch(randomUUID()));
-  assert.equal((await store.saveAssistant(old, { messageId: randomUUID(), text: "old process", presentation: { presentationMode: "default" } }, authority())).kind, "terminated");
+  assert.equal((await store.saveAssistant(old, () => ({ messageId: randomUUID(), text: "old process", presentation: { presentationMode: "default" } }), authority())).kind, "terminated");
   assert.equal((await firestore.collection(`${parent(old)}/messages`).get()).size, 1);
+});
+
+test("retained orphan under absent parent cannot be recreated as reserved_new", async () => {
+  const t = target(); await firestore.doc(`${parent(t)}/effects/${randomUUID()}`).create({ kind: "send", userMessageId: randomUUID() });
+  assert.equal((await store.initializeOperation(t, epoch, authority())).kind, "unavailable");
+  assert.equal((await firestore.doc(parent(t)).get()).exists, false);
+});
+
+test("actual Auth -> six-route isolated Fastify boundary -> real store with explicitly fake orchestration and reply", async () => {
+  // A handwritten integration fixture, NOT ZHOU's pending production async runtime.
+  // This case proves Transport/store joining; not capacity, model policy or all six real use cases.
+  const t = target(), key = Buffer.alloc(32, 9).toString("base64url");
+  let op: OpenOperation | undefined, binding: string | undefined, consumed = false;
+  const unavailable = async () => ({ kind: "failure" as const, code: "AI_UNAVAILABLE" as const });
+  const operations: ConversationOperations = {
+    prepare: async caller => { binding = caller.tokenInstance; return { kind: "success", value: {
+      operationId: t.operationId, operationKey: key, conversationId: t.conversationId, preparationExpiresAt: new Date(Date.now() + 15000).toISOString() } }; },
+    execute: async (caller, input, delivery) => {
+      if (consumed || caller.tokenInstance !== binding || input.operationKey !== key) return { kind: "failure", code: "AI_OPERATION_CONFLICT" };
+      consumed = true;
+      const a: OriginalWriteAuthority = { ...authority(), principal: caller.principal, current: () => delivery.current(),
+        verifyCurrentAuth: async () => { const r = await caller.verifyCurrentAuth();
+          return r.kind === "verified" ? r : { kind: r.kind === "dependency_unavailable" ? "unavailable" : "denied" }; } };
+      op = confirmed(await store.initializeOperation(t, epoch, a));
+      confirmed(await store.saveUser(op, () => input.text, a));
+      confirmed(await store.saveAssistant(op, () => ({ messageId: randomUUID(), text: "Explicit synthetic fake reply", presentation: { presentationMode: "default" } }), a));
+      confirmed(await store.settleAcknowledgedAssistant(op, a));
+      const pair = confirmed(await store.readAcknowledgedPair(op, a));
+      assert.equal(delivery.current(), true);
+      return { kind: "success", value: { operationId: t.operationId, conversationId: t.conversationId, userMessage: pair.user, assistantMessage: pair.assistant } };
+    },
+    cancel: unavailable, listMessages: unavailable, deleteConversation: unavailable,
+    readOutcome: async caller => { const outcome = confirmed(await store.readOutcome(caller.principal, t));
+      if (outcome.state === "assistant_saved") return { kind: "success", value: { operationId: t.operationId, state: "assistant_saved", userMessage: outcome.user, assistantMessage: outcome.assistant } };
+      return { kind: "success", value: { operationId: t.operationId, state: "unresolved" } }; },
+  };
+  const unused = { execute: async () => err(appFailure("SERVICE_UNAVAILABLE")) };
+  const app = await buildApp({ identityVerifier: verifier, completeOnboarding: unused, getOnboarding: unused,
+    createCheckIn: unused, getCheckIn: unused, getInterestTags: unused, getOwnInterests: unused, replaceOwnInterests: unused,
+    isolatedSlices: { environment: process.env, conversations: operations } });
+  try {
+    const headers = { authorization: `Bearer ${token}` };
+    const prepared = await app.inject({ method: "POST", url: "/v1/me/ai/operations", headers, payload: { kind: "send", purpose: "checkin_conversation" } });
+    assert.equal(prepared.statusCode, 201);
+    const executed = await app.inject({ method: "POST", url: `/v1/me/ai/operations/${t.operationId}/execute`, headers: { ...headers, "ai-operation-key": key }, payload: { text: "Synthetic HTTP input" } });
+    assert.equal(executed.statusCode, 200);
+    const dto = executed.json() as { userMessage: { messageId: string; text: string }; assistantMessage: { text: string } };
+    assert.equal(dto.userMessage.messageId, t.userMessageId); assert.equal(dto.assistantMessage.text, "Explicit synthetic fake reply");
+    assert.equal((await firestore.doc(user(t)).get()).data()!.text, "Synthetic HTTP input");
+    assert.equal((await firestore.collection(`${parent(t)}/messages`).get()).size, 2);
+    const duplicate = await app.inject({ method: "POST", url: `/v1/me/ai/operations/${t.operationId}/execute`, headers: { ...headers, "ai-operation-key": key }, payload: { text: "Synthetic HTTP input" } });
+    assert.equal(duplicate.statusCode, 409);
+    confirmed(await store.closeOperation(op!, epoch));
+    const read = await app.inject({ method: "GET", url: `/v1/me/conversations/${t.conversationId}/operations/${t.operationId}`, headers });
+    assert.equal(read.statusCode, 200); assert.equal((read.json() as { state: string }).state, "assistant_saved");
+  } finally { await app.close(); }
 });

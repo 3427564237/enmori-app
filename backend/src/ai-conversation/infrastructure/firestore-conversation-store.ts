@@ -8,6 +8,7 @@ import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
 import type { RealConversationStore, StoreResult, StoreFailure, RuntimeEpoch, OperationTarget,
   OpenOperation, OriginalWriteAuthority, StoredConversationMessage, SavedOperationOutcome } from "../ports/real-conversation-store.js";
 import type { PresentationMetadata } from "../ports/conversation-lifecycle.js";
+import { normalizePersonaInput } from "../../personas/domain/persona-values.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const RUNTIME = "ai_runtime_fence/current";
@@ -100,7 +101,12 @@ export class FirestoreConversationStore implements RealConversationStore {
       if (!/^[0-9a-f]{64}$/.test(deps.usedPersonaId)) refuse("unavailable");
       const persona = await tx.get(`accounts/${target.ownerAccountId}/personas/${deps.usedPersonaId}`);
       if (persona === undefined) refuse("denied");
-      if (!positive(persona.revision)) refuse("unavailable");
+      const state = await tx.get(`accounts/${target.ownerAccountId}/persona_state/current`);
+      const fields = normalizePersonaInput({ displayName: persona.displayName, tone: persona.tone,
+        responseLength: persona.responseLength, formatStyle: persona.formatStyle });
+      if (!positive(persona.revision) || fields === undefined || fields.displayName !== persona.displayName ||
+          state === undefined || !Array.isArray(state.livePersonaIds) || !state.livePersonaIds.includes(deps.usedPersonaId) ||
+          !nonnegative(state.stateRevision)) refuse("unavailable");
       // Edit/switch are NOT revocations; only the originally used record must remain live.
     }
     current(a);
@@ -129,7 +135,13 @@ export class FirestoreConversationStore implements RealConversationStore {
   }
   private async inventory(tx: Tx, target: OperationTarget): Promise<Inventory | undefined> {
     const parent = await tx.get(parentPath(target));
-    if (parent === undefined) return undefined;
+    if (parent === undefined) {
+      // A missing parent cannot hide retained children and become a fresh target.
+      for (const collection of ["messages", "message_sources", "effects"]) {
+        if ((await tx.list(`${parentPath(target)}/${collection}`)).length !== 0) refuse("unavailable");
+      }
+      return undefined;
+    }
     if (!exact(parent, ["state", "lifecycleVersion", "nextSequence", "latestMessageId"]) ||
         tx.listSnapshots === undefined) refuse("unavailable");
     const rows = await tx.listSnapshots(`${parentPath(target)}/messages`);
@@ -201,9 +213,9 @@ export class FirestoreConversationStore implements RealConversationStore {
       return { ...t, epoch, revision: 1 };
     });
   }
-  async saveUser(op: OpenOperation, text: string, a: OriginalWriteAuthority): Promise<StoreResult<void>> {
+  async saveUser(op: OpenOperation, borrowText: () => string | undefined, a: OriginalWriteAuthority): Promise<StoreResult<void>> {
     return this.content(a, async tx => {
-      if (op.kind !== "send" || !validText(text)) refuse("conflict");
+      if (op.kind !== "send") refuse("conflict");
       await this.writable(tx, op, a);
       const inv = await this.inventory(tx, op);
       const existingUser = await tx.get(userPath(op)), existingEffect = await tx.get(effectPath(op));
@@ -212,6 +224,8 @@ export class FirestoreConversationStore implements RealConversationStore {
       if (inv !== undefined && op.targetKind === "reserved_new") refuse("conflict");
       const sequence = inv === undefined ? 1 : this.nextSequence(inv);
       current(a);
+      const text = borrowText(); if (text === undefined) refuse("terminated");
+      if (!validText(text)) refuse("conflict");
       tx.create(userPath(op), { role: "user", sequence, text, pendingOperationId: op.operationId,
         ...(inv === undefined ? {} : { appendBefore: inv.cutoff }) });
       tx.create(effectPath(op), { kind: "send", userMessageId: op.userMessageId });
@@ -219,13 +233,15 @@ export class FirestoreConversationStore implements RealConversationStore {
         nextSequence: sequence + 1, latestMessageId: op.userMessageId });
     });
   }
-  async claimRetry(op: OpenOperation, text: string, a: OriginalWriteAuthority): Promise<StoreResult<void>> {
+  async claimRetry(op: OpenOperation, borrowText: () => string | undefined, a: OriginalWriteAuthority): Promise<StoreResult<void>> {
     return this.content(a, async tx => {
-      if (op.kind !== "retry" || !validText(text)) refuse("conflict");
+      if (op.kind !== "retry") refuse("conflict");
       await this.writable(tx, op, a);
       const inv = await this.inventory(tx, op); if (inv === undefined) refuse("conversation_unavailable");
       const user = this.requireUser(inv, op.userMessageId);
       const oldEffect = await tx.get(effectPath(op));
+      current(a); const text = borrowText(); if (text === undefined) refuse("terminated");
+      if (!validText(text)) refuse("conflict");
       if (user.data.text !== text || user.data.acceptedAssistantMessageId !== undefined ||
           user.data.pendingOperationId !== undefined || oldEffect !== undefined) refuse("conflict");
       current(a);
@@ -233,24 +249,28 @@ export class FirestoreConversationStore implements RealConversationStore {
       tx.create(effectPath(op), { kind: "retry", userMessageId: op.userMessageId });
     });
   }
-  async saveAssistant(op: OpenOperation, input: { readonly messageId: string; readonly text: string; readonly presentation: PresentationMetadata },
+  async saveAssistant(op: OpenOperation, borrowInput: () => { readonly messageId: string; readonly text: string; readonly presentation: PresentationMetadata } | undefined,
     a: OriginalWriteAuthority): Promise<StoreResult<void>> {
     return this.content(a, async tx => {
-      if (!UUID.test(input.messageId) || input.messageId === op.userMessageId || !validText(input.text) ||
-          !((input.presentation.presentationMode === "default" && a.dependencies.usedPersonaId === undefined) ||
-            (input.presentation.presentationMode === "persona" && a.dependencies.usedPersonaId !== undefined &&
-              input.presentation.presentationProjectionVersion === "persona_presentation_v1"))) refuse("unavailable");
       await this.writable(tx, op, a);
       const inv = await this.inventory(tx, op); if (inv === undefined) refuse("conversation_unavailable");
       const user = this.requireUser(inv, op.userMessageId);
       const effect = await tx.get(effectPath(op));
-      const path = `${parentPath(op)}/messages/${input.messageId}`, provenance = `${parentPath(op)}/message_sources/${input.messageId}`;
-      const oldAssistant = await tx.get(path), oldSources = await tx.get(provenance);
+      // Query existing provenance before borrowing reply content. No awaited
+      // authority or data read may retain a borrowed reply before SDK submission.
+      const allSources = await tx.list(`${parentPath(op)}/message_sources`);
       if (user.data.pendingOperationId !== op.operationId || user.data.acceptedAssistantMessageId !== undefined) refuse("conflict");
       if (effect === undefined || !exact(effect, ["kind", "userMessageId"]) || effect.kind !== op.kind ||
-          effect.userMessageId !== op.userMessageId || oldAssistant !== undefined || oldSources !== undefined) refuse("unavailable");
+          effect.userMessageId !== op.userMessageId) refuse("unavailable");
       const sequence = this.nextSequence(inv);
       current(a);
+      const input = borrowInput(); if (input === undefined) refuse("terminated");
+      if (!UUID.test(input.messageId) || input.messageId === op.userMessageId || !validText(input.text) ||
+          inv.rows.some(row => row.id === input.messageId) || allSources.some(row => row.id === input.messageId) ||
+          !((input.presentation.presentationMode === "default" && a.dependencies.usedPersonaId === undefined) ||
+            (input.presentation.presentationMode === "persona" && a.dependencies.usedPersonaId !== undefined &&
+              input.presentation.presentationProjectionVersion === "persona_presentation_v1"))) refuse("unavailable");
+      const path = `${parentPath(op)}/messages/${input.messageId}`, provenance = `${parentPath(op)}/message_sources/${input.messageId}`;
       tx.create(path, { role: "assistant", sequence, availability: "available", text: input.text, replyToUserMessageId: op.userMessageId,
         ...input.presentation, appendBefore: inv.cutoff });
       tx.create(provenance, { sources: [] }); // authority() has refused every nonempty dependency.
@@ -313,6 +333,22 @@ export class FirestoreConversationStore implements RealConversationStore {
       }
       return assistant === undefined ? { state: "user_saved", user: this.message(user) }
         : { state: "assistant_saved", user: this.message(user), assistant };
+    });
+  }
+
+  async readAcknowledgedPair(op: OpenOperation, a: OriginalWriteAuthority): Promise<StoreResult<{
+    readonly user: StoredConversationMessage; readonly assistant: StoredConversationMessage;
+  }>> {
+    return this.content(a, async tx => {
+      await this.writable(tx, op, a);
+      const inv = await this.inventory(tx, op); if (inv === undefined) refuse("conversation_unavailable");
+      const user = this.requireUser(inv, op.userMessageId), effect = await tx.get(effectPath(op));
+      if (user.data.pendingOperationId !== undefined) refuse("conflict");
+      const assistant = await this.pair(tx, op, inv, user);
+      if (assistant === undefined || assistant.availability !== "available" || effect === undefined ||
+          !exact(effect, ["kind", "userMessageId", "assistantMessageId"]) || effect.kind !== op.kind ||
+          effect.userMessageId !== user.id || effect.assistantMessageId !== assistant.messageId) refuse("unavailable");
+      current(a); return { user: this.message(user), assistant };
     });
   }
 }

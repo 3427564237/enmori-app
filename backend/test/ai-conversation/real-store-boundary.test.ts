@@ -56,3 +56,19 @@ test("close before initialize records only content-free closed fence and preserv
   assert.deepEqual(gateway.read(`ai_operation_fences/${target.operationId}`), first);
   assert.equal(gateway.entries().length, 2);
 });
+
+test("terminal during fresh Auth never borrows user/reply text or dispatches a transaction", async () => {
+  let borrowed = 0, transactions = 0, live = true;
+  const store = new FirestoreConversationStore({runTransaction: async <T>(): Promise<T> => {transactions++; throw new Error("not reached");}}, environment);
+  const a: OriginalWriteAuthority = {...authority, current:()=>live, verifyCurrentAuth:async()=>{
+    await Promise.resolve(); live=false; return {kind:"verified",principal:authority.principal};
+  }};
+  const op={...target,epoch:{processEpoch:randomUUID(),generation:1},revision:1};
+  const text=()=>{borrowed++;return "synthetic";};
+  assert.equal((await store.saveUser(op,text,a)).kind,"terminated");
+  live=true;
+  assert.equal((await store.claimRetry({...op,kind:"retry",targetKind:"existing"},text,a)).kind,"terminated");
+  live=true;
+  assert.equal((await store.saveAssistant(op,()=>{borrowed++;return {messageId:randomUUID(),text:"synthetic",presentation:{presentationMode:"default"}};},a)).kind,"terminated");
+  assert.equal(borrowed,0); assert.equal(transactions,0);
+});

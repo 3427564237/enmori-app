@@ -61,18 +61,23 @@ export interface RealConversationStore {
   startEpoch(processEpoch: string): Promise<StoreResult<RuntimeEpoch>>;
   initializeOperation(target: OperationTarget, epoch: RuntimeEpoch,
     authority: OriginalWriteAuthority): Promise<StoreResult<OpenOperation>>;
-  saveUser(operation: OpenOperation, text: string,
+  /** Borrow only at guarded SDK submission; the supplier returns undefined after terminal disposal. */
+  saveUser(operation: OpenOperation, text: () => string | undefined,
     authority: OriginalWriteAuthority): Promise<StoreResult<void>>;
-  claimRetry(operation: OpenOperation, explicitText: string,
+  claimRetry(operation: OpenOperation, explicitText: () => string | undefined,
     authority: OriginalWriteAuthority): Promise<StoreResult<void>>;
-  saveAssistant(operation: OpenOperation, input: {
+  saveAssistant(operation: OpenOperation, input: () => {
     readonly messageId: string; readonly text: string; readonly presentation: PresentationMetadata;
-  }, authority: OriginalWriteAuthority): Promise<StoreResult<void>>;
+  } | undefined, authority: OriginalWriteAuthority): Promise<StoreResult<void>>;
   /** Synchronously end the original Application BEFORE invoking this method. */
   closeOperation(target: OperationTarget, epoch: RuntimeEpoch): Promise<StoreResult<void>>;
   /** Only after a definite assistant ACK while the original request is still current. */
   settleAcknowledgedAssistant(operation: OpenOperation,
     authority: OriginalWriteAuthority): Promise<StoreResult<void>>;
+  /** Definite ACK metadata projection for the still-current original guarded sink, never a replay cache. */
+  readAcknowledgedPair(operation: OpenOperation, authority: OriginalWriteAuthority): Promise<StoreResult<{
+    readonly user: StoredConversationMessage; readonly assistant: StoredConversationMessage;
+  }>>;
   /** New ordinary owner read. Checks canonical U and ALL pending operations on U. */
   readOutcome(principal: AuthPrincipal, target: OperationTarget): Promise<StoreResult<SavedOperationOutcome>>;
 }
