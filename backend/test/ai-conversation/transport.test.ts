@@ -153,3 +153,24 @@ test("normative AI envelope/codes and isolation are separate from unchanged lega
     for(const operation of Object.values(methods)) assert.equal(operation["x-enmori-environment"],"isolated-emulator");
   }
 });
+
+test("actual complete-body sink accepts once synchronously and ignores the later return value",async t=>{
+  const observed:boolean[]=[];let resumed=false;
+  const f=await fixture(true,{execute:async(_caller,_input,delivery)=>{
+    assert.equal(typeof delivery.acceptCompleteBody,"function");
+    observed.push(delivery.acceptCompleteBody!({operationId,conversationId,userMessage:user,assistantMessage:assistant}));
+    observed.push(delivery.acceptCompleteBody!({operationId,conversationId,userMessage:user,assistantMessage:{...assistant,text:"late replacement"}}));
+    await Promise.resolve();resumed=true;return {kind:"failure",code:"AI_UNAVAILABLE"};
+  }});t.after(()=>f.app.close());
+  const response=await f.app.inject({method:"POST",url:routes[1][1],headers:controlHeaders,payload:{text:user.text}});
+  assert.equal(response.statusCode,200);assert.equal(response.json().assistantMessage.text,assistant.text);
+  assert.equal(response.headers["cache-control"],"no-store");assert.deepEqual(observed,[true,false]);assert.equal(resumed,true);
+});
+test("complete-body sink rejects mismatched pair before writing any response bytes",async t=>{
+  const f=await fixture(true,{execute:async(_caller,_input,delivery)=>{
+    assert.equal(delivery.acceptCompleteBody!({operationId:randomUUID(),conversationId,userMessage:user,assistantMessage:assistant}),false);
+    return {kind:"failure",code:"AI_UNAVAILABLE"};
+  }});t.after(()=>f.app.close());
+  const response=await f.app.inject({method:"POST",url:routes[1][1],headers:controlHeaders,payload:{text:user.text}});
+  failure(response,503,"AI_UNAVAILABLE");assert.equal(response.body.includes("Synthetic reply"),false);
+});

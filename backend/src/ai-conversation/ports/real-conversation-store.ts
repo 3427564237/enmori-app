@@ -84,6 +84,7 @@ export interface RealConversationStore {
   /** Definite ACK metadata projection for the still-current original guarded sink, never a replay cache. */
   readAcknowledgedPair(operation: OpenOperation, authority: OriginalWriteAuthority): Promise<StoreResult<{
     readonly user: StoredConversationMessage; readonly assistant: StoredConversationMessage;
+    readonly presentation: PresentationMetadata;
   }>>;
   /** New ordinary owner read. Checks canonical U and ALL pending operations on U. */
   readOutcome(principal: AuthPrincipal, target: OperationTarget): Promise<StoreResult<SavedOperationOutcome>>;

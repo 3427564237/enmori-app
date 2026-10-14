@@ -25,10 +25,17 @@ export type ConversationReadback =
   | { readonly operationId: string; readonly state: "active" | "no_effect" | "unresolved" }
   | { readonly operationId: string; readonly state: "user_saved"; readonly userMessage: StoredConversationMessage }
   | { readonly operationId: string; readonly state: "assistant_saved"; readonly userMessage: StoredConversationMessage; readonly assistantMessage: StoredConversationMessage };
+export interface ExecutedConversationPair {
+  readonly operationId:string;readonly conversationId:string;
+  readonly userMessage:StoredConversationMessage;readonly assistantMessage:StoredConversationMessage;
+}
 export interface ConversationOperations {
   prepare(caller: ConversationCaller, input: PrepareConversation): Promise<ConversationResult<PreparedConversationOperation>>;
   execute(caller: ConversationCaller, input: { readonly operationId: string; readonly operationKey: string; readonly text: string },
-    delivery: { readonly signal: AbortSignal; current(): boolean }): Promise<ConversationResult<{
+    delivery: { readonly signal: AbortSignal; current(): boolean;
+      /** Complete body acceptance at the original guarded synchronous sink event. */
+      readonly acceptCompleteBody?:(pair:ExecutedConversationPair)=>boolean;
+    }): Promise<ConversationResult<{
       readonly operationId: string; readonly conversationId: string; readonly userMessage: StoredConversationMessage; readonly assistantMessage: StoredConversationMessage;
     }>>;
   cancel(caller: ConversationCaller, input: { readonly operationId: string; readonly operationKey: string }): Promise<ConversationResult<{ readonly operationId: string; readonly state: "terminal" }>>;

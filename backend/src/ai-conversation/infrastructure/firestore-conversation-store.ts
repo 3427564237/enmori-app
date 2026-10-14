@@ -344,6 +344,7 @@ export class FirestoreConversationStore implements RealConversationStore {
 
   async readAcknowledgedPair(op: OpenOperation, a: OriginalWriteAuthority): Promise<StoreResult<{
     readonly user: StoredConversationMessage; readonly assistant: StoredConversationMessage;
+    readonly presentation: PresentationMetadata;
   }>> {
     return this.content(a, async tx => {
       await this.writable(tx, op, a);
@@ -354,7 +355,10 @@ export class FirestoreConversationStore implements RealConversationStore {
       if (assistant === undefined || assistant.availability !== "available" || effect === undefined ||
           !exact(effect, ["kind", "userMessageId", "assistantMessageId"]) || effect.kind !== op.kind ||
           effect.userMessageId !== user.id || effect.assistantMessageId !== assistant.messageId) refuse("unavailable");
-      current(a); return { user: this.message(user), assistant };
+      const stored=inv.rows.find(row=>row.id===assistant.messageId)!;
+      const presentation:PresentationMetadata=stored.data.presentationMode==="persona"
+        ?{presentationMode:"persona",presentationProjectionVersion:"persona_presentation_v1"}:{presentationMode:"default"};
+      current(a); return { user: this.message(user), assistant, presentation };
     });
   }
 

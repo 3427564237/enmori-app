@@ -12,6 +12,11 @@ export interface ConversationQuiescence {
    */
   withTargetClosed<T>(ownerAccountId: string, conversationId: string, work: () => Promise<T>):
     Promise<{ readonly kind: "settled"; readonly value: T } | { readonly kind: "unresolved" }>;
+  /** Orphan cleanup: block new target admission and await existing I/O without
+   * cancelling an otherwise authorized live operation. No callback on unknown.
+   * Optional until the concrete coordinator supplies this distinct proof. */
+  withTargetIdle?<T>(ownerAccountId: string, conversationId: string, work: () => Promise<T>):
+    Promise<{ readonly kind: "settled"; readonly value: T } | { readonly kind: "unresolved" }>;
 }
 export type ConversationCleanupResult = { readonly kind: "deleted" } | { readonly kind: "live" }
   | { readonly kind: "denied" | "unavailable" | "unresolved" };
