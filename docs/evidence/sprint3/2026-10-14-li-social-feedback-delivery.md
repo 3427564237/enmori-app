@@ -129,7 +129,7 @@ merge, close Issues, promote Project or claim Sprint/UAT/Release completion.
 ```text
 fvm flutter test --no-pub --reporter expanded
 fvm dart analyze --fatal-infos lib test integration_test
-fvm dart format --output=none --set-exit-if-changed lib/features/ai_conversation/presentation/ai_conversation_page.dart lib/features/check_in/presentation/check_in_page.dart lib/harness/social test/features/ai_conversation/ai_conversation_page_test.dart test/harness/social
+fvm dart format --output=none --set-exit-if-changed lib/features/ai_conversation/presentation/ai_conversation_page.dart lib/features/check_in/presentation/check_in_page.dart lib/features/friends/presentation/my_friends_page.dart lib/harness/social test/features/ai_conversation/ai_conversation_page_test.dart test/harness/social
 ENMORI_PERSONA_ANDROID_TEST=true fvm flutter build apk --debug --no-pub --split-per-abi --target-platform android-arm64 --target lib/social_account_harness.dart
 ```
 
