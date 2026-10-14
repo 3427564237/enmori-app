@@ -660,8 +660,9 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     }.contains(state.phase);
     switch (action) {
       case 'check':
-        if (state.canCheckResult && !state.readBusy)
+        if (state.canCheckResult && !state.readBusy) {
           unawaited(_controller.checkResult());
+        }
       case 'reload':
         if (!hidden && state.conversationId != null && !state.readBusy) {
           unawaited(_controller.loadMessages());
