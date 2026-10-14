@@ -10,9 +10,16 @@ import 'check_in_controller.dart';
 enum _CheckInAction { create, read }
 
 final class CheckInComposerPage extends ConsumerStatefulWidget {
-  const CheckInComposerPage({this.onReturnHome, super.key});
+  const CheckInComposerPage({
+    this.onReturnHome,
+    this.socialStyle = false,
+    this.visibility,
+    super.key,
+  });
 
   final VoidCallback? onReturnHome;
+  final bool socialStyle;
+  final CheckInVisibility? visibility;
 
   @override
   ConsumerState<CheckInComposerPage> createState() =>
@@ -57,7 +64,9 @@ final class _CheckInComposerPageState
     final pending = state is CommandPending<CheckIn>;
     final noteLength = _noteController.text.trim().characters.length;
     return Scaffold(
-      appBar: AppBar(title: const Text('New Check-in')),
+      appBar: AppBar(
+        title: Text(widget.socialStyle ? 'Check-in' : 'New Check-in'),
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -66,24 +75,86 @@ final class _CheckInComposerPageState
               key: const Key('route-check-in'),
               padding: const EdgeInsets.all(24),
               children: [
-                Text(
-                  'Note-only Check-in',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 8),
-                const Text('Write a note between 1 and 500 characters.'),
+                if (widget.socialStyle) ...[
+                  Container(
+                    padding: const EdgeInsets.all(22),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.edit_note,
+                          size: 36,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Keep a little moment',
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -.5,
+                              ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Something you noticed. Something you want to remember.',
+                          style: TextStyle(height: 1.6),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (widget.visibility case final visibility?)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Chip(
+                        avatar: Icon(
+                          visibility == CheckInVisibility.private
+                              ? Icons.lock_outline
+                              : visibility == CheckInVisibility.public
+                              ? Icons.public
+                              : Icons.people_outline,
+                          size: 18,
+                        ),
+                        label: Text(switch (visibility) {
+                          CheckInVisibility.private => 'Private',
+                          CheckInVisibility.public => 'Public',
+                          CheckInVisibility.friendsOnly => 'Friends only',
+                        }),
+                      ),
+                    ),
+                ] else ...[
+                  Text(
+                    'Note-only Check-in',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('Write a note between 1 and 500 characters.'),
+                ],
                 const SizedBox(height: 20),
                 TextField(
                   key: const Key('r6-check-in-note'),
                   controller: _noteController,
-                  minLines: 5,
-                  maxLines: 8,
+                  minLines: widget.socialStyle ? 7 : 5,
+                  maxLines: widget.socialStyle ? 12 : 8,
                   maxLength: 500,
                   onChanged: (_) => setState(() => _noteErrorText = null),
                   decoration: InputDecoration(
                     alignLabelWithHint: true,
                     errorText: _noteErrorText,
-                    helperText: '$noteLength / 500 characters',
+                    helperText: widget.socialStyle
+                        ? 'A note of up to 500 characters.'
+                        : '$noteLength / 500 characters',
+                    counterText: widget.socialStyle
+                        ? '$noteLength / 500'
+                        : null,
+                    hintText: widget.socialStyle
+                        ? 'What would you like to keep from today?'
+                        : null,
                     labelText: 'Note',
                   ),
                 ),
@@ -122,8 +193,12 @@ final class _CheckInComposerPageState
             ? 'Confirming your saved Check-in…'
             : 'Saving Check-in',
         body: _lastAction == _CheckInAction.read
-            ? 'Reading the saved Check-in from backend-only product data.'
-            : 'Saving your Check-in with the approved backend operation.',
+            ? (widget.socialStyle
+                  ? 'Checking your saved note…'
+                  : 'Reading the saved Check-in from backend-only product data.')
+            : (widget.socialStyle
+                  ? 'Saving your moment…'
+                  : 'Saving your Check-in with the approved backend operation.'),
       );
     }
     if (state case CommandFailed<CheckIn>(:final failure)) {

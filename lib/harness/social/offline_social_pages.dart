@@ -96,47 +96,9 @@ final class OfflineSocialHub extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: OfflineSocialNavigation(
         selectedIndex: tab,
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 0:
-              context.go(AppRoutes.home);
-            case 1:
-              context.go('/friends');
-            case 2:
-              _open(context, AppRoutes.checkIn);
-            case 3:
-              _open(context, AppRoutes.aiAssistant);
-            case 4:
-              context.go(AppRoutes.profile);
-          }
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.people_outline),
-            selectedIcon: Icon(Icons.people),
-            label: 'Friends',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.add_box_outlined),
-            label: 'Check-in',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.auto_awesome_outlined),
-            label: 'AI',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Me',
-          ),
-        ],
+        onSelected: (index) => selectSocialTab(context, index),
       ),
     ),
   );
@@ -250,7 +212,7 @@ final class OfflineSocialHub extends StatelessWidget {
             IconButton(
               key: const Key('social-ai-card'),
               tooltip: 'Open AI conversation',
-              onPressed: () => _open(context, AppRoutes.aiAssistant),
+              onPressed: () => context.go(AppRoutes.aiAssistant),
               icon: const Icon(Icons.chevron_right, color: _accent),
             ),
           ],
@@ -266,6 +228,9 @@ final class OfflineSocialHub extends StatelessWidget {
       Card(
         margin: const EdgeInsets.only(bottom: 10),
         child: ListTile(
+          key: Key('social-friend-${friend.username}'),
+          onTap: () =>
+              _open(context, offlineFriendProfilePath(friend.username)),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 17,
             vertical: 9,
@@ -276,7 +241,7 @@ final class OfflineSocialHub extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           subtitle: Text('@${friend.username}'),
-          trailing: const Icon(Icons.people_outline, color: _muted),
+          trailing: const Icon(Icons.chevron_right, color: _muted),
         ),
       ),
     _Heading(
@@ -307,7 +272,7 @@ final class OfflineSocialHub extends StatelessWidget {
   List<Widget> _friends(BuildContext context) => [
     const _Eyebrow('YOUR CIRCLE'),
     const Text(
-      'People, not profiles.',
+      'Your people,\nin one place.',
       style: TextStyle(
         fontSize: 29,
         fontWeight: FontWeight.w700,
@@ -333,45 +298,35 @@ final class OfflineSocialHub extends StatelessWidget {
       key: const Key('social-friends-list'),
       onPressed: () => _open(context, '/friends/list'),
       icon: const Icon(Icons.search),
-      label: const Text('Search My Friends'),
+      label: const Text('Search friends'),
     ),
     _Heading(title: 'My friends · ${store.friends.length}'),
     for (final friend in store.friends)
       Card(
         margin: const EdgeInsets.only(bottom: 12),
-        child: Padding(
-          padding: const EdgeInsets.all(17),
-          child: Row(
-            children: [
-              _Avatar(friend.displayName),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      friend.displayName,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      '@${friend.username}',
-                      style: const TextStyle(color: _muted),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.check_circle_outline, color: _accent),
-            ],
+        child: ListTile(
+          key: Key('social-friend-${friend.username}'),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 17,
+            vertical: 10,
           ),
+          leading: _Avatar(friend.displayName),
+          title: Text(
+            friend.displayName,
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+          ),
+          subtitle: Text(
+            '@${friend.username}',
+            style: const TextStyle(color: _muted),
+          ),
+          trailing: const Icon(Icons.chevron_right, color: _muted),
+          onTap: () =>
+              _open(context, offlineFriendProfilePath(friend.username)),
         ),
       ),
     const SizedBox(height: 10),
     const Text(
-      'Public-profile projections, Special Care, recommendations and Friends Activity still need their own complete feature delivery. This sample list does not claim those services.',
+      'Sample profiles show names and usernames only. More profile information is not available in this preview.',
       style: TextStyle(color: _muted, fontSize: 12, height: 1.6),
     ),
   ];
@@ -431,13 +386,6 @@ final class OfflineSocialHub extends StatelessWidget {
       icon: Icons.interests_outlined,
       text: 'Edit interests',
       path: AppRoutes.interests,
-    ),
-    _entry(
-      context,
-      keyName: 'social-profile-friends',
-      icon: Icons.people_outline,
-      text: 'My friends',
-      path: '/friends/list',
     ),
     _entry(
       context,
@@ -508,6 +456,165 @@ final class OfflineSocialHub extends StatelessWidget {
     title: Text(text),
     trailing: const Icon(Icons.chevron_right),
     onTap: () => _open(context, path),
+  );
+}
+
+String offlineFriendProfilePath(String username) =>
+    '/friends/${Uri.encodeComponent(username)}/profile';
+
+void selectSocialTab(BuildContext context, int index) {
+  switch (index) {
+    case 0:
+      context.go(AppRoutes.home);
+    case 1:
+      context.go('/friends');
+    case 2:
+      context.push<void>(AppRoutes.checkIn);
+    case 3:
+      context.go(AppRoutes.aiAssistant);
+    case 4:
+      context.go(AppRoutes.profile);
+  }
+}
+
+/// AI supplies its existing guarded navigation callback to the same bar.
+final class OfflineSocialNavigation extends StatelessWidget {
+  const OfflineSocialNavigation({
+    required this.selectedIndex,
+    required this.onSelected,
+    super.key,
+  });
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+  @override
+  Widget build(BuildContext context) => NavigationBar(
+    key: const Key('social-bottom-navigation'),
+    selectedIndex: selectedIndex,
+    onDestinationSelected: (index) {
+      if (index != selectedIndex) onSelected(index);
+    },
+    destinations: const [
+      NavigationDestination(
+        key: Key('social-nav-home'),
+        icon: Icon(Icons.home_outlined),
+        selectedIcon: Icon(Icons.home),
+        label: 'Home',
+      ),
+      NavigationDestination(
+        key: Key('social-nav-friends'),
+        icon: Icon(Icons.people_outline),
+        selectedIcon: Icon(Icons.people),
+        label: 'Friends',
+      ),
+      NavigationDestination(
+        key: Key('social-nav-check-in'),
+        icon: Icon(Icons.add_box_outlined),
+        label: 'Check-in',
+      ),
+      NavigationDestination(
+        key: Key('social-nav-ai'),
+        icon: Icon(Icons.auto_awesome_outlined),
+        selectedIcon: Icon(Icons.auto_awesome),
+        label: 'AI',
+      ),
+      NavigationDestination(
+        key: Key('social-nav-me'),
+        icon: Icon(Icons.person_outline),
+        selectedIcon: Icon(Icons.person),
+        label: 'Me',
+      ),
+    ],
+  );
+}
+
+/// Existing minimum identity projection only, never a real full Profile API.
+final class OfflineFriendProfilePage extends StatelessWidget {
+  const OfflineFriendProfilePage({
+    required this.store,
+    required this.username,
+    required this.onBack,
+    super.key,
+  });
+  final OfflineSocialStore store;
+  final String username;
+  final VoidCallback onBack;
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: store,
+    builder: (context, _) {
+      final friend = store.friends
+          .where((f) => f.username == username)
+          .firstOrNull;
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            key: const Key('offline-friend-back'),
+            tooltip: 'Back',
+            onPressed: onBack,
+            icon: const Icon(Icons.arrow_back),
+          ),
+          title: const Text('Sample profile'),
+        ),
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 660),
+              child: ListView(
+                key: const Key('route-offline-friend-profile'),
+                padding: const EdgeInsets.all(24),
+                children: [
+                  if (friend == null)
+                    const Text(
+                      'This profile is unavailable.',
+                      key: Key('offline-friend-unavailable'),
+                    )
+                  else ...[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: const SizedBox(
+                        height: 110,
+                        child: _EventArtwork(
+                          label: '',
+                          alternate: true,
+                          cover: true,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: _Avatar(friend.displayName, radius: 36),
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      friend.displayName,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '@${friend.username}',
+                      style: const TextStyle(color: _muted),
+                    ),
+                    const SizedBox(height: 24),
+                    const Chip(
+                      avatar: Icon(Icons.people_outline, size: 18),
+                      label: Text('Your friend · sample'),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'This is a synthetic profile. Only the name and username are available.',
+                      style: TextStyle(color: _muted, height: 1.6),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
   );
 }
 

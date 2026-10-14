@@ -278,7 +278,23 @@ GoRouter _router(
       ),
       GoRoute(
         path: '/friends/list',
-        builder: (_, _) => const MyFriendsListPage(),
+        builder: (context, _) => MyFriendsListPage(
+          onOpenFriend: (username) {
+            if (context.mounted &&
+                current() &&
+                GoRouter.of(context).state.uri.path == '/friends/list') {
+              context.push<void>(offlineFriendProfilePath(username));
+            }
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/friends/:username/profile',
+        builder: (context, state) => OfflineFriendProfilePage(
+          store: store,
+          username: state.pathParameters['username'] ?? '',
+          onBack: () => back(context),
+        ),
       ),
       GoRoute(
         path: AppRoutes.profileEdit,
@@ -302,8 +318,11 @@ GoRouter _router(
       ),
       GoRoute(
         path: AppRoutes.checkIn,
-        builder: (context, _) =>
-            CheckInComposerPage(onReturnHome: () => back(context)),
+        builder: (context, _) => CheckInComposerPage(
+          socialStyle: true,
+          visibility: store.settings.checkInVisibility,
+          onReturnHome: () => back(context),
+        ),
       ),
       GoRoute(
         path: '/check-in/:checkInId',
@@ -342,6 +361,13 @@ GoRouter _router(
       GoRoute(
         path: AppRoutes.aiAssistant,
         builder: (context, _) => AiConversationPage(
+          socialStyle: true,
+          navigationBarBuilder: (navigate) => OfflineSocialNavigation(
+            selectedIndex: 3,
+            onSelected: (index) => navigate(() {
+              if (context.mounted && current()) selectSocialTab(context, index);
+            }),
+          ),
           onBack: () => back(context),
           onOpenSettings: () {
             if (current()) context.push<void>(AppRoutes.settings);

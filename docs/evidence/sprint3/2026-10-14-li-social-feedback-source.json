@@ -1,0 +1,260 @@
+{
+  "source": "ee57d20688f2e6ae45f4a558c257ca35d3f36224",
+  "tree": "377e37f7895313d8d1c022c3f2378d51b370b07f",
+  "review_base": "ffb8e1122f48e5e9ccab5a53a4f3d2785e2c9156",
+  "input_blobs": {
+    "docs/decisions/2026-10-14-li-social-feedback-navigation.md": "b5e6f3dcbd3d2ab1fa52949f5ab247ba13fd1df0",
+    "lib/features/ai_conversation/presentation/ai_conversation_page.dart": "83b76b90de2f7a0aa917db49ff3c7bdd64093414",
+    "lib/features/check_in/presentation/check_in_page.dart": "4189a59ba4e66b46eac38ea3d967a97c77373cbd",
+    "lib/features/friends/presentation/my_friends_page.dart": "db65fd335188d21f3e4ffa8b23cbe3ab7762cc96",
+    "lib/harness/social/offline_setup_auth_repository.dart": "4f0b65b9a338d21d8c4e43bb099c3baa91914ad2",
+    "lib/harness/social/offline_social_app.dart": "6bb654897915e6ab417241b38e54ac912cc6f812",
+    "lib/harness/social/offline_social_pages.dart": "9860d45e9e30405a7c0f06c089f6447c4576c5ad",
+    "test/features/ai_conversation/ai_conversation_page_test.dart": "36bf2161a847b439a3601f209966f6268d9d50df",
+    "test/harness/social/offline_account_setup_test.dart": "9388176875233aae584604dd342e54477aecac9c",
+    "test/harness/social/offline_social_app_test.dart": "27d360a6e18bf26a468433227a835adf0e044b4d",
+    "test/harness/social/offline_social_feedback_test.dart": "89bf141f9e92beaa4ec4b28ba06e5a034759e359"
+  },
+  "validation": {
+    "full_flutter": {
+      "passed": 537,
+      "failed": 0,
+      "exit": 0,
+      "default_concurrency": true,
+      "new_cases_included": 12
+    },
+    "analysis": {
+      "exit": 0,
+      "issues": 0
+    },
+    "format": {
+      "exit": 0,
+      "files": 12,
+      "changes": 0
+    },
+    "diff_check": {
+      "exit": 0
+    },
+    "android_build": {
+      "exit": 0,
+      "entry": "lib/social_account_harness.dart"
+    },
+    "signature": {
+      "exit": 0,
+      "verified_v2": true
+    },
+    "widget_raster_case": {
+      "passed": 1,
+      "exit": 0,
+      "overlaps_full_suite": true,
+      "fonts": "installed Inter.ttc aliased for test Roboto and locked SDK MaterialIcons; not Android font equivalence"
+    }
+  },
+  "apk": {
+    "filename": "ENMORI-Social-Feedback-20261014-arm64.apk",
+    "sha256": "50b1fd65ca69af43a3f753aee4bc9f7fb28bca527e1b57101880e015df4f3b57",
+    "bytes": 121520514,
+    "package": "com.enmori.app.personatest",
+    "version_code": 2001,
+    "version_name": "1.0.0",
+    "abi": "arm64-v8a",
+    "min_sdk": 24,
+    "target_sdk": 36,
+    "debuggable": true,
+    "test_only": false,
+    "distribution_directory": "/home/miku/Documents/ChatGPT/ENMORI/build/distributions/social-feedback-20261014"
+  },
+  "rasters": {
+    "ai-chat.png": {
+      "sha256": "2f2e853b368d94b2970c4e8a64c1be65562d88dba0ec35eede4012a583090a33",
+      "bytes": 83852,
+      "logical_viewport": [
+        390,
+        844
+      ],
+      "pixel_ratio": 2,
+      "physical_phone": false
+    },
+    "ai-empty.png": {
+      "sha256": "ba744d929192a9b663deee530098a00d8e5b5c1b3c844b7a305155ac625347b5",
+      "bytes": 76151,
+      "logical_viewport": [
+        390,
+        844
+      ],
+      "pixel_ratio": 2,
+      "physical_phone": false
+    },
+    "check-in.png": {
+      "sha256": "223b34b637a98f43d3706755fcb1688aaea83fac3894b3546d195727b693be18",
+      "bytes": 78976,
+      "logical_viewport": [
+        390,
+        844
+      ],
+      "pixel_ratio": 2,
+      "physical_phone": false
+    },
+    "friend-profile.png": {
+      "sha256": "561591bd599ba2586e96e14d0dca03e18f984dea6941402574fdf109df68b4b1",
+      "bytes": 80603,
+      "logical_viewport": [
+        390,
+        844
+      ],
+      "pixel_ratio": 2,
+      "physical_phone": false
+    }
+  },
+  "logs": {
+    "li-social-feedback-account-ai-red.log": {
+      "sha256": "07fa99b68852a7ba718c59a28a9bb82296021969864f622e64c9f31daa884d83",
+      "bytes": 1275
+    },
+    "li-social-feedback-account-ai-red2.log": {
+      "sha256": "a8d08a0bdbaeaa5ca55af9d05baeab121c1823539fef537c80af7f6977162c9b",
+      "bytes": 2199
+    },
+    "li-social-feedback-analysis-complete.log": {
+      "sha256": "9bd5fa0fa9d4c387d4aa09dd90a440bdfa2eb384df4b32a777934558daf594a4",
+      "bytes": 277
+    },
+    "li-social-feedback-analysis-delivery.log": {
+      "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
+      "bytes": 58
+    },
+    "li-social-feedback-analysis-final-source.log": {
+      "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
+      "bytes": 58
+    },
+    "li-social-feedback-analysis-final.log": {
+      "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
+      "bytes": 58
+    },
+    "li-social-feedback-analysis-initial.log": {
+      "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
+      "bytes": 58
+    },
+    "li-social-feedback-analysis-pass.log": {
+      "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
+      "bytes": 58
+    },
+    "li-social-feedback-apk-delivery.log": {
+      "sha256": "78594d4e5b7ada076762354a3527ed6e258ec5c6c5a6fd5e72662417e1d9898c",
+      "bytes": 1503
+    },
+    "li-social-feedback-apk-final-source.log": {
+      "sha256": "fef9bd9fcc50d79432c7cbe1fc511b3705872472f782654c9e9b4873c982c3ec",
+      "bytes": 1503
+    },
+    "li-social-feedback-apk.log": {
+      "sha256": "5e2502ce2242aa75b9b550625d35b8b65bbef46d8f962c6b4a24cc10d1c3a01d",
+      "bytes": 1753
+    },
+    "li-social-feedback-badging-delivery.log": {
+      "sha256": "0338c7a2ec9d043604df5fe19ed00a0e7f1d003a45e8019d63f2e01103616fa0",
+      "bytes": 4698
+    },
+    "li-social-feedback-badging-final-source.log": {
+      "sha256": "0338c7a2ec9d043604df5fe19ed00a0e7f1d003a45e8019d63f2e01103616fa0",
+      "bytes": 4698
+    },
+    "li-social-feedback-badging.log": {
+      "sha256": "0338c7a2ec9d043604df5fe19ed00a0e7f1d003a45e8019d63f2e01103616fa0",
+      "bytes": 4698
+    },
+    "li-social-feedback-focused-final.log": {
+      "sha256": "a2819eeebf133915403b82286ffb4d020fa3ba5c725a940d4922876a8220d377",
+      "bytes": 11464
+    },
+    "li-social-feedback-focused-initial.log": {
+      "sha256": "d72656b1704d180fd80350161f3278816241b0b9f28eab7419c90488578f9ae5",
+      "bytes": 14374
+    },
+    "li-social-feedback-focused-second.log": {
+      "sha256": "052bf8e5c9ffcbb800db15f8c2eef9b028192ca379b3108bd6c6936dc6bc3fbc",
+      "bytes": 14919
+    },
+    "li-social-feedback-focused-third.log": {
+      "sha256": "4a33b8fda549bbcfd01c10bae136e44c96be3737566d9f27a1eb5d805592bcb2",
+      "bytes": 14202
+    },
+    "li-social-feedback-format-delivery.log": {
+      "sha256": "48ce15c5c9f98db1eb6059a00c5a46ed349ffa216780a9acf56212e5d55af9ba",
+      "bytes": 48
+    },
+    "li-social-feedback-format-final-source.log": {
+      "sha256": "8780398bcb07521c69da42c7cd8e6124063ee2abc3a9b9417b9b8af2493b7e88",
+      "bytes": 48
+    },
+    "li-social-feedback-format.log": {
+      "sha256": "48ce15c5c9f98db1eb6059a00c5a46ed349ffa216780a9acf56212e5d55af9ba",
+      "bytes": 48
+    },
+    "li-social-feedback-full-delivery.log": {
+      "sha256": "d9fd80330eb8ead8f8766844df1476e8b77deb027bb83f2d6f7cd3c6cbd0481e",
+      "bytes": 99598
+    },
+    "li-social-feedback-full-final-source.log": {
+      "sha256": "3bf99239e9679d94138751bbaa99e719f9bbe854bf99d2ff54ca65bf40186edb",
+      "bytes": 99240
+    },
+    "li-social-feedback-full-final.log": {
+      "sha256": "44c07d688a768c89f55e8430bd9ca74066185650bb61b90eb90ab322ee2bf7cf",
+      "bytes": 100588
+    },
+    "li-social-feedback-full.log": {
+      "sha256": "2cf99654f08e8721f5ce0a849c3a1dbca699d914e117d07716bbd6886f4a6860",
+      "bytes": 100145
+    },
+    "li-social-feedback-manifest-delivery.log": {
+      "sha256": "60548f73c2f05998662902a14606690b555516b3b7d3cd7792f9aacb2596f4eb",
+      "bytes": 13913
+    },
+    "li-social-feedback-manifest-final-source.log": {
+      "sha256": "60548f73c2f05998662902a14606690b555516b3b7d3cd7792f9aacb2596f4eb",
+      "bytes": 13913
+    },
+    "li-social-feedback-manifest.log": {
+      "sha256": "60548f73c2f05998662902a14606690b555516b3b7d3cd7792f9aacb2596f4eb",
+      "bytes": 13913
+    },
+    "li-social-feedback-raster-delivery.log": {
+      "sha256": "66d99062132b5b374974f082b816b12827cd9d8c24f1d3f556aa47041d1fa198",
+      "bytes": 248
+    },
+    "li-social-feedback-raster-final-source.log": {
+      "sha256": "66d99062132b5b374974f082b816b12827cd9d8c24f1d3f556aa47041d1fa198",
+      "bytes": 248
+    },
+    "li-social-feedback-raster-final.log": {
+      "sha256": "7e6aa4d6ff87877fa5597c63226c5697e7f6e17e6fcc741ef125140b154f732d",
+      "bytes": 248
+    },
+    "li-social-feedback-raster.log": {
+      "sha256": "7e6aa4d6ff87877fa5597c63226c5697e7f6e17e6fcc741ef125140b154f732d",
+      "bytes": 248
+    },
+    "li-social-feedback-signature-delivery.log": {
+      "sha256": "91925cfb114d718962d9f0748b1addef1dec90079d3f752180a6b597f46db44c",
+      "bytes": 777
+    },
+    "li-social-feedback-signature-final-source.log": {
+      "sha256": "91925cfb114d718962d9f0748b1addef1dec90079d3f752180a6b597f46db44c",
+      "bytes": 777
+    },
+    "li-social-feedback-signature.log": {
+      "sha256": "91925cfb114d718962d9f0748b1addef1dec90079d3f752180a6b597f46db44c",
+      "bytes": 777
+    }
+  },
+  "pending": [
+    "DU independent new-code review",
+    "physical install/run",
+    "real full other-user Profile projection",
+    "actual Backend/model/persistence gate",
+    "API24/25 and human accessibility",
+    "UAT/Release"
+  ],
+  "runtime_scope": "explicit local synthetic entry; ordinary/bootstrap/API/backend/dependencies unchanged; no service credentials"
+}

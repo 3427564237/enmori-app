@@ -74,7 +74,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();
       expect(find.text('A scripted sample message'), findsWidgets);
-      await tap(tester, find.byKey(const Key('ai-back')));
+      await tap(tester, find.byKey(const Key('social-nav-home')));
       expect(find.byType(OfflineSocialHub), findsOneWidget);
       expect(find.byKey(const Key('route-ai-conversation')), findsNothing);
       expect(tester.takeException(), isNull);

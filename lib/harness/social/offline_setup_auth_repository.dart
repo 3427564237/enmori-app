@@ -4,7 +4,7 @@ import '../../core/result/result.dart';
 import '../../features/auth/domain/auth_repository.dart';
 
 /// Form/session exercise only. Inputs are discarded, with no identity service,
-/// credential storage or usable bearer token. Never composed by Bootstrap.
+/// credential storage or real service token. Never composed by Bootstrap.
 final class OfflineSetupAuthRepository implements AuthRepository {
   OfflineSetupAuthRepository({this.automaticallyObserve = true});
 
@@ -13,6 +13,7 @@ final class OfflineSetupAuthRepository implements AuthRepository {
   AuthSession _session = const AuthSessionUnauthenticated();
   bool _closed = false;
   int _operation = 0;
+  int _generation = 0;
 
   @override
   Stream<AuthSession> watchSession() async* {
@@ -24,6 +25,7 @@ final class OfflineSetupAuthRepository implements AuthRepository {
   /// unchanged. A successful command alone never controls routing.
   void observeSampleSession() {
     if (_closed) return;
+    _generation++;
     _session = AuthSessionAuthenticated(subject: 'offline-setup-sample');
     _changes.add(_session);
   }
@@ -62,7 +64,12 @@ final class OfflineSetupAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<Result<String>> getIdToken() async => const Failure(_unavailable);
+  Future<Result<String>> getIdToken() async =>
+      !_closed && _session is AuthSessionAuthenticated
+      // Deliberately not a JWT or service credential. The existing local
+      // scripted transport requires this synthetic-only prefix.
+      ? Success('synthetic-ai-token-offline-$_generation')
+      : const Failure(_unavailable);
 
   Future<void> dispose() async {
     _operation++;

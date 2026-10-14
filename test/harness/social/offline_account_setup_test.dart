@@ -190,6 +190,7 @@ void main() {
       container.read(appRouterProvider).go(AppRoutes.home);
       await tester.pumpAndSettle();
       expect(find.byType(OfflineSocialHub), findsNothing);
+      expect(await auth.getIdToken(), isA<Failure<String>>());
       auth.observeSampleSession();
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-onboarding')), findsOneWidget);
@@ -197,7 +198,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-onboarding')), findsOneWidget);
       expect(find.byKey(const Key('settings-sign-out')), findsNothing);
-      expect(await auth.getIdToken(), isA<Failure<String>>());
+      final sampleToken = (await auth.getIdToken() as Success<String>).value;
+      expect(sampleToken, startsWith('synthetic-ai-token-'));
+      expect(sampleToken.contains('.'), isFalse);
       expect(tester.takeException(), isNull);
     },
   );
