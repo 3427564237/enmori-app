@@ -95,6 +95,21 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   const SizedBox(height: 16),
                   _FailureText(failure: failure),
                   if (_step == _OnboardingStep.choice &&
+                      (failure.kind == AppFailureKind.usernameInvalid ||
+                          failure.kind == AppFailureKind.usernameUnavailable))
+                    TextButton(
+                      key: const Key('r6-onboarding-change-username'),
+                      onPressed: () {
+                        _controller.abandon();
+                        setState(() {
+                          _step = _OnboardingStep.username;
+                          _acceptedUsername = null;
+                          _chosenChoice = null;
+                        });
+                      },
+                      child: const Text('Change Username'),
+                    ),
+                  if (_step == _OnboardingStep.choice &&
                       _chosenChoice != null) ...[
                     const SizedBox(height: 12),
                     FilledButton(

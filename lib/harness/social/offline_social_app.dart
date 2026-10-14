@@ -10,11 +10,14 @@ import '../../features/account/account_preferences_providers.dart';
 import '../../features/account/account_providers.dart';
 import '../../features/account/presentation/account_preferences_controller.dart';
 import '../../features/account/presentation/account_preferences_page.dart';
+import '../../features/account/presentation/onboarding_page.dart';
 import '../../features/ai_conversation/ai_conversation_providers.dart';
 import '../../features/ai_conversation/data/ai_wire_repository.dart';
 import '../../features/ai_conversation/presentation/ai_conversation_page.dart';
 import '../../features/auth/auth_providers.dart';
 import '../../features/auth/domain/auth_repository.dart';
+import '../../features/auth/presentation/registration_page.dart';
+import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/check_in/check_in_providers.dart';
 import '../../features/check_in/presentation/check_in_history_controller.dart';
 import '../../features/check_in/presentation/check_in_history_page.dart'
@@ -37,28 +40,45 @@ import '../ai_conversation/synthetic_ai_transport.dart';
 import '../ai_conversation/synthetic_auth_repository.dart';
 import 'offline_social_pages.dart';
 import 'offline_social_store.dart';
+import 'offline_setup_auth_repository.dart';
 
 /// Explicit offline product preview. Ordinary EnmoriApp/Bootstrap is untouched.
 final class OfflineSocialApp extends StatefulWidget {
-  const OfflineSocialApp({super.key, this.store});
+  const OfflineSocialApp({
+    super.key,
+    this.store,
+    this.accountSetup = false,
+    this.setupAuth,
+  });
   final OfflineSocialStore? store;
+  final bool accountSetup;
+  final OfflineSetupAuthRepository? setupAuth;
   @override
   State<OfflineSocialApp> createState() => _OfflineSocialState();
 }
 
 final class _OfflineSocialState extends State<OfflineSocialApp> {
   late final OfflineSocialStore store;
-  final auth = SyntheticAiAuthRepository();
+  late final AuthRepository auth;
   @override
   void initState() {
     super.initState();
-    store = widget.store ?? OfflineSocialStore();
+    store =
+        widget.store ??
+        OfflineSocialStore(onboardingCompleted: !widget.accountSetup);
+    auth = widget.accountSetup
+        ? widget.setupAuth ?? OfflineSetupAuthRepository()
+        : SyntheticAiAuthRepository();
   }
 
   @override
   void dispose() {
     if (widget.store == null) store.dispose();
-    unawaited(auth.dispose());
+    if (auth case final SyntheticAiAuthRepository legacy) {
+      unawaited(legacy.dispose());
+    } else if (auth case final OfflineSetupAuthRepository setup) {
+      if (widget.setupAuth == null) unawaited(setup.dispose());
+    }
     super.dispose();
   }
 
@@ -99,17 +119,20 @@ final class _OfflineSocialState extends State<OfflineSocialApp> {
         ref.onDispose(transport.close);
         return AiWireRepository(transport);
       }),
-      appRouterProvider.overrideWith((ref) => _router(ref, store, auth)),
+      appRouterProvider.overrideWith(
+        (ref) => _router(ref, store, auth, accountSetup: widget.accountSetup),
+      ),
     ],
-    child: const _OfflineMaterialApp(),
+    child: _OfflineMaterialApp(accountSetup: widget.accountSetup),
   );
 }
 
 GoRouter _router(
   Ref ref,
   OfflineSocialStore store,
-  SyntheticAiAuthRepository auth,
-) {
+  AuthRepository auth, {
+  required bool accountSetup,
+}) {
   final session = ref.watch(authSessionProvider).asData?.value;
   final refresh = RouterRefreshNotifier(ref);
   bool current() =>
@@ -127,12 +150,40 @@ GoRouter _router(
   }
 
   final router = GoRouter(
-    initialLocation: AppRoutes.home,
+    initialLocation: accountSetup
+        ? (store.onboardingCompleted ? AppRoutes.signIn : AppRoutes.register)
+        : AppRoutes.home,
     refreshListenable: refresh,
     redirect: (context, state) {
       final gate = ref.read(routerGateProvider);
       if (gate == RouterGateState.resolving) {
         return state.uri.path == '/offline-startup' ? null : '/offline-startup';
+      }
+      if (accountSetup) {
+        if (gate == RouterGateState.unauthenticated ||
+            gate == RouterGateState.signInRequired) {
+          return state.uri.path == AppRoutes.register ||
+                  state.uri.path == AppRoutes.signIn
+              ? null
+              : AppRoutes.signIn;
+        }
+        if (gate == RouterGateState.onboardingRequired) {
+          return state.uri.path == AppRoutes.onboarding
+              ? null
+              : AppRoutes.onboarding;
+        }
+        if (gate != RouterGateState.authenticated) {
+          return state.uri.path == '/offline-unavailable'
+              ? null
+              : '/offline-unavailable';
+        }
+        if (state.uri.path == AppRoutes.register ||
+            state.uri.path == AppRoutes.signIn ||
+            state.uri.path == AppRoutes.onboarding ||
+            state.uri.path.startsWith('/offline-')) {
+          return AppRoutes.home;
+        }
+        return null;
       }
       if (gate != RouterGateState.authenticated) {
         return state.uri.path == '/offline-entry' ? null : '/offline-entry';
@@ -147,8 +198,69 @@ GoRouter _router(
       ),
       GoRoute(
         path: '/offline-entry',
-        builder: (_, _) => OfflineEntry(onEnter: auth.replaceSession),
+        builder: (_, _) => OfflineEntry(
+          onEnter: () {
+            if (auth case final SyntheticAiAuthRepository legacy) {
+              legacy.replaceSession();
+            }
+          },
+        ),
       ),
+      if (accountSetup) ...[
+        GoRoute(
+          path: AppRoutes.register,
+          // The waiting-for-session notice belongs to this entry route. It
+          // must not cover the next page's choice/save/logout controls.
+          builder: (context, _) => ScaffoldMessenger(
+            child: RegistrationPage(
+              onSignIn: () => context.go(AppRoutes.signIn),
+            ),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.signIn,
+          builder: (context, _) => SignInPage(
+            onCreateAccount: () => context.go(AppRoutes.register),
+            // Command success cannot grant a session. The gate observes Auth.
+            onSucceeded: () {},
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.onboarding,
+          builder: (context, _) => OnboardingPage(
+            onCompleted: () {
+              if (context.mounted && current()) context.go(AppRoutes.home);
+            },
+          ),
+        ),
+        GoRoute(
+          path: '/offline-unavailable',
+          builder: (context, _) => Scaffold(
+            appBar: AppBar(title: const Text('Sample account unavailable')),
+            body: ListView(
+              padding: const EdgeInsets.all(24),
+              children: [
+                const Text(
+                  'The sample account could not be read. Retry or sign out.',
+                ),
+                FilledButton(
+                  onPressed: () {
+                    if (ref.read(currentAuthSubjectProvider)
+                        case final subject?) {
+                      ref.invalidate(onboardingStatusProvider(subject));
+                    }
+                  },
+                  child: const Text('Retry'),
+                ),
+                TextButton(
+                  onPressed: auth.signOut,
+                  child: const Text('Sign out'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
       for (final (path, tab) in [
         (AppRoutes.home, 0),
         ('/friends', 1),
@@ -272,7 +384,8 @@ GoRouter _router(
 }
 
 final class _OfflineMaterialApp extends ConsumerWidget {
-  const _OfflineMaterialApp();
+  const _OfflineMaterialApp({required this.accountSetup});
+  final bool accountSetup;
   @override
   Widget build(BuildContext context, WidgetRef ref) => MaterialApp.router(
     title: 'ENMORI Offline Social',
@@ -325,7 +438,9 @@ final class _OfflineMaterialApp extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: Text(
-                'OFFLINE INTERNAL · sample data · restart clears changes',
+                accountSetup
+                    ? 'OFFLINE SAMPLE · use invented email/password · no real account · restart clears changes'
+                    : 'OFFLINE INTERNAL · sample data · restart clears changes',
                 key: const Key('offline-social-warning'),
                 style: Theme.of(context).textTheme.labelSmall
                     ?.copyWith(color: const Color(0xff4c43b8)),
