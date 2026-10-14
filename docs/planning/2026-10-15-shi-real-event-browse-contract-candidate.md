@@ -1,6 +1,6 @@
 # SHI real Event browse/Detail — focused contract candidate
 
-Prepared 15 October 2026, Asia/Singapore. Owner: SHI; technical reviewer: ZHOU; contract decision/acceptance: LI. **Proposal only, not implementation authority.** No product code, normative OpenAPI, datastore, runtime or provider credential has been changed. 
+Prepared 15 October 2026, Asia/Singapore. Owner: SHI; technical reviewer: ZHOU; contract decision/acceptance: LI. **Proposal only, not implementation authority.** No product code, normative OpenAPI, datastore, runtime or provider credential has been changed.
 
 ## Controlling sources and current evidence
 
