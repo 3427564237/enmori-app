@@ -12,6 +12,7 @@ final class HomeShellPage extends StatelessWidget {
     this.onOpenHistory,
     this.onOpenAi,
     this.onOpenEvent,
+    this.onBrowseActivities,
     required this.onSeeAllEvents,
     super.key,
   });
@@ -25,6 +26,7 @@ final class HomeShellPage extends StatelessWidget {
   final VoidCallback? onOpenAi;
   final void Function(String)? onOpenEvent;
   final VoidCallback onSeeAllEvents;
+  final VoidCallback? onBrowseActivities;
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +88,13 @@ final class HomeShellPage extends StatelessWidget {
                 onPressed: onOpenAi,
                 icon: const Icon(Icons.chat_outlined),
                 label: const Text('AI conversation'),
+              ),
+            if (onBrowseActivities != null)
+              OutlinedButton.icon(
+                key: const Key('home-browse-activities'),
+                onPressed: onBrowseActivities,
+                icon: const Icon(Icons.explore_outlined),
+                label: const Text('Browse activities'),
               ),
             const SizedBox(height: 32),
             Text(

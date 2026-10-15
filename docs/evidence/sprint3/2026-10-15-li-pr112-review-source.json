@@ -1,0 +1,141 @@
+{
+  "date": "2026-10-15",
+  "timezone": "Asia/Singapore",
+  "reviewer": "LI",
+  "reviewHead": "1e53e15e0261ca2f61496831eaf50f4857bf2815",
+  "executableSource": "bb9170c2cc393001176058dd36f76f294258fffb",
+  "productTree": "3f670a2f2b4f3180710a6a60be6c9ce163c168af",
+  "sourceBinding": {
+    "inputs": 443,
+    "normalizedAggregate": "70dca6fe989ec297cf5ab386ae60eebb062702da989bfb5c3731a5ec2619394f",
+    "ownerAggregateMatched": true,
+    "productToHeadDocsOnly": true,
+    "backendSrcAndUnitApiLocksUnchangedFrom105": true
+  },
+  "independent": {
+    "strictCompile": "pass",
+    "sdkDart": {
+      "passed": 145,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "exit": 0,
+      "modelTokenDoubles": true
+    },
+    "operatorTests": {
+      "passed": 31,
+      "processModelCounterDoubles": true
+    },
+    "focusedFlutter": {
+      "passed": 9,
+      "exit": 0
+    },
+    "scopedAnalysis": "no issues",
+    "executableWhitespace": "pass"
+  },
+  "originalHeldInvocationSettlement": {
+    "observedAtUtc": "2026-10-15T02:32:16.725210+00:00",
+    "service": {
+      "SubState": "running",
+      "ActiveEnterTimestampMonotonic": "16637252",
+      "MainPID": "1035",
+      "NRestarts": "0"
+    },
+    "descendantPids": [],
+    "readOnly": true,
+    "modelRead1": {
+      "loadedCount": 0,
+      "selectedLoaded": false
+    },
+    "modelRead2": {
+      "loadedCount": 0,
+      "selectedLoaded": false
+    },
+    "serviceCgroupPids": [
+      1035
+    ],
+    "confirmedNoModelWorker": true,
+    "settlementConclusion": "Original held invocation has no surviving model worker: original service process unchanged; whole service cgroup contains only server; no children and two unloaded model observations. Natural worker exit/unload, no restart/reset/generation.",
+    "replySuccessInferred": false
+  },
+  "readiness": {
+    "observedAtUtc": "2026-10-15T02:36:46.078788+00:00",
+    "originalLeaseSettlementRecorded": true,
+    "productContentRetained": false,
+    "alreadyLoaded": false,
+    "zeroContentPreloadMs": 14610,
+    "ready": true
+  },
+  "actualModelStore": {
+    "kind": "zhou-model-store-report",
+    "schemaVersion": 1,
+    "status": "Pass",
+    "actualModelStorePass": true,
+    "actualMobileJourneyPass": false,
+    "accepted": true,
+    "completeInputGatePassed": true,
+    "personaCrudAndSelectionPassed": true,
+    "ordinaryOutcomeAndHistoryPassed": true,
+    "canonicalUserMetadataConfirmed": true,
+    "assistantAnchorConfirmed": true,
+    "physicalConversationCleanupPassed": true,
+    "fixtureCleanupConfirmed": true,
+    "localApplicationTerminal": true,
+    "localHandlesClosed": true,
+    "localShutdownUnconfirmed": false,
+    "operatorHold": false,
+    "databaseLifetime": "temporary-emulator-process-only",
+    "durableFixtureRetention": "not-provided",
+    "modelPosts": 1,
+    "adapterState": "stopped",
+    "completeInputCounts": [
+      622,
+      622
+    ],
+    "remoteSettlementRequired": false,
+    "deviceExecution": "Not Run",
+    "mobileConfigurationDelivered": false,
+    "mobileCredentialCleanupConfirmed": false,
+    "mobileAiReadback": false,
+    "mobilePersonaHistoryAndDelete": false,
+    "mobileApkAttributionConfirmed": false,
+    "model": "formal-9b-existing-private-binding",
+    "database": "actual-isolated-Auth-and-Firestore-Emulators",
+    "capturedStderrBytes": 0
+  },
+  "actualOuterExit": 0,
+  "profilesAndPortsClean": true,
+  "apkAndDevice": "not_run_no_device_attached",
+  "logs": [
+    {
+      "name": "enmori-li-112-compile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "enmori-li-112-operators.log",
+      "sha256": "8f125097698712e32e2966b862e9fe84427dd8972137c4863bacc132baaa4d38",
+      "bytes": 3536
+    },
+    {
+      "name": "enmori-li-112-emulator.log",
+      "sha256": "c09d388d3f7b448a35e20fefedfcf3480366441da1321208cba744577c0c7087",
+      "bytes": 21412
+    },
+    {
+      "name": "enmori-li-112-flutter.log",
+      "sha256": "6c08bc9d264064916b1dac073d479eff5882e1d02004454128375b87c6f5ad8c",
+      "bytes": 1967
+    },
+    {
+      "name": "enmori-li-112-analysis.log",
+      "sha256": "2d040abaafc08c53a99f5dfcdcc883e83c2baa58d189c81b0375e7c36795351c",
+      "bytes": 169
+    },
+    {
+      "name": "li112-actual-model-store-20261015.log",
+      "sha256": "3c2158dfbfc70d56f037ec935b467dd87a3ef17159a889d07926197497fc99b7",
+      "bytes": 2386
+    }
+  ]
+}

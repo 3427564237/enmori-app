@@ -6,6 +6,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
 import '../../app/router/app_router.dart';
+import '../../app/router/activity_routes.dart';
+import '../../app/platform/external_activity_opener.dart';
+import '../../features/event_browse/event_browse_providers.dart';
 import '../../features/account/account_preferences_providers.dart';
 import '../../features/account/account_providers.dart';
 import '../../features/account/presentation/account_preferences_controller.dart';
@@ -87,6 +90,9 @@ final class _OfflineSocialState extends State<OfflineSocialApp> {
     overrides: [
       authRepositoryProvider.overrideWithValue(auth),
       backendBaseUriProvider.overrideWithValue(null),
+      externalActivityOpenerProvider.overrideWithValue(
+        const PlatformExternalActivityOpener(),
+      ),
       isolatedSlicesEnabledProvider.overrideWithValue(true),
       accountRepositoryProvider.overrideWithValue(
         OfflineAccountRepository(store),
@@ -191,6 +197,7 @@ GoRouter _router(
       return state.uri.path.startsWith('/offline-') ? AppRoutes.home : null;
     },
     routes: [
+      ...activityRoutes(current: current),
       GoRoute(
         path: '/offline-startup',
         builder: (_, _) =>

@@ -1,0 +1,216 @@
+{
+  "date": "2026-10-15",
+  "timezone": "Asia/Singapore",
+  "owner": "LI",
+  "jinReviewHead": "aab3bf23b8d9c76c6f830dfefa483d3f42bd2f01",
+  "jinProduct": "f83005108517330370876c76ebee208051682570",
+  "jinTree": "e1eb09e1afe5a0cd1fc637a4268572fd61d3044a",
+  "backend": {
+    "passed": 882,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "exit": 0
+  },
+  "actualIsolatedSdkDart": {
+    "passed": 139,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "exit": 0,
+    "profilesRemoved": 2,
+    "portsFree": [
+      8080,
+      9099,
+      4400,
+      4500,
+      9150
+    ],
+    "modelTokenDoubles": true
+  },
+  "hostToolUnitTests": {
+    "passed": 7,
+    "fakeHttp": true,
+    "includedInBackendCount": false
+  },
+  "sourceChecks": {
+    "accepted108PathsUnchanged": 18,
+    "changedManifestGitBlobsMatch": true,
+    "productToHeadDocsOnly": true,
+    "apiLocksIndexUnchanged": true,
+    "executableWhitespace": "pass",
+    "allFileWhitespace": "retained inherited log exceptions"
+  },
+  "host": {
+    "firstSemantic": {
+      "mode": "semantic-once",
+      "status": "Not Proven",
+      "policyVersion": "bounded_routine_summary_v1",
+      "modelState": "not_checked",
+      "modelDispatches": 0,
+      "runtime": {
+        "admission": "open",
+        "quarantined": false,
+        "queued": 0,
+        "nonTerminal": 0
+      },
+      "scope": "synthetic-auth-empty-note-memory-store-complete-body-sink",
+      "semanticGate": "explicitly-injected",
+      "completeInputTokenCounts": [],
+      "results": [
+        {
+          "index": 0,
+          "result": "failure",
+          "failure": "AI_UNAVAILABLE",
+          "elapsedMs": 158.23628700000003,
+          "usersCommitted": 1,
+          "assistantsCommitted": 0,
+          "bodiesAccepted": 0,
+          "syntheticRetentionAnchor": "user",
+          "inputAvailableBeforeGeneration": true,
+          "candidateAvailableBeforeCheck": false,
+          "borrowedGettersRevoked": true,
+          "originalCapabilityRevoked": true
+        }
+      ],
+      "localContentHoldersCleared": true,
+      "productWrites": 0,
+      "actualDatabase": "Not Run",
+      "semanticScope": "finite-exact-attribution-only"
+    },
+    "hostAfterSdk": {
+      "afterEmulatorShutdown": true,
+      "rawContentRetained": false,
+      "applicationGenerations": 0,
+      "alreadyLoaded": false,
+      "zeroContentPreloadMs": 37426,
+      "ready": true
+    },
+    "positiveSemantic": {
+      "mode": "semantic-once",
+      "status": "Pass",
+      "policyVersion": "bounded_routine_summary_v1",
+      "modelState": "stopped",
+      "modelDispatches": 1,
+      "runtime": {
+        "admission": "open",
+        "quarantined": false,
+        "queued": 0,
+        "nonTerminal": 0
+      },
+      "scope": "synthetic-auth-empty-note-memory-store-complete-body-sink",
+      "semanticGate": "explicitly-injected",
+      "completeInputTokenCounts": [
+        595
+      ],
+      "results": [
+        {
+          "index": 0,
+          "result": "success",
+          "elapsedMs": 3184.148709,
+          "usersCommitted": 1,
+          "assistantsCommitted": 1,
+          "bodiesAccepted": 1,
+          "syntheticRetentionAnchor": "assistant",
+          "inputAvailableBeforeGeneration": true,
+          "candidateAvailableBeforeCheck": true,
+          "borrowedGettersRevoked": true,
+          "originalCapabilityRevoked": true
+        }
+      ],
+      "localContentHoldersCleared": true,
+      "productWrites": 0,
+      "actualDatabase": "Not Run",
+      "semanticScope": "finite-exact-attribution-only"
+    },
+    "completeInputs": {
+      "mode": "complete-inputs",
+      "status": "Pass",
+      "measurements": 24,
+      "cases": [
+        {
+          "completeTokens": 4096,
+          "currentMessageCodePoints": 1200,
+          "compilerAdmitted": true
+        },
+        {
+          "completeTokens": 4097,
+          "currentMessageCodePoints": 1202,
+          "compilerAdmitted": false
+        }
+      ],
+      "noNotes": true,
+      "generatePostCalls": 0,
+      "productWrites": 0,
+      "semanticAcceptance": "Not Run"
+    },
+    "cancel": {
+      "mode": "cancel-once",
+      "status": "Pass",
+      "elapsedMs": 1731,
+      "generatePostCalls": 1,
+      "applicationFailure": "abandoned",
+      "forwardedAbort": true,
+      "adapterState": "termination_unconfirmed",
+      "quarantined": true,
+      "nextAdmissionDenied": true,
+      "candidateChecks": 0,
+      "serverReceiptOrStartProved": false,
+      "remoteStopProved": false,
+      "productWrites": 0,
+      "semanticAcceptance": "Not Run",
+      "nextGenerationRequiresOperatorRemoteSettlement": true
+    }
+  },
+  "currentGenerationHold": {
+    "recordedAtUtc": "2026-10-15T02:02:58.173250+00:00",
+    "source": "aab3bf23b8d9c76c6f830dfefa483d3f42bd2f01",
+    "generationHeld": true,
+    "reason": "Actual cancelled adapter invocation has no confirmed remote settlement. Do not admit another generation or reset/restart to bypass this hold.",
+    "cancelReportSha256": "b895f33af8a9fab29d35c57f1efb33111a38384ada5ea5fcd61e864abdeb7b9b"
+  },
+  "du": {
+    "approvedLiHead": "b53ad18c4ea05d1410760c1dfbd5779aa534a514",
+    "reviewId": 5526998896,
+    "currentSourceFilesMatch94": 4,
+    "independentFocusedTests": 11,
+    "exit": 0,
+    "includedInPrior595": true,
+    "newCodeRequiredForSameMinimum": false
+  },
+  "environment": {
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "java": "25.0.4.1",
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "dependenciesChanged": false
+  },
+  "logs": [
+    {
+      "name": "enmori-li-aab-compile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "enmori-li-aab-backend.log",
+      "sha256": "1b39776ee5526ff932ebca4068c7bca3a316b206c4982d946074eecfe67f4997",
+      "bytes": 83494
+    },
+    {
+      "name": "enmori-li-aab-emulator.log",
+      "sha256": "c8794d2f45c68dfb8759b8247ed6097b08d1f442d3ad7bb0d84ab473f4328236",
+      "bytes": 19958
+    },
+    {
+      "name": "enmori-li-aab-host-tool.log",
+      "sha256": "83f980aeb355acb6123e097405dd2ac40ccb6e517a65a1a939885d2e9b627f8b",
+      "bytes": 854
+    },
+    {
+      "name": "enmori-oct15-du-reconciliation.log",
+      "sha256": "440b870772fd4750ee0d245fb1d576df679c08ed942eeb27ba55678f956c9b80",
+      "bytes": 2139
+    }
+  ]
+}

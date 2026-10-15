@@ -1,5 +1,8 @@
 package com.enmori.app
 
+import android.content.Intent
+import android.net.Uri
+import java.net.URI
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -12,6 +15,15 @@ import java.util.TimeZone
 class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/external_activity")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "open") {
+                    result.notImplemented()
+                } else {
+                    val url = call.argument<String>("url")
+                    result.success(openActivitySource(url))
+                }
+            }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/time_zone")
             .setMethodCallHandler { call, result ->
                 if (call.method == "ianaTimeZone") {
@@ -42,6 +54,30 @@ class MainActivity : FlutterActivity() {
                     result.notImplemented()
                 }
             }
+    }
+
+    private fun openActivitySource(value: String?): Boolean {
+        if (value == null || value.length > 2048 || isFinishing || isDestroyed || !hasWindowFocus()) return false
+        return try {
+            if (Regex("[\\s\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]").containsMatchIn(value)) return false
+            val url = URI(value)
+            if (url.scheme != "https" ||
+                url.host?.lowercase(Locale.ROOT) !in setOf("ticketmaster.sg", "www.ticketmaster.sg") ||
+                url.rawUserInfo != null || url.rawFragment != null || url.port !in setOf(-1, 443)) return false
+            val nativeUri = Uri.parse(value)
+            if (nativeUri.queryParameterNames.any {
+                Regex("^(api[_-]?key|token|access_token|secret|password|authorization)$", RegexOption.IGNORE_CASE).matches(it)
+            }) return false
+            val intent = Intent(Intent.ACTION_VIEW, nativeUri).apply {
+                // Select a browser, including when another app owns a verified link.
+                selector = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_BROWSER)
+                addCategory(Intent.CATEGORY_BROWSABLE)
+            }
+            startActivity(intent)
+            true // OS handoff only; never a registration or participation receipt.
+        } catch (_: Exception) {
+            false // Do not log content, URLs or platform exception messages.
+        }
     }
 
     private fun isApprovedIanaZone(zone: String): Boolean {

@@ -119,6 +119,16 @@ final class OfflineSocialHub extends StatelessWidget {
       'Explore sample activities, meet your circle, and keep a moment for yourself.',
       style: TextStyle(color: _muted, height: 1.6),
     ),
+    OutlinedButton.icon(
+      key: const Key('social-browse-activities'),
+      onPressed: () => _open(context, AppRoutes.activities),
+      icon: const Icon(Icons.explore_outlined),
+      label: const Text('Browse activities'),
+    ),
+    const Text(
+      'Live activities require the controlled service; this offline preview is not connected.',
+      style: TextStyle(color: _muted, height: 1.4),
+    ),
     _Heading(
       title: 'Discover activities',
       action: 'See all',
