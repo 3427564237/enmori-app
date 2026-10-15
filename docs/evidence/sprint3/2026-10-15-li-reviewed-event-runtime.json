@@ -1,0 +1,522 @@
+{
+  "recordedAtSGT": "2026-10-15T21:17:31.810436+08:00",
+  "scope": "LI received SHI/ZHOU work, independently verified actual Backend environment, preserved a usable approved v3 preview; no Event phone/provider acceptance",
+  "source": {
+    "backend": "5e08e5bb8e331c90159d682977608e2120056351",
+    "clientCandidate": "da26c2cb453f62e41fb689f9a72d098aeaf76521",
+    "hostHelperProduct": "f528ebde96fbbc3813f9402cbb469e8202a3425e",
+    "referenceManifest": "2026-10-15-li-event-service-candidate.json",
+    "selectedInputsChecked": 483,
+    "unchangedInputs": 481,
+    "changedInputs": [
+      {
+        "path": "tool/li_controlled_phone_handoff.py",
+        "sha256": "589a72c38a6a2c818a9149d4ea5baea0e9f1d4a750171e385c4b237388645e2d",
+        "previousSha256": "a1336ed0d5e28a01777760de7c4694d7379b2cd3358093d7474a6ffe99ae14d8"
+      },
+      {
+        "path": "tool/test_li_controlled_phone_handoff.py",
+        "sha256": "168ca816c19900d372475e4d594cfccf6c3886a2d1a77153b0a02a68675010ab",
+        "previousSha256": "51f14e4d33ee21e1931710084769e2a4ac3cfbbe96ecb82b6f4e26b7c817882a"
+      }
+    ]
+  },
+  "receivedReviews": {
+    "SHI124": 5532820531,
+    "ZHOU125ConsumerReceipt": 5533135723,
+    "LI122FormalApproval": 5533352617,
+    "LI124BoundedApproval": 5533687213
+  },
+  "sdk": {
+    "first": {
+      "tests": 164,
+      "passed": 163,
+      "failed": 1,
+      "outerExit": 1,
+      "cause": "launcher PATH omitted existing pinned Dart3.13.2; version precondition rejected before Dart journey",
+      "log": "guarded-sdk-first-missing-dart.log"
+    },
+    "final": {
+      "tests": 164,
+      "passed": 164,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "outerExit": 0,
+      "log": "guarded-sdk-final.log"
+    },
+    "profilesAndFivePortsReleased": true,
+    "providerCompilerModel": "explicit doubles"
+  },
+  "priorPreviewStop": {
+    "recordedAtSGT": "2026-10-15T20:48:40.292599+08:00",
+    "scope": "prior #117-only preview explicit settled stop before reviewed new Backend validation",
+    "quietObservations": [
+      {
+        "phase": "running",
+        "accepting": true,
+        "modelAttempts": 0,
+        "modelPending": 0,
+        "compilerPending": 0,
+        "activeCalls": 0,
+        "nonTerminal": 0,
+        "quarantined": false,
+        "admission": "open",
+        "operatorHold": false
+      },
+      {
+        "phase": "running",
+        "accepting": true,
+        "modelAttempts": 0,
+        "modelPending": 0,
+        "compilerPending": 0,
+        "activeCalls": 0,
+        "nonTerminal": 0,
+        "quarantined": false,
+        "admission": "open",
+        "operatorHold": false
+      }
+    ],
+    "closed": {
+      "schemaVersion": 1,
+      "phase": "closed",
+      "accepting": false,
+      "httpsListening": false,
+      "cleanupConfirmed": true,
+      "operatorHold": false,
+      "databaseLifetime": "owned-emulator-process"
+    },
+    "workerExit": {
+      "schemaVersion": 1,
+      "innerProfileRemoved": true
+    },
+    "operatorExit": {
+      "schemaVersion": 1,
+      "exitCode": 0,
+      "portsFree": true,
+      "outerProfileRemoved": true
+    },
+    "fivePortsIndependentlyFree": true,
+    "ownedPrivateFilesRetainedForTransitionAudit": true,
+    "adbAuthorizedDeviceCount": 0,
+    "deviceMappingCleanupNotClaimed": true
+  },
+  "manualPreload": {
+    "originalSettledAndFivePortsFree": true,
+    "initialExactModelResident": false,
+    "manualZeroContentPreload": true,
+    "done": true,
+    "reportedEvalCount": null,
+    "emptyResponseConfirmed": true,
+    "durationMs": 26520,
+    "freshExactModelAnd8192Context": true
+  },
+  "privateOperatorActual": {
+    "recordedAtSGT": "2026-10-15T21:00:31.478770+08:00",
+    "scope": "actual reviewed Linux operator/private files/TLS/Auth/Firestore; no real-provider success exercised, modelAttempts0",
+    "status": "Pass",
+    "initialGate": {
+      "configured": true,
+      "enabled": false,
+      "pending": 0
+    },
+    "httpChecks": [
+      {
+        "route": "/v1/event-browse",
+        "status": 401
+      },
+      {
+        "route": "/v1/event-browse",
+        "status": 503
+      },
+      {
+        "route": "/v1/event-browse/{browseId}",
+        "status": 503
+      },
+      {
+        "route": "/v1/me/profile",
+        "status": 200
+      },
+      {
+        "route": "/v1/me/settings",
+        "status": 200
+      },
+      {
+        "route": "/v1/me/personas",
+        "status": 200
+      },
+      {
+        "route": "/v1/event-browse",
+        "status": 503
+      },
+      {
+        "route": "/v1/me/profile",
+        "status": 200
+      }
+    ],
+    "privateControl": [
+      {
+        "enabled": true,
+        "eventControlFailed": false,
+        "modelAttempts": 0
+      },
+      {
+        "enabled": false,
+        "eventControlFailed": true,
+        "modelAttempts": 0
+      },
+      {
+        "enabled": false,
+        "eventControlFailed": false,
+        "modelAttempts": 0
+      }
+    ],
+    "queuedEnableIgnoredDuringStop": true,
+    "receipts": {
+      "closed": {
+        "schemaVersion": 1,
+        "phase": "closed",
+        "accepting": false,
+        "httpsListening": false,
+        "cleanupConfirmed": true,
+        "operatorHold": false,
+        "databaseLifetime": "owned-emulator-process"
+      },
+      "worker": {
+        "schemaVersion": 1,
+        "innerProfileRemoved": true
+      },
+      "operator": {
+        "schemaVersion": 1,
+        "exitCode": 0,
+        "portsFree": true,
+        "outerProfileRemoved": true
+      }
+    },
+    "fivePortsIndependentlyFree": true,
+    "probeSentEventRequestsWhileEnabled": false,
+    "providerEgressIndependentlyCounted": false,
+    "providerSuccessOrRealContentClaimed": false,
+    "actualContentGeneration": 0,
+    "deviceOrBrowserPerformed": false
+  },
+  "privateOperatorFirstProbe": {
+    "status": "reporter failed after actual operator exit0 and cleanup",
+    "cause": "assumed NODE_OPTIONS observer would survive controlled environment; observed parent-only loader; production allowlist correctly strips it",
+    "fullProviderEgressMeasured": false
+  },
+  "closedSessionPrivateCleanup": {
+    "closedSessions": 3,
+    "onlyIdentifiedOwnedConfigTlsFilesRemoved": 9,
+    "activePreviewResourcesPreserved": true,
+    "callerHomePrivateConfigurationUnchanged": true
+  },
+  "handoff": {
+    "sourceCorrection": "READY can disappear during polling; preserve owner and WAIT then confirm complete consumption. Present wrong nonce/symlink still refuse. No extra credential delivery or timeout extension.",
+    "firstPosixRegression": {
+      "tests": 18,
+      "passed": 17,
+      "failed": 1
+    },
+    "finalPosix": {
+      "tests": 18,
+      "passed": 18,
+      "failed": 0
+    },
+    "androidIsolatedFileFixture": {
+      "iterations": 60,
+      "passed": 60,
+      "failed": 0,
+      "actualAppRestartOrProviderCalls": false
+    },
+    "firstActualDelivery": {
+      "status": "Blocked",
+      "category": "command_failed",
+      "apkVerified": true,
+      "installedApkMatched": true,
+      "readyNonceVerified": true,
+      "configurationConsumed": false,
+      "failureCleanupConfirmed": true,
+      "createdReverseCount": 2,
+      "apkSha256": "d492141ed9c09f93ec5da3784fc0f924d8e52ca46085c7ca172b2dfa4674ffe8"
+    },
+    "afterFixActualDelivery": {
+      "status": "Blocked",
+      "category": "command_failed",
+      "apkVerified": true,
+      "installedApkMatched": true,
+      "readyNonceVerified": true,
+      "configurationConsumed": false,
+      "failureCleanupConfirmed": true,
+      "createdReverseCount": 2,
+      "apkSha256": "d492141ed9c09f93ec5da3784fc0f924d8e52ca46085c7ca172b2dfa4674ffe8"
+    },
+    "afterFixDiagnostic": {
+      "report": {
+        "status": "Blocked",
+        "category": "command_failed",
+        "apkVerified": true,
+        "installedApkMatched": true,
+        "readyNonceVerified": true,
+        "configurationConsumed": false,
+        "failureCleanupConfirmed": true,
+        "createdReverseCount": 2,
+        "apkSha256": "d492141ed9c09f93ec5da3784fc0f924d8e52ca46085c7ca172b2dfa4674ffe8"
+      },
+      "commands": [
+        {
+          "stage": "aapt",
+          "exit": 0,
+          "stdoutBytes": 4718,
+          "durationMs": 4,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "metadata",
+          "exit": 0,
+          "stdoutBytes": 106,
+          "durationMs": 40,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "metadata",
+          "exit": 0,
+          "stdoutBytes": 164,
+          "durationMs": 178,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "READ_READY",
+          "exit": 0,
+          "stdoutBytes": 94,
+          "durationMs": 61,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "reverse---list",
+          "exit": 0,
+          "stdoutBytes": 1,
+          "durationMs": 7,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "reverse---no-rebind",
+          "exit": 0,
+          "stdoutBytes": 5,
+          "durationMs": 8,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "reverse---no-rebind",
+          "exit": 0,
+          "stdoutBytes": 6,
+          "durationMs": 7,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "DELIVER",
+          "exit": 0,
+          "stdoutBytes": 0,
+          "durationMs": 105,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "CONSUMED",
+          "exit": 0,
+          "stdoutBytes": 4,
+          "durationMs": 106,
+          "stderrClasses": [],
+          "stdoutState": "WAIT"
+        },
+        {
+          "stage": "CONSUMED",
+          "exit": 0,
+          "stdoutBytes": 4,
+          "durationMs": 59,
+          "stderrClasses": [],
+          "stdoutState": "WAIT"
+        },
+        {
+          "stage": "CONSUMED",
+          "exit": 1,
+          "stdoutBytes": 0,
+          "durationMs": 65,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "CLEAN",
+          "exit": 0,
+          "stdoutBytes": 0,
+          "durationMs": 62,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "reverse---list",
+          "exit": 0,
+          "stdoutBytes": 53,
+          "durationMs": 6,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "reverse---remove",
+          "exit": 0,
+          "stdoutBytes": 0,
+          "durationMs": 7,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "reverse---list",
+          "exit": 0,
+          "stdoutBytes": 26,
+          "durationMs": 6,
+          "stderrClasses": [],
+          "stdoutState": null
+        },
+        {
+          "stage": "reverse---remove",
+          "exit": 0,
+          "stdoutBytes": 0,
+          "durationMs": 5,
+          "stderrClasses": [],
+          "stdoutState": null
+        }
+      ]
+    },
+    "latestActualDelivery": {
+      "report": {
+        "status": "Pass",
+        "category": null,
+        "apkVerified": true,
+        "installedApkMatched": true,
+        "readyNonceVerified": true,
+        "configurationConsumed": true,
+        "failureCleanupConfirmed": true,
+        "createdReverseCount": 2,
+        "apkSha256": "d492141ed9c09f93ec5da3784fc0f924d8e52ca46085c7ca172b2dfa4674ffe8"
+      },
+      "commands": [
+        {
+          "stage": "READ_READY",
+          "exit": 0
+        },
+        {
+          "stage": "DELIVER",
+          "exit": 0
+        },
+        {
+          "stage": "CONSUMED",
+          "exit": 0,
+          "state": "WAIT"
+        },
+        {
+          "stage": "CONSUMED",
+          "exit": 0,
+          "state": "CONSUMED"
+        }
+      ]
+    },
+    "openFinding": "Two post-correction actual consumption-command failures remain unclassified. Later successful delivery/60 synthetic Android iterations do not prove resolution. Current preview restored; preserve these failures for focused follow-up."
+  },
+  "activePreview": {
+    "recordedAtSGT": "2026-10-15T21:15:05.031323+08:00",
+    "nativeSignInMetadataPresent": true,
+    "noHostSignInIssuedInThisPreview": true,
+    "installedKnownV3Sha256": "d492141ed9c09f93ec5da3784fc0f924d8e52ca46085c7ca172b2dfa4674ffe8",
+    "v5Installed": false,
+    "sameOriginalPreviewReusedAcrossDeliveryAttempts": true,
+    "latestConfigurationConsumptionVerified": true,
+    "authAndHttpsReverseMatch": true,
+    "phase": "running",
+    "eventBrowse": {
+      "configured": true,
+      "enabled": false,
+      "pending": 0
+    },
+    "modelAttempts": 0,
+    "modelPending": 0,
+    "operatorHold": false,
+    "privateResourcesIntentionallyRetained": true,
+    "cleanupOfActivePreviewClaimed": false,
+    "intermittentPostFixConsumptionCommandFailureStillUnresolved": true
+  },
+  "providerTermsRefresh": {
+    "dateSGT": "2026-10-15",
+    "sources": [
+      "https://developer.ticketmaster.com/support/terms-of-use/",
+      "https://ticketmaster.sg/terms-of-use"
+    ],
+    "existingNoticeRemovalAndDeepLinkConditionsPreserved": true,
+    "providerContactOrNewHumanCredentialWorkflowAdded": false
+  },
+  "remaining": [
+    "DU formal review of exact #125 new client delta",
+    "DU focused review of new host-helper correction and unresolved actual command failures",
+    "Real Event provider/typed-client phone/browser and source-disable/client-clear/owned-copy exercise Not Run"
+  ],
+  "noMainMergeIssueProjectOrWholeBaselineAcceptance": true,
+  "localLogs": {
+    "android-poll-stress.log": {
+      "localOnly": true,
+      "sha256": "7b9dccfcb2ee85db8174f651fe99d135d72d4108d6bc84f78d500068e8fcfdb5",
+      "bytes": 27
+    },
+    "fresh-backend-build.log": {
+      "localOnly": true,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "guarded-sdk-final.log": {
+      "localOnly": true,
+      "sha256": "6caf392aa2b0d188d0d5611a982e82c6ea615046590cc35ff21a9c969b299bfb",
+      "bytes": 24127
+    },
+    "guarded-sdk-first-missing-dart.log": {
+      "localOnly": true,
+      "sha256": "787339ec8f3dd7c8fd3365318f2c6530f07c2fbe9f2d80ed0fde77deeb9b6f24",
+      "bytes": 25709
+    },
+    "guarded-sdk.log": {
+      "localOnly": true,
+      "sha256": "787339ec8f3dd7c8fd3365318f2c6530f07c2fbe9f2d80ed0fde77deeb9b6f24",
+      "bytes": 25709
+    },
+    "handoff-race-first.log": {
+      "localOnly": true,
+      "sha256": "f58f4f59632863fb6ad7da0ef4140e330bae7d41512be82b94f2c3307f02e880",
+      "bytes": 835
+    },
+    "handoff-race-fixed.log": {
+      "localOnly": true,
+      "sha256": "28a8f32568bca03db22f915c6de5563c20c4ef2b2026e4cf709e344a9821a331",
+      "bytes": 117
+    },
+    "private-operator-first-observer-failure.log": {
+      "localOnly": true,
+      "sha256": "764e463132b7c64038826d58aaa6fab76d332e743ec8b627a99aec28eaed06c9",
+      "bytes": 359
+    },
+    "private-operator-probe-final.log": {
+      "localOnly": true,
+      "sha256": "7504a1d80038f5b67a8f42cbe1baad04b7aac32572650751d62dfe42da9b2667",
+      "bytes": 1933
+    },
+    "private-operator-probe.log": {
+      "localOnly": true,
+      "sha256": "764e463132b7c64038826d58aaa6fab76d332e743ec8b627a99aec28eaed06c9",
+      "bytes": 359
+    }
+  }
+}
