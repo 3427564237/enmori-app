@@ -11,6 +11,7 @@ import 'package:http/io_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/platform/external_activity_opener.dart';
+import 'app/controlled_demo_app.dart';
 import 'core/network/backend_api_client.dart';
 import 'core/result/result.dart';
 import 'features/account/data/backend_account_preferences_repository.dart';
@@ -107,6 +108,7 @@ final class ControlledPhoneHarness extends StatefulWidget {
     this.connectionFactory = _connect,
     this.handoffWait = const Duration(minutes: 5),
     this.activitiesEnabled = false,
+    this.integratedDemo = false,
     super.key,
   });
   static const readyFileName = 'enmori-controlled-phone-ready.json';
@@ -116,6 +118,7 @@ final class ControlledPhoneHarness extends StatefulWidget {
 
   /// Client navigation only. The service's private source gate stays separate.
   final bool activitiesEnabled;
+  final bool integratedDemo;
   @override
   State<ControlledPhoneHarness> createState() => _ControlledPhoneHarnessState();
 }
@@ -392,6 +395,15 @@ final class _ControlledPhoneHarnessState extends State<ControlledPhoneHarness> {
     final connection = _connection;
     final configuration = _configuration;
     if (connection != null && configuration != null) {
+      if (widget.integratedDemo) {
+        return ControlledDemoApp(
+          key: ObjectKey(connection),
+          baseUri: configuration.baseUri,
+          auth: connection.auth,
+          client: connection.client,
+          onClose: () => _exit(connection),
+        );
+      }
       return AiNetworkHarnessApp(
         navigatorKey: _navigator,
         baseUri: configuration.baseUri,

@@ -185,3 +185,15 @@ test('final report failure retries after confirmed original cleanup without repe
   assert.equal(finalAttempts, 3); assert.equal(f.state().closes, 1); assert.equal(f.state().stops, 1);
   assert(removals >= 3); assert.equal(f.reports.at(-1).report.phase, 'failed-cleaned');
 });
+
+
+test('demo feature opt-in is explicit, bounded and passed to the existing owned service only', async () => {
+  const c = { ...config(), demoFeatures: true }, f = fixture();
+  assert.equal(validatePhoneServiceConfiguration(c), c);
+  for (const value of [false, 1, "true", null]) assert.throws(() => validatePhoneServiceConfiguration({ ...config(), demoFeatures: value }));
+  const create = f.deps.createService;
+  f.deps.createService = async options => { assert.equal(options.demoFeatures, true); return create(options); };
+  assert.equal(await runPhoneService(c, f.deps), 0);
+  assert(!JSON.stringify(f.reports.filter(row => row.name !== 'handoff.json')).includes('private-test-only'));
+  assert.equal(f.reports.find(row => row.name === 'handoff.json').report.password, 'private-test-only');
+});
