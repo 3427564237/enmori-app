@@ -70,3 +70,5 @@ node tool/run_ai_store_emulators.mjs
 ```
 
 The ten committed service SDK cases are included in the full suite. The earlier eight-case focused run predates the added checkpoint-preservation and startup-acknowledgment cases and is not an additional distinct set. Operator unit tests use explicit listener/model/service doubles; SDK cases use real Auth/Firestore/HTTP with explicit model/compiler doubles. This packet does not claim a new actual Qwen, Linux foreground launcher, TLS/device or installed APK run. Exact results, source binding, retained failures and next gate are in the accompanying evidence manifest/report.
+
+Report/handoff I/O correction: [current operator evidence](2026-10-15-jin-phone-service-report-io-correction.md). Reporting or private-handoff removal failure preserves the same original service and retries safe drain/removal/reporting. A missing or stale status file is not current readiness or cleanup proof. Confirmed cleanup is retained across final-receipt failures; no repeated cleanup or replacement lane makes an I/O outage pass.
