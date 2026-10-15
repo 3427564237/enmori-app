@@ -88,11 +88,13 @@ async function outer() {
   const config = await configuration(); privateDirectory(config.phone.sessionDirectory, true);
   // Reuse operator-supplied existing TLS files. Never generate/install/copy them.
   privateFile(config.phone.keyPath, 16384);
-  assert(lstatSync(config.phone.certificatePath).isFile());
+  const certificate = lstatSync(config.phone.certificatePath);
+  assert(certificate.isFile() && !certificate.isSymbolicLink() && certificate.size <= 16384);
   for (const port of ports) await free(port);
   const directory = mkdtempSync(join(tmpdir(), 'enmori-phone-service-outer-'));
   const onSignal = () => { try { requestStop(config.phone.sessionDirectory); } catch { /* No forced disposal or false success. */ } };
   process.on('SIGINT', onSignal); process.on('SIGTERM', onSignal);
+  let exitCode = 1, portsFree = false;
   try {
     const env = buildControlledEmulatorTestEnvironment({ ...process.env,
       GCLOUD_PROJECT: 'demo-enmori-rmvp01a-r10', GOOGLE_CLOUD_PROJECT: 'demo-enmori-rmvp01a-r10',
@@ -109,9 +111,11 @@ async function outer() {
       child.once('error', reject); child.once('exit', done);
     });
     for (const port of ports) await free(port);
-    return code ?? 1;
+    portsFree = true; exitCode = code ?? 1;
+    return exitCode;
   } finally {
     process.off('SIGINT', onSignal); process.off('SIGTERM', onSignal); removeOwnedProfile(directory);
+    writePrivate(config.phone.sessionDirectory, 'operator-exit.json', { schemaVersion: 1, exitCode, portsFree, outerProfileRemoved: true });
   }
 }
 async function worker() {
@@ -131,7 +135,10 @@ async function worker() {
       child.stdin.end(JSON.stringify(config));
     });
     return code ?? 1;
-  } finally { removeOwnedProfile(directory); }
+  } finally {
+    removeOwnedProfile(directory);
+    writePrivate(config.phone.sessionDirectory, 'worker-exit.json', { schemaVersion: 1, innerProfileRemoved: true });
+  }
 }
 
 /** Reusable owned HTTPS edge. Does not perform ADB reversal or install an APK.
@@ -142,7 +149,9 @@ export async function runPhoneService(config, dependencies = {}) {
   const read = dependencies.read ?? readFileSync;
   const publish = dependencies.publish ?? ((name, value) => writePrivate(phone.sessionDirectory, name, value));
   const removeHandoff = dependencies.removeHandoff ?? (() => {
-    const path = join(phone.sessionDirectory, 'handoff.json'); if (existsSync(path)) { privateFile(path, 32768); unlinkSync(path); }
+    for (const name of ['handoff.json', 'handoff.json.tmp']) {
+      const path = join(phone.sessionDirectory, name); if (existsSync(path)) { privateFile(path, 32768); unlinkSync(path); }
+    }
   });
   const requested = dependencies.requested ?? (() => stopRequested(phone.sessionDirectory));
   const wait = dependencies.wait ?? (() => delay(500));

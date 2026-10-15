@@ -167,3 +167,20 @@ test("a different actual Auth user cannot adopt the owned service Account; clean
     assert.equal((await auth.getUser(foreign.uid)).uid, foreign.uid);
   } finally { await auth.deleteUser(foreign.uid); await deleteApp(firebase); await cleanup(service); }
 });
+
+test("unresolved maintenance checkpoint holds stop and is preserved until the separate owned test repair", async () => {
+  const service = await createControlledPhoneService(options);
+  const env = requireControlledEmulatorEnvironment(process.env);
+  const firebase = initializeApp({ projectId: env.projectId }, randomUUID()), db = getFirestore(firebase);
+  const checkpoint = db.doc("ai_cleanup_progress/source_sweep");
+  try {
+    await checkpoint.create({ explicitUnresolvedTestCheckpoint: true });
+    assert.deepEqual(await service.stopAndClean(), { cleanupConfirmed: false, operatorHold: true });
+    assert.deepEqual((await checkpoint.get()).data(), { explicitUnresolvedTestCheckpoint: true });
+    assert.equal((await db.collection("accounts").get()).size, 1);
+    assert.equal((await db.doc("ai_runtime_fence/current").get()).exists, true);
+    // Test-only removal of the exact document just created; not a production
+    // recovery path, forced reset, SLA proof, or new cleanup rule.
+    await checkpoint.delete();
+  } finally { await db.terminate(); await deleteApp(firebase); await cleanup(service); }
+});

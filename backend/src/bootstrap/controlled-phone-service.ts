@@ -120,7 +120,11 @@ export async function createControlledPhoneService(options: {
         }
         await db.runTransaction(async tx => {
           const current = await tx.get(db.doc(runtimePath));
+          const sweep = await tx.get(db.doc("ai_cleanup_progress/source_sweep"));
           requireProof(current.data()?.processEpoch === joined!.epoch.processEpoch && current.data()?.generation === joined!.epoch.generation);
+          // A stopped failed sweep can retain a checkpoint. It is not covered
+          // by owned Account recursion; preserve it instead of claiming cleanup.
+          requireProof(!sweep.exists);
         }, { maxAttempts: 1 });
         if (accountOwned) {
           await db.recursiveDelete(db.doc(account));
