@@ -1,0 +1,337 @@
+{
+  "schemaVersion": 1,
+  "scope": "JIN controlled phone Event construction and isolated fixture gate only",
+  "recordedAt": "2026-10-15T19:20:17.443785+08:00",
+  "authority": "https://github.com/3427564237/enmori-app/issues/84#issuecomment-6188049349",
+  "product": {
+    "parents": [
+      "f6036d4efbc4f3d7a33378cd7184b01d4eda31bb",
+      "e34f4a2bc40ddc9a4805ac90e31e1ab0215b4691"
+    ],
+    "merge": "83da4a69e74104d4f9952fee213d518aa64dd070",
+    "mergeTree": "d8814da15d62a320dec19c65541186f5cdd36bee",
+    "producer": "0b730c52fd62ddfc02bdc7166ab1a80374eb2681",
+    "copied": [
+      "backend/src/event-browse/infrastructure/ticketmaster-browse-source.ts",
+      "backend/test/event-browse/event-browse.test.ts"
+    ],
+    "product": "3c8202dff914d897ba4b2ce1dd8095711eeb07c9",
+    "productTree": "8e0e8130b9a228b5a9ae66c31abd2887a8e7a538",
+    "changedPaths": [
+      "backend/src/event-browse/infrastructure/ticketmaster-browse-source.ts",
+      "backend/test/event-browse/event-browse.test.ts",
+      "backend/src/bootstrap/controlled-event-browse.ts",
+      "backend/src/bootstrap/controlled-phone-service.ts",
+      "backend/test/controlled-event-browse.test.ts",
+      "backend/emulator-test/controlled-phone-service.integration.test.ts",
+      "tool/controlled_phone_service.mjs",
+      "tool/controlled_phone_service.test.mjs"
+    ],
+    "workingSha256": {
+      "backend/src/event-browse/infrastructure/ticketmaster-browse-source.ts": "cc6e18825e41e3f3087463d59d198e27bf2b1f4c34b349ddc3d7b4517737dd99",
+      "backend/test/event-browse/event-browse.test.ts": "206a3fb67787a673549216a641d906f9b89ef413083b1765b3862f128345993b",
+      "backend/src/bootstrap/controlled-event-browse.ts": "8bc44b761f033301b467b4ba525853495e876d46223d66491c6ff4eddc9135bc",
+      "backend/src/bootstrap/controlled-phone-service.ts": "2944fea939fda2d60fd212bec31b79bb9d44e6df487e9eff795de4b5abf809ae",
+      "backend/test/controlled-event-browse.test.ts": "0c1a9ef8e7998e7fe842da6403b1cc914b4f61d10fdcd9badacddc5795c0d31d",
+      "backend/emulator-test/controlled-phone-service.integration.test.ts": "4a2a5b17f5dc44630b4cefaf8f7cddfb9d14b77aeb5598080f566faf7167c709",
+      "tool/controlled_phone_service.mjs": "094acfec137f32c6b10c30c9d7e9d7bae1750a1c0e0c2ab018ac04e633fcf04e",
+      "tool/controlled_phone_service.test.mjs": "b5151140abb839ee1dc107a43519b5059ec0baf323a032896e398a176505dc28"
+    }
+  },
+  "sourceChecks": {
+    "product": "3c8202dff914d897ba4b2ce1dd8095711eeb07c9",
+    "tree": "8e0e8130b9a228b5a9ae66c31abd2887a8e7a538",
+    "trackedInputs": 1144,
+    "allTrackedWorkingInputsBound": true,
+    "exactWorkingInputs": 66,
+    "CRLFEquivalentWorkingInputs": 1078,
+    "nonDocumentInputs": 657,
+    "nonDocumentWorkingInventorySha256": "92b329629597fc27cfcb06c9ce80d81fb68ceab0d152b69f34a87f14f53b293c",
+    "gitNonDocumentInventorySha256": "760d2665537ea5d1d50ed5b568ccfe4585717fa4706dfba347475d820d57d7b5",
+    "producerBindings": {
+      "backend/src/event-browse/application/event-browse.ts": {
+        "gitBlobIdentical": true,
+        "blobSha256": "7d258b93b89209171bc78ab37b5fa787bf4b71511b9aaef4406f960306e149a2",
+        "workingSha256": "005d587cf3b5b328efc3684326741d21b858ac68b54513a9870c685a905df118",
+        "binding": "CRLF-equivalent"
+      },
+      "backend/src/event-browse/domain/browse-values.ts": {
+        "gitBlobIdentical": true,
+        "blobSha256": "623ceb565846ecfa7d42c7640ff1f8394cf9f01809cb098f39ddb436a242e244",
+        "workingSha256": "3ba016b5796308d232c2cdc64438539d588b38a8720af9cfcabcd75b69eaf94d",
+        "binding": "CRLF-equivalent"
+      },
+      "backend/src/event-browse/ports/event-browse.ts": {
+        "gitBlobIdentical": true,
+        "blobSha256": "cb083f04d7ae34b795961e61d80a0a635fae07c9138ca29902e93f0e9adea193",
+        "workingSha256": "813af4de33b828420c121d5b34bb70e8ecea78f90912e252acaa44ad8310ab25",
+        "binding": "CRLF-equivalent"
+      },
+      "backend/src/event-browse/transport/register-routes.ts": {
+        "gitBlobIdentical": true,
+        "blobSha256": "2ee910e5716c63b3773564a2bd8fbf545a749e70410392415d3c1ce84c031595",
+        "workingSha256": "52f5e34a2bbd8d658762595839358f14529dda337cfffd2aca3ada0fe9f22903",
+        "binding": "CRLF-equivalent"
+      },
+      "backend/src/event-browse/transport/schemas.ts": {
+        "gitBlobIdentical": true,
+        "blobSha256": "a06603d1aba31d345437748fb101744aec6f366dd2282b4e609c75690e0466e4",
+        "workingSha256": "93bd8b3aa6baf307a66e0c00f7c88ea4b8392c3742c7caaa61aa9ba6f7adbcc8",
+        "binding": "CRLF-equivalent"
+      },
+      "backend/src/event-browse/infrastructure/ticketmaster-browse-source.ts": {
+        "gitBlobIdentical": true,
+        "blobSha256": "cc6e18825e41e3f3087463d59d198e27bf2b1f4c34b349ddc3d7b4517737dd99",
+        "workingSha256": "cc6e18825e41e3f3087463d59d198e27bf2b1f4c34b349ddc3d7b4517737dd99",
+        "binding": "exact"
+      },
+      "backend/test/event-browse/event-browse.test.ts": {
+        "gitBlobIdentical": true,
+        "blobSha256": "206a3fb67787a673549216a641d906f9b89ef413083b1765b3862f128345993b",
+        "workingSha256": "206a3fb67787a673549216a641d906f9b89ef413083b1765b3862f128345993b",
+        "binding": "exact"
+      }
+    },
+    "api": {
+      "identicalTo": "e34f4a2bc40ddc9a4805ac90e31e1ab0215b4691",
+      "operations": 35,
+      "schemas": 45
+    },
+    "checks": {
+      "newDeltaWhitespace": {
+        "exit": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "baseWhitespace": {
+        "exit": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "changedPaths": [
+      {
+        "path": "backend/emulator-test/controlled-phone-service.integration.test.ts",
+        "mode": "100644",
+        "blob": "62ce64edc027e1a9e350973349d6164799c8811c",
+        "sha256": "4a2a5b17f5dc44630b4cefaf8f7cddfb9d14b77aeb5598080f566faf7167c709",
+        "binding": "CRLF-equivalent"
+      },
+      {
+        "path": "backend/src/bootstrap/controlled-event-browse.ts",
+        "mode": "100644",
+        "blob": "54268ff9b6ebea70cf2bb10d06c05055d6ca2010",
+        "sha256": "8bc44b761f033301b467b4ba525853495e876d46223d66491c6ff4eddc9135bc",
+        "binding": "exact"
+      },
+      {
+        "path": "backend/src/bootstrap/controlled-phone-service.ts",
+        "mode": "100644",
+        "blob": "8055ae1a119c68d65b8904fa3a4451dcd65925d1",
+        "sha256": "2944fea939fda2d60fd212bec31b79bb9d44e6df487e9eff795de4b5abf809ae",
+        "binding": "CRLF-equivalent"
+      },
+      {
+        "path": "backend/src/event-browse/infrastructure/ticketmaster-browse-source.ts",
+        "mode": "100644",
+        "blob": "279d1e282035c6e0bad40ddfbd404c306ab980e2",
+        "sha256": "cc6e18825e41e3f3087463d59d198e27bf2b1f4c34b349ddc3d7b4517737dd99",
+        "binding": "exact"
+      },
+      {
+        "path": "backend/test/controlled-event-browse.test.ts",
+        "mode": "100644",
+        "blob": "ce5a8c3b4c69ae35699f9678ff0280470dd9a7c9",
+        "sha256": "0c1a9ef8e7998e7fe842da6403b1cc914b4f61d10fdcd9badacddc5795c0d31d",
+        "binding": "exact"
+      },
+      {
+        "path": "backend/test/event-browse/event-browse.test.ts",
+        "mode": "100644",
+        "blob": "d493c7b70beefb9186804fba152b9518715dab8c",
+        "sha256": "206a3fb67787a673549216a641d906f9b89ef413083b1765b3862f128345993b",
+        "binding": "exact"
+      },
+      {
+        "path": "tool/controlled_phone_service.mjs",
+        "mode": "100644",
+        "blob": "ce47ba63c423241bae231f753125888c498c7bbc",
+        "sha256": "094acfec137f32c6b10c30c9d7e9d7bae1750a1c0e0c2ab018ac04e633fcf04e",
+        "binding": "CRLF-equivalent"
+      },
+      {
+        "path": "tool/controlled_phone_service.test.mjs",
+        "mode": "100644",
+        "blob": "b804686f516d7eb3bb9e2dd736995cfa0b29e59d",
+        "sha256": "b5151140abb839ee1dc107a43519b5059ec0baf323a032896e398a176505dc28",
+        "binding": "CRLF-equivalent"
+      }
+    ]
+  },
+  "toolchain": {
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "firebaseAdmin": "14.3.0",
+    "firestore": "8.7.1",
+    "firebaseCli": "15.29.0",
+    "emulator": "1.22.0",
+    "dart": "3.13.2",
+    "java": "21.0.12.1",
+    "log": {
+      "localOnly": true,
+      "file": "toolchain.log",
+      "bytes": 388,
+      "sha256": "b8e5bd0c57788cf47fd94c1e706395402a8c7add99ef1626c44824f0629d80f1"
+    }
+  },
+  "commands": {
+    "strictBuild": "node node_modules/typescript/bin/tsc --project backend/tsconfig.json",
+    "backend": "node --test \"backend/dist/test/**/*.test.js\"",
+    "operator": "node --test tool/controlled_phone_service.test.mjs",
+    "emulator": "node tool/run_ai_store_emulators.mjs",
+    "syntax": [
+      "node --check tool/controlled_phone_service.mjs",
+      "node --check tool/controlled_phone_service.test.mjs"
+    ],
+    "dartPreparation": "dart <existing Flutter 3.47.2 flutter_tools.snapshot> pub get --offline"
+  },
+  "results": {
+    "strictBuild": {
+      "exit": 0,
+      "log": {
+        "localOnly": true,
+        "file": "build-corrected.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "backend": {
+      "tests": 912,
+      "pass": 912,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exit": 0,
+      "log": {
+        "localOnly": true,
+        "file": "backend-final.log",
+        "bytes": 85881,
+        "sha256": "1e2e662e2286301723c3a330746a1eda4f24ae203d3352b260e5a52ed66455d9"
+      },
+      "durationMs": 7682.4527
+    },
+    "operator": {
+      "tests": 15,
+      "pass": 15,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exit": 0,
+      "log": {
+        "localOnly": true,
+        "file": "operator-final.log",
+        "bytes": 1751,
+        "sha256": "665b898d9b6fc716836e0b0b2a03fc1f047b7163d635e921700610691c60b6d7"
+      },
+      "durationMs": 4725.4385
+    },
+    "emulator": {
+      "tests": 164,
+      "pass": 164,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exit": 0,
+      "log": {
+        "localOnly": true,
+        "file": "emulator-full-run02.log",
+        "bytes": 24396,
+        "sha256": "c98c4ea89b5d5b1bfea8db271aba73288d58b8e797316cd8c37fbdacf34a07e6"
+      },
+      "durationMs": 280033.2721
+    },
+    "syntax": {
+      "checks": 2,
+      "exit": 0
+    },
+    "offlineRestore": {
+      "exit": 0,
+      "lockUnchanged": true,
+      "log": {
+        "localOnly": true,
+        "file": "offline-restore.log",
+        "bytes": 71,
+        "sha256": "c083f9ce64654caa4975b431c9e24916bd2b0af137a60f0e49f45dfb26fee81c"
+      }
+    }
+  },
+  "isolation": {
+    "project": "demo-enmori-rmvp01a-r10",
+    "auth": "127.0.0.1:9099",
+    "firestore": "127.0.0.1:8080",
+    "exclusiveRequiredPorts": [
+      8080,
+      9099,
+      4400,
+      4500,
+      9150
+    ],
+    "actualValidatedGatewayBindingAudits": true,
+    "outerAndWorkerPrivateProfilesRemoved": true,
+    "requiredPortsFree": true,
+    "completionMarkers": [
+      "Script exited successfully (code 0)",
+      "JIN_NEXT_EMULATOR_WORKER_PROFILE_REMOVED",
+      "JIN_NEXT_EMULATOR_OUTER_PROFILE_REMOVED",
+      "JIN_NEXT_EMULATOR_REQUIRED_PORTS_FREE",
+      "EVENT_BROWSE_OWN_FIXTURES_AND_SDK_TEARDOWN_PASS"
+    ],
+    "provider": "explicit source/HTTP doubles; zero actual provider calls",
+    "model": "explicit generation/compiler doubles; zero actual live-model calls",
+    "network": "actual isolated local HTTP/Auth/Firestore, not device or HTTPS execution"
+  },
+  "retainedFailures": [
+    {
+      "source": "4b386b1726eb156cd4f4127ea7eaa60fd180af47",
+      "kind": "new Emulator assertion error",
+      "result": {
+        "tests": 164,
+        "pass": 163,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "exit": 1,
+        "log": {
+          "localOnly": true,
+          "file": "emulator-full-run01.log",
+          "bytes": 25949,
+          "sha256": "518bc97f96ff1dc9e599add8d82f50bceac5382a9930426a6f2b337f1d2d0a9d"
+        },
+        "durationMs": 288968.5807
+      },
+      "actual": 503,
+      "incorrectExpected": 409,
+      "cause": "Already-bound Account with missing completion timestamp is corrupt, not an unbound onboarding-required owner. Product behavior was correct.",
+      "correction": "Keep corrupted Account 503; separately remove/restore owned binding to prove 409. No source invocation in either case.",
+      "profilesAndPortsCleaned": true
+    },
+    {
+      "kind": "local source-identity helper",
+      "exit": 1,
+      "cause": "Initial exact raw-byte comparison rejected Windows CRLF archive bytes against LF Git blobs.",
+      "correction": "Explicit exact or CRLF-equivalent UTF-8 binding; binary exact. Final 1144 bindings pass.",
+      "rawInitialOutputPersisted": false
+    }
+  ],
+  "notRun": [
+    "actual provider/display/link activation",
+    "actual Linux private-file/HTTPS operator exercise on LI host",
+    "new Flutter/APK/Android/browser or device source-disable/client-clear exercise",
+    "live-model call or readiness/residency change",
+    "ordinary/cloud/production enablement",
+    "SHI new-source review and LI independent evidence disposition"
+  ],
+  "publicationBoundary": "New code source is independently identified; later evidence files only. Existing accepted inputs and historical failures remain. No merge, Issue/Project state change or whole-Sprint/UAT/Release claim."
+}

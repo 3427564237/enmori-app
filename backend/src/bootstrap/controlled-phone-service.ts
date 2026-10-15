@@ -21,6 +21,8 @@ import type { GenerationTransport } from "../ai-runtime/ports/generation-transpo
 import type { CompletePromptCompiler } from "../ai-runtime/infrastructure/controlled-ollama-transport.js";
 import { buildApp } from "./build-app.js";
 import { createIsolatedConversationComposition } from "./isolated-conversation-composition.js";
+import { createControlledEventBrowse } from "./controlled-event-browse.js";
+import type { IsolatedEventBrowseInput } from "./isolated-event-browse.js";
 
 const unavailable = () => new Error("CONTROLLED_PHONE_SERVICE_UNAVAILABLE");
 function requireProof(value: unknown): asserts value { if (!value) throw unavailable(); }
@@ -38,6 +40,7 @@ export async function createControlledPhoneService(options: {
   readonly exclusiveEmulatorsVerified: true;
   readonly transport: GenerationTransport<ConversationInput>;
   readonly compiler: CompletePromptCompiler<ConversationInput>;
+  readonly eventBrowse?: IsolatedEventBrowseInput;
 }) {
   const environment = requireControlledEmulatorEnvironment(options.environment);
   requireProof(environment.projectId === "demo-enmori-rmvp01a-r10" && options.exclusiveEmulatorsVerified === true);
@@ -61,6 +64,8 @@ export async function createControlledPhoneService(options: {
     calls++;
     try { return await work(); } finally { calls--; }
   }
+  const eventBrowse = createControlledEventBrowse({ ...(options.eventBrowse ? { source: options.eventBrowse.source } : {}),
+    running: () => phase === "running", track: tracked });
   const rawGateway = new FirebaseAdminFirestoreGateway(db);
   const gateway: FirestoreGateway = { runTransaction: (work, transactionOptions) => {
     if (phase !== "running") return Promise.reject(unavailable());
@@ -85,6 +90,7 @@ export async function createControlledPhoneService(options: {
     return { phase, accepting: phase === "running", maintenanceHealthy, retirementConfirmed: !retirementFailed,
       modelAttempts, modelPending, compilerPending, activeCalls: calls, nonTerminal: state?.nonTerminal ?? 0,
       quarantined: state?.quarantined ?? false, admission: state?.admission ?? "stopped",
+      eventBrowse: eventBrowse.observation(),
       databaseLifetime: "owned-emulator-process" as const };
   }
   const quiet = () => calls === 0 && compilerPending === 0 && modelPending === 0 && !retirementFailed &&
@@ -93,6 +99,7 @@ export async function createControlledPhoneService(options: {
   async function stop() {
     if (phase === "closed") return { cleanupConfirmed: true, operatorHold: false };
     phase = "stopping"; // Synchronous gate before any awaited operation.
+    eventBrowse.disable();
     await joined?.stopAdmissionAndMaintenance();
     // Do not terminate the process, replace the epoch, erase a write, or release
     // the model lane because the Application is terminal or a timeout elapsed.
@@ -218,10 +225,12 @@ export async function createControlledPhoneService(options: {
       createCheckIn: unavailableOperation, getCheckIn: unavailableOperation, getInterestTags: unavailableOperation,
       getOwnInterests: unavailableOperation, replaceOwnInterests: unavailableOperation,
       isolatedSlices: { environment: { ...options.environment }, conversations,
+        eventBrowse: { source: eventBrowse.source, ...(options.eventBrowse?.now ? { now: options.eventBrowse.now } : {}) },
         personas: new OwnPersonas(new FirestorePersonaRepository(gateway, { now: () => ok(new Date()) })) },
     });
     phase = "running";
     return { app, observation, stopAndClean,
+      eventBrowseControl: { enable: eventBrowse.enable, disable: eventBrowse.disable, observation: eventBrowse.observation },
       /** Private in-process handoff only. Never log, publish, or embed in APK. */
       privateHandoff: () => { requireProof(phase === "running"); return { projectId: environment.projectId, email, password }; },
     };
