@@ -15,6 +15,7 @@ import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/event_browse/data/backend_activity_repository.dart';
 import 'package:enmori/features/event_browse/domain/activity_repository.dart';
 import 'package:enmori/features/event_browse/event_browse_providers.dart';
+import 'package:enmori/features/event_browse/presentation/activity_controller.dart';
 import 'package:enmori/features/event_recommendations/event_recommendations_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -153,8 +154,10 @@ void main() {
 
       await _tap(tester, find.byKey(const Key('home-browse-activities')));
       expect(calls.map((r) => r.url.path), ['/v1/event-browse']);
+      await _readReady(tester, container, '', batch: true);
       expect(find.textContaining('not the full catalogue'), findsOneWidget);
       await _tap(tester, find.text(title));
+      await _readReady(tester, container, id, batch: false);
       expect(find.text('Activity details'), findsOneWidget);
       expect(find.text('End time unavailable.'), findsOneWidget);
       expect(find.text('Location unavailable.'), findsOneWidget);
@@ -186,6 +189,7 @@ void main() {
       expect(find.text('Going'), findsNothing);
       expect(find.textContaining('registered'), findsNothing);
       await _tap(tester, find.text('Reload'));
+      await _readReady(tester, container, id, batch: false);
       expect(calls.length, 3);
       expect(find.text(title), findsOneWidget);
       container.read(appRouterProvider).pop();
@@ -195,6 +199,7 @@ void main() {
       expect(find.text('Reload activities to continue.'), findsOneWidget);
       expect(calls.length, 3);
       await _tap(tester, find.text('Reload'));
+      await _readReady(tester, container, '', batch: true);
       expect(calls.length, 4);
       expect(find.text(title), findsOneWidget);
       expect(calls.map((r) => r.url.path), [
@@ -254,6 +259,33 @@ final class _Lifecycle with WidgetsBindingObserver {
       if (!background.isCompleted) background.complete();
     } else if (background.isCompleted && !returned.isCompleted) {
       returned.complete();
+    }
+  }
+}
+
+Future<void> _readReady(
+  WidgetTester tester,
+  ProviderContainer container,
+  String id, {
+  required bool batch,
+}) async {
+  final deadline = DateTime.now().add(const Duration(seconds: 15));
+  while (true) {
+    await tester.pump(const Duration(milliseconds: 100));
+    final state = container.read(activityControllerProvider(id));
+    if (batch ? state.value is ActivityBatch : state.value is ActivityDetail)
+      return;
+    if (state.hasError || DateTime.now().isAfter(deadline)) {
+      debugPrint(
+        'ENMORI_ACTIVITY_STAGE read_not_ready_${state.hasError
+            ? 'error'
+            : state.isLoading
+            ? 'loading'
+            : 'cleared'}',
+      );
+      throw TestFailure(
+        'Activity read did not produce its expected synthetic projection.',
+      );
     }
   }
 }
