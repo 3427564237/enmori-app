@@ -250,7 +250,7 @@ Future<void> _until(
 }
 
 Future<void> _visible(WidgetTester tester, String key) =>
-    _until(tester, () => find.byKey(Key(key)).evaluate().isNotEmpty);
+    _until(tester, () => find.byKey(Key(key)).evaluate().length == 1);
 
 Future<void> _tap(WidgetTester tester, String key) async {
   // Real-device keyboard insets can keep ensureVisible's target outside the
@@ -261,7 +261,10 @@ Future<void> _tap(WidgetTester tester, String key) async {
   final target = find.byKey(Key(key));
   await tester.ensureVisible(target);
   await _until(tester, () {
-    if (target.hitTestable().evaluate().isEmpty) return false;
+    if (target.evaluate().length != 1 ||
+        target.hitTestable().evaluate().isEmpty) {
+      return false;
+    }
     final route = ModalRoute.of(tester.element(target));
     return route?.animation?.isCompleted ?? true;
   });
