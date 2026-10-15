@@ -1,3 +1,5 @@
+import { createIsolatedEventBrowse, type IsolatedEventBrowseInput } from "./isolated-event-browse.js";
+import { registerEventBrowseRoutes } from "../event-browse/transport/register-routes.js";
 import { registerIsolatedSlices } from "../transport/register-isolated-slices.js";
 import { registerConversationRoutes } from "../ai-conversation/transport/register-routes.js";
 import type { ConversationOperations } from "../ai-conversation/ports/conversation-operations.js";
@@ -25,7 +27,7 @@ import {
 export async function buildApp(
   dependencies: R4RouteDependencies & { readonly recommendEvents?: Pick<RecommendEvents, "execute">;
     readonly accountPreferences?: OwnAccountPreferences;
-    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly conversations?: ConversationOperations } },
+    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput } },
 ): Promise<FastifyInstance> {
   if (dependencies.isolatedSlices !== undefined) {
     requireControlledEmulatorEnvironment(dependencies.isolatedSlices.environment);
@@ -58,6 +60,10 @@ export async function buildApp(
     await registerIsolatedSlices(app, dependencies.identityVerifier, dependencies.isolatedSlices.friends, dependencies.isolatedSlices.eventDetail, dependencies.isolatedSlices.checkInHistory);
     if (dependencies.isolatedSlices.personas !== undefined) {
       await registerPersonaRoutes(app, dependencies.identityVerifier, dependencies.isolatedSlices.personas);
+    }
+    if (dependencies.isolatedSlices.eventBrowse !== undefined) {
+      await registerEventBrowseRoutes(app, dependencies.identityVerifier,
+        createIsolatedEventBrowse(dependencies.getOnboarding, dependencies.isolatedSlices.eventBrowse));
     }
     if (dependencies.isolatedSlices.conversations !== undefined) {
       await registerConversationRoutes(app, dependencies.identityVerifier, dependencies.isolatedSlices.conversations);
