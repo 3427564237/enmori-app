@@ -159,3 +159,35 @@ test("normative Event success schemas, error status union and cache headers matc
     }
   }
 });
+
+test("shared router accepts the approved 174-character occurrence locator without truncation", async () => {
+  const f = fixture(), id = browseId("x".repeat(128))!; assert.equal(id.length, 174);
+  let received: string | undefined;
+  const app = await buildApp({ ...f.dependencies, isolatedSlices: { environment, eventBrowse: {
+    source: { ...f.source, async detail(value) { received = value; return { ...item, browseId: value }; } },
+  } } });
+  try {
+    const r = await app.inject({ url: `/v1/event-browse/${id}`, headers });
+    assert.equal(r.statusCode, 200); assert.equal(received, id); assert.equal(r.json().browseId, id);
+    assert.equal(r.headers["cache-control"], "no-store");
+  } finally { await app.close(); }
+});
+
+test("framework-rejected Event locators preserve identity/account ordering, safe errors and unrelated routes", async () => {
+  const f = fixture(), app = await f.app(), ordinary = await buildApp(f.dependencies);
+  try {
+    for (const raw of ["%ZZ", "%FF", "tm_" + "x".repeat(172)]) {
+      for (const [token, status, code] of [[undefined, 401, "AUTH_REQUIRED"], ["disabled", 403, "AUTH_FORBIDDEN"],
+        ["newcomer", 409, "ONBOARDING_REQUIRED"], ["owner", 404, "EVENT_UNAVAILABLE"]] as const) {
+        const r = await app.inject({ url: `/v1/event-browse/${raw}`, ...(token === undefined ? {} : { headers: { authorization: `Bearer ${token}` } }) });
+        assert.equal(r.statusCode, status); assert.equal(r.json().error.code, code); assert.equal(r.headers["cache-control"], "no-store");
+        assert.equal(r.body.includes(raw), false);
+      }
+    }
+    assert.equal(f.calls(), 0);
+    for (const url of ["/other/%ZZ", "/v1/me/personas/%ZZ"]) {
+      const [a, b] = await Promise.all([app.inject({ url }), ordinary.inject({ url })]);
+      assert.equal(a.statusCode, b.statusCode); assert.deepEqual(a.json(), b.json());
+    }
+  } finally { await app.close(); await ordinary.close(); }
+});

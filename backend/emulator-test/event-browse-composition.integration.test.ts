@@ -114,3 +114,15 @@ test("actual authority plus source failure yields sanitized no-store 503, not fa
     assert.equal(r.body.includes("private-provider"), false);
   } finally { failSource = false; }
 });
+
+test("actual Auth and Account protect framework-rejected locators before any source access", async () => {
+  const beforeCalls = calls;
+  for (const raw of ["%ZZ", "tm_" + "x".repeat(172)]) {
+    for (const [token, expected] of [[undefined, 401], [newcomerToken, 409], [ownerToken, 404]] as const) {
+      const r = await app!.inject({ url: `/v1/event-browse/${raw}`, ...(token === undefined ? {} : { headers: { authorization: `Bearer ${token}` } }) });
+      assert.equal(r.statusCode, expected); assert.equal(r.headers["cache-control"], "no-store");
+      assert.equal(typeof r.json().error.code, "string"); assert.equal(r.body.includes(raw), false);
+    }
+  }
+  assert.equal(calls, beforeCalls);
+});

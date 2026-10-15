@@ -28,7 +28,7 @@ function isAddressedPersonaRequest(request: FastifyRequest): boolean {
 }
 
 /** Preserve the pinned Fastify framework response for unrelated routes. */
-function sendDefaultFrameworkFailure(error: FastifyError, reply: FastifyReply): void {
+export function sendDefaultFrameworkFailure(error: FastifyError, reply: FastifyReply): void {
   const pathFailure = error.code === "FST_ERR_BAD_URL" || error.code === "FST_ERR_MAX_PARAM_LENGTH";
   const statusCode = error.code === "FST_ERR_MAX_PARAM_LENGTH" ? 414 : pathFailure ? 400 : 500;
   reply.code(statusCode).send({
