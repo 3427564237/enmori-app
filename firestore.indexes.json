@@ -4,9 +4,54 @@
       "collectionGroup": "check_ins",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "ownerAccountId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" },
-        { "fieldPath": "__name__", "order": "DESCENDING" }
+        {
+          "fieldPath": "ownerAccountId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "check_ins",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ownerAccountId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "ai_operation_fences",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ownerAccountId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "conversationId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
       ]
     }
   ],
@@ -15,6 +60,51 @@
       "collectionGroup": "accounts",
       "fieldPath": "purposeRevocationGeneration",
       "indexes": []
+    },
+    {
+      "collectionGroup": "conversations",
+      "indexes": [],
+      "fieldPath": "*"
+    },
+    {
+      "collectionGroup": "message_sources",
+      "indexes": [],
+      "fieldPath": "*"
+    },
+    {
+      "collectionGroup": "effects",
+      "indexes": [],
+      "fieldPath": "*"
+    },
+    {
+      "collectionGroup": "ai_runtime_fence",
+      "indexes": [],
+      "fieldPath": "*"
+    },
+    {
+      "collectionGroup": "ai_cleanup_progress",
+      "indexes": [],
+      "fieldPath": "*"
+    },
+    {
+      "collectionGroup": "messages",
+      "indexes": [],
+      "fieldPath": "*"
+    },
+    {
+      "collectionGroup": "ai_operation_fences",
+      "indexes": [],
+      "fieldPath": "*"
+    },
+    {
+      "collectionGroup": "messages",
+      "indexes": [
+        {
+          "queryScope": "COLLECTION",
+          "order": "DESCENDING"
+        }
+      ],
+      "fieldPath": "sequence"
     }
   ]
 }

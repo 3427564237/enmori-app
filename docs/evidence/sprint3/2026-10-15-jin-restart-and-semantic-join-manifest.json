@@ -1,0 +1,314 @@
+{
+  "publicationProduct": {
+    "publicationProduct": "f83005108517330370876c76ebee208051682570",
+    "tree": "e1eb09e1afe5a0cd1fc637a4268572fd61d3044a",
+    "sameTreeAsLocalTestReference": "c7065899d496d0e932a53777fe7e13db95591268",
+    "parent": "4ac29ad25a30a33ef548a9a84b7ba234387d6312",
+    "acceptedInput": "c1060448e53034a297c9f5da536c991ca900505a",
+    "reason": "Preserve stacked #108 Draft/Open; no second-parent ancestry pushed",
+    "unpublishedLocalMerge": "d169f10703d92c54b90b838216f8413191213365",
+    "acceptedInputPathsUnchanged": [
+      "backend/emulator-test/zhou-persona-conversation-join.integration.test.ts",
+      "backend/src/ai-conversation/application/bounded-conversation-semantic-policy.ts",
+      "backend/test/bounded-conversation-semantic-policy.test.ts",
+      "backend/test/support/bounded-conversation-semantic-corpus.ts",
+      "backend/test/zhou-controlled-chat-packet.test.ts",
+      "backend/test/zhou-controlled-chat-packet.ts",
+      "docs/evidence/sprint3/2026-10-14-zhou-controlled-chat-packet.md",
+      "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment.md",
+      "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/backend-first.log",
+      "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/backend-full.log",
+      "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/emulator-first.log",
+      "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/emulator-full.log",
+      "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/flutter-analyze.log",
+      "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/flutter-full.log",
+      "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/inputs.json",
+      "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/run-manifest.json",
+      "lib/harness/ai_conversation/ai_network_harness_app.dart",
+      "test/harness/ai_network_persona_harness_test.dart"
+    ]
+  },
+  "reviewBase": "71dfa60266bebd5f38dfef97d020214e5e5b7703",
+  "owner": "JIN",
+  "recordedAtSGT": "2026-10-15T09:46:25.079015+08:00",
+  "workingBindingsChecked": 494,
+  "workingBindingInventorySha256": "f8b707e061e3d7086ddefee9220b61c297872f610f5bed0505c1a6a815011ca9",
+  "changedExecutableBindings": [
+    {
+      "path": "backend/emulator-test/real-conversation-maintenance.integration.test.ts",
+      "mode": "100644",
+      "gitBlob": "aa0c58be8bb9cc48fc9cd35bdace9a6741227d94",
+      "workingSha256": "6f7c4247eb22109ce4040bfc59717e22bc987dbd5ad51ea09115af968d255232",
+      "workingBinding": "CRLF-equivalent"
+    },
+    {
+      "path": "backend/emulator-test/zhou-persona-conversation-join.integration.test.ts",
+      "mode": "100644",
+      "gitBlob": "904f5461e8065751c632bc0cf7f7805f31b562eb",
+      "workingSha256": "88d4ad75738f91cdbb0faf1f33f20df6e27bc0405231f1c9b80de66537ce3268",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/bounded-conversation-semantic-policy.ts",
+      "mode": "100644",
+      "gitBlob": "0a1227564d28d362a3e7bad043b34bfa0f70b0ce",
+      "workingSha256": "3a9365f2f60af0034099029a8ef353a279814473a36bc054b9bfc39877638005",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-store.ts",
+      "mode": "100644",
+      "gitBlob": "b22bc354d75d2086441d43198704c3ffe90b4b6e",
+      "workingSha256": "67f603675971476f7c2e7a29e261d9abd177a78b5064fbbe7d08aa22787e45c0",
+      "workingBinding": "CRLF-equivalent"
+    },
+    {
+      "path": "backend/src/ai-runtime/infrastructure/controlled-conversation-prompt.ts",
+      "mode": "100644",
+      "gitBlob": "aaf738c435a11b124d1b7f4788ed7cbff52ab798",
+      "workingSha256": "8375725a509a523d28c3f8a9e706fec0b396b8027f85ff52caf27eb18e19b545",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "backend/src/bootstrap/isolated-conversation-composition.ts",
+      "mode": "100644",
+      "gitBlob": "7755f837b125d66ca511d065520599893733e8cf",
+      "workingSha256": "17aa1c553a6b292950e4211a2c3bf757c032724aa41948edb7f6239b8229d447",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "backend/test/ai-runtime/controlled-ollama-runtime.test.ts",
+      "mode": "100644",
+      "gitBlob": "1ce7c94d51fba3ef26fa98e024626e48c86eb59a",
+      "workingSha256": "582dac00e68cdad8e0fc1213bcb792c84ad44b15eb1a2e2aa9e56b1733fcf83f",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "backend/test/bounded-conversation-semantic-policy.test.ts",
+      "mode": "100644",
+      "gitBlob": "4783de3a396d39b431af300f26e8994e06d5f600",
+      "workingSha256": "fb8d8ec082056b95258c0ebaddbcb53fa517e59fb0ed7119f6c9cdefe71c178a",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "backend/test/support/bounded-conversation-semantic-corpus.ts",
+      "mode": "100644",
+      "gitBlob": "fa274e14f7f267c406a50fb0271326cd19726975",
+      "workingSha256": "a78c426f4469afb939f9de50ab7b9b5472f12bcca7158c613e2540544e0705a2",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "backend/test/zhou-controlled-chat-packet.test.ts",
+      "mode": "100644",
+      "gitBlob": "80f185b60848019c02307a81c42852f8b5738639",
+      "workingSha256": "aabdb7df584e9e504b3bd2b4335871504af32644f89e1c73cbfdf21499773d1f",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "backend/test/zhou-controlled-chat-packet.ts",
+      "mode": "100644",
+      "gitBlob": "6e6c8eb9c8b62d941fe246eeb6ad31a606e285e9",
+      "workingSha256": "1fbabcbf627dd840d9bd5ef50764cfb210c9e6b5f7ff497f5f92dce32930179a",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "lib/harness/ai_conversation/ai_network_harness_app.dart",
+      "mode": "100644",
+      "gitBlob": "aa3976b66da6baac7e6d1ea136c6451b45960dd3",
+      "workingSha256": "c15d2a5b06895f0339c11eee7512b6e8e546d9803f07527a79aba82d63298623",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "test/harness/ai_network_persona_harness_test.dart",
+      "mode": "100644",
+      "gitBlob": "4c54f969a6ee23a5f17ba67c09ea46ee9c6c8231",
+      "workingSha256": "45b57cb53a1d84a8005f29675364daa6d58f9a5ad8e9c6edc249e54c4a2d353f",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "tool/controlled_qwen_followup.mjs",
+      "mode": "100644",
+      "gitBlob": "8ef718748de05d67cf9802ac4dc01a2705d4d59c",
+      "workingSha256": "6192f8093cdebc4e8f87fdf9d990f216e6d911c1c429cc3fd9521bfba393edee",
+      "workingBinding": "exact"
+    },
+    {
+      "path": "tool/controlled_qwen_followup.test.mjs",
+      "mode": "100644",
+      "gitBlob": "495b8c347f09e5cf1e2d889fd26390749b2f9a83",
+      "workingSha256": "7343b06967d532b7d5c9b82c06ba896335920ae097f81118bff09df536727bce",
+      "workingBinding": "exact"
+    }
+  ],
+  "protected": {
+    "protectedRoots": [
+      "api",
+      "package.json",
+      "pnpm-lock.yaml",
+      "pubspec.yaml",
+      "pubspec.lock",
+      "firestore.indexes.json",
+      "firebase.json",
+      "lib/app",
+      "lib/features/auth"
+    ],
+    "identicalGitInventorySha256": "c97acffd7b4ce7e855c4a64b89f878b74ce8bcd7a040c4af0794eeaafbbf43f8",
+    "operations": 33,
+    "schemas": 45
+  },
+  "logs": [
+    {
+      "localFile": "r1-red-build01.log",
+      "exit": 0,
+      "result": "Strict build before correction",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "localFile": "r1-red-emulator01.log",
+      "exit": 1,
+      "result": "18/20; two original R1 reproductions fail",
+      "bytes": 7354,
+      "sha256": "f191bedbd3045cffe66c100639bece70d648c40b9f8f2857012671d974db34f9"
+    },
+    {
+      "localFile": "r1-fixed-build01.log",
+      "exit": 0,
+      "result": "Strict build4ac29ad",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "localFile": "r1-fixed-emulator01.log",
+      "exit": 1,
+      "result": "22/25; ambiguous-bucket test error and two obsolete-epoch fixture failures",
+      "bytes": 9019,
+      "sha256": "581f5d756889295f8bcd3e9ccec4b8a065fb7d67741863c47aa8412290ce5815"
+    },
+    {
+      "localFile": "join108-build01.log",
+      "exit": 0,
+      "result": "Strict combined-source build",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "localFile": "r1-fixed-emulator02.log",
+      "exit": 0,
+      "result": "25/25; overlaps full SDK",
+      "bytes": 5133,
+      "sha256": "b736e31c05d10bb7e132149a200586ea590076aef0cc39c961b4c568d68fd770"
+    },
+    {
+      "localFile": "join108-backend01.log",
+      "exit": 0,
+      "result": "882/882",
+      "bytes": 82573,
+      "sha256": "bada9622115ce67e50853d60ea3b52781152b0945d8fbb687d2b6ec81194a32a"
+    },
+    {
+      "localFile": "join108-emulator01.log",
+      "exit": 0,
+      "result": "139/139",
+      "bytes": 20247,
+      "sha256": "7d8092ac823d16f8e037c759f579114cc0ab5f7a61574c4569d7cc8cada92531"
+    },
+    {
+      "localFile": "join108-flutter01.log",
+      "exit": 0,
+      "result": "546/546 default concurrency",
+      "bytes": 144196,
+      "sha256": "f0d032cc6466407b32982f2c942bd452e95c56aad5fa9683c663f6ea13303dcb"
+    },
+    {
+      "localFile": "join108-analysis01.log",
+      "exit": 0,
+      "result": "No issues, fatal infos",
+      "bytes": 60,
+      "sha256": "9a9d35ce9d6fac973a72f078461e18cde1f1c7f2ae7fa7a5916ae87adef4b99a"
+    },
+    {
+      "localFile": "join108-format01.log",
+      "exit": 0,
+      "result": "2 files,0 changed",
+      "bytes": 48,
+      "sha256": "b71f47074172960495cc3f424adde3fc64c47734057a40fa3441af669f698c7f"
+    },
+    {
+      "localFile": "join108-host-tool01.log",
+      "exit": 0,
+      "result": "7/7; fake HTTP/counter",
+      "bytes": 853,
+      "sha256": "0ac681e45f6e6f8265eab0ac3a8dc8347e8cc843641a4cdf08520e71fba7515e"
+    },
+    {
+      "localFile": "join108-host-negative01.log",
+      "exit": 1,
+      "result": "Expected missing private config rejection, no host contact",
+      "bytes": 81,
+      "sha256": "d29d5f8a9add633996b6141ae15ddafcc8a6d271b02184f4975197ca4496b9cc"
+    },
+    {
+      "localFile": "new-whitespace.log",
+      "exit": 2,
+      "result": "Three inherited #108 raw-log padding findings",
+      "bytes": 383,
+      "sha256": "735e221983bb333a76afc2526375b2e397b291ab10cb65ceba715fa3a4c0c247"
+    },
+    {
+      "localFile": "whole-whitespace.log",
+      "exit": 2,
+      "result": "Inherited full PR raw-log padding",
+      "bytes": 1039,
+      "sha256": "f598600df1339e359df2e7b2ef232c1c0a2575cef3a4fb2e2da48c9d3727b965"
+    },
+    {
+      "localFile": "source-whitespace.log",
+      "exit": 0,
+      "result": "Executable/API new delta clean",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "redRegressionTestSnapshotSha256": "14935a2eb555cff2d8d4f45b3cb31eaabc9e92a48078bd6e5003e4ff4c9c3d78",
+  "sourceAttributions": {
+    "red": "f57e88a product plus two new tests, snapshot fingerprint above",
+    "firstFixed": "4ac29ad compiled before #108 integration",
+    "current": "c7065899 complete tree equals publicationProduct; no input or compiled source was changed during suites",
+    "accepted108": "18 path/blob copies unchanged; ancestry intentionally not pushed to its base branch"
+  },
+  "actualSdk": {
+    "tests": 139,
+    "focusedOverlapping": 25,
+    "gatewayBindingObserver": true,
+    "profilesRemoved": 2,
+    "requiredPortsFreed": [
+      8080,
+      9099,
+      4400,
+      4500,
+      9150
+    ],
+    "ordinaryCloudFallback": false,
+    "model": "synthetic",
+    "notes": "owned empty or explicitly unauthorized fixtures; not operational producer authority"
+  },
+  "realHost": {
+    "JinNewSource": "Not Run",
+    "toolModes": [
+      "semantic-once",
+      "complete-inputs",
+      "cancel-once"
+    ],
+    "policy": "bounded_routine_summary_v1 unchanged from LI-approved #108",
+    "oldLiRun": "one rejected real reply185tokens/3032ms, attribution retained; no raw reply or retrospective cause",
+    "nativeRenderEquivalence": "Not Proven"
+  },
+  "reviews": {
+    "SHI": "R1 correction and new source Pending",
+    "LI": "new evidence disposition and host run Pending"
+  },
+  "privateLogsCredentialsModelIdentitiesPublished": false,
+  "rootCheckout": "unchanged bae777d / codex/issue-84-isolated-integration",
+  "statusChanges": "none; Draft/Open/main/Issue/Project preserved"
+}

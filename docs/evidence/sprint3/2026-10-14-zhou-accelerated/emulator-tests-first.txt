@@ -1,0 +1,107 @@
+ZHOU_VERIFICATION {"cachedJarChecksumVerified":true,"initialPortsFree":true,"credentialProfileIsolated":true}
+[36m[1mi  emulators:[22m[39m Starting emulators: auth, firestore
+[36m[1mi  emulators:[22m[39m Detected demo project ID "demo-enmori-rmvp01a-r10", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+[33m[1m!  firestore:[22m[39m Did not find a Cloud Firestore rules file specified in a firebase.json config file.
+[33m[1m!  firestore:[22m[39m The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration.
+[36m[1mi  firestore:[22m[39m downloading cloud-firestore-emulator-v1.22.0.jar...
+
+[36m[1mi  firestore:[22m[39m Firestore Emulator logging to [1mfirestore-debug.log[22m
+[32m[1m+  firestore:[22m[39m Firestore Emulator was started in standard edition.
+[32m[1m+  firestore:[22m[39m Firestore Emulator UI websocket is running on 9150.
+[36m[1mi [22m[39m Running script: [1mnode backend/scripts/run-emulator-tests.mjs[22m
+✔ real transaction races commit once, preserve independent resources and isolate another Account (7235.3558ms)
+✔ AI context Emulator: minimal preaccept denial and omitted source prerequisites submit no Note query (392.1623ms)
+✔ AI context Emulator: fixed asOf survives acknowledged cross-document mutations and page25 keyset (274.9154ms)
+✔ AI context Emulator: Prepared reader projects only complete legal first-five Notes and original Persona (312.5924ms)
+✔ AI context Emulator: current permits edit/switch/visibility, detects permanent used-source/Persona deletion (339.1473ms)
+✔ AI context Emulator: unavailable future readTime has no latest fallback or content query (7298.2173ms)
+✔ AI context Emulator: original token is reverified after user disable, before any DB content read (46.326ms)
+✔ Emulator concurrent same/opposite sends produce one pending and one inbox reference (3681.1365ms)
+✔ Emulator accept/decline race has one winner and stale references cannot consume replacement (3286.2059ms)
+✔ Emulator block/accept race preserves the committed transition boundary (558.8448ms)
+✔ Emulator delete/accept race preserves the committed transition boundary (561.9682ms)
+✔ Emulator My Friends acceptance atomically creates both pointers, fresh privacy and eligibility apply on each page (1596.7649ms)
+✔ Emulator failed transaction commits neither acceptance nor either pointer (591.5559ms)
+✔ Emulator racing Profile visibility and requester eligibility changes are reread on a fresh list (918.9861ms)
+{"case":"my-friends-read-bound","transactionAttempts":2,"readsPerAttempt":[106,106],"retry":"injected-ABORTED"}
+✔ Emulator My Friends ordering and 106-read ceiling hold per SDK transaction attempt including retry (4723.9331ms)
+✔ Emulator exact expiry and temporarily unavailable recipient never create false friendship (900.6007ms)
+✔ Emulator authenticated Friend HTTP chain protects identity and supports accept/re-read (808.7056ms)
+✔ Emulator Check-in snapshots Settings in the same transaction and retains old/replayed/legacy values (984.0068ms)
+✔ Emulator overlapping Settings/save takes one consistent value, leaves each old snapshot stable (154.8248ms)
+✔ Emulator Detail uses isolated separate records, rejects expired/unsafe data and no recommendation mutation (299.9932ms)
+✔ combined isolated app retains all three reads, Persona persistence and owner isolation (1123.5686ms)
+✔ test mode uses loopback-only Auth and Firestore demo resources (21.1352ms)
+✔ fixture reset clears Auth and Firestore Emulator state (130.8147ms)
+{"audit":"S3-04-history-createdAt-compatibility","dataset":"S3-04-history-audit-2026-10-08","scope":"demo-enmori-rmvp01a-r10 isolated Auth/Firestore Emulator only","counts":{"total":5,"string":5,"canonicalFixedMillisecondUtc":5,"otherStringFormat":0,"nonString":0,"years":{"2026":5}},"pages":3,"pageSize":2,"coverage":"5/5","passed":true}
+✔ S3-04 history audit 2026-10-08 covers the complete synthetic Check-in dataset (73.0448ms)
+✔ History API pages the isolated synthetic owner data through Auth and Firestore Emulator (388.9637ms)
+✔ Auth Emulator verifies ordinary and Admin-claimed principals without promoting claims (61.9671ms)
+✔ Auth Emulator fails closed for malformed, expired, disabled and revoked identity (1178.1841ms)
+✔ Firestore Emulator atomically persists only the approved onboarding records (123.7629ms)
+✔ Firestore Emulator preserves atomic exact retry under concurrent onboarding (3157.9739ms)
+✔ Firestore Emulator creates and privately reads the approved Check-in record (526.424ms)
+✔ Firestore Emulator saves and later reads an account-isolated Interest selection (434.1345ms)
+✔ Firestore Emulator prevents two stale-revision updates from overwriting (3384.419ms)
+✔ Firestore Emulator enforces Inactive assignment against current persisted state (372.5694ms)
+✔ Firestore Emulator serializes a concurrent Tag deactivation and new assignment (217.2446ms)
+✔ PC01 actual Firebase identity rejects absent, malformed, expired, disabled and revoked sessions before Persona access (1406.2893ms)
+✔ PC01 current binding and completed Account are validated before any Persona get (460.0509ms)
+✔ PC01/PC04 real Admin claims and identical keys never cross owner partitions (468.5558ms)
+✔ PC02 authenticated invalid activation IDs and malformed values never reach Firestore (355.7526ms)
+✔ PC01/PC02 actual Auth precedes malformed Persona URL rejection without Firestore access (80.3394ms)
+✔ PC03 initialized empty set is distinct from missing, malformed, incomplete and orphaned state (1103.8677ms)
+✔ PC04/PC05 fifth creation replays before capacity; normalized conflict and different-key races cannot overwrite (4972.9082ms)
+✔ PC05 actual concurrent identical command commits once and same open command with changed input conflicts (3757.3917ms)
+✔ PC06 real pre-commit interruption is atomic and an identical retry creates at the original revision (252.2708ms)
+✔ PC06 real commit with lost completion replays unchanged; later mutation closes recovery (528.6886ms)
+✔ PC07 every subsequent effective owner mutation closes original creation without restoring deleted content (1322.5228ms)
+✔ PC07/PC09 valid same-value edit and already-Active confirmation preserve the latest create window (748.2761ms)
+✔ PC08 deleting Active clears without replacement, frees capacity and repeat-delete ignores stale supplied versions (1694.4162ms)
+✔ PC09 real competing edits commit once and stale target preconditions cannot bypass same-value checks (3973.2272ms)
+✔ PC03 actual concurrent reads remain coherent across create, edit, activation and deletion commits (446.1217ms)
+✔ PC10 owner and target overflow fail without partial writes while current reads and no-ops succeed (991.9391ms)
+✔ PC10 derived candidate orphan and full-ID collision checks precede stale and capacity outcomes (589.0341ms)
+✔ PC10 measured logical-get ceilings are eight/nine per actual SDK attempt, with retry accounting separate (1379.1576ms)
+✔ PC14 live persistence and permanent deletion retain only approved records and content-free owner state (391.0186ms)
+✔ actual Persona Emulator Port contract: PC03/04/08 complete set, duplicate names and inactive creation (584.0939ms)
+✔ actual Persona Emulator Port contract: PC04/05 fifth create replays before capacity and unequal fields conflict (1145.3272ms)
+✔ actual Persona Emulator Port contract: PC05/07/09 no-op preserves replay, effective edit and restored fields close it (963.5277ms)
+✔ actual Persona Emulator Port contract: PC07/08/09 activation no-op preserves replay, delete Active clears without replacement (1767.2393ms)
+✔ actual Persona Emulator Port contract: PC01/04 owner identity isolates the same key and foreign IDs (898.3374ms)
+✔ actual Persona Emulator Port contract: PC01/03 missing state is unavailable and is never initialized (432.6366ms)
+✔ actual Persona Emulator Port contract: PC03/10 corrupt live member and invalid Active fail closed (326.4213ms)
+Persona Emulator transaction counts {"transactionCalls":208,"transactionAttempts":216,"retriedCalls":8,"maximumGets":9,"collectionScans":0}; SDK retries are separate attempts, not a billing/runtime bound
+✔ actual Persona Emulator Port contract: PC10 overflow blocks effects but allows reads, no-ops and absent repeat deletion (1135.2848ms)
+✔ R13 accept create, exact retry, changed-Note conflict and later owner read (538.007ms)
+✔ R13 reject path preserves onboarding exact-retry and conflict semantics (245.9832ms)
+✔ R13 identity, validation, incomplete onboarding and privacy-safe negative paths fail closed (602.5437ms)
+✔ X-01 expired identity fails closed on a protected operation (49.4676ms)
+✔ S2-01 real Auth, Fastify and Firestore flow saves ten Interests and reads them later (916.1831ms)
+✔ R13-T12 cancellation aborts the client response and exact retry reconciles the authoritative result (763.5222ms)
+✔ real Auth/Firestore Emulator Port contract: persisted eligibility, exact future precision and complete order (332.8154ms)
+✔ real Auth/Firestore Emulator Port contract: missing own selection is successful empty (59.4031ms)
+✔ real Auth/Firestore Emulator Port contract: missing or invalid binding/account cannot read another selection (127.7386ms)
+✔ real Auth/Firestore Emulator Port contract: invalid own selection fails closed, not fabricated empty (79.0647ms)
+✔ real Auth/Firestore Emulator Port contract: new requests observe tag deactivation, restore and label rename (266.2455ms)
+✔ real Auth/Firestore Emulator Port contract: invalid server asOf fails closed (92.1025ms)
+✔ real Auth + persisted API returns Home/All and isolates own selection (420.1649ms)
+✔ real persisted API rereads inputs and recaptures independent asOf (294.5816ms)
+✔ real Event API missing/malformed/expired/disabled/revoked identity fails closed (1185.014ms)
+✔ approved initializer is create-only, atomic and race safe in the isolated Emulator (4924.2876ms)
+ℹ tests 77
+ℹ suites 0
+ℹ pass 77
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 93184.7949
+[32m[1m+ [22m[39m Script exited successfully (code 0)
+[36m[1mi  emulators:[22m[39m Shutting down emulators.
+[36m[1mi  firestore:[22m[39m Stopping Firestore Emulator
+[33m[1m! [22m[39m Firestore Emulator has exited upon receiving signal: SIGINT
+[36m[1mi  auth:[22m[39m Stopping Authentication Emulator
+[36m[1mi  hub:[22m[39m Stopping emulator hub
+[36m[1mi  logging:[22m[39m Stopping Logging Emulator
+ZHOU_VERIFICATION {"ownProfileRemoved":true}

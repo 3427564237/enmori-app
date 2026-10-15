@@ -1,0 +1,177 @@
+00:00 +0: loading C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_controller_test.dart
+00:00 +0: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_controller_test.dart: ordinary composition disables AI without a transport
+00:00 +1: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +2: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +3: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +4: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +5: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +6: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +7: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +8: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +9: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +10: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +11: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +12: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +13: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +14: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +15: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +16: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +17: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +18: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +19: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +20: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +21: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +22: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +23: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +24: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +25: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +26: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +27: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +28: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +29: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +30: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +31: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +32: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +33: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +34: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +35: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +36: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +37: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +38: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +39: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +40: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +41: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +42: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +43: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +44: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +45: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +46: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +47: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +48: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +49: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +50: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +51: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +52: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +53: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +54: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +55: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +56: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +57: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +58: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +59: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +60: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +61: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +62: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +63: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +64: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +65: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +66: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +67: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +68: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +69: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +70: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +71: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +72: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +73: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +74: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +75: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +76: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +77: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +78: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +79: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +80: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +81: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +82: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +83: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +84: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +85: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +86: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +87: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +88: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +89: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +90: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +91: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +92: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +93: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +94: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +95: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +96: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +97: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +98: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +99: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +100: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +101: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +102: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +103: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +104: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +105: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +106: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +107: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +108: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:00 +109: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +110: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +111: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +112: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +113: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +114: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +115: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +116: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +117: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +118: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +119: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +120: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +121: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +122: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +123: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +124: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +125: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +126: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +127: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +128: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +129: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +130: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +131: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +132: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Send needs input and Cancel dispatches synchronously
+00:01 +133: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_conversation_harness_test.dart: standalone harness mounts real page/wire mapping with visible synthetic boundary
+00:01 +134: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_conversation_harness_test.dart: standalone harness mounts real page/wire mapping with visible synthetic boundary
+00:01 +135: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_conversation_harness_test.dart: standalone harness mounts real page/wire mapping with visible synthetic boundary
+00:01 +136: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_conversation_harness_test.dart: standalone harness mounts real page/wire mapping with visible synthetic boundary
+00:01 +137: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_conversation_harness_test.dart: standalone harness mounts real page/wire mapping with visible synthetic boundary
+00:01 +138: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_conversation_harness_test.dart: standalone harness mounts real page/wire mapping with visible synthetic boundary
+00:02 +139: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:02 +140: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:02 +141: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:02 +142: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:02 +143: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:02 +144: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:02 +145: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:02 +146: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:02 +147: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:02 +148: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only
+00:03 +149: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Persona return keeps private input empty and never resends
+00:03 +150: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: draft guard prevents navigation until explicit discard
+00:03 +151: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: draft guard prevents navigation until explicit discard
+00:03 +152: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: system Back uses the same in-progress confirmation
+00:03 +153: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: Persona detour cancels only the active attempt and never resumes it
+00:03 +154: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: Persona detour cancels only the active attempt and never resumes it
+00:03 +155: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: Persona detour cancels only the active attempt and never resumes it
+00:03 +156: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: Persona detour cancels only the active attempt and never resumes it
+00:03 +157: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: Persona detour cancels only the active attempt and never resumes it
+00:03 +158: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: Persona detour cancels only the active attempt and never resumes it
+00:03 +159: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: busy displays non-content state without auto retry
+00:03 +160: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:03 +161: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:03 +162: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:03 +163: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:03 +164: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:03 +165: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:03 +166: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:03 +167: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:03 +168: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:03 +169: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/harness/ai_persona_harness_test.dart: same-UID replacement removes Persona editor draft and AI content
+00:03 +170: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: Delete requires confirmation, hides immediately and Check again only deletes
+00:03 +171: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: ordinary reads and outcome checks do not resend
+00:03 +172: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: R-A explains unknown and clears private display and draft before leaving
+00:03 +173: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: R-A exit stays reachable during a result read at 2x text on a small screen
+00:04 +174: C:/Users/ASUS/.codex/worktrees/zhou-ai-accelerated-1014/3851/test/features/ai_conversation/ai_conversation_page_test.dart: small screen at 2x text keeps labeled Cancel reachable at 48dp
+00:04 +175: All tests passed!

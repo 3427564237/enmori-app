@@ -1,0 +1,31 @@
+ZHOU_VERIFICATION {"cachedJarChecksumVerified":true,"initialPortsFree":true,"credentialProfileIsolated":true}
+[36m[1mi  emulators:[22m[39m Starting emulators: auth, firestore
+[36m[1mi  emulators:[22m[39m Detected demo project ID "demo-enmori-rmvp01a-r10", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+[33m[1m!  firestore:[22m[39m Did not find a Cloud Firestore rules file specified in a firebase.json config file.
+[33m[1m!  firestore:[22m[39m The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration.
+[36m[1mi  firestore:[22m[39m Firestore Emulator logging to [1mfirestore-debug.log[22m
+[32m[1m+  firestore:[22m[39m Firestore Emulator was started in standard edition.
+[32m[1m+  firestore:[22m[39m Firestore Emulator UI websocket is running on 9150.
+[36m[1mi [22m[39m Running script: [1mnode backend/dist/zhou-context-test-worker.mjs[22m
+✔ AI context Emulator: minimal preaccept denial and omitted source prerequisites submit no Note query (781.1732ms)
+✔ AI context Emulator: fixed asOf survives acknowledged cross-document mutations and page25 keyset (303.9633ms)
+✔ AI context Emulator: Prepared reader projects only complete legal first-five Notes and original Persona (306.5599ms)
+✔ AI context Emulator: current permits edit/switch/visibility, detects permanent used-source/Persona deletion (324.4241ms)
+✔ AI context Emulator: unavailable future readTime has no latest fallback or content query (7640.3164ms)
+✔ AI context Emulator: original token is reverified after user disable, before any DB content read (70.9961ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10024.9478
+[32m[1m+ [22m[39m Script exited successfully (code 0)
+[36m[1mi  emulators:[22m[39m Shutting down emulators.
+[36m[1mi  firestore:[22m[39m Stopping Firestore Emulator
+[33m[1m! [22m[39m Firestore Emulator has exited upon receiving signal: SIGINT
+[36m[1mi  auth:[22m[39m Stopping Authentication Emulator
+[36m[1mi  hub:[22m[39m Stopping emulator hub
+[36m[1mi  logging:[22m[39m Stopping Logging Emulator
+ZHOU_VERIFICATION {"ownProfileRemoved":true}
