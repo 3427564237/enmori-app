@@ -10,6 +10,7 @@ import subprocess
 import sys
 
 TARGETS = {
+    'demo': 'integration_test/controlled_demo_device_test.dart',
     'connected': 'integration_test/controlled_connected_device_test.dart',
     'activity': 'integration_test/activity_device_flow_test.dart',
     'offline': 'integration_test/offline_baseline_device_flow_test.dart',
