@@ -1,0 +1,19 @@
+import type {FastifyInstance} from "fastify";
+import type {IdentityVerifier} from "../../shared/ports/identity-verifier.js";
+import {buildAuthenticate,requirePrincipal} from "../../transport/authenticate.js";
+import {sendFailure,sendFailureCode} from "../../transport/error-response.js";
+import type {EventBrowse} from "../application/event-browse.js";
+import {browseBatchSchema,browseDetailSchema} from "./schemas.js";
+/** JIN registers this fragment at controlled composition; ordinary root untouched. */
+export async function registerEventBrowseRoutes(app:FastifyInstance,identity:IdentityVerifier,browse:EventBrowse):Promise<void>{
+  const auth=buildAuthenticate(identity);
+  for(const path of ["/v1/event-browse","/v1/event-browse/:browseId"]){
+    app.get<{Params:{browseId?:string}}>(path,{exposeHeadRoute:false,schema:{response:{200:path.endsWith(":browseId")?browseDetailSchema:browseBatchSchema}},onRequest:async(req,reply)=>{reply.header("Cache-Control","no-store");await auth(req,reply);},
+      errorHandler:(error,req,reply)=>sendFailureCode(req,reply,error.statusCode===400||error.statusCode===415?"REQUEST_INVALID":"SERVICE_UNAVAILABLE")},async(req,reply)=>{
+      if(Object.keys(req.query as object).length!==0||req.body!==undefined||Number(req.headers["content-length"]??0)!==0||req.headers["transfer-encoding"]!==undefined)return sendFailureCode(req,reply,"REQUEST_INVALID");
+      const abort=new AbortController();const gone=()=>{if(!reply.raw.writableEnded)abort.abort();};req.raw.once("aborted",gone);reply.raw.once("close",gone);
+      try{const r=await browse.read(requirePrincipal(req),req.params.browseId,abort.signal);if(abort.signal.aborted){reply.hijack();reply.raw.destroy();return reply;}return r.ok?reply.send(r.value):sendFailure(req,reply,r.failure);}
+      finally{req.raw.off("aborted",gone);reply.raw.off("close",gone);}
+    });
+  }
+}

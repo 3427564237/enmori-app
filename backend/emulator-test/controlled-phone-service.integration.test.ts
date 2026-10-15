@@ -10,6 +10,8 @@ import { requireControlledEmulatorEnvironment } from "../src/shared/infrastructu
 import type { ConversationInput } from "../src/ai-conversation/ports/conversation-lifecycle.js";
 import type { GenerationTransport } from "../src/ai-runtime/ports/generation-transport.js";
 import type { CompletePromptCompiler } from "../src/ai-runtime/infrastructure/controlled-ollama-transport.js";
+import { browseId } from "../src/event-browse/domain/browse-values.js";
+import { createAuthBindingDocumentId } from "../src/shared/infrastructure/firebase/firestore-records.js";
 
 const compiler: CompletePromptCompiler<ConversationInput> = { compile: async () => ({ rawPrompt: "explicit synthetic compiler double", tokens: 10,
   includesAllFraming: true, manifestDigest: "3".repeat(64), tokenizerDigest: "4".repeat(64) }) };
@@ -206,4 +208,90 @@ test("lost startup Auth acknowledgment preserves the actual created identity and
     if (createdUid) await auth.deleteUser(createdUid);
     await db.terminate(); await deleteApp(firebase);
   }
+});
+
+const eventRow = { browseId: browseId("ongoing-synthetic-occurrence")!, title: "Synthetic activity", startAt: "2026-10-16T10:00:00.000Z",
+  externalSourceUrl: "https://ticketmaster.sg/activity/synthetic" };
+const eventPaths = ["/v1/event-browse", `/v1/event-browse/${eventRow.browseId}`];
+
+test("ongoing service Event defaults unavailable; actual current Auth/Account precede source, read-only enable/disable preserves AI/Persona", async () => {
+  let calls = 0, fail = false, empty = false;
+  const service = await createControlledPhoneService({ ...options, eventBrowse: { now: () => new Date("2026-10-15T10:00:00Z"), source: {
+    firstBatch: async () => { calls++; if (fail) throw new Error("synthetic private source failure"); return empty ? [] : [eventRow]; },
+    detail: async () => { calls++; return eventRow; },
+  } } });
+  const env = requireControlledEmulatorEnvironment(process.env), firebase = initializeApp({ projectId: env.projectId }, randomUUID());
+  const db = getFirestore(firebase), auth = getAuth(firebase);
+  try {
+    const { email, password } = service.privateHandoff(), token = await signIn(email, password);
+    const user = await auth.getUserByEmail(email), account = (await db.collection("accounts").get()).docs[0]!;
+    const initial = account.data(), initialTime = account.updateTime;
+    const base = await service.app.listen({ host: "127.0.0.1", port: 0 });
+    async function read(path: string, status: number, bearer: string | undefined = token) {
+      const response = await fetch(`${base}${path}`, { redirect: "error", signal: AbortSignal.timeout(15_000),
+        headers: bearer === undefined ? {} : { authorization: `Bearer ${bearer}` } });
+      assert.equal(response.status, status); assert.equal(response.headers.get("cache-control"), "no-store");
+      const body = await response.text(); assert(!body.includes("private source")); return JSON.parse(body);
+    }
+    for (const path of eventPaths) { await read(path, 503); await read(path, 401, "invalid"); }
+    assert.equal(calls, 0); service.eventBrowseControl.enable();
+    assert.deepEqual((await read(eventPaths[0]!, 200)).items, [{ browseId: eventRow.browseId, title: eventRow.title, startAt: eventRow.startAt }]);
+    assert.deepEqual(await read(eventPaths[1]!, 200), eventRow); assert.equal(calls, 2);
+    assert.deepEqual((await account.ref.get()).data(), initial); assert((await account.ref.get()).updateTime!.isEqual(initialTime));
+    assert.deepEqual((await db.listCollections()).map(c => c.id).sort(), ["accounts", "ai_runtime_fence", "auth_bindings"]);
+    await auth.updateUser(user.uid, { disabled: true });
+    for (const path of eventPaths) await read(path, 403);
+    await auth.updateUser(user.uid, { disabled: false });
+    const corrupt = { ...initial }; delete corrupt.onboardingCompletedAt;
+    await account.ref.set(corrupt);
+    for (const path of eventPaths) await read(path, 503);
+    await account.ref.set(initial); assert.equal(calls, 2);
+    const binding = db.doc(`auth_bindings/${createAuthBindingDocumentId(user.uid)!}`), savedBinding = (await binding.get()).data()!;
+    await binding.delete();
+    for (const path of eventPaths) await read(path, 409);
+    await binding.create(savedBinding); assert.equal(calls, 2);
+    service.eventBrowseControl.disable(); for (const path of eventPaths) await read(path, 503); assert.equal(calls, 2);
+    service.eventBrowseControl.enable(); fail = true; await read(eventPaths[0]!, 503);
+    fail = false; empty = true; assert.deepEqual((await read(eventPaths[0]!, 200)).items, []);
+    await read("/v1/event-browse/not-canonical", 404);
+    assert.equal((await service.app.inject({ url: "/v1/me/profile", headers: { authorization: `Bearer ${token}` } })).statusCode, 200);
+    assert.equal((await service.app.inject({ url: "/v1/me/personas", headers: { authorization: `Bearer ${token}` } })).statusCode, 200);
+    assert.equal(service.observation().modelAttempts, 0); assert.equal(service.observation().phase, "running");
+  } finally { await db.terminate(); await deleteApp(firebase); await cleanup(service); }
+});
+
+test("ongoing Event disable/re-enable suppresses old response and stop holds actual pending source until its settlement", async () => {
+  const first = Promise.withResolvers<readonly typeof eventRow[]>(), second = Promise.withResolvers<readonly typeof eventRow[]>();
+  let calls = 0; const signals: AbortSignal[] = [];
+  const service = await createControlledPhoneService({ ...options, eventBrowse: { source: {
+    firstBatch: async (_now, signal) => { signals.push(signal); return ++calls === 1 ? first.promise : second.promise; }, detail: async () => eventRow,
+  } } });
+  let old: Promise<unknown> | undefined, current: Promise<unknown> | undefined;
+  try {
+    const c = await client(service); service.eventBrowseControl.enable();
+    old = c.call("GET", eventPaths[0]!, 503); await until(() => calls === 1);
+    service.eventBrowseControl.disable(); service.eventBrowseControl.enable();
+    assert.equal(signals[0]!.aborted, true); assert.equal(service.observation().eventBrowse.pending, 1);
+    first.resolve([eventRow]); await old;
+    current = c.call("GET", eventPaths[0]!, 503); await until(() => calls === 2);
+    assert.deepEqual(await service.stopAndClean(), { cleanupConfirmed: false, operatorHold: true });
+    assert.equal(service.observation().eventBrowse.pending, 1); assert.equal(signals[1]!.aborted, true);
+    assert.throws(() => service.eventBrowseControl.enable());
+    second.resolve([eventRow]); await current;
+    assert.equal(service.observation().eventBrowse.pending, 0); assert.equal(service.observation().modelAttempts, 0);
+  } finally { first.resolve([]); second.resolve([]); await old?.catch(() => {}); await current?.catch(() => {}); await cleanup(service); }
+});
+
+test("ongoing service with no Event source exposes protected unavailable reads, never automatic provider construction", async () => {
+  const service = await createControlledPhoneService(options);
+  try {
+    const c = await client(service);
+    assert.deepEqual(service.observation().eventBrowse, { configured: false, enabled: false, pending: 0 });
+    assert.throws(() => service.eventBrowseControl.enable());
+    for (const path of eventPaths) {
+      assert.equal((await c.call("GET", path, 503)).error.code, "SERVICE_UNAVAILABLE");
+      assert.equal((await service.app.inject({ url: path })).statusCode, 401);
+    }
+    await c.call("GET", "/v1/me/settings", 200);
+  } finally { await cleanup(service); }
 });

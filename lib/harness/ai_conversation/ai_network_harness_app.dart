@@ -13,6 +13,8 @@ import '../../features/ai_conversation/data/http_ai_wire_transport.dart';
 import '../../features/ai_conversation/presentation/ai_conversation_page.dart';
 import '../../features/auth/auth_providers.dart';
 import '../../features/auth/domain/auth_repository.dart';
+import '../../features/event_browse/domain/activity_repository.dart';
+import '../../features/event_browse/event_browse_providers.dart';
 import '../../features/personas/data/backend_persona_repository.dart';
 import '../../features/personas/persona_providers.dart';
 import '../../features/personas/presentation/persona_editor_page.dart';
@@ -34,6 +36,9 @@ final class AiNetworkHarnessApp extends StatefulWidget {
     this.onOpenPersonas,
     this.navigatorKey,
     this.accountPreferencesRepository,
+    this.activityRepository,
+    this.activityOpener,
+    this.onOpenActivities,
     super.key,
   }) : _isolatedLoopback = false;
 
@@ -47,6 +52,9 @@ final class AiNetworkHarnessApp extends StatefulWidget {
     this.onOpenPersonas,
     this.navigatorKey,
     this.accountPreferencesRepository,
+    this.activityRepository,
+    this.activityOpener,
+    this.onOpenActivities,
     super.key,
   }) : _isolatedLoopback = true;
 
@@ -58,6 +66,9 @@ final class AiNetworkHarnessApp extends StatefulWidget {
   final VoidCallback? onOpenPersonas;
   final GlobalKey<NavigatorState>? navigatorKey;
   final AccountPreferencesRepository? accountPreferencesRepository;
+  final ActivityRepository? activityRepository;
+  final ExternalActivityOpener? activityOpener;
+  final VoidCallback? onOpenActivities;
   final bool _isolatedLoopback;
 
   @override
@@ -114,6 +125,10 @@ final class _AiNetworkHarnessAppState extends State<AiNetworkHarnessApp> {
           accountPreferencesRepositoryProvider.overrideWithValue(repository),
         aiConversationRepositoryProvider.overrideWithValue(_repository),
         personaRepositoryProvider.overrideWithValue(_personas),
+        if (widget.activityRepository case final repository?)
+          activityRepositoryProvider.overrideWithValue(repository),
+        if (widget.activityOpener case final opener?)
+          externalActivityOpenerProvider.overrideWithValue(opener),
       ],
       child: MaterialApp(
         navigatorKey: widget.navigatorKey,
@@ -152,6 +167,7 @@ final class _AiNetworkHarnessAppState extends State<AiNetworkHarnessApp> {
         home: _NetworkConversation(
           onOpenSettings: widget.onOpenSettings,
           onOpenPersonas: widget.onOpenPersonas,
+          onOpenActivities: widget.onOpenActivities,
         ),
       ),
     );
@@ -162,10 +178,12 @@ final class _NetworkConversation extends StatefulWidget {
   const _NetworkConversation({
     required this.onOpenSettings,
     this.onOpenPersonas,
+    this.onOpenActivities,
   });
 
   final VoidCallback onOpenSettings;
   final VoidCallback? onOpenPersonas;
+  final VoidCallback? onOpenActivities;
 
   @override
   State<_NetworkConversation> createState() => _NetworkConversationState();
@@ -207,6 +225,22 @@ final class _NetworkConversationState extends State<_NetworkConversation> {
           onBack: () => setState(() => _open = false),
           onOpenSettings: widget.onOpenSettings,
           onOpenPersonas: widget.onOpenPersonas ?? _openPersonas,
+          navigationBarBuilder: widget.onOpenActivities == null
+              ? null
+              : (navigate) => Consumer(
+                  builder: (context, ref, _) =>
+                      ref.watch(authSessionProvider).value
+                          is AuthSessionAuthenticated
+                      ? SafeArea(
+                          child: TextButton.icon(
+                            key: const Key('controlled-browse-activities'),
+                            onPressed: () => navigate(widget.onOpenActivities!),
+                            icon: const Icon(Icons.event_outlined),
+                            label: const Text('Browse activities'),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
         )
       : Scaffold(
           body: Center(
