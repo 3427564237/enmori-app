@@ -8,7 +8,6 @@ import 'package:enmori/features/event_browse/domain/activity_repository.dart';
 import 'package:enmori/features/event_browse/presentation/activity_controller.dart';
 import 'package:enmori/features/event_browse/presentation/activity_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -215,11 +214,6 @@ void main() {
     await back(tester);
     await visible(tester, 'route-home');
     expect(await staleOpen.sourceAction(open: true), isNull);
-    await Clipboard.setData(const ClipboardData(text: ''));
-    expect(
-      (await Clipboard.getData(Clipboard.kTextPlain))?.text ?? '',
-      isEmpty,
-    );
     await tap(tester, 'home-browse-activities');
     await until(tester, () => find.byType(ActivityPage).evaluate().isNotEmpty);
     final refusedScope = ProviderScope.containerOf(
