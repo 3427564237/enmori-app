@@ -101,7 +101,7 @@ void main() {
     );
     await _tap(tester, 'persona-save');
     debugPrint('ZHOU_MOBILE_STAGE: persona_create_requested');
-    await _visible(tester, 'persona-saved');
+    await _saved(tester, 'route-persona-create');
     debugPrint('ZHOU_MOBILE_STAGE: persona_saved');
     await _tap(tester, 'persona-back');
     debugPrint('ZHOU_MOBILE_STAGE: personas_returned');
@@ -132,7 +132,7 @@ void main() {
       'Edited controlled mobile guide',
     );
     await _tap(tester, 'persona-save');
-    await _visible(tester, 'persona-saved');
+    await _saved(tester, 'route-persona-edit');
     await _tap(tester, 'persona-back');
     await _visible(tester, 'persona-edit-${persona.personaId}');
     final edited = scope.read(personaSessionControllerProvider).collection!;
@@ -249,12 +249,33 @@ Future<void> _visible(WidgetTester tester, String key) =>
     _until(tester, () => find.byKey(Key(key)).evaluate().isNotEmpty);
 
 Future<void> _tap(WidgetTester tester, String key) async {
+  // Real-device keyboard insets can keep ensureVisible's target outside the
+  // hit-test area. Dismiss input and wait for the actual viewport to settle.
+  FocusManager.instance.primaryFocus?.unfocus();
+  await _until(tester, () => tester.view.viewInsets.bottom == 0);
   await _visible(tester, key);
   final target = find.byKey(Key(key));
   await tester.ensureVisible(target);
-  await tester.pump();
+  await _until(tester, () {
+    if (target.hitTestable().evaluate().isEmpty) return false;
+    final route = ModalRoute.of(tester.element(target));
+    return route?.animation?.isCompleted ?? true;
+  });
   await tester.tap(target);
   await tester.pump();
+}
+
+Future<void> _saved(WidgetTester tester, String surface) async {
+  // The success panel is a separate lazy-list child above the form. Restore
+  // that viewport before waiting for the original success assertion.
+  final scrollable = find
+      .descendant(
+        of: find.byKey(Key(surface)),
+        matching: find.byType(Scrollable),
+      )
+      .first;
+  tester.state<ScrollableState>(scrollable).position.jumpTo(0);
+  await _visible(tester, 'persona-saved');
 }
 
 Future<void> _menu(WidgetTester tester, String key) async {

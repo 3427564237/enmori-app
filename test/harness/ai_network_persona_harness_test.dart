@@ -11,6 +11,72 @@ import 'package:http/http.dart' as http;
 // double. This suite does not execute Firebase, a model, a device or a Backend.
 void main() {
   testWidgets(
+    'small keyboard-inset harness needs focus release and upward saved-status scroll',
+    (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auth = SyntheticAiAuthRepository();
+      final client = _Peer();
+      addTearDown(auth.dispose);
+      await tester.pumpWidget(
+        _app(
+          auth,
+          client,
+          label: 'Run-owned Auth/Firestore; real Qwen9B fixture',
+        ),
+      );
+      await tester.pumpAndSettle();
+      await _tap(tester, 'ai-personas');
+      expect(find.byKey(const Key('persona-empty')), findsOneWidget);
+      await _tap(tester, 'persona-create');
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('persona-name')),
+        'Controlled mobile guide',
+      );
+      final save = find.byKey(const Key('persona-save'));
+      // A focused EditableText can scroll itself back into view after the
+      // helper exposes Save. Widget existence is not a usable tap target.
+      await tester.ensureVisible(save);
+      await tester.pumpAndSettle();
+      expect(save.hitTestable(), findsNothing);
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(save);
+      await tester.pumpAndSettle();
+      expect(save.hitTestable(), findsOneWidget);
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+      expect(client.createRequests, hasLength(1));
+      expect(client.persona?['displayName'], 'Controlled mobile guide');
+      expect(client.stateRevision, 1);
+      final saved = find.byKey(const Key('persona-saved'));
+      // The request succeeded, but the independently lazy status panel at the
+      // top has left the tree. Waiting for its key alone cannot make it return.
+      expect(saved, findsNothing);
+      await tester.scrollUntilVisible(
+        saved,
+        -200,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const Key('route-persona-create')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.pumpAndSettle();
+      expect(saved.hitTestable(), findsOneWidget);
+      expect(find.text('Your change was saved.'), findsOneWidget);
+      expect(client.createRequests, hasLength(1));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'shared HTTP composition supports Persona CRUD, explicit activation and dirty guards',
     (tester) async {
       final auth = SyntheticAiAuthRepository();
