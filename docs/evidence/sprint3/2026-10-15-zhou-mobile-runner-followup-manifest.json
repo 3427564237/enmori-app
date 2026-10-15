@@ -1,0 +1,174 @@
+{
+  "date": "2026-10-15",
+  "timezone": "Asia/Singapore",
+  "owner": "ZHOU",
+  "workspace": "D:\\3851",
+  "base": "1e53e15e0261ca2f61496831eaf50f4857bf2815",
+  "sourceCommit": "3bca59053501ffdc13dc6ed63853f2c753b14170",
+  "sourceTree": "e4789a0a9645da43936377b75363c64ad1199038",
+  "sourceCount": 443,
+  "normalizedInputsSha256": "bb2fecf56e0c3566d170487294d2d5c928ddb1cadae13478c9c053a93ab54699",
+  "sourceBindings": [
+    {
+      "gitBlob": "738e1f998a28e33c34188f196efe8fbbac80e26d",
+      "path": "tool/zhou_mobile_network_fixture.mjs",
+      "gitBlobSha256": "4480a077de7afd29ae2d455f1e97fa2b682254507c1b2eb88446af1a05cca77d",
+      "workingSha256": "4480a077de7afd29ae2d455f1e97fa2b682254507c1b2eb88446af1a05cca77d",
+      "normalizedSha256": "4480a077de7afd29ae2d455f1e97fa2b682254507c1b2eb88446af1a05cca77d"
+    },
+    {
+      "gitBlob": "2505152cd494edaed7ef5bd095b7038808ef7a3e",
+      "path": "tool/zhou_mobile_network_fixture.test.mjs",
+      "gitBlobSha256": "25f5131f3b36da1d1c257ecc3da15efcc4d1e512ecf30a739ab4726cc14cc60e",
+      "workingSha256": "25f5131f3b36da1d1c257ecc3da15efcc4d1e512ecf30a739ab4726cc14cc60e",
+      "normalizedSha256": "25f5131f3b36da1d1c257ecc3da15efcc4d1e512ecf30a739ab4726cc14cc60e"
+    },
+    {
+      "gitBlob": "22c79089b17bf65c8ee3c415a1b5b53f3fbfeecb",
+      "path": "tool/zhou_real_model_store_probe.mjs",
+      "gitBlobSha256": "e2dbad5e32e6d6b7eaef5f6b32ee55ebc9dd2a9a5099802a95113ff256f8fea2",
+      "workingSha256": "e2dbad5e32e6d6b7eaef5f6b32ee55ebc9dd2a9a5099802a95113ff256f8fea2",
+      "normalizedSha256": "e2dbad5e32e6d6b7eaef5f6b32ee55ebc9dd2a9a5099802a95113ff256f8fea2"
+    },
+    {
+      "gitBlob": "e869558df55385d7ee696228858bb3146c5b6dda",
+      "path": "tool/zhou_real_model_store_probe.test.mjs",
+      "gitBlobSha256": "1bec1cede638a1b3fac3a898117b596e67b4f698ff550e594b523b258262e15b",
+      "workingSha256": "1bec1cede638a1b3fac3a898117b596e67b4f698ff550e594b523b258262e15b",
+      "normalizedSha256": "1bec1cede638a1b3fac3a898117b596e67b4f698ff550e594b523b258262e15b"
+    }
+  ],
+  "unchangedProductTargetsApiDependencies": true,
+  "verification": {
+    "node": {
+      "passed": 36,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "exit": 0,
+      "newCases": 5,
+      "retainedCases": 31,
+      "mobileOperator": 14,
+      "credentialHelper": 9,
+      "probe": 6,
+      "jinFollowup": 7,
+      "processArtifactModelCounterDoubles": true,
+      "actualHostPosixShell": true,
+      "device": "Not Run"
+    },
+    "redRegression": {
+      "cases": 2,
+      "failed": 2,
+      "exit": 1,
+      "reason": "Different direct/runner bytes and absent old APK expose accepted operator defects"
+    },
+    "readonlyIndependentReview": {
+      "blockingFindings": 0,
+      "scope": "Changed tool delta; no execution"
+    },
+    "backendFlutterEmulatorRerun": false,
+    "newApkBuild": false,
+    "newLiveModelRun": false
+  },
+  "inheritedLiApproval": {
+    "pr": 112,
+    "reviewId": 5527408288,
+    "head": "1e53e15e0261ca2f61496831eaf50f4857bf2815",
+    "executable": "bb9170c2cc393001176058dd36f76f294258fffb",
+    "receipt": "4c8a0ee",
+    "actualModelStorePass": true,
+    "modelPosts": 1,
+    "completeInputCounts": [
+      622,
+      622
+    ],
+    "modelState": "stopped",
+    "fixtureCleanupConfirmed": true,
+    "originalCancelledInvocationNaturallySettledBeforeNewCall": true,
+    "oldGenerationHoldReleased": true,
+    "scope": "Owned empty-Note temporary Auth/Firestore Emulator journey; LI-executed; not this follow-up source/device"
+  },
+  "currentPhone": {
+    "status": "Not Run",
+    "attachedDevices": 0,
+    "ordinaryNetworkApk": "LI-owned",
+    "controlledBackendCandidate": "JIN-owned",
+    "newArtifactAttribution": "Prebuild and runner separate; selected SHA belongs to verified runner"
+  },
+  "shiReview": {
+    "pr": 110,
+    "lastObservedHead": "82fbd0ac94a4731ff8d12617309705a2c5353baf",
+    "reviewId": 5527108790,
+    "state": "Changes Requested",
+    "correctedHeadReceived": false,
+    "repeatedUnchangedTests": false,
+    "scope": "Positive-total/empty-raw-page only"
+  },
+  "sdk": {
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+    "files": [
+      {
+        "path": "packages/flutter_tools/lib/src/test/flutter_platform.dart",
+        "sha256": "1c632b2e950a641980c9d164fc84c8b33719fdc91b450f81743c3e49b4763c25"
+      },
+      {
+        "path": "packages/flutter_tools/lib/src/test/integration_test_device.dart",
+        "sha256": "8d6afe7630816077f6a5c8a20e9e0a37156cc780da3180ab43a04364dbcb85f2"
+      },
+      {
+        "path": "packages/flutter_tools/lib/src/android/android_device.dart",
+        "sha256": "f78241c6e9d88217f67bbe85a3eca995abe3db3ce3393cbe19867756088ad720"
+      }
+    ]
+  },
+  "logs": [
+    {
+      "path": "build/zhou-mobile-followup/verified-tools.log",
+      "bytes": 4082,
+      "sha256": "b567363569dc8ec473425367bb3029b847b6555ea85fca383fb844f9b6251794"
+    },
+    {
+      "path": "build/zhou-mobile-followup/runner-regression-red.log",
+      "bytes": 1924,
+      "sha256": "36cc12f9904a2707cc2629c9123821ee831750d9bfee95d0a95999593842ccb2"
+    },
+    {
+      "path": "build/zhou-mobile-followup/runner-regression-green.log",
+      "bytes": 1630,
+      "sha256": "bf62495219d92f3c7b6abb7b04ee297ede668aefaa4f5632e3801fbfcfb1b406"
+    },
+    {
+      "path": "build/zhou-mobile-followup/mobile-tools-green.log",
+      "bytes": 2601,
+      "sha256": "b8e39823b72599b50cbd3842e75b5b6001583db00ca77dc09ad13c0c477e82ce"
+    },
+    {
+      "path": "build/zhou-mobile-followup/probe-environment.log",
+      "bytes": 865,
+      "sha256": "ef03e86328ae93836757f65a3f441420e596264c5e16aba788264aa1fed2822d"
+    },
+    {
+      "path": "build/zhou-mobile-followup/environment-prefilter-proof.log",
+      "bytes": 70,
+      "sha256": "612e2cb49ca70d8a5ebb770abe0f27d4720cb94fe3725296fe61b84b969c8882"
+    },
+    {
+      "path": "build/zhou-1015/mobile-followup-before.json",
+      "bytes": 185761,
+      "sha256": "94278f6e51b5c973608499b6c0de01bded4ddb71d8feacda4a76f786c5fc9840"
+    },
+    {
+      "path": "build/zhou-1015/mobile-followup-after.json",
+      "bytes": 185761,
+      "sha256": "7eb6297b1c7aad077b752b942fa046a9973a31413fad578f21a4cf44fda4e248"
+    }
+  ],
+  "limits": [
+    "No claim of actual installed runner/device success",
+    "Prior accepted model/store evidence stays bound to its original source",
+    "No new deployment/certificate/provider/secret or dependency decision",
+    "No merge/issue/project/runtime transition"
+  ]
+}
