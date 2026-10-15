@@ -1,0 +1,336 @@
+{
+  "recordedAt": "2026-10-15T10:45:17.927957+08:00",
+  "source": {
+    "base": "aab3bf23b8d9c76c6f830dfefa483d3f42bd2f01",
+    "product": "11957495d6e69bdb0f8b5f591221fe85fdca7c0c",
+    "tree": "ae9e8ed9324c2c7b1f00eedb96d01b2327568f46",
+    "changedPaths": [
+      "api/openapi.json",
+      "backend/emulator-test/event-browse-composition.integration.test.ts",
+      "backend/src/bootstrap/build-app.ts",
+      "backend/src/bootstrap/event-browse-framework-errors.ts",
+      "backend/src/bootstrap/isolated-event-browse.ts",
+      "backend/src/event-browse/application/event-browse.ts",
+      "backend/src/event-browse/domain/browse-values.ts",
+      "backend/src/event-browse/ports/event-browse.ts",
+      "backend/src/event-browse/transport/register-routes.ts",
+      "backend/src/event-browse/transport/schemas.ts",
+      "backend/src/personas/transport/framework-errors.ts",
+      "backend/src/transport/route-inventory.ts",
+      "backend/test/event-browse-composition.test.ts"
+    ],
+    "producer": "82fbd0ac94a4731ff8d12617309705a2c5353baf",
+    "producerCopies": [
+      {
+        "path": "backend/src/event-browse/application/event-browse.ts",
+        "blob": "ee91f50a008b5868b9eb70bc944f224b8bc3a2a3"
+      },
+      {
+        "path": "backend/src/event-browse/domain/browse-values.ts",
+        "blob": "aadd120b4b492a0c7a9e11655689bd3f8421969e"
+      },
+      {
+        "path": "backend/src/event-browse/ports/event-browse.ts",
+        "blob": "2a4d6ad96be2157f5b4409cb3451d425f5cd542b"
+      },
+      {
+        "path": "backend/src/event-browse/transport/register-routes.ts",
+        "blob": "b138c22a36c066578cf503474dddd4dfe5e99ddf"
+      },
+      {
+        "path": "backend/src/event-browse/transport/schemas.ts",
+        "blob": "0b3c099108e404d5f2039f3a399fc8a26bbd9e5a"
+      }
+    ],
+    "excludedProviderAdapter": true,
+    "nonDocumentInputCount": 502,
+    "exactInputCount": 35,
+    "nonDocumentGitInventorySha256": "aa4521e9adb57039f255e3209e7f2df83ad5a3c57d384211c01fb686e16ec563",
+    "api": {
+      "baselineOperations": 33,
+      "operations": 35,
+      "schemas": 45,
+      "allPriorObjectsUnchanged": true
+    },
+    "protectedClientToolsDependenciesIndexesUnchanged": true,
+    "deltaBindings": [
+      {
+        "path": "api/openapi.json",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "a366db9a99c9f0b778325310d07c503d27259eab",
+        "workingSha256": "b1d8b633a1a3dab25769a5be84c6df3f66418525fc73edfbfc254ac43d9ae817",
+        "exact": true
+      },
+      {
+        "path": "backend/emulator-test/event-browse-composition.integration.test.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "5e1047c456f71d5ab22ec2a0a7711b2ecea706d7",
+        "workingSha256": "c60676d4c18e3f809f43dc7a096f886eacf912e3e9fc72dfa856f81d882755af",
+        "exact": true
+      },
+      {
+        "path": "backend/src/bootstrap/build-app.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "f5ab0e20d3f7569da5ee9441fa2f59db0578195a",
+        "workingSha256": "474707ac4396d7ad2f4a3a4d46b78477f75c3ff79b8b56924079b452a69462a8",
+        "exact": true
+      },
+      {
+        "path": "backend/src/bootstrap/event-browse-framework-errors.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "a7f1a8e32ae62cef88ccca84745b6a1cdc924024",
+        "workingSha256": "5a2983a30c15b36a352d8195115547586942f199bc062a567be96556509f7cb9",
+        "exact": true
+      },
+      {
+        "path": "backend/src/bootstrap/isolated-event-browse.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "e5fd1dbb1c3d2ed7e142f1715c8fc109b7a30eb0",
+        "workingSha256": "d49c4ddccdc88d6837571df33124194c9c8cf5951c8cef0de281bcd84d955f93",
+        "exact": true
+      },
+      {
+        "path": "backend/src/event-browse/application/event-browse.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "ee91f50a008b5868b9eb70bc944f224b8bc3a2a3",
+        "workingSha256": "7d258b93b89209171bc78ab37b5fa787bf4b71511b9aaef4406f960306e149a2",
+        "exact": true
+      },
+      {
+        "path": "backend/src/event-browse/domain/browse-values.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "aadd120b4b492a0c7a9e11655689bd3f8421969e",
+        "workingSha256": "623ceb565846ecfa7d42c7640ff1f8394cf9f01809cb098f39ddb436a242e244",
+        "exact": true
+      },
+      {
+        "path": "backend/src/event-browse/ports/event-browse.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "2a4d6ad96be2157f5b4409cb3451d425f5cd542b",
+        "workingSha256": "cb083f04d7ae34b795961e61d80a0a635fae07c9138ca29902e93f0e9adea193",
+        "exact": true
+      },
+      {
+        "path": "backend/src/event-browse/transport/register-routes.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "b138c22a36c066578cf503474dddd4dfe5e99ddf",
+        "workingSha256": "2ee910e5716c63b3773564a2bd8fbf545a749e70410392415d3c1ce84c031595",
+        "exact": true
+      },
+      {
+        "path": "backend/src/event-browse/transport/schemas.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "0b3c099108e404d5f2039f3a399fc8a26bbd9e5a",
+        "workingSha256": "a06603d1aba31d345437748fb101744aec6f366dd2282b4e609c75690e0466e4",
+        "exact": true
+      },
+      {
+        "path": "backend/src/personas/transport/framework-errors.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "4ec5335702340b6568da5d2a350b268dbb8938fe",
+        "workingSha256": "d6e949cfd8bdb27c536cbd76dd55130714067a571db29fdf4951ce4fa9fba162",
+        "exact": false
+      },
+      {
+        "path": "backend/src/transport/route-inventory.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "d4de409d75c3e216395f2d00f19951d15df242de",
+        "workingSha256": "357e5fc31e2bc1dd121f13a443057563b4dced97a82231018ebaef8c85369561",
+        "exact": true
+      },
+      {
+        "path": "backend/test/event-browse-composition.test.ts",
+        "mode": "100644",
+        "kind": "blob",
+        "blob": "226e7de9b59089736a4292b4d540ad0cde7bb335",
+        "workingSha256": "edd025b1f843dac03732b6e6ec5db7cde8d55a1c55ea879d2ca139eec5574ddb",
+        "exact": true
+      }
+    ]
+  },
+  "toolchain": {
+    "Node": "24.19.0",
+    "TypeScript": "7.0.2",
+    "FirebaseAdmin": "14.3.0",
+    "Firestore": "8.7.1",
+    "FirebaseCLI": "15.29.0",
+    "FirestoreEmulator": "1.22.0",
+    "Java": "21.0.12",
+    "Dart": "3.13.2"
+  },
+  "results": {
+    "strictCompile": {
+      "exitCode": 0,
+      "log": "compile04.log"
+    },
+    "focused": {
+      "exitCode": 0,
+      "tests": 13,
+      "pass": 13,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "backend": {
+      "exitCode": 0,
+      "tests": 895,
+      "pass": 895,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "actualEmulator": {
+      "outerExitCode": 0,
+      "tests": 145,
+      "pass": 145,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "newEventCases": 6,
+      "sourceContent": "synthetic",
+      "providerCalls": 0,
+      "ownedFixtureTeardown": "Pass",
+      "privateProfileTeardown": "Pass",
+      "portsFreed": [
+        8080,
+        9099,
+        4400,
+        4500,
+        9150
+      ]
+    }
+  },
+  "retained": {
+    "initialProduct": "ed220ffb9f5f961ac0a6b0a91fa41cec70b709f1",
+    "initialBackend": {
+      "tests": 893,
+      "pass": 893,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "initialEmulator": {
+      "outerExitCode": 1,
+      "tests": 144,
+      "pass": 143,
+      "fail": 1,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "failure": "Inherited Dart child emitted invalid non-content JSON; archive lacked package_config.json; raw child output unavailable."
+    },
+    "routerObservations": [
+      {
+        "case": "approved174",
+        "status": 414,
+        "noStore": false,
+        "safeEnvelope": false
+      },
+      {
+        "case": "malformedPercent",
+        "status": 400,
+        "noStore": false,
+        "safeEnvelope": false
+      }
+    ],
+    "initialCompile": "Optional fake transaction delete required explicit availability assertion."
+  },
+  "evidencePreparationFailure": "Initial local builder used unsupported Python encoding alias utf8-sig; corrected to utf-8-sig. No product/source/test change.",
+  "dependencyRestoration": {
+    "command": "flutter pub get --offline",
+    "lockSha256BeforeAndAfter": "774e3ce672777e779ddfbd80440e47c9ccf0cdf8a86ae2c09d4e4fe4e5c73b82",
+    "dependencyChange": false
+  },
+  "notRun": [
+    "new Flutter/widget suites",
+    "APK/device",
+    "actual provider",
+    "external browser/copy/return",
+    "real model",
+    "human accessibility",
+    "provider notice/removal operational proof"
+  ],
+  "reviewBoundaries": {
+    "SHI": "new JIN shared-code delta",
+    "LI": "JIN source-bound evidence and bounded disposition",
+    "ZHOU": "SHI producer review remains on #110; R1 unresolved"
+  },
+  "privateLogFingerprints": [
+    {
+      "localName": "compile01.log",
+      "bytes": 124,
+      "sha256": "47536b1a518cb22229d0dd5fd55ef84df7776c2c95dc86349e9a3921dfef8b02"
+    },
+    {
+      "localName": "compile02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "localName": "compile03.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "localName": "compile04.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "localName": "focused01.log",
+      "bytes": 1367,
+      "sha256": "b28ca05aefed89aba6e24e16389b14c07ba97b4064998056090d8b6c0f36e8bf"
+    },
+    {
+      "localName": "focused02.log",
+      "bytes": 1587,
+      "sha256": "70aabb1db0de29d3fc05c6b4cadada848befe555b90889135a34c4d1badd1bec"
+    },
+    {
+      "localName": "backend01.log",
+      "bytes": 83827,
+      "sha256": "67f0590d5a02f5439bb70b0a6fec7de7f0da9b0e77178b9a1a1aee0651ea46fa"
+    },
+    {
+      "localName": "backend02.log",
+      "bytes": 84029,
+      "sha256": "ce1a5fa13c62f2ad4bf024f7e34335e5bb13df0d5c986e6268e7079673025de0"
+    },
+    {
+      "localName": "emulator01.log",
+      "bytes": 22325,
+      "sha256": "c51457fa055474a384455fca89a6879912dd425d4a0daaa35743527316418e43"
+    },
+    {
+      "localName": "emulator02.log",
+      "bytes": 21061,
+      "sha256": "68eb0cffba84575f799a6d97685b92960f1d8a989e12513f95a1575e7aff5b48"
+    },
+    {
+      "localName": "router-red01.log",
+      "bytes": 191,
+      "sha256": "a30fee94e5e90aa8567d4d252dec1bbb5e948b81340174c866b736c23e5ccd8f"
+    },
+    {
+      "localName": "pubget01.log",
+      "bytes": 71,
+      "sha256": "c083f9ce64654caa4975b431c9e24916bd2b0af137a60f0e49f45dfb26fee81c"
+    }
+  ]
+}
