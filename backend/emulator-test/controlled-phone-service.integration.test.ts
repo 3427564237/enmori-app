@@ -184,3 +184,26 @@ test("unresolved maintenance checkpoint holds stop and is preserved until the se
     await checkpoint.delete();
   } finally { await db.terminate(); await deleteApp(firebase); await cleanup(service); }
 });
+
+test("lost startup Auth acknowledgment preserves the actual created identity and reports hold, never clean startup failure", async () => {
+  const env = requireControlledEmulatorEnvironment(process.env);
+  const firebase = initializeApp({ projectId: env.projectId }, randomUUID()), auth = getAuth(firebase), db = getFirestore(firebase);
+  let prototype = Object.getPrototypeOf(auth);
+  while (!Object.hasOwn(prototype, "createUser")) prototype = Object.getPrototypeOf(prototype);
+  const original = prototype.createUser as typeof auth.createUser;
+  let createdUid: string | undefined;
+  prototype.createUser = async function(this: typeof auth, ...args: Parameters<typeof auth.createUser>) {
+    const created = await original.apply(this, args); createdUid = created.uid;
+    throw new Error("explicit test discards acknowledged Auth result");
+  };
+  try {
+    await assert.rejects(createControlledPhoneService(options), /CONTROLLED_PHONE_SERVICE_STARTUP_HOLD/);
+    assert(createdUid);
+    assert.equal((await auth.getUser(createdUid)).uid, createdUid);
+    assert.equal((await db.listCollections()).length, 0);
+  } finally {
+    prototype.createUser = original;
+    if (createdUid) await auth.deleteUser(createdUid);
+    await db.terminate(); await deleteApp(firebase);
+  }
+});

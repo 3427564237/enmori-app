@@ -52,7 +52,7 @@ export async function createControlledPhoneService(options: {
   let phase: "starting" | "running" | "stopping" | "held" | "closed" = "starting";
   let calls = 0, compilerPending = 0, modelPending = 0, modelAttempts = 0, maintenanceHealthy = true, retirementFailed = false;
   let joined: Awaited<ReturnType<typeof createIsolatedConversationComposition>> | undefined;
-  let compositionStarted = false, epochRetired = false;
+  let startupWritesAttempted = false, epochRetired = false;
   let app: Awaited<ReturnType<typeof buildApp>> | undefined;
   let stopped: Promise<{ cleanupConfirmed: boolean; operatorHold: boolean }> | undefined;
   const targets = new Set<string>();
@@ -167,12 +167,12 @@ export async function createControlledPhoneService(options: {
     // An existing account, orphan collection, runtime/fence or Auth user is not
     // an empty fixture. Startup never clears it or silently resumes a new epoch.
     requireProof((await db.listCollections()).length === 0 && (await auth.listUsers(1)).users.length === 0);
+    startupWritesAttempted = true;
     await auth.createUser({ uid, email, password }); authOwned = true;
     await db.doc(binding).create({ accountId: owner }); bindingOwned = true;
     await db.doc(account).create({ username: `p_${owner.replaceAll("-", "").slice(0, 16)}`,
       optionalProcessingConsent: "accepted", checkInVisibility: "private", onboardingCompletedAt: new Date().toISOString(), purposeRevocationGeneration: 0 }); accountOwned = true;
     await db.doc(`${account}/persona_state/current`).create({ livePersonaIds: [], stateRevision: 0 });
-    compositionStarted = true;
     joined = await createIsolatedConversationComposition({ firestore: db, environment: options.environment,
       transport: { generate: (input, budget) => {
         requireProof(phase === "running" && input.checkIns.length === 0);
@@ -226,9 +226,12 @@ export async function createControlledPhoneService(options: {
       privateHandoff: () => { requireProof(phase === "running"); return { projectId: environment.projectId, email, password }; },
     };
   } catch {
-    if (compositionStarted && !joined) {
-      // Construction may have committed a fence before failing. No model has
-      // been dispatched; close only local handles, preserve that partial state.
+    if (startupWritesAttempted) {
+      // A rejected create/transaction can have lost its ACK. No model has been
+      // dispatched, but boolean ownership flags cannot prove absence of those
+      // effects. Close local handles only; preserve the original fixture/hold.
+      await joined?.stopAdmissionAndMaintenance(); joined?.runtime.shutdown();
+      await app?.close();
       await db.terminate(); await deleteApp(firebase);
       throw new Error("CONTROLLED_PHONE_SERVICE_STARTUP_HOLD");
     }
