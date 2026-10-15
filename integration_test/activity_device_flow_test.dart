@@ -304,7 +304,13 @@ final class _ObservedRepository implements ActivityRepository {
         );
       }
       return result;
-    } catch (error) {
+    } catch (error, stack) {
+      debugPrint(
+        'ENMORI_ACTIVITY_DIAGNOSTIC exception_type_${error.runtimeType}',
+      );
+      for (final frame in stack.toString().split('\n').take(6)) {
+        debugPrint('ENMORI_ACTIVITY_DIAGNOSTIC $frame');
+      }
       debugPrint(
         'ENMORI_ACTIVITY_STAGE adapter_exception_${error is TestFailure
             ? 'fixture_assertion'
