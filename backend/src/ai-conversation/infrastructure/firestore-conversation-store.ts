@@ -11,6 +11,8 @@ import type { PresentationMetadata } from "../ports/conversation-lifecycle.js";
 import { normalizePersonaInput } from "../../personas/domain/persona-values.js";
 import type { ConversationReadback } from "../ports/conversation-operations.js";
 
+import { inspectNoteSources, inspectProvenance, parseProvenance, validDependencies, type TransactionalNotePrerequisites } from "./transactional-note-sources.js";
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const RUNTIME = "ai_runtime_fence/current";
 type Location=Pick<OperationTarget,"ownerAccountId"|"conversationId">;
@@ -39,15 +41,15 @@ interface Inventory { readonly parent: RecordData; readonly rows: readonly Snaps
 
 /**
  * First isolated N02 vertical: actual SDK transactions, no ordinary composition.
- * Sources are deliberately held until DU's real writer/nonreuse guarantees and
- * ZHOU's transactional reader handoff exist. A nonempty dependency is refused,
- * never silently converted to an authorized empty snapshot. Empty sources must
- * come from the caller's already-authorized complete capture (synthetic here).
+ * Nonempty sources additionally require explicit source-bound producer facts
+ * for this gateway. Ordinary construction still omits that authority. Every
+ * actual effect and ordinary read checks sources in its own transaction.
  */
 export class FirestoreConversationStore implements RealConversationStore {
   private lastNow = Number.NEGATIVE_INFINITY;
   constructor(private readonly gateway: FirestoreGateway, environment: Readonly<Record<string, string | undefined>>,
-    private readonly utcMilliseconds: () => number = Date.now) {
+    private readonly utcMilliseconds: () => number = Date.now,
+    private readonly notePrerequisites?: TransactionalNotePrerequisites) {
     requireControlledEmulatorEnvironment(environment);
   }
 
@@ -97,8 +99,9 @@ export class FirestoreConversationStore implements RealConversationStore {
     if (!nonnegative(account.purposeRevocationGeneration) || !nonnegative(deps.purposeRevocationGeneration)) refuse("unavailable");
     if (account.purposeRevocationGeneration > deps.purposeRevocationGeneration) refuse("denied");
     if (account.purposeRevocationGeneration !== deps.purposeRevocationGeneration) refuse("unavailable");
-    // No invented producer authority. Account-only empty-source vertical works independently.
-    if (deps.sources.length !== 0) refuse("unavailable");
+    if (!validDependencies(deps)) refuse("unavailable");
+    const sourceState = await inspectNoteSources(tx, this.gateway, this.notePrerequisites, target.ownerAccountId, deps.sources, deps, () => current(a));
+    if (sourceState !== "valid") refuse(sourceState === "invalid" ? "denied" : "unavailable");
     if (deps.usedPersonaId !== undefined) {
       if (!/^[0-9a-f]{64}$/.test(deps.usedPersonaId)) refuse("unavailable");
       const persona = await tx.get(`accounts/${target.ownerAccountId}/personas/${deps.usedPersonaId}`);
@@ -281,7 +284,8 @@ export class FirestoreConversationStore implements RealConversationStore {
       const path = `${parentPath(op)}/messages/${input.messageId}`, provenance = `${parentPath(op)}/message_sources/${input.messageId}`;
       tx.create(path, { role: "assistant", sequence, availability: "available", text: input.text, replyToUserMessageId: op.userMessageId,
         ...input.presentation, appendBefore: inv.cutoff });
-      tx.create(provenance, { sources: [] }); // authority() has refused every nonempty dependency.
+      tx.create(provenance, { sources: a.dependencies.sources.map(({ sourceType, sourceId }) => ({ sourceType, sourceId })),
+        ...(a.dependencies.sources.length ? { purposeRevocationGeneration: a.dependencies.purposeRevocationGeneration } : {}) });
       tx.set(userPath(op), { ...user.data, acceptedAssistantMessageId: input.messageId });
       tx.set(effectPath(op), { ...effect, assistantMessageId: input.messageId });
       tx.set(parentPath(op), { ...inv.parent, nextSequence: sequence + 1, latestMessageId: input.messageId });
@@ -304,9 +308,19 @@ export class FirestoreConversationStore implements RealConversationStore {
     const assistant = inv.rows.find(r => r.id === id);
     if (assistant === undefined || assistant.data.role !== "assistant" || assistant.data.replyToUserMessageId !== user.id) refuse("unavailable");
     const sources = await tx.get(`${parentPath(t)}/message_sources/${id as string}`);
-    if (assistant.data.availability === "available" &&
-        (sources === undefined || !exact(sources, ["sources"]) || !Array.isArray(sources.sources) || sources.sources.length !== 0)) refuse("unavailable");
-    if (assistant.data.availability === "unavailable" && sources !== undefined) refuse("unavailable");
+    if (assistant.data.availability === "unavailable") {
+      if (sources !== undefined) refuse("unavailable");
+      return this.message(assistant);
+    }
+    const parsed = parseProvenance(sources); if (!parsed) refuse("unavailable");
+    const state = await inspectProvenance(tx, this.gateway, this.notePrerequisites, t.ownerAccountId, parsed);
+    if (state === "unavailable") refuse("unavailable");
+    if (state === "invalid") {
+      // Immediate read suppression; the selected source sweep physically removes
+      // text/all provenance atomically. Do not write here before later page reads.
+      const { text: _content, ...metadata } = assistant.data;
+      return this.message({ ...assistant, data: { ...metadata, availability: "unavailable" } });
+    }
     return this.message(assistant);
   }
   async settleAcknowledgedAssistant(op: OpenOperation, a: OriginalWriteAuthority): Promise<StoreResult<void>> {

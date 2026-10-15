@@ -429,3 +429,33 @@ test("actual Auth -> six-route isolated Fastify boundary -> real store with expl
     assert.equal(read.statusCode, 200); assert.equal((read.json() as { state: string }).state, "assistant_saved");
   } finally { await app.close(); }
 });
+
+test("actual sourced writes bind current source in the content transaction, preserve exact provenance and suppress deleted-source history",async()=>{
+  const id=randomUUID(),path=`check_ins/${id}`;
+  const proof={gateway,sourceReferences:["this fresh owned immutable Note fixture; permanent test deletion without restore"],
+    completeCanonicalUtcInventory:true as const,immutableOwnerNoteAndTime:true as const,permanentDeletion:true as const,noRestoreOrIdReuse:true as const};
+  const sourcedStore=new FirestoreConversationStore(gateway,process.env,Date.now,proof);
+  await firestore.doc(path).create({ownerAccountId:owner,note:"Synthetic Note",createdAt:new Date().toISOString()});
+  const note=await firestore.doc(path).get();
+  const a:OriginalWriteAuthority={...authority(),dependencies:{...authority().dependencies,sources:[{sourceType:"check_in",sourceId:id,
+    observedVersion:{seconds:note.updateTime!.seconds,nanoseconds:note.updateTime!.nanoseconds}}]}};
+  try{
+    const deniedTarget=target();assert.equal((await store.initializeOperation(deniedTarget,epoch,a)).kind,"unavailable");
+    const op=confirmed(await sourcedStore.initializeOperation(target(),epoch,a));
+    confirmed(await sourcedStore.saveUser(op,()=>"Synthetic sourced user",a));
+    const replyId=randomUUID();confirmed(await sourcedStore.saveAssistant(op,()=>({messageId:replyId,text:"Synthetic sourced reply",presentation:{presentationMode:"default"}}),a));
+    confirmed(await sourcedStore.settleAcknowledgedAssistant(op,a));
+    assert.deepEqual((await firestore.doc(`${parent(op)}/message_sources/${replyId}`).get()).data(),{
+      sources:[{sourceType:"check_in",sourceId:id}],purposeRevocationGeneration:0});
+    const listed=confirmed(await sourcedStore.listOwnedMessages(a.principal,owner,op.conversationId,undefined,()=>true));
+    assert.equal(listed.messages[1]!.availability,"available");
+    const second=confirmed(await sourcedStore.initializeOperation(target(),epoch,a));
+    confirmed(await sourcedStore.saveUser(second,()=>"Synthetic pending user",a));
+    await firestore.doc(path).delete();
+    let borrowed=false;assert.equal((await sourcedStore.saveAssistant(second,()=>{borrowed=true;return {messageId:randomUUID(),text:"must not be borrowed",presentation:{presentationMode:"default"}};},a)).kind,"denied");
+    assert.equal(borrowed,false);assert.equal((await firestore.collection(`${parent(second)}/message_sources`).get()).empty,true);
+    const hidden=confirmed(await sourcedStore.listOwnedMessages(a.principal,owner,op.conversationId,undefined,()=>true));
+    assert.equal(hidden.messages[1]!.availability,"unavailable");assert.equal(Object.hasOwn(hidden.messages[1]!,"text"),false);
+    assert.equal((await firestore.doc(`${parent(op)}/message_sources/${replyId}`).get()).exists,true);
+  }finally{await firestore.doc(path).delete();assert.equal((await firestore.doc(path).get()).exists,false);}
+});
