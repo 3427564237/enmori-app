@@ -1,0 +1,64 @@
+{
+  "product": "290c4317208089e36d0d494031e3ee25cba7d451",
+  "base": "0adb9a5b29605f5c8dba758a8e8383e4ba2e3e89",
+  "ownerAgentWidgetPass": 39,
+  "parentIndependentWidgetPass": 25,
+  "overlappingCounts": true,
+  "oldSourceLayoutFailures": 2,
+  "scopedAnalyze": "no_issues",
+  "formalPeer": "DU_pending",
+  "apkDeviceUpdatedProduct": "install_and_cold_launch_pass_route_flow_not_run",
+  "logs": [
+    {
+      "name": "enmori-offline-entry-before.log",
+      "bytes": 4239,
+      "sha256": "edb13a82b1581fa06eeca9bdb6627619087bad641d807f2fa510a7f9a154fd18"
+    },
+    {
+      "name": "enmori-offline-entry-after.log",
+      "bytes": 7644,
+      "sha256": "fc4eab5fd7c9fef11b41a99daaba3352e8fae19ed452657ea50b94ae3fc764dc"
+    },
+    {
+      "name": "enmori-offline-entry-analyze.log",
+      "bytes": 163,
+      "sha256": "05345725af50fb97e53843c80c6bdb8051cec9f060e5fae6ae604b0df948975c"
+    },
+    {
+      "name": "enmori-li-ux-independent-tests.log",
+      "bytes": 5572,
+      "sha256": "b0fa45ece4b84c8699b767bddfcf20b86203f41b8fd9a0ca7437dd892dbd5725"
+    }
+  ],
+  "apk": {
+    "product": "290c4317208089e36d0d494031e3ee25cba7d451",
+    "publication": "36adbbefb8829b9ca7d4f8ec538e9f51f6571ef0",
+    "package": "com.enmori.app.personatest",
+    "sha256": "f458ea31909689e85a21a2429125e7886a65cdeaafcef3646ea3112e8be01009",
+    "bytes": 121547384,
+    "mode": "offline_synthetic",
+    "normalNetwork": false,
+    "formalDuReview": "pending",
+    "build": "Pass",
+    "v2Signature": "Pass",
+    "minimumSdk": 24,
+    "targetSdk": 36,
+    "firstInstall": "INSTALL_FAILED_UPDATE_INCOMPATIBLE",
+    "installedUpdatedApk": true,
+    "deviceInstallation": {
+      "product": "290c4317208089e36d0d494031e3ee25cba7d451",
+      "package": "com.enmori.app.personatest",
+      "device": "vivo V2405A",
+      "androidApi": 36,
+      "installed": true,
+      "coldLaunch": "Pass",
+      "processRunning": true,
+      "installedApkSha256": "f458ea31909689e85a21a2429125e7886a65cdeaafcef3646ea3112e8be01009",
+      "hostApkSha256": "f458ea31909689e85a21a2429125e7886a65cdeaafcef3646ea3112e8be01009",
+      "ordinaryPackageUnchanged": true,
+      "scope": "offline_synthetic_candidate",
+      "formalDuReview": "pending",
+      "routeJourneyNotClaimed": true
+    }
+  }
+}

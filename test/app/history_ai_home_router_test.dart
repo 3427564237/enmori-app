@@ -281,7 +281,7 @@ void main() {
       final semantics = tester.ensureSemantics();
       try {
         for (final entry in {
-          'home-check-in-history': 'Check-in history',
+          'home-check-in-history': 'Footprint',
           'home-ai-conversation': 'AI conversation',
         }.entries) {
           final finder = find.byKey(Key(entry.key));

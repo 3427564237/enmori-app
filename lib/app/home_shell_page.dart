@@ -80,7 +80,7 @@ final class HomeShellPage extends StatelessWidget {
                 key: const Key('home-check-in-history'),
                 onPressed: onOpenHistory,
                 icon: const Icon(Icons.history),
-                label: const Text('Check-in history'),
+                label: const Text('Footprint'),
               ),
             if (onOpenAi != null)
               OutlinedButton.icon(
