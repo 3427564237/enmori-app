@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "base": "f6036d4efbc4f3d7a33378cd7184b01d4eda31bb",
+  "testSource": "d444e06b7fbdc9b7468143c66b37887f1caec664",
+  "testTree": "943b872d1211724b8d875a197e6c281ffd9643d6",
+  "testBinding": {
+    "path": "backend/test/ai-runtime/controlled-ollama-transport.test.ts",
+    "blob": "99c4cd9d37f7cc65352d50ff1702416bdd0e9377",
+    "sha256": "6b8af273602da62c3a7078423c764e673ced6c7ee86167d599a91266cc195633",
+    "workingSha256": "d8e676959d52a31102111d0d56bcaa827c97847c15f874c7e34b762c447665f6"
+  },
+  "productionChanged": false,
+  "liEvidenceSource": "dcb94d925b8010e02d41f033e84ed3902ab08559",
+  "attribution": "The following three observations are LI published evidence, not JIN reruns",
+  "liObservations": {
+    "laterPreviewIdleObservation": {
+      "serviceRunning": true,
+      "modelAttempts": 0,
+      "modelPending": 0,
+      "operatorHold": false,
+      "verifiedModelCurrentlyLoaded": false,
+      "readOnlyObservation": true
+    },
+    "manualPreviewWarmReconnect": {
+      "sameOriginalPreviewService": true,
+      "quietOriginalBeforeAndAfterNativeStop": true,
+      "manualExistingZeroContentPreload": true,
+      "done": true,
+      "generatedTokens": 0,
+      "durationMs": 27611,
+      "noHostPolicyChange": true,
+      "noAutomaticWarmLoop": true,
+      "futureIdleReadinessStillLimited": true
+    },
+    "afterManualWarmReadiness": {
+      "serviceRunning": true,
+      "modelAttempts": 0,
+      "modelPending": 0,
+      "operatorHold": false,
+      "verifiedModelCurrentlyLoaded": true,
+      "readOnlyObservation": true
+    }
+  },
+  "checks": {
+    "strictCompileExit": 0,
+    "focused": {
+      "tests": 11,
+      "pass": 11,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exitCode": 0
+    },
+    "newCases": 2,
+    "actualHostModelFirebaseDeviceCalls": 0
+  },
+  "logs": [
+    {
+      "name": "readiness-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "readiness-focused.log",
+      "bytes": 1411,
+      "sha256": "9c80182fec11c51f54f99998bf0347443a0558afab375c40da6268dae6ce506a"
+    }
+  ],
+  "rawLogsPublished": false,
+  "recordedSgt": "2026-10-15T17:34:30.665932+08:00"
+}
