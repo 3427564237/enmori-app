@@ -11,6 +11,7 @@ import type { ConversationInput } from "../src/ai-conversation/ports/conversatio
 import type { GenerationTransport } from "../src/ai-runtime/ports/generation-transport.js";
 import type { CompletePromptCompiler } from "../src/ai-runtime/infrastructure/controlled-ollama-transport.js";
 import { browseId } from "../src/event-browse/domain/browse-values.js";
+import { createAuthBindingDocumentId } from "../src/shared/infrastructure/firebase/firestore-records.js";
 
 const compiler: CompletePromptCompiler<ConversationInput> = { compile: async () => ({ rawPrompt: "explicit synthetic compiler double", tokens: 10,
   includesAllFraming: true, manifestDigest: "3".repeat(64), tokenizerDigest: "4".repeat(64) }) };
@@ -241,10 +242,14 @@ test("ongoing service Event defaults unavailable; actual current Auth/Account pr
     await auth.updateUser(user.uid, { disabled: true });
     for (const path of eventPaths) await read(path, 403);
     await auth.updateUser(user.uid, { disabled: false });
-    const incomplete = { ...initial }; delete incomplete.onboardingCompletedAt;
-    await account.ref.set(incomplete);
-    for (const path of eventPaths) await read(path, 409);
+    const corrupt = { ...initial }; delete corrupt.onboardingCompletedAt;
+    await account.ref.set(corrupt);
+    for (const path of eventPaths) await read(path, 503);
     await account.ref.set(initial); assert.equal(calls, 2);
+    const binding = db.doc(`auth_bindings/${createAuthBindingDocumentId(user.uid)!}`), savedBinding = (await binding.get()).data()!;
+    await binding.delete();
+    for (const path of eventPaths) await read(path, 409);
+    await binding.create(savedBinding); assert.equal(calls, 2);
     service.eventBrowseControl.disable(); for (const path of eventPaths) await read(path, 503); assert.equal(calls, 2);
     service.eventBrowseControl.enable(); fail = true; await read(eventPaths[0]!, 503);
     fail = false; empty = true; assert.deepEqual((await read(eventPaths[0]!, 200)).items, []);
