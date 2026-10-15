@@ -206,7 +206,7 @@ final class _ConnectedPages extends ConsumerWidget {
                 padding: const EdgeInsets.all(8),
                 child: Text(
                   'Test account • data clears when the host stops. '
-                  'AI cannot yet use saved Check-ins. Music and Friends are fixtures; '
+                  'AI uses only eligible Check-in Notes from this test account. Music and Friends are fixtures; '
                   'Activity needs host permission. Recommendations and participation are unavailable.',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),

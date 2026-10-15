@@ -14,6 +14,8 @@ export interface StoredDocumentEntry {
 /** Immutable service metadata, not a stored application timestamp field. */
 export interface StoredDocumentSnapshot extends StoredDocumentEntry {
   readonly createTime: { readonly seconds: number; readonly nanoseconds: number };
+  /** Current service metadata; request-only, never persisted as provenance. */
+  readonly updateTime?: { readonly seconds: number; readonly nanoseconds: number };
 }
 
 export interface FirestoreTransactionGateway {
@@ -58,7 +60,8 @@ class FirebaseAdminTransactionGateway
     if (!snapshot.exists) return undefined;
     if (data === undefined || created === undefined) throw new Error("Required immutable metadata unavailable");
     return { id: snapshot.id, data: { ...data },
-      createTime: { seconds: created.seconds, nanoseconds: created.nanoseconds } };
+      createTime: { seconds: created.seconds, nanoseconds: created.nanoseconds },
+      ...(snapshot.updateTime ? { updateTime: { seconds: snapshot.updateTime.seconds, nanoseconds: snapshot.updateTime.nanoseconds } } : {}) };
   }
 
   public async listSnapshots(collectionPath: string): Promise<readonly StoredDocumentSnapshot[]> {

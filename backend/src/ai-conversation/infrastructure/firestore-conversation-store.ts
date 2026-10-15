@@ -11,6 +11,8 @@ import type { PresentationMetadata } from "../ports/conversation-lifecycle.js";
 import { normalizePersonaInput } from "../../personas/domain/persona-values.js";
 import type { ConversationReadback } from "../ports/conversation-operations.js";
 
+import { inspectNoteSources, inspectProvenance, parseProvenance, validDependencies, type TransactionalNotePrerequisites } from "./transactional-note-sources.js";
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const RUNTIME = "ai_runtime_fence/current";
 type Location=Pick<OperationTarget,"ownerAccountId"|"conversationId">;
@@ -35,19 +37,24 @@ function current(a: OriginalWriteAuthority): void {
   try { if (a.current() === true) return; } catch { /* No original authority. */ }
   refuse("terminated");
 }
+// Request reads retain their original guard across each SDK dispatch/settlement.
+// Service-owned cleanup/retirement calls intentionally supply no request guard.
+async function readWhileCurrent<T>(check: (() => void) | undefined, read: () => Promise<T>): Promise<T> {
+  check?.(); const value = await read(); check?.(); return value;
+}
 interface Inventory { readonly parent: RecordData; readonly rows: readonly Snapshot[]; readonly cutoff: FullPrecisionInstant }
 
 /**
  * First isolated N02 vertical: actual SDK transactions, no ordinary composition.
- * Sources are deliberately held until DU's real writer/nonreuse guarantees and
- * ZHOU's transactional reader handoff exist. A nonempty dependency is refused,
- * never silently converted to an authorized empty snapshot. Empty sources must
- * come from the caller's already-authorized complete capture (synthetic here).
+ * Nonempty sources additionally require explicit source-bound producer facts
+ * for this gateway. Ordinary construction still omits that authority. Every
+ * actual effect and ordinary read checks sources in its own transaction.
  */
 export class FirestoreConversationStore implements RealConversationStore {
   private lastNow = Number.NEGATIVE_INFINITY;
   constructor(private readonly gateway: FirestoreGateway, environment: Readonly<Record<string, string | undefined>>,
-    private readonly utcMilliseconds: () => number = Date.now) {
+    private readonly utcMilliseconds: () => number = Date.now,
+    private readonly notePrerequisites?: TransactionalNotePrerequisites) {
     requireControlledEmulatorEnvironment(environment);
   }
 
@@ -77,33 +84,35 @@ export class FirestoreConversationStore implements RealConversationStore {
     // No intervening await between this original guard and SDK dispatch.
     return this.run(async tx => { current(a); const value = await work(tx); current(a); return value; });
   }
-  private async owner(tx: Tx, principal: AuthPrincipal, expected: string): Promise<RecordData> {
+  private async owner(tx: Tx, principal: AuthPrincipal, expected: string, check?: () => void): Promise<RecordData> {
     const bindingId = createAuthBindingDocumentId(principal.firebaseUid);
     if (bindingId === undefined) refuse("denied");
-    const binding = await tx.get(`auth_bindings/${bindingId}`);
+    const binding = await readWhileCurrent(check, () => tx.get(`auth_bindings/${bindingId}`));
     if (binding === undefined) refuse("denied");
     const owner = parseAuthBinding(binding);
     if (owner === undefined) refuse("unavailable");
     if (owner !== expected) refuse("denied");
-    const account = await tx.get(`accounts/${owner}`);
+    const account = await readWhileCurrent(check, () => tx.get(`accounts/${owner}`));
     if (account === undefined || parseAccountProjection(account) === undefined) refuse("unavailable");
     return account;
   }
   private async authority(tx: Tx, target: OperationTarget, a: OriginalWriteAuthority): Promise<void> {
-    const account = await this.owner(tx, a.principal, target.ownerAccountId);
+    const check = () => current(a);
+    const account = await this.owner(tx, a.principal, target.ownerAccountId, check);
     const deps = a.dependencies;
     if (deps.ownerId !== target.ownerAccountId || deps.purpose !== "checkin_conversation") refuse("denied");
     if (account.optionalProcessingConsent !== "accepted") refuse("denied");
     if (!nonnegative(account.purposeRevocationGeneration) || !nonnegative(deps.purposeRevocationGeneration)) refuse("unavailable");
     if (account.purposeRevocationGeneration > deps.purposeRevocationGeneration) refuse("denied");
     if (account.purposeRevocationGeneration !== deps.purposeRevocationGeneration) refuse("unavailable");
-    // No invented producer authority. Account-only empty-source vertical works independently.
-    if (deps.sources.length !== 0) refuse("unavailable");
+    if (!validDependencies(deps)) refuse("unavailable");
+    const sourceState = await inspectNoteSources(tx, this.gateway, this.notePrerequisites, target.ownerAccountId, deps.sources, deps, () => current(a));
+    if (sourceState !== "valid") refuse(sourceState === "invalid" ? "denied" : "unavailable");
     if (deps.usedPersonaId !== undefined) {
       if (!/^[0-9a-f]{64}$/.test(deps.usedPersonaId)) refuse("unavailable");
-      const persona = await tx.get(`accounts/${target.ownerAccountId}/personas/${deps.usedPersonaId}`);
+      const persona = await readWhileCurrent(check, () => tx.get(`accounts/${target.ownerAccountId}/personas/${deps.usedPersonaId}`));
       if (persona === undefined) refuse("denied");
-      const state = await tx.get(`accounts/${target.ownerAccountId}/persona_state/current`);
+      const state = await readWhileCurrent(check, () => tx.get(`accounts/${target.ownerAccountId}/persona_state/current`));
       const fields = normalizePersonaInput({ displayName: persona.displayName, tone: persona.tone,
         responseLength: persona.responseLength, formatStyle: persona.formatStyle });
       if (!positive(persona.revision) || fields === undefined || fields.displayName !== persona.displayName ||
@@ -113,8 +122,8 @@ export class FirestoreConversationStore implements RealConversationStore {
     }
     current(a);
   }
-  private async epoch(tx: Tx, expected: RuntimeEpoch): Promise<RecordData> {
-    const row = await tx.get(RUNTIME);
+  private async epoch(tx: Tx, expected: RuntimeEpoch, check?: () => void): Promise<RecordData> {
+    const row = await readWhileCurrent(check, () => tx.get(RUNTIME));
     if (row === undefined || !exact(row, ["processEpoch", "generation", "cleanupGeneration"]) ||
         typeof row.processEpoch !== "string" || !UUID.test(row.processEpoch) ||
         !positive(row.generation) || !nonnegative(row.cleanupGeneration)) refuse("unavailable");
@@ -129,24 +138,25 @@ export class FirestoreConversationStore implements RealConversationStore {
   }
   private async writable(tx: Tx, op: OpenOperation, a: OriginalWriteAuthority): Promise<void> {
     requireTarget(op);
-    await this.epoch(tx, op.epoch);
-    const row = await tx.get(fencePath(op));
+    const check = () => current(a);
+    await this.epoch(tx, op.epoch, check);
+    const row = await readWhileCurrent(check, () => tx.get(fencePath(op)));
     if (row === undefined || !this.fenceMatches(row, op)) refuse("unavailable");
     if (row.processEpoch !== op.epoch.processEpoch || row.state !== "open" || row.revision !== op.revision) refuse("terminated");
     await this.authority(tx, op, a);
   }
-  private async inventory(tx: Tx, target: Location, allowExpiredRetirement = false): Promise<Inventory | undefined> {
-    const parent = await tx.get(parentPath(target));
+  private async inventory(tx: Tx, target: Location, allowExpiredRetirement = false, check?: () => void): Promise<Inventory | undefined> {
+    const parent = await readWhileCurrent(check, () => tx.get(parentPath(target)));
     if (parent === undefined) {
       // A missing parent cannot hide retained children and become a fresh target.
       for (const collection of ["messages", "message_sources", "effects"]) {
-        if ((await tx.list(`${parentPath(target)}/${collection}`)).length !== 0) refuse("unavailable");
+        if ((await readWhileCurrent(check, () => tx.list(`${parentPath(target)}/${collection}`))).length !== 0) refuse("unavailable");
       }
       return undefined;
     }
     if (!exact(parent, ["state", "lifecycleVersion", "nextSequence", "latestMessageId"]) ||
         tx.listSnapshots === undefined) refuse("unavailable");
-    const rows = await tx.listSnapshots(`${parentPath(target)}/messages`);
+    const rows = await readWhileCurrent(check, () => tx.listSnapshots!(`${parentPath(target)}/messages`));
     for (const row of rows) this.message(row); // Validate records before any effect/read projection.
     const resolution = resolveRealRetention({ ownerAccountId: target.ownerAccountId, conversationId: target.conversationId,
       inventory: { parent: { ...parent, ownerAccountId: target.ownerAccountId, conversationId: target.conversationId },
@@ -281,7 +291,8 @@ export class FirestoreConversationStore implements RealConversationStore {
       const path = `${parentPath(op)}/messages/${input.messageId}`, provenance = `${parentPath(op)}/message_sources/${input.messageId}`;
       tx.create(path, { role: "assistant", sequence, availability: "available", text: input.text, replyToUserMessageId: op.userMessageId,
         ...input.presentation, appendBefore: inv.cutoff });
-      tx.create(provenance, { sources: [] }); // authority() has refused every nonempty dependency.
+      tx.create(provenance, { sources: a.dependencies.sources.map(({ sourceType, sourceId }) => ({ sourceType, sourceId })),
+        ...(a.dependencies.sources.length ? { purposeRevocationGeneration: a.dependencies.purposeRevocationGeneration } : {}) });
       tx.set(userPath(op), { ...user.data, acceptedAssistantMessageId: input.messageId });
       tx.set(effectPath(op), { ...effect, assistantMessageId: input.messageId });
       tx.set(parentPath(op), { ...inv.parent, nextSequence: sequence + 1, latestMessageId: input.messageId });
@@ -298,23 +309,34 @@ export class FirestoreConversationStore implements RealConversationStore {
       tx.set(fencePath(t), { ...row, state: "closed", revision: row.revision + 1 });
     });
   }
-  private async pair(tx: Tx, t: Location, inv: Inventory, user: Snapshot): Promise<StoredConversationMessage | undefined> {
+  private async pair(tx: Tx, t: Location, inv: Inventory, user: Snapshot, check?: () => void): Promise<StoredConversationMessage | undefined> {
+    check?.();
     const id = user.data.acceptedAssistantMessageId;
     if (id === undefined) return undefined;
     const assistant = inv.rows.find(r => r.id === id);
     if (assistant === undefined || assistant.data.role !== "assistant" || assistant.data.replyToUserMessageId !== user.id) refuse("unavailable");
-    const sources = await tx.get(`${parentPath(t)}/message_sources/${id as string}`);
-    if (assistant.data.availability === "available" &&
-        (sources === undefined || !exact(sources, ["sources"]) || !Array.isArray(sources.sources) || sources.sources.length !== 0)) refuse("unavailable");
-    if (assistant.data.availability === "unavailable" && sources !== undefined) refuse("unavailable");
+    const sources = await readWhileCurrent(check, () => tx.get(`${parentPath(t)}/message_sources/${id as string}`));
+    if (assistant.data.availability === "unavailable") {
+      if (sources !== undefined) refuse("unavailable");
+      return this.message(assistant);
+    }
+    const parsed = parseProvenance(sources); if (!parsed) refuse("unavailable");
+    const state = await readWhileCurrent(check, () => inspectProvenance(tx, this.gateway, this.notePrerequisites, t.ownerAccountId, parsed, check));
+    if (state === "unavailable") refuse("unavailable");
+    if (state === "invalid") {
+      // Immediate read suppression; the selected source sweep physically removes
+      // text/all provenance atomically. Do not write here before later page reads.
+      const { text: _content, ...metadata } = assistant.data;
+      return this.message({ ...assistant, data: { ...metadata, availability: "unavailable" } });
+    }
     return this.message(assistant);
   }
   async settleAcknowledgedAssistant(op: OpenOperation, a: OriginalWriteAuthority): Promise<StoreResult<void>> {
     return this.run(async tx => {
       current(a); await this.writable(tx, op, a);
-      const inv = await this.inventory(tx, op); if (inv === undefined) refuse("conversation_unavailable");
-      const user = this.requireUser(inv, op.userMessageId), effect = await tx.get(effectPath(op));
-      const assistant = await this.pair(tx, op, inv, user);
+      const inv = await this.inventory(tx, op, false, () => current(a)); if (inv === undefined) refuse("conversation_unavailable");
+      const user = this.requireUser(inv, op.userMessageId), effect = await readWhileCurrent(() => current(a), () => tx.get(effectPath(op)));
+      const assistant = await this.pair(tx, op, inv, user, () => current(a));
       if (user.data.pendingOperationId !== op.operationId || assistant === undefined || effect === undefined ||
           effect.assistantMessageId !== assistant.messageId || effect.userMessageId !== user.id || effect.kind !== op.kind) refuse("conflict");
       current(a); const { pendingOperationId: _claim, ...settled } = user.data;
@@ -394,10 +416,10 @@ export class FirestoreConversationStore implements RealConversationStore {
   }>> {
     return this.content(a, async tx => {
       await this.writable(tx, op, a);
-      const inv = await this.inventory(tx, op); if (inv === undefined) refuse("conversation_unavailable");
-      const user = this.requireUser(inv, op.userMessageId), effect = await tx.get(effectPath(op));
+      const inv = await this.inventory(tx, op, false, () => current(a)); if (inv === undefined) refuse("conversation_unavailable");
+      const user = this.requireUser(inv, op.userMessageId), effect = await readWhileCurrent(() => current(a), () => tx.get(effectPath(op)));
       if (user.data.pendingOperationId !== undefined) refuse("conflict");
-      const assistant = await this.pair(tx, op, inv, user);
+      const assistant = await this.pair(tx, op, inv, user, () => current(a));
       if (assistant === undefined || assistant.availability !== "available" || effect === undefined ||
           !exact(effect, ["kind", "userMessageId", "assistantMessageId"]) || effect.kind !== op.kind ||
           effect.userMessageId !== user.id || effect.assistantMessageId !== assistant.messageId) refuse("unavailable");
@@ -439,13 +461,13 @@ export class FirestoreConversationStore implements RealConversationStore {
   async listOwnedMessages(principal:AuthPrincipal,owner:string,id:string,before:number|undefined,current:()=>boolean):Promise<StoreResult<{
     readonly messages:readonly StoredConversationMessage[];readonly nextBefore?:number;
   }>>{
-    return this.run(async tx=>{this.readCurrent(current);const location=this.location(owner,id);await this.owner(tx,principal,owner);
-      const inv=await this.inventory(tx,location);if(!inv)refuse("conversation_unavailable");if(!tx.listMessagePage)refuse("unavailable");
-      const page=await tx.listMessagePage(`${parentPath(location)}/messages`,before),messages:StoredConversationMessage[]=[];
+    return this.run(async tx=>{const check=()=>this.readCurrent(current);check();const location=this.location(owner,id);await this.owner(tx,principal,owner,check);
+      const inv=await this.inventory(tx,location,false,check);if(!inv)refuse("conversation_unavailable");if(!tx.listMessagePage)refuse("unavailable");
+      const page=await readWhileCurrent(check,()=>tx.listMessagePage!(`${parentPath(location)}/messages`,before)),messages:StoredConversationMessage[]=[];
       for(const row of [...page].reverse()){
         if(!inv.rows.some(m=>m.id===row.id&&m.data.sequence===row.data.sequence))refuse("unavailable");
         if(row.data.role==="user")messages.push(this.message(row));else{
-          const user=this.requireUser(inv,row.data.replyToUserMessageId as string),a=await this.pair(tx,location,inv,user);
+          const user=this.requireUser(inv,row.data.replyToUserMessageId as string),a=await this.pair(tx,location,inv,user,check);
           if(!a||a.messageId!==row.id)refuse("unavailable");messages.push(a);
         }
       }
@@ -456,8 +478,10 @@ export class FirestoreConversationStore implements RealConversationStore {
   async readOwnedOutcome(principal:AuthPrincipal,owner:string,id:string,operationId:string,original:Omit<OperationTarget,"ownerAccountId">|undefined,
     current:()=>boolean):Promise<StoreResult<ConversationReadback>>{
     return this.run(async tx=>{
-      this.readCurrent(current);const location=this.location(owner,id);if(!UUID.test(operationId))refuse("unavailable");await this.owner(tx,principal,owner);
-      const inv=await this.inventory(tx,location),effect=await tx.get(`${parentPath(location)}/effects/${operationId}`),fence=await tx.get(`ai_operation_fences/${operationId}`);
+      const check=()=>this.readCurrent(current);check();const location=this.location(owner,id);if(!UUID.test(operationId))refuse("unavailable");await this.owner(tx,principal,owner,check);
+      const inv=await this.inventory(tx,location,false,check),
+        effect=await readWhileCurrent(check,()=>tx.get(`${parentPath(location)}/effects/${operationId}`)),
+        fence=await readWhileCurrent(check,()=>tx.get(`ai_operation_fences/${operationId}`));
       this.readCurrent(current);
       if(!inv){
         if(original&&original.operationId===operationId&&original.conversationId===id&&original.targetKind==="reserved_new"&&effect===undefined&&
@@ -471,7 +495,7 @@ export class FirestoreConversationStore implements RealConversationStore {
       const user=this.requireUser(inv,target.userMessageId);
       if(fence&&(!this.fenceMatches(fence,target)||fence.state!=="closed"))return {operationId,state:"unresolved"};
       if(user.data.pendingOperationId!==undefined&&(user.data.pendingOperationId!==operationId||!fence))return {operationId,state:"unresolved"};
-      const a=await this.pair(tx,target,inv,user);
+      const a=await this.pair(tx,target,inv,user,check);
       if(effect.assistantMessageId!==undefined&&effect.assistantMessageId!==a?.messageId)refuse("unavailable");
       this.readCurrent(current);
       if(user.data.pendingOperationId===operationId){const {pendingOperationId:_claim,...settled}=user.data;tx.set(userPath(target),settled);}

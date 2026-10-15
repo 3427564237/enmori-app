@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "checkpointSgt": "2026-10-16T00:35:34+08:00",
+  "product": {
+    "head": "f2404282f785dd0df08858679861828d63e2b6d8",
+    "tree": "bb56595f6676f027af89a11bbb31331a1473406e",
+    "base": "a33132d9a8e0119688d1415e5700de5847d38f0a",
+    "files": [
+      {
+        "path": "backend/src/shared/infrastructure/firebase/firestore-gateway.ts",
+        "blob": "054a02039a592a4a0c81976f058eb28f93887e9e",
+        "workingSha256": "154663dcaf5b2b259239812fdfac010088d620463d0e0dee043f63be83a30eb7",
+        "gitSha256": "154663dcaf5b2b259239812fdfac010088d620463d0e0dee043f63be83a30eb7"
+      },
+      {
+        "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-store.ts",
+        "blob": "b03161710b281e476901d5a19c6f650d899cbf97",
+        "workingSha256": "120a1c4c42085b2ecc2ed63912cb7dc82be85dd285ddc626f3c5fc0912540765",
+        "gitSha256": "120a1c4c42085b2ecc2ed63912cb7dc82be85dd285ddc626f3c5fc0912540765"
+      },
+      {
+        "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-maintenance.ts",
+        "blob": "ddb9212ee21899c5de6a03944000a7c4b520852b",
+        "workingSha256": "abb6f579f16fa17a5d4c9b6084318b17d3c982b7f6d6b3c4ba69139631a945bf",
+        "gitSha256": "abb6f579f16fa17a5d4c9b6084318b17d3c982b7f6d6b3c4ba69139631a945bf"
+      },
+      {
+        "path": "backend/src/ai-conversation/infrastructure/transactional-note-sources.ts",
+        "blob": "8d199e17aa66bd629116cdbed3353d90de7a87f8",
+        "workingSha256": "16ad0faf4cf507187ad011e246725bedcef0364db684290d6f881883c721bf5f",
+        "gitSha256": "16ad0faf4cf507187ad011e246725bedcef0364db684290d6f881883c721bf5f"
+      },
+      {
+        "path": "backend/src/bootstrap/isolated-conversation-composition.ts",
+        "blob": "53c0ea51eb614ca0e2785fcfdc7798311339c767",
+        "workingSha256": "fe053c70adf835a77ed0f75464256c9b276be224d025ac86eed67cbadb244167",
+        "gitSha256": "fe053c70adf835a77ed0f75464256c9b276be224d025ac86eed67cbadb244167"
+      },
+      {
+        "path": "backend/test/ai-conversation/transactional-note-sources.test.ts",
+        "blob": "2890be65e9bc9de8f57c38a70b937d858c86d5fb",
+        "workingSha256": "72962e5349ff436727a629c47f722c420e9857ec4c00b221c41d273ff61f197f",
+        "gitSha256": "72962e5349ff436727a629c47f722c420e9857ec4c00b221c41d273ff61f197f"
+      },
+      {
+        "path": "backend/emulator-test/controlled-phone-service.integration.test.ts",
+        "blob": "5cf56f7e7498cf186960312a55fd0bbf6a5844a3",
+        "workingSha256": "318728a4c0c9491e09b0e78ef60a277f1d8aa5e041a699f46761c1ec77a584c3",
+        "gitSha256": "318728a4c0c9491e09b0e78ef60a277f1d8aa5e041a699f46761c1ec77a584c3"
+      },
+      {
+        "path": "backend/emulator-test/real-conversation-store.integration.test.ts",
+        "blob": "e1dbf3a1b7a8a95791d855a7385f658495d0b407",
+        "workingSha256": "4d808f5f220825d672d6f9a9e275bc501ce5b613840a7d4834f24c3811307d80",
+        "gitSha256": "4d808f5f220825d672d6f9a9e275bc501ce5b613840a7d4834f24c3811307d80"
+      },
+      {
+        "path": "backend/emulator-test/real-conversation-maintenance.integration.test.ts",
+        "blob": "aa2e9c590524e528292eae4a2856bdfdaf612cc3",
+        "workingSha256": "80ee62d1f398d0bd24a7dffad7647d18a30afad7fdacd38e23d75009e3bd2396",
+        "gitSha256": "80ee62d1f398d0bd24a7dffad7647d18a30afad7fdacd38e23d75009e3bd2396"
+      },
+      {
+        "path": "lib/app/controlled_demo_app.dart",
+        "blob": "b7984796c42935575b14791930c73002a7f49787",
+        "workingSha256": "91eb4ab22e82baa3c08d45e6ed966302b8f27250a4267f83ee3d2221b69e9e37",
+        "gitSha256": "c99fb179c38a7009fcb69fd397c57caa0a6c86809ab220f6dfaebce5a3014997"
+      }
+    ]
+  },
+  "binding": {
+    "versionedInputs": 1257,
+    "sourceExact": 76,
+    "sourceCrlfEquivalent": 1181,
+    "allApkInputsBound": true,
+    "localCompleteReceiptSha256": "279e3a743e6d6ebdade93cc42a01923fd84269c2368b8db46be537379ebb60d4"
+  },
+  "unchanged": [
+    "api/openapi.json",
+    "backend/src/transport/route-inventory.ts",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pubspec.yaml",
+    "pubspec.lock",
+    "firebase.json",
+    "firestore.indexes.json"
+  ],
+  "operations": 35,
+  "schemas": 45,
+  "results": {
+    "strictBuild": "Pass",
+    "backend": {
+      "pass": 918,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exit": 0
+    },
+    "actualAuthFirestoreHttpDart": {
+      "pass": 168,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "outerExit": 0
+    },
+    "operator": {
+      "pass": 16,
+      "fail": 0,
+      "exit": 0
+    },
+    "focusedFlutter": {
+      "pass": 2,
+      "fail": 0,
+      "exit": 0
+    },
+    "analysis": "two-file fatal-info Pass",
+    "format": "one changed Dart file, zero changes",
+    "fullFlutter": "Not Run at this product; #127 658/1 Windows symlink failure remains open",
+    "actualNewSourceQwenPhoneProvider": "Not Run"
+  },
+  "apk": {
+    "file": "enmori-controlled-note-demo-f240428-arm64.apk",
+    "bytes": 94261175,
+    "sha256": "87eb10617fcb69f34a7336fe8426100859e83cbe409627888112946a0d92ebff",
+    "package": "com.enmori.app.personatest",
+    "versionName": "1.0.0",
+    "versionCode": 1,
+    "targetPlatform": "android-arm64",
+    "minSdk": 24,
+    "targetSdk": 36,
+    "signatureV2": true,
+    "installed": false
+  },
+  "cleanup": {
+    "ownedFixtureAssertions": "Pass",
+    "workerProfileRemoved": true,
+    "outerProfileRemoved": true,
+    "requiredPortsFree": [
+      8080,
+      9099,
+      4400,
+      4500,
+      9150
+    ],
+    "liPreviewTouched": false
+  },
+  "toolchain": {
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "admin": "14.3.0",
+    "firestore": "8.7.1",
+    "cli": "15.29.0",
+    "emulator": "1.22.0",
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "java": "21.0.12.1",
+    "androidBuildTools": "36.0.0"
+  },
+  "receipts": [
+    {
+      "name": "build-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "backend-final.log",
+      "bytes": 86629,
+      "sha256": "c3608312fb415fada84a0dc176da4292cb342847ec913a8378624e004407914d",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "sdk-final.log",
+      "bytes": 24924,
+      "sha256": "5c3adebb90a8ab88c334270e5cdb9a99e0501350965f3197998f9f6e3cfa660c",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "operator-final.log",
+      "bytes": 1855,
+      "sha256": "a1a834a6d421b687d577ebca8af874472be827cc2540e7b5c64cbf13106104fb",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "widget-final.log",
+      "bytes": 1541,
+      "sha256": "1b5d4df312f873645a26a3ce31424baf019d90228343c1ef0617c1997e6bb94f",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "analysis-final.log",
+      "bytes": 88,
+      "sha256": "5f66024caeeeb6e4b01a420f60e5e6774e883e18c0165d2c66288c744f4957b5",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "format-final.log",
+      "bytes": 47,
+      "sha256": "0ca2b8b657b5bdb6934dc921588ab79b77d42a489e47d006852a505eed82e96d",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "apk-final.log",
+      "bytes": 981,
+      "sha256": "0e9f63598b35069f11829d8945909a2b3f9320c8c57cba18ac4c779bd57bd3a9",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "apk-signature.txt",
+      "bytes": 351,
+      "sha256": "b9c6879e48d25a9786d2beb8a15738c06edce7d06f2722dd860894618592bd09",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "apk-badging.txt",
+      "bytes": 4835,
+      "sha256": "4651a0750a7afd2cf98a7b46cef2238fcca934755a0a07b46d7f1673110b33ac",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "sdk-run01.log",
+      "bytes": 24923,
+      "sha256": "a03033a0be2c4858488e40300754a5fd74c50150be8e5b0c1c263d23f25098ea",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "backend-before-final-guard.log",
+      "bytes": 86492,
+      "sha256": "a786a1b14313446311da2af011fdcc4c2e7c9a623eb9699b9f7b81e1cb0391a2",
+      "raw": "retained locally, not uploaded"
+    },
+    {
+      "name": "apk-pub-before-copy-complete.log",
+      "bytes": 61,
+      "sha256": "5232bd8d3189c6f39c96c8070f46a7cc922743d438484bc4ccef156a3781081e",
+      "raw": "retained locally, not uploaded"
+    }
+  ],
+  "preFinalExecution": {
+    "backend": 917,
+    "sdk": 168,
+    "status": "separate pre-final observation, not final-source totals",
+    "helperSha256": "30b1bec74f341a564ab291e6fe1760bc7e15df0b685e3e85952ea68f4364f61d",
+    "storeSha256": "505a88b4543542a93774c2b7cb177794d8edefe34c11733f9b6645480b162d7f",
+    "laterChanges": "synchronous original guard around each awaited source read, exact whole-invalidation behavior and disclosure"
+  },
+  "retainedLimitations": [
+    "No ordinary/cloud source authority, restore/ID reuse or new source writer",
+    "Model/compiler doubles in SDK suite; no new actual Qwen/device/provider operation",
+    "Current full Flutter/symlink execution remains unproved",
+    "Old #99/#126 failures and cleanup history are not resolved by this increment",
+    "SHI new-code review and LI evidence/fixed-source acceptance remain separate",
+    "15 October23:59 target not retrospectively met by this16October packet"
+  ]
+}

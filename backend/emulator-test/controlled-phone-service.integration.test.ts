@@ -297,7 +297,7 @@ test("ongoing service with no Event source exposes protected unavailable reads, 
   } finally { await cleanup(service); }
 });
 
-test("explicit demo joins real social/history persistence, preserves the nonempty-Note AI hold, and cleans all owned records", async () => {
+test("explicit demo joins saved Note AI, canonical provenance, real history/social persistence and owned cleanup", async () => {
   let observedNotes = 0;
   const service = await createControlledPhoneService({ ...options, demoFeatures: true,
     transport: { generate: async input => { observedNotes = input.checkIns.length; return reply(input); } } });
@@ -323,20 +323,28 @@ test("explicit demo joins real social/history persistence, preserves the nonempt
     await c.call("GET", "/v1/me/interests", 200);
     const before = await db.doc(`check_ins/${created.checkIn.checkInId}`).get();
     const op = await ticket(c);
-    // Retain the demonstrated held boundary: the accepted store explicitly
-    // refuses nonempty provenance. Do not strip Notes or weaken that guard.
-    await c.call("POST", `/v1/me/ai/operations/${op.operationId}/execute`, 503, { text: "今天读书了。" }, { "ai-operation-key": op.operationKey });
-    assert.equal(observedNotes, 0);
-    assert.equal(service.observation().modelAttempts, 1);
-    const deniedHistory = await c.call("GET", `/v1/me/conversations/${op.conversationId}/messages`, 404);
-    assert.equal(deniedHistory.error.code, "CONVERSATION_UNAVAILABLE");
-    const ownerDocuments = await db.collection("accounts").get();
-    assert.equal(ownerDocuments.size, 1);
-    const refusedTarget = ownerDocuments.docs[0]!.ref.collection("conversations").doc(op.conversationId);
-    assert.equal((await refusedTarget.get()).exists, false);
-    assert.equal((await refusedTarget.listCollections()).length, 0);
+    const savedPair = await c.call("POST", `/v1/me/ai/operations/${op.operationId}/execute`, 200, { text: "今天读书了。" }, { "ai-operation-key": op.operationKey });
+    assert.equal(observedNotes, 1);
+    assert.equal(service.observation().modelAttempts, 2);
+    const historyPair = await c.call("GET", `/v1/me/conversations/${op.conversationId}/messages`, 200);
+    assert.deepEqual(historyPair.messages, [savedPair.userMessage, savedPair.assistantMessage]);
+    const ownerDocuments = await db.collection("accounts").get(); assert.equal(ownerDocuments.size, 1);
+    const target = ownerDocuments.docs[0]!.ref.collection("conversations").doc(op.conversationId);
+    const provenance = await target.collection("message_sources").get(); assert.equal(provenance.size, 1);
+    assert.deepEqual(provenance.docs[0]!.data(), { sources: [{ sourceType: "check_in", sourceId: created.checkIn.checkInId }], purposeRevocationGeneration: 0 });
+    // Visibility-only change is not a new AI denial or source incarnation.
+    await db.doc(`check_ins/${created.checkIn.checkInId}`).update({ checkInVisibility: "public" });
+    assert.deepEqual((await c.call("GET", `/v1/me/conversations/${op.conversationId}/messages`, 200)).messages, historyPair.messages);
+    await c.call("PUT", "/v1/me/settings", 200, { checkInVisibility: "private", optionalProcessingConsent: "rejected", expectedRevision: 0 });
+    await c.call("PUT", "/v1/me/settings", 200, { checkInVisibility: "private", optionalProcessingConsent: "accepted", expectedRevision: 1 });
+    const suppressed = (await c.call("GET", `/v1/me/conversations/${op.conversationId}/messages`, 200)).messages as { role: string; availability: string; text?: string }[];
+    assert.equal(suppressed[1]!.availability, "unavailable"); assert.equal(Object.hasOwn(suppressed[1]!, "text"), false);
+    // An ordinary read suppresses immediately without rewriting clocks. The
+    // existing separately scheduled source sweep owns physical tombstoning.
+    assert.equal((await provenance.docs[0]!.ref.get()).exists, true);
     const after = await db.doc(`check_ins/${created.checkIn.checkInId}`).get();
-    assert.deepEqual(after.data(), before.data()); assert(before.updateTime!.isEqual(after.updateTime!));
+    assert.deepEqual(after.data(), { ...before.data(), checkInVisibility: "public" });
+    assert(before.createTime!.isEqual(after.createTime!));
     await c.call("DELETE", `/v1/check-ins/${created.checkIn.checkInId}`, 404);
     await c.call("PUT", `/v1/check-ins/${created.checkIn.checkInId}`, 404, { note: "not allowed" });
   } finally {

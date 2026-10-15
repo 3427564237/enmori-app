@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "checkpointSgt": "2026-10-16T01:15:33+08:00",
+  "reviewFinding": {
+    "review": 5536837666,
+    "comment": 4285852304,
+    "head": "5229fefe5ee3bce5fa0962514de943b76a57abc0"
+  },
+  "product": {
+    "head": "27705999ebf3840f8d9b768a7714382d60632617",
+    "tree": "50cb02c2b619964cad352b991bf52edcb95aa6cc",
+    "base": "5229fefe5ee3bce5fa0962514de943b76a57abc0",
+    "files": [
+      {
+        "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-store.ts",
+        "blob": "ee77bd1e85a171f28d59554294344093e441b65e",
+        "workingSha256": "38d2e1647ce21929e51de6458937e927bc580d00dcfb8c9434334c80eeffc82e",
+        "gitSha256": "38d2e1647ce21929e51de6458937e927bc580d00dcfb8c9434334c80eeffc82e"
+      },
+      {
+        "path": "backend/src/ai-conversation/infrastructure/transactional-note-sources.ts",
+        "blob": "fee486fe1c35f7c2c1027931f28b2a24d1038ded",
+        "workingSha256": "d183ede5c1ffb7e0cd7df4c978e50c97d7a590377e32f7e00088e9a8ca5afb92",
+        "gitSha256": "d183ede5c1ffb7e0cd7df4c978e50c97d7a590377e32f7e00088e9a8ca5afb92"
+      },
+      {
+        "path": "backend/test/ai-conversation/sourced-pair-cancellation.test.ts",
+        "blob": "3c16f0c7d3c7a30040e67d13c8c68d946148b082",
+        "workingSha256": "ababbd032f788ff6af3e58ff7c794a49dab9ae2f00e8478bdd4c99b54d6592d7",
+        "gitSha256": "ababbd032f788ff6af3e58ff7c794a49dab9ae2f00e8478bdd4c99b54d6592d7"
+      }
+    ]
+  },
+  "scope": "R1 original/current guard propagation; two implementation files and one public-method regression file",
+  "results": {
+    "strictBuild": {
+      "exit": 0
+    },
+    "originalSourceWithNewRegressionTests": {
+      "pass": 4,
+      "fail": 12,
+      "exit": 1
+    },
+    "correctedPublicRegressions": {
+      "pass": 16,
+      "fail": 0,
+      "exit": 0
+    },
+    "backend": {
+      "pass": 934,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exit": 0
+    },
+    "actualGuardedAuthFirestoreHttpDart": {
+      "pass": 168,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "outerExit": 0
+    }
+  },
+  "originalFailureAttribution": "5229fefe production files plus the submitted regression test; this was a reviewer-finding reproduction, not a rerun of the old 918 suite",
+  "firstSdkRun": {
+    "pass": 167,
+    "fail": 1,
+    "outerExit": 1,
+    "failure": "Dart probe invalid non-content JSON before client execution",
+    "diagnosis": "Isolated archive lacked local package configuration and resolved the ancestor old checkout; zero-token diagnostic reproduced missing current package imports. Existing pinned Flutter offline pub restore created the correct local package configuration; the same zero-token diagnostic then reached the expected missing-argument exit2. No source/test/dependency change.",
+    "cleanup": "worker/outer profile removal and five-port-free markers retained"
+  },
+  "bindings": {
+    "productFiles": 1260,
+    "exact": 70,
+    "crlfEquivalent": 1190,
+    "fullLocalInventorySha256": "0fbc8bfb0823d6bdaeb8ed8fbfa116920edd750f6bf45a469afaabc5eadeb439",
+    "compiledOutputs": [
+      {
+        "path": "backend/dist/src/ai-conversation/infrastructure/firestore-conversation-store.js",
+        "sha256": "d26c8b13d5fe26adfbff58b632852c80d40695d21b7dd81da4a78345890a0666"
+      },
+      {
+        "path": "backend/dist/src/ai-conversation/infrastructure/transactional-note-sources.js",
+        "sha256": "efde860730ca160d7af0b806abde6f1b080437489eb3bd6c4b34dd35231f2eba"
+      },
+      {
+        "path": "backend/dist/test/ai-conversation/sourced-pair-cancellation.test.js",
+        "sha256": "b36d0ecff2be07bbaed3b6ed778fc2f7f981f026e7c047397b27cd642dd7ad3f"
+      }
+    ]
+  },
+  "protected": [
+    "api/openapi.json",
+    "backend/src/transport/route-inventory.ts",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pubspec.yaml",
+    "pubspec.lock",
+    "firebase.json",
+    "firestore.indexes.json",
+    "backend/src/ai-conversation/infrastructure/firestore-conversation-maintenance.ts"
+  ],
+  "api": {
+    "operations": 35,
+    "schemas": 45
+  },
+  "cleanup": {
+    "workerProfileRemoved": true,
+    "outerProfileRemoved": true,
+    "requiredPortsFree": [
+      8080,
+      9099,
+      4400,
+      4500,
+      9150
+    ],
+    "fixtureAssertions": "Pass",
+    "existingPreviewModelPhoneTouched": false
+  },
+  "receipts": [
+    {
+      "file": "red-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "raw": "retained locally"
+    },
+    {
+      "file": "red-probes.log",
+      "sha256": "9a786358f7560b01d96b3db6ba56e1ae2026d9006ec1716a8ee2bb68cd0a1262",
+      "bytes": 19236,
+      "raw": "retained locally"
+    },
+    {
+      "file": "build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "raw": "retained locally"
+    },
+    {
+      "file": "probes.log",
+      "sha256": "d2d8a2538cd1879a8ae55ce8b500abacebccea7c296c4a8e08c65d607bfc7731",
+      "bytes": 1808,
+      "raw": "retained locally"
+    },
+    {
+      "file": "backend.log",
+      "sha256": "1dc73fceea762494890d3607c302cf74bb5e6f5d2340ac6a179f043ff3b5f7c6",
+      "bytes": 88307,
+      "raw": "retained locally"
+    },
+    {
+      "file": "sdk.log",
+      "sha256": "9d7ab43eb456e332d9d0e59c8c62dd0c73332ed2747f021505fdd2ff1cc463e9",
+      "bytes": 24923,
+      "raw": "retained locally"
+    },
+    {
+      "file": "sdk-run01.log",
+      "sha256": "51b029d698aee9d1d0e5e45444783aeb7924c6c5214c5874344c36ae5d1bc262",
+      "bytes": 26298,
+      "raw": "retained locally"
+    },
+    {
+      "file": "dart-preflight-before.log",
+      "sha256": "467a80f8f4bdf10eff6677936f9bf05be61c3f62594f69a255e93fe62d902f3c",
+      "bytes": 4982,
+      "raw": "retained locally"
+    },
+    {
+      "file": "pub-offline.log",
+      "sha256": "c083f9ce64654caa4975b431c9e24916bd2b0af137a60f0e49f45dfb26fee81c",
+      "bytes": 71,
+      "raw": "retained locally"
+    },
+    {
+      "file": "dart-preflight-after.log",
+      "sha256": "6be3101ac4f4b360c7b347d150b61772a418b407a176c870a1c3cb40911e85ae",
+      "bytes": 62,
+      "raw": "retained locally"
+    },
+    {
+      "file": "source-verification.log",
+      "sha256": "2e3bca8fec4db34abcaadd588b1a20663a09f27209289de9faf805549c09a363",
+      "bytes": 448,
+      "raw": "retained locally"
+    }
+  ],
+  "toolchain": {
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "admin": "14.3.0",
+    "firestore": "8.7.1",
+    "firebaseCli": "15.29.0",
+    "emulator": "1.22.0",
+    "dart": "3.13.2",
+    "java": "21.0.12.1"
+  },
+  "unchangedClientArtifact": {
+    "sha256": "87eb10617fcb69f34a7336fe8426100859e83cbe409627888112946a0d92ebff",
+    "buildSource": "f2404282f785dd0df08858679861828d63e2b6d8",
+    "status": "previous unchanged-client APK; no new build/install/device claim"
+  },
+  "notRun": [
+    "Full Flutter on this corrected Backend candidate",
+    "New APK build or install",
+    "Actual Qwen+Note/mobile/provider/browser/private-handoff acceptance"
+  ],
+  "retained": [
+    "SHI R1 and original failed probes remain historical pending independent correction review",
+    "LI #127659/symlink1 is cleared at its source, not transferred",
+    "Old #99 reliability and #126 CONSUMED failures remain separate",
+    "No new deadline or whole-baseline completion claim"
+  ]
+}

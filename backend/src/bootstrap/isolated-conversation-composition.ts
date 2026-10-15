@@ -46,7 +46,8 @@ export async function createIsolatedConversationComposition(options: {
   if (options.notePrerequisites && options.notePrerequisites.firestore !== options.firestore) throw new Error("Mismatched Note authority");
   const clock = new MonotonicRuntimeClock(), io = new ConversationIoTracker(), utcMilliseconds=options.utcMilliseconds??Date.now;
   const gateway = new FirebaseAdminFirestoreGateway(options.firestore);
-  const store = new FirestoreConversationStore(gateway,options.environment,utcMilliseconds);
+  const notePrerequisites = options.notePrerequisites ? { ...options.notePrerequisites, gateway } : undefined;
+  const store = new FirestoreConversationStore(gateway,options.environment,utcMilliseconds,notePrerequisites);
   const start = await store.startEpoch(randomUUID());
   if (start.kind !== "confirmed") throw new Error("Isolated runtime epoch unavailable");
   const epoch = start.value;
@@ -72,7 +73,7 @@ export async function createIsolatedConversationComposition(options: {
         const bridge=new TrackedAsyncConversationStore(new AsyncFirestoreConversationStore(store,epoch,authority),io,store,epoch,options.reportRetirement);
         return {authority,reads,store:bridge,acknowledgedPair:bridge};
       }}).create(input,delivery)},readers);
-  const maintenance=new FirestoreConversationMaintenance(gateway,options.environment,cleanup,quiescence,utcMilliseconds);
+  const maintenance=new FirestoreConversationMaintenance(gateway,options.environment,cleanup,quiescence,utcMilliseconds,notePrerequisites);
   // Construct consumer BEFORE startup sweeps, expose operations only AFTER them.
   const runner=startConversationMaintenance(maintenance,epoch,options.report,options.schedule);
   await runner.settled();

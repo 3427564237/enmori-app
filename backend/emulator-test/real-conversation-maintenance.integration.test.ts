@@ -470,3 +470,34 @@ test("actual general isolated composition traverses all six HTTP operations, ind
     token="";await auth.deleteUser(uid);await assert.rejects(auth.getUser(uid));
   }
 });
+
+test("source-bound actual sweep keeps live sources, then atomically tombstones all pairs on permanent used-source deletion", async()=>{
+  const first=randomUUID(),second=randomUUID();
+  for(const id of [first,second])await set(`check_ins/${id}`,{ownerAccountId:owner,note:"Synthetic immutable Note",createdAt:new Date().toISOString()});
+  const row=await pair([{sourceType:"check_in",sourceId:first},{sourceType:"check_in",sourceId:second}],2);
+  const sourcePath=`${row.base}/message_sources/${row.a}`,messagePath=`${row.base}/messages/${row.a}`;
+  const original=await db.doc(messagePath).get();
+  const cleanup=new FirestoreConversationCleanup(gateway,process.env,idle,now);
+  const maintenance=new FirestoreConversationMaintenance(gateway,process.env,cleanup,idle,now,{gateway,
+    sourceReferences:["this owned synthetic create-only fixture; explicit permanent test delete, no restore"],completeCanonicalUtcInventory:true,
+    immutableOwnerNoteAndTime:true,permanentDeletion:true,noRestoreOrIdReuse:true});
+  assert.equal((await maintenance.sourceSweep(epoch)).complete,true);
+  assert.deepEqual((await db.doc(messagePath).get()).data(),original.data());
+  await db.doc(`check_ins/${first}`).delete();
+  const swept=await maintenance.sourceSweep(epoch);assert.equal(swept.complete,true);assert.equal(swept.changed,1);
+  const final=await db.doc(messagePath).get();const {text:_discarded,...metadata}=original.data()!;
+  assert.deepEqual(final.data(),{...metadata,availability:"unavailable"});assert(final.createTime!.isEqual(original.createTime!));
+  assert.equal((await db.doc(sourcePath).get()).exists,false);assert.equal((await db.doc(`check_ins/${second}`).get()).exists,true);
+  assert.equal((await maintenance.sourceSweep(epoch)).changed,0);
+});
+
+test("source-bound sweep treats corrupt owner/time or unknown read as incomplete, not proof for permanent erasure",async()=>{
+  const id=randomUUID();await set(`check_ins/${id}`,{ownerAccountId:owner,note:"Synthetic Note",createdAt:"2026-10-16T00:00:00Z"});
+  const row=await pair([{sourceType:"check_in",sourceId:id}],2),original=await db.doc(`${row.base}/messages/${row.a}`).get();
+  const cleanup=new FirestoreConversationCleanup(gateway,process.env,idle,now);
+  const maintenance=new FirestoreConversationMaintenance(gateway,process.env,cleanup,idle,now,{gateway,sourceReferences:["explicit negative fixture"],
+    completeCanonicalUtcInventory:true,immutableOwnerNoteAndTime:true,permanentDeletion:true,noRestoreOrIdReuse:true});
+  const result=await maintenance.sourceSweep(epoch);assert.equal(result.complete,false);assert.equal(result.changed,0);
+  assert.deepEqual((await db.doc(`${row.base}/messages/${row.a}`).get()).data(),original.data());
+  assert.equal((await db.doc(`${row.base}/message_sources/${row.a}`).get()).exists,true);
+});

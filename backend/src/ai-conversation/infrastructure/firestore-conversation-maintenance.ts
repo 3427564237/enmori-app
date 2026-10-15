@@ -4,9 +4,11 @@ import type { RuntimeEpoch } from "../ports/real-conversation-store.js";
 import type { ConversationCleanup, ConversationQuiescence } from "../ports/conversation-cleanup.js";
 import { parseCanonicalAiMessageLocation, type CanonicalAiMessageCollection } from "../domain/canonical-ai-message-location.js";
 import { resolveRealRetention } from "../domain/real-retention-resolver.js";
-import { parseReadAuthority, parseReadInstant, compareInstant } from "./real-context-records.js";
+import { parseReadInstant, compareInstant } from "./real-context-records.js";
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
 import type { ConversationMaintenance, MaintenanceResult } from "../ports/conversation-maintenance.js";
+
+import { inspectProvenance, parseProvenance, type TransactionalNotePrerequisites } from "./transactional-note-sources.js";
 
 const RUNTIME="ai_runtime_fence/current", PROGRESS="ai_cleanup_progress/source_sweep";
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -33,7 +35,7 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
   private lastNow=Number.NEGATIVE_INFINITY;
   constructor(private readonly gateway:FirestoreGateway, environment:Readonly<Record<string,string|undefined>>,
     private readonly cleanup:ConversationCleanup,private readonly quiescence:ConversationQuiescence,
-    private readonly utcMilliseconds:()=>number=Date.now){requireControlledEmulatorEnvironment(environment);}
+    private readonly utcMilliseconds:()=>number=Date.now,private readonly notePrerequisites?:TransactionalNotePrerequisites){requireControlledEmulatorEnvironment(environment);}
   private tx<T>(work:(tx:Tx)=>Promise<T>):Promise<T>{return this.gateway.runTransaction(work,{maxAttempts:1});}
   private now():FullPrecisionInstant{
     const ms=this.utcMilliseconds();if(!Number.isSafeInteger(ms)||ms<this.lastNow)unavailable();this.lastNow=ms;
@@ -115,24 +117,12 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
         if(source)tx.delete(sourcePath);
         return source||Object.hasOwn(a.data,"text")?"changed":"kept";
       }
-      if(typeof a.data.text!=="string"||!a.data.text.isWellFormed()||!a.data.text.trim()||!source||!exact(source,["sources"],["purposeRevocationGeneration"])||!Array.isArray(source.sources)||source.sources.length>5)unavailable();
-      const seen=new Set<string>();
-      for(const item of source.sources){
-        if(typeof item!=="object"||item===null||Array.isArray(item)||!exact(item,["sourceType","sourceId"])||item.sourceType!=="check_in"||
-          typeof item.sourceId!=="string"||!item.sourceId||!item.sourceId.isWellFormed()||item.sourceId.includes("/")||seen.has(item.sourceId))unavailable();
-        seen.add(item.sourceId);
-      }
-      if(source.sources.length===0){if(Object.hasOwn(source,"purposeRevocationGeneration"))unavailable();return "kept";}
-      if(!uint(source.purposeRevocationGeneration))unavailable();
-      const authority=parseReadAuthority(await tx.get(`accounts/${at.ownerAccountId}`),at.ownerAccountId);
-      if(!authority||authority.purposeRevocationGeneration<source.purposeRevocationGeneration)unavailable();
-      if(authority.purposeRevocationGeneration===source.purposeRevocationGeneration){
-        // DU's operational no-restore/nonreuse proof is absent. A present or
-        // missing Note alone cannot certify permanent current source identity.
-        unavailable();
-      }
-      // A complete legal monotonic generation advancement independently proves
-      // revocation, including revoke/regrant offline. Remove ALL source pairs.
+      if(typeof a.data.text!=="string"||!a.data.text.isWellFormed()||!a.data.text.trim())unavailable();
+      const parsed=parseProvenance(source);if(!parsed)unavailable();
+      const state=await inspectProvenance(tx,this.gateway,this.notePrerequisites,at.ownerAccountId,parsed);
+      if(state==="unavailable")unavailable();if(state==="valid")return "kept";
+      // Confirmed monotonic revocation or permanent used-source deletion. Remove
+      // ALL provenance/stamp and text, preserving metadata/pair/retention clocks.
       const {text:_discarded,...metadata}=a.data;
       tx.set(messagePath,{...metadata,availability:"unavailable"});tx.delete(sourcePath);return "changed";
     });
