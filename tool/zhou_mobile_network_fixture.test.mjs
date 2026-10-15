@@ -16,7 +16,7 @@ class Child extends EventEmitter {
   }
   kill() { setImmediate(() => this.finish(1)); return true; }
 }
-function setup({ conflict = false, changedMapping = false, markers = true, duplicateMarker = false, badPackage = false, failSignature = false, quarantine = false, missingLease = false, changedApk = false, abruptExit = false, failedDisposal = false, differentRunnerApk = false, missingPrebuiltApk = false, badRunnerPackage = false, badRunnerSignature = false, exitBeforeRunnerInspection = false, exitDuringDelivery = false } = {}) {
+function setup({ conflict = false, changedMapping = false, markers = true, duplicateMarker = false, badPackage = false, failSignature = false, quarantine = false, missingLease = false, changedApk = false, abruptExit = false, failedDisposal = false, differentRunnerApk = false, missingPrebuiltApk = false, badRunnerPackage = false, badRunnerSignature = false, exitBeforeRunnerInspection = false, exitDuringDelivery = false, freshFlutterProfile = false } = {}) {
   const calls = [], phases = [], reverses = new Map([['tcp:9099', conflict ? 'tcp:12345' : 'tcp:9099']]);
   let privateReads = 0, delivered, cleaned = 0, preserved = 0, tlsClosed = 0, disposed = 0, fixtureState = { modelAttempts: 1, modelPending: quarantine ? 1 : 0, nonTerminal: 0, quarantined: quarantine };
   let androidChild;
@@ -82,7 +82,7 @@ function setup({ conflict = false, changedMapping = false, markers = true, dupli
         }
         let output = '', code = 0;
         if (program === '/flutter/dart' && args[0] === '--version') output = 'Dart SDK version: 3.13.2 (stable)';
-        else if (program === '/flutter/dart' && args.includes('--machine')) output = JSON.stringify({ frameworkVersion: '3.47.2', dartSdkVersion: '3.13.2 (stable)' });
+        else if (program === '/flutter/dart' && args.includes('--machine')) output = JSON.stringify({ frameworkVersion: '3.47.2', dartSdkVersion: '3.13.2 (stable)' }) + (freshFlutterProfile && !calls.some(call => call.args.includes('--disable-analytics')) ? '\nFirst-run telemetry notice\n' : '');
         else if (program === '/tools/aapt' && args.includes('badging')) output = `package: name='${badPackage || badRunnerPackage && calls.some(call => call.args.includes('test')) ? 'com.enmori.app' : 'com.enmori.app.personatest'}' versionCode='1'\nlaunchable-activity: name='com.enmori.app.MainActivity'\n`;
         else if (program === '/tools/aapt' && args.includes('xmltree')) output = '  A: package="com.enmori.app.personatest"\n';
         else if (program === '/tools/java') code = failSignature || badRunnerSignature && calls.some(call => call.args.includes('test')) ? 1 : 0;
@@ -122,6 +122,17 @@ test('pipeline verifies dedicated APK/signature before installation, delivers fr
     assert.equal(JSON.stringify(call).includes('never-forward-this-token'), false);
   }
   assert.equal(JSON.stringify(report).includes('private-marker-value'), false);
+});
+
+test('fresh isolated Flutter profile keeps version JSON clean before build or credentials', async () => {
+  const state = setup({ freshFlutterProfile: true });
+  const report = await runZhouMobileNetworkFixture(state.options);
+  assert.equal(report.result, 'passed');
+  const version = state.calls.find(call => call.args.includes('--machine'));
+  assert.equal(version.options.env.DASH__SUPPRESS_ANALYTICS, 'true');
+  assert.ok(state.calls.findIndex(call => call.args.includes('--disable-analytics')) < state.calls.indexOf(version));
+  assert.equal(state.options.environment.DASH__SUPPRESS_ANALYTICS, undefined);
+  assert.equal(state.observation().privateReads, 1);
 });
 
 test('runner-generated APK differs from direct target prebuild yet remains correctly attributed', async () => {

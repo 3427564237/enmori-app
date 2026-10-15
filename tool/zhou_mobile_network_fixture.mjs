@@ -37,6 +37,8 @@ export async function runZhouMobileNetworkFixture({
   onPhase = () => {}, commandTimeoutMs = 30_000, flutterTimeoutMs = 300_000,
   buildTimeoutMs = 300_000, terminalTimeoutMs = 65_000,
 }) {
+  // Keep all Flutter commands in the owned profile opted out of telemetry.
+  const toolEnvironment = { ...environment, DASH__SUPPRESS_ANALYTICS: 'true' };
   let httpsServer, httpsListening = false, flutterChild, flutterExited = true;
   let markerCount = 0, acceptedSeen = false, finishedSeen = false, delivered = false;
   let currentStage = 'preflight', blockedStage, cleanupPassed = false, fixturePreserved = false;
@@ -62,7 +64,7 @@ export async function runZhouMobileNetworkFixture({
     credentialCleanupConfirmed, rawChildOutputDiscarded: true,
   });
   // Short commands retain bounded output only in memory and never print it.
-  const run = (program, args, childEnvironment = environment, timeout = commandTimeoutMs) => new Promise((done, reject) => {
+  const run = (program, args, childEnvironment = toolEnvironment, timeout = commandTimeoutMs) => new Promise((done, reject) => {
     const child = spawnChild(program, args, { cwd: repository, env: childEnvironment, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
     let output = '', size = 0;
     const timer = setTimeout(() => { child.kill(); reject(failure()); }, timeout);
@@ -130,10 +132,13 @@ export async function runZhouMobileNetworkFixture({
     }
     for (const timeout of [commandTimeoutMs, buildTimeoutMs, flutterTimeoutMs, terminalTimeoutMs]) assert.ok(Number.isFinite(timeout) && timeout > 0);
     assert.match(await run(flutterDart, ['--version']), /Dart SDK version: 3\.13\.2(?:\s|\()/);
+    // First-run consent text is appended even with suppression enabled.
+    // Initialize only this isolated profile before strictly parsing machine JSON.
+    await run(flutterDart, [flutterSnapshot, '--suppress-analytics', '--disable-analytics']);
     const flutterVersion = JSON.parse(await run(flutterDart, [flutterSnapshot, '--suppress-analytics', '--version', '--machine']));
     assert.equal(flutterVersion.frameworkVersion, '3.47.2');
     assert.match(flutterVersion.dartSdkVersion, /^3\.13\.2(?:\s|$)/);
-    const flutterEnvironment = { ...environment, ENMORI_PERSONA_ANDROID_TEST: 'true', DASH__SUPPRESS_ANALYTICS: 'true',
+    const flutterEnvironment = { ...toolEnvironment, ENMORI_PERSONA_ANDROID_TEST: 'true', DASH__SUPPRESS_ANALYTICS: 'true',
       GRADLE_OPTS: '-Dorg.gradle.project.kotlin.incremental=false -Dorg.gradle.project.kotlin.compiler.execution.strategy=in-process' };
     phase('dedicated-build');
     // Building cannot install an APK. A clean checkout need not contain an old
