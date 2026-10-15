@@ -84,7 +84,13 @@ void main() {
       );
       await _atTop(tester, 'route-check-in');
       await _unique(tester, find.byKey(const Key('r6-check-in-confirmed')));
-      expect(find.textContaining(note), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('r6-check-in-confirmed')),
+          matching: find.textContaining(note),
+        ),
+        findsOneWidget,
+      );
       expect(store.notes.length, originalNotes + 1);
       await _tapKey(
         tester,
@@ -102,7 +108,13 @@ void main() {
         tester,
         find.byKey(const Key('r6-saved-check-in-confirmed')),
       );
-      expect(find.textContaining(note), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('r6-saved-check-in-confirmed')),
+          matching: find.textContaining(note),
+        ),
+        findsOneWidget,
+      );
       await _tapKey(
         tester,
         'r6-return-home',
