@@ -48,13 +48,8 @@ void main() {
         () async => const Success('synthetic-not-a-credential'),
         httpClient: MockClient((request) async {
           calls.add(request);
-          expect(request.method, 'GET');
-          expect(request.url.query, isEmpty);
-          expect(request.body, isEmpty);
-          expect(
-            request.headers['authorization'],
-            'Bearer synthetic-not-a-credential',
-          );
+          // Native callbacks may run during a guarded tester action. Record
+          // requests here; assert metadata in the owning test after the read.
           final summary = <String, Object?>{
             'browseId': id,
             'title': title,
@@ -67,9 +62,10 @@ void main() {
               'scope': 'ticketmaster_sg_first_batch_v1',
               'items': [summary],
             };
-          } else {
-            expect(request.url.path, '/v1/event-browse/$id');
+          } else if (request.url.path == '/v1/event-browse/$id') {
             payload = {...summary, 'externalSourceUrl': source};
+          } else {
+            throw StateError('Unexpected synthetic activity route.');
           }
           return http.Response(
             jsonEncode(payload),
@@ -89,7 +85,7 @@ void main() {
           routerGateProvider.overrideWith((ref) => gate),
           activityBrowseEnabledProvider.overrideWithValue(true),
           activityRepositoryProvider.overrideWithValue(
-            _ObservedRepository(BackendActivityRepository(client)),
+            BackendActivityRepository(client),
           ),
           externalActivityOpenerProvider.overrideWithValue(opener),
           eventRecommendationRepositoryProvider.overrideWithValue(
@@ -155,9 +151,11 @@ void main() {
       await _tap(tester, find.byKey(const Key('home-browse-activities')));
       expect(calls.map((r) => r.url.path), ['/v1/event-browse']);
       await _readReady(tester, container, '', batch: true);
+      _assertReadRequests(calls);
       expect(find.textContaining('not the full catalogue'), findsOneWidget);
       await _tap(tester, find.text(title));
       await _readReady(tester, container, id, batch: false);
+      _assertReadRequests(calls);
       expect(find.text('Activity details'), findsOneWidget);
       expect(find.text('End time unavailable.'), findsOneWidget);
       expect(find.text('Location unavailable.'), findsOneWidget);
@@ -201,6 +199,7 @@ void main() {
       await _tap(tester, find.text('Reload'));
       await _readReady(tester, container, '', batch: true);
       expect(calls.length, 4);
+      _assertReadRequests(calls);
       expect(find.text(title), findsOneWidget);
       expect(calls.map((r) => r.url.path), [
         '/v1/event-browse',
@@ -274,6 +273,7 @@ Future<void> _readReady(
     await tester.pump(const Duration(milliseconds: 100));
     final state = container.read(activityControllerProvider(id));
     if (batch ? state.value is ActivityBatch : state.value is ActivityDetail) {
+      await tester.pump();
       return;
     }
     if (state.hasError || DateTime.now().isAfter(deadline)) {
@@ -291,34 +291,14 @@ Future<void> _readReady(
   }
 }
 
-final class _ObservedRepository implements ActivityRepository {
-  _ObservedRepository(this.delegate);
-  final ActivityRepository delegate;
-  @override
-  Future<Result<ActivityRead>> read(String? id) async {
-    try {
-      final result = await delegate.read(id);
-      if (result case Failure<ActivityRead>(:final failure)) {
-        debugPrint(
-          'ENMORI_ACTIVITY_STAGE adapter_failure_${failure.kind.name}',
-        );
-      }
-      return result;
-    } catch (error, stack) {
-      debugPrint(
-        'ENMORI_ACTIVITY_DIAGNOSTIC exception_type_${error.runtimeType}',
-      );
-      for (final frame in stack.toString().split('\n').take(6)) {
-        debugPrint('ENMORI_ACTIVITY_DIAGNOSTIC $frame');
-      }
-      debugPrint(
-        'ENMORI_ACTIVITY_STAGE adapter_exception_${error is TestFailure
-            ? 'fixture_assertion'
-            : error is FormatException
-            ? 'format'
-            : 'other'}',
-      );
-      rethrow;
-    }
+void _assertReadRequests(List<http.Request> requests) {
+  for (final request in requests) {
+    expect(request.method, 'GET');
+    expect(request.url.query, isEmpty);
+    expect(request.body, isEmpty);
+    expect(
+      request.headers['authorization'],
+      'Bearer synthetic-not-a-credential',
+    );
   }
 }
