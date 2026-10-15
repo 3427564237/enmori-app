@@ -18,6 +18,20 @@ const safeFailure = reason => ({status: 'Blocked', reason, actualModelStorePass:
 const exact = (value, fields) => value && typeof value === 'object' && !Array.isArray(value) &&
   Object.keys(value).length === fields.length && Object.keys(value).every(key => fields.includes(key));
 
+export function buildZhouProbeEnvironment(host, profile, mobile = false) {
+  const environment = buildControlledEmulatorTestEnvironment(host, profile);
+  // Match the existing PC13 operator's explicit toolchain forwarding. Keep the
+  // isolated credential HOME/config directories; never rediscover the host's
+  // profile or forward credentials. Model-only execution is unchanged.
+  if (mobile) for (const name of ['ANDROID_HOME', 'JAVA_HOME', 'PUB_CACHE', 'GRADLE_USER_HOME']) {
+    if (host[name] !== undefined) {
+      assert(isAbsolute(host[name]));
+      environment[name] = realpathSync(host[name]);
+    }
+  }
+  return environment;
+}
+
 export function validateZhouModelConfiguration(config) {
   assert(exact(config, ['controlledHostVerified', 'existingHostGenerationLeaseSettled', 'binding', 'tokenizerFiles']) ||
     exact(config, ['controlledHostVerified', 'existingHostGenerationLeaseSettled', 'binding', 'tokenizerFiles', 'mobile']));
@@ -114,9 +128,9 @@ async function outer() {
   for (const port of ports) await free(port);
   const directory = mkdtempSync(join(tmpdir(), 'enmori-zhou-model-outer-'));
   try {
-    const env = buildControlledEmulatorTestEnvironment({...process.env,
+    const env = buildZhouProbeEnvironment({...process.env,
       GCLOUD_PROJECT: 'demo-enmori-rmvp01a-r10', GOOGLE_CLOUD_PROJECT: 'demo-enmori-rmvp01a-r10',
-      FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099', FIRESTORE_EMULATOR_HOST: '127.0.0.1:8080'}, directory);
+      FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099', FIRESTORE_EMULATOR_HOST: '127.0.0.1:8080'}, directory, Boolean(config.mobile));
     env.CI = 'true'; env.FIREBASE_CLI_DISABLE_USAGE = 'true'; env.FIREBASE_EMULATORS_PATH = process.env.FIREBASE_EMULATORS_PATH;
     // One temporary mode0600 transfer inside the newly owned private profile.
     // CLI argv/stdout/env contain none of the private model/tokenizer values.
@@ -143,12 +157,15 @@ async function worker() {
   const file = join(parentProfile, handoffName), stat = lstatSync(file);
   assert(stat.isFile() && !stat.isSymbolicLink() && stat.size <= 16384 && (stat.mode & 0o777) === 0o600);
   let bytes = readFileSync(file); unlinkSync(file);
-  let serialized;
-  try { serialized = JSON.stringify(validateZhouModelConfiguration(JSON.parse(bytes.toString('utf8')))); }
+  let serialized, mobile = false;
+  try {
+    const config = validateZhouModelConfiguration(JSON.parse(bytes.toString('utf8')));
+    mobile = Boolean(config.mobile); serialized = JSON.stringify(config);
+  }
   finally { bytes.fill(0); bytes = undefined; }
   const directory = mkdtempSync(join(tmpdir(), 'enmori-zhou-model-worker-'));
   try {
-    const env = buildControlledEmulatorTestEnvironment(process.env, directory);
+    const env = buildZhouProbeEnvironment(process.env, directory, mobile);
     const result = await new Promise((done, reject) => {
       const child = spawn(process.execPath, ['--import', pathToFileURL(resolve('tool/ai_store_gateway_binding.mjs')).href,
         resolve('tool/zhou_real_model_store_probe.mjs'), '--execute'], {env, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true});
@@ -250,6 +267,8 @@ async function execute() {
     mobileAiReadback: mobileResult?.aiAcceptedAndReadback === true,
     mobilePersonaHistoryAndDelete: mobileResult?.personaHistoryAndDelete === true,
     mobileApkAttributionConfirmed: mobileResult?.apkAttributionConfirmed === true,
+    mobilePrebuildApkSha256: mobileResult?.prebuildApkSha256,
+    mobileRunnerApkSha256: mobileResult?.runnerApkSha256,
     mobileApkSha256: mobileResult?.selectedApkSha256, model: 'formal-9b-existing-private-binding',
     database: 'actual-isolated-Auth-and-Firestore-Emulators'}) + '\n');
   if (localShutdownUnconfirmed) {

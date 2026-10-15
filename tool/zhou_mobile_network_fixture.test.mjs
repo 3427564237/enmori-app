@@ -16,9 +16,10 @@ class Child extends EventEmitter {
   }
   kill() { setImmediate(() => this.finish(1)); return true; }
 }
-function setup({ conflict = false, changedMapping = false, markers = true, duplicateMarker = false, badPackage = false, failSignature = false, quarantine = false, missingLease = false, changedApk = false, abruptExit = false, failedDisposal = false } = {}) {
+function setup({ conflict = false, changedMapping = false, markers = true, duplicateMarker = false, badPackage = false, failSignature = false, quarantine = false, missingLease = false, changedApk = false, abruptExit = false, failedDisposal = false, differentRunnerApk = false, missingPrebuiltApk = false, badRunnerPackage = false, badRunnerSignature = false, exitBeforeRunnerInspection = false, exitDuringDelivery = false } = {}) {
   const calls = [], phases = [], reverses = new Map([['tcp:9099', conflict ? 'tcp:12345' : 'tcp:9099']]);
   let privateReads = 0, delivered, cleaned = 0, preserved = 0, tlsClosed = 0, disposed = 0, fixtureState = { modelAttempts: 1, modelPending: quarantine ? 1 : 0, nonTerminal: 0, quarantined: quarantine };
+  let androidChild;
   const fixture = {
     server: { routing() {} },
     state: () => fixtureState,
@@ -34,7 +35,12 @@ function setup({ conflict = false, changedMapping = false, markers = true, dupli
     modelBinding: { mode: 'test-double' }, existingHostGenerationLeaseSettled: missingLease ? undefined : true,
     environment: { PATH: '/owned/tools' },
     now: () => Date.parse('2026-10-15T04:00:00Z'),
-    readArtifact: async path => { assert.equal(path, expectedZhouMobileApkPath); return Buffer.from(changedApk && delivered ? 'different post-test APK' : 'dedicated reviewed test APK'); }, onPhase: phase => phases.push(phase),
+    readArtifact: async path => {
+      assert.equal(path, expectedZhouMobileApkPath);
+      if (missingPrebuiltApk && !calls.some(call => call.args.includes('build'))) throw Error('No pre-existing APK');
+      return Buffer.from(changedApk && delivered ? 'different post-test APK' :
+        differentRunnerApk && calls.some(call => call.args.includes('test')) ? 'generated listener runner APK' : 'dedicated reviewed test APK');
+    }, onPhase: phase => phases.push(phase),
     createHttpsServer(configuration, routing) {
       assert.equal(routing, fixture.server.routing); assert.equal(configuration.key, 'TEST ONLY KEY');
       const server = new EventEmitter();
@@ -48,27 +54,38 @@ function setup({ conflict = false, changedMapping = false, markers = true, dupli
       delivered = configuration;
       assert.equal(configuration.expiresAt, '2026-10-15T04:02:00.000Z');
       assert.equal(configuration.baseUri, 'https://127.0.0.1:42001/');
-      return { dispose: async () => { disposed++; if (failedDisposal) throw Error('private failure'); return { credentialCleanupConfirmed: true }; } };
+      const ownership = { dispose: async () => { disposed++; if (failedDisposal) throw Error('private failure'); return { credentialCleanupConfirmed: true }; } };
+      if (exitDuringDelivery) return new Promise(done => setImmediate(() => { androidChild.finish(1); setImmediate(() => done(ownership)); }));
+      return ownership;
     },
     spawnChild(program, args, childOptions) {
       calls.push({ program, args, options: childOptions });
       const child = new Child();
       setImmediate(() => {
         if (program === '/flutter/dart' && args.includes('test')) {
+          androidChild = child;
           child.stdout.write('discard unrelated SDK detail and private-marker-value\n');
           if (markers) {
             child.stdout.write('ZHOU_MOBILE_RUNTIME_CONFIGURATION_REQUIRED\n');
             if (duplicateMarker) child.stdout.write('ZHOU_MOBILE_RUNTIME_CONFIGURATION_REQUIRED\n');
-            setImmediate(() => child.finish(abruptExit ? 1 : 0, abruptExit ? '' : 'ZHOU_MOBILE_AI_ACCEPTED_PERSISTED_READBACK: Pass\nZHOU_MOBILE_PERSONA_DELETE_PRESERVES_HISTORY_AND_CONVERSATION_DELETE: Pass\n'));
+            if (exitBeforeRunnerInspection) { child.finish(1); return; }
+            if (!exitDuringDelivery) {
+              const finishAfterDelivery = () => {
+                if (child.exited) return;
+                if (!delivered) { setImmediate(finishAfterDelivery); return; }
+                child.finish(abruptExit ? 1 : 0, abruptExit ? '' : 'ZHOU_MOBILE_AI_ACCEPTED_PERSISTED_READBACK: Pass\nZHOU_MOBILE_PERSONA_DELETE_PRESERVES_HISTORY_AND_CONVERSATION_DELETE: Pass\n');
+              };
+              setImmediate(finishAfterDelivery);
+            }
           } else child.finish(0, 'All tests passed!\n');
           return;
         }
         let output = '', code = 0;
         if (program === '/flutter/dart' && args[0] === '--version') output = 'Dart SDK version: 3.13.2 (stable)';
         else if (program === '/flutter/dart' && args.includes('--machine')) output = JSON.stringify({ frameworkVersion: '3.47.2', dartSdkVersion: '3.13.2 (stable)' });
-        else if (program === '/tools/aapt' && args.includes('badging')) output = `package: name='${badPackage ? 'com.enmori.app' : 'com.enmori.app.personatest'}' versionCode='1'\nlaunchable-activity: name='com.enmori.app.MainActivity'\n`;
+        else if (program === '/tools/aapt' && args.includes('badging')) output = `package: name='${badPackage || badRunnerPackage && calls.some(call => call.args.includes('test')) ? 'com.enmori.app' : 'com.enmori.app.personatest'}' versionCode='1'\nlaunchable-activity: name='com.enmori.app.MainActivity'\n`;
         else if (program === '/tools/aapt' && args.includes('xmltree')) output = '  A: package="com.enmori.app.personatest"\n';
-        else if (program === '/tools/java') code = failSignature ? 1 : 0;
+        else if (program === '/tools/java') code = failSignature || badRunnerSignature && calls.some(call => call.args.includes('test')) ? 1 : 0;
         else if (program === '/tools/adb') {
           if (args.includes('get-state')) output = 'device\n';
           else if (args.includes('force-stop')) assert.equal(args.at(-1), 'com.enmori.app.personatest');
@@ -107,6 +124,21 @@ test('pipeline verifies dedicated APK/signature before installation, delivers fr
   assert.equal(JSON.stringify(report).includes('private-marker-value'), false);
 });
 
+test('runner-generated APK differs from direct target prebuild yet remains correctly attributed', async () => {
+  const state = setup({ differentRunnerApk: true }), report = await runZhouMobileNetworkFixture(state.options);
+  assert.equal(report.result, 'passed');
+  assert.notEqual(report.prebuildApkSha256, report.runnerApkSha256);
+  assert.equal(report.runnerApkSha256, report.selectedApkSha256);
+  assert.equal(report.postTestApkSha256, report.runnerApkSha256);
+  assert.equal(state.observation().privateReads, 1);
+});
+
+test('clean checkout builds its dedicated APK safely without requiring an older APK', async () => {
+  const state = setup({ differentRunnerApk: true, missingPrebuiltApk: true }), report = await runZhouMobileNetworkFixture(state.options);
+  assert.equal(report.result, 'passed');
+  assert.ok(state.calls.findIndex(call => call.args.includes('build')) < state.calls.findIndex(call => call.program === '/tools/aapt'));
+});
+
 test('stale copied APK paths and changed post-test build outputs cannot be attributed as a pass', async () => {
   const copied = setup(); copied.options.apkPath = '/owned/elsewhere/app-debug.apk';
   const copyReport = await runZhouMobileNetworkFixture(copied.options);
@@ -133,13 +165,32 @@ test('held or unknown original host generation lease prevents commands and crede
   assert.equal(state.observation().cleaned, 0); assert.equal(state.observation().preserved, 0);
 });
 
-test('ordinary APK or invalid signature stops before Flutter build, ADB or private identity access', async () => {
+test('ordinary built APK or invalid signature stops before Flutter TEST, ADB or private identity access', async () => {
   for (const selected of [{ badPackage: true }, { failSignature: true }]) {
     const state = setup(selected), report = await runZhouMobileNetworkFixture(state.options);
     assert.equal(report.result, 'blocked'); assert.equal(report.signatureVerified, false);
-    assert.equal(state.calls.some(call => call.args.includes('test') || call.args.includes('build') || call.program === '/tools/adb'), false);
+    assert.equal(state.calls.some(call => call.args.includes('build')), true);
+    assert.equal(state.calls.some(call => call.args.includes('test') || call.program === '/tools/adb'), false);
     assert.equal(state.observation().privateReads, 0);
   }
+});
+
+test('runner package or signature is verified before any private identity or credential access', async () => {
+  for (const selected of [{ badRunnerPackage: true }, { badRunnerSignature: true }]) {
+    const state = setup({ ...selected, differentRunnerApk: true }), report = await runZhouMobileNetworkFixture(state.options);
+    assert.equal(report.result, 'blocked'); assert.equal(report.signatureVerified, false);
+    assert.equal(report.prebuildSignatureVerified, true);
+    assert.equal(report.runnerApkSha256, undefined); assert.equal(report.selectedApkSha256, undefined);
+    assert.equal(state.observation().privateReads, 0); assert.equal(state.observation().delivered, undefined);
+  }
+});
+
+test('child exit during runner inspection prevents credentials and late delivery ownership is drained before cleanup', async () => {
+  const inspecting = setup({ exitBeforeRunnerInspection: true }), inspectingReport = await runZhouMobileNetworkFixture(inspecting.options);
+  assert.equal(inspectingReport.result, 'blocked'); assert.equal(inspecting.observation().privateReads, 0);
+  const delivering = setup({ exitDuringDelivery: true }), deliveringReport = await runZhouMobileNetworkFixture(delivering.options);
+  assert.equal(deliveringReport.result, 'blocked'); assert.equal(delivering.observation().privateReads, 1);
+  assert.equal(delivering.observation().disposed, 1); assert.equal(deliveringReport.credentialCleanupConfirmed, true);
 });
 
 test('conflicting pre-existing reverse is preserved and no device test or new credential is started', async () => {
