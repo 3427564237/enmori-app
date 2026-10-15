@@ -29,5 +29,21 @@
       "bytes": 5572,
       "sha256": "b0fa45ece4b84c8699b767bddfcf20b86203f41b8fd9a0ca7437dd892dbd5725"
     }
-  ]
+  ],
+  "apk": {
+    "product": "290c4317208089e36d0d494031e3ee25cba7d451",
+    "publication": "36adbbefb8829b9ca7d4f8ec538e9f51f6571ef0",
+    "package": "com.enmori.app.personatest",
+    "sha256": "f458ea31909689e85a21a2429125e7886a65cdeaafcef3646ea3112e8be01009",
+    "bytes": 121547384,
+    "mode": "offline_synthetic",
+    "normalNetwork": false,
+    "formalDuReview": "pending",
+    "build": "Pass",
+    "v2Signature": "Pass",
+    "minimumSdk": 24,
+    "targetSdk": 36,
+    "firstInstall": "INSTALL_FAILED_UPDATE_INCOMPATIBLE",
+    "installedUpdatedApk": false
+  }
 }

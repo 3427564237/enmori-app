@@ -11,3 +11,9 @@ A separate agent read the final four-file delta and found no blocker: viewport b
 Figma/Q04 reference: existing route26 `checkin-timeline` Footprint/M21; precise live Figma node unavailable in this pass. No live Figma visual-parity claim. Ordinary-size centering is source-reviewed; TalkBack/keyboard/Figma pixels and actual installed updated APK remain Not Run at this checkpoint. New evidence will be appended to this exact product if a device build/run occurs.
 
 The physical device is vivo V2405A/API36, connected USB. Parent is separately running the reviewed controlled real-model network target; that target does not include this offline UI source. Existing baseline offline APK keeps its original hash/source and is not relabelled as the new increment before rebuild. Keep Draft/Open, no main merge or whole Figma/module/Sprint/UAT/Release/Done claim.
+
+## Identified updated APK build
+
+Pinned dedicated arm64 debug build from this unchanged product passed, packagecom.enmori.app.personatest/min24/target36, v2 signature verified. APK121547384 bytes, SHA256f458ea31909689e85a21a2429125e7886a65cdeaafcef3646ea3112e8be01009. Local delivery `build/distributions/baseline-candidate-20261015/ux-increment-20261015/ENMORI-Baseline-UX-20261015-arm64.apk`, with instructions/checksum/source receipt. Earlier original APK is retained separately.
+
+First replacement attempt returned INSTALL_FAILED_UPDATE_INCOMPATIBLE because the installed run-owned integration runner has a different debug signing identity. That attempt did not install this updated APK; the subsequent start command did not prove the new product. Only the dedicated test package may be replaced after the active controlled journey finishes; ordinary com.enmori.app remains separate. Actual final installation, when performed, will be appended with its verified result.
