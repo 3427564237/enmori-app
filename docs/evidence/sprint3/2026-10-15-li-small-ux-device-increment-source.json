@@ -7,7 +7,7 @@
   "oldSourceLayoutFailures": 2,
   "scopedAnalyze": "no_issues",
   "formalPeer": "DU_pending",
-  "apkDeviceUpdatedProduct": "Not Run",
+  "apkDeviceUpdatedProduct": "install_and_cold_launch_pass_route_flow_not_run",
   "logs": [
     {
       "name": "enmori-offline-entry-before.log",
@@ -44,6 +44,21 @@
     "minimumSdk": 24,
     "targetSdk": 36,
     "firstInstall": "INSTALL_FAILED_UPDATE_INCOMPATIBLE",
-    "installedUpdatedApk": false
+    "installedUpdatedApk": true,
+    "deviceInstallation": {
+      "product": "290c4317208089e36d0d494031e3ee25cba7d451",
+      "package": "com.enmori.app.personatest",
+      "device": "vivo V2405A",
+      "androidApi": 36,
+      "installed": true,
+      "coldLaunch": "Pass",
+      "processRunning": true,
+      "installedApkSha256": "f458ea31909689e85a21a2429125e7886a65cdeaafcef3646ea3112e8be01009",
+      "hostApkSha256": "f458ea31909689e85a21a2429125e7886a65cdeaafcef3646ea3112e8be01009",
+      "ordinaryPackageUnchanged": true,
+      "scope": "offline_synthetic_candidate",
+      "formalDuReview": "pending",
+      "routeJourneyNotClaimed": true
+    }
   }
 }
