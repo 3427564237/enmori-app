@@ -8,7 +8,7 @@ import { resolve, join, relative, isAbsolute } from 'node:path';
 import { createServer } from 'node:net';
 import { buildControlledEmulatorTestEnvironment } from '../backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js';
 assert.equal(process.version,'v24.19.0');
-assert.ok(process.argv.slice(2).length===0 || (process.argv.length===3 && process.argv[2]==='--coordinator-only'));
+assert.ok(process.argv.slice(2).length===0 || (process.argv.length===3 && ['--coordinator-only','--phone-service-only'].includes(process.argv[2])));
 const readJson=path=>JSON.parse(readFileSync(path,'utf8'));
 const required = createRequire(import.meta.url);
 const adminRequire = createRequire(required.resolve('firebase-admin/app'));

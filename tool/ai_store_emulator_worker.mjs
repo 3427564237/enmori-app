@@ -7,8 +7,8 @@ import assert from 'node:assert/strict';
 import { buildControlledEmulatorTestEnvironment } from '../backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js';
 const profile = mkdtempSync(join(tmpdir(), 'enmori-jin-next-worker-'));
 try {
-  assert.ok(process.argv.slice(2).length===0 || (process.argv.length===3 && process.argv[2]==='--coordinator-only'));
-  const selected=process.argv[2]==='--coordinator-only'?'backend/dist/emulator-test/real-conversation-maintenance.integration.test.js':'backend/dist/emulator-test/**/*.test.js';
+  assert.ok(process.argv.slice(2).length===0 || (process.argv.length===3 && ['--coordinator-only','--phone-service-only'].includes(process.argv[2])));
+  const selected=process.argv[2]==='--phone-service-only'?'backend/dist/emulator-test/controlled-phone-service.integration.test.js':process.argv[2]==='--coordinator-only'?'backend/dist/emulator-test/real-conversation-maintenance.integration.test.js':'backend/dist/emulator-test/**/*.test.js';
   const child = spawnSync(process.execPath, [
     '--import', pathToFileURL(resolve('tool/ai_store_gateway_binding.mjs')).href,
     '--test', '--test-concurrency=1', selected,
