@@ -1,0 +1,100 @@
+{
+  "date": "2026-10-15",
+  "oldSource": "b7aad4c3653af6979575a2840807b83a7118df5d",
+  "correctedSource": "f6036d4efbc4f3d7a33378cd7184b01d4eda31bb",
+  "operatorTests": {
+    "passed": 10,
+    "failed": 0,
+    "scope": "injected operator seams"
+  },
+  "independentHoldProbe": {
+    "scope": "operator-seams-only-no-network-firebase-device-model",
+    "reviewedSourceHead": "f6036d4efbc4f3d7a33378cd7184b01d4eda31bb",
+    "operatorSha256": "11a1c9bbf299feba935d32eb34d4536a2e061f2ee2249adeb584236e8f6e7bbd",
+    "heldObservation": {
+      "promiseRetained": true,
+      "originalPendingUnsettled": true,
+      "listenerClosed": false,
+      "stopCalls": 1,
+      "statusPublishAttempts": 2
+    },
+    "afterOriginalSettlement": {
+      "operatorFailureExit": 1,
+      "listenerClosed": true,
+      "stopCalls": 2,
+      "handoffRemoved": true
+    },
+    "actualModelCalls": 0,
+    "actualNetworkListeners": 0,
+    "actualFirebaseCalls": 0,
+    "counterexampleProspectivelyResolved": true
+  },
+  "actualOldSourceZeroGeneration": {
+    "scope": "actual117-zero-generation-host-http",
+    "source": "b7aad4c3653af6979575a2840807b83a7118df5d",
+    "startedAtUtc": "2026-10-15T08:13:38Z",
+    "nativeDevice": false,
+    "contentGenerationRequests": 0,
+    "signIns": 2,
+    "authenticatedReads": 6,
+    "tlsCertificateVerified": true,
+    "statusAfter": {
+      "schemaVersion": 1,
+      "scope": "isolated-phone-service",
+      "phase": "running",
+      "accepting": true,
+      "maintenanceHealthy": true,
+      "retirementConfirmed": true,
+      "modelAttempts": 0,
+      "modelPending": 0,
+      "compilerPending": 0,
+      "activeCalls": 1,
+      "nonTerminal": 0,
+      "quarantined": false,
+      "admission": "open",
+      "databaseLifetime": "owned-emulator-process",
+      "hostPreflightPassed": true,
+      "tokenizerReadinessPassed": true,
+      "adapterState": "ready",
+      "httpsListening": true,
+      "stopRequested": false,
+      "cleanupConfirmed": false,
+      "operatorHold": false
+    }
+  },
+  "actualOldSourceCleanup": {
+    "source": "b7aad4c3653af6979575a2840807b83a7118df5d",
+    "receipts": {
+      "status.json": {
+        "schemaVersion": 1,
+        "phase": "closed",
+        "accepting": false,
+        "httpsListening": false,
+        "cleanupConfirmed": true,
+        "operatorHold": false,
+        "databaseLifetime": "owned-emulator-process"
+      },
+      "worker-exit.json": {
+        "schemaVersion": 1,
+        "innerProfileRemoved": true
+      },
+      "operator-exit.json": {
+        "schemaVersion": 1,
+        "exitCode": 0,
+        "portsFree": true,
+        "outerProfileRemoved": true
+      }
+    },
+    "portsIndependentlyBindableWithReuseAddress": true,
+    "callerPrivateFilesRemoved": true,
+    "deviceReversesCreated": 0
+  },
+  "preload": {
+    "zeroContentPreload": true,
+    "done": true,
+    "generatedTokens": 0,
+    "durationMs": 28347
+  },
+  "newRealModelDeviceRun": "Not Run",
+  "formalPeerReview": "SHI pending at observation"
+}
