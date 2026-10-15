@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:enmori/controlled_phone_harness.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
+import 'package:enmori/features/event_browse/presentation/activity_page.dart';
 import 'package:enmori/harness/ai_conversation/controlled_phone_service_configuration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -63,6 +64,144 @@ File readyFile(Directory directory) =>
     File('${directory.path}/${ControlledPhoneHarness.readyFileName}');
 
 void main() {
+  for (final enabled in [false, true]) {
+    testWidgets(
+      'controlled Activity client reads respect service availability $enabled and clear on background',
+      (tester) async {
+        final cache = await directory(tester), auth = _Auth();
+        addTearDown(auth.dispose);
+        final paths = <String>[];
+        final client = MockClient((request) async {
+          paths.add(request.url.path);
+          expect(
+            request.headers['authorization'],
+            'Bearer synthetic-not-a-service-token',
+          );
+          expect(request.url.scheme, 'https');
+          return http.Response(
+            jsonEncode(
+              enabled
+                  ? request.url.path == '/v1/event-browse'
+                        ? {
+                            'asOf': '2026-10-15T00:00:00Z',
+                            'scope': 'ticketmaster_sg_first_batch_v1',
+                            'items': [
+                              {
+                                'browseId': 'tm_U3ludGhldGljXzAx',
+                                'title': 'Synthetic joined activity',
+                                'startAt': '2026-10-16T00:00:00Z',
+                              },
+                            ],
+                          }
+                        : {
+                            'browseId': 'tm_U3ludGhldGljXzAx',
+                            'title': 'Synthetic joined activity',
+                            'startAt': '2026-10-16T00:00:00Z',
+                            'externalSourceUrl':
+                                'https://ticketmaster.sg/event/synthetic',
+                          }
+                  : {
+                      'error': {
+                        'code': 'SERVICE_UNAVAILABLE',
+                        'message': 'Activities are unavailable. Try again.',
+                        'requestId': 'synthetic',
+                      },
+                    },
+            ),
+            enabled ? 200 : 503,
+            headers: {
+              'content-type': 'application/json',
+              'cache-control': 'no-store',
+            },
+          );
+        });
+        await tester.pumpWidget(
+          ControlledPhoneHarness(
+            activitiesEnabled: true,
+            cacheDirectory: cache,
+            connectionFactory: (_) async => ControlledPhoneConnection(
+              auth: auth,
+              client: client,
+              release: () async {},
+            ),
+          ),
+        );
+        await framesUntil(tester, () => readyFile(cache).existsSync());
+        await tester.runAsync(
+          () => configFile(cache).writeAsString(jsonEncode(handoff())),
+        );
+        await framesUntil(tester, () => auth.events.contains('signIn'));
+        await tester.pumpAndSettle();
+        expect(paths, isEmpty);
+        await tester.tap(find.byKey(const Key('controlled-browse-activities')));
+        await tester.pumpAndSettle();
+        // A fresh whole-session observation may require the approved explicit Reload.
+        if (paths.isEmpty) {
+          await tester.scrollUntilVisible(find.text('Reload'), 200);
+          await tester.tap(find.text('Reload'));
+          await tester.pumpAndSettle();
+        }
+        expect(paths, ['/v1/event-browse']);
+        if (enabled) {
+          final stale = tester
+              .widget<ActivityPage>(find.byType(ActivityPage))
+              .onSelect!;
+          await tester.tap(find.text('Synthetic joined activity'));
+          await tester.pumpAndSettle();
+          expect(find.text('Activity details'), findsOneWidget);
+          expect(paths, [
+            '/v1/event-browse',
+            '/v1/event-browse/tm_U3ludGhldGljXzAx',
+          ]);
+          // A callback retained by the covered list cannot stack another Detail.
+          stale('tm_U3ludGhldGljXzAx');
+          await tester.pumpAndSettle();
+          expect(paths, hasLength(2));
+          await tester.tap(find.byTooltip('Back').hitTestable());
+          await tester.pumpAndSettle();
+          auth.sessions.add(
+            AuthSessionAuthenticated(subject: 'synthetic-owner'),
+          );
+          await tester.pumpAndSettle();
+          stale('tm_U3ludGhldGljXzAx');
+          await tester.pumpAndSettle();
+          expect(find.text('Activity details'), findsNothing);
+          expect(paths, hasLength(2));
+          // The new observation may explicitly Reload and navigate normally;
+          // only the retained old callback must remain invalid.
+          await tester.scrollUntilVisible(find.text('Reload'), 200);
+          await tester.tap(find.text('Reload'));
+          await tester.pumpAndSettle();
+          await tester.scrollUntilVisible(
+            find.text('Synthetic joined activity'),
+            -200,
+          );
+          await tester.tap(find.text('Synthetic joined activity'));
+          await tester.pumpAndSettle();
+          expect(find.text('Activity details'), findsOneWidget);
+          expect(paths, hasLength(4));
+        } else {
+          expect(
+            find.text('Activities are unavailable. Try again.'),
+            findsOneWidget,
+          );
+          expect(find.textContaining('No eligible activities'), findsNothing);
+        }
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.inactive,
+        );
+        await tester.pump();
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Synthetic joined activity'), findsNothing);
+        expect(paths, hasLength(enabled ? 4 : 1));
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
+  }
   testWidgets(
     'startup clears stale handoff, publishes fresh readiness, invalid handoff fails safely and retry rotates nonce',
     (tester) async {
