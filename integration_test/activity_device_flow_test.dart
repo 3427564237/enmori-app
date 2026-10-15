@@ -112,8 +112,9 @@ void main() {
       auth.emit(AuthSessionAuthenticated(subject: 'synthetic-device-subject'));
       for (var i = 0; i < 50; i++) {
         if (container.read(authSessionProvider).value
-            is AuthSessionAuthenticated)
+            is AuthSessionAuthenticated) {
           break;
+        }
         await tester.pump(const Duration(milliseconds: 100));
       }
       expect(
@@ -211,6 +212,14 @@ void main() {
 }
 
 Future<void> _tap(WidgetTester tester, Finder finder) async {
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      finder,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
+  expect(finder, findsOneWidget);
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
   await tester.tap(finder);
