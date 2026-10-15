@@ -249,6 +249,103 @@ async function readers(){
   const store=new FirestoreConversationStore(gateway,process.env,now),c={principal:{firebaseUid:uid},ownerId:owner,signal:new AbortController().signal,current:()=>true};
   return {c,store,readers:new FirestoreConversationOperationReaders(store,components().cleanup,epoch)};
 }
+
+for (const scenario of ["expired", "interrupted-delete"] as const) test(`R1 actual previous ${scenario} target permits control retirement and bounded cleanup`, async()=>{
+  const row=await pair(),operationId=randomUUID(),fence=`ai_operation_fences/${operationId}`,oldEpoch=epoch;
+  const target={ownerAccountId:owner,conversationId:row.cid,userMessageId:row.u,operationId,kind:"send" as const,targetKind:"reserved_new" as const};
+  await set(`${row.base}/effects/${operationId}`,{kind:"send",userMessageId:row.u,assistantMessageId:row.a});
+  await db.doc(`${row.base}/messages/${row.u}`).update({pendingOperationId:operationId});
+  await set(fence,{ownerAccountId:owner,conversationId:row.cid,userMessageId:row.u,kind:"send",targetKind:"reserved_new",
+    processEpoch:oldEpoch.processEpoch,revision:1,state:"open"});
+  const latest=(await db.doc(`${row.base}/messages/${row.a}`).get()).createTime!;
+  const future=()=>latest.seconds*1000+Math.floor(latest.nanoseconds/1e6)+90*86400000+1;
+  if(scenario==="interrupted-delete"){
+    await db.doc(row.base).update({state:"deleting",lifecycleVersion:2});
+    // A real interrupted child batch: U is gone, its effect and A remain.
+    await db.doc(`${row.base}/messages/${row.u}`).delete();
+  }
+  const clock=scenario==="expired"?future:now,store=new FirestoreConversationStore(gateway,process.env,clock);
+  const started=await store.startEpoch(randomUUID());assert.equal(started.kind,"confirmed");if(started.kind!=="confirmed")return;epoch=started.value;
+  const result=await retirePreviousConversationEpoch(gateway,store,epoch,process.env);
+  assert.deepEqual(result,{complete:true,inspected:1,retired:1,failures:0});
+  assert.equal((await db.doc(fence).get()).exists,false);
+  assert.equal((await store.closeOperation(target,oldEpoch)).kind,"terminated");
+  assert.equal((await components(gateway,idle,clock).cleanup.expireKnown(owner,row.cid,epoch)).kind,"deleted");
+  assert.equal((await db.doc(row.base).get()).exists,false);
+  for(const name of ["messages","message_sources","effects"])assert.equal((await db.collection(`${row.base}/${name}`).get()).empty,true);
+});
+
+async function restartTarget(){
+  const row=await pair(),operationId=randomUUID(),fence=`ai_operation_fences/${operationId}`,oldEpoch=epoch;
+  const target={ownerAccountId:owner,conversationId:row.cid,userMessageId:row.u,operationId,kind:"send" as const,targetKind:"reserved_new" as const};
+  await set(`${row.base}/effects/${operationId}`,{kind:"send",userMessageId:row.u,assistantMessageId:row.a});
+  await db.doc(`${row.base}/messages/${row.u}`).update({pendingOperationId:operationId});
+  await set(fence,{ownerAccountId:owner,conversationId:row.cid,userMessageId:row.u,kind:"send",targetKind:"reserved_new",
+    processEpoch:oldEpoch.processEpoch,revision:2,state:"closed"});
+  const latest=await db.doc(`${row.base}/messages/${row.a}`).get();
+  const expiryMs=(latest.createTime!.seconds+90*86400)*1000+Math.ceil(latest.createTime!.nanoseconds/1e6);
+  return {...row,target,fence,oldEpoch,latest,expiryMs};
+}
+async function startForRestart(clock:()=>number){
+  const reports:{phase:string;complete:boolean;changed:number}[]=[];let stopped=0;
+  const joined=await createIsolatedConversationComposition({firestore:db,environment:process.env,utcMilliseconds:clock,
+    transport:{generate:async()=>{throw new Error("No model in restart fixture");}},
+    gates:{beforeGeneration:async()=>({ok:false,failure:"dependency_unavailable"}),candidate:async()=>({ok:false,failure:"unsafe_output"})},
+    report:(phase,result)=>reports.push({phase,complete:result.complete,changed:result.changed}),reportRetirement:()=>{},
+    schedule:{every:(interval)=>{assert.equal(interval,3600000);return ()=>{stopped++;};}}});
+  epoch=joined.epoch;
+  return {joined,reports,stop:async()=>{await joined.stopAdmissionAndMaintenance();assert.equal(stopped,1);}};
+}
+
+for(const kind of ["expired","deleting","partial-deleting"] as const)test(`R1 actual Bootstrap ${kind} restart reaches startup sweeps and physically drains old target`,async()=>{
+  const row=await restartTarget();
+  if(kind!=="expired")await db.doc(row.base).update({state:"deleting",lifecycleVersion:2});
+  if(kind==="partial-deleting")await db.doc(`${row.base}/messages/${row.u}`).delete();
+  const clock=kind==="expired"?()=>row.expiryMs:now;
+  const f=await startForRestart(clock);
+  try{
+    assert.deepEqual(f.joined.restart,{complete:true,inspected:1,retired:1,failures:0});
+    assert.deepEqual(f.reports,[{phase:"expiry",complete:true,changed:1},{phase:"source",complete:true,changed:0}]);
+    assert.equal((await db.doc(row.base).get()).exists,false);assert.equal((await db.doc(row.fence).get()).exists,false);
+    for(const name of ["messages","message_sources","effects"])assert.equal((await db.collection(`${row.base}/${name}`).get()).empty,true);
+    assert.equal((await db.doc(progress).get()).exists,false);
+    const old=new FirestoreConversationStore(gateway,process.env,clock);
+    assert.equal((await old.closeOperation(row.target,row.oldEpoch)).kind,"terminated");
+    assert.equal((await db.doc(row.fence).get()).exists,false);
+  }finally{await f.stop();}
+});
+
+test("R1 restart preserves full-precision original expiry; retirement does not renew or round the target deadline",async()=>{
+  const row=await restartTarget(),before=await startForRestart(()=>row.expiryMs-1);
+  try{
+    assert.equal(before.joined.restart.complete,true);
+    assert.equal(before.reports[0]!.changed,0);assert.equal((await db.doc(row.base).get()).data()!.state,"live");
+    const latest=await db.doc(`${row.base}/messages/${row.a}`).get();
+    assert.equal(latest.createTime!.isEqual(row.latest.createTime!),true);assert.deepEqual(latest.data()!.appendBefore,row.appendBefore);
+    assert.equal((await db.doc(`${row.base}/messages/${row.u}`).get()).createTime!.isEqual(row.original.createTime!),true);
+  }finally{await before.stop();}
+  const at=await startForRestart(()=>row.expiryMs);
+  try{assert.equal(at.reports[0]!.changed,1);assert.equal((await db.doc(row.base).get()).exists,false);}finally{await at.stop();}
+});
+
+test("R1 current-epoch unsettled and corrupt old targets remain fail closed with their controls retained",async()=>{
+  const row=await restartTarget(),store=new FirestoreConversationStore(gateway,process.env,now);
+  await db.doc(row.base).update({state:"deleting",lifecycleVersion:2});
+  assert.equal((await store.retireOperation(row.target,epoch,()=>false)).kind,"conflict");
+  assert.equal((await db.doc(row.fence).get()).exists,true);
+  const started=await store.startEpoch(randomUUID());assert.equal(started.kind,"confirmed");if(started.kind!=="confirmed")return;epoch=started.value;
+  await db.doc(row.base).update({latestMessageId:"invalid"});
+  assert.equal((await store.retireOperation(row.target,epoch,()=>false)).kind,"unavailable");
+  assert.equal((await db.doc(row.fence).get()).exists,true);
+  await db.doc(row.base).update({state:"live",latestMessageId:row.a});
+  await db.doc(`${row.base}/messages/${row.a}`).update({appendBefore:{seconds:row.appendBefore.seconds,nanoseconds:1000000000}});
+  const future=new FirestoreConversationStore(gateway,process.env,()=>row.expiryMs+1);
+  assert.equal((await future.retireOperation(row.target,epoch,()=>false)).kind,"unavailable");
+  const unavailable:FirestoreGateway={runTransaction:async()=>{throw new Error("Synthetic unknown SDK result");}};
+  assert.equal((await new FirestoreConversationStore(unavailable,process.env).retireOperation(row.target,epoch,()=>false)).kind,"unresolved");
+  assert.equal((await db.doc(row.fence).get()).exists,true);
+  assert.equal((await db.doc(`${row.base}/messages/${row.u}`).get()).data()!.pendingOperationId,row.target.operationId);
+});
 test("actual ordinary message query uses DESC limit20, returns ASC with precise continuation, and verifies owner first",async()=>{
   const f=await readers(),cid=randomUUID(),base=`accounts/${owner}/conversations/${cid}`;let previous:{seconds:number;nanoseconds:number}|undefined;
   let latest="";

@@ -135,7 +135,7 @@ export class FirestoreConversationStore implements RealConversationStore {
     if (row.processEpoch !== op.epoch.processEpoch || row.state !== "open" || row.revision !== op.revision) refuse("terminated");
     await this.authority(tx, op, a);
   }
-  private async inventory(tx: Tx, target: Location): Promise<Inventory | undefined> {
+  private async inventory(tx: Tx, target: Location, allowExpiredRetirement = false): Promise<Inventory | undefined> {
     const parent = await tx.get(parentPath(target));
     if (parent === undefined) {
       // A missing parent cannot hide retained children and become a fresh target.
@@ -155,7 +155,7 @@ export class FirestoreConversationStore implements RealConversationStore {
           ...(row.data.appendBefore === undefined ? {} : { appendBefore: row.data.appendBefore }) })) },
       now: { precision: "millisecond", instant: this.now() } });
     if (resolution.state === "unavailable") refuse("unavailable");
-    if (resolution.state !== "live") refuse("conversation_unavailable");
+    if (resolution.state !== "live" && !(allowExpiredRetirement && resolution.state === "expired")) refuse("conversation_unavailable");
     return { parent, rows, cutoff: resolution.expiresAt };
   }
   private message(row: Snapshot): StoredConversationMessage {
@@ -354,7 +354,25 @@ export class FirestoreConversationStore implements RealConversationStore {
       if(!this.fenceMatches(fence,t))refuse("unavailable");
       const previousEpoch=fence.processEpoch!==epoch.processEpoch;
       if(!previousEpoch&&(fence.state!=="closed"||!originalSettled()))refuse("conflict");
-      const inv=await this.inventory(tx,t),effect=await tx.get(effectPath(t));
+      if(previousEpoch){
+        const parent=await tx.get(parentPath(t));
+        if(parent?.state==="deleting"){
+          // A persisted valid deleting marker is irreversible. Its child batches
+          // may already be partial, so it cannot satisfy a live/canonical-pair
+          // read. The confirmed replacement epoch fences every old write. Retire
+          // ONLY this control; startup whole cleanup owns remaining children.
+          // Do not infer any saved/no-effect outcome or clear another claim.
+          if(!exact(parent,["state","lifecycleVersion","nextSequence","latestMessageId"])||
+            !positive(parent.lifecycleVersion)||!positive(parent.nextSequence)||
+            typeof parent.latestMessageId!=="string"||!UUID.test(parent.latestMessageId))refuse("unavailable");
+          tx.delete(fencePath(t));return;
+        }
+      }
+      // The expired exception is exclusive to previous-epoch control retirement:
+      // complete metadata, lineage, effects and canonical pairs still validate.
+      // It never grants a read/write, changes createTime/appendBefore or revives
+      // a target. All ordinary callers retain the live-only default.
+      const inv=await this.inventory(tx,t,previousEpoch),effect=await tx.get(effectPath(t));
       if(effect!==undefined&&(!exact(effect,["kind","userMessageId"],["assistantMessageId"])||effect.kind!==t.kind||effect.userMessageId!==t.userMessageId))refuse("unavailable");
       const user=inv?.rows.find(row=>row.id===t.userMessageId);
       if(user&&user.data.role!=="user")refuse("unavailable");

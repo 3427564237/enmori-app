@@ -38,13 +38,15 @@ export async function createIsolatedConversationComposition(options: {
   readonly report: (phase: "expiry" | "source", result: MaintenanceResult) => void;
   readonly reportRetirement: (confirmed: boolean) => void;
   readonly schedule?: MaintenanceSchedule;
+  /** Trusted host clock/test seam only; never taken from a request or DTO. */
+  readonly utcMilliseconds?: () => number;
 }) {
   requireControlledEmulatorEnvironment(options.environment);
   requireIsolatedContextFirestore(options.firestore,options.environment);
   if (options.notePrerequisites && options.notePrerequisites.firestore !== options.firestore) throw new Error("Mismatched Note authority");
-  const clock = new MonotonicRuntimeClock(), io = new ConversationIoTracker();
+  const clock = new MonotonicRuntimeClock(), io = new ConversationIoTracker(), utcMilliseconds=options.utcMilliseconds??Date.now;
   const gateway = new FirebaseAdminFirestoreGateway(options.firestore);
-  const store = new FirestoreConversationStore(gateway,options.environment);
+  const store = new FirestoreConversationStore(gateway,options.environment,utcMilliseconds);
   const start = await store.startEpoch(randomUUID());
   if (start.kind !== "confirmed") throw new Error("Isolated runtime epoch unavailable");
   const epoch = start.value;
@@ -53,14 +55,14 @@ export async function createIsolatedConversationComposition(options: {
   const runtime = new BoundedAiRuntime(clock,new AuthorizedAsyncConversationGenerationTransport(options.transport));
   let consumer!: ApplicationConversationOperations;
   const quiescence = new ConversationIoQuiescence({ acquireTargetLease: (...args) => consumer.acquireTargetLease(...args) },io);
-  const cleanup = new FirestoreConversationCleanup(gateway,options.environment,quiescence);
+  const cleanup = new FirestoreConversationCleanup(gateway,options.environment,quiescence,utcMilliseconds);
   const readers = new FirestoreConversationOperationReaders(store,cleanup,epoch);
   consumer = new ApplicationConversationOperations(
     new FirebaseAdminConversationOperationAuthority(options.firestore,options.environment,()=>clock.now()),
     {uuid:randomUUID,operationKey:()=>randomBytes(32).toString("base64url")},
-    {now:()=>clock.now(),at:(at,wake)=>clock.at(at,wake),utcMilliseconds:Date.now},
+    {now:()=>clock.now(),at:(at,wake)=>clock.at(at,wake),utcMilliseconds},
     {create:(input,delivery)=>new AsyncConversationOperationExecutor({runtime,gates:options.gates,
-      clock:{monotonicNow:()=>clock.now(),utcNow:()=>{const ms=Date.now(),seconds=Math.floor(ms/1000);return {seconds,nanoseconds:(ms-seconds*1000)*1000000};}},
+      clock:{monotonicNow:()=>clock.now(),utcNow:()=>{const ms=utcMilliseconds(),seconds=Math.floor(ms/1000);return {seconds,nanoseconds:(ms-seconds*1000)*1000000};}},
       ports:original=>{
         const db=trackConversationFirestore(options.firestore,io,input.identity.ownerId,input.operation.conversationId,input.operation.operationId);
         const authority=new FirebaseAdminAsyncConversationAuthority(db,original,options.environment);
@@ -70,7 +72,7 @@ export async function createIsolatedConversationComposition(options: {
         const bridge=new TrackedAsyncConversationStore(new AsyncFirestoreConversationStore(store,epoch,authority),io,store,epoch,options.reportRetirement);
         return {authority,reads,store:bridge,acknowledgedPair:bridge};
       }}).create(input,delivery)},readers);
-  const maintenance=new FirestoreConversationMaintenance(gateway,options.environment,cleanup,quiescence);
+  const maintenance=new FirestoreConversationMaintenance(gateway,options.environment,cleanup,quiescence,utcMilliseconds);
   // Construct consumer BEFORE startup sweeps, expose operations only AFTER them.
   const runner=startConversationMaintenance(maintenance,epoch,options.report,options.schedule);
   await runner.settled();
