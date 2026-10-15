@@ -46,7 +46,13 @@ CONSUMED = (DIRECTORY + f'test -f "$directory/{OWNER}" && test ! -L "$directory/
             f'if [ ! -e "$directory/{CONFIG}" ] && [ ! -e "$directory/{TEMP}" ] && '
             f'[ ! -e "$directory/{READY}" ]; then rm -f "$directory/{OWNER}" || exit 1; '
             'printf "CONSUMED"; else '
-            + MATCH_READY + 'printf "WAIT"; fi')
+            # The consumer removes CONFIG and READY asynchronously. A READY
+            # disappearance during this read is WAIT, then the next full-absence
+            # observation confirms consumption. A present wrong nonce, unreadable
+            # file or symlink still fails closed; ownership checks are unchanged.
+            + '(' + MATCH_READY + ') || { '
+            f'test ! -e "$directory/{READY}" && test ! -L "$directory/{READY}" || exit 1; '
+            '}; printf "WAIT"; fi')
 
 
 class Blocked(Exception):

@@ -281,6 +281,50 @@ class HandoffTests(unittest.TestCase):
                 process.kill()
                 process.communicate()
 
+    def test_consumption_ready_disappears_during_poll_waits_then_confirms(self):
+        cache = self.directory / 'code_cache'
+        cache.mkdir()
+        (cache / target.OWNER).write_text(self.token + '\n')
+        (cache / target.READY).write_text(json.dumps({'schemaVersion': 1, 'nonce': self.nonce}))
+        # Dart has consumed CONFIG and removes READY between the poll's first
+        # existence check and strict nonce read. This is an ordinary transition.
+        prelude = ('test() { if [ "$1" = "-f" ] && '
+                   f'[ "$2" = "code_cache/{target.READY}" ]; then '
+                   f'/bin/rm -f "code_cache/{target.READY}"; fi; command test "$@"; }}; ')
+        first = subprocess.run(['/bin/sh', '-c', prelude + target.CONSUMED, self.nonce, self.token],
+                               cwd=self.directory, capture_output=True)
+        self.assertEqual(first.returncode, 0, first.stderr)
+        self.assertEqual(first.stdout, b'WAIT')
+        self.assertTrue((cache / target.OWNER).exists())
+        second = subprocess.run(['/bin/sh', '-c', target.CONSUMED, self.nonce, self.token],
+                                cwd=self.directory, capture_output=True)
+        self.assertEqual(second.returncode, 0, second.stderr)
+        self.assertEqual(second.stdout, b'CONSUMED')
+        self.assertFalse((cache / target.OWNER).exists())
+
+    def test_consumption_present_replacement_nonce_is_still_refused(self):
+        cache = self.directory / 'code_cache'
+        cache.mkdir()
+        (cache / target.OWNER).write_text(self.token + '\n')
+        ready = cache / target.READY
+        ready.write_text(json.dumps({'schemaVersion': 1, 'nonce': 'c' * 64}))
+        result = subprocess.run(['/bin/sh', '-c', target.CONSUMED, self.nonce, self.token],
+                                cwd=self.directory, capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue(ready.exists())
+        self.assertTrue((cache / target.OWNER).exists())
+
+    def test_consumption_dangling_ready_symlink_is_still_refused(self):
+        cache = self.directory / 'code_cache'
+        cache.mkdir()
+        (cache / target.OWNER).write_text(self.token + '\n')
+        (cache / target.CONFIG).write_bytes(b'pending synthetic config')
+        (cache / target.READY).symlink_to(cache / 'absent')
+        result = subprocess.run(['/bin/sh', '-c', target.CONSUMED, self.nonce, self.token],
+                                cwd=self.directory, capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue((cache / target.OWNER).exists())
+
 
 if __name__ == "__main__":
     unittest.main()
