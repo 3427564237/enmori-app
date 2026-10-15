@@ -355,5 +355,9 @@
     "UAT",
     "Release",
     "Sprint_Done"
-  ]
+  ],
+  "ownedTemporaryOperatorConfigAndTlsRemoved": true,
+  "originalPrivateRuntimeConfigPreserved0600": true,
+  "adbReversesReleased": true,
+  "runnerReplacedOnlyAfterTerminalWithSeparateOfflineUx": true
 }
