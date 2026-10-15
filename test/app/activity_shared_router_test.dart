@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:enmori/app/app.dart';
 import 'package:enmori/app/providers.dart';
 import 'package:enmori/app/router/app_router.dart';
@@ -113,6 +115,76 @@ void main() {
     expect(f.repository.reads, [null, null]);
     await _finish(tester, f);
   });
+
+  testWidgets(
+    'pending source action cannot restore notices or data after background and return',
+    (tester) async {
+      final f = await _start(tester);
+      final pending = f.opener.pending = Completer<bool>();
+      await _tap(tester, find.byKey(const Key('home-browse-activities')));
+      await _tap(tester, find.text('Synthetic browse activity'));
+      await _tap(tester, find.text('View on Ticketmaster'));
+      expect(f.opener.calls, 1);
+      expect(f.opener.pendingCurrent!(), isTrue);
+      expect(f.repository.reads, [null, 'tm_QQ']);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+      expect(f.opener.pendingCurrent!(), isFalse);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      pending.complete(false);
+      await tester.pumpAndSettle();
+      expect(find.text('Synthetic browse activity'), findsNothing);
+      expect(find.text('Reload activities to continue.'), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.text('Copy source link'), findsNothing);
+      expect(f.repository.reads, [null, 'tm_QQ']);
+
+      await _tap(tester, find.text('Reload'));
+      expect(f.repository.reads, [null, 'tm_QQ', 'tm_QQ']);
+      expect(find.text('Synthetic browse activity'), findsOneWidget);
+      expect(f.opener.calls, 1);
+      f.container.read(appRouterProvider).pop();
+      await tester.pumpAndSettle();
+      expect(find.text('Browse activities'), findsOneWidget);
+      expect(find.text('Reload activities to continue.'), findsOneWidget);
+      expect(find.text('Synthetic browse activity'), findsNothing);
+      expect(f.repository.reads, [null, 'tm_QQ', 'tm_QQ']);
+      expect(f.events.views, [EventRecommendationView.home]);
+      expect(tester.takeException(), isNull);
+      await _finish(tester, f);
+    },
+  );
+
+  testWidgets(
+    'covered activity list callback cannot stack another detail or read again',
+    (tester) async {
+      final f = await _start(tester);
+      await _tap(tester, find.byKey(const Key('home-browse-activities')));
+      final covered = tester
+          .widget<ActivityPage>(find.byType(ActivityPage))
+          .onSelect!;
+      await _tap(tester, find.text('Synthetic browse activity'));
+      covered('tm_QQ');
+      await _frames(tester);
+      expect(f.repository.reads, [null, 'tm_QQ']);
+      expect(
+        f.container.read(appRouterProvider).state.uri.path,
+        '/activities/tm_QQ',
+      );
+      expect(f.opener.calls, 0);
+
+      // One Back must reveal the original list rather than a duplicated Detail.
+      f.container.read(appRouterProvider).pop();
+      await tester.pumpAndSettle();
+      expect(find.text('Browse activities'), findsOneWidget);
+      expect(find.text('Activity details'), findsNothing);
+      expect(f.repository.reads, [null, 'tm_QQ']);
+      expect(tester.takeException(), isNull);
+      await _finish(tester, f);
+    },
+  );
 }
 
 Future<_Fixture> _start(
@@ -209,9 +281,13 @@ final class _Repository implements ActivityRepository {
 
 final class _Opener implements ExternalActivityOpener {
   int calls = 0;
+  Completer<bool>? pending;
+  bool Function()? pendingCurrent;
   @override
   Future<bool> open(Uri url, {required bool Function() current}) async {
-    if (current()) calls++;
-    return false;
+    if (!current()) return false;
+    calls++;
+    pendingCurrent = current;
+    return pending?.future ?? false;
   }
 }

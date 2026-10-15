@@ -1,0 +1,77 @@
+// Operator-only read-only preflight, executed with the pinned Flutter SDK's
+// own package_config. No project dependency or device operation is introduced.
+import 'dart:io' as io;
+
+import 'package:file/file.dart';
+import 'package:file/local.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/application_package.dart';
+import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:process/process.dart';
+
+Future<void> main(List<String> args) async {
+  try {
+    if (args.length != 2) throw StateError('Arguments');
+    const fs = LocalFileSystem();
+    const platform = LocalPlatform();
+    const processes = LocalProcessManager();
+    final logger = BufferLogger.test();
+    // Match Config's path selection without its parent-directory creation or
+    // malformed-file deletion. Managed reads throw on malformed settings.
+    final home =
+        platform.environment[platform.isWindows ? 'APPDATA' : 'HOME'] ?? '.';
+    final legacy = fs.file(fs.path.join(home, '.flutter_settings'));
+    final configFile =
+        (platform.isLinux || platform.isMacOS) && !legacy.existsSync()
+        ? fs.file(
+            fs.path.join(
+              platform.environment['XDG_CONFIG_HOME'] ??
+                  fs.path.join(home, '.config', 'flutter'),
+              'settings',
+            ),
+          )
+        : legacy;
+    final config = Config.createForTesting(configFile, logger, managed: true);
+    await context.run<void>(
+      overrides: <Type, Generator>{
+        Config: () => config,
+        FileSystem: () => fs,
+        Platform: () => platform,
+        Logger: () => logger,
+      },
+      body: () async {
+        final sdk = AndroidSdk.locateAndroidSdk();
+        final actualAapt = sdk?.latestVersion?.aaptPath;
+        if (sdk == null ||
+            actualAapt == null ||
+            fs.file(actualAapt).resolveSymbolicLinksSync() !=
+                fs.file(args[1]).resolveSymbolicLinksSync()) {
+          throw StateError('SDK tool binding');
+        }
+        final apk = AndroidApk.fromApk(
+          fs.file(args[0]),
+          androidSdk: sdk,
+          processManager: processes,
+          userMessages: UserMessages(),
+          logger: logger,
+          processUtils: ProcessUtils(processManager: processes, logger: logger),
+        );
+        if (apk?.id != 'com.enmori.app.personatest' ||
+            apk?.launchActivity !=
+                'com.enmori.app.personatest/com.enmori.app.MainActivity') {
+          throw StateError('Dedicated package and launcher');
+        }
+      },
+    );
+    io.stdout.writeln('ENMORI_APK_SDK_PARSER_VERIFIED');
+  } catch (_) {
+    // BufferLogger and raw SDK/parser diagnostics remain unpublished.
+    io.stderr.writeln('ENMORI APK SDK parser preflight rejected.');
+    io.exitCode = 1;
+  }
+}
