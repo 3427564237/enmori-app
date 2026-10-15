@@ -1,0 +1,359 @@
+{
+  "source": "6f549b7d7a99a26219c061191b92cd89a4e37554",
+  "tree": "e5d2b3c47fb9197cb1c0d90c33d85b89828bbe31",
+  "capturedAtSGT": "2026-10-14T21:30:19.398418+08:00",
+  "owner": "JIN",
+  "workingBindingsChecked": 385,
+  "inventorySha256": "e1a5e83322e12ebd6d31ebc439b96dff4a067d74bc090bede878229b824bfeee",
+  "unitInputsIdenticalTo": "2d7f6b170d108b0a64a018b1756112529005e8a7",
+  "unitInputsInventorySha256": "339ebcd19fb8e9495d29a6bdd953a807e7368cfaaa23f830855ab7511a9fa8fc",
+  "backendAndToolIdenticalTo": "4cb507d6efcfca329baf4dc234ecbd914c15a1cf",
+  "changedSourceBindings": [
+    {
+      "path": "backend/emulator-test/conversation-operation-authority.integration.test.ts",
+      "mode": "100644",
+      "blob": "c9e2e8d89a0b188be09df030ac265bca10d6c867",
+      "sha256": "e477ca08ca270c958e7bc36526e7561e5d3eee5e8fcc43c184ad5a9e6cce0edd"
+    },
+    {
+      "path": "backend/emulator-test/real-conversation-maintenance.integration.test.ts",
+      "mode": "100644",
+      "blob": "50dbb61d2e13ac5b4b0dab59aeb06a6e41a09dd5",
+      "sha256": "641523162d05be0c528fce8969983b07e330a77a921a8110e4a0c8edf1c18e74"
+    },
+    {
+      "path": "backend/emulator-test/zhou-n01-application-store.integration.test.ts",
+      "mode": "100644",
+      "blob": "5db7ca52986279fcdf65316332eda8bd4fa76b6d",
+      "sha256": "efc8bf064eec5a5fe6b316156b511d05439542b8865552d8800e3c721b545277"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/application-conversation-operations.ts",
+      "mode": "100644",
+      "blob": "cd9f94784b50ecee1921947176575fab8c9d8a17",
+      "sha256": "c0c889e0ccb24397b76379fe910e362e8927eeb76d63bd4569c5c5b8efd1a848"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/async-conversation-operation-executor.ts",
+      "mode": "100644",
+      "blob": "25625f548a666c03b57c0725d8e6cef625442867",
+      "sha256": "77c5772d2333b62c47bd6d13ce0ac4ff47730a5bd9d6b983d5f8ec4e03fee2ca"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/conversation-io-coordinator.ts",
+      "mode": "100644",
+      "blob": "8cff08059f30d66b8486eddc46123cc3c9fbc1af",
+      "sha256": "f6588dd35c5f3a750c4d51ec9c8c44cfef4af34ad816b7f9dbb91bc62606ddf1"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firebase-admin-conversation-operation-authority.ts",
+      "mode": "100644",
+      "blob": "d381f6f11b9cd732faa18d78c8d14f348bda37da",
+      "sha256": "cbac0cae93fc8643e04ffea079a9a1c2508ed7821d4482a5b2263b2139bff5a3"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-maintenance.ts",
+      "mode": "100644",
+      "blob": "1e16e7693a39cc8f98d7d28ac48114db13e45079",
+      "sha256": "2350c7d066af4eb28a68b0b9ebf50f51be02b1986edba0c4e54b2734f01ba94d"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-operation-readers.ts",
+      "mode": "100644",
+      "blob": "45d3e658e7acc24742ff55e4d566174dc03d192e",
+      "sha256": "c36483aa0d5f7c0bcfd5bac70e56b4203d518d7026d185d51c7e10badebc4561"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-restart.ts",
+      "mode": "100644",
+      "blob": "6a5404cbcf9fd069f8fe11e692df31de3e9be553",
+      "sha256": "02427d5c0a4be5d79bed5f3e1438ea156512903e60ebc121c0ce244f371715c7"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-store.ts",
+      "mode": "100644",
+      "blob": "f928eb6d2c471daad1fbc6b42e5fd72f6af77768",
+      "sha256": "7e3229e51faa2ab40642a8f1e6064d66bb1304dafd9ea8dd6a0be0e1a0c18f73"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/tracked-async-conversation-store.ts",
+      "mode": "100644",
+      "blob": "f33e540a923715498ac656b6481018b0394932de",
+      "sha256": "4d12aee489836ac91c8b16695260e9e41fdc01a076ebaf1f020b246aba39b244"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/tracked-conversation-firestore.ts",
+      "mode": "100644",
+      "blob": "ed07f794b64ded191438db43ea85af915d916bb5",
+      "sha256": "58dcef6f9d701c8744dcd04757668faa66294409584230c218f21c21fc2734b3"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/application-conversation-operations.ts",
+      "mode": "100644",
+      "blob": "7e0b3d216f0b7702bc67c1b550595719688e0453",
+      "sha256": "6300512137fea36a8cae4c426a333af7bd6402f21f252e0f207702ff1e57edd3"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/real-conversation-store.ts",
+      "mode": "100644",
+      "blob": "af455d92aef58f6dead6a0f07c35f267cb2b240e",
+      "sha256": "a925856dd9e145b8c84889074ee0388b64fd3893fc7abed8c89165d99319b098"
+    },
+    {
+      "path": "backend/src/ai-runtime/infrastructure/controlled-ollama-transport.ts",
+      "mode": "100644",
+      "blob": "c0deffbf27675e7581a785247801953f5b8dda62",
+      "sha256": "8cecc8ef7d3c46a0651b309a4bcb99aebe242747879c4aec3989a43a9217ad74"
+    },
+    {
+      "path": "backend/src/bootstrap/isolated-conversation-composition.ts",
+      "mode": "100644",
+      "blob": "534619e2e6ab17a075445582d379f3bb4f97fee5",
+      "sha256": "03e28e1e8d6666fe449c2403d2de9409276c88859d5067afbcfd9cc0ef106b7f"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-gateway.ts",
+      "mode": "100644",
+      "blob": "d9e4b1c3db3adc0b84a74c09ce77cb04d81d7aec",
+      "sha256": "4d9d479aecfaf9b3dce058c6b9f25952d34e8f1a0dddfd18fae285a601f9669a"
+    },
+    {
+      "path": "backend/test/ai-conversation/application-conversation-operations.test.ts",
+      "mode": "100644",
+      "blob": "1420a81651ff0d82efee919fee57df1f8722e756",
+      "sha256": "638ef624f5ea52500728cfbf5b46e1a5b3e9ec31ab699e6e9b831404e89f5f19"
+    },
+    {
+      "path": "backend/test/ai-conversation/async-conversation-operation-executor.test.ts",
+      "mode": "100644",
+      "blob": "5cd9d0dbe350975cfa9af6ef91a7df1117c6a322",
+      "sha256": "3a5d944a838ed3c9f7a2bc7c98579a84f47f11f3441220043729b6a67bf3001d"
+    },
+    {
+      "path": "backend/test/ai-conversation/conversation-io-coordinator.test.ts",
+      "mode": "100644",
+      "blob": "ad803a2452cf0348cb9cde536edf339b595a0be1",
+      "sha256": "2713026443f207c513b88a66d47edcf82790fdb8d5009033e36c8fce37ba66cc"
+    },
+    {
+      "path": "backend/test/ai-conversation/conversation-operation-authority.test.ts",
+      "mode": "100644",
+      "blob": "ec8b28972bde3f36355f4922e11e3449f7cb7e01",
+      "sha256": "a30356bc0a2fa277ae73ff0644c7a128d3f68db760a75d325f4e00380357e94b"
+    },
+    {
+      "path": "backend/test/ai-runtime/controlled-ollama-transport.test.ts",
+      "mode": "100644",
+      "blob": "61e5009219cb9cf4fa23e847879dbf09f8bfef04",
+      "sha256": "cf34545debbfd813b6d6e0d76c07d1528133b5668af1860407fdd7a0d8ebf775"
+    },
+    {
+      "path": "firestore.indexes.json",
+      "mode": "100644",
+      "blob": "e7129be7b344bebba8317d1abf3e6898e5da2930",
+      "sha256": "f449a1e492da9e9661dd6062909ac39ec3db473068137ee2c1d7f33e78f7ca42"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "mode": "100644",
+      "blob": "f4a1a92c58aa5cf41c24a25cfa07eb55f658b371",
+      "sha256": "b171df7f955a101a7dc22115defeb99187a030a75ae1275a8996172fcfcd601f"
+    },
+    {
+      "path": "lib/harness/ai_conversation/ai_network_harness_app.dart",
+      "mode": "100644",
+      "blob": "666b88e2f48d6b9645a236bd31d0fd82018c27aa",
+      "sha256": "2dca749b103b735f95bdce25daf0562f92848c189ecc6d4fc00cccd2fed0da8c"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_wire_network_journey_test.dart",
+      "mode": "100644",
+      "blob": "6a1a301ce7dd65fca713554d170eb195cf0d5928",
+      "sha256": "d032f439f92de994f3282c5936b9c29b215e52e50f6cc4e843ccb22177d1152c"
+    },
+    {
+      "path": "test/features/personas/persona_client_session_test.dart",
+      "mode": "100644",
+      "blob": "c7670eb5b173fbdffabccf7ce7cfc3a0e0df01d3",
+      "sha256": "ad011735bb283dcba5d21ca4f96f4e33302ef01b73d9b6f1bb1fc3247defad8c"
+    },
+    {
+      "path": "test/harness/ai_network_harness_test.dart",
+      "mode": "100644",
+      "blob": "a75d63a8e3d7435be42c65b92e6cd6a986e329f6",
+      "sha256": "2117a33e9345d2ce8663e4fd4f3036d9f677692411c782dae773bb66f0fee081"
+    },
+    {
+      "path": "tool/ai_store_emulator_worker.mjs",
+      "mode": "100644",
+      "blob": "1a385a6ac586814d512542007f4d67dd7d8b43da",
+      "sha256": "95f4d270d97f0b6b4aad899cc401eb9faf7a6013028f0668860f8a3b65a8721c"
+    },
+    {
+      "path": "tool/ai_wire_controlled_probe.dart",
+      "mode": "100644",
+      "blob": "6dbc8829a42a64edc660cdb995dbe65a0b32a8ef",
+      "sha256": "9890c765e3b0d62a5956cf1e4a5f8a45fb640371937d8578d9335ebf52b9d986"
+    },
+    {
+      "path": "tool/run_ai_store_emulators.mjs",
+      "mode": "100644",
+      "blob": "f3977c1b88a8c0224dfc854feb1faef3d0608c10",
+      "sha256": "fbe78dc3c65acec47690490a6eca458493c9248344d637607c02d3d53bea83f4"
+    }
+  ],
+  "localLogs": [
+    {
+      "file": "coordinator-backend01.log",
+      "source": "2d7f6b170d108b0a64a018b1756112529005e8a7",
+      "result": "Pass 790/790, exit0",
+      "bytes": 73499,
+      "sha256": "a7bf7788822c897e212eb304780bc3b961d62ba29293ff9740e02a2f486212cd"
+    },
+    {
+      "file": "coordinator-build01.log",
+      "source": "uncommitted coordinator",
+      "result": "Fail import path; corrected before final product",
+      "bytes": 482,
+      "sha256": "79e68ea34366be9918e94d09c7702efc0309e7f2baf851fb46c307ca9c94c3c9"
+    },
+    {
+      "file": "coordinator-build04.log",
+      "source": "4cb507d6efcfca329baf4dc234ecbd914c15a1cf",
+      "result": "Pass strict compile",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "coordinator-focused01.log",
+      "source": "coordinator before final fixture",
+      "result": "Pass 7/7, overlaps790",
+      "bytes": 882,
+      "sha256": "03352e8f1b967d90e76fa48e7d708e71775da4240cb0b339c3d4f0ac5fff94ed"
+    },
+    {
+      "file": "coordinator-emulator01.log",
+      "source": "a3e2143d8c8898c3a71f89d15b723bea35d05cbb",
+      "result": "Fail17/18, exit1; test assumed retirement started before observing completion",
+      "bytes": 5612,
+      "sha256": "c3ae18069eb6a8b921836c2040e4521d89cf1648dd041a283977ea2442b615bb"
+    },
+    {
+      "file": "coordinator-emulator02.log",
+      "source": "4cb507d6efcfca329baf4dc234ecbd914c15a1cf",
+      "result": "Pass18/18, outerexit0; explicit retirement completion",
+      "bytes": 4334,
+      "sha256": "b25bd6ea84f331ba857fbb58c9a693952c071dc0f53f19f56001929e0cbbac02"
+    },
+    {
+      "file": "coordinator-flutter01.log",
+      "source": "6f549b7d7a99a26219c061191b92cd89a4e37554",
+      "result": "Pass540/540 default concurrency exit0",
+      "bytes": 142389,
+      "sha256": "787b7d5b1410e2f31ca5c3c81f4506ea6eb4161f9325e6fbda476aa432a5ab1e"
+    },
+    {
+      "file": "coordinator-analysis01.log",
+      "source": "6f549b7d7a99a26219c061191b92cd89a4e37554",
+      "result": "Pass no issues exit0",
+      "bytes": 60,
+      "sha256": "9a9d35ce9d6fac973a72f078461e18cde1f1c7f2ae7fa7a5916ae87adef4b99a"
+    },
+    {
+      "file": "coordinator-pubget01.log",
+      "source": "6f549b7d7a99a26219c061191b92cd89a4e37554",
+      "result": "Pass offline locked dependency restore",
+      "bytes": 626,
+      "sha256": "4948cbca5eb2734a85d02701eac7337f746655a321a72c138399d761e093b45f"
+    },
+    {
+      "file": "readers-backend01.log",
+      "source": "e14c360d83399581d057773eca05e302613f7b9d",
+      "result": "Pass720/720 exit0",
+      "bytes": 65800,
+      "sha256": "87049be3faef6c6b57d423612f40789c3373f693723050f03a308e116193af2e"
+    },
+    {
+      "file": "readers-emulator01.log",
+      "source": "e14c360d83399581d057773eca05e302613f7b9d",
+      "result": "Fail119/120 exit1; legacy Auth test7349390.9945ms invalid vs forbidden; cause not proved",
+      "bytes": 19001,
+      "sha256": "96f740f3d15afa4dab6124de7c5ab2149027393b0d63ee4e1b2eec4f1edc342d"
+    },
+    {
+      "file": "readers-emulator02.log",
+      "source": "e14c360d83399581d057773eca05e302613f7b9d",
+      "result": "Fail Hub4400 startup timeout, exit2; no product cases",
+      "bytes": 679,
+      "sha256": "bc358563cef2cd5ab03fbab86b693342e536f260bd52e9f1811db4a71648cbbb"
+    },
+    {
+      "file": "readers-emulator03.log",
+      "source": "e14c360d83399581d057773eca05e302613f7b9d",
+      "result": "Pass120/120 outerexit0 unchanged source",
+      "bytes": 17646,
+      "sha256": "e4343510a0d94de43d01701cecf1447f0efac532a22777d60518bf03f1ec2343"
+    },
+    {
+      "file": "sink-build01.log",
+      "source": "intermediate supplier",
+      "result": "Fail raw writeHead header type; retained",
+      "bytes": 969,
+      "sha256": "a46452f750340e6cb40f980c71a96e6c2c9d36ea4d4f8f20ae1f030691ac399f"
+    },
+    {
+      "file": "sink-backend01.log",
+      "source": "f887524075469f55db7d6a862804470158ce0d4e",
+      "result": "Pass711/711",
+      "bytes": 64765,
+      "sha256": "5be6338b033b5ff8dbe28a7416ebe5e1e87f06adba2cce90f679d8d56d84aae6"
+    },
+    {
+      "file": "sink-emulator01.log",
+      "source": "f887524075469f55db7d6a862804470158ce0d4e",
+      "result": "Pass111/111",
+      "bytes": 16514,
+      "sha256": "e19f96bbe595920b49b964f75b9cb33246d4fd03f938f34860efc5fa978c6a2b"
+    },
+    {
+      "file": "restart-backend01.log",
+      "source": "c9f52ae994c9dc274c2550caac1fb9734b1ef350",
+      "result": "Pass711/711",
+      "bytes": 64763,
+      "sha256": "2cfb5e0b962a31373716c135688ede9551664d4a9efca58755e0c14150e569bb"
+    },
+    {
+      "file": "restart-emulator01.log",
+      "source": "c9f52ae994c9dc274c2550caac1fb9734b1ef350",
+      "result": "Pass114/114",
+      "bytes": 16890,
+      "sha256": "d4dd114556d6f238338f82fc03d08300d58e01db84b84248ec10e6c54bbdaaf4"
+    },
+    {
+      "file": "qwen-backend01.log",
+      "source": "ef10048f7e23dff1f4a2675068b0f9f30f929a8a",
+      "result": "Pass720/720",
+      "bytes": 65780,
+      "sha256": "80376240d70d80cdb2521e03992449933d7027346b4b55581a6634012bcc27bb"
+    },
+    {
+      "file": "qwen-focused02.log",
+      "source": "ef10048f7e23dff1f4a2675068b0f9f30f929a8a",
+      "result": "Pass9/9 injected HTTP; not real model",
+      "bytes": 1144,
+      "sha256": "d1cda064206956369b73358c0cddd9dbbb0a46b024dd09ae6420017a50d07a34"
+    },
+    {
+      "file": "qwen-emulator01.log",
+      "source": "ef10048f7e23dff1f4a2675068b0f9f30f929a8a",
+      "result": "Pass115/115",
+      "bytes": 17001,
+      "sha256": "b848fd1f41d6921be579e76a7fab15243723cbf10b41f083fde8e8d92cc15484"
+    }
+  ],
+  "privateArtifactsPublished": false,
+  "fullJoinedEmulator": "Blocked/Not Run: inherited ZHOU Dart child uses a foreign hardcoded SDK path; no case silently skipped",
+  "model": "JIN9 injectedHTTP cases only; LI actual host observations are separately attributed",
+  "device": "Not Run at this candidate",
+  "reviews": "SHI new JIN composition and LI evidence pending; ZHOU#107 code remains LI review path"
+}

@@ -1,0 +1,49 @@
+{
+  "source": "f8b4ae12004c7cfc0ad504113bdf5454e0f20cc1",
+  "tree": "0274af62aa46aad156b51eb4ea05bc96d14a6674",
+  "sourceBindings": [
+    {
+      "path": "backend/src/ai-runtime/infrastructure/controlled-conversation-prompt.ts",
+      "blob": "50308a42e4aff6104693c14a4f9a4b7f2c896d7a",
+      "sha256": "161aa48e80f8943750c5d9a8ecbf0ea328671f8af39ff7adfc127a687bc4d8cb"
+    },
+    {
+      "path": "backend/src/ai-runtime/infrastructure/controlled-tokenizer-process.ts",
+      "blob": "8090fda31ad7d67802ef55afb15752d06fcd4ee1",
+      "sha256": "317a6c96db681ee37989f8aa892b5c070b5e9660f438eb78f71cd127e3c150a5"
+    },
+    {
+      "path": "backend/test/ai-runtime/controlled-conversation-prompt.test.ts",
+      "blob": "b44d1c74dcb63cb0861182c9f72885791001594a",
+      "sha256": "cab5c347fd4a6f5462044504aa5f503bade8bb047e72f4ae4d75ac65a55cd7f3"
+    },
+    {
+      "path": "tool/count_controlled_qwen_tokens.py",
+      "blob": "98665659423622891d4aa4ff07676dc2a4a1e794",
+      "sha256": "f84a890747ed8878d1125b8a0cbd37a0063d414fa38dfee458fc986b46f7c261"
+    }
+  ],
+  "logs": [
+    {
+      "file": "prompt-build02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "prompt-focused01.log",
+      "bytes": 945,
+      "sha256": "ab2419fad454271acd7d6406d8e84da0f49d07564b749c1cea6776a40ce094e1"
+    },
+    {
+      "file": "prompt-backend01.log",
+      "bytes": 74327,
+      "sha256": "47ac26e64e23606b70f5ad520106f6a09d0619dcece82144f2ad8cedcfcac5bf"
+    }
+  ],
+  "backend": "798/798 exit0 on final source",
+  "focused": "8/8 before holder-lifetime hardening; included in final798",
+  "python": "AST syntax only; actual model-matched0.23.3 tokenizer remains LI controlled-host verification",
+  "realModel": "Not Run",
+  "semanticPolicy": "Mandatory separate gate; prompt text is not semantic validation",
+  "priorCompositionEvidence": "85015b7e327c2b17fa5a8da7347f8392a99b9d17; no transfer to new full SDK/device run"
+}

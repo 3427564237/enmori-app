@@ -1,5 +1,30 @@
 # Internal Conversation lifecycle — Issue #78
 
+## 14 October accelerated delta — Issue #83
+
+The separate `AsyncConversationApplication` and
+`AuthorizedAsyncConversationGenerationTransport` implement asynchronous inner
+orchestration under [the accelerated release](../../../docs/decisions/2026-10-14-li-ai-acceleration-and-target.md).
+They leave the original synchronous fake Application/Ports/runtime below
+unchanged. The asynchronous store/control/sink contracts live in
+`ports/async-conversation.ts`; JIN owns the actual store/HTTP/cleanup composition.
+
+`FirebaseAdminRealContextReader` and `FirebaseAdminAsyncConversationAuthority`
+are separate isolated Infrastructure implementations. Their constructors check
+the actual locked SDK's loopback/project binding. The reader uses one exact
+acceptance-time read-only view and checks returned readTime, complete Persona
+membership, page25 Note ordering and fresh current authority. Missing source-bound
+canonical-time/immutability/permanent-deletion/no-ID-reuse facts fail closed
+before Note queries. The adapter is unwired; a test-only prerequisite declaration
+for the complete synthetic fixture inventory is not DU's operational guarantee.
+
+LI reviews this new delta, replacing JIN only for the accelerated package.
+[Source-bound implementation and evidence](../../../docs/evidence/sprint3/2026-10-14-zhou-accelerated-delivery.md)
+distinguish real SDK reader tests from fake asynchronous store/model tests and
+the synthetic mobile harness. No actual store/HTTP/model/device journey or
+ordinary enablement is claimed. The sections below retain the earlier bounded
+component descriptions and their original review attribution.
+
 This is the local implementation of PR #76 C01–C07 and LC01–LC16 released by
 [LI's 12 October decision](../../../docs/decisions/2026-10-12-li-friend-search-and-internal-ai-approval.md).
 The candidate's former proposal-only status remains in its original record;

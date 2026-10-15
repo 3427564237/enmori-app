@@ -1,0 +1,170 @@
+{
+  "source": "96c0b70b3d5d7d8c806b6797f72f2b250f106b91",
+  "tree": "dec895957c63496268d69f8ca9593501d65e1f9a",
+  "capturedAtSGT": "2026-10-14T21:48:36.074026+08:00",
+  "owner": "JIN",
+  "workingBindingsChecked": 409,
+  "inventorySha256": "a339e82fe5c868f2ff42a9da15b3c6688481373861a99afbfb9962d56cab82d1",
+  "comparisons": [
+    {
+      "label": "798 unit/contract inputs",
+      "sameAs": "f8b4ae12004c7cfc0ad504113bdf5454e0f20cc1",
+      "paths": [
+        "backend/src",
+        "backend/test",
+        "backend/tsconfig.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "inventorySha256": "91b6b59f2f799a185396c57e2e2cf682320780bb28de6ceb7fb8c1052e813ea8"
+    },
+    {
+      "label": "540 Flutter/analysis inputs",
+      "sameAs": "6f549b7d7a99a26219c061191b92cd89a4e37554",
+      "paths": [
+        "lib",
+        "test",
+        "integration_test",
+        "pubspec.yaml",
+        "pubspec.lock",
+        "android"
+      ],
+      "inventorySha256": "7eae594cc2596906f85ed67efc6ea3652c430734bfdcf9b3d7ca45abf33ea1a6"
+    },
+    {
+      "label": "unchanged API/dependency/isolation configuration",
+      "sameAs": "85015b7e327c2b17fa5a8da7347f8392a99b9d17",
+      "paths": [
+        "api",
+        "package.json",
+        "pnpm-lock.yaml",
+        "firebase.json",
+        "firestore.indexes.json"
+      ],
+      "inventorySha256": "aeb494017aa417554cbf2ba50f9b1b25469a8545195c1781134cf765aa9a585c"
+    }
+  ],
+  "newBindings": [
+    {
+      "path": "backend/emulator-test/zhou-n01-application-store.integration.test.ts",
+      "mode": "100644",
+      "blob": "5145a7468f49ec1a9cb5fd19e5ba3376fddb05f3",
+      "sha256": "0de2dddb727a22436ce14b1ff18264950e501650301c4c4929ecdd02920fc7e4"
+    },
+    {
+      "path": "backend/src/ai-runtime/infrastructure/controlled-conversation-prompt.ts",
+      "mode": "100644",
+      "blob": "50308a42e4aff6104693c14a4f9a4b7f2c896d7a",
+      "sha256": "161aa48e80f8943750c5d9a8ecbf0ea328671f8af39ff7adfc127a687bc4d8cb"
+    },
+    {
+      "path": "backend/src/ai-runtime/infrastructure/controlled-tokenizer-process.ts",
+      "mode": "100644",
+      "blob": "8090fda31ad7d67802ef55afb15752d06fcd4ee1",
+      "sha256": "317a6c96db681ee37989f8aa892b5c070b5e9660f438eb78f71cd127e3c150a5"
+    },
+    {
+      "path": "backend/test/ai-runtime/controlled-conversation-prompt.test.ts",
+      "mode": "100644",
+      "blob": "b44d1c74dcb63cb0861182c9f72885791001594a",
+      "sha256": "cab5c347fd4a6f5462044504aa5f503bade8bb047e72f4ae4d75ac65a55cd7f3"
+    },
+    {
+      "path": "tool/count_controlled_qwen_tokens.py",
+      "mode": "100644",
+      "blob": "98665659423622891d4aa4ff07676dc2a4a1e794",
+      "sha256": "f84a890747ed8878d1125b8a0cbd37a0063d414fa38dfee458fc986b46f7c261"
+    }
+  ],
+  "localLogs": [
+    {
+      "file": "joined-build01.log",
+      "source": "96c0b70b3d5d7d8c806b6797f72f2b250f106b91",
+      "result": "Pass strict TypeScript, exit0",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "joined-emulator01.log",
+      "source": "96c0b70b3d5d7d8c806b6797f72f2b250f106b91",
+      "result": "Pass129/129, fail/cancel/skip/todo0, outerexit0; two profiles removed and five required ports free",
+      "bytes": 18857,
+      "sha256": "52dacabbb1805687f1e78138487d2bd47ac97ab8ad90ce5e2696032820b00b5f"
+    },
+    {
+      "file": "prompt-build02.log",
+      "source": "f8b4ae12004c7cfc0ad504113bdf5454e0f20cc1",
+      "result": "Pass strict TypeScript, exit0",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "prompt-backend01.log",
+      "source": "f8b4ae12004c7cfc0ad504113bdf5454e0f20cc1",
+      "result": "Pass798/798, fail/cancel/skip/todo0, exit0",
+      "bytes": 74327,
+      "sha256": "47ac26e64e23606b70f5ad520106f6a09d0619dcece82144f2ad8cedcfcac5bf"
+    },
+    {
+      "file": "coordinator-flutter01.log",
+      "source": "6f549b7d7a99a26219c061191b92cd89a4e37554",
+      "result": "Pass540/540 default concurrency, exit0",
+      "bytes": 142389,
+      "sha256": "787b7d5b1410e2f31ca5c3c81f4506ea6eb4161f9325e6fbda476aa432a5ab1e"
+    },
+    {
+      "file": "coordinator-analysis01.log",
+      "source": "6f549b7d7a99a26219c061191b92cd89a4e37554",
+      "result": "Pass fatal-info analysis lib/test/integration_test",
+      "bytes": 60,
+      "sha256": "9a9d35ce9d6fac973a72f078461e18cde1f1c7f2ae7fa7a5916ae87adef4b99a"
+    }
+  ],
+  "whitespace": [
+    {
+      "check": "new executable delta",
+      "base": "85015b7e327c2b17fa5a8da7347f8392a99b9d17",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "check": "full code/API/test/tool delta",
+      "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "check": "full inherited delta including historical raw evidence",
+      "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+      "exitCode": 2,
+      "output": "docs/evidence/sprint3/2026-10-14-zhou-accelerated/android-harness-build.txt:1: trailing whitespace.\n+Running Gradle task 'assembleDebug'...                          \ndocs/evidence/sprint3/2026-10-14-zhou-accelerated/flutter-analyze-full.txt:1: trailing whitespace.\n+Analyzing 3851...                                               \ndocs/evidence/sprint3/2026-10-14-zhou-accelerated/mobile-analyze.txt:1: trailing whitespace.\n+Analyzing 5 items...                                            \ndocs/evidence/sprint3/2026-10-14-zhou-wire-followup/75d-flutter-analyze.log:1: trailing whitespace.\n+Analyzing 3851..."
+    }
+  ],
+  "fullEmulator": {
+    "cases": 129,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "outerExit": 0,
+    "durationMs": 216129.6927,
+    "profilesRemoved": [
+      "worker",
+      "outer"
+    ],
+    "portsFree": [
+      8080,
+      9099,
+      4400,
+      4500,
+      9150
+    ]
+  },
+  "actualDartSdk": "3.13.2 preflighted before credential pipe; existing PATH SDK, no download",
+  "testAdaptation": "JIN-owned portable test launcher only; original #107 branch unchanged",
+  "privateArtifactsPublished": false,
+  "modelAndSemanticGates": "Explicitly fake in SDK fixtures; actual controlled-model Application gate Not Run",
+  "device": "No new device run on this candidate",
+  "retainedFailures": "See immutable six-operation-coordinator manifest; no historical failure is overwritten or claimed disproved",
+  "review": "SHI5517245586 covers f887524 only; later JIN source/composition and this evidence need SHI/LI respective disposition"
+}

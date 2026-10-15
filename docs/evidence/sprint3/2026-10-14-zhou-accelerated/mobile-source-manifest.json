@@ -1,0 +1,55 @@
+{
+  "kind": "ZHOU owner mobile working-tree source manifest",
+  "sourceHead": "ddd991f82458da949bd29daa43134833e8e5b2a9",
+  "generatedAtUtc": "2026-10-14T08:28:18.7161807Z",
+  "flutter": "3.47.2",
+  "dart": "3.13.2",
+  "ordinaryEnablement": false,
+  "files": [
+    {
+      "path": "lib/features/ai_conversation/data/ai_wire_transport.dart",
+      "sha256": "e37ae32941e2f43a1cb9d782e738f630fb0ffd2729a742d8475e09152c409c05",
+      "gitBlob": "b18dfc07036ccf8635e9e3147115dfe1753cac0b"
+    },
+    {
+      "path": "lib/features/ai_conversation/data/http_ai_wire_transport.dart",
+      "sha256": "c31535bdd4f95ae3ac61099e6a9a8a7b8e9af0efd381bce394fa6681c22563c8",
+      "gitBlob": "b11a9a7bcaac6cbdf1cfcbfcf5449076a4011b7d"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "sha256": "d6fa87e5e17cbfbd3739425cdc50af1405e9ab626dbf870a042d86ca2ce024f5",
+      "gitBlob": "72aca0c935a1a7c11a88e438449bb9e6812cf607"
+    },
+    {
+      "path": "lib/ai_persona_harness.dart",
+      "sha256": "887fc1fa651b6152f14971b148ac05d4b55d4050e91cb83bf486d21e89762292",
+      "gitBlob": "9d28e2e846a5cfd854e7fb5db9410d46b470eaf3"
+    },
+    {
+      "path": "lib/harness/ai_persona/ai_persona_harness_app.dart",
+      "sha256": "78c869780bf6c48bbd970f58ab4d7d4a5e6e92280a92382963ee989228147266",
+      "gitBlob": "22d68ebff72334fdb3ec26255b9c3d9a5ae73e25"
+    },
+    {
+      "path": "lib/harness/ai_persona/synthetic_persona_repository.dart",
+      "sha256": "82e9462ba153f6d5bcc7cbed4b6f74a3bf4201b6ca4dfe86fdb91cd4a37434f4",
+      "gitBlob": "d97ad687889ad625ce52d89349ac0b0c3ddddeec"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "sha256": "7d3a30b911345d25cee7d2d893ba4193abf1dd4ef94eb447144898c379cbf3f7",
+      "gitBlob": "fa53f2259c475524220ead106188275e12a93f8e"
+    },
+    {
+      "path": "test/features/ai_conversation/http_ai_wire_transport_test.dart",
+      "sha256": "dc241db4362cec3235d744349e712cc73e34530880f15bd1e6d4dfefe90f8195",
+      "gitBlob": "56d0f39c677af7da120abccecfdc6fe14ba95054"
+    },
+    {
+      "path": "test/harness/ai_persona_harness_test.dart",
+      "sha256": "9e7673d56690cf1fd4cd910b03bbfeccc3715c5428536a7ba545886ce733c95f",
+      "gitBlob": "0f3408a9fa5094d8e1c5254a03756bbb71cc95d3"
+    }
+  ]
+}

@@ -4,6 +4,8 @@ import { isRevision, isVisibility, normalizeDisplayName } from "../domain/profil
 import type { FirestoreGateway, FirestoreTransactionGateway, StoredDocument } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId, parseAuthBinding, parseAccountProjection } from "../../shared/infrastructure/firebase/firestore-records.js";
 import { dependencyUnavailable } from "../../shared/ports/dependency-failure.js";
+import { nextPurposeRevocationGeneration } from "../domain/purpose-revocation-generation.js";
+import { requireControlledEmulatorEnvironment } from "../../shared/infrastructure/firebase/controlled-emulator-environment.js";
 
 type ResolvedAccount = { readonly kind: "found"; readonly path: string; readonly data: StoredDocument }
   | { readonly kind: "onboarding_required" } | typeof dependencyUnavailable;
@@ -44,7 +46,12 @@ export function parseOwnSettings(data: StoredDocument): OwnSettings | undefined 
 }
 
 export class FirestoreAccountPreferencesRepository implements AccountPreferencesRepository {
-  public constructor(private readonly firestore: FirestoreGateway) {}
+  private readonly isolatedAiPurpose: boolean;
+  public constructor(private readonly firestore: FirestoreGateway,
+    isolatedAiEnvironment?: Readonly<Record<string, string | undefined>>) {
+    this.isolatedAiPurpose = isolatedAiEnvironment !== undefined;
+    if (isolatedAiEnvironment !== undefined) requireControlledEmulatorEnvironment(isolatedAiEnvironment);
+  }
 
   public getProfile(uid: string): Promise<AccountRead<OwnProfile>> {
     return this.read(uid, parseOwnProfile);
@@ -86,6 +93,16 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
         if (current.revision !== expected) return { kind: "revision_precondition_failed" };
         if (current.revision >= Number.MAX_SAFE_INTEGER) return dependencyUnavailable;
         const next = { ...account.data, ...fields(current.revision + 1) };
+        // A legacy writer must not bypass the selected producer on an opted-in
+        // Account. It may still preserve independent Profile/visibility fields.
+        if (!this.isolatedAiPurpose && Object.hasOwn(account.data, "purposeRevocationGeneration") &&
+            next.optionalProcessingConsent !== account.data.optionalProcessingConsent) return dependencyUnavailable;
+        if (this.isolatedAiPurpose) {
+          const generation = nextPurposeRevocationGeneration(account.data.purposeRevocationGeneration,
+            account.data.optionalProcessingConsent, next.optionalProcessingConsent);
+          if (generation === undefined) return dependencyUnavailable;
+          next.purposeRevocationGeneration = generation;
+        }
         const value = project(next);
         if (value === undefined) return dependencyUnavailable;
         transaction.set(account.path, next);
