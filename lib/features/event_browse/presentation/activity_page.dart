@@ -5,6 +5,21 @@ import '../../../core/result/result.dart';
 import '../domain/activity_repository.dart';
 import 'activity_controller.dart';
 
+const _listDisclosure =
+    'Source: Ticketmaster. Activity requests pass through ENMORI to Ticketmaster. '
+    'Your ENMORI sign-in token, profile, Check-ins, Personas and AI messages are '
+    'not shared with Ticketmaster. Ticketmaster receives the activity request '
+    'and server connection information.';
+const _sourceActionDisclosure =
+    '“View on Ticketmaster” opens the source page in your browser. Your browser '
+    'connects directly to Ticketmaster; its privacy and cookie policies apply. '
+    'Opening or copying a link does not register you or mark you as Going. '
+    "A copied link can remain on your device's clipboard.";
+const _lifetimeDisclosure =
+    "This activity view stays in ENMORI's memory for at most five minutes and "
+    'clears when the app goes into the background or you sign out. Reload to '
+    'request current information.';
+
 /// LI supplies route/session guards and list navigation. Never remaps /events.
 final class ActivityPage extends ConsumerStatefulWidget {
   const ActivityPage({this.browseId = '', this.onSelect, super.key});
@@ -126,6 +141,8 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                     Text(locationLabel ?? 'Location unavailable.'),
                     Text(categoryLabel ?? 'Category unavailable.'),
                     const Text('Description unavailable.'),
+                    const SizedBox(height: 16),
+                    const Text(_sourceActionDisclosure),
                     FilledButton(
                       onPressed: () => _action(true),
                       child: const Text('View on Ticketmaster'),
@@ -144,6 +161,12 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                 onPressed: controller.load,
                 child: Text(state.hasError ? 'Retry' : 'Reload'),
               ),
+            const SizedBox(height: 16),
+            if (widget.browseId.isEmpty) ...[
+              const Text(_listDisclosure),
+              const SizedBox(height: 12),
+            ],
+            const Text(_lifetimeDisclosure),
           ],
         ),
       ),
