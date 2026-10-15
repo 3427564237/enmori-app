@@ -1,12 +1,37 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { spawnSync } from 'node:child_process';
-import { resolve } from 'node:path';
-import { validateZhouModelConfiguration, quoteFixedWorkerCommand, isPositiveZhouModelStoreReport } from './zhou_real_model_store_probe.mjs';
+import { resolve, relative, isAbsolute } from 'node:path';
+import { mkdtempSync, mkdirSync, rmSync, realpathSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { validateZhouModelConfiguration, quoteFixedWorkerCommand, isPositiveZhouModelStoreReport, buildZhouProbeEnvironment } from './zhou_real_model_store_probe.mjs';
 
 const configuration = () => ({controlledHostVerified: true, existingHostGenerationLeaseSettled: true, binding: {endpoint: 'http://127.0.0.1:11434',
   reference: 'synthetic-existing-host:9b', manifestDigest: '1'.repeat(64), tokenizerDigest: '2'.repeat(64),
   ollamaVersion: '0.0.0-test', mode: 'formal-9b'}, tokenizerFiles: {manifestDigest: '1'.repeat(64), tokenizerSha256: '2'.repeat(64)}});
+
+test('both isolated mobile workers retain only explicitly supplied existing toolchain paths and never host credential profiles', () => {
+  const directory = mkdtempSync(resolve(tmpdir(), 'zhou-mobile-env-'));
+  try {
+    const host = {GCLOUD_PROJECT:'demo-enmori-rmvp01a-r10', GOOGLE_CLOUD_PROJECT:'demo-enmori-rmvp01a-r10',
+      FIREBASE_AUTH_EMULATOR_HOST:'127.0.0.1:9099', FIRESTORE_EMULATOR_HOST:'127.0.0.1:8080',
+      HOME:'synthetic-foreign-home', CLOUDSDK_CONFIG:'synthetic-foreign-config', FIREBASE_TOKEN:'synthetic-token'};
+    for (const name of ['ANDROID_HOME','JAVA_HOME','PUB_CACHE','GRADLE_USER_HOME']) {
+      host[name] = resolve(directory, name); mkdirSync(host[name]);
+    }
+    const outer = buildZhouProbeEnvironment(host, resolve(directory,'outer'), true);
+    const inner = buildZhouProbeEnvironment(outer, resolve(directory,'inner'), true);
+    for (const name of ['ANDROID_HOME','JAVA_HOME','PUB_CACHE','GRADLE_USER_HOME']) assert.equal(inner[name], realpathSync(host[name]));
+    for (const name of ['HOME','APPDATA','USERPROFILE','XDG_CONFIG_HOME']) assert.equal(inner[name], resolve(directory,'inner'));
+    assert.equal(inner.CLOUDSDK_CONFIG, undefined); assert.equal(inner.FIREBASE_TOKEN, undefined);
+    assert.equal(buildZhouProbeEnvironment(host, resolve(directory,'model')).ANDROID_HOME, undefined);
+    assert.throws(() => buildZhouProbeEnvironment({...host, ANDROID_HOME:'relative'}, resolve(directory,'bad'), true));
+  } finally {
+    const child = relative(realpathSync(tmpdir()), realpathSync(directory));
+    assert(child && !child.startsWith('..') && !isAbsolute(child));
+    rmSync(directory, {recursive:true,force:true});
+  }
+});
 
 test('operator configuration binds the existing formal loopback model and matching tokenizer before any contact', () => {
   assert.equal(validateZhouModelConfiguration(configuration()).binding.mode, 'formal-9b');

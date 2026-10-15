@@ -40,9 +40,11 @@ export async function runZhouMobileNetworkFixture({
   let httpsServer, httpsListening = false, flutterChild, flutterExited = true;
   let markerCount = 0, acceptedSeen = false, finishedSeen = false, delivered = false;
   let currentStage = 'preflight', blockedStage, cleanupPassed = false, fixturePreserved = false;
-  let selectedApkSha256, signatureVerified = false;
+  let prebuildApkSha256, runnerApkSha256, selectedApkSha256;
+  let prebuildSignatureVerified = false, signatureVerified = false;
   let postTestApkSha256, apkAttributionConfirmed = false;
   let disposeConfiguration, credentialCleanupConfirmed = true, androidTestAttempted = false;
+  let credentialFlight, credentialFlightClosed = false;
   let hostLeaseAccepted = false;
   const createdReverses = [];
   const phase = value => { currentStage = value; try { onPhase(value); } catch { /* Diagnostics cannot own resources. */ } };
@@ -55,7 +57,8 @@ export async function runZhouMobileNetworkFixture({
     runtimeConfigurationDelivered: delivered, configurationMarkerCount: markerCount,
     aiAcceptedAndReadback: acceptedSeen, personaHistoryAndDelete: finishedSeen,
     cleanupPassed, fixturePreserved, operatorHold: Boolean(blockedStage) || !cleanupPassed,
-    selectedApkSha256, postTestApkSha256, apkAttributionConfirmed, signatureVerified,
+    prebuildApkSha256, runnerApkSha256, selectedApkSha256, postTestApkSha256,
+    apkAttributionConfirmed, prebuildSignatureVerified, signatureVerified,
     credentialCleanupConfirmed, rawChildOutputDiscarded: true,
   });
   // Short commands retain bounded output only in memory and never print it.
@@ -89,17 +92,22 @@ export async function runZhouMobileNetworkFixture({
     await adbRun(['reverse', '--no-rebind', endpoint, endpoint]);
     createdReverses.push(endpoint);
   };
-  const inspectApk = async () => {
+  const inspectApk = async (current = () => true) => {
+    assert.ok(current());
     const bytes = await readArtifact(apkPath);
-    selectedApkSha256 = createHash('sha256').update(bytes).digest('hex');
+    assert.ok(current());
+    const sha256 = createHash('sha256').update(bytes).digest('hex');
     const badging = await run(aapt, ['dump', 'badging', apkPath]);
+    assert.ok(current());
     assert.match(badging, /^package: name='com\.enmori\.app\.personatest'(?:\s|$)/m);
     assert.match(badging, /^launchable-activity: name='com\.enmori\.app\.MainActivity'(?:\s|$)/m);
     const manifest = await run(aapt, ['dump', 'xmltree', apkPath, 'AndroidManifest.xml']);
+    assert.ok(current());
     assert.match(manifest, /^\s*A: package="com\.enmori\.app\.personatest"/m);
     const signer = executable(apksigner);
     await run(signer.program, [...signer.args, 'verify', '--verbose', apkPath]);
-    signatureVerified = true;
+    assert.ok(current());
+    return sha256;
   };
   try {
     // LI's original cancel-once invocation is a host-level hold. The caller must
@@ -125,17 +133,15 @@ export async function runZhouMobileNetworkFixture({
     const flutterVersion = JSON.parse(await run(flutterDart, [flutterSnapshot, '--suppress-analytics', '--version', '--machine']));
     assert.equal(flutterVersion.frameworkVersion, '3.47.2');
     assert.match(flutterVersion.dartSdkVersion, /^3\.13\.2(?:\s|$)/);
-    // Inspect supplied dedicated APK before ANY installation-capable Flutter
-    // command; never select the ordinary application ID or install a generic APK.
-    await inspectApk();
     const flutterEnvironment = { ...environment, ENMORI_PERSONA_ANDROID_TEST: 'true', DASH__SUPPRESS_ANALYTICS: 'true',
       GRADLE_OPTS: '-Dorg.gradle.project.kotlin.incremental=false -Dorg.gradle.project.kotlin.compiler.execution.strategy=in-process' };
     phase('dedicated-build');
-    // Pinned TestCommand has no --use-application-binary. Follow existing PC13:
-    // same dedicated flag/target build, inspect, then test (cached source build).
+    // Building cannot install an APK. A clean checkout need not contain an old
+    // artifact: build the dedicated target, then inspect before Flutter TEST.
     await run(flutterDart, [flutterSnapshot, '--suppress-analytics', 'build', 'apk', '--debug', '--no-pub', '--target', target,
       '--android-project-arg=kotlin.incremental=false', '--android-project-arg=kotlin.compiler.execution.strategy=in-process'], flutterEnvironment, buildTimeoutMs);
-    await inspectApk();
+    prebuildApkSha256 = await inspectApk();
+    prebuildSignatureVerified = true;
     assert.equal((await adbRun(['get-state'])).trim(), 'device');
     phase('owned-https-and-usb');
     httpsServer = createHttpsServer({ cert: certificate, key }, fixture.server.routing);
@@ -146,19 +152,30 @@ export async function runZhouMobileNetworkFixture({
     await ensureReverse(9099); await ensureReverse(address.port);
     phase('android-journey');
     await new Promise((done, reject) => {
-      let pending = '', deliveryTask;
+      let pending = '', flightTimer;
       androidTestAttempted = true;
       flutterChild = spawnChild(flutterDart, [flutterSnapshot, '--suppress-analytics', 'test', target, '-d', serial,
         '--no-pub', '--no-uninstall', '--reporter', 'expanded'], { cwd: repository, env: flutterEnvironment, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
       flutterExited = false;
-      const timer = setTimeout(() => { flutterChild.kill(); reject(failure()); }, flutterTimeoutMs);
-      const fail = () => { flutterChild.kill(); clearTimeout(timer); reject(failure()); };
+      const timer = setTimeout(() => { credentialFlightClosed = true; flutterChild.kill(); reject(failure()); }, flutterTimeoutMs);
+      const fail = () => { credentialFlightClosed = true; flutterChild.kill(); clearTimeout(timer); reject(failure()); };
       const line = value => {
         if (value.includes(requested)) {
           if (++markerCount !== 1) { fail(); return; }
-          deliveryTask = (async () => {
-            // Fresh TTL begins at the mounted target's handshake, after builds.
+          const current = () => !credentialFlightClosed && !flutterExited;
+          credentialFlight = (async () => {
+            // Flutter's integration runner builds a generated listener.dart,
+            // not the direct target used by BUILD. At this mounted handshake
+            // its installed runner APK is the actual default build output.
+            phase('runner-apk-preflight');
+            runnerApkSha256 = await inspectApk(current);
+            assert.ok(current());
+            selectedApkSha256 = runnerApkSha256;
+            signatureVerified = true;
+            phase('runner-apk-verified');
+            // No identity access or credential delivery before runner proof.
             const identity = fixture.privateChannel(), issuedAt = now();
+            assert.ok(current());
             credentialCleanupConfirmed = false;
             let ownership;
             try { ownership = await deliverConfiguration({ adb, serial, configuration: {
@@ -169,9 +186,11 @@ export async function runZhouMobileNetworkFixture({
             } }); } catch (error) { disposeConfiguration = error?.dispose; throw failure(); }
             disposeConfiguration = ownership?.dispose;
             assert.equal(typeof disposeConfiguration, 'function');
+            assert.ok(current());
             delivered = true; phase('runtime-configuration-delivered');
           })();
-          deliveryTask.catch(fail);
+          flightTimer = setTimeout(fail, commandTimeoutMs + 10_000);
+          credentialFlight.then(() => clearTimeout(flightTimer), () => { clearTimeout(flightTimer); fail(); });
         }
         if (value.includes(accepted)) acceptedSeen = true;
         if (value.includes(finished)) finishedSeen = true;
@@ -187,12 +206,12 @@ export async function runZhouMobileNetworkFixture({
       flutterChild.stderr.resume();
       flutterChild.once('error', () => { flutterExited = !flutterChild.pid; fail(); });
       flutterChild.once('exit', code => {
-        flutterExited = true; clearTimeout(timer); if (pending) line(pending); pending = '';
-        Promise.resolve(deliveryTask).then(() => code === 0 && delivered && markerCount === 1 && acceptedSeen && finishedSeen ? done() : reject(failure()), () => reject(failure()));
+        flutterExited = true; credentialFlightClosed = true; clearTimeout(timer); if (pending) line(pending); pending = '';
+        Promise.resolve(credentialFlight).then(() => code === 0 && delivered && markerCount === 1 && acceptedSeen && finishedSeen ? done() : reject(failure()), () => reject(failure()));
       });
     });
     postTestApkSha256 = createHash('sha256').update(await readArtifact(apkPath)).digest('hex');
-    assert.equal(postTestApkSha256, selectedApkSha256);
+    assert.equal(postTestApkSha256, runnerApkSha256);
     apkAttributionConfirmed = true;
     const state = fixture.state();
     assert.equal(state.modelAttempts, 1);
@@ -209,9 +228,20 @@ export async function runZhouMobileNetworkFixture({
       // Do not inspect, clean, close or authenticate against that fixture here.
       fixturePreserved = true;
     } else {
+    credentialFlightClosed = true;
     if (!flutterExited && flutterChild) {
       flutterChild.kill();
       await new Promise(done => { const timer = setTimeout(done, commandTimeoutMs); flutterChild.once('exit', () => { clearTimeout(timer); flutterExited = true; done(); }); });
+    }
+    if (credentialFlight) {
+      // A marker flight can still be returning an ownership capability after a
+      // child/duplicate-marker failure. Drain it before disposing credentials.
+      try {
+        await new Promise((done, reject) => {
+          const timer = setTimeout(() => reject(failure()), commandTimeoutMs + 10_000);
+          credentialFlight.then(() => { clearTimeout(timer); done(); }, () => { clearTimeout(timer); done(); });
+        });
+      } catch { credentialCleanupConfirmed = false; blockedStage ??= 'runtime-credential-flight-unconfirmed'; }
     }
     if (flutterExited && androidTestAttempted) {
       try { await adbRun(['shell', 'am', 'force-stop', packageId]); }
