@@ -1,15 +1,201 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
 import 'package:enmori/harness/ai_conversation/ai_network_harness_app.dart';
 import 'package:enmori/harness/ai_conversation/synthetic_auth_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
 // Real feature pages, controllers and HTTP mappers with a handwritten HTTP
 // double. This suite does not execute Firebase, a model, a device or a Backend.
 void main() {
+  testWidgets(
+    'Persona pop transition overlaps Back keys until the route settles',
+    (tester) async {
+      final auth = SyntheticAiAuthRepository();
+      final client = _Peer(seeded: true);
+      addTearDown(auth.dispose);
+      await tester.pumpWidget(_app(auth, client));
+      await tester.pumpAndSettle();
+      await _tap(tester, 'ai-personas');
+      await _tap(tester, 'persona-edit-$_persona', 'route-persona-management');
+      final back = find.byKey(const Key('persona-back'));
+      expect(back, findsOneWidget);
+      await tester.tap(back);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Management is already exposed while the outgoing editor is still in
+      // the transition tree. Existence alone cannot identify a unique control.
+      expect(find.byKey(const Key('persona-edit-$_persona')), findsOneWidget);
+      expect(back, findsNWidgets(2));
+      await expectLater(
+        () async => tester.ensureVisible(back),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.toString(),
+            'message',
+            contains('Too many elements'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(back, findsOneWidget);
+      expect(back.hitTestable(), findsOneWidget);
+      expect(client.editRequests, isEmpty);
+      expect(client.executions, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'small keyboard-inset harness needs focus release and upward saved-status scroll',
+    (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auth = SyntheticAiAuthRepository();
+      final client = _Peer();
+      addTearDown(auth.dispose);
+      await tester.pumpWidget(
+        _app(
+          auth,
+          client,
+          label: 'Run-owned Auth/Firestore; real Qwen9B fixture',
+        ),
+      );
+      await tester.pumpAndSettle();
+      await _tap(tester, 'ai-personas');
+      expect(find.byKey(const Key('persona-empty')), findsOneWidget);
+      await _tap(tester, 'persona-create');
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('persona-name')),
+        'Controlled mobile guide',
+      );
+      final save = find.byKey(const Key('persona-save'));
+      // A focused EditableText can scroll itself back into view after the
+      // helper exposes Save. Widget existence is not a usable tap target.
+      await tester.ensureVisible(save);
+      await tester.pumpAndSettle();
+      expect(save.hitTestable(), findsNothing);
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(save);
+      await tester.pumpAndSettle();
+      expect(save.hitTestable(), findsOneWidget);
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+      expect(client.createRequests, hasLength(1));
+      expect(client.persona?['displayName'], 'Controlled mobile guide');
+      expect(client.stateRevision, 1);
+      final saved = find.byKey(const Key('persona-saved'));
+      // The request succeeded, but the independently lazy status panel at the
+      // top has left the tree. Waiting for its key alone cannot make it return.
+      expect(saved, findsNothing);
+      await tester.scrollUntilVisible(
+        saved,
+        -200,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const Key('route-persona-create')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.pumpAndSettle();
+      expect(saved.hitTestable(), findsOneWidget);
+      expect(find.text('Your change was saved.'), findsOneWidget);
+      expect(client.createRequests, hasLength(1));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'idle AI sends its first message after Persona create activate edit detour',
+    (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auth = SyntheticAiAuthRepository();
+      final client = _Peer();
+      addTearDown(auth.dispose);
+      await tester.pumpWidget(
+        _app(
+          auth,
+          client,
+          label: 'Run-owned Auth/Firestore; real Qwen9B fixture',
+        ),
+      );
+      await tester.pumpAndSettle();
+      final scope = ProviderScope.containerOf(
+        tester.element(find.byKey(const Key('ai-message-input'))),
+      );
+      expect(
+        scope.read(aiConversationControllerProvider).phase,
+        AiConversationPhase.idle,
+      );
+      expect(scope.read(aiConversationControllerProvider).canSend, isTrue);
+      expect(client.executions, isEmpty);
+      await _tap(tester, 'ai-personas');
+      expect(find.byKey(const Key('persona-empty')), findsOneWidget);
+      await _tap(tester, 'persona-create');
+      await tester.enterText(
+        find.byKey(const Key('persona-name')),
+        'Controlled mobile guide',
+      );
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await _tap(tester, 'persona-save', 'route-persona-create');
+      expect(client.createRequests, hasLength(1));
+      await _tap(tester, 'persona-back');
+      await _tap(tester, 'persona-select-$_persona');
+      await _tap(tester, 'persona-activate', 'route-persona-management');
+      await _tap(tester, 'persona-confirm-activate');
+      expect(client.active, _persona);
+      await _tap(tester, 'persona-edit-$_persona', 'route-persona-management');
+      await tester.enterText(
+        find.byKey(const Key('persona-name')),
+        'Edited controlled mobile guide',
+      );
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await _tap(tester, 'persona-save', 'route-persona-edit');
+      expect(client.persona?['revision'], 2);
+      expect(client.stateRevision, 3);
+      await _tap(tester, 'persona-back');
+      await _tap(tester, 'persona-back');
+      expect(find.byKey(const Key('ai-message-input')), findsOneWidget);
+      expect(
+        scope.read(aiConversationControllerProvider).phase,
+        AiConversationPhase.idle,
+      );
+      expect(scope.read(aiConversationControllerProvider).canSend, isTrue);
+      expect(client.executions, isEmpty);
+      await tester.enterText(find.byKey(const Key('ai-message-input')), _input);
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      final send = find.byKey(const Key('ai-send'));
+      expect(tester.widget<FilledButton>(send).onPressed, isNotNull);
+      expect(send.hitTestable(), findsOneWidget);
+      await _tap(tester, 'ai-send');
+      expect(client.executions, hasLength(1));
+      expect(
+        scope.read(aiConversationControllerProvider).phase,
+        AiConversationPhase.success,
+      );
+      expect(find.text(_reply), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets(
     'shared HTTP composition supports Persona CRUD, explicit activation and dirty guards',
     (tester) async {

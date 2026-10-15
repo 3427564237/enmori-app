@@ -45,6 +45,7 @@ void main() {
     final configuration = await ControlledMobileFixtureConfiguration.consume(
       configurationFile,
     );
+    debugPrint('ZHOU_MOBILE_STAGE: config_consumed');
     final firebase = await Firebase.initializeApp(
       name: 'zhou-mobile-controlled',
       options: const FirebaseOptions(
@@ -54,6 +55,7 @@ void main() {
         projectId: ControlledMobileFixtureConfiguration.projectId,
       ),
     );
+    debugPrint('ZHOU_MOBILE_STAGE: firebase_ready');
     addTearDown(firebase.delete);
     final firebaseAuth = FirebaseAuth.instanceFor(app: firebase);
     await firebaseAuth.useAuthEmulator(
@@ -61,6 +63,7 @@ void main() {
       9099,
       automaticHostMapping: false,
     );
+    debugPrint('ZHOU_MOBILE_STAGE: auth_emulator');
     final auth = FirebaseAuthRepository(firebaseAuth);
     addTearDown(auth.signOut);
     final trust = SecurityContext(withTrustedRoots: false)
@@ -78,26 +81,36 @@ void main() {
     );
     // Mount the sole app-owned observer before the ordinary sign-in command.
     await tester.pump();
+    debugPrint('ZHOU_MOBILE_STAGE: harness_mounted');
     final signedIn = await configuration.signIn(auth);
     expect(signedIn is Success<void>, isTrue);
+    debugPrint('ZHOU_MOBILE_STAGE: signed_in');
     await _until(tester, () => _state(tester).canSend);
+    debugPrint('ZHOU_MOBILE_STAGE: ai_ready');
     await _tap(tester, 'ai-personas');
+    debugPrint('ZHOU_MOBILE_STAGE: personas_opened');
     await _visible(tester, 'persona-create');
     expect(find.byKey(const Key('persona-empty')), findsOneWidget);
+    debugPrint('ZHOU_MOBILE_STAGE: personas_loaded');
     await _tap(tester, 'persona-create');
     await _visible(tester, 'persona-name');
+    debugPrint('ZHOU_MOBILE_STAGE: persona_editor_opened');
     await tester.enterText(
       find.byKey(const Key('persona-name')),
       'Controlled mobile guide',
     );
     await _tap(tester, 'persona-save');
-    await _visible(tester, 'persona-saved');
+    debugPrint('ZHOU_MOBILE_STAGE: persona_create_requested');
+    await _saved(tester, 'route-persona-create');
+    debugPrint('ZHOU_MOBILE_STAGE: persona_saved');
     await _tap(tester, 'persona-back');
+    debugPrint('ZHOU_MOBILE_STAGE: personas_returned');
     final scope = ProviderScope.containerOf(
       tester.element(find.byKey(const Key('route-persona-management'))),
     );
     final collection = scope.read(personaSessionControllerProvider).collection;
     expect(collection?.items.length, 1);
+    debugPrint('ZHOU_MOBILE_STAGE: persona_created');
     final persona = collection!.items.single;
     await _tap(tester, 'persona-select-${persona.personaId}');
     await _tap(tester, 'persona-activate');
@@ -111,6 +124,7 @@ void main() {
               ?.activePersonaId ==
           persona.personaId,
     );
+    debugPrint('ZHOU_MOBILE_STAGE: persona_active');
     await _tap(tester, 'persona-edit-${persona.personaId}');
     await _visible(tester, 'persona-name');
     await tester.enterText(
@@ -118,21 +132,27 @@ void main() {
       'Edited controlled mobile guide',
     );
     await _tap(tester, 'persona-save');
-    await _visible(tester, 'persona-saved');
+    await _saved(tester, 'route-persona-edit');
     await _tap(tester, 'persona-back');
     await _visible(tester, 'persona-edit-${persona.personaId}');
     final edited = scope.read(personaSessionControllerProvider).collection!;
     expect(edited.items.single.revision, 2);
     expect(edited.stateRevision, 3);
     expect(edited.activePersonaId == persona.personaId, isTrue);
+    debugPrint('ZHOU_MOBILE_STAGE: persona_edited');
     await _tap(tester, 'persona-back');
     await _visible(tester, 'ai-message-input');
+    debugPrint('ZHOU_MOBILE_STAGE: ai_input_visible');
+    await _until(tester, () => _state(tester).canSend);
+    debugPrint('ZHOU_MOBILE_STAGE: ai_return_ready');
 
     // Exact harmless routine lies inside the reviewed bounded semantic grammar.
     // The test never supplies an expected model reply or repairs its output.
     const input = 'I read a book today.';
     await tester.enterText(find.byKey(const Key('ai-message-input')), input);
+    debugPrint('ZHOU_MOBILE_STAGE: ai_input_entered');
     await _tap(tester, 'ai-send');
+    debugPrint('ZHOU_MOBILE_STAGE: send_requested');
     await _until(
       tester,
       () => !const {
@@ -159,6 +179,7 @@ void main() {
       isTrue,
     );
     expect(_state(tester).messages.last.availability, AiAvailability.available);
+    debugPrint('ZHOU_MOBILE_STAGE: ai_readback');
     debugPrint('ZHOU_MOBILE_AI_ACCEPTED_PERSISTED_READBACK: Pass');
 
     await _tap(tester, 'ai-personas');
@@ -199,6 +220,7 @@ void main() {
     );
     expect(_state(tester).messages, isEmpty);
     expect(tester.takeException(), isNull);
+    debugPrint('ZHOU_MOBILE_STAGE: conversation_deleted');
     debugPrint(
       'ZHOU_MOBILE_PERSONA_DELETE_PRESERVES_HISTORY_AND_CONVERSATION_DELETE: Pass',
     );
@@ -228,15 +250,39 @@ Future<void> _until(
 }
 
 Future<void> _visible(WidgetTester tester, String key) =>
-    _until(tester, () => find.byKey(Key(key)).evaluate().isNotEmpty);
+    _until(tester, () => find.byKey(Key(key)).evaluate().length == 1);
 
 Future<void> _tap(WidgetTester tester, String key) async {
+  // Real-device keyboard insets can keep ensureVisible's target outside the
+  // hit-test area. Dismiss input and wait for the actual viewport to settle.
+  FocusManager.instance.primaryFocus?.unfocus();
+  await _until(tester, () => tester.view.viewInsets.bottom == 0);
   await _visible(tester, key);
   final target = find.byKey(Key(key));
   await tester.ensureVisible(target);
-  await tester.pump();
+  await _until(tester, () {
+    if (target.evaluate().length != 1 ||
+        target.hitTestable().evaluate().isEmpty) {
+      return false;
+    }
+    final route = ModalRoute.of(tester.element(target));
+    return route?.animation?.isCompleted ?? true;
+  });
   await tester.tap(target);
   await tester.pump();
+}
+
+Future<void> _saved(WidgetTester tester, String surface) async {
+  // The success panel is a separate lazy-list child above the form. Restore
+  // that viewport before waiting for the original success assertion.
+  final scrollable = find
+      .descendant(
+        of: find.byKey(Key(surface)),
+        matching: find.byType(Scrollable),
+      )
+      .first;
+  tester.state<ScrollableState>(scrollable).position.jumpTo(0);
+  await _visible(tester, 'persona-saved');
 }
 
 Future<void> _menu(WidgetTester tester, String key) async {

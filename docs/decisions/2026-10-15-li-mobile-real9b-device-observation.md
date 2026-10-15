@@ -1,0 +1,9 @@
+# LI controlled mobile real9B observation
+
+Source ID S-PM-1015-LI-MOBILE-REAL9B-OBSERVED. Authority: human LI HOURUI/PM and current designated controlled-host/device operator,15October2026 SGT. User explicitly connected the phone and requested small experience/Figma progress with optional agent delegation. Existing controlled synthetic-account/empty-Note model and Firebase scope remains.
+
+Receive [the exact-source actual observation](../evidence/sprint3/2026-10-15-li-mobile-profile-preflight.md) and [receipt](../evidence/sprint3/2026-10-15-li-mobile-profile-preflight-source.json): product7a505c034f05d5e70aa44444117455aa5c40b3e3 on vivo V2405A/API36 passes Auth/Persona CRUD+selection, one actual formal9B generation, saved pair/history, Persona-delete history preservation, whole conversation deletion and complete cleanup. Counts621/621 measure one complete input twice. No invocation hold remains.
+
+The prior mobile Not Run/Not Proven status is prospectively resolved only for this bounded physical-device packet. All six prior zero-generation failures remain source-bound; parent corrected test preflight/interaction mechanics while retaining every business assertion. No source/result transfer onto the ordinary APK, real Event, different branch or unexecuted scope. ZHOU formal review of new LI PR115 remains Pending; observed execution Pass is not peer acceptance.
+
+JIN's controlled phone-facing service and LI ordinary app/config/network candidate remain separate deliverables. Current user-preview APK is separately built offline/synthetic UX product290c431 under PR116; DU reviews its new UI delta. No persistent/cloud/real-human data, new API/dependency/deployment choice, ordinary service enablement, main merge, task/Project transition or whole-module/Sprint/UAT/Release/Done acceptance follows.
