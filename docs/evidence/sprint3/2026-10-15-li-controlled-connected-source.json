@@ -2214,5 +2214,43 @@
   ],
   "rawContentOrCredentialsCommitted": false,
   "ordinaryPackageRestored": false,
-  "formalLiClientReviewer": "DU pending"
+  "formalLiClientReviewer": "DU pending",
+  "laterPreviewIdleObservation": {
+    "serviceRunning": true,
+    "modelAttempts": 0,
+    "modelPending": 0,
+    "operatorHold": false,
+    "verifiedModelCurrentlyLoaded": false,
+    "readOnlyObservation": true
+  },
+  "manualPreviewWarmReconnect": {
+    "sameOriginalPreviewService": true,
+    "quietOriginalBeforeAndAfterNativeStop": true,
+    "manualExistingZeroContentPreload": true,
+    "done": true,
+    "generatedTokens": 0,
+    "durationMs": 27611,
+    "noHostPolicyChange": true,
+    "noAutomaticWarmLoop": true,
+    "futureIdleReadinessStillLimited": true
+  },
+  "privateReconnectDelivery": {
+    "status": "Pass",
+    "category": null,
+    "apkVerified": true,
+    "installedApkMatched": true,
+    "readyNonceVerified": true,
+    "configurationConsumed": true,
+    "failureCleanupConfirmed": true,
+    "createdReverseCount": 0,
+    "apkSha256": "d492141ed9c09f93ec5da3784fc0f924d8e52ca46085c7ca172b2dfa4674ffe8"
+  },
+  "afterManualWarmReadiness": {
+    "serviceRunning": true,
+    "modelAttempts": 0,
+    "modelPending": 0,
+    "operatorHold": false,
+    "verifiedModelCurrentlyLoaded": true,
+    "readOnlyObservation": true
+  }
 }
