@@ -1,5 +1,6 @@
 // Operator-only existing-host probes. No ordinary application wiring, writes,
-// model installation, fallback, raw output logging or semantic acceptance.
+// model installation, fallback or raw output logging. The semantic-once mode
+// uses the LI-approved finite gate; its Auth/store/sink remain synthetic.
 import assert from 'node:assert/strict';
 import { performance } from 'node:perf_hooks';
 import { pathToFileURL } from 'node:url';
@@ -8,6 +9,25 @@ import { ControlledConversationPrompt } from '../backend/dist/src/ai-runtime/inf
 import { ControlledOllamaTransport } from '../backend/dist/src/ai-runtime/infrastructure/controlled-ollama-transport.js';
 import { BoundedAiRuntime } from '../backend/dist/src/ai-runtime/application/bounded-ai-runtime.js';
 import { MonotonicRuntimeClock } from '../backend/dist/src/ai-runtime/infrastructure/monotonic-runtime-clock.js';
+import { boundedConversationSemanticCandidate, boundedConversationSemanticPolicyVersion } from '../backend/dist/src/ai-conversation/application/bounded-conversation-semantic-policy.js';
+import { startControlledChatPacket } from '../backend/dist/test/zhou-controlled-chat-packet.js';
+
+/** One joined Application/compiler/model attempt. No retry, response repair,
+ * canned success or policy weakening. Failed/unknown output remains rejected. */
+export async function runSemanticProbe(binding, counter, http = fetch) {
+  assert.equal(binding.mode, 'formal-9b');
+  const packet = startControlledChatPacket({ binding, counter, http, requests: 1, gates: {
+    beforeGeneration: async (input, budget) => input() !== undefined && !budget.signal.aborted && budget.remainingMs() > 0
+      ? { ok: true, value: undefined } : { ok: false, failure: 'stale_authority' },
+    candidate: boundedConversationSemanticCandidate,
+  } });
+  const report = await packet.outcome, row = report.results[0];
+  const pass = report.modelDispatches === 1 && report.modelState === 'stopped' && !report.runtime.quarantined &&
+    report.runtime.nonTerminal === 0 && row.result === 'success' && row.usersCommitted === 1 && row.assistantsCommitted === 1 &&
+    row.bodiesAccepted === 1 && row.borrowedGettersRevoked && row.originalCapabilityRevoked && report.localContentHoldersCleared;
+  return { status: pass ? 'Pass' : 'Not Proven', policyVersion: boundedConversationSemanticPolicyVersion,
+    ...report, productWrites: 0, actualDatabase: 'Not Run', semanticScope: 'finite-exact-attribution-only' };
+}
 
 async function bounded(work) {
   const abort = new AbortController(), end = performance.now() + 60000;
@@ -118,7 +138,7 @@ export async function runCancellationProbe(binding, counter, http = fetch) {
 
 async function main() {
   assert.equal(process.version, 'v24.19.0');
-  const mode = process.argv[2]; assert(['complete-inputs', 'cancel-once'].includes(mode) && process.argv.length === 3);
+  const mode = process.argv[2]; assert(['semantic-once', 'complete-inputs', 'cancel-once'].includes(mode) && process.argv.length === 3);
   // Existing private operator configuration only, passed by stdin. No content,
   // key, endpoint, digest or exception is printed by this tool.
   let input = ''; for await (const chunk of process.stdin) { input += chunk; assert(Buffer.byteLength(input) <= 16384); }
@@ -133,7 +153,8 @@ async function main() {
   const binding = { ...config.binding, current: () => live };
   const counter = new ControlledTokenizerProcess({ ...config.tokenizerFiles, current: () => live });
   try {
-    const result = mode === 'complete-inputs' ? await runCompleteInputProbe(binding, counter) : await runCancellationProbe(binding, counter);
+    const result = mode === 'semantic-once' ? await runSemanticProbe(binding, counter) :
+      mode === 'complete-inputs' ? await runCompleteInputProbe(binding, counter) : await runCancellationProbe(binding, counter);
     process.stdout.write(JSON.stringify({ mode, ...result }) + '\n');
     process.exitCode = result.status === 'Pass' ? 0 : 2;
   } finally { live = false; }

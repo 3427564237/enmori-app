@@ -61,6 +61,10 @@ before(async()=>{
 afterEach(async()=>{
   for(const path of [...paths].sort((a,b)=>b.length-a.length)){await db.doc(path).delete();assert.equal((await db.doc(path).get()).exists,false);}
   paths.clear();await db.doc(progress).delete();await db.doc(`accounts/${owner}`).set(account);
+  // A failed Bootstrap may already have confirmed a replacement epoch. Read it
+  // back so a failed assertion cannot poison later independent fixture cases.
+  const current=(await db.doc(runtime).get()).data()!;
+  epoch={processEpoch:current.processEpoch as string,generation:current.generation as number};
 });
 after(async()=>{
   try{for(const path of [progress,runtime,`accounts/${owner}`]){await db.doc(path).delete();assert.equal((await db.doc(path).get()).exists,false);}}
@@ -316,7 +320,11 @@ for(const kind of ["expired","deleting","partial-deleting"] as const)test(`R1 ac
 });
 
 test("R1 restart preserves full-precision original expiry; retirement does not renew or round the target deadline",async()=>{
-  const row=await restartTarget(),before=await startForRestart(()=>row.expiryMs-1);
+  const row=await restartTarget();
+  // The floor bucket containing a sub-ms expiry is deliberately unavailable,
+  // not live. Test the last certainly-live bucket, then the first expired one.
+  const certainlyLive=(row.latest.createTime!.seconds+90*86400)*1000+Math.floor(row.latest.createTime!.nanoseconds/1e6)-1;
+  const before=await startForRestart(()=>certainlyLive);
   try{
     assert.equal(before.joined.restart.complete,true);
     assert.equal(before.reports[0]!.changed,0);assert.equal((await db.doc(row.base).get()).data()!.state,"live");

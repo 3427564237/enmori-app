@@ -1,0 +1,153 @@
+{
+  "source": "098d6517ba7d08a58c190c43b5fecf9f59615a40",
+  "tree": "a5437ea9a44c1d9455717807bf3c0dd76cd5abb7",
+  "base": "71dfa60266bebd5f38dfef97d020214e5e5b7703",
+  "capturedAt": "2026-10-14T15:48:34.454Z",
+  "owner": "ZHOU",
+  "reviewer": "LI",
+  "node": "v24.19.0",
+  "typescript": "7.0.2",
+  "flutter": "3.47.2",
+  "dart": "3.13.2",
+  "strictCompile": {
+    "exitCode": 0,
+    "command": "node node_modules/typescript/bin/tsc --project backend/tsconfig.json"
+  },
+  "inputs": {
+    "count": 396,
+    "beforeCapturedAt": "2026-10-14T15:44:01.071Z",
+    "afterCapturedAt": "2026-10-14T15:48:34.390Z",
+    "normalizedSha256": "f682a0eebf352639f7d8f1dec550747b365b02f1d46db88b5df0b5c2576cbae3",
+    "unchangedAcrossFinalBackendAndSdk": true,
+    "workingFilesMatchNormalizedImmutableGitBlobs": true,
+    "flutterInputsCompared": 147,
+    "inventory": "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/inputs.json"
+  },
+  "policy": {
+    "version": "bounded_routine_summary_v1",
+    "corpus": "bounded_routine_summary_corpus_v1",
+    "allowed": 8,
+    "prohibited": 14,
+    "ambiguous": 12,
+    "focusedUnitSubset": 44,
+    "joinedPacketSubset": 31,
+    "joinedActualPolicyCases": {
+      "allowed": 1,
+      "prohibited": 11,
+      "ambiguous": 9
+    },
+    "universalGroundingClaim": false
+  },
+  "sdkAdded": {
+    "count": 3,
+    "actual": [
+      "Firebase Auth",
+      "Persona HTTP/Firestore",
+      "AI Application/fixed-current reader/real store",
+      "HTTP complete-body sink",
+      "bounded semantic policy"
+    ],
+    "synthetic": [
+      "Qwen",
+      "token decisions"
+    ],
+    "ownedNoteInventory": "complete-empty"
+  },
+  "runs": [
+    {
+      "scope": "full Backend",
+      "source": "098d6517ba7d08a58c190c43b5fecf9f59615a40",
+      "passed": 873,
+      "failed": 0,
+      "exitCode": 0,
+      "command": "node --test \"backend/dist/test/**/*.test.js\"",
+      "log": {
+        "path": "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/backend-full.log",
+        "sha256": "3906a99209585a6d8c84ed2fac6512419c3db2e23376c0b0e88cb87d40140c38",
+        "bytes": 81544
+      }
+    },
+    {
+      "scope": "full actual guarded Auth/Firestore Emulator",
+      "source": "098d6517ba7d08a58c190c43b5fecf9f59615a40",
+      "passed": 132,
+      "failed": 0,
+      "exitCode": 0,
+      "command": "node tool/run_ai_store_emulators.mjs",
+      "log": {
+        "path": "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/emulator-full.log",
+        "sha256": "3d4b88152deae0ff68fee211ab3c6e83cf80ac5a1cb4f762955972e61d2f35a8",
+        "bytes": 19342
+      },
+      "profilesRemoved": 2,
+      "requiredPortsFreed": [
+        8080,
+        9099,
+        4400,
+        4500,
+        9150
+      ]
+    },
+    {
+      "scope": "full Flutter default concurrency",
+      "source": "af77d758684117afe3ed1ad8d797acfed1ef9ee3",
+      "inputsUnchangedAt": "098d6517ba7d08a58c190c43b5fecf9f59615a40",
+      "passed": 546,
+      "failed": 0,
+      "exitCode": 0,
+      "command": "C:/Users/ASUS/fvm/versions/3.47.2/bin/flutter.bat test",
+      "log": {
+        "path": "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/flutter-full.log",
+        "sha256": "e43798257ca6518835ce9f9c14e7bacf811cc3eea1d8439a7596420b091878b0",
+        "bytes": 73951
+      }
+    },
+    {
+      "scope": "full Flutter fatal-info analysis",
+      "source": "af77d758684117afe3ed1ad8d797acfed1ef9ee3",
+      "inputsUnchangedAt": "098d6517ba7d08a58c190c43b5fecf9f59615a40",
+      "exitCode": 0,
+      "command": "C:/Users/ASUS/fvm/versions/3.47.2/bin/flutter.bat analyze --fatal-infos",
+      "log": {
+        "path": "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/flutter-analyze.log",
+        "sha256": "5c22abd7ba945168f37230469513c77c421a18475752d6843cd4677778a13e80",
+        "bytes": 1264
+      }
+    }
+  ],
+  "historicalRuns": [
+    {
+      "source": "af77d758684117afe3ed1ad8d797acfed1ef9ee3",
+      "scope": "initial full Backend",
+      "passed": 870,
+      "failed": 0,
+      "exitCode": 0,
+      "log": {
+        "path": "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/backend-first.log",
+        "sha256": "2569221fbd43a5293a7ec8a4228916c0a750e5340cd7c0baa3088a150d2b79c5",
+        "bytes": 81275
+      }
+    },
+    {
+      "source": "af77d758684117afe3ed1ad8d797acfed1ef9ee3",
+      "scope": "initial full actual Emulator",
+      "passed": 130,
+      "failed": 2,
+      "exitCode": 1,
+      "correction": "Only new fixture assertions: stale-authority HTTP terminal without body; selected latestMessageId/full-precision-createTime retention representation.",
+      "log": {
+        "path": "docs/evidence/sprint3/2026-10-14-zhou-real-chat-increment/emulator-first.log",
+        "sha256": "5e506cfb5f40cc0917b61b18751004266480f4a4128c6ea040a152b674b3e2c8",
+        "bytes": 21327
+      }
+    }
+  ],
+  "notRun": [
+    "actual controlled Qwen/tokenizer/native-template join here",
+    "one combined actual model/Auth/store/mobile/device journey",
+    "new APK/device",
+    "nonempty operational Note authority",
+    "operational cleanup SLA",
+    "LI new-source approval"
+  ]
+}

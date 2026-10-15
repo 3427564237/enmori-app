@@ -1,17 +1,27 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import '../../core/network/backend_api_client.dart';
 import '../../features/ai_conversation/ai_conversation_providers.dart';
 import '../../features/ai_conversation/data/ai_wire_repository.dart';
 import '../../features/ai_conversation/data/http_ai_wire_transport.dart';
 import '../../features/ai_conversation/presentation/ai_conversation_page.dart';
 import '../../features/auth/auth_providers.dart';
 import '../../features/auth/domain/auth_repository.dart';
+import '../../features/personas/data/backend_persona_repository.dart';
+import '../../features/personas/persona_providers.dart';
+import '../../features/personas/presentation/persona_editor_page.dart';
+import '../../features/personas/presentation/persona_management_page.dart';
 
 /// Explicit isolated composition. The launcher supplies an observed Auth source
 /// and owns its client; this widget never creates a session, token or fixture.
-/// Navigation callbacks and any Persona dependencies belong to the caller.
+/// AI and Persona use the same injected Backend, Auth and caller-owned client.
+/// The optional Persona callback overrides the isolated management navigation.
+/// Persona retains BackendApiClient's HTTPS requirement, including when AI's
+/// host-only HTTP loopback option is selected; no transport exception is added.
 final class AiNetworkHarnessApp extends StatefulWidget {
   const AiNetworkHarnessApp({
     required this.baseUri,
@@ -48,6 +58,7 @@ final class AiNetworkHarnessApp extends StatefulWidget {
 
 final class _AiNetworkHarnessAppState extends State<AiNetworkHarnessApp> {
   late AiWireRepository _repository;
+  late BackendPersonaRepository _personas;
 
   @override
   void initState() {
@@ -74,6 +85,13 @@ final class _AiNetworkHarnessAppState extends State<AiNetworkHarnessApp> {
           )
         : HttpAiWireTransport(baseUri: widget.baseUri, client: widget.client);
     _repository = AiWireRepository(transport);
+    _personas = BackendPersonaRepository(
+      BackendApiClient(
+        widget.baseUri,
+        widget.auth.getIdToken,
+        httpClient: widget.client,
+      ),
+    );
   }
 
   @override
@@ -85,6 +103,7 @@ final class _AiNetworkHarnessAppState extends State<AiNetworkHarnessApp> {
       overrides: [
         authRepositoryProvider.overrideWithValue(widget.auth),
         aiConversationRepositoryProvider.overrideWithValue(_repository),
+        personaRepositoryProvider.overrideWithValue(_personas),
       ],
       child: MaterialApp(
         title: 'ENMORI controlled HTTP AI journey',
@@ -144,13 +163,39 @@ final class _NetworkConversation extends StatefulWidget {
 final class _NetworkConversationState extends State<_NetworkConversation> {
   bool _open = true;
 
+  void _openPersonas() {
+    final navigator = Navigator.of(context);
+    unawaited(
+      navigator.push<void>(
+        MaterialPageRoute(
+          builder: (_) => PersonaManagementPage(
+            onBack: navigator.pop,
+            onCreate: () => _openEditor(navigator),
+            onEdit: (id) => _openEditor(navigator, id: id),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openEditor(NavigatorState navigator, {String? id}) {
+    unawaited(
+      navigator.push<void>(
+        MaterialPageRoute(
+          builder: (_) =>
+              PersonaEditorPage(personaId: id, onBack: navigator.pop),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => _open
       ? AiConversationPage(
           socialStyle: true,
           onBack: () => setState(() => _open = false),
           onOpenSettings: widget.onOpenSettings,
-          onOpenPersonas: widget.onOpenPersonas,
+          onOpenPersonas: widget.onOpenPersonas ?? _openPersonas,
         )
       : Scaffold(
           body: Center(
