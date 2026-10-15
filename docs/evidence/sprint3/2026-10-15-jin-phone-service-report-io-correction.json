@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "scope": "operator I/O lifecycle correction; explicit seams only; zero real network/Firebase/device/model calls",
+  "historicalHead": "b7aad4c3653af6979575a2840807b83a7118df5d",
+  "product": "12cff0bdf668631053d92c921b6c22386e7b487e",
+  "productTree": "32ea0d394623d38545d365d8e441534c582ec348",
+  "changedInputs": [
+    {
+      "path": "tool/controlled_phone_service.mjs",
+      "blob": "991f240b08a1b72c2cf6192cd6bd23832d322a3e",
+      "sha256": "11a1c9bbf299feba935d32eb34d4536a2e061f2ee2249adeb584236e8f6e7bbd",
+      "workingSha256": "11a1c9bbf299feba935d32eb34d4536a2e061f2ee2249adeb584236e8f6e7bbd"
+    },
+    {
+      "path": "tool/controlled_phone_service.test.mjs",
+      "blob": "640a1951e27c75a374c316106c94104d02ba5eb7",
+      "sha256": "c14b58161365ed1d9ba4af329e7c232617550de62c5a6bdcc5abf5fb18370482",
+      "workingSha256": "c14b58161365ed1d9ba4af329e7c232617550de62c5a6bdcc5abf5fb18370482"
+    }
+  ],
+  "historicalCounterexampleReproduced": {
+    "scope": "operator-seams-only-no-network-firebase-device-model",
+    "reviewedSourceHead": "b7aad4c3653af6979575a2840807b83a7118df5d",
+    "operatorSha256": "6915e1f74762ac85ef979a26977f16285d46129a5d356181dc8ec8797376c9ec",
+    "serviceCreated": true,
+    "statusPublishAttempts": 2,
+    "stopCalls": 1,
+    "handoffRemoved": true,
+    "runPhoneServiceRejected": true,
+    "originalPendingUnsettled": true,
+    "listenerClosed": false,
+    "timeline": [
+      "service-created",
+      "handoff-published",
+      "running-report-write-failed",
+      "handoff-removed",
+      "original-stop-held",
+      "held-report-write-failed"
+    ],
+    "reproduced": true,
+    "actualModelCalls": 0,
+    "actualNetworkListeners": 0,
+    "actualFirebaseCalls": 0
+  },
+  "checks": {
+    "newNegativeCasesOnOldOperator": {
+      "passed": 5,
+      "failed": 5,
+      "exitCode": 1
+    },
+    "finalOperatorSuite": {
+      "passed": 10,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exitCode": 0
+    },
+    "strictCompileUnchangedBackendInputs": {
+      "exitCode": 0
+    },
+    "syntaxChecks": {
+      "files": 2,
+      "exitCode": 0
+    }
+  },
+  "logs": [
+    {
+      "name": "li-counterexample-reproduced.log",
+      "sha256": "1f6510c9607cc37d259bdedf87929c46be643c421c60c43095a99386e283bb72",
+      "bytes": 903
+    },
+    {
+      "name": "li-counterexample-reproduced-2.log",
+      "sha256": "79e31e5460997b5cc11c703ee4f58ec6df67f4822d65eab65eb674166d8d8e85",
+      "bytes": 844
+    },
+    {
+      "name": "li-counterexample-reproduced-3.log",
+      "sha256": "9534946947f4c9af16034cb0b42d0ecf4ffee5b989c5d09b5c4737fc89373560",
+      "bytes": 621
+    },
+    {
+      "name": "operator-report-red.log",
+      "sha256": "fc004b8c42acdd0784e3165c8cd965aa24b1c191bfd65cec8873ae0e9df52ee6",
+      "bytes": 6152
+    },
+    {
+      "name": "operator-report-green.log",
+      "sha256": "e3d61e9a6e71382e2b22af10c58e193eb4a5cb4534e350d191aa3bc311d061ce",
+      "bytes": 1221
+    },
+    {
+      "name": "operator-report-final.log",
+      "sha256": "ba13a5058353a360b5bfd3576c9a3f2808852c6b9de183c8d06cb3f3ba663a78",
+      "bytes": 1222
+    },
+    {
+      "name": "compile-report-correction.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "actualLinuxOperator": "Not Run",
+  "outerFirebaseCLITeardown": "source consequence only; Not Run",
+  "newEmulatorDeviceModelSuites": "Not Run",
+  "rawLogsPublished": false,
+  "recordedSgt": "2026-10-15T16:12:09.289197+08:00"
+}
