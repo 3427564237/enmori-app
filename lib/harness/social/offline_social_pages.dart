@@ -13,30 +13,36 @@ final class OfflineEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     body: SafeArea(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.spa_outlined, size: 56),
-              const SizedBox(height: 20),
-              const Text(
-                'ENMORI offline preview',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Padding(
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.spa_outlined, size: 56),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'ENMORI offline preview',
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'A synthetic sample account. No email, password or Firebase connection is used.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    key: const Key('offline-enter'),
+                    onPressed: onEnter,
+                    child: const Text('Continue offline demo'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              const Text(
-                'A synthetic sample account. No email, password or Firebase connection is used.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              FilledButton(
-                key: const Key('offline-enter'),
-                onPressed: onEnter,
-                child: const Text('Continue offline demo'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -256,7 +262,7 @@ final class OfflineSocialHub extends StatelessWidget {
       ),
     _Heading(
       title: 'Your own moments',
-      action: 'History',
+      action: 'Footprint',
       onTap: () => _open(context, AppRoutes.checkInHistory),
     ),
     if (store.notes.isNotEmpty)
@@ -401,7 +407,7 @@ final class OfflineSocialHub extends StatelessWidget {
       context,
       keyName: 'social-history',
       icon: Icons.calendar_month_outlined,
-      text: 'My footprints & dates',
+      text: 'Footprint',
       path: AppRoutes.checkInHistory,
     ),
     _entry(
