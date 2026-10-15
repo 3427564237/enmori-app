@@ -2098,8 +2098,10 @@
     "bytes": 84638027,
     "package": "com.enmori.app.personatest",
     "versionCode": 3,
-    "installed": false,
-    "scope": "controlled synthetic-owner AI Persona Account Settings; fresh private runtime handoff required"
+    "installed": true,
+    "scope": "controlled synthetic-owner AI Persona Account Settings; fresh private runtime handoff required",
+    "initialBuildInstalledObservation": false,
+    "installedSha256": "d492141ed9c09f93ec5da3784fc0f924d8e52ca46085c7ca172b2dfa4674ffe8"
   },
   "standalonePrivateDelivery": {
     "status": "Pass",
