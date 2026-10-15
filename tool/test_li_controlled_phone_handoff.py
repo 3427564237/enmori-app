@@ -111,6 +111,19 @@ class HandoffTests(unittest.TestCase):
             self.assertNotIn(secret, arguments)
         self.assertFalse(any("install" in x or "uninstall" in x or "force-stop" in x for args, _ in self.calls for x in args))
 
+    def test_empty_reverse_list_with_adb_blank_line_is_successful(self):
+        self.mapping = {}
+        original = self.runner
+        def blank_runner(args, input=None):
+            if args[3:] == ["reverse", "--list"] and not self.mapping:
+                return b"\n"
+            return original(args, input=input)
+        report = target.transfer(self.apk, self.private, "USBTEST00001", adb="/tools/adb", aapt="/tools/aapt",
+                                 runner=blank_runner, clock=self.clock, sleep=lambda _: None,
+                                 consume_timeout=2, attempt_token=self.token)
+        self.assertEqual(report["status"], "Pass")
+        self.assertEqual(report["createdReverseCount"], 2)
+
     def test_wrong_apk_package_refused_before_adb(self):
         self.other_package = True
         self.assertEqual(self.transfer()["category"], "apk_identity_refused")

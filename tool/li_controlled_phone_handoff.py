@@ -153,6 +153,8 @@ def transfer(apk: Path, private_handoff: Path, serial: str, *, adb: str, aapt: s
         rows = command(["reverse", "--list"]).decode("ascii").splitlines()
         result = {}
         for line in rows:
+            if not line.strip():
+                continue
             fields = line.split()
             require(len(fields) == 3 and fields[1] not in result, "reverse_conflict")
             result[fields[1]] = fields[2]

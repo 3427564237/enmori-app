@@ -55,6 +55,7 @@ void main() {
     final savedSettings = settingsScope.read(settingsProvider).settings!;
     expect(savedSettings.checkInVisibility, beforeSettings.checkInVisibility);
     expect(savedSettings.consent, beforeSettings.consent);
+    expect(savedSettings.revision, beforeSettings.revision + 1);
     position.jumpTo(position.maxScrollExtent);
     await _visible(tester, 'preferences-save-success');
     position.jumpTo(0);
@@ -69,10 +70,8 @@ void main() {
               .onPressed !=
           null,
     );
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _back(tester, 'route-profile-edit');
+    await _back(tester, 'route-settings');
     debugPrint('LI_CONNECTED_STAGE: settings_saved_profile_read');
     await _tap(tester, 'ai-personas');
     debugPrint('LI_CONNECTED_STAGE: personas_opened');
@@ -282,4 +281,17 @@ Future<void> _saved(WidgetTester tester, String surface) async {
 Future<void> _menu(WidgetTester tester, String key) async {
   await _tap(tester, 'ai-conversation-actions');
   await _tap(tester, key);
+}
+
+Future<void> _back(WidgetTester tester, String routeKey) async {
+  final page = find.byKey(Key(routeKey));
+  await _until(tester, () {
+    if (page.evaluate().length != 1) return false;
+    final route = ModalRoute.of(tester.element(page));
+    return route?.isCurrent == true && (route?.animation?.isCompleted ?? true);
+  });
+  final back = find.byType(BackButton).hitTestable();
+  expect(back, findsOneWidget);
+  await tester.tap(back);
+  await tester.pumpAndSettle();
 }
