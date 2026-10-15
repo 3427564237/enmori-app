@@ -1,0 +1,190 @@
+{
+  "activity": {
+    "source": "e1e645d75c9d778ba05a0e00c5668644e8c6eaf3",
+    "status": "Pass",
+    "actualAndroidNativeChannel": true,
+    "httpAuthAndActivityContent": "synthetic",
+    "uiReads": 4,
+    "uiWrites": 0,
+    "unsafeNativeUrlsRejected": 9,
+    "actualExternalBrowser": {
+      "scope": "dedicated_test_package_browser_handoff",
+      "rawUiCaptured": false,
+      "defaultBrowserChanged": false,
+      "browserForegroundObserved": true,
+      "chooserObserved": true,
+      "returnIssued": true,
+      "browserPackage": "com.android.chrome"
+    },
+    "realProviderContentOnDevice": false,
+    "runnerApkSha256": "9a2e19ea7e6e9c1086851a19ebe3af28fac87bdddbbe52822424c605554cec7f",
+    "installedRunnerHashAtEnd": null,
+    "runnerHashBoundary": "built output only; no installed-runner hash observation before Flutter cleanup"
+  },
+  "offline": {
+    "source": "5aa0b69adb872fdb6e0ef3a41ba75c84b0d1ba7e",
+    "status": "Pass",
+    "finalStage": "baseline_journey_pass",
+    "surroundingCombinedCommand": "1 passed / 1 failed; failing activity guard is separately corrected by later activity Pass",
+    "actualAndroidImeObserved": true,
+    "authAndProductData": "synthetic_in_memory",
+    "modelGenerationCalls": 0
+  },
+  "unchangedProductionBase": "ab17cae25ef045ef7bfb93a5c5e4f2f419d5f30e",
+  "productionDiffFiles": [],
+  "widgetAgentResult": "13/13",
+  "widgetParentIndependentResult": "1/1 new pending-action case (overlaps13)",
+  "formalReview": "DU_pending",
+  "device": {
+    "model": "vivo V2405A",
+    "androidApi": 36,
+    "forcedViewportOrTextScale": false
+  },
+  "previewRestored": {
+    "package": "com.enmori.app.personatest",
+    "installed": true,
+    "coldLaunch": "Pass",
+    "processRunning": true,
+    "installedApkSha256": "f458ea31909689e85a21a2429125e7886a65cdeaafcef3646ea3112e8be01009",
+    "hostApkSha256": "f458ea31909689e85a21a2429125e7886a65cdeaafcef3646ea3112e8be01009",
+    "bytes": 121547384,
+    "ordinaryPackageUnchanged": false,
+    "ordinaryPackageState": "present before first run; absent after suite",
+    "ordinaryPackageData": "user confirmed old test build with no important local data",
+    "mode": "offline_synthetic",
+    "adbReverseEmpty": true,
+    "ownedFlutterForwardsRemoved": 9,
+    "adbForwardEmpty": true
+  },
+  "cleanupIncident": {
+    "ordinaryPackageMissing": true,
+    "directOrdinaryUninstallTraceRetained": false,
+    "inference": "SDK caches package before build; missing app-debug.apk falls back to ordinary namespace; default cleanup uninstalls that cached package. First app-debug.apk birth matches this test session.",
+    "userInformed": true,
+    "userConfirmedNoImportantLocalData": true,
+    "prevention": "prebuild + exact pinned-SDK AndroidApk.fromApk/aapt/package/launcher verification + --no-uninstall for teardown; installation retry may replace only the verified owned test package",
+    "guardRegressions": "9/9 subprocess doubles; no device calls; actual SDK parser positive independently observed by parent",
+    "actualSdkHelperResults": {
+      "ownedApk": "Pass",
+      "missingApk": "rejected",
+      "mismatchedAapt": "rejected",
+      "parentIndependentOwnedApk": "Pass",
+      "guardFullDeviceRerun": "not_run"
+    }
+  },
+  "logs": [
+    {
+      "name": "device-first.log",
+      "bytes": 3274,
+      "sha256": "3fc566752a23ccfced2dfb9445db62ee1fee92f86388f2752d2115222b30cc20"
+    },
+    {
+      "name": "device-staged.log",
+      "bytes": 1705,
+      "sha256": "bf007ef5bc8c3f2a737c68f19f517e13561dd989ae4aa34ec73e2c2fed1d64e9"
+    },
+    {
+      "name": "device-gate-fixed.log",
+      "bytes": 4932,
+      "sha256": "73bc9ab0d0564502dcc26a4588abe31b53d1a6537a9b1b648ab643da0e836e17"
+    },
+    {
+      "name": "device-lazy-scroll-fixed.log",
+      "bytes": 4462,
+      "sha256": "7c96b311a94e21915c64f6ea76b1f81e4c50aed2dcecba400b2991198e2ad3dc"
+    },
+    {
+      "name": "device-read-ready.log",
+      "bytes": 3874,
+      "sha256": "56a0364af5e814ab9b5a17c3f09c9d35866f388a40c43379e84b518b868bb7db"
+    },
+    {
+      "name": "device-adapter-diagnostic.log",
+      "bytes": 3920,
+      "sha256": "99ad901ada15ece0ec4834d61bb180409c24644775b9937496e53f01d2246c1e"
+    },
+    {
+      "name": "offline-device-first.log",
+      "bytes": 5534,
+      "sha256": "ae86925095d7cf33a327612e8ef99fd49e2b6f5e971eff2192b74f39c4ef7ed0"
+    },
+    {
+      "name": "combined-device-first.log",
+      "bytes": 4997,
+      "sha256": "057237f5e109997fde05a60a387b4ff6a4936f05a1dfc3f6d1a5398a34b024e3"
+    },
+    {
+      "name": "device-guard-fixed.log",
+      "bytes": 2159,
+      "sha256": "498858bd999621bb376efef50d800cf1eeb7758c0d59ff09a1693e344eabc43e"
+    },
+    {
+      "name": "parent-pending-action-widget.log",
+      "bytes": 238,
+      "sha256": "505149df9c576c5f6f7fe2dc6b5283a941fa2e3d23c72a2e84ce590561a67b3d"
+    },
+    {
+      "name": "final-verified-analysis.log",
+      "bytes": 96,
+      "sha256": "cb4d9942df3e0bad2f0016fe8607f5bc47e2f25ef891dd146051058d81b59521"
+    },
+    {
+      "name": "final-format.log",
+      "bytes": 47,
+      "sha256": "82f9b6d44abe9019c4ef72d3e300c473ba76393f81efdf7076ee7f7a648a23fd"
+    },
+    {
+      "name": "preview-restored.json",
+      "bytes": 574,
+      "sha256": "4a226c237ea3b175885449a46dee31da28141ae2249b23836ac1f4e2a3e83018"
+    },
+    {
+      "name": "device-host-observation-guard-fixed.json",
+      "bytes": 246,
+      "sha256": "f5d27b458264a6d95c9b1cb792ccbb323f45d6e243615385eae82df2734a797d"
+    },
+    {
+      "name": "final-global-analysis.log",
+      "bytes": 96,
+      "sha256": "7c69869d77d4d0a14b8ef1c5dcef16002e907987897ec64c5d7f140a51f706f6"
+    },
+    {
+      "name": "guard-verification-summary.log",
+      "bytes": 1058,
+      "sha256": "30a81d55b293a52d9fd218596609b6bf6828b25462eda367a81e6fda41891c83"
+    }
+  ],
+  "testInputs": [
+    {
+      "path": "integration_test/activity_device_flow_test.dart",
+      "sha256": "7847733a9fc042101c0a1c36eafab17483cfd10cb8329e3722f0aa7fe8c982c1"
+    },
+    {
+      "path": "integration_test/offline_baseline_device_flow_test.dart",
+      "sha256": "a4664aba1ac521fa47377b9a7aa66194ddb99bd47907a314f0787930bb410a53"
+    },
+    {
+      "path": "integration_test/baseline_device_flow_test.dart",
+      "sha256": "5afade93d6ec4b03a1489ba97c2c1b7fa135617ca3a5703960834ad5f4d0268d"
+    },
+    {
+      "path": "test/app/activity_shared_router_test.dart",
+      "sha256": "68c2b69a2bbd7cd462367a471fc940d652d6d4db2dce6298bf991cc42ec15cf4"
+    },
+    {
+      "path": "tool/run_baseline_device_flow.py",
+      "sha256": "b5b5b7acb3557350430cc5ea75731af0c360a6baad920404eded5e7f90d6e8be"
+    },
+    {
+      "path": "tool/verify_baseline_apk.dart.template",
+      "sha256": "9440ba0e0c058daae9533aeae62e68af60954a067175b56cf83f6a1dadbdc1c6"
+    }
+  ],
+  "verification": {
+    "globalFlutterAnalyze": "no_issues",
+    "fourDartFilesFormat": "0_changes",
+    "sdkHelperAnalyze": "no_issues",
+    "guardDoubles": "9/9",
+    "deltaWhitespace": "Pass"
+  }
+}

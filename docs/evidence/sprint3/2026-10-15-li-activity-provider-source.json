@@ -1,0 +1,76 @@
+{
+  "providerProbe": {
+    "startedAtUtc": "2026-10-15T07:22:37Z",
+    "finishedAtUtc": "2026-10-15T07:22:39Z",
+    "sourceHead": "0b730c52fd62ddfc02bdc7166ab1a80374eb2681",
+    "status": "Pass",
+    "failureCategory": null,
+    "calls": {
+      "providerRequests": 2,
+      "firstBatchReads": 1,
+      "detailReads": 1,
+      "disableAttempts": 1
+    },
+    "requests": [
+      {
+        "operation": "first_batch",
+        "httpStatus": 200,
+        "responseBytes": 118164
+      },
+      {
+        "operation": "detail",
+        "httpStatus": 200,
+        "responseBytes": 5763
+      }
+    ],
+    "eligibleCount": 18,
+    "missingOptionalCounts": {
+      "endAt": 18,
+      "locationLabel": 0,
+      "categoryLabel": 0
+    },
+    "sameDetailId": true,
+    "disableNoFetch": true,
+    "rawContentRetained": false,
+    "productWrites": 0
+  },
+  "providerInputSource": {
+    "source": "0b730c52fd62ddfc02bdc7166ab1a80374eb2681",
+    "files": [
+      {
+        "path": "backend/src/event-browse/infrastructure/ticketmaster-browse-source.ts",
+        "sha256": "cc6e18825e41e3f3087463d59d198e27bf2b1f4c34b349ddc3d7b4517737dd99"
+      },
+      {
+        "path": "backend/src/event-browse/domain/browse-values.ts",
+        "sha256": "623ceb565846ecfa7d42c7640ff1f8394cf9f01809cb098f39ddb436a242e244"
+      },
+      {
+        "path": "backend/src/event-browse/ports/event-browse.ts",
+        "sha256": "cb083f04d7ae34b795961e61d80a0a635fae07c9138ca29902e93f0e9adea193"
+      },
+      {
+        "path": "backend/src/shared/ports/dependency-failure.ts",
+        "sha256": "c994f3c8e7a5dc64c43a670856c543a3474ac75343fa680c0532856186fdd2e8"
+      },
+      {
+        "path": "backend/src/shared/ports/identity-verifier.ts",
+        "sha256": "b22dcf19431cf8d424dfb3a91b3dde52f0d4308c9c31d1f956b99c07d7f5ebfd"
+      },
+      {
+        "path": "backend/src/shared/domain/result.ts",
+        "sha256": "ee98f0cf51f0606a9478825ffcf57f93f1dc2e74e4a351866fb151aa03be2422"
+      },
+      {
+        "path": "backend/src/shared/application/app-failure.ts",
+        "sha256": "ac7a95c5db603269f6f0925a025f4c273007de6c9080ca7927785d9c90ed3f70"
+      }
+    ]
+  },
+  "probeScriptSha256": "df647ee46ff4e1f44fd34eef5a3d79804166efce9c62197b4bd6a7e66c070b9d",
+  "scope": "standalone_read_only_provider_adapter_probe",
+  "sharedBackendAuthAccountAndMobileJoin": "not_run",
+  "ordinaryProviderActivation": false,
+  "termsRefreshed": "https://developer.ticketmaster.com/support/terms-of-use/",
+  "termsLastUpdatedLabel": "June 27, 2023"
+}
