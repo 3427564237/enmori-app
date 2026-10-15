@@ -1,0 +1,11 @@
+# LI Activity disclosure implementation handoff
+
+Source: LI/PM [#47 comment6188262391](https://github.com/3427564237/enmori-app/issues/47#issuecomment-6188262391) and explicit [#44 implementation assignment6188384611](https://github.com/3427564237/enmori-app/issues/44#issuecomment-6188384611),15October2026 SGT. Scope: release the smallest SHI page-local disclosure increment for ZHOU review, not a new product/interface/consent/provider decision.
+
+The exact handoff is LI's [disclosure/data-flow/removal packet at dcb94d925b8010e02d41f033e84ed3902ab08559](https://github.com/3427564237/enmori-app/blob/dcb94d925b8010e02d41f033e84ed3902ab08559/docs/planning/2026-10-15-li-event-disclosure-and-removal-packet.md), blob9923a2e3930e69d4118d1b146c86b1cd18b34516. The packet's proposal/Not Run language remains its preparation-time boundary; LI's subsequent explicit assignment permits implementation of its factual list footer, Detail explanation and optional common lifetime sentence. It does not retroactively mark rendered notice/removal/actual-provider-to-phone acceptance complete.
+
+Use those three strings verbatim, preserving existing attribution, first-batch limitation, missing-field text, source/copy actions, Auth and lifecycle behavior. No checkbox, consent gate, new route, package, source call, shared router/platform edit or unapproved data/architecture rule. Existing EB01–EB06 and EB07 external-opening supersession remain controlling.
+
+SHI supplies feature-local code/tests/display explanation; ZHOU reviews only this new delta. JIN owns the separate default-disabled process-owned Event source/service join. LI owns private provider input, disclosure/removal operation, new-source shared integration and actual real-service/phone/browser verification. Do not touch LI's live AI preview, run a competing model/Emulator/device operation, request another key or invent removal/enablement parameters.
+
+No permission/right is inferred from displayed copy. Source disable does not itself clear a foreground view or OS clipboard/browser copies. Follow the packet's separately owned and evidenced disable/client-clear/owned-copy inventory exercise; do not claim a global erasure or24h SLA from widget tests. No main merge, Issue/Project/runtime enablement or Sprint/UAT/Release/Done transition is authorized here.
