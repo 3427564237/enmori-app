@@ -69,12 +69,16 @@ export async function inspectNoteSources(tx: FirestoreTransactionGateway, gatewa
 }
 
 export async function inspectProvenance(tx: FirestoreTransactionGateway, gateway: FirestoreGateway,
-  prerequisites: TransactionalNotePrerequisites | undefined, owner: string, value: ParsedProvenance): Promise<"valid" | "invalid" | "unavailable"> {
+  prerequisites: TransactionalNotePrerequisites | undefined, owner: string, value: ParsedProvenance,
+  originalCurrent?: () => void): Promise<"valid" | "invalid" | "unavailable"> {
+  originalCurrent?.();
   if (value.sources.length === 0) return "valid";
-  const account = parseReadAuthority(await tx.get(`accounts/${owner}`), owner);
+  const row = await tx.get(`accounts/${owner}`);
+  originalCurrent?.();
+  const account = parseReadAuthority(row, owner);
   const stamp = value.purposeRevocationGeneration;
   if (!account || stamp === undefined || account.purposeRevocationGeneration < stamp) return "unavailable";
   if (account.purposeRevocationGeneration > stamp) return "invalid";
   if (account.consent !== "accepted") return "unavailable"; // Equal-generation rejection violates producer authority; no permanent erasure.
-  return inspectNoteSources(tx, gateway, prerequisites, owner, value.sources);
+  return inspectNoteSources(tx, gateway, prerequisites, owner, value.sources, undefined, originalCurrent);
 }
