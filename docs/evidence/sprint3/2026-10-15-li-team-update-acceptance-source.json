@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-15",
+  "timezone": "Asia/Singapore",
+  "reviewer": "LI",
+  "pr105": {
+    "head": "aab3bf23b8d9c76c6f830dfefa483d3f42bd2f01",
+    "peerReview": 5528682839,
+    "peerState": "APPROVED",
+    "peer": "SHI",
+    "liPriorReview": 5527145378,
+    "liPriorBackend": 882,
+    "liPriorSdkDart": 139,
+    "unchangedHead": true,
+    "newRerun": false
+  },
+  "pr114": {
+    "head": "7f45b0656d608fdbf2dcdaba846eeaaa0a4214cb",
+    "executable": "3bca59053501ffdc13dc6ed63853f2c753b14170",
+    "review": 5528735319,
+    "reviewState": "APPROVED",
+    "operatorTests": {
+      "passed": 36,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exit": 0,
+      "processArtifactModelDoubles": true
+    },
+    "inputs": 443,
+    "normalizedAggregate": "bb2fecf56e0c3566d170487294d2d5c928ddb1cadae13478c9c053a93ab54699",
+    "backendClientAndroidApiDependenciesUnchanged": true,
+    "sdkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+    "sdkOwnerCrlfHashesReconciled": true,
+    "operatorLogSha256": "ad09a7e65ec4efd471ac875212d0fc0fb891817e637985d39c5de5a8598ed3df"
+  },
+  "device": {
+    "adbAttached": 0,
+    "mobileJourney": "Not Run"
+  },
+  "notClaimed": [
+    "ordinary network APK",
+    "live Event validation/browser",
+    "main merge",
+    "UAT",
+    "Release",
+    "Sprint Done"
+  ],
+  "pr113": {
+    "head": "e34f4a2bc40ddc9a4805ac90e31e1ab0215b4691",
+    "product": "11957495d6e69bdb0f8b5f591221fe85fdca7c0c",
+    "productTree": "ae9e8ed9324c2c7b1f00eedb96d01b2327568f46",
+    "peer": "SHI",
+    "peerReview": 5528719512,
+    "peerState": "APPROVED",
+    "liEvidenceReview": 5528775029,
+    "liState": "COMMENTED_ACCEPT",
+    "independent": {
+      "strictCompile": "Pass",
+      "backend": {
+        "passed": 895,
+        "newSharedRouterCasesIncluded": 13,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "exit": 0
+      },
+      "sdkDart": {
+        "passed": 145,
+        "newEventCasesIncluded": 6,
+        "eventContent": "explicit_synthetic",
+        "modelTokenizerDoubles": true,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "outerExit": 0
+      },
+      "profilesAndFivePortsClean": true,
+      "ownedEventFixturesRemoved": true,
+      "scopedInputCount": 440,
+      "scopedInputAggregate": "4cf8accb76d6a69c7b52d39038beb822a3d5d4da0597706bb7089d9c0400fb89",
+      "deltaBindingsVerified": 13,
+      "correctedProducerBlobsMatched": 5,
+      "originalApiOperationsPreserved": 33,
+      "currentApiOperations": 35,
+      "schemas": 45,
+      "java": "25.0.4.1",
+      "node": "24.19.0",
+      "dart": "3.13.2",
+      "generatedOutputArchivedBeforeCompile": true
+    },
+    "providerAdapterIncluded": false,
+    "phoneFacingService": false,
+    "logs": [
+      {
+        "name": "li113-compile.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "li113-backend.log",
+        "bytes": 84900,
+        "sha256": "55df045b4a465a78afaab07180c346c408007721558ca95055ad0356af92bb52"
+      },
+      {
+        "name": "li113-emulator.log",
+        "bytes": 20781,
+        "sha256": "ae9b70ad52d070e7eb95553684e27d5c429622acc2741b7d67f31ea3d28d66a6"
+      }
+    ]
+  }
+}
