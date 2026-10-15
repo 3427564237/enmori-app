@@ -17,7 +17,8 @@ const requested = 'ZHOU_MOBILE_RUNTIME_CONFIGURATION_REQUIRED';
 const accepted = 'ZHOU_MOBILE_AI_ACCEPTED_PERSISTED_READBACK: Pass';
 const finished = 'ZHOU_MOBILE_PERSONA_DELETE_PRESERVES_HISTORY_AND_CONVERSATION_DELETE: Pass';
 const mobileStages = new Set(['config_consumed', 'firebase_ready', 'auth_emulator', 'harness_mounted',
-  'signed_in', 'ai_ready', 'persona_created', 'persona_active', 'persona_edited', 'send_requested',
+  'signed_in', 'ai_ready', 'personas_opened', 'personas_loaded', 'persona_editor_opened',
+  'persona_create_requested', 'persona_saved', 'personas_returned', 'persona_created', 'persona_active', 'persona_edited', 'send_requested',
   'ai_readback', 'conversation_deleted']);
 export const allowlistedZhouMobileStage = value => mobileStages.has(value) ? value : undefined;
 const failure = () => new Error('ZHOU_MOBILE_NETWORK_OPERATOR_BLOCKED');

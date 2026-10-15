@@ -88,17 +88,23 @@ void main() {
     await _until(tester, () => _state(tester).canSend);
     debugPrint('ZHOU_MOBILE_STAGE: ai_ready');
     await _tap(tester, 'ai-personas');
+    debugPrint('ZHOU_MOBILE_STAGE: personas_opened');
     await _visible(tester, 'persona-create');
     expect(find.byKey(const Key('persona-empty')), findsOneWidget);
+    debugPrint('ZHOU_MOBILE_STAGE: personas_loaded');
     await _tap(tester, 'persona-create');
     await _visible(tester, 'persona-name');
+    debugPrint('ZHOU_MOBILE_STAGE: persona_editor_opened');
     await tester.enterText(
       find.byKey(const Key('persona-name')),
       'Controlled mobile guide',
     );
     await _tap(tester, 'persona-save');
+    debugPrint('ZHOU_MOBILE_STAGE: persona_create_requested');
     await _visible(tester, 'persona-saved');
+    debugPrint('ZHOU_MOBILE_STAGE: persona_saved');
     await _tap(tester, 'persona-back');
+    debugPrint('ZHOU_MOBILE_STAGE: personas_returned');
     final scope = ProviderScope.containerOf(
       tester.element(find.byKey(const Key('route-persona-management'))),
     );
