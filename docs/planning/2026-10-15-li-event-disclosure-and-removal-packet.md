@@ -25,7 +25,7 @@ Reuse the [actual strict provider receipt](../evidence/sprint3/2026-10-15-li-act
 
 Keep existing attribution, first-batch limitation and missing-field text. Proposed list footer:
 
-> Source: Ticketmaster. Activity requests go through ENMORI's server. We send Ticketmaster our developer API key and the activity request, without forwarding your ENMORI sign-in token, profile, Check-ins, Personas or AI messages. Ticketmaster can receive server connection information; ENMORI cannot guarantee how the provider logs requests.
+> Source: Ticketmaster. Activity requests pass through ENMORI to Ticketmaster. Your ENMORI sign-in token, profile, Check-ins, Personas and AI messages are not shared with Ticketmaster. Ticketmaster receives the activity request and server connection information.
 
 Proposed Detail explanation before the existing source actions:
 
