@@ -16,6 +16,10 @@ export const expectedZhouMobileApkPath = resolve(repository, 'build/app/outputs/
 const requested = 'ZHOU_MOBILE_RUNTIME_CONFIGURATION_REQUIRED';
 const accepted = 'ZHOU_MOBILE_AI_ACCEPTED_PERSISTED_READBACK: Pass';
 const finished = 'ZHOU_MOBILE_PERSONA_DELETE_PRESERVES_HISTORY_AND_CONVERSATION_DELETE: Pass';
+const mobileStages = new Set(['config_consumed', 'firebase_ready', 'auth_emulator', 'harness_mounted',
+  'signed_in', 'ai_ready', 'persona_created', 'persona_active', 'persona_edited', 'send_requested',
+  'ai_readback', 'conversation_deleted']);
+export const allowlistedZhouMobileStage = value => mobileStages.has(value) ? value : undefined;
 const failure = () => new Error('ZHOU_MOBILE_NETWORK_OPERATOR_BLOCKED');
 const fixed = value => typeof value === 'string' && value.length > 0 && !/[\x00\r\n]/.test(value);
 const executable = value => {
@@ -41,6 +45,7 @@ export async function runZhouMobileNetworkFixture({
   const toolEnvironment = { ...environment, DASH__SUPPRESS_ANALYTICS: 'true' };
   let httpsServer, httpsListening = false, flutterChild, flutterExited = true;
   let markerCount = 0, acceptedSeen = false, finishedSeen = false, delivered = false;
+  let mobileLastStage;
   let currentStage = 'preflight', blockedStage, cleanupPassed = false, fixturePreserved = false;
   let prebuildApkSha256, runnerApkSha256, selectedApkSha256;
   let prebuildSignatureVerified = false, signatureVerified = false;
@@ -52,7 +57,7 @@ export async function runZhouMobileNetworkFixture({
   const phase = value => { currentStage = value; try { onPhase(value); } catch { /* Diagnostics cannot own resources. */ } };
   const report = () => ({ schemaVersion: 1, scope: 'controlled-android-ai-persona-network',
     result: !blockedStage && acceptedSeen && finishedSeen && cleanupPassed ? 'passed' : 'blocked',
-    blockedStage, deviceJourneyPassed: !blockedStage && acceptedSeen && finishedSeen,
+    blockedStage, mobileLastStage, deviceJourneyPassed: !blockedStage && acceptedSeen && finishedSeen,
     actual9bJourneyPassed: !blockedStage && acceptedSeen && finishedSeen && cleanupPassed && modelBinding?.mode === 'formal-9b',
     modelMode: modelBinding?.mode === 'formal-9b' ? 'formal-9b' : 'test-double',
     modelBindingBasis: modelBinding?.mode === 'formal-9b' ? 'caller-verified-private-binding' : 'explicit-test-double',
@@ -165,6 +170,10 @@ export async function runZhouMobileNetworkFixture({
       const timer = setTimeout(() => { credentialFlightClosed = true; flutterChild.kill(); reject(failure()); }, flutterTimeoutMs);
       const fail = () => { credentialFlightClosed = true; flutterChild.kill(); clearTimeout(timer); reject(failure()); };
       const line = value => {
+        // Only a fixed stage at the end of a complete Flutter log line is kept.
+        // Arbitrary stdout, unknown stage names and trailing data are discarded.
+        const stage = allowlistedZhouMobileStage(value.match(/(?:^|\s)ZHOU_MOBILE_STAGE: ([a-z_]+)\r?$/u)?.[1]);
+        if (stage) mobileLastStage = stage;
         if (value.includes(requested)) {
           if (++markerCount !== 1) { fail(); return; }
           const current = () => !credentialFlightClosed && !flutterExited;

@@ -11,12 +11,14 @@ import { join, resolve, relative, isAbsolute } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createServer } from 'node:net';
 import { buildControlledEmulatorTestEnvironment, requireControlledEmulatorEnvironment } from '../backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js';
+import { allowlistedZhouMobileStage } from './zhou_mobile_network_fixture.mjs';
 
 const ports = [8080, 9099, 4400, 4500, 9150];
 const handoffName = 'zhou-model-handoff.json';
 const safeFailure = reason => ({status: 'Blocked', reason, actualModelStorePass: false});
 const exact = (value, fields) => value && typeof value === 'object' && !Array.isArray(value) &&
   Object.keys(value).length === fields.length && Object.keys(value).every(key => fields.includes(key));
+export const safeZhouMobileLastStage = report => allowlistedZhouMobileStage(report?.mobileLastStage);
 
 export function buildZhouProbeEnvironment(host, profile, mobile = false) {
   const environment = buildControlledEmulatorTestEnvironment(host, profile);
@@ -263,6 +265,7 @@ async function execute() {
     remoteSettlementRequired: modelPosts > 0 && transport.state !== 'stopped',
     deviceExecution: config.mobile ? (actualMobileJourneyPass ? 'Pass' : 'Not Proven') : 'Not Run',
     mobileConfigurationDelivered: mobileResult?.runtimeConfigurationDelivered === true,
+    mobileLastStage: safeZhouMobileLastStage(mobileResult),
     mobileCredentialCleanupConfirmed: mobileResult?.credentialCleanupConfirmed === true,
     mobileAiReadback: mobileResult?.aiAcceptedAndReadback === true,
     mobilePersonaHistoryAndDelete: mobileResult?.personaHistoryAndDelete === true,

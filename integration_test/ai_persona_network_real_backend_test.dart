@@ -45,6 +45,7 @@ void main() {
     final configuration = await ControlledMobileFixtureConfiguration.consume(
       configurationFile,
     );
+    debugPrint('ZHOU_MOBILE_STAGE: config_consumed');
     final firebase = await Firebase.initializeApp(
       name: 'zhou-mobile-controlled',
       options: const FirebaseOptions(
@@ -54,6 +55,7 @@ void main() {
         projectId: ControlledMobileFixtureConfiguration.projectId,
       ),
     );
+    debugPrint('ZHOU_MOBILE_STAGE: firebase_ready');
     addTearDown(firebase.delete);
     final firebaseAuth = FirebaseAuth.instanceFor(app: firebase);
     await firebaseAuth.useAuthEmulator(
@@ -61,6 +63,7 @@ void main() {
       9099,
       automaticHostMapping: false,
     );
+    debugPrint('ZHOU_MOBILE_STAGE: auth_emulator');
     final auth = FirebaseAuthRepository(firebaseAuth);
     addTearDown(auth.signOut);
     final trust = SecurityContext(withTrustedRoots: false)
@@ -78,9 +81,12 @@ void main() {
     );
     // Mount the sole app-owned observer before the ordinary sign-in command.
     await tester.pump();
+    debugPrint('ZHOU_MOBILE_STAGE: harness_mounted');
     final signedIn = await configuration.signIn(auth);
     expect(signedIn is Success<void>, isTrue);
+    debugPrint('ZHOU_MOBILE_STAGE: signed_in');
     await _until(tester, () => _state(tester).canSend);
+    debugPrint('ZHOU_MOBILE_STAGE: ai_ready');
     await _tap(tester, 'ai-personas');
     await _visible(tester, 'persona-create');
     expect(find.byKey(const Key('persona-empty')), findsOneWidget);
@@ -98,6 +104,7 @@ void main() {
     );
     final collection = scope.read(personaSessionControllerProvider).collection;
     expect(collection?.items.length, 1);
+    debugPrint('ZHOU_MOBILE_STAGE: persona_created');
     final persona = collection!.items.single;
     await _tap(tester, 'persona-select-${persona.personaId}');
     await _tap(tester, 'persona-activate');
@@ -111,6 +118,7 @@ void main() {
               ?.activePersonaId ==
           persona.personaId,
     );
+    debugPrint('ZHOU_MOBILE_STAGE: persona_active');
     await _tap(tester, 'persona-edit-${persona.personaId}');
     await _visible(tester, 'persona-name');
     await tester.enterText(
@@ -125,6 +133,7 @@ void main() {
     expect(edited.items.single.revision, 2);
     expect(edited.stateRevision, 3);
     expect(edited.activePersonaId == persona.personaId, isTrue);
+    debugPrint('ZHOU_MOBILE_STAGE: persona_edited');
     await _tap(tester, 'persona-back');
     await _visible(tester, 'ai-message-input');
 
@@ -133,6 +142,7 @@ void main() {
     const input = 'I read a book today.';
     await tester.enterText(find.byKey(const Key('ai-message-input')), input);
     await _tap(tester, 'ai-send');
+    debugPrint('ZHOU_MOBILE_STAGE: send_requested');
     await _until(
       tester,
       () => !const {
@@ -159,6 +169,7 @@ void main() {
       isTrue,
     );
     expect(_state(tester).messages.last.availability, AiAvailability.available);
+    debugPrint('ZHOU_MOBILE_STAGE: ai_readback');
     debugPrint('ZHOU_MOBILE_AI_ACCEPTED_PERSISTED_READBACK: Pass');
 
     await _tap(tester, 'ai-personas');
@@ -199,6 +210,7 @@ void main() {
     );
     expect(_state(tester).messages, isEmpty);
     expect(tester.takeException(), isNull);
+    debugPrint('ZHOU_MOBILE_STAGE: conversation_deleted');
     debugPrint(
       'ZHOU_MOBILE_PERSONA_DELETE_PRESERVES_HISTORY_AND_CONVERSATION_DELETE: Pass',
     );

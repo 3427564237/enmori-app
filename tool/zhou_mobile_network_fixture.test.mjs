@@ -16,7 +16,7 @@ class Child extends EventEmitter {
   }
   kill() { setImmediate(() => this.finish(1)); return true; }
 }
-function setup({ conflict = false, changedMapping = false, markers = true, duplicateMarker = false, badPackage = false, failSignature = false, quarantine = false, missingLease = false, changedApk = false, abruptExit = false, failedDisposal = false, differentRunnerApk = false, missingPrebuiltApk = false, badRunnerPackage = false, badRunnerSignature = false, exitBeforeRunnerInspection = false, exitDuringDelivery = false, freshFlutterProfile = false } = {}) {
+function setup({ conflict = false, changedMapping = false, markers = true, duplicateMarker = false, badPackage = false, failSignature = false, quarantine = false, missingLease = false, changedApk = false, abruptExit = false, failedDisposal = false, differentRunnerApk = false, missingPrebuiltApk = false, badRunnerPackage = false, badRunnerSignature = false, exitBeforeRunnerInspection = false, exitDuringDelivery = false, freshFlutterProfile = false, stageOutput = '' } = {}) {
   const calls = [], phases = [], reverses = new Map([['tcp:9099', conflict ? 'tcp:12345' : 'tcp:9099']]);
   let privateReads = 0, delivered, cleaned = 0, preserved = 0, tlsClosed = 0, disposed = 0, fixtureState = { modelAttempts: 1, modelPending: quarantine ? 1 : 0, nonTerminal: 0, quarantined: quarantine };
   let androidChild;
@@ -73,6 +73,7 @@ function setup({ conflict = false, changedMapping = false, markers = true, dupli
               const finishAfterDelivery = () => {
                 if (child.exited) return;
                 if (!delivered) { setImmediate(finishAfterDelivery); return; }
+                child.stdout.write(stageOutput);
                 child.finish(abruptExit ? 1 : 0, abruptExit ? '' : 'ZHOU_MOBILE_AI_ACCEPTED_PERSISTED_READBACK: Pass\nZHOU_MOBILE_PERSONA_DELETE_PRESERVES_HISTORY_AND_CONVERSATION_DELETE: Pass\n');
               };
               setImmediate(finishAfterDelivery);
@@ -238,4 +239,21 @@ test('orchestration test seams cannot claim formal9B device evidence', async () 
   const report = await runZhouMobileNetworkFixture(state.options);
   assert.equal(report.result, 'blocked'); assert.equal(report.actual9bJourneyPassed, false);
   assert.equal(state.calls.length, 0);
+});
+
+test('only fixed mobile phase values survive stdout diagnostics and blocked journeys retain the last known phase', async () => {
+  const secret = 'synthetic-private-identity-and-prompt';
+  const state = setup({ abruptExit: true, stageOutput:
+    'I/flutter (123): ZHOU_MOBILE_STAGE: config_consumed\n' +
+    'I/flutter (123): ZHOU_MOBILE_STAGE: signed_in\n' +
+    `ZHOU_MOBILE_STAGE: ${secret}\nZHOU_MOBILE_STAGE: ai_ready ${secret}\n` });
+  const report = await runZhouMobileNetworkFixture(state.options);
+  assert.equal(report.result, 'blocked');
+  assert.equal(report.mobileLastStage, 'signed_in');
+  assert.equal(report.credentialCleanupConfirmed, true);
+  assert.equal(JSON.stringify(report).includes(secret), false);
+  const unknown = setup({ stageOutput: `ZHOU_MOBILE_STAGE: ${secret}\n` });
+  const unknownReport = await runZhouMobileNetworkFixture(unknown.options);
+  assert.equal(unknownReport.mobileLastStage, undefined);
+  assert.equal(JSON.stringify(unknownReport).includes(secret), false);
 });

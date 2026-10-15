@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { resolve, relative, isAbsolute } from 'node:path';
 import { mkdtempSync, mkdirSync, rmSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { validateZhouModelConfiguration, quoteFixedWorkerCommand, isPositiveZhouModelStoreReport, buildZhouProbeEnvironment } from './zhou_real_model_store_probe.mjs';
+import { validateZhouModelConfiguration, quoteFixedWorkerCommand, isPositiveZhouModelStoreReport, buildZhouProbeEnvironment, safeZhouMobileLastStage } from './zhou_real_model_store_probe.mjs';
 
 const configuration = () => ({controlledHostVerified: true, existingHostGenerationLeaseSettled: true, binding: {endpoint: 'http://127.0.0.1:11434',
   reference: 'synthetic-existing-host:9b', manifestDigest: '1'.repeat(64), tokenizerDigest: '2'.repeat(64),
@@ -90,4 +90,12 @@ test('negative CLI configuration publishes only a safe blocked record without pr
   const record = JSON.parse(child.stdout);
   assert.equal(record.kind, 'zhou-model-store-report'); assert.equal(record.status, 'Blocked');
   assert.equal(record.actualModelStorePass, false); assert.equal(child.stdout.includes(secret), false);
+});
+
+test('outer mobile report forwards only the allowlisted phase and never unknown diagnostic content', () => {
+  assert.equal(safeZhouMobileLastStage({ mobileLastStage: 'signed_in', raw: 'synthetic-private-content' }), 'signed_in');
+  for (const mobileLastStage of ['synthetic-private-content', 'ai_ready private-content', '', null, {}, ['signed_in']]) {
+    assert.equal(safeZhouMobileLastStage({ mobileLastStage }), undefined);
+  }
+  assert.equal(safeZhouMobileLastStage(undefined), undefined);
 });
