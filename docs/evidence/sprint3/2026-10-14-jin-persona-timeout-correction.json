@@ -1,0 +1,251 @@
+{
+  "recordedSgt": "2026-10-14T16:01:31.059769+08:00",
+  "status": "JIN focused correction delivered for SHI review; original failure not retroactively assigned to one path",
+  "authority": "https://github.com/3427564237/enmori-app/blob/948579ec82b2c5363ab2b3b2ea353ca652020f07/docs/decisions/2026-10-14-li-pr99-bounded-disposition.md",
+  "source": {
+    "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+    "source": "71d5cc5787806cc35b89f60f1cfce5e971e0c2d4",
+    "tree": "71fe3fb611c36e08650ced234aed4a0ead96121b",
+    "trackedPathsChecked": 955,
+    "changedPaths": [
+      "test/features/personas/persona_client_session_test.dart"
+    ],
+    "testBlob": "c7670eb5b173fbdffabccf7ce7cfc3a0e0df01d3",
+    "testSha256": "ad011735bb283dcba5d21ca4f96f4e33302ef01b73d9b6f1bb1fc3247defad8c",
+    "productUnchanged": true
+  },
+  "toolchain": {
+    "flutter": "3.47.2 (existing FVM SDK/snapshot)",
+    "dart": "3.13.2",
+    "dependencies": "unchanged existing lock and local cache"
+  },
+  "originalFailure": {
+    "source": "c58a4e56968e52296f13fa322c45b34bd1b3e30b",
+    "passed": 504,
+    "failed": 1,
+    "exit": 1,
+    "testLine": 58,
+    "logSha256": "ebabdc92b73eb61784df7dcf3d10dfdce3bb585dfa703d5e7859d8bcb2a36ebd",
+    "historicalTrigger": "unconfirmed; no retroactive load-vs-token attribution"
+  },
+  "controlledRedObservations": [
+    {
+      "boundary": "initial-read",
+      "stage": "after-load",
+      "current": false,
+      "canCreate": false,
+      "pending": null,
+      "failure": "serviceUnavailable",
+      "gets": 1,
+      "posts": 0,
+      "tokenCalls": 1
+    },
+    {
+      "boundary": "initial-read",
+      "stage": "after-create",
+      "current": false,
+      "canCreate": false,
+      "pending": null,
+      "failure": "serviceUnavailable",
+      "gets": 1,
+      "posts": 0,
+      "tokenCalls": 1
+    },
+    {
+      "boundary": "create-token",
+      "stage": "after-load",
+      "current": true,
+      "canCreate": true,
+      "pending": null,
+      "failure": null,
+      "gets": 1,
+      "posts": 0,
+      "tokenCalls": 1
+    },
+    {
+      "boundary": "create-token",
+      "stage": "after-create",
+      "current": true,
+      "canCreate": true,
+      "pending": null,
+      "failure": "serviceUnavailable",
+      "gets": 1,
+      "posts": 0,
+      "tokenCalls": 2
+    }
+  ],
+  "controlledRedResult": {
+    "failedAsIntended": 2,
+    "exit": 1,
+    "sameNullAssertion": true,
+    "productionSourceUnchanged": true
+  },
+  "redFixture": {
+    "path": "docs/evidence/sprint3/fixtures/2026-10-14-jin-persona-timeout-preconditions.dart.txt",
+    "executionSnapshotSha256": "e1564aa423ad99ce0ffaf5e0abaaf05854210d244abf684441813bf7df19e678",
+    "normalizedGitSha256": "ebd596c83b53db1ea8333232c248fdb20db3c7f4a4ef6e64ca606f84f38835e5",
+    "purpose": "Copy to temporary test location and run expecting two failures; excluded from normal suite"
+  },
+  "checks": {
+    "red-preconditions": {
+      "label": "red-preconditions",
+      "startedSgt": "2026-10-14T15:52:05.234315+08:00",
+      "endedSgt": "2026-10-14T15:52:25.304386+08:00",
+      "command": [
+        "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart.exe",
+        "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/flutter_tools.snapshot",
+        "test",
+        "--no-pub",
+        "--reporter",
+        "expanded",
+        "test/features/personas/jin_timeout_precondition_probe_test.dart"
+      ],
+      "exit": 1,
+      "logSha256": "50676d20da844218f0a01e696f4f2d837664e8da04a7d9d5d259d3fdbdf20f74",
+      "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+      "testInputs": {
+        "persona_client_session_test.dart": "a4a2be6aab08ebdcf873ac51f22adcd59a38f7db94ddc05fc6dae8a13312b158"
+      }
+    },
+    "focused": {
+      "label": "focused",
+      "startedSgt": "2026-10-14T15:54:06.487107+08:00",
+      "endedSgt": "2026-10-14T15:54:11.903328+08:00",
+      "command": [
+        "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart.exe",
+        "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/flutter_tools.snapshot",
+        "test",
+        "--no-pub",
+        "--reporter",
+        "expanded",
+        "test/features/personas/persona_client_session_test.dart"
+      ],
+      "exit": 0,
+      "logSha256": "44d22c80c5983c45747b71cc300624745f20fa84b28e3cdf51b47aa971bffa1f",
+      "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+      "testInputs": {
+        "persona_client_session_test.dart": "7331bc6a880b688807440b2e385bc2aa2352425e723ed63b64949bc27516d6d5"
+      }
+    },
+    "full-default": {
+      "label": "full-default",
+      "startedSgt": "2026-10-14T15:57:08.733465+08:00",
+      "endedSgt": "2026-10-14T15:57:56.474984+08:00",
+      "command": [
+        "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart.exe",
+        "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/flutter_tools.snapshot",
+        "test",
+        "--no-pub",
+        "--reporter",
+        "expanded"
+      ],
+      "exit": 0,
+      "logSha256": "273d4c8d3a203a5665f39374d6b0feacbd0ee23e6acebe17c0230db04b2eeafa",
+      "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+      "testInputs": {
+        "persona_client_session_test.dart": "7331bc6a880b688807440b2e385bc2aa2352425e723ed63b64949bc27516d6d5"
+      },
+      "sourceIdentity": {
+        "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+        "source": "71d5cc5787806cc35b89f60f1cfce5e971e0c2d4",
+        "tree": "71fe3fb611c36e08650ced234aed4a0ead96121b",
+        "trackedPathsChecked": 955,
+        "changedPaths": [
+          "test/features/personas/persona_client_session_test.dart"
+        ],
+        "testBlob": "c7670eb5b173fbdffabccf7ce7cfc3a0e0df01d3",
+        "testSha256": "ad011735bb283dcba5d21ca4f96f4e33302ef01b73d9b6f1bb1fc3247defad8c",
+        "productUnchanged": true
+      }
+    },
+    "analysis": {
+      "label": "analysis",
+      "startedSgt": "2026-10-14T15:58:24.013561+08:00",
+      "endedSgt": "2026-10-14T15:59:46.929921+08:00",
+      "command": [
+        "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart.exe",
+        "analyze",
+        "--fatal-infos",
+        "lib",
+        "test",
+        "integration_test"
+      ],
+      "exit": 0,
+      "logSha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
+      "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+      "testInputs": {
+        "persona_client_session_test.dart": "7331bc6a880b688807440b2e385bc2aa2352425e723ed63b64949bc27516d6d5"
+      },
+      "sourceIdentity": {
+        "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+        "source": "71d5cc5787806cc35b89f60f1cfce5e971e0c2d4",
+        "tree": "71fe3fb611c36e08650ced234aed4a0ead96121b",
+        "trackedPathsChecked": 955,
+        "changedPaths": [
+          "test/features/personas/persona_client_session_test.dart"
+        ],
+        "testBlob": "c7670eb5b173fbdffabccf7ce7cfc3a0e0df01d3",
+        "testSha256": "ad011735bb283dcba5d21ca4f96f4e33302ef01b73d9b6f1bb1fc3247defad8c",
+        "productUnchanged": true
+      }
+    },
+    "format-check": {
+      "label": "format-check",
+      "startedSgt": "2026-10-14T15:59:47.168357+08:00",
+      "endedSgt": "2026-10-14T15:59:47.282944+08:00",
+      "command": [
+        "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart.exe",
+        "format",
+        "--output=none",
+        "--set-exit-if-changed",
+        "test/features/personas/persona_client_session_test.dart"
+      ],
+      "exit": 0,
+      "logSha256": "ebf8691cd9669b02dd9d748aaf543551b337b2beb44f2d128dc7ffbfa0318f03",
+      "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+      "testInputs": {
+        "persona_client_session_test.dart": "7331bc6a880b688807440b2e385bc2aa2352425e723ed63b64949bc27516d6d5"
+      },
+      "sourceIdentity": {
+        "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+        "source": "71d5cc5787806cc35b89f60f1cfce5e971e0c2d4",
+        "tree": "71fe3fb611c36e08650ced234aed4a0ead96121b",
+        "trackedPathsChecked": 955,
+        "changedPaths": [
+          "test/features/personas/persona_client_session_test.dart"
+        ],
+        "testBlob": "c7670eb5b173fbdffabccf7ce7cfc3a0e0df01d3",
+        "testSha256": "ad011735bb283dcba5d21ca4f96f4e33302ef01b73d9b6f1bb1fc3247defad8c",
+        "productUnchanged": true
+      }
+    }
+  },
+  "testCounts": {
+    "focused": 7,
+    "fullDefaultConcurrency": 508,
+    "additionalCases": 3,
+    "overlap": "focused seven are included in full 508, not additive"
+  },
+  "preservedAssertions": [
+    "late 201 headers and body",
+    "412 closes recovery before original completion",
+    "same key on both POSTs",
+    "same exact body/expected state revision",
+    "independent post-commit GET",
+    "one confirmed effect",
+    "token-wait session disposal prevents dispatch",
+    "late token after pre-dispatch timeout prevents dispatch"
+  ],
+  "retainedToolingFailure": "First archive audit normalized binary CRLF before checking exact bytes, falsely flagging image/archive files. It stopped before commit/full-suite execution. The corrected exact-first verifier checked all 955 tracked paths and found only the intended test difference; no binary files changed.",
+  "notRun": [
+    "Backend suites",
+    "Auth/Firestore Emulator",
+    "Android/APK/device",
+    "live model or provider"
+  ],
+  "review": {
+    "SHI": "pending focused correction review",
+    "LI": "pending receipt/disposition; no self-closure"
+  },
+  "privacy": "Raw full logs and local preparation scripts remain local. This manifest publishes non-content counts, source bindings and attributed hashes; no credentials or real user data."
+}

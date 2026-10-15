@@ -1,0 +1,373 @@
+{
+  "date": "2026-10-15",
+  "timezone": "Asia/Singapore",
+  "owner": "ZHOU",
+  "workspace": "D:\\3851",
+  "base": "aab3bf23b8d9c76c6f830dfefa483d3f42bd2f01",
+  "sourceCommit": "bb9170c2cc393001176058dd36f76f294258fffb",
+  "sourceTree": "3f670a2f2b4f3180710a6a60be6c9ce163c168af",
+  "sourceCount": 443,
+  "normalizedInputsSha256": "70dca6fe989ec297cf5ab386ae60eebb062702da989bfb5c3731a5ec2619394f",
+  "sourceBindings": [
+    {
+      "gitBlob": "95a40eafe48c62856b58b46d82a3c3aca4c04ecd",
+      "path": "backend/emulator-test/support/zhou-real-model-store-fixture.ts",
+      "gitBlobSha256": "dbb13afb8e98fc9ff778ff7a1c2cc684061a71b50bc5575aa6a4c0b000eb63b9",
+      "workingSha256": "dbb13afb8e98fc9ff778ff7a1c2cc684061a71b50bc5575aa6a4c0b000eb63b9",
+      "normalizedSha256": "dbb13afb8e98fc9ff778ff7a1c2cc684061a71b50bc5575aa6a4c0b000eb63b9"
+    },
+    {
+      "gitBlob": "7f0b94b47aa9695feb8c2d88e25e7d6d0697dc6a",
+      "path": "backend/emulator-test/zhou-real-model-store.integration.test.ts",
+      "gitBlobSha256": "1256e2756aa657654c4eb30e3049f407c4d711809ea7a4e67266a7ac6dfbf7e2",
+      "workingSha256": "1256e2756aa657654c4eb30e3049f407c4d711809ea7a4e67266a7ac6dfbf7e2",
+      "normalizedSha256": "1256e2756aa657654c4eb30e3049f407c4d711809ea7a4e67266a7ac6dfbf7e2"
+    },
+    {
+      "gitBlob": "ac37b6ea6db2be88b8f44c462e37f3bf8484adb6",
+      "path": "integration_test/ai_persona_network_real_backend_test.dart",
+      "gitBlobSha256": "f42aea3412caad3b831cce75510f0215ad068b75f8920221b088f6270e9326a1",
+      "workingSha256": "f42aea3412caad3b831cce75510f0215ad068b75f8920221b088f6270e9326a1",
+      "normalizedSha256": "f42aea3412caad3b831cce75510f0215ad068b75f8920221b088f6270e9326a1"
+    },
+    {
+      "gitBlob": "d910d20e032577c809146e869732117c2fb51926",
+      "path": "lib/harness/ai_conversation/controlled_mobile_fixture_configuration.dart",
+      "gitBlobSha256": "cf83f189a005eeb862d7d7e942ed6bd047b1c83e06d0ea9ae0d27697c653957b",
+      "workingSha256": "cf83f189a005eeb862d7d7e942ed6bd047b1c83e06d0ea9ae0d27697c653957b",
+      "normalizedSha256": "cf83f189a005eeb862d7d7e942ed6bd047b1c83e06d0ea9ae0d27697c653957b"
+    },
+    {
+      "gitBlob": "e2c37326fc7ae0c525438a15c23f08c28977cda4",
+      "path": "test/harness/controlled_mobile_fixture_configuration_test.dart",
+      "gitBlobSha256": "5800e83c3228cd7317aeec15f37b7db2e097e13f375d5bf0b56b792cf121a7e6",
+      "workingSha256": "5800e83c3228cd7317aeec15f37b7db2e097e13f375d5bf0b56b792cf121a7e6",
+      "normalizedSha256": "5800e83c3228cd7317aeec15f37b7db2e097e13f375d5bf0b56b792cf121a7e6"
+    },
+    {
+      "gitBlob": "44f5d85fe02557bd9d4ff5b354f58a734de779a6",
+      "path": "tool/capture_zhou_join_inputs.mjs",
+      "gitBlobSha256": "84d980acb348cbffa0d90c1d970ec2c168176cecd199a569ec4aaa3687103626",
+      "workingSha256": "84d980acb348cbffa0d90c1d970ec2c168176cecd199a569ec4aaa3687103626",
+      "normalizedSha256": "84d980acb348cbffa0d90c1d970ec2c168176cecd199a569ec4aaa3687103626"
+    },
+    {
+      "gitBlob": "af931ac516541f067f62042728d27a41bd96c67e",
+      "path": "tool/zhou_mobile_fixture_credentials.mjs",
+      "gitBlobSha256": "065f92d04c87b87354928d4ac33558fa94ef144bd99517b89e1e271cff3512d9",
+      "workingSha256": "065f92d04c87b87354928d4ac33558fa94ef144bd99517b89e1e271cff3512d9",
+      "normalizedSha256": "065f92d04c87b87354928d4ac33558fa94ef144bd99517b89e1e271cff3512d9"
+    },
+    {
+      "gitBlob": "ef99ffdc3ff6e8940a2ac4827a6b0bef14dede93",
+      "path": "tool/zhou_mobile_fixture_credentials.test.mjs",
+      "gitBlobSha256": "d4f044af11c1ccc912f80f11a5ba771019c2accce6a3b658310d83bcb5d20f28",
+      "workingSha256": "d4f044af11c1ccc912f80f11a5ba771019c2accce6a3b658310d83bcb5d20f28",
+      "normalizedSha256": "d4f044af11c1ccc912f80f11a5ba771019c2accce6a3b658310d83bcb5d20f28"
+    },
+    {
+      "gitBlob": "d65d2457006422c119847a6494494744ce33d95e",
+      "path": "tool/zhou_mobile_network_fixture.mjs",
+      "gitBlobSha256": "876421e631bbc972972892cece013f7f3381a2671d9156357b384d74d69c7cbd",
+      "workingSha256": "876421e631bbc972972892cece013f7f3381a2671d9156357b384d74d69c7cbd",
+      "normalizedSha256": "876421e631bbc972972892cece013f7f3381a2671d9156357b384d74d69c7cbd"
+    },
+    {
+      "gitBlob": "bb448bbc3cd676f8db9ad8dd6b9bdce6f25250ad",
+      "path": "tool/zhou_mobile_network_fixture.test.mjs",
+      "gitBlobSha256": "fc986cef7d38e34a363b0c9369c0fa5cf29c39353180185cd896012aa152d2df",
+      "workingSha256": "fc986cef7d38e34a363b0c9369c0fa5cf29c39353180185cd896012aa152d2df",
+      "normalizedSha256": "fc986cef7d38e34a363b0c9369c0fa5cf29c39353180185cd896012aa152d2df"
+    },
+    {
+      "gitBlob": "826eb2d06f87b1ff4a4f4ac4a90dba3ef9f30e61",
+      "path": "tool/zhou_real_model_store_probe.mjs",
+      "gitBlobSha256": "c780951f194d25985bba361d43e3f0c2701c816115a3c45304fd6825a6afce04",
+      "workingSha256": "c780951f194d25985bba361d43e3f0c2701c816115a3c45304fd6825a6afce04",
+      "normalizedSha256": "c780951f194d25985bba361d43e3f0c2701c816115a3c45304fd6825a6afce04"
+    },
+    {
+      "gitBlob": "21f75dfcb06f92719aabaa56d5144e337bc109f1",
+      "path": "tool/zhou_real_model_store_probe.test.mjs",
+      "gitBlobSha256": "33c0f0e0cb97370911c14c2d30647a0e0f1da9891c8b0585907b2ca997cc1eff",
+      "workingSha256": "33c0f0e0cb97370911c14c2d30647a0e0f1da9891c8b0585907b2ca997cc1eff",
+      "normalizedSha256": "33c0f0e0cb97370911c14c2d30647a0e0f1da9891c8b0585907b2ca997cc1eff"
+    }
+  ],
+  "verification": {
+    "strictCompile": {
+      "exit": 0
+    },
+    "backend": {
+      "passed": 882,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "exit": 0
+    },
+    "actualIsolatedAuthFirestore": {
+      "passed": 145,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "exit": 0,
+      "newCases": 6,
+      "actualHttpAndSdk": true,
+      "modelHttpAndTokenCountDoubles": true,
+      "profilesRemoved": 2,
+      "portsFree": [
+        8080,
+        9099,
+        4400,
+        4500,
+        9150
+      ]
+    },
+    "flutter": {
+      "passed": 549,
+      "failed": 0,
+      "exit": 0,
+      "newConfigurationCases": 3,
+      "inputsUnchangedSinceRun": true
+    },
+    "flutterAnalysis": {
+      "fatalInfos": true,
+      "issues": 0,
+      "exit": 0
+    },
+    "operatorUnit": {
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0,
+      "newOperatorCases": 24,
+      "jinExistingCases": 7,
+      "processModelCounterDoubles": true,
+      "hostPosixShellExecuted": true,
+      "deviceExecution": "Not Run"
+    },
+    "exactEvent110Independent": {
+      "source": "82fbd0ac94a4731ff8d12617309705a2c5353baf",
+      "backend": 650,
+      "flutter": 533,
+      "focusedBackend": 9,
+      "focusedFlutter": 8,
+      "focusedOverlapsFull": true,
+      "review": "REQUEST_CHANGES",
+      "reviewId": 5527108790,
+      "confirmedFindings": 1
+    }
+  },
+  "android": {
+    "artifact": "build/zhou-mobile/ai-persona-network-debug.apk",
+    "bytes": 157978580,
+    "sha256": "c85e10ccfe8954f045498e78906bb187328a621733bf1bc91e00b425c307d7a1",
+    "applicationId": "com.enmori.app.personatest",
+    "activity": "com.enmori.app.MainActivity",
+    "compile": "Pass",
+    "aapt": "Pass",
+    "signature": "Pass",
+    "installed": false,
+    "deviceJourney": "Not Run",
+    "adbDevices": 0,
+    "credentialDefines": false,
+    "compiledBeforeSourceCommit": true,
+    "selectedInputBindingsNowMatchSource": true,
+    "selectedInputBindings": [
+      {
+        "path": "integration_test/ai_persona_network_real_backend_test.dart",
+        "sha256": "f42aea3412caad3b831cce75510f0215ad068b75f8920221b088f6270e9326a1"
+      },
+      {
+        "path": "lib/harness/ai_conversation/controlled_mobile_fixture_configuration.dart",
+        "sha256": "cf83f189a005eeb862d7d7e942ed6bd047b1c83e06d0ea9ae0d27697c653957b"
+      },
+      {
+        "path": "lib/harness/ai_conversation/ai_network_harness_app.dart",
+        "sha256": "f13181e9554eb113a9b39e9d3a2987da20322f6779e3108fba98199d7c977ccb"
+      },
+      {
+        "path": "lib/features/auth/data/firebase_auth_repository.dart",
+        "sha256": "5941ec337fe7c2948ab4b577063674a987ead4b794688313d87fc118b5b364a1"
+      },
+      {
+        "path": "pubspec.yaml",
+        "sha256": "01b6fa4cd7931fd29d258281da78579ba81a085c658143e6b5a83c2a13050c80"
+      },
+      {
+        "path": "pubspec.lock",
+        "sha256": "774e3ce672777e779ddfbd80440e47c9ccf0cdf8a86ae2c09d4e4fe4e5c73b82"
+      },
+      {
+        "path": "android/app/build.gradle.kts",
+        "sha256": "6d4f4dea8beeb450637e6522ac96e3d1868950f1a36fd419211c7b03c7dab0d6"
+      },
+      {
+        "path": ".fvmrc",
+        "sha256": "737e433349b97a1961b900c15b921d20b34e3896ef76192abbf8788901a5ed81"
+      }
+    ]
+  },
+  "actualModel": {
+    "combinedModelAuthStore": "Not Run",
+    "androidModelJourney": "Not Run",
+    "liAttributedSemantic": {
+      "source": "aab3bf23b8d9c76c6f830dfefa483d3f42bd2f01",
+      "receipt": "752b25c",
+      "reviewId": 5527145378,
+      "passed": true,
+      "completeInputTokens": 595,
+      "elapsedMs": 3184.148709,
+      "modelDispatches": 1,
+      "modelState": "stopped",
+      "authNotesStoreSinkSynthetic": true,
+      "independentZhouExecution": false
+    },
+    "subsequentOriginalHostLease": {
+      "held": true,
+      "recordedAtUtc": "2026-10-15T02:02:58.173250+00:00",
+      "reason": "Subsequent actual cancel-once has no confirmed original remote settlement",
+      "noFurtherGenerationUntilActualOriginalSettlement": true,
+      "noResetOrFreshLeaseBypass": true
+    }
+  },
+  "failureHistory": [
+    {
+      "run": "emulator-first",
+      "passed": 143,
+      "failed": 0,
+      "exit": 0,
+      "newCases": 4
+    },
+    {
+      "run": "emulator-final-before-repair",
+      "passed": 143,
+      "failed": 1,
+      "exit": 1,
+      "newCases": 5,
+      "reason": "Terminal fixture frontend connection close timeout; final cleanup obscured first error"
+    },
+    {
+      "run": "real-model-focused-failure",
+      "passed": 0,
+      "failed": 1,
+      "exit": 1,
+      "reason": "Proved terminal-server-close timeout"
+    },
+    {
+      "run": "real-model-focused-fixed",
+      "passed": 1,
+      "failed": 0,
+      "exit": 0,
+      "overlapsFinal145": true
+    },
+    {
+      "run": "intermediate-source-checks",
+      "reason": "TypeScript narrowing, Dart constructor argument naming and Windows POSIX test PATH corrected; retained in agent/tool execution history"
+    }
+  ],
+  "limits": [
+    "No actual new 9B/model-store/device invocation while LI original host lease remains held",
+    "Temporary Emulator shutdown is not remote model stop, durable fixture retention or production cleanup SLA",
+    "Nonempty Note authority remains held only on corresponding functionality",
+    "Source and author log fingerprints do not independently expose unpublished raw invocation bytes",
+    "No ordinary bootstrap, shared router/platform, API, locks or dependencies changed; no merge/issue/project/runtime transition"
+  ],
+  "logs": [
+    {
+      "path": "build/zhou-1015/compile-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/zhou-1015/backend-verified-source.log",
+      "bytes": 82532,
+      "sha256": "b8196a05b462cb24cb9c0c5dd7ed2c9dbbcae17c5314525953119bcf1b06cc44"
+    },
+    {
+      "path": "build/zhou-1015/emulator-verified-source.log",
+      "bytes": 21587,
+      "sha256": "d8ad403e8673f9de38032b53bf89c87a819108fdcf79c98876fafbff4f292b9b"
+    },
+    {
+      "path": "build/zhou-1015/flutter-full.log",
+      "bytes": 76713,
+      "sha256": "018456ed7938e50b559c7fcfddc029f94a35fe507d1de6a7146890064eebf268"
+    },
+    {
+      "path": "build/zhou-1015/analyze-full.log",
+      "bytes": 1263,
+      "sha256": "b621c7b869aa0083de3721c0bdf9ba9cb16d39126aaf2c8a70fd9a869b2ced26"
+    },
+    {
+      "path": "build/zhou-1015/operator-verified-source.log",
+      "bytes": 3514,
+      "sha256": "e2d0203df5dba2e9a44a34e618eefb4a3c51140623aa65175e47e72d53755dc6"
+    },
+    {
+      "path": "build/zhou-1015/emulator-first.log",
+      "bytes": 20967,
+      "sha256": "35a52a8bf5ad0f54a25d068ae7b5715897be739580d9de29e7005e239688c2f7"
+    },
+    {
+      "path": "build/zhou-1015/emulator-final.log",
+      "bytes": 22320,
+      "sha256": "38e26d773a9979ee68f6ca9bde6d4a93df18ca06ed1caa6a9e2603995a9ef85f"
+    },
+    {
+      "path": "build/zhou-1015/real-model-focused-failure.log",
+      "bytes": 3247,
+      "sha256": "6dd22fb5d03b29472c6ba9ff25b87a1e0f928d8552ae6e3e049b481b00a57976"
+    },
+    {
+      "path": "build/zhou-1015/real-model-focused-fixed.log",
+      "bytes": 2407,
+      "sha256": "fa7c6b52addab41c69246173997f514303381d136f37d8286911ca7f7fd187fb"
+    },
+    {
+      "path": "build/zhou-1015/inputs-before.json",
+      "bytes": 185761,
+      "sha256": "143cce251b7e0938e6702125553df07aba284db9aef2aebba4d9922dddfca0b6"
+    },
+    {
+      "path": "build/zhou-1015/inputs-after.json",
+      "bytes": 185761,
+      "sha256": "9973dd0bd7afa3eb7e44b538195ab91168b8fb62bf43e149f521df929162e3ea"
+    },
+    {
+      "path": "build/zhou-mobile/compile.log",
+      "bytes": 1764,
+      "sha256": "608bb8552f11aa0149d7bd6329098f1e7d7b00721d13bf224ea6dc46045337c7"
+    },
+    {
+      "path": "build/zhou-mobile/aapt-badging.log",
+      "bytes": 4835,
+      "sha256": "4651a0750a7afd2cf98a7b46cef2238fcca934755a0a07b46d7f1673110b33ac"
+    },
+    {
+      "path": "build/zhou-mobile/aapt-manifest.log",
+      "bytes": 14094,
+      "sha256": "01df1f4aaabae81a49b4a9bec8baafba140805ad6a32d284e29ae014035b60f1"
+    },
+    {
+      "path": "build/zhou-mobile/apksigner-verification.log",
+      "bytes": 1482,
+      "sha256": "6b3b7e78fc6865c89df806b4a862e3f15a83872bfd2dad3224ecb468db6017a4"
+    },
+    {
+      "path": "build/zhou-mobile/apk-manifest.json",
+      "bytes": 1961,
+      "sha256": "4eaac1f0e1ac83bc1a31f336b549315cb7492c2b55222ee1fc635ee28a133f17"
+    },
+    {
+      "path": "build/zhou-1015/format.log",
+      "bytes": 48,
+      "sha256": "863b5401b7644a22386a25309281b11d6e37e252d0a6f7852dfb1abed0a59272"
+    },
+    {
+      "path": "build/zhou-1015/adb-devices.log",
+      "bytes": 28,
+      "sha256": "bbfcc7239a6f1be3544814ebdc6bcc9b66bf5b1f0b03baa3340808f19265a630"
+    }
+  ]
+}

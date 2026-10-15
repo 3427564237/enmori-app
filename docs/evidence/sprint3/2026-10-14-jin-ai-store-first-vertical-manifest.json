@@ -1,0 +1,128 @@
+{
+  "testedSource": "375747005b3d02de0e2e82d62569a50032d97b55",
+  "base": "e84b23cd82eeda039f2bef9fa455909e9f39cc87",
+  "bindings": [
+    {
+      "path": "backend/src/ai-conversation/ports/real-conversation-store.ts",
+      "executedBytesSha256": "59a40a5ed40ba4a279b12ee69b8d3b86a5d4a78b05ea96ef951b1edeef8abf94",
+      "normalizedGitBlob": "86f913ddd8c24d7957691fbbbb0aeea594aa53ae",
+      "lineNormalizationOnly": false
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-gateway.ts",
+      "executedBytesSha256": "51a1d784b13569eceb248be3acce4bd46d5a6fad073f0ee13d84eb670bb5da7e",
+      "normalizedGitBlob": "8565292b0a26a25613960d5305218df496078593",
+      "lineNormalizationOnly": true
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-store.ts",
+      "executedBytesSha256": "ef19f610aa6187a0e0fc8df7b7451373d6918132ce0adc903e0288eb554aa89e",
+      "normalizedGitBlob": "e176b3e5fdcb16e99a182d195b3a93983236343a",
+      "lineNormalizationOnly": false
+    },
+    {
+      "path": "backend/emulator-test/real-conversation-store.integration.test.ts",
+      "executedBytesSha256": "065a96e9fc630123cb8d1f7a299408ffe35db91fcda243469eedf439e0b68373",
+      "normalizedGitBlob": "880ab2ddaa4a54027e51bb50a894f9940b4b3446",
+      "lineNormalizationOnly": false
+    },
+    {
+      "path": "backend/test/ai-conversation/real-store-boundary.test.ts",
+      "executedBytesSha256": "462495a5d633c732fcf58cacbaa6949e759091638c2cad1b8f38ed7f03c967ad",
+      "normalizedGitBlob": "e83c5997b5878397ca807a252a87626dca94d978",
+      "lineNormalizationOnly": false
+    },
+    {
+      "path": "tool/run_ai_store_emulators.mjs",
+      "executedBytesSha256": "6ec55deb68bc4b5248b2dfdc4ff42edd0a324c57d736e01f113dca556187dffa",
+      "normalizedGitBlob": "eaf0786cd405218e6fa5e3e417226354fa6014d5",
+      "lineNormalizationOnly": false
+    },
+    {
+      "path": "tool/ai_store_emulator_worker.mjs",
+      "executedBytesSha256": "888e0aa06dc12487d7f4c4be26f558baa82354bc5ad0e8500efe1076fcc22da7",
+      "normalizedGitBlob": "5f36af589a1d798429453fefffa2a0a81659c22b",
+      "lineNormalizationOnly": false
+    },
+    {
+      "path": "tool/ai_store_gateway_binding.mjs",
+      "executedBytesSha256": "94db443e00872689865a6740de33abbfcc729dcd66143afbebf30456844760c1",
+      "normalizedGitBlob": "3e5270ccefac7695095e7f09a2c905e414e98f6c",
+      "lineNormalizationOnly": false
+    }
+  ],
+  "privateLogs": [
+    {
+      "file": "interface-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "store-build01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "store-build02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "store-build03.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "store-backend01.log",
+      "bytes": 58027,
+      "sha256": "ddf542851845a6f511087b0db8359093d86dcf099cd001ab6732efec03e29922"
+    },
+    {
+      "file": "store-backend02.log",
+      "bytes": 58486,
+      "sha256": "6efd146472665242c52e714b0d7831b3b3b0318bbfb194dd04100bee1c2ac48e"
+    },
+    {
+      "file": "store-emulator01.log",
+      "bytes": 14523,
+      "sha256": "90633ca5c4e24a87322f073f22a0c5e267e6c9df4e37fab3105b1f03d16ebf4a"
+    },
+    {
+      "file": "store-emulator02.log",
+      "bytes": 13755,
+      "sha256": "b8a6312430e6606d087b35841053b34bfc8bc8d579a4b27c0687bd3cac0c7622"
+    }
+  ],
+  "results": {
+    "backend": {
+      "pass": 654,
+      "fail": 0,
+      "exit": 0
+    },
+    "emulator": {
+      "pass": 90,
+      "fail": 0,
+      "exit": 0,
+      "newStoreCasesIncluded": 14
+    },
+    "emulatorRun01": {
+      "exit": 1,
+      "fileLoaderFailures": 9,
+      "functionalCasesExecuted": 0,
+      "reason": "Windows import path not file URL",
+      "cleanup": "profiles removed; ports free"
+    }
+  },
+  "publicationCheck": {
+    "firstCheck": "Fail exit2: CRLF bytes bypassed Git clean conversion in temporary-index publishing; normalized before push",
+    "retestReason": "normalization only; normalized source bindings are retained"
+  },
+  "notRun": [
+    "six-operation real HTTP journey",
+    "product cleanup runner",
+    "actual producer Note guarantees",
+    "D1-A real model",
+    "Android",
+    "Flutter"
+  ]
+}

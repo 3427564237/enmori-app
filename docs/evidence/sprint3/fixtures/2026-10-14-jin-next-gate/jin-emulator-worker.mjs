@@ -1,0 +1,22 @@
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, realpathSync, rmSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve, relative, isAbsolute } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import assert from 'node:assert/strict';
+import { buildControlledEmulatorTestEnvironment } from '../backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js';
+const profile = mkdtempSync(join(tmpdir(), 'enmori-jin-next-worker-'));
+try {
+  const child = spawnSync(process.execPath, [
+    '--import', pathToFileURL(resolve('build/jin-actual-gateway-binding.mjs')).href,
+    '--test', '--test-concurrency=1', 'backend/dist/emulator-test/**/*.test.js',
+  ], { env: buildControlledEmulatorTestEnvironment(process.env, profile), stdio:'inherit', windowsHide:true });
+  if(child.error) throw child.error;
+  process.exitCode = child.status ?? 1;
+} finally {
+  const child = relative(realpathSync(tmpdir()), realpathSync(profile));
+  assert.ok(child && !child.startsWith('..') && !isAbsolute(child));
+  rmSync(profile,{recursive:true,force:true,maxRetries:5,retryDelay:200});
+  assert.equal(existsSync(profile),false);
+  console.info('JIN_NEXT_EMULATOR_WORKER_PROFILE_REMOVED');
+}
