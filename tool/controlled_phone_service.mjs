@@ -155,7 +155,7 @@ export async function runPhoneService(config, dependencies = {}) {
   });
   const requested = dependencies.requested ?? (() => stopRequested(phone.sessionDirectory));
   const wait = dependencies.wait ?? (() => delay(500));
-  let live = true, service, listener, listenerClosed = false, cleaned = false, constructing = false;
+  let live = true, service, listener, listenerClosed = false, cleaned = false, constructing = false, cleanupConfirmed = false;
   const compiler = dependencies.compiler ?? new ControlledConversationPrompt(new ControlledTokenizerProcess({ ...config.tokenizerFiles, current: () => live }));
   const transport = dependencies.transport ?? new ControlledOllamaTransport({ ...config.binding, current: () => live }, compiler);
   try {
@@ -185,14 +185,15 @@ export async function runPhoneService(config, dependencies = {}) {
       if (!stopping && requested()) { stopping = true; removeHandoff(); }
       let result;
       if (stopping) result = await service.stopAndClean();
+      if (result?.cleanupConfirmed) cleanupConfirmed = true;
       // No model/key/token/URL/identity/content is included in readiness output.
       publish('status.json', { schemaVersion: 1, scope: 'isolated-phone-service', ...service.observation(),
         hostPreflightPassed: true, tokenizerReadinessPassed: true, adapterState: transport.state, httpsListening: !listenerClosed,
         stopRequested: stopping, cleanupConfirmed: result?.cleanupConfirmed === true,
         operatorHold: result?.operatorHold === true });
       if (result?.cleanupConfirmed) {
-        listenerClosed = true;
         await new Promise((done, reject) => { listener.close(error => error ? reject(error) : done()); listener.closeAllConnections(); });
+        listenerClosed = true;
         publish('status.json', { schemaVersion: 1, phase: 'closed', accepting: false, httpsListening: false,
           cleanupConfirmed: true, operatorHold: false, databaseLifetime: 'owned-emulator-process' });
         cleaned = true; return 0;
@@ -200,28 +201,42 @@ export async function runPhoneService(config, dependencies = {}) {
       await wait();
     }
   } catch (error) {
-    removeHandoff();
     if (!service && (!constructing || error?.message === 'CONTROLLED_PHONE_SERVICE_UNAVAILABLE')) {
       // A failed read-only model preflight, or a factory-confirmed clean startup
       // rejection, has no outstanding owned execution requiring preservation.
+      try { removeHandoff(); } catch { /* No owned execution; retain failure exit. */ }
       cleaned = true;
-      publish('status.json', { schemaVersion: 1, phase: 'failed-before-ready', accepting: false,
-        cleanupConfirmed: true, operatorHold: false });
+      try {
+        publish('status.json', { schemaVersion: 1, phase: 'failed-before-ready', accepting: false,
+          cleanupConfirmed: true, operatorHold: false });
+      } catch { /* A missing receipt is not a reported Pass. */ }
       return 1;
     }
     // Startup/lifecycle failure must not let emulators:exec destroy a possible
-    // in-flight fixture. Keep the ORIGINAL process alive for operator action.
+    // in-flight fixture. Reporting and private-file removal are not lifecycle
+    // authority: each can fail independently while this ORIGINAL stays held.
     for (;;) {
-      let result;
-      try { result = service ? await service.stopAndClean() : undefined; } catch { /* Retain hold. */ }
-      if (result?.cleanupConfirmed) {
-        if (listener) await new Promise(done => { listener.close(done); listener.closeAllConnections(); });
-        cleaned = true;
-        publish('status.json', { schemaVersion: 1, phase: 'failed-cleaned', accepting: false, cleanupConfirmed: true, operatorHold: false });
-        return 1;
+      let handoffRemoved = false;
+      try { removeHandoff(); handoffRemoved = true; } catch { /* Retry without skipping the admission/drain gate. */ }
+      if (!cleanupConfirmed) {
+        try { cleanupConfirmed = (await service?.stopAndClean())?.cleanupConfirmed === true; } catch { /* Retain hold. */ }
       }
-      publish('status.json', { schemaVersion: 1, phase: 'held', accepting: false, cleanupConfirmed: false, operatorHold: true });
-      await wait();
+      if (cleanupConfirmed) {
+        try {
+          if (listener && !listenerClosed) {
+            await new Promise((done, reject) => { listener.close(error => error ? reject(error) : done()); listener.closeAllConnections(); });
+            listenerClosed = true;
+          }
+          if (handoffRemoved) {
+            publish('status.json', { schemaVersion: 1, phase: 'failed-cleaned', accepting: false, cleanupConfirmed: true, operatorHold: false });
+            cleaned = true; return 1;
+          }
+        } catch { /* Original cleanup is confirmed; retry only close/removal/reporting. */ }
+      }
+      try {
+        publish('status.json', { schemaVersion: 1, phase: 'held', accepting: false, cleanupConfirmed: false, operatorHold: true });
+      } catch { /* A reporting outage cannot reject the held operator promise. */ }
+      try { await wait(); } catch { await delay(500); }
     }
   } finally { if (cleaned) live = false; }
 }
