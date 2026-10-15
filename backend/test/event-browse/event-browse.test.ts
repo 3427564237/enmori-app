@@ -7,6 +7,7 @@ import {EventBrowse} from "../../src/event-browse/application/event-browse.js";
 import {registerEventBrowseRoutes} from "../../src/event-browse/transport/register-routes.js";
 import {ok,err} from "../../src/shared/domain/result.js";
 import {appFailure} from "../../src/shared/application/app-failure.js";
+import {dependencyUnavailable} from "../../src/shared/ports/dependency-failure.js";
 const now="2026-10-15T00:00:00Z",id="Synthetic_01",locator=browseId(id)!;
 const row=(change:Record<string,unknown>={})=>({id,name:"Synthetic concert",url:"https://ticketmaster.sg/event/synthetic",
   dates:{start:{dateTime:"2026-10-16T10:00:00+08:00"},status:{code:"onsale"}},_embedded:{venues:[{country:{countryCode:"SG"},name:"Synthetic venue"}]},...change});
@@ -58,6 +59,29 @@ test("detail requires returned identity, handles removed occurrence, never subst
   assert.equal(await make(Response.json(row({id:"other"}))).detail(locator,now,new AbortController().signal),undefined);
   assert.equal(await make(new Response("not found",{status:404})).detail(locator,now,new AbortController().signal),undefined);
   const v=await make(Response.json(row())).detail(locator,now,new AbortController().signal);assert.equal(v?.browseId,locator);
+});
+test("positive total with an empty raw first page is dependency failure, not filtered success",async()=>{
+  const source=new TicketmasterBrowseSource({key:()=>"synthetic",enabled:()=>true},async()=>Response.json({page:{number:0,totalElements:1},_embedded:{events:[]}}));
+  await assert.rejects(source.firstBatch(now,new AbortController().signal),error=>error===dependencyUnavailable);
+});
+test("genuine zero results stay valid with absent or explicitly empty raw events",async()=>{
+  for(const raw of [{page:{number:0,totalElements:0}},{page:{number:0,totalElements:0},_embedded:{events:[]}}]){
+    const source=new TicketmasterBrowseSource({key:()=>"synthetic",enabled:()=>true},async()=>Response.json(raw));
+    assert.deepEqual(await source.firstBatch(now,new AbortController().signal),[]);
+  }
+});
+test("nonempty raw first batch whose occurrences are all ineligible remains a valid empty result",async()=>{
+  const source=new TicketmasterBrowseSource({key:()=>"synthetic",enabled:()=>true},async()=>Response.json({page:{number:0,totalElements:2},_embedded:{events:[row({name:"\ud800"}),row({_embedded:{venues:[{country:{countryCode:"US"}}]}})]}}));
+  assert.deepEqual(await source.firstBatch(now,new AbortController().signal),[]);
+});
+test("positive-total empty raw page maps through real adapter and Application to safe no-store 503",async t=>{
+  const app=Fastify();app.decorateRequest("authPrincipal",null);t.after(()=>app.close());
+  let calls=0;
+  const source=new TicketmasterBrowseSource({key:()=>"synthetic",enabled:()=>true},async()=>{calls++;return Response.json({page:{number:0,totalElements:1},_embedded:{events:[]}});});
+  await registerEventBrowseRoutes(app,{verifyIdToken:async()=>({kind:"verified",principal:{firebaseUid:"synthetic"}})},new EventBrowse({verify:async()=>ok(undefined)},source,()=>new Date(now)));
+  const response=await app.inject({url:"/v1/event-browse",headers:{authorization:"Bearer synthetic"}});
+  assert.equal(response.statusCode,503);assert.equal(response.headers["cache-control"],"no-store");
+  assert.equal(response.json().error.code,"SERVICE_UNAVAILABLE");assert.equal(Object.hasOwn(response.json(),"items"),false);assert.equal(calls,1);
 });
 test("raw byte ceiling, malformed UTF-8, revoked activation and caller cancellation fail closed", async()=>{
   for (const response of [new Response(new Uint8Array(1024*1024+1)), new Response(new Uint8Array([0xc3,0x28]))]) {

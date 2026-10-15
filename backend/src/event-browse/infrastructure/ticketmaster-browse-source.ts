@@ -28,7 +28,9 @@ export class TicketmasterBrowseSource implements BrowseSource {
     let rows:unknown[]=[];
     if(raw._embedded!==undefined){if(!object(raw._embedded)||!Array.isArray(raw._embedded.events))throw dependencyUnavailable;rows=raw._embedded.events;}
     else if(raw.page.totalElements!==0)throw dependencyUnavailable;
-    if(rows.length>20||raw.page.totalElements<rows.length)throw dependencyUnavailable;
+    // A positive upstream count with no raw page0 rows is an inconsistent
+    // source response, not a batch whose supplied occurrences were excluded.
+    if(rows.length>20||raw.page.totalElements<rows.length||(raw.page.totalElements>0&&rows.length===0))throw dependencyUnavailable;
     const items:BrowseDetail[]=[];const ids=new Set<string>();
     for(const row of rows){const v=projectOccurrence(row,asOf);if(v){if(ids.has(v.browseId))throw dependencyUnavailable;ids.add(v.browseId);items.push(v);}}
     return items;
