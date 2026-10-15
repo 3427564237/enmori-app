@@ -54,6 +54,15 @@ final class Opener implements ExternalActivityOpener {
   }
 }
 
+Future<void> reveal(WidgetTester tester, Finder target) async {
+  // Long disclosure paragraphs can move a sibling outside ListView's build
+  // cache. Start at the top and scroll it into the built, laid-out viewport.
+  await tester.drag(find.byType(ListView), const Offset(0, 5000));
+  await tester.pumpAndSettle();
+  await tester.scrollUntilVisible(target, 200);
+  await tester.pumpAndSettle();
+}
+
 Future<void> pump(
   WidgetTester tester,
   Repo repo, {
@@ -87,10 +96,13 @@ Future<void> pump(
   // First observation may arrive after page init. Only this explicit Reload is
   // issued when observation reset leaves the page empty; no hidden retry.
   if (repo.calls == 0) {
+    await reveal(tester, find.text('Reload'));
     await tester.tap(find.text('Reload'));
     await tester.pump();
   }
   if (repo.pending == null) await tester.pumpAndSettle();
+  await tester.drag(find.byType(ListView), const Offset(0, 5000));
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -222,6 +234,7 @@ void main() {
       await pump(tester, repo, key: id, opener: opener);
       expect(opener.calls, 0);
       expect(find.text('Description unavailable.'), findsOneWidget);
+      await reveal(tester, find.text('View on Ticketmaster'));
       await tester.tap(find.text('View on Ticketmaster'));
       await tester.pumpAndSettle();
       expect(opener.calls, 1);
@@ -229,12 +242,14 @@ void main() {
       expect(find.textContaining('registered'), findsNothing);
       expect(find.text('Going'), findsNothing);
       opener.success = false;
+      await reveal(tester, find.text('View on Ticketmaster'));
       await tester.tap(find.text('View on Ticketmaster'));
       await tester.pumpAndSettle();
       expect(
         find.text('Could not open the source page. You can copy the link.'),
         findsOneWidget,
       );
+      await reveal(tester, find.text('Copy source link'));
       await tester.tap(find.text('Copy source link'));
       await tester.pumpAndSettle();
       expect(copied, detail.sourceUrl.toString());
@@ -298,6 +313,85 @@ void main() {
       expect(find.text(summary.title), findsNothing);
       await tester.pumpWidget(const SizedBox());
       await sessions.close();
+    },
+  );
+  testWidgets(
+    'list disclosure stays available for empty and failed reads without extra requests',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final repo = Repo()
+        ..result = Success(
+          ActivityBatch(asOf: '2026-10-15T00:00:00Z', items: []),
+        );
+      await pump(tester, repo, scale: 2);
+      final disclosure = find.text(
+        'Source: Ticketmaster. Activity requests pass through ENMORI to Ticketmaster. '
+        'Your ENMORI sign-in token, profile, Check-ins, Personas and AI messages are '
+        'not shared with Ticketmaster. Ticketmaster receives the activity request '
+        'and server connection information.',
+      );
+      await reveal(tester, disclosure);
+      expect(disclosure, findsOneWidget);
+      await reveal(tester, find.textContaining('at most five minutes'));
+      expect(find.textContaining('at most five minutes'), findsOneWidget);
+      expect(repo.calls, 1);
+      repo.result = const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'Activities are unavailable. Try again.',
+        ),
+      );
+      await reveal(tester, find.text('Reload'));
+      await tester.tap(find.text('Reload'));
+      await tester.pumpAndSettle();
+      await reveal(tester, disclosure);
+      expect(disclosure, findsOneWidget);
+      await reveal(tester, find.text('Retry'));
+      expect(find.text('Retry'), findsOneWidget);
+      expect(find.textContaining('No eligible activities'), findsNothing);
+      expect(repo.calls, 2);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+  testWidgets(
+    'Detail disclosure precedes explicit source actions and remains reachable at 320px with 2x text',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final repo = Repo()..result = Success(detail), opener = Opener();
+      await pump(tester, repo, key: id, opener: opener, scale: 2);
+      final explanation = find.text(
+        '“View on Ticketmaster” opens the source page in your browser. Your browser '
+        'connects directly to Ticketmaster; its privacy and cookie policies apply. '
+        'Opening or copying a link does not register you or mark you as Going. '
+        "A copied link can remain on your device's clipboard.",
+      );
+      await reveal(tester, explanation);
+      expect(explanation, findsOneWidget);
+      expect(opener.calls, 0);
+      await reveal(tester, find.text('View on Ticketmaster'));
+      expect(
+        tester.getTopLeft(explanation).dy,
+        lessThan(tester.getTopLeft(find.text('View on Ticketmaster')).dy),
+      );
+      await tester.tap(find.text('View on Ticketmaster'));
+      await tester.pumpAndSettle();
+      expect(opener.calls, 1);
+      expect(opener.received, detail.sourceUrl);
+      await reveal(tester, find.textContaining('at most five minutes'));
+      expect(
+        find.textContaining('Reload to request current information.'),
+        findsOneWidget,
+      );
+      expect(repo.calls, 1);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
     },
   );
   testWidgets(

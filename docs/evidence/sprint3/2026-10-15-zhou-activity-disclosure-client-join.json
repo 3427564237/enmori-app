@@ -1,0 +1,90 @@
+{
+  "scope": "ZHOU feature-only client compatibility handoff; not LI runtime integration",
+  "recordedAt": "2026-10-15T10:17:08.589Z",
+  "testedProduct": "df42ed2897cfd4058f15f481cf1e26ca31977a6f",
+  "testedTree": "b689ba806c210b2d1222408ecdba4700473cbc50",
+  "liBase": "dcb94d925b8010e02d41f033e84ed3902ab08559",
+  "approvedShiFeature": "49d9b7d8df1b3d6819139473c1f67c91938266e7",
+  "approvalUrl": "https://github.com/3427564237/enmori-app/pull/120#pullrequestreview-5531488284",
+  "productConstruction": "Clean cherry-pick of the four approved SHI paths onto LI119; no resolution or additional implementation",
+  "exactFeatureBlobs": [
+    {
+      "path": "lib/features/event_browse/presentation/activity_page.dart",
+      "blob": "c8f8322aa86217171cbdc0d718abb32181ee7bb3"
+    },
+    {
+      "path": "test/features/event_browse_test.dart",
+      "blob": "cfd5880328741f7c8092c7b5fcd2d614f421b9fa"
+    },
+    {
+      "path": "docs/decisions/2026-10-15-li-activity-disclosure-implementation-handoff.md",
+      "blob": "014baa7fc33c9515dba2c1c9db8127ac4dd8cd94"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-15-shi-activity-display-and-disclosure.md",
+      "blob": "7efe547b755e81b6a146c92fc9e3fdf7cc4f4090"
+    }
+  ],
+  "unchangedLiPaths": [
+    "lib/app",
+    "lib/harness",
+    "lib/controlled_phone_harness.dart",
+    "android",
+    "ios",
+    "backend",
+    "api",
+    "integration_test",
+    "tool",
+    "test/app",
+    "pubspec.yaml",
+    "pubspec.lock",
+    "package.json",
+    "pnpm-lock.yaml"
+  ],
+  "verifiedWorkingInputCount": 483,
+  "normalizedInputsSha256": "002716c9d52700f39d42af067f01d38d4ceaac602cb8e753269a8f43baa0d0af",
+  "bindingTime": "Post-run working-vs-Git capture; no before/after capture claimed for this composed run",
+  "toolchain": {
+    "flutter": "3.47.2",
+    "dart": "3.13.2"
+  },
+  "commands": [
+    "flutter test --no-pub --reporter expanded test/features/event_browse_test.dart test/app/activity_shared_router_test.dart test/app/external_activity_opener_test.dart",
+    "dart analyze --fatal-infos lib/features/event_browse lib/app/router/activity_routes.dart lib/app/platform/external_activity_opener.dart test/features/event_browse_test.dart test/app/activity_shared_router_test.dart test/app/external_activity_opener_test.dart",
+    "git diff --check dcb94d925b8010e02d41f033e84ed3902ab08559 HEAD"
+  ],
+  "checks": [
+    {
+      "name": "focused-client-route-opener",
+      "file": "build/zhou-activity-join-1015/focused-join.log",
+      "pass": 27,
+      "fail": 0,
+      "exit": 0,
+      "bytes": 3709,
+      "sha256": "4640042d7a4aff575d43d020aa8a48c65dd16949236ba1996f0cf6837d1893f2",
+      "committedRawLog": false
+    },
+    {
+      "name": "scoped-fatal-info-analysis",
+      "file": "build/zhou-activity-join-1015/scoped-analysis.log",
+      "status": "No issues",
+      "exit": 0,
+      "bytes": 192,
+      "sha256": "60faf4ee742fe7d1c2b03b21083d99074720a58c4c82dcfc5bbc2f301bb08906",
+      "committedRawLog": false
+    }
+  ],
+  "fixtures": "Explicit synthetic Auth/repository and native-channel doubles in existing widget/unit tests; zero real provider/model/device/service calls",
+  "newZhouDefectFound": false,
+  "currentPublicLiBranchIncludesFeatureAtCheck": false,
+  "eventOngoingServicePublishedAtCheck": false,
+  "existingJinReadinessOnly": {
+    "pr": 121,
+    "head": "3304141098225dce4564d1c1c1940f15141bf317",
+    "shiApproval": 5531134407,
+    "productionChanged": false
+  },
+  "realProviderPhoneJoin": "Not Run by ZHOU; requires JIN new service composition, SHI composition review and LI actual integration/execution",
+  "actualPreviewTouched": false,
+  "mergeIssueProjectTransition": false
+}
