@@ -97,3 +97,38 @@ test("late confirmed done releases only remote invocation while withholding all 
   release(Response.json({model:reference,done:true,response:raw,prompt_eval_count:12,eval_count:20}));
   await assert.rejects(outcome,/AI_UNAVAILABLE/);assert.equal(f.adapter.state,"stopped");
 });
+
+test("a successful startup observation is not residency: cold idle is rejected before compilation or generation POST",async()=>{
+  let loaded=true,compiles=0;
+  const f=fixture({compile:async(input,budget)=>{compiles++;return compiler.compile(input,budget);},
+    reply:async path=>Response.json(path==="/api/version"?{version:binding.ollamaVersion}:
+      {models:path==="/api/ps"&&!loaded?[]:[model]})});
+  await f.adapter.preflight(f.budget);assert.equal(f.adapter.state,"ready");
+  loaded=false; // External idle-unload observation, not an adapter action.
+  assert.equal(f.adapter.state,"ready"); // Cached lifecycle state cannot observe idle host changes.
+  await assert.rejects(f.adapter.generate("input",f.budget),/AI_UNAVAILABLE/);
+  assert.equal(f.adapter.state,"not_checked");assert.equal(compiles,0);
+  assert.deepEqual(f.calls.map(c=>c.path),["/api/version","/api/tags","/api/ps","/api/version","/api/tags","/api/ps"]);
+  assert(f.calls.every(c=>c.init?.method==="GET"&&c.init.cache==="no-store"));
+});
+
+test("external residency restoration reuses the same adapter without automatic generation and does not reserve future readiness",async()=>{
+  let loaded=false;
+  const f=fixture({reply:async path=>Response.json(path==="/api/version"?{version:binding.ollamaVersion}:path==="/api/generate"?
+    {model:reference,response:raw,done:true,prompt_eval_count:12,eval_count:20}:
+    {models:path==="/api/ps"&&!loaded?[]:[model]})});
+  await assert.rejects(f.adapter.generate("cold",f.budget),/AI_UNAVAILABLE/);
+  assert.equal(f.calls.some(c=>c.init?.method==="POST"),false);
+  loaded=true; // Explicit fixture restoration models LI's separately attributed manual recovery.
+  await f.adapter.preflight(f.budget);assert.equal(f.adapter.state,"ready");
+  assert.equal(f.calls.some(c=>c.init?.method==="POST"),false);
+  assert.equal(new TextDecoder().decode(await f.adapter.generate("explicit user request",f.budget)),raw);
+  assert.equal(f.adapter.state,"stopped");
+  loaded=false;
+  await assert.rejects(f.adapter.generate("later cold request",f.budget),/AI_UNAVAILABLE/);
+  assert.equal(f.adapter.state,"not_checked");
+  const posts=f.calls.filter(c=>c.init?.method==="POST");assert.equal(posts.length,1);
+  assert.equal(posts[0]!.path,"/api/generate");
+  assert.deepEqual(JSON.parse(posts[0]!.init!.body as string).options,{num_ctx:8192,num_predict:512});
+  assert.equal("keep_alive" in JSON.parse(posts[0]!.init!.body as string),false);
+});
