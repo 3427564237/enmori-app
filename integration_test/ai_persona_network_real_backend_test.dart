@@ -142,11 +142,15 @@ void main() {
     debugPrint('ZHOU_MOBILE_STAGE: persona_edited');
     await _tap(tester, 'persona-back');
     await _visible(tester, 'ai-message-input');
+    debugPrint('ZHOU_MOBILE_STAGE: ai_input_visible');
+    await _until(tester, () => _state(tester).canSend);
+    debugPrint('ZHOU_MOBILE_STAGE: ai_return_ready');
 
     // Exact harmless routine lies inside the reviewed bounded semantic grammar.
     // The test never supplies an expected model reply or repairs its output.
     const input = 'I read a book today.';
     await tester.enterText(find.byKey(const Key('ai-message-input')), input);
+    debugPrint('ZHOU_MOBILE_STAGE: ai_input_entered');
     await _tap(tester, 'ai-send');
     debugPrint('ZHOU_MOBILE_STAGE: send_requested');
     await _until(
