@@ -26,6 +26,7 @@ import '../providers.dart';
 import '../route_status_pages.dart';
 import 'isolated_persona_pages.dart';
 import 'isolated_history_ai_pages.dart';
+import 'activity_routes.dart';
 
 abstract final class AppRoutes {
   static const startup = '/startup';
@@ -47,6 +48,7 @@ abstract final class AppRoutes {
   static const aiAssistant = '/ai-assistant';
   static const interests = '/interests';
   static const eventRecommendations = '/events';
+  static const activities = '/activities';
   static const unavailable = '/unavailable';
   static const configurationUnavailable = '/configuration-unavailable';
   static const forbidden = '/account-unavailable';
@@ -59,6 +61,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   // An account-owned route stack must not survive an identity replacement.
   final routeSubject = ref.watch(currentAuthSubjectProvider);
   final isolatedSlices = ref.watch(isolatedSlicesEnabledProvider);
+  final activitiesEnabled = ref.watch(activityBrowseEnabledProvider);
   final personaPages = isolatedSlices
       ? ref.watch(isolatedPersonaPagesProvider)
       : null;
@@ -71,7 +74,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   // Observe same-UID replacement only for an available shared feature. Existing
   // compositions retain their auth dependency path when no page is supplied.
-  final routeSession = historyPage != null || aiPage != null
+  final routeSession =
+      historyPage != null || aiPage != null || activitiesEnabled
       ? ref.watch(
           authSessionProvider.select(
             (value) => switch (value) {
@@ -84,6 +88,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         )
       : null;
+
+  bool canNavigateActivity() =>
+      ref.mounted &&
+      activitiesEnabled &&
+      routeSession != null &&
+      identical(ref.read(authSessionProvider).asData?.value, routeSession) &&
+      ref.read(activityBrowseEnabledProvider) &&
+      ref.read(routerGateProvider) == RouterGateState.authenticated;
 
   bool canNavigateShared(BuildContext context, String sourcePath) =>
       context.mounted &&
@@ -144,6 +156,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       signedOutEntry: ref.read(signOutEntryProvider),
     ),
     routes: [
+      if (activitiesEnabled) ...activityRoutes(current: canNavigateActivity),
       if (historyPage != null)
         GoRoute(
           path: AppRoutes.checkInHistory,
@@ -255,6 +268,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.home,
         builder: (context, state) => HomeShellPage(
           onStartCheckIn: () => context.go(AppRoutes.checkIn),
+          onBrowseActivities: activitiesEnabled
+              ? () {
+                  if (context.mounted && canNavigateActivity()) {
+                    context.push<void>(AppRoutes.activities);
+                  }
+                }
+              : null,
           onOpenHistory: historyPage != null
               ? () => openShared(
                   context,

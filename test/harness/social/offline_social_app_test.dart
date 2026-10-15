@@ -35,6 +35,24 @@ Future<void> tap(WidgetTester tester, Finder target) async {
 
 void main() {
   testWidgets(
+    'activity handoff in offline APK reports unconfigured service, never empty or live success',
+    (tester) async {
+      final store = OfflineSocialStore();
+      addTearDown(store.dispose);
+      await start(tester, store);
+      await tap(tester, find.byKey(const Key('social-browse-activities')));
+      expect(find.text('The service is not configured.'), findsOneWidget);
+      expect(
+        find.text('No eligible activities were found in this source batch.'),
+        findsNothing,
+      );
+      expect(find.text('View on Ticketmaster'), findsNothing);
+      await tap(tester, find.byTooltip('Back'));
+      expect(find.byType(OfflineSocialHub), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
     'Persona creation uses the existing session controller and survives returning to management',
     (tester) async {
       final store = OfflineSocialStore();
