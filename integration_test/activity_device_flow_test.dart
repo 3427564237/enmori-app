@@ -89,7 +89,7 @@ void main() {
           routerGateProvider.overrideWith((ref) => gate),
           activityBrowseEnabledProvider.overrideWithValue(true),
           activityRepositoryProvider.overrideWithValue(
-            BackendActivityRepository(client),
+            _ObservedRepository(BackendActivityRepository(client)),
           ),
           externalActivityOpenerProvider.overrideWithValue(opener),
           eventRecommendationRepositoryProvider.overrideWithValue(
@@ -273,8 +273,9 @@ Future<void> _readReady(
   while (true) {
     await tester.pump(const Duration(milliseconds: 100));
     final state = container.read(activityControllerProvider(id));
-    if (batch ? state.value is ActivityBatch : state.value is ActivityDetail)
+    if (batch ? state.value is ActivityBatch : state.value is ActivityDetail) {
       return;
+    }
     if (state.hasError || DateTime.now().isAfter(deadline)) {
       debugPrint(
         'ENMORI_ACTIVITY_STAGE read_not_ready_${state.hasError
@@ -286,6 +287,32 @@ Future<void> _readReady(
       throw TestFailure(
         'Activity read did not produce its expected synthetic projection.',
       );
+    }
+  }
+}
+
+final class _ObservedRepository implements ActivityRepository {
+  _ObservedRepository(this.delegate);
+  final ActivityRepository delegate;
+  @override
+  Future<Result<ActivityRead>> read(String? id) async {
+    try {
+      final result = await delegate.read(id);
+      if (result case Failure<ActivityRead>(:final failure)) {
+        debugPrint(
+          'ENMORI_ACTIVITY_STAGE adapter_failure_${failure.kind.name}',
+        );
+      }
+      return result;
+    } catch (error) {
+      debugPrint(
+        'ENMORI_ACTIVITY_STAGE adapter_exception_${error is TestFailure
+            ? 'fixture_assertion'
+            : error is FormatException
+            ? 'format'
+            : 'other'}',
+      );
+      rethrow;
     }
   }
 }
