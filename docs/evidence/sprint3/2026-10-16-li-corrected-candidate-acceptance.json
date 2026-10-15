@@ -145,12 +145,15 @@
     "firstDedicatedVersionDowngrade": true,
     "dedicatedPackageReplacedByFlutterSdk": true,
     "ordinaryPackageTargeted": false,
-    "v4Install": "Pending system confirmation at publication preparation",
+    "v4Install": "System approval not confirmed; own waiting ADB client interrupted, exit130; package still versionCode1",
     "uiLoggingRestoration": "Pending human confirmation; ADB property change was denied; original persist.sys.log.ctrl=no stayed unchanged",
     "historicalConsumedFailuresResolved": false,
     "clipboardReadOrClearPerformed": false,
     "realSourceLinkOpenedOrCopied": false,
-    "fixtureHostChoreography": "Requires assigned host stage/command coordinator; not claimed as a complete standalone runner"
+    "fixtureHostChoreography": "Requires assigned host stage/command coordinator; not claimed as a complete standalone runner",
+    "lastObservedInstalledVersionCode": 1,
+    "installerClientExit": 130,
+    "osDialogDismissalClaimed": false
   },
   "apk": {
     "path": "enmori-controlled-demo-li128-v4-arm64.apk",
@@ -285,7 +288,7 @@
       "name": "enmori-li128-install-v4.log",
       "bytes": 191,
       "sha256": "4f72e6452ba3987f0bb4b4ecf79b58582fe79b171831f0a776f8d969594261a9",
-      "snapshotOfPendingOperation": true
+      "operationOutcome": "Client interrupted while awaiting system confirmation, exit130; no successful install"
     },
     {
       "name": "enmori-li128-device-analysis.log",
