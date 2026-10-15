@@ -140,6 +140,7 @@ test("startup refuses existing records/Auth and preserves them instead of resett
 });
 
 test("invalid isolation is rejected before any Firebase access; no ordinary/cloud registration", async () => {
+  await assert.rejects(createControlledPhoneService({ ...options, demoFeatures: "true" as never }));
   await assert.rejects(createControlledPhoneService({ ...options, environment: { ...process.env, ENMORI_ENVIRONMENT: "controlled-demo" } }));
   await assert.rejects(createControlledPhoneService({ ...options, environment: { ...process.env, FIRESTORE_EMULATOR_HOST: "example.invalid:8080" } }));
 });
@@ -294,4 +295,53 @@ test("ongoing service with no Event source exposes protected unavailable reads, 
     }
     await c.call("GET", "/v1/me/settings", 200);
   } finally { await cleanup(service); }
+});
+
+test("explicit demo joins real social/history persistence, preserves the nonempty-Note AI hold, and cleans all owned records", async () => {
+  let observedNotes = 0;
+  const service = await createControlledPhoneService({ ...options, demoFeatures: true,
+    transport: { generate: async input => { observedNotes = input.checkIns.length; return reply(input); } } });
+  const env = requireControlledEmulatorEnvironment(process.env);
+  const probe = initializeApp({ projectId: env.projectId }, randomUUID()), db = getFirestore(probe);
+  try {
+    const c = await client(service);
+    const emptyOp = await ticket(c);
+    await c.call("POST", `/v1/me/ai/operations/${emptyOp.operationId}/execute`, 200, { text: "今天读书了。" }, { "ai-operation-key": emptyOp.operationKey });
+    assert.equal(service.observation().modelAttempts, 1);
+    const key = randomUUID();
+    const created = await c.call("POST", "/v1/check-ins", 201, { note: "今天读书了。" }, { "idempotency-key": key }) as unknown as { checkIn: { checkInId: string; note: string; createdAt: string } };
+    const replay = await c.call("POST", "/v1/check-ins", 200, { note: "今天读书了。" }, { "idempotency-key": key });
+    assert.deepEqual((replay as unknown as typeof created).checkIn, created.checkIn);
+    await c.call("GET", `/v1/check-ins/${created.checkIn.checkInId}`, 200);
+    const history = await c.call("GET", `/v1/me/check-ins?date=${created.checkIn.createdAt.slice(0,10)}&timeZone=Etc%2FUTC`, 200) as unknown as { checkIns: unknown[] };
+    assert.deepEqual(history.checkIns, [created.checkIn]);
+    const friends = await c.call("GET", "/v1/me/friends", 200) as unknown as { friends: unknown[] };
+    assert.deepEqual(friends.friends, []);
+    await c.call("GET", "/v1/me/friends/search?q=Nobody", 200);
+    await c.call("GET", "/v1/interest-tags", 200);
+    await c.call("PUT", "/v1/me/interests", 200, { interestTagIds: ["interest_music"], expectedRevision: 1 });
+    await c.call("GET", "/v1/me/interests", 200);
+    const before = await db.doc(`check_ins/${created.checkIn.checkInId}`).get();
+    const op = await ticket(c);
+    // Retain the demonstrated held boundary: the accepted store explicitly
+    // refuses nonempty provenance. Do not strip Notes or weaken that guard.
+    await c.call("POST", `/v1/me/ai/operations/${op.operationId}/execute`, 503, { text: "今天读书了。" }, { "ai-operation-key": op.operationKey });
+    assert.equal(observedNotes, 0);
+    assert.equal(service.observation().modelAttempts, 1);
+    const deniedHistory = await c.call("GET", `/v1/me/conversations/${op.conversationId}/messages`, 404);
+    assert.equal(deniedHistory.error.code, "CONVERSATION_UNAVAILABLE");
+    const ownerDocuments = await db.collection("accounts").get();
+    assert.equal(ownerDocuments.size, 1);
+    const refusedTarget = ownerDocuments.docs[0]!.ref.collection("conversations").doc(op.conversationId);
+    assert.equal((await refusedTarget.get()).exists, false);
+    assert.equal((await refusedTarget.listCollections()).length, 0);
+    const after = await db.doc(`check_ins/${created.checkIn.checkInId}`).get();
+    assert.deepEqual(after.data(), before.data()); assert(before.updateTime!.isEqual(after.updateTime!));
+    await c.call("DELETE", `/v1/check-ins/${created.checkIn.checkInId}`, 404);
+    await c.call("PUT", `/v1/check-ins/${created.checkIn.checkInId}`, 404, { note: "not allowed" });
+  } finally {
+    await cleanup(service);
+    assert.equal((await db.listCollections()).length, 0);
+    await db.terminate(); await deleteApp(probe);
+  }
 });

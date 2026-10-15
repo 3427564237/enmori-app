@@ -1,3 +1,18 @@
+import { CreateCheckIn } from "../check-ins/application/create-check-in.js";
+import { GetCheckIn } from "../check-ins/application/get-check-in.js";
+import { FirestoreCheckInRepository } from "../check-ins/infrastructure/firestore-check-in-repository.js";
+import { ListOwnCheckInsForDate } from "../check-ins/application/check-in-history.js";
+import { FirestoreCheckInHistoryRepository } from "../check-ins/infrastructure/firestore-check-in-history-repository.js";
+import { FirebaseAdminCheckInHistoryGateway } from "../check-ins/infrastructure/firebase-admin-check-in-history-gateway.js";
+import { createHistoryCursorCodec } from "../check-ins/infrastructure/aes-gcm-history-cursor-codec.js";
+import { FriendRequests } from "../friends/application/friend-requests.js";
+import { FirestoreFriendRepository } from "../friends/infrastructure/firestore-friend-repository.js";
+import { GetInterestTags } from "../interests/application/get-interest-tags.js";
+import { GetOwnInterests } from "../interests/application/get-own-interests.js";
+import { ReplaceOwnInterests } from "../interests/application/replace-own-interests.js";
+import { FirestoreInterestRepository } from "../interests/infrastructure/firestore-interest-repository.js";
+import { CryptoOpaqueIdGenerator } from "../shared/infrastructure/crypto-opaque-id-generator.js";
+import { SystemClock } from "../shared/infrastructure/system-clock.js";
 import { randomUUID } from "node:crypto";
 import { initializeApp, deleteApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
@@ -32,8 +47,12 @@ const runtimePath = "ai_runtime_fence/current";
  * Emulator pair. Ordinary/controlled-demo bootstrap never imports this module.
  * There is no automatic journey, one-generation cap, fixture reset after a
  * request, cloud fallback, new HTTP operation or fabricated Note authority.
- * Only this fresh synthetic owner is admitted. Check-in/source writers are
- * disabled, making the complete empty Note inventory an owned-fixture fact.
+ * Only this fresh synthetic owner is admitted. Default mode has no source
+ * writer. Explicit demo mode admits only the existing create-only canonical UTC
+ * Check-in writer; no edit/delete/import/restore exists during this process.
+ * IDs cannot be reused while records remain. Final deletion happens only after
+ * admission is closed and every original operation settles; this process never
+ * restarts that owner. These are isolated owned-source facts, not cloud authority.
  */
 export async function createControlledPhoneService(options: {
   readonly environment: Readonly<Record<string, string | undefined>>;
@@ -41,10 +60,13 @@ export async function createControlledPhoneService(options: {
   readonly transport: GenerationTransport<ConversationInput>;
   readonly compiler: CompletePromptCompiler<ConversationInput>;
   readonly eventBrowse?: IsolatedEventBrowseInput;
+  /** Explicit isolated demo composition; ordinary and existing phone modes stay unchanged. */
+  readonly demoFeatures?: true;
 }) {
   const environment = requireControlledEmulatorEnvironment(options.environment);
   requireProof(environment.projectId === "demo-enmori-rmvp01a-r10" && options.exclusiveEmulatorsVerified === true);
   requireProof(JSON.stringify(requireControlledEmulatorEnvironment(process.env)) === JSON.stringify(environment));
+  requireProof(options.demoFeatures === undefined || options.demoFeatures === true);
   requireProof(typeof options.transport?.generate === "function" && typeof options.compiler?.compile === "function");
   const firebase = initializeApp({ projectId: environment.projectId }, `controlled-phone-${randomUUID()}`);
   const db = getFirestore(firebase), auth = getAuth(firebase);
@@ -59,6 +81,8 @@ export async function createControlledPhoneService(options: {
   let app: Awaited<ReturnType<typeof buildApp>> | undefined;
   let stopped: Promise<{ cleanupConfirmed: boolean; operatorHold: boolean }> | undefined;
   const targets = new Set<string>();
+  const demoOwnedPaths = new Set<string>();
+  const clock = new SystemClock();
   const isClosed = () => phase === "closed";
   async function tracked<T>(work: () => Promise<T>): Promise<T> {
     calls++;
@@ -149,6 +173,19 @@ export async function createControlledPhoneService(options: {
       } else if (accountOwned) {
         await db.recursiveDelete(db.doc(account)); accountOwned = false;
       }
+      if (options.demoFeatures) {
+        // No writer can enter after phase=stopping; quiet() observes original SDK
+        // settlement. Only this fresh owner and explicitly created fixture paths.
+        for (const [collection, field] of [["check_ins", "ownerAccountId"], ["idempotency", "scope"]] as const) {
+          const owned = await db.collection(collection).where(field, "==", owner).get();
+          for (const record of owned.docs) await record.ref.delete();
+          requireProof((await db.collection(collection).where(field, "==", owner).get()).empty);
+        }
+        for (const path of demoOwnedPaths) {
+          await db.recursiveDelete(db.doc(path));
+          requireProof(!(await db.doc(path).get()).exists && (await db.doc(path).listCollections()).length === 0);
+        }
+      }
       if (bindingOwned) { await db.doc(binding).delete(); requireProof(!(await db.doc(binding).get()).exists); bindingOwned = false; }
       if (authOwned) {
         await auth.deleteUser(uid);
@@ -180,15 +217,31 @@ export async function createControlledPhoneService(options: {
     await db.doc(account).create({ username: `p_${owner.replaceAll("-", "").slice(0, 16)}`,
       optionalProcessingConsent: "accepted", checkInVisibility: "private", onboardingCompletedAt: new Date().toISOString(), purposeRevocationGeneration: 0 }); accountOwned = true;
     await db.doc(`${account}/persona_state/current`).create({ livePersonaIds: [], stateRevision: 0 });
+    if (options.demoFeatures) {
+      const records = {
+        [`friend_access/${owner}`]: { eligibilityState: "eligible" },
+        [`friend_lists/${owner}`]: { initialized: true },
+        [`friend_inboxes/${owner}`]: { initialized: true },
+        [`account_interests/${owner}`]: { interestTagIds: [], revision: 1 },
+        ["interest_tags/interest_music"]: { displayName: "Music fixture", lifecycleState: "active", revision: 1 },
+      };
+      for (const [path, record] of Object.entries(records)) {
+        demoOwnedPaths.add(path); await db.doc(path).create(record);
+      }
+    }
     joined = await createIsolatedConversationComposition({ firestore: db, environment: options.environment,
       transport: { generate: (input, budget) => {
-        requireProof(phase === "running" && input.checkIns.length === 0);
+        requireProof(phase === "running" && (options.demoFeatures === true || input.checkIns.length === 0));
         modelAttempts++; modelPending++;
         try { return options.transport.generate(input, budget).finally(() => { modelPending--; }); }
         catch { modelPending--; throw unavailable(); }
       } },
       gates: { beforeGeneration, candidate: boundedConversationSemanticCandidate },
-      notePrerequisites: { firestore: db, sourceReferences: ["controlled-phone-service.ts#exclusive-fresh-owner-no-source-writers"],
+      notePrerequisites: { firestore: db, sourceReferences: options.demoFeatures ? [
+        "controlled-phone-service.ts#exclusive-empty-start-single-create-only-writer-and-quiescent-final-delete",
+        "check-ins/application/create-check-in.ts#authoritative-canonical-UTC",
+        "check-ins/infrastructure/firestore-check-in-repository.ts#create-only-owner-note-time-no-edit-restore",
+      ] : ["controlled-phone-service.ts#exclusive-fresh-owner-no-source-writers"],
         completeCanonicalUtcInventory: true, immutableOwnerNoteAndTime: true, permanentDeletion: true, noRestoreOrIdReuse: true },
       report: (_phase, result) => { if (!result.complete) maintenanceHealthy = false; },
       reportRetirement: confirmed => { if (!confirmed) retirementFailed = true; },
@@ -212,6 +265,15 @@ export async function createControlledPhoneService(options: {
       deleteConversation: (...args) => run(() => joined!.operations.deleteConversation(...args)),
     };
     const verifier = new FirebaseIdentityVerifier(auth);
+    const checkIns = new FirestoreCheckInRepository(gateway);
+    const interests = new FirestoreInterestRepository(gateway);
+    const rawHistory = new FirebaseAdminCheckInHistoryGateway(db);
+    const history = new ListOwnCheckInsForDate(new FirestoreCheckInHistoryRepository({
+      runTransaction: work => {
+        if (phase !== "running") return Promise.reject(unavailable());
+        return tracked(() => rawHistory.runTransaction(work));
+      },
+    }), createHistoryCursorCodec(), clock);
     const unavailableOperation = { execute: async () => err(appFailure("SERVICE_UNAVAILABLE")) };
     app = await buildApp({
       identityVerifier: { verifyIdToken: async token => {
@@ -222,9 +284,13 @@ export async function createControlledPhoneService(options: {
       } },
       accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, options.environment)),
       completeOnboarding: unavailableOperation, getOnboarding: new GetOnboarding(new FirestoreOnboardingRepository(gateway)),
-      createCheckIn: unavailableOperation, getCheckIn: unavailableOperation, getInterestTags: unavailableOperation,
-      getOwnInterests: unavailableOperation, replaceOwnInterests: unavailableOperation,
+      createCheckIn: options.demoFeatures ? new CreateCheckIn(checkIns, clock, new CryptoOpaqueIdGenerator()) : unavailableOperation,
+      getCheckIn: options.demoFeatures ? new GetCheckIn(checkIns) : unavailableOperation,
+      getInterestTags: options.demoFeatures ? new GetInterestTags(interests) : unavailableOperation,
+      getOwnInterests: options.demoFeatures ? new GetOwnInterests(interests) : unavailableOperation,
+      replaceOwnInterests: options.demoFeatures ? new ReplaceOwnInterests(interests) : unavailableOperation,
       isolatedSlices: { environment: { ...options.environment }, conversations,
+        ...(options.demoFeatures ? { friends: new FriendRequests(new FirestoreFriendRepository(gateway, clock), clock), checkInHistory: history } : {}),
         eventBrowse: { source: eventBrowse.source, ...(options.eventBrowse?.now ? { now: options.eventBrowse.now } : {}) },
         personas: new OwnPersonas(new FirestorePersonaRepository(gateway, { now: () => ok(new Date()) })) },
     });

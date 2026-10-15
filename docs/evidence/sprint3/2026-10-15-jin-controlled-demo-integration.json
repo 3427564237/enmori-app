@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 1,
+  "checkpointSgt": "2026-10-15T23:37:22+08:00",
+  "authority": {
+    "source": "S-PM-1015-LI-JIN-DEMO-INTEGRATION",
+    "commit": "fd63434b1729adbd045950f24735bf75ad7bf47b",
+    "issue84Comment": 6193357656
+  },
+  "source": {
+    "product": "22a9cab51bfdc461b2bded928df8270bfc14e593",
+    "tree": "e7a67332815ab661e7badf08a074256215526452",
+    "base": "ed6ed9a31a6ed0921412377cfc4da824fd3870ef",
+    "changedFiles": [
+      {
+        "path": "backend/src/bootstrap/controlled-phone-service.ts",
+        "gitBlob": "98ba9e58a446461a19e90b7053ac08a2832b1246",
+        "workingSha256": "4ada37487c7116a3de6760939aef5a12aa60b587ab44aeeffc797dc221720abb",
+        "gitContentSha256": "8c7ec5813dcc17c6810591e2693b585aaf41f4286587d1d581bfe166a38af646"
+      },
+      {
+        "path": "backend/emulator-test/controlled-phone-service.integration.test.ts",
+        "gitBlob": "84eb58ddfe83c05765082109a2560d64b055fa26",
+        "workingSha256": "5a8aeba7be7eed9079a4c0ea25d519e7eba22eefd676e02cda996d1e95a6302b",
+        "gitContentSha256": "c67afd16e4bf5e3f9a8051e6beeb5d008a59672bbd084485ab95f6523e246aa2"
+      },
+      {
+        "path": "tool/controlled_phone_service.mjs",
+        "gitBlob": "73b815b68e14bc0cd8002ff9991d5744127618a4",
+        "workingSha256": "cdd56845741b2f10346999b090214b4286fab7a00bedbe30843d89d6f16c54b0",
+        "gitContentSha256": "ff3ab922c8032b818c2fb312558b067cf1d6699fc98e07864b87df4be559fb33"
+      },
+      {
+        "path": "tool/controlled_phone_service.test.mjs",
+        "gitBlob": "3f1b33892310d73ae755cd4865c12d1b68c2e084",
+        "workingSha256": "9e217c023c9e25f7c573398dbb64d2c640cc30afa1447df8995289169bbf157f",
+        "gitContentSha256": "e816bab225dbcba54f89718d018f97cdd107470ff5553351ff3d074623fc4797"
+      },
+      {
+        "path": "lib/controlled_phone_harness.dart",
+        "gitBlob": "1989c26327591db5b0753032891685dfeb18a481",
+        "workingSha256": "f5fa4103cfddf246300ab285440cdabbf04deb04e4c8406fb151579511443eb9",
+        "gitContentSha256": "3e9e3c0dba0a6872065e4a6a65083642bd7880fd8a75195ec9dbaae9c66fb852"
+      },
+      {
+        "path": "lib/controlled_demo.dart",
+        "gitBlob": "19e3a1602a8404dd233ed2a5fd56b5915f13fd72",
+        "workingSha256": "2c6aa11e933ca0762160f4630c79b6055d8ed693d349b89c124357e04fcaa1cd",
+        "gitContentSha256": "61cd656f75041badf98e4afdf9d3961734d805864258030a5e9b77bc6cff56f4"
+      },
+      {
+        "path": "lib/app/controlled_demo_app.dart",
+        "gitBlob": "3684d98749e965bc63c62042d889a26df3c32b7e",
+        "workingSha256": "c7ef68c1d985b3ea823a131b8508ba81a29ae0c8a9ca1b694ab94ee256356b97",
+        "gitContentSha256": "09d4258ae0cf575c648ee38a49151c80c0046d90d08056601f07467d32a2ea0b"
+      },
+      {
+        "path": "test/app/controlled_demo_app_test.dart",
+        "gitBlob": "37bf6d153786e0802856735ef8bd2bf7083da665",
+        "workingSha256": "5f7adda67d4c624da7f2cee4ae20efb89a28b54306374ca71036276b80c2a49c",
+        "gitContentSha256": "009347228aef17076996be04f239df8a58cb75c1b21d6199c43a8620e01aaf76"
+      }
+    ],
+    "allVersionedFileCount": 1253,
+    "sourceExact": 67,
+    "sourceCrlfEquivalent": 1186,
+    "apkInputExact": 67,
+    "apkInputCrlfEquivalent": 1186,
+    "localCompleteBindingReceiptSha256": "5fa51401c1d68f19678486a64e2fb362670ed87099c8ec4e8ad2ef81e0323256",
+    "unchangedAgainstBase": [
+      "api/openapi.json",
+      "backend/src/transport/route-inventory.ts",
+      "pubspec.yaml",
+      "pubspec.lock",
+      "package.json",
+      "pnpm-lock.yaml",
+      "firebase.json"
+    ],
+    "operations": 35,
+    "schemas": 45
+  },
+  "toolchain": {
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "firebaseAdmin": "14.3.0",
+    "firestore": "8.7.1",
+    "firebaseCli": "15.29.0",
+    "firestoreEmulator": "1.22.0",
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "java": "21.0.12.1",
+    "androidBuildTools": "36.0.0"
+  },
+  "results": {
+    "strictBackendBuild": {
+      "status": "Pass",
+      "exit": 0
+    },
+    "backend": {
+      "pass": 912,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exit": 0
+    },
+    "operator": {
+      "pass": 16,
+      "fail": 0,
+      "exit": 0
+    },
+    "actualGuardedEmulatorHttpDart": {
+      "pass": 165,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "outerExit": 0,
+      "modelAndCompiler": "explicit doubles, not real Qwen"
+    },
+    "focusedClient": {
+      "pass": 2,
+      "fail": 0,
+      "overlapsFullFlutter": true
+    },
+    "fullFlutter": {
+      "pass": 658,
+      "fail": 1,
+      "exit": 1,
+      "status": "Fail; symlink negative-case setup blocked by Windows OS1314 before consumer invocation"
+    },
+    "analysis": {
+      "status": "Pass",
+      "scope": [
+        "lib",
+        "test",
+        "integration_test"
+      ],
+      "fatalInfos": true
+    },
+    "format": {
+      "status": "Pass",
+      "files": 4,
+      "changed": 0
+    },
+    "newDeltaWhitespace": {
+      "status": "Pass"
+    },
+    "apk": {
+      "status": "Build/signature Pass; installation/device Not Run"
+    }
+  },
+  "apk": {
+    "name": "enmori-controlled-demo-22a9cab-arm64.apk",
+    "bytes": 94261271,
+    "sha256": "97ea298c50b83ba53fefd9eeb3a409472b60e1f26d2c106f99732db35d18248b",
+    "package": "com.enmori.app.personatest",
+    "activity": "com.enmori.app.MainActivity",
+    "versionName": "1.0.0",
+    "versionCode": 1,
+    "minSdk": 24,
+    "targetSdk": 36,
+    "buildTargetPlatform": "android-arm64",
+    "badgingNativeCode": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "signatureV2": true,
+    "installed": false,
+    "uploadedToGit": false
+  },
+  "actualCleanup": {
+    "workerProfileRemoved": true,
+    "outerProfileRemoved": true,
+    "requiredPortsFree": [
+      8080,
+      9099,
+      4400,
+      4500,
+      9150
+    ],
+    "newDemoOwnCollectionsAfterStop": 0,
+    "existingLiPreviewTouched": false
+  },
+  "openBoundaries": [
+    "Nonempty Note-dependent AI storage/provenance remains unimplemented: actual execute503, no new model call/user/assistant content, read404; protected source was not weakened.",
+    "One full Flutter test failed during Windows symlink setup, no full-green claim.",
+    "New Linux ongoing operator/private handoff/HTTPS/native Auth/phone/model/provider/browser/disable-client-clear are Not Run.",
+    "Two inherited #126 actual CONSUMED-command failures remain unclassified.",
+    "SHI new-code review and LI evidence/phone acceptance remain pending."
+  ],
+  "retainedFailures": [
+    {
+      "name": "operator initial",
+      "result": "15/16; incorrect assertion included private credential handoff; test now distinguishes private handoff from public report"
+    },
+    {
+      "name": "SDK first full",
+      "result": "164/165; incorrect positive expectation exposed existing nonempty Note store hold; not a resolved positive chain"
+    },
+    {
+      "name": "SDK focused second",
+      "result": "13/14; expected200empty-history was wrong; retained protected404 plus independently absent content"
+    },
+    {
+      "name": "full Flutter initial and final",
+      "result": "658/1 each; same OS1314 case, not additive"
+    },
+    {
+      "name": "first APK",
+      "result": "non-ASCII checkout path refusal; identical source copied to owned ASCII build directory, no path guard disabled"
+    },
+    {
+      "name": "source receipt first attempt",
+      "result": "wrong normative API pathname; corrected to api/openapi.json; all1253 source/APK bindings verified"
+    },
+    {
+      "name": "early tooling",
+      "result": "offline pub/cache write permission and one analyzer brace-style info; later pinned offline restore/analysis passed"
+    }
+  ],
+  "receipts": [
+    {
+      "name": "build-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exitCode": 0,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "backend-final.log",
+      "bytes": 85842,
+      "sha256": "540bf27cd97a35a83286b47ed4ce6aeaaec53cde4232aa46ecc256fb4379275d",
+      "exitCode": 0,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "operator-final2.log",
+      "bytes": 1855,
+      "sha256": "892cdc83b9233f78d4b4daa9065a10cde149258f57dd1fe7a4e5735ed87e06eb",
+      "exitCode": 0,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "widget-run01.log",
+      "bytes": 402,
+      "sha256": "f19cae66a6d0e653025bc08caddf1684ed85a0ee71de3345a9f58d6db310b77f",
+      "exitCode": 0,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "analysis-final2.log",
+      "bytes": 60,
+      "sha256": "9a9d35ce9d6fac973a72f078461e18cde1f1c7f2ae7fa7a5916ae87adef4b99a",
+      "exitCode": 0,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "sdk-final.log",
+      "bytes": 24522,
+      "sha256": "6732bbc987f6ae3c531a6d5126d5be8a4a685beea0ac65ed66eb375511d3bf84",
+      "exitCode": 0,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "flutter-final.log",
+      "bytes": 134357,
+      "sha256": "f6d73f4e4bf6feb0c8f0c57f58953d96b5a4b22d837524f32868f85fcba5e04a",
+      "exitCode": 1,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "apk-final.log",
+      "bytes": 981,
+      "sha256": "9b1d101dcd7ef27e3868eb03d76492ff81628a387db12fe8e5d0ec5f162e1238",
+      "exitCode": 0,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "apk-badging.txt",
+      "bytes": 4835,
+      "sha256": "4651a0750a7afd2cf98a7b46cef2238fcca934755a0a07b46d7f1673110b33ac",
+      "exitCode": null,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "apk-signature.txt",
+      "bytes": 351,
+      "sha256": "b9c6879e48d25a9786d2beb8a15738c06edce7d06f2722dd860894618592bd09",
+      "exitCode": null,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "operator.log",
+      "bytes": 2715,
+      "sha256": "0522d741c2f239bf41128178d3f3cd5d9dda6ccfba56705e88eb4d7b40334551",
+      "exitCode": 1,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "sdk-run01.log",
+      "bytes": 26141,
+      "sha256": "d802b7a741256526ef2c7ae9e26cfc9a2ef5712ca2d8865b2704dbbcf55732d3",
+      "exitCode": 1,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "sdk-focused02.log",
+      "bytes": 5512,
+      "sha256": "3d496f165495a1bcaf12c03e08183dc0a2dea4b3369df973f6513cf5bddbe6c9",
+      "exitCode": 1,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "flutter-full.log",
+      "bytes": 172423,
+      "sha256": "ccab348b02c595c3018e1a918419a5068fb4be7affa8788d2ccfcbc3d59d6294",
+      "exitCode": 1,
+      "rawArtifact": "retained locally; not published"
+    },
+    {
+      "name": "apk-build.log",
+      "bytes": 1209,
+      "sha256": "da750240d06a13b6c7a6d4d468350e9f651a3542779d5a7e67f34674e293159e",
+      "exitCode": 1,
+      "rawArtifact": "retained locally; not published"
+    }
+  ]
+}

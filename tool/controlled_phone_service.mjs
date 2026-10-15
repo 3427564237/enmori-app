@@ -25,8 +25,9 @@ const exact = (value, keys) => value && typeof value === 'object' && !Array.isAr
   Object.keys(value).length === keys.length && Object.keys(value).every(key => keys.includes(key));
 export function validatePhoneServiceConfiguration(config) {
   const keys = ['controlledHostVerified', 'existingHostGenerationLeaseSettled', 'binding', 'tokenizerFiles', 'phone'];
-  assert(exact(config, keys) || exact(config, [...keys, 'eventBrowse']));
-  const { phone, eventBrowse, ...existing } = config; validateZhouModelConfiguration(existing);
+  assert(exact(config, keys) || exact(config, [...keys, 'eventBrowse']) || exact(config, [...keys, 'demoFeatures']) || exact(config, [...keys, 'eventBrowse', 'demoFeatures']));
+  if (Object.hasOwn(config, 'demoFeatures')) assert.equal(config.demoFeatures, true);
+  const { phone, eventBrowse, demoFeatures, ...existing } = config; validateZhouModelConfiguration(existing);
   if (Object.hasOwn(config, 'eventBrowse')) {
     assert(exact(eventBrowse, ['key']));
     assert(typeof eventBrowse.key === 'string' && /^[A-Za-z0-9_-]{1,256}$/u.test(eventBrowse.key));
@@ -199,7 +200,7 @@ export async function runPhoneService(config, dependencies = {}) {
       key: () => live ? config.eventBrowse.key : undefined,
       enabled: () => service?.eventBrowseControl.observation().enabled === true,
     }) } : undefined;
-    service = await (dependencies.createService ?? createControlledPhoneService)({ environment: process.env, exclusiveEmulatorsVerified: true, transport, compiler,
+    service = await (dependencies.createService ?? createControlledPhoneService)({ environment: process.env, exclusiveEmulatorsVerified: true, ...(config.demoFeatures ? { demoFeatures: true } : {}), transport, compiler,
       ...(eventBrowse ? { eventBrowse } : {}) });
     listener = (dependencies.createHttpsServer ?? createHttpsServer)({ cert: read(phone.certificatePath), key: read(phone.keyPath) }, service.app.routing);
     await new Promise((done, reject) => { listener.once('error', reject); listener.listen(0, '127.0.0.1', done); });
