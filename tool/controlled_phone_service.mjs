@@ -17,18 +17,28 @@ import { ControlledTokenizerProcess } from '../backend/dist/src/ai-runtime/infra
 import { ControlledConversationPrompt } from '../backend/dist/src/ai-runtime/infrastructure/controlled-conversation-prompt.js';
 import { ControlledOllamaTransport } from '../backend/dist/src/ai-runtime/infrastructure/controlled-ollama-transport.js';
 import { createControlledPhoneService } from '../backend/dist/src/bootstrap/controlled-phone-service.js';
+import { TicketmasterBrowseSource } from '../backend/dist/src/event-browse/infrastructure/ticketmaster-browse-source.js';
 
 const ports = [8080, 9099, 4400, 4500, 9150];
 const transfer = 'phone-service-model-handoff.json';
 const exact = (value, keys) => value && typeof value === 'object' && !Array.isArray(value) &&
   Object.keys(value).length === keys.length && Object.keys(value).every(key => keys.includes(key));
 export function validatePhoneServiceConfiguration(config) {
-  assert(exact(config, ['controlledHostVerified', 'existingHostGenerationLeaseSettled', 'binding', 'tokenizerFiles', 'phone']));
-  const { phone, ...existing } = config; validateZhouModelConfiguration(existing);
+  const keys = ['controlledHostVerified', 'existingHostGenerationLeaseSettled', 'binding', 'tokenizerFiles', 'phone'];
+  assert(exact(config, keys) || exact(config, [...keys, 'eventBrowse']));
+  const { phone, eventBrowse, ...existing } = config; validateZhouModelConfiguration(existing);
+  if (Object.hasOwn(config, 'eventBrowse')) {
+    assert(exact(eventBrowse, ['key']));
+    assert(typeof eventBrowse.key === 'string' && /^[A-Za-z0-9_-]{1,256}$/u.test(eventBrowse.key));
+  }
   assert(exact(phone, ['certificatePath', 'keyPath', 'sessionDirectory']));
   for (const path of Object.values(phone)) assert(typeof path === 'string' && isAbsolute(path) && !/[\x00\r\n]/u.test(path));
   assert.notEqual(phone.certificatePath, phone.keyPath);
   return config;
+}
+export function validateEventBrowseCommand(command) {
+  assert(exact(command, ['enabled']) && typeof command.enabled === 'boolean');
+  return command.enabled;
 }
 function privateDirectory(directory, empty = false) {
   const stat = lstatSync(directory);
@@ -52,6 +62,16 @@ function stopRequested(directory) {
   const path = join(directory, 'stop');
   if (!existsSync(path)) return false;
   privateFile(path, 0); return true;
+}
+function takeEventBrowseCommand(directory) {
+  privateDirectory(directory);
+  const path = join(directory, 'event-command.json');
+  if (!existsSync(path)) return undefined;
+  privateFile(path, 64);
+  const bytes = readFileSync(path);
+  // Consume before acting. A failed read/unlink/parse cannot activate a source.
+  unlinkSync(path);
+  try { return JSON.parse(bytes.toString('utf8')); } finally { bytes.fill(0); }
 }
 function requestStop(directory) {
   privateDirectory(directory);
@@ -154,6 +174,7 @@ export async function runPhoneService(config, dependencies = {}) {
     }
   });
   const requested = dependencies.requested ?? (() => stopRequested(phone.sessionDirectory));
+  const eventCommand = dependencies.eventCommand ?? (() => takeEventBrowseCommand(phone.sessionDirectory));
   const wait = dependencies.wait ?? (() => delay(500));
   let live = true, service, listener, listenerClosed = false, cleaned = false, constructing = false, cleanupConfirmed = false;
   const compiler = dependencies.compiler ?? new ControlledConversationPrompt(new ControlledTokenizerProcess({ ...config.tokenizerFiles, current: () => live }));
@@ -173,16 +194,36 @@ export async function runPhoneService(config, dependencies = {}) {
     }
     finally { clearTimeout(timer); abort.abort(); }
     constructing = true;
-    service = await (dependencies.createService ?? createControlledPhoneService)({ environment: process.env, exclusiveEmulatorsVerified: true, transport, compiler });
+    // A supplied private key constructs a source only; it NEVER enables it.
+    const eventBrowse = config.eventBrowse ? { source: new TicketmasterBrowseSource({
+      key: () => live ? config.eventBrowse.key : undefined,
+      enabled: () => service?.eventBrowseControl.observation().enabled === true,
+    }) } : undefined;
+    service = await (dependencies.createService ?? createControlledPhoneService)({ environment: process.env, exclusiveEmulatorsVerified: true, transport, compiler,
+      ...(eventBrowse ? { eventBrowse } : {}) });
     listener = (dependencies.createHttpsServer ?? createHttpsServer)({ cert: read(phone.certificatePath), key: read(phone.keyPath) }, service.app.routing);
     await new Promise((done, reject) => { listener.once('error', reject); listener.listen(0, '127.0.0.1', done); });
     const address = listener.address(); assert(address && typeof address !== 'string');
     publish('handoff.json', { schemaVersion: 1, ...service.privateHandoff(), baseUri: `https://127.0.0.1:${address.port}/`,
       certificateBase64: read(phone.certificatePath).toString('base64'), authEmulatorHost: '127.0.0.1:9099',
       lifetime: 'until-explicit-stop-in-this-owned-process', syntheticOwnerOnly: true });
-    let stopping = false;
+    let stopping = false, eventControlFailed = false;
     for (;;) {
       if (!stopping && requested()) { stopping = true; removeHandoff(); }
+      if (!stopping) {
+        try {
+          const command = eventCommand();
+          if (command !== undefined) {
+            if (validateEventBrowseCommand(command)) service.eventBrowseControl.enable();
+            else service.eventBrowseControl.disable();
+            eventControlFailed = false;
+          }
+        } catch {
+          // This private control failure disables only Event. No model/service
+          // restart, owner reset, false cleanup, or credential diagnostic.
+          service.eventBrowseControl.disable(); eventControlFailed = true;
+        }
+      }
       let result;
       if (stopping) result = await service.stopAndClean();
       if (result?.cleanupConfirmed) cleanupConfirmed = true;
@@ -190,6 +231,7 @@ export async function runPhoneService(config, dependencies = {}) {
       publish('status.json', { schemaVersion: 1, scope: 'isolated-phone-service', ...service.observation(),
         hostPreflightPassed: true, tokenizerReadinessPassed: true, adapterState: transport.state, httpsListening: !listenerClosed,
         stopRequested: stopping, cleanupConfirmed: result?.cleanupConfirmed === true,
+        eventControlFailed,
         operatorHold: result?.operatorHold === true });
       if (result?.cleanupConfirmed) {
         await new Promise((done, reject) => { listener.close(error => error ? reject(error) : done()); listener.closeAllConnections(); });
