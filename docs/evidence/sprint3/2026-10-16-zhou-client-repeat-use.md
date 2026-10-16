@@ -6,7 +6,7 @@
 
 Reviewed production base: #130 `9cf30134a522009f410485c6352df757ed0ab23d`. The branch starts from PM kickoff `dd1994af69d861253356571d59317c549c879914` and synchronizes already-approved main#131 `d59cb128bfe0b5889baae0b08c973e140505590f` at `25a5567a28540855f555edb67416dedbf9629b85`. That inherited32-path tooling update is not new product work or requested component reapproval.
 
-**Source-only integration unit: `449f67459a02a8621f1212f82251da62bf1cc2b6`**, tree `52802f2761aa15e14266e6ef2b5f7de204673c8c`: two new test files only. All `lib`, Backend/API, Android/iOS, integration targets, runtime/operator/tooling, dependency and lock inputs remain identical to reviewed#130. Later evidence commits do not change the tested client or tests.
+**Source-only integration unit: `449f67459a02a8621f1212f82251da62bf1cc2b6`**, tree `52802f2761aa15e14266e6ef2b5f7de204673c8c`: two new test files only. All `lib`, Backend/API, Android/iOS, integration targets, runtime/operator scripts under `tool/`, dependency and lock inputs remain identical to reviewed#130. The inherited `.agents` and tooling-record changes are the explicitly excluded approved main#131 synchronization above. Later evidence commits do not change the tested client or tests.
 
 | New joined regression | Observable assertion |
 | --- | --- |
