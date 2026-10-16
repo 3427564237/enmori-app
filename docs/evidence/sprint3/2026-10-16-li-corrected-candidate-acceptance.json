@@ -146,14 +146,17 @@
     "dedicatedPackageReplacedByFlutterSdk": true,
     "ordinaryPackageTargeted": false,
     "v4Install": "System approval not confirmed; own waiting ADB client interrupted, exit130; package still versionCode1",
-    "uiLoggingRestoration": "Pending human confirmation; ADB property change was denied; original persist.sys.log.ctrl=no stayed unchanged",
+    "uiLoggingRestoration": "Human confirmed phone UI Log collection switched off; not independently verified by ADB",
     "historicalConsumedFailuresResolved": false,
     "clipboardReadOrClearPerformed": false,
     "realSourceLinkOpenedOrCopied": false,
     "fixtureHostChoreography": "Requires assigned host stage/command coordinator; not claimed as a complete standalone runner",
     "lastObservedInstalledVersionCode": 1,
     "installerClientExit": 130,
-    "osDialogDismissalClaimed": false
+    "osDialogDismissalClaimed": false,
+    "installationConfirmationPage": "Human reports no visible confirmation page",
+    "followupDeviceConnected": true,
+    "newInstallStartedAfterFollowup": false
   },
   "apk": {
     "path": "enmori-controlled-demo-li128-v4-arm64.apk",
