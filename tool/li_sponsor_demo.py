@@ -60,7 +60,7 @@ def quiet(value):
             and value.get('retirementConfirmed') is True
             and value.get('admission') == 'open'
             and value.get('httpsListening') is True
-            and value.get('adapterState') in ('stopped', 'not_checked')
+            and value.get('adapterState') in ('stopped', 'not_checked', 'ready')
             and all(value.get(k) == 0 for k in
                     ['modelPending', 'compilerPending', 'activeCalls', 'nonTerminal'])
             and all(value.get(k) is False for k in

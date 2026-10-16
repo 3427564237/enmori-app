@@ -27,6 +27,9 @@ class SponsorPreparationTests(unittest.TestCase):
         self.assertTrue(quiet(self.state))
         # Transport preflight failure leaves not_checked without a dispatched generation.
         self.assertTrue(quiet({**self.state, 'adapterState': 'not_checked'}))
+        # Startup preflight may be ready with no invocation, after all authority/IO checks.
+        self.assertTrue(quiet({**self.state, 'adapterState': 'ready'}))
+        self.assertFalse(quiet({**self.state, 'adapterState': 'ready', 'modelPending': 1}))
         self.assertFalse(quiet({**self.state, 'adapterState': 'not_checked', 'retirementConfirmed': False}))
         for key, value in [('modelPending', 1), ('compilerPending', 1), ('activeCalls', 1),
                            ('nonTerminal', 1), ('operatorHold', True), ('quarantined', True),
