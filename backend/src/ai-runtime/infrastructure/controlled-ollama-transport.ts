@@ -111,7 +111,9 @@ export class ControlledOllamaTransport<Input> implements GenerationTransport<Inp
     if(this.invoked)throw unavailable();
     const expectedTokens=compiled.tokens;
     let body:string|undefined=JSON.stringify({model:this.binding.reference,prompt:compiled.rawPrompt,raw:true,stream:false,
-      format:"json",options:{num_ctx:8192,num_predict:512}});
+      // The bounded attribution slice needs repeatable decoding, not creative sampling.
+      // Gates still decide acceptance; these parameters never guarantee safety.
+      format:"json",options:{num_ctx:8192,num_predict:512,temperature:0,seed:42}});
     compiled=undefined;
     // No await between the original guard, host lease and actual SDK dispatch.
     if(!this.live(budget)){body=undefined;throw unavailable();}

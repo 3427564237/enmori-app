@@ -55,7 +55,7 @@ test("controlled chat packet joins the actual compiler/adapter/wrapper/executor 
   assert.equal(report.localContentHoldersCleared, true); assert.equal(report.modelState, "stopped");
   const payload = JSON.parse(f.body()!) as { prompt: string; raw: boolean; stream: boolean; options: unknown };
   assert.equal(payload.prompt, f.fullRaw()); assert.equal(payload.raw, true); assert.equal(payload.stream, false);
-  assert.deepEqual(payload.options, { num_ctx: 8192, num_predict: 512 });
+  assert.deepEqual(payload.options, { num_ctx: 8192, num_predict: 512, temperature: 0, seed: 42 });
   assert.match(payload.prompt, /<\|im_start\|>system/); assert.match(payload.prompt, /"checkIns":\[\]/);
   const serialized = JSON.stringify(report);
   for (const forbidden of [binding.reference, binding.manifestDigest, binding.tokenizerDigest,
