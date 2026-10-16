@@ -51,7 +51,14 @@ final class ActivityController extends Notifier<AsyncValue<ActivityRead?>> {
       generation == _generation &&
       _authenticated &&
       (_expiry?.isActive ?? false);
+
+  /// A queued tile action cannot outlive the exact displayed read snapshot.
+  bool isCurrentSnapshot(AsyncValue<ActivityRead?> snapshot) =>
+      _current(_generation) && identical(state, snapshot);
+
   Future<void> load() async {
+    // The previous Reload button can still receive another tap before repaint.
+    if (state.isLoading) return;
     clear();
     final generation = _generation;
     if (!_authenticated) {
