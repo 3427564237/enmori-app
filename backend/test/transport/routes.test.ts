@@ -69,6 +69,18 @@ const commandHeaders = {
   "idempotency-key": "A".repeat(22),
 };
 
+const isolatedEnvironment = {
+  ENMORI_ENVIRONMENT: "test",
+  ENMORI_CONTROLLED_PROFILE_DIRECTORY: "/tmp/history-route-test",
+  APPDATA: "/tmp/history-route-test",
+  HOME: "/tmp/history-route-test",
+  USERPROFILE: "/tmp/history-route-test",
+  XDG_CONFIG_HOME: "/tmp/history-route-test",
+  GCLOUD_PROJECT: "demo-enmori-rmvp01a-r10",
+  FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099",
+  FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080",
+} as NodeJS.ProcessEnv;
+
 test("PUT onboarding maps the approved payload and created projection", async () => {
   const input: unknown[] = [];
   const deps = dependencies();
@@ -96,6 +108,47 @@ test("PUT onboarding maps the approved payload and created projection", async ()
       idempotencyKey: "A".repeat(22),
     },
   ]);
+});
+
+test("Check-in history authenticates before parsing and marks every response no-store", async () => {
+  let calls = 0;
+  const deps = {
+    ...dependencies(),
+    isolatedSlices: {
+      environment: isolatedEnvironment,
+      checkInHistory: { execute: async (input: { readonly principal: { readonly firebaseUid: string }; readonly date: string; readonly timeZone: string; readonly cursor?: string }) => {
+        calls += 1;
+        assert.deepEqual(input, { principal: { firebaseUid: "firebase-1" }, date: "2026-10-07", timeZone: "Asia/Singapore" });
+        return ok({ checkIns: [checkIn], nextCursor: null });
+      } },
+    },
+  };
+  const app = await buildApp(deps);
+  test.after(() => app.close());
+
+  const unauthenticated = await app.inject({ method: "GET", url: "/v1/me/check-ins?date=bad&timeZone=bad" });
+  assert.equal(unauthenticated.statusCode, 401);
+  assert.equal(unauthenticated.headers["cache-control"], "no-store");
+  assert.equal(calls, 0);
+
+  const success = await app.inject({
+    method: "GET",
+    url: "/v1/me/check-ins?date=2026-10-07&timeZone=Asia%2FSingapore",
+    headers: authHeaders,
+  });
+  assert.equal(success.statusCode, 200);
+  assert.equal(success.headers["cache-control"], "no-store");
+  assert.deepEqual(success.json(), { checkIns: [checkIn], nextCursor: null });
+
+  const invalid = await app.inject({
+    method: "GET",
+    url: "/v1/me/check-ins?date=2026-10-07&timeZone=Asia%2FSingapore&limit=500",
+    headers: authHeaders,
+  });
+  assert.equal(invalid.statusCode, 400);
+  assert.equal(invalid.headers["cache-control"], "no-store");
+  assert.equal(invalid.json().error.code, "REQUEST_INVALID");
+  assert.equal(calls, 1);
 });
 
 test("PUT and POST exact retries return 200", async () => {

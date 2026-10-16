@@ -2,10 +2,11 @@ import type { FastifyInstance, FastifySchema } from "fastify";
 import type { IdentityVerifier } from "../shared/ports/identity-verifier.js";
 import type { FriendRequests } from "../friends/application/friend-requests.js";
 import type { GetEventDetail } from "../event-detail/application/get-event-detail.js";
+import type { ListOwnCheckInsForDate } from "../check-ins/application/check-in-history.js";
 import { decodeFriendCursor, isRequestRef } from "../friends/domain/request-reference.js";
 import { buildAuthenticate, requirePrincipal } from "./authenticate.js";
 import { sendFailure, sendFailureCode } from "./error-response.js";
-import { errorEnvelopeSchema } from "./schemas.js";
+import { errorEnvelopeSchema, getCheckInHistorySchema } from "./schemas.js";
 export const targetSchema = { type: "object", additionalProperties: false, required: ["username","displayName","relationshipState"], properties: {
   username: { type: "string" }, displayName: { type: "string" }, relationshipState: { type: "string", enum: ["self","already_friends","outgoing_request_pending","incoming_request_pending","can_send_request"] } } } as const;
 export const eventDetailSchema = { type: "object", additionalProperties: false, required: ["eventId","title","startAt","externalSourceUrl"], properties: {
@@ -16,7 +17,7 @@ export const friendInboxSchema = { type: "object", additionalProperties: false, 
 export const friendActionSchema = { type: "object", additionalProperties: false, required: ["result"], properties: { result: { type:"string", enum:["accepted","declined"] } } } as const;
 function responses(success: unknown) { return { 200: success, 400:errorEnvelopeSchema,401:errorEnvelopeSchema,403:errorEnvelopeSchema,404:errorEnvelopeSchema,409:errorEnvelopeSchema,503:errorEnvelopeSchema }; }
 const emptyQuery = { type:"object", additionalProperties:false, properties:{} };
-export async function registerIsolatedSlices(app: FastifyInstance, identity: IdentityVerifier, friends?: FriendRequests, events?: GetEventDetail): Promise<void> {
+export async function registerIsolatedSlices(app: FastifyInstance, identity: IdentityVerifier, friends?: FriendRequests, events?: GetEventDetail, checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">): Promise<void> {
   const authenticate = buildAuthenticate(identity);
   if (friends !== undefined) {
     for (const [path, send] of [["/v1/friends/lookup", false], ["/v1/friend-requests", true]] as const) {
@@ -44,4 +45,31 @@ export async function registerIsolatedSlices(app: FastifyInstance, identity: Ide
     const result = await events.execute(requirePrincipal(request),request.params.eventId);
     return result.ok ? reply.send({event:result.value}) : sendFailure(request,reply,result.failure);
   });
+  if (checkInHistory !== undefined) {
+    app.get<{ Querystring: { date: string; timeZone: string; cursor?: string } }>(
+      "/v1/me/check-ins",
+      {
+        schema: getCheckInHistorySchema,
+        onRequest: [async (_request, reply) => { reply.header("Cache-Control", "no-store"); }, authenticate],
+      },
+      async (request, reply) => {
+        const result = await checkInHistory.execute({
+          principal: requirePrincipal(request),
+          date: request.query.date,
+          timeZone: request.query.timeZone,
+          ...(request.query.cursor === undefined ? {} : { cursor: request.query.cursor }),
+        });
+        if (!result.ok) return sendFailure(request, reply, result.failure);
+        return reply.code(200).send({
+          checkIns: result.value.checkIns.map(row => ({
+            checkInId: row.checkInId,
+            note: row.note,
+            createdAt: row.createdAt,
+            ...(row.checkInVisibility === undefined ? {} : { checkInVisibility: row.checkInVisibility }),
+          })),
+          nextCursor: result.value.nextCursor,
+        });
+      },
+    );
+  }
 }

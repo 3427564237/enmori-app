@@ -12,6 +12,9 @@ Future<void> main() async {
       await directory.create(recursive: true);
       final file = File('${directory.path}/$name.png');
       await file.writeAsBytes(bytes);
+      stdout.writeln(
+        'S3_HISTORY_SCREENSHOT_SAVED ${file.path} ${bytes.length}',
+      );
       return true;
     },
   );

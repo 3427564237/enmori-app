@@ -186,6 +186,27 @@ const checkInEnvelope = {
   properties: { checkIn: checkInSchema },
 } as const;
 
+const checkInHistoryQuery = {
+  type: "object",
+  additionalProperties: false,
+  required: ["date", "timeZone"],
+  properties: {
+    date: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$" },
+    timeZone: { type: "string", minLength: 1, maxLength: 128 },
+    cursor: { type: "string", minLength: 1, maxLength: 4096 },
+  },
+} as const;
+
+const checkInHistoryEnvelope = {
+  type: "object",
+  additionalProperties: false,
+  required: ["checkIns", "nextCursor"],
+  properties: {
+    checkIns: { type: "array", maxItems: 20, items: checkInSchema },
+    nextCursor: { anyOf: [{ type: "string", minLength: 1 }, { type: "null" }] },
+  },
+} as const;
+
 const interestTagListEnvelope = {
   type: "object",
   additionalProperties: false,
@@ -250,6 +271,11 @@ export const createCheckInSchema = {
 export const getCheckInSchema = {
   params: checkInParams,
   response: withErrors({ 200: checkInEnvelope }, [401, 403, 404, 409, 503]),
+} satisfies FastifySchema;
+
+export const getCheckInHistorySchema = {
+  querystring: checkInHistoryQuery,
+  response: withErrors({ 200: checkInHistoryEnvelope }, [400, 401, 403, 409, 503]),
 } satisfies FastifySchema;
 
 export const getInterestTagsSchema = {
