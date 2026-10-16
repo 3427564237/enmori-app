@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
 import '../../auth/auth_providers.dart';
+import '../../auth/domain/auth_repository.dart';
 import '../account_preferences_providers.dart';
 import '../domain/account_preferences_repository.dart';
 import '../domain/account_repository.dart';
@@ -41,10 +42,12 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
   @override
   PreferencesState build() {
     _repository = ref.watch(accountPreferencesRepositoryProvider);
-    final subject = ref.watch(currentAuthSubjectProvider);
+    // A replacement observation is a new session even for the same subject.
+    // Rebuild the request fence so old reads/saves cannot settle this session.
+    final session = ref.watch(authSessionProvider).asData?.value;
     final operation = ++_operation;
     ref.onDispose(() => _operation++);
-    if (subject != null) {
+    if (session is AuthSessionAuthenticated) {
       scheduleMicrotask(() {
         if (ref.mounted && operation == _operation) unawaited(load());
       });
