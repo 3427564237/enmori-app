@@ -8,7 +8,7 @@ Every Skill listed as shared is committed under `.agents/skills/` and is availab
 | --- | --- | --- | --- |
 | `enmori-backend-development` | Project-authored | Implicitly eligible | Assigned Backend/API implementation or review inside the approved TypeScript/Fastify/Firebase/Ports/OpenAPI boundary. |
 | `enmori-scrum-planning` | Project-authored | Explicit only | PM-controlled refinement, assignment, Sprint Planning/rebalance, Review, Retro, closure, and named planning reports. |
-| `domain-modeling` | Vendored | Explicit only | Confirmed terminology, `CONTEXT.md`, and ADR work; metadata is conservatively explicit-only for all tasks. |
+| `domain-modeling` | Vendored | Explicit only | Confirmed terminology, existing glossary files (`CONTEXT.md` or `GLOSSARY.md`), and ADR work; metadata is conservatively explicit-only for all tasks. |
 | `ui-ux-pro-max` | Vendored | Implicitly eligible | UI/UX, accessibility, interaction, visual, responsive, typography, and Flutter-specific guidance within approved UI authority. |
 | `grill-with-docs` | Vendored | Explicit only | Deliberately requested plan/design stress testing with documentation support. |
 | `grilling` | Vendored | Explicit only | Deliberately requested stress-test interview; dependency of `grill-with-docs`. |
@@ -53,3 +53,5 @@ The project-authored `enmori-backend-development` Skill replaces these candidate
 ## Update rule
 
 Do not refresh a vendored Skill from a moving branch. Review the complete upstream directory and licence, pin a new commit in `team-skills.lock`, reapply and record only necessary ENMORI modifications, then rerun the complete integrity and security checks. Do not copy local authentication or alter `.codex/config.toml` as part of a routine Skill update.
+
+The seven-Skill refresh prepared on 2026-10-12 is distributed through [the team synchronization record](skill-update-2026-10-12.md). Teammates receive it by pulling the merged repository; no personal/global installation is required.
