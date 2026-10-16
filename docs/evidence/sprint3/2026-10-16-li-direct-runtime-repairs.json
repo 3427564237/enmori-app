@@ -1,0 +1,483 @@
+{
+  "schemaVersion": 1,
+  "recordedAtSGT": "2026-10-16T08:47:08.009996+08:00",
+  "disposition": "Owner repairs verified on actual controlled host; independent new-delta review and phone acceptance remain separate",
+  "source": {
+    "baseline": "6523a98f8a401045914212ab118e490eccfff336",
+    "productCommit": "fe5c46c6f69e377bb21893a1ef14f7566c7df0b9",
+    "productTree": "1b5d105573268ce79f231960a335038a03bf40a2",
+    "changedProductBindings": [
+      {
+        "path": "backend/src/ai-runtime/infrastructure/controlled-conversation-prompt.ts",
+        "gitBlob": "9e2c4de43667a903578abe17808830140b663ce7",
+        "sha256": "2ac28770c98ed7a91a20fd910798beb3650daa8778a25976407df87e3b38a48c",
+        "freshCompiledPath": "backend/dist/src/ai-runtime/infrastructure/controlled-conversation-prompt.js",
+        "freshCompiledSha256": "c388d1e4c8a2754450d31215065bc232face99fe29e9582695fd850f29d640de"
+      },
+      {
+        "path": "backend/src/event-browse/infrastructure/ticketmaster-browse-source.ts",
+        "gitBlob": "fd4bc82e5aed570248c654ef10883891882d27e9",
+        "sha256": "e099f6c857117805d99fe1256c510edcf6f187eb81e6f91d90cfd21f26b7447e",
+        "freshCompiledPath": "backend/dist/src/event-browse/infrastructure/ticketmaster-browse-source.js",
+        "freshCompiledSha256": "17afc494d159cf582998fdf418c4a1be6a73ab3b7749391a22ffeb4bef7fec6f"
+      }
+    ],
+    "unchangedAgainstBaseline": {
+      "lib": true,
+      "android": true,
+      "api": true,
+      "pubspec.yaml": true,
+      "pubspec.lock": true,
+      "package.json": true,
+      "pnpm-lock.yaml": true,
+      "firebase.json": true,
+      "tool/controlled_phone_service.mjs": true,
+      "backend/src/ai-conversation/application/bounded-conversation-semantic-policy.ts": true
+    }
+  },
+  "checks": {
+    "freshStrictCompile": "Pass",
+    "backend": {
+      "pass": 938,
+      "fail": 0
+    },
+    "operator": {
+      "pass": 16,
+      "fail": 0
+    },
+    "compilerAndSemanticSubset": {
+      "pass": 54,
+      "fail": 0,
+      "includedInBackend": true
+    },
+    "eventSubset": {
+      "pass": 15,
+      "fail": 0,
+      "includedInBackend": true
+    },
+    "guardedSdk": {
+      "pass": 168,
+      "fail": 0,
+      "outerExit": 0,
+      "modelCompilerProvider": "explicit doubles",
+      "innerOuterProfileRemoved": true,
+      "independentFivePortsFree": true
+    },
+    "oldEventRegression": {
+      "pass": 0,
+      "fail": 2
+    },
+    "oldPromptContractRegression": {
+      "pass": 53,
+      "fail": 1,
+      "includesUnchangedSemanticRejectionControl": true
+    }
+  },
+  "realModelDiagnosticBeforePromptFix": {
+    "result": "unsafe_output",
+    "posts": 1,
+    "transportState": "stopped",
+    "runtime": {
+      "admission": "open",
+      "quarantined": false,
+      "queued": 0,
+      "nonTerminal": 0
+    },
+    "elapsedMs": 3430,
+    "diagnostic": {
+      "remoteDone": true,
+      "validJson": true,
+      "correctSchema": true,
+      "allowedKeysOnly": true,
+      "messageIsText": true,
+      "lineCount": 1,
+      "bulleted": false,
+      "exactCurrent": false,
+      "exactNote": false,
+      "containsExactCurrent": true,
+      "containsExactNote": true
+    },
+    "syntheticContext": true,
+    "productWrites": 0
+  },
+  "realModelDiagnosticAfterPromptFix": {
+    "result": "Pass",
+    "posts": 1,
+    "transportState": "stopped",
+    "runtime": {
+      "admission": "open",
+      "quarantined": false,
+      "queued": 0,
+      "nonTerminal": 0
+    },
+    "elapsedMs": 2596,
+    "diagnostic": {
+      "remoteDone": true,
+      "validJson": true,
+      "correctSchema": true,
+      "allowedKeysOnly": true,
+      "messageIsText": true,
+      "lineCount": 1,
+      "bulleted": false,
+      "exactCurrent": true,
+      "exactNote": false,
+      "containsExactCurrent": true,
+      "containsExactNote": false
+    },
+    "syntheticContext": true,
+    "productWrites": 0
+  },
+  "realAdapterProviderAfterFix": {
+    "result": "Pass",
+    "inputHasMilliseconds": true,
+    "eligibleCount": 18,
+    "matchingDetail": true,
+    "observations": [
+      {
+        "upstreamStatus": 200,
+        "listQuery": true,
+        "queryFractionPresent": false
+      },
+      {
+        "upstreamStatus": 200,
+        "listQuery": false,
+        "queryFractionPresent": false
+      }
+    ],
+    "scope": "actual adapter/provider diagnostic, not protected service or phone",
+    "contentRetained": false
+  },
+  "joinedRealEnglishNote": {
+    "result": "Pass",
+    "scope": "actual candidate HTTPS/Auth/Firestore/complete compiler/formal9B and synthetic saved Note; host HTTP client, not phone UI",
+    "serviceModelAttempts": 1,
+    "remoteGenerationPostsIndependentlyMeasured": false,
+    "elapsedGenerationAndReadbackSeconds": 6.29,
+    "independent": {
+      "mode": "pair",
+      "result": "Pass",
+      "independentActualFirestore": true,
+      "noteCount": 1,
+      "sourceContentAndVisibilityUnchanged": true,
+      "canonicalPairAndExactNoteProvenance": true
+    },
+    "conversationDeleted": true,
+    "checks": [
+      {
+        "method": "POST",
+        "status": 201,
+        "expected": 201,
+        "safeErrorCode": null
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "safeErrorCode": null
+      },
+      {
+        "method": "POST",
+        "status": 201,
+        "expected": 201,
+        "safeErrorCode": null
+      },
+      {
+        "method": "POST",
+        "status": 200,
+        "expected": 200,
+        "safeErrorCode": null
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "safeErrorCode": null
+      },
+      {
+        "method": "DELETE",
+        "status": 204,
+        "expected": 204,
+        "safeErrorCode": null
+      }
+    ],
+    "observation": {
+      "schemaVersion": 1,
+      "scope": "isolated-phone-service",
+      "phase": "running",
+      "accepting": true,
+      "maintenanceHealthy": true,
+      "retirementConfirmed": true,
+      "modelAttempts": 1,
+      "modelPending": 0,
+      "compilerPending": 0,
+      "activeCalls": 0,
+      "nonTerminal": 0,
+      "quarantined": false,
+      "admission": "open",
+      "eventBrowse": {
+        "configured": true,
+        "enabled": false,
+        "pending": 0
+      },
+      "databaseLifetime": "owned-emulator-process",
+      "hostPreflightPassed": true,
+      "tokenizerReadinessPassed": true,
+      "adapterState": "stopped",
+      "httpsListening": true,
+      "stopRequested": false,
+      "cleanupConfirmed": false,
+      "eventControlFailed": false,
+      "operatorHold": false
+    },
+    "phoneUiClaimed": false,
+    "independentPeerAcceptanceOfNewDeltaClaimed": false
+  },
+  "joinedRealChineseWithSameEnglishNote": {
+    "result": "Pass",
+    "scope": "actual candidate HTTPS/Auth/Firestore/complete compiler/formal9B and synthetic saved Note; host HTTP client, not phone UI",
+    "serviceModelAttempts": 2,
+    "thisControlAdditionalAttempts": 1,
+    "remoteGenerationPostsIndependentlyMeasured": false,
+    "elapsedGenerationAndReadbackSeconds": 5.5,
+    "independent": {
+      "mode": "pair",
+      "result": "Pass",
+      "independentActualFirestore": true,
+      "noteCount": 1,
+      "sourceContentAndVisibilityUnchanged": true,
+      "canonicalPairAndExactNoteProvenance": true
+    },
+    "conversationDeleted": true,
+    "checks": [
+      {
+        "method": "POST",
+        "status": 201,
+        "expected": 201,
+        "safeErrorCode": null
+      },
+      {
+        "method": "POST",
+        "status": 200,
+        "expected": 200,
+        "safeErrorCode": null
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "safeErrorCode": null
+      },
+      {
+        "method": "DELETE",
+        "status": 204,
+        "expected": 204,
+        "safeErrorCode": null
+      },
+      {
+        "method": "GET",
+        "status": 404,
+        "expected": 404,
+        "safeErrorCode": "CONVERSATION_UNAVAILABLE"
+      }
+    ],
+    "observation": {
+      "schemaVersion": 1,
+      "scope": "isolated-phone-service",
+      "phase": "running",
+      "accepting": true,
+      "maintenanceHealthy": true,
+      "retirementConfirmed": true,
+      "modelAttempts": 2,
+      "modelPending": 0,
+      "compilerPending": 0,
+      "activeCalls": 0,
+      "nonTerminal": 0,
+      "quarantined": false,
+      "admission": "open",
+      "eventBrowse": {
+        "configured": true,
+        "enabled": false,
+        "pending": 0
+      },
+      "databaseLifetime": "owned-emulator-process",
+      "hostPreflightPassed": true,
+      "tokenizerReadinessPassed": true,
+      "adapterState": "stopped",
+      "httpsListening": true,
+      "stopRequested": false,
+      "cleanupConfirmed": false,
+      "eventControlFailed": false,
+      "operatorHold": false
+    },
+    "phoneUiClaimed": false,
+    "independentPeerAcceptanceOfNewDeltaClaimed": false
+  },
+  "joinedRealEventService": {
+    "scope": "actual candidate ongoing service/HTTPS/Auth/real provider; host client, not phone",
+    "checks": [
+      {
+        "route": "/v1/event-browse",
+        "httpStatus": 401,
+        "noStore": true
+      },
+      {
+        "route": "/v1/event-browse",
+        "httpStatus": 503,
+        "noStore": true
+      },
+      {
+        "route": "/v1/event-browse",
+        "httpStatus": 200,
+        "noStore": true
+      },
+      {
+        "route": "/v1/event-browse/{browseId}",
+        "httpStatus": 200,
+        "noStore": true
+      },
+      {
+        "route": "/v1/event-browse",
+        "httpStatus": 503,
+        "noStore": true
+      },
+      {
+        "route": "/v1/me/profile",
+        "httpStatus": 200,
+        "noStore": false
+      }
+    ],
+    "rawProviderContentRetained": false,
+    "outboundFetchesIndependentlyMeasured": false,
+    "phoneOrBrowserClaimed": false,
+    "privateEnableAcknowledged": true,
+    "eligibleFirstBatchCount": 18,
+    "matchingDetail": true,
+    "externalOpen": "Not Run: unresolved existing SG deep-link use condition",
+    "result": "Pass",
+    "privateDisableAcknowledged": true,
+    "finalSourceDisabled": true,
+    "independentPeerAcceptanceOfNewDeltaClaimed": false
+  },
+  "readinessBeforeDiagnostic": {
+    "done": true,
+    "responseEmpty": true,
+    "evalCountPresent": false,
+    "elapsedMs": 18575
+  },
+  "readinessBeforeJoinedService": {
+    "residentInitially": false,
+    "independentFivePortsFree": true,
+    "manualEmptyPreloadPerformed": true,
+    "done": true,
+    "responseEmpty": true,
+    "evalCountPresent": false,
+    "elapsedMs": 8919
+  },
+  "sameOriginalCleanup": {
+    "sameOriginal": true,
+    "twiceQuietBeforeStop": true,
+    "closed": {
+      "schemaVersion": 1,
+      "phase": "closed",
+      "accepting": false,
+      "httpsListening": false,
+      "cleanupConfirmed": true,
+      "operatorHold": false,
+      "databaseLifetime": "owned-emulator-process"
+    },
+    "worker": {
+      "schemaVersion": 1,
+      "innerProfileRemoved": true
+    },
+    "operator": {
+      "schemaVersion": 1,
+      "exitCode": 0,
+      "portsFree": true,
+      "outerProfileRemoved": true
+    },
+    "independentFivePortsFree": true,
+    "firstImmediateIndependentBind": "errno98 on an unrecorded port; subsequent ss showed no listeners and all five plain binds passed; transient cause not proved",
+    "forcedCleanup": false
+  },
+  "logs": [
+    {
+      "name": "enmori-li-fix-final-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "enmori-li-fix-event-red.log",
+      "bytes": 1262,
+      "sha256": "0e18e3167e415b09fb135437ab8c1488cac6e6eed9bfca67695d2f7b6873caac"
+    },
+    {
+      "name": "enmori-li-fix-event-green.log",
+      "bytes": 1736,
+      "sha256": "071d7077f3c668636d2a6558dc5c9e993930e1a30d453b6f324f275019ccbd07"
+    },
+    {
+      "name": "enmori-li-fix-prompt-red.log",
+      "bytes": 5741,
+      "sha256": "9c96ae1d530c666dd2cb494fe3801af706a84a3eb927896e8ee48ee5f262729e"
+    },
+    {
+      "name": "enmori-li-fix-prompt-green.log",
+      "bytes": 5292,
+      "sha256": "7ed75f7877f4dfac61655f317aab9b92803ee419b214a705511c08bf1e04e3fa"
+    },
+    {
+      "name": "enmori-li-fix-backend.log",
+      "bytes": 89618,
+      "sha256": "b1373b6717b647ce5a80f0152fba608081c14be2eff24f5140dbe08072622e27"
+    },
+    {
+      "name": "enmori-li-fix-operator.log",
+      "bytes": 1868,
+      "sha256": "00f3203b544a86250c1f624c0136afc8f08e1eddbeca4b93ad1a62d1412184d2"
+    },
+    {
+      "name": "enmori-li-fix-emulator.log",
+      "bytes": 24660,
+      "sha256": "5b6919e2b0778ba56fe65ec20d0c1bd178954f78f450f3edb71e5554ff09a024"
+    },
+    {
+      "name": "enmori-li-fix-model-diagnostic.log",
+      "bytes": 439,
+      "sha256": "ca1fc586cf108ace4261a7ea85bccb4a426edb5b4a77fb72e4510cc65c1f2aa5"
+    },
+    {
+      "name": "enmori-li-fix-model-after.log",
+      "bytes": 430,
+      "sha256": "3be0d66a144dffd1fa56d0bac8994f6220fabe3d4af6d44511736a4e6dad0bb7"
+    },
+    {
+      "name": "enmori-li-fix-event-live.log",
+      "bytes": 344,
+      "sha256": "0ef2df917d9283840072da0c8ba29f2971a438f8461f03d1ca407a996d1ec774"
+    },
+    {
+      "name": "enmori-li-fix-real-note-host.log",
+      "bytes": 1626,
+      "sha256": "ffcf5833ee4b859141a4f376b23808ed19f4cf4b30781d25fe6a4da3d829e2ed"
+    },
+    {
+      "name": "enmori-li-fix-chinese-note-host.log",
+      "bytes": 1608,
+      "sha256": "dac7ceedee5de5a824278d8500d864a2427119388aa7fcdf51192545be7dd8d4"
+    },
+    {
+      "name": "enmori-li-fix-real-event-host.log",
+      "bytes": 882,
+      "sha256": "c6000564d473a493bd25fae80557689895911497fac196c6719898c27242b2b4"
+    }
+  ],
+  "firstPromptContractFailureLog": "Assertion printed Backend-authored system instructions; content removed, failed count retained, boolean assertions prevent repetition; no model reply or actual user Note was printed",
+  "privateInputs": "Owner-only existing inputs retained outside Git; no active preview",
+  "notClaimed": [
+    "Independent approval or PM acceptance of LI-authored repairs",
+    "New physical phone/browser/return/client-disable-clear/owned-copy journey",
+    "Resolution of the two historical CONSUMED failures",
+    "New APK build or successful v4 install",
+    "Whole-baseline/UAT/Release/Done or merge/task/Project transition"
+  ]
+}

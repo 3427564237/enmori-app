@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router/app_router.dart';
+import '../../app/social_demo_presentation.dart';
 import 'offline_social_store.dart';
 
 const _accent = Color(0xff4f46e5);
@@ -503,43 +504,9 @@ final class OfflineSocialNavigation extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelected;
   @override
-  Widget build(BuildContext context) => NavigationBar(
-    key: const Key('social-bottom-navigation'),
+  Widget build(BuildContext context) => SocialDemoNavigation(
     selectedIndex: selectedIndex,
-    onDestinationSelected: (index) {
-      if (index != selectedIndex) onSelected(index);
-    },
-    destinations: const [
-      NavigationDestination(
-        key: Key('social-nav-home'),
-        icon: Icon(Icons.home_outlined),
-        selectedIcon: Icon(Icons.home),
-        label: 'Home',
-      ),
-      NavigationDestination(
-        key: Key('social-nav-friends'),
-        icon: Icon(Icons.people_outline),
-        selectedIcon: Icon(Icons.people),
-        label: 'Friends',
-      ),
-      NavigationDestination(
-        key: Key('social-nav-check-in'),
-        icon: Icon(Icons.add_box_outlined),
-        label: 'Check-in',
-      ),
-      NavigationDestination(
-        key: Key('social-nav-ai'),
-        icon: Icon(Icons.auto_awesome_outlined),
-        selectedIcon: Icon(Icons.auto_awesome),
-        label: 'AI',
-      ),
-      NavigationDestination(
-        key: Key('social-nav-me'),
-        icon: Icon(Icons.person_outline),
-        selectedIcon: Icon(Icons.person),
-        label: 'Me',
-      ),
-    ],
+    onSelected: onSelected,
   );
 }
 

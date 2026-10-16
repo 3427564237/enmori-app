@@ -112,6 +112,69 @@ void main() {
       final router = GoRouter.of(
         tester.element(find.byKey(const Key('route-home'))),
       );
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        0,
+      );
+      for (final destination in [
+        ('social-nav-friends', 'route-friends', 1),
+        ('social-nav-me', 'route-own-profile', 4),
+        ('social-nav-home', 'route-home', 0),
+      ]) {
+        await tester.tap(find.byKey(Key(destination.$1)));
+        await tester.pumpAndSettle();
+        expect(find.byKey(Key(destination.$2)), findsOneWidget);
+        expect(
+          tester
+              .widget<NavigationBar>(find.byType(NavigationBar))
+              .selectedIndex,
+          destination.$3,
+        );
+      }
+      await tester.tap(find.byKey(const Key('social-nav-check-in')));
+      await tester.pumpAndSettle();
+      expect(find.text('Keep a little moment'), findsOneWidget);
+      router.go(AppRoutes.home);
+      await tester.pumpAndSettle();
+      final oldHomeTab = tester
+          .widget<NavigationBar>(find.byType(NavigationBar))
+          .onDestinationSelected!;
+      await tester.tap(find.byKey(const Key('social-nav-ai')));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        3,
+      );
+      oldHomeTab(1);
+      await tester.pumpAndSettle();
+      expect(
+        router.routeInformationProvider.value.uri.path,
+        AppRoutes.aiAssistant,
+      );
+      await tester.enterText(
+        find.byKey(const Key('ai-message-input')),
+        'Unsaved demo draft',
+      );
+      await tester.tap(find.byKey(const Key('social-nav-home')));
+      await tester.pumpAndSettle();
+      expect(find.text('Discard unsaved changes?'), findsOneWidget);
+      await tester.tap(find.text('Keep editing'));
+      await tester.pumpAndSettle();
+      expect(find.text('Unsaved demo draft'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('social-nav-home')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('ai-confirm-discard')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('route-home')), findsOneWidget);
+      // A narrow viewport and large text keep the bottom bar and content usable.
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
       for (final path in [
         AppRoutes.profile,
         AppRoutes.interests,
@@ -141,6 +204,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('No public registration'), findsOneWidget);
       expect(find.byKey(const Key('route-home')), findsNothing);
+      oldHomeTab(1);
+      await tester.pumpAndSettle();
+      expect(find.textContaining('No public registration'), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
       await auth.sessions.close();
       client.close();
