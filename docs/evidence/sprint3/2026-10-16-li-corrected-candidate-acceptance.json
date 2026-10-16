@@ -1,0 +1,316 @@
+{
+  "schemaVersion": 1,
+  "recordedAtSGT": "2026-10-16T02:46:46.862457+08:00",
+  "reviewHead": "6523a98f8a401045914212ab118e490eccfff336",
+  "backendProduct": "27705999ebf3840f8d9b768a7714382d60632617",
+  "liFixtureSource": "aeb29991e464a7b9c067b93f0d1675c2c1f610b5",
+  "disposition": "Source/evidence received; integrated real-model/provider/phone positive acceptance NOT PASSED",
+  "independentChecks": {
+    "strictCompile": "Pass",
+    "r1": {
+      "pass": 16,
+      "fail": 0
+    },
+    "flutter": {
+      "pass": 659,
+      "fail": 0
+    },
+    "actualGuardedSdk": {
+      "pass": 168,
+      "fail": 0,
+      "outerExit": 0,
+      "modelCompilerProvider": "explicit doubles"
+    },
+    "hostHandoffUnit": {
+      "pass": 18,
+      "fail": 0
+    }
+  },
+  "bindings": {
+    "r1SourceBlobsAndSha256": 3,
+    "r1CompiledOutputHashes": 3,
+    "declaredProtectedPaths": 9,
+    "allClientAndroidOperatorInputsUnchangedAgainst": "5229fefe5ee3bce5fa0962514de943b76a57abc0",
+    "apiOperations": 35,
+    "apiSchemas": 45
+  },
+  "realNote": {
+    "serviceModelAttempts": 3,
+    "remoteGenerationPostsIndependentlyMeasured": false,
+    "initialEnglishSend": "Non-200; exact HTTP status was not retained",
+    "initialIndependentReadback": {
+      "user": 1,
+      "assistant": 0,
+      "provenance": 0
+    },
+    "originalUserRetry": [
+      {
+        "method": "POST",
+        "status": 201,
+        "expected": 201,
+        "safeErrorCode": null
+      },
+      {
+        "method": "POST",
+        "status": 502,
+        "expected": 200,
+        "safeErrorCode": "AI_REPLY_REJECTED"
+      }
+    ],
+    "newChineseControlAfterExplicitOriginalDeletion": [
+      {
+        "method": "DELETE",
+        "status": 204,
+        "expected": 204,
+        "safeErrorCode": null
+      },
+      {
+        "method": "GET",
+        "status": 404,
+        "expected": 404,
+        "safeErrorCode": "CONVERSATION_UNAVAILABLE"
+      },
+      {
+        "method": "POST",
+        "status": 201,
+        "expected": 201,
+        "safeErrorCode": null
+      },
+      {
+        "method": "POST",
+        "status": 502,
+        "expected": 200,
+        "safeErrorCode": "AI_REPLY_REJECTED"
+      }
+    ],
+    "positiveAcceptedPairClaimed": false,
+    "semanticPolicyBypassed": false,
+    "knownOriginalsSettledBeforeCleanup": true
+  },
+  "eventService": {
+    "scope": "actual reviewed ongoing service/HTTPS/Auth/real provider; host client, not phone",
+    "checks": [
+      {
+        "route": "/v1/event-browse",
+        "httpStatus": 401,
+        "noStore": true
+      },
+      {
+        "route": "/v1/event-browse",
+        "httpStatus": 503,
+        "noStore": true
+      },
+      {
+        "route": "/v1/event-browse",
+        "httpStatus": 503,
+        "noStore": true
+      },
+      {
+        "route": "/v1/event-browse",
+        "httpStatus": 503,
+        "noStore": true
+      },
+      {
+        "route": "/v1/me/profile",
+        "httpStatus": 200,
+        "noStore": false
+      }
+    ],
+    "rawProviderContentRetained": false,
+    "outboundFetchesIndependentlyMeasured": false,
+    "phoneOrBrowserClaimed": false,
+    "privateEnableAcknowledged": true,
+    "privateDisableAcknowledged": true,
+    "finalSourceDisabled": true
+  },
+  "providerEncodingDiagnostic": [
+    {
+      "format": "milliseconds",
+      "startDateTimeHasFraction": true,
+      "upstreamHttpStatus": 400,
+      "adapterResult": "Unavailable"
+    },
+    {
+      "format": "whole-seconds",
+      "startDateTimeHasFraction": false,
+      "upstreamHttpStatus": 200,
+      "adapterResult": "Pass",
+      "eligibleCount": 18
+    }
+  ],
+  "phone": {
+    "actualNewJourney": "Not Run: installer/log-discovery/startup gates, not a failed completed product journey",
+    "newConfigurationConsumptionProven": false,
+    "nativeAuthInferredFromHostAuth": false,
+    "firstDedicatedVersionDowngrade": true,
+    "dedicatedPackageReplacedByFlutterSdk": true,
+    "ordinaryPackageTargeted": false,
+    "v4Install": "System approval not confirmed; own waiting ADB client interrupted, exit130; package still versionCode1",
+    "uiLoggingRestoration": "Human confirmed phone UI Log collection switched off; not independently verified by ADB",
+    "historicalConsumedFailuresResolved": false,
+    "clipboardReadOrClearPerformed": false,
+    "realSourceLinkOpenedOrCopied": false,
+    "fixtureHostChoreography": "Requires assigned host stage/command coordinator; not claimed as a complete standalone runner",
+    "lastObservedInstalledVersionCode": 1,
+    "installerClientExit": 130,
+    "osDialogDismissalClaimed": false,
+    "installationConfirmationPage": "Human reports no visible confirmation page",
+    "followupDeviceConnected": true,
+    "newInstallStartedAfterFollowup": false
+  },
+  "apk": {
+    "path": "enmori-controlled-demo-li128-v4-arm64.apk",
+    "bytes": 94172503,
+    "sha256": "95c09c08af2e8be1b96096e8c30c493ca3728a49a0faa3c39e2e5f65bbae3cf2",
+    "package": "com.enmori.app.personatest",
+    "versionCode": 4,
+    "clientSource": "6523a98f8a401045914212ab118e490eccfff336"
+  },
+  "oldPreviewStop": {
+    "firstQuiet": true,
+    "secondQuiet": true,
+    "closed": {
+      "schemaVersion": 1,
+      "phase": "closed",
+      "accepting": false,
+      "httpsListening": false,
+      "cleanupConfirmed": true,
+      "operatorHold": false,
+      "databaseLifetime": "owned-emulator-process"
+    },
+    "worker": {
+      "schemaVersion": 1,
+      "innerProfileRemoved": true
+    },
+    "operator": {
+      "schemaVersion": 1,
+      "exitCode": 0,
+      "portsFree": true,
+      "outerProfileRemoved": true
+    },
+    "independentFivePortsFree": true
+  },
+  "sameOriginalNewServiceCleanup": {
+    "sameOriginal": true,
+    "observedContentAttempts": 3,
+    "quiescentBeforeStop": true,
+    "closed": {
+      "schemaVersion": 1,
+      "phase": "closed",
+      "accepting": false,
+      "httpsListening": false,
+      "cleanupConfirmed": true,
+      "operatorHold": false,
+      "databaseLifetime": "owned-emulator-process"
+    },
+    "worker": {
+      "schemaVersion": 1,
+      "innerProfileRemoved": true
+    },
+    "operator": {
+      "schemaVersion": 1,
+      "exitCode": 0,
+      "portsFree": true,
+      "outerProfileRemoved": true
+    },
+    "independentFivePortsFree": true
+  },
+  "privateInputs": "Retained owner-only for a later fixed-source handoff; no running service/preview claimed",
+  "logs": [
+    {
+      "name": "enmori-li128-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "enmori-li128-r1.log",
+      "bytes": 1816,
+      "sha256": "4fa0e24ca4cb9c6dfe12820b2c74b054cd6bbd51b8c4e283afe7adb4f3aca3a0"
+    },
+    {
+      "name": "enmori-li128-flutter.log",
+      "bytes": 132080,
+      "sha256": "5fe76793fdd3434f9358c8b96b9bd0b27b2c1499f4d149b27fda93745b134a14"
+    },
+    {
+      "name": "enmori-li128-emulator.log",
+      "bytes": 24657,
+      "sha256": "c433e1710b68ed69389a41e411a27450fd4c3fbf59afb0425b6bafbec8800ee2"
+    },
+    {
+      "name": "enmori-li128-handoff-tests.log",
+      "bytes": 117,
+      "sha256": "01cae0a7f8a1a2ae4d3a2f24dc0d927de42fd046d362f318738c57d15a2e5f34"
+    },
+    {
+      "name": "enmori-li128-device.log",
+      "bytes": 3693,
+      "sha256": "dfa321085b5f63a214deb3ff00ab573d964f601560416b6798154f657168e93f"
+    },
+    {
+      "name": "enmori-li128-device-2.log",
+      "bytes": 3284,
+      "sha256": "ef49c35b69a924a6eb9c482c415a4025c76e223c3522218823d7b014ba733ac7"
+    },
+    {
+      "name": "enmori-li128-device-3.log",
+      "bytes": 3275,
+      "sha256": "6ee7014ad183a41881fb87af7e093dfd7fc83036c6b0a679eed0cf177534f436"
+    },
+    {
+      "name": "enmori-li128-real-note-host.log",
+      "bytes": 903,
+      "sha256": "b05d50e0ca9f03a1f726662a2b0247f23ef38377ce223c29ed645edcb3ea22b3"
+    },
+    {
+      "name": "enmori-li128-real-note-retry.log",
+      "bytes": 763,
+      "sha256": "2da1bbd300ed02a3e359fe03bcebca601b8b3300b487ae3b8373fc72ad8af3d7"
+    },
+    {
+      "name": "enmori-li128-real-note-chinese.log",
+      "bytes": 757,
+      "sha256": "09d47ace190acfebd094f5e46f947ed8afe862f49cf4881a593aa6a7023676b1"
+    },
+    {
+      "name": "enmori-li128-real-event-host.log",
+      "bytes": 1507,
+      "sha256": "268aa5d7e3974f268b804eecf006b5d1c42e77638181f1c9e4e83cbb23a0951d"
+    },
+    {
+      "name": "enmori-li128-provider-diagnostic.log",
+      "bytes": 242,
+      "sha256": "7478c11334a32988ec9a44cfd3cc861b2e6c139904b480136f4647f9f5ca3a23"
+    },
+    {
+      "name": "enmori-li128-apk-v4.log",
+      "bytes": 1493,
+      "sha256": "4290ee9495ae704b15303f77dde824062e43fad5b5f68876611f5442c070f329"
+    },
+    {
+      "name": "enmori-li128-install-v4.log",
+      "bytes": 191,
+      "sha256": "4f72e6452ba3987f0bb4b4ecf79b58582fe79b171831f0a776f8d969594261a9",
+      "operationOutcome": "Client interrupted while awaiting system confirmation, exit130; no successful install"
+    },
+    {
+      "name": "enmori-li128-device-analysis.log",
+      "bytes": 506,
+      "sha256": "47262cb09f9cebdef440b95deb94cd1768488d3d0b6bbe9a72c98491541d418e"
+    },
+    {
+      "name": "enmori-li128-device-analysis-4.log",
+      "bytes": 96,
+      "sha256": "553ac5577571b63628325bff391c6ba42970af66de6123ecbb9ece4c213db6db"
+    }
+  ],
+  "notClaimed": [
+    "actual positive Qwen+Note save/readback",
+    "new phone UI/model/provider journey",
+    "browser/disable assigned-client/owned-copy exercise",
+    "ordinary producer guarantees",
+    "whole module/baseline/UAT/Release/Done"
+  ],
+  "logsAreCapturedSnapshotsAtPreparation": true,
+  "runtimeFindingsIssueComment": "https://github.com/3427564237/enmori-app/issues/84#issuecomment-6199637687"
+}
