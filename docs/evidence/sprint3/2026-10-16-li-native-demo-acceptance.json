@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "recordedAtSGT": "2026-10-16T09:26:14.847009+08:00",
+  "scope": "Actual assigned Android standalone candidate, manual ADB/UIAutomator checks; no claim that the #129 integration_test fixture executed",
+  "backendProduct": "fe5c46c6f69e377bb21893a1ef14f7566c7df0b9",
+  "backendEvidenceHead": "fb35f60f2bc7d790da98f332b54ce547c2fbf602",
+  "unchangedClientSource": "6523a98f8a401045914212ab118e490eccfff336",
+  "device": {
+    "model": "V2405A",
+    "api": 36,
+    "dedicatedPackage": "com.enmori.app.personatest",
+    "versionCode": 4,
+    "ordinaryPackageTouched": false,
+    "logging": "Human-confirmed off; no system log collection or setting change performed"
+  },
+  "apk": {
+    "filename": "enmori-controlled-demo-li128-v4-arm64.apk",
+    "bytes": 94172503,
+    "sha256": "95c09c08af2e8be1b96096e8c30c493ca3728a49a0faa3c39e2e5f65bbae3cf2",
+    "installedHashCheckedTwice": true,
+    "nativeInstallHumanApproved": true
+  },
+  "firstHandoff": {
+    "report": {
+      "status": "Pass",
+      "category": null,
+      "apkVerified": true,
+      "installedApkMatched": true,
+      "readyNonceVerified": true,
+      "configurationConsumed": true,
+      "failureCleanupConfirmed": true,
+      "createdReverseCount": 2,
+      "apkSha256": "95c09c08af2e8be1b96096e8c30c493ca3728a49a0faa3c39e2e5f65bbae3cf2"
+    },
+    "consumptionObservations": [
+      {
+        "phase": "CONSUMED",
+        "exitCode": 0,
+        "state": "WAIT",
+        "stderrBytes": 0
+      },
+      {
+        "phase": "CONSUMED",
+        "exitCode": 0,
+        "state": "CONSUMED",
+        "stderrBytes": 0
+      }
+    ],
+    "backendProduct": "fe5c46c6f69e377bb21893a1ef14f7566c7df0b9"
+  },
+  "sameOriginalReconnect": {
+    "sameOriginal": true,
+    "report": {
+      "status": "Pass",
+      "category": null,
+      "apkVerified": true,
+      "installedApkMatched": true,
+      "readyNonceVerified": true,
+      "configurationConsumed": true,
+      "failureCleanupConfirmed": true,
+      "createdReverseCount": 0,
+      "apkSha256": "95c09c08af2e8be1b96096e8c30c493ca3728a49a0faa3c39e2e5f65bbae3cf2"
+    },
+    "consumptionObservations": [
+      {
+        "exitCode": 0,
+        "state": "WAIT",
+        "stderrBytes": 0
+      },
+      {
+        "exitCode": 0,
+        "state": "CONSUMED",
+        "stderrBytes": 0
+      }
+    ]
+  },
+  "nativeAuth": {
+    "result": "Pass",
+    "actualAuthEmulator": true,
+    "oneSyntheticOwner": true,
+    "lastSignInRecorded": true,
+    "noHostSignInInThisService": true,
+    "appReachedAuthenticatedHome": true
+  },
+  "independentSavedState": {
+    "result": "Pass",
+    "actualFirestore": true,
+    "interestCount": 1,
+    "personaCount": 1,
+    "onePersonaActive": true
+  },
+  "independentAcceptedPair": {
+    "mode": "pair",
+    "result": "Pass",
+    "independentActualFirestore": true,
+    "noteCount": 1,
+    "sourceContentAndVisibilityUnchanged": true,
+    "canonicalPairAndExactNoteProvenance": true,
+    "activePersonaPresentationCaptured": true
+  },
+  "independentDeletion": {
+    "result": "Pass",
+    "actualFirestore": true,
+    "conversations": 0,
+    "messages": 0,
+    "provenance": 0,
+    "originalNoteUnchanged": true
+  },
+  "uiCheckpoints": [
+    {
+      "checkpoint": "native_home_after_private_handoff",
+      "visible": true
+    },
+    {
+      "checkpoint": "interests_saved",
+      "successVisible": true,
+      "checkboxCount": 1
+    },
+    {
+      "checkpoint": "friends_entry_opened",
+      "ownedForeground": true
+    },
+    {
+      "checkpoint": "my_friends_search",
+      "emptyResultVisible": true,
+      "scope": "explicit fixture navigation only"
+    },
+    {
+      "checkpoint": "checkin_saved_and_http_confirmed",
+      "confirmed": true
+    },
+    {
+      "checkpoint": "footprint_opened",
+      "ownedForeground": true
+    },
+    {
+      "checkpoint": "footprint_previous_date",
+      "savedEntryAbsent": true
+    },
+    {
+      "checkpoint": "footprint_selected_date_saved_read",
+      "confirmed": true
+    },
+    {
+      "checkpoint": "persona_management_opened",
+      "ownedForeground": true
+    },
+    {
+      "checkpoint": "persona_navigation_probe_correction",
+      "firstAttempt": "Create control absent on overview; opened explicit Manage Personas route; no create was submitted"
+    },
+    {
+      "checkpoint": "persona_created",
+      "savedStatusVisible": true
+    },
+    {
+      "checkpoint": "persona_selection_probe_correction",
+      "firstAttempt": "Newly created Persona was already selected; no Select action required"
+    },
+    {
+      "checkpoint": "persona_activation_confirmed_in_ui",
+      "confirmationPressed": true
+    },
+    {
+      "checkpoint": "ai_route_opened",
+      "ownedForeground": true
+    },
+    {
+      "checkpoint": "native_ai_send_once",
+      "sent": true
+    },
+    {
+      "checkpoint": "native_ai_original_settled",
+      "modelAttempts": 1,
+      "noHold": true
+    },
+    {
+      "checkpoint": "native_ai_reply_rendered",
+      "recognizedAcceptedAttributionVisible": true
+    },
+    {
+      "checkpoint": "native_ai_history_reloaded",
+      "acceptedReplyVisible": true
+    },
+    {
+      "checkpoint": "same_session_settings_opened",
+      "visible": true
+    },
+    {
+      "checkpoint": "settings_back_to_ai",
+      "ownedForeground": true
+    },
+    {
+      "checkpoint": "native_ai_deleted",
+      "oldReplyAbsent": true
+    },
+    {
+      "checkpoint": "home_after_ai_and_settings",
+      "visible": true
+    },
+    {
+      "checkpoint": "native_activity_disabled",
+      "retryVisible": true
+    },
+    {
+      "checkpoint": "activity_selector_probe_correction",
+      "correction": "Native ListTile is a Button; selected a timestamp-bearing source row from the actual tree"
+    },
+    {
+      "checkpoint": "activity_detail_probe_correction",
+      "correction": "Native detail merges title and time; validated time containment rather than Starts prefix"
+    },
+    {
+      "checkpoint": "native_real_activity_list_and_matching_detail",
+      "matchingTitle": true,
+      "startTimeVisible": true,
+      "realSource": true,
+      "disclosureVisible": true
+    },
+    {
+      "checkpoint": "native_activity_background_clear",
+      "oldTitleAbsent": true,
+      "sourceActionsAbsent": true
+    },
+    {
+      "checkpoint": "real_browser_and_copy",
+      "result": "Not Run",
+      "reason": "Existing SG deep-link use condition; no specific authorization established; clipboard not read or cleared"
+    },
+    {
+      "checkpoint": "native_source_disable_dispose_reopen",
+      "staleTitleAbsent": true,
+      "sourceActionsAbsent": true,
+      "retryVisible": true
+    },
+    {
+      "checkpoint": "footprint_previous_date_loaded_empty",
+      "explicitLoadedEmptyState": true
+    },
+    {
+      "checkpoint": "final_native_home",
+      "connected": true,
+      "sourceDisabled": true
+    },
+    {
+      "checkpoint": "same_original_preview_reconnected",
+      "newHandoffConsumed": true,
+      "homeVisible": true,
+      "modelAttemptsUnchanged": true
+    },
+    {
+      "checkpoint": "persona_selector_final_diagnosis",
+      "correction": "Earlier already-selected assumption was incorrect: native semantic value precedes descriptive Select for activation label; actual selection/activation and independent saved state subsequently passed"
+    }
+  ],
+  "initialReadiness": {
+    "residentInitially": false,
+    "manualEmptyPreload": true,
+    "portsFree": true,
+    "elapsedMs": 14251,
+    "evalCountPresent": false
+  },
+  "preSendReadiness": {
+    "manualPreSendReadiness": true,
+    "residentInitially": false,
+    "emptyPreload": true,
+    "elapsedMs": 8556,
+    "evalCountPresent": false
+  },
+  "previewReadiness": {
+    "sameOriginalPreserved": true,
+    "quietTwice": true,
+    "dedicatedAppPausedBeforeManualReadiness": true,
+    "residentInitially": false,
+    "emptyPreload": true,
+    "elapsedMs": 37436,
+    "evalCountPresent": false
+  },
+  "retainedPreviewStatus": {
+    "schemaVersion": 1,
+    "scope": "isolated-phone-service",
+    "phase": "running",
+    "accepting": true,
+    "maintenanceHealthy": true,
+    "retirementConfirmed": true,
+    "modelAttempts": 1,
+    "modelPending": 0,
+    "compilerPending": 0,
+    "activeCalls": 0,
+    "nonTerminal": 0,
+    "quarantined": false,
+    "admission": "open",
+    "eventBrowse": {
+      "configured": true,
+      "enabled": false,
+      "pending": 0
+    },
+    "databaseLifetime": "owned-emulator-process",
+    "hostPreflightPassed": true,
+    "tokenizerReadinessPassed": true,
+    "adapterState": "stopped",
+    "httpsListening": true,
+    "stopRequested": false,
+    "cleanupConfirmed": false,
+    "eventControlFailed": false,
+    "operatorHold": false
+  },
+  "preview": {
+    "intentionallyRunning": true,
+    "cleanupClaimed": false,
+    "sourceDisabled": true,
+    "modelUserAttempts": 1,
+    "noMoreUserGenerationOnReconnect": true,
+    "coldIdleLimitation": "Existing manual empty-prompt recovery only, no keepalive extension/warm loop/host policy change; current readiness is not persistent readiness",
+    "historicalConsumedFailuresErased": false,
+    "historicalFailureCausesResolved": false
+  },
+  "notRun": [
+    "Real Event external browser/open/return or copy under unresolved use condition",
+    "Owned-copy clearing: no app-owned copy made, no clipboard read or clear",
+    "Direct invocation of an obsolete captured callback on the phone",
+    "#129 integration_test Dart fixture",
+    "Full real Friend or Music flows: explicitly labelled fixtures",
+    "Whole baseline/UAT/Release/Done, merge/Issue/Project transitions"
+  ],
+  "review": "DU new-delta review still requested and not yet submitted; owner phone evidence is not independent approval"
+}
