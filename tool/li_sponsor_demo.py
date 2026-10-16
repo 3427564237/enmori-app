@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Manual preparation of the existing owned Sponsor preview; never starts a service.
 
-No credentials or model/provider content are printed. No loop, keepalive change,
-force-stop, reset, install, log collection or model generation retry is provided.
+No credentials or model/provider content are printed. No loop, keepalive change, data reset, install, log collection or model generation
+retry is provided. next-round restarts only the dedicated app after confirmed deletion.
 """
 import argparse
 import hashlib
@@ -14,7 +14,9 @@ import stat
 import subprocess
 import sys
 import time
+import xml.etree.ElementTree as ET
 import urllib.request
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 ADB = '/home/miku/Android/Sdk/platform-tools/adb'
@@ -58,7 +60,7 @@ def quiet(value):
             and value.get('retirementConfirmed') is True
             and value.get('admission') == 'open'
             and value.get('httpsListening') is True
-            and value.get('adapterState') == 'stopped'
+            and value.get('adapterState') in ('stopped', 'not_checked')
             and all(value.get(k) == 0 for k in
                     ['modelPending', 'compilerPending', 'activeCalls', 'nonTerminal'])
             and all(value.get(k) is False for k in
@@ -97,21 +99,28 @@ def installed(serial):
             == identity['sha256'], 'local_apk_identity_changed')
     require(adb(serial, 'get-state').strip() == b'device', 'phone_not_connected')
     path = adb(serial, 'shell', 'pm', 'path', PKG).decode().strip()
-    require(re.fullmatch(r'package:/data/app/[A-Za-z0-9_./=+\-]+/base\.apk', path),
+    require(re.fullmatch(r'package:/data/app/[A-Za-z0-9_./=+~\-]+/base\.apk', path),
             'dedicated_package_unavailable')
     digest = adb(serial, 'exec-out', 'sha256sum', path[len('package:'):]).decode().split()[0]
     require(digest == identity['sha256'], 'installed_apk_identity_changed')
     return apk
 
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, message, headers, newurl):
+        raise Refused('model_redirect_refused')
+
+
 def remote_json(binding, path, payload=None):
     url = binding['endpoint'].rstrip('/') + path
-    require(re.fullmatch(r'http://(?:127\.0\.0\.1|\[::1\])(?::[0-9]+)?/',
-                         binding['endpoint']), 'unexpected_model_origin')
+    origin = urlsplit(binding['endpoint'])
+    require(origin.scheme == 'http' and origin.hostname in ('127.0.0.1', '::1')
+            and origin.path in ('', '/') and not origin.username and not origin.password
+            and not origin.query and not origin.fragment, 'unexpected_model_origin')
     request = urllib.request.Request(url, data=None if payload is None else
                                      json.dumps(payload).encode(),
                                      headers={'Content-Type': 'application/json'})
-    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
     with opener.open(request, timeout=60) as response:
         raw = response.read(2_000_001)
         require(len(raw) <= 2_000_000, 'model_metadata_size')
@@ -152,6 +161,16 @@ def gate(session, enabled):
     raise Refused('source_acknowledgment_unconfirmed_do_not_repeat')
 
 
+def require_deleted_page(focus, raw):
+    require(any(PKG in line for line in focus.splitlines() if 'mCurrentFocus=' in line),
+            'show_confirmed_deleted_ai_page_first')
+    start, end = raw.find('<?xml'), raw.find('</hierarchy>')
+    require(start >= 0 and end >= 0, 'deleted_page_not_observed')
+    tree = ET.fromstring(raw[start:end + len('</hierarchy>')])
+    require(any(n.get('content-desc') == 'Conversation deleted.' or n.get('text') == 'Conversation deleted.'
+                for n in tree.iter('node')), 'show_confirmed_deleted_ai_page_first')
+
+
 def execute(args):
     base = Path(read_private(args.runtime_pointer).decode().strip())
     private(base, True)
@@ -164,9 +183,21 @@ def execute(args):
     fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     inode = os.fstat(fd).st_ino
     os.close(fd)
+    release_lock = True
     try:
         before = twice_quiet(session)
-        if args.command == 'connect':
+        if args.command in ('connect', 'next-round'):
+            if args.command == 'next-round':
+                focus = adb(args.serial, 'shell', 'dumpsys', 'window').decode()
+                require(any(PKG in line for line in focus.splitlines() if 'mCurrentFocus=' in line),
+                        'show_confirmed_deleted_ai_page_first')
+                raw = adb(args.serial, 'exec-out', 'uiautomator', 'dump', '/dev/tty').decode()
+                require_deleted_page(focus, raw)
+                require(twice_quiet(session)['modelAttempts'] == before['modelAttempts'],
+                        'product_activity_changed_do_not_restart')
+                adb(args.serial, 'shell', 'am', 'force-stop', PKG)
+                adb(args.serial, 'shell', 'am', 'start', '-W', '-n', PKG + '/com.enmori.app.MainActivity')
+                time.sleep(2)
             # The existing helper verifies installed hash, app nonce and CONSUMED.
             from li_controlled_phone_handoff import transfer
             receipt = transfer(apk, session / 'handoff.json', args.serial, adb=ADB,
@@ -178,6 +209,11 @@ def execute(args):
             gate(session, False)
             result = {'activitySourceEnabled': False}
         else:
+            from li_controlled_phone_handoff import handoff
+            _, port = handoff(session / 'handoff.json')
+            mappings = [line.split()[-2:] for line in adb(args.serial, 'reverse', '--list').decode().splitlines()]
+            require(all([f'tcp:{p}', f'tcp:{p}'] in mappings for p in (9099, port)),
+                    'phone_reverse_missing_use_private_connect')
             binding = config['binding']
             require(binding['mode'] == 'formal-9b', 'unexpected_model_mode')
             require(remote_json(binding, '/api/version').get('version') == binding['ollamaVersion'],
@@ -193,6 +229,7 @@ def execute(args):
                 adb(args.serial, 'shell', 'input', 'keyevent', 'KEYCODE_HOME')
                 try:
                     twice_quiet(session)
+                    release_lock = False  # Unknown completion keeps this operator's lock.
                     response = remote_json(binding, '/api/generate', {
                         'model': binding['reference'], 'prompt': '', 'stream': False,
                         'options': {'num_ctx': 8192},
@@ -200,6 +237,7 @@ def execute(args):
                     require(response.get('done') is True and response.get('response') == '',
                             'empty_readiness_not_confirmed_no_retry')
                     warmed = True
+                    release_lock = True
                 finally:
                     adb(args.serial, 'shell', 'am', 'start', '-n', PKG + '/com.enmori.app.MainActivity')
                 require(matching_models(remote_json(binding, '/api/ps'), binding, True),
@@ -212,13 +250,13 @@ def execute(args):
                       'activitySourceEnabled': True, 'productGenerationAdded': 0}
         print(json.dumps({'result': 'Pass', **result}))
     finally:
-        if lock.exists() and lock.lstat().st_ino == inode:
+        if release_lock and lock.exists() and lock.lstat().st_ino == inode:
             lock.unlink()
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=['prepare', 'connect', 'off'])
+    parser.add_argument('command', choices=['prepare', 'connect', 'next-round', 'off'])
     parser.add_argument('--serial', default='10AF5N20E0004UH')
     parser.add_argument('--runtime-pointer', type=Path, default=POINTER)
     args = parser.parse_args()

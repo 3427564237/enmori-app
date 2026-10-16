@@ -1,11 +1,13 @@
 import copy
+import hashlib
+import json
 import os
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
-from li_sponsor_demo import Refused, matching_models, private, quiet, twice_quiet
+from li_sponsor_demo import Refused, installed, matching_models, private, quiet, twice_quiet, remote_json, require_deleted_page
 
 
 class SponsorPreparationTests(unittest.TestCase):
@@ -23,6 +25,9 @@ class SponsorPreparationTests(unittest.TestCase):
 
     def test_held_or_inflight_original_is_refused(self):
         self.assertTrue(quiet(self.state))
+        # Transport preflight failure leaves not_checked without a dispatched generation.
+        self.assertTrue(quiet({**self.state, 'adapterState': 'not_checked'}))
+        self.assertFalse(quiet({**self.state, 'adapterState': 'not_checked', 'retirementConfirmed': False}))
         for key, value in [('modelPending', 1), ('compilerPending', 1), ('activeCalls', 1),
                            ('nonTerminal', 1), ('operatorHold', True), ('quarantined', True),
                            ('adapterState', 'unknown'), ('retirementConfirmed', False),
@@ -62,6 +67,42 @@ class SponsorPreparationTests(unittest.TestCase):
             os.symlink(path, link)
             with self.assertRaises(Refused):
                 private(link)
+
+    def test_actual_android_tilde_install_path_and_hash_mismatch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            apk = root / 'demo.apk'
+            apk.write_bytes(b'bound-apk')
+            digest = hashlib.sha256(apk.read_bytes()).hexdigest()
+            identity = root / 'identity.json'
+            identity.write_text(json.dumps(dict(package='com.enmori.app.personatest', relativePath='demo.apk', sha256=digest)))
+            native_path = b'package:/data/app/~~abc==/com.enmori.app.personatest-abc==/base.apk\n'
+            with patch('li_sponsor_demo.IDENTITY', identity), patch('li_sponsor_demo.ROOT', root):
+                with patch('li_sponsor_demo.adb', side_effect=[b'device', native_path, digest.encode()+b'  /bound.apk']):
+                    self.assertEqual(installed('owned-serial'), apk)
+                with patch('li_sponsor_demo.adb', side_effect=[b'device', native_path, b'bad-hash /bound.apk']):
+                    with self.assertRaises(Refused):
+                        installed('owned-serial')
+
+    def test_existing_loopback_origin_with_or_without_slash_and_no_public_origin(self):
+        opener = MagicMock()
+        opener.open.return_value.__enter__.return_value.read.return_value = b'{}'
+        with patch('li_sponsor_demo.urllib.request.build_opener', return_value=opener):
+            for endpoint in ['http://127.0.0.1:11434', 'http://127.0.0.1:11434/', 'http://[::1]:11434/']:
+                self.assertEqual(remote_json(dict(endpoint=endpoint), '/api/ps'), {})
+            for endpoint in ['https://example.com/', 'http://127.0.0.1:11434/?token=private', 'http://user:pass@127.0.0.1/']:
+                with self.assertRaises(Refused):
+                    remote_json(dict(endpoint=endpoint), '/api/ps')
+
+    def test_next_round_requires_owned_foreground_and_actual_terminal_deletion(self):
+        focus = 'mCurrentFocus=Window{ com.enmori.app.personatest/.MainActivity }'
+        deleted = '<?xml version="1.0"?><hierarchy><node text="Conversation deleted."/></hierarchy>'
+        require_deleted_page(focus, deleted)
+        for wrong_focus, wrong_xml in [('mCurrentFocus=other.package', deleted),
+                                        (focus, deleted.replace('Conversation deleted.', 'Waiting for a reply…')),
+                                        (focus, 'no hierarchy')]:
+            with self.assertRaises(Refused):
+                require_deleted_page(wrong_focus, wrong_xml)
 
 
 if __name__ == '__main__':
