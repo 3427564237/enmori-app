@@ -160,3 +160,14 @@ test("absent optional Persona never reads an inherited accessor", async () => {
   assert.deepEqual(await boundedConversationSemanticCandidate(() => projection, () => output, budget()), { ok: true, value: undefined });
   assert.equal(reads, 0);
 });
+
+test("plain output never combines current and saved Note attributions even when both are grounded",async()=>{
+  const source:ConversationInput={currentMessage:"I read a book today.",checkIns:[{occurredAt:"2026-10-16T00:00:00Z",noteText:"I read a book today."}],persona:undefined};
+  const lines=["You mentioned: I read a book today.","Your check-in mentions: I read a book today."];
+  for(const message of lines)assert.deepEqual(await boundedConversationSemanticCandidate(()=>source,()=>({...output,message}),budget()),{ok:true,value:undefined});
+  for(const message of [lines.join(" "),lines.join("\n"),lines.map(x=>"- "+x).join("\n")]){
+    assert.deepEqual(await boundedConversationSemanticCandidate(()=>source,()=>({...output,message}),budget()),{ok:false,failure:"unsafe_output"});
+  }
+  const bulleted:ConversationInput={...source,persona:{schemaVersion:"persona_presentation_v1",tone:"neutral",responseLength:"concise",formatStyle:"bulleted"}};
+  assert.deepEqual(await boundedConversationSemanticCandidate(()=>bulleted,()=>({...output,message:lines.map(x=>"- "+x).join("\n")}),budget()),{ok:true,value:undefined});
+});

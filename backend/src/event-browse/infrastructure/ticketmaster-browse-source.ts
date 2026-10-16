@@ -1,3 +1,4 @@
+import {Temporal} from "@js-temporal/polyfill";
 import {decodeBrowseId,object,projectOccurrence} from "../domain/browse-values.js";
 import {dependencyUnavailable} from "../../shared/ports/dependency-failure.js";
 import type {BrowseSource,BrowseDetail} from "../ports/event-browse.js";
@@ -23,7 +24,12 @@ export class TicketmasterBrowseSource implements BrowseSource {
     finally{clearTimeout(timer);await reader?.cancel().catch(()=>{});reader?.releaseLock();}
   }
   async firstBatch(asOf:string,signal:AbortSignal):Promise<readonly BrowseDetail[]>{
-    const raw=await this.read("events",{countryCode:"SG",size:"20",page:"0",sort:"date,asc",startDateTime:asOf,includeTBA:"no",includeTBD:"no",includeTest:"no"},signal);
+    // Discovery rejects fractional query seconds. Widen only its lower bound;
+    // projectOccurrence below still compares each row to the original asOf.
+    let startDateTime:string;
+    try{startDateTime=Temporal.Instant.from(asOf).toString({smallestUnit:"second",roundingMode:"floor"});}
+    catch{throw dependencyUnavailable;}
+    const raw=await this.read("events",{countryCode:"SG",size:"20",page:"0",sort:"date,asc",startDateTime,includeTBA:"no",includeTBD:"no",includeTest:"no"},signal);
     if(!object(raw)||!object(raw.page)||raw.page.number!==0||typeof raw.page.totalElements!=="number"||!Number.isSafeInteger(raw.page.totalElements)||raw.page.totalElements<0)throw dependencyUnavailable;
     let rows:unknown[]=[];
     if(raw._embedded!==undefined){if(!object(raw._embedded)||!Array.isArray(raw._embedded.events))throw dependencyUnavailable;rows=raw._embedded.events;}
