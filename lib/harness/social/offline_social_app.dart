@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
 import '../../app/router/app_router.dart';
+import '../../app/social_demo_presentation.dart';
 import '../../app/router/activity_routes.dart';
 import '../../app/platform/external_activity_opener.dart';
 import '../../features/event_browse/event_browse_providers.dart';
@@ -431,43 +432,7 @@ final class _OfflineMaterialApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => MaterialApp.router(
     title: 'ENMORI Offline Social',
     debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      useMaterial3: true,
-      scaffoldBackgroundColor: const Color(0xfffafaf8),
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xff4f46e5),
-        surface: const Color(0xfffafaf8),
-      ).copyWith(primary: const Color(0xff4f46e5), onPrimary: Colors.white),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xfffafaf8),
-        surfaceTintColor: Colors.transparent,
-      ),
-      cardTheme: CardThemeData(
-        color: Colors.white,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xffe9e9e3)),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          minimumSize: const Size(48, 48),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(13),
-          ),
-        ),
-      ),
-      navigationBarTheme: const NavigationBarThemeData(
-        backgroundColor: Colors.white,
-        indicatorColor: Color(0xffeeedff),
-      ),
-    ),
+    theme: socialDemoTheme(),
     routerConfig: ref.watch(appRouterProvider),
     builder: (context, child) => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
