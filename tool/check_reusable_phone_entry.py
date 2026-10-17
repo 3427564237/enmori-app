@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import base64
-from datetime import datetime
 import hashlib
 import http.client
 import json
@@ -34,25 +33,6 @@ class Refused(Exception):
 def require(condition, reason):
     if not condition:
         raise Refused(reason)
-
-
-class Window:
-    def __init__(self, start: str, end: str):
-        try:
-            # An explicit SGT interval is an operator input, never an implied
-            # permanent service window or a default execution appointment.
-            pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+08:00"
-            require(re.fullmatch(pattern, start) and re.fullmatch(pattern, end), "invalid_sgt_window")
-            self.start = datetime.fromisoformat(start).timestamp()
-            self.end = datetime.fromisoformat(end).timestamp()
-            require(self.start < self.end, "invalid_sgt_window")
-        except (ValueError, TypeError):
-            raise Refused("invalid_sgt_window") from None
-
-    def remaining(self, clock=time.time):
-        now = clock()
-        require(self.start <= now < self.end, "outside_agreed_window")
-        return self.end - now
 
 
 def procedure_sha256():
@@ -122,8 +102,8 @@ def valid_settings(value):
             and 0 <= settings["revision"] <= 9007199254740991)
 
 
-def check_connection(apk: Path, private_handoff: Path, window: Window, *,
-                     clock=time.time, request=request_json, load=handoff_tool.handoff):
+def check_connection(apk: Path, private_handoff: Path, *,
+                     request=request_json, load=handoff_tool.handoff):
     report = {"status": "Blocked", "scope": "workstation-auth-backend-connection-only",
               "candidateSource": SOURCE, "apkSha256": APK_SHA256,
               "apkMatched": False, "backendTlsAndAuthGuard": False,
@@ -133,7 +113,6 @@ def check_connection(apk: Path, private_handoff: Path, window: Window, *,
     phase = "preflight_refused"
     data = token = value = None
     try:
-        window.remaining(clock)
         require(apk.is_absolute() and private_handoff.is_absolute(), phase)
         with apk.open("rb") as stream:
             require(hashlib.file_digest(stream, "sha256").hexdigest() == APK_SHA256, "candidate_apk_mismatch")
@@ -147,16 +126,13 @@ def check_connection(apk: Path, private_handoff: Path, window: Window, *,
         context.load_verify_locations(cadata=base64.b64decode(value["certificateBase64"]).decode("ascii"))
 
         def current():
-            window.remaining(clock)
             latest, latest_port = load(private_handoff)
             require(latest_port == port and hashlib.sha256(latest).digest() == initial_digest,
                     "private_handoff_changed")
-            return min(10.0, window.remaining(clock))
 
         def call(**kwargs):
-            result = request(context=context, timeout=current(), **kwargs)
-            window.remaining(clock)
-            return result
+            current()
+            return request(context=context, timeout=10.0, **kwargs)
 
         phase = "backend_tls_or_auth_guard_failed"
         status, result = call(tls=True, port=port, path=SETTINGS_PATH, method="GET", body=None, headers={})
@@ -205,7 +181,7 @@ def host_status_usable(value):
             and type(value.get("modelAttempts")) is int and value["modelAttempts"] >= 0)
 
 
-def check_host(session: Path, window: Window, *, clock=time.time, sleep=time.sleep,
+def check_host(session: Path, *, clock=time.time, sleep=time.sleep,
                read=read_private_handoff_file, load=handoff_tool.handoff):
     report = {"status": "Blocked", "scope": "original-host-current-status-only",
               "category": "host_status_unavailable", "quietSamples": 0,
@@ -213,18 +189,15 @@ def check_host(session: Path, window: Window, *, clock=time.time, sleep=time.sle
               "networkOrModelStarted": False}
     try:
         require(session.is_absolute(), "private_session_refused")
-        window.remaining(clock)
         initial, _ = load(session / "handoff.json")
         initial_digest = hashlib.sha256(initial).digest()
         first = None
         for _ in range(2):
-            window.remaining(clock)
             path = session / "status.json"
             before = path.stat(follow_symlinks=False)
             require(-2 <= clock() - before.st_mtime < 5, "host_status_stale")
             raw = read(path)
             after = path.stat(follow_symlinks=False)
-            window.remaining(clock)
             require(-2 <= clock() - after.st_mtime < 5, "host_status_stale")
             require((before.st_dev, before.st_ino, before.st_mtime_ns, before.st_size)
                     == (after.st_dev, after.st_ino, after.st_mtime_ns, after.st_size), "host_status_changed_during_read")
@@ -234,13 +207,10 @@ def check_host(session: Path, window: Window, *, clock=time.time, sleep=time.sle
             first = value["modelAttempts"]
             latest, _ = load(session / "handoff.json")
             require(hashlib.sha256(latest).digest() == initial_digest, "private_handoff_changed")
-            window.remaining(clock)
             require(-2 <= clock() - after.st_mtime < 5, "host_status_stale")
             report["quietSamples"] += 1
             if report["quietSamples"] == 1:
-                require(window.remaining(clock) > 0.7, "outside_agreed_window")
                 sleep(0.7)
-        window.remaining(clock)
         report.update(status="Pass", category=None)
     except Refused as error:
         report["category"] = str(error)
@@ -254,8 +224,6 @@ def check_host(session: Path, window: Window, *, clock=time.time, sleep=time.sle
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("host-check", "connection-check"))
-    parser.add_argument("--window-start-sgt", required=True)
-    parser.add_argument("--window-end-sgt", required=True)
     parser.add_argument("--session", type=Path)
     parser.add_argument("--apk", type=Path)
     parser.add_argument("--handoff", type=Path)
@@ -263,13 +231,12 @@ def main(argv=None):
     initial_procedure = None
     try:
         initial_procedure = procedure_sha256()
-        window = Window(args.window_start_sgt, args.window_end_sgt)
         if args.mode == "host-check":
             require(args.session is not None and args.apk is None and args.handoff is None, "arguments_refused")
-            report = check_host(args.session, window)
+            report = check_host(args.session)
         else:
             require(args.session is None and args.apk is not None and args.handoff is not None, "arguments_refused")
-            report = check_connection(args.apk, args.handoff, window)
+            report = check_connection(args.apk, args.handoff)
         require(procedure_sha256() == initial_procedure, "procedure_changed")
         report["procedureSha256"] = initial_procedure
     except Refused as error:

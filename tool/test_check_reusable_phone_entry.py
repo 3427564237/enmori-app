@@ -1,7 +1,6 @@
 """Focused entry checks: synthetic inputs and owned loopback servers only."""
 import base64
 import copy
-from datetime import datetime
 import hashlib
 import http.client
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -21,35 +20,33 @@ from unittest.mock import MagicMock, patch
 import check_reusable_phone_entry as target
 
 
-START = "2026-10-17T22:00:00+08:00"
-END = "2026-10-17T22:01:00+08:00"
-NOW = datetime.fromisoformat(START).timestamp()
+NOW = 1_800_000_000.0  # Arbitrary host-status fixture clock; not an appointment.
 GUARD = {"error": {"code": "AUTH_REQUIRED"}}
 SETTINGS = {"settings": {"checkInVisibility": "private",
                          "optionalProcessingConsent": "accepted", "revision": 0}}
 TOKEN = "SyntheticPrivateTokenCanary"
 
 
-class WindowTests(unittest.TestCase):
-    def test_explicit_sgt_interval_and_half_open_boundaries(self):
-        window = target.Window(START, END)
-        self.assertEqual(window.remaining(lambda: NOW), 60)
-        self.assertAlmostEqual(window.remaining(lambda: NOW + 59.5), 0.5)
-        for tick in (NOW - 0.001, NOW + 60, NOW + 61, float("nan")):
-            with self.subTest(tick=tick), self.assertRaises(target.Refused) as error:
-                window.remaining(lambda: tick)
-            self.assertEqual(str(error.exception), "outside_agreed_window")
+class NoAppointmentCliTests(unittest.TestCase):
+    def test_connection_check_needs_only_apk_and_private_handoff(self):
+        with patch.object(target, "check_connection", return_value={"status": "Pass", "category": None}) as check, \
+                patch.object(target, "procedure_sha256", return_value="1" * 64) as procedure, \
+                patch("sys.stdout", new_callable=io.StringIO) as output:
+            code = target.main(["connection-check", "--apk", "candidate.apk", "--handoff", "private.json"])
+        self.assertEqual(code, 0)
+        check.assert_called_once_with(Path("candidate.apk"), Path("private.json"))
+        self.assertEqual(procedure.call_count, 2)
+        self.assertEqual(json.loads(output.getvalue())["status"], "Pass")
 
-    def test_invalid_or_ambiguous_windows_are_rejected(self):
-        for start, end in ((START.replace("+08:00", "Z"), END),
-                           (START.replace("T", " "), END),
-                           (START.replace("00+", "00.1+"), END),
-                           (START.replace("+08:00", "+09:00"), END),
-                           ("2026-02-30T22:00:00+08:00", END),
-                           (START, START), (END, START), (None, END)):
-            with self.subTest(start=start, end=end), self.assertRaises(target.Refused) as error:
-                target.Window(start, end)
-            self.assertEqual(str(error.exception), "invalid_sgt_window")
+    def test_host_check_needs_only_current_session(self):
+        with patch.object(target, "check_host", return_value={"status": "Pass", "category": None}) as check, \
+                patch.object(target, "procedure_sha256", return_value="1" * 64) as procedure, \
+                patch("sys.stdout", new_callable=io.StringIO) as output:
+            code = target.main(["host-check", "--session", "current-session"])
+        self.assertEqual(code, 0)
+        check.assert_called_once_with(Path("current-session"))
+        self.assertEqual(procedure.call_count, 2)
+        self.assertEqual(json.loads(output.getvalue())["status"], "Pass")
 
 
 class ConnectionTests(unittest.TestCase):
@@ -93,11 +90,11 @@ class ConnectionTests(unittest.TestCase):
         with patch.object(target, "APK_SHA256", self.digest if bind_fixture else target.APK_SHA256):
             if mock_tls:
                 with patch.object(target.ssl, "SSLContext", return_value=self.context):
-                    return target.check_connection(self.apk, self.handoff, target.Window(START, END),
-                                                   clock=lambda: self.tick, request=request or self.request,
+                    return target.check_connection(self.apk, self.handoff,
+                                                   request=request or self.request,
                                                    load=load or self.load)
-            return target.check_connection(self.apk, self.handoff, target.Window(START, END),
-                                           clock=lambda: self.tick, request=request or self.request,
+            return target.check_connection(self.apk, self.handoff,
+                                           request=request or self.request,
                                            load=load or self.load)
 
     def assert_safe(self, report):
@@ -105,15 +102,16 @@ class ConnectionTests(unittest.TestCase):
         for secret in (*self.value.values(), TOKEN, str(self.directory)):
             self.assertNotIn(secret, public)
 
-    def test_slow_handoff_reload_cannot_dispatch_after_window_end(self):
-        def slow_load(path):
-            result = self.load(path)
-            if self.loads == 2:
-                self.tick = NOW + 60
-            return result
-        report = self.check(load=slow_load)
-        self.assertEqual(report["category"], "outside_agreed_window")
-        self.assertEqual(len(self.calls), 0, "Expired handoff reload must not dispatch Backend/Auth")
+    def test_handoff_is_reloaded_before_each_request_and_final_acceptance_without_clock(self):
+        loads_at_dispatch = []
+        def request(**arguments):
+            loads_at_dispatch.append(self.loads)
+            return self.request(**arguments)
+        with patch.object(target.time, "time", side_effect=AssertionError("Connection check has no appointment clock")):
+            report = self.check(request=request)
+        self.assertEqual(report["status"], "Pass")
+        self.assertEqual(loads_at_dispatch, [2, 3, 4])
+        self.assertEqual(self.loads, 5)
         self.assert_safe(report)
 
     def test_success_is_three_requests_with_original_credentials_and_no_retry(self):
@@ -216,33 +214,33 @@ class ConnectionTests(unittest.TestCase):
                 self.assertEqual(output.getvalue(), "")
                 self.assert_safe(report)
 
-    def test_window_expiration_after_request_prevents_next_stage(self):
+    def test_wall_clock_jump_at_each_stage_does_not_impose_operation_expiry(self):
         original = copy.deepcopy(self.responses)
         for stage in (1, 2, 3):
             with self.subTest(stage=stage):
                 self.tick = NOW
                 self.calls.clear()
                 self.responses = copy.deepcopy(original)
-                def expires(**arguments):
+                def jump(**arguments):
                     result = self.request(**arguments)
                     if len(self.calls) == stage:
-                        self.tick = NOW + 60
+                        self.tick = NOW + 365 * 24 * 3600
                     return result
-                report = self.check(request=expires)
-                self.assertEqual(report["category"], "outside_agreed_window")
-                self.assertEqual(len(self.calls), stage)
-                self.assertFalse(report["authenticatedSettingsRead"])
+                with patch.object(target.time, "time", side_effect=lambda: self.tick):
+                    report = self.check(request=jump)
+                self.assertEqual(report["status"], "Pass")
+                self.assertEqual(len(self.calls), 3)
+                self.assertTrue(report["authenticatedSettingsRead"])
 
-    def test_reload_time_is_subtracted_from_dispatch_budget(self):
-        self.tick = NOW + 55
+    def test_private_reload_leaves_each_request_its_own_ten_second_timeout(self):
         def slow_load(path):
             result = self.load(path)
-            if self.loads == 2:
-                self.tick += 4
+            self.tick += 300
             return result
-        report = self.check(load=slow_load)
+        with patch.object(target.time, "time", side_effect=lambda: self.tick):
+            report = self.check(load=slow_load)
         self.assertEqual(report["status"], "Pass")
-        self.assertEqual([call["timeout"] for call in self.calls], [1, 1, 1])
+        self.assertEqual([call["timeout"] for call in self.calls], [10.0, 10.0, 10.0])
 
     def test_changed_handoff_bytes_or_port_stop_each_boundary(self):
         original = copy.deepcopy(self.responses)
@@ -303,7 +301,7 @@ class HostTests(unittest.TestCase):
         self.tick += duration
 
     def check(self, *, read=None, load=None, sleep=None):
-        return target.check_host(self.session, target.Window(START, END), clock=lambda: self.tick,
+        return target.check_host(self.session, clock=lambda: self.tick,
                                  sleep=sleep or self.sleep, read=read or self.read, load=load or self.load)
 
     def test_configured_event_inflight_prevents_shared_quiet_snapshot(self):
@@ -434,24 +432,25 @@ class HostTests(unittest.TestCase):
         self.assertEqual(report["category"], "host_status_stale")
         self.assertEqual(report["quietSamples"], 1)
 
-    def test_handoff_reload_cannot_cross_window_before_acceptance(self):
-        def slow_reload(path):
-            result = self.load(path)
-            if self.loads == 3:
-                self.tick = NOW + 60
-            return result
-        report = self.check(load=slow_reload)
-        self.assertEqual(report["category"], "outside_agreed_window")
-        self.assertEqual(report["quietSamples"], 1)
+    def test_fresh_host_snapshot_is_usable_at_unrelated_current_dates(self):
+        for current in (1_000_000_000.0, 2_000_000_000.0):
+            with self.subTest(current=current):
+                self.tick = current
+                self.write()
+                report = self.check()
+                self.assertEqual(report["status"], "Pass")
+                self.assertEqual(report["quietSamples"], 2)
+                self.assertEqual(report["originalLeaseSettlement"],
+                                 "Operator must independently confirm before startup")
 
-    def test_read_crossing_window_never_passes(self):
-        def expires_during_read(path):
+    def test_slow_read_still_refuses_stale_status_without_operation_expiry(self):
+        def slow_read(path):
             result = self.read(path)
             self.tick = NOW + 60
             return result
-        report = self.check(read=expires_during_read)
+        report = self.check(read=slow_read)
         self.assertEqual(report["status"], "Blocked")
-        self.assertEqual(report["category"], "outside_agreed_window")
+        self.assertEqual(report["category"], "host_status_stale")
         self.assertEqual(report["quietSamples"], 0)
 
     def test_exception_and_duplicate_status_fields_do_not_leak_private_data(self):
@@ -473,16 +472,14 @@ class OutputTests(unittest.TestCase):
         with patch.object(target, "procedure_sha256", side_effect=[first, changed]), \
                 patch.object(target, "check_connection", return_value={"status": "Pass", "category": None}), \
                 patch("sys.stdout", new_callable=io.StringIO) as output:
-            code = target.main(["connection-check", "--window-start-sgt", START,
-                                "--window-end-sgt", END, "--apk", "fixture.apk", "--handoff", "fixture.json"])
+            code = target.main(["connection-check", "--apk", "fixture.apk", "--handoff", "fixture.json"])
         report = json.loads(output.getvalue())
         self.assertEqual(code, 2)
         self.assertEqual(report["category"], "procedure_changed")
         self.assertEqual(report["procedureSha256"], first)
 
     def test_cli_exception_produces_only_one_safe_json_line(self):
-        arguments = ["connection-check", "--window-start-sgt", START, "--window-end-sgt", END,
-                     "--apk", "PrivatePathCanary.apk", "--handoff", "PrivatePathCanary.json"]
+        arguments = ["connection-check", "--apk", "PrivatePathCanary.apk", "--handoff", "PrivatePathCanary.json"]
         with patch.object(target, "check_connection", side_effect=OSError("PrivateExceptionCanary")), \
                 patch("sys.stdout", new_callable=io.StringIO) as output:
             code = target.main(arguments)
@@ -494,13 +491,12 @@ class OutputTests(unittest.TestCase):
         self.assertNotIn("PrivateExceptionCanary", output.getvalue())
         self.assertNotIn("PrivatePathCanary", output.getvalue())
 
-    def test_cli_invalid_window_does_not_dispatch_checker(self):
+    def test_cli_wrong_mode_arguments_do_not_dispatch_checker(self):
         with patch.object(target, "check_host") as check, patch("sys.stdout", new_callable=io.StringIO) as output:
-            code = target.main(["host-check", "--window-start-sgt", START.replace("+08:00", "Z"),
-                                "--window-end-sgt", END, "--session", "PrivatePathCanary"])
+            code = target.main(["host-check", "--session", "PrivatePathCanary", "--apk", "candidate.apk"])
         self.assertEqual(code, 2)
         check.assert_not_called()
-        self.assertEqual(json.loads(output.getvalue())["category"], "invalid_sgt_window")
+        self.assertEqual(json.loads(output.getvalue())["category"], "arguments_refused")
 
 
 class LoopbackTransportTests(unittest.TestCase):
