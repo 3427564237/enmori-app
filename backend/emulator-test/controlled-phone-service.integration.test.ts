@@ -79,6 +79,92 @@ test("ongoing service keeps canonical pairs, Persona and Account across repeated
   } finally { await cleanup(service); }
 });
 
+test("same fixed Send, Reload, fresh Send preserves two canonical pairs and Note provenance (actual SDK, model/compiler doubles)", async () => {
+  const text = "I read a book today.";
+  let generations = 0;
+  let firstInput: ConversationInput | undefined;
+  const service = await createControlledPhoneService({ ...options, demoFeatures: true, transport: {
+    generate: async input => {
+      generations++;
+      assert.equal(input.currentMessage, text);
+      assert.equal(input.checkIns.length, 1);
+      assert.equal(input.checkIns[0]!.noteText, text);
+      if (firstInput) assert.deepEqual(input, firstInput);
+      else firstInput = structuredClone(input);
+      return reply(input);
+    },
+  } });
+  const env = requireControlledEmulatorEnvironment(process.env);
+  const probe = initializeApp({ projectId: env.projectId }, randomUUID()), db = getFirestore(probe);
+  try {
+    const c = await client(service);
+    const created = await c.call("POST", "/v1/check-ins", 201, { note: text }, { "idempotency-key": randomUUID() }) as unknown as {
+      checkIn: { checkInId: string };
+    };
+    const note = db.doc(`check_ins/${created.checkIn.checkInId}`), noteBefore = await note.get();
+
+    // ZHOU #133's five-request baseline, now through actual HTTP/Auth/store:
+    // prepare A -> execute A -> ordinary history -> prepare B -> execute B.
+    // Neither compiler/token counts nor generation are real-model evidence.
+    const first = await ticket(c);
+    assert.equal(service.observation().modelAttempts, 0);
+    const pair1 = await c.call("POST", `/v1/me/ai/operations/${first.operationId}/execute`, 200,
+      { text }, { "ai-operation-key": first.operationKey });
+    assert.ok(pair1.operationId === first.operationId && pair1.conversationId === first.conversationId);
+    assert.equal(service.observation().modelAttempts, 1);
+    const reloaded = await c.call("GET", `/v1/me/conversations/${first.conversationId}/messages`, 200);
+    assert.deepEqual(reloaded.messages, [pair1.userMessage, pair1.assistantMessage]);
+    assert.equal(service.observation().modelAttempts, 1);
+    assert.equal(generations, 1);
+    const second = await ticket(c, first.conversationId);
+    assert.ok(second.conversationId === first.conversationId);
+    assert.ok(second.operationId !== first.operationId && second.operationKey !== first.operationKey);
+    assert.equal(service.observation().modelAttempts, 1);
+    const pair2 = await c.call("POST", `/v1/me/ai/operations/${second.operationId}/execute`, 200,
+      { text }, { "ai-operation-key": second.operationKey });
+    assert.ok(pair2.operationId === second.operationId && pair2.conversationId === first.conversationId);
+    assert.equal(service.observation().modelAttempts, 2);
+    assert.equal(generations, 2);
+
+    const history = await c.call("GET", `/v1/me/conversations/${first.conversationId}/messages`, 200);
+    assert.deepEqual(history.messages, [pair1.userMessage, pair1.assistantMessage, pair2.userMessage, pair2.assistantMessage]);
+    const rows = history.messages as { messageId: string; sequence: number; role: string; text: string }[];
+    assert.equal(new Set(rows.map(row => row.messageId)).size, 4);
+    assert.deepEqual(rows.map(row => row.sequence), [1, 2, 3, 4]);
+    assert.deepEqual(rows.map(row => row.role), ["user", "assistant", "user", "assistant"]);
+    assert.deepEqual(rows.filter(row => row.role === "user").map(row => row.text), [text, text]);
+    const owners = await db.collection("accounts").get();
+    assert.equal(owners.size, 1);
+    const target = owners.docs[0]!.ref.collection("conversations").doc(first.conversationId);
+    assert.equal((await owners.docs[0]!.ref.collection("conversations").get()).size, 1);
+    assert.equal((await target.collection("messages").get()).size, 4);
+    const sources = await target.collection("message_sources").get();
+    assert.equal(sources.size, 2);
+    assert.deepEqual(sources.docs.map(doc => doc.id).sort(), rows.filter(row => row.role === "assistant").map(row => row.messageId).sort());
+    for (const source of sources.docs) assert.deepEqual(source.data(), {
+      sources: [{ sourceType: "check_in", sourceId: created.checkIn.checkInId }], purposeRevocationGeneration: 0,
+    });
+    const noteAfter = await note.get();
+    assert.deepEqual(noteAfter.data(), noteBefore.data());
+    assert(noteAfter.createTime!.isEqual(noteBefore.createTime!));
+    assert(noteAfter.updateTime!.isEqual(noteBefore.updateTime!));
+    assert.equal((await db.collection("check_ins").get()).size, 1);
+    assert.equal(generations, 2);
+
+    await c.call("DELETE", `/v1/me/conversations/${first.conversationId}`, 204);
+    assert.equal((await target.get()).exists, false);
+    for (const child of ["messages", "message_sources", "effects"]) assert.equal((await target.collection(child).get()).size, 0);
+    for (const op of [first, second]) assert.equal((await db.doc(`ai_operation_fences/${op.operationId}`).get()).exists, false);
+    assert.deepEqual((await note.get()).data(), noteBefore.data());
+  } finally {
+    try {
+      await cleanup(service);
+      assert.equal((await db.listCollections()).length, 0);
+      assert.equal((await getAuth(probe).listUsers()).users.length, 0);
+    } finally { await db.terminate(); await deleteApp(probe); }
+  }
+});
+
 test("Settings uses approved purpose generation; consent revocation blocks later AI while Account remains available", async () => {
   const service = await createControlledPhoneService(options);
   try {
