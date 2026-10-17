@@ -42,11 +42,14 @@ class HandoffTests(unittest.TestCase):
         self.private.write_text(json.dumps(self.value))
         self.private.chmod(0o600)
 
-    def runner(self, args, input=None):
+    def runner(self, args, input=None, cwd=None):
         self.calls.append((args, input))
         if args[0] == "/tools/aapt":
+            self.assertEqual(args, ["/tools/aapt", "dump", "badging", "./" + self.apk.name])
+            self.assertEqual(cwd, self.apk.parent)
             package = "com.enmori.app" if self.other_package else target.PACKAGE
             return f"package: name='{package}' versionCode='1'\nlaunchable-activity: name='com.enmori.app.MainActivity'\n".encode()
+        self.assertIsNone(cwd)
         self.assertEqual(args[:3], ["/tools/adb", "-s", "USBTEST00001"])
         rest = args[3:]
         if rest[:3] == ["shell", "pm", "path"]:
@@ -114,10 +117,10 @@ class HandoffTests(unittest.TestCase):
     def test_empty_reverse_list_with_adb_blank_line_is_successful(self):
         self.mapping = {}
         original = self.runner
-        def blank_runner(args, input=None):
+        def blank_runner(args, input=None, cwd=None):
             if args[3:] == ["reverse", "--list"] and not self.mapping:
                 return b"\n"
-            return original(args, input=input)
+            return original(args, input=input, cwd=cwd)
         report = target.transfer(self.apk, self.private, "USBTEST00001", adb="/tools/adb", aapt="/tools/aapt",
                                  runner=blank_runner, clock=self.clock, sleep=lambda _: None,
                                  consume_timeout=2, attempt_token=self.token)

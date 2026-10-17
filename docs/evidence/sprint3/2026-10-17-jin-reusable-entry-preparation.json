@@ -1,0 +1,169 @@
+{
+  "source": "47c6d77403bd01aad3cd4fb945ec3a5287e47b6d",
+  "tree": "23f607aa628d16ac82b364bf8dc09db03997f591",
+  "kind": "prepared-entry-tooling-not-operational-acceptance",
+  "base": "3a03f09c811f3b9c9debd2da24e1b503f0b8607d",
+  "preservedDecisionHeads": [
+    "d25b0b4edac7893f810a2a2e949388f43c02e697",
+    "1a0731420c3009e11b0360d5620eca20745a6720"
+  ],
+  "candidate": {
+    "pr": 135,
+    "source": "b3c8a2223bd305c65a56cbd4fc88aff13b8a1d8e",
+    "tree": "df800e43374ec89b71799b6722d5364163eb68cc",
+    "apkSha256": "776bc6a640fff73ba0382d0dcfb56c685f4bc787397901961ca4839ca0cfb825",
+    "bytes": 94273899,
+    "rebuilt": false,
+    "productionInputsChanged": []
+  },
+  "inputs": [
+    {
+      "path": "tool/check_reusable_phone_entry.py",
+      "sha256": "3cdf046b36510f1802f5841b1deb92a69224f2e5311f3b5615e30bd917d7ad47",
+      "lfSha256": "3cdf046b36510f1802f5841b1deb92a69224f2e5311f3b5615e30bd917d7ad47",
+      "gitBlob": "c0969717dc8ebbfa44a1a40be9c36e768a75086f"
+    },
+    {
+      "path": "tool/private_handoff_file.py",
+      "sha256": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c",
+      "lfSha256": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c",
+      "gitBlob": "b542485b9b8087a4ee40d85b7c48db422f095b00"
+    },
+    {
+      "path": "tool/li_controlled_phone_handoff.py",
+      "sha256": "727ed013d5a1660aa105c2cbd25c241a19ef056b31b26abe1314fd895daa1320",
+      "lfSha256": "53b20ebd52d28b2c7d79445ee6ce1707f984d775d9df5e56f9765e88b0f8339b",
+      "gitBlob": "fa5868ce380dfcd94d258f516a86f61872740738"
+    },
+    {
+      "path": "tool/test_check_reusable_phone_entry.py",
+      "sha256": "d20dddfc8ea73dd2ad420e97a2d215d40704de83f192deaaf34c1a69a8b62ce4",
+      "lfSha256": "d20dddfc8ea73dd2ad420e97a2d215d40704de83f192deaaf34c1a69a8b62ce4",
+      "gitBlob": "1906fbaf59ce4c78626b63cdb3d143eabc4cc238"
+    },
+    {
+      "path": "tool/test_private_handoff_file.py",
+      "sha256": "3b1c63e8dc717213767e0de7d3d5b48021b259089827cce7bdfe02877005a5b1",
+      "lfSha256": "3b1c63e8dc717213767e0de7d3d5b48021b259089827cce7bdfe02877005a5b1",
+      "gitBlob": "88b0d03f3716e46f6ae2e7e28a1b5bb6c5c259f2"
+    },
+    {
+      "path": "tool/test_li_controlled_phone_handoff.py",
+      "sha256": "ce47504f5c86311cd96679d2594997bcf6ba5d7f09079db0e9e4c1898373129d",
+      "lfSha256": "168ca816c19900d372475e4d594cfccf6c3886a2d1a77153b0a02a68675010ab",
+      "gitBlob": "a0abb9559030e6d81f5a11d82e49cbbe97d0cfca"
+    },
+    {
+      "path": "tool/li_controlled_phone_handoff.md",
+      "sha256": "adec47f7f73e17bbe2dc19fe3379aa270b2ab5c27de759ae45e418b631bed59e",
+      "lfSha256": "d0caff5aba33f7f9e07dbe62dbdfb50ecdebbf5ca36b86730bc26d7065811a2a",
+      "gitBlob": "5c6579bbe1e8ae94f7b31741c2347a0c62d36ae0"
+    },
+    {
+      "path": "tool/reusable_phone_entry.md",
+      "sha256": "e79bcad6c4cec28a8f399dea14e59002bf468d33bb9a4ed97b9ca29c577a09bc",
+      "lfSha256": "e79bcad6c4cec28a8f399dea14e59002bf468d33bb9a4ed97b9ca29c577a09bc",
+      "gitBlob": "3447eb1924d0f55e043611fa02ea32d07965147b"
+    }
+  ],
+  "checks": [
+    {
+      "scope": "native Windows private-file synthetic ACL/junction and pure policy",
+      "command": "python -B -m unittest discover -s tool -p test_private_handoff_file.py -v",
+      "discovered": 28,
+      "passed": 23,
+      "skipped": 5,
+      "skipReason": "POSIX-only",
+      "exit": 0,
+      "log": {
+        "path": "build/jin-private-handoff-20261017/windows-native-reparse-20261017T142757139Z/tests.log",
+        "sha256": "2cc80cbc13eef101d547598900124b7b3a2b5c3ebd7ac5a55ae5326f5a066e28"
+      },
+      "receipt": {
+        "path": "build/jin-private-handoff-20261017/windows-native-reparse-20261017T142757139Z/receipt.json",
+        "sha256": "0f0f64953d3a54024561c28c521e25f4912588b47edd46e420721cde1768fc05"
+      }
+    },
+    {
+      "scope": "Ubuntu existing Python, exact source copy: policy/POSIX files + affected original handoff",
+      "command": "python3 -B -m unittest test_private_handoff_file test_li_controlled_phone_handoff -v",
+      "discovered": 46,
+      "passed": 34,
+      "skipped": 12,
+      "skipReason": "Windows-only",
+      "exit": 0,
+      "includesOriginalHandoff": 18,
+      "temporaryCopyRemoved": true,
+      "log": {
+        "path": "build/jin-private-handoff-20261017/posix-20261017T142830084553Z/tests.log",
+        "sha256": "f207756b10f57c258552523348b0398ac906245ab2e424c7a02c8037fe46907b"
+      },
+      "receipt": {
+        "path": "build/jin-private-handoff-20261017/posix-20261017T142830084553Z/receipt.json",
+        "sha256": "a50b2e4b4a952009b3e7694bfcf1dbda8fa76369ce34eac7f1d26417935de2d0"
+      }
+    },
+    {
+      "scope": "native Windows checker synthetic flows and actual owned loopback HTTP/TLS fixtures",
+      "command": "python -B -W always::ResourceWarning -m unittest discover -s tool -p test_check_reusable_phone_entry.py -v",
+      "discovered": 38,
+      "passed": 38,
+      "skipped": 0,
+      "exit": 0,
+      "resourceWarning": false,
+      "log": {
+        "path": "build/jin-reusable-entry-20261017/checker-tests-focused-06.log",
+        "sha256": "48ab3842fa00c44bbab60fb7e531135809a4f98cfbb6bec292e26494019dd76e"
+      },
+      "before": {
+        "path": "build/jin-reusable-entry-20261017/checker-source-focused-06-before.sha256",
+        "sha256": "c425b7e174e6c54603148b950be6d7645bd40921260b674f622c37f11433c62b"
+      },
+      "after": {
+        "path": "build/jin-reusable-entry-20261017/checker-source-focused-06-after.sha256",
+        "sha256": "c425b7e174e6c54603148b950be6d7645bd40921260b674f622c37f11433c62b"
+      }
+    }
+  ],
+  "overlap": "Policy tests overlap across OS invocations; do not sum counts. All are JIN author execution, not formal SHI/LI evidence.",
+  "failuresRetained": [
+    "Private reader first sandbox run: Temp create/cleanup denied, 22 errors before actual ACL checks; original log and 11-directory cleanup confirmation retained.",
+    "Checker01: 2 tests, 4 sandbox Temp setup/cleanup errors; no implementation assertion reached.",
+    "Checker02: 2/2 failures, slow private reload dispatch after window and pending Event incorrectly quiet; fixed with post-read time/state checks.",
+    "Internal in-memory reproduction: expired final reload Pass and stale post-read host snapshot; retained JSON, not real host execution.",
+    "Checker03: 2/2 failures, slow-drip body exceeded per-operation timeout and end-only procedure hash allowed changed source; fixed with request watchdog and pre/post digest.",
+    "Checker04: 36/37 Pass; one fixture used real mtime with fake clock; fixture corrected. ResourceWarning led to explicit response.close; no real service.",
+    "Checker05: 1/1 response cleanup check; overlaps final38, not an additional count.",
+    "Sandbox OpenSSL metadata command failed with NtCreateDirectoryObject0xC0000022; ordinary-permission metadata succeeded, no test result substituted."
+  ],
+  "cleanup": {
+    "windowsAndPosix": "Synthetic temp files/owned junction/POSIX copied directory removed; see per-run receipts and sandbox cleanup receipt",
+    "loopback": "Fixture listeners/handlers joined and temporary TLS fixture removed; no ResourceWarning in final38",
+    "originalArtifacts": "Previous APK/ZIP/build evidence untouched"
+  },
+  "skills": "Repository Skill sources/lock/routing equal merged main d59cb128; no installation; Backend skill and systematic-debugging used.",
+  "window": {
+    "startSGT": "2026-10-17T22:27:00+08:00",
+    "endSGT": "2026-10-17T22:57:00+08:00",
+    "hostOwner": "LI",
+    "actualEntryAcceptance": "pending, not inferred from host availability"
+  },
+  "networkProposal": "https://github.com/3427564237/enmori-app/issues/84#issuecomment-6235109065",
+  "pending": [
+    "LI disposition of two native Serve TCP + two Windows loopback listener scope and access limits",
+    "Current original runtime config/TLS/lease evidence and route implementation after applicable disposition",
+    "SHI usable Tailscale session and actual independent phone start within a valid window",
+    "SHI new-tool review and LI evidence review"
+  ],
+  "notRun": [
+    "actual tailnet TCP forwarding",
+    "Windows-to-LI remote connection",
+    "current runtime startup",
+    "current private phone handoff",
+    "Android business flows",
+    "real consecutive9B",
+    "model/provider call",
+    "unchanged full Backend/SDK/Flutter suites",
+    "new APK build"
+  ]
+}
