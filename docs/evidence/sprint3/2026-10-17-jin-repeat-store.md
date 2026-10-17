@@ -35,7 +35,7 @@ Pinned Node 24.19.0/TypeScript 7.0.2 and the existing locked SDK/Java/Dart/cache
 
 The focused checks are included in the full SDK count, not added to it. Full execution validates cross-suite isolation after the new provenance/deletion journey. Both SDK invocations have zero failures, cancellations, skips and todos. Worker/outer profiles were removed and ports 8080/9099/4400/4500/9150 verified free. Local invocation logs/manifests are retained in `build/jin-repeat-store-20261017`; exact commands, times and SHA256 values are in the [machine receipt](2026-10-17-jin-repeat-store.json). Previous candidate logs/APKs remain at their original paths.
 
-No full Backend unit, Flutter, operator/Python, build or device gate was rerun for this single SDK-test delta; prior counts are not transferred to this source. #135's Windows 675/1 symlink failure and its missing capable-environment/device evidence remain unresolved. Historical real-model failures and missing bad-candidate diagnosis remain retained. The expired demonstration service is not restored.
+No full Backend unit, Flutter, operator/Python, APK build or device gate was rerun for this single SDK-test delta; prior counts are not transferred to this source. #135's Windows 675/1 symlink failure and its missing capable-environment/device evidence remain unresolved. Historical real-model failures and missing bad-candidate diagnosis remain retained. The expired demonstration service is not restored.
 
 ## Review and independent boundaries
 
