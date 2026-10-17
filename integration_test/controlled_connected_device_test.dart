@@ -4,11 +4,12 @@ import 'package:enmori/controlled_phone_harness.dart' as candidate;
 import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
 import 'package:enmori/features/account/presentation/account_preferences_controller.dart';
 import 'package:enmori/features/personas/persona_providers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+
+import '../test/support/ai_connected_repeat_journey.dart';
 
 // Actual assigned-device entrypoint. Private runtime handoff is delivered by
 // the host only after the candidate's own fresh readiness nonce is visible.
@@ -132,41 +133,13 @@ void main() {
     await _until(tester, () => _state(tester).canSend);
     debugPrint('LI_CONNECTED_STAGE: ai_return_ready');
 
-    // Exact harmless routine lies inside the reviewed bounded semantic grammar.
-    // The test never supplies an expected model reply or repairs its output.
-    const input = 'I read a book today.';
-    await tester.enterText(find.byKey(const Key('ai-message-input')), input);
-    debugPrint('LI_CONNECTED_STAGE: ai_input_entered');
-    await _tap(tester, 'ai-send');
-    debugPrint('LI_CONNECTED_STAGE: send_requested');
-    await _until(
+    // Exercise the same script in local HTTP fixtures and on the assigned
+    // device. Fixtures never certify a model response or canonical storage.
+    final accepted = await runAiConnectedRepeatJourney(
       tester,
-      () => !const {
-        AiConversationPhase.preparing,
-        AiConversationPhase.waiting,
-      }.contains(_state(tester).phase),
-      timeout: const Duration(seconds: 65),
+      onStage: (stage) => debugPrint('ZHOU_CONNECTED_STAGE: $stage'),
     );
-    final accepted = _state(tester);
-    expect(accepted.phase, AiConversationPhase.success);
-    expect(accepted.messages.length, 2);
-    expect(accepted.messages.first.role, AiRole.user);
-    expect(accepted.messages.last.role, AiRole.assistant);
-    expect(accepted.messages.last.availability, AiAvailability.available);
-    expect(accepted.messages.last.text?.isNotEmpty, isTrue);
-    final ids = accepted.messages.map((message) => message.messageId).toList();
-    await _menu(tester, 'ai-reload-messages');
-    await _until(tester, () => !_state(tester).readBusy);
-    expect(
-      listEquals(
-        _state(tester).messages.map((message) => message.messageId).toList(),
-        ids,
-      ),
-      isTrue,
-    );
-    expect(_state(tester).messages.last.availability, AiAvailability.available);
-    debugPrint('LI_CONNECTED_STAGE: ai_readback');
-    debugPrint('LI_CONNECTED_AI_ACCEPTED_PERSISTED_READBACK: Pass');
+    debugPrint('ZHOU_CONNECTED_AI_TWO_ROUNDS_DELIVERED: Pass');
 
     await _tap(tester, 'ai-personas');
     await _visible(tester, 'persona-edit-${persona.personaId}');
@@ -192,12 +165,11 @@ void main() {
     await _until(tester, () => !_state(tester).readBusy);
     // Q19: deletion after accepted delivery must not rewrite historical A.
     // Deleting a used Persona during generation is a separate late-A barrier.
-    expect(_state(tester).messages.last.messageId == ids.last, isTrue);
-    expect(_state(tester).messages.last.availability, AiAvailability.available);
-    expect(
-      _state(tester).messages.last.text == accepted.messages.last.text,
-      isTrue,
-    );
+    expectAiConnectedHistory(_state(tester), accepted);
+    // Persona navigation cleared the previous display. This comparison now
+    // requires history fetched into a fresh view, rather than cached rows.
+    debugPrint('ZHOU_CONNECTED_AI_TWO_ROUNDS_FRESH_VIEW_READBACK: Pass');
+    debugPrint('LI_CONNECTED_AI_ACCEPTED_PERSISTED_READBACK: Pass');
     await _menu(tester, 'ai-delete');
     await _tap(tester, 'ai-confirm-delete');
     await _until(
