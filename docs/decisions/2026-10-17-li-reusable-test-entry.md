@@ -34,7 +34,11 @@ JIN selects the smallest implementation within this scope and supplies the chang
 | JIN | Deliver and maintain the reusable entry, startup/check/handoff procedure and connection fixes; supply the existing runtime/storage support and address entry faults. |
 | SHI | After receiving the one-time setup/configuration through the private channel, independently use the documented entry and execute the existing assigned phone tests on the identified candidate, recording actual results. |
 
-The window's start/end and the first execution appointment remain to be agreed. LI's obligation is the agreed window, not unspecified permanent uptime. Keep conflicting tests serialized where the existing shared environment requires it.
+LI's obligation is the agreed window, not unspecified permanent uptime. Keep conflicting tests serialized where the existing shared environment requires it.
+
+### First LI host-availability window
+
+LI subsequently requested “不能现在吗？” instead of waiting for JIN's proposed 18 October 10:00–10:30 SGT slot. Record the immediate 30-minute LI host/coordination window as **17 October 2026, 22:27–22:57 SGT**. The 18 October proposal is not confirmed. JIN and SHI's acknowledgement and the actual test-start appointment are still pending; this window does not prove the current runtime/entry is ready or that either teammate is already testing. Entry/configuration checks and any required original-call settlement remain prerequisites for business/model execution. If the entry is not ready in this window, preserve that actual outcome and coordinate the next window rather than claim an operational Pass.
 
 ## Acceptance
 
