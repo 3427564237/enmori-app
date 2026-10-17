@@ -113,7 +113,11 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                           ),
                           onTap: widget.onSelect == null
                               ? null
-                              : () => widget.onSelect!(item.browseId),
+                              : () {
+                                  if (controller.isCurrentSnapshot(state)) {
+                                    widget.onSelect!(item.browseId);
+                                  }
+                                },
                         ),
                       ),
                   ],

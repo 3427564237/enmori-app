@@ -185,6 +185,132 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     },
   );
+  testWidgets('rapid Reload taps admit only one pending activity read', (
+    tester,
+  ) async {
+    final repo = Repo();
+    await pump(tester, repo);
+    repo.pending = Completer<Result<ActivityRead>>();
+    await reveal(tester, find.text('Reload'));
+    await tester.tap(find.text('Reload'));
+    // No intervening frame: the old button is still on screen.
+    await tester.tap(find.text('Reload'));
+    final calls = repo.calls;
+    repo.pending!.complete(repo.result);
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(const SizedBox());
+    expect(calls, 2); // Initial read plus one explicit refresh.
+  });
+  testWidgets(
+    'a list callback queued before background clear cannot navigate afterward',
+    (tester) async {
+      final repo = Repo();
+      final selections = <String>[];
+      await pump(tester, repo, select: selections.add);
+      final oldTap = tester.widget<ListTile>(find.byType(ListTile)).onTap!;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      // Deliver a queued callback before Flutter paints the cleared state.
+      oldTap();
+      await tester.pumpWidget(const SizedBox());
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      expect(selections, isEmpty);
+      expect(repo.calls, 1);
+    },
+  );
+  testWidgets(
+    'a refreshed snapshot rejects the old tile even when its locator is unchanged',
+    (tester) async {
+      final repo = Repo();
+      final selections = <String>[];
+      await pump(tester, repo, select: selections.add);
+      final oldTap = tester.widget<ListTile>(find.byType(ListTile)).onTap!;
+      await reveal(tester, find.text('Reload'));
+      await tester.tap(find.text('Reload'));
+      await tester.pumpAndSettle();
+      oldTap();
+      expect(selections, isEmpty);
+      await reveal(tester, find.byType(ListTile));
+      await tester.tap(find.byType(ListTile));
+      expect(selections, [id]);
+      expect(repo.calls, 2);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+  testWidgets(
+    'a failed refresh invalidates old selection and retains explicit Retry',
+    (tester) async {
+      final repo = Repo();
+      final selections = <String>[];
+      await pump(tester, repo, select: selections.add);
+      final oldTap = tester.widget<ListTile>(find.byType(ListTile)).onTap!;
+      repo.result = const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'Activities are unavailable. Try again.',
+        ),
+      );
+      await reveal(tester, find.text('Reload'));
+      await tester.tap(find.text('Reload'));
+      await tester.pumpAndSettle();
+      oldTap();
+      expect(selections, isEmpty);
+      expect(find.text(summary.title), findsNothing);
+      expect(find.text('Retry'), findsOneWidget);
+      expect(repo.calls, 2);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+  testWidgets(
+    'expired and disposed list snapshots cannot dispatch old selections',
+    (tester) async {
+      final repo = Repo();
+      final selections = <String>[];
+      await pump(tester, repo, select: selections.add);
+      final oldTap = tester.widget<ListTile>(find.byType(ListTile)).onTap!;
+      await tester.pump(const Duration(minutes: 5));
+      oldTap();
+      expect(selections, isEmpty);
+      expect(find.text(summary.title), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+      oldTap();
+      expect(selections, isEmpty);
+      expect(tester.takeException(), isNull);
+      expect(repo.calls, 1);
+    },
+  );
+  testWidgets(
+    'clear permits an explicit fresh read without waiting for the invalidated request',
+    (tester) async {
+      final oldRead = Completer<Result<ActivityRead>>();
+      final repo = Repo()..pending = oldRead;
+      await pump(tester, repo);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pump();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      const fresh = ActivitySummary(
+        browseId: 'tm_U3ludGhldGljXzAy',
+        title: 'Fresh synthetic activity',
+        startAt: '2026-10-17T00:00:00Z',
+      );
+      repo
+        ..pending = null
+        ..result = Success(
+          ActivityBatch(asOf: '2026-10-16T00:00:00Z', items: [fresh]),
+        );
+      await tester.tap(find.text('Reload'));
+      await tester.pumpAndSettle();
+      expect(find.text(fresh.title), findsOneWidget);
+      oldRead.complete(
+        Success(ActivityBatch(asOf: '2026-10-15T00:00:00Z', items: [summary])),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(summary.title), findsNothing);
+      expect(find.text(fresh.title), findsOneWidget);
+      expect(repo.calls, 2);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
   testWidgets(
     'zero batch and provider failure stay distinct; only explicit retry starts next read',
     (tester) async {
