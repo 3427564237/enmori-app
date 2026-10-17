@@ -6,16 +6,16 @@ import argparse
 import base64
 import hashlib
 import json
-import os
 from pathlib import Path
 import re
 import secrets
 import shlex
-import stat
 import subprocess
 import sys
 import time
 from urllib.parse import urlsplit
+
+from private_handoff_file import PrivateFileRefused, read_private_handoff_file
 
 PACKAGE = "com.enmori.app.personatest"
 READY = "enmori-controlled-phone-ready.json"
@@ -80,16 +80,10 @@ def strict_object(data: bytes) -> dict:
 
 
 def handoff(path: Path) -> tuple[bytes, int]:
-    info = path.lstat()
-    require(stat.S_ISREG(info.st_mode) and not path.is_symlink())
-    require(stat.S_IMODE(info.st_mode) == 0o600 and info.st_uid == os.getuid())
-    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
-    with os.fdopen(fd, "rb") as stream:
-        opened = os.fstat(stream.fileno())
-        require(stat.S_ISREG(opened.st_mode) and stat.S_IMODE(opened.st_mode) == 0o600
-                and opened.st_uid == os.getuid())
-        data = stream.read(32769)
-    require(0 < len(data) <= 32768)
+    try:
+        data = read_private_handoff_file(path)
+    except PrivateFileRefused:
+        raise Blocked("preflight_refused") from None
     value = strict_object(data)
     require(set(value) == {"schemaVersion", "projectId", "email", "password", "baseUri",
                            "certificateBase64", "authEmulatorHost", "lifetime", "syntheticOwnerOnly"})

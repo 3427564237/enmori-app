@@ -12,9 +12,20 @@ python tool/li_controlled_phone_handoff.py --apk /absolute/candidate.apk \
 python -m unittest discover -s tool -p test_li_controlled_phone_handoff.py
 ```
 
-The input handoff must be a regular, operator-owned mode600 file. Optional
+On POSIX the input handoff must be a regular, operator-owned mode600 file. On
+Windows it must be a current-user-owned file on an ordinary local fixed-disk
+path, with allow ACEs limited to that user, LocalSystem or local Administrators.
+The opened handle's owner/DACL, file identity and size are checked; reparse
+points (including ancestors), UNC paths, broad/null DACLs, replacement and
+oversized files are refused. No automatic ACL repair is performed. Keep
+`private_handoff_file.py` beside this script when distributing it.
+
+Optional
 `--adb` and `--aapt` select existing absolute tool paths. Defaults use the existing
-Android SDK platform tools and build-tools36.0.0.
+Linux Android SDK platform tools and build-tools36.0.0. Windows operators must
+pass their existing absolute SDK executable paths. This portability does not
+establish a remote connection; see [the reusable-entry preparation and its
+remaining transport gate](reusable_phone_entry.md).
 
 The app writes `enmori-controlled-phone-ready.json` with schemaVersion1 and a
 fresh64-character lowercase-hex nonce in its system-temp directory. `code_cache`
