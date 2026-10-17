@@ -1,0 +1,1643 @@
+{
+  "schemaVersion": 1,
+  "checkpointUtc": "2026-10-17T05:39:48.522Z",
+  "task": 84,
+  "parent": 44,
+  "owner": "JIN",
+  "independentReview": false,
+  "source": {
+    "commit": "b3c8a2223bd305c65a56cbd4fc88aff13b8a1d8e",
+    "tree": "df800e43374ec89b71799b6722d5364163eb68cc",
+    "initial": {
+      "commit": "a6b994340d338934ca280c1de39714bb30411088",
+      "tree": "1186fbd31a8456bc73a0727b4da1df7676f0bf38"
+    },
+    "trackedFiles": 1286,
+    "beforeAfterWorkingBytesEqual": true,
+    "workingInputAggregateSha256": "8545ef1544373ecf4769b0807a92ffad0cfbc3b3f4843610871494b7a7fb106d",
+    "normalization": "Active Windows working files match Git blobs exactly or with explicitly recorded CRLF normalization; all working bytes stable. APK LF export matched every raw Git blob.",
+    "compiledFiles": 702,
+    "compiledAggregateSha256": "24860282a1f88e005ca6461d87fe8cc1b6b141a5d5d4033fbc2f852823cdcc88"
+  },
+  "inputs": [
+    {
+      "pr": 128,
+      "head": "6523a98f8a401045914212ab118e490eccfff336"
+    },
+    {
+      "pr": 130,
+      "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+    },
+    {
+      "pr": 132,
+      "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+    },
+    {
+      "pr": 133,
+      "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+    },
+    {
+      "pr": 134,
+      "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+    }
+  ],
+  "merges": [
+    {
+      "commit": "24ec4cee7b46457633dc2d09470553f98cf74692",
+      "tree": "60ba6c5bc8f965d52d6e85c635ae1cdffcb2752d",
+      "parents": [
+        "a6b994340d338934ca280c1de39714bb30411088",
+        "9cf30134a522009f410485c6352df757ed0ab23d"
+      ],
+      "mergeBase": "6523a98f8a401045914212ab118e490eccfff336",
+      "incomingChangedPaths": [
+        "backend/emulator-test/zhou-real-model-store.integration.test.ts",
+        "backend/src/ai-runtime/infrastructure/controlled-conversation-prompt.ts",
+        "backend/src/ai-runtime/infrastructure/controlled-ollama-transport.ts",
+        "backend/src/event-browse/infrastructure/ticketmaster-browse-source.ts",
+        "backend/test/ai-runtime/controlled-conversation-prompt.test.ts",
+        "backend/test/ai-runtime/controlled-ollama-transport.test.ts",
+        "backend/test/bounded-conversation-semantic-policy.test.ts",
+        "backend/test/event-browse/event-browse.test.ts",
+        "backend/test/zhou-controlled-chat-packet.test.ts",
+        "docs/decisions/2026-10-16-li-application-completion-priority.md",
+        "docs/decisions/2026-10-16-li-direct-runtime-fix-authorization.md",
+        "docs/decisions/2026-10-16-li-sponsor-demo-composition.md",
+        "docs/decisions/2026-10-16-li-sponsor-repeatability-correction.md",
+        "docs/evidence/sprint3/2026-10-16-li-direct-runtime-repairs.json",
+        "docs/evidence/sprint3/2026-10-16-li-direct-runtime-repairs.md",
+        "docs/evidence/sprint3/2026-10-16-li-native-demo-acceptance.json",
+        "docs/evidence/sprint3/2026-10-16-li-native-demo-acceptance.md",
+        "docs/evidence/sprint3/2026-10-16-li-sponsor-demo-rehearsal.md",
+        "docs/planning/2026-10-16-li-sponsor-demo-runbook.md",
+        "lib/app/controlled_demo_app.dart",
+        "lib/app/home_shell_page.dart",
+        "lib/app/router/app_router.dart",
+        "lib/app/social_demo_presentation.dart",
+        "lib/harness/social/offline_social_app.dart",
+        "lib/harness/social/offline_social_pages.dart",
+        "test/app/controlled_demo_app_test.dart",
+        "tool/li_sponsor_demo.py",
+        "tool/test_li_sponsor_demo.py"
+      ],
+      "effectiveChangedPathsRelativeToInitial": [
+        "backend/emulator-test/zhou-real-model-store.integration.test.ts",
+        "backend/src/ai-runtime/infrastructure/controlled-conversation-prompt.ts",
+        "backend/src/ai-runtime/infrastructure/controlled-ollama-transport.ts",
+        "backend/src/event-browse/infrastructure/ticketmaster-browse-source.ts",
+        "backend/test/ai-runtime/controlled-conversation-prompt.test.ts",
+        "backend/test/ai-runtime/controlled-ollama-transport.test.ts",
+        "backend/test/bounded-conversation-semantic-policy.test.ts",
+        "backend/test/event-browse/event-browse.test.ts",
+        "backend/test/zhou-controlled-chat-packet.test.ts",
+        "docs/decisions/2026-10-16-li-application-completion-priority.md",
+        "docs/decisions/2026-10-16-li-direct-runtime-fix-authorization.md",
+        "docs/decisions/2026-10-16-li-sponsor-demo-composition.md",
+        "docs/decisions/2026-10-16-li-sponsor-repeatability-correction.md",
+        "docs/evidence/sprint3/2026-10-16-li-direct-runtime-repairs.json",
+        "docs/evidence/sprint3/2026-10-16-li-direct-runtime-repairs.md",
+        "docs/evidence/sprint3/2026-10-16-li-native-demo-acceptance.json",
+        "docs/evidence/sprint3/2026-10-16-li-native-demo-acceptance.md",
+        "docs/evidence/sprint3/2026-10-16-li-sponsor-demo-rehearsal.md",
+        "docs/planning/2026-10-16-li-sponsor-demo-runbook.md",
+        "lib/app/controlled_demo_app.dart",
+        "lib/app/home_shell_page.dart",
+        "lib/app/router/app_router.dart",
+        "lib/app/social_demo_presentation.dart",
+        "lib/harness/social/offline_social_app.dart",
+        "lib/harness/social/offline_social_pages.dart",
+        "test/app/controlled_demo_app_test.dart",
+        "tool/li_sponsor_demo.py",
+        "tool/test_li_sponsor_demo.py"
+      ],
+      "combinedDiffEmpty": true
+    },
+    {
+      "commit": "64a10881bbe8d14bf01ef364306ad668ff4eea86",
+      "tree": "8efd44f65ac7f129a0d2cd09cb0e9ffd9248b57b",
+      "parents": [
+        "24ec4cee7b46457633dc2d09470553f98cf74692",
+        "7da25cade87f808606320aff0f5c343cef4e1b5f"
+      ],
+      "mergeBase": "9cf30134a522009f410485c6352df757ed0ab23d",
+      "incomingChangedPaths": [
+        ".agents/skills/brainstorming/SKILL.md",
+        ".agents/skills/brainstorming/builder-check-prompt.md",
+        ".agents/skills/brainstorming/scripts/server.cjs",
+        ".agents/skills/brainstorming/spec-document-reviewer-prompt.md",
+        ".agents/skills/brainstorming/visual-companion.md",
+        ".agents/skills/dart-flutter-patterns/SKILL.md",
+        ".agents/skills/domain-modeling/GLOSSARY-FORMAT.md",
+        ".agents/skills/domain-modeling/SKILL.md",
+        ".agents/skills/grilling/SKILL.md",
+        ".agents/skills/systematic-debugging/SKILL.md",
+        ".agents/skills/systematic-debugging/root-cause-tracing.md",
+        ".agents/skills/ui-ux-pro-max/data/catalog-summary.json",
+        ".agents/skills/ui-ux-pro-max/data/stacks/nuxt-ui.csv",
+        ".agents/skills/ui-ux-pro-max/data/stacks/react.csv",
+        ".agents/skills/ui-ux-pro-max/data/stacks/threejs.csv",
+        ".agents/skills/ui-ux-pro-max/scripts/core.py",
+        ".agents/skills/ui-ux-pro-max/scripts/design_system.py",
+        ".agents/skills/ui-ux-pro-max/scripts/search.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/fixtures/relevance-baseline.json",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/fixtures/relevance-thresholds.json",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_catalog_summary_line_endings.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_design_system_mode.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_design_system_stack.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_native_desktop_stack_freshness.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_skill_script_paths.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_web_stack_freshness.py",
+        ".agents/skills/ui-ux-pro-max/scripts/validate_data.py",
+        ".agents/skills/writing-plans/SKILL.md",
+        ".agents/skills/writing-plans/plan-document-reviewer-prompt.md",
+        "docs/evidence/sprint3/2026-10-16-shi-event-interaction-guards.md",
+        "docs/tooling/skill-update-2026-10-12.md",
+        "docs/tooling/skills-inventory.md",
+        "lib/features/event_browse/presentation/activity_controller.dart",
+        "lib/features/event_browse/presentation/activity_page.dart",
+        "team-skills.lock",
+        "test/features/event_browse_test.dart"
+      ],
+      "effectiveChangedPathsRelativeToInitial": [
+        "docs/evidence/sprint3/2026-10-16-shi-event-interaction-guards.md",
+        "lib/features/event_browse/presentation/activity_controller.dart",
+        "lib/features/event_browse/presentation/activity_page.dart",
+        "test/features/event_browse_test.dart"
+      ],
+      "combinedDiffEmpty": true
+    },
+    {
+      "commit": "3ea70a19b621c181e8023c44c9d7dac20dc41158",
+      "tree": "ab3f91077ef04d0d0d5502591e96e2ee8994009a",
+      "parents": [
+        "64a10881bbe8d14bf01ef364306ad668ff4eea86",
+        "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+      ],
+      "mergeBase": "9cf30134a522009f410485c6352df757ed0ab23d",
+      "incomingChangedPaths": [
+        ".agents/skills/brainstorming/SKILL.md",
+        ".agents/skills/brainstorming/builder-check-prompt.md",
+        ".agents/skills/brainstorming/scripts/server.cjs",
+        ".agents/skills/brainstorming/spec-document-reviewer-prompt.md",
+        ".agents/skills/brainstorming/visual-companion.md",
+        ".agents/skills/dart-flutter-patterns/SKILL.md",
+        ".agents/skills/domain-modeling/GLOSSARY-FORMAT.md",
+        ".agents/skills/domain-modeling/SKILL.md",
+        ".agents/skills/grilling/SKILL.md",
+        ".agents/skills/systematic-debugging/SKILL.md",
+        ".agents/skills/systematic-debugging/root-cause-tracing.md",
+        ".agents/skills/ui-ux-pro-max/data/catalog-summary.json",
+        ".agents/skills/ui-ux-pro-max/data/stacks/nuxt-ui.csv",
+        ".agents/skills/ui-ux-pro-max/data/stacks/react.csv",
+        ".agents/skills/ui-ux-pro-max/data/stacks/threejs.csv",
+        ".agents/skills/ui-ux-pro-max/scripts/core.py",
+        ".agents/skills/ui-ux-pro-max/scripts/design_system.py",
+        ".agents/skills/ui-ux-pro-max/scripts/search.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/fixtures/relevance-baseline.json",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/fixtures/relevance-thresholds.json",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_catalog_summary_line_endings.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_design_system_mode.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_design_system_stack.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_native_desktop_stack_freshness.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_skill_script_paths.py",
+        ".agents/skills/ui-ux-pro-max/scripts/tests/test_web_stack_freshness.py",
+        ".agents/skills/ui-ux-pro-max/scripts/validate_data.py",
+        ".agents/skills/writing-plans/SKILL.md",
+        ".agents/skills/writing-plans/plan-document-reviewer-prompt.md",
+        "docs/decisions/2026-10-16-li-low-blocking-kickoff.md",
+        "docs/evidence/sprint3/2026-10-16-zhou-client-repeat-use.json",
+        "docs/evidence/sprint3/2026-10-16-zhou-client-repeat-use.md",
+        "docs/tooling/skill-update-2026-10-12.md",
+        "docs/tooling/skills-inventory.md",
+        "team-skills.lock",
+        "test/features/ai_conversation/ai_repeat_wire_join_test.dart",
+        "test/harness/ai_network_cancel_return_test.dart"
+      ],
+      "effectiveChangedPathsRelativeToInitial": [
+        "docs/decisions/2026-10-16-li-low-blocking-kickoff.md",
+        "docs/evidence/sprint3/2026-10-16-zhou-client-repeat-use.json",
+        "docs/evidence/sprint3/2026-10-16-zhou-client-repeat-use.md",
+        "test/features/ai_conversation/ai_repeat_wire_join_test.dart",
+        "test/harness/ai_network_cancel_return_test.dart"
+      ],
+      "combinedDiffEmpty": true
+    },
+    {
+      "commit": "b3c8a2223bd305c65a56cbd4fc88aff13b8a1d8e",
+      "tree": "df800e43374ec89b71799b6722d5364163eb68cc",
+      "parents": [
+        "3ea70a19b621c181e8023c44c9d7dac20dc41158",
+        "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+      ],
+      "mergeBase": "dd1994af69d861253356571d59317c549c879914",
+      "incomingChangedPaths": [
+        "docs/evidence/sprint3/2026-10-17-li-account-session-repair.json",
+        "docs/evidence/sprint3/2026-10-17-li-account-session-repair.md",
+        "lib/features/account/presentation/account_preferences_controller.dart",
+        "lib/features/account/presentation/account_preferences_page.dart",
+        "test/app/account_preferences_flow_test.dart"
+      ],
+      "effectiveChangedPathsRelativeToInitial": [
+        "docs/evidence/sprint3/2026-10-17-li-account-session-repair.json",
+        "docs/evidence/sprint3/2026-10-17-li-account-session-repair.md",
+        "lib/features/account/presentation/account_preferences_controller.dart",
+        "lib/features/account/presentation/account_preferences_page.dart",
+        "test/app/account_preferences_flow_test.dart"
+      ],
+      "combinedDiffEmpty": true
+    }
+  ],
+  "composition": {
+    "changedPathCount": 42,
+    "rawIncomingUnionCount": 74,
+    "effectiveIncomingUnionCount": 42,
+    "alreadyPresentIncomingPathCount": 32,
+    "unattributedFinalBlobCount": 0,
+    "extraChangedPathCount": 0,
+    "missingEffectiveInputPathCount": 0,
+    "changedPaths": [
+      {
+        "path": "backend/emulator-test/zhou-real-model-store.integration.test.ts",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "88609462824866a3aac172c8a691e5c293205222",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "backend/src/ai-runtime/infrastructure/controlled-conversation-prompt.ts",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "9e2c4de43667a903578abe17808830140b663ce7",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "backend/src/ai-runtime/infrastructure/controlled-ollama-transport.ts",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "50e34f8ee7fb77602d9966b8c4ec3ad0e7d9b5c6",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "backend/src/event-browse/infrastructure/ticketmaster-browse-source.ts",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "fd4bc82e5aed570248c654ef10883891882d27e9",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "backend/test/ai-runtime/controlled-conversation-prompt.test.ts",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "4343c2ede8cb2def0e0c1547f1ad620584d3bf2a",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "backend/test/ai-runtime/controlled-ollama-transport.test.ts",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "7c1f6bcbfcd7534a95f5564bc9661527f2eccbb7",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "backend/test/bounded-conversation-semantic-policy.test.ts",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "f17c70ffe8bcce6c939f94f00844d7a216bc3662",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "backend/test/event-browse/event-browse.test.ts",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "6f090826c946edded084f1606ffc3afa1840a6d3",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "backend/test/zhou-controlled-chat-packet.test.ts",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "38f2c2cc1e5f863156f744dd47b7e943faec8f9f",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/decisions/2026-10-16-li-application-completion-priority.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "35c2f4f757fa604c686f0ffdcf6d60828ed11b47",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/decisions/2026-10-16-li-direct-runtime-fix-authorization.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "bcc32522a60c1f3dc5189e9ae282eaf756eb23d1",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/decisions/2026-10-16-li-low-blocking-kickoff.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "b91f60bb2b47411093e6aa93b5a728087355f104",
+        "matchesApprovedInputs": [
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/decisions/2026-10-16-li-sponsor-demo-composition.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "09060b8eecda39c0389601a16920b31c49b83b4d",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/decisions/2026-10-16-li-sponsor-repeatability-correction.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "160c56f77d73328fd8260b1676fa81e19e60817a",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/evidence/sprint3/2026-10-16-li-direct-runtime-repairs.json",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "ee3acaf09cf26cfbf29028d7c7e485d900056e4a",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/evidence/sprint3/2026-10-16-li-direct-runtime-repairs.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "4e8966737369703b9673e00cafac2b5037931df2",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/evidence/sprint3/2026-10-16-li-native-demo-acceptance.json",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "86bf31f9491e31d7e03c137d8e56f3fac50ab1d2",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/evidence/sprint3/2026-10-16-li-native-demo-acceptance.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "c130970596c93e82b19f181141790834df6ffa0b",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/evidence/sprint3/2026-10-16-li-sponsor-demo-rehearsal.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "7424085651acee51ff870ca33dc78083431169c2",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/evidence/sprint3/2026-10-16-shi-event-interaction-guards.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "7af04f93e49465f3c3629cd09ad71a51241bb0dc",
+        "matchesApprovedInputs": [
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          }
+        ]
+      },
+      {
+        "path": "docs/evidence/sprint3/2026-10-16-zhou-client-repeat-use.json",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "e5b27d579b1485ee7fb8c3d80ad186d9be074dae",
+        "matchesApprovedInputs": [
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          }
+        ]
+      },
+      {
+        "path": "docs/evidence/sprint3/2026-10-16-zhou-client-repeat-use.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "9794d317ac0c2783ae9f23d9daa89cff871a3652",
+        "matchesApprovedInputs": [
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          }
+        ]
+      },
+      {
+        "path": "docs/evidence/sprint3/2026-10-17-li-account-session-repair.json",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "51664088ec9648f3f04d16e3b24470bc67d5c610",
+        "matchesApprovedInputs": [
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/evidence/sprint3/2026-10-17-li-account-session-repair.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "1f082cde0008824b0fb6cca837f80c2c482168a1",
+        "matchesApprovedInputs": [
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "docs/planning/2026-10-16-li-sponsor-demo-runbook.md",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "9027e06ce0070016af0774c396ee3dd0c64f1183",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "lib/app/controlled_demo_app.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "cae1360d8581235b0efbb98c766450c12e8b88af",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "lib/app/home_shell_page.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "f9d38789d76ef1d6ece966cdf9e027cd266833ad",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "lib/app/router/app_router.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "190dcf860cbf0156d093a99f96a0e962afce7b17",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "lib/app/social_demo_presentation.dart",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "01d13ae7097da78bd6834062feec480ee5632c42",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "lib/features/account/presentation/account_preferences_controller.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "69d9f3909302980e077f212160586178949e735a",
+        "matchesApprovedInputs": [
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "lib/features/account/presentation/account_preferences_page.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "011b5af263e67616d0d42e206ff37622632b2952",
+        "matchesApprovedInputs": [
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "lib/features/event_browse/presentation/activity_controller.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "f56e68bddbc3e9351ab0e0ddb8c32b9d46770d04",
+        "matchesApprovedInputs": [
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          }
+        ]
+      },
+      {
+        "path": "lib/features/event_browse/presentation/activity_page.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "848c6bc3cd682d4313d20c8932216f3427772a72",
+        "matchesApprovedInputs": [
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          }
+        ]
+      },
+      {
+        "path": "lib/harness/social/offline_social_app.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "e7ca4d2451c7d6039310fc478abb43185233481b",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "lib/harness/social/offline_social_pages.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "8fefe09bbb34f72e0d454f090e28f67b68f6ee33",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "test/app/account_preferences_flow_test.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "56d32b5d6a9081528aaab2ca3aaaa2a656fd660d",
+        "matchesApprovedInputs": [
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "test/app/controlled_demo_app_test.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "6ca5e7017268d7359f2a3a91ec25f76efc245d17",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "test/features/ai_conversation/ai_repeat_wire_join_test.dart",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "400449272959fa5ed550e61a479ffe46c26baf93",
+        "matchesApprovedInputs": [
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          }
+        ]
+      },
+      {
+        "path": "test/features/event_browse_test.dart",
+        "status": "M",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "9eca367f638a610eba646064cd956fd4d6e02f98",
+        "matchesApprovedInputs": [
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          }
+        ]
+      },
+      {
+        "path": "test/harness/ai_network_cancel_return_test.dart",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "7c79b7e34dc26b941ebf44904e149a8aede90c8e",
+        "matchesApprovedInputs": [
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          }
+        ]
+      },
+      {
+        "path": "tool/li_sponsor_demo.py",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "eff1bbb8a03572bfda6db850cb3ae2433a371372",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      },
+      {
+        "path": "tool/test_li_sponsor_demo.py",
+        "status": "A",
+        "mode": "100644",
+        "type": "blob",
+        "finalBlob": "0da3558b38e3d5ca020b650c5cf05aef4bd41f2a",
+        "matchesApprovedInputs": [
+          {
+            "pr": 130,
+            "head": "9cf30134a522009f410485c6352df757ed0ab23d"
+          },
+          {
+            "pr": 132,
+            "head": "7da25cade87f808606320aff0f5c343cef4e1b5f"
+          },
+          {
+            "pr": 133,
+            "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9"
+          },
+          {
+            "pr": 134,
+            "head": "0ceb12124185fe8c9f436d3d35d9f1c0cee64a7e"
+          }
+        ]
+      }
+    ],
+    "protectedPaths": [
+      {
+        "name": "Skills and repository agent policy",
+        "gitPathspecs": [
+          ".agents"
+        ],
+        "equal": true,
+        "changedPaths": []
+      },
+      {
+        "name": "API",
+        "gitPathspecs": [
+          "api"
+        ],
+        "equal": true,
+        "changedPaths": []
+      },
+      {
+        "name": "Android",
+        "gitPathspecs": [
+          "android"
+        ],
+        "equal": true,
+        "changedPaths": []
+      },
+      {
+        "name": "Codex configuration",
+        "gitPathspecs": [
+          ".codex"
+        ],
+        "equal": true,
+        "changedPaths": []
+      },
+      {
+        "name": "Dependency manifests and locks",
+        "gitPathspecs": [
+          ":(glob)**/package.json",
+          ":(glob)**/pubspec.yaml",
+          ":(glob)**/pnpm-workspace.yaml",
+          "*.lock",
+          "*lock*.json"
+        ],
+        "equal": true,
+        "changedPaths": []
+      },
+      {
+        "name": "FVM configuration",
+        "gitPathspecs": [
+          ".fvmrc",
+          ".fvm/fvm_config.json"
+        ],
+        "equal": true,
+        "changedPaths": []
+      }
+    ]
+  },
+  "results": {
+    "backendCompile": {
+      "argv": [
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "backend/tsconfig.json"
+      ],
+      "startedAt": "2026-10-17T05:32:21.471Z",
+      "finishedAt": "2026-10-17T05:32:24.178Z",
+      "exit": 0,
+      "signal": null,
+      "log": "backend-compile.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "backend": {
+      "tests": 938,
+      "pass": 938,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "argv": [
+        "--test",
+        "backend/dist/test/**/*.test.js"
+      ],
+      "startedAt": "2026-10-17T05:32:24.182Z",
+      "finishedAt": "2026-10-17T05:32:35.029Z",
+      "exit": 0,
+      "signal": null,
+      "log": "backend-full.log",
+      "logSha256": "30d0c835ed5b024c7b14551168d328f6fa71f5f0d00ca462c2987f777f438244"
+    },
+    "operatorFirst": {
+      "tests": 52,
+      "pass": 49,
+      "fail": 3,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "argv": [
+        "--test",
+        "tool/*.test.mjs"
+      ],
+      "startedAt": "2026-10-17T05:32:35.030Z",
+      "finishedAt": "2026-10-17T05:32:38.775Z",
+      "exit": 1,
+      "signal": null,
+      "log": "operator-full.log",
+      "logSha256": "4dfce8580f3535a18ca43bfa5ad515d3768e8acbaaf77dcbfa42e018b334d5e3"
+    },
+    "operatorAuthorized": {
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "argv": [
+        "--test",
+        "tool/*.test.mjs"
+      ],
+      "startedAt": "2026-10-17T05:33:26.780Z",
+      "finishedAt": "2026-10-17T05:33:30.869Z",
+      "exit": 0,
+      "signal": null,
+      "log": "operator-full-authorized.log",
+      "logSha256": "3c2581de8cf528f84396927343489748d4fd811bd433ff3f9a2543f4c79def47"
+    },
+    "sdk": {
+      "tests": 168,
+      "pass": 168,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "argv": [
+        "tool/run_ai_store_emulators.mjs"
+      ],
+      "startedAt": "2026-10-17T05:33:05.780Z",
+      "finishedAt": "2026-10-17T05:38:06.870Z",
+      "exit": 0,
+      "signal": null,
+      "log": "sdk-full.log",
+      "logSha256": "46acc721966ae72bad3762c8d358e81e3605298fbbf23fc7bb1cbd05fe37ae09",
+      "actualIsolatedSdk": true,
+      "modelCompilerProviderDoubles": true,
+      "cleanupMarkers": [
+        "JIN_NEXT_EMULATOR_WORKER_PROFILE_REMOVED",
+        "JIN_NEXT_EMULATOR_OUTER_PROFILE_REMOVED",
+        "JIN_NEXT_EMULATOR_REQUIRED_PORTS_FREE"
+      ],
+      "ports": [
+        8080,
+        9099,
+        4400,
+        4500,
+        9150
+      ],
+      "ordinaryOrDemonstrationData": false
+    },
+    "flutter": {
+      "fullWindows": {
+        "pass": 675,
+        "fail": 1,
+        "exit": 1,
+        "skipped": 0,
+        "failedCase": "test/harness/controlled_phone_service_configuration_test.dart: symlink handoffs are rejected and unlinked without consuming the target",
+        "failureLocation": "158:16",
+        "category": "Windows environment privilege failure before consumer invocation",
+        "errno": 1314,
+        "repeatedFullRun": false,
+        "sourceOrAssertionChanged": false
+      },
+      "analysis": {
+        "exit": 0,
+        "result": "No issues found",
+        "scope": [
+          "lib",
+          "test",
+          "integration_test"
+        ],
+        "fatalInfos": true
+      },
+      "format": {
+        "exit": 0,
+        "files": 15,
+        "changed": 0,
+        "nonWriting": true
+      },
+      "sourceStable": true,
+      "capableEnvironment": {
+        "windowsAuthorizedTokenHasSymlinkPrivilege": false,
+        "ubuntuAvailable": true,
+        "linuxFlutterSdkFound": false,
+        "linuxPubCacheFound": false,
+        "searched": [
+          "PATH",
+          "/root",
+          "/home",
+          "/opt",
+          "/usr/local",
+          "/usr/lib",
+          "/tmp"
+        ],
+        "result": "Linux Flutter gate Not Run: no existing Flutter3.47.2/Dart SDK or package cache found in bounded standard-tool search; no installation or OS setting change"
+      }
+    },
+    "pythonWindows": {
+      "pass": 5,
+      "errors": 2,
+      "total": 7,
+      "exit": 1,
+      "reason": "Sandbox temporary file and cleanup permissions; both generated temporary directories subsequently absent"
+    },
+    "pythonPosix": {
+      "source": "b3c8a2223bd305c65a56cbd4fc88aff13b8a1d8e",
+      "startedAt": "2026-10-17T05:34:45.447935+00:00",
+      "finishedAt": "2026-10-17T05:34:45.701838+00:00",
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "test_li_sponsor_demo",
+        "test_li_controlled_phone_handoff",
+        "-v"
+      ],
+      "python": "3.12.3 (main, Jun 18 2025, 17:59:45) [GCC 13.3.0]",
+      "platform": "linux",
+      "exit": 0,
+      "files": {
+        "li_sponsor_demo.py": "1319f1d2f0de8e118b28af90adf4388df1db6cca35140eaf9e72dc68211c4eaf",
+        "test_li_sponsor_demo.py": "067aa1b861527b26ab5917616c12756b4dd83eb28a90367510b8e2ddce61b2e2",
+        "li_controlled_phone_handoff.py": "b8558a9bf08d7235111b51e57e0e27e038c1079b9452056ae1d75f3e09232c95",
+        "test_li_controlled_phone_handoff.py": "ce47504f5c86311cd96679d2594997bcf6ba5d7f09079db0e9e4c1898373129d"
+      },
+      "temporaryRemoved": true,
+      "logSha256": "5eca35f69d3d73f3aaff7505378348d289731594d22ff800697e9c28a3fa073d",
+      "pass": 25,
+      "fail": 0,
+      "realDevice": false
+    }
+  },
+  "apk": {
+    "outputPath": "build/jin-unified-20261017/jin-unified-b3c8a222-arm64-debug.apk",
+    "bytes": 94273899,
+    "sha256": "776bc6a640fff73ba0382d0dcfb56c685f4bc787397901961ca4839ca0cfb825",
+    "package": "com.enmori.app.personatest",
+    "versionCode": 1,
+    "versionName": "1.0.0",
+    "minSdk": 24,
+    "targetSdk": 36,
+    "launchableActivity": "com.enmori.app.MainActivity",
+    "builtFrom": {
+      "source": "b3c8a2223bd305c65a56cbd4fc88aff13b8a1d8e",
+      "tree": "df800e43374ec89b71799b6722d5364163eb68cc",
+      "exportDirectory": "retained new ASCII exact-source export (local)",
+      "archiveSha256": "c0e60e44656dd7602f561fd0d767b0e8d906062c3dceb0443f5ea9f3f22e563b",
+      "beforeAndAfterRawBlobMatches": 1286,
+      "trackedMismatches": 0,
+      "locksUnchanged": true
+    },
+    "command": "pinned dart <Flutter tools snapshot> --suppress-analytics build apk --debug --target-platform android-arm64 --target lib/controlled_demo.dart --no-pub",
+    "environment": {
+      "flutter": "3.47.2",
+      "dart": "3.13.2",
+      "java": "21.0.12.1",
+      "personaAndroidTest": "true, process-only",
+      "pubRestoreOffline": true,
+      "successfulGradleInvocationOffline": false,
+      "dependencyVersionsChanged": false
+    },
+    "verificationExits": {
+      "offlinePub": 0,
+      "successfulFlutterApkBuild": 0,
+      "aaptBadging": 0,
+      "apksigner": 0,
+      "rawSourceAndLocks": 0,
+      "copiedHash": 0
+    },
+    "signature": {
+      "scheme": "v2",
+      "signers": 1,
+      "certificateDn": "C=US, O=Android, CN=Android Debug",
+      "certificateSha256": "a6ff83fa12ff92d4b33e5efde167aee3b0f3f4590bd843def55d9584f7724dd3"
+    },
+    "abi": {
+      "requestedTarget": "android-arm64",
+      "flutterEngine": "arm64-v8a",
+      "otherIncludedNativeLibraries": "Inherited libdatastore_shared_counter.so also appears under armeabi-v7a and x86_64; this is not claimed to be an arm64-only ZIP"
+    },
+    "retainedFailures": [
+      "Initial git archive inherited core.autocrlf=true and exported CRLF; raw blob identity preflight failed before build. First archive/directory/receipt retained. Fresh git -c core.autocrlf=false archive matched all 1286 blobs.",
+      "Sandbox creation of isolated Gradle-cache junction denied; escalated same operation succeeded. No source change.",
+      "First actual APK build using isolated Gradle home with cache/wrapper junctions failed exit1 in settings Kotlin DSL with unresolved builtins. Same source and same offline init with original Gradle home passed offline help; normal pinned Flutter retry passed. Low-level junction/cache path cause not asserted.",
+      "First failure receipt wrapper mistakenly used PowerShell true instead of $true, so its initial JSON write failed; actual Gradle exit1 remained in original log and separate apk-build-first-failure.json records both."
+    ],
+    "retainedWarnings": [
+      "firebase_auth/firebase_core KGP migration warning",
+      "SDK XML reader supports v3 but encountered v4"
+    ],
+    "notRun": [
+      "Device installation",
+      "Device launch/journeys",
+      "Real Auth/Backend/model/provider checks attributable to this APK build",
+      "iOS build"
+    ],
+    "cleanup": "All old and new exports, logs, APKs and build failures retained. No original build cleaned/overwritten. No device or app operated. No global configuration changed. No Gradle or adb daemon stopped.",
+    "evidence": [
+      "apk-source-before.json",
+      "apk-source-before-lf.json",
+      "apk-pub-offline.log",
+      "apk-pub-offline.log.json",
+      "apk-after-pub.json",
+      "apk-build-offline.log",
+      "apk-build-first-failure.json",
+      "apk-gradle-original-home-diagnostic.log",
+      "apk-gradle-original-home-diagnostic.log.json",
+      "apk-after-diagnostic.json",
+      "apk-build-original-cache.log",
+      "apk-build-original-cache.log.json",
+      "apk-aapt-badging.txt",
+      "apk-signature-verification.txt",
+      "apk-identity.json",
+      "apk-native-library-inventory.json",
+      "apk-toolchain.txt",
+      "apk-evidence-index.json"
+    ]
+  },
+  "remaining": {
+    "capableEnvironmentFullFlutter": "Blocked: Windows symlink fixture OS1314; no existing Linux Flutter SDK/cache found. No skip or waiver.",
+    "shiComposition": "Pending formal review",
+    "liEvidenceAcceptance": "Pending formal review/PM acceptance",
+    "realSameInputTwoRounds": "Not Run on new source; previous rejection cause unproved and one later real success does not close it.",
+    "androidCrossVerification": "Not Run; immutable APK delivered locally, valid authorized runtime/private handoff and device owner required.",
+    "eventProviderBrowserClearOwnedCopy": "Not Run on new source",
+    "ios": "Not Run; applicable prior deferrals/gates retained",
+    "demoRestoration": "Paused by existing PM decision; not attempted"
+  },
+  "logs": [
+    {
+      "path": "build/jin-unified-20261017/source-before.json",
+      "bytes": 345709,
+      "sha256": "b388c6e6a40a47a4e964763b927c1ec42534174ebb8df876ae8d3d516fa09fbc"
+    },
+    {
+      "path": "build/jin-unified-20261017/source-after.json",
+      "bytes": 345709,
+      "sha256": "ef454ad7bc032ca7a46b689a2c36bca2ddae8e39bb12e5278c9c04a7ddb37b44"
+    },
+    {
+      "path": "build/jin-unified-20261017/composition.json",
+      "bytes": 40188,
+      "sha256": "2523736f76c1f7e1ea355bbeaef87dd67fa011ce09fdcc68e20a8e4433489cc8"
+    },
+    {
+      "path": "build/jin-unified-20261017/compiled-output-manifest.json",
+      "bytes": 110139,
+      "sha256": "0dd9b3363b179802779b8cbd1526d9197461e6d7ce28db85703991a6e025ce79"
+    },
+    {
+      "path": "build/jin-unified-20261017/dependencies-offline.log",
+      "bytes": 1621,
+      "sha256": "0e35dacc01016c69ab3f25e78f043f616fbe957365e3bd4cd24f46e811c81e51"
+    },
+    {
+      "path": "build/jin-unified-20261017/dependencies-offline-authorized.log",
+      "bytes": 3245,
+      "sha256": "327d411613f55c89cd95413f6883421ab215a95adc9c86c79fa487b093e72bd7"
+    },
+    {
+      "path": "build/jin-unified-20261017/backend-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-unified-20261017/backend-full.log",
+      "bytes": 87733,
+      "sha256": "30d0c835ed5b024c7b14551168d328f6fa71f5f0d00ca462c2987f777f438244"
+    },
+    {
+      "path": "build/jin-unified-20261017/operator-full.log",
+      "bytes": 9236,
+      "sha256": "4dfce8580f3535a18ca43bfa5ad515d3768e8acbaaf77dcbfa42e018b334d5e3"
+    },
+    {
+      "path": "build/jin-unified-20261017/operator-full-authorized.log",
+      "bytes": 5765,
+      "sha256": "3c2581de8cf528f84396927343489748d4fd811bd433ff3f9a2543f4c79def47"
+    },
+    {
+      "path": "build/jin-unified-20261017/sdk-full.log",
+      "bytes": 24679,
+      "sha256": "46acc721966ae72bad3762c8d358e81e3605298fbbf23fc7bb1cbd05fe37ae09"
+    },
+    {
+      "path": "build/jin-unified-20261017/flutter-summary.json",
+      "bytes": 3541,
+      "sha256": "85a8e4cf6e2f2fc4112547fed5f02df19eb4de35fced10e59337345ffbb16f75"
+    },
+    {
+      "path": "build/jin-unified-20261017/flutter-pub-run01.log",
+      "bytes": 267,
+      "sha256": "b1cb4206737824d5ca5f1680b7ab186ed7cbad7819aa53defb99e753f6c5352b"
+    },
+    {
+      "path": "build/jin-unified-20261017/flutter-pub-run02-authorized.log",
+      "bytes": 617,
+      "sha256": "17ab702e98a51d72f929da8773d34406233b9c8038e5c82a693d7e7c637be060"
+    },
+    {
+      "path": "build/jin-unified-20261017/flutter-full-run01-authorized.log",
+      "bytes": 141251,
+      "sha256": "0944872e6958fd1319f2540cb01adc556ef746a985799fa1a55d32071e56bb17"
+    },
+    {
+      "path": "build/jin-unified-20261017/flutter-analysis-run01-authorized.log",
+      "bytes": 58,
+      "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735"
+    },
+    {
+      "path": "build/jin-unified-20261017/flutter-format-run01-authorized.log",
+      "bytes": 48,
+      "sha256": "1be6038a2d0e246316addf5defd6a2ee748d637e5f42de73eb700b232309b52a"
+    },
+    {
+      "path": "build/jin-unified-20261017/python-sponsor-windows.log",
+      "bytes": 8518,
+      "sha256": "4f93563c00bed80ab9d3f121d3081229c953472b7f31ecc47b69491e3b0e564c"
+    },
+    {
+      "path": "build/jin-unified-20261017/python-posix-full.log",
+      "bytes": 4435,
+      "sha256": "5eca35f69d3d73f3aaff7505378348d289731594d22ff800697e9c28a3fa073d"
+    },
+    {
+      "path": "build/jin-unified-20261017/python-posix-full.json",
+      "bytes": 954,
+      "sha256": "083a14871753bc7b1cb111598ef5dc1f99a5f5289064516cd4e7afb8940f6c6f"
+    },
+    {
+      "path": "build/jin-unified-20261017/apk-summary.json",
+      "bytes": 4334,
+      "sha256": "c11254c46c1e85e340243cd257bee12c48b7d14708d926937d7ddd097869c69a"
+    },
+    {
+      "path": "build/jin-unified-20261017/apk-build-offline.log",
+      "bytes": 3212,
+      "sha256": "a6c1c21df050b9d8253b5b07e8ab05602f146743f238b3f36ed46844e88c2ba7"
+    },
+    {
+      "path": "build/jin-unified-20261017/apk-build-first-failure.json",
+      "bytes": 1133,
+      "sha256": "e86b8aa40e0d22dbc5d14e54ba4213cb4f23389269f38877e05640f5a0e80e46"
+    },
+    {
+      "path": "build/jin-unified-20261017/apk-build-original-cache.log",
+      "bytes": 1232,
+      "sha256": "f8ae0d115d0f9c368c0e7f50ab08df16aaee8c1d2d838d815676197f78543d41"
+    },
+    {
+      "path": "build/jin-unified-20261017/apk-gradle-original-home-diagnostic.log",
+      "bytes": 22497,
+      "sha256": "2df65442e999a9d2419ca5dcc4fbf2b8aaefdf528dbc2c628393cb67212ea11e"
+    },
+    {
+      "path": "build/jin-unified-20261017/apk-source-before.json",
+      "bytes": 148040,
+      "sha256": "48b417389aa761b855e4a6c5442be3455c29f888a530ac3ef2cd3d575dfd18de"
+    },
+    {
+      "path": "build/jin-unified-20261017/apk-source-before-lf.json",
+      "bytes": 1232,
+      "sha256": "f2fdc9386e2b6ca349a0582fd90b8b48c79efd7f4b5d0033ebc9644cd100128a"
+    },
+    {
+      "path": "build/jin-unified-20261017/apk-aapt-badging.txt",
+      "bytes": 4835,
+      "sha256": "4651a0750a7afd2cf98a7b46cef2238fcca934755a0a07b46d7f1673110b33ac"
+    },
+    {
+      "path": "build/jin-unified-20261017/apk-signature-verification.txt",
+      "bytes": 972,
+      "sha256": "f97fb10fffbcce6a2316559830bb014590c0d28680274bffef3c8b7725fb62ad"
+    },
+    {
+      "path": "build/jin-unified-20261017/apk-native-library-inventory.json",
+      "bytes": 452,
+      "sha256": "3b8a40e34b49fda0632846f56a1cce8a5a15c76079b36f3a8c3f982f03c90171"
+    }
+  ],
+  "preservation": {
+    "originalBranchUnchanged": true,
+    "originalNeighborBuildUntouched": true,
+    "newLogsNeverOverwritten": true,
+    "originalFailuresRetained": true,
+    "noRuntimeReset": true,
+    "noMainMerge": true,
+    "noIssueOrProjectStatusChange": true,
+    "rawLogsAndApkLocalOnly": true
+  }
+}
