@@ -1,4 +1,7 @@
 import 'package:flutter/widgets.dart';
+
+import '../social_demo_presentation.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -57,10 +60,42 @@ abstract final class AppRoutes {
       '/check-in/${Uri.encodeComponent(checkInId)}';
 }
 
+/// Only a currently observed controlled session may switch a visible root tab.
+/// AI calls this only after its existing draft/pending-operation leave guard.
+void selectConnectedSocialTab(
+  BuildContext context,
+  int index, {
+  required AuthSession? session,
+  required String sourcePath,
+}) {
+  if (!context.mounted || session is! AuthSessionAuthenticated) return;
+  final scope = ProviderScope.containerOf(context, listen: false);
+  if (!scope.read(socialDemoPresentationProvider) ||
+      scope.read(routerGateProvider) != RouterGateState.authenticated ||
+      !identical(scope.read(authSessionProvider).value, session) ||
+      GoRouter.of(context).state.uri.path != sourcePath) {
+    return;
+  }
+  const paths = [
+    AppRoutes.home,
+    '/friends',
+    AppRoutes.checkIn,
+    AppRoutes.aiAssistant,
+    AppRoutes.profile,
+  ];
+  if (index < 0 || index >= paths.length || paths[index] == sourcePath) return;
+  if (index == 2) {
+    context.push<void>(paths[index]);
+  } else {
+    context.go(paths[index]);
+  }
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   // An account-owned route stack must not survive an identity replacement.
   final routeSubject = ref.watch(currentAuthSubjectProvider);
   final isolatedSlices = ref.watch(isolatedSlicesEnabledProvider);
+  final socialPresentation = ref.watch(socialDemoPresentationProvider);
   final activitiesEnabled = ref.watch(activityBrowseEnabledProvider);
   final personaPages = isolatedSlices
       ? ref.watch(isolatedPersonaPagesProvider)
@@ -146,6 +181,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     }
   }
 
+  Widget rootTab(BuildContext context, String path, int index, Widget child) =>
+      socialPresentation
+      ? SocialDemoTab(
+          selectedIndex: index,
+          onSelected: (index) => selectConnectedSocialTab(
+            context,
+            index,
+            session: routeSession,
+            sourcePath: path,
+          ),
+          child: child,
+        )
+      : child;
+
   final refresh = RouterRefreshNotifier(ref);
   final router = GoRouter(
     initialLocation: AppRoutes.startup,
@@ -223,8 +272,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isolatedSlices)
         GoRoute(
           path: '/friends',
-          builder: (context, state) => FriendPage(
-            onOpenMyFriends: () => context.push<void>('/friends/list'),
+          builder: (context, state) => rootTab(
+            context,
+            '/friends',
+            1,
+            FriendPage(
+              onOpenMyFriends: () => context.push<void>('/friends/list'),
+            ),
           ),
         ),
       if (isolatedSlices)
@@ -267,6 +321,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.home,
         builder: (context, state) => HomeShellPage(
+          socialStyle: socialPresentation,
+          onSelectTab: socialPresentation
+              ? (index) => selectConnectedSocialTab(
+                  context,
+                  index,
+                  session: routeSession,
+                  sourcePath: AppRoutes.home,
+                )
+              : null,
+          onOpenSettings: socialPresentation
+              ? () => openShared(context, AppRoutes.home, AppRoutes.settings)
+              : null,
           onStartCheckIn: () => context.go(AppRoutes.checkIn),
           onBrowseActivities: activitiesEnabled
               ? () {
@@ -328,16 +394,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.profile,
-        builder: (context, state) => OwnProfilePage(
-          onEditProfile: () async {
-            await context.push<void>(AppRoutes.profileEdit);
-          },
-          onOpenSettings: () async {
-            await context.push<void>(AppRoutes.settings);
-          },
-          onEditInterests: () async {
-            await context.push<bool>(AppRoutes.interests);
-          },
+        builder: (context, state) => rootTab(
+          context,
+          AppRoutes.profile,
+          4,
+          OwnProfilePage(
+            onEditProfile: () async {
+              await context.push<void>(AppRoutes.profileEdit);
+            },
+            onOpenSettings: () async {
+              await context.push<void>(AppRoutes.settings);
+            },
+            onEditInterests: () async {
+              await context.push<bool>(AppRoutes.interests);
+            },
+          ),
         ),
       ),
       GoRoute(
@@ -372,8 +443,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.checkIn,
-        builder: (context, state) =>
-            CheckInComposerPage(onReturnHome: () => context.go(AppRoutes.home)),
+        builder: (context, state) => CheckInComposerPage(
+          socialStyle: socialPresentation,
+          onReturnHome: () => context.go(AppRoutes.home),
+        ),
       ),
       GoRoute(
         path: AppRoutes.interests,

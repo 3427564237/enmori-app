@@ -24,7 +24,7 @@ test("controlled adapter preflights existing version/manifest/loaded context and
   const f=fixture();assert.equal(new TextDecoder().decode(await f.adapter.generate("input",f.budget)),raw);
   assert.deepEqual(f.calls.map(c=>c.path),["/api/version","/api/tags","/api/ps","/api/generate"]);
   const request=JSON.parse(f.calls[3]!.init!.body as string);
-  assert.deepEqual(request,{model:reference,prompt:"Synthetic complete prompt input",raw:true,stream:false,format:"json",options:{num_ctx:8192,num_predict:512}});
+  assert.deepEqual(request,{model:reference,prompt:"Synthetic complete prompt input",raw:true,stream:false,format:"json",options:{num_ctx:8192,num_predict:512,temperature:0,seed:42}});
   assert.equal(f.calls.every(c=>c.init?.redirect==="error"),true);assert.equal(f.adapter.state,"stopped");
 });
 test("controlled adapter rejects public/credential/query/DNS endpoints without any network call",()=>{

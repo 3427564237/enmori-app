@@ -59,7 +59,7 @@ function modelFixture(options: { message?: string; tokens?: number; available?: 
     assert(typeof request === "object" && request !== null);
     const body = request as Record<string, unknown>;
     assert.equal(body.raw, true); assert.equal(body.stream, false); assert.equal(body.format, "json");
-    assert.deepEqual(body.options, { num_ctx: 8192, num_predict: 512 });
+    assert.deepEqual(body.options, { num_ctx: 8192, num_predict: 512, temperature: 0, seed: 42 });
     assert.equal(init!.signal?.aborted, false);
     options.onStarted?.(); await options.hold;
     return Response.json({ model: reference, done: true, response: rawReply(options.message ?? "你提到：今天读书了。"),
