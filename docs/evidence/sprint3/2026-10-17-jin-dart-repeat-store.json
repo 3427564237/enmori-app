@@ -1,0 +1,310 @@
+{
+  "source": "520132837d8e905e848c0cfb9b219b686d7ee124",
+  "tree": "3601c74593041145549ce77b3066430f9ce65fd4",
+  "base": "0219cee3034dae2c90ac1fc3f209b6506aaad45a",
+  "scope": "Test-only actual Dart Repository/HTTP transport repeat Send and Reload through controlled real Auth/Firestore; compiler/token count/model doubles.",
+  "sourceOnlyChanges": [
+    {
+      "path": "backend/emulator-test/controlled-phone-service.integration.test.ts",
+      "blob": "8486a584807e446d86ad3635a1cbb46fb634f1f1",
+      "sha256": "427b1a1cf213baeb31d01c88cfc7d71471d6c0cf366132e3ef5bf8c4e74e69a3",
+      "equivalent": "CRLF-equivalent"
+    },
+    {
+      "path": "backend/emulator-test/support/dart-repeat-store-probe.ts",
+      "blob": "decc1c9265b216129357f651a65f7d85b576cd47",
+      "sha256": "7c8dd0d14cd96f31c5e258b4c685c3ed9e971e9432346164edd0e97dab4831f5",
+      "equivalent": "exact"
+    },
+    {
+      "path": "test/support/ai_repeat_store_probe.dart",
+      "blob": "cc2a16a06bd6b623a62d4e8eca5c4391b8833139",
+      "sha256": "4e5b28970774d705d537de7d662c55d3255db99f83736b272766b0529a8483c9",
+      "equivalent": "exact"
+    }
+  ],
+  "binding": {
+    "count": 1292,
+    "aggregateSha256": "f4ada4710417c81550b32fc2535b22fd47d015f56e7f9d862fed2fdc6e0961e1",
+    "beforeManifestSha256": "f7c9ed57f4bf6c745c9c9a13a7742e6d4a7145f44150806bfcbdc9079d620a8d",
+    "afterManifestSha256": "dfc2381576546f4754a594eda29dd9dbcd4aff54bc15c25b5ed3d156a424930e",
+    "compiledCount": 705,
+    "compiledAggregateSha256": "395f4cb05094e3de5242c965287b3e9d9f98f9b02dd5be39a86c487c69f1149c"
+  },
+  "commands": {
+    "compile": {
+      "source": "520132837d8e905e848c0cfb9b219b686d7ee124",
+      "tree": "3601c74593041145549ce77b3066430f9ce65fd4",
+      "cwd": "C:\\Users\\Aa124\\OneDrive\\文档\\ChatGPT\\Comp3851B\\enmori-app-jin-active",
+      "executable": "C:/Users/Aa124/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe",
+      "argv": [
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "backend/tsconfig.json"
+      ],
+      "startedAt": "2026-10-17T11:09:56.726Z",
+      "finishedAt": "2026-10-17T11:09:59.602Z",
+      "exit": 0,
+      "signal": null,
+      "log": "C:\\Users\\Aa124\\OneDrive\\文档\\ChatGPT\\Comp3851B\\enmori-app-jin-active\\build\\jin-dart-repeat-store-20261017\\compile.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "focused": {
+      "source": "520132837d8e905e848c0cfb9b219b686d7ee124",
+      "tree": "3601c74593041145549ce77b3066430f9ce65fd4",
+      "cwd": "C:\\Users\\Aa124\\OneDrive\\文档\\ChatGPT\\Comp3851B\\enmori-app-jin-active",
+      "executable": "C:/Users/Aa124/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe",
+      "argv": [
+        "tool/run_ai_store_emulators.mjs",
+        "--phone-service-only"
+      ],
+      "startedAt": "2026-10-17T11:10:25.537Z",
+      "finishedAt": "2026-10-17T11:12:05.405Z",
+      "exit": 0,
+      "signal": null,
+      "log": "C:\\Users\\Aa124\\OneDrive\\文档\\ChatGPT\\Comp3851B\\enmori-app-jin-active\\build\\jin-dart-repeat-store-20261017\\sdk-focused.log",
+      "logSha256": "41ec0807244c006ac91e002bc4b614a849b4615c47ccaa97ee0f65f1ec0cfd1b",
+      "counts": {
+        "tests": 16,
+        "pass": 16,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "cleanupMarkers": [
+        "JIN_NEXT_EMULATOR_WORKER_PROFILE_REMOVED",
+        "JIN_NEXT_EMULATOR_OUTER_PROFILE_REMOVED",
+        "JIN_NEXT_EMULATOR_REQUIRED_PORTS_FREE"
+      ]
+    },
+    "helperStatic": {
+      "evidenceScope": "working-file-only static checks; not a frozen candidate, SDK, device or model result",
+      "observedHead": "0219cee3034dae2c90ac1fc3f209b6506aaad45a",
+      "file": "test/support/ai_repeat_store_probe.dart",
+      "sha256": "4e5b28970774d705d537de7d662c55d3255db99f83736b272766b0529a8483c9",
+      "dart": "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart.exe",
+      "version": "3.13.2",
+      "checks": [
+        {
+          "args": [
+            "--version"
+          ],
+          "exit": 0,
+          "log": "helper-dart-version-01.log"
+        },
+        {
+          "args": [
+            "format",
+            "test/support/ai_repeat_store_probe.dart"
+          ],
+          "exit": 0,
+          "log": "helper-format-02.log"
+        },
+        {
+          "args": [
+            "analyze",
+            "test/support/ai_repeat_store_probe.dart"
+          ],
+          "exit": 0,
+          "log": "helper-analyze-02.log"
+        }
+      ],
+      "runtime": "Not Run by helper author; parent owns actual SDK host execution",
+      "retainedEarlierLogs": [
+        "helper-format-01.log",
+        "helper-analyze-01.log"
+      ],
+      "binding": "Working-file static execution matches frozen-source SHA256; no redundant rerun."
+    },
+    "negativeConfiguration": {
+      "source": "520132837d8e905e848c0cfb9b219b686d7ee124",
+      "helperSha256": "4e5b28970774d705d537de7d662c55d3255db99f83736b272766b0529a8483c9",
+      "time": "2026-10-17T11:11:24.234Z",
+      "results": [
+        {
+          "name": "non-test-mode",
+          "executable": "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart.exe",
+          "args": [
+            "run",
+            "test/support/ai_repeat_store_probe.dart",
+            "--base-uri=http://127.0.0.1:1"
+          ],
+          "exit": 2,
+          "result": "expected blocked before token/network",
+          "stdout": "{\"result\":\"blocked\",\"steps\":[\"configuration:blocked\"],\"cleanup\":\"not-required\"}\n"
+        },
+        {
+          "name": "non-loopback-uri",
+          "executable": "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart.exe",
+          "args": [
+            "run",
+            "test/support/ai_repeat_store_probe.dart",
+            "--base-uri=https://example.invalid"
+          ],
+          "exit": 2,
+          "result": "expected blocked before token/network",
+          "stdout": "{\"result\":\"blocked\",\"steps\":[\"configuration:blocked\"],\"cleanup\":\"not-required\"}\n"
+        },
+        {
+          "name": "missing-stdin-token",
+          "executable": "C:/Users/Aa124/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart.exe",
+          "args": [
+            "run",
+            "test/support/ai_repeat_store_probe.dart",
+            "--base-uri=http://127.0.0.1:1"
+          ],
+          "exit": 2,
+          "result": "expected blocked before token/network",
+          "stdout": "{\"result\":\"blocked\",\"steps\":[\"configuration:blocked\"],\"cleanup\":\"not-required\"}\n"
+        }
+      ]
+    }
+  },
+  "priorReviewSupersession": {
+    "observedAt": "2026-10-17T11:12:42.038Z",
+    "priorReviews": [
+      {
+        "pr": 135,
+        "reviews": [
+          {
+            "id": 5556605959,
+            "url": "https://github.com/3427564237/enmori-app/pull/135#pullrequestreview-5556605959",
+            "state": "COMMENTED",
+            "head": "dcdc3ba13f1a4bac192775b7a45f8e37bc4c680e",
+            "reviewer": "3427564237"
+          },
+          {
+            "id": 5557362538,
+            "url": "https://github.com/3427564237/enmori-app/pull/135#pullrequestreview-5557362538",
+            "state": "APPROVED",
+            "head": "dcdc3ba13f1a4bac192775b7a45f8e37bc4c680e",
+            "reviewer": "GGGGHOST-CN"
+          }
+        ]
+      },
+      {
+        "pr": 136,
+        "reviews": [
+          {
+            "id": 5556615895,
+            "url": "https://github.com/3427564237/enmori-app/pull/136#pullrequestreview-5556615895",
+            "state": "COMMENTED",
+            "head": "0219cee3034dae2c90ac1fc3f209b6506aaad45a",
+            "reviewer": "3427564237"
+          },
+          {
+            "id": 5557363644,
+            "url": "https://github.com/3427564237/enmori-app/pull/136#pullrequestreview-5557363644",
+            "state": "APPROVED",
+            "head": "0219cee3034dae2c90ac1fc3f209b6506aaad45a",
+            "reviewer": "GGGGHOST-CN"
+          }
+        ]
+      }
+    ],
+    "scope": "Only old Pending observations are superseded. #135/#136 heads remain unchanged; their SHI assigned reviews and LI independent evidence paths are complete. Original Windows 675/1 and every historical failure remain."
+  },
+  "failures": {
+    "localHarness": {
+      "source": "520132837d8e905e848c0cfb9b219b686d7ee124",
+      "scope": "local auxiliary runner failures, no product repair or passed cases",
+      "attempts": [
+        {
+          "script": "negative-config.mjs",
+          "exit": 1,
+          "observed": "ERR_MODULE_NOT_FOUND",
+          "cause": "Runner import used ../../../ instead of ../../ from build/jin-dart-repeat-store-20261017. Failed before Dart or network dispatch.",
+          "fix": "Retain original; negative-config-02.mjs corrects only import path."
+        },
+        {
+          "script": "negative-config-02.mjs",
+          "exit": 1,
+          "observed": "non-test-mode child status 3221225480 (0xC0000008), expected 2",
+          "cause": "Unknown at observation; Windows invalid-handle status from sandboxed Dart child. No positive helper result; stderr not retained by this runner.",
+          "next": "Preserve this failure and compare the identical runner with authorized unsandboxed process execution; do not infer a product failure."
+        }
+      ]
+    },
+    "resolution": "Identical corrected runner passed 3/3 with normal authorized process permissions. Sandboxed Dart 0xC0000008 remains a failed invocation. No tested product/source repair was made.",
+    "sdk": "No failure in this 16-case invocation."
+  },
+  "boundary": {
+    "actual": [
+      "Dart AiWireRepository and HttpAiWireTransport.isolatedLoopback",
+      "two fresh same-input Sends with intermediate and final canonical history",
+      "loopback HTTP and actual Firebase Auth verification",
+      "Firestore canonical pairs, original Note provenance and unchanged Note",
+      "existing controlled composition semantic candidate gate",
+      "actual Dart DELETE plus SDK absence checks and owned service cleanup"
+    ],
+    "doubles": [
+      "Qwen generation",
+      "complete-input compiler and token count"
+    ],
+    "notRunOnThisSource": [
+      "full SDK suite",
+      "full Backend unit suite",
+      "full Flutter unit/widget suite",
+      "actual Flutter Controller/Page UI journey",
+      "operator/Python gates",
+      "new APK build or signing",
+      "real 9B/tokenizer repeated routine",
+      "Android/iOS device execution"
+    ],
+    "limitations": [
+      "300-second watchdog bounds only child lifetime; SDK checkpoint awaits its reads to settle and has no separate aggregate deadline. Unsettled SDK observations are not a completed cleanup claim.",
+      "No induced mid-flight child/SDK timeout or checkpoint-rejection case was executed in this packet.",
+      "Existing #135 APK still requires an approved recipient location and valid current private runtime configuration; LI/SHI separately report zero connected devices."
+    ]
+  },
+  "localReceipts": [
+    {
+      "path": "build/jin-dart-repeat-store-20261017/compile.json",
+      "sha256": "e8d185393b296b9e3cb1a7403b227991bdfc6df1dfb1c71efbc261d3c21f5ec4"
+    },
+    {
+      "path": "build/jin-dart-repeat-store-20261017/sdk-focused.json",
+      "sha256": "67b70d3dc8a8d6a894b2eb3f5e0aceeabcaf6a280cc488ee637429bfe7f98f0c"
+    },
+    {
+      "path": "build/jin-dart-repeat-store-20261017/helper-validation-02.json",
+      "sha256": "cb25aa711529af2f571b307098c64ba08c9155dc184cb4e04c4b6cc7b1e01e9b"
+    },
+    {
+      "path": "build/jin-dart-repeat-store-20261017/helper-format-02.log",
+      "sha256": "56d314280a92aac617eeeacbfee28ae9d98c01fb997840fdb15f112fcf773615"
+    },
+    {
+      "path": "build/jin-dart-repeat-store-20261017/helper-analyze-02.log",
+      "sha256": "c1dda15e441e7a4e6f50ef946c331399cc7fc5fad4d21f8e429fe708b0c299f2"
+    },
+    {
+      "path": "build/jin-dart-repeat-store-20261017/negative-config.json",
+      "sha256": "dc2d5a0f3a2e2d8966dd9a93128ccdcee72ae2c3ed4cf107e9d83acd8c30fd06"
+    },
+    {
+      "path": "build/jin-dart-repeat-store-20261017/negative-failures.json",
+      "sha256": "2c6040b2fa63769c1e92c199e1902cf2339ba01f5b9d8a162f346cdb16b03caa"
+    },
+    {
+      "path": "build/jin-dart-repeat-store-20261017/pr135-reviews.json",
+      "sha256": "25d9e83d6f646ffbe06cabba418beb402b28ad5ea5b455c14ee4cddf2bddddb4"
+    },
+    {
+      "path": "build/jin-dart-repeat-store-20261017/pr136-reviews.json",
+      "sha256": "e7e1d0f980a9ea7f06b3c3c5192d2de99fd26629b52ed70f3afdc36efacf1a3c"
+    }
+  ],
+  "review": {
+    "newContribution": "SHI — Pending",
+    "executionEvidence": "LI — Pending",
+    "internalReviewIsNotFormalApproval": true
+  },
+  "unchanged": [
+    "production/API/client/runtime launcher/dependencies and build configuration",
+    "frozen #135/#136 heads",
+    "original #135 APK identity and private bytes",
+    "main/Issue/Project/UAT/Release state; demonstration remains paused"
+  ]
+}
