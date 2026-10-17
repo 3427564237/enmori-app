@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
+import '../../auth/auth_providers.dart';
 import '../domain/account_preferences_repository.dart';
 import '../domain/account_repository.dart';
 import 'account_preferences_controller.dart';
 
-final class AccountPreferencesPage extends ConsumerStatefulWidget {
+final class AccountPreferencesPage extends ConsumerWidget {
   const AccountPreferencesPage({
     required this.view,
     this.onEditProfile,
@@ -17,12 +18,33 @@ final class AccountPreferencesPage extends ConsumerStatefulWidget {
   final Future<void> Function()? onEditProfile;
   final Future<Result<void>> Function()? onSignOut;
   @override
-  ConsumerState<AccountPreferencesPage> createState() =>
+  Widget build(BuildContext context, WidgetRef ref) => _AccountPreferencesForm(
+    key: ValueKey((view, ref.watch(authSessionProvider).asData?.value)),
+    view: view,
+    onEditProfile: onEditProfile,
+    onSignOut: onSignOut,
+  );
+}
+
+// Drafts and asynchronous signout feedback belong to one observed session.
+final class _AccountPreferencesForm extends ConsumerStatefulWidget {
+  const _AccountPreferencesForm({
+    required this.view,
+    this.onEditProfile,
+    this.onSignOut,
+    super.key,
+  });
+  final PreferencesView view;
+  final Future<void> Function()? onEditProfile;
+  final Future<Result<void>> Function()? onSignOut;
+
+  @override
+  ConsumerState<_AccountPreferencesForm> createState() =>
       _AccountPreferencesPageState();
 }
 
 final class _AccountPreferencesPageState
-    extends ConsumerState<AccountPreferencesPage> {
+    extends ConsumerState<_AccountPreferencesForm> {
   final _name = TextEditingController();
   int? _revision;
   ProfileVisibility _profileVisibility = ProfileVisibility.private;

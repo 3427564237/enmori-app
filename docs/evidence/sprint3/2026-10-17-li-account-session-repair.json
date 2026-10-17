@@ -1,0 +1,134 @@
+{
+  "recordedAt": "2026-10-16T19:14:18.480081+00:00",
+  "authority": [
+    "S-PM-1005-LI-PROFILE-SETTINGS",
+    "S-PM-1016-LI-DISTRIBUTED-FEATURE-OWNERSHIP",
+    "S-PM-1016-LI-LOW-BLOCKING-KICKOFF"
+  ],
+  "base": "dd1994af69d861253356571d59317c549c879914",
+  "reviewedProductBase": "9cf30134a522009f410485c6352df757ed0ab23d",
+  "sourceOnlyCommit": "11e06b4b961e495fd76c9dc3e8a61a76fead5480",
+  "testedTree": "5142a6bdae116774b4556531f91facda901a07b5",
+  "sourceOnlyPaths": [
+    {
+      "path": "lib/features/account/presentation/account_preferences_controller.dart",
+      "gitBlob": "69d9f3909302980e077f212160586178949e735a",
+      "sha256": "5ebedcea80d9a0d29aad6c62b35917fe9617729404d8180c375166059f162545"
+    },
+    {
+      "path": "lib/features/account/presentation/account_preferences_page.dart",
+      "gitBlob": "011b5af263e67616d0d42e206ff37622632b2952",
+      "sha256": "c0e6b25f57001afa87903dee2531fe28032208a3726a5eafc03302eb559ce944"
+    },
+    {
+      "path": "test/app/account_preferences_flow_test.dart",
+      "gitBlob": "56d32b5d6a9081528aaab2ca3aaaa2a656fd660d",
+      "sha256": "0f7e2667ab288852f8c9aee5549431e3ea6591a9ceb5b2731d02f6e1156b030f"
+    }
+  ],
+  "rootFlutter": {
+    "pass": 664,
+    "fail": 0,
+    "exit": 0,
+    "defaultConcurrency": true,
+    "includesNewCases": 5
+  },
+  "baselineReproduction": {
+    "productionSource": "dd1994af69d861253356571d59317c549c879914",
+    "existingCasesPass": 8,
+    "newCasesFail": 5,
+    "exit": 1,
+    "note": "Final five regression cases on original production files; subsequent dart format changed test layout only. Original four-case red and intermediate 12-case green are also retained."
+  },
+  "analysis": {
+    "scope": "lib test integration_test",
+    "fatalInfos": true,
+    "result": "No issues found",
+    "exit": 0
+  },
+  "nonWritingFormat": {
+    "files": 3,
+    "changed": 0,
+    "exit": 0
+  },
+  "deltaWhitespace": "Pass",
+  "protectedPathsUnchanged": [
+    "lib/app",
+    "lib/harness",
+    "backend",
+    "api",
+    "tool",
+    "android",
+    "ios",
+    "pubspec.yaml",
+    "pubspec.lock"
+  ],
+  "backendOrApiChange": false,
+  "runtimeRestored": false,
+  "newApkBuilt": false,
+  "deviceExecution": "Not Run",
+  "realAuthOrBackendEffects": "Not Run",
+  "unifiedCandidateGate": "Not Run",
+  "commands": [
+    "/home/miku/fvm/versions/3.47.2/bin/flutter pub get --offline",
+    "/home/miku/fvm/versions/3.47.2/bin/flutter test --no-pub --reporter expanded",
+    "/home/miku/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart analyze --fatal-infos lib test integration_test",
+    "/home/miku/fvm/versions/3.47.2/bin/cache/dart-sdk/bin/dart format --output=none --set-exit-if-changed lib/features/account/presentation/account_preferences_controller.dart lib/features/account/presentation/account_preferences_page.dart test/app/account_preferences_flow_test.dart",
+    "git diff --check dd1994af69d861253356571d59317c549c879914 11e06b4b961e495fd76c9dc3e8a61a76fead5480"
+  ],
+  "separatePr133Review": {
+    "head": "e9d9fe9aa2481e6301e121829cd9fc6a339b58d9",
+    "sourceOnly": "449f67459a02a8621f1212f82251da62bf1cc2b6",
+    "affectedPass": 250,
+    "exit": 0,
+    "analysis": "No issues found",
+    "formatFiles": 2,
+    "formatChanged": 0,
+    "review": "https://github.com/3427564237/enmori-app/pull/133#pullrequestreview-5552512965",
+    "inheritedInThisBranch": false
+  },
+  "logs": [
+    {
+      "path": "build/li-review-20261017/account-before.log",
+      "bytes": 9934,
+      "sha256": "75c06bd847e3fae26454237c4c2b5b20187a9bb2256639d5b51b8e6a39ad5e26",
+      "committed": false
+    },
+    {
+      "path": "build/li-review-20261017/account-after.log",
+      "bytes": 1086,
+      "sha256": "2b703b1e1886ad87b0654c7a8bc1b337c6f56f3eadb29c85f6c7ec72a5c212d9",
+      "committed": false
+    },
+    {
+      "path": "build/li-review-20261017/account-final-baseline-red.log",
+      "bytes": 13233,
+      "sha256": "14e9b9e65b366523530f36079a41d2a7889849f53a3d3889055c0011784f2305",
+      "committed": false
+    },
+    {
+      "path": "build/li-review-20261017/account-full.log",
+      "bytes": 128655,
+      "sha256": "fb40bd7a1d926733b0ccaf73580565e2d368910fc309bd742a96ab032eb2bf4d",
+      "committed": false
+    },
+    {
+      "path": "build/li-review-20261017/account-analysis.log",
+      "bytes": 58,
+      "sha256": "e8dc9876c280f5e5856ad02bdfff74e10fe944a331b6e4f3ea1f4297666ad735",
+      "committed": false
+    },
+    {
+      "path": "build/li-review-20261017/affected.log",
+      "bytes": 51506,
+      "sha256": "988d7bf9bc9f1730090f8b21fdcf398738d2914ccbcdcb04221e95ca2cfdbfb1",
+      "committed": false
+    },
+    {
+      "path": "build/li-review-20261017/analysis.log",
+      "bytes": 216,
+      "sha256": "388b9933c6efc60ee1d736bc2f035d73c05c2af80e34a5a16c401c68db82f9d4",
+      "committed": false
+    }
+  ]
+}

@@ -9,6 +9,8 @@ import 'package:enmori/features/account/account_preferences_providers.dart';
 import 'package:enmori/features/account/account_providers.dart';
 import 'package:enmori/features/account/domain/account_preferences_repository.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
+import 'package:enmori/features/account/presentation/account_preferences_controller.dart';
+import 'package:enmori/features/account/presentation/account_preferences_page.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/interests/interests_providers.dart';
@@ -18,6 +20,204 @@ import '../support/fakes.dart';
 import '../support/fake_account_preferences.dart';
 
 void main() {
+  testWidgets('old signout feedback cannot enter a replacement Settings form', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    final prefs = FakeAccountPreferences();
+    final signout = Completer<Result<void>>();
+    addTearDown(auth.close);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          accountPreferencesRepositoryProvider.overrideWithValue(prefs),
+        ],
+        child: MaterialApp(
+          home: AccountPreferencesPage(
+            view: PreferencesView.settings,
+            onSignOut: () => signout.future,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    auth.emit(AuthSessionAuthenticated(subject: 'member-a'));
+    await frames(tester);
+    await tap(tester, 'settings-sign-out');
+    expect(
+      tester
+          .widget<OutlinedButton>(find.byKey(const Key('settings-sign-out')))
+          .onPressed,
+      isNull,
+    );
+    auth.emit(AuthSessionAuthenticated(subject: 'member-a'));
+    await frames(tester);
+    expect(
+      tester
+          .widget<OutlinedButton>(find.byKey(const Key('settings-sign-out')))
+          .onPressed,
+      isNotNull,
+    );
+    signout.complete(
+      const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'Synthetic old signout refusal',
+        ),
+      ),
+    );
+    await frames(tester);
+    expect(find.text('Could not sign out. Try again.'), findsNothing);
+    expect(auth.watchCount, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('same-UID replacement reloads Profile and discards its draft', (
+    tester,
+  ) async {
+    final h = await start(tester);
+    await tap(tester, 'profile-edit');
+    await tester.enterText(
+      find.byKey(const Key('profile-display-name')),
+      'Previous session draft',
+    );
+    h.prefs.profile = const OwnProfile(
+      username: 'member_a',
+      displayName: 'Current session',
+      visibility: ProfileVisibility.public,
+      revision: 0,
+    );
+    h.auth.emit(AuthSessionAuthenticated(subject: 'member-a'));
+    await frames(tester);
+    expect(find.text('Previous session draft'), findsNothing);
+    expect(find.text('Current session'), findsOneWidget);
+    expect(
+      tester
+          .widget<DropdownButton<ProfileVisibility>>(
+            find.byKey(const Key('profile-visibility')),
+          )
+          .value,
+      ProfileVisibility.public,
+    );
+    expect(h.prefs.profileNames, isEmpty);
+    expect(h.auth.watchCount, 1);
+  });
+
+  testWidgets('same-UID replacement discards unsaved Settings choices', (
+    tester,
+  ) async {
+    final h = await start(tester);
+    await tap(tester, 'profile-settings');
+    await tap(tester, 'settings-consent');
+    h.prefs.settings = const OwnSettings(
+      checkInVisibility: CheckInVisibility.friendsOnly,
+      consent: OptionalProcessingConsent.rejected,
+      revision: 0,
+    );
+    h.auth.emit(AuthSessionAuthenticated(subject: 'member-a'));
+    await frames(tester);
+    expect(
+      tester
+          .widget<DropdownButton<CheckInVisibility>>(
+            find.byKey(const Key('settings-visibility')),
+          )
+          .value,
+      CheckInVisibility.friendsOnly,
+    );
+    expect(
+      tester
+          .widget<SwitchListTile>(find.byKey(const Key('settings-consent')))
+          .value,
+      isFalse,
+    );
+    expect(h.prefs.settingsSaveCount, 0);
+    await tap(tester, 'settings-save');
+    expect(h.prefs.settings.checkInVisibility, CheckInVisibility.friendsOnly);
+    expect(h.prefs.settings.consent, OptionalProcessingConsent.rejected);
+    expect(h.prefs.settingsSaveCount, 1);
+  });
+
+  testWidgets('late Profile save cannot mark a replacement session saved', (
+    tester,
+  ) async {
+    final h = await start(tester);
+    await tap(tester, 'profile-edit');
+    final pending = h.prefs.pendingSave = Completer<Result<OwnProfile>>();
+    await tap(tester, 'profile-save');
+    h.auth.emit(AuthSessionAuthenticated(subject: 'member-a'));
+    await frames(tester);
+    final replacementSave = tester
+        .widget<FilledButton>(find.byKey(const Key('profile-save')))
+        .onPressed;
+    final reads = h.prefs.profileReadCount;
+    pending.complete(
+      const Success(
+        OwnProfile(
+          username: 'member_a',
+          displayName: 'Old save result',
+          visibility: ProfileVisibility.public,
+          revision: 1,
+        ),
+      ),
+    );
+    await frames(tester);
+    expect(find.byKey(const Key('preferences-save-success')), findsNothing);
+    expect(replacementSave, isNotNull);
+    expect(find.text('Old save result'), findsNothing);
+    expect(h.prefs.profileReadCount, reads);
+    expect(h.prefs.profileNames, hasLength(1));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('late Profile read cannot replace the new session snapshot', (
+    tester,
+  ) async {
+    final h = await start(tester);
+    await tap(tester, 'profile-edit');
+    final container = ProviderScope.containerOf(
+      tester.element(find.byKey(const Key('profile-display-name'))),
+    );
+    final pending = Completer<Result<OwnProfile>>();
+    h.prefs.profileReads.add(pending.future);
+    final loading = container
+        .read(
+          accountPreferencesControllerProvider(PreferencesView.profile)
+              .notifier,
+        )
+        .load();
+    await tester.pump();
+    h.prefs.profile = const OwnProfile(
+      username: 'member_a',
+      displayName: 'New session read',
+      visibility: ProfileVisibility.private,
+      revision: 0,
+    );
+    h.auth.emit(AuthSessionAuthenticated(subject: 'member-a'));
+    await frames(tester);
+    final replacementWasLoaded = find
+        .text('New session read')
+        .evaluate()
+        .isNotEmpty;
+    pending.complete(
+      const Success(
+        OwnProfile(
+          username: 'member_a',
+          displayName: 'Old delayed read',
+          visibility: ProfileVisibility.public,
+          revision: 2,
+        ),
+      ),
+    );
+    await loading;
+    await frames(tester);
+    expect(find.text('Old delayed read'), findsNothing);
+    expect(replacementWasLoaded, isTrue);
+    expect(find.text('New session read'), findsOneWidget);
+    expect(h.prefs.profileNames, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'Profile editor saves then rereads canonical fields; unsaved Back never writes',
     (tester) async {
