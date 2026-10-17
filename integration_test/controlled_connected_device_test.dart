@@ -142,6 +142,7 @@ void main() {
     debugPrint('ZHOU_CONNECTED_AI_TWO_ROUNDS_DELIVERED: Pass');
 
     await _tap(tester, 'ai-personas');
+    expect(_state(tester).messages, isEmpty);
     await _visible(tester, 'persona-edit-${persona.personaId}');
     await _tap(tester, 'persona-edit-${persona.personaId}');
     await _visible(tester, 'persona-name');

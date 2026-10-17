@@ -145,14 +145,16 @@ void main() {
 }
 
 Future<AiConversationState> _returnThroughPersonas(WidgetTester tester) async {
+  final scope = ProviderScope.containerOf(
+    tester.element(find.byKey(const Key('ai-network-harness-banner'))),
+  );
   await _tap(tester, 'ai-personas');
+  expect(scope.read(aiConversationControllerProvider).messages, isEmpty);
   expect(find.byKey(const Key('persona-empty')), findsOneWidget);
   await _tap(tester, 'persona-back');
   await _tap(tester, 'ai-conversation-actions');
   await _tap(tester, 'ai-reload-messages');
-  return ProviderScope.containerOf(
-    tester.element(find.byKey(const Key('ai-network-harness-banner'))),
-  ).read(aiConversationControllerProvider);
+  return scope.read(aiConversationControllerProvider);
 }
 
 Future<_Peer> _mount(WidgetTester tester, {_Fault? fault}) async {
