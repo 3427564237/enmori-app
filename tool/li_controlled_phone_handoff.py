@@ -117,10 +117,10 @@ def handoff(path: Path) -> tuple[bytes, int]:
     return data, port
 
 
-def run(arguments: list[str], *, input: bytes | None = None) -> bytes:
+def run(arguments: list[str], *, input: bytes | None = None, cwd: Path | None = None) -> bytes:
     try:
         completed = subprocess.run(arguments, input=input, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE, timeout=30, check=False)
+                                   stderr=subprocess.PIPE, timeout=30, check=False, cwd=cwd)
         require(completed.returncode == 0 and len(completed.stdout) <= 524288, "command_failed")
         return completed.stdout
     except (OSError, subprocess.SubprocessError):
@@ -170,7 +170,10 @@ def transfer(apk: Path, private_handoff: Path, serial: str, *, adb: str, aapt: s
         with apk.open("rb") as stream:
             apk_hash = hashlib.file_digest(stream, "sha256").hexdigest()
         report["apkSha256"] = apk_hash
-        badging = runner([aapt, "dump", "badging", str(apk)]).decode("utf-8")
+        # Some Windows aapt/locale combinations cannot decode a Unicode parent
+        # in argv. Keep the absolute input/hash, but give this child alone the
+        # APK directory and relative filename; ./ also protects option-like names.
+        badging = runner([aapt, "dump", "badging", "./" + apk.name], cwd=apk.parent).decode("utf-8")
         require(re.search(r"^package: name='com\.enmori\.app\.personatest'(?:\s|$)", badging, re.M) is not None,
                 "apk_identity_refused")
         require(re.search(r"^launchable-activity: name='com\.enmori\.app\.MainActivity'(?:\s|$)", badging, re.M) is not None,

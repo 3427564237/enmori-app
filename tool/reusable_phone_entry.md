@@ -10,6 +10,8 @@ SSH/raw TCP double forward, and provided **17 October 2026, 22:27–22:57 SGT**.
 The additional listener/access scope proposed below remains unresolved. No remote route,
 host availability, private handoff or operational acceptance is claimed here.
 Do not run a startup command merely because this document exists.
+The recorded 17 October window has now expired; a new explicit window is
+required. None of the historical timestamps below authorizes another run.
 
 ## Frozen artifact and tool identity
 
@@ -163,6 +165,11 @@ a JIN entry issue to resolve, not permission to remove the check.
      --apk $Apk --handoff $PrivateHandoff --serial $Serial `
      --adb $Adb --aapt $Aapt
    ```
+
+   Keep `$Apk` absolute and retain the original ASCII filename. The helper uses
+   the APK parent as `aapt`'s child-only working directory and passes a relative
+   filename, so a Chinese/spaced receiver directory is not sent in its arguments.
+   It does not change the caller's working directory, copy the APK or alter ACLs.
 
    It checks installed bytes/nonce and delivers through stdin. The helper
    itself has no window parameter; never reuse it outside the agreed interval
