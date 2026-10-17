@@ -131,7 +131,9 @@ a JIN entry issue to resolve, not permission to remove the check.
    Tailscale status. An offline status is a connection prerequisite to report,
    not proof of wrong membership. Do not reset/logout/re-enrol the client or
    invent remote addresses. Bring up only the selected, documented existing
-   route. **Its actual route command is still pending the inventory above.**
+   route. **Its actual route command awaits LI's additional listener/access
+   decision, followed by implementation and connection validation.** The
+   existing-facility inventory above is complete.
 2. With absolute local paths, run:
 
    ```powershell
