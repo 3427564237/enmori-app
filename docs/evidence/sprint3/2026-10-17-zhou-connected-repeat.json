@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "scope": "connected-ai-two-round-automation",
+  "observedAtUtc": "2026-10-17T14:44:45.3539230Z",
+  "base": "dcdc3ba13f1a4bac192775b7a45f8e37bc4c680e",
+  "sourceCommit": "e877a94bac55383009d68c9e9be779d5fdbcdb36",
+  "sourceTree": "280b1777a9cb383caabebbbadf18e8126f69439d",
+  "toolchain": {
+    "host": "Windows",
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "workspace": "D:/3851"
+  },
+  "testedInputs": [
+    {
+      "path": "integration_test/controlled_connected_device_test.dart",
+      "gitBlob": "21e5a3fce57dbe31ca9ce5e17f6eb8df4f3ba5a5",
+      "workingSha256": "b73c243d0dec5f84441580b7361dc15d537d6e1844ee48369f14e1c4f62ba711"
+    },
+    {
+      "path": "test/support/ai_connected_repeat_journey.dart",
+      "gitBlob": "4a72a4822a1d9afef20f4a98dae5efd0c7c80988",
+      "workingSha256": "db850f18b4ae868fbea530412fe30d610b017cfb5b31df924e097381d15a5704"
+    },
+    {
+      "path": "test/harness/ai_connected_repeat_journey_test.dart",
+      "gitBlob": "5a4d1b9261ebfa2bf3464cd07414934c2bc0f24b",
+      "workingSha256": "9b9a07a2965209990f5a01c8141c570e2abfa0d6b7036559ccc651feb445d08f"
+    }
+  ],
+  "protectedInputCount": 356,
+  "protectedInputsUnchanged": true,
+  "checks": {
+    "affected": {
+      "exitCode": 0,
+      "newCasesIncluded": 5,
+      "passed": 17,
+      "failed": 0
+    },
+    "analysis": {
+      "exitCode": 0,
+      "issues": 0
+    },
+    "format": {
+      "exitCode": 0,
+      "files": 3,
+      "changed": 0
+    },
+    "scopedWhitespace": {
+      "exitCode": 0
+    }
+  },
+  "commands": [
+    "fvm flutter test --no-pub --reporter expanded test/harness/ai_connected_repeat_journey_test.dart test/harness/ai_network_persona_harness_test.dart test/harness/ai_network_cancel_return_test.dart test/features/ai_conversation/ai_repeat_wire_join_test.dart",
+    "fvm dart analyze --fatal-infos integration_test/controlled_connected_device_test.dart test/support/ai_connected_repeat_journey.dart test/harness/ai_connected_repeat_journey_test.dart",
+    "fvm dart format --output=none --set-exit-if-changed integration_test/controlled_connected_device_test.dart test/support/ai_connected_repeat_journey.dart test/harness/ai_connected_repeat_journey_test.dart",
+    "git diff --cached --check"
+  ],
+  "localLogDirectory": "build/zhou-connected-repeat-20261017",
+  "localLogHashes": [
+    {
+      "name": "affected-final-source.log",
+      "scope": "final committed source",
+      "sha256": "bdcfb0b5b176ec27e894a1010e90c9331d4746e0d58085a72ba0c5546dab0552"
+    },
+    {
+      "name": "analysis-final-source.log",
+      "scope": "final committed source",
+      "sha256": "8af8a1c2f4b56dd3eb302b382c0ae3375bcd561cfb6f9fc93fb69e5a3fe2fd82"
+    },
+    {
+      "name": "format-final-source.log",
+      "scope": "final committed source",
+      "sha256": "e287e944aafa53fc284aeaf29867f88da09161ad1cd7b77b41ce789dfdb80aa1"
+    }
+  ],
+  "notRun": [
+    "Android integration target",
+    "real Qwen9B two-round generation",
+    "real Backend/Auth/Firestore and independent canonical/source/cleanup",
+    "APK build or installation",
+    "remote reusable-entry execution",
+    "iOS",
+    "full application gate"
+  ],
+  "failureHistory": [
+    "Author first local 3-case run: 1 pass / 2 tester guard failures; direct await/catch replaced expectLater around active tester actions. Original output only in tool transcript, not a retained raw file.",
+    "Review caught legal idle phase after Persona return, cached ordinary-history evidence ambiguity and private-content matcher output; test helpers/markers corrected before final source verification."
+  ],
+  "localIndependentStaticReview": {
+    "sourceChangedDuringFinalChecks": false,
+    "formalLiApproval": false,
+    "actionableFindingsRemaining": 0
+  },
+  "sourceOnlyCommits": [
+    "86117035ffd7c007623121cb74751835b0ecbf40",
+    "e877a94bac55383009d68c9e9be779d5fdbcdb36"
+  ],
+  "preFinalHelperLog": {
+    "name": "helper-five-cases.log",
+    "scope": "author five-case run before final fixed-stage rename and explicit cleared-display assertions; not the final source gate",
+    "sha256": "a3d66be3a1df20abea0a552bc3145e7c5f7b4e34488bc9a242bc8f83f48fd4c6"
+  }
+}
