@@ -1,0 +1,209 @@
+{
+  "source": "752e22213f1a70027c44e02a13f1fc2a63191e33",
+  "tree": "200a0984ddb604def6ce29432f0c0a16063c7787",
+  "reviewedBase": "c777fbfc2f24e68dd43efcb5f3ba0ed352871f14",
+  "review": "https://github.com/3427564237/enmori-app/pull/139#pullrequestreview-5558564124",
+  "scope": "R1 aapt path/cwd compatibility correction; formal re-review pending",
+  "procedureSha256": "16c7b422ae38975a54ed4fde3a8676aa7df7e882767d0323ba2714f532aad944",
+  "inputs": [
+    {
+      "path": "tool/li_controlled_phone_handoff.py",
+      "sha256": "3e5180ffd48dbc30fa4086e93b3c21f54db5c77a332b429cb4d354a1965be77c",
+      "lfSha256": "fb3b39e78a80052e7baa66b9a8079367bb3d1ad54258da576f7ac1066174566e",
+      "gitBlob": "f27ac108f8fb6911b86296b4c97b6be84d4f1fa9"
+    },
+    {
+      "path": "tool/private_handoff_file.py",
+      "sha256": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c",
+      "lfSha256": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c",
+      "gitBlob": "b542485b9b8087a4ee40d85b7c48db422f095b00"
+    },
+    {
+      "path": "tool/check_reusable_phone_entry.py",
+      "sha256": "3cdf046b36510f1802f5841b1deb92a69224f2e5311f3b5615e30bd917d7ad47",
+      "lfSha256": "3cdf046b36510f1802f5841b1deb92a69224f2e5311f3b5615e30bd917d7ad47",
+      "gitBlob": "c0969717dc8ebbfa44a1a40be9c36e768a75086f"
+    },
+    {
+      "path": "tool/test_handoff_apk_paths.py",
+      "sha256": "2dc44cc3ef94a1a8e0ac232da29fa67f576334074c7c16e10f1f7b59b57f4284",
+      "lfSha256": "2dc44cc3ef94a1a8e0ac232da29fa67f576334074c7c16e10f1f7b59b57f4284",
+      "gitBlob": "474971e37e3865bf5b86514c731a63b3ce9224c0"
+    },
+    {
+      "path": "tool/test_li_controlled_phone_handoff.py",
+      "sha256": "647414177176b569a5d0c614d4ddc2d5a8c7d692fff1075baa96b26d449d6f35",
+      "lfSha256": "4e309b9ef10e224ed3cc2b50ef72d1458b70a700eac69216774fea909e3d359d",
+      "gitBlob": "de877013cc9a7fe843507c68884c738045a97b1e"
+    },
+    {
+      "path": "tool/li_controlled_phone_handoff.md",
+      "sha256": "3542d52eed8b1041ce9d1dc2f0cf8a427601886915336cdeeb5f4061f5c41b39",
+      "lfSha256": "e14e7c1d9f53192c51fabeb6d32290331c732231dbabfdce84e5860401425775",
+      "gitBlob": "0f5a2eb088a71b411b371c40cc6b08b3639c8031"
+    },
+    {
+      "path": "tool/reusable_phone_entry.md",
+      "sha256": "c936f93762d18601ae4c5dca09bd1112503028e5f24c3643c366838c8fdcfd0e",
+      "lfSha256": "c936f93762d18601ae4c5dca09bd1112503028e5f24c3643c366838c8fdcfd0e",
+      "gitBlob": "75715cd5a40d3b224acf02a855730ea755c35857"
+    }
+  ],
+  "runs": [
+    {
+      "platform": "win32",
+      "phase": "red",
+      "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+      "command": [
+        "python.exe",
+        "-B",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "unittest",
+        "-v",
+        "test_handoff_apk_paths"
+      ],
+      "discovered": 8,
+      "passed": 4,
+      "skipped": 0,
+      "failures": 4,
+      "exitCode": 1,
+      "receipt": {
+        "path": "build/jin-reusable-entry-r1-20261017/win32-red-20261017T154852891111Z/receipt.json",
+        "sha256": "3ede7f5edefa03d8b4f329f1e34336b0f4553dced2009e954c8ee9d7f04aed76"
+      },
+      "log": {
+        "path": "build/jin-reusable-entry-r1-20261017/win32-red-20261017T154852891111Z/tests.log",
+        "sha256": "ad38683742d3538a4246bedcb282b18675093b53573a829c55642483b5982677"
+      },
+      "startedAt": "2026-10-17T15:48:58.402132+00:00",
+      "finishedAt": "2026-10-17T15:48:59.882303+00:00",
+      "inputs": {
+        "li_controlled_phone_handoff.py": "727ed013d5a1660aa105c2cbd25c241a19ef056b31b26abe1314fd895daa1320",
+        "private_handoff_file.py": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c",
+        "test_li_controlled_phone_handoff.py": "ce47504f5c86311cd96679d2594997bcf6ba5d7f09079db0e9e4c1898373129d",
+        "test_handoff_apk_paths.py": "2dc44cc3ef94a1a8e0ac232da29fa67f576334074c7c16e10f1f7b59b57f4284"
+      },
+      "cleanup": "owned source copy and test fixture directories removed"
+    },
+    {
+      "platform": "win32",
+      "phase": "green",
+      "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+      "command": [
+        "python.exe",
+        "-B",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "unittest",
+        "-v",
+        "test_handoff_apk_paths"
+      ],
+      "discovered": 8,
+      "passed": 8,
+      "skipped": 0,
+      "failures": 0,
+      "exitCode": 0,
+      "receipt": {
+        "path": "build/jin-reusable-entry-r1-20261017/win32-green-20261017T154920673546Z/receipt.json",
+        "sha256": "e67fcdf12a8cfaa1238f96c7db350cbf36b5209300457e48a944b3cb1c64a9fd"
+      },
+      "log": {
+        "path": "build/jin-reusable-entry-r1-20261017/win32-green-20261017T154920673546Z/tests.log",
+        "sha256": "9f83864e729843ca0e2f37f104063800951dd21ef54234281d747dfc1f8a871c"
+      },
+      "startedAt": "2026-10-17T15:49:20.840399+00:00",
+      "finishedAt": "2026-10-17T15:49:22.036209+00:00",
+      "inputs": {
+        "li_controlled_phone_handoff.py": "3e5180ffd48dbc30fa4086e93b3c21f54db5c77a332b429cb4d354a1965be77c",
+        "private_handoff_file.py": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c",
+        "test_li_controlled_phone_handoff.py": "647414177176b569a5d0c614d4ddc2d5a8c7d692fff1075baa96b26d449d6f35",
+        "test_handoff_apk_paths.py": "2dc44cc3ef94a1a8e0ac232da29fa67f576334074c7c16e10f1f7b59b57f4284"
+      },
+      "cleanup": "owned source copy and test fixture directories removed"
+    },
+    {
+      "platform": "linux",
+      "phase": "green",
+      "python": "3.12.3 (main, Jun 18 2025, 17:59:45) [GCC 13.3.0]",
+      "command": [
+        "python3",
+        "-B",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "unittest",
+        "-v",
+        "test_handoff_apk_paths",
+        "test_li_controlled_phone_handoff"
+      ],
+      "discovered": 26,
+      "passed": 24,
+      "skipped": 2,
+      "failures": 0,
+      "exitCode": 0,
+      "receipt": {
+        "path": "build/jin-reusable-entry-r1-20261017/linux-green-20261017T154936754364Z/receipt.json",
+        "sha256": "26fb1e3d2dae74650feba95cdab1eab3621dfd988dac79dd8c9b3b6a4f196161"
+      },
+      "log": {
+        "path": "build/jin-reusable-entry-r1-20261017/linux-green-20261017T154936754364Z/tests.log",
+        "sha256": "b673d5bc6f0aeb542a80808cec3bc2213e3c58b29bd28c01ff0be3fea4025ea2"
+      },
+      "startedAt": "2026-10-17T15:49:36.772814+00:00",
+      "finishedAt": "2026-10-17T15:49:37.041427+00:00",
+      "inputs": {
+        "li_controlled_phone_handoff.py": "3e5180ffd48dbc30fa4086e93b3c21f54db5c77a332b429cb4d354a1965be77c",
+        "private_handoff_file.py": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c",
+        "test_li_controlled_phone_handoff.py": "647414177176b569a5d0c614d4ddc2d5a8c7d692fff1075baa96b26d449d6f35",
+        "test_handoff_apk_paths.py": "2dc44cc3ef94a1a8e0ac232da29fa67f576334074c7c16e10f1f7b59b57f4284"
+      },
+      "cleanup": "owned source copy and test fixture directories removed"
+    }
+  ],
+  "candidate": {
+    "source": "b3c8a2223bd305c65a56cbd4fc88aff13b8a1d8e",
+    "tree": "df800e43374ec89b71799b6722d5364163eb68cc",
+    "apkSha256": "776bc6a640fff73ba0382d0dcfb56c685f4bc787397901961ca4839ca0cfb825",
+    "bytes": 94273899,
+    "rebuilt": false
+  },
+  "originalPathObservation": {
+    "path": "build/jin-reusable-entry-r1-20261017/pre-fix-reproduction.json",
+    "sha256": "2c6308c05664f33f11ce240a9d5b3c369d728ad548c73500d53bdc038f0094e9"
+  },
+  "unicodeFixtureObservation": {
+    "path": "build/jin-reusable-entry-r1-20261017/pre-fix-non-acp-reproduction.json",
+    "sha256": "8c72fecb61e1e970407f9e15be18e3b05cffa681387c4d8d2456e2ef5295971a"
+  },
+  "initialSandboxFailure": {
+    "path": "build/jin-reusable-entry-r1-20261017/initial-sandbox-fixture-failure.json",
+    "sha256": "67d0b495d146416aaff7bc20776045031ca3ba0c682764a234d787e77c2e5127"
+  },
+  "observationLimit": "JIN Windows ACP65001: original absolute and relative paths both succeed. SHI actual failure remains separately attributed. RED native failure is an invocation assertion, not a reproduced SDK encoding error.",
+  "checks": {
+    "changedPythonAst": 3,
+    "whitespace": "pass",
+    "productApiDependenciesSkills": "unchanged",
+    "testedBytesAndGitBlobs": "pass",
+    "noResourceWarning": true
+  },
+  "notRun": [
+    "SHI corrected-path native execution and formal re-review",
+    "current remote route",
+    "runtime startup",
+    "real private handoff or phone business flow",
+    "real consecutive 9B"
+  ],
+  "remaining": [
+    "specific listener/access disposition",
+    "route implementation and validation",
+    "valid current original runtime/lease/configuration",
+    "usable SHI Tailscale",
+    "new explicit SGT window"
+  ],
+  "window": "17 October 22:27\u201322:57 SGT expired; not extended",
+  "historicalResults": "Prior JIN and SHI counts remain bound to their original source; not rerun or relabeled. Windows8 and Linux24 overlap in six cases and are not added."
+}
