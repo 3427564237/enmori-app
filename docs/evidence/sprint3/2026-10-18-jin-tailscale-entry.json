@@ -1,0 +1,250 @@
+{
+  "source": "116f041c4ab1ceda656897cecde0c72407d3e1ff",
+  "tree": "3f7f1abd9a57d3b967cf2a2d7b843bfb79ef8600",
+  "base": "84a93e75e1097920e1505d325eb39802d91def0f",
+  "decision": "f348278be0615cde9c5297ce06fa750716480f98",
+  "decisionMerge": "15962a8b2d87e4634388eff644b9b877ef8067ec",
+  "branch": "codex/jin-tailscale-entry-20261018",
+  "appointmentRequired": false,
+  "proposalRequiresAnotherApproval": false,
+  "procedureSha256": "4df62efde8766ed6964d20b74d0b97c3530629218b7363ec6f1c1d84710ee6d9",
+  "inputs": [
+    {
+      "path": "tool/check_reusable_phone_entry.py",
+      "sha256": "fa69b4bab2b387ef0ebe1ef7fc99f6a6bd35bc2f50655e75f78c0ca928de3ccf",
+      "lfSha256": "fa69b4bab2b387ef0ebe1ef7fc99f6a6bd35bc2f50655e75f78c0ca928de3ccf",
+      "gitBlob": "7de4a82438d614e75ddf5f9919fbbf680072cf61"
+    },
+    {
+      "path": "tool/test_check_reusable_phone_entry.py",
+      "sha256": "35c87f95cb9662a200c149873b130b992680030023ea1c228466d72ce4789cca",
+      "lfSha256": "35c87f95cb9662a200c149873b130b992680030023ea1c228466d72ce4789cca",
+      "gitBlob": "62975aa6b4a638aa8b4c4661438d3806c85ddc2e"
+    },
+    {
+      "path": "tool/tailscale_phone_relay.py",
+      "sha256": "683cdcbf622d3107087e77e231f1d0006a9e11cace87f466aa1d057a84134e5c",
+      "lfSha256": "683cdcbf622d3107087e77e231f1d0006a9e11cace87f466aa1d057a84134e5c",
+      "gitBlob": "35f22b01813c2ed3b7a5de5c02cc3888905a5bbe"
+    },
+    {
+      "path": "tool/test_tailscale_phone_relay.py",
+      "sha256": "da160d48d9dddbd8f233dbaab335c50b52db7c83f6c99068da4dca9f45d9bfd4",
+      "lfSha256": "da160d48d9dddbd8f233dbaab335c50b52db7c83f6c99068da4dca9f45d9bfd4",
+      "gitBlob": "6ab8ced9e63beba44e53e5ca8a1114ef4c17c5ff"
+    },
+    {
+      "path": "tool/prepare_tailscale_phone_route.py",
+      "sha256": "31b66d3ddf97ac47bb872083b128213588194f4a516e23603b67a39c375beadc",
+      "lfSha256": "31b66d3ddf97ac47bb872083b128213588194f4a516e23603b67a39c375beadc",
+      "gitBlob": "d07fbf196c741ed298444f8027c9b74a410d4b2c"
+    },
+    {
+      "path": "tool/test_prepare_tailscale_phone_route.py",
+      "sha256": "3a14dcc981cce4e57827c052a3ed337015595964a2c27edfc5daf64b53212fd4",
+      "lfSha256": "3a14dcc981cce4e57827c052a3ed337015595964a2c27edfc5daf64b53212fd4",
+      "gitBlob": "0b7eb80f392af964fddfe7f6e221b9a707cd9ca5"
+    },
+    {
+      "path": "tool/test_reusable_phone_route.py",
+      "sha256": "3b0c86b47e08f5a4468ddeef1ec9d7a5b1948cef4f90a77ebedbedfce4450c1f",
+      "lfSha256": "3b0c86b47e08f5a4468ddeef1ec9d7a5b1948cef4f90a77ebedbedfce4450c1f",
+      "gitBlob": "0de6bf6d650ef16a7fd2fd964a4d10e3b05f2b39"
+    },
+    {
+      "path": "tool/li_controlled_phone_handoff.py",
+      "sha256": "3e5180ffd48dbc30fa4086e93b3c21f54db5c77a332b429cb4d354a1965be77c",
+      "lfSha256": "fb3b39e78a80052e7baa66b9a8079367bb3d1ad54258da576f7ac1066174566e",
+      "gitBlob": "f27ac108f8fb6911b86296b4c97b6be84d4f1fa9"
+    },
+    {
+      "path": "tool/private_handoff_file.py",
+      "sha256": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c",
+      "lfSha256": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c",
+      "gitBlob": "b542485b9b8087a4ee40d85b7c48db422f095b00"
+    },
+    {
+      "path": "tool/reusable_phone_entry.md",
+      "sha256": "ce98a09427d653db17f4efa327c257088ac8f1c4488cb391b37907d7042573b3",
+      "lfSha256": "ce98a09427d653db17f4efa327c257088ac8f1c4488cb391b37907d7042573b3",
+      "gitBlob": "46fd111e79f271eca4c1d5769e8d1b9a6c054ec8"
+    }
+  ],
+  "runs": [
+    {
+      "scope": "no-appointment checker",
+      "platform": "Windows",
+      "python": "3.12.14",
+      "passed": 38,
+      "skipped": 0,
+      "exitCode": 0,
+      "command": "python -B -W error::ResourceWarning -m unittest -v test_check_reusable_phone_entry",
+      "resourceWarningFatal": true,
+      "inputs": {
+        "check_reusable_phone_entry.py": "fa69b4bab2b387ef0ebe1ef7fc99f6a6bd35bc2f50655e75f78c0ca928de3ccf",
+        "test_check_reusable_phone_entry.py": "35c87f95cb9662a200c149873b130b992680030023ea1c228466d72ce4789cca",
+        "private_handoff_file.py": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c",
+        "li_controlled_phone_handoff.py": "3e5180ffd48dbc30fa4086e93b3c21f54db5c77a332b429cb4d354a1965be77c"
+      },
+      "log": {
+        "path": "build/jin-reusable-entry-20261018/checker-no-appointment-green-02.log",
+        "sha256": "d0f7fc48daf7db0a8b5be967896742f145b461411fc947d5ff83bf0abb10a8c3"
+      },
+      "before": {
+        "path": "build/jin-reusable-entry-20261018/checker-no-appointment-green-02-before.sha256",
+        "sha256": "914ad1c12c2b053d671c9ca157cd51bd249607dff8e9023d9917ecd2dd1788e1"
+      },
+      "after": {
+        "path": "build/jin-reusable-entry-20261018/checker-no-appointment-green-02-after.sha256",
+        "sha256": "914ad1c12c2b053d671c9ca157cd51bd249607dff8e9023d9917ecd2dd1788e1"
+      }
+    },
+    {
+      "scope": "checker/opaque-relay/local TLS-Auth composition",
+      "platform": "Windows",
+      "python": "3.12.14",
+      "passed": 2,
+      "skipped": 0,
+      "exitCode": 0,
+      "command": "python -B -W error::ResourceWarning -m unittest -v test_reusable_phone_route",
+      "resourceWarningFatal": true,
+      "inputs": {
+        "tailscale_phone_relay.py": "683cdcbf622d3107087e77e231f1d0006a9e11cace87f466aa1d057a84134e5c",
+        "check_reusable_phone_entry.py": "fa69b4bab2b387ef0ebe1ef7fc99f6a6bd35bc2f50655e75f78c0ca928de3ccf",
+        "test_reusable_phone_route.py": "3b0c86b47e08f5a4468ddeef1ec9d7a5b1948cef4f90a77ebedbedfce4450c1f",
+        "li_controlled_phone_handoff.py": "3e5180ffd48dbc30fa4086e93b3c21f54db5c77a332b429cb4d354a1965be77c",
+        "private_handoff_file.py": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c"
+      },
+      "log": {
+        "path": "build/jin-reusable-entry-20261018/route-composition-01.log",
+        "sha256": "f2825a5c6b1cc3da6938b3bd0c46792d3230690f5cfbc4e875b16262c229bd3c"
+      },
+      "before": {
+        "path": "build/jin-reusable-entry-20261018/route-composition-01-before.sha256",
+        "sha256": "fe3b2c5c873e44fb0aff3633901e7dcb5ee0bb76a5835682a8133e27f325c8dc"
+      },
+      "after": {
+        "path": "build/jin-reusable-entry-20261018/route-composition-01-after.sha256",
+        "sha256": "fe3b2c5c873e44fb0aff3633901e7dcb5ee0bb76a5835682a8133e27f325c8dc"
+      }
+    },
+    {
+      "scope": "opaque relay and Windows owned-private-file fixtures",
+      "platform": "Windows",
+      "python": "3.12.14",
+      "passed": 15,
+      "skipped": 0,
+      "exitCode": 0,
+      "command": "pinned Python -B -m unittest discover -s tool -p test_tailscale_phone_relay.py -v",
+      "resourceWarningFatal": false,
+      "inputs": {
+        "tailscale_phone_relay.py": "683cdcbf622d3107087e77e231f1d0006a9e11cace87f466aa1d057a84134e5c",
+        "test_tailscale_phone_relay.py": "da160d48d9dddbd8f233dbaab335c50b52db7c83f6c99068da4dca9f45d9bfd4",
+        "private_handoff_file.py": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c",
+        "li_controlled_phone_handoff.py": "3e5180ffd48dbc30fa4086e93b3c21f54db5c77a332b429cb4d354a1965be77c"
+      },
+      "receipt": {
+        "path": "build/jin-tailscale-relay-20261018/windows-refusal-20261017T165227428Z/receipt.json",
+        "sha256": "03ba0ca1a4434aa6108722fbc6ec4781b5c6b6798f8ec3b5f40fc964ff715478"
+      },
+      "log": {
+        "path": "build/jin-tailscale-relay-20261018/windows-refusal-20261017T165227428Z/tests.log",
+        "sha256": "8346099d938b0321600ecd57bf8fed03362cde83ea49160f8666b1fcdf54037e"
+      }
+    },
+    {
+      "scope": "private route exporter/current-host and POSIX file fixtures",
+      "platform": "Linux/Ubuntu",
+      "python": "3.12.3",
+      "passed": 24,
+      "skipped": 0,
+      "exitCode": 0,
+      "command": "python3 -B -m unittest -v test_prepare_tailscale_phone_route (exact temporary source copy)",
+      "resourceWarningFatal": false,
+      "inputs": {
+        "prepare_tailscale_phone_route.py": "31b66d3ddf97ac47bb872083b128213588194f4a516e23603b67a39c375beadc",
+        "test_prepare_tailscale_phone_route.py": "3a14dcc981cce4e57827c052a3ed337015595964a2c27edfc5daf64b53212fd4",
+        "check_reusable_phone_entry.py": "fa69b4bab2b387ef0ebe1ef7fc99f6a6bd35bc2f50655e75f78c0ca928de3ccf",
+        "li_controlled_phone_handoff.py": "3e5180ffd48dbc30fa4086e93b3c21f54db5c77a332b429cb4d354a1965be77c",
+        "private_handoff_file.py": "7b4d0a8ae9120983424e137329d879c9fd4c642f5c2933861e2d712b4247ef0c"
+      },
+      "receipt": {
+        "path": "build/jin-reusable-entry-20261018/receipt.json",
+        "sha256": "85e6d451bf8a0f65f630bd1a7feed3f08eca50c61efd5d0d645074201f9981c6"
+      },
+      "transcript": {
+        "path": "build/jin-reusable-entry-20261018/exporter-linux-tool-output.txt",
+        "sha256": "6990eed8ae21a2a370e4f709328b7a9d503b4aeefba4a1784c75cc4907830085"
+      },
+      "evidenceKind": "captured tool output transcription",
+      "cleanup": {
+        "outerTemporaryDirectory": "The actual command uses tempfile.TemporaryDirectory; its with block unwinds on sys.exit, and the command returned 0 without a cleanup exception.",
+        "testTemporaryDirectories": "LinuxPreparationTests registers TemporaryDirectory.cleanup with unittest.addCleanup; the 24-test result is OK.",
+        "identityFixture": "test_parent_identity_change_cleans_only_new_file_in_pinned_directory passed; it asserts the newly created file in the pinned original directory is absent while the replacement file survives.",
+        "failedWriteFixture": "test_write_failure_removes_only_its_new_file passed and asserts the failed newly created route file is absent.",
+        "independentPostRunFilesystemInventory": false,
+        "boundary": "No real Tailscale/runtime/device/model resources were created. Cleanup statements describe executed Python/context-manager and test assertions, not a separate later filesystem inventory."
+      }
+    }
+  ],
+  "sourceBinding": "Invocations ran on working inputs; captured before/after digests match these committed Git blobs. No old-tree run is relabeled.",
+  "candidate": {
+    "source": "b3c8a2223bd305c65a56cbd4fc88aff13b8a1d8e",
+    "tree": "df800e43374ec89b71799b6722d5364163eb68cc",
+    "apkSha256": "776bc6a640fff73ba0382d0dcfb56c685f4bc787397901961ca4839ca0cfb825",
+    "rebuilt": false,
+    "productApiDependenciesChanged": false
+  },
+  "preservedFailures": [
+    {
+      "scope": "no-appointment CLI regression against old checker",
+      "errors": 2,
+      "passed": 0,
+      "exitCode": 1,
+      "log": {
+        "path": "build/jin-reusable-entry-20261018/checker-no-appointment-red-01.log",
+        "sha256": "e5fb77513699d6f9d7c0e98b7604a69d47076e0439670c57b51c5fb7b555ad67"
+      },
+      "inputs": {
+        "path": "build/jin-reusable-entry-20261018/checker-no-appointment-red-01.sha256",
+        "sha256": "9d1321e067103ccacfe193bcd12f97e01477d425ec0a47327d831b0e536d8f28"
+      }
+    },
+    {
+      "scope": "initial exporter WSL invocation",
+      "category": "E_ACCESSDENIED before tests",
+      "receipt": {
+        "path": "build/jin-reusable-entry-20261018/receipt.json",
+        "sha256": "85e6d451bf8a0f65f630bd1a7feed3f08eca50c61efd5d0d645074201f9981c6"
+      }
+    }
+  ],
+  "earlierOverlappingRun": {
+    "path": "build/jin-tailscale-relay-20261018/windows-20261017T165156240Z/receipt.json",
+    "sha256": "471109b12a1fb83b391998e63ac7ebd92cfea267968e195e6a26e023dd30b4e0"
+  },
+  "checks": {
+    "changedPythonAst": 7,
+    "whitespace": "pass",
+    "sourceBytesGitBlobs": "pass",
+    "oldWindowFlagsAndRefusals": "removed from current checker/instructions",
+    "productApiDependenciesSkillsAndR1Files": "unchanged"
+  },
+  "review": {
+    "shi": "new incremental code and composition pending; #139 R1 remains separate",
+    "li": "new evidence pending; previous review5558677764 belongs only to84a93e7",
+    "internalAssistance": "author-side only"
+  },
+  "actualRemoteConnection": "Not Run",
+  "actualPhoneBusiness": "Not Run",
+  "actualTwoRound9B": "Not Run",
+  "runtimeOrNetworkActivated": false,
+  "blockers": [
+    "original Linux current configuration/lease/readiness and effective authorized-only policy not supplied to this executor",
+    "no original Linux execution entry or local Tailscale CLI on JIN",
+    "SHI current local Tailscale availability and actual private pair receipt not yet established"
+  ],
+  "acceptance": "SHI reaches current Backend/Auth and independently starts assigned flow without appointment",
+  "cleanup": "Owned local fixture sockets/listeners/threads and temporary files handled by executed cleanup assertions/context managers; no remote or model cleanup claimed",
+  "counts": "Separate attributed suites, not summed; prior component/SDK/Flutter results remain historical"
+}
