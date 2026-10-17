@@ -28,6 +28,7 @@ import '../features/personas/presentation/persona_editor_page.dart';
 import '../features/event_browse/event_browse_providers.dart';
 import 'platform/external_activity_opener.dart';
 import 'providers.dart';
+import 'social_demo_presentation.dart';
 import 'router/app_router.dart';
 import 'router/activity_routes.dart';
 import 'router/isolated_history_ai_pages.dart';
@@ -89,6 +90,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       backendBaseUriProvider.overrideWithValue(widget.baseUri),
       backendApiClientProvider.overrideWithValue(_api),
       isolatedSlicesEnabledProvider.overrideWithValue(true),
+      socialDemoPresentationProvider.overrideWithValue(true),
       activityBrowseEnabledProvider.overrideWithValue(true),
       externalActivityOpenerProvider.overrideWithValue(
         const PlatformExternalActivityOpener(),
@@ -121,15 +123,33 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       ),
       isolatedAiConversationPageProvider.overrideWithValue(
         IsolatedAiConversationPage(
-          build: (context, {required onBack, required onOpenSettings}) =>
-              buildAiConversationPage(
-                context,
-                onBack: onBack,
-                onOpenSettings: onOpenSettings,
-                onOpenPersonas: () {
-                  if (context.mounted) context.push<void>(AppRoutes.personas);
-                },
+          build: (context, {required onBack, required onOpenSettings}) {
+            final session = ProviderScope.containerOf(
+              context,
+              listen: false,
+            ).read(authSessionProvider).value;
+            return AiConversationPage(
+              socialStyle: true,
+              navigationBarBuilder: (navigate) => SocialDemoNavigation(
+                selectedIndex: 3,
+                onSelected: (index) => navigate(() {
+                  if (context.mounted) {
+                    selectConnectedSocialTab(
+                      context,
+                      index,
+                      session: session,
+                      sourcePath: AppRoutes.aiAssistant,
+                    );
+                  }
+                }),
               ),
+              onBack: onBack,
+              onOpenSettings: onOpenSettings,
+              onOpenPersonas: () {
+                if (context.mounted) context.push<void>(AppRoutes.personas);
+              },
+            );
+          },
         ),
       ),
       isolatedPersonaPagesProvider.overrideWithValue(
@@ -191,10 +211,7 @@ final class _ConnectedPages extends ConsumerWidget {
     return MaterialApp.router(
       title: 'ENMORI controlled demo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff1f6f5b)),
-      ),
+      theme: socialDemoTheme(),
       routerConfig: ref.watch(appRouterProvider),
       builder: (context, child) => Column(
         children: [

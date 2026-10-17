@@ -1,0 +1,227 @@
+{
+  "scope": "ZHOU actual Dart client/controller/page regression with handwritten HTTP/Auth doubles",
+  "recordedAt": "2026-10-16T14:43:45.608Z",
+  "testedProduct": "449f67459a02a8621f1212f82251da62bf1cc2b6",
+  "testedTree": "52802f2761aa15e14266e6ef2b5f7de204673c8c",
+  "sourceOnlyParent": "25a5567a28540855f555edb67416dedbf9629b85",
+  "sourceOnlyPaths": [
+    {
+      "path": "test/features/ai_conversation/ai_repeat_wire_join_test.dart",
+      "blob": "400449272959fa5ed550e61a479ffe46c26baf93",
+      "workingSha256": "4c7a0d28808b2aa6ee053c83ef7091ff26dd709b8fe50ddcc2ed00fd7fd9927b"
+    },
+    {
+      "path": "test/harness/ai_network_cancel_return_test.dart",
+      "blob": "7c79b7e34dc26b941ebf44904e149a8aede90c8e",
+      "workingSha256": "8c4b629ebca611b674828a03eae97f0470ae2e38a288cce5ef65ed6eccd64e8b"
+    }
+  ],
+  "reviewedProductionBase": "9cf30134a522009f410485c6352df757ed0ab23d",
+  "kickoffBase": "dd1994af69d861253356571d59317c549c879914",
+  "inheritedApprovedMain": "d59cb128bfe0b5889baae0b08c973e140505590f",
+  "unchangedProductionPaths": [
+    "lib",
+    "backend",
+    "api",
+    "android",
+    "ios",
+    "integration_test",
+    "tool",
+    "pubspec.yaml",
+    "pubspec.lock",
+    "package.json",
+    "pnpm-lock.yaml"
+  ],
+  "runtimeOrBusinessRuleChanged": false,
+  "verifiedInputs": 507,
+  "normalizedInputsSha256": "735ae5e939ddc9f3c1ede9426f6f4996cee19bdc9d790bf3a4a725160d6b7caf",
+  "beforeAfterInputsEqual": true,
+  "toolchain": {
+    "flutter": "3.47.2",
+    "dart": "3.13.2"
+  },
+  "commands": [
+    "flutter test --no-pub --reporter expanded test/features/ai_conversation test/features/personas test/harness/ai_network_harness_test.dart test/harness/ai_network_persona_harness_test.dart test/harness/ai_network_cancel_return_test.dart",
+    "dart analyze --fatal-infos lib/features/ai_conversation lib/features/personas lib/harness/ai_conversation/ai_network_harness_app.dart test/features/ai_conversation test/features/personas test/harness/ai_network_harness_test.dart test/harness/ai_network_persona_harness_test.dart test/harness/ai_network_cancel_return_test.dart"
+  ],
+  "checks": {
+    "affectedSuite": {
+      "pass": 250,
+      "fail": 0,
+      "exit": 0,
+      "includesNewCases": 6
+    },
+    "scopedAnalysis": "No issues",
+    "nonWritingFormat": {
+      "files": 2,
+      "changed": 0
+    },
+    "deltaWhitespace": "Pass"
+  },
+  "scenarios": [
+    "Send A / Reload / regular Send B with different input",
+    "same fixed input twice with distinct operation/key/User+Assistant IDs and four rows",
+    "unknown second execute, ordinary history and wrong-operation readback cannot release it",
+    "same UID new observation detaches B and uses original B cancellation identity",
+    "actual cancel/leave/two route returns with only ordinary history, delayed original HTTP cannot settle, explicit outcome then new Send",
+    "same UID replacement clears Persona draft and excludes old AI result; explicit Persona draft decisions and fresh Send"
+  ],
+  "actualClientDefectReproduced": false,
+  "realBackendOrModelOrDeviceExecuted": false,
+  "expiredDemoServiceRestored": false,
+  "fullApplicationGate": "Not Run for this client-only packet",
+  "retainedFixtureHistory": [
+    "Wire first and diagnostic red runs: expect() inside asynchronous HTTP peer conflicted with Flutter guarded tester action; identical envelope assertions moved to owning test zone. No production change.",
+    "Widget run01/run02: lazy R-A control and later B row had no built element; helper performs actual scroll and layout before the same interaction/assertion.",
+    "Widget analyzer01: one braces info in new fake, corrected locally.",
+    "Widget run03 passed before independent fixture audit; not final gate. Review found canonical persistence incorrectly coupled to delayed HTTP delivery; split states so A is canonical before Cancel terminal ACK and history cannot release unknown. Corrected run04 passes.",
+    "Wire first three-case pass preceded the added identical-input variant; final four cases and root250 are current-source gates."
+  ],
+  "logs": [
+    {
+      "file": "build/zhou-client-repeat-1016/affected-analysis-final.log",
+      "bytes": 218,
+      "sha256": "1297e90f39bec7176096187899301eebab1f9966c6b6278314cbf44d28165574",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/affected-final.log",
+      "bytes": 37496,
+      "sha256": "0aa4687d2ba942f59dbf648f46b51bd066f029b355902622b754004ecc86b23b",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/widget-cancel-analyze-final.log",
+      "bytes": 67,
+      "sha256": "44bb8022a9689a8604098d59c35a52bba17ee784a48e3da12769f6c3fb8f4273",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/widget-cancel-analyze01.log",
+      "bytes": 255,
+      "sha256": "e6d01fb20232bedd5667b603a6ba3ec02735ad40cf18e596efcca82e7d42222a",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/widget-cancel-analyze02.log",
+      "bytes": 67,
+      "sha256": "44bb8022a9689a8604098d59c35a52bba17ee784a48e3da12769f6c3fb8f4273",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/widget-cancel-format.log",
+      "bytes": 47,
+      "sha256": "56d314280a92aac617eeeacbfee28ae9d98c01fb997840fdb15f112fcf773615",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/widget-cancel-reviewfix-analyze.log",
+      "bytes": 67,
+      "sha256": "44bb8022a9689a8604098d59c35a52bba17ee784a48e3da12769f6c3fb8f4273",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/widget-cancel-reviewfix-format.log",
+      "bytes": 47,
+      "sha256": "56d314280a92aac617eeeacbfee28ae9d98c01fb997840fdb15f112fcf773615",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/widget-cancel-reviewfix-run04.log",
+      "bytes": 295,
+      "sha256": "a87c78536d7a006885d70eee74d92d4fcec1ced5201476ec2ddb09207143a038",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/widget-cancel-run01.log",
+      "bytes": 2289,
+      "sha256": "56d49e168431612b80fdc67be51325fc12fb985ee46c75d656f65268b750e1d6",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/widget-cancel-run02.log",
+      "bytes": 2276,
+      "sha256": "ee306e5f8130f6686f52e677c661db718ee73ff3f087b17a97fbefe7c191aaa3",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/widget-cancel-run03.log",
+      "bytes": 293,
+      "sha256": "1827b95205af43d14e4aeb69a6a33beaec661e3e47cbe6af2a639f0c534ee4bc",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-analyze-final.log",
+      "bytes": 62,
+      "sha256": "c00d0cfeeb5e9e3a7bd1773affa727200643fdf1ad448b77e301051a7e951960",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-analyze-same-input-final.log",
+      "bytes": 62,
+      "sha256": "c00d0cfeeb5e9e3a7bd1773affa727200643fdf1ad448b77e301051a7e951960",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-format-final.log",
+      "bytes": 47,
+      "sha256": "56d314280a92aac617eeeacbfee28ae9d98c01fb997840fdb15f112fcf773615",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-format-same-input-check.log",
+      "bytes": 47,
+      "sha256": "56d314280a92aac617eeeacbfee28ae9d98c01fb997840fdb15f112fcf773615",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-format-same-input.log",
+      "bytes": 118,
+      "sha256": "24114a099ec6b72902f557c7b209805ba47e26a06fbb7c7a2c685787703d900f",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-format.log",
+      "bytes": 118,
+      "sha256": "24114a099ec6b72902f557c7b209805ba47e26a06fbb7c7a2c685787703d900f",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-owning-zone-diagnostic.log",
+      "bytes": 1963,
+      "sha256": "4f17600ed1351f3ae00234921a551e2cf7720b797ab299de43b1558475338845",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-test-diagnostic.log",
+      "bytes": 2525,
+      "sha256": "216e3ff259e6ccf19fa797f95dcdab517988bbca35cadfefd00df53d57c5fd8b",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-test-final.log",
+      "bytes": 376,
+      "sha256": "328768c0ad6b7031a2b7cd3c9c453e04d401c96ee6c119822f1abb55464226e9",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-test-first.log",
+      "bytes": 5974,
+      "sha256": "37d949fc586e73cf2ec51969a79a48189518700372afd419ee6fc23f99da2cff",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-test-same-input-final.log",
+      "bytes": 503,
+      "sha256": "5d3862f9ee9a5d5576515a8267adb599db353713b1bec66688b0e7301b6eef76",
+      "committedRawLog": false
+    },
+    {
+      "file": "build/zhou-client-repeat-1016/wire-test-second.log",
+      "bytes": 376,
+      "sha256": "328768c0ad6b7031a2b7cd3c9c453e04d401c96ee6c119822f1abb55464226e9",
+      "committedRawLog": false
+    }
+  ],
+  "remainingBoundary": "JIN identified unified candidate/current authorized handoff, then SHI Android cross-verification; real-model repeated success and source/lifecycle outcome remain unproved by fixtures"
+}

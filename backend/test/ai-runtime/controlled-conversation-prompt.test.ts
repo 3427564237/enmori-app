@@ -63,3 +63,17 @@ test("counter subprocess rejects relative paths, unpinned identities and unappro
   assert.throws(()=>new ControlledTokenizerProcess({...absolute,tokenizerSha256:"wrong"}));
   assert.throws(()=>new ControlledTokenizerProcess({...absolute,tokenizersVersion:"0.99.0" as "0.23.3"}));
 });
+
+test("plain attribution instruction resolves multiple available sources without removing any source data",async()=>{
+  for(const persona of [undefined,{schemaVersion:"persona_presentation_v1",tone:"neutral",responseLength:"concise",formatStyle:"plain"} as const]){
+    const f=setup();const complete:ConversationInput={currentMessage:"I read a book today.",checkIns:[
+      {occurredAt:"2026-10-16T00:00:00Z",noteText:"I read a book today."},
+      {occurredAt:"2026-10-15T00:00:00Z",noteText:"昨天散步了。"},
+    ],persona};
+    const result=await f.compiler.compile(complete,f.budget);
+    const [systemPart,userPart]=result.rawPrompt.split("<|im_start|>user\n");
+    assert.deepEqual(JSON.parse(userPart!.split("<|im_end|>")[0]!),JSON.parse(JSON.stringify(complete)));
+    assert.equal(/For plain output, choose exactly ONE attribution/.test(systemPart!),true);
+    assert.equal(/Never join multiple attributions/.test(systemPart!),true);
+  }
+});

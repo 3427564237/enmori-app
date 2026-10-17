@@ -107,3 +107,30 @@ test("two feature-local routes authenticate before reading, no-store, unknown in
   assert.equal((await app.inject({url:`/v1/event-browse/${locator}`,headers})).statusCode,200);
   assert.equal((await app.inject({url:"/v1/event-browse/invalid",headers})).statusCode,404);
 });
+
+// Real provider counterexample: fractional UTC query values return HTTP400.
+// Floor only the upstream lower bound; retain the original precise eligibility boundary.
+test("provider lower bound uses whole seconds while local eligibility retains exact asOf",async()=>{
+  for(const asOf of ["2026-10-15T00:00:00.123Z","2026-10-15T08:00:00.123456789+08:00"]){
+    const calls:URL[]=[];
+    const event=(id:string,dateTime:string)=>row({id,dates:{start:{dateTime},status:{code:"onsale"}}});
+    const source=new TicketmasterBrowseSource({key:()=>"synthetic-only",enabled:()=>true},async input=>{
+      const url=new URL(String(input));calls.push(url);
+      assert.equal(url.searchParams.get("startDateTime"),"2026-10-15T00:00:00Z");
+      return Response.json({page:{number:0,totalElements:3},_embedded:{events:[
+        event("before","2026-10-15T00:00:00.100Z"),event("equal",asOf),event("future","2026-10-15T00:00:00.123456790Z"),
+      ]}});
+    });
+    const values=await source.firstBatch(asOf,new AbortController().signal);
+    assert.equal(calls.length,1);assert.deepEqual(values.map(v=>v.browseId),[browseId("future")]);
+  }
+});
+test("invalid provider lower bound fails before fetching and whole-second input stays unchanged",async()=>{
+  let calls=0;
+  const source=new TicketmasterBrowseSource({key:()=>"synthetic-only",enabled:()=>true},async input=>{
+    calls++;assert.equal(new URL(String(input)).searchParams.get("startDateTime"),now);
+    return Response.json({page:{number:0,totalElements:0}});
+  });
+  await assert.rejects(source.firstBatch("not-an-instant",new AbortController().signal));assert.equal(calls,0);
+  assert.deepEqual(await source.firstBatch(now,new AbortController().signal),[]);assert.equal(calls,1);
+});
