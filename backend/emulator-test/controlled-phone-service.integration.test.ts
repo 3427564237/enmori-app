@@ -12,6 +12,7 @@ import type { GenerationTransport } from "../src/ai-runtime/ports/generation-tra
 import type { CompletePromptCompiler } from "../src/ai-runtime/infrastructure/controlled-ollama-transport.js";
 import { browseId } from "../src/event-browse/domain/browse-values.js";
 import { createAuthBindingDocumentId } from "../src/shared/infrastructure/firebase/firestore-records.js";
+import { dartRepeatStoreProbe } from "./support/dart-repeat-store-probe.js";
 
 const compiler: CompletePromptCompiler<ConversationInput> = { compile: async () => ({ rawPrompt: "explicit synthetic compiler double", tokens: 10,
   includesAllFraming: true, manifestDigest: "3".repeat(64), tokenizerDigest: "4".repeat(64) }) };
@@ -156,6 +157,73 @@ test("same fixed Send, Reload, fresh Send preserves two canonical pairs and Note
     for (const child of ["messages", "message_sources", "effects"]) assert.equal((await target.collection(child).get()).size, 0);
     for (const op of [first, second]) assert.equal((await db.doc(`ai_operation_fences/${op.operationId}`).get()).exists, false);
     assert.deepEqual((await note.get()).data(), noteBefore.data());
+  } finally {
+    try {
+      await cleanup(service);
+      assert.equal((await db.listCollections()).length, 0);
+      assert.equal((await getAuth(probe).listUsers()).users.length, 0);
+    } finally { await db.terminate(); await deleteApp(probe); }
+  }
+});
+
+test("actual Dart fixed Send, Reload, fresh Send crosses controlled HTTP and canonical Note storage (model/compiler doubles)", async () => {
+  const text = "I read a book today.";
+  let generations = 0, firstInput: ConversationInput | undefined;
+  const service = await createControlledPhoneService({ ...options, demoFeatures: true, transport: {
+    generate: async input => {
+      generations++;
+      assert.equal(input.currentMessage, text);
+      assert.equal(input.checkIns.length, 1); assert.equal(input.checkIns[0]!.noteText, text);
+      if (firstInput) assert.deepEqual(input, firstInput); else firstInput = structuredClone(input);
+      return reply(input);
+    },
+  } });
+  const env = requireControlledEmulatorEnvironment(process.env);
+  const probe = initializeApp({ projectId: env.projectId }, randomUUID()), db = getFirestore(probe);
+  try {
+    const c = await client(service);
+    const created = await c.call("POST", "/v1/check-ins", 201, { note: text }, { "idempotency-key": randomUUID() }) as unknown as {
+      checkIn: { checkInId: string };
+    };
+    const note = db.doc(`check_ins/${created.checkIn.checkInId}`), noteBefore = await note.get();
+    const address = service.app.server.address();
+    assert(address && typeof address !== "string");
+    const { email, password } = service.privateHandoff(), token = await signIn(email, password);
+    let targetPath: string | undefined;
+    await dartRepeatStoreProbe(`http://127.0.0.1:${address.port}`, token, async () => {
+      // The child has checked both exact HTTP pairs. Inspect actual SDK records
+      // while it waits, then acknowledge so its actual DELETE can proceed.
+      assert.equal(generations, 2); assert.equal(service.observation().modelAttempts, 2);
+      const owners = await db.collection("accounts").get(); assert.equal(owners.size, 1);
+      const conversations = await owners.docs[0]!.ref.collection("conversations").get(); assert.equal(conversations.size, 1);
+      const target = conversations.docs[0]!.ref; targetPath = target.path;
+      const rows = (await target.collection("messages").orderBy("sequence").get()).docs;
+      assert.equal(rows.length, 4);
+      assert.deepEqual(rows.map(row => row.data().sequence), [1, 2, 3, 4]);
+      assert.deepEqual(rows.map(row => row.data().role), ["user", "assistant", "user", "assistant"]);
+      assert.equal(new Set(rows.map(row => row.id)).size, 4);
+      for (const index of [0, 2]) {
+        const user = rows[index]!.data();
+        assert.equal(user.text, text); assert.equal(user.pendingOperationId, undefined);
+        assert.equal(user.acceptedAssistantMessageId, rows[index + 1]!.id);
+      }
+      const sources = await target.collection("message_sources").get(); assert.equal(sources.size, 2);
+      assert.deepEqual(sources.docs.map(doc => doc.id).sort(), [rows[1]!.id, rows[3]!.id].sort());
+      for (const source of sources.docs) assert.deepEqual(source.data(), {
+        sources: [{ sourceType: "check_in", sourceId: created.checkIn.checkInId }], purposeRevocationGeneration: 0,
+      });
+      const noteAfter = await note.get();
+      assert.deepEqual(noteAfter.data(), noteBefore.data());
+      assert(noteAfter.createTime!.isEqual(noteBefore.createTime!)); assert(noteAfter.updateTime!.isEqual(noteBefore.updateTime!));
+      assert.equal((await db.collection("check_ins").get()).size, 1);
+    });
+    assert(targetPath, "The child must reach the independent before-delete inspection");
+    const target = db.doc(targetPath);
+    assert.equal((await target.get()).exists, false);
+    for (const child of ["messages", "message_sources", "effects"]) assert.equal((await target.collection(child).get()).size, 0);
+    assert.equal((await db.collection("ai_operation_fences").get()).size, 0);
+    assert.deepEqual((await note.get()).data(), noteBefore.data());
+    assert.equal(generations, 2); assert.equal(service.observation().modelAttempts, 2);
   } finally {
     try {
       await cleanup(service);
