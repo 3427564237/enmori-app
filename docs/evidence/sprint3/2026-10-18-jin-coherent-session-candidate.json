@@ -1,0 +1,364 @@
+{
+  "sourceCommit": "7848b5a75c65b5455394684512cb8f4cf58d6743",
+  "sourceTree": "dd185879fd6626e0465162418722fcee0fe0e2d3",
+  "base154": "8abb9bc63e304b69804729f1dc761fac832d22ed",
+  "approvedInputs": [
+    {
+      "pr": 155,
+      "base": "8abb9bc63e304b69804729f1dc761fac832d22ed",
+      "approvedHead": "a83443b78bf00ff481765e6c8f4c8710b7e43409",
+      "matchingPaths": [
+        "docs/evidence/sprint3/2026-10-18-li-interest-session-reliability.json",
+        "docs/evidence/sprint3/2026-10-18-li-interest-session-reliability.md",
+        "docs/planning/2026-10-18-li-interest-catalogue-expansion-options.md",
+        "lib/features/interests/presentation/interest_editor_controller.dart",
+        "test/features/interest_editor_session_test.dart"
+      ]
+    },
+    {
+      "pr": 156,
+      "base": "8c31f34c4ac257d665cf6fd7fed4a190460f708e",
+      "approvedHead": "01e0f1714ae804d143ca00cb52c5a1e29794581d",
+      "matchingPaths": [
+        "docs/decisions/2026-10-18-li-complete-user-journey-delivery.md",
+        "docs/decisions/2026-10-18-li-functionality-and-reliability-priority.md",
+        "docs/evidence/sprint3/2026-10-18-zhou-ai-local-admission.json",
+        "docs/evidence/sprint3/2026-10-18-zhou-ai-local-admission.md",
+        "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+        "test/features/ai_conversation/ai_conversation_page_test.dart",
+        "test/harness/ai_local_rejection_journey_test.dart"
+      ]
+    },
+    {
+      "pr": 157,
+      "base": "dcdc3ba13f1a4bac192775b7a45f8e37bc4c680e",
+      "approvedHead": "9b021381ea003ea16bc5f9aa1bf6099c34742d84",
+      "matchingPaths": [
+        "lib/features/check_in/presentation/check_in_history_controller.dart",
+        "lib/features/check_in/presentation/check_in_history_page.dart",
+        "test/app/check_in_history_shared_router_test.dart",
+        "test/features/check_in_history_controller_test.dart"
+      ]
+    }
+  ],
+  "approved145Ancestor": true,
+  "jinSource": "c35744d855d70c2e14cd917fd421880f97555da1",
+  "jinTestOnlyLintCorrection": "8f763da802357002542dc69588b8c7e872d0d649",
+  "changedInputs": [
+    {
+      "path": "docs/decisions/2026-10-18-li-complete-user-journey-delivery.md",
+      "gitBlob": "b1aa88f311376be9a3cfe17d39722a6e0ae9ad02",
+      "sha256": "7e37109f83e66b6fcbbd788d3c14da368cf960ee9640e34c1018ac9562e26303",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "docs/decisions/2026-10-18-li-functionality-and-reliability-priority.md",
+      "gitBlob": "d5bc644b5d8eabd355f907c9260e47e79177c715",
+      "sha256": "c917d3d7f3b33668fa15fcd439d931d3adfc8292fbde629411660174030d7483",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-18-li-interest-session-reliability.json",
+      "gitBlob": "9d691628c2b19ebca092c8dcb32722acfc72b3c9",
+      "sha256": "2957b5c4c3893362c1ff0f6dadff7b40f1a410ea8eea591c5a97dcaabe57f0d6",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-18-li-interest-session-reliability.md",
+      "gitBlob": "dcc43759fb93b45e219e400fbb0ae1e2ba7e7b03",
+      "sha256": "c4e4480375cdd895c5f9c02ef6da18c69c0a0ae27265182ab77605089a351c04",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-18-zhou-ai-local-admission.json",
+      "gitBlob": "2311e7d7c2779562ad578e99d224372cb2dd2723",
+      "sha256": "5e8cdd0f7cb9f69e13054afa4e5876fd7eb3d008c8b47829c0fbe0226dafeb92",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-18-zhou-ai-local-admission.md",
+      "gitBlob": "215de70215751c6299aa728214d588f25f51630e",
+      "sha256": "84b1e5d247bcd20db649ab71f26075c7e783233db4c664168fb88484b1888d44",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "docs/planning/2026-10-18-li-interest-catalogue-expansion-options.md",
+      "gitBlob": "4057dfddf84e1fa92bb1882d08f376f04abfafae",
+      "sha256": "74c7179db1293030811c0ad49db8bb289f6ce1a3d910c9d31d1594a3ba49d074",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "gitBlob": "7d1aadbde0bf5c9a3053c6ea288c80f8204083c5",
+      "sha256": "68fee59e484bb05ef13a5faefddf94b21de50adc8d73d6e9cfeab9f35794b973",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_history_controller.dart",
+      "gitBlob": "12cfdfe764198c726a5663a64c2c0a733763399f",
+      "sha256": "839ed41589d819f1985a21e1db1281bdfcce355d4b29fbf6c79b111b2e140c60",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_history_page.dart",
+      "gitBlob": "a68cf66e5831439f3d8dcb0a64b2de18d0ae39e4",
+      "sha256": "0482b62bce80f7d26a2b4baee05d07b743813517968ab09d02da719ebe7584ce",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_controller.dart",
+      "gitBlob": "e2b81c6eb3bbe600197555b7d5ca411c187375ce",
+      "sha256": "93c8ff98553df5f329d31b4215f37da2c80ab8c0be42692f0b3c9cee87e624e5",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "lib/features/interests/presentation/interest_editor_controller.dart",
+      "gitBlob": "21af5d7e7c19c47e2a3a6bc24e3eae3b729f8ca3",
+      "sha256": "1e557880de793d5fe5f912af581a5e918a0d724360ea5bb6809aef632df8ef4b",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "test/app/check_in_history_shared_router_test.dart",
+      "gitBlob": "c9f1894c22e4f1f5e19c028bab37484747d1e99d",
+      "sha256": "626bb966a7553402d7f9722be8a86ba35524365f235d1eeb3e0a44412d78862c",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "gitBlob": "7bb7f801a07d14900e8bbbde7631b487115c529b",
+      "sha256": "6eb025c4cba608a5ed52eb8be1dae9f51ca54bff21941ad16bafc9abf95044f8",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "test/features/check_in_history_controller_test.dart",
+      "gitBlob": "468e5ddb7497fa8812da6cc649326785409e9c13",
+      "sha256": "d6b64ee64e79d5b01c3fe898cbd1751fe0c75fb0e70c42861b0f93a24157ac45",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "test/features/friend_request_session_test.dart",
+      "gitBlob": "af8e215020b9229d26a61935d862b0ec5a851984",
+      "sha256": "eecb501607bf6f5e482fdecf878925401c15c1acfaea83f36b52bd53a5f6bfce",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "test/features/interest_editor_session_test.dart",
+      "gitBlob": "2f69b41f3a60b2951535704d35224bad2c81c6bf",
+      "sha256": "5e09b45efb1cecc97f0864d34f9650b4831ccef9f2526d999979508a34cb8422",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "test/harness/ai_local_rejection_journey_test.dart",
+      "gitBlob": "d88effd0b34242676e513fc656b2cb9fbd831c65",
+      "sha256": "f00f267eb7773af530b53f1911cea9d351099f24d79e7c90bd18aa75dc686fc1",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    }
+  ],
+  "checks": {
+    "affectedPass": 90,
+    "friendExistingPass": 3,
+    "disjointTotal": 93,
+    "fail": 0,
+    "testExit": 0,
+    "analysisFiles": 13,
+    "analysisExit": 0,
+    "formatFiles": 13,
+    "formatWouldChange": 1,
+    "formatExit": 1,
+    "formatException": "Inherited nonblocking #145/#157 test/app/check_in_history_shared_router_test.dart; non-writing",
+    "whitespaceExit": 0,
+    "buildsExit": [
+      0,
+      0
+    ],
+    "archiveByteMatches": 1316,
+    "gitNormalizedMatches": 1316,
+    "lineEndingOnlyDifferences": 1249
+  },
+  "attribution": "JIN final candidate client/widget/HTTP/Auth/platform fixtures; no actual remote or device result. Component approvals reused, old counts not transferred.",
+  "artifacts": [
+    {
+      "kind": "connected",
+      "file": "ENMORI-connected-7848b5a-v11.apk",
+      "bytes": 94285463,
+      "sha256": "cab5037303ac37163a30a8b4bd7641f8645e0c4b02eff45f4d2e2aa350fae08f",
+      "package": "com.enmori.app.personatest",
+      "versionCode": 11,
+      "signerCertificateSha256": "a6ff83fa12ff92d4b33e5efde167aee3b0f3f4590bd843def55d9584f7724dd3",
+      "nativeCodeInventory": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64"
+      ]
+    },
+    {
+      "kind": "hci",
+      "file": "ENMORI-HCI-7848b5a-v3.apk",
+      "bytes": 94036515,
+      "sha256": "f190eea12850fd2debe34982c91ccf5c79a1f97b9ea709b758aa746e126bc21e",
+      "package": "com.enmori.app.hcitest",
+      "versionCode": 3,
+      "signerCertificateSha256": "a6ff83fa12ff92d4b33e5efde167aee3b0f3f4590bd843def55d9584f7724dd3",
+      "nativeCodeInventory": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64"
+      ]
+    }
+  ],
+  "logs": [
+    {
+      "file": "affected.log",
+      "sha256": "ddbe589436b6aa52f0115f08e11e780565acdf3b15be8806af48077d65c40f65"
+    },
+    {
+      "file": "friend-existing.log",
+      "sha256": "85f531817a89febd4794d615bb31502f103a67c53c5acbc9fd1812da7b51c28e"
+    },
+    {
+      "file": "analysis.log",
+      "sha256": "57d876cc38d37d2eac8d59df25f196e76f8f4f623f1c7106c4ca564286e2eab2"
+    },
+    {
+      "file": "format.log",
+      "sha256": "109f21d6db6282c92b8dee1f80314b7941e971b33a3ca9e21c4cdd8c88b9166e"
+    },
+    {
+      "file": "whitespace.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "pub-offline.log",
+      "sha256": "c083f9ce64654caa4975b431c9e24916bd2b0af137a60f0e49f45dfb26fee81c"
+    },
+    {
+      "file": "build-connected.log",
+      "sha256": "ff0dd8b243bf5336b42331883da67789a110c1aab9623871e56d1fa0b8d6ac81"
+    },
+    {
+      "file": "build-hci.log",
+      "sha256": "f4b897066e8ca72318923ece67abb916c8388297f5a1bc9708bb867272275b9c"
+    },
+    {
+      "file": "source-verification.json",
+      "sha256": "689d9300cccadd1883753818fa1c1f9054a67a8c45e4e228661d34fe0a5fb329"
+    },
+    {
+      "file": "source-verification.log",
+      "sha256": "a8877dd6a2283e09e8d69977817c5f1e80bd93432acb70d4f6d2347f27d1540d"
+    },
+    {
+      "file": "connected-aapt.txt",
+      "sha256": "129e340388ac88ec780ee2c48a89078e5d3c4730a3d7bdbdd225b14c23e7affd"
+    },
+    {
+      "file": "connected-signature.txt",
+      "sha256": "f97fb10fffbcce6a2316559830bb014590c0d28680274bffef3c8b7725fb62ad"
+    },
+    {
+      "file": "hci-aapt.txt",
+      "sha256": "5173210988efb19860aa7e28029949182cb9cb57d3c5cfe2e02b11091ae27cfd"
+    },
+    {
+      "file": "hci-signature.txt",
+      "sha256": "f97fb10fffbcce6a2316559830bb014590c0d28680274bffef3c8b7725fb62ad"
+    }
+  ],
+  "retainedPreviousStageLogs": [
+    {
+      "file": "build/jin-interest-friend-candidate-20261018-01/friend-red.log",
+      "sha256": "321d4c09e31e85e0dd8961203e39220a5d381814da1e34b09a59d8a1e98f4ec4"
+    },
+    {
+      "file": "build/jin-interest-friend-candidate-20261018-01/friend-red-02.log",
+      "sha256": "87ece20a2e78ef80df24401e95b486db031085174c01055034b7f1ab918e95b7"
+    },
+    {
+      "file": "build/jin-interest-friend-candidate-20261018-01/friend-green.log",
+      "sha256": "eb197bc3c278e72ae6fbed9ea268af3f718e827b2c4fbb9a0f82362a2dbd6d0b"
+    },
+    {
+      "file": "build/jin-interest-friend-candidate-20261018-01/friend-green-02.log",
+      "sha256": "8d68254ed39570d4d6e8b7b21fc9d0e21f46ecf3181cf3877e48d0b25fa91d9c"
+    },
+    {
+      "file": "build/jin-interest-friend-candidate-20261018-01/analysis.log",
+      "sha256": "9899560646dbb3daeccd63212c93ccf473459330df77908dfc6a51ccec6aa125"
+    },
+    {
+      "file": "build/jin-interest-friend-candidate-20261018-01/analysis-final.log",
+      "sha256": "e9b8ab2595e20c30319f758f3c7df6d82e277aec48f26432526c7d93211a5d8d"
+    },
+    {
+      "file": "build/jin-interest-friend-candidate-20261018-01/composition.log",
+      "sha256": "332b6f4bd8d546fbbd7cf8d1c5bef110ab8a6f44396d258805c29f8586a9770b"
+    },
+    {
+      "file": "build/jin-interest-friend-candidate-20261018-01/composition-final.log",
+      "sha256": "d64e727910f2a4f8f650dacaa3bcd0e80d9a8dd2315c57ef8c356ebc8effa668"
+    },
+    {
+      "file": "build/jin-interest-friend-candidate-20261018-01/build-connected.log",
+      "sha256": "faee7ec7813c11f4da69f39dcefec2c1d66e7e9af77d866dda28bd5f8daf558f"
+    },
+    {
+      "file": "build/jin-interest-friend-candidate-20261018-01/build-connected-final.log",
+      "sha256": "ff0dd8b243bf5336b42331883da67789a110c1aab9623871e56d1fa0b8d6ac81"
+    }
+  ],
+  "notRun": [
+    "new artifact recipient receipt/install/device execution",
+    "current original-host runtime/Auth/TLS/provider/model",
+    "actual Interest catalogue/save/reopen/recommendations",
+    "Footprint real persistence/device Next recovery",
+    "real two-account Friend with applicable producer/permission facts",
+    "native IME/ordinary landscape cause or fix",
+    "missing session-replacement/held-create phone fixtures",
+    "capture150 installation/writer/reader/timer",
+    "real consecutive9B"
+  ],
+  "review": "SHI new JIN Friend code/composition; LI independent new evidence. No repeated155/156/157/145 component review.",
+  "commands": {
+    "tests": "flutter test --no-pub --reporter expanded test/features/friend_request_session_test.dart test/features/interest_editor_session_test.dart test/app/controlled_demo_app_test.dart test/features/ai_conversation/ai_conversation_page_test.dart test/harness/ai_local_rejection_journey_test.dart test/features/check_in_history_controller_test.dart test/app/check_in_history_shared_router_test.dart test/harness/social/hci_offline_candidate_test.dart",
+    "friend": "flutter test --no-pub --reporter expanded test/features/blocker_slices_test.dart --plain-name Friend",
+    "buildConnected": "ENMORI_PERSONA_ANDROID_TEST=true; HCI flag absent; flutter build apk --debug --no-pub --target lib/controlled_demo.dart --target-platform android-arm64 --build-number 11",
+    "buildHci": "ENMORI_HCI_ANDROID_TEST=true; Persona flag absent; flutter build apk --debug --no-pub --target lib/hci_offline_harness.dart --target-platform android-arm64 --build-number 3",
+    "identity": "aapt dump badging RELATIVE_APK; apksigner verify --verbose --print-certs RELATIVE_APK in its directory"
+  }
+}

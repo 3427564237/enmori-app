@@ -27,6 +27,8 @@ final class CheckInHistoryState {
     this.entries = const [],
     this.nextCursor,
     this.failure,
+    this.isLoadingNext = false,
+    this.nextPageFailure,
   });
 
   final CheckInHistoryPhase phase;
@@ -36,6 +38,8 @@ final class CheckInHistoryState {
   final List<CheckInHistoryEntry> entries;
   final String? nextCursor;
   final AppFailure? failure;
+  final bool isLoadingNext;
+  final AppFailure? nextPageFailure;
 }
 
 final checkInHistoryControllerProvider =
@@ -181,16 +185,20 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
         today == null ||
         zone == null ||
         cursor == null ||
-        current.phase != CheckInHistoryPhase.ready) {
+        current.phase != CheckInHistoryPhase.ready ||
+        current.isLoadingNext) {
       return;
     }
     final session = _session;
     final request = ++_request;
     state = CheckInHistoryState(
-      phase: CheckInHistoryPhase.loading,
+      phase: CheckInHistoryPhase.ready,
       selectedDate: date,
       latestDate: today,
       ianaZone: zone,
+      entries: current.entries,
+      nextCursor: cursor,
+      isLoadingNext: true,
     );
     await _readPage(
       session: session,
@@ -200,6 +208,7 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
       today: today,
       zone: zone,
       cursor: cursor,
+      existingEntries: current.entries,
     );
   }
 
@@ -211,6 +220,7 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
     required DateTime today,
     required String zone,
     required String? cursor,
+    List<CheckInHistoryEntry>? existingEntries,
   }) async {
     try {
       final result = await _repository.readOwnForDate(
@@ -220,6 +230,18 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
       );
       if (!_isCurrent(session, request, subject)) return;
       if (result case Failure<CheckInHistoryPage>()) {
+        if (existingEntries != null) {
+          state = CheckInHistoryState(
+            phase: CheckInHistoryPhase.ready,
+            selectedDate: date,
+            latestDate: today,
+            ianaZone: zone,
+            entries: existingEntries,
+            nextCursor: cursor,
+            nextPageFailure: result.failure,
+          );
+          return;
+        }
         state = CheckInHistoryState(
           phase: CheckInHistoryPhase.failed,
           selectedDate: date,
@@ -251,6 +273,21 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
       );
     } on Object {
       if (!_isCurrent(session, request, subject)) return;
+      if (existingEntries != null) {
+        state = CheckInHistoryState(
+          phase: CheckInHistoryPhase.ready,
+          selectedDate: date,
+          latestDate: today,
+          ianaZone: zone,
+          entries: existingEntries,
+          nextCursor: cursor,
+          nextPageFailure: const AppFailure(
+            kind: AppFailureKind.unexpected,
+            message: 'The next page could not be loaded.',
+          ),
+        );
+        return;
+      }
       state = CheckInHistoryState(
         phase: CheckInHistoryPhase.failed,
         selectedDate: date,

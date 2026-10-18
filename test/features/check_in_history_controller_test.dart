@@ -232,6 +232,50 @@ void main() {
     },
   );
 
+  test(
+    'failed next page preserves the current page and retries its cursor',
+    () async {
+      repository.responses.single.complete(
+        Success(_page([_entry('first-page')], cursor: 'next-token')),
+      );
+      await _drain();
+
+      repository.queued.add(
+        const Failure(
+          AppFailure(
+            kind: AppFailureKind.serviceUnavailable,
+            message: 'private',
+          ),
+        ),
+      );
+      await container
+          .read(checkInHistoryControllerProvider.notifier)
+          .loadNext();
+
+      var state = container.read(checkInHistoryControllerProvider);
+      expect(state.phase, CheckInHistoryPhase.ready);
+      expect(state.entries.single.checkIn.checkInId, 'first-page');
+      expect(state.nextCursor, 'next-token');
+      expect(state.nextPageFailure, isNotNull);
+
+      final retry = container
+          .read(checkInHistoryControllerProvider.notifier)
+          .loadNext();
+      expect(repository.calls.last.cursor, 'next-token');
+      state = container.read(checkInHistoryControllerProvider);
+      expect(state.isLoadingNext, isTrue);
+      expect(state.entries.single.checkIn.checkInId, 'first-page');
+      repository.responses.last.complete(
+        Success(_page([_entry('second-page')])),
+      );
+      await retry;
+
+      state = container.read(checkInHistoryControllerProvider);
+      expect(state.entries.single.checkIn.checkInId, 'second-page');
+      expect(state.nextPageFailure, isNull);
+    },
+  );
+
   test('session replacement clears state and ignores prior response', () async {
     sessions.add(AuthSessionAuthenticated(subject: 'owner-a'));
     await _drain();

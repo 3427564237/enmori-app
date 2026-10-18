@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
 import '../../auth/auth_providers.dart';
+import '../../auth/domain/auth_repository.dart';
 import '../domain/friend_repository.dart';
 import '../friend_providers.dart';
 
@@ -32,8 +33,22 @@ final class FriendController extends Notifier<FriendScreenState> {
   @override
   FriendScreenState build() {
     ref.watch(currentAuthSubjectProvider);
+    // A new observation for the same subject must also retire old UI work.
+    ref.watch(
+      authSessionProvider.select(
+        (value) => switch (value) {
+          AsyncData<AuthSession>(
+            value: final AuthSessionAuthenticated session,
+          ) =>
+            session,
+          _ => null,
+        },
+      ),
+    );
     _repository = ref.watch(friendRepositoryProvider);
     _operation++;
+    // Invalidation retires callbacks before the next lazy rebuild occurs.
+    ref.onDispose(() => _operation++);
     return const FriendScreenState();
   }
 
