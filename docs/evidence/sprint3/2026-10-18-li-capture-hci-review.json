@@ -1,0 +1,155 @@
+{
+  "date": "2026-10-18",
+  "reviewer": "LI",
+  "sourceReviews": [
+    {
+      "pr": 150,
+      "head": "c2c923c08bbbf0f1bda9a54697b7c5ba0c4c0cc3",
+      "source": "789dc4fe0cedf250cacbb6508becd83a65c6680c",
+      "scope": "independent evidence only; SHI code/composition remains separate",
+      "compileExit": 0,
+      "backend": {
+        "pass": 52,
+        "skip": 0,
+        "exit": 0
+      },
+      "operator": {
+        "pass": 24,
+        "skip": 0,
+        "exit": 0
+      },
+      "pythonLocalUnprivileged": {
+        "discovered": 27,
+        "pass": 11,
+        "skip": 16,
+        "exit": 0,
+        "version": "3.14.8"
+      },
+      "changedInputHashAndBlobMatches": 11,
+      "review": "https://github.com/3427564237/enmori-app/pull/150#pullrequestreview-5562552747"
+    },
+    {
+      "pr": 151,
+      "head": "8c31f34c4ac257d665cf6fd7fed4a190460f708e",
+      "source": "6962b519a1c18cbf698fd89e2516cc4adfb7f6d0",
+      "scope": "AI/Persona exact-dialog lifetime and stale callback source review",
+      "affectedPass": 361,
+      "testExit": 0,
+      "analysisExit": 0,
+      "format": {
+        "files": 7,
+        "changed": 0,
+        "exit": 0
+      },
+      "review": "https://github.com/3427564237/enmori-app/pull/151#pullrequestreview-5562552620"
+    },
+    {
+      "pr": 152,
+      "head": "bf0d01c4e04aef3ca588ac45879f36195a20f274",
+      "source": "f36faf380735a82970735ad66dc4b2a8231c723b",
+      "scope": "independent evidence and received artifact identity only; SHI wiring/platform review remains separate",
+      "affectedPass": 360,
+      "testExit": 0,
+      "analysisExit": 0,
+      "format": {
+        "files": 3,
+        "changed": 0,
+        "exit": 0
+      },
+      "newGitBlobMatches": 6,
+      "authorCRLFHashesReproduced": 6,
+      "approvedFeatureBlobsUnchanged": 2,
+      "review": "https://github.com/3427564237/enmori-app/pull/152#pullrequestreview-5562552856"
+    }
+  ],
+  "localReceipt": {
+    "filename": "ENMORI-HCI-f36faf3-handoff.zip",
+    "bytes": 57656279,
+    "sha256": "ce56dc12fd1e8e0f9427ac78c8f0251216fcff0e02904f7464f6ada9be206317",
+    "allowlistedArchiveEntries": 7,
+    "apkBytes": 94026523,
+    "apkSHA256": "b0f41f25151627a424965029721c02bff04ca04b25e49e35aaaa0c9ab7dc9f73",
+    "package": "com.enmori.app.hcitest",
+    "versionCode": 1,
+    "label": "ENMORI HCI (offline)",
+    "signatureVerified": true,
+    "signerSHA256": "a6ff83fa12ff92d4b33e5efde167aee3b0f3f4590bd843def55d9584f7724dd3",
+    "receiptEstablishedFor": "LI only; SHI receipt not assumed",
+    "installed": false
+  },
+  "hostPreflight": {
+    "pid1Systemd": true,
+    "existingPythonSudoVisudoSystemctlSystemdAnalyze": true,
+    "captureWrapperExists": false,
+    "existingNoninteractiveSudoAvailable": false,
+    "restrictedBackendIdentityConfirmed": false,
+    "observedRegularInteractiveAccounts": 1,
+    "observedAccountHasAdministrativeGroup": true,
+    "effectiveSudoPolkitNotFullyAudited": true,
+    "questionPending": "human LI asked whether an existing restricted Backend operator account exists",
+    "adbServerAlreadyListening": false,
+    "adbServerStartedByThisReview": false
+  },
+  "rawLogsLocalDirectory": "output/li-capture-hci-review-20261018",
+  "logs": [
+    {
+      "name": "enmori-review-150-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "enmori-review-150-backend.log",
+      "bytes": 5708,
+      "sha256": "9756e3f6e0c67357acd0159cd1a4904d2c5b3b3b835c9c18d1a6a2ecfbba6953"
+    },
+    {
+      "name": "enmori-review-150-operator.log",
+      "bytes": 2729,
+      "sha256": "53d028eeaf32711908b4ef15df4d0783906598e8f24c34e10bbd9ae20c01c867"
+    },
+    {
+      "name": "enmori-review-150-python.log",
+      "bytes": 4469,
+      "sha256": "ffb1197b3b1e231684ea379aabdec810e01ea767f5dfc7fedf11462f1ba54e3f"
+    },
+    {
+      "name": "enmori-review-151-tests.log",
+      "bytes": 72792,
+      "sha256": "ee740783fe83394d87d6268a81a0402653c6972fea393c4cc4f2791ff02fe8b4"
+    },
+    {
+      "name": "enmori-review-151-analysis.log",
+      "bytes": 222,
+      "sha256": "35f3bbe06f5ca759ad546163433bc726182de6c14f2955cbb5743177fe5bc3d4"
+    },
+    {
+      "name": "enmori-review-151-format.log",
+      "bytes": 47,
+      "sha256": "e2204b96429dbeb46c0c725da699c41ba71e7e6b732657c712963de3881789bc"
+    },
+    {
+      "name": "enmori-review-152-tests.log",
+      "bytes": 67861,
+      "sha256": "c457b89da5e33dc0ce437db05803aa8f5afcfbd6a927dbd4bd6d31f10544d450"
+    },
+    {
+      "name": "enmori-review-152-analysis.log",
+      "bytes": 166,
+      "sha256": "7d9a4e7a6a2066d67e1d5dd8845c8987c7b14881bafedf55b133df127e0b0ceb"
+    },
+    {
+      "name": "enmori-review-152-format.log",
+      "bytes": 47,
+      "sha256": "e2b84052659d83c2c420ce83f6d7641cbe36d94e0ec22f6a58374d89233f5440"
+    }
+  ],
+  "scopeLimits": [
+    "No root-owned storage/parser tests independently rerun; author Ubuntu27/27 remains attributed.",
+    "No original-host capture install, sudo/unit/account/config/permission changes.",
+    "No APK install/launch, model/provider/backend runtime action or new Send/Retry/Check/cancel.",
+    "SHI code/composition for150/152 pending at observation.",
+    "152 includes approved147/148, not later151.",
+    "Test suites overlap and are not a summed product acceptance numerator.",
+    "Actual real AI cause/repair and consecutive9B remain unestablished."
+  ]
+}
