@@ -5,7 +5,7 @@ import { CONVERSATION_ERRORS } from "../ai-conversation/transport/register-route
 import { diagnosticStages, diagnosticStatuses, type ControlledAiDiagnostic } from "../ai-runtime/infrastructure/controlled-ai-diagnostic.js";
 import type { CompletePromptCompiler } from "../ai-runtime/infrastructure/controlled-ollama-transport.js";
 
-const routes = new Map([
+export const controlledDiagnosticRoutes: ReadonlyMap<string, string> = new Map([
   ["/v1/me/ai/operations", "POST"],
   ["/v1/me/ai/operations/:operationId/execute", "POST"],
   ["/v1/me/ai/operations/:operationId/cancel", "POST"],
@@ -82,7 +82,7 @@ export class ControlledPhoneDiagnostics {
   install(app: FastifyInstance): void {
     app.addHook("onRequest", (request, reply, done) => {
       const route = request.routeOptions.url;
-      if (route === undefined || routes.get(route) !== request.method) { done(); return; }
+      if (route === undefined || controlledDiagnosticRoutes.get(route) !== request.method) { done(); return; }
       // Independent trusted ID, never a client header or business identifier.
       const ctx: Context = { requestId: randomUUID(), routeTemplate: route, method: request.method, started: performance.now() };
       request.id = ctx.requestId;

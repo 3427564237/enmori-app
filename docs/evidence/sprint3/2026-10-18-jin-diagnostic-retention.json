@@ -1,0 +1,62 @@
+{
+  "source": "710f16bd05f516f040418e4ba81bd1f28ebf4002",
+  "tree": "9be0aa303eedcab19a93617c56c90808f7f2f1a9",
+  "base": "f434c49498e38d2575988907df073749c3401dd1",
+  "recordedAtSgt": "2026-10-18T15:55:22+08:00",
+  "branch": "codex/jin-diagnostic-retention-20261018",
+  "inputHashesCapturedAfterExecution": true,
+  "fullBeforeAfterInputStabilityClaimed": false,
+  "normalization": "CRLF to LF only; all changed working input bytes match committed source blobs",
+  "inputs": [
+    {
+      "path": "backend/src/bootstrap/controlled-diagnostic-retention.ts",
+      "sha256": "819522f977d132c71785a10fcae15f8535a883b2934113d05ef662168b733fff",
+      "lfSha256": "819522f977d132c71785a10fcae15f8535a883b2934113d05ef662168b733fff",
+      "gitBlob": "e441d7413abc66e22793a6950d953f43b7fa4636"
+    },
+    {
+      "path": "backend/src/bootstrap/controlled-phone-diagnostics.ts",
+      "sha256": "a680aa564ac31c62e3db50099344399e97edbc2d3ab5b41f8d9e4e22c3262687",
+      "lfSha256": "a680aa564ac31c62e3db50099344399e97edbc2d3ab5b41f8d9e4e22c3262687",
+      "gitBlob": "bf0c44841379e7896fbc01762bf560f2ed29bc41"
+    },
+    {
+      "path": "backend/test/bootstrap/controlled-diagnostic-retention.test.ts",
+      "sha256": "ba7b1ff6ec1ff74393f6138b8a86da409982d32f5a21ab368055a6d454ceb12a",
+      "lfSha256": "ba7b1ff6ec1ff74393f6138b8a86da409982d32f5a21ab368055a6d454ceb12a",
+      "gitBlob": "81f7fc7f616e00551d86c5524b6a6a230712dd2d"
+    }
+  ],
+  "node": "24.19.0",
+  "typescript": "7.0.2",
+  "compileExit": 0,
+  "focused": {
+    "files": [
+      "test/bootstrap/controlled-diagnostic-retention.test.js",
+      "test/bootstrap/controlled-phone-diagnostics.test.js",
+      "test/ai-conversation/transport.test.js"
+    ],
+    "pass": 27,
+    "fail": 0,
+    "cancelled": 0,
+    "skip": 0,
+    "exit": 0
+  },
+  "logs": [
+    {
+      "name": "compile-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "focused-01.log",
+      "sha256": "a82648a84032e0ff97cadf23e4e6e5deae3d721fa0234b8c65b7cf150916802e",
+      "bytes": 3039
+    }
+  ],
+  "realStorageAccessOrDeletionTested": false,
+  "realOperatorIdentityEnforced": false,
+  "cleanupSchedulerSelectedOrInstalled": false,
+  "actualCaptureWired": false,
+  "realModelOrPhoneRun": false
+}
