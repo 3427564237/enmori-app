@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "f36faf380735a82970735ad66dc4b2a8231c723b",
+  "sourceTree": "0e85e54013c0e4fec5655578e067b9022c38d3d0",
+  "approvedBase": "e1a51eab55522a53c2b7c98440a46660098b4635",
+  "newInputs": [
+    {
+      "path": "android/app/build.gradle.kts",
+      "gitBlob": "d5c808dfec9129b6f55802fa890027e12692aca1",
+      "sha256": "0bb567e7536dbcb0dbd9e0b129484ec14dd6ae4db57bee6199b4de808e9a68f8",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveBytesMatch": true
+    },
+    {
+      "path": "android/app/src/main/AndroidManifest.xml",
+      "gitBlob": "696e9198d22274fdc888ae656127cee2d4b8e685",
+      "sha256": "55847dd0523b868f39431a492a1dcbcd9196665f22126965aa5a9c26dc01eb8d",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveBytesMatch": true
+    },
+    {
+      "path": "lib/harness/social/offline_social_app.dart",
+      "gitBlob": "f3bda4cf1c5a2fc584261f3f969be66668d730c7",
+      "sha256": "2415c293b2dbf337570e4a35817401298d92d504ac0505acad19ad2745d880f9",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveBytesMatch": true
+    },
+    {
+      "path": "lib/hci_offline_harness.dart",
+      "gitBlob": "b4f0febfdd31e63ba8ff948a970c571b5e698458",
+      "sha256": "e8af6ea1d0b065a5ecf2ac512b9e74adb13c3f8663ba2d8ec557198d31a4d3f4",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveBytesMatch": true
+    },
+    {
+      "path": "test/harness/social/hci_offline_candidate_test.dart",
+      "gitBlob": "df70dece29168d7df5f2f7514686d53e8e6be09f",
+      "sha256": "000628250bcab9c5a419ffe92e4acbd127048b85f887fb61a5605c905dd38553",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveBytesMatch": true
+    },
+    {
+      "path": "tool/hci_android_candidate.md",
+      "gitBlob": "3cecda780215a1b25b04c86c7e9139c8c072fd1f",
+      "sha256": "153786c613513914b785b55eefc4d1e9c572c2abfe1ffc4b8d7eb144fb332558",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveBytesMatch": true
+    }
+  ],
+  "checks": {
+    "affectedPass": 360,
+    "affectedFail": 0,
+    "affectedExit": 0,
+    "newCasesIncluded": 2,
+    "analysisExit": 0,
+    "formatFiles": 3,
+    "formatChanged": 0,
+    "buildsExit": [
+      0,
+      0
+    ],
+    "archiveByteMatches": 1300,
+    "gitNormalizedMatches": 1300,
+    "gitRawMismatchDueToLineEndings": 1233
+  },
+  "toolchain": {
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "androidCompileSdk": 36,
+    "java": "21.0.12.1"
+  },
+  "artifacts": [
+    {
+      "kind": "hci",
+      "file": "ENMORI-HCI-f36faf3-arm64-v1.apk",
+      "bytes": 94026523,
+      "sha256": "b0f41f25151627a424965029721c02bff04ca04b25e49e35aaaa0c9ab7dc9f73",
+      "package": "com.enmori.app.hcitest",
+      "versionCode": 1,
+      "signerCertificateSha256": "a6ff83fa12ff92d4b33e5efde167aee3b0f3f4590bd843def55d9584f7724dd3",
+      "requestedTargetPlatform": "android-arm64",
+      "aaptNativeCode": "'arm64-v8a' 'armeabi-v7a' 'x86_64'"
+    },
+    {
+      "kind": "connected",
+      "file": "ENMORI-connected-f36faf3-arm64-v8.apk",
+      "bytes": 94276035,
+      "sha256": "25e7e10d7028c33821043234e2f194a5fe844dc17dfdb1321db7ee78fa84de7a",
+      "package": "com.enmori.app.personatest",
+      "versionCode": 8,
+      "signerCertificateSha256": "a6ff83fa12ff92d4b33e5efde167aee3b0f3f4590bd843def55d9584f7724dd3",
+      "requestedTargetPlatform": "android-arm64",
+      "aaptNativeCode": "'arm64-v8a' 'armeabi-v7a' 'x86_64'"
+    }
+  ],
+  "logs": [
+    {
+      "file": "setup-observation.txt",
+      "sha256": "48f6897543712117319b9d651f201e6757e51a66999f0cc4443ed7a83e4cffbe"
+    },
+    {
+      "file": "fixture-first.log",
+      "sha256": "2b03c9e1b8a6cbf5003d6a918423c77a95b2c3477a8e8c7e583d76554ff4d5d5"
+    },
+    {
+      "file": "fixture-second.log",
+      "sha256": "6d49dd80eec03cd9efa2ed101891b2ee027640bcf6ede3328e1d2d91e1cbb33a"
+    },
+    {
+      "file": "fixture-third.log",
+      "sha256": "90db7359247e3c6de242131823d1fe9c6cc51c8427af103507d4b5868fa11274"
+    },
+    {
+      "file": "fixture-fourth.log",
+      "sha256": "969ee379345c889ce7899f208efc9c1ed663b9cb0fc855210830616d6ddebdbf"
+    },
+    {
+      "file": "analysis-first.log",
+      "sha256": "55b8557e7968e240a3440c2d4de243a62601629238ce025557811efd5448dc0f"
+    },
+    {
+      "file": "analysis-final.log",
+      "sha256": "049423dd486a02e88fb8c5190cecd7609de36aa7bb6ada432f8c021c61231ac1"
+    },
+    {
+      "file": "affected.log",
+      "sha256": "550287d503f62d2245cdbdb9f11c2f97ba8b271a1aaa343e20ce2c02cdacbfc7"
+    },
+    {
+      "file": "format.log",
+      "sha256": "d62fe8bc12be6eda848eaf9a25722e5c0b87ff222ac84c4c95443457c93f8939"
+    },
+    {
+      "file": "whitespace.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "pub-offline.log",
+      "sha256": "c083f9ce64654caa4975b431c9e24916bd2b0af137a60f0e49f45dfb26fee81c"
+    },
+    {
+      "file": "build-hci.log",
+      "sha256": "5a179e687a083b45f64223de43ccd28085c76c817c947b621ec65625ab95f803"
+    },
+    {
+      "file": "build-connected.log",
+      "sha256": "cb41682e839bdc65afba22a0ebb61c84dcee3b195b414b2cd34e7a9978210467"
+    },
+    {
+      "file": "export-verification.json",
+      "sha256": "2f4c800a297963032f238a41f228800ad803d2dd0984bb8c82083b5c927624ef"
+    },
+    {
+      "file": "export-normalized-verification.json",
+      "sha256": "a71f1566946b0fbd031ccf22cd1b02efb2b8c2895e66062fc7d664d345de776a"
+    },
+    {
+      "file": "hci-aapt.txt",
+      "sha256": "bc2af126d74850634d7a8d555ca8c37b11dff02d2bb53a1cc9e2033dc394e712"
+    },
+    {
+      "file": "hci-signature.txt",
+      "sha256": "f97fb10fffbcce6a2316559830bb014590c0d28680274bffef3c8b7725fb62ad"
+    },
+    {
+      "file": "connected-aapt.txt",
+      "sha256": "e956249ff141a3eaffb33db533b158496a52676c9342c6d20c7422746b652be8"
+    },
+    {
+      "file": "connected-signature.txt",
+      "sha256": "f97fb10fffbcce6a2316559830bb014590c0d28680274bffef3c8b7725fb62ad"
+    }
+  ],
+  "notRun": [
+    "Android device/emulator installation or launch",
+    "TalkBack",
+    "iOS",
+    "live runtime/capture/model",
+    "real consecutive9B",
+    "SHI receipt of new artifacts"
+  ],
+  "review": "new JIN fixture/composition -> SHI; new evidence -> LI; existing approved inputs not reopened"
+}
