@@ -1,0 +1,78 @@
+{
+  "baseline": "8abb9bc63e304b69804729f1dc761fac832d22ed",
+  "executedSource": "2ff1142ba157ded1a0dca225719f6ded97e78167",
+  "changedExecutableFiles": [
+    "lib/features/interests/presentation/interest_editor_controller.dart",
+    "test/features/interest_editor_session_test.dart"
+  ],
+  "logs": [
+    {
+      "file": "interest-session-before-20261018.log",
+      "sha256": "6f0b531d509d9220da345487bf2a1f38f182a37b322ff8ed53d79723bd8465b2",
+      "result": "preliminary 2 passed / 2 failed"
+    },
+    {
+      "file": "interest-session-before-final-20261018.log",
+      "sha256": "bb454d24773a004ee5fe4f27e60ed540eee05e90fe25158fa1a249984b0987b2",
+      "result": "final 4-regression reproduction: 0 passed / 4 failed"
+    },
+    {
+      "file": "interest-session-after-20261018.log",
+      "sha256": "419cebd6b6b4b9253667ec495f24e2ba8dbe537b6bef5ab22760c09af04812c8",
+      "result": "6 affected files: 45 passed / 0 failed"
+    },
+    {
+      "file": "interest-session-analysis-20261018.log",
+      "sha256": "e6b281daeefe95d63cbbe0bea359e026b4d6cf8b93b4ac7c40bf54c68c3520c1",
+      "result": "scoped fatal-info analysis: no issues"
+    }
+  ],
+  "format": {
+    "files": 2,
+    "wouldChange": 0,
+    "exitCode": 0
+  },
+  "whitespace": "Pass",
+  "scope": "component/controller/router tests with handwritten fakes; not real Backend/Firestore/phone/model",
+  "runtime": {
+    "8080Listening": false,
+    "9099Listening": false,
+    "servicesStarted": false,
+    "modelCalled": false
+  },
+  "captureSourceStaging": {
+    "source": "c2c923c08bbbf0f1bda9a54697b7c5ba0c4c0cc3",
+    "files": [
+      {
+        "source": "tool/diagnostic_capture.py",
+        "sha256": "364d560e436b97c4040d73e4f7f75e3d4d8a2acd958d7b633073caf6d9e06847",
+        "bytes": 16264,
+        "compiledWithoutExecution": true
+      },
+      {
+        "source": "tool/install_diagnostic_capture.py",
+        "sha256": "20c63fea64f35089ff4f08608bab51b43a93d84c2dd8d7477dd0f920b8c3158f",
+        "bytes": 7220,
+        "compiledWithoutExecution": true
+      }
+    ],
+    "zipReceived": false,
+    "sourcePrepared": true,
+    "installed": false,
+    "rootActionsPerformed": false,
+    "remaining": [
+      "SHI exact-source code/composition review",
+      "full host effective-permission verification",
+      "human local authentication for reviewed installation",
+      "actual allowed/denied/synthetic writer-read/system timer checks"
+    ]
+  },
+  "remaining": [
+    "DU independent review of LI delta",
+    "JIN candidate consumption and applicable source gate",
+    "actual authorized connected catalogue and recommendation journey",
+    "catalogue product choice and missing physical maintenance contract",
+    "SHI capture code/composition review and effective host permissions",
+    "actual capture install and real repeat AI repair evidence"
+  ]
+}
