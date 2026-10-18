@@ -1,0 +1,97 @@
+{
+  "collectedDate": "2026-10-18",
+  "timezone": "Asia/Singapore",
+  "acceptedHead": "5bcec34a44f4b8c62315c0eaae0254bf4cba95bd",
+  "executable": "69e77179015ffa8fcd02460c4a282eba1de4bbe7",
+  "executableTree": "27cc70e427a8e261a5484572b00f8613e2f2f8fd",
+  "reviews": [
+    {
+      "role": "LI independent evidence",
+      "id": 5561920552,
+      "state": "APPROVED",
+      "commit": "5bcec34a44f4b8c62315c0eaae0254bf4cba95bd"
+    },
+    {
+      "role": "SHI new code/composition",
+      "id": 5561926559,
+      "state": "APPROVED",
+      "commit": "5bcec34a44f4b8c62315c0eaae0254bf4cba95bd"
+    }
+  ],
+  "liFreshLocalChecks": {
+    "strictCompile": {
+      "exit": 0
+    },
+    "backend": {
+      "pass": 51,
+      "exit": 0
+    },
+    "operator": {
+      "pass": 19,
+      "exit": 0
+    },
+    "hostChecker": {
+      "pass": 16,
+      "exit": 0,
+      "ResourceWarning": "fatal"
+    }
+  },
+  "liLocalLogHashes": [
+    {
+      "file": "backend-focused.log",
+      "bytes": 5647,
+      "sha256": "e676ce4ba45baf48f03b19cd0267216524a57a3ef0c18d87536653772d91167f"
+    },
+    {
+      "file": "compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "host-checker.log",
+      "bytes": 2823,
+      "sha256": "f7ae50ed533fc07665e6d5fc95742a6b34f5f5d9a48857b1284cabc4c0acd363"
+    },
+    {
+      "file": "operator.log",
+      "bytes": 2206,
+      "sha256": "3fcff783257152023a6ece40fefae9e60ac6894823364bffaf814eefebfde55e"
+    }
+  ],
+  "originalHostResidualReceipt": "https://github.com/3427564237/enmori-app/issues/84#issuecomment-6246367402",
+  "currentModelObservation": {
+    "samples": [
+      {
+        "sample": 1,
+        "timeSGT": "2026-10-18T15:26:52.229217+08:00",
+        "httpStatus": 200,
+        "residentModelCount": 0,
+        "originalBoundModelResidentCount": 0
+      },
+      {
+        "sample": 2,
+        "timeSGT": "2026-10-18T15:26:53.231734+08:00",
+        "httpStatus": 200,
+        "residentModelCount": 0,
+        "originalBoundModelResidentCount": 0
+      }
+    ],
+    "processSampleAtSGT": "2026-10-18T15:27:19.074997+08:00",
+    "originalServerProcessAbsent": true,
+    "currentServiceIdentityDiffersFromOriginal": true,
+    "currentServiceCgroupProcessCount": 1,
+    "currentRunnerProcessCount": 0,
+    "serviceJournalOriginalStoppedAtSGT": "2026-10-18T04:08:52.528245+08:00",
+    "serviceJournalCurrentStartedAtSGT": "2026-10-18T04:08:53.602554+08:00"
+  },
+  "interpretation": {
+    "currentOriginalModelExecution": "not running at observation; original server absent, no runner, two empty model inventories",
+    "historicalModelDoneOrApplicationLease": "not recovered; current absence is not a recovered original done/lease record",
+    "historicalCanonicalProvenanceNoteAndAutomaticCancel": "unknown; original store inaccessible",
+    "currentBackendAuthRuntime": "not running/ready by this record; no new composition constructed",
+    "liveDiagnosticCapture": "not delivered by accepted DI-preparation increment",
+    "realConsecutive9B": "Blocked"
+  },
+  "actions": "Read existing system lifecycle journal, process/cgroup inventory and two loopback GET /api/ps requests only. No generation, load/unload, stop/restart, outcome GET, data mutation or private-config change.",
+  "privacy": "No model names/digests, PIDs, invocation IDs, device/IP/endpoint/configuration, correlation identities or business content are included."
+}
