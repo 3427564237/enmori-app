@@ -178,6 +178,7 @@ def host_status_usable(value):
             and type(value.get("eventBrowse")) is dict
             and type(value["eventBrowse"].get("pending")) is int
             and value["eventBrowse"]["pending"] == 0
+            and value.get("diagnosticCaptureHealthy", True) is True
             and type(value.get("modelAttempts")) is int and value["modelAttempts"] >= 0)
 
 

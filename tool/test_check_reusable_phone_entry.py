@@ -263,6 +263,18 @@ class ConnectionTests(unittest.TestCase):
 
 
 class HostTests(unittest.TestCase):
+    def test_diagnostic_capture_health_is_optional_but_strict_when_present(self):
+        for value in (True, False, 0, 1, None, "true"):
+            with self.subTest(value=value):
+                self.state["diagnosticCaptureHealthy"] = value
+                self.write()
+                report = self.check()
+                if value is True:
+                    self.assertEqual(report["status"], "Pass")
+                else:
+                    self.assertEqual(report["category"], "original_service_busy_or_held_do_not_reset")
+                self.assertFalse(report["networkOrModelStarted"])
+
     def setUp(self):
         temporary = tempfile.TemporaryDirectory(prefix="enmori-entry-host-test-")
         self.addCleanup(temporary.cleanup)
