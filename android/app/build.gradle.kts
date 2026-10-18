@@ -10,6 +10,14 @@ val personaAndroidTestFlag = providers.environmentVariable("ENMORI_PERSONA_ANDRO
 check(personaAndroidTestFlag == null || personaAndroidTestFlag == "true") {
     "ENMORI_PERSONA_ANDROID_TEST must be absent or exactly true"
 }
+// HCI fixtures coexist with the original connected .personatest candidate.
+val hciAndroidTestFlag = providers.environmentVariable("ENMORI_HCI_ANDROID_TEST").orNull
+check(hciAndroidTestFlag == null || hciAndroidTestFlag == "true") {
+    "ENMORI_HCI_ANDROID_TEST must be absent or exactly true"
+}
+check(personaAndroidTestFlag == null || hciAndroidTestFlag == null) {
+    "Select only one isolated Android test package"
+}
 
 android {
     namespace = "com.enmori.app"
@@ -24,6 +32,7 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.enmori.app"
+        manifestPlaceholders["enmoriApplicationLabel"] = "enmori"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -40,6 +49,10 @@ android {
         getByName("debug") {
             if (personaAndroidTestFlag == "true") {
                 applicationIdSuffix = ".personatest"
+            }
+            if (hciAndroidTestFlag == "true") {
+                applicationIdSuffix = ".hcitest"
+                manifestPlaceholders["enmoriApplicationLabel"] = "ENMORI HCI (offline)"
             }
         }
         release {
