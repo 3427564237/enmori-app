@@ -1122,7 +1122,16 @@ class _PageController extends AiConversationController {
   }
 
   @override
-  Future<void> retry(String text) async => retried.add(text);
+  Future<void> retry(String text) async {
+    retried.add(text);
+    state = _state(
+      sessionKey: state.sessionKey,
+      phase: AiConversationPhase.preparing,
+      conversationId: state.conversationId,
+      messages: state.messages,
+      canCancel: true,
+    );
+  }
 
   @override
   void cancel() {
