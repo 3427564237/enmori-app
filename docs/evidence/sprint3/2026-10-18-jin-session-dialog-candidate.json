@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "940d220c399120fd7649d8ea8856b790ad622dce",
+  "sourceTree": "f8aadccd3c471d17ad5615c90e2087b5bb354aec",
+  "parents": [
+    "bf0d01c4e04aef3ca588ac45879f36195a20f274",
+    "8c31f34c4ac257d665cf6fd7fed4a190460f708e"
+  ],
+  "incomingInputsMatchingApprovedParent": [
+    {
+      "path": "docs/evidence/sprint3/2026-10-18-zhou-session-dialog-hci.json",
+      "gitBlob": "86993b7a21bdd893e0feb8e1b3300f0c8b50ba4b",
+      "sha256": "f83993fae2e57289aa435fbb425b4416b5df67603298bb3dc7a7936f102e30b0",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-18-zhou-session-dialog-hci.md",
+      "gitBlob": "132b209034b7140859d37e5245cc9d420da05592",
+      "sha256": "9b0b00faf28f8cfb85104429da26e611c2ef67e2e881ff86bd28a8b0b7096478",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "gitBlob": "8822d3f31b0a21e94cdb000b1af79c6ba2bec69b",
+      "sha256": "fcd44c08514d76bb1d6cd0ac48b6148f532ba9ad3966840b5c032702cba2bffb",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_editor_page.dart",
+      "gitBlob": "7dfb266e0c68ad2c25d3507cbb1c62b8f3ad20a9",
+      "sha256": "5ccacfedf626ecd214eacbba2180cc2d83bf7b8eacde3786d48b95a5e7fa3013",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_management_page.dart",
+      "gitBlob": "867ae4eb23c1004d93c13cd874bb36fbb4534df5",
+      "sha256": "23c9ed21c0a957021281a04a96761b9dc990ec738d2001f17681b3009a5ed7ea",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_overview_page.dart",
+      "gitBlob": "d82546d98d105e575e25881c47a66066573f5eaa",
+      "sha256": "b2143fab55b3a626194d41835ff2feb909936f25b4afdba557435426db5ff2e7",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_page_parts.dart",
+      "gitBlob": "598465660a6b6dc09c8be06b22455733314c5f24",
+      "sha256": "e6a321dc16d4d14503d91b71e8b7c1027a37dfc4e4f004ebe34e551e13d5a61e",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "gitBlob": "0aef9c0536d7f0d10d88a2047d7d6db757a5b845",
+      "sha256": "e855a381c41bce1e6eaf63a9995b947e8c17045fc75eb737bbf362f43f73ce7d",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    },
+    {
+      "path": "test/features/personas/persona_pages_test.dart",
+      "gitBlob": "bca70a7f85ecb6ee77dc806a4d2e4e995fae8535",
+      "sha256": "829ca4ee5a2b01edef785cb000a8c6fc3316ab8cf4a97fda2df2f631e4a2cd3b",
+      "rawGitMatch": false,
+      "normalizedGitMatch": true,
+      "archiveByteMatch": true
+    }
+  ],
+  "checks": {
+    "affectedPass": 386,
+    "affectedFail": 0,
+    "exitCode": 0,
+    "incoming26CasesIncluded": true,
+    "hci2CasesIncluded": true,
+    "analysisExit": 0,
+    "formatFiles": 10,
+    "formatChanged": 0,
+    "buildsExit": [
+      0,
+      0
+    ],
+    "archiveByteMatches": 1304,
+    "gitNormalizedMatches": 1304,
+    "lineEndingOnlyDifferences": 1237
+  },
+  "artifacts": [
+    {
+      "kind": "hci",
+      "file": "ENMORI-HCI-940d220-v2.apk",
+      "bytes": 94031803,
+      "sha256": "6bef23b5352d170483852aab2bd91ac02c6ed04bc9a6aa98dd3b0006db5c024a",
+      "package": "com.enmori.app.hcitest",
+      "versionCode": 2,
+      "signerCertificateSha256": "a6ff83fa12ff92d4b33e5efde167aee3b0f3f4590bd843def55d9584f7724dd3"
+    },
+    {
+      "kind": "connected",
+      "file": "ENMORI-connected-940d220-v9.apk",
+      "bytes": 94281987,
+      "sha256": "8ffa6492677c7f5d829b45624c1a6558d73feb71b793661aad94b3c5ceff4f73",
+      "package": "com.enmori.app.personatest",
+      "versionCode": 9,
+      "signerCertificateSha256": "a6ff83fa12ff92d4b33e5efde167aee3b0f3f4590bd843def55d9584f7724dd3"
+    }
+  ],
+  "logs": [
+    {
+      "file": "affected.log",
+      "sha256": "ebc1aeb77213f985dafd7bd56f34e68a33a10996e546f743a17cb579d26c5a4a"
+    },
+    {
+      "file": "analysis.log",
+      "sha256": "968f892ea576d2be2969125f1338fa650c29e7b195e4b94015590a89b66b0f11"
+    },
+    {
+      "file": "format.log",
+      "sha256": "f6969d5e4a8abae56edc3ea1beff41ea9865fa13ebd3ab9db26c02ab83597007"
+    },
+    {
+      "file": "whitespace.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "pub-offline.log",
+      "sha256": "c083f9ce64654caa4975b431c9e24916bd2b0af137a60f0e49f45dfb26fee81c"
+    },
+    {
+      "file": "build-hci.log",
+      "sha256": "759004572c549c5fdb08fbced473733a3569d3f40c8e72b595fcc2cf3059a39d"
+    },
+    {
+      "file": "build-connected.log",
+      "sha256": "eb8a3d7209949755a248aefaca07a3490c7f7511961c1babacb3f2b6a16e7844"
+    },
+    {
+      "file": "source-verification.json",
+      "sha256": "8c9fbd530120d6a7368489b1867a150e1a1e4d9d011678059d360ed7bf29d990"
+    },
+    {
+      "file": "source-verification.log",
+      "sha256": "af4bc05d96db45235168f6aca843c0254df8291c5bba711d27fba02a0c9b94d3"
+    },
+    {
+      "file": "hci-aapt.txt",
+      "sha256": "bd181aca78381f481ab6fd8feb1f13516d10519816e90431b549d2dd2d3cc26d"
+    },
+    {
+      "file": "hci-signature.txt",
+      "sha256": "f97fb10fffbcce6a2316559830bb014590c0d28680274bffef3c8b7725fb62ad"
+    },
+    {
+      "file": "connected-aapt.txt",
+      "sha256": "b653ab3b1a99dbb5d023ad543c84d022ccc4ba8f1ca044083feb06ed944f9b44"
+    },
+    {
+      "file": "connected-signature.txt",
+      "sha256": "f97fb10fffbcce6a2316559830bb014590c0d28680274bffef3c8b7725fb62ad"
+    }
+  ],
+  "notRun": [
+    "new artifact receipt by SHI or LI",
+    "Android/emulator install or launch",
+    "TalkBack/iOS",
+    "dialog-open observed session replacement on phone: fixture control absent",
+    "held waiting/uncertain-create on phone: fixture absent",
+    "newer-route stale callback on phone",
+    "long-history PageDown without long history",
+    "runtime/capture/model or consecutive9B"
+  ],
+  "reviewBoundary": "LI approved #151 source; #152 platform/fixture and this new combination need applicable SHI conclusion; LI new evidence remains separate."
+}

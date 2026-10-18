@@ -1,0 +1,100 @@
+JIN next client composition: approved session-owned dialogs
+18 October 2026 SGT
+
+Executable merge 940d220c399120fd7649d8ea8856b790ad622dce
+Tree f8aadccd3c471d17ad5615c90e2087b5bb354aec
+Parents: frozen #152 bf0d01c4e04aef3ca588ac45879f36195a20f274 and LI-approved
+#151 8c31f34c4ac257d665cf6fd7fed4a190460f708e (source6962b51).
+The merge had no conflicts or manual resolutions. All feature/test-feature files
+match #151 exactly; Android identity/entry/harness, Backend/API/dependencies match
+#152 exactly. Nine incoming paths are the seven approved feature/test files and
+two ZHOU evidence files. No duplicate product repair or new fixture is introduced.
+
+Review attribution
+LI's #151 client approval is complete. #152 LI evidence approval5562552856 and
+LI receipt of the original f36faf3 HCI ZIP/APK are complete. That received v1 is
+not this new v2 and does not contain #151. Original #152 head/APKs/receipts remain
+unchanged and useful for their #147/#148 scope. Do not mark their scope invalid.
+SHI new #152 fixture/platform review is still a separate gate unless a later
+formal review explicitly covers that same source within this new composition.
+Review only new composition impact, not unchanged LI-approved #147/#148/#151.
+#150 evidence approval is complete; capture code review/host acceptance and the
+#153 proposed operator identity decision remain independent of this client work.
+
+Actual new-source checks (Windows Flutter3.47.2 / Dart3.13.2)
+- Affected combined tests386/386 Pass, exit0. This contains the26 incoming dialog
+  cases and the2 JIN HCI fixture cases; neither is added again. ZHOU's original
+  baseline0/26 failure and LI's361 results are not rerun or attributed to JIN.
+- Scoped analysis10files/fatal-info clean; non-writing format10/0changes;
+  whitespace check pass. No source-test/build failures in this new packet.
+- HCI v2 and connected v9 debug builds exit0, on existing SDK36/Java21.0.12.1.
+  No dependency changes; offline resolution uses the existing cache.
+- Exported tracked inputs match the original source.tar bytes after execution
+  and Git after LF normalization (count/details in JSON). No raw-Git-byte claim
+  across Windows archive line-ending conversion. Both parent source relations
+  and approved feature blobs are checked; evidence-only followup is separate.
+- Existing KGP plugin compatibility warning remains; no upgrade is attempted.
+  No Android/emulator launch, ADB, phone/TalkBack, iOS, live Backend/model request,
+  original-operation Check/cancel, capture install or host account action.
+
+New artifacts, not transferred or installed by this work
+ENMORI-HCI-940d220-v2.apk: 94,031,803 bytes, com.enmori.app.hcitest / v2
+SHA256 6bef23b5352d170483852aab2bd91ac02c6ed04bc9a6aa98dd3b0006db5c024a
+ENMORI-connected-940d220-v9.apk: 94,281,987 bytes, com.enmori.app.personatest / v9
+SHA256 8ffa6492677c7f5d829b45624c1a6558d73feb71b793661aad94b3c5ceff4f73
+Signer SHA256 for both: a6ff83fa12ff92d4b33e5efde167aee3b0f3f4590bd843def55d9584f7724dd3
+Both aapt identities and apksigner v2 verification pass. Build requested
+android-arm64; aapt inventories arm64-v8a/armeabi-v7a/x86_64, not an ABI-exclusive
+artifact claim. Readable name of the HCI package remains ENMORI HCI (offline).
+ZIP receipt is local under build/jin-session-candidate-20261018-01; raw logs and
+all prior artifacts are preserved. No previous local emulator results uploaded.
+
+Commands
+flutter test --no-pub --reporter expanded test/features/personas test/features/ai_conversation test/harness/social test/harness/ai_network_harness_test.dart test/harness/ai_network_persona_harness_test.dart test/harness/ai_network_cancel_return_test.dart test/harness/ai_connected_repeat_journey_test.dart test/harness/ai_conversation_harness_test.dart test/harness/ai_persona_harness_test.dart test/app/ai_conversation_shared_router_test.dart test/app/history_ai_home_router_test.dart test/app/persona_home_router_test.dart
+dart analyze --fatal-infos lib/hci_offline_harness.dart lib/harness/social/offline_social_app.dart lib/features/personas/presentation/persona_editor_page.dart lib/features/personas/presentation/persona_management_page.dart lib/features/personas/presentation/persona_overview_page.dart lib/features/personas/presentation/persona_page_parts.dart lib/features/ai_conversation/presentation/ai_conversation_page.dart test/harness/social/hci_offline_candidate_test.dart test/features/personas/persona_pages_test.dart test/features/ai_conversation/ai_conversation_page_test.dart
+dart format --output=none --set-exit-if-changed (same10files)
+HCI: ENMORI_HCI_ANDROID_TEST=true; other isolation flag absent;
+flutter build apk --debug --no-pub --target lib/hci_offline_harness.dart --target-platform android-arm64 --build-number 2
+Connected: ENMORI_PERSONA_ANDROID_TEST=true; HCI flag absent;
+flutter build apk --debug --no-pub --target lib/controlled_demo.dart --target-platform android-arm64 --build-number 9
+aapt dump badging RELATIVE_APK; apksigner verify --verbose --print-certs RELATIVE_APK
+APK tools ran in the file's own directory to retain the reviewed Windows path handling.
+
+Current v2 device handoff and bounded coverage
+The older tool/hci_android_candidate.md is the #152 v1 packet. Its existing
+no-model Persona/composer procedure is inherited here; this receipt overrides
+only its artifact source/version/hash with 940d220/v2 above. Use the separately
+packaged current steps and never install v2 while calling it original f36faf3.
+After applicable composition/platform review, verify received APK/package/signer
+and installed file hash. If .hcitest is absent, installation coexists with the
+original .personatest. If present, the device owner first confirms same signer
+and version; no uninstall, data clear or differently signed overwrite. No new
+private service config, Tailscale/ADB reverse or model is needed for HCI.
+
+Test only on the permanent HCI FIXTURE banner. Existing Persona invalid/valid
+save, helper/error association, multiline draft/selection/focus, large text,
+keyboard/rotation and synthetic Send -> Check result -> Retry remain available.
+These are memory records; expected unavailable/user-only is not an AI repair.
+Existing explicit Keep editing/Cancel/Back and memory Persona activation/delete
+confirmations can also be checked. Ordinary confirmed signout/session loss must
+still discard the old session's display. Report actual observed actions only.
+
+The current HCI entry has NO manual session-replacement control usable while
+a dialog is open, and NO held-waiting Persona/AI operation fixture. Therefore
+#151 device cases for dialog-open same-UID replacement/signout, late old callback
+vs newer route, and in-flight/uncertain-create exit remain Not Run until an
+existing authorized fixture exposes those transitions. Host regressions cover
+them; do not translate that into phone evidence, force a real pending operation,
+or invent a new product control. Long-history PageDown is also Not Run where
+there is insufficient fixture history. Hold only those cases, not unrelated
+authorized UI checks. Actual TalkBack still belongs to SHI.
+
+Stop on wrong identity/banner, unexpected private config/network prompt, missing
+permitted Retry, crash/overflow or unintended action; preserve observations and
+remaining Not Run. Connected v9 remains a separately prepared future artifact,
+subject to current runtime/capture/original-invocation gates; no positive model
+attempt is authorized by building it. Real consecutive9B remains Blocked.
+
+Next checkpoint: SHI applicable composition/platform conclusion, independent LI
+new-source evidence, actual private artifact receipt and bounded device execution.
+No merge, closure, Project state or whole-application acceptance change.
