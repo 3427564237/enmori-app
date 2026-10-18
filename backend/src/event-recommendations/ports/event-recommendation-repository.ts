@@ -15,7 +15,7 @@ export interface EventRecommendationSources {
     readonly presentation: {
       readonly title: string;
       readonly startAt: string;
-      readonly endAt: string;
+      readonly endAt?: string;
     };
   }[];
 }

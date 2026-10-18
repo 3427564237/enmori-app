@@ -11,7 +11,9 @@ export class EventBrowse {
       if(signal.aborted)return err(appFailure("SERVICE_UNAVAILABLE"));
       if(id!==undefined&&decodeBrowseId(id)===undefined)return err(appFailure("EVENT_UNAVAILABLE"));
       const asOf=this.now().toISOString();
-      if(id!==undefined){const detail=await this.source.detail(id,asOf,signal);if(signal.aborted)return err(appFailure("SERVICE_UNAVAILABLE"));return detail?ok(detail):err(appFailure("EVENT_UNAVAILABLE"));}
+      if(id!==undefined){const detail=await this.source.detail(id,asOf,signal);if(signal.aborted)return err(appFailure("SERVICE_UNAVAILABLE"));if(!detail)return err(appFailure("EVENT_UNAVAILABLE"));
+        const {browseId,title,startAt,externalSourceUrl,endAt,locationLabel,categoryLabel}=detail;
+        return ok({browseId,title,startAt,externalSourceUrl,...(endAt===undefined?{}:{endAt}),...(locationLabel===undefined?{}:{locationLabel}),...(categoryLabel===undefined?{}:{categoryLabel})});}
       const details=await this.source.firstBatch(asOf,signal);if(signal.aborted)return err(appFailure("SERVICE_UNAVAILABLE"));
       return ok({asOf,scope:"ticketmaster_sg_first_batch_v1",items:details.map(({browseId,title,startAt,endAt})=>({browseId,title,startAt,...(endAt===undefined?{}:{endAt})}))});
     }catch{return err(appFailure("SERVICE_UNAVAILABLE"));}

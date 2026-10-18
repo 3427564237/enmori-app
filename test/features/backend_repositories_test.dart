@@ -775,6 +775,52 @@ void main() {
       );
     });
 
+    test(
+      'missing end stays absent; explicit invalid end fails closed',
+      () async {
+        final template = Map<String, dynamic>.from(
+          (_recommendationResponse['items'] as List).first as Map,
+        )..remove('endAt');
+        Future<Result<EventRecommendationResponse>> read(
+          Map<String, dynamic> item,
+        ) {
+          final client = _client(
+            (_) async => http.Response(
+              jsonEncode({
+                ..._recommendationResponse,
+                'items': [item],
+              }),
+              200,
+            ),
+          );
+          return BackendEventRecommendationRepository(client)
+              .read(view: EventRecommendationView.all);
+        }
+
+        final missing = await read(template);
+        expect(
+          (missing as Success<EventRecommendationResponse>)
+              .value
+              .items
+              .single
+              .endAt,
+          isNull,
+        );
+        final precise = await read({
+          ...template,
+          'startAt': '2026-09-16T10:00:00.000000001Z',
+          'endAt': '2026-09-16T10:00:00.000000002Z',
+        });
+        expect(precise, isA<Success<EventRecommendationResponse>>());
+        for (final invalid in [null, 'bad', template['startAt']]) {
+          expect(
+            await read({...template, 'endAt': invalid}),
+            isA<Failure<EventRecommendationResponse>>(),
+          );
+        }
+      },
+    );
+
     test('accepts a successful empty Event response', () async {
       final client = _client(
         (request) async => http.Response(

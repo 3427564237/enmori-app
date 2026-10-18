@@ -75,6 +75,9 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
         ),
         const SizedBox(height: 8),
         Text('${state.selectedCount} of 10 selected'),
+        Text(
+          '${state.options.where((option) => option.lifecycleState == InterestLifecycleState.active).length} available interests',
+        ),
         const SizedBox(height: 16),
         if (state.options.isEmpty)
           const Text('No interests are available right now.')

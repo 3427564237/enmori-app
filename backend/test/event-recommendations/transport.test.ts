@@ -97,3 +97,12 @@ test("unexpected failures and forbidden bodies never expose content or use query
     assert.equal(unchanged.statusCode, 200);
   } finally { await app.close(); }
 });
+test("Event recommendation transport omits unknown end and remains no-store", async () => {
+  const { endAt: _end, ...item } = value.items[0]!;
+  const app = await appFor(async () => ok({ ...value, items: [item] }));
+  try {
+    const response = await app.inject({ url: "/v1/recommendations/events?view=all", headers: authHeaders });
+    assert.equal(response.statusCode, 200); assert.equal(response.headers["cache-control"], "no-store");
+    assert.equal(Object.hasOwn(response.json().items[0], "endAt"), false);
+  } finally { await app.close(); }
+});

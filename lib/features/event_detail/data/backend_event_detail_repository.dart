@@ -40,7 +40,7 @@ final class BackendEventDetailRepository implements EventDetailRepository {
       return _invalid();
     }
     final start = tryParseUtcTimestamp(value['startAt']);
-    final startInstant = _instant(value['startAt']);
+    final startInstant = tryParseEventInstant(value['startAt']);
     final url = Uri.tryParse(value['externalSourceUrl'] as String);
     if (start == null ||
         startInstant == null ||
@@ -51,7 +51,7 @@ final class BackendEventDetailRepository implements EventDetailRepository {
       return _invalid();
     }
     final end = tryParseUtcTimestamp(value['endAt']);
-    final endInstant = _instant(value['endAt']);
+    final endInstant = tryParseEventInstant(value['endAt']);
     if (value.containsKey('endAt') &&
         (end == null || endInstant == null || endInstant <= startInstant)) {
       return _invalid();
@@ -75,20 +75,6 @@ final class BackendEventDetailRepository implements EventDetailRepository {
         shortDescription: value['shortDescription'] as String?,
       ),
     );
-  }
-
-  BigInt? _instant(Object? value) {
-    if (value is! String) return null;
-    final match = RegExp(
-      r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,9}))?Z$',
-    ).firstMatch(value);
-    if (match == null) return null;
-    final whole = DateTime.tryParse('${match[1]}Z');
-    if (whole == null || whole.toIso8601String().substring(0, 19) != match[1]) {
-      return null;
-    }
-    return BigInt.from(whole.millisecondsSinceEpoch) * BigInt.from(1000000) +
-        BigInt.parse((match[2] ?? '').padRight(9, '0'));
   }
 
   @override

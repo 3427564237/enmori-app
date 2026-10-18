@@ -2975,7 +2975,7 @@
             }
           }
         },
-        "description": "Isolated Emulator composition only; verified Firebase identity and completed Account required before any source read. No query parameters or request body. No pagination, database write or server cache. Real provider activation remains separately gated."
+        "description": "Isolated Emulator composition only; verified Firebase identity and completed Account required before any source read. No query parameters or request body. No pagination or database write. The approved Sponsor demo composition may reuse one atomic server-owned source projection for at most five minutes, shared with recommendations and detail; disable invalidates it and source failure never serves stale success. Other compositions retain request-only source reads. Real provider activation remains separately gated."
       }
     },
     "/v1/event-browse/{browseId}": {
@@ -3176,7 +3176,7 @@
             }
           }
         ],
-        "description": "Isolated Emulator composition only; verified Firebase identity and completed Account required before any source read. No query parameters or request body. No pagination, database write or server cache. Real provider activation remains separately gated."
+        "description": "Isolated Emulator composition only; verified Firebase identity and completed Account required before any source read. No query parameters or request body. No pagination or database write. The approved Sponsor demo composition may reuse one atomic server-owned source projection for at most five minutes, shared with recommendations and detail; disable invalidates it and source failure never serves stale success. Other compositions retain request-only source reads. Real provider activation remains separately gated."
       }
     }
   },
@@ -3843,7 +3843,6 @@
           "eventId",
           "title",
           "startAt",
-          "endAt",
           "matchedInterests",
           "reasonCode"
         ],

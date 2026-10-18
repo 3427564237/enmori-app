@@ -53,11 +53,11 @@ export function parseRecommendationEvent(id: string, data: StoredDocument):
       ["title", "active", "published", "startAt", "endAt", "interestTagIds"]) ||
       typeof title !== "string" || title.length === 0 || !title.isWellFormed() ||
       typeof active !== "boolean" || typeof published !== "boolean" ||
-      typeof startAt !== "string" || typeof endAt !== "string" ||
-      startInstant === undefined || endInstant === undefined || endInstant <= startInstant ||
+      typeof startAt !== "string" || startInstant === undefined ||
+      (Object.hasOwn(data, "endAt") && (typeof endAt !== "string" || endInstant === undefined || endInstant <= startInstant)) ||
       !validIds(interestTagIds)) return undefined;
   return {
     scoring: { eventId: id, active, published, startInstant, interestTagIds: [...interestTagIds] },
-    presentation: { title, startAt, endAt },
+    presentation: { title, startAt, ...(typeof endAt === "string" ? { endAt } : {}) },
   };
 }

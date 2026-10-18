@@ -66,7 +66,7 @@ export async function registerIsolatedSlices(app: FastifyInstance, identity: Ide
       });
     }
   }
-  if (events !== undefined) app.get<{Params:{eventId:string}}>("/v1/events/:eventId", {onRequest:authenticate,schema:{querystring:emptyQuery,params:{type:"object",additionalProperties:false,required:["eventId"],properties:{eventId:{type:"string",minLength:1}}},response:responses({type:"object",additionalProperties:false,required:["event"],properties:{event:eventDetailSchema}})}}, async(request,reply) => {
+  if (events !== undefined) app.get<{Params:{eventId:string}}>("/v1/events/:eventId", {onRequest:[async (_request, reply) => { reply.header("Cache-Control", "no-store"); }, authenticate],schema:{querystring:emptyQuery,params:{type:"object",additionalProperties:false,required:["eventId"],properties:{eventId:{type:"string",minLength:1}}},response:responses({type:"object",additionalProperties:false,required:["event"],properties:{event:eventDetailSchema}})}}, async(request,reply) => {
     const result = await events.execute(requirePrincipal(request),request.params.eventId);
     return result.ok ? reply.send({event:result.value}) : sendFailure(request,reply,result.failure);
   });

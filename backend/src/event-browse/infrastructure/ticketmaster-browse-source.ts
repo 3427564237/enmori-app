@@ -1,7 +1,7 @@
 import {Temporal} from "@js-temporal/polyfill";
 import {decodeBrowseId,object,projectOccurrence} from "../domain/browse-values.js";
 import {dependencyUnavailable} from "../../shared/ports/dependency-failure.js";
-import type {BrowseSource,BrowseDetail} from "../ports/event-browse.js";
+import type {BrowseSource,BrowseOccurrence} from "../ports/event-browse.js";
 /** Explicit private key and activation supplied by controlled composition.
  * Default activation is NEVER inferred from a key; no env/credential discovery. */
 export class TicketmasterBrowseSource implements BrowseSource {
@@ -23,7 +23,7 @@ export class TicketmasterBrowseSource implements BrowseSource {
     }catch{throw dependencyUnavailable;}
     finally{clearTimeout(timer);await reader?.cancel().catch(()=>{});reader?.releaseLock();}
   }
-  async firstBatch(asOf:string,signal:AbortSignal):Promise<readonly BrowseDetail[]>{
+  async firstBatch(asOf:string,signal:AbortSignal):Promise<readonly BrowseOccurrence[]>{
     // Discovery rejects fractional query seconds. Widen only its lower bound;
     // projectOccurrence below still compares each row to the original asOf.
     let startDateTime:string;
@@ -37,11 +37,11 @@ export class TicketmasterBrowseSource implements BrowseSource {
     // A positive upstream count with no raw page0 rows is an inconsistent
     // source response, not a batch whose supplied occurrences were excluded.
     if(rows.length>20||raw.page.totalElements<rows.length||(raw.page.totalElements>0&&rows.length===0))throw dependencyUnavailable;
-    const items:BrowseDetail[]=[];const ids=new Set<string>();
+    const items:BrowseOccurrence[]=[];const ids=new Set<string>();
     for(const row of rows){const v=projectOccurrence(row,asOf);if(v){if(ids.has(v.browseId))throw dependencyUnavailable;ids.add(v.browseId);items.push(v);}}
     return items;
   }
-  async detail(id:string,asOf:string,signal:AbortSignal):Promise<BrowseDetail|undefined>{
+  async detail(id:string,asOf:string,signal:AbortSignal):Promise<BrowseOccurrence|undefined>{
     const source=decodeBrowseId(id);if(!source)return undefined;
     const raw=await this.read(`events/${encodeURIComponent(source)}`,{},signal);
     if(raw===undefined)return undefined;
