@@ -44,6 +44,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
   GlobalKey<FormState> _form = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _nameFocus = FocusNode();
+  final _confirmation = PersonaConfirmation();
   PersonaTone _tone = PersonaTone.neutral;
   PersonaResponseLength _responseLength = PersonaResponseLength.balanced;
   PersonaFormatStyle _formatStyle = PersonaFormatStyle.plain;
@@ -113,6 +114,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
   @override
   void dispose() {
     _pageOperation++;
+    _confirmation.dispose();
     _name.dispose();
     _nameFocus.dispose();
     super.dispose();
@@ -201,7 +203,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
     if (_confirming) return false;
     _confirming = true;
     final sessionKey = ref.read(personaSessionControllerProvider).sessionKey;
-    final discard = await confirmPersonaAction(
+    final discard = await _confirmation.action(
       context,
       message: 'Discard unsaved changes?',
       cancelLabel: 'Keep editing',
@@ -220,7 +222,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
     var leave = true;
     if (session.isBusy || session.pendingCreate != null) {
       _confirming = true;
-      leave = await confirmPersonaExit(context);
+      leave = await _confirmation.exit(context);
       if (!mounted) return;
       _confirming = false;
     } else if (_dirty) {
