@@ -14,7 +14,13 @@ This is an execution ledger. Component results below do not establish final APK/
 - Original host audit failure retained: prior-provision-receipt/FileNotFoundError. V2 inventories missing history and independently checks current identity/permissions; no historical receipt is reconstructed.
 - Actual vivo connection/awake observed; no new APK installed at this ledger checkpoint.
 - Existing Ollama model tag visible; no loaded model and controlled service ports free at initial read-only check. No new generation invoked.
-- Actual private config identity, final source/APK/SHA256, installation, scheduled cleanup and device results: Pending.
+- Final production source through `654f49f`; evidence tail `fd3d958`; tests-only harness fix mapped from reviewed `f6a9ab5` to combined `a11cdfd7cd6d27b3e74b41c12ced29efed76cd1b`.
+- Final combined strict Backend build and full Backend tests: **1008/1008**, zero failures/skips, exit0.
+- Final combined full guarded Auth/Firestore/HTTP/Dart SDK: **176/176**, zero failures/skips, exit0; inner/outer profiles removed and required ports free. Models and provider are explicit doubles, not live-provider/model evidence.
+- First combined full Flutter: **748 Pass /2 Fail**, exit1. The two stable harness failures (ambiguous Scrollable; lazy status outside built viewport) were independently reproduced and retained. Reviewed tests-only fix preserves controller status/draft/selection/focus/no-new-request/exact-Retry assertions; production code is unchanged.
+- Final combined full Flutter on `a11cdfd`: **750/750**, exit0. Fatal-info analysis on combined production source: no issues. Tests-only fix independently analyzed without issues.
+- Final combined operator: **25/25**, zero failures/skips, exit0. Python: **32 Pass /16 Skip** out of48, exit0; skipped root cases remain Not Run.
+- Final configuration identity, APK/SHA256, installation, scheduled cleanup and connected device results: Pending.
 
 ## Required final same-candidate journeys
 
