@@ -19,7 +19,7 @@ for (const message of ["You mentioned enjoying reading. What was the book like?"
     assert.equal((await boundedConversationSemanticCandidate(()=>input,()=>candidate(message),budget())).ok,false);
   });
 }
-for (const message of ["I accessed your account.","我已经保存了记录。","I searched for nearby events.","You have a disorder.","你患有抑郁症。","Take medication daily.","Your compatibility score is 98.","The event starts at 9:00.","Your API key is secret.","我知道你的位置。","I remember you from another account.","You said “I enjoy swimming”.","You have 3 friends.","The schemaVersion is ai_assistant_message_v1.","我能访问你的私人消息。","I will browse Ticketmaster for you."]) {
+for (const message of ["You live alone in Singapore.","You are a teacher.","Your family lives nearby.","你住在新加坡。","I will delete your note.","I've saved your note.","We can send a friend request.","I am going to book it.","我会帮你保存记录。","I accessed your account.","我已经保存了记录。","I searched for nearby events.","You have a disorder.","你患有抑郁症。","Take medication daily.","Your compatibility score is 98.","The event starts at 9:00.","Your API key is secret.","我知道你的位置。","I remember you from another account.","You said “I enjoy swimming”.","You have 3 friends.","The schemaVersion is ai_assistant_message_v1.","我能访问你的私人消息。","I will browse Ticketmaster for you."]) {
   test(`open policy rejects prohibited or unsupported claim: ${message}`,async () => {
     assert.deepEqual(await openConversationSemanticCandidate(()=>input,()=>candidate(message),budget()),{ok:false,failure:"unsafe_output"});
   });

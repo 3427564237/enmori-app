@@ -34,6 +34,8 @@ export function validOpenConversationInput(v: ConversationInput): boolean {
 const prohibited = [
   /(?:firestore|firebase|ollama|tokenizer|system prompt|developer message|api[_ -]?key|access[_ -]?token|schemaVersion|ai_assistant_message_v1|Bearer\s|\/home\/|localhost|127\.0\.0\.1)/iu,
   /(?:系统提示词|开发者指令|后台指令|访问令牌|密钥|数据库|服务器路径)/u,
+  /\b(?:I|we)(?:['’](?:ve|ll|m)|\s+(?:have already|have just|am going to|am able to|can now|will now|have|will|can|shall|am|are|did|just|already))?\s+(?:already\s+|just\s+|now\s+)?(?:access(?:ed)?|search(?:ed)?|brows(?:e|ed)|track(?:ed)?|sav(?:e|ed)|delet(?:e|ed)|updat(?:e|ed)|register(?:ed)?|book(?:ed)?|send|sent|accept(?:ed)?|sign(?:ed)?\s+up|purchas(?:e|ed)|order(?:ed)?|locat(?:e|ed)|look(?:ed)? up)\b/iu,
+  /(?:我|我们)(?:已经|刚刚|刚才|已|可以|能|会|将|正在|即将|将会|能够|能帮你|会帮你|会为你|将为你|已经为你)?(?:访问|查询|搜索|定位|保存|删除|修改|注册|报名|预订|发送|接受申请|购买|下单)/u,
   /\b(?:I (?:have |can |will |just )?(?:access|accessed|search|searched|browse|browsed|track|tracked)|I (?:have |just )?(?:saved|deleted|updated|registered|booked|sent|accepted)|your (?:account|location|GPS|private (?:data|messages)))\b/iu,
   /(?:我(?:已经|刚刚|已|可以|能)?(?:访问|查询|搜索|定位|保存|删除|修改|注册|报名|预订|发送|接受申请)|你的(?:账号|账户|位置|定位|私密信息|私人消息))/u,
   /\b(?:diagnos\w*|prescri\w*|medication|dosage|suicid\w*|self.harm|disorder|treatment|therapy|antidepressant|insulin)\b/iu,
@@ -50,6 +52,21 @@ function accepts(input: ConversationInput, output: OutputCandidate): boolean {
   // Numbers and quoted attributions require exact support in the actual supplied
   // data. Prior model claims alone cannot establish a new user fact.
   const sources = [input.currentMessage,...input.checkIns.map(n => n.noteText!),...(input.history ?? []).map(p => p.user)];
+  // Unsupported assertions about identity, living situation, location, work,
+  // possessions or attributes are private-fact claims even without numbers.
+  // Only an exact supported first/second-person statement can establish one;
+  // a speculative paraphrase is rejected instead of becoming a user fact.
+  const normalizedSources = sources.map(s => s.toLocaleLowerCase("en").replace(/\bi am\b|\bi['’]m\b/gu,"you are")
+    .replace(/\bi have\b|\bi['’]ve\b/gu,"you have").replace(/\bi\b/gu,"you").replace(/\bmy\b/gu,"your"));
+  const claims = output.message.matchAll(/\byou(?:['’]re|['’]ve| are| have| live| reside| work| study| earn| weigh| own| belong)[^.!?\n]*|\byour (?:home|address|location|name|age|job|salary|income|family|partner|children|religion|nationality)[^.!?\n]*/giu);
+  for (const match of claims) {
+    const claim=match[0].toLocaleLowerCase("en").replace(/\byou['’]re\b/gu,"you are").replace(/\byou['’]ve\b/gu,"you have");
+    if (!normalizedSources.some(s=>s.includes(claim))) return false;
+  }
+  for (const match of output.message.matchAll(/你(?:住在|独居|住|来自|的(?:家庭|住址|地址|位置|姓名|年龄|工作|收入|伴侣|孩子|国籍|宗教))[^。！？\n]*/gu)) {
+    const claim=match[0].replace(/^你/u,"我");
+    if (!sources.some(s=>s.includes(claim)||s.includes(match[0]))) return false;
+  }
   for (const match of output.message.matchAll(/\d+(?:[.:/-]\d+)*/gu)) if (!sources.some(s => s.includes(match[0]))) return false;
   for (const match of output.message.matchAll(/[“「"]([^”」"\n]+)[”」"]/gu)) if (!sources.some(s => s.includes(match[1]!))) return false;
   return true;

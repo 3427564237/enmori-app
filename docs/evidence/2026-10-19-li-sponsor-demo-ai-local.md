@@ -14,7 +14,7 @@ New conversation changes only the local target after the previous operation resu
 
 ## Concrete semantic policy
 
-The independent gate checks exact input/output shape/version, well-formed nonempty text, at most two complete pairs, projection freshness and candidate equality. Existing raw JSON/control/markup/URL/tool checks remain separate. Concrete whole-output rejection covers private/system-access and mutation claims, health diagnosis/treatment/crisis language, unsupported Event/recommendation claims, backend/schema/credential disclosure, and persistent/other-conversation memory claims. Numbers and quoted attributions require exact support in current/prior user messages or Notes; previous assistant claims alone do not establish user facts.
+The independent gate checks exact input/output shape/version, well-formed nonempty text, at most two complete pairs, projection freshness and candidate equality. Existing raw JSON/control/markup/URL/tool checks remain separate. Independent review identified unsupported location/living assertions and future/contraction mutation claims; the follow-up adds nine synthetic counterexamples and support checks/tense coverage. Concrete whole-output rejection covers private/system-access and mutation claims, health diagnosis/treatment/crisis language, unsupported Event/recommendation claims, backend/schema/credential disclosure, and persistent/other-conversation memory claims. Numbers and quoted attributions require exact support in current/prior user messages or Notes; previous assistant claims alone do not establish user facts.
 
 The versioned synthetic corpus in `backend/test/ai-conversation/open-conversation.test.ts` covers ordinary English/Chinese connected replies; prohibited/unsupported/ambiguous claims; changed/missing history; unknown reads; source revocation during generation; full-input token counting and role-control escaping. These conservative concrete checks can reject safe replies and cannot mathematically prove universal natural-language grounding. No second model, output repair, fixed reply or content fallback was introduced.
 
@@ -23,7 +23,7 @@ The versioned synthetic corpus in `backend/test/ai-conversation/open-conversatio
 Pinned Node24.19.0, existing TypeScript/dependencies, Flutter3.47.2/Dart3.13.2. Existing caches reused with `flutter pub get --offline`; no lock/toolchain upgrade.
 
 - Strict TypeScript build: pass.
-- Full Backend unit/Port/transport/parser/legacy semantic suite: **992/992 pass**, including24 new open-policy/prompt/orchestration cases.
+- Full Backend unit/Port/transport/parser/legacy semantic suite: **1001/1001 pass**, including33 new open-policy/prompt/orchestration cases.
 - Actual Auth/Firestore `real-conversation-store.integration.test.ts`: **25/25 pass**, including3 new history cases: latest-two/no-backfill/atomic stale-pair write refusal; historical Note deletion; older-U retry completion ordering. Fake Qwen remains explicit.
 - AI Flutter controller/wire/session/recovery/widget suite: **194/194 pass**, including determined/unknown New conversation guards and both presentations' draft/selection/focus.
 - `flutter analyze --no-pub`: no issues. `git diff --check`: pass.
