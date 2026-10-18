@@ -1,4 +1,5 @@
 import type { GenerationTransport, RequestBudget } from "../ports/generation-transport.js";
+import { observeControlledAi, type ControlledAiObserver, type ControlledAiDiagnostic } from "./controlled-ai-diagnostic.js";
 
 export interface ControlledOllamaBinding {
   readonly endpoint:string;readonly reference:string;readonly manifestDigest:string;readonly tokenizerDigest:string;
@@ -68,7 +69,8 @@ export class ControlledOllamaTransport<Input> implements GenerationTransport<Inp
   private readonly origin:string;private invoked=false;
   private stateValue:"not_checked"|"ready"|"invoked"|"stopped"|"termination_unconfirmed"="not_checked";
   constructor(private readonly binding:ControlledOllamaBinding,private readonly compiler:CompletePromptCompiler<Input>,
-    private readonly http:typeof fetch=fetch){
+    private readonly http:typeof fetch=fetch, private readonly observer?:ControlledAiObserver,
+    private readonly admitDispatch?:()=>boolean){
     this.origin=privateOrigin(binding.endpoint);
     if(!binding.reference||/\s/.test(binding.reference)||!digest(binding.manifestDigest)||!digest(binding.tokenizerDigest)||
       !/^\d+\.\d+\.\d+(?:[-+][a-zA-Z0-9.-]+)?$/.test(binding.ollamaVersion)||
@@ -79,36 +81,54 @@ export class ControlledOllamaTransport<Input> implements GenerationTransport<Inp
     try{return !budget.signal.aborted&&Number.isFinite(budget.remainingMs())&&budget.remainingMs()>0&&this.binding.current();}catch{return false;}
   }
   async preflight(budget:RequestBudget):Promise<void>{
-    if(!this.live(budget)||this.invoked)throw unavailable();
-    const read=async(path:string)=>{
-      if(!this.live(budget))throw unavailable();
-      const response=await this.http(`${this.origin}${path}`,{method:"GET",redirect:"error",signal:budget.signal,cache:"no-store"});
-      const result=await boundedEnvelope(response);if(!this.live(budget))throw unavailable();return result;
+    let stage:ControlledAiDiagnostic["stage"]="preflight",started=performance.now();
+    const emit=(status:ControlledAiDiagnostic["status"],httpStatus?:number)=>observeControlledAi(this.observer,stage,status,started,httpStatus);
+    const fail:(status:ControlledAiDiagnostic["status"])=>never=status=>{emit(status);throw unavailable();};
+    if(!this.live(budget))fail("budget_or_authority_lost");
+    if(this.invoked)fail("already_invoked");
+    const read=async(path:string,next:ControlledAiDiagnostic["stage"])=>{
+      stage=next;started=performance.now();emit("started");
+      if(!this.live(budget))fail("budget_or_authority_lost");
+      let response:Response;
+      try { response=await this.http(`${this.origin}${path}`,{method:"GET",redirect:"error",signal:budget.signal,cache:"no-store"}); }
+      catch { fail(this.live(budget)?"request_failed":"budget_or_authority_lost"); }
+      if(!response.ok){emit("http_failed",response.status);throw unavailable();}
+      let result:unknown;
+      try { result=await boundedEnvelope(response); } catch { fail("envelope_invalid"); }
+      if(!this.live(budget))fail("budget_or_authority_lost");return result;
     };
     try{
-      const version=await read("/api/version");if(!record(version)||version.version!==this.binding.ollamaVersion)throw unavailable();
+      const version=await read("/api/version","preflight_version");if(!record(version))fail("envelope_invalid");
+      if(version.version!==this.binding.ollamaVersion)fail("version_mismatch");emit("passed");
       for(const path of ["/api/tags","/api/ps"]){
-        const result=await read(path);if(!record(result)||!Array.isArray(result.models))throw unavailable();
+        const result=await read(path,path==="/api/tags"?"preflight_tags":"preflight_ps");
+        if(!record(result)||!Array.isArray(result.models))fail("envelope_invalid");
         const matching=result.models.filter(m=>record(m)&&(m.name===this.binding.reference||m.model===this.binding.reference));
-        if(matching.length!==1)throw unavailable();const model=matching[0] as Record<string,unknown>;
-        if(model.digest!==this.binding.manifestDigest||!record(model.details))throw unavailable();
+        if(matching.length!==1)fail("model_match_failed");const model=matching[0] as Record<string,unknown>;
+        if(model.digest!==this.binding.manifestDigest)fail("manifest_mismatch");
+        if(!record(model.details))fail("envelope_invalid");
         const sizeText=typeof model.details.parameter_size==="string"?/^(\d+(?:\.\d+)?)B$/.exec(model.details.parameter_size):null;
         const size=sizeText?Number(sizeText[1]):NaN;
         if(typeof model.details.family!=="string"||!model.details.family.toLowerCase().startsWith("qwen")||
-          (this.binding.mode==="formal-9b"?size<8||size>=10:size<3||size>=5)||!Number.isFinite(size))throw unavailable();
-        if(path==="/api/ps"&&model.context_length!==8192)throw unavailable();
+          (this.binding.mode==="formal-9b"?size<8||size>=10:size<3||size>=5)||!Number.isFinite(size))fail("family_size_mismatch");
+        if(path==="/api/ps"&&model.context_length!==8192)fail("context_mismatch");emit("passed");
       }
       this.stateValue="ready";
     }catch{this.stateValue="not_checked";throw unavailable();}
   }
   async generate(input:Input,budget:RequestBudget):Promise<Uint8Array>{
     await this.preflight(budget);
+    const compileStarted=performance.now();
+    observeControlledAi(this.observer,"adapter_compile","started",compileStarted);
     let compiled:Awaited<ReturnType<CompletePromptCompiler<Input>["compile"]>>|undefined;
-    try{compiled=await this.compiler.compile(input,budget);}catch{throw unavailable();}
-    if(!this.live(budget)||compiled.manifestDigest!==this.binding.manifestDigest||compiled.tokenizerDigest!==this.binding.tokenizerDigest||
+    try{compiled=await this.compiler.compile(input,budget);}catch{observeControlledAi(this.observer,"adapter_compile","compile_failed",compileStarted);throw unavailable();}
+    const compileCurrent=this.live(budget);
+    if(!compileCurrent||compiled.manifestDigest!==this.binding.manifestDigest||compiled.tokenizerDigest!==this.binding.tokenizerDigest||
       compiled.includesAllFraming!==true||!Number.isSafeInteger(compiled.tokens)||compiled.tokens<1||compiled.tokens>4096||
-      typeof compiled.rawPrompt!=="string"||!compiled.rawPrompt.isWellFormed()||!compiled.rawPrompt)throw unavailable();
-    if(this.invoked)throw unavailable();
+      typeof compiled.rawPrompt!=="string"||!compiled.rawPrompt.isWellFormed()||!compiled.rawPrompt){
+      observeControlledAi(this.observer,"adapter_compile",compileCurrent?"compiled_input_invalid":"budget_or_authority_lost",compileStarted);throw unavailable();}
+    observeControlledAi(this.observer,"adapter_compile","passed",compileStarted);
+    if(this.invoked){observeControlledAi(this.observer,"generate_dispatch","already_invoked",compileStarted);throw unavailable();}
     const expectedTokens=compiled.tokens;
     let body:string|undefined=JSON.stringify({model:this.binding.reference,prompt:compiled.rawPrompt,raw:true,stream:false,
       // The bounded attribution slice needs repeatable decoding, not creative sampling.
@@ -116,18 +136,30 @@ export class ControlledOllamaTransport<Input> implements GenerationTransport<Inp
       format:"json",options:{num_ctx:8192,num_predict:512,temperature:0,seed:42}});
     compiled=undefined;
     // No await between the original guard, host lease and actual SDK dispatch.
-    if(!this.live(budget)){body=undefined;throw unavailable();}
+    // Capture admission is checked only BEFORE dispatch. Once physically
+    // invoked, a capture failure must not fabricate or override settlement.
+    let admitted=true;
+    try{if(this.admitDispatch)admitted=this.admitDispatch()===true;}catch{admitted=false;}
+    if(!admitted||!this.live(budget)){body=undefined;observeControlledAi(this.observer,"generate_dispatch","budget_or_authority_lost",compileStarted);throw unavailable();}
     this.invoked=true;this.stateValue="invoked";
+    const dispatchStarted=performance.now();
     let stopped=false;
     try{
-      const response=await this.http(`${this.origin}/api/generate`,{method:"POST",headers:{"content-type":"application/json"},body,
-        signal:budget.signal,redirect:"error",cache:"no-store"});body=undefined;
+      let pending:Promise<Response>;
+      try { pending=this.http(`${this.origin}/api/generate`,{method:"POST",headers:{"content-type":"application/json"},body,
+        signal:budget.signal,redirect:"error",cache:"no-store"}); }
+      finally { observeControlledAi(this.observer,"generate_dispatch","dispatch_attempted",dispatchStarted); }
+      const response=await pending;body=undefined;
+      observeControlledAi(this.observer,"generate_response",response.ok?"response_received":"http_failed",dispatchStarted,response.status);
       const value=await boundedEnvelope(response);
       if(!record(value)||value.model!==this.binding.reference||value.done!==true)throw unavailable();
       stopped=true;this.stateValue="stopped";this.invoked=false;
+      observeControlledAi(this.observer,"generate_done","done_confirmed",dispatchStarted);
       if(!this.live(budget)||typeof value.response!=="string"||!value.response.isWellFormed()||
         value.prompt_eval_count!==expectedTokens||!Number.isSafeInteger(value.eval_count)||
-        (value.eval_count as number)<0||(value.eval_count as number)>512)throw unavailable();
+        (value.eval_count as number)<0||(value.eval_count as number)>512){
+        observeControlledAi(this.observer,"output_validation","output_invalid",dispatchStarted);throw unavailable();}
+      observeControlledAi(this.observer,"output_validation","passed",dispatchStarted);
       return new TextEncoder().encode(value.response);
     }catch{
       body=undefined;compiled=undefined;
@@ -136,6 +168,7 @@ export class ControlledOllamaTransport<Input> implements GenerationTransport<Inp
       // evidence that the remote generation stopped. Never free its lane here.
       // The unresolved promise owns no response/content cache or replay handle.
       this.stateValue="termination_unconfirmed";
+      observeControlledAi(this.observer,"generate_done","termination_unconfirmed",dispatchStarted);
       return new Promise<Uint8Array>(()=>{});
     }
   }

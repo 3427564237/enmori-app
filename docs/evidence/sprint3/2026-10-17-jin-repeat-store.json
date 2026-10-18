@@ -1,0 +1,139 @@
+{
+  "source": "8763e4c33a29f0b6f9178649e720e14ded270697",
+  "tree": "8c9d0ee0a562d13ab5b8b32ead6725eec59d4708",
+  "base": "dcdc3ba13f1a4bac192775b7a45f8e37bc4c680e",
+  "sourceOnlyChange": {
+    "path": "backend/emulator-test/controlled-phone-service.integration.test.ts",
+    "blob": "79464d0e481a0a14a0c5a4490d227da7891928d4",
+    "sha256": "1ecd43d786cb6581da8af727b027d30ef5308da8f6f9854b0b5f5f798c065d3a",
+    "equivalent": "CRLF-equivalent"
+  },
+  "scope": "One new real isolated Auth/Firestore/HTTP regression; compiler/model doubles; no product change or real-model success claim.",
+  "unchanged": {
+    "allOtherTrackedInputs": true,
+    "productionAndApiAndDependenciesAndTooling": true,
+    "frozenCandidatePr": 135,
+    "frozenCandidateHead": "dcdc3ba13f1a4bac192775b7a45f8e37bc4c680e",
+    "previousApkSource": "b3c8a2223bd305c65a56cbd4fc88aff13b8a1d8e"
+  },
+  "binding": {
+    "count": 1288,
+    "aggregateSha256": "d0fe05bcf4d30808cf1c75ad8bf43065bd07043acafb80342de7cd4b04eb1aa2",
+    "beforeManifestSha256": "5251287af602b5b3da616faae7195cbb4fd81ed45adf8c15bec02b4c58ef2831",
+    "afterManifestSha256": "e30b6a59844e2cff02d75a9ab06524fd6c43aaa9174bead7d1f7b81aeafb173b",
+    "compiledFiles": 702,
+    "compiledAggregateSha256": "d4f00b83d968594e944461e3ed70965764516ce6371e55d24e2449c6fdef4799",
+    "compiledManifestSha256": "3d6642e73fe5d989fd5502ab6f9567e56ebeb3a4d366edf158a29c69026205cf"
+  },
+  "commands": {
+    "compile": {
+      "source": "8763e4c33a29f0b6f9178649e720e14ded270697",
+      "tree": "8c9d0ee0a562d13ab5b8b32ead6725eec59d4708",
+      "cwd": "C:\\Users\\Aa124\\OneDrive\\文档\\ChatGPT\\Comp3851B\\enmori-app-jin-active",
+      "executable": "C:/Users/Aa124/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe",
+      "argv": [
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "backend/tsconfig.json"
+      ],
+      "startedAt": "2026-10-17T05:53:24.785Z",
+      "finishedAt": "2026-10-17T05:53:26.571Z",
+      "exit": 0,
+      "signal": null,
+      "log": "C:\\Users\\Aa124\\OneDrive\\文档\\ChatGPT\\Comp3851B\\enmori-app-jin-active\\build\\jin-repeat-store-20261017\\compile.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "focused": {
+      "source": "8763e4c33a29f0b6f9178649e720e14ded270697",
+      "tree": "8c9d0ee0a562d13ab5b8b32ead6725eec59d4708",
+      "cwd": "C:\\Users\\Aa124\\OneDrive\\文档\\ChatGPT\\Comp3851B\\enmori-app-jin-active",
+      "executable": "C:/Users/Aa124/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe",
+      "argv": [
+        "tool/run_ai_store_emulators.mjs",
+        "--phone-service-only"
+      ],
+      "startedAt": "2026-10-17T05:53:35.815Z",
+      "finishedAt": "2026-10-17T05:54:36.705Z",
+      "exit": 0,
+      "signal": null,
+      "log": "C:\\Users\\Aa124\\OneDrive\\文档\\ChatGPT\\Comp3851B\\enmori-app-jin-active\\build\\jin-repeat-store-20261017\\sdk-focused.log",
+      "logSha256": "5aaaab953e744af4394eb8946f28394fc592c3a0fc4f921b78669d98ac0c56b4",
+      "counts": {
+        "tests": 15,
+        "pass": 15,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "cleanupMarkers": [
+        "JIN_NEXT_EMULATOR_WORKER_PROFILE_REMOVED",
+        "JIN_NEXT_EMULATOR_OUTER_PROFILE_REMOVED",
+        "JIN_NEXT_EMULATOR_REQUIRED_PORTS_FREE"
+      ]
+    },
+    "full": {
+      "source": "8763e4c33a29f0b6f9178649e720e14ded270697",
+      "tree": "8c9d0ee0a562d13ab5b8b32ead6725eec59d4708",
+      "cwd": "C:\\Users\\Aa124\\OneDrive\\文档\\ChatGPT\\Comp3851B\\enmori-app-jin-active",
+      "executable": "C:/Users/Aa124/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe",
+      "argv": [
+        "tool/run_ai_store_emulators.mjs"
+      ],
+      "startedAt": "2026-10-17T05:55:01.493Z",
+      "finishedAt": "2026-10-17T05:59:25.814Z",
+      "exit": 0,
+      "signal": null,
+      "log": "C:\\Users\\Aa124\\OneDrive\\文档\\ChatGPT\\Comp3851B\\enmori-app-jin-active\\build\\jin-repeat-store-20261017\\sdk-full.log",
+      "logSha256": "a13ecb7174fbc4a86bb0cf5cd05d5916e9e49d020880b8a3d88b974d27f55a14",
+      "counts": {
+        "tests": 169,
+        "pass": 169,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "cleanupMarkers": [
+        "JIN_NEXT_EMULATOR_WORKER_PROFILE_REMOVED",
+        "JIN_NEXT_EMULATOR_OUTER_PROFILE_REMOVED",
+        "JIN_NEXT_EMULATOR_REQUIRED_PORTS_FREE"
+      ]
+    }
+  },
+  "boundary": {
+    "actual": [
+      "Firebase Auth verification",
+      "loopback HTTP",
+      "Firestore canonical messages and Note provenance",
+      "existing composition semantic candidate gate",
+      "whole-conversation deletion and owned cleanup"
+    ],
+    "doubles": [
+      "Qwen generation",
+      "complete-input compiler and token count",
+      "existing provider doubles elsewhere in full SDK suite"
+    ],
+    "notRunOnThisSource": [
+      "real 9B/tokenizer two-round flow",
+      "two-round real Dart wire probe",
+      "Android/iOS device execution",
+      "new APK build",
+      "full Backend unit suite",
+      "Flutter unit/widget suite and Dart analysis",
+      "operator/Python suites"
+    ],
+    "retained": [
+      "#135 Windows Flutter 675 Pass / 1 Fail (symlink OS1314), not copied as new-source execution",
+      "#135 SHI composition and LI gate acceptance pending",
+      "historical second real-model rejection without retained bad candidate remains unassigned",
+      "expired disposable demonstration service remains paused"
+    ]
+  },
+  "failures": "No compile or SDK failure in these invocations; all earlier source-bound failures remain retained.",
+  "review": {
+    "newTest": "SHI — Pending",
+    "evidence": "LI — Pending",
+    "internalChecksDoNotReplaceFormalReview": true
+  }
+}

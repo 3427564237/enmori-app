@@ -20,6 +20,7 @@ import { registerAccountPreferencesRoutes } from "../account/transport/register-
 import { registerEventRecommendationRoute } from "../event-recommendations/transport/register-route.js";
 import type { AppFailureCode } from "../shared/application/app-failure.js";
 import { sendFailureCode } from "../transport/error-response.js";
+import type { ControlledPhoneDiagnostics } from "./controlled-phone-diagnostics.js";
 import {
   registerR4Routes,
   type R4RouteDependencies,
@@ -28,10 +29,14 @@ import {
 export async function buildApp(
   dependencies: R4RouteDependencies & { readonly recommendEvents?: Pick<RecommendEvents, "execute">;
     readonly accountPreferences?: OwnAccountPreferences;
+    readonly controlledPhoneDiagnostics?: ControlledPhoneDiagnostics;
     readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput } },
 ): Promise<FastifyInstance> {
   if (dependencies.isolatedSlices !== undefined) {
     requireControlledEmulatorEnvironment(dependencies.isolatedSlices.environment);
+  }
+  if (dependencies.controlledPhoneDiagnostics && dependencies.isolatedSlices === undefined) {
+    throw new Error("CONTROLLED_PHONE_DIAGNOSTICS_REQUIRE_ISOLATED_ENVIRONMENT");
   }
   const app = Fastify({
     logger: false,
@@ -45,6 +50,7 @@ export async function buildApp(
     }),
   });
   app.decorateRequest("authPrincipal", null);
+  dependencies.controlledPhoneDiagnostics?.install(app);
 
   app.setErrorHandler((error, request, reply) => {
     const code = validationFailureCode(error, request);

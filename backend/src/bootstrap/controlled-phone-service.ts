@@ -38,6 +38,7 @@ import { buildApp } from "./build-app.js";
 import { createIsolatedConversationComposition } from "./isolated-conversation-composition.js";
 import { createControlledEventBrowse } from "./controlled-event-browse.js";
 import type { IsolatedEventBrowseInput } from "./isolated-event-browse.js";
+import type { ControlledPhoneDiagnostics } from "./controlled-phone-diagnostics.js";
 
 const unavailable = () => new Error("CONTROLLED_PHONE_SERVICE_UNAVAILABLE");
 function requireProof(value: unknown): asserts value { if (!value) throw unavailable(); }
@@ -62,6 +63,7 @@ export async function createControlledPhoneService(options: {
   readonly eventBrowse?: IsolatedEventBrowseInput;
   /** Explicit isolated demo composition; ordinary and existing phone modes stay unchanged. */
   readonly demoFeatures?: true;
+  readonly diagnostics?: ControlledPhoneDiagnostics;
 }) {
   const environment = requireControlledEmulatorEnvironment(options.environment);
   requireProof(environment.projectId === "demo-enmori-rmvp01a-r10" && options.exclusiveEmulatorsVerified === true);
@@ -101,7 +103,7 @@ export async function createControlledPhoneService(options: {
       if (phase !== "running" || !maintenanceHealthy || !input || budget.signal.aborted || budget.remainingMs() <= 0) return Promise.resolve(err("stale_authority" as const));
       compilerPending++;
       let compiling: ReturnType<typeof options.compiler.compile>;
-      try { compiling = options.compiler.compile(input, budget); } catch { compilerPending--; throw unavailable(); }
+      try { compiling = (options.diagnostics?.compiler("before_generation_compile", options.compiler) ?? options.compiler).compile(input, budget); } catch { compilerPending--; throw unavailable(); }
       return compiling.then(compiled => {
         if (phase !== "running" || budget.signal.aborted || budget.remainingMs() <= 0 || getInput() === undefined) return err("stale_authority" as const);
         return compiled.includesAllFraming === true && Number.isSafeInteger(compiled.tokens) && compiled.tokens >= 1 && compiled.tokens <= 4096
@@ -276,6 +278,7 @@ export async function createControlledPhoneService(options: {
     }), createHistoryCursorCodec(), clock);
     const unavailableOperation = { execute: async () => err(appFailure("SERVICE_UNAVAILABLE")) };
     app = await buildApp({
+      ...(options.diagnostics ? { controlledPhoneDiagnostics: options.diagnostics } : {}),
       identityVerifier: { verifyIdToken: async token => {
         if (isClosed()) return { kind: "dependency_unavailable" };
         const result = await tracked(() => verifier.verifyIdToken(token));

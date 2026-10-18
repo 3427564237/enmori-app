@@ -1,0 +1,186 @@
+{
+  "scope": "actual capture implementation packet; not host installation or AI acceptance",
+  "executable": "789dc4fe0cedf250cacbb6508becd83a65c6680c",
+  "sourceTree": "9d6de57d2b8da79ad51c5ec9df0d0227d1379280",
+  "base": "2d42a4832393d958a9b7e2fb7629c1a341b14d2b",
+  "approvedDecision": "078ef5b89fcd90abee4b6909893d4dca435afdd5",
+  "inputs": [
+    {
+      "path": "backend/src/ai-runtime/infrastructure/controlled-ollama-transport.ts",
+      "gitBlob": "b756b3f82a112041eb85053829d334904b080ccb",
+      "gitBytesSha256": "a993b57c102e4bf8a8fce238435bd8a67ff504f7ab58e66f5202ad7edc7b2b93",
+      "worktreeRawSha256": "a802a9a96fa95a9de6a6561bb895ab6104bafab082e08f7d3c055f8c75f575b0",
+      "normalizedSha256": "a993b57c102e4bf8a8fce238435bd8a67ff504f7ab58e66f5202ad7edc7b2b93"
+    },
+    {
+      "path": "backend/src/bootstrap/controlled-phone-diagnostics.ts",
+      "gitBlob": "0b412696326399333754df176f211a9991f3601e",
+      "gitBytesSha256": "b31c18f90cfe1f08a59b0940f568afc9ec8c981477167d834a6f7e0d3938b0d9",
+      "worktreeRawSha256": "b31c18f90cfe1f08a59b0940f568afc9ec8c981477167d834a6f7e0d3938b0d9",
+      "normalizedSha256": "b31c18f90cfe1f08a59b0940f568afc9ec8c981477167d834a6f7e0d3938b0d9"
+    },
+    {
+      "path": "backend/test/ai-runtime/controlled-ollama-transport.test.ts",
+      "gitBlob": "961d08a5a331e6e61e07928eb838b6b4bbb92dbb",
+      "gitBytesSha256": "c7e86d402b0659c2d554683227d0e66dd2f057d675cbf29d1ef544f8edd6c1b6",
+      "worktreeRawSha256": "c1a6c654c9ecdb91bff861c02d9dac092365258a7019ae92f3ffec47d500cdaf",
+      "normalizedSha256": "c7e86d402b0659c2d554683227d0e66dd2f057d675cbf29d1ef544f8edd6c1b6"
+    },
+    {
+      "path": "tool/controlled_phone_service.mjs",
+      "gitBlob": "39abc6f07218f3876a5b7e06b85c87329314a52e",
+      "gitBytesSha256": "383e7e65ab52e97125677fbcb455d08e0aff7dce6c32c333f84bef00581cfbd6",
+      "worktreeRawSha256": "dbfe0ddd4b202b85437a745801ebd692707ede3635812037c4aed7856ef03f4b",
+      "normalizedSha256": "383e7e65ab52e97125677fbcb455d08e0aff7dce6c32c333f84bef00581cfbd6"
+    },
+    {
+      "path": "tool/controlled_phone_service.test.mjs",
+      "gitBlob": "53747b16ec88ae1cc9db7ba1d7ff031a6d927145",
+      "gitBytesSha256": "e0860e5ef453c41624564c87449df34f020d5233c7344cb8cf11fa8ac3b58c14",
+      "worktreeRawSha256": "0576b199442af58e913c7419079c89c8a86a7f1c89fbbd711929bb6f520dda94",
+      "normalizedSha256": "e0860e5ef453c41624564c87449df34f020d5233c7344cb8cf11fa8ac3b58c14"
+    },
+    {
+      "path": "tool/diagnostic_capture.py",
+      "gitBlob": "13f3075a19d4fbd85d11624993afd8d72c56d508",
+      "gitBytesSha256": "364d560e436b97c4040d73e4f7f75e3d4d8a2acd958d7b633073caf6d9e06847",
+      "worktreeRawSha256": "364d560e436b97c4040d73e4f7f75e3d4d8a2acd958d7b633073caf6d9e06847",
+      "normalizedSha256": "364d560e436b97c4040d73e4f7f75e3d4d8a2acd958d7b633073caf6d9e06847"
+    },
+    {
+      "path": "tool/diagnostic_capture_client.mjs",
+      "gitBlob": "d24ac0a1dc31fa6b1831896086d12cd8308ec021",
+      "gitBytesSha256": "c18bd06af00a3809591a6fcae16eb991af2884c0734928d067445e2404f95653",
+      "worktreeRawSha256": "c18bd06af00a3809591a6fcae16eb991af2884c0734928d067445e2404f95653",
+      "normalizedSha256": "c18bd06af00a3809591a6fcae16eb991af2884c0734928d067445e2404f95653"
+    },
+    {
+      "path": "tool/diagnostic_capture_client.test.mjs",
+      "gitBlob": "7adbdf0f9d341a783d3596a6095d5105244d4536",
+      "gitBytesSha256": "9ed8179dbfa945b36cec54f621591e2667f1d6ea2db06af1a4b7ca3126c45dff",
+      "worktreeRawSha256": "9ed8179dbfa945b36cec54f621591e2667f1d6ea2db06af1a4b7ca3126c45dff",
+      "normalizedSha256": "9ed8179dbfa945b36cec54f621591e2667f1d6ea2db06af1a4b7ca3126c45dff"
+    },
+    {
+      "path": "tool/install_diagnostic_capture.py",
+      "gitBlob": "8a9ceab3e83e7e5051bd56bc64f9b00c6bf0b6b5",
+      "gitBytesSha256": "20c63fea64f35089ff4f08608bab51b43a93d84c2dd8d7477dd0f920b8c3158f",
+      "worktreeRawSha256": "20c63fea64f35089ff4f08608bab51b43a93d84c2dd8d7477dd0f920b8c3158f",
+      "normalizedSha256": "20c63fea64f35089ff4f08608bab51b43a93d84c2dd8d7477dd0f920b8c3158f"
+    },
+    {
+      "path": "tool/test_diagnostic_capture.py",
+      "gitBlob": "4210abec31b886d8673a6cda003fd65751317433",
+      "gitBytesSha256": "c1884bc1e7f3b7aaba46c99358ae74431a4556737d71808a3a90a673b88e0668",
+      "worktreeRawSha256": "c1884bc1e7f3b7aaba46c99358ae74431a4556737d71808a3a90a673b88e0668",
+      "normalizedSha256": "c1884bc1e7f3b7aaba46c99358ae74431a4556737d71808a3a90a673b88e0668"
+    },
+    {
+      "path": "tool/test_install_diagnostic_capture.py",
+      "gitBlob": "9a4acfa2c59f486bcd6dab424ef90308165f70d6",
+      "gitBytesSha256": "b9f6094d15a685840dc403c5c0384eea086186090005bd18b659b0b58503c9e7",
+      "worktreeRawSha256": "b9f6094d15a685840dc403c5c0384eea086186090005bd18b659b0b58503c9e7",
+      "normalizedSha256": "b9f6094d15a685840dc403c5c0384eea086186090005bd18b659b0b58503c9e7"
+    }
+  ],
+  "inputHashTiming": "post-execution; 11 normalized source/test inputs match Git; no whole-input before/after stability claim",
+  "runtimes": {
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "pythonLocalUbuntu": "3.12.3"
+  },
+  "runs": [
+    {
+      "log": "compile-01.log",
+      "command": "<pinned-node> node_modules/typescript/bin/tsc --project backend/tsconfig.json --outDir build/jin-diagnostic-capture-20261018-01/runtime/backend/dist",
+      "exit": 0
+    },
+    {
+      "log": "backend-01.log",
+      "command": "<pinned-node> --test <fresh-dist>/test/ai-runtime/controlled-ollama-transport.test.js <fresh-dist>/test/ai-runtime/controlled-ai-diagnostic.test.js <fresh-dist>/test/bootstrap/controlled-phone-diagnostics.test.js <fresh-dist>/test/bootstrap/controlled-diagnostic-retention.test.js <fresh-dist>/test/ai-conversation/transport.test.js",
+      "pass": 52,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0
+    },
+    {
+      "log": "operator-01.log",
+      "command": "<pinned-node> --test build/jin-diagnostic-capture-20261018-01/runtime/tool/diagnostic_capture_client.test.mjs build/jin-diagnostic-capture-20261018-01/runtime/tool/controlled_phone_service.test.mjs",
+      "pass": 24,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0
+    },
+    {
+      "log": "linux-capture-04.log",
+      "command": "existing local Ubuntu, root, cwd tool: /usr/bin/python3 -B -W error::ResourceWarning -m unittest -v test_diagnostic_capture test_install_diagnostic_capture",
+      "pass": 27,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0
+    }
+  ],
+  "attribution": {
+    "backendOperator": "actual Fastify/collector/transport and source code, model/HTTP/compiler/privileged-command/lifecycle doubles; no model or product store",
+    "linux": "actual root-owned files, descriptor/lock/permission/expiry/deletion operations and actual separate unprivileged process; clock/boot/runner/error-injection fixtures; actual visudo/systemd-analyze parsers; no rule/unit installed",
+    "staging": "four executed MJS files byte-match source; compiled inputs unchanged after their run; later edits affected Python/installation documents only",
+    "priorRuns": "20, 24, 26 Python preparation runs are retained separately, not added to final 27 or moved onto changed Python inputs"
+  },
+  "notRun": [
+    "original Linux installation",
+    "real selected operator sudo privilege boundary",
+    "installed writer/read probe",
+    "actual timer after logout",
+    "real host downtime/31-day passage",
+    "remote capture",
+    "Auth/Firestore service activation",
+    "model/tokenizer/phone/consecutive9B"
+  ],
+  "cleanup": {
+    "ownedLocalSyntheticDirectoriesRemaining": 0,
+    "captureConfigInstalled": false,
+    "captureSudoersInstalled": false,
+    "captureSystemUnitInstalled": false,
+    "originalIncidentAndBuildArtifactsPreserved": true
+  },
+  "failureHistory": [
+    "initial sandbox-only WSL inventory was access-denied; authorized read-only retry succeeded; not a product/test failure",
+    "no failing test invocation in this increment; installer source-loading order issue found by inspection and corrected before final source; regression retained",
+    "old AI failure and unknown application/store history remain unchanged"
+  ],
+  "logs": [
+    {
+      "path": "build/jin-diagnostic-capture-20261018-01/backend-01.log",
+      "sha256": "77636aac9fa48a5a730891453e9b25e03f713897c923233adc5904756e15876b"
+    },
+    {
+      "path": "build/jin-diagnostic-capture-20261018-01/compile-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-diagnostic-capture-20261018-01/linux-capture-02.log",
+      "sha256": "f4e6a6d03e2a8791dace2a99a023c5a7431f99d17adc3c6451baf2182261f264"
+    },
+    {
+      "path": "build/jin-diagnostic-capture-20261018-01/linux-capture-03.log",
+      "sha256": "bba2fe825cf17285eb41af9c6d10e7fd18792bbe8a048ebbba76270d43cf9769"
+    },
+    {
+      "path": "build/jin-diagnostic-capture-20261018-01/linux-capture-04.log",
+      "sha256": "b22703928f14af91137d800faf39bb04430f1c47684b59619ae56d54acdfae66"
+    },
+    {
+      "path": "build/jin-diagnostic-capture-20261018-01/linux-storage-01.log",
+      "sha256": "d71b09cf77d6d93a068d7ecf69c2c1157807735ece8962c9622a1d2d9d75d0f9"
+    },
+    {
+      "path": "build/jin-diagnostic-capture-20261018-01/local-cleanup-01.log",
+      "sha256": "634583aeec1ea156cbac62bf2389b64f9c36b17d6f8e38292b862c4ebd627937"
+    },
+    {
+      "path": "build/jin-diagnostic-capture-20261018-01/operator-01.log",
+      "sha256": "0db26e4d19eef57a9295ff955b734efd8c17802a6cfafb7159a8b0d49f8bac32"
+    }
+  ],
+  "rawLogs": "local only; hashes here are not an upload claim"
+}

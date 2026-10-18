@@ -6,16 +6,16 @@ import argparse
 import base64
 import hashlib
 import json
-import os
 from pathlib import Path
 import re
 import secrets
 import shlex
-import stat
 import subprocess
 import sys
 import time
 from urllib.parse import urlsplit
+
+from private_handoff_file import PrivateFileRefused, read_private_handoff_file
 
 PACKAGE = "com.enmori.app.personatest"
 READY = "enmori-controlled-phone-ready.json"
@@ -80,16 +80,10 @@ def strict_object(data: bytes) -> dict:
 
 
 def handoff(path: Path) -> tuple[bytes, int]:
-    info = path.lstat()
-    require(stat.S_ISREG(info.st_mode) and not path.is_symlink())
-    require(stat.S_IMODE(info.st_mode) == 0o600 and info.st_uid == os.getuid())
-    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
-    with os.fdopen(fd, "rb") as stream:
-        opened = os.fstat(stream.fileno())
-        require(stat.S_ISREG(opened.st_mode) and stat.S_IMODE(opened.st_mode) == 0o600
-                and opened.st_uid == os.getuid())
-        data = stream.read(32769)
-    require(0 < len(data) <= 32768)
+    try:
+        data = read_private_handoff_file(path)
+    except PrivateFileRefused:
+        raise Blocked("preflight_refused") from None
     value = strict_object(data)
     require(set(value) == {"schemaVersion", "projectId", "email", "password", "baseUri",
                            "certificateBase64", "authEmulatorHost", "lifetime", "syntheticOwnerOnly"})
@@ -123,10 +117,10 @@ def handoff(path: Path) -> tuple[bytes, int]:
     return data, port
 
 
-def run(arguments: list[str], *, input: bytes | None = None) -> bytes:
+def run(arguments: list[str], *, input: bytes | None = None, cwd: Path | None = None) -> bytes:
     try:
         completed = subprocess.run(arguments, input=input, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE, timeout=30, check=False)
+                                   stderr=subprocess.PIPE, timeout=30, check=False, cwd=cwd)
         require(completed.returncode == 0 and len(completed.stdout) <= 524288, "command_failed")
         return completed.stdout
     except (OSError, subprocess.SubprocessError):
@@ -176,7 +170,10 @@ def transfer(apk: Path, private_handoff: Path, serial: str, *, adb: str, aapt: s
         with apk.open("rb") as stream:
             apk_hash = hashlib.file_digest(stream, "sha256").hexdigest()
         report["apkSha256"] = apk_hash
-        badging = runner([aapt, "dump", "badging", str(apk)]).decode("utf-8")
+        # Some Windows aapt/locale combinations cannot decode a Unicode parent
+        # in argv. Keep the absolute input/hash, but give this child alone the
+        # APK directory and relative filename; ./ also protects option-like names.
+        badging = runner([aapt, "dump", "badging", "./" + apk.name], cwd=apk.parent).decode("utf-8")
         require(re.search(r"^package: name='com\.enmori\.app\.personatest'(?:\s|$)", badging, re.M) is not None,
                 "apk_identity_refused")
         require(re.search(r"^launchable-activity: name='com\.enmori\.app\.MainActivity'(?:\s|$)", badging, re.M) is not None,

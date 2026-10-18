@@ -1,0 +1,35 @@
+JIN actual diagnostic capture implementation packet — 18 October 2026 SGT
+
+Executable 789dc4fe0cedf250cacbb6508becd83a65c6680c
+Tree 9d6de57d2b8da79ad51c5ec9df0d0227d1379280
+Parent merge 6fb5e8b retains #146 head 2d42a4832393d958a9b7e2fb7629c1a341b14d2b and #149 decision 078ef5b89fcd90abee4b6909893d4dca435afdd5 as ancestors. #149 changes only its approved decision document. Eleven new/changed source and test files; no dependency, public API, product datastore or APK change.
+
+The two landing choices are APPROVED by S-PM-1018-LI-DIAGNOSTIC-CAPTURE-LANDING, not PM-Pending. #146 LI evidence approval is complete. At delivery preparation #146 SHI code disposition is still separate/pending; this packet neither approves it nor reopens completed #142/#135/#136/#137/#139/#141 reviews.
+
+Delivered implementation
+- Fixed sudo helper boundary for append/read/health; root-held metadata/config/code, separate from transient profiles; no user-selectable executable/store/identity/clock argument. Trusted host root retains administration; the intended Backend operator must have no broad raw-root bypass.
+- Root-owned, revalidated metadata-only file store with fd-pinned ancestry, no symlink/hardlink/wrong-owner reads, atomic publication, fsync, lock, immediate original-loggedAt+30day refusal and verified owned-file deletion. Copying a stored row never changes its timestamp.
+- Durable cleanup intent, boot continuity, last-sweep freshness and actual systemd timer/service status checks. Failed/unknown cleanup or missed day31 stays unhealthy after catch-up; no reset/acknowledge/silent replacement command.
+- Actual live outer/execute CLI requires installed capture before readiness/preflight and wires the writer/collector. An additional transport admission check refuses physical dispatch after a new capture failure, without altering an already dispatched invocation's matching-done/unknown settlement.
+- Root-owned verified installation snapshots, exact sudo commands, system-level hourly/Persistent/boot-catch-up timer and oneshot. Installer checks source hash before executing helper code, never overwrites an existing install/store, and retains partial failures. No dependency/account/network/model operation is automated.
+- tool/diagnostic_capture.md contains the least-privilege installation packet, real operator/raw-path checks, one synthetic installed writer/reader probe, actual scheduled execution after logout, and original-invocation prerequisites/stop conditions. The private store name, user and config remain outside Git and handoff/route.
+
+Actual execution on this contribution
+1. Existing pinned Node24.19.0 / TypeScript7.0.2 strict compilation to a fresh build output: exit0. Existing strict/noEmitOnError/skipLibCheck=false retained.
+2. Five affected Backend suites: 52/52, fail0/skip0/cancel0, exit0. Real Fastify/collector/transport with explicit model/HTTP/compiler doubles; no real model.
+3. Actual operator/client source tests: 24/24, fail0/skip0/cancel0, exit0. Installed command/HTTPS/lifecycle are explicit seams, not a sudo deployment.
+4. Existing local Ubuntu, Python3.12.3, root, ResourceWarning fatal: 27/27, skip0, exit0. Actual Linux files, root vs unprivileged raw access, lock/concurrent process, expiry/read/copy/unlink, ownership/link/partial-write failure handling. Clock/boot/runner and injected filesystem failures are fixtures. Actual visudo/systemd-analyze parse generated files; their command location is substituted to a temporary executable only for parser validation. No rule/unit is installed or activated by these tests.
+
+Do not add intermediate 20/24/26 Python invocations to final27. Those earlier source stages/logs remain local. Backend/operator inputs had no later TS/MJS edits; executed staged MJS bytes match the committed sources. Eleven source hashes are POST-execution and normalized against exact Git blobs; no full-input before/after stability assertion is made. Commands, individual logs/hashes and attribution are in the adjacent JSON receipt. Raw logs have not been uploaded.
+
+Failures/limits retained
+The first sandboxed read-only WSL inventory was access-denied; an authorized read-only retry found the existing Ubuntu. It was not a product/test failure and no distribution was installed. All recorded test invocations in this increment passed. Pre-submission inspection found installer helper loading occurred before digest verification; source ordering was corrected and its regression is in final27. Earlier incident, emulator, SDK and build failures elsewhere remain untouched, not replaced by these passes.
+
+Cleanup: all newly allocated local /run/enmori-capture-test-* and /run/enmori-capture-install-test-* directories removed; final read-only count0. Local installed capture config, sudoers and system unit absent. No real service/model/emulator/phone resources launched. Original workspace/build logs/APKs/incident records preserved.
+
+Not Run: original Linux installation; actual selected operator sudo/access enforcement; installed synthetic writer/reader probe; real scheduled timer execution after phone-service/desktop exit; actual elapsed30/31days/host reboot; remote capture; actual new model/tokenizer/phone; real consecutive9B. No full Flutter or full SDK gate rerun is claimed for this bounded operational increment.
+
+Current next checkpoint / responsibility
+JIN's concentrated source/tests/installation packet is available now; next is SHI new code/composition and LI independent evidence/host execution. LI confirms an actual existing restricted operator and original-host prerequisites, then executes the fixed reviewed installation/verification packet; JIN retains fault support and canonical/provenance/cleanup integration. No repeated vote on the same landing, simultaneous-online appointment or old-component review is required. Actual remote completion time depends on these concrete receipts and is not invented.
+
+LI's original-generation termination facts remain established. Historical original done/application lease/fence/claim/canonical/provenance/Note/cancel/cleanup remain unrecovered; later empty model residency does not diagnose the first unavailable response. New runtime requires current source/config/TLS/tokenizer/exclusive host state, fresh distinct empty Auth/store, epoch/retirement/maintenance and actual capture health. No positive AI attempt, Retry/extra Check/cancel, original environment reconstruction or reset is performed here. Draft/Open remains; no merge/closure/Project/overall acceptance claim.

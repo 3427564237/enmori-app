@@ -18,6 +18,7 @@ import { ControlledConversationPrompt } from '../backend/dist/src/ai-runtime/inf
 import { ControlledOllamaTransport } from '../backend/dist/src/ai-runtime/infrastructure/controlled-ollama-transport.js';
 import { createControlledPhoneService } from '../backend/dist/src/bootstrap/controlled-phone-service.js';
 import { TicketmasterBrowseSource } from '../backend/dist/src/event-browse/infrastructure/ticketmaster-browse-source.js';
+import { createHostDiagnostics } from './diagnostic_capture_client.mjs';
 
 const ports = [8080, 9099, 4400, 4500, 9150];
 const transfer = 'phone-service-model-handoff.json';
@@ -106,6 +107,7 @@ function lockedStack() {
 
 async function outer() {
   assert.equal(process.platform, 'linux'); lockedStack();
+  assert.equal(createHostDiagnostics().healthy, true); // Before emulators or model preflight.
   const config = await configuration(); privateDirectory(config.phone.sessionDirectory, true);
   // Reuse operator-supplied existing TLS files. Never generate/install/copy them.
   privateFile(config.phone.keyPath, 16384);
@@ -179,18 +181,24 @@ export async function runPhoneService(config, dependencies = {}) {
   const wait = dependencies.wait ?? (() => delay(500));
   let live = true, service, listener, listenerClosed = false, cleaned = false, constructing = false, cleanupConfirmed = false;
   const compiler = dependencies.compiler ?? new ControlledConversationPrompt(new ControlledTokenizerProcess({ ...config.tokenizerFiles, current: () => live }));
-  const transport = dependencies.transport ?? new ControlledOllamaTransport({ ...config.binding, current: () => live }, compiler);
+  // The actual CLI supplies the installed Q14 capture. Test seams retain the
+  // existing isolated in-process path; ordinary application bootstrap is unchanged.
+  const diagnostics = dependencies.diagnostics;
+  const transport = dependencies.transport ?? new ControlledOllamaTransport({ ...config.binding, current: () => live }, compiler, undefined,
+    diagnostics?.observe, diagnostics ? () => diagnostics.healthy : undefined);
   try {
+    assert(!diagnostics || diagnostics.healthy === true);
     const abort = new AbortController(), end = performance.now() + 60_000;
     const timer = setTimeout(() => abort.abort(), 60_000);
     try {
       const budget = { signal: abort.signal, deadline: end, remainingMs: () => Math.max(0, end - performance.now()) };
       await transport.preflight(budget);
-      const probe = await compiler.compile({ currentMessage: '今天读书了。', checkIns: [], persona: undefined }, budget);
+      const probe = await (diagnostics?.compiler('startup_compile', compiler) ?? compiler).compile({ currentMessage: '今天读书了。', checkIns: [], persona: undefined }, budget);
       assert(probe.includesAllFraming === true && Number.isSafeInteger(probe.tokens) && probe.tokens >= 1 && probe.tokens <= 4096);
       assert.equal(probe.manifestDigest, config.binding.manifestDigest);
       assert.equal(probe.tokenizerDigest, config.binding.tokenizerDigest);
       assert(!budget.signal.aborted && budget.remainingMs() > 0);
+      assert(!diagnostics || diagnostics.healthy === true);
       // No generation, storage, saved content, raw prompt or count is published.
     }
     finally { clearTimeout(timer); abort.abort(); }
@@ -201,7 +209,7 @@ export async function runPhoneService(config, dependencies = {}) {
       enabled: () => service?.eventBrowseControl.observation().enabled === true,
     }) } : undefined;
     service = await (dependencies.createService ?? createControlledPhoneService)({ environment: process.env, exclusiveEmulatorsVerified: true, ...(config.demoFeatures ? { demoFeatures: true } : {}), transport, compiler,
-      ...(eventBrowse ? { eventBrowse } : {}) });
+      ...(eventBrowse ? { eventBrowse } : {}), ...(diagnostics ? { diagnostics } : {}) });
     listener = (dependencies.createHttpsServer ?? createHttpsServer)({ cert: read(phone.certificatePath), key: read(phone.keyPath) }, service.app.routing);
     await new Promise((done, reject) => { listener.once('error', reject); listener.listen(0, '127.0.0.1', done); });
     const address = listener.address(); assert(address && typeof address !== 'string');
@@ -233,6 +241,7 @@ export async function runPhoneService(config, dependencies = {}) {
         hostPreflightPassed: true, tokenizerReadinessPassed: true, adapterState: transport.state, httpsListening: !listenerClosed,
         stopRequested: stopping, cleanupConfirmed: result?.cleanupConfirmed === true,
         eventControlFailed,
+        ...(diagnostics ? { diagnosticCaptureHealthy: diagnostics.healthy } : {}),
         operatorHold: result?.operatorHold === true });
       if (result?.cleanupConfirmed) {
         await new Promise((done, reject) => { listener.close(error => error ? reject(error) : done()); listener.closeAllConnections(); });
@@ -287,7 +296,9 @@ async function execute() {
   assert.equal(process.platform, 'linux');
   requireControlledEmulatorEnvironment(process.env);
   const config = await configuration(); privateDirectory(config.phone.sessionDirectory);
-  return runPhoneService(config);
+  const diagnostics = createHostDiagnostics();
+  assert.equal(diagnostics.healthy, true);
+  return runPhoneService(config, { diagnostics });
 }
 export async function main() {
   assert.equal(process.argv.length, 3);

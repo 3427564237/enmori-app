@@ -1,0 +1,68 @@
+JIN controlled AI failure diagnostics — 18 October 2026 SGT
+
+Problem and scope
+The first SHI phone AI Send showed unavailable; the original-operation Check showed a user message but no visible assistant. LI's original-host residual receipt established that the service subsequently exited and the original emulator is no longer readable. The source previously discarded child stdout/stderr and used logger:false, leaving no safe per-request dependency-stage record.
+Source evidence: https://github.com/3427564237/enmori-app/issues/84#issuecomment-6246367402
+This increment supplies opt-in capture hooks and focused local verification. It does not identify the historical error conclusively or activate live collection.
+
+Exact source
+Base: reviewed #141, 9c7878bf9f7837eacc043656cc456217ad7b3e63.
+New source-only commit: 69e77179015ffa8fcd02460c4a282eba1de4bbe7.
+New source tree: 27cc70e427a8e261a5484572b00f8613e2f2f8fd.
+Companion receipt: 2026-10-18-jin-ai-diagnostics.json.
+Commands ran on working inputs before the source-only commit. All 1,316 recorded input bytes remained stable; all 12 changed source/test files match that commit after CRLF-to-LF normalization. The receipt includes raw/normalized SHA256 and Git blob IDs. A later evidence-only commit is not a second executable source.
+Repository Skills are unchanged from approved d59cb128; systematic-debugging and enmori-backend-development were used. No installation.
+
+What changed
+- Optional adapter observation distinguishes version/tags/ps request, HTTP, envelope and binding failures; compiler stages; local generation dispatch; HTTP response; matching done; output validation; and unconfirmed termination.
+- The collector records only Q14 allowlisted metadata: server loggedAt, server-generated per-request ID, route template, method/status, latency, stable application error, dependency stage/status and duration. It does not log identifiers from paths, tokens, content, raw vendor errors, model references or endpoint configuration.
+- Fastify hooks preserve per-request async context and keep authentication ahead of diagnostic-failure refusal. A failed synchronous sink latches unhealthy and refuses subsequent prepare/execute. It does not change original pending generation settlement or disable original cancel/read paths.
+- Startup compilation, request beforeGeneration compilation and adapter compilation are separate. Compiler completion alone is not prompt validation, model success or storage success.
+- Controlled service/operator accept explicit diagnostics dependency injection. The status checker requires strict true when diagnosticCaptureHealthy is present. Ordinary composition stays disabled; no CLI activation or persistent sink was added.
+- No Flutter, APK/signature, API contract, dependency, network setup, model parameters, retry policy or schema changes. The changed Backend/tooling behavior is new contribution and requires the assigned independent review.
+
+Historical attribution remains conditional
+For the exact original source, same unchanged transport instance and a coherent snapshot, modelAttempts=1 plus adapterState=not_checked narrows the failure to generate's repeated preflight, before adapter compilation and generation POST. This is a source deduction, not a captured historical HTTP trace; do not record original POST count as zero.
+The local missing-resident-model fixture reproduces that state, but version/network/HTTP/envelope/binding/context failures can also do so. No specific cause is selected from the fixture results.
+LI's 13:52/13:53 collection reread a file last modified at 04:08:52. The later desktop/session shutdown is compatible with the subsequent service exit; it does not explain the earlier approximately 03:16 AI error.
+Original canonical U/A, effect/fence/claim, provenance, Note state/version, automatic cancel and model/lease settlement remain unknown. No absent evidence is filled with zero, deletion or success.
+
+Fresh author verification
+Node 24.19.0; TypeScript 7.0.2; existing dependencies. These are JIN author executions, not SHI/LI independent reviews. No actual model/provider or remote host was used.
+Let RUN be a new owned build output directory. This run used build/jin-ai-diagnostic-20261018-01 and compiled to RUN/runtime/backend/dist, preserving the original backend/dist and build artifacts. Node below denotes the pinned 24.19.0 executable, not the different system PATH version.
+
+1. Strict compilation: exit0 (compile-05.log).
+node node_modules/typescript/bin/tsc --project backend/tsconfig.json --outDir RUN/runtime/backend/dist
+strict/noEmitOnError/skipLibCheck=false retained.
+
+2. Affected Backend: 51/51 Pass, 0 skip, exit0 (backend-focused-02.log).
+node --test RUN/runtime/backend/dist/test/ai-runtime/controlled-ai-diagnostic.test.js RUN/runtime/backend/dist/test/bootstrap/controlled-phone-diagnostics.test.js RUN/runtime/backend/dist/test/ai-runtime/controlled-ollama-transport.test.js RUN/runtime/backend/dist/test/ai-runtime/controlled-ollama-runtime.test.js RUN/runtime/backend/dist/test/ai-conversation/transport.test.js
+Actual Fastify injection and adapter/runtime code with handwritten HTTP/compiler/store-operation doubles. Covers fixed failure classifications, concurrent trusted request correlation, actual route composition/authentication priority, privacy canaries, capture failure, budget/abort protection and unresolved invocation behavior. No real storage result is inferred.
+
+3. Affected operator: 19/19 Pass, 0 skip, exit0 (operator-02.log).
+Copy the existing tool/*.mjs files byte-for-byte to RUN/runtime/tool; then:
+node --test RUN/runtime/tool/controlled_phone_service.test.mjs
+Service/transport/listener/process actions are doubles. Tests prove dependency wiring, startup capture failure refusal, status health and preservation of original pending/cleanup behavior, not operational readiness.
+
+4. Host checker: 16/16 Pass, exit0, ResourceWarning fatal (host-check-02.log).
+Set PYTHONDONTWRITEBYTECODE=1, PYTHONPATH=tool, and TEMP/TMP to a newly created writable owned directory under RUN; then:
+python -W error::ResourceWarning -m unittest -v test_check_reusable_phone_entry.HostTests
+Uses owned local files, no remote network or current private runtime configuration. Existing freshness/two-sample/busy-state checks and new optional-strict diagnostic health pass.
+
+Retained failures and cleanup
+- compile-01 failed strict narrowing in the new failure helper; explicit never typing corrected it. compile-04 failed optional-text narrowing in a new test; explicit test checking corrected it. Both failures remain in the receipt.
+- host-check-01 attempted 16 cases but default sandbox temporary-directory permission failures produced 32 setup/cleanup errors before business assertions. Using an owned workspace temporary directory resolved that environment issue without weakening assertions or permission checks. First-attempt temporary-directory cleanup remains unconfirmed; no broad deletion was performed.
+- The successful workspace temporary directory was empty after the run. Test processes exited. No real runtime, model, emulator profile, device mapping or remote cleanup was created/performed by these executions.
+- Earlier overlapping backend-focused-01/operator-01 results are retained separately, not added to final counts. Old full Backend/SDK/Flutter results are not reassigned to this source.
+- Log hashes are published; raw logs stay local. The original failed phone operation and all prior failure/cleanup records remain historical and are not replaced by these fixtures.
+
+Remaining capture and execution gates
+The collector currently requires explicit in-process dependency injection. No persistent sink, CLI switch, remote activation or private-host delivery is claimed. A live sink must enforce the existing Q14 operator-only access, expiry at 30 days and physical cleanup within the following 24 hours. This PR does not choose a new log platform or supervisor.
+Current status collection still requires actual collection time/file mtime and the existing fresh quiet host check. Lifecycle evidence must retain application cleanup, worker-exit and operator-exit separately; port release is not application cleanup or model termination.
+Storage observation requires a uniquely selected authorized original context and existing independent read-only gateway. Selection identifiers remain in private memory and do not enter logs. Current readOutcome/readOwnedOutcome can clear pending claims and are not pure observation; no extra Check is requested. With the original store inaccessible and correlation missing, storage capture remains Blocked; no replacement composition or database reconstruction is used.
+Stop before a new positive attempt if original model/lease settlement is unknown, state is stale/held/quarantined, configuration mismatches or capture is unhealthy. After the first failure/unknown/missing capture, stop new Send/Retry and preserve the same state; do not make another Check merely to manufacture evidence.
+
+Review and next checkpoint
+SHI reviews only this new diagnostic code/composition; LI independently reviews its evidence. Completed #135/#136/#137/#139/#141 reviews remain complete. LI retains original-host/model-lease disposition and current configuration; JIN retains capture wiring, entry faults and canonical/provenance/cleanup support; SHI retains independent phone verification.
+Next checkpoint is these new gates plus verified original invocation disposition and current capture/runtime availability. No appointment or repeat approval of the already authorized Tailscale proposal is required. No credible live-test ETA is asserted while those facts are unavailable.
+Real new AI execution, consecutive two-round 9B and original-store readback remain Not Run/Blocked. No merge, Issue/Project transition, whole-app/UAT/Release/Done statement.

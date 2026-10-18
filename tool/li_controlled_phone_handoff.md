@@ -12,9 +12,28 @@ python tool/li_controlled_phone_handoff.py --apk /absolute/candidate.apk \
 python -m unittest discover -s tool -p test_li_controlled_phone_handoff.py
 ```
 
-The input handoff must be a regular, operator-owned mode600 file. Optional
+On POSIX the input handoff must be a regular, operator-owned mode600 file. On
+Windows it must be a current-user-owned file on an ordinary local fixed-disk
+path, with allow ACEs limited to that user, LocalSystem or local Administrators.
+The opened handle's owner/DACL, file identity and size are checked; reparse
+points (including ancestors), UNC paths, broad/null DACLs, replacement and
+oversized files are refused. No automatic ACL repair is performed. Keep
+`private_handoff_file.py` beside this script when distributing it.
+
+Optional
 `--adb` and `--aapt` select existing absolute tool paths. Defaults use the existing
-Android SDK platform tools and build-tools36.0.0.
+Linux Android SDK platform tools and build-tools36.0.0. Windows operators must
+pass their existing absolute SDK executable paths. This portability does not
+establish a remote connection; see [the reusable-entry preparation and its
+remaining transport gate](reusable_phone_entry.md).
+
+Keep `--apk` absolute and retain the delivered ASCII APK filename. For `aapt`
+alone, the helper sets the child working directory to that APK's parent and
+passes `./filename`, avoiding Unicode parent directories in `aapt` arguments.
+The Python working directory and subsequent ADB commands are unchanged. No APK
+copy, rebuild, permission or system-encoding change is needed. Command failures
+remain content-free and stop before ADB; local and installed hashes still bind
+the original selected bytes.
 
 The app writes `enmori-controlled-phone-ready.json` with schemaVersion1 and a
 fresh64-character lowercase-hex nonce in its system-temp directory. `code_cache`
@@ -38,3 +57,13 @@ categories, booleans, counts and the APK hash.
 
 Tests use command doubles plus a local temporary POSIX-shell fixture. They do not
 exercise Android, a real service, Firebase or a model.
+
+`test_handoff_apk_paths.py` adds cross-platform path/failure tests. Its two native
+Windows cases are opt-in through `ENMORI_TEST_NATIVE_AAPT`,
+`ENMORI_TEST_NATIVE_APK` (existing absolute paths) and
+`ENMORI_TEST_NATIVE_APK_SHA256` (the approved artifact digest). They read the same
+APK through an owned temporary hard link in a Unicode/spaced directory and test
+an invalid APK failure. They invoke real `aapt`; all private configuration reads
+and ADB responses remain synthetic. Omitted opt-in is recorded as skipped, not
+native success. Run with `python -B -W error::ResourceWarning -m unittest discover
+-s tool -p test_handoff_apk_paths.py -v`.
