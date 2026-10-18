@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "scope": "local-ai-admission-draft-and-repeat-use-reliability",
+  "workspace": "D:/3851",
+  "base": "8c31f34c4ac257d665cf6fd7fed4a190460f708e",
+  "sourceCommit": "63e7b49a33bfde58b671f7a602b2d1b1f5e9c1c5",
+  "sourceTree": "46eaab74a7f5051f8995e9397aeea8f6941608f1",
+  "observedAtUtc": "2026-10-18T12:20:11.692740+00:00",
+  "toolchain": {
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "host": "Windows"
+  },
+  "testedInputs": [
+    {
+      "path": "docs/decisions/2026-10-18-li-complete-user-journey-delivery.md",
+      "gitBlob": "b1aa88f311376be9a3cfe17d39722a6e0ae9ad02",
+      "workingSha256": "17541d6e121a9e67c764f21cb0d0b45de8097a4438c84d0db595e9be1a5bfb62"
+    },
+    {
+      "path": "docs/decisions/2026-10-18-li-functionality-and-reliability-priority.md",
+      "gitBlob": "d5bc644b5d8eabd355f907c9260e47e79177c715",
+      "workingSha256": "1264fefaa2fc3198a5038ea90a6a2be1c07e8cafb3ca1426f4f51a43d60a8f5e"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "gitBlob": "7d1aadbde0bf5c9a3053c6ea288c80f8204083c5",
+      "workingSha256": "68fee59e484bb05ef13a5faefddf94b21de50adc8d73d6e9cfeab9f35794b973"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "gitBlob": "7bb7f801a07d14900e8bbbde7631b487115c529b",
+      "workingSha256": "6eb025c4cba608a5ed52eb8be1dae9f51ca54bff21941ad16bafc9abf95044f8"
+    },
+    {
+      "path": "test/harness/ai_local_rejection_journey_test.dart",
+      "gitBlob": "d88effd0b34242676e513fc656b2cb9fbd831c65",
+      "workingSha256": "521f516969dad7d792f07c5c32f785ed791fcbfdcbc53a5c907fd6b053ff9e5d"
+    }
+  ],
+  "approvedAuthorityImports": [
+    {
+      "sourceCommit": "12422a6a2b03a7c67071388a1d3fb7cb0776b347",
+      "path": "docs/decisions/2026-10-18-li-functionality-and-reliability-priority.md",
+      "gitBlob": "d5bc644b5d8eabd355f907c9260e47e79177c715",
+      "exactGitBytes": true
+    },
+    {
+      "sourceCommit": "911001ae9e1b1280e6a24d1ad3c7ba11eff8eddb",
+      "path": "docs/decisions/2026-10-18-li-complete-user-journey-delivery.md",
+      "gitBlob": "b1aa88f311376be9a3cfe17d39722a6e0ae9ad02",
+      "exactGitBytes": true
+    }
+  ],
+  "sourceManifest": {
+    "path": "build/zhou-continuity-20261018/tested-git-manifest.txt",
+    "sha256": "61cb0fe939844ebe6f7ec1a106fc561da8dd272802c8cdee75380aa9583675c6",
+    "blobCount": 1302
+  },
+  "baselineCounterfactual": {
+    "export": "build/zhou-continuity-20261018/baseline",
+    "archiveSha256": "7b6081194ab03e2e7dfecc69832512195665f0dbaab2ef51606ee13505158e8e",
+    "unchangedOriginalBlobsVerified": 1299,
+    "configuredCrlfCheckoutConversionsIncluded": 1232,
+    "onlyAddedTest": "test/harness/ai_local_rejection_journey_test.dart",
+    "addedTestMatchesCurrentBytes": true,
+    "otherGeneratedInputs": "Existing package_config.json and package_graph.json from this same SDK, no dependency update",
+    "passed": 2,
+    "failed": 6,
+    "exitCode": 1,
+    "positiveControls": "2400 Unicode scalars accepted intact, one per existing page style",
+    "log": "build/zhou-continuity-20261018/baseline-final-red.log"
+  },
+  "checks": {
+    "affected": {
+      "passed": 266,
+      "failed": 0,
+      "exitCode": 0,
+      "newCasesIncluded": 8
+    },
+    "localRejectionPaths": {
+      "zeroHttpCallsForInvalidSend": true,
+      "zeroAdditionalHttpCallsForMismatchedRetry": true,
+      "textSelectionFocusRetained": true,
+      "nativeImeCompositionPreservationClaimed": false
+    },
+    "syntheticRepeatUse": {
+      "exactOriginalRetryUserReferenceChecked": true,
+      "exactExecuteTextsChecked": true,
+      "retryThenReloadThenNextSendThenReload": true,
+      "originalUserIdentitySequenceTimestampContentRetained": true,
+      "realBackendOrModel": false
+    },
+    "analysis": {
+      "issues": 0,
+      "exitCode": 0
+    },
+    "format": {
+      "files": 3,
+      "changed": 0,
+      "exitCode": 0
+    },
+    "whitespace": {
+      "exitCode": 0
+    },
+    "independentLocalReview": {
+      "actionableSourceFindings": 0,
+      "formalLiAcceptance": false
+    }
+  },
+  "logHashes": [
+    {
+      "path": "build/zhou-continuity-20261018/affected-before-wire-assertions-green.log",
+      "sha256": "48f6da0b2c62fe11c41275b4abaae22f723d43dc33941ce1f36b48d340d9bd85",
+      "bytes": 41322
+    },
+    {
+      "path": "build/zhou-continuity-20261018/affected-green.log",
+      "sha256": "8c88cf7827e1320bb8b2389860400a5c041c345151d5084c291650fe09b5728c",
+      "bytes": 41137
+    },
+    {
+      "path": "build/zhou-continuity-20261018/analysis.log",
+      "sha256": "262bc446986d3414e7f260d4439c7b3a9aac592a5f28026d81bac3a626656c07",
+      "bytes": 128
+    },
+    {
+      "path": "build/zhou-continuity-20261018/baseline-before-wire-assertions-red.log",
+      "sha256": "cfb0b7898aa11557396a4c5788a4791e99681bcf4396ce65c0291a37481c0cfe",
+      "bytes": 12022
+    },
+    {
+      "path": "build/zhou-continuity-20261018/baseline-final-red.log",
+      "sha256": "a57050fcdc8fa05f72beb604198e5407b8f1f2b687003faa6ce12e08771081cb",
+      "bytes": 12022
+    },
+    {
+      "path": "build/zhou-continuity-20261018/format.log",
+      "sha256": "d62fe8bc12be6eda848eaf9a25722e5c0b87ff222ac84c4c95443457c93f8939",
+      "bytes": 48
+    },
+    {
+      "path": "build/zhou-continuity-20261018/local-rejection-fixture-after-admission.log",
+      "sha256": "4ed435039cd4c3814920e61f7b8578aaa14c841f47a69f36e89fcdb3f34b8060",
+      "bytes": 15797
+    },
+    {
+      "path": "build/zhou-continuity-20261018/local-rejection-fixture-before-composition.log",
+      "sha256": "6d9dcc324b825675f43e728d5c7c05ef6fef7803f41182a440383d730da05bdd",
+      "bytes": 37062
+    },
+    {
+      "path": "build/zhou-continuity-20261018/local-rejection-fixture-before-pump.log",
+      "sha256": "c52bd2d86d5a1be665c7d59ec24b395503f3c7946c3409e6a9d4dee394115778",
+      "bytes": 37932
+    },
+    {
+      "path": "build/zhou-continuity-20261018/local-rejection-green.log",
+      "sha256": "2bfe52fc78c20064544b6325d8f978d9ca94f8fd714c026a003cf3e8fa8bc943",
+      "bytes": 9089
+    },
+    {
+      "path": "build/zhou-continuity-20261018/local-rejection-red.log",
+      "sha256": "30023d74677bfddd7868ca38eeaad96d0934a7546dadd5ea96c62b2b3403de8a",
+      "bytes": 11796
+    }
+  ],
+  "existingCandidateCheckpoint": {
+    "pr": 154,
+    "head": "8abb9bc63e304b69804729f1dc761fac832d22ed",
+    "source": "940d220c399120fd7649d8ea8856b790ad622dce",
+    "includes151": true,
+    "includesThisLaterFix": false,
+    "shiInstalledOfflineHciVersion": 2,
+    "installedApkSha256": "6bef23b5352d170483852aab2bd91ac02c6ed04bc9a6aa98dd3b0006db5c024a",
+    "evidenceOwner": "SHI, issue84 comment6249086603, not a new author phone run"
+  },
+  "notRun": [
+    "new combined APK/build/install/phone checks",
+    "fixture-missing151 session/held-waiting phone checks",
+    "ordinary-font landscape/Pinyin viewport reachability",
+    "real backend/store/model repeat journey",
+    "whole application acceptance"
+  ],
+  "currentDependencies": {
+    "newCandidateComposition": "JIN after applicable review",
+    "newClientReview": "LI",
+    "boundedPhoneFollowup": "SHI",
+    "originalRealAiFailureDispositionCaptureAndHostAccess": "JIN/LI"
+  },
+  "notCurrentBlockers": [
+    "TalkBack/extra accessibility matrix",
+    "old PR merge",
+    "already-approved151/152/154 source review",
+    "already-created restricted host account"
+  ]
+}
