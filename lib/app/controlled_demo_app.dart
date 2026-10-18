@@ -26,6 +26,7 @@ import '../features/personas/presentation/persona_overview_page.dart';
 import '../features/personas/presentation/persona_management_page.dart';
 import '../features/personas/presentation/persona_editor_page.dart';
 import '../features/event_browse/event_browse_providers.dart';
+import '../features/event_detail/event_detail_providers.dart';
 import '../features/event_recommendations/event_recommendations_providers.dart';
 import '../features/event_recommendations/data/backend_event_recommendation_repository.dart';
 import 'platform/external_activity_opener.dart';
@@ -96,6 +97,10 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       isolatedSlicesEnabledProvider.overrideWithValue(true),
       socialDemoPresentationProvider.overrideWithValue(true),
       activityBrowseEnabledProvider.overrideWithValue(true),
+      if (widget.dualAccounts)
+        eventDetailSourceActionsProvider.overrideWith(
+          (ref) => ref.watch(activitySourceActionsProvider),
+        ),
       externalActivityOpenerProvider.overrideWithValue(
         const PlatformExternalActivityOpener(),
       ),

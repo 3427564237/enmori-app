@@ -195,7 +195,8 @@ export async function runPhoneService(config, dependencies = {}) {
     try {
       const budget = { signal: abort.signal, deadline: end, remainingMs: () => Math.max(0, end - performance.now()) };
       await transport.preflight(budget);
-      const probe = await (diagnostics?.compiler('startup_compile', compiler) ?? compiler).compile({ currentMessage: '今天读书了。', checkIns: [], persona: undefined }, budget);
+      const probe = await (diagnostics?.compiler('startup_compile', compiler) ?? compiler).compile({ currentMessage: '今天读书了。', checkIns: [], persona: undefined,
+        ...(config.dualAccounts ? { strategy: 'open_conversation_v1', history: [] } : {}) }, budget);
       assert(probe.includesAllFraming === true && Number.isSafeInteger(probe.tokens) && probe.tokens >= 1 && probe.tokens <= 4096);
       assert.equal(probe.manifestDigest, config.binding.manifestDigest);
       assert.equal(probe.tokenizerDigest, config.binding.tokenizerDigest);

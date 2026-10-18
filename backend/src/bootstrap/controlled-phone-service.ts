@@ -33,11 +33,14 @@ import { appFailure } from "../shared/application/app-failure.js";
 import { err, ok } from "../shared/domain/result.js";
 import type { ConversationInput, ConversationGates } from "../ai-conversation/ports/conversation-lifecycle.js";
 import type { ConversationOperations, ConversationResult } from "../ai-conversation/ports/conversation-operations.js";
+import { openConversationSemanticCandidate } from "../ai-conversation/application/open-conversation-semantic-policy.js";
 import { boundedConversationSemanticCandidate } from "../ai-conversation/application/bounded-conversation-semantic-policy.js";
 import type { GenerationTransport } from "../ai-runtime/ports/generation-transport.js";
 import type { CompletePromptCompiler } from "../ai-runtime/infrastructure/controlled-ollama-transport.js";
 import { buildApp } from "./build-app.js";
 import { createIsolatedConversationComposition } from "./isolated-conversation-composition.js";
+import { createControlledEventRecommendations } from "./controlled-event-recommendations.js";
+import { FirebaseAdminEventReadGateway, type EventReadGateway } from "../event-recommendations/infrastructure/event-read-gateway.js";
 import { createControlledEventBrowse } from "./controlled-event-browse.js";
 import type { IsolatedEventBrowseInput } from "./isolated-event-browse.js";
 import type { ControlledPhoneDiagnostics } from "./controlled-phone-diagnostics.js";
@@ -107,6 +110,7 @@ export async function createControlledPhoneService(options: {
     try { return await work(); } finally { calls--; }
   }
   const eventBrowse = createControlledEventBrowse({ ...(options.eventBrowse ? { source: options.eventBrowse.source } : {}),
+    ...(options.dualAccounts ? { projectionCache: true } : {}),
     running: () => phase === "running", track: tracked });
   const rawGateway = new FirebaseAdminFirestoreGateway(db);
   const gateway: FirestoreGateway = { runTransaction: (work, transactionOptions) => {
@@ -293,9 +297,11 @@ export async function createControlledPhoneService(options: {
         try { return options.transport.generate(input, budget).finally(() => { modelPending--; }); }
         catch { modelPending--; throw unavailable(); }
       } },
-      gates: { beforeGeneration, candidate: boundedConversationSemanticCandidate },
+      gates: { beforeGeneration, candidate: options.conversationStrategy === "open_conversation_v1" ? openConversationSemanticCandidate : boundedConversationSemanticCandidate },
+      ...(options.conversationStrategy ? { conversationStrategy: options.conversationStrategy } : {}),
       notePrerequisites: { firestore: db, sourceReferences: options.demoFeatures ? [
-        "controlled-phone-service.ts#exclusive-empty-start-single-create-only-writer-and-quiescent-final-delete",
+        options.dualAccounts ? "controlled-phone-service.ts#exclusive-empty-start-two-bound-identities-create-only-writer-and-quiescent-owned-delete"
+          : "controlled-phone-service.ts#exclusive-empty-start-single-create-only-writer-and-quiescent-final-delete",
         "check-ins/application/create-check-in.ts#authoritative-canonical-UTC",
         "check-ins/infrastructure/firestore-check-in-repository.ts#create-only-owner-note-time-no-edit-restore",
       ] : ["controlled-phone-service.ts#exclusive-fresh-owner-no-source-writers"],
@@ -331,6 +337,18 @@ export async function createControlledPhoneService(options: {
         return tracked(() => rawHistory.runTransaction(work));
       },
     }), createHistoryCursorCodec(), clock);
+    const rawEvents = new FirebaseAdminEventReadGateway(db);
+    const eventGateway: EventReadGateway = {
+      get: path => {
+        if (phase !== "running") return Promise.reject(unavailable());
+        return tracked(() => rawEvents.get(path));
+      },
+      listEvents: () => {
+        if (phase !== "running") return Promise.reject(unavailable());
+        return tracked(() => rawEvents.listEvents());
+      },
+    };
+    const realEvents = options.dualAccounts ? createControlledEventRecommendations({ gateway: eventGateway, source: eventBrowse.source, clock }) : undefined;
     const unavailableOperation = { execute: async () => err(appFailure("SERVICE_UNAVAILABLE")) };
     const completePrimary = new CompleteOnboarding(new FirestoreOnboardingRepository(gateway, options.environment), clock, { generate: () => ok(owner) });
     const completeOnboarding: Pick<CompleteOnboarding, "execute"> = options.dualAccounts ? {
@@ -338,6 +356,7 @@ export async function createControlledPhoneService(options: {
     } : unavailableOperation;
     app = await buildApp({
       ...(options.diagnostics ? { controlledPhoneDiagnostics: options.diagnostics } : {}),
+      ...(realEvents ? { recommendEvents: realEvents.recommendEvents } : {}),
       identityVerifier: { verifyIdToken: async token => {
         if (isClosed()) return { kind: "dependency_unavailable" };
         const result = await tracked(() => verifier.verifyIdToken(token));
@@ -364,6 +383,7 @@ export async function createControlledPhoneService(options: {
       replaceOwnInterests: options.demoFeatures ? new ReplaceOwnInterests(interests) : unavailableOperation,
       isolatedSlices: { environment: { ...options.environment }, conversations,
         ...(options.demoFeatures ? { friends: new FriendRequests(new FirestoreFriendRepository(gateway, clock), clock), checkInHistory: history } : {}),
+        ...(realEvents ? { eventDetail: realEvents.eventDetail } : {}),
         eventBrowse: { source: eventBrowse.source, ...(options.eventBrowse?.now ? { now: options.eventBrowse.now } : {}) },
         personas: new OwnPersonas(new FirestorePersonaRepository(gateway, { now: () => ok(new Date()) })) },
     });

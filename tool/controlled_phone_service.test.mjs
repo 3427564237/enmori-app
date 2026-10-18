@@ -247,6 +247,8 @@ test('v2 explicitly selects dual accounts and matched open strategy; private cre
   const f = fixture(), original = f.deps.createService;
   f.service.privateHandoff = () => ({ projectId: 'demo-enmori-rmvp01a-r10', email: 'synthetic@example.invalid', password: 'private-test-only', secondaryAccount: { email: 'second@example.invalid', password: 'private-second-only' } });
   f.deps.createService = async options => { assert.equal(options.dualAccounts, true); assert.equal(options.conversationStrategy, 'open_conversation_v1'); return original(options); };
+  const compile = f.deps.compiler.compile;
+  f.deps.compiler.compile = async input => { assert.equal(input.strategy, 'open_conversation_v1'); assert.deepEqual(input.history, []); return compile(input); };
   assert.equal(await runPhoneService({ ...config(), demoFeatures: true, dualAccounts: true }, f.deps), 0);
   assert.equal(f.reports.find(row => row.name === 'handoff.json').report.schemaVersion, 2);
   assert.equal(f.reports.find(row => row.name === 'handoff.json').report.secondaryAccount.password, 'private-second-only');

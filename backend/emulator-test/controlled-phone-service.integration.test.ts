@@ -509,7 +509,11 @@ test("explicit demo joins saved Note AI, canonical provenance, real history/soci
 });
 
 test("v2 registers only the reserved primary journey, isolates two verified identities, saves interests and completes real Friend handoff; exact cleanup preserves unrelated data", async () => {
-  const service = await createControlledPhoneService({ ...options, demoFeatures: true, dualAccounts: true });
+  let sourceReads = 0;
+  const service = await createControlledPhoneService({ ...options, demoFeatures: true, dualAccounts: true, eventBrowse: { source: {
+    firstBatch: async () => { sourceReads++; return [{ browseId: browseId("sponsor_real_source_shape")!, title: "Source projection test", startAt: "2026-11-10T00:00:00Z", externalSourceUrl: "https://ticketmaster.sg/event/synthetic", musicSegment: true as const }]; },
+    detail: async () => { throw new Error("same projection must serve detail"); },
+  } } });
   const env = requireControlledEmulatorEnvironment(process.env);
   const probe = initializeApp({ projectId: env.projectId }, randomUUID()), db = getFirestore(probe), auth = getAuth(probe);
   const privateFields = service.privateHandoff();
@@ -537,6 +541,14 @@ test("v2 registers only the reserved primary journey, isolates two verified iden
     assert.equal((await invoke(primaryToken, "GET", "/v1/me/settings", 200)).settings.optionalProcessingConsent, "accepted");
     assert.deepEqual((await invoke(primaryToken, "GET", "/v1/interest-tags", 200)).interestTags, [{ interestTagId: "interest_music", displayName: "Music" }]);
     await invoke(primaryToken, "PUT", "/v1/me/interests", 200, { interestTagIds: ["interest_music"], expectedRevision: 1 });
+    await invoke(primaryToken, "GET", "/v1/recommendations/events?view=home", 503);
+    assert.equal(sourceReads, 0); service.eventBrowseControl.enable();
+    const recommendations = await invoke(primaryToken, "GET", "/v1/recommendations/events?view=home", 200);
+    assert.equal(recommendations.items.length, 1); assert.equal(recommendations.items[0].title, "Source projection test");
+    assert.equal(Object.hasOwn(recommendations.items[0], "endAt"), false);
+    const sourceDetail = await invoke(primaryToken, "GET", `/v1/events/${recommendations.items[0].eventId}`, 200);
+    assert.equal(sourceDetail.event.title, recommendations.items[0].title);
+    await invoke(primaryToken, "GET", "/v1/event-browse", 200); assert.equal(sourceReads, 1);
     const reloggedPrimary = await signIn(privateFields.email, privateFields.password);
     assert.equal((await invoke(reloggedPrimary, "GET", "/v1/me/interests", 200)).interests.interestTags[0].interestTagId, "interest_music");
     const secondaryToken = await signIn(secondary.email, secondary.password);
@@ -604,4 +616,42 @@ test("v2 cleanup owns a primary registered without a Backend request, and a repl
       await db.terminate(); await deleteApp(probe);
     }
   }
+});
+
+test("v2 matched open policy and composition include two-pair history, isolate the secondary conversation and clean both settled owners", async () => {
+  const observed: ConversationInput[] = [];
+  const service = await createControlledPhoneService({ ...options, demoFeatures: true, dualAccounts: true, conversationStrategy: "open_conversation_v1",
+    transport: { generate: async input => {
+      observed.push(structuredClone(input));
+      return new TextEncoder().encode(JSON.stringify({ schemaVersion: "ai_assistant_message_v1", message: "What would you like to explore next?" }));
+    } } });
+  const env = requireControlledEmulatorEnvironment(process.env);
+  const probe = initializeApp({ projectId: env.projectId }, randomUUID()), db = getFirestore(probe), auth = getAuth(probe);
+  const handoff = service.privateHandoff();
+  try {
+    await auth.createUser({ email: handoff.email, password: handoff.password });
+    const primary = await signIn(handoff.email, handoff.password), secondary = await signIn(handoff.secondaryAccount!.email, handoff.secondaryAccount!.password);
+    const call = async (token: string, method: "POST" | "PUT" | "GET", url: string, status: number, payload?: object, headers?: Record<string, string>) => {
+      const response = await service.app.inject({ method, url, headers: { authorization: `Bearer ${token}`, ...headers }, ...(payload ? { payload } : {}) });
+      assert.equal(response.statusCode, status); return response.json();
+    };
+    await call(primary, "PUT", "/v1/me/onboarding", 201, { username: "open_primary", initialChoice: "accept" }, { "idempotency-key": randomUUID() });
+    let conversationId: string | undefined;
+    const texts = ["I would like to talk about music.", "What did I mention?", "What can we discuss next?"];
+    for (const text of texts) {
+      const ticket = await call(primary, "POST", "/v1/me/ai/operations", 201, { kind: "send", purpose: "checkin_conversation", ...(conversationId ? { conversationId } : {}) });
+      conversationId = ticket.conversationId;
+      await call(primary, "POST", `/v1/me/ai/operations/${ticket.operationId}/execute`, 200, { text }, { "ai-operation-key": ticket.operationKey });
+    }
+    assert.deepEqual(observed.map(input => input.strategy), Array(3).fill("open_conversation_v1"));
+    assert.deepEqual(observed.map(input => input.history!.length), [0, 1, 2]);
+    assert.deepEqual(observed[2]!.history!.map(pair => pair.user), texts.slice(0, 2));
+    await call(secondary, "GET", `/v1/me/conversations/${conversationId}/messages`, 404);
+    const other = await call(secondary, "POST", "/v1/me/ai/operations", 201, { kind: "send", purpose: "checkin_conversation" });
+    await call(secondary, "POST", `/v1/me/ai/operations/${other.operationId}/execute`, 200, { text: "Hello." }, { "ai-operation-key": other.operationKey });
+    assert.deepEqual(observed[3]!.history, []);
+    assert.equal(service.observation().modelAttempts, 4);
+    await cleanup(service);
+    assert.equal((await db.listCollections()).length, 0); assert.equal((await auth.listUsers()).users.length, 0);
+  } finally { await cleanup(service); await db.terminate(); await deleteApp(probe); }
 });

@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 
 import li_controlled_phone_handoff as target
 
@@ -54,7 +55,7 @@ class HandoffTests(unittest.TestCase):
         rest = args[3:]
         if rest[:3] == ["shell", "pm", "path"]:
             self.assertEqual(rest[3], target.PACKAGE)
-            return b"package:/data/app/~~test==/com.enmori.app.personatest-test==/base.apk\n"
+            return f"package:/data/app/~~test==/{target.PACKAGE}-test==/base.apk\n".encode()
         if rest[:3] == ["shell", "toybox", "sha256sum"]:
             checksum = "0" * 64 if self.hash_mismatch else self.sha
             return f"{checksum}  {rest[3]}\n".encode()
@@ -111,6 +112,20 @@ class HandoffTests(unittest.TestCase):
             self.write_handoff()
             with self.assertRaises(target.Blocked):
                 target.handoff(self.private)
+
+    def test_v2_transfer_targets_only_the_verified_sponsor_private_cache(self):
+        self.value.update(schemaVersion=2, secondaryAccount={"email": "second@example.invalid", "password": "SyntheticSecondPassword!"})
+        self.write_handoff()
+        with patch.object(target, "PACKAGE", "com.enmori.app.sponsordemo"):
+            report = target.transfer(self.apk, self.private, "USBTEST00001", adb="/tools/adb", aapt="/tools/aapt",
+                                     runner=self.runner, clock=self.clock, sleep=lambda _: None,
+                                     consume_timeout=2, attempt_token=self.token, package="com.enmori.app.sponsordemo")
+        self.assertEqual(report["status"], "Pass")
+        self.assertTrue(report["configurationConsumed"])
+        for arguments, _ in self.calls:
+            if "shell" in arguments and len(arguments) == 5:
+                self.assertIn("run-as com.enmori.app.sponsordemo ", arguments[4])
+        self.assertNotIn("SyntheticSecondPassword!", json.dumps(report))
 
     def test_sponsor_package_is_verified_before_adb_and_arbitrary_package_refused(self):
         result = target.transfer(self.apk, self.private, "USBTEST00001", adb="/tools/adb", aapt="/tools/aapt",
