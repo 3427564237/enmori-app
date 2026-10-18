@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "scope": "session-owned-ai-persona-confirmations",
+  "workspace": "D:/3851",
+  "base": "e1a51eab55522a53c2b7c98440a46660098b4635",
+  "sourceCommit": "6962b519a1c18cbf698fd89e2516cc4adfb7f6d0",
+  "sourceTree": "1c4513e034e4963f769a8004a0795bfae8da54cf",
+  "observedAtUtc": "2026-10-18T10:14:21.516873+00:00",
+  "toolchain": {
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "host": "Windows"
+  },
+  "testedInputs": [
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "gitBlob": "8822d3f31b0a21e94cdb000b1af79c6ba2bec69b",
+      "workingSha256": "fcd44c08514d76bb1d6cd0ac48b6148f532ba9ad3966840b5c032702cba2bffb"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_editor_page.dart",
+      "gitBlob": "7dfb266e0c68ad2c25d3507cbb1c62b8f3ad20a9",
+      "workingSha256": "5ccacfedf626ecd214eacbba2180cc2d83bf7b8eacde3786d48b95a5e7fa3013"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_management_page.dart",
+      "gitBlob": "867ae4eb23c1004d93c13cd874bb36fbb4534df5",
+      "workingSha256": "23c9ed21c0a957021281a04a96761b9dc990ec738d2001f17681b3009a5ed7ea"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_overview_page.dart",
+      "gitBlob": "d82546d98d105e575e25881c47a66066573f5eaa",
+      "workingSha256": "b2143fab55b3a626194d41835ff2feb909936f25b4afdba557435426db5ff2e7"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_page_parts.dart",
+      "gitBlob": "598465660a6b6dc09c8be06b22455733314c5f24",
+      "workingSha256": "e6a321dc16d4d14503d91b71e8b7c1027a37dfc4e4f004ebe34e551e13d5a61e"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "gitBlob": "0aef9c0536d7f0d10d88a2047d7d6db757a5b845",
+      "workingSha256": "e855a381c41bce1e6eaf63a9995b947e8c17045fc75eb737bbf362f43f73ce7d"
+    },
+    {
+      "path": "test/features/personas/persona_pages_test.dart",
+      "gitBlob": "bca70a7f85ecb6ee77dc806a4d2e4e995fae8535",
+      "workingSha256": "829ca4ee5a2b01edef785cb000a8c6fc3316ab8cf4a97fda2df2f631e4a2cd3b"
+    }
+  ],
+  "sourceManifest": {
+    "path": "build/zhou-session-dialog-hci-20261018/tested-git-manifest.txt",
+    "sha256": "9bb4db261a5042b4935e8935d3183411e4014e73431cdce4e0b712b9abb43bef",
+    "blobCount": 1297
+  },
+  "baselineCounterfactual": {
+    "export": "build/zhou-session-dialog-hci-20261018/baseline",
+    "baseArchiveSha256": "733be6d8bf6dd9ebfce36946fcfa0b695a8b3f5e45f68e7593d3e5602d301859",
+    "unchangedOriginalBlobsVerified": 1295,
+    "configuredCrlfCheckoutConversionsIncluded": 1228,
+    "currentTestOverlays": [
+      "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "test/features/personas/persona_pages_test.dart"
+    ],
+    "onlyOtherInputs": "Generated package_config.json and package_graph.json copied from the existing same-SDK workspace",
+    "testFilter": "session dialog|session-owned Persona",
+    "passed": 0,
+    "failed": 26,
+    "exitCode": 1,
+    "log": "build/zhou-session-dialog-hci-20261018/baseline-final-red.log"
+  },
+  "checks": {
+    "affected": {
+      "passed": 361,
+      "failed": 0,
+      "exitCode": 0,
+      "newCasesIncluded": 26,
+      "log": "build/zhou-session-dialog-hci-20261018/affected-green.log"
+    },
+    "aiPage": {
+      "passed": 54,
+      "exitCode": 0,
+      "includedInAffected": true
+    },
+    "personaSessionCases": {
+      "passed": 19,
+      "exitCode": 0,
+      "includedInAffected": true
+    },
+    "analysis": {
+      "issues": 0,
+      "exitCode": 0
+    },
+    "format": {
+      "files": 7,
+      "changed": 0,
+      "exitCode": 0
+    },
+    "whitespace": {
+      "exitCode": 0
+    },
+    "independentLocalStaticReview": {
+      "sourceFiles": 5,
+      "actionableFindings": 0,
+      "formalLiAcceptance": false
+    }
+  },
+  "logHashes": [
+    {
+      "path": "build/zhou-session-dialog-hci-20261018/affected-green.log",
+      "sha256": "e295fe3257ea163929eb0df6c4db5e938d5fb440ac5c7e4999c150be373849e2",
+      "bytes": 54958
+    },
+    {
+      "path": "build/zhou-session-dialog-hci-20261018/ai-page-green.log",
+      "sha256": "6464d706231b9baccfa06511ceb10c90b7718089079e3be663174af70f6da315",
+      "bytes": 4233
+    },
+    {
+      "path": "build/zhou-session-dialog-hci-20261018/ai-red.log",
+      "sha256": "0c1e506083b9f33742650fe651bae1dca344998595b0b4d9d39b9368c1c3b7ea",
+      "bytes": 15514
+    },
+    {
+      "path": "build/zhou-session-dialog-hci-20261018/analysis.log",
+      "sha256": "dd15cfe13a09afa739fb9e870cfced933fa65914c9de9911f1c38eea0cd03f2f",
+      "bytes": 224
+    },
+    {
+      "path": "build/zhou-session-dialog-hci-20261018/baseline-final-red.log",
+      "sha256": "47a1b9984c8498717f274f8eee521b4e8ff723deeebb8c7372a98ab2b66de232",
+      "bytes": 65319
+    },
+    {
+      "path": "build/zhou-session-dialog-hci-20261018/format.log",
+      "sha256": "3631a932b6f01d19458ce5066867d3eaacdd9cd48dcc0893d365010ff8e36c3d",
+      "bytes": 48
+    },
+    {
+      "path": "build/zhou-session-dialog-hci-20261018/persona-session-owned-baseline-red.log",
+      "sha256": "9e70de4d3a00288b64be81fb0f69165a0a7b98a0ed7af86066d2408de2be1e03",
+      "bytes": 40660
+    },
+    {
+      "path": "build/zhou-session-dialog-hci-20261018/persona-session-owned-green.log",
+      "sha256": "5d3a94d5ee79e64e4adabe1c6972f29337662ac233cc27e3055fad48c6eb2916",
+      "bytes": 1559
+    },
+    {
+      "path": "build/zhou-session-dialog-hci-20261018/persona-session-owned-red-corrected.log",
+      "sha256": "c9fcc8227c0aa1473369b9444279b7e8c81c2c86b84d2f7f4dbf74485af8443a",
+      "bytes": 3659
+    },
+    {
+      "path": "build/zhou-session-dialog-hci-20261018/persona-session-owned-red.log",
+      "sha256": "f238aa8fb49c40f0877fd7fdfbe46ddd3360a6cfdc2a5548e3a1108e73c4bcb9",
+      "bytes": 39339
+    }
+  ],
+  "notRun": [
+    "new Android/TalkBack checks",
+    "combined APK/build/signing",
+    "real backend/emulator/model",
+    "whole application suite"
+  ],
+  "retainedLocalBlockers": [
+    "identified combined APK and authorized session/waiting fixtures for SHI device checks",
+    "original real-AI disposition/capture gates remain with JIN/LI"
+  ],
+  "reviewer": "LI / 3427564237"
+}

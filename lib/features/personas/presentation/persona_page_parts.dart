@@ -197,38 +197,78 @@ final class PersonaSummary extends StatelessWidget {
   );
 }
 
-Future<bool> confirmPersonaAction(
-  BuildContext context, {
-  required String message,
-  required String cancelLabel,
-  required String actionLabel,
-  required String actionKey,
-}) async =>
-    await showDialog<bool>(
+/// A confirmation belongs to the invoking page, including its session-key
+/// lifetime. An old callback must never pop a later page or confirmation.
+final class PersonaConfirmation {
+  DialogRoute<bool>? _route;
+  bool _disposed = false;
+
+  Future<bool> action(
+    BuildContext context, {
+    required String message,
+    required String cancelLabel,
+    required String actionLabel,
+    required String actionKey,
+  }) async {
+    if (_disposed || _route != null) return false;
+    final navigator = Navigator.of(context, rootNavigator: true);
+    late final DialogRoute<bool> route;
+    void complete(bool confirmed) {
+      if (!_disposed && identical(_route, route) && route.isCurrent) {
+        navigator.pop(confirmed);
+      }
+    }
+
+    route = DialogRoute<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      themes: InheritedTheme.capture(from: context, to: navigator.context),
+      barrierColor:
+          DialogTheme.of(context).barrierColor ??
+          Theme.of(context).dialogTheme.barrierColor ??
+          Colors.black54,
+      traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+      builder: (_) => AlertDialog(
         scrollable: true,
         content: Text(message),
         actions: [
           TextButton(
             autofocus: true,
-            onPressed: () => Navigator.of(dialogContext).pop(false),
+            onPressed: () => complete(false),
             child: Text(cancelLabel),
           ),
           FilledButton(
             key: Key(actionKey),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
+            onPressed: () => complete(true),
             child: Text(actionLabel),
           ),
         ],
       ),
-    ) ??
-    false;
+    );
+    _route = route;
+    try {
+      return await navigator.push<bool>(route) ?? false;
+    } finally {
+      if (identical(_route, route)) _route = null;
+    }
+  }
 
-Future<bool> confirmPersonaExit(BuildContext context) => confirmPersonaAction(
-  context,
-  message: 'The request may still complete. Leave this screen?',
-  cancelLabel: 'Stay',
-  actionLabel: 'Leave',
-  actionKey: 'persona-confirm-leave',
-);
+  Future<bool> exit(BuildContext context) => action(
+    context,
+    message: 'The request may still complete. Leave this screen?',
+    cancelLabel: 'Stay',
+    actionLabel: 'Leave',
+    actionKey: 'persona-confirm-leave',
+  );
+
+  void dispose() {
+    _disposed = true;
+    final route = _route;
+    _route = null;
+    if (route == null) return;
+    // Disposing a keyed page can happen while Navigator is building. Remove
+    // only this page's old dialog after the frame, even beneath a newer route.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (route.isActive) route.navigator?.removeRoute<bool>(route, false);
+    });
+  }
+}

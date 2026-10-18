@@ -9,6 +9,109 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final action in ['discard', 'leave', 'delete']) {
+    for (final authRejected in [false, true]) {
+      testWidgets(
+        'session dialog AI $action closes on ${authRejected ? 'auth rejection' : 'session replacement'} and permits fresh use',
+        (tester) async {
+          final controller = _PageController(
+            _state(
+              canSend: action == 'discard',
+              canCancel: action == 'leave',
+              canDelete: action == 'delete',
+              phase: action == 'leave'
+                  ? AiConversationPhase.waiting
+                  : AiConversationPhase.idle,
+            ),
+          );
+          await _pump(
+            tester,
+            controller,
+            onBack: () => controller.events.add('back'),
+          );
+          if (action == 'discard') {
+            await tester.enterText(
+              find.byKey(const Key('ai-message-input')),
+              'Old session draft',
+            );
+          }
+          await _tap(tester, action == 'delete' ? 'ai-delete' : 'ai-back');
+          final confirmation = find.byKey(Key('ai-confirm-$action'));
+          final oldRoute = ModalRoute.of(tester.element(confirmation))!;
+          final staleAction = tester
+              .widget<TextButton>(confirmation)
+              .onPressed!;
+          controller.publish(
+            authRejected
+                ? _state(phase: AiConversationPhase.unauthenticated)
+                : _state(sessionKey: 'replacement', canSend: true),
+          );
+          await tester.pumpAndSettle();
+          expect(confirmation, findsNothing);
+          expect(oldRoute.isActive, isFalse);
+          staleAction();
+          await tester.pumpAndSettle();
+          expect(controller.events, isEmpty);
+          expect(controller.cancels, 0);
+          expect(controller.deletes, 0);
+          expect(controller.sent, isEmpty);
+          expect(controller.retried, isEmpty);
+          if (authRejected) {
+            expect(find.byKey(const Key('ai-message-input')), findsNothing);
+            controller.publish(
+              _state(sessionKey: 'replacement', canSend: true),
+            );
+            await tester.pumpAndSettle();
+          }
+          final input = find.byKey(const Key('ai-message-input'));
+          expect(tester.widget<TextField>(input).controller!.text, isEmpty);
+          await tester.enterText(input, 'Fresh explicit input');
+          await _tap(tester, 'ai-send');
+          expect(controller.sent, ['Fresh explicit input']);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
+  testWidgets('session dialog cleanup preserves a newer route above it', (
+    tester,
+  ) async {
+    final controller = _PageController(_state(canSend: true));
+    await _pump(tester, controller);
+    await tester.enterText(
+      find.byKey(const Key('ai-message-input')),
+      'Old session draft',
+    );
+    await _tap(tester, 'ai-back');
+    final staleAction = tester
+        .widget<TextButton>(find.byKey(const Key('ai-confirm-discard')))
+        .onPressed!;
+    final navigator = Navigator.of(
+      tester.element(find.byType(AiConversationPage)),
+    );
+    unawaited(
+      navigator.push<void>(
+        MaterialPageRoute(
+          builder: (_) => const Scaffold(body: Text('New session destination')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    staleAction();
+    await tester.pumpAndSettle();
+    expect(find.text('New session destination'), findsOneWidget);
+    controller.publish(_state(sessionKey: 'replacement', canSend: true));
+    await tester.pumpAndSettle();
+    expect(find.text('New session destination'), findsOneWidget);
+    navigator.pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('ai-confirm-discard')), findsNothing);
+    expect(controller.events, isEmpty);
+    expect(controller.sent, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('social composer leaves one primary scroll target for PageDown', (
     tester,
   ) async {
@@ -372,9 +475,14 @@ void main() {
       'private draft',
     );
     await _tap(tester, 'ai-personas');
+    final staleAction = tester
+        .widget<TextButton>(find.byKey(const Key('ai-confirm-discard')))
+        .onPressed!;
     controller.publish(_state(sessionKey: 'replacement', canSend: true));
     await tester.pumpAndSettle();
-    await _tap(tester, 'ai-confirm-discard');
+    expect(find.byKey(const Key('ai-confirm-discard')), findsNothing);
+    staleAction();
+    await tester.pumpAndSettle();
     expect(controller.events, isEmpty);
     expect(controller.sent, isEmpty);
     expect(
