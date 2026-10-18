@@ -1,0 +1,77 @@
+{
+  "date": "2026-10-18",
+  "accountPreparation": {
+    "humanReportedCommandCompleted": true,
+    "preparedScriptHashStillMatches": "7e021887a63ca51c3b39a099aeeb42b0cff47ffc47a0718b9088d426e7aa6747",
+    "freshIndependentChecks": {
+      "accountExists": true,
+      "nonRootUid": true,
+      "nologin": true,
+      "ownPrimaryGroup": true,
+      "noSupplementaryGroups": true,
+      "runtimeIsDirectory": true,
+      "runtimeOwnerAndGroupMatch": true,
+      "runtimeMode": "0700",
+      "currentAdminUserCannotListPrivateRuntime": true
+    },
+    "lockedPasswordAndInitialEmptyDirectory": "validated by the fixed human-executed preparation script if its reported completion was successful; root receipt not independently read",
+    "interactiveAdminEntry": "human-reported usable for account preparation; no password received",
+    "noninteractiveSudoInAssistantContext": false,
+    "fullEffectiveSudoPolkitCapabilitiesAndPathAudit": "not yet independently completed",
+    "captureWrapperExists": false,
+    "noRecreationOrForceRetry": true
+  },
+  "receivedV2": {
+    "receivedBy": "LI",
+    "zipBytes": 57666991,
+    "zipSHA256": "96ab2ac981895312fdde0d4fc182241963d322c394e00a6a316a18ba857c7987",
+    "archiveEntries": 8,
+    "checksumsVerified": 7,
+    "apkBytes": 94031803,
+    "apkSHA256": "6bef23b5352d170483852aab2bd91ac02c6ed04bc9a6aa98dd3b0006db5c024a",
+    "package": "com.enmori.app.hcitest",
+    "versionCode": 2,
+    "signatureVerified": true,
+    "signerMatchesJinOriginal": true,
+    "sourceReceiptMatches154": true,
+    "apkInstalledOrLaunchedByLI": false,
+    "initialReceiptProbe": "Incorrectly reused v1 seven-entry count; stopped before extraction. Replaced with explicit published v2 eight-entry allowlist; original attempt retained as review setup error."
+  },
+  "freshReviewObservations": {
+    "152SHI": "APPROVED atbf0d01c4, review5562648838",
+    "154SHI": "APPROVED at8abb9bc6, review5562649061",
+    "150SHICodeComposition": "still absent at observation; LI evidence approval remains complete"
+  },
+  "shiDeviceEvidence": {
+    "source": "https://github.com/3427564237/enmori-app/issues/84#issuecomment-6249086603",
+    "attribution": "SHI-reported actual Android16/API36 no-model HCI v2; not LI execution",
+    "partialPasses": [
+      "Persona Name guidance/validation/focus and no invalid create",
+      "dirty Keep editing, one valid in-memory save",
+      "four-line draft retention across keyboard/rotation",
+      "one synthetic Send/Check reaches permitted Retry",
+      "portrait outer-composer scroll exposes Retry"
+    ],
+    "remaining": [
+      "2x landscape current Pinyin IME editor/actions not visible; cause not established",
+      "second fixture Retry final result not captured",
+      "precise selection and audible TalkBack",
+      "long-history PageDown",
+      "151 session-replacement/held-create fixture cases unavailable",
+      "remaining3x/edit-mode combinations"
+    ]
+  },
+  "nextOwners": {
+    "SHI": "complete150new-code/composition review only;152/154source reviews are complete",
+    "ZHOU": "triage the bounded landscape/IME/available-height counterexample within existing client scope; no real model",
+    "JIN": "support capture/access integration and applicable next candidate",
+    "LI": "actual host effective-access/installation after applicable150review; no repeated account provisioning"
+  },
+  "scopeLimits": [
+    "No new source tests repeated for unchanged reviewed heads.",
+    "No LI APK install/launch, new account/permission/rule/unit/model/runtime/device mutation in this follow-up.",
+    "Human account preparation is distinct from capture deployment/access/timer acceptance.",
+    "No merge/closure/Project or whole-app acceptance.",
+    "Original AI cause/repair and consecutive9B remain unestablished."
+  ]
+}
