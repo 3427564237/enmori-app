@@ -39,6 +39,7 @@ final class _PersonaOverview extends ConsumerStatefulWidget {
 }
 
 final class _PersonaOverviewState extends ConsumerState<_PersonaOverview> {
+  final _confirmation = PersonaConfirmation();
   bool _checkingExit = false;
 
   @override
@@ -49,13 +50,19 @@ final class _PersonaOverviewState extends ConsumerState<_PersonaOverview> {
     });
   }
 
+  @override
+  void dispose() {
+    _confirmation.dispose();
+    super.dispose();
+  }
+
   Future<void> _back() async {
     if (_checkingExit) return;
     _checkingExit = true;
     final state = ref.read(personaSessionControllerProvider);
     final leave =
         (!state.isBusy && state.pendingCreate == null) ||
-        await confirmPersonaExit(context);
+        await _confirmation.exit(context);
     if (!mounted) return;
     _checkingExit = false;
     if (leave &&

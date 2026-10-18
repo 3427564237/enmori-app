@@ -41,6 +41,7 @@ final class _PersonaManagement extends ConsumerStatefulWidget {
 }
 
 final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
+  final _confirmation = PersonaConfirmation();
   String? _selected;
   bool _confirming = false;
   bool _staleConfirmation = false;
@@ -54,6 +55,12 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
     });
   }
 
+  @override
+  void dispose() {
+    _confirmation.dispose();
+    super.dispose();
+  }
+
   Future<void> _back() async {
     if (_confirming) return;
     final operation = ++_pageOperation;
@@ -61,7 +68,7 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
     final state = ref.read(personaSessionControllerProvider);
     final leave =
         (!state.isBusy && state.pendingCreate == null) ||
-        await confirmPersonaExit(context);
+        await _confirmation.exit(context);
     if (!mounted || operation != _pageOperation) return;
     _confirming = false;
     if (leave &&
@@ -79,7 +86,7 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
     final invokingFocus = FocusManager.instance.primaryFocus;
     setState(() => _confirming = true);
     final active = state.collection?.activePersonaId == persona.personaId;
-    final confirmed = await confirmPersonaAction(
+    final confirmed = await _confirmation.action(
       context,
       message: deleting
           ? 'Permanently delete this Persona? This cannot be undone.${active ? '\n\nYou will have no active Persona until you activate another.' : ''}'

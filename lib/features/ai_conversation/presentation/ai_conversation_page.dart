@@ -74,6 +74,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   final _messageFocus = FocusNode();
   late final AiConversationController _controller;
   late final Object _sessionKey;
+  DialogRoute<bool>? _confirmationRoute;
   bool _confirming = false;
   bool _leaving = false;
 
@@ -99,6 +100,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _dismissConfirmation();
     // No deferred callback: disposal must close dispatch before a late token.
     // detach deliberately does not publish Riverpod state during disposal.
     _controller.detach(sessionKey: _sessionKey);
@@ -192,29 +194,62 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     required String keepLabel,
     required String actionLabel,
     required String actionKey,
-  }) async =>
-      await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          scrollable: true,
-          content: Text(message),
-          actions: [
-            TextButton(
-              autofocus: true,
-              style: _buttonStyle,
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(keepLabel),
-            ),
-            TextButton(
-              key: Key(actionKey),
-              style: _buttonStyle,
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(actionLabel),
-            ),
-          ],
-        ),
-      ) ??
-      false;
+  }) async {
+    final navigator = Navigator.of(context, rootNavigator: true);
+    late final DialogRoute<bool> route;
+    void complete(bool confirmed) {
+      if (_ownsCurrentSession &&
+          identical(_confirmationRoute, route) &&
+          route.isCurrent) {
+        navigator.pop(confirmed);
+      }
+    }
+
+    route = DialogRoute<bool>(
+      context: context,
+      themes: InheritedTheme.capture(from: context, to: navigator.context),
+      barrierColor:
+          DialogTheme.of(context).barrierColor ??
+          Theme.of(context).dialogTheme.barrierColor ??
+          Colors.black54,
+      traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+      builder: (_) => AlertDialog(
+        scrollable: true,
+        content: Text(message),
+        actions: [
+          TextButton(
+            autofocus: true,
+            style: _buttonStyle,
+            onPressed: () => complete(false),
+            child: Text(keepLabel),
+          ),
+          TextButton(
+            key: Key(actionKey),
+            style: _buttonStyle,
+            onPressed: () => complete(true),
+            child: Text(actionLabel),
+          ),
+        ],
+      ),
+    );
+    _confirmationRoute = route;
+    try {
+      return await navigator.push<bool>(route) ?? false;
+    } finally {
+      if (identical(_confirmationRoute, route)) _confirmationRoute = null;
+    }
+  }
+
+  void _dismissConfirmation() {
+    final route = _confirmationRoute;
+    _confirmationRoute = null;
+    if (route == null) return;
+    // Session-key rebuilding disposes this page during a frame. Defer the
+    // Navigator mutation, retaining only the exact old route, never a top pop.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (route.isActive) route.navigator?.removeRoute<bool>(route, false);
+    });
+  }
 
   void _submit({required bool retry}) {
     if (!_ownsCurrentSession ||
@@ -247,6 +282,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         // Removing the input widget alone would retain its private draft.
         _message.clear();
         _messageFocus.unfocus();
+        _dismissConfirmation();
       }
     });
     final state = ref.watch(aiConversationControllerProvider);
