@@ -98,25 +98,26 @@ void main() {
     },
   );
 
-  testWidgets('failed Next keeps records visible and retries the same cursor', (
-    tester,
-  ) async {
-    final f = await _pump(tester);
-    await _open(tester);
-    f.failNext = true;
+  testWidgets(
+    'failed Next keeps records visible and retries the same cursor',
+    (tester) async {
+      final f = await _pump(tester);
+      await _open(tester);
+      f.failNext = true;
 
-    await _tap(tester, 'history-next-page');
+      await _tap(tester, 'history-next-page');
 
-    expect(find.text('First synthetic Note'), findsOneWidget);
-    expect(find.byKey(const Key('history-next-page-error')), findsOneWidget);
-    expect(f.historyQueries.last['cursor'], 'synthetic-cursor');
-    await _tap(tester, 'history-next-page');
+      expect(find.text('First synthetic Note'), findsOneWidget);
+      expect(find.byKey(const Key('history-next-page-error')), findsOneWidget);
+      expect(f.historyQueries.last['cursor'], 'synthetic-cursor');
+      await _tap(tester, 'history-next-page');
 
-    expect(find.text('First synthetic Note'), findsNothing);
-    expect(find.text('Next synthetic Note'), findsOneWidget);
-    expect(f.historyQueries.last['cursor'], 'synthetic-cursor');
-    expect(tester.takeException(), isNull);
-  });
+      expect(find.text('First synthetic Note'), findsNothing);
+      expect(find.text('Next synthetic Note'), findsOneWidget);
+      expect(f.historyQueries.last['cursor'], 'synthetic-cursor');
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'saved Check-in uses existing owner read and return rereads date',

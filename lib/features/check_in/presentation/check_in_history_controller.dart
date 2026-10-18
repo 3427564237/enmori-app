@@ -257,21 +257,6 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
         zone,
       );
       if (!_isCurrent(session, request, subject)) return;
-      if (existingEntries != null) {
-        state = CheckInHistoryState(
-          phase: CheckInHistoryPhase.ready,
-          selectedDate: date,
-          latestDate: today,
-          ianaZone: zone,
-          entries: existingEntries,
-          nextCursor: cursor,
-          nextPageFailure: const AppFailure(
-            kind: AppFailureKind.unexpected,
-            message: 'The next page could not be formatted.',
-          ),
-        );
-        return;
-      }
       state = CheckInHistoryState(
         phase: CheckInHistoryPhase.ready,
         selectedDate: date,
