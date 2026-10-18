@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
 import '../../auth/auth_providers.dart';
+import '../../auth/domain/auth_repository.dart';
 import '../domain/interest_repository.dart';
 import '../interests_providers.dart';
 
@@ -94,25 +95,36 @@ final interestEditorControllerProvider =
 final class InterestEditorController extends Notifier<InterestEditorState> {
   int _operation = 0;
   late InterestRepository _repository;
-  String? _authSubject;
 
   @override
   InterestEditorState build() {
     _repository = ref.watch(interestRepositoryProvider);
-    final authSubject = ref.watch(currentAuthSubjectProvider);
-    if (_authSubject != authSubject) _operation++;
-    _authSubject = authSubject;
+    // A replacement observation is a new session even for the same subject.
+    ref.watch(
+      authSessionProvider.select(
+        (value) => switch (value) {
+          AsyncData<AuthSession>(
+            value: final AuthSessionAuthenticated session,
+          ) =>
+            session,
+          _ => null,
+        },
+      ),
+    );
+    _operation++;
+    ref.onDispose(() => _operation++);
     return const InterestEditorState();
   }
 
   Future<void> load() async {
+    if (!ref.mounted) return;
     final operation = ++_operation;
     state = const InterestEditorState(phase: InterestEditorPhase.loading);
     final catalogueFuture = _repository.readSelectableTags();
     final ownFuture = _repository.readOwn();
     final catalogue = await catalogueFuture;
     final own = await ownFuture;
-    if (operation != _operation) return;
+    if (!ref.mounted || operation != _operation) return;
 
     if (catalogue case Failure<List<InterestTagOption>>(:final failure)) {
       state = InterestEditorState(
@@ -189,7 +201,8 @@ final class InterestEditorController extends Notifier<InterestEditorState> {
   }
 
   Future<void> save() async {
-    if (!state.hasLoaded ||
+    if (!ref.mounted ||
+        !state.hasLoaded ||
         state.phase == InterestEditorPhase.saving ||
         state.phase == InterestEditorPhase.conflict) {
       return;
@@ -209,7 +222,7 @@ final class InterestEditorController extends Notifier<InterestEditorState> {
       interestTagIds: selectedIds,
       expectedRevision: state.revision,
     );
-    if (operation != _operation) return;
+    if (!ref.mounted || operation != _operation) return;
     switch (result) {
       case Success<InterestSelection>(:final value):
         state = InterestEditorState(
