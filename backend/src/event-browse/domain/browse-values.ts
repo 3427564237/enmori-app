@@ -18,6 +18,11 @@ function instant(v:unknown):Temporal.Instant|undefined{
   if(typeof v!=="string"||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:[0-5]\d(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(v))return undefined;
   try{return Temporal.Instant.from(v);}catch{return undefined;}
 }
+/** Canonical UTC clock/projection value, preserving nanoseconds. */
+export function parseBrowseInstant(value: unknown): bigint | undefined {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:[0-5]\d(?:\.\d{1,9})?Z$/.test(value)) return undefined;
+  try { return Temporal.Instant.from(value).epochNanoseconds; } catch { return undefined; }
+}
 /** Minimized source projection. Music ID verified against the official Discovery API:
  * https://developer.ticketmaster.com/products-and-docs/apis/discovery/v2/
  * No label inference, other category mapping or participation fields. */

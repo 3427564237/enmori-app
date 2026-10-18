@@ -1,6 +1,6 @@
 import type { BrowseOccurrence, BrowseSource } from "../ports/event-browse.js";
 import { dependencyUnavailable } from "../../shared/ports/dependency-failure.js";
-import { parseEventInstant } from "../../event-recommendations/infrastructure/event-records.js";
+import { parseBrowseInstant } from "../domain/browse-values.js";
 
 /** One process-owned source generation, shared by browse, recommendation and
  * detail. No persistence, title merging, retry, or stale-on-error fallback. */
@@ -12,11 +12,11 @@ export class ControlledSourceProjection implements BrowseSource {
   private current() { return this.snapshot; }
   clear(): void { this.snapshot = undefined; this.pending = undefined; this.epoch = {}; }
   async firstBatch(asOf: string, signal: AbortSignal): Promise<readonly BrowseOccurrence[]> {
-    const now = parseEventInstant(asOf);
+    const now = parseBrowseInstant(asOf);
     if (now === undefined || signal.aborted) throw dependencyUnavailable;
     const current = this.snapshot;
     if (current && now >= current.at && now - current.at < 300_000_000_000n) {
-      return current.items.filter(item => parseEventInstant(item.startAt)! > now);
+      return current.items.filter(item => parseBrowseInstant(item.startAt)! > now);
     }
     this.snapshot = undefined; // Expired generation cannot become a fallback.
     if (!this.pending) {
@@ -36,7 +36,7 @@ export class ControlledSourceProjection implements BrowseSource {
     // A concurrent request can only consume a complete, still-current generation.
     const published = this.current();
     if (!published || now < published.at || now - published.at >= 300_000_000_000n) throw dependencyUnavailable;
-    return items.filter(item => parseEventInstant(item.startAt)! > now);
+    return items.filter(item => parseBrowseInstant(item.startAt)! > now);
   }
   async detail(id: string, asOf: string, signal: AbortSignal): Promise<BrowseOccurrence | undefined> {
     return (await this.firstBatch(asOf, signal)).find(item => item.browseId === id);
