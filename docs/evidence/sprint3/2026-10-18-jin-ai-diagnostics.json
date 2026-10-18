@@ -1,0 +1,195 @@
+{
+  "source": "69e77179015ffa8fcd02460c4a282eba1de4bbe7",
+  "tree": "27cc70e427a8e261a5484572b00f8613e2f2f8fd",
+  "base": "9c7878bf9f7837eacc043656cc456217ad7b3e63",
+  "branch": "codex/jin-ai-diagnostics-20261018",
+  "executedBeforeCommit": true,
+  "inputNormalization": "CRLF to LF only; normalized bytes equal source Git blobs",
+  "testedInputCount": 1316,
+  "rawInputManifestSha256": "dd9b72cfc5586e4e2ef65a700d630d87fb6ac8f2e12febfe4268a19b8ea168da",
+  "inputsStableAfterFinalExecution": true,
+  "inputs": [
+    {
+      "path": "backend/src/ai-runtime/infrastructure/controlled-ai-diagnostic.ts",
+      "sha256": "5e027fe2ae707768e1594e441d97877e140e49011e08e7faa4897e146d2f32b2",
+      "lfSha256": "5e027fe2ae707768e1594e441d97877e140e49011e08e7faa4897e146d2f32b2",
+      "gitBlob": "c3af82a7a86cc33f1a3af054bcf3859004acc4ed"
+    },
+    {
+      "path": "backend/src/ai-runtime/infrastructure/controlled-ollama-transport.ts",
+      "sha256": "40d57e29e70405d223f2c6f8e45691909827008255762ab879dbb761ff75796a",
+      "lfSha256": "e6421407bde48df06efbd46d93384d705802d6ef05c896d3ee6ba778a52a81d9",
+      "gitBlob": "d873cba9a4e9450a507c7a6381c03e86bc496552"
+    },
+    {
+      "path": "backend/src/bootstrap/build-app.ts",
+      "sha256": "c524fc59738fe6f462117a5dc606b73667ffb4cfdeecae3c00000769d07da900",
+      "lfSha256": "41d46cc3190532efc584bc5f9fcc8b3e45dd663a622071fd3bd9b681f87888f8",
+      "gitBlob": "51533f534477f491e6dcc2ed3f682f278e88bd1b"
+    },
+    {
+      "path": "backend/src/bootstrap/controlled-phone-diagnostics.ts",
+      "sha256": "776cb8a71df9b395cc1f0fec73d5e99ba88a25d4dc4d3d4b4997273da24c04f3",
+      "lfSha256": "776cb8a71df9b395cc1f0fec73d5e99ba88a25d4dc4d3d4b4997273da24c04f3",
+      "gitBlob": "cf212928b53fa30cf45b09f6a6cbdecb3e5208aa"
+    },
+    {
+      "path": "backend/src/bootstrap/controlled-phone-service.ts",
+      "sha256": "309dfd91badb5417685bfd21a8ab765a887b49fa1587fe9633a67a62b2f16eca",
+      "lfSha256": "dd0c4100a00c10f5d357e9b0ca38c0d71652de843c64a93c5e5831e3cc9cf337",
+      "gitBlob": "4cd0b4668c0986cb2b283558de950202bb97cc24"
+    },
+    {
+      "path": "backend/test/ai-conversation/transport.test.ts",
+      "sha256": "6ae8a15b55a33a6b26e68ce5eb54720cd54b4587448bace8458ee4b05f2f8450",
+      "lfSha256": "1d08b8fcf894e7d6da8ebabaccbd8b7d55bf7964d08b2808c886cec906b0189a",
+      "gitBlob": "29e2dae62cf6f466478b66abfdb02b5b2abe18a7"
+    },
+    {
+      "path": "backend/test/ai-runtime/controlled-ai-diagnostic.test.ts",
+      "sha256": "09e105e8ecdd9b6c4d259b90b0598445e9c45cffccf1c9ecd018538fd7f6c4f6",
+      "lfSha256": "09e105e8ecdd9b6c4d259b90b0598445e9c45cffccf1c9ecd018538fd7f6c4f6",
+      "gitBlob": "6793a3138b2a9734010c3227517329b20f359bfe"
+    },
+    {
+      "path": "backend/test/bootstrap/controlled-phone-diagnostics.test.ts",
+      "sha256": "5daa1b61d367a657ce702d2bcc3af39ed769e792cec3e5a1adbd28897bf723a5",
+      "lfSha256": "5daa1b61d367a657ce702d2bcc3af39ed769e792cec3e5a1adbd28897bf723a5",
+      "gitBlob": "049e5905c8788fb24b50e8e8016c3426b84ada56"
+    },
+    {
+      "path": "tool/check_reusable_phone_entry.py",
+      "sha256": "78e4a206f9b2fbb51424754b54f1843a92bed2b6ad6c201da40a75aeb5264136",
+      "lfSha256": "78e4a206f9b2fbb51424754b54f1843a92bed2b6ad6c201da40a75aeb5264136",
+      "gitBlob": "ec331377040fc0dabd0dc9f6adbfc5f632861978"
+    },
+    {
+      "path": "tool/controlled_phone_service.mjs",
+      "sha256": "85562cb911568da13a37fca2b92a3cab4d6aca2da90d39cc02c0fbda7a646db5",
+      "lfSha256": "a7f3057808e73c6fef6e035353e536bbfd8a39b96c761aa96a40a2aca854c1e8",
+      "gitBlob": "7d79483a87d91d68a8a3102d838e5efce1cb1da9"
+    },
+    {
+      "path": "tool/controlled_phone_service.test.mjs",
+      "sha256": "ab2c2bb1145d3265db31be2ed92be52bc7b889f896cfd076a9cc9d829c88d605",
+      "lfSha256": "12847d9115da189724cf6648e92058bfb7ba085352a8dbaeb07ce59815df43aa",
+      "gitBlob": "363b2e15331e41437729734bc351bb328015f3ca"
+    },
+    {
+      "path": "tool/test_check_reusable_phone_entry.py",
+      "sha256": "5bc62332d91fd2e7c6a57375b41d158efcab0f73bbf517873fbc801aec185fc9",
+      "lfSha256": "5bc62332d91fd2e7c6a57375b41d158efcab0f73bbf517873fbc801aec185fc9",
+      "gitBlob": "06a27d9e42efcbca40bffd27ce1227dd9301ee0f"
+    }
+  ],
+  "node": "24.19.0",
+  "typescript": "7.0.2",
+  "results": {
+    "strictCompile": {
+      "log": "compile-05.log",
+      "exit": 0
+    },
+    "backendFocused": {
+      "log": "backend-focused-02.log",
+      "pass": 51,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0
+    },
+    "operator": {
+      "log": "operator-02.log",
+      "pass": 19,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0
+    },
+    "hostChecker": {
+      "log": "host-check-02.log",
+      "pass": 16,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0,
+      "resourceWarning": "fatal"
+    }
+  },
+  "retainedFailures": [
+    {
+      "log": "compile-01.log",
+      "exit": 1,
+      "category": "strict failure-helper narrowing"
+    },
+    {
+      "log": "compile-04.log",
+      "exit": 1,
+      "category": "strict test optional text narrowing"
+    },
+    {
+      "log": "host-check-01.log",
+      "exit": 1,
+      "testCases": 16,
+      "setupAndCleanupErrors": 32,
+      "category": "sandbox default temporary directory permission; body not reached"
+    }
+  ],
+  "logHashes": [
+    {
+      "file": "backend-focused-01.log",
+      "bytes": 3965,
+      "sha256": "ed472ce92642bf3296c0a6e1170185432775fcf60649664779e2b35f775c4905"
+    },
+    {
+      "file": "backend-focused-02.log",
+      "bytes": 5601,
+      "sha256": "10898fe58b7460ec8a0ae24aa9e87be4fa25bae0205fdd5e90c2ce2c936f3f7f"
+    },
+    {
+      "file": "compile-01.log",
+      "bytes": 1345,
+      "sha256": "f2b2fca4bb266d4b08000cc2f0d0a96b8de5e86966a13013ca42cb9040da3072"
+    },
+    {
+      "file": "compile-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "compile-03.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "compile-04.log",
+      "bytes": 214,
+      "sha256": "1f074330f532fc958b9e74f9ecad8ccd1fb424fc589e36e17f6097e787e4c714"
+    },
+    {
+      "file": "compile-05.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "host-check-01.log",
+      "bytes": 63016,
+      "sha256": "e9d6f5530f1da058209e7545ca2391ddd66b2d5bd65846b600f1ea483adfb47b"
+    },
+    {
+      "file": "host-check-02.log",
+      "bytes": 2844,
+      "sha256": "9dc0dbbcd8a5541af27a41503c63c5460a93d90c30a909e78579a51eeed12355"
+    },
+    {
+      "file": "operator-01.log",
+      "bytes": 2194,
+      "sha256": "7f36c2b79493e2f05abb7a232397c26be12cbd09119eb2255705e1e66ba494ed"
+    },
+    {
+      "file": "operator-02.log",
+      "bytes": 2189,
+      "sha256": "e8528f1a922c30c9d86f8f7f88414fe27fe75e8be1805082523c14a21e42c241"
+    }
+  ],
+  "rawLogsUploaded": false,
+  "newRealRuntimeOrModelInvocation": false,
+  "originalCanonicalAndProvenance": "unknown: original store inaccessible",
+  "liveDiagnosticSinkAndHostCapture": "Not Run: opt-in DI only; no persistent sink or CLI activation delivered"
+}
