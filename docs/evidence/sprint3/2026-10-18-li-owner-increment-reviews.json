@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-18",
+  "reviewer": "LI",
+  "flutter": "3.47.2",
+  "dart": "3.13.2",
+  "node": "24.19.0",
+  "typescript": "7.0.2",
+  "checks": {
+    "145": {
+      "head": "9dbf94f5b772f3e7932813d9e8407e9bf8850aa4",
+      "base": "dcdc3ba13f1a4bac192775b7a45f8e37bc4c680e",
+      "pass": 45,
+      "fail": 1,
+      "testExit": 1,
+      "analysisExit": 0,
+      "formatExit": 1,
+      "review": "CHANGES_REQUESTED",
+      "reviewUrl": "https://github.com/3427564237/enmori-app/pull/145#pullrequestreview-5562413651",
+      "scope": "Footprint device-zone label; new test navigation does not settle Home layout. Original single-case exit1; pump-only diagnostic exit0; edits restored."
+    },
+    "146": {
+      "head": "2d42a4832393d958a9b7e2fb7629c1a341b14d2b",
+      "source": "710f16bd05f516f040418e4ba81bd1f28ebf4002",
+      "pass": 27,
+      "fail": 0,
+      "testExit": 0,
+      "compileExit": 0,
+      "unchangedExportedInputs": 1325,
+      "changedHashesMatched": 3,
+      "review": "APPROVED_EVIDENCE_ONLY",
+      "reviewUrl": "https://github.com/3427564237/enmori-app/pull/146#pullrequestreview-5562412343",
+      "scope": "Policy preparation with actual Fastify and explicit doubles. SHI new-code review pending at observation; actual capture/access/storage/runner unimplemented."
+    },
+    "147": {
+      "head": "f0a1c4698e18ceac9cc4320169530a0f74857343",
+      "source": "f8b49f917eebc7aa244c9d11d6876487938bae16",
+      "pass": 90,
+      "fail": 0,
+      "testExit": 0,
+      "analysisExit": 0,
+      "formatExit": 0,
+      "review": "APPROVED",
+      "reviewUrl": "https://github.com/3427564237/enmori-app/pull/147#pullrequestreview-5562411842",
+      "scope": "Native Persona Name guidance/error wrapping and existing field semantics."
+    },
+    "148": {
+      "head": "e1a51eab55522a53c2b7c98440a46660098b4635",
+      "source": "5e147b7dfedae2f51c7caee2babfcd0bca19b88b",
+      "pass": 251,
+      "fail": 0,
+      "testExit": 0,
+      "analysisExit": 0,
+      "formatExit": 0,
+      "review": "APPROVED",
+      "reviewUrl": "https://github.com/3427564237/enmori-app/pull/148#pullrequestreview-5562412094",
+      "scope": "Stable composer, multiline reachability and editing/selection/focus preservation; fixtures only."
+    }
+  },
+  "rawLogs": [
+    {
+      "path": "output/li-owner-review-20261018/enmori-review-148-tests.log",
+      "bytes": 51614,
+      "sha256": "83d44ebbba4578fe1d685c28cd765ed6c6a15983b252189c273be4e481aa4647"
+    },
+    {
+      "path": "output/li-owner-review-20261018/enmori-review-147-tests.log",
+      "bytes": 17322,
+      "sha256": "2f9dc5c19540229d6710209c512188e113faed88cdacabb4d157015a42985fbf"
+    },
+    {
+      "path": "output/li-owner-review-20261018/enmori-review-146-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "output/li-owner-review-20261018/enmori-review-146-tests.log",
+      "bytes": 3057,
+      "sha256": "10eacda14740457a9605b6e303013db12b284d4b523f83ca6e649c855e445b51"
+    },
+    {
+      "path": "output/li-owner-review-20261018/enmori-review-145-tests.log",
+      "bytes": 12638,
+      "sha256": "de7a2333e7e240b67be98dcf4ac301e3bb2b75d2ba3c42057a879af255b87cec"
+    },
+    {
+      "path": "output/li-owner-review-20261018/enmori-review-145-single-original.log",
+      "bytes": 4424,
+      "sha256": "ec31c0f41eca824dfe48ea24a518f30be95b86326e1bb19e0f2a2483b3a249c1"
+    },
+    {
+      "path": "output/li-owner-review-20261018/enmori-review-145-pump-only.log",
+      "bytes": 221,
+      "sha256": "166e830613c3ccff889bc4775050f0fddf264d2a3f9c63c6f3cb173fc0767bb4"
+    },
+    {
+      "path": "output/li-owner-review-20261018/enmori-review-145-hypothesis.log",
+      "bytes": 221,
+      "sha256": "166e830613c3ccff889bc4775050f0fddf264d2a3f9c63c6f3cb173fc0767bb4"
+    }
+  ],
+  "whitespace": "All four scoped diffs pass",
+  "notRun": [
+    "physical Android/iOS/TalkBack",
+    "model/provider calls",
+    "actual capture deployment/access/physical deletion",
+    "combined candidate gate"
+  ],
+  "setupFailures": [
+    "First backend export invoked from /tmp without an explicit Git directory; failed before setup. Corrected explicit git -C; no product changes.",
+    "Initial Check-in test selection used a nonexistent directory; no tests ran in that command. Corrected to existing five files before the recorded45/1 run."
+  ],
+  "diagnosticProbe": "145 diagnostic helper modifications were restored. Passing probes are not passes on the owner commit.",
+  "approval": "Human LI explicitly approved the concrete storage/access and system-level cleanup landing; see S-PM-1018-LI-DIAGNOSTIC-CAPTURE-LANDING at078ef5b."
+}
