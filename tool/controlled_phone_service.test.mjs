@@ -241,3 +241,15 @@ test('demo feature opt-in is explicit, bounded and passed to the existing owned 
   assert(!JSON.stringify(f.reports.filter(row => row.name !== 'handoff.json')).includes('private-test-only'));
   assert.equal(f.reports.find(row => row.name === 'handoff.json').report.password, 'private-test-only');
 });
+
+
+test('v2 explicitly selects dual accounts and matched open strategy; private credentials never reach status', async () => {
+  const f = fixture(), original = f.deps.createService;
+  f.service.privateHandoff = () => ({ projectId: 'demo-enmori-rmvp01a-r10', email: 'synthetic@example.invalid', password: 'private-test-only', secondaryAccount: { email: 'second@example.invalid', password: 'private-second-only' } });
+  f.deps.createService = async options => { assert.equal(options.dualAccounts, true); assert.equal(options.conversationStrategy, 'open_conversation_v1'); return original(options); };
+  assert.equal(await runPhoneService({ ...config(), demoFeatures: true, dualAccounts: true }, f.deps), 0);
+  assert.equal(f.reports.find(row => row.name === 'handoff.json').report.schemaVersion, 2);
+  assert.equal(f.reports.find(row => row.name === 'handoff.json').report.secondaryAccount.password, 'private-second-only');
+  assert(!JSON.stringify(f.reports.filter(row => row.name !== 'handoff.json')).includes('private-'));
+  for (const bad of [{ dualAccounts: true }, { demoFeatures: true, dualAccounts: false }, { demoFeatures: true, dualAccounts: 'true' }]) assert.throws(() => validatePhoneServiceConfiguration({ ...config(), ...bad }));
+});

@@ -100,6 +100,29 @@ class HandoffTests(unittest.TestCase):
                                runner=self.runner, clock=self.clock, sleep=lambda _: None,
                                consume_timeout=2, attempt_token=self.token)
 
+    def test_v2_handoff_requires_two_exact_distinct_bounded_accounts(self):
+        self.value.update(schemaVersion=2, secondaryAccount={"email": "second@example.invalid", "password": "SyntheticSecondPassword!"})
+        self.write_handoff()
+        self.assertEqual(target.handoff(self.private)[1], 42425)
+        for account in [{"email": self.value["email"], "password": "SyntheticSecondPassword!"},
+                        {"email": "second@example.invalid", "password": "short"},
+                        {"email": "second@example.invalid", "password": "SyntheticSecondPassword!", "extra": True}]:
+            self.value["secondaryAccount"] = account
+            self.write_handoff()
+            with self.assertRaises(target.Blocked):
+                target.handoff(self.private)
+
+    def test_sponsor_package_is_verified_before_adb_and_arbitrary_package_refused(self):
+        result = target.transfer(self.apk, self.private, "USBTEST00001", adb="/tools/adb", aapt="/tools/aapt",
+                                 runner=self.runner, package="com.enmori.app.sponsordemo")
+        self.assertEqual(result["category"], "apk_identity_refused")
+        self.assertEqual(len(self.calls), 1)
+        self.calls.clear()
+        result = target.transfer(self.apk, self.private, "USBTEST00001", adb="/tools/adb", aapt="/tools/aapt",
+                                 runner=self.runner, package="com.enmori.app")
+        self.assertEqual(result["status"], "Blocked")
+        self.assertEqual(self.calls, [])
+
     def test_success_verifies_installed_bytes_and_consumption_without_credential_output(self):
         report = self.transfer()
         self.assertEqual(report["status"], "Pass")

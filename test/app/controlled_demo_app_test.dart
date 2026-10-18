@@ -14,6 +14,7 @@ import 'package:http/testing.dart';
 
 final class AuthDouble implements AuthRepository {
   final sessions = StreamController<AuthSession>.broadcast(sync: true);
+  int registrations = 0;
   @override
   Stream<AuthSession> watchSession() => sessions.stream;
   @override
@@ -34,11 +35,88 @@ final class AuthDouble implements AuthRepository {
   Future<Result<void>> register({
     required String email,
     required String password,
-  }) async => throw StateError('Registration is outside this composition');
+  }) async {
+    registrations++;
+    return const Success(null);
+  }
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  testWidgets(
+    'v2 enters registration through the existing router and keeps login available after observed signout',
+    (tester) async {
+      final auth = AuthDouble();
+      final client = MockClient(
+        (request) async => http.Response(
+          jsonEncode({
+            'status': 'completed',
+            'account': {
+              'username': 'controlled_primary',
+              'optionalProcessingConsent': 'accepted',
+              'checkInVisibility': 'private',
+              'onboardingCompletedAt': '2026-10-19T00:00:00.000Z',
+            },
+          }),
+          200,
+        ),
+      );
+      await tester.pumpWidget(
+        ControlledDemoApp(
+          baseUri: Uri.parse('https://127.0.0.1:42001/'),
+          auth: auth,
+          client: client,
+          dualAccounts: true,
+          onClose: () async => const Success(null),
+        ),
+      );
+      await tester.pump();
+      auth.sessions.add(const AuthSessionUnauthenticated());
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('route-register')), findsOneWidget);
+      expect(find.textContaining('No public registration'), findsNothing);
+      await tester.enterText(
+        find.byKey(const Key('r6-register-email')),
+        'controlled-primary@example.invalid',
+      );
+      await tester.enterText(
+        find.byKey(const Key('r6-register-password')),
+        'SyntheticPassword1!',
+      );
+      await tester.enterText(
+        find.byKey(const Key('r6-register-confirm-password')),
+        'SyntheticPassword1!',
+      );
+      await tester.ensureVisible(find.byKey(const Key('r6-register-submit')));
+      await tester.tap(find.byKey(const Key('r6-register-submit')));
+      await tester.pumpAndSettle();
+      expect(auth.registrations, 1);
+      expect(
+        find.byKey(const Key('route-register')),
+        findsOneWidget,
+      ); // command does not invent a session
+      await tester.pump(
+        const Duration(seconds: 5),
+      ); // let the success SnackBar leave the bottom action
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('register-sign-in')));
+      await tester.tap(find.byKey(const Key('register-sign-in')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('route-sign-in')), findsOneWidget);
+      auth.sessions.add(
+        const AuthSessionAuthenticated(subject: 'controlled_primary'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('route-home')), findsOneWidget);
+      auth.sessions.add(const AuthSessionUnauthenticated());
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('route-home')), findsNothing);
+      expect(find.byKey(const Key('route-register')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await auth.sessions.close();
+      client.close();
+    },
+  );
   testWidgets(
     'one observed owner and HTTPS client serve Home, Profile, interests, Friend, Footprint and Persona',
     (tester) async {

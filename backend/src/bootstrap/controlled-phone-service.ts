@@ -5,6 +5,8 @@ import { ListOwnCheckInsForDate } from "../check-ins/application/check-in-histor
 import { FirestoreCheckInHistoryRepository } from "../check-ins/infrastructure/firestore-check-in-history-repository.js";
 import { FirebaseAdminCheckInHistoryGateway } from "../check-ins/infrastructure/firebase-admin-check-in-history-gateway.js";
 import { createHistoryCursorCodec } from "../check-ins/infrastructure/aes-gcm-history-cursor-codec.js";
+import { CompleteOnboarding } from "../onboarding/application/complete-onboarding.js";
+import { friendPairKey } from "../friends/infrastructure/firestore-friend-repository.js";
 import { FriendRequests } from "../friends/application/friend-requests.js";
 import { FirestoreFriendRepository } from "../friends/infrastructure/firestore-friend-repository.js";
 import { GetInterestTags } from "../interests/application/get-interest-tags.js";
@@ -48,7 +50,9 @@ const runtimePath = "ai_runtime_fence/current";
  * Emulator pair. Ordinary/controlled-demo bootstrap never imports this module.
  * There is no automatic journey, one-generation cap, fixture reset after a
  * request, cloud fallback, new HTTP operation or fabricated Note authority.
- * Only this fresh synthetic owner is admitted. Default mode has no source
+ * Default mode admits one fresh synthetic owner; explicit v2 admits exactly two
+ * reserved email identities, with primary registration and a precreated secondary.
+ * Default mode has no source
  * writer. Explicit demo mode admits only the existing create-only canonical UTC
  * Check-in writer; no edit/delete/import/restore exists during this process.
  * IDs cannot be reused while records remain. Final deletion happens only after
@@ -63,12 +67,17 @@ export async function createControlledPhoneService(options: {
   readonly eventBrowse?: IsolatedEventBrowseInput;
   /** Explicit isolated demo composition; ordinary and existing phone modes stay unchanged. */
   readonly demoFeatures?: true;
+  /** v2 reserves primary registration and precreates only the secondary. */
+  readonly dualAccounts?: true;
+  readonly conversationStrategy?: "open_conversation_v1";
   readonly diagnostics?: ControlledPhoneDiagnostics;
 }) {
   const environment = requireControlledEmulatorEnvironment(options.environment);
   requireProof(environment.projectId === "demo-enmori-rmvp01a-r10" && options.exclusiveEmulatorsVerified === true);
   requireProof(JSON.stringify(requireControlledEmulatorEnvironment(process.env)) === JSON.stringify(environment));
   requireProof(options.demoFeatures === undefined || options.demoFeatures === true);
+  requireProof(options.dualAccounts === undefined || (options.dualAccounts === true && options.demoFeatures === true));
+  requireProof(options.conversationStrategy === undefined || (options.conversationStrategy === "open_conversation_v1" && options.dualAccounts === true));
   requireProof(typeof options.transport?.generate === "function" && typeof options.compiler?.compile === "function");
   const firebase = initializeApp({ projectId: environment.projectId }, `controlled-phone-${randomUUID()}`);
   const db = getFirestore(firebase), auth = getAuth(firebase);
@@ -76,6 +85,13 @@ export async function createControlledPhoneService(options: {
   const account = `accounts/${owner}`, binding = `auth_bindings/${createAuthBindingDocumentId(uid)!}`;
   let email = `${uid}@example.invalid`, password = `Synthetic_${randomUUID()}`;
   let authOwned = false, accountOwned = false, bindingOwned = false;
+  const secondaryOwner = randomUUID(), secondaryUid = `controlled-phone-${randomUUID()}`;
+  let secondaryEmail = `${secondaryUid}@example.invalid`, secondaryPassword = `Synthetic_${randomUUID()}`;
+  let primaryUid: string | undefined, secondaryAuthOwned = false;
+  const ownerIds = options.dualAccounts ? [owner, secondaryOwner] : [owner];
+  const admittedUids = new Map<string, string>();
+  if (!options.dualAccounts) admittedUids.set(email, uid);
+  else admittedUids.set(secondaryEmail, secondaryUid);
   let phase: "starting" | "running" | "stopping" | "held" | "closed" = "starting";
   let calls = 0, compilerPending = 0, modelPending = 0, modelAttempts = 0, maintenanceHealthy = true, retirementFailed = false;
   let joined: Awaited<ReturnType<typeof createIsolatedConversationComposition>> | undefined;
@@ -137,35 +153,33 @@ export async function createControlledPhoneService(options: {
       }
       requireProof(quiet());
       if (joined && !epochRetired) {
-        const parents = await db.collection(`${account}/conversations`).get();
-        for (const parent of parents.docs) targets.add(parent.id);
-        const discovered = await db.collection("ai_operation_fences").where("ownerAccountId", "==", owner).get();
-        for (const fence of discovered.docs) {
-          requireProof(typeof fence.data().conversationId === "string"); targets.add(fence.data().conversationId);
+        for (const ownerId of ownerIds) {
+          const conversationIds = new Set(targets);
+          const parents = await db.collection(`accounts/${ownerId}/conversations`).get();
+          for (const parent of parents.docs) conversationIds.add(parent.id);
+          const discovered = await db.collection("ai_operation_fences").where("ownerAccountId", "==", ownerId).get();
+          for (const fence of discovered.docs) {
+            requireProof(typeof fence.data().conversationId === "string"); conversationIds.add(fence.data().conversationId);
+          }
+          for (const target of conversationIds) await joined.io.settled(ownerId, target);
         }
-        for (const target of targets) await joined.io.settled(owner, target);
         requireProof(quiet());
-        const fences = await db.collection("ai_operation_fences").where("ownerAccountId", "==", owner).get();
-        // Delete only this run's confirmed CLOSED fences, never another epoch.
-        // A failed/unknown retirement remains a hold; no reset makes it pass.
-        for (const fence of fences.docs) {
-          requireProof(fence.data().processEpoch === joined.epoch.processEpoch && fence.data().state === "closed");
-        }
+        const fences = (await Promise.all(ownerIds.map(ownerId => db.collection("ai_operation_fences").where("ownerAccountId", "==", ownerId).get()))).flatMap(snapshot => snapshot.docs);
+        for (const fence of fences) requireProof(fence.data().processEpoch === joined.epoch.processEpoch && fence.data().state === "closed");
         await db.runTransaction(async tx => {
           const current = await tx.get(db.doc(runtimePath));
           const sweep = await tx.get(db.doc("ai_cleanup_progress/source_sweep"));
           requireProof(current.data()?.processEpoch === joined!.epoch.processEpoch && current.data()?.generation === joined!.epoch.generation);
-          // A stopped failed sweep can retain a checkpoint. It is not covered
-          // by owned Account recursion; preserve it instead of claiming cleanup.
           requireProof(!sweep.exists);
         }, { maxAttempts: 1 });
-        if (accountOwned) {
-          await db.recursiveDelete(db.doc(account));
-          requireProof(!(await db.doc(account).get()).exists && (await db.doc(account).listCollections()).length === 0);
-          accountOwned = false;
+        for (const ownerId of ownerIds) {
+          const ownedAccount = db.doc(`accounts/${ownerId}`);
+          await db.recursiveDelete(ownedAccount);
+          requireProof(!(await ownedAccount.get()).exists && (await ownedAccount.listCollections()).length === 0);
         }
-        for (const fence of fences.docs) await fence.ref.delete();
-        requireProof((await db.collection("ai_operation_fences").where("ownerAccountId", "==", owner).get()).empty);
+        accountOwned = false;
+        for (const fence of fences) await fence.ref.delete();
+        for (const ownerId of ownerIds) requireProof((await db.collection("ai_operation_fences").where("ownerAccountId", "==", ownerId).get()).empty);
         await db.runTransaction(async tx => {
           const current = await tx.get(db.doc(runtimePath));
           requireProof(current.data()?.processEpoch === joined!.epoch.processEpoch && current.data()?.generation === joined!.epoch.generation);
@@ -178,10 +192,13 @@ export async function createControlledPhoneService(options: {
       if (options.demoFeatures) {
         // No writer can enter after phase=stopping; quiet() observes original SDK
         // settlement. Only this fresh owner and explicitly created fixture paths.
-        for (const [collection, field] of [["check_ins", "ownerAccountId"], ["idempotency", "scope"]] as const) {
-          const owned = await db.collection(collection).where(field, "==", owner).get();
-          for (const record of owned.docs) await record.ref.delete();
-          requireProof((await db.collection(collection).where(field, "==", owner).get()).empty);
+        const cleanupScopes = [...ownerIds, ...admittedUids.values()];
+        for (const [collection, field, scopes] of [["check_ins", "ownerAccountId", ownerIds], ["idempotency", "scope", cleanupScopes], ["username_reservations", "accountId", ownerIds]] as const) {
+          for (const scope of scopes) {
+            const owned = await db.collection(collection).where(field, "==", scope).get();
+            for (const record of owned.docs) await record.ref.delete();
+            requireProof((await db.collection(collection).where(field, "==", scope).get()).empty);
+          }
         }
         for (const path of demoOwnedPaths) {
           await db.recursiveDelete(db.doc(path));
@@ -196,7 +213,25 @@ export async function createControlledPhoneService(options: {
           throw unavailable();
         })); authOwned = false;
       }
-      email = ""; password = "";
+      if (options.dualAccounts) {
+        for (const admittedUid of admittedUids.values()) {
+          const ownedBinding = db.doc(`auth_bindings/${createAuthBindingDocumentId(admittedUid)!}`);
+          await ownedBinding.delete(); requireProof(!(await ownedBinding.get()).exists);
+        }
+        // A primary may register and close before its first Backend request.
+        // This exact reserved email was absent at exclusive startup; no broad Auth sweep.
+        const registered = await (primaryUid ? auth.getUser(primaryUid) : auth.getUserByEmail(email)).catch(error => {
+          if (error?.code === "auth/user-not-found") return undefined;
+          throw unavailable();
+        });
+        if (registered) {
+          requireProof(primaryUid === undefined || primaryUid === registered.uid);
+          await db.doc(`auth_bindings/${createAuthBindingDocumentId(registered.uid)!}`).delete();
+          await auth.deleteUser(registered.uid);
+        }
+        if (secondaryAuthOwned) { await auth.deleteUser(secondaryUid); secondaryAuthOwned = false; }
+      }
+      email = ""; password = ""; secondaryEmail = ""; secondaryPassword = "";
       await db.terminate(); await deleteApp(firebase);
       phase = "closed";
       return { cleanupConfirmed: true, operatorHold: false };
@@ -214,19 +249,39 @@ export async function createControlledPhoneService(options: {
     // an empty fixture. Startup never clears it or silently resumes a new epoch.
     requireProof((await db.listCollections()).length === 0 && (await auth.listUsers(1)).users.length === 0);
     startupWritesAttempted = true;
-    await auth.createUser({ uid, email, password }); authOwned = true;
-    await db.doc(binding).create({ accountId: owner }); bindingOwned = true;
-    await db.doc(account).create({ username: `p_${owner.replaceAll("-", "").slice(0, 16)}`,
-      optionalProcessingConsent: "accepted", checkInVisibility: "private", onboardingCompletedAt: new Date().toISOString(), purposeRevocationGeneration: 0 }); accountOwned = true;
-    await db.doc(`${account}/persona_state/current`).create({ livePersonaIds: [], stateRevision: 0 });
+    if (!options.dualAccounts) {
+      await auth.createUser({ uid, email, password }); authOwned = true;
+      await db.doc(binding).create({ accountId: owner }); bindingOwned = true;
+      await db.doc(account).create({ username: `p_${owner.replaceAll("-", "").slice(0, 16)}`,
+        optionalProcessingConsent: "accepted", checkInVisibility: "private", onboardingCompletedAt: new Date().toISOString(), purposeRevocationGeneration: 0 }); accountOwned = true;
+    } else {
+      await auth.createUser({ uid: secondaryUid, email: secondaryEmail, password: secondaryPassword }); secondaryAuthOwned = true;
+      const secondaryBinding = `auth_bindings/${createAuthBindingDocumentId(secondaryUid)!}`;
+      const secondaryUsername = `s_${secondaryOwner.replaceAll("-", "").slice(0, 16)}`;
+      const records = {
+        [secondaryBinding]: { accountId: secondaryOwner },
+        [`accounts/${secondaryOwner}`]: { username: secondaryUsername, optionalProcessingConsent: "accepted", checkInVisibility: "private", onboardingCompletedAt: new Date().toISOString(), purposeRevocationGeneration: 0,
+          displayName: "Demo friend", profileVisibility: "public", profileRevision: 1 },
+        [`username_reservations/${secondaryUsername}`]: { accountId: secondaryOwner },
+        [`friend_pairs/${friendPairKey(owner, secondaryOwner)}`]: { accountIds: [owner, secondaryOwner].sort(), blockedByAccountIds: [], friendship: false, pending: null },
+      };
+      for (const [path, record] of Object.entries(records)) { demoOwnedPaths.add(path); await db.doc(path).create(record); }
+    }
+    for (const ownerId of ownerIds) await db.doc(`accounts/${ownerId}/persona_state/current`).create({ livePersonaIds: [], stateRevision: 0 });
     if (options.demoFeatures) {
       const records = {
         [`friend_access/${owner}`]: { eligibilityState: "eligible" },
         [`friend_lists/${owner}`]: { initialized: true },
         [`friend_inboxes/${owner}`]: { initialized: true },
         [`account_interests/${owner}`]: { interestTagIds: [], revision: 1 },
-        ["interest_tags/interest_music"]: { displayName: "Music fixture", lifecycleState: "active", revision: 1 },
+        ["interest_tags/interest_music"]: { displayName: options.dualAccounts ? "Music" : "Music fixture", lifecycleState: "active", revision: 1 },
       };
+      if (options.dualAccounts) Object.assign(records, {
+        [`friend_access/${secondaryOwner}`]: { eligibilityState: "eligible" },
+        [`friend_lists/${secondaryOwner}`]: { initialized: true },
+        [`friend_inboxes/${secondaryOwner}`]: { initialized: true },
+        [`account_interests/${secondaryOwner}`]: { interestTagIds: [], revision: 1 },
+      });
       for (const [path, record] of Object.entries(records)) {
         demoOwnedPaths.add(path); await db.doc(path).create(record);
       }
@@ -277,16 +332,31 @@ export async function createControlledPhoneService(options: {
       },
     }), createHistoryCursorCodec(), clock);
     const unavailableOperation = { execute: async () => err(appFailure("SERVICE_UNAVAILABLE")) };
+    const completePrimary = new CompleteOnboarding(new FirestoreOnboardingRepository(gateway, options.environment), clock, { generate: () => ok(owner) });
+    const completeOnboarding: Pick<CompleteOnboarding, "execute"> = options.dualAccounts ? {
+      execute: input => input.principal.firebaseUid === primaryUid ? completePrimary.execute(input) : Promise.resolve(err(appFailure("AUTH_FORBIDDEN"))),
+    } : unavailableOperation;
     app = await buildApp({
       ...(options.diagnostics ? { controlledPhoneDiagnostics: options.diagnostics } : {}),
       identityVerifier: { verifyIdToken: async token => {
         if (isClosed()) return { kind: "dependency_unavailable" };
         const result = await tracked(() => verifier.verifyIdToken(token));
         if (isClosed()) return { kind: "dependency_unavailable" };
-        return result.kind === "verified" && result.principal.firebaseUid !== uid ? { kind: "forbidden" } : result;
+        if (result.kind !== "verified") return result;
+        if (!options.dualAccounts) return result.principal.firebaseUid === uid ? result : { kind: "forbidden" };
+        try {
+          const identity = await tracked(() => auth.getUser(result.principal.firebaseUid));
+          if (isClosed() || identity.disabled || (identity.email !== email && identity.email !== secondaryEmail)) return { kind: "forbidden" };
+          const boundUid = admittedUids.get(identity.email);
+          if (boundUid !== undefined && boundUid !== identity.uid) return { kind: "forbidden" };
+          if (identity.email === email && boundUid === undefined) {
+            primaryUid = identity.uid; admittedUids.set(email, identity.uid);
+          }
+          return result;
+        } catch { return { kind: "dependency_unavailable" }; }
       } },
       accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, options.environment)),
-      completeOnboarding: unavailableOperation, getOnboarding: new GetOnboarding(new FirestoreOnboardingRepository(gateway)),
+      completeOnboarding, getOnboarding: new GetOnboarding(new FirestoreOnboardingRepository(gateway)),
       createCheckIn: options.demoFeatures ? new CreateCheckIn(checkIns, clock, new CryptoOpaqueIdGenerator()) : unavailableOperation,
       getCheckIn: options.demoFeatures ? new GetCheckIn(checkIns) : unavailableOperation,
       getInterestTags: options.demoFeatures ? new GetInterestTags(interests) : unavailableOperation,
@@ -301,7 +371,8 @@ export async function createControlledPhoneService(options: {
     return { app, observation, stopAndClean,
       eventBrowseControl: { enable: eventBrowse.enable, disable: eventBrowse.disable, observation: eventBrowse.observation },
       /** Private in-process handoff only. Never log, publish, or embed in APK. */
-      privateHandoff: () => { requireProof(phase === "running"); return { projectId: environment.projectId, email, password }; },
+      privateHandoff: () => { requireProof(phase === "running"); return { projectId: environment.projectId, email, password,
+        ...(options.dualAccounts ? { secondaryAccount: { email: secondaryEmail, password: secondaryPassword } } : {}) }; },
     };
   } catch {
     if (startupWritesAttempted) {

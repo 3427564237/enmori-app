@@ -26,9 +26,11 @@ const exact = (value, keys) => value && typeof value === 'object' && !Array.isAr
   Object.keys(value).length === keys.length && Object.keys(value).every(key => keys.includes(key));
 export function validatePhoneServiceConfiguration(config) {
   const keys = ['controlledHostVerified', 'existingHostGenerationLeaseSettled', 'binding', 'tokenizerFiles', 'phone'];
-  assert(exact(config, keys) || exact(config, [...keys, 'eventBrowse']) || exact(config, [...keys, 'demoFeatures']) || exact(config, [...keys, 'eventBrowse', 'demoFeatures']));
+  const allowed = [...keys, 'eventBrowse', 'demoFeatures', 'dualAccounts'];
+  assert(config && typeof config === 'object' && keys.every(key => Object.hasOwn(config, key)) && Object.keys(config).every(key => allowed.includes(key)));
+  if (Object.hasOwn(config, 'dualAccounts')) assert(config.dualAccounts === true && config.demoFeatures === true);
   if (Object.hasOwn(config, 'demoFeatures')) assert.equal(config.demoFeatures, true);
-  const { phone, eventBrowse, demoFeatures, ...existing } = config; validateZhouModelConfiguration(existing);
+  const { phone, eventBrowse, demoFeatures, dualAccounts, ...existing } = config; validateZhouModelConfiguration(existing);
   if (Object.hasOwn(config, 'eventBrowse')) {
     assert(exact(eventBrowse, ['key']));
     assert(typeof eventBrowse.key === 'string' && /^[A-Za-z0-9_-]{1,256}$/u.test(eventBrowse.key));
@@ -180,7 +182,7 @@ export async function runPhoneService(config, dependencies = {}) {
   const eventCommand = dependencies.eventCommand ?? (() => takeEventBrowseCommand(phone.sessionDirectory));
   const wait = dependencies.wait ?? (() => delay(500));
   let live = true, service, listener, listenerClosed = false, cleaned = false, constructing = false, cleanupConfirmed = false;
-  const compiler = dependencies.compiler ?? new ControlledConversationPrompt(new ControlledTokenizerProcess({ ...config.tokenizerFiles, current: () => live }));
+  const compiler = dependencies.compiler ?? new ControlledConversationPrompt(new ControlledTokenizerProcess({ ...config.tokenizerFiles, current: () => live }), ...(config.dualAccounts ? ["open_conversation_v1"] : []));
   // The actual CLI supplies the installed Q14 capture. Test seams retain the
   // existing isolated in-process path; ordinary application bootstrap is unchanged.
   const diagnostics = dependencies.diagnostics;
@@ -208,12 +210,12 @@ export async function runPhoneService(config, dependencies = {}) {
       key: () => live ? config.eventBrowse.key : undefined,
       enabled: () => service?.eventBrowseControl.observation().enabled === true,
     }) } : undefined;
-    service = await (dependencies.createService ?? createControlledPhoneService)({ environment: process.env, exclusiveEmulatorsVerified: true, ...(config.demoFeatures ? { demoFeatures: true } : {}), transport, compiler,
+    service = await (dependencies.createService ?? createControlledPhoneService)({ environment: process.env, exclusiveEmulatorsVerified: true, ...(config.demoFeatures ? { demoFeatures: true } : {}), ...(config.dualAccounts ? { dualAccounts: true, conversationStrategy: "open_conversation_v1" } : {}), transport, compiler,
       ...(eventBrowse ? { eventBrowse } : {}), ...(diagnostics ? { diagnostics } : {}) });
     listener = (dependencies.createHttpsServer ?? createHttpsServer)({ cert: read(phone.certificatePath), key: read(phone.keyPath) }, service.app.routing);
     await new Promise((done, reject) => { listener.once('error', reject); listener.listen(0, '127.0.0.1', done); });
     const address = listener.address(); assert(address && typeof address !== 'string');
-    publish('handoff.json', { schemaVersion: 1, ...service.privateHandoff(), baseUri: `https://127.0.0.1:${address.port}/`,
+    publish('handoff.json', { schemaVersion: config.dualAccounts ? 2 : 1, ...service.privateHandoff(), baseUri: `https://127.0.0.1:${address.port}/`,
       certificateBase64: read(phone.certificatePath).toString('base64'), authEmulatorHost: '127.0.0.1:9099',
       lifetime: 'until-explicit-stop-in-this-owned-process', syntheticOwnerOnly: true });
     let stopping = false, eventControlFailed = false;

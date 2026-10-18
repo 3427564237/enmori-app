@@ -402,6 +402,7 @@ final class _ControlledPhoneHarnessState extends State<ControlledPhoneHarness> {
           auth: connection.auth,
           client: connection.client,
           onClose: () => _exit(connection),
+          dualAccounts: configuration.dualAccounts,
         );
       }
       return AiNetworkHarnessApp(

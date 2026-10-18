@@ -507,3 +507,101 @@ test("explicit demo joins saved Note AI, canonical provenance, real history/soci
     await db.terminate(); await deleteApp(probe);
   }
 });
+
+test("v2 registers only the reserved primary journey, isolates two verified identities, saves interests and completes real Friend handoff; exact cleanup preserves unrelated data", async () => {
+  const service = await createControlledPhoneService({ ...options, demoFeatures: true, dualAccounts: true });
+  const env = requireControlledEmulatorEnvironment(process.env);
+  const probe = initializeApp({ projectId: env.projectId }, randomUUID()), db = getFirestore(probe), auth = getAuth(probe);
+  const privateFields = service.privateHandoff();
+  assert(privateFields.secondaryAccount);
+  const secondary = privateFields.secondaryAccount;
+  const foreign = await auth.createUser({ email: `foreign-${randomUUID()}@example.invalid`, password: "Synthetic_password!" });
+  const unrelated = db.doc(`unrelated_operator_data/${randomUUID()}`);
+  await unrelated.create({ preserve: true });
+  const invoke = async (token: string, method: "GET" | "PUT" | "POST", url: string, expected: number, payload?: object) => {
+    const response = await service.app.inject({ method, url, headers: { authorization: `Bearer ${token}`, "idempotency-key": randomUUID() }, ...(payload ? { payload } : {}) });
+    assert.equal(response.statusCode, expected);
+    return response.json();
+  };
+  try {
+    assert.equal((await auth.listUsers()).users.length, 2); // secondary + unrelated, never a precreated primary
+    await assert.rejects(auth.getUserByEmail(privateFields.email), error => (error as { code?: string }).code === "auth/user-not-found");
+    const registered = await fetch(`http://${env.authHost}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=controlled-emulator-key`, {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: privateFields.email, password: privateFields.password, returnSecureToken: true }), signal: AbortSignal.timeout(15_000),
+    });
+    assert.equal(registered.status, 200);
+    const { idToken: primaryToken, localId: primaryUid } = await registered.json() as { idToken: string; localId: string };
+    assert.equal((await invoke(primaryToken, "GET", "/v1/me/onboarding", 200)).status, "required");
+    await invoke(primaryToken, "PUT", "/v1/me/onboarding", 201, { username: "sponsor_primary", initialChoice: "accept" });
+    await invoke(primaryToken, "PUT", "/v1/me/profile", 200, { displayName: "Primary demo", profileVisibility: "public", expectedRevision: 0 });
+    assert.equal((await invoke(primaryToken, "GET", "/v1/me/settings", 200)).settings.optionalProcessingConsent, "accepted");
+    assert.deepEqual((await invoke(primaryToken, "GET", "/v1/interest-tags", 200)).interestTags, [{ interestTagId: "interest_music", displayName: "Music" }]);
+    await invoke(primaryToken, "PUT", "/v1/me/interests", 200, { interestTagIds: ["interest_music"], expectedRevision: 1 });
+    const reloggedPrimary = await signIn(privateFields.email, privateFields.password);
+    assert.equal((await invoke(reloggedPrimary, "GET", "/v1/me/interests", 200)).interests.interestTags[0].interestTagId, "interest_music");
+    const secondaryToken = await signIn(secondary.email, secondary.password);
+    assert.deepEqual((await invoke(secondaryToken, "GET", "/v1/me/interests", 200)).interests.interestTags, []);
+    const secondaryUsername = (await invoke(secondaryToken, "GET", "/v1/me/profile", 200)).profile.username;
+    assert.equal((await invoke(primaryToken, "POST", "/v1/friends/lookup", 200, { username: secondaryUsername })).target.relationshipState, "can_send_request");
+    assert.equal((await invoke(primaryToken, "POST", "/v1/friend-requests", 200, { username: secondaryUsername })).target.relationshipState, "outgoing_request_pending");
+    const inbox = await invoke(secondaryToken, "GET", "/v1/me/friend-requests", 200);
+    assert.equal(inbox.requests.length, 1); assert.equal(inbox.requests[0].username, "sponsor_primary");
+    await invoke(secondaryToken, "POST", `/v1/friend-requests/${inbox.requests[0].requestRef}/accept`, 200);
+    assert.deepEqual((await invoke(await signIn(privateFields.email, privateFields.password), "GET", "/v1/me/friends", 200)).friends,
+      [{ username: secondaryUsername, displayName: "Demo friend" }]);
+    assert.deepEqual((await invoke(secondaryToken, "GET", "/v1/me/friends", 200)).friends,
+      [{ username: "sponsor_primary", displayName: "Primary demo" }]);
+    let note: { checkInId: string; createdAt: string } | undefined;
+    for (let index = 0; index < 21; index++) note = (await invoke(primaryToken, "POST", "/v1/check-ins", 201, { note: `Controlled paging note ${index}` })).checkIn;
+    assert(note);
+    const historyUrl = `/v1/me/check-ins?date=${note.createdAt.slice(0,10)}&timeZone=Etc%2FUTC`;
+    const first = await invoke(primaryToken, "GET", historyUrl, 200);
+    assert.equal(first.checkIns.length, 20); assert.equal(typeof first.nextCursor, "string");
+    const second = await invoke(primaryToken, "GET", `${historyUrl}&cursor=${encodeURIComponent(first.nextCursor)}`, 200);
+    assert.equal(second.checkIns.length, 1); assert.equal(second.nextCursor, null);
+    assert.equal(new Set([...first.checkIns, ...second.checkIns].map(row => row.checkInId)).size, 21);
+    assert.deepEqual((await invoke(secondaryToken, "GET", historyUrl, 200)).checkIns, []);
+    await invoke(secondaryToken, "GET", `/v1/check-ins/${note.checkInId}`, 404);
+    const foreignToken = await signIn(foreign.email!, "Synthetic_password!");
+    await invoke(foreignToken, "GET", "/v1/me/onboarding", 403);
+    await auth.updateUser(primaryUid, { email: `moved-${randomUUID()}@example.invalid` });
+    await invoke(primaryToken, "GET", "/v1/me/profile", 403); // token's stale email cannot grant identity
+    await auth.updateUser(primaryUid, { email: privateFields.email });
+    await cleanup(service);
+    assert.equal((await auth.getUser(foreign.uid)).uid, foreign.uid);
+    assert.deepEqual((await unrelated.get()).data(), { preserve: true });
+    assert.equal((await auth.listUsers()).users.length, 1);
+    assert.deepEqual((await db.listCollections()).map(collection => collection.id), ["unrelated_operator_data"]);
+  } finally {
+    await cleanup(service); await unrelated.delete(); await auth.deleteUser(foreign.uid);
+    await db.terminate(); await deleteApp(probe);
+  }
+});
+
+test("v2 cleanup owns a primary registered without a Backend request, and a replacement UID cannot reuse a previously bound email", async () => {
+  for (const bindFirst of [false, true]) {
+    const service = await createControlledPhoneService({ ...options, demoFeatures: true, dualAccounts: true });
+    const env = requireControlledEmulatorEnvironment(process.env);
+    const probe = initializeApp({ projectId: env.projectId }, randomUUID()), auth = getAuth(probe), db = getFirestore(probe);
+    const handoff = service.privateHandoff();
+    let replacement: string | undefined;
+    try {
+      const user = await auth.createUser({ email: handoff.email, password: handoff.password });
+      if (bindFirst) {
+        const first = await signIn(handoff.email, handoff.password);
+        assert.equal((await service.app.inject({ url: "/v1/me/onboarding", headers: { authorization: `Bearer ${first}` } })).statusCode, 200);
+        await auth.deleteUser(user.uid);
+        replacement = (await auth.createUser({ email: handoff.email, password: handoff.password })).uid;
+        const token = await signIn(handoff.email, handoff.password);
+        assert.equal((await service.app.inject({ url: "/v1/me/onboarding", headers: { authorization: `Bearer ${token}` } })).statusCode, 403);
+      }
+      await cleanup(service);
+      if (replacement) { assert.equal((await auth.getUser(replacement)).uid, replacement); await auth.deleteUser(replacement); replacement = undefined; }
+      assert.equal((await auth.listUsers()).users.length, 0);
+      assert.equal((await db.listCollections()).length, 0);
+    } finally {
+      await cleanup(service); if (replacement) await auth.deleteUser(replacement);
+      await db.terminate(); await deleteApp(probe);
+    }
+  }
+});

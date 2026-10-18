@@ -24,6 +24,55 @@ Map<String, Object> handoff() => {
 };
 
 void main() {
+  test('v2 validates two distinct accounts and never automatically signs in or retains registration password', () async {
+    final raw = {
+      ...handoff(),
+      'schemaVersion': 2,
+      'secondaryAccount': {
+        'email': 'synthetic-second@example.invalid',
+        'password': 'SyntheticSecondPassword1!',
+      },
+    };
+    final configuration = ControlledPhoneServiceConfiguration.parse(
+      jsonEncode(raw),
+    );
+    expect(configuration.dualAccounts, isTrue);
+    final auth = FakeAuthRepository();
+    addTearDown(auth.close);
+    expect(await configuration.signIn(auth), isA<Success<void>>());
+    expect(auth.signInCount, 0);
+    for (final invalid in [
+      {
+        ...raw,
+        'secondaryAccount': {
+          'email': raw['email'],
+          'password': 'SyntheticSecondPassword1!',
+        },
+      },
+      {
+        ...raw,
+        'secondaryAccount': {
+          'email': 'synthetic-second@example.invalid',
+          'password': 'short',
+        },
+      },
+      {
+        ...raw,
+        'secondaryAccount': {
+          'email': 'synthetic-second@example.invalid',
+          'password': 'SyntheticSecondPassword1!',
+          'extra': true,
+        },
+      },
+      {...raw, 'schemaVersion': 3},
+      {...handoff(), 'secondaryAccount': raw['secondaryAccount']},
+    ]) {
+      expect(
+        () => ControlledPhoneServiceConfiguration.parse(jsonEncode(invalid)),
+        throwsFormatException,
+      );
+    }
+  });
   test(
     'exact process handoff retains only bounded public connection fields',
     () {

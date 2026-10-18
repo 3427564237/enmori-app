@@ -15,7 +15,11 @@ val hciAndroidTestFlag = providers.environmentVariable("ENMORI_HCI_ANDROID_TEST"
 check(hciAndroidTestFlag == null || hciAndroidTestFlag == "true") {
     "ENMORI_HCI_ANDROID_TEST must be absent or exactly true"
 }
-check(personaAndroidTestFlag == null || hciAndroidTestFlag == null) {
+val sponsorDemoFlag = providers.environmentVariable("ENMORI_SPONSOR_DEMO").orNull
+check(sponsorDemoFlag == null || sponsorDemoFlag == "true") {
+    "ENMORI_SPONSOR_DEMO must be absent or exactly true"
+}
+check(listOf(personaAndroidTestFlag, hciAndroidTestFlag, sponsorDemoFlag).count { it != null } <= 1) {
     "Select only one isolated Android test package"
 }
 
@@ -49,6 +53,10 @@ android {
         getByName("debug") {
             if (personaAndroidTestFlag == "true") {
                 applicationIdSuffix = ".personatest"
+            }
+            if (sponsorDemoFlag == "true") {
+                applicationIdSuffix = ".sponsordemo"
+                manifestPlaceholders["enmoriApplicationLabel"] = "ENMORI Sponsor demo"
             }
             if (hciAndroidTestFlag == "true") {
                 applicationIdSuffix = ".hcitest"

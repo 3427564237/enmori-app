@@ -85,9 +85,11 @@ def handoff(path: Path) -> tuple[bytes, int]:
     except PrivateFileRefused:
         raise Blocked("preflight_refused") from None
     value = strict_object(data)
-    require(set(value) == {"schemaVersion", "projectId", "email", "password", "baseUri",
-                           "certificateBase64", "authEmulatorHost", "lifetime", "syntheticOwnerOnly"})
-    require(type(value["schemaVersion"]) is int and value["schemaVersion"] == 1)
+    version = value.get("schemaVersion")
+    require(type(version) is int and version in (1, 2))
+    fields = {"schemaVersion", "projectId", "email", "password", "baseUri",
+              "certificateBase64", "authEmulatorHost", "lifetime", "syntheticOwnerOnly"}
+    require(set(value) == fields | ({"secondaryAccount"} if version == 2 else set()))
     require(value["projectId"] == "demo-enmori-rmvp01a-r10"
             and value["authEmulatorHost"] == "127.0.0.1:9099"
             and value["syntheticOwnerOnly"] is True
@@ -96,6 +98,13 @@ def handoff(path: Path) -> tuple[bytes, int]:
     require(isinstance(value["password"], str)
             and 12 <= len(value["password"].encode("utf-16-le")) // 2 <= 256
             and not re.search(r"[\x00-\x1f\x7f]", value["password"]))
+    if version == 2:
+        secondary = value["secondaryAccount"]
+        require(type(secondary) is dict and set(secondary) == {"email", "password"})
+        require(isinstance(secondary["email"], str) and secondary["email"] != value["email"]
+                and re.fullmatch(r"[a-z0-9][a-z0-9._+-]{1,80}@example\.invalid", secondary["email"]) is not None)
+        require(isinstance(secondary["password"], str) and 12 <= len(secondary["password"].encode("utf-16-le")) // 2 <= 256
+                and not re.search(r"[\x00-\x1f\x7f]", secondary["password"]))
     require(isinstance(value["baseUri"], str)
             and re.fullmatch(r"https://127\.0\.0\.1:[1-9][0-9]{0,4}/", value["baseUri"]) is not None)
     try:
@@ -129,7 +138,7 @@ def run(arguments: list[str], *, input: bytes | None = None, cwd: Path | None = 
 
 def transfer(apk: Path, private_handoff: Path, serial: str, *, adb: str, aapt: str,
              runner=run, clock=time.monotonic, sleep=time.sleep, consume_timeout=20.0,
-             attempt_token=None) -> dict:
+             attempt_token=None, package=PACKAGE) -> dict:
     report = {"status": "Blocked", "category": "preflight_refused", "apkVerified": False,
               "installedApkMatched": False, "readyNonceVerified": False,
               "configurationConsumed": False, "failureCleanupConfirmed": True,
@@ -146,7 +155,7 @@ def transfer(apk: Path, private_handoff: Path, serial: str, *, adb: str, aapt: s
     def shell(script, *values):
         # Values are validated non-content nonces only; private configuration
         # travels exclusively through the subprocess stdin below.
-        return ["shell", f"run-as {PACKAGE} sh -c {shlex.quote(script)} "
+        return ["shell", f"run-as {package} sh -c {shlex.quote(script)} "
                 + " ".join(shlex.quote(value) for value in values)]
 
     def reverses():
@@ -161,6 +170,7 @@ def transfer(apk: Path, private_handoff: Path, serial: str, *, adb: str, aapt: s
         return result
 
     try:
+        require(package in (PACKAGE, "com.enmori.app.sponsordemo"))
         require(re.fullmatch(r"[A-Za-z0-9]{6,64}", serial) is not None)
         require(re.fullmatch(r"[0-9a-f]{32}", token) is not None)
         require(consume_timeout > 0)
@@ -174,12 +184,12 @@ def transfer(apk: Path, private_handoff: Path, serial: str, *, adb: str, aapt: s
         # in argv. Keep the absolute input/hash, but give this child alone the
         # APK directory and relative filename; ./ also protects option-like names.
         badging = runner([aapt, "dump", "badging", "./" + apk.name], cwd=apk.parent).decode("utf-8")
-        require(re.search(r"^package: name='com\.enmori\.app\.personatest'(?:\s|$)", badging, re.M) is not None,
+        require(re.search(rf"^package: name='{re.escape(package)}'(?:\s|$)", badging, re.M) is not None,
                 "apk_identity_refused")
         require(re.search(r"^launchable-activity: name='com\.enmori\.app\.MainActivity'(?:\s|$)", badging, re.M) is not None,
                 "apk_identity_refused")
         report["apkVerified"] = True
-        paths = command(["shell", "pm", "path", PACKAGE]).decode("ascii").splitlines()
+        paths = command(["shell", "pm", "path", package]).decode("ascii").splitlines()
         require(all(re.fullmatch(r"package:/data/app/[A-Za-z0-9_./=+~-]+\.apk", p) for p in paths), "installed_apk_refused")
         bases = [p[len("package:"):] for p in paths if p.endswith("/base.apk")]
         require(len(bases) == 1, "installed_apk_refused")
@@ -255,8 +265,10 @@ def main(argv=None) -> int:
     parser.add_argument("--serial", required=True)
     parser.add_argument("--adb", default="/home/miku/Android/Sdk/platform-tools/adb")
     parser.add_argument("--aapt", default="/home/miku/Android/Sdk/build-tools/36.0.0/aapt")
+    parser.add_argument("--sponsor-demo", action="store_true", help="Require the independent Sponsor demo package")
     options = parser.parse_args(argv)
-    report = transfer(options.apk, options.handoff, options.serial, adb=options.adb, aapt=options.aapt)
+    report = transfer(options.apk, options.handoff, options.serial, adb=options.adb, aapt=options.aapt,
+                      package="com.enmori.app.sponsordemo" if options.sponsor_demo else PACKAGE)
     sys.stdout.write(json.dumps(report, separators=(",", ":")) + "\n")
     return 0 if report["status"] == "Pass" else 2
 

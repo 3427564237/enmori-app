@@ -12,6 +12,7 @@ final class ControlledPhoneServiceConfiguration {
     required this.certificate,
     required this._email,
     required this._password,
+    this.dualAccounts = false,
   });
 
   static const cacheFileName = 'enmori-controlled-phone-service.json';
@@ -35,6 +36,7 @@ final class ControlledPhoneServiceConfiguration {
     message: 'The controlled service identity is unavailable.',
   );
 
+  final bool dualAccounts;
   final Uri baseUri;
   final List<int> certificate;
   final String _email;
@@ -78,10 +80,14 @@ final class ControlledPhoneServiceConfiguration {
       }
       final raw = jsonDecode(encoded);
       if (raw is! Map<String, dynamic> ||
-          raw.length != _fields.length ||
-          raw.keys.any((key) => !_fields.contains(key)) ||
+          raw.length != _fields.length + (raw['schemaVersion'] == 2 ? 1 : 0) ||
+          raw.keys.any(
+            (key) =>
+                !_fields.contains(key) &&
+                !(raw['schemaVersion'] == 2 && key == 'secondaryAccount'),
+          ) ||
           raw['schemaVersion'] is! int ||
-          raw['schemaVersion'] != 1 ||
+          (raw['schemaVersion'] != 1 && raw['schemaVersion'] != 2) ||
           raw['projectId'] != projectId ||
           raw['authEmulatorHost'] != '127.0.0.1:9099' ||
           raw['lifetime'] != 'until-explicit-stop-in-this-owned-process' ||
@@ -114,6 +120,25 @@ final class ControlledPhoneServiceConfiguration {
           password.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)) {
         throw const FormatException();
       }
+      if (raw['schemaVersion'] == 2) {
+        final secondary = raw['secondaryAccount'];
+        if (secondary is! Map<String, dynamic> ||
+            secondary.length != 2 ||
+            !secondary.containsKey('email') ||
+            !secondary.containsKey('password') ||
+            secondary['email'] is! String ||
+            secondary['password'] is! String ||
+            secondary['email'] == email ||
+            !RegExp(r'^[a-z0-9][a-z0-9._+-]{1,80}@example\.invalid$')
+                .hasMatch(secondary['email'] as String) ||
+            (secondary['password'] as String).length < 12 ||
+            (secondary['password'] as String).length > 256 ||
+            (secondary['password'] as String).codeUnits.any(
+              (unit) => unit < 0x20 || unit == 0x7f,
+            )) {
+          throw const FormatException();
+        }
+      }
       final encodedCertificate = raw['certificateBase64'] as String;
       final certificate = base64Decode(encodedCertificate);
       if (certificate.length > certificateMaximumBytes ||
@@ -134,7 +159,8 @@ final class ControlledPhoneServiceConfiguration {
         baseUri: uri,
         certificate: List<int>.unmodifiable(certificate),
         email: email,
-        password: password,
+        password: raw['schemaVersion'] == 2 ? null : password,
+        dualAccounts: raw['schemaVersion'] == 2,
       );
     } catch (_) {
       throw const FormatException(_invalid);
@@ -144,6 +170,7 @@ final class ControlledPhoneServiceConfiguration {
   /// One command only; success never creates or emits an authenticated session.
   /// The existing AuthRepository observation remains the source of authority.
   Future<Result<void>> signIn(AuthRepository auth) async {
+    if (dualAccounts) return const Success(null);
     final password = _password;
     _password = null;
     if (password == null) return const Failure(_unavailable);

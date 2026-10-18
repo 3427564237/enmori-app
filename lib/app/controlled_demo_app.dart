@@ -26,6 +26,8 @@ import '../features/personas/presentation/persona_overview_page.dart';
 import '../features/personas/presentation/persona_management_page.dart';
 import '../features/personas/presentation/persona_editor_page.dart';
 import '../features/event_browse/event_browse_providers.dart';
+import '../features/event_recommendations/event_recommendations_providers.dart';
+import '../features/event_recommendations/data/backend_event_recommendation_repository.dart';
 import 'platform/external_activity_opener.dart';
 import 'providers.dart';
 import 'social_demo_presentation.dart';
@@ -42,8 +44,10 @@ final class ControlledDemoApp extends StatefulWidget {
     required this.auth,
     required this.client,
     required this.onClose,
+    this.dualAccounts = false,
     super.key,
   });
+  final bool dualAccounts;
   final Uri baseUri;
   final AuthRepository auth;
   final http.Client client;
@@ -101,6 +105,10 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       accountPreferencesRepositoryProvider.overrideWithValue(
         BackendAccountPreferencesRepository(_api),
       ),
+      if (widget.dualAccounts)
+        eventRecommendationRepositoryProvider.overrideWithValue(
+          BackendEventRecommendationRepository(_api),
+        ),
       interestRepositoryProvider.overrideWithValue(
         BackendInterestRepository(_api),
       ),
@@ -174,17 +182,22 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
         ),
       ),
     ],
-    child: _ConnectedPages(onClose: widget.onClose),
+    child: _ConnectedPages(
+      onClose: widget.onClose,
+      dualAccounts: widget.dualAccounts,
+    ),
   );
 }
 
 final class _ConnectedPages extends ConsumerWidget {
-  const _ConnectedPages({required this.onClose});
+  const _ConnectedPages({required this.onClose, required this.dualAccounts});
+  final bool dualAccounts;
   final Future<Result<void>> Function() onClose;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Registration/new identities are not authorized by this owned fixture.
-    if (ref.watch(authSessionProvider).value is! AuthSessionAuthenticated) {
+    if (!dualAccounts &&
+        ref.watch(authSessionProvider).value is! AuthSessionAuthenticated) {
       return MaterialApp(
         home: Scaffold(
           body: SafeArea(
@@ -222,9 +235,13 @@ final class _ConnectedPages extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Text(
-                  'Test account • data clears when the host stops. '
-                  'AI uses only eligible Check-in Notes from this test account. Music and Friends are fixtures; '
-                  'Activity needs host permission. Recommendations and participation are unavailable.',
+                  dualAccounts
+                      ? 'Controlled demo • two test accounts; data clears when the host stops. '
+                            'Activity and recommendations use Ticketmaster when enabled by the host. '
+                            'External links open the organiser website.'
+                      : 'Test account • data clears when the host stops. '
+                            'AI uses only eligible Check-in Notes from this test account. Music and Friends are fixtures; '
+                            'Activity needs host permission. Recommendations and participation are unavailable.',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),

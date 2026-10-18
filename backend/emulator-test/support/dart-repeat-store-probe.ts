@@ -54,7 +54,9 @@ export async function dartRepeatStoreProbe(baseUri: string, token: string, befor
     await checkpoint;
     assert(!timedOut && !invalid && pending.trim() === "", "Controlled Dart repeat-store protocol or timeout failure");
     assert.equal(stderrBytes, 0, "Controlled Dart repeat-store child emitted suppressed stderr");
-    assert.equal(code, 0, "Controlled Dart repeat-store child reported failure");
+    const safeSteps = typeof output === "object" && output !== null && "steps" in output && Array.isArray(output.steps)
+      ? output.steps.filter((step): step is string => typeof step === "string" && /^[A-Za-z]+:(?:pass|blocked)$/.test(step)).join(",") : "invalid-protocol";
+    assert.equal(code, 0, `Controlled Dart repeat-store child reported failure (${safeSteps})`);
     assert(checkpointSeen && checkpointPassed && finalSeen, "SDK before-delete checkpoint must pass exactly once");
     assert(isDeepStrictEqual(output, { result: "pass", steps: [
       "prepareA:pass", "executeA:pass", "readMessagesA:pass", "prepareB:pass", "executeB:pass", "readMessagesB:pass", "deleteConversation:pass",
