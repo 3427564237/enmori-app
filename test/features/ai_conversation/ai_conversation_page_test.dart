@@ -4,10 +4,149 @@ import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
 import 'package:enmori/features/ai_conversation/presentation/ai_conversation_page.dart';
 import 'package:enmori/harness/social/offline_social_pages.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('social composer leaves one primary scroll target for PageDown', (
+    tester,
+  ) async {
+    final controller = _PageController(
+      _state(
+        canSend: true,
+        messages: [
+          for (var index = 0; index < 40; index++)
+            _message('history-$index', index + 1, AiRole.user, 'Saved $index'),
+        ],
+      ),
+    );
+    await _pump(tester, controller, socialStyle: true);
+    final settingsContext = tester.element(find.byIcon(Icons.tune));
+    final settingsFocus = Focus.of(settingsContext);
+    settingsFocus.requestFocus();
+    await tester.pumpAndSettle();
+    expect(settingsFocus.hasFocus, isTrue);
+    final primary = PrimaryScrollController.of(settingsContext);
+    final initialOffset = primary.positions.first.pixels;
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(primary.positions, hasLength(1));
+    expect(primary.position.pixels, greaterThan(initialOffset));
+    expect(controller.sent, isEmpty);
+    expect(controller.retried, isEmpty);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  for (final longHistory in [false, true]) {
+    for (final retry in [false, true]) {
+      testWidgets(
+        'social composer preserves editing across keyboard layout changes longHistory=$longHistory retry=$retry',
+        (tester) async {
+          tester.view.physicalSize = const Size(320, 900);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          addTearDown(tester.view.resetViewInsets);
+          final controller = _PageController(
+            _state(
+              canSend: !retry,
+              canRetry: retry,
+              messages: [
+                if (longHistory)
+                  for (var index = 0; index < 40; index++)
+                    _message(
+                      'history-$index',
+                      index + 1,
+                      AiRole.user,
+                      'Saved message $index',
+                    ),
+              ],
+            ),
+          );
+          await _pump(
+            tester,
+            controller,
+            socialStyle: true,
+            textScale: 2,
+            navigationBarBuilder: (navigate) =>
+                OfflineSocialNavigation(selectedIndex: 3, onSelected: (_) {}),
+          );
+          final input = find.byKey(const Key('ai-message-input'));
+          if (longHistory) {
+            expect(
+              find.byKey(const ValueKey('ai-message-history-39')),
+              findsNothing,
+              reason:
+                  'The history should keep building its distant rows lazily.',
+            );
+          }
+          await tester.enterText(input, 'An unfinished draft');
+          final field = tester.widget<TextField>(input);
+          const selection = TextSelection(baseOffset: 3, extentOffset: 9);
+          field.controller!.selection = selection;
+          expect(field.focusNode!.hasFocus, isTrue);
+          for (final bottom in [400.0, 0.0, 500.0, 0.0]) {
+            tester.view.viewInsets = FakeViewPadding(bottom: bottom);
+            await tester.pumpAndSettle();
+            await tester.ensureVisible(input);
+            final current = tester.widget<TextField>(input);
+            expect(current.controller!.text, 'An unfinished draft');
+            expect(current.controller!.selection, selection);
+            expect(current.focusNode!.hasFocus, isTrue);
+            expect(controller.sent, isEmpty);
+            expect(controller.retried, isEmpty);
+            expect(controller.cancels, 0);
+            expect(tester.takeException(), isNull);
+          }
+        },
+      );
+    }
+  }
+
+  for (final retry in [false, true]) {
+    testWidgets(
+      'social multiline composer remains reachable with keyboard and large text retry=$retry',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1;
+        tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.view.resetViewInsets);
+        final controller = _PageController(
+          _state(canSend: !retry, canRetry: retry),
+        );
+        await _pump(
+          tester,
+          controller,
+          socialStyle: true,
+          textScale: 2,
+          navigationBarBuilder: (navigate) =>
+              OfflineSocialNavigation(selectedIndex: 3, onSelected: (_) {}),
+        );
+        const text = 'First line\nSecond line\nThird line\nFourth line';
+        await tester.scrollUntilVisible(
+          find.byKey(const Key('ai-message-input')),
+          200,
+          scrollable: find
+              .descendant(
+                of: find.byKey(const Key('route-ai-conversation')),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byKey(const Key('ai-message-input')), text);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        await _tap(tester, retry ? 'ai-retry' : 'ai-send');
+        expect(retry ? controller.retried : controller.sent, [text]);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   for (final destination in [0, 1, 2, 4]) {
     testWidgets(
       'social AI tab $destination passes through cancel/leave before navigation',

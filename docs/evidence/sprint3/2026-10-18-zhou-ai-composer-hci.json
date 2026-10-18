@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "scope": "ai-composer-keyboard-and-multiline-reachability",
+  "base": "f0a1c4698e18ceac9cc4320169530a0f74857343",
+  "sourceCommit": "5e147b7dfedae2f51c7caee2babfcd0bca19b88b",
+  "sourceTree": "3e6a4caaeec5d10687b25dea81ac3458146d20dc",
+  "sourceCommits": [
+    "d155db9c2ac865314062e9e83081f43c503a7942",
+    "5e147b7dfedae2f51c7caee2babfcd0bca19b88b"
+  ],
+  "workspace": "D:/3851",
+  "observedAtUtc": "2026-10-18T08:49:13.9118639Z",
+  "toolchain": {
+    "dart": "3.13.2",
+    "flutter": "3.47.2",
+    "host": "Windows"
+  },
+  "testedInputs": [
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "gitBlob": "c881066d750dee05466e005f62028af76ffeadcc",
+      "workingSha256": "4e645f674ee0dd88e54cfae52f57721e797b53772a52e0338fb8726cda28a3c3"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "gitBlob": "fb780646215da8613317f2ddf7241049b8873abe",
+      "workingSha256": "1072a3fe197917480a23e27963201afc0f732ba12cb1b8bf406ee3414a5a8af8"
+    }
+  ],
+  "manifest": {
+    "sha256": "e8a3d3b2c417917b5d15ae444da8a55f28bb0489b08370c630539f0c981b046a",
+    "path": "build/zhou-hci-20261018/ai-tested-git-manifest.txt",
+    "inputCount": 1295
+  },
+  "checks": {
+    "whitespace": {
+      "exitCode": 0
+    },
+    "visual": {
+      "actualDevice": false,
+      "passed": 1,
+      "target": "new phone layouts and optional actual Flutter rasters retain Note confirmation",
+      "fixture": "Existing offline social app, bundled SDK Roboto/MaterialIcons",
+      "includedInAffected": true
+    },
+    "affected": {
+      "exitCode": 0,
+      "passed": 251,
+      "newCasesIncluded": 7,
+      "failed": 0
+    },
+    "analysis": {
+      "exitCode": 0,
+      "issues": 0
+    },
+    "format": {
+      "exitCode": 0,
+      "files": 2,
+      "changed": 0
+    }
+  },
+  "commands": [
+    "fvm flutter test --no-pub --reporter expanded test/features/ai_conversation test/harness/ai_network_harness_test.dart test/harness/ai_network_persona_harness_test.dart test/harness/ai_network_cancel_return_test.dart test/harness/ai_connected_repeat_journey_test.dart test/harness/ai_conversation_harness_test.dart test/harness/ai_persona_harness_test.dart test/app/ai_conversation_shared_router_test.dart test/app/history_ai_home_router_test.dart test/harness/social/offline_social_feedback_test.dart",
+    "fvm dart analyze --fatal-infos lib/features/ai_conversation/presentation/ai_conversation_page.dart test/features/ai_conversation/ai_conversation_page_test.dart",
+    "fvm dart format --output=none --set-exit-if-changed lib/features/ai_conversation/presentation/ai_conversation_page.dart test/features/ai_conversation/ai_conversation_page_test.dart"
+  ],
+  "logHashes": [
+    {
+      "name": "ai-multiline-before.log",
+      "sha256": "db61b1ef538c768bdf2c99423800830f15a2dfe68c7975b8660eb996acd0d525"
+    },
+    {
+      "name": "ai-multiline-before-820.log",
+      "sha256": "db61b1ef538c768bdf2c99423800830f15a2dfe68c7975b8660eb996acd0d525"
+    },
+    {
+      "name": "ai-multiline-before-640.log",
+      "sha256": "b86f9415f238e34c63869ec956554d5d68d97e1a96baf40874d3f1641d0d9104"
+    },
+    {
+      "name": "ai-multiline-after.log",
+      "sha256": "df237ecac8c1280b850eb8ca4a7398ea7680bd6fc284d2ddf7bef2b9fc13a23e"
+    },
+    {
+      "name": "ai-multiline-after-scroll.log",
+      "sha256": "db61b1ef538c768bdf2c99423800830f15a2dfe68c7975b8660eb996acd0d525"
+    },
+    {
+      "name": "ai-focus-before.log",
+      "sha256": "13bfa7c7b81a7f47b37c7237654363538a71e4c06b9f3d7d634f0a91f4206040"
+    },
+    {
+      "name": "ai-primary-page-down-before.log",
+      "sha256": "d3b6132b079e4457c49a416c7ebb9a060e881fecb5da9b7311bd1eca071de3d8"
+    },
+    {
+      "name": "ai-primary-page-down-focus-green.log",
+      "sha256": "44b115c33dd2265575ebe051d1dc20ce4daf9ee8c54a04668d3d6a32b606e719"
+    },
+    {
+      "name": "ai-analysis-final.log",
+      "sha256": "4293425ed0afeb0127be5b9207554f0a537c20abeb0eb0353676613ee420b159"
+    },
+    {
+      "name": "ai-analysis-corrected.log",
+      "sha256": "a39bcfd38227e1a134c007cb56f34fc5cd60a5773a30fb97238675c3dbd99999"
+    },
+    {
+      "name": "ai-affected-current-source.log",
+      "sha256": "33122b5a7476173e948cd5f3b6a506a329622c041a16b289cf6e98563a2a32fc"
+    },
+    {
+      "name": "ai-format-current-source.log",
+      "sha256": "523585481be8f6396c627c8a69cd9a79c808641d14a3f58afa3c8e09f0256911"
+    },
+    {
+      "name": "ai-visual-roboto.log",
+      "sha256": "05891e89afbf1bd66106d2b9074e9eb450f93e5594f2e29e8f281f1e64fb8c6d"
+    }
+  ],
+  "originalFailure": {
+    "failed": 1,
+    "viewport": "320x640",
+    "controlCase": "Send-only case passes",
+    "input": "Four synthetic lines",
+    "failure": "RenderFlex overflowed by 36 pixels on the bottom",
+    "textScale": 2,
+    "retryAvailable": true,
+    "passed": 1,
+    "keyboardInset": 300
+  },
+  "retainedIntermediateFailures": [
+    "740/820-height probes passed before the specific failing compact viewport was identified.",
+    "A threshold-scaling draft caused the input to be unbuilt in the lazy fallback. A direct enterText probe also required explicit scrolling; source/focus scheduling was investigated before replacing the layout.",
+    "The first stable-tree draft shared a mobile PrimaryScrollController; PageDown assertion reproduced, composer primary:false fixed it.",
+    "A platform-override test fixture teardown invariant was fixed with TargetPlatformVariant.only(android).",
+    "One unnecessary-import fatal-info failure fixed in the final source-only commit."
+  ],
+  "independentStaticReview": "No remaining actionable finding after primary:false; formal LI review separate.",
+  "notRun": [
+    "physical Android/iOS",
+    "TalkBack",
+    "APK build/install",
+    "real Backend/Firestore/model",
+    "original-operation disposition",
+    "whole-app gate"
+  ]
+}

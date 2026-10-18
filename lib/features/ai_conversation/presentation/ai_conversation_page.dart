@@ -658,25 +658,28 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
               constraints: const BoxConstraints(maxWidth: 640),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  // Very small keyboard/large-text viewports must keep the input
-                  // reachable by scrolling instead of overflowing a fixed Column.
-                  if (constraints.maxHeight < 260) {
-                    return ListView(
-                      key: const Key('route-ai-conversation'),
-                      padding: const EdgeInsets.all(16),
-                      children: [...content, if (!contentHidden) composer],
-                    );
-                  }
                   return Column(
+                    key: const Key('route-ai-conversation'),
                     children: [
                       Expanded(
                         child: ListView(
-                          key: const Key('route-ai-conversation'),
                           padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
                           children: content,
                         ),
                       ),
-                      if (!contentHidden) composer,
+                      if (!contentHidden)
+                        // Keep the editor in one stable subtree when the
+                        // keyboard opens. A tall draft scrolls locally while
+                        // retaining room for the independently lazy history.
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: constraints.maxHeight * .6,
+                          ),
+                          child: SingleChildScrollView(
+                            primary: false,
+                            child: composer,
+                          ),
+                        ),
                     ],
                   );
                 },
