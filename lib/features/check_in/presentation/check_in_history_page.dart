@@ -69,7 +69,7 @@ final class CheckInHistoryPage extends ConsumerWidget {
                   ),
                   if (state.ianaZone case final zone?)
                     Text(
-                      zone,
+                      'Device time zone: $zone',
                       key: const Key('history-device-zone'),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
@@ -88,11 +88,42 @@ final class CheckInHistoryPage extends ConsumerWidget {
                 state.nextCursor != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: FilledButton.tonalIcon(
-                  key: const Key('history-next-page'),
-                  onPressed: controller.loadNext,
-                  icon: const Icon(Icons.navigate_next),
-                  label: const Text('Next'),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (state.nextPageFailure != null) ...[
+                      const Text(
+                        'The next page is unavailable. Your current records '
+                        'are still shown.',
+                        key: Key('history-next-page-error'),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    FilledButton.tonalIcon(
+                      key: const Key('history-next-page'),
+                      onPressed: state.isLoadingNext
+                          ? null
+                          : controller.loadNext,
+                      icon: state.isLoadingNext
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Icon(
+                              state.nextPageFailure == null
+                                  ? Icons.navigate_next
+                                  : Icons.refresh,
+                            ),
+                      label: Text(
+                        state.isLoadingNext
+                            ? 'Loading…'
+                            : state.nextPageFailure == null
+                            ? 'Next'
+                            : 'Retry next page',
+                      ),
+                    ),
+                  ],
                 ),
               ),
           ],

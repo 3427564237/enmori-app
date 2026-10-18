@@ -28,7 +28,7 @@ void main() {
       expect(find.byKey(const Key('home-ai-conversation')), findsNothing);
       await _open(tester);
       expect(find.byType(CheckInHistoryPage), findsOneWidget);
-      expect(find.text('Asia/Singapore'), findsOneWidget);
+      expect(find.text('Device time zone: Asia/Singapore'), findsOneWidget);
       expect(find.text('First synthetic Note'), findsOneWidget);
       expect(f.historyQueries.single, {
         'date': '2026-10-13',
@@ -40,6 +40,38 @@ void main() {
       await _open(tester);
       expect(f.historyQueries.length, 2);
       expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'date and long device zone remain clear at 200% text scale',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+      const zone = 'America/Argentina/ComodRivadavia';
+      final f = await _pump(tester, zone: zone);
+      await _open(tester);
+
+      expect(find.byType(CheckInHistoryPage), findsOneWidget);
+      expect(f.router.state.uri.path, AppRoutes.checkInHistory);
+      final zoneLabel = find.byKey(const Key('history-device-zone'));
+      expect(find.text('2026-10-13'), findsOneWidget);
+      expect(find.text('Device time zone: $zone'), findsOneWidget);
+      final semantics = tester.ensureSemantics();
+      try {
+        expect(tester.getSemantics(zoneLabel).label, 'Device time zone: $zone');
+        expect(tester.getRect(zoneLabel).left, greaterThanOrEqualTo(0));
+        expect(tester.getRect(zoneLabel).right, lessThanOrEqualTo(320));
+        expect(tester.takeException(), isNull);
+      } finally {
+        semantics.dispose();
+      }
+      expect(f.historyQueries.single['timeZone'], zone);
     },
   );
 
@@ -62,6 +94,27 @@ void main() {
       expect(f.historyQueries.last['date'], '2026-10-12');
       expect(f.historyQueries.last.containsKey('cursor'), isFalse);
       expect(find.byKey(const Key('history-empty')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'failed Next keeps records visible and retries the same cursor',
+    (tester) async {
+      final f = await _pump(tester);
+      await _open(tester);
+      f.failNext = true;
+
+      await _tap(tester, 'history-next-page');
+
+      expect(find.text('First synthetic Note'), findsOneWidget);
+      expect(find.byKey(const Key('history-next-page-error')), findsOneWidget);
+      expect(f.historyQueries.last['cursor'], 'synthetic-cursor');
+      await _tap(tester, 'history-next-page');
+
+      expect(find.text('First synthetic Note'), findsNothing);
+      expect(find.text('Next synthetic Note'), findsOneWidget);
+      expect(f.historyQueries.last['cursor'], 'synthetic-cursor');
       expect(tester.takeException(), isNull);
     },
   );
@@ -153,6 +206,7 @@ void main() {
 Future<_Fixture> _pump(
   WidgetTester tester, {
   bool zoneUnavailable = false,
+  String zone = 'Asia/Singapore',
 }) async {
   final f = _Fixture();
   addTearDown(() async {
@@ -163,7 +217,7 @@ Future<_Fixture> _pump(
     IsolatedHistoryHomeApp(
       auth: f.auth,
       client: f.client,
-      device: _Device(zoneUnavailable),
+      device: _Device(zoneUnavailable, zone),
     ),
   );
   f.scope = ProviderScope.containerOf(tester.element(find.byType(EnmoriApp)));
@@ -196,6 +250,7 @@ Future<void> _open(WidgetTester tester) async {
 
 Future<void> _tap(WidgetTester tester, String key) async {
   await tester.ensureVisible(find.byKey(Key(key)));
+  await tester.pumpAndSettle();
   await tester.tap(find.byKey(Key(key)));
   await _frames(tester);
 }
@@ -278,12 +333,13 @@ final class _Fixture {
 }
 
 final class _Device implements HistoryDevicePort {
-  const _Device(this.unavailable);
+  const _Device(this.unavailable, this.zone);
   final bool unavailable;
+  final String zone;
   @override
   Future<String> captureIanaZone() async {
     if (unavailable) throw StateError('Synthetic unavailable device zone');
-    return 'Asia/Singapore';
+    return zone;
   }
 
   @override
