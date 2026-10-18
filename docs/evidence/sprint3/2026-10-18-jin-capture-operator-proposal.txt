@@ -1,0 +1,144 @@
+Restricted Backend operator: bounded host proposal for LI confirmation
+18 October 2026 SGT — PROPOSED, NOT INSTALLED / NOT A PM DECISION
+
+Request: LI #84 comment6248791645. Existing #149 decision078ef5b approved the
+private capture store and system cleanup timer. Those choices are not reopened.
+Implementation remains #150 exactc2c923c0 / source789dc4f. LI evidence approval
+5562552747 is complete; SHI new-code/composition review remains required.
+
+Observed versus missing
+LI reports systemd/Python/sudo/visudo/systemctl/systemd-analyze present, wrapper
+absent, current sudo -n unavailable, and an administrative interactive account.
+JIN has no verified original-host restricted identity or remote administration
+access to name. This is NOT evidence that no suitable account exists. LI's
+private inventory/confirmation is the authoritative next check. No account name,
+host path, privilege or installation state is guessed from this Windows machine.
+
+Two different permissions must stay separate:
+1. LI's existing trusted host administrator authorizes installation/account work.
+   A failed noninteractive sudo does not prove interactive administration is
+   impossible. LI can privately use their already-authorized console/sudo path;
+   credentials stay with LI. If that path is also unavailable, report that exact
+   host-admin dependency. Do not add broad NOPASSWD or give JIN remote access to
+   work around it.
+2. The Backend process/reader uses a distinct non-root UID whose effective rights
+   obey the capture boundary. Admin-group membership of the ordinary interactive
+   user cannot demonstrate this restriction. The #150 installer only checks UID
+   existence/nonzero; it does NOT audit all effective privileges automatically.
+
+Minimal choice requested from LI
+A. If an existing approved restricted account satisfies the matrix below,
+   identify it privately and retain it; do not create another identity.
+B. Otherwise approve ONE dedicated local system account with its own primary
+   group and nonzero unique UID, locked password and nologin shell. No interactive
+   login, SSH key, new remote endpoint, subordinate container IDs, admin group,
+   privileged socket/group, polkit grant or capability is requested. Actual
+   account name/UID and private runtime location are selected and recorded by LI
+   outside Git. This document does not execute useradd or authorize creation.
+
+Least-privilege matrix for either choice
+Resource/action                         Ordinary operator             Host root/LI
+Reviewed Node/Python/Java executables,   read/execute only              owns/verifies snapshot
+locked dependencies/tokenizer assets,
+exact Backend compiled source
+Fresh run-owned session/temp profiles,  own private0700 dirs;         provisions approved
+current TLS key and runtime config       own0600 files as required     current configuration
+Capture helper wrapper                  execute via3exactsudo cmds    installed root-owned
+Capture Python/config/store/ancestors    no raw read/write/list/copy   root-only0700/0600
+append/read/health capture commands      exact #150 NOPASSWD only     trusted administrator
+cleanup/initialize, timer/system units,  no command or modification    root/system runner
+sudo policy, other users, model service
+New ports/provider/network/model rights none added by this proposal  existing separate gates
+
+The operator must not have sudo/admin/wheel, docker/lxd/disk or equivalent
+root/raw-storage access, broad sudo -u rights, writable privileged code/config,
+group/ACL access to raw capture data, or host service-management privileges.
+Group names alone are not proof: LI examines the full effective sudo/polkit,
+groups, sockets/capabilities and relevant path ACL/ownership. No scanning or
+publication of unrelated private user files is required.
+
+Minimum runtime access, not a new deployment architecture
+The current service explicitly requires current-process ownership for the new
+session directory and TLS key; copying an old admin-owned path into config will
+fail. LI provisions a NEW operator-owned private session/config/key copy only
+after the existing current-config/TLS authorization checks, preserving originals.
+No recursive chown/chmod of the old incident, an administrator home, old session,
+model storage or entire shared checkout is permitted by this proposal.
+
+Use the already-installed pinned Node24.19.0, Java, Python, dependencies and
+checked emulator JAR. If their approved location is inaccessible to this UID,
+prepare a root-owned, non-operator-writable snapshot of the exact required
+runtime files and an explicitly private operator work directory. Verify hashes
+and symlink targets; do not broaden an admin home or download dependencies.
+List the concrete inaccessible paths privately before provisioning. This is the
+minimum proposed access envelope, not permission to migrate all host software.
+
+The existing controlled_phone_service entry still owns its bounded child
+processes/profiles and existing loopback ports. There is no new Backend daemon,
+user service, linger setting or general process-supervisor grant here. The
+approved CAPTURE cleanup timer alone is independent of desktop/service exit.
+If the chosen Backend launch later needs a different lifecycle mechanism, report
+that concrete gap; don't silently add one or restart the lost original service.
+
+How LI can verify the real restricted identity after approval
+LI uses an already-authorized admin entry to execute a fixed command as the
+selected UID, without a login shell (e.g. sudo -u OPERATOR -- /usr/bin/id).
+This does not grant that operator an admin shell or grant JIN an admin entry.
+For a nologin system account, the #150 instruction to verify in a 'real login'
+means verify the real target UID/process and its policy, not enable an interactive
+login. The helper's own nested sudo must originate from that UID. Never simulate
+it by setting SUDO_UID while retaining root. Clear inherited admin credentials,
+agent sockets and arbitrary environment when launching the actual runtime; retain
+only its existing reviewed environment requirements and fixed tool paths.
+
+Read-only preparation (LI, private terminal; no creation/installation):
+- getent passwd OPERATOR; id OPERATOR; inspect locked password/login shell via
+  the authorized host administrator. Publish only eligibility booleans.
+- sudo -ll -U OPERATOR from the authorized administrator: inspect all effective
+  rules, not only /etc/sudoers.d/enmori-diagnostic-capture. This may itself require
+  LI's interactive authentication; don't use a failed -n as a policy conclusion.
+- Confirm the actual UID can execute the existing required tools and traverse
+  their approved paths, without starting Backend/Firebase/Ollama or reading keys.
+
+After LI confirms identity/permissions and SHI concludes #150, use the original
+root-held, hash-verified #150 installer. It alone adds the exact append/read/health
+rule and approved cleanup units. Do not hand-add a second competing sudo rule.
+Then execute #150's real UID allow/deny checks, no-model synthetic append/read
+probe and scheduled cleanup after logout. A capture health check may update its
+own control state; these are installation acceptance steps, not pre-installation
+read-only inventory. Keep an unrelated unprivileged identity as the negative
+test only if LI already authorizes its use; don't create an extra tester account.
+
+Stop/retain/ownership
+- Unknown effective access, absent root entry or missing current private config:
+  stop that host step and report the exact owner/dependency; no bypass.
+- Installer partial state, unsafe ownership, denied/extra sudo rights, failed
+  health/probe/timer or missed retention deadline: preserve state, report to JIN,
+  block new positive AI. No reset/reinstall, deletion or false healthy flag.
+- Raw capture copies and old incident/config are not moved into this proposal.
+- Account/store installation is LI's host action after confirmation and gates;
+  JIN supplies implementation/access diagnosis; SHI reviews new code. No shared
+  online appointment is reintroduced. Original application/store history remains
+  unknown; LI's original-generation-not-running evidence remains established.
+
+One-line LI decision sufficient (identifiers stay private):
+'Use an existing eligible restricted operator' OR 'Approve one local non-login
+restricted operator and the scoped runtime file access above; LI provisions it'.
+This is the new identity/access decision only, not another store/timer vote.
+Upon confirmation persist a PM decision under docs/decisions before execution.
+
+Validation/limits
+Documentation only. Checked against #150 installer/helper and actual service
+ownership guards; no product/tool source changed, old tests not repeated. No
+original-host access, accounts, sudo rules, units, files, model or device changes
+were performed. Next verifiable checkpoint: LI private eligibility/admin-entry
+receipt or this bounded confirmation, then the already specified installation
+and access proof. No credible installation ETA before those facts.
+
+Command semantics reference (distribution documentation, verify target version):
+https://manpages.ubuntu.com/manpages/noble/man8/useradd.8.html
+https://manpages.ubuntu.com/manpages/noble/man8/nologin.8.html
+https://manpages.ubuntu.com/manpages/noble/man8/sudo.8.html
+https://manpages.ubuntu.com/manpages/noble/man5/sudoers.5.html
+These references explain system/locked/no-login accounts and target-user/policy
+inspection. They do not grant ENMORI authority or prove this host's actual policy.
