@@ -25,7 +25,7 @@ const oldInbox = FriendInbox(requests: [request], nextCursor: 'old-cursor');
 
 void main() {
   test('same-subject replacement clears target, inbox and cursor', () async {
-    final h = await start();
+    final h = await _start();
     await h.controller.lookup('member_b');
     await h.controller.loadInbox();
     expect(h.state.target, target);
@@ -44,7 +44,7 @@ void main() {
     test(
       'late lookup send=$send cannot restore the replaced session',
       () async {
-        final h = await start();
+        final h = await _start();
         final pending = Completer<Result<FriendTarget>>();
         h.repository.pendingLookup = pending;
         final old = h.controller.lookup('member_b', send: send);
@@ -58,7 +58,7 @@ void main() {
   }
 
   test('late inbox cannot append old requests or restore its cursor', () async {
-    final h = await start();
+    final h = await _start();
     final pending = Completer<Result<FriendInbox>>();
     h.repository.pendingInbox = pending;
     final old = h.controller.loadInbox();
@@ -76,7 +76,7 @@ void main() {
   test(
     'late accepted action does not start an inbox read in the new session',
     () async {
-      final h = await start();
+      final h = await _start();
       final pending = Completer<Result<String>>();
       h.repository.pendingAction = pending;
       final old = h.controller.act(request, accept: true);
@@ -92,7 +92,7 @@ void main() {
   test(
     'session replacement during post-action reread drops rows and message',
     () async {
-      final h = await start();
+      final h = await _start();
       final pending = Completer<Result<FriendInbox>>();
       h.repository.pendingInbox = pending;
       final old = h.controller.act(request, accept: false);
@@ -116,7 +116,7 @@ void expectEmpty(FriendScreenState state) {
   expect(state.failure, isNull);
 }
 
-Future<_Harness> start() async {
+Future<_Harness> _start() async {
   final auth = FakeAuthRepository();
   final repository = _Friends();
   final container = ProviderContainer(
