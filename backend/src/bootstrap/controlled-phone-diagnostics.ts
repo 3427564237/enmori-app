@@ -38,8 +38,15 @@ export class ControlledPhoneDiagnostics {
   private readonly context = new AsyncLocalStorage<Context>();
   private readonly requests = new WeakMap<FastifyRequest, Context>();
   private failed = false;
-  constructor(private readonly sink: (record: ControlledPhoneDiagnosticRecord) => void) {}
-  get healthy(): boolean { return !this.failed; }
+  constructor(private readonly sink: (record: ControlledPhoneDiagnosticRecord) => void,
+    private readonly checkHealth?: () => boolean) {}
+  get healthy(): boolean {
+    if (!this.failed && this.checkHealth) {
+      try { if (this.checkHealth() !== true) this.failed = true; }
+      catch { this.failed = true; }
+    }
+    return !this.failed;
+  }
   private emit(record: Omit<ControlledPhoneDiagnosticRecord, "loggedAt">): void {
     if (this.failed) return;
     try {
