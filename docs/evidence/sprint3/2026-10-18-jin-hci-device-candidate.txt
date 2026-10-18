@@ -1,0 +1,102 @@
+JIN Android candidate for approved Persona/composer increments — 18 October 2026 SGT
+
+Source-only f36faf380735a82970735ad66dc4b2a8231c723b
+Tree 0e85e54013c0e4fec5655578e067b9022c38d3d0
+Base #148 e1a51eab55522a53c2b7c98440a46660098b4635; #147 f0a1c4698e18ceac9cc4320169530a0f74857343,
+#140 9150c3c7852d43c31bcb59ce80193b08be5c2850 and #135 dcdc3ba13f1a4bac192775b7a45f8e37bc4c680e
+remain ancestors. Those prior LI/SHI reviews are not reopened. #146 SHI approval
+at 2d42a483 is now read back, superseding the obsolete pending-review sentence
+in JIN's earlier #84 delivery comment 6248511002. #150 capture code/host gates
+remain separate; this client branch does not import that unreviewed contribution.
+
+Exactly six new contribution paths: two Android identity files, offline harness
+composition, dedicated HCI entry, its widget test, and tool/hci_android_candidate.md.
+Persona feature blob 68d4a369c9e11d225f8ec22f5d36379a80c164bb and AI page blob
+c881066d750dee05466e005f62028af76ffeadcc match the approved inputs. All feature
+files are unchanged from #148; Backend/API/dependencies unchanged from #135.
+Project Skills were read from .agents/skills and match the approved #131 update;
+none were installed. Used project Dart/Flutter, widget/integration workflow and
+systematic-debugging instructions as applicable; no new dependency/requirement.
+
+New HCI entry: real offline social router and Persona/AI pages/controllers with
+existing SyntheticAiTransport.dependency, memory Auth and Persona store. Explicit
+fixture Send -> expected dependency error -> Conversation actions/Check result
+produces the existing permitted Retry state. An explicit fixture Retry remains
+memory-only and produces no assistant/model success. The permanent banner and
+separate package/name distinguish it from the original connected installation.
+No production request/recovery behavior changed; no real failure was recreated.
+
+Actual validation on the new source:
+- Pinned Flutter 3.47.2 / Dart 3.13.2, Windows. Existing cache, offline pub get.
+- Combined affected host widget/domain/controller/harness suites: 360/360 Pass,
+  exit0. Two new HCI entry/Persona tests are included, not added to 360 again.
+  This is a new invocation, not ZHOU's 90/251 or earlier JIN evidence transferred.
+- Scoped fatal-info analysis: no issues, exit0; non-writing format 3/0 changed;
+  scoped git diff --check exit0.
+- Two actual debug APK builds exit0, with the existing Android SDK 36 and Java21.
+  Requested target platform android-arm64; actual aapt native-code inventory
+  includes arm64-v8a/armeabi-v7a/x86_64. No claim that the files are ABI-exclusive.
+- Both aapt identities and apksigner v2 verification pass. Both signer certificates
+  SHA256 a6ff83fa12ff92d4b33e5efde167aee3b0f3f4590bd843def55d9584f7724dd3,
+  matching the saved JIN #135 signer receipt (not LI's independently signed v7).
+- All 1,300 exported tracked inputs match the initial source.tar bytes after
+  tests/builds. All match Git blobs after LF normalization; 1,233 text files have
+  Windows archive line-ending conversion. The initial raw-Git-byte comparison
+  failed and is preserved; the subsequent archive/raw and Git/normalized checks
+  establish the distinction. No source edit or rebuild was needed for that check.
+
+Artifacts (new files; original #135 APK/ZIP and build records preserved):
+HCI: ENMORI-HCI-f36faf3-arm64-v1.apk, 94,026,523 bytes
+package com.enmori.app.hcitest / version1 / name ENMORI HCI (offline)
+SHA256 b0f41f25151627a424965029721c02bff04ca04b25e49e35aaaa0c9ab7dc9f73
+Connected: ENMORI-connected-f36faf3-arm64-v8.apk, 94,276,035 bytes
+package com.enmori.app.personatest / version8 / name enmori
+SHA256 25e7e10d7028c33821043234e2f194a5fe844dc17dfdb1321db7ee78fa84de7a
+
+The HCI ZIP contains only its APK, checksums, signature/aapt receipt, source
+receipt and manual steps. The distinct connected artifact is packaged separately
+for a later authorized runtime; it must not be used to create this fixture's
+Retry state. Local prepared ZIPs are not a remote download or SHI receipt.
+Transfer uses the existing human WeChat channel; no new distribution facility.
+SHI must independently verify received bytes/signature and installation outcome.
+
+Commands (exact executable path is recorded locally; no toolchain upgrade):
+flutter test --no-pub --reporter expanded test/features/personas test/features/ai_conversation test/harness/social test/harness/ai_network_harness_test.dart test/harness/ai_network_persona_harness_test.dart test/harness/ai_network_cancel_return_test.dart test/harness/ai_connected_repeat_journey_test.dart test/harness/ai_conversation_harness_test.dart test/harness/ai_persona_harness_test.dart test/app/ai_conversation_shared_router_test.dart test/app/history_ai_home_router_test.dart test/app/persona_home_router_test.dart
+dart analyze --fatal-infos lib/hci_offline_harness.dart lib/harness/social/offline_social_app.dart lib/features/personas/presentation/persona_editor_page.dart lib/features/ai_conversation/presentation/ai_conversation_page.dart test/harness/social/hci_offline_candidate_test.dart
+dart format --output=none --set-exit-if-changed lib/hci_offline_harness.dart lib/harness/social/offline_social_app.dart test/harness/social/hci_offline_candidate_test.dart
+HCI build: ENMORI_HCI_ANDROID_TEST=true; other isolation flag absent;
+flutter build apk --debug --no-pub --target lib/hci_offline_harness.dart --target-platform android-arm64 --build-number 1
+Connected build: ENMORI_PERSONA_ANDROID_TEST=true; HCI flag absent;
+flutter build apk --debug --no-pub --target lib/controlled_demo.dart --target-platform android-arm64 --build-number 8
+aapt dump badging RELATIVE_APK_FILENAME (child cwd is its directory)
+apksigner verify --verbose --print-certs RELATIVE_APK_FILENAME
+
+Preserved failures and limitations:
+- Initial sandboxed dart.bat wrapper produced no output and was interrupted;
+  direct pinned dart.exe formatting worked. Sandbox CIM inventory was refused;
+  the later read-only authorized inventory worked. Neither was a product test.
+- First new test compile failed on unsupported TextFormField.focusNode getter;
+  the assertion now checks its actual EditableText. Initial analysis captured
+  the same old getter failure and remains separately retained.
+- Next fixture run 0/2: test accessed an unbuilt lazy target and clicked Send
+  before rebuilding its enabled state. Using actual AppBar/AI->Persona navigation
+  fixed lazy lookup (intermediate 1/2); awaiting the frame before tapping fixed
+  the remaining test timing error. Focused final 2/2 is included in later360.
+  No feature behavior was changed to satisfy these tests.
+- KGP firebase_auth/firebase_core future-compatibility and SDK XML-version
+  warnings remain. No dependency/SDK upgrade was made.
+- Test logs remain at build/jin-hci-candidate-20261018-01; their hashes are in
+  the adjacent JSON. No prior local Android emulator results are uploaded.
+- No Android device/emulator installation, launch, TalkBack, iOS or runtime
+  activation in this packet. Debug INTERNET permission is not an egress test;
+  the HCI AI/Persona boundary is established by its fixed memory composition.
+- SHI owns actual device large-text/orientation/keyboard/TalkBack observations;
+  long-history PageDown without a reachable long-history fixture remains Not Run.
+- Real AI/canonical/provenance/cleanup and consecutive9B remain Blocked by the
+  existing independent runtime/capture/original-invocation gates. Old Settings/
+  Check-in passes are not retested or claimed for this new APK.
+
+Next gate: SHI new fixture/composition review, LI new evidence review, then
+received-byte/install verification and bounded no-model phone checks under the
+existing assignment. Original #147/#148 code approvals are reused. Draft/Open;
+no merge, closure, Project change or overall acceptance statement.

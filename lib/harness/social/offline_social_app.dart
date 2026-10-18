@@ -53,10 +53,15 @@ final class OfflineSocialApp extends StatefulWidget {
     this.store,
     this.accountSetup = false,
     this.setupAuth,
+    this.hciRetryFixture = false,
   });
   final OfflineSocialStore? store;
   final bool accountSetup;
   final OfflineSetupAuthRepository? setupAuth;
+
+  /// Explicit memory-only failure for the separate HCI device entrypoint.
+  /// Never selects a network transport or changes production recovery rules.
+  final bool hciRetryFixture;
   @override
   State<OfflineSocialApp> createState() => _OfflineSocialState();
 }
@@ -122,7 +127,11 @@ final class _OfflineSocialState extends State<OfflineSocialApp> {
       ),
       aiConversationRepositoryProvider.overrideWith((ref) {
         ref.watch(authSessionProvider);
-        final transport = SyntheticAiTransport();
+        final transport = SyntheticAiTransport(
+          scenario: widget.hciRetryFixture
+              ? SyntheticAiScenario.dependency
+              : SyntheticAiScenario.success,
+        );
         ref.onDispose(transport.close);
         return AiWireRepository(transport);
       }),
@@ -130,7 +139,10 @@ final class _OfflineSocialState extends State<OfflineSocialApp> {
         (ref) => _router(ref, store, auth, accountSetup: widget.accountSetup),
       ),
     ],
-    child: _OfflineMaterialApp(accountSetup: widget.accountSetup),
+    child: _OfflineMaterialApp(
+      accountSetup: widget.accountSetup,
+      hciRetryFixture: widget.hciRetryFixture,
+    ),
   );
 }
 
@@ -426,8 +438,12 @@ GoRouter _router(
 }
 
 final class _OfflineMaterialApp extends ConsumerWidget {
-  const _OfflineMaterialApp({required this.accountSetup});
+  const _OfflineMaterialApp({
+    required this.accountSetup,
+    required this.hciRetryFixture,
+  });
   final bool accountSetup;
+  final bool hciRetryFixture;
   @override
   Widget build(BuildContext context, WidgetRef ref) => MaterialApp.router(
     title: 'ENMORI Offline Social',
@@ -444,7 +460,9 @@ final class _OfflineMaterialApp extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: Text(
-                accountSetup
+                hciRetryFixture
+                    ? 'HCI FIXTURE · AI/Persona in memory · no model'
+                    : accountSetup
                     ? 'OFFLINE SAMPLE · use invented email/password · no real account · restart clears changes'
                     : 'OFFLINE INTERNAL · sample data · restart clears changes',
                 key: const Key('offline-social-warning'),
