@@ -261,9 +261,18 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     final state = ref.read(aiConversationControllerProvider);
     if (retry ? !state.canRetry : !state.canSend) return;
     final text = _message.text;
-    _message.clear();
-    _messageFocus.unfocus();
-    unawaited(retry ? _controller.retry(text) : _controller.send(text));
+    final sending = retry ? _controller.retry(text) : _controller.send(text);
+    // Local validation and exact Retry matching happen synchronously before
+    // preparation. Preserve editing when they reject without a new attempt.
+    if (_ownsCurrentSession) {
+      final admitted = ref.read(aiConversationControllerProvider);
+      if (admitted.phase == AiConversationPhase.preparing &&
+          admitted.canCancel) {
+        _message.clear();
+        _messageFocus.unfocus();
+      }
+    }
+    unawaited(sending);
   }
 
   static const _buttonStyle = ButtonStyle(
