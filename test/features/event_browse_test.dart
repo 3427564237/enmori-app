@@ -178,7 +178,7 @@ void main() {
       await pump(tester, repo, select: (id) => selected = id);
       expect(find.text(summary.title), findsOneWidget);
       expect(find.textContaining('not the full catalogue'), findsOneWidget);
-      expect(find.textContaining('End time unavailable.'), findsOneWidget);
+      expect(find.textContaining('End time not provided.'), findsOneWidget);
       await tester.tap(find.byType(ListTile));
       expect(selected, id);
       expect(repo.calls, 1);

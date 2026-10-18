@@ -11,7 +11,7 @@ export async function registerEventRecommendationRoute(app: FastifyInstance, dep
 }): Promise<void> {
   app.get<{ Querystring: { readonly view: "home" | "all" } }>("/v1/recommendations/events", {
     schema: recommendEventsSchema,
-    onRequest: [buildAuthenticate(dependencies.identityVerifier), async (request, reply) => {
+    onRequest: [async (_request, reply) => { reply.header("Cache-Control", "no-store"); }, buildAuthenticate(dependencies.identityVerifier), async (request, reply) => {
       // Inspect multiplicity before AJV coercion: duplicate values never become valid.
       const query = new URL(request.raw.url ?? "", "http://localhost").searchParams;
       const values = query.getAll("view");
@@ -33,7 +33,7 @@ export async function registerEventRecommendationRoute(app: FastifyInstance, dep
     return reply.code(200).send({
       asOf: result.value.asOf, formulaVersion: result.value.formulaVersion,
       items: result.value.items.map((item) => ({
-        eventId: item.eventId, title: item.title, startAt: item.startAt, endAt: item.endAt,
+        eventId: item.eventId, title: item.title, startAt: item.startAt, ...(item.endAt === undefined ? {} : { endAt: item.endAt }),
         matchedInterests: item.matchedInterests.map((tag) => ({
           interestTagId: tag.interestTagId, displayName: tag.displayName,
         })), reasonCode: "interest_match",

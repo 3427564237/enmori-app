@@ -1,5 +1,5 @@
 import { Temporal } from "@js-temporal/polyfill";
-import type { BrowseDetail } from "../ports/event-browse.js";
+import type { BrowseOccurrence } from "../ports/event-browse.js";
 const sourceId=/^[A-Za-z0-9_-]{1,128}$/;
 const unsafe=/[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069<>]|```/u;
 export const object=(v:unknown):v is Record<string,unknown>=>typeof v==="object"&&v!==null&&!Array.isArray(v);
@@ -18,8 +18,10 @@ function instant(v:unknown):Temporal.Instant|undefined{
   if(typeof v!=="string"||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:[0-5]\d(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/.test(v))return undefined;
   try{return Temporal.Instant.from(v);}catch{return undefined;}
 }
-/** Minimized source projection. No status/tag/participation/database mapping. */
-export function projectOccurrence(raw:unknown,asOf:string):BrowseDetail|undefined{
+/** Minimized source projection. Music ID verified against the official Discovery API:
+ * https://developer.ticketmaster.com/products-and-docs/apis/discovery/v2/
+ * No label inference, other category mapping or participation fields. */
+export function projectOccurrence(raw:unknown,asOf:string):BrowseOccurrence|undefined{
   try{
     if(!object(raw)||typeof raw.id!=="string"||!text(raw.name,200)||!sourceUrl(raw.url)||!object(raw.dates)||!object(raw.dates.start)||!object(raw.dates.status)||raw.dates.status.code!=="onsale")return undefined;
     const id=browseId(raw.id),start=instant(raw.dates.start.dateTime),now=instant(asOf);
@@ -32,6 +34,7 @@ export function projectOccurrence(raw:unknown,asOf:string):BrowseDetail|undefine
     if(raw.classifications!==undefined){if(!Array.isArray(raw.classifications))return undefined;const c=raw.classifications[0];if(c!==undefined){if(!object(c))return undefined;if(c.segment!==undefined){if(!object(c.segment))return undefined;category=c.segment.name;}}}
     if((Object.hasOwn(venue,"name")&&!text(venue.name,200))||(category!==undefined&&!text(category,100)))return undefined;
     return {browseId:id,title:raw.name,startAt:start.toString(),externalSourceUrl:raw.url,
+      ...(Array.isArray(raw.classifications)&&raw.classifications.some(c=>object(c)&&object(c.segment)&&c.segment.id==="KZFzniwnSyZfZ7v7nJ")?{musicSegment:true as const}:{}),
       ...(end?{endAt:end.toString()}:{}),...(typeof venue.name==="string"?{locationLabel:venue.name}:{}),...(typeof category==="string"?{categoryLabel:category}:{})};
   }catch{return undefined;}
 }

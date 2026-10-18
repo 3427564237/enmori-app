@@ -109,7 +109,7 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                         child: ListTile(
                           title: Text(item.title),
                           subtitle: Text(
-                            '${item.startAt}\n${item.endAt ?? 'End time unavailable.'}',
+                            '${item.startAt}\n${item.endAt ?? 'End time not provided.'}',
                           ),
                           onTap: widget.onSelect == null
                               ? null
@@ -139,7 +139,7 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                     Text('Starts: ${summary.startAt}'),
                     Text(
                       summary.endAt == null
-                          ? 'End time unavailable.'
+                          ? 'End time not provided.'
                           : 'Ends: ${summary.endAt}',
                     ),
                     Text(locationLabel ?? 'Location unavailable.'),

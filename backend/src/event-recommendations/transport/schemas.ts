@@ -8,7 +8,7 @@ const matchedInterest = {
 } as const;
 export const eventRecommendationItemSchema = {
   type: "object", additionalProperties: false,
-  required: ["eventId", "title", "startAt", "endAt", "matchedInterests", "reasonCode"],
+  required: ["eventId", "title", "startAt", "matchedInterests", "reasonCode"],
   properties: {
     eventId: { type: "string", minLength: 1 }, title: { type: "string", minLength: 1 },
     startAt: utc, endAt: utc,

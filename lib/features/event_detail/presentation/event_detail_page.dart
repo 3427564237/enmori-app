@@ -18,15 +18,30 @@ final class EventDetailPage extends ConsumerStatefulWidget {
   ConsumerState<EventDetailPage> createState() => _EventDetailPageState();
 }
 
-final class _EventDetailPageState extends ConsumerState<EventDetailPage> {
+final class _EventDetailPageState extends ConsumerState<EventDetailPage>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(eventDetailControllerProvider(widget.eventId).notifier).load();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed && mounted) {
+      ref.read(eventDetailControllerProvider(widget.eventId).notifier).clear();
+    }
   }
 
   @override
@@ -96,7 +111,9 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                           const SizedBox(height: 8),
                           Text('Starts: ${value.startAt.toLocal()}'),
                           Text(
-                            'Ends: ${value.endAt?.toLocal().toString() ?? 'Not provided'}',
+                            value.endAt == null
+                                ? 'End time not provided.'
+                                : 'Ends: ${value.endAt!.toLocal()}',
                           ),
                         ],
                       ),
@@ -110,6 +127,30 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                   const SizedBox(height: 16),
                   SelectableText(value.externalSourceUrl),
                   const SizedBox(height: 8),
+                  if (!widget.syntheticPreview) ...[
+                    const Text(
+                      'Ticketmaster source. Opens the organiser website; this does not register you for the event.',
+                    ),
+                    FilledButton.icon(
+                      key: const Key('event-detail-open-source'),
+                      onPressed: () async {
+                        final result = await ref
+                            .read(
+                              eventDetailControllerProvider(widget.eventId)
+                                  .notifier,
+                            )
+                            .openSource(value);
+                        if (!context.mounted) return;
+                        if (result case Failure<void>(:final failure)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(failure.message)),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.open_in_new),
+                      label: const Text('View on Ticketmaster'),
+                    ),
+                  ],
                   OutlinedButton.icon(
                     key: const Key('event-detail-copy-link'),
                     onPressed: () async {

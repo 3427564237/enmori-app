@@ -37,3 +37,8 @@ test("only current valid Q12 labels/lifecycle and valid own selection map", () =
   }
   assert.deepEqual(parseSelectedInterests({ interestTagIds: [], revision: 1 }), []);
 });
+test("optional end is omitted; explicit null, malformed or nonlater end remains invalid", () => {
+  const record = { ...eventTestRecords()["events/ev_a"]! }; delete record.endAt;
+  const parsed = parseRecommendationEvent("ev_a", record); assert.ok(parsed); assert.equal(Object.hasOwn(parsed!.presentation, "endAt"), false);
+  for (const endAt of [null, undefined, "bad", record.startAt]) assert.equal(parseRecommendationEvent("ev_a", { ...record, endAt }), undefined);
+});

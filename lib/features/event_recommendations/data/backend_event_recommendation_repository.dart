@@ -43,6 +43,8 @@ final class BackendEventRecommendationRepository
       final title = item['title'];
       final startAt = tryParseUtcTimestamp(item['startAt']);
       final endAt = tryParseUtcTimestamp(item['endAt']);
+      final startInstant = tryParseEventInstant(item['startAt']);
+      final endInstant = tryParseEventInstant(item['endAt']);
       final matchedInterests = item['matchedInterests'];
       final reasonCode = item['reasonCode'];
       if (eventId is! String ||
@@ -50,7 +52,11 @@ final class BackendEventRecommendationRepository
           title is! String ||
           title.isEmpty ||
           startAt == null ||
-          endAt == null ||
+          startInstant == null ||
+          (item.containsKey('endAt') &&
+              (endAt == null ||
+                  endInstant == null ||
+                  endInstant <= startInstant)) ||
           matchedInterests is! List ||
           matchedInterests.isEmpty ||
           reasonCode != _reasonCode) {

@@ -14,7 +14,7 @@ export interface EventRecommendations {
     readonly eventId: string;
     readonly title: string;
     readonly startAt: string;
-    readonly endAt: string;
+    readonly endAt?: string;
     readonly matchedInterests: readonly {
       readonly interestTagId: string;
       readonly displayName: string;
@@ -68,7 +68,7 @@ export class RecommendEvents {
           eventId: event.eventId,
           title: display.title,
           startAt: display.startAt,
-          endAt: display.endAt,
+          ...(display.endAt === undefined ? {} : { endAt: display.endAt }),
           matchedInterests: event.matchedInterestTagIds.map((id) => ({
             interestTagId: id,
             displayName: activeTags.get(id)!.displayName,

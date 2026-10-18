@@ -26,22 +26,30 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
 }
 
 final class _EventRecommendationsSectionState
-    extends ConsumerState<EventRecommendationsSection> {
+    extends ConsumerState<EventRecommendationsSection>
+    with WidgetsBindingObserver {
   late final EventRecommendationsController _controller;
   int? _operation;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller = ref.read(eventRecommendationsControllerProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     final operation = _operation;
     if (operation != null) _controller.abandon(operation);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed && mounted) _controller.clear();
   }
 
   void _load() {
@@ -77,22 +85,30 @@ final class EventRecommendationsPage extends ConsumerStatefulWidget {
 }
 
 final class _EventRecommendationsPageState
-    extends ConsumerState<EventRecommendationsPage> {
+    extends ConsumerState<EventRecommendationsPage>
+    with WidgetsBindingObserver {
   late final EventRecommendationsController _controller;
   int? _operation;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller = ref.read(eventRecommendationsControllerProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     final operation = _operation;
     if (operation != null) _controller.abandon(operation);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed && mounted) _controller.clear();
   }
 
   void _load() {
@@ -253,7 +269,8 @@ final class _RecommendationList extends StatelessWidget {
                     : const Icon(Icons.chevron_right),
                 contentPadding: const EdgeInsets.all(16),
                 subtitle: Text(
-                  '${_formatTime(item.startAt)} to ${_formatTime(item.endAt)}\n'
+                  '${_formatTime(item.startAt)}\n'
+                  '${item.endAt == null ? 'End time not provided.' : 'Ends: ${_formatTime(item.endAt!)}'}\n'
                   'Matches: ${item.matchedInterests.map((interest) => interest.displayName).join(', ')}',
                 ),
               ),

@@ -17,7 +17,7 @@ final class EventRecommendation {
     required this.eventId,
     required this.title,
     required this.startAt,
-    required this.endAt,
+    this.endAt,
     required this.matchedInterests,
     required this.reasonCode,
   });
@@ -25,7 +25,7 @@ final class EventRecommendation {
   final String eventId;
   final String title;
   final DateTime startAt;
-  final DateTime endAt;
+  final DateTime? endAt;
   final List<MatchedInterest> matchedInterests;
   final String reasonCode;
 }
