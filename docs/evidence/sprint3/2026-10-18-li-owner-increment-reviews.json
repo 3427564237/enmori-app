@@ -110,5 +110,26 @@
     "Initial Check-in test selection used a nonexistent directory; no tests ran in that command. Corrected to existing five files before the recorded45/1 run."
   ],
   "diagnosticProbe": "145 diagnostic helper modifications were restored. Passing probes are not passes on the owner commit.",
-  "approval": "Human LI explicitly approved the concrete storage/access and system-level cleanup landing; see S-PM-1018-LI-DIAGNOSTIC-CAPTURE-LANDING at078ef5b."
+  "approval": "Human LI explicitly approved the concrete storage/access and system-level cleanup landing; see S-PM-1018-LI-DIAGNOSTIC-CAPTURE-LANDING at078ef5b.",
+  "followups": [
+    {
+      "pr": 145,
+      "head": "d7aff4961634ddc0ddd7c5924e2d089b5491a1ec",
+      "pass": 46,
+      "fail": 0,
+      "testExit": 0,
+      "analysisExit": 0,
+      "formatExit": 1,
+      "formatFilesWouldChange": 1,
+      "formatDisposition": "nonblocking cleanup; not falsely marked resolved",
+      "whitespaceExit": 0,
+      "productionChangeFromPriorHead": false,
+      "review": "APPROVED",
+      "reviewUrl": "https://github.com/3427564237/enmori-app/pull/145#pullrequestreview-5562488838",
+      "originalR1ThreadResolved": true,
+      "rawLog": "output/li-owner-review-20261018/enmori-review-145-d7aff496-tests.log",
+      "logSha256": "9676b849601b3471d8f1905695688067e98650a95c0fc5d6fb85dac5994a7a7f",
+      "correction": "Review body corrected after formatter completion to remove premature format-pass statement; functional approval retained. Original failure record remains."
+    }
+  ]
 }
