@@ -14,6 +14,225 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final signOut in [false, true]) {
+    for (final deleting in [false, true]) {
+      testWidgets(
+        'session-owned Persona ${deleting ? 'delete' : 'activation'} closes after signOut=$signOut',
+        (tester) async {
+          final repository = _Repository()..items.add(_persona('a'));
+          var back = 0;
+          final observed = await _pumpObservedSession(
+            tester,
+            repository,
+            PersonaManagementPage(
+              onCreate: () {},
+              onEdit: (_) {},
+              onBack: () => back++,
+            ),
+          );
+          final action = deleting ? 'delete' : 'activate';
+          Future<void> openConfirmation() async {
+            if (!deleting) {
+              await _tapVisible(tester, 'persona-select-${'a' * 64}');
+            }
+            await _tapVisible(
+              tester,
+              deleting ? 'persona-delete-${'a' * 64}' : 'persona-activate',
+            );
+          }
+
+          await openConfirmation();
+          final confirm = find.byKey(Key('persona-confirm-$action'));
+          final staleAction = tester.widget<FilledButton>(confirm).onPressed!;
+          await _replaceObservedSession(tester, observed, signOut: signOut);
+          expect(confirm, findsNothing);
+          expect(repository.activations, 0);
+          expect(repository.deletions, 0);
+          expect(back, 0);
+
+          // A retained callback belongs to the old dialog, even while a fresh
+          // confirmation for the replacement session is now on top.
+          await openConfirmation();
+          staleAction();
+          await tester.pumpAndSettle();
+          expect(confirm, findsOneWidget);
+          expect(repository.activations, 0);
+          expect(repository.deletions, 0);
+          await tester.tap(confirm);
+          await tester.pumpAndSettle();
+          expect(repository.activations, deleting ? 0 : 1);
+          expect(repository.deletions, deleting ? 1 : 0);
+          expect(back, 0);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+
+    testWidgets('session-owned Persona discard closes after signOut=$signOut', (
+      tester,
+    ) async {
+      final repository = _Repository();
+      var back = 0;
+      final observed = await _pumpObservedSession(
+        tester,
+        repository,
+        PersonaEditorPage(onBack: () => back++),
+      );
+      final name = find.byKey(const Key('persona-name'));
+      await tester.enterText(name, 'Old session draft');
+      await _tapVisible(tester, 'persona-back');
+      final confirm = find.byKey(const Key('persona-confirm-discard'));
+      final staleAction = tester.widget<FilledButton>(confirm).onPressed!;
+      await _replaceObservedSession(tester, observed, signOut: signOut);
+      expect(confirm, findsNothing);
+      expect(tester.widget<TextFormField>(name).controller!.text, isEmpty);
+      expect(back, 0);
+      expect(repository.creates, isEmpty);
+
+      await tester.enterText(name, 'New session draft');
+      await _tapVisible(tester, 'persona-back');
+      staleAction();
+      await tester.pumpAndSettle();
+      expect(confirm, findsOneWidget);
+      expect(back, 0);
+      expect(
+        tester.widget<TextFormField>(name).controller!.text,
+        'New session draft',
+      );
+      await tester.tap(confirm);
+      await tester.pumpAndSettle();
+      expect(back, 1);
+      expect(repository.creates, isEmpty);
+      expect(tester.takeException(), isNull);
+    });
+
+    for (final page in ['overview', 'management', 'editor']) {
+      for (final busy in [false, true]) {
+        testWidgets(
+          'session-owned Persona $page ${busy ? 'busy' : 'pending'} exit closes after signOut=$signOut',
+          (tester) async {
+            final foreground = Completer<Result<PersonaMutation>>();
+            final completion = Completer<Result<PersonaMutation>>();
+            final repository = _Repository()
+              ..nextAttempt = PersonaCreateAttempt(
+                foreground: foreground.future,
+                completion: completion.future,
+                wasDispatched: () => true,
+              );
+            var back = 0;
+            final surface = switch (page) {
+              'overview' => PersonaOverviewPage(
+                onManage: () {},
+                onBack: () => back++,
+              ),
+              'management' => PersonaManagementPage(
+                onCreate: () {},
+                onEdit: (_) {},
+                onBack: () => back++,
+              ),
+              _ => PersonaEditorPage(onBack: () => back++),
+            };
+            final observed = await _pumpObservedSession(
+              tester,
+              repository,
+              surface,
+            );
+            final request = observed.$1
+                .read(personaSessionControllerProvider.notifier)
+                .create(_persona('b').fields);
+            if (!busy) foreground.complete(const Failure(_offline));
+            await tester.pump();
+            expect(
+              observed.$1.read(personaSessionControllerProvider).isBusy,
+              busy,
+            );
+            expect(
+              observed.$1.read(personaSessionControllerProvider).pendingCreate,
+              isNotNull,
+            );
+            await tester.tap(find.byKey(const Key('persona-back')));
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 250));
+            final confirm = find.byKey(const Key('persona-confirm-leave'));
+            final staleAction = tester.widget<FilledButton>(confirm).onPressed!;
+            await _replaceObservedSession(tester, observed, signOut: signOut);
+            expect(confirm, findsNothing);
+            staleAction();
+            if (busy) foreground.complete(const Failure(_offline));
+            completion.complete(const Failure(_offline));
+            await request;
+            await tester.pumpAndSettle();
+            expect(back, 0);
+            expect(repository.creates, hasLength(1));
+            expect(repository.activations, 0);
+            expect(repository.deletions, 0);
+            expect(repository.edits, 0);
+            expect(
+              observed.$1.read(personaSessionControllerProvider).pendingCreate,
+              isNull,
+            );
+            await _tapVisible(tester, 'persona-back');
+            expect(back, 1);
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+    }
+  }
+
+  testWidgets(
+    'session-owned Persona removes only its dialog below a newer route',
+    (tester) async {
+      final repository = _Repository();
+      var back = 0;
+      final page = ValueNotifier<Widget>(
+        PersonaEditorPage(onBack: () => back++),
+      );
+      addTearDown(page.dispose);
+      final observed = await _pumpObservedSession(
+        tester,
+        repository,
+        ValueListenableBuilder<Widget>(
+          valueListenable: page,
+          builder: (_, value, _) => value,
+        ),
+      );
+      await tester.enterText(
+        find.byKey(const Key('persona-name')),
+        'Old session draft',
+      );
+      await _tapVisible(tester, 'persona-back');
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      unawaited(
+        navigator.push(
+          MaterialPageRoute<void>(
+            builder: (_) => const Scaffold(body: Text('Unrelated new route')),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await _replaceObservedSession(tester, observed, signOut: false);
+      // Teardown may be scheduled by app composition while an unrelated route
+      // is above the dialog. Cleanup must target the owned route, not the top.
+      page.value = const SizedBox.shrink();
+      await tester.pumpAndSettle();
+      expect(find.text('Unrelated new route'), findsOneWidget);
+      expect(
+        find.byKey(const Key('persona-confirm-discard'), skipOffstage: false),
+        findsNothing,
+      );
+      navigator.pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+      page.value = PersonaEditorPage(onBack: () => back++);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('persona-name')), findsOneWidget);
+      expect(back, 0);
+      expect(repository.creates, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('initial load failure never masquerades as empty or no Active', (
     tester,
   ) async {
@@ -606,6 +825,55 @@ Future<ProviderContainer> _pump(
   );
   await tester.pumpAndSettle();
   return container;
+}
+
+Future<(ProviderContainer, StreamController<AuthSession>)> _pumpObservedSession(
+  WidgetTester tester,
+  _Repository repository,
+  Widget page,
+) async {
+  final auth = StreamController<AuthSession>();
+  final container = ProviderContainer(
+    overrides: [
+      authSessionProvider.overrideWith((ref) => auth.stream),
+      personaRepositoryProvider.overrideWithValue(repository),
+    ],
+  );
+  addTearDown(auth.close);
+  addTearDown(container.dispose);
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(home: page),
+    ),
+  );
+  auth.add(const AuthSessionAuthenticated(subject: 'synthetic-owner'));
+  await tester.pumpAndSettle();
+  return (container, auth);
+}
+
+Future<void> _replaceObservedSession(
+  WidgetTester tester,
+  (ProviderContainer, StreamController<AuthSession>) observed, {
+  required bool signOut,
+}) async {
+  final oldKey = observed.$1.read(personaSessionControllerProvider).sessionKey;
+  final auth = observed.$2;
+  auth.add(
+    signOut
+        ? const AuthSessionUnauthenticated()
+        : AuthSessionAuthenticated(subject: 'synthetic-owner'),
+  );
+  await tester.pumpAndSettle();
+  expect(
+    observed.$1.read(personaSessionControllerProvider).sessionKey,
+    isNot(same(oldKey)),
+  );
+  if (signOut) {
+    expect(find.byType(AlertDialog, skipOffstage: false), findsNothing);
+    auth.add(const AuthSessionAuthenticated(subject: 'synthetic-owner'));
+    await tester.pumpAndSettle();
+  }
 }
 
 Future<void> _tapVisible(WidgetTester tester, String key) async {
