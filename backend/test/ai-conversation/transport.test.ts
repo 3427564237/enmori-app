@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { buildApp } from "../../src/bootstrap/build-app.js";
+import { ControlledPhoneDiagnostics, type ControlledPhoneDiagnosticRecord } from "../../src/bootstrap/controlled-phone-diagnostics.js";
 import { err } from "../../src/shared/domain/result.js";
 import { appFailure } from "../../src/shared/application/app-failure.js";
 import type { ConversationOperations, ConversationCaller } from "../../src/ai-conversation/ports/conversation-operations.js";
@@ -23,7 +24,7 @@ const assistant: StoredConversationMessage = { ...user, messageId: randomUUID(),
 const routes = [ ["POST", "/v1/me/ai/operations"], ["POST", `/v1/me/ai/operations/${operationId}/execute`],
   ["POST", `/v1/me/ai/operations/${operationId}/cancel`], ["GET", `/v1/me/conversations/${conversationId}/operations/${operationId}`],
   ["GET", `/v1/me/conversations/${conversationId}/messages`], ["DELETE", `/v1/me/conversations/${conversationId}`] ] as const;
-async function fixture(isolated = true, change?: Partial<ConversationOperations>) {
+async function fixture(isolated = true, change?: Partial<ConversationOperations>, diagnostics?: ControlledPhoneDiagnostics) {
   const calls: { kind: string; caller: ConversationCaller; input: unknown }[] = [];
   const verified: string[] = [];
   const identityVerifier = { verifyIdToken: async (token: string) => { verified.push(token); return token === "expired" ? { kind: "invalid" as const } :
@@ -38,9 +39,37 @@ async function fixture(isolated = true, change?: Partial<ConversationOperations>
     listMessages: async (caller, c, before) => { calls.push({ kind: "page", caller, input: [c, before] }); return { kind: "success", value: { messages: [user, assistant] } }; },
     deleteConversation: async (caller, c) => { calls.push({ kind: "delete", caller, input: c }); return { kind: "success", value: undefined }; }, ...change,
   };
-  const app = await buildApp({ ...dependencies, identityVerifier, ...(isolated ? { isolatedSlices: { environment, conversations: operations } } : {}) });
+  const app = await buildApp({ ...dependencies, identityVerifier, ...(diagnostics ? { controlledPhoneDiagnostics: diagnostics } : {}), ...(isolated ? { isolatedSlices: { environment, conversations: operations } } : {}) });
   return { app, calls, verified, operations, identityVerifier };
 }
+
+test("diagnostic gate preserves actual route authentication and cannot be enabled in ordinary composition", async t => {
+  const diagnostics = new ControlledPhoneDiagnostics(() => { throw new Error("private-sink-canary"); });
+  await assert.rejects(fixture(false, undefined, diagnostics), /CONTROLLED_PHONE_DIAGNOSTICS_REQUIRE_ISOLATED_ENVIRONMENT/);
+  const f = await fixture(true, undefined, diagnostics); t.after(() => f.app.close());
+  failure(await f.app.inject({ method: "POST", url: routes[0][1] }), 401, "AUTH_REQUIRED");
+  failure(await f.app.inject({ method: "POST", url: routes[0][1], headers, payload: { kind: "send", purpose: "checkin_conversation" } }), 503, "AI_UNAVAILABLE");
+  failure(await f.app.inject({ method: "POST", url: routes[1][1], headers: controlHeaders, payload: { text: "Synthetic" } }), 503, "AI_UNAVAILABLE");
+  assert.equal(f.calls.length, 0);
+  assert.equal((await f.app.inject({ method: "POST", url: routes[2][1], headers: controlHeaders })).statusCode, 200);
+  assert.deepEqual(f.calls.map(c => c.kind), ["cancel"]);
+});
+
+test("actual AI route composition records prepare/execute/cancel/outcome independently without operation identifiers", async t => {
+  const records: ControlledPhoneDiagnosticRecord[] = [], diagnostics = new ControlledPhoneDiagnostics(r => { records.push(r); });
+  const f = await fixture(true, { execute: async () => ({ kind: "failure", code: "AI_UNAVAILABLE" }) }, diagnostics); t.after(() => f.app.close());
+  await f.app.inject({ method: "POST", url: routes[0][1], headers, payload: { kind: "send", purpose: "checkin_conversation" } });
+  await f.app.inject({ method: "POST", url: routes[1][1], headers: controlHeaders, payload: { text: "private-input-canary" } });
+  await f.app.inject({ method: "POST", url: routes[2][1], headers: controlHeaders });
+  await f.app.inject({ method: "GET", url: routes[3][1], headers });
+  const completed = records.filter(r => r.latencyMs !== undefined);
+  assert.equal(completed.length, 4); assert.equal(new Set(completed.map(r => r.requestId)).size, 4);
+  assert.deepEqual(completed.map(r => r.httpStatus), [201, 503, 200, 200]);
+  assert.equal(completed[1]?.errorCategory, "AI_UNAVAILABLE");
+  for (const secret of [operationId, conversationId, key, "original-token", "private-input-canary", user.text, assistant.text]) {
+    assert.equal(typeof secret, "string"); if (secret !== undefined) assert(!JSON.stringify(records).includes(secret));
+  }
+});
 function failure(response: { statusCode: number; json(): unknown }, status: number, code: string): void {
   assert.equal(response.statusCode, status); const b = response.json() as { error: { code: string; message: string }; requestId: string };
   assert.deepEqual(Object.keys(b).sort(), ["error", "requestId"]); assert.deepEqual(Object.keys(b.error).sort(), ["code", "message"]);

@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { EventEmitter } from 'node:events';
 import { resolve } from 'node:path';
 import { runPhoneService, validatePhoneServiceConfiguration, validateEventBrowseCommand } from './controlled_phone_service.mjs';
+import { ControlledPhoneDiagnostics } from '../backend/dist/src/bootstrap/controlled-phone-diagnostics.js';
 
 const config = () => ({ controlledHostVerified: true, existingHostGenerationLeaseSettled: true,
   binding: { endpoint: 'http://127.0.0.1:11434/', reference: 'test-only:9b', manifestDigest: '3'.repeat(64),
@@ -43,6 +44,39 @@ function fixture({ holdStops = 0, stopAfter = 3, preflightFailure = false, liste
     } };
   return { deps, service, reports, timeline, state: () => ({ ticks, stops, closes, disposed, preflights }) };
 }
+
+test('opt-in diagnostic observes startup compiler, reaches original composition and publishes only health', async () => {
+  const records = [], diagnostics = new ControlledPhoneDiagnostics(record => { records.push(record); });
+  const f = fixture(), create = f.deps.createService;
+  f.deps.diagnostics = diagnostics;
+  f.deps.createService = async options => { assert.equal(options.diagnostics, diagnostics); return create(options); };
+  assert.equal(await runPhoneService(config(), f.deps), 0);
+  assert.deepEqual(records.map(row => [row.dependencyStage, row.dependencyStatus]), [['startup_compile', 'started'], ['startup_compile', 'passed']]);
+  assert(f.reports.some(row => row.name === 'status.json' && row.report.diagnosticCaptureHealthy === true));
+  assert(!JSON.stringify(records).includes('private-')); assert(!JSON.stringify(records).includes('今天读书'));
+});
+
+test('failed startup diagnostic stops before datastore construction without a false-ready handoff', async () => {
+  const f = fixture(); f.deps.diagnostics = new ControlledPhoneDiagnostics(() => { throw new Error('private-sink-canary'); });
+  f.deps.createService = async () => { assert.fail('Failed startup capture must not construct a service'); };
+  assert.equal(await runPhoneService(config(), f.deps), 1);
+  assert.equal(f.reports.length, 1); assert.equal(f.reports[0].report.phase, 'failed-before-ready');
+  assert.equal(f.state().stops, 0); assert(!JSON.stringify(f.reports).includes('private-sink-canary'));
+});
+
+test('later capture failure is visible without replacing or prematurely cleaning the original service', async () => {
+  const f = fixture(), wait = f.deps.wait; let failing = false;
+  f.deps.diagnostics = new ControlledPhoneDiagnostics(() => { if (failing) throw new Error('private-sink-canary'); });
+  f.deps.wait = async () => {
+    if (f.state().ticks === 0) {
+      failing = true; f.deps.diagnostics.observe({ stage: 'generate_done', status: 'termination_unconfirmed', durationMs: 1 });
+    }
+    assert.equal(f.state().stops, 0); await wait();
+  };
+  assert.equal(await runPhoneService(config(), f.deps), 0);
+  assert(f.reports.some(row => row.report.diagnosticCaptureHealthy === false));
+  assert.equal(f.state().stops, 1);
+});
 
 test('private source is constructed disabled; explicit enable/disable commands alone control it and never enter handoff/status', async () => {
   const c = { ...config(), eventBrowse: { key: 'synthetic-not-a-provider-credential' } }, f = fixture();
