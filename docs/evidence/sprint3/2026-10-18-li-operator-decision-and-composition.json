@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-18",
+  "operatorDecision": {
+    "id": "S-PM-1018-LI-RESTRICTED-BACKEND-OPERATOR",
+    "commit": "0ff0a52756cb40f95c4760f3ad3b7d625960f357",
+    "proposalHead": "cf5b2b1f6830569981b79dedb840c8fbffce102a",
+    "humanExplicitlyApproved": true,
+    "privateLocalPacketSyntaxChecked": true,
+    "privatePacketCopiesAndVerifiesRootOwnedSnapshot": true,
+    "onlyAccountAndFreshEmptyRuntime": true,
+    "privilegedExecutionPerformedByAssistant": false,
+    "accountExistsAtObservation": false,
+    "humanExecutionConfirmationReceived": false,
+    "captureInstalledByThisTurn": false
+  },
+  "pr154": {
+    "head": "8abb9bc63e304b69804729f1dc761fac832d22ed",
+    "source": "940d220c399120fd7649d8ea8856b790ad622dce",
+    "tree": "f8aadccd3c471d17ad5615c90e2087b5bb354aec",
+    "exactParentsVerified": true,
+    "automaticMergeTreeReproduced": true,
+    "incoming151BlobsMatch": 9,
+    "affectedPass": 386,
+    "testExit": 0,
+    "analysisExit": 0,
+    "formatFiles": 10,
+    "formatChanged": 0,
+    "formatExit": 0,
+    "whitespaceExit": 0,
+    "sourceUnchanged": true,
+    "v2OrV9ReceivedByLI": false,
+    "deviceOrModelExecuted": false
+  },
+  "logs": [
+    {
+      "name": "enmori-review-154-tests.log",
+      "sha256": "23ac40d464d20fd03a1e748db90a03d1290d2273de77dfad4b18cdf24faa67b7",
+      "bytes": 71970
+    },
+    {
+      "name": "enmori-review-154-analysis.log",
+      "sha256": "b38125fd4b4bfc4a93b74954c0542e7419d5ad16e93249502804a24df94fc85d",
+      "bytes": 306
+    },
+    {
+      "name": "enmori-review-154-format.log",
+      "sha256": "dcd7e53083d98f47458460c4d9a76fcbf17ee716d024064a3abde7cdc595bafe",
+      "bytes": 48
+    }
+  ],
+  "limits": [
+    "150 new-code/composition still requires SHI; LI evidence remains complete.",
+    "Human local sudo authentication is required; failed sudo -n is not proof interactive admin access is impossible.",
+    "No credentials requested in chat.",
+    "Identity creation is distinct from full effective-access audit, capture installation, writer/read probe and timer after logout.",
+    "Original AI repair and consecutive9B remain unestablished."
+  ]
+}
