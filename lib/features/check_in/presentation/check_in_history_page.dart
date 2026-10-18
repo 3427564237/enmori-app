@@ -69,7 +69,7 @@ final class CheckInHistoryPage extends ConsumerWidget {
                   ),
                   if (state.ianaZone case final zone?)
                     Text(
-                      zone,
+                      'Device time zone: $zone',
                       key: const Key('history-device-zone'),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
