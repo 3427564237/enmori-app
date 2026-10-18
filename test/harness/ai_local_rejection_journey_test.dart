@@ -108,6 +108,14 @@ void main() {
         expect(editor.controller!.selection, mismatch.selection);
         expect(editor.focusNode!.hasFocus, isTrue);
         expect(
+          _state(tester).statusMessage,
+          'Enter the same saved message to retry.',
+        );
+        // The standalone ListView builds the status lazily above the composer.
+        // New conversation adds an action there, so scroll back to the status
+        // before asserting its rendering; keep exact Retry and draft assertions.
+        await _ensure(tester, find.byKey(const Key('ai-status')), delta: -200);
+        expect(
           find.text('Enter the same saved message to retry.'),
           findsOneWidget,
         );
@@ -213,12 +221,16 @@ Future<void> _enter(WidgetTester tester, String text) async {
   await tester.enterText(_input, text);
 }
 
-Future<void> _ensure(WidgetTester tester, Finder target) async {
+Future<void> _ensure(
+  WidgetTester tester,
+  Finder target, {
+  double delta = 200,
+}) async {
   await tester.pump();
   if (target.evaluate().isEmpty) {
     await tester.scrollUntilVisible(
       target,
-      200,
+      delta,
       scrollable: find
           .descendant(
             of: find.byKey(const Key('route-ai-conversation')),

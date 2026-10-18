@@ -258,10 +258,14 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const Key('ai-delete')),
         250,
-        scrollable: find.descendant(
-          of: find.byKey(const Key('route-ai-conversation')),
-          matching: find.byType(Scrollable),
-        ),
+        // The page ListView precedes the editor's own Scrollable. Target
+        // page scrolling explicitly rather than selecting both viewports.
+        scrollable: find
+            .descendant(
+              of: find.byKey(const Key('route-ai-conversation')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
       );
       await tester.tap(find.byKey(const Key('ai-delete')));
       await tester.pumpAndSettle();
