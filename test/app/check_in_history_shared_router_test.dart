@@ -43,37 +43,37 @@ void main() {
     },
   );
 
-  testWidgets('date and long device zone remain clear at 200% text scale', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(320, 640);
-    tester.view.devicePixelRatio = 1;
-    tester.platformDispatcher.textScaleFactorTestValue = 2;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+  testWidgets(
+    'date and long device zone remain clear at 200% text scale',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
-    const zone = 'America/Argentina/ComodRivadavia';
-    final f = await _pump(tester, zone: zone);
-    await _open(tester);
+      const zone = 'America/Argentina/ComodRivadavia';
+      final f = await _pump(tester, zone: zone);
+      await _open(tester);
 
-    final zoneLabel = find.byKey(const Key('history-device-zone'));
-    expect(find.text('2026-10-13'), findsOneWidget);
-    expect(find.text('Device time zone: $zone'), findsOneWidget);
-    final semantics = tester.ensureSemantics();
-    try {
-      expect(
-        tester.getSemantics(zoneLabel).label,
-        'Device time zone: $zone',
-      );
-      expect(tester.getRect(zoneLabel).left, greaterThanOrEqualTo(0));
-      expect(tester.getRect(zoneLabel).right, lessThanOrEqualTo(320));
-      expect(tester.takeException(), isNull);
-    } finally {
-      semantics.dispose();
-    }
-    expect(f.historyQueries.single['timeZone'], zone);
-  });
+      expect(find.byType(CheckInHistoryPage), findsOneWidget);
+      expect(f.router.state.uri.path, AppRoutes.checkInHistory);
+      final zoneLabel = find.byKey(const Key('history-device-zone'));
+      expect(find.text('2026-10-13'), findsOneWidget);
+      expect(find.text('Device time zone: $zone'), findsOneWidget);
+      final semantics = tester.ensureSemantics();
+      try {
+        expect(tester.getSemantics(zoneLabel).label, 'Device time zone: $zone');
+        expect(tester.getRect(zoneLabel).left, greaterThanOrEqualTo(0));
+        expect(tester.getRect(zoneLabel).right, lessThanOrEqualTo(320));
+        expect(tester.takeException(), isNull);
+      } finally {
+        semantics.dispose();
+      }
+      expect(f.historyQueries.single['timeZone'], zone);
+    },
+  );
 
   testWidgets(
     'Next replaces page, Reload restores first, chosen date is sent',
@@ -229,6 +229,7 @@ Future<void> _open(WidgetTester tester) async {
 
 Future<void> _tap(WidgetTester tester, String key) async {
   await tester.ensureVisible(find.byKey(Key(key)));
+  await tester.pumpAndSettle();
   await tester.tap(find.byKey(Key(key)));
   await _frames(tester);
 }
