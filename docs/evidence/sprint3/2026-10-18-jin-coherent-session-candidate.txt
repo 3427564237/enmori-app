@@ -1,0 +1,131 @@
+JIN coherent client candidate — 18 October 2026 SGT
+
+Source 7848b5a75c65b5455394684512cb8f4cf58d6743
+Tree dd185879fd6626e0465162418722fcee0fe0e2d3
+Baseline #154 8abb9bc63e304b69804729f1dc761fac832d22ed.
+
+Complete consumed inputs and attribution
+- #155 a83443b78bf00ff481765e6c8f4c8710b7e43409, code2ff1142:
+  DU code APPROVE5562924336. LI's prior45/45 is LI execution; DU did not rerun.
+- #156 01e0f1714ae804d143ca00cb52c5a1e29794581d, code63e7b49:
+  LI APPROVE5563088458; local Send/Retry refusals preserve editable input.
+- #157 9b021381ea003ea16bc5f9aa1bf6099c34742d84:
+  LI APPROVE5563070364; includes the entire approved #145 d7aff496 base and
+  both original recovery and R1 correction, not just the final correction.
+  Its earlier10Pass/4Fail and temporary diagnostic14/14 remain author/reviewer
+  history; JIN did not rerun that old failure or relabel the probe.
+- All three heads and #145 are ancestors. Merges6647801/a4ddb5d/7848b5a had
+  no conflict or manual feature resolution. All16 incoming changed blobs match
+  their respective approved heads (5/7/4). Approved component reviews are reused.
+  #155's Pending catalogue proposal is documentation, not an approved expansion.
+
+New JIN Friend correction
+Existing Friend request controller observed subject text only. A replacement
+authenticated observation for the same subject retained target/inbox/cursor and
+allowed late callbacks. A late Accept could start the follow-up inbox read under
+the replacement session. This is a bounded lifecycle defect within the existing
+Friend chain, not a new Friend operation or real-account activation.
+
+The controller now observes authenticated session identity and advances the
+existing operation fence immediately on invalidation/disposal as well as rebuild.
+Existing post-await guards then reject old lookup/send/inbox/action completions,
+including the post-action reread. Captured old actions already sent to Backend
+are not cancelled, rolled back or declared unsuccessful by this UI fence.
+Production change is15 added lines in friend_controller.dart; six new focused
+tests cover cleared state, late lookup and send, late inbox, late action with no
+follow-up read, and replacement during post-action reread. My Friends/search,
+API, Backend, storage, dependencies, Android configuration and composition root
+are unchanged. Code c35744d; test-helper lint correction8f763da.
+
+Root-cause and failure trail (retained locally)
+1. First new fixture did not compile because its inbox constant shadowed the
+   repository method. Corrected only the fixture name; this is not a product red.
+2. Against unchanged Friend production at6647801: all six regressions failed.
+   Tests were subsequently formatted without changing these assertions.
+3. Observing session identity alone passed5/6; the old action still started an
+   inbox read before the lazy rebuild. The installed Riverpod3.4.2 invalidateSelf
+   calls runOnDispose before scheduling rebuild; the existing project disposal
+   fence pattern resolves that gap. Final focused6/6 passed.
+4. First strict analysis found a public test factory returning a private type;
+   renaming it private resolved that info. Source8f763da then passed focused15,
+   clean analysis/format and built intermediate v10. Both c35744d and8f763da APKs,
+   exports and all logs are retained. Neither is the final7848b5a candidate.
+5. During that work PM explicitly added approved156 and complete157/145 to this
+   candidate. This packet binds the resulting new tree; intermediate15 is not
+   transferred to it. Old #154, HCI v2 and earlier failures remain unchanged.
+
+Actual checks on final7848b5a (pinned Flutter3.47.2 / Dart3.13.2)
+- Targeted eight-file composition90/90, plus the separate Friend main-chain
+  filter3/3, exit0. Disjoint final cases93 total. The focused6 is included in90,
+  not added again. HTTP/Auth/repositories/platform dependencies are explicit
+  handwritten fixtures; there is no live TLS/Auth/Firestore/provider/model proof.
+- Fatal-info analysis13files clean, exit0; whitespace pass.
+- Non-writing format13files reports ONE would-change:
+  test/app/check_in_history_shared_router_test.dart, exit1. This is the same
+  nonblocking item explicitly accepted in145/157. No format-pass claim and no
+  unrelated whitespace edit or modified approved blob.
+- New connected v11 and offline HCI v3 artifacts are built from this exact
+  exported source; hashes, signer, commands and build outcomes are in JSON.
+  Existing Firebase Kotlin-plugin compatibility warning is retained; no upgrade.
+- Full exported source inputs are compared after execution/build against the
+  initial archive bytes and Git LF-normalized bytes. Counts and mismatches are
+  in JSON; Windows line-ending differences are not raw-Git-byte matches.
+- No full old45/266/386/Backend/SDK gate replay. No Backend/API/dependency change
+  requires a new Backend gate here; capture150 remains a separate source/gate.
+
+Connected scope versus real execution
+The unchanged controlled_demo entry uses one caller-supplied Auth/HTTPS client
+for Account/Profile/Settings, Interests, Check-in/Footprint, Persona/AI and the
+existing Activity/Friend routes. The shared-root test observes real client HTTP
+mapping and navigation under synthetic HTTP/Auth. These are connected adapters,
+not proof the original Linux service is currently available.
+
+Actual current catalogue, Interest save/reopen/recommendation recomputation,
+Footprint persistence/paging on a device, real Event/provider and real two-account
+Friend are Not Run on this candidate. Friends/Music remain identified fixtures;
+recommendations/participation remain unavailable in this controlled composition.
+No catalogue expansion/Admin maintenance, recommendation producer, discovery,
+Friends Activity or Special Care contract is invented. Friend's real eligibility,
+producer/permission and two-account prerequisites retain their existing owners.
+
+Runtime gate
+LI created the restricted account and has prepared150installation source; these
+are no longer generic waits or a need to transmit the installation ZIP. At this
+delivery150new code/composition still awaits SHI; full effective access and actual
+installed writer/read/timer evidence remain LI-host steps supported by JIN.
+No150code is silently merged or installed by this client delivery. Current
+source/config/TLS/tokenizer/exclusive ownership/lifecycle/capture checks still
+precede positive AI. Original generation no longer executing is established;
+historical application/store/lease/fence/claim/cleanup remain unrecovered. No
+original-operation Send/Retry/Check/cancel or new model attempt occurred.
+
+Device handoff
+Use only the matching SOURCE-RECEIPT, SHA256SUMS and package/signer. New v11 is
+com.enmori.app.personatest; new v3 is com.enmori.app.hcitest. They are different
+artifacts with the original JIN signer; do not overwrite LI's differently signed
+v7 or clear user data. Device owner confirms installed identity/disposition.
+Old HCI v2 lacks155/156/157 and cannot establish their device results.
+
+HCI v3 requires its permanent HCI FIXTURE banner and no private configuration.
+At ordinary font, the supplied harmless2401-character text may exercise local
+Send rejection and retained editing. Deliberately shorten it for the existing
+synthetic Send; use the already available user-saved/Check-result fixture for
+wrong-text Retry rejection and correction to the exact original text. Confirm
+text/selection/focus and explicit Reload; this memory fixture is not model/store
+success. Never manufacture a Retry state by calling the blocked real model.
+
+For Footprint Next/retry, an authorized existing dataset with a next cursor and
+the appropriate bounded failure fixture is required; the HCI seed does not
+promise those states. If absent, report the device subcase Not Run; do not seed
+real data, inject a service fault or claim a fixture page is persisted. Tests
+cover the accepted recovery branches; actual device results remain separate.
+Dialog-open session replacement/held-create phone controls are still absent.
+Ordinary-font landscape/Pinyin reachability and native composing-range behavior
+remain unverified; this fixes no claimed IME/layout root cause. ZHOU retains that
+client follow-up. No new TalkBack/accessibility-only matrix is scheduled.
+
+Next gates: SHI reviews JIN's new Friend code and new composition only; LI reviews
+JIN's source-bound evidence. The approved155/156/157/145 components are not
+re-reviewed. SHI receives/validates the new artifacts through the existing channel
+and records actual ordinary-use device outcomes. Local artifacts are not receipt.
+Keep Draft/Open; no merge, closure, Project or whole-app/AI/UAT/Release acceptance.
