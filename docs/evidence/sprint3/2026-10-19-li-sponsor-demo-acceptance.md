@@ -20,7 +20,10 @@ This is an execution ledger. Component results below do not establish final APK/
 - First combined full Flutter: **748 Pass /2 Fail**, exit1. The two stable harness failures (ambiguous Scrollable; lazy status outside built viewport) were independently reproduced and retained. Reviewed tests-only fix preserves controller status/draft/selection/focus/no-new-request/exact-Retry assertions; production code is unchanged.
 - Final combined full Flutter on `a11cdfd`: **750/750**, exit0. Fatal-info analysis on combined production source: no issues. Tests-only fix independently analyzed without issues.
 - Final combined operator: **25/25**, zero failures/skips, exit0. Python: **32 Pass /16 Skip** out of48, exit0; skipped root cases remain Not Run.
-- Final configuration identity, APK/SHA256, installation, scheduled cleanup and connected device results: Pending.
+- Candidate APK built at source `a11cdfd7cd6d27b3e74b41c12ced29efed76cd1b`: `com.enmori.app.sponsordemo`, version1.0.0-sponsor20261019+1, 167460076bytes, SHA256 `afa2026164973bc1e8fb32ed4d51b1f0d336589b155188eb5d320e7f1547bc4b`. Signer SHA256 `0353f50d507f56ee2d8344e56b7b84d6afccdff31cab5a4ca8a69060a9979106`.
+- Exact source archive SHA256 `2a3c0ba188895622dafb0faaf51c3ecfcd644c7ca30f146587932dda60983340`. Actual known Ticketmaster key and TLS private key absent from tracked source and every uncompressed APK member. No private runtime credentials were compiled in.
+- Actual install attempt: **Fail**, `INSTALL_FAILED_ABORTED: User rejected permissions`; no automatic retry/bypass. Actual Android user0 verified; candidate absent there. Existing `com.enmori.app.personatest` remains present with unchanged APK bytes; no old-package clear/uninstall was performed. A default all-users package inspection separately encountered shell denial on another Android profile; the actual user0 checks were then performed explicitly.
+- Candidate distribution includes APK/source/checksums/receipt and acceptance/runbook/known limits. It is not a frozen accepted demo. Final actual runtime/configuration identity, scheduled cleanup, real source/model and both connected phone rounds remain Not Run/Blocked.
 
 ## Required final same-candidate journeys
 
@@ -48,8 +51,8 @@ This is an execution ledger. Component results below do not establish final APK/
 | Expiry/delete/fail-closed root synthetic suite | Not Run |
 | Real scheduled cleanup and desktop-login independence | Not Run |
 | Current TLS/tokenizer/model manifest/context and exclusive ownership | Not Run |
-| Final same APK `com.enmori.app.sponsordemo` and existing-app preservation | Not Run |
-| APK SHA256/source/config receipt and reproducible source | Not Run |
-| Final runbook, startup/recovery, known failures, private credentials file | In preparation |
+| Candidate APK `com.enmori.app.sponsordemo` and existing-app preservation | Built/hashed/signed; install Fail (device permission); old APK bytes unchanged |
+| APK SHA256/source/config receipt and reproducible source | Candidate files prepared; actual runtime config identity Not established |
+| Runbook, startup/recovery, known failures, private credentials | Documents prepared; actual service-generated credentials not yet provisioned |
 
 No main merge, remote publication, task closure, UAT/Release/Done or full-application acceptance is claimed.
