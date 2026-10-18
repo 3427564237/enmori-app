@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "scope": "persona-name-guidance-and-validation-readability",
+  "sourceCommit": "f8b49f917eebc7aa244c9d11d6876487938bae16",
+  "sourceTree": "d695e4a8ceb04f56bd91d34c751df8c791bf694d",
+  "base": "9150c3c7852d43c31bcb59ce80193b08be5c2850",
+  "authorityCommit": "8dd85381381512961713b242c2b3ab5a93dc28db",
+  "authorityBlob": "e066fc93ab177514afea6915f586a1130035894c",
+  "observedAtUtc": "2026-10-18T08:44:07.8842372Z",
+  "workspace": "D:/3851",
+  "executionDirectory": "build/zhou-hci-20261018/persona-f8b49f9",
+  "toolchain": {
+    "dart": "3.13.2",
+    "flutter": "3.47.2"
+  },
+  "exportedTrackedInputsVerified": 1293,
+  "testedInputs": [
+    {
+      "path": "lib/features/personas/presentation/persona_editor_page.dart",
+      "gitBlob": "68d4a369c9e11d225f8ec22f5d36379a80c164bb",
+      "exportedSha256": "372ed4b97824973725280c0a64c233655114339192f3a1f4b07f58ff314bf8ff"
+    },
+    {
+      "path": "test/features/personas/persona_accessibility_test.dart",
+      "gitBlob": "6c96fbc80580f58af7fba65605751365d23bb18d",
+      "exportedSha256": "e193256e8e166829aef4cc2c10a076ae8f54af0e22ca005475c1ae4301e61817"
+    },
+    {
+      "path": "docs/decisions/2026-10-18-li-zhou-du-continuous-improvement.md",
+      "gitBlob": "e066fc93ab177514afea6915f586a1130035894c",
+      "exportedSha256": "d35b39c6a8b5c84e8eb6203353f44fe4ab198f49dae17d4906e796d653b9577f"
+    }
+  ],
+  "results": {
+    "affected": {
+      "pass": 90,
+      "fail": 0,
+      "newCasesIncluded": 4,
+      "exitCode": 0
+    },
+    "analysis": {
+      "issues": 0,
+      "exitCode": 0
+    },
+    "whitespace": {
+      "exitCode": 0
+    },
+    "format": {
+      "files": 2,
+      "exitCode": 0,
+      "changed": 0
+    }
+  },
+  "commands": [
+    "fvm flutter test --no-pub --reporter expanded test/features/personas test/harness/ai_network_persona_harness_test.dart test/app/persona_home_router_test.dart",
+    "fvm dart analyze --fatal-infos lib/features/personas/presentation/persona_editor_page.dart test/features/personas/persona_accessibility_test.dart",
+    "fvm dart format --output=none --set-exit-if-changed lib/features/personas/presentation/persona_editor_page.dart test/features/personas/persona_accessibility_test.dart"
+  ],
+  "logs": [
+    {
+      "name": "persona-exact-affected.log",
+      "sha256": "cae689354f10e8a158fd64c5b84329e64b6f0ffd824ffa2fe5172d3a5eb3b6d2"
+    },
+    {
+      "name": "persona-exact-affected-retry.log",
+      "sha256": "729c5589f6df9671de160df74f1d78a37e9b83b891854aed34a6f2278d458ac3"
+    },
+    {
+      "name": "persona-exact-analysis.log",
+      "sha256": "65e9a2608d1f3e463eefc1f4e6da7f76938e01dbf45d1b415c6424bca4d598a9"
+    },
+    {
+      "name": "persona-exact-format.log",
+      "sha256": "d3c51591a0bccbeeaefbae7e3d4ad257f8b0f4cd3371d73ccb769d9b63d2aab3"
+    },
+    {
+      "name": "persona-error-association-before.log",
+      "sha256": "02136186663180083095b15506577edc336bab23a2b720e6d78b60120980f054"
+    },
+    {
+      "name": "persona-native-wrap-after.log",
+      "sha256": "fa7a3fa068b3df9982cb4433424045ed200c4960a17a131506e852d74b7356b0"
+    }
+  ],
+  "originalReadabilityFailure": {
+    "passed": 0,
+    "failed": 2,
+    "path": "build/persona-hci-audit/persona-name-readability-red.log",
+    "sha256": "d667bf3710bf5e94967651c8e4c36131862cb73581cbe61ed8aa51a408cd9340"
+  },
+  "localIndependentReview": "Original errorBuilder field-association finding reproduced, corrected to native errorText, and independently re-reviewed; not formal LI approval.",
+  "notRun": [
+    "Android/TalkBack",
+    "iOS",
+    "APK build/install",
+    "real Backend/model/device journey",
+    "whole-app gate"
+  ],
+  "failureHistory": [
+    "Original helper/error truncation two cases failed.",
+    "Intermediate custom errorBuilder lost Name field error hint; root regression failed, then native errorText fixed it.",
+    "Exact export initially lacked generated package_graph.json; copied matching existing generated metadata without pub/dependency change and retried."
+  ],
+  "nextIndependentItem": "AI composer multiline Retry overflow and keyboard editing-state preservation; separate source packet."
+}
