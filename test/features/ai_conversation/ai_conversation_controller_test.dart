@@ -38,6 +38,50 @@ const _unresolved = AppFailure(
 );
 
 void main() {
+  testWidgets(
+    'New conversation retains old messages and reserves a new target on next explicit send',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      await r.controller.send('note');
+      expect(r.state.canStartNewConversation, isTrue);
+      final oldConversation = r.state.conversationId;
+      expect(r.state.messages, isNotEmpty);
+      final deletes = r.repo.deletes.length;
+      r.controller.startNewConversation();
+      expect(r.state.conversationId, isNull);
+      expect(r.state.messages, isEmpty);
+      expect(r.state.canSend, isTrue);
+      expect(r.repo.deletes.length, deletes);
+      expect(r.repo.prepares, hasLength(1));
+      await r.controller.send('new explicit input');
+      expect(r.repo.prepares.last.conversationId, isNull);
+      expect(oldConversation, isNotNull);
+      r.dispose();
+    },
+  );
+
+  testWidgets(
+    'New conversation cannot bypass pending generation or an unknown outcome',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      final reply = Completer<Result<AiReply>>();
+      r.repo.executeResult = reply.future;
+      unawaited(r.controller.send('note'));
+      await tester.pump();
+      expect(r.state.canStartNewConversation, isFalse);
+      final conversation = r.state.conversationId;
+      r.controller.startNewConversation();
+      expect(r.state.conversationId, conversation);
+      reply.complete(const Failure(_unresolved));
+      await tester.pump();
+      expect(r.state.canStartNewConversation, isFalse);
+      r.controller.startNewConversation();
+      expect(r.state.conversationId, conversation);
+      expect(r.repo.prepares, hasLength(1));
+      r.dispose();
+    },
+  );
+
   testWidgets('ordinary composition disables AI without a transport', (
     tester,
   ) async {
@@ -619,11 +663,18 @@ final class _Auth implements AuthRepository {
 }
 
 final class _Call {
-  _Call(this.token, this.abort, {this.operationId, this.userMessageId});
+  _Call(
+    this.token,
+    this.abort, {
+    this.operationId,
+    this.userMessageId,
+    this.conversationId,
+  });
   final String token;
   final AiAbortSignal abort;
   final String? operationId;
   final String? userMessageId;
+  final String? conversationId;
 }
 
 final class _Repository implements AiConversationRepository {
@@ -644,7 +695,14 @@ final class _Repository implements AiConversationRepository {
     String? conversationId,
     String? userMessageId,
   }) async {
-    prepares.add(_Call(token, abort, userMessageId: userMessageId));
+    prepares.add(
+      _Call(
+        token,
+        abort,
+        userMessageId: userMessageId,
+        conversationId: conversationId,
+      ),
+    );
     return prepareResult ??
         Success(_ticket(String.fromCharCode(64 + prepares.length)));
   }

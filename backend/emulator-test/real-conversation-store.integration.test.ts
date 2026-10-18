@@ -459,3 +459,80 @@ test("actual sourced writes bind current source in the content transaction, pres
     assert.equal((await firestore.doc(`${parent(op)}/message_sources/${replyId}`).get()).exists,true);
   }finally{await firestore.doc(path).delete();assert.equal((await firestore.doc(path).get()).exists,false);}
 });
+
+test("open history: real canonical latest two pairs, no tombstone backfill and atomic stale-pair write refusal", async () => {
+  const first = await saved(); await assistant(first); confirmed(await store.settleAcknowledgedAssistant(first,authority()));
+  const pairs: OpenOperation[] = [first];
+  for (let n=0;n<2;n++) {
+    const next: OperationTarget = {...first,targetKind:"existing",userMessageId:randomUUID(),operationId:randomUUID()};
+    targets.push(next);
+    const op=confirmed(await store.initializeOperation(next,epoch,authority()));
+    confirmed(await store.saveUser(op,()=>`Synthetic complete history ${n}`,authority()));
+    await assistant(op);confirmed(await store.settleAcknowledgedAssistant(op,authority()));pairs.push(op);
+  }
+  const next: OperationTarget={...first,targetKind:"existing",userMessageId:randomUUID(),operationId:randomUUID()};targets.push(next);
+  const captured=confirmed(await store.readHistory(next,authority()));
+  assert.deepEqual(captured.pairs.map(p=>p.identity.userMessageId),pairs.slice(1).map(p=>p.userMessageId));
+  const last=captured.pairs[1]!, previous=captured.pairs[0]!;
+  const tombstone=async(id:string)=>{
+    const ref=firestore.doc(`${parent(first)}/messages/${id}`),row=(await ref.get()).data()!;
+    const {text:_private,...metadata}=row;
+    await ref.set({...metadata,availability:"unavailable"});await firestore.doc(`${parent(first)}/message_sources/${id}`).delete();
+  };
+  await tombstone(last.identity.assistantMessageId);
+  const filtered=confirmed(await store.readHistory(next,authority()));
+  assert.deepEqual(filtered.pairs.map(p=>p.identity.userMessageId),[previous.identity.userMessageId]);
+  assert.equal(filtered.pairs.some(p=>p.identity.userMessageId===first.userMessageId),false,"older pair was not backfilled");
+  const guarded:OriginalWriteAuthority={...authority(),dependencies:{...authority().dependencies,history:filtered.pairs.map(p=>p.identity)}};
+  const op=confirmed(await store.initializeOperation(next,epoch,guarded));
+  confirmed(await store.saveUser(op,()=>"New message with prior context",guarded));
+  await tombstone(previous.identity.assistantMessageId);
+  let borrowed=false;
+  assert.equal((await store.saveAssistant(op,()=>{borrowed=true;return {messageId:randomUUID(),text:"Must never save",presentation:{presentationMode:"default"}};},guarded)).kind,"denied");
+  assert.equal(borrowed,false,"source/pair gate precedes content borrowing in the same write transaction");
+  assert.equal((await store.readHistory(next,guarded,filtered.pairs.map(p=>p.identity))).kind,"denied");
+  assert.equal((await store.readHistory({...next,ownerAccountId:randomUUID()},authority())).kind,"denied");
+});
+
+test("open history: a historical Note authorization loss cannot be treated as empty or save a descendant", async () => {
+  const noteId=`history-note-${randomUUID()}`,notePath=`check_ins/${noteId}`;
+  await firestore.doc(notePath).create({ownerAccountId:owner,note:"Synthetic historical Note",createdAt:new Date().toISOString(),checkInVisibility:"private"});
+  try {
+    const note=(await firestore.doc(notePath).get());
+    const sourced=new FirestoreConversationStore(gateway,process.env,Date.now,{gateway,sourceReferences:["owned immutable history fixture"],
+      completeCanonicalUtcInventory:true,immutableOwnerNoteAndTime:true,permanentDeletion:true,noRestoreOrIdReuse:true});
+    const a:OriginalWriteAuthority={...authority(),dependencies:{...authority().dependencies,sources:[{sourceType:"check_in",sourceId:noteId,
+      observedVersion:{seconds:note.updateTime!.seconds,nanoseconds:note.updateTime!.nanoseconds}}]}};
+    const first=target(),op=confirmed(await sourced.initializeOperation(first,epoch,a));
+    confirmed(await sourced.saveUser(op,()=>"Historical user",a));
+    const assistantId=randomUUID();confirmed(await sourced.saveAssistant(op,()=>({messageId:assistantId,text:"Historical reply",presentation:{presentationMode:"default"}}),a));
+    confirmed(await sourced.settleAcknowledgedAssistant(op,a));
+    const next:OperationTarget={...first,targetKind:"existing",userMessageId:randomUUID(),operationId:randomUUID()};targets.push(next);
+    const capture=confirmed(await sourced.readHistory(next,authority()));
+    assert.equal(capture.pairs.length,1);assert.equal(capture.sources[0]!.sourceId,noteId);
+    const descendant:OriginalWriteAuthority={...authority(),dependencies:{...authority().dependencies,sources:capture.sources,history:capture.pairs.map(p=>p.identity)}};
+    const open=confirmed(await sourced.initializeOperation(next,epoch,descendant));
+    confirmed(await sourced.saveUser(open,()=>"Refer to the earlier Note",descendant));
+    await firestore.doc(notePath).delete();
+    assert.equal((await sourced.readHistory(next,descendant,capture.pairs.map(p=>p.identity))).kind,"denied");
+    assert.equal((await sourced.saveAssistant(open,()=>({messageId:randomUUID(),text:"Unauthorized descendant",presentation:{presentationMode:"default"}}),descendant)).kind,"denied");
+    const fresh=confirmed(await sourced.readHistory(next,authority()));assert.deepEqual(fresh.pairs,[]);
+  } finally {await firestore.doc(notePath).delete();assert.equal((await firestore.doc(notePath).get()).exists,false);}
+});
+
+test("open history orders completed exchanges by assistant time even when an older U is retried later",async()=>{
+  const first=await saved();confirmed(await store.closeOperation(first,epoch));
+  confirmed(await store.readOutcome({firebaseUid:uid},first));
+  const second:OperationTarget={...first,targetKind:"existing",userMessageId:randomUUID(),operationId:randomUUID()};targets.push(second);
+  const b=confirmed(await store.initializeOperation(second,epoch,authority()));
+  confirmed(await store.saveUser(b,()=>"Second user",authority()));await assistant(b);confirmed(await store.settleAcknowledgedAssistant(b,authority()));
+  const a=confirmed(await store.initializeOperation(retry(first),epoch,authority()));
+  confirmed(await store.claimRetry(a,()=>"Synthetic user message",await identityOf(first),authority()));await assistant(a);confirmed(await store.settleAcknowledgedAssistant(a,authority()));
+  const third:OperationTarget={...second,userMessageId:randomUUID(),operationId:randomUUID()};targets.push(third);
+  const c=confirmed(await store.initializeOperation(third,epoch,authority()));
+  confirmed(await store.saveUser(c,()=>"Third user",authority()));await assistant(c);confirmed(await store.settleAcknowledgedAssistant(c,authority()));
+  const next:OperationTarget={...third,userMessageId:randomUUID(),operationId:randomUUID()};targets.push(next);
+  const history=confirmed(await store.readHistory(next,authority()));
+  assert.deepEqual(history.pairs.map(p=>p.identity.userMessageId),[first.userMessageId,third.userMessageId]);
+  assert(history.pairs[0]!.identity.assistantSequence<history.pairs[1]!.identity.assistantSequence);
+});

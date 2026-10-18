@@ -167,6 +167,17 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     }
   }
 
+  void _newConversation() {
+    if (!_ownsCurrentSession || _confirming || _leaving) return;
+    final value = _message.value;
+    final focused = _messageFocus.hasFocus;
+    _controller.startNewConversation();
+    // The same editor stays mounted. Switching a determined conversation must
+    // preserve an unsent draft, selection and focus just like local rejection.
+    _message.value = value;
+    if (focused) _messageFocus.requestFocus();
+  }
+
   Future<void> _delete() async {
     if (!_ownsCurrentSession || _confirming || _leaving) return;
     if (!ref.read(aiConversationControllerProvider).canDelete) return;
@@ -354,6 +365,15 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                       key: const Key('ai-status'),
                       liveRegion: true,
                       child: Text(status),
+                    ),
+                  ],
+                  if (state.canStartNewConversation) ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      key: const Key('ai-new-conversation'),
+                      style: _buttonStyle,
+                      onPressed: _newConversation,
+                      child: const Text('New conversation'),
                     ),
                   ],
                   if (state.canCancel) ...[
@@ -652,13 +672,20 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                 onPressed: () => unawaited(_navigate(openPersonas)),
                 icon: const Icon(Icons.person_outline),
               ),
-            if (state.canCheckResult ||
+            if (state.canStartNewConversation ||
+                state.canCheckResult ||
                 (!contentHidden && state.conversationId != null))
               PopupMenuButton<String>(
                 key: const Key('ai-conversation-actions'),
                 tooltip: 'Conversation actions',
                 onSelected: _selectSocialAction,
                 itemBuilder: (context) => [
+                  if (state.canStartNewConversation)
+                    const PopupMenuItem(
+                      value: 'new',
+                      key: Key('ai-new-conversation'),
+                      child: Text('New conversation'),
+                    ),
                   if (state.canCheckResult)
                     PopupMenuItem(
                       value: 'check',
@@ -749,6 +776,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       AiConversationPhase.unauthenticated,
     }.contains(state.phase);
     switch (action) {
+      case 'new':
+        if (state.canStartNewConversation) _newConversation();
       case 'check':
         if (state.canCheckResult && !state.readBusy) {
           unawaited(_controller.checkResult());

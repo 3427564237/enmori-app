@@ -43,6 +43,16 @@ export class AsyncFirestoreConversationStore implements AsyncConversationStore {
       return {kind:"success",value:pair.value};
     }catch{return {kind:"failure",code:"AI_UNAVAILABLE"};}
   }
+  async readHistory(context: AsyncEffectContext, expected?: readonly import("../ports/real-context-reader.js").HistoryPairIdentity[]): Promise<import("../ports/real-context-reader.js").ContextReadResult<import("../ports/real-context-reader.js").ConversationHistory>> {
+    try {
+      const authority = this.writeAuthority(context);
+      if (!authority || !this.store.readHistory) return {kind:"unavailable"};
+      const result = await this.store.readHistory(this.target(context.identity,context.operation),authority,expected);
+      if (!context.originalCurrent()) return {kind:"terminated"};
+      return result.kind === "confirmed" ? {kind:"read",value:result.value} :
+        {kind: result.kind === "denied" || result.kind === "conversation_unavailable" ? "denied" : result.kind === "terminated" ? "terminated" : "unavailable"};
+    } catch { return {kind:"unavailable"}; }
+  }
   async open(context:AsyncEffectContext):Promise<AsyncFenceObservation>{
     try{
       if(this.opened.has(context))return {kind:"rejected",failure:"stale_authority"};

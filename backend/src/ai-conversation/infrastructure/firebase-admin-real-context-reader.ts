@@ -249,7 +249,7 @@ export class FirebaseAdminRealContextReader implements RealContextReadPort {
     if (dependencies.ownerId !== context.ownerId || dependencies.purpose !== "checkin_conversation" ||
         !validGeneration(dependencies.purposeRevocationGeneration) ||
         (dependencies.usedPersonaId !== undefined && !isPersonaId(dependencies.usedPersonaId)) ||
-        !Array.isArray(dependencies.sources) || dependencies.sources.length > 5 ||
+        !Array.isArray(dependencies.sources) || dependencies.sources.length > 15 ||
         new Set(dependencies.sources.map(s => s.sourceId)).size !== dependencies.sources.length ||
         dependencies.sources.some(s => s.sourceType !== "check_in" || !isSafeDocumentId(s.sourceId) || !parseReadInstant(s.observedVersion)) ||
         (dependencies.sources.length > 0 && !prerequisites(this.firestore, this.options.notePrerequisites))) return unavailable;

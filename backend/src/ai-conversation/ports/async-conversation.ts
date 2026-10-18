@@ -2,7 +2,7 @@ import type { RuntimeApplicationControl, RuntimeFailure } from "../../ai-runtime
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
 import type { AcceptedAssistant, ConversationGates, ConversationInput } from "./conversation-lifecycle.js";
-import type { AcceptedContextRead, ContextDependencies } from "./real-context-reader.js";
+import type { AcceptedContextRead, ContextDependencies, ConversationHistory, HistoryPairIdentity, ContextReadResult } from "./real-context-reader.js";
 
 /** Trusted, request-local identities supplied by N01 Transport, never a body UID. */
 export interface AsyncConversationIdentity {
@@ -102,6 +102,7 @@ export type AsyncReadbackObservation = (AsyncEffectIdentity & {
  * missing parent/effect is not no-effect proof for a reserved-new in-flight write.
  */
 export interface AsyncConversationStore {
+  readHistory?(context: AsyncEffectContext, expected?: readonly HistoryPairIdentity[]): Promise<ContextReadResult<ConversationHistory>>;
   open(context: AsyncEffectContext): Promise<AsyncFenceObservation>;
   submitUser(context: AsyncEffectContext, text: () => string | undefined,
     retry: AsyncSavedUser | undefined): Promise<AsyncUserWriteObservation>;

@@ -28,6 +28,8 @@ export interface StartView {
   readonly checkIns: readonly { readonly source: SourceProvenance; readonly projection: CheckInProjection }[];
 }
 export interface ConversationInput {
+  readonly strategy?: "open_conversation_v1";
+  readonly history?: readonly { readonly user: string; readonly assistant: string }[];
   readonly currentMessage: string;
   readonly checkIns: readonly CheckInProjection[];
   readonly persona: PersonaProjection | undefined;

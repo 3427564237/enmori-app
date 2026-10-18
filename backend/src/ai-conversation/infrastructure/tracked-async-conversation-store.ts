@@ -18,6 +18,10 @@ export class TrackedAsyncConversationStore implements AsyncConversationStore, As
   private run<T>(identity: AsyncConversationIdentity, operation: AsyncOperation, work: () => Promise<T>): Promise<T> {
     return this.io.run(identity.ownerId, operation.conversationId, operation.operationId, work);
   }
+  readHistory(c: AsyncEffectContext, expected?: readonly import("../ports/real-context-reader.js").HistoryPairIdentity[]): Promise<import("../ports/real-context-reader.js").ContextReadResult<import("../ports/real-context-reader.js").ConversationHistory>> {
+    if (this.terminal) return Promise.resolve({kind:"terminated"});
+    return this.run(c.identity,c.operation,() => this.inner.readHistory?.(c,expected) ?? Promise.resolve({kind:"unavailable" as const})).catch(() => ({kind:"unavailable"}));
+  }
   open(c: AsyncEffectContext): ReturnType<AsyncConversationStore["open"]> {
     if (this.terminal) return Promise.resolve({ kind: "rejected", failure: "stale_authority" });
     return this.run(c.identity,c.operation,()=>this.inner.open(c)).catch(()=>({kind:"unknown"}));
