@@ -8,11 +8,60 @@ import 'package:enmori/features/personas/presentation/persona_editor_page.dart';
 import 'package:enmori/features/personas/presentation/persona_management_page.dart';
 import 'package:enmori/features/personas/presentation/persona_page_parts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final size in [const Size(320, 640), const Size(640, 320)]) {
+    for (final scale in [2.0, 3.0]) {
+      testWidgets(
+        'Name guidance and validation wrap at ${size.width.toInt()}x${size.height.toInt()} with ${scale.toInt()}x text',
+        (tester) async {
+          tester.view.physicalSize = size;
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          final repository = _Repository();
+          await _pump(
+            tester,
+            repository,
+            PersonaEditorPage(onBack: () {}),
+            textScale: scale,
+          );
+          final guidance = find.text('Required. Use 1–50 characters.');
+          expect(
+            tester.renderObject<RenderParagraph>(guidance).didExceedMaxLines,
+            isFalse,
+          );
+          final save = find.byKey(const Key('persona-save'));
+          await tester.ensureVisible(save);
+          await tester.pumpAndSettle();
+          expect(save.hitTestable(), findsOneWidget);
+          await tester.tap(save);
+          await tester.pumpAndSettle();
+          expect(
+            _ownsPrimaryFocus(tester, find.byKey(const Key('persona-name'))),
+            isTrue,
+          );
+          final correction = find.text(
+            'Enter a name of 1–50 characters without control characters.',
+          );
+          expect(
+            tester.renderObject<RenderParagraph>(correction).didExceedMaxLines,
+            isFalse,
+          );
+          await tester.ensureVisible(correction);
+          await tester.pumpAndSettle();
+          expect(correction.hitTestable(), findsOneWidget);
+          expect(repository.creates, 0);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
   testWidgets(
     'structured fields expose their labels and invalid Name receives focus',
     (tester) async {
@@ -31,6 +80,10 @@ void main() {
           RegExp('Enter a name of 1–50 characters without control characters.'),
         ),
         findsWidgets,
+      );
+      expect(
+        tester.getSemantics(find.byKey(const Key('persona-name'))).hint,
+        contains('Enter a name of 1–50 characters without control characters.'),
       );
       expect(repository.creates, 0);
       expect(tester.takeException(), isNull);
@@ -359,8 +412,9 @@ Future<void> _tap(WidgetTester tester, String key) async {
 Future<void> _pump(
   WidgetTester tester,
   _Repository repository,
-  Widget page,
-) async {
+  Widget page, {
+  double textScale = 1,
+}) async {
   final session = PersonaSession(
     repository,
     newKey: () => '11111111-1111-4111-8111-111111111111',
@@ -369,7 +423,14 @@ Future<void> _pump(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [personaSessionSourceProvider.overrideWithValue(session)],
-      child: MaterialApp(home: page),
+      child: MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
+        home: page,
+      ),
     ),
   );
   await tester.pumpAndSettle();

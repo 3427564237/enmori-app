@@ -38,6 +38,9 @@ final class _PersonaEditor extends ConsumerStatefulWidget {
 }
 
 final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
+  static const _nameGuidance = 'Required. Use 1–50 characters.';
+  static const _nameCorrection =
+      'Enter a name of 1–50 characters without control characters.';
   GlobalKey<FormState> _form = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _nameFocus = FocusNode();
@@ -355,9 +358,13 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                             focusNode: _nameFocus,
                             enabled: enabled,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Name',
-                              helperText: 'Required. Use 1–50 characters.',
+                              helperText: _nameGuidance,
+                              // These fixed messages can wrap as far as one
+                              // character per line without an arbitrary cap.
+                              helperMaxLines: _nameGuidance.length,
+                              errorMaxLines: _nameCorrection.length,
                             ),
                             validator: (value) =>
                                 PersonaFields.nameValidationMessage(
@@ -365,7 +372,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                                     ) ==
                                     null
                                 ? null
-                                : 'Enter a name of 1–50 characters without control characters.',
+                                : _nameCorrection,
                             onChanged: (_) => setState(() {}),
                           ),
                           const SizedBox(height: 24),
