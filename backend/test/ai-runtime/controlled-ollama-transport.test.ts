@@ -2,13 +2,14 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { setImmediate } from "node:timers/promises";
 import { ControlledOllamaTransport, type ControlledOllamaBinding, type CompletePromptCompiler } from "../../src/ai-runtime/infrastructure/controlled-ollama-transport.js";
+import type { ControlledAiObserver } from "../../src/ai-runtime/infrastructure/controlled-ai-diagnostic.js";
 const manifest="1".repeat(64),tokenizer="2".repeat(64),reference="synthetic-approved-qwen:9b";
 const binding:ControlledOllamaBinding={endpoint:"http://127.0.0.1:11434",reference,manifestDigest:manifest,tokenizerDigest:tokenizer,
   ollamaVersion:"0.0.0-test",mode:"formal-9b",current:()=>true};
 const compiler:CompletePromptCompiler<string>={compile:async input=>({rawPrompt:`Synthetic complete prompt ${input}`,tokens:12,manifestDigest:manifest,tokenizerDigest:tokenizer,includesAllFraming:true})};
 const model={name:reference,model:reference,digest:manifest,details:{family:"qwen35",parameter_size:"9B"},context_length:8192};
 const raw='{"schemaVersion":"ai_assistant_message_v1","message":"synthetic"}';
-function fixture(change?:{binding?:Partial<ControlledOllamaBinding>;compile?:CompletePromptCompiler<string>["compile"];reply?:(path:string,init:RequestInit|undefined)=>Promise<Response>}){
+function fixture(change?:{binding?:Partial<ControlledOllamaBinding>;compile?:CompletePromptCompiler<string>["compile"];reply?:(path:string,init:RequestInit|undefined)=>Promise<Response>;admit?:()=>boolean;observer?:ControlledAiObserver}){
   const calls:{path:string;init:RequestInit|undefined}[]=[],abort=new AbortController();
   const http:typeof fetch=async(url,init)=>{
     const path=new URL(String(url)).pathname;calls.push({path,init});
@@ -16,10 +17,39 @@ function fixture(change?:{binding?:Partial<ControlledOllamaBinding>;compile?:Com
     return Response.json(path==="/api/version"?{version:binding.ollamaVersion}:path==="/api/generate"?
       {model:reference,response:raw,done:true,prompt_eval_count:12,eval_count:20}:{models:[model]});
   };
-  const adapter=new ControlledOllamaTransport({...binding,...change?.binding},{compile:change?.compile??compiler.compile},http);
+  const adapter=new ControlledOllamaTransport({...binding,...change?.binding},{compile:change?.compile??compiler.compile},http,change?.observer,change?.admit);
   const budget={deadline:1000,signal:abort.signal,remainingMs:()=>1000};
   return {adapter,calls,abort,budget};
 }
+
+test("capture failure after adapter compilation refuses physical dispatch without occupying the model lane",async()=>{
+  for(const throws of [false,true]){
+    let healthy=true;
+    const f=fixture({observer:event=>{if(event.stage==="adapter_compile"&&event.status==="passed")healthy=false;},
+      admit:()=>{if(throws)throw new Error("private capture failure");return healthy;}});
+    await assert.rejects(f.adapter.generate("input",f.budget),/AI_UNAVAILABLE/);
+    assert.equal(f.calls.some(call=>call.path==="/api/generate"),false);
+    assert.equal(f.adapter.state,"ready");
+  }
+});
+
+test("capture failure after physical dispatch preserves matching done and refuses the next dispatch",async()=>{
+  let healthy=true;
+  const f=fixture({observer:event=>{if(event.stage==="generate_dispatch")healthy=false;},admit:()=>healthy});
+  assert.equal(new TextDecoder().decode(await f.adapter.generate("input",f.budget)),raw);
+  assert.equal(f.adapter.state,"stopped");
+  await assert.rejects(f.adapter.generate("next synthetic input",f.budget),/AI_UNAVAILABLE/);
+  assert.equal(f.calls.filter(call=>call.path==="/api/generate").length,1);
+});
+
+test("capture failure after dispatch does not settle an unknown physical result",async()=>{
+  let healthy=true,settled=false;
+  const f=fixture({observer:event=>{if(event.stage==="generate_dispatch")healthy=false;},admit:()=>healthy,
+    reply:async path=>{if(path==="/api/generate")throw new Error("synthetic disconnected response");return undefined as never;}});
+  void f.adapter.generate("input",f.budget).then(()=>{settled=true;},()=>{settled=true;});
+  await setImmediate();
+  assert.equal(f.adapter.state,"termination_unconfirmed");assert.equal(settled,false);
+});
 test("controlled adapter preflights existing version/manifest/loaded context and submits one measured raw prompt",async()=>{
   const f=fixture();assert.equal(new TextDecoder().decode(await f.adapter.generate("input",f.budget)),raw);
   assert.deepEqual(f.calls.map(c=>c.path),["/api/version","/api/tags","/api/ps","/api/generate"]);

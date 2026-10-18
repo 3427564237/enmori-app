@@ -69,7 +69,8 @@ export class ControlledOllamaTransport<Input> implements GenerationTransport<Inp
   private readonly origin:string;private invoked=false;
   private stateValue:"not_checked"|"ready"|"invoked"|"stopped"|"termination_unconfirmed"="not_checked";
   constructor(private readonly binding:ControlledOllamaBinding,private readonly compiler:CompletePromptCompiler<Input>,
-    private readonly http:typeof fetch=fetch, private readonly observer?:ControlledAiObserver){
+    private readonly http:typeof fetch=fetch, private readonly observer?:ControlledAiObserver,
+    private readonly admitDispatch?:()=>boolean){
     this.origin=privateOrigin(binding.endpoint);
     if(!binding.reference||/\s/.test(binding.reference)||!digest(binding.manifestDigest)||!digest(binding.tokenizerDigest)||
       !/^\d+\.\d+\.\d+(?:[-+][a-zA-Z0-9.-]+)?$/.test(binding.ollamaVersion)||
@@ -135,7 +136,11 @@ export class ControlledOllamaTransport<Input> implements GenerationTransport<Inp
       format:"json",options:{num_ctx:8192,num_predict:512,temperature:0,seed:42}});
     compiled=undefined;
     // No await between the original guard, host lease and actual SDK dispatch.
-    if(!this.live(budget)){body=undefined;observeControlledAi(this.observer,"generate_dispatch","budget_or_authority_lost",compileStarted);throw unavailable();}
+    // Capture admission is checked only BEFORE dispatch. Once physically
+    // invoked, a capture failure must not fabricate or override settlement.
+    let admitted=true;
+    try{if(this.admitDispatch)admitted=this.admitDispatch()===true;}catch{admitted=false;}
+    if(!admitted||!this.live(budget)){body=undefined;observeControlledAi(this.observer,"generate_dispatch","budget_or_authority_lost",compileStarted);throw unavailable();}
     this.invoked=true;this.stateValue="invoked";
     const dispatchStarted=performance.now();
     let stopped=false;

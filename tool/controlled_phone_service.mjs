@@ -18,6 +18,7 @@ import { ControlledConversationPrompt } from '../backend/dist/src/ai-runtime/inf
 import { ControlledOllamaTransport } from '../backend/dist/src/ai-runtime/infrastructure/controlled-ollama-transport.js';
 import { createControlledPhoneService } from '../backend/dist/src/bootstrap/controlled-phone-service.js';
 import { TicketmasterBrowseSource } from '../backend/dist/src/event-browse/infrastructure/ticketmaster-browse-source.js';
+import { createHostDiagnostics } from './diagnostic_capture_client.mjs';
 
 const ports = [8080, 9099, 4400, 4500, 9150];
 const transfer = 'phone-service-model-handoff.json';
@@ -106,6 +107,7 @@ function lockedStack() {
 
 async function outer() {
   assert.equal(process.platform, 'linux'); lockedStack();
+  assert.equal(createHostDiagnostics().healthy, true); // Before emulators or model preflight.
   const config = await configuration(); privateDirectory(config.phone.sessionDirectory, true);
   // Reuse operator-supplied existing TLS files. Never generate/install/copy them.
   privateFile(config.phone.keyPath, 16384);
@@ -179,11 +181,13 @@ export async function runPhoneService(config, dependencies = {}) {
   const wait = dependencies.wait ?? (() => delay(500));
   let live = true, service, listener, listenerClosed = false, cleaned = false, constructing = false, cleanupConfirmed = false;
   const compiler = dependencies.compiler ?? new ControlledConversationPrompt(new ControlledTokenizerProcess({ ...config.tokenizerFiles, current: () => live }));
-  // Diagnostic collection is explicit and process-local. No new default file,
-  // stdout logging, public API or live activation is introduced here.
+  // The actual CLI supplies the installed Q14 capture. Test seams retain the
+  // existing isolated in-process path; ordinary application bootstrap is unchanged.
   const diagnostics = dependencies.diagnostics;
-  const transport = dependencies.transport ?? new ControlledOllamaTransport({ ...config.binding, current: () => live }, compiler, undefined, diagnostics?.observe);
+  const transport = dependencies.transport ?? new ControlledOllamaTransport({ ...config.binding, current: () => live }, compiler, undefined,
+    diagnostics?.observe, diagnostics ? () => diagnostics.healthy : undefined);
   try {
+    assert(!diagnostics || diagnostics.healthy === true);
     const abort = new AbortController(), end = performance.now() + 60_000;
     const timer = setTimeout(() => abort.abort(), 60_000);
     try {
@@ -292,7 +296,9 @@ async function execute() {
   assert.equal(process.platform, 'linux');
   requireControlledEmulatorEnvironment(process.env);
   const config = await configuration(); privateDirectory(config.phone.sessionDirectory);
-  return runPhoneService(config);
+  const diagnostics = createHostDiagnostics();
+  assert.equal(diagnostics.healthy, true);
+  return runPhoneService(config, { diagnostics });
 }
 export async function main() {
   assert.equal(process.argv.length, 3);

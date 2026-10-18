@@ -64,6 +64,16 @@ test('failed startup diagnostic stops before datastore construction without a fa
   assert.equal(f.state().stops, 0); assert(!JSON.stringify(f.reports).includes('private-sink-canary'));
 });
 
+test('unhealthy installed capture refuses startup before preflight, compiler or service construction', async () => {
+  const f = fixture();
+  f.deps.diagnostics = new ControlledPhoneDiagnostics(() => {}, () => false);
+  f.deps.compiler = { compile: async () => assert.fail('No compile before capture readiness') };
+  f.deps.createService = async () => assert.fail('No datastore before capture readiness');
+  assert.equal(await runPhoneService(config(), f.deps), 1);
+  assert.equal(f.state().preflights, 0);
+  assert.equal(f.reports.length, 1); assert.equal(f.reports[0].report.phase, 'failed-before-ready');
+});
+
 test('later capture failure is visible without replacing or prematurely cleaning the original service', async () => {
   const f = fixture(), wait = f.deps.wait; let failing = false;
   f.deps.diagnostics = new ControlledPhoneDiagnostics(() => { if (failing) throw new Error('private-sink-canary'); });
