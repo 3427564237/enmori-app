@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-18",
+  "sourceCandidate": "8abb9bc63e304b69804729f1dc761fac832d22ed",
+  "hciPackage": "com.enmori.app.hcitest/v2",
+  "facts": {
+    "offlineHomeSampleActivities": 2,
+    "offlineSampleActivityRefreshChangesInventory": false,
+    "offlineInterestTags": [
+      "Photography",
+      "Outdoors",
+      "Music",
+      "Art"
+    ],
+    "offlineCatalogueCount": 4,
+    "offlineRecommendationsUseSelectedInterests": false,
+    "controlledPhoneServiceSeedActiveTags": [
+      {
+        "name": "Music fixture",
+        "count": 1
+      }
+    ],
+    "userSelectionMaximum": 10,
+    "liveCatalogueCountObservedNow": false,
+    "liveBackend8080Listening": false,
+    "liveAuth9099Listening": false,
+    "realBrowseImplemented": true,
+    "realBrowseScope": "SG upcoming eligible first20/page0,date ascending; maximum returned20, no pagination",
+    "reloadMeaning": "fresh provider request of same approved first batch; changes only if source/time eligibility changes",
+    "ordinaryUserCreatesTags": false,
+    "adminCatalogueMutationRequirementApproved": true,
+    "deliveredAdminCatalogueMaintenanceWorkflowVerified": false
+  },
+  "historicalRealEventEvidence": {
+    "path": "docs/evidence/sprint3/2026-10-16-li-direct-runtime-repairs.json",
+    "scope": "joinedRealEventService host HTTPS/Auth/real provider; not phone",
+    "eligibleFirstBatchCount": 18,
+    "currentRuntimeProof": false
+  },
+  "limits": [
+    "No service started, provider called, credentials accessed or data changed for this inventory.",
+    "The one-tag seed is a source fact, not a live database count.",
+    "The four-tag offline memory fixture is not the controlled backend catalogue.",
+    "Visible offline activities and refreshed fixtures do not prove personalized/current provider results."
+  ]
+}
