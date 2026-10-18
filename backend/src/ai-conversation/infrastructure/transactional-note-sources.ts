@@ -22,7 +22,7 @@ const exact = (value: StoredDocument, fields: readonly string[]): boolean =>
   Object.keys(value).length === fields.length && fields.every(k => Object.hasOwn(value, k));
 
 export function parseProvenance(value: StoredDocument | undefined): ParsedProvenance | undefined {
-  if (!value || !Array.isArray(value.sources) || value.sources.length > 5) return undefined;
+  if (!value || !Array.isArray(value.sources) || value.sources.length > 15) return undefined;
   if (value.sources.length === 0) return exact(value, ["sources"]) ? { sources: [] } : undefined;
   if (!exact(value, ["sources", "purposeRevocationGeneration"]) || !validGeneration(value.purposeRevocationGeneration)) return undefined;
   const sources: SourcePair[] = [], seen = new Set<string>();
@@ -35,7 +35,7 @@ export function parseProvenance(value: StoredDocument | undefined): ParsedProven
 }
 
 export function validDependencies(value: ContextDependencies): boolean {
-  return Array.isArray(value.sources) && value.sources.length <= 5 &&
+  return Array.isArray(value.sources) && value.sources.length <= 15 &&
     value.sources.every(s => typeof s === "object" && s !== null && !Array.isArray(s) &&
       s.sourceType === "check_in" && typeof s.sourceId === "string" && isSafeDocumentId(s.sourceId) && parseReadInstant(s.observedVersion) !== undefined) &&
     new Set(value.sources.map(s => s.sourceId)).size === value.sources.length;

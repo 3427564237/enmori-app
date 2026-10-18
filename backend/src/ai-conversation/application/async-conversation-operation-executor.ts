@@ -21,6 +21,7 @@ export interface AsyncConversationExecutionPorts {
 }
 export interface AsyncConversationExecutionProviders {
   readonly runtime: BoundedAiRuntime<AsyncConversationModelInput>;
+  readonly strategy?: "open_conversation_v1";
   /** Explicit composition only, no I/O. Bind all three adapters to the SAME
    * request-local original capability; do not introduce a global token registry. */
   readonly ports: (original: RequestOriginalConversationIdentity) => AsyncConversationExecutionPorts;
@@ -184,7 +185,7 @@ class Execution implements ConversationExecution {
             return value;
           } catch { this.revoke(); throw new Error("unavailable"); }
         },
-      });
+      }, this.providers.strategy);
     this.command = this.app.create({ identity: this.identity, operation: this.operation, text,
       ...(this.retry ? { retryUser: this.retry } : {}) });
     this.private.text = undefined;

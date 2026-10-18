@@ -75,7 +75,16 @@ export interface FixedStartReadView {
   close(): void;
 }
 
+export interface HistoryPairIdentity {
+  readonly userMessageId: string; readonly assistantMessageId: string;
+  readonly userSequence: number; readonly assistantSequence: number;
+}
+export interface ConversationHistory {
+  readonly pairs: readonly { readonly identity: HistoryPairIdentity; readonly user: string; readonly assistant: string }[];
+  readonly sources: ContextDependencies["sources"];
+}
 export interface ContextDependencies {
+  readonly history?: readonly HistoryPairIdentity[];
   readonly ownerId: string;
   readonly purpose: "checkin_conversation";
   readonly purposeRevocationGeneration: number;

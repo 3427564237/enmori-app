@@ -7,6 +7,8 @@ import { resolveRealRetention } from "../domain/real-retention-resolver.js";
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
 import type { RealConversationStore, StoreResult, StoreFailure, RuntimeEpoch, OperationTarget,
   OpenOperation, OriginalWriteAuthority, StoredConversationMessage, StoredUserIdentity, SavedOperationOutcome } from "../ports/real-conversation-store.js";
+import type { ConversationHistory, HistoryPairIdentity } from "../ports/real-context-reader.js";
+import { parseReadNote } from "./real-context-records.js";
 import type { PresentationMetadata } from "../ports/conversation-lifecycle.js";
 import { normalizePersonaInput } from "../../personas/domain/persona-values.js";
 import type { ConversationReadback } from "../ports/conversation-operations.js";
@@ -119,6 +121,11 @@ export class FirestoreConversationStore implements RealConversationStore {
           state === undefined || !Array.isArray(state.livePersonaIds) || !state.livePersonaIds.includes(deps.usedPersonaId) ||
           !nonnegative(state.stateRevision)) refuse("unavailable");
       // Edit/switch are NOT revocations; only the originally used record must remain live.
+    }
+    if (deps.history !== undefined) {
+      const inv = await this.inventory(tx, target, false, check);
+      if (!inv && deps.history.length) refuse("denied");
+      if (inv) await this.history(tx, target, inv, deps.history, check);
     }
     current(a);
   }
@@ -330,6 +337,61 @@ export class FirestoreConversationStore implements RealConversationStore {
       return this.message({ ...assistant, data: { ...metadata, availability: "unavailable" } });
     }
     return this.message(assistant);
+  }
+  /** Select the latest TWO canonical complete pairs before exclusions. Never backfill.
+   * An explicit expected set rechecks precisely the borrowed pairs at every effect. */
+  private async history(tx: Tx, t: OperationTarget, inv: Inventory,
+    expected: readonly HistoryPairIdentity[] | undefined, check: () => void): Promise<ConversationHistory> {
+    if (expected && (!Array.isArray(expected) || expected.length > 2 || new Set(expected.map(p => p.userMessageId)).size !== expected.length)) refuse("unavailable");
+    const selected = expected ? expected.map(p => {
+      if (!UUID.test(p.userMessageId) || !UUID.test(p.assistantMessageId) || !positive(p.userSequence) || !positive(p.assistantSequence)) refuse("unavailable");
+      const row = this.requireUser(inv, p.userMessageId);
+      if (row.data.sequence !== p.userSequence || row.data.acceptedAssistantMessageId !== p.assistantMessageId) refuse("denied");
+      return row;
+    }) : inv.rows.filter(row => row.data.role === "user" && row.id !== t.userMessageId &&
+      row.data.acceptedAssistantMessageId !== undefined && row.data.pendingOperationId === undefined)
+      .sort((a,b) => {
+        const aa=inv.rows.find(row=>row.id===a.data.acceptedAssistantMessageId),bb=inv.rows.find(row=>row.id===b.data.acceptedAssistantMessageId);
+        if (!aa || !bb) refuse("unavailable");
+        return Number(bb.data.sequence)-Number(aa.data.sequence);
+      }).slice(0,2).reverse();
+    const pairs: ConversationHistory["pairs"][number][] = [], sources = new Map<string, ConversationHistory["sources"][number]>();
+    for (const row of selected) {
+      check();
+      const assistant = await this.pair(tx,t,inv,row,check);
+      if (row.data.pendingOperationId !== undefined || !assistant || assistant.availability !== "available" || !assistant.text) {
+        if (expected) refuse("denied");
+        continue;
+      }
+      const identity = { userMessageId: row.id, assistantMessageId: assistant.messageId,
+        userSequence: Number(row.data.sequence), assistantSequence: assistant.sequence };
+      if (expected && !expected.some(p => p.userMessageId === identity.userMessageId && p.assistantMessageId === identity.assistantMessageId &&
+          p.userSequence === identity.userSequence && p.assistantSequence === identity.assistantSequence)) refuse("denied");
+      const provenance = parseProvenance(await readWhileCurrent(check, () => tx.get(`${parentPath(t)}/message_sources/${assistant.messageId}`)));
+      if (!provenance) refuse("unavailable");
+      if (!tx.getSnapshot && provenance.sources.length) refuse("unavailable");
+      for (const source of provenance.sources) {
+        const note = await readWhileCurrent(check, () => tx.getSnapshot!(`check_ins/${source.sourceId}`));
+        if (!note) refuse("denied");
+        const parsed = parseReadNote(note.data,source.sourceId,note.updateTime,t.ownerAccountId);
+        if (!parsed) refuse("unavailable");
+        sources.set(source.sourceId,{...source,observedVersion:parsed.observedVersion});
+      }
+      pairs.push(Object.freeze({identity:Object.freeze(identity),user:String(row.data.text),assistant:assistant.text}));
+    }
+    if (sources.size > 15) refuse("unavailable");
+    return Object.freeze({pairs:Object.freeze(pairs),sources:Object.freeze([...sources.values()])});
+  }
+  async readHistory(t: OperationTarget, a: OriginalWriteAuthority, expected?: readonly HistoryPairIdentity[]): Promise<StoreResult<ConversationHistory>> {
+    return this.content(a,async tx => {
+      requireTarget(t); await this.authority(tx,t,a);
+      const inv = await this.inventory(tx,t,false,() => current(a));
+      if (!inv) {
+        if (t.targetKind !== "reserved_new" || expected?.length) refuse("conversation_unavailable");
+        return {pairs:[],sources:[]};
+      }
+      return this.history(tx,t,inv,expected,() => current(a));
+    });
   }
   async settleAcknowledgedAssistant(op: OpenOperation, a: OriginalWriteAuthority): Promise<StoreResult<void>> {
     return this.run(async tx => {

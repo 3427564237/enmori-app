@@ -9,7 +9,7 @@ import type { AsyncAssistantWriteObservation, AsyncClaimSettlement, AsyncCloseOb
   AsyncConversationModelInput, AsyncConversationStore, AsyncEffectContext, AsyncEffectIdentity,
   AsyncOperation, AsyncSavedUser, AsyncUserWriteObservation } from "../ports/async-conversation.js";
 import type { AcceptedAssistant, ConversationInput } from "../ports/conversation-lifecycle.js";
-import type { AcceptedContextRead, RealContextReadPort } from "../ports/real-context-reader.js";
+import type { AcceptedContextRead, ContextDependencies, ConversationHistory, RealContextReadPort } from "../ports/real-context-reader.js";
 import { PreparedRealContextReader } from "./real-context-reader.js";
 
 export type AsyncConversationCommand = object;
@@ -22,6 +22,7 @@ interface State {
   readonly operation: AsyncOperation;
   readonly retryUser: AsyncSavedUser | undefined;
   processing: Processing | undefined;
+  history: ConversationHistory | undefined;
   dispatch: Promise<AsyncConversationAdmission> | undefined;
   control: RuntimeApplicationControl | undefined;
   reader: PreparedRealContextReader | undefined;
@@ -63,7 +64,8 @@ export class AsyncConversationApplication {
   constructor(private readonly runtime: BoundedAiRuntime<AsyncConversationModelInput>,
     private readonly authority: AsyncConversationAuthority, private readonly reads: RealContextReadPort,
     private readonly store: AsyncConversationStore, private readonly gates: AsyncConversationGates,
-    private readonly sink: AsyncConversationDelivery, private readonly clock: AsyncConversationClock) {}
+    private readonly sink: AsyncConversationDelivery, private readonly clock: AsyncConversationClock,
+    private readonly strategy?: "open_conversation_v1") {}
 
   /** Input is from a verified, consumed N01 ticket, never an ordinary untrusted DTO. */
   create(input: AsyncConversationCommandInput): AsyncConversationCommand {
@@ -74,7 +76,7 @@ export class AsyncConversationApplication {
     const operation = Object.freeze({ operationId: input.operation.operationId, conversationId: input.operation.conversationId,
       userMessageId: input.operation.userMessageId, kind: input.operation.kind, targetKind: input.operation.targetKind });
     const state: State = { identity, operation, retryUser: input.retryUser === undefined ? undefined : user(input.retryUser),
-      processing: { text: input.text, candidate: undefined }, dispatch: undefined, control: undefined,
+      history: undefined, processing: { text: input.text, candidate: undefined }, dispatch: undefined, control: undefined,
       reader: undefined, context: undefined, readerReady: undefined, terminal: false, disposeCount: 0,
       fenceIssued: false, uncertain: false, user: undefined, assistantMessageId: undefined,
       close: undefined, closePending: false, barrier: "unresolved", checkingResult: false };
@@ -105,7 +107,7 @@ export class AsyncConversationApplication {
             acceptedAt: control.acceptedAt, deadline: control.deadline, asOf: instant(this.clock.utcNow()), signal: control.signal });
           s.reader = new PreparedRealContextReader(read, this.reads, () => this.clock.monotonicNow(), () => this.live(s));
           s.context = Object.freeze({ identity: s.identity, operation: s.operation, read, budget: control,
-            originalCurrent: () => this.live(s), dependencies: () => this.live(s) ? s.reader?.dependencies() : undefined });
+            originalCurrent: () => this.live(s), dependencies: () => this.dependencies(s) });
           // Starts at acceptance, including while queued; never first captures at dequeue.
           s.readerReady = s.reader.prepare();
         } catch { control.fail("dependency_unavailable"); }
@@ -198,14 +200,25 @@ export class AsyncConversationApplication {
   private matches(s: State, result: AsyncEffectIdentity): boolean {
     return result.operationId === s.operation.operationId && result.conversationId === s.operation.conversationId;
   }
+  private dependencies(s: State): ContextDependencies | undefined {
+    if (!this.live(s)) return undefined;
+    const base = s.reader?.dependencies();
+    if (!base) return undefined;
+    if (!this.strategy) return base;
+    const sources = new Map(base.sources.map(source => [source.sourceId,source]));
+    for (const source of s.history?.sources ?? []) sources.set(source.sourceId,source);
+    if (sources.size > 15) return undefined;
+    return Object.freeze({...base,sources:Object.freeze([...sources.values()]),history:Object.freeze(s.history?.pairs.map(p => p.identity) ?? [])});
+  }
   private model(s: State): ConversationInput | undefined {
     if (!this.live(s) || !s.processing) return undefined;
     const projection = s.reader?.modelContext();
-    return projection && Object.freeze({ currentMessage: s.processing.text, checkIns: projection.checkIns, persona: projection.persona });
+    return projection && Object.freeze({ currentMessage: s.processing.text, checkIns: projection.checkIns, persona: projection.persona,
+      ...(this.strategy ? {strategy:this.strategy,history:Object.freeze(s.history?.pairs.map(p => Object.freeze({user:p.user,assistant:p.assistant})) ?? [])} : {}) });
   }
   private assistant(s: State): AcceptedAssistant | undefined {
     if (!this.live(s) || !s.processing?.candidate) return undefined;
-    const dependencies = s.reader?.dependencies(), projection = s.reader?.modelContext();
+    const dependencies = this.dependencies(s), projection = s.reader?.modelContext();
     return dependencies && projection && { message: s.processing.candidate.message,
       presentation: projection.persona ? { presentationMode: "persona", presentationProjectionVersion: "persona_presentation_v1" }
         : { presentationMode: "default" },
@@ -220,6 +233,18 @@ export class AsyncConversationApplication {
       const current = await s.reader!.revalidate();
       if (!this.live(s)) return false;
       if (current !== "ready") { this.fail(s, current === "denied" ? "stale_authority" : "dependency_unavailable"); return false; }
+      if (this.strategy && s.history) {
+        const history = await this.store.readHistory?.(s.context!,s.history.pairs.map(p => p.identity));
+        if (!this.live(s)) return false;
+        if (history?.kind !== "read") {
+          this.fail(s,history?.kind === "denied" ? "stale_authority" : "dependency_unavailable"); return false;
+        }
+        // Source/message identity and bytes are immutable; an adapter cannot
+        // swap content after the complete input was budgeted or validated.
+        if (JSON.stringify(history.value.pairs) !== JSON.stringify(s.history.pairs)) {
+          this.fail(s,"stale_authority"); return false;
+        }
+      }
       return true;
     } catch { this.fail(s, "dependency_unavailable"); return false; }
   }
@@ -235,6 +260,13 @@ export class AsyncConversationApplication {
     const ready = await s.readerReady;
     if (!this.live(s)) return;
     if (ready !== "ready") { this.fail(s, ready === "denied" ? "stale_authority" : "dependency_unavailable"); return; }
+    if (this.strategy) {
+      const history = await this.store.readHistory?.(s.context!);
+      if (!this.live(s)) return;
+      if (history?.kind !== "read") { this.fail(s,history?.kind === "denied" ? "stale_authority" : "dependency_unavailable"); return; }
+      s.history = history.value;
+      if (!this.dependencies(s)) { this.fail(s,"dependency_unavailable"); return; }
+    }
     const gate = await this.gates.beforeGeneration(() => this.model(s), s.control!);
     if (!this.live(s)) return;
     if (!gate.ok) { this.fail(s, gate.failure); return; }
@@ -311,6 +343,7 @@ export class AsyncConversationApplication {
     s.terminal = true; s.disposeCount++;
     const processing = s.processing; s.processing = undefined;
     if (processing) { processing.text = ""; processing.candidate = undefined; }
+    s.history = undefined;
     s.reader?.dispose(); s.reader = undefined; s.readerReady = undefined; s.context = undefined;
     // Do not await or claim remote cancellation. Only content-free matching close
     // observation may arrive after local disposal, never a late content ACK.

@@ -1,6 +1,6 @@
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
-import type { ContextDependencies } from "./real-context-reader.js";
+import type { ContextDependencies, ConversationHistory, HistoryPairIdentity } from "./real-context-reader.js";
 import type { PresentationMetadata } from "./conversation-lifecycle.js";
 
 /** N02/F01 asynchronous boundary. The synchronous fake effect(commit) Port is unchanged. */
@@ -63,6 +63,7 @@ export type SavedOperationOutcome =
  * The caller must revalidate original delivery authority and ordinary read rules.
  */
 export interface RealConversationStore {
+  readHistory?(target: OperationTarget, authority: OriginalWriteAuthority, expected?: readonly HistoryPairIdentity[]): Promise<StoreResult<ConversationHistory>>;
   startEpoch(processEpoch: string): Promise<StoreResult<RuntimeEpoch>>;
   initializeOperation(target: OperationTarget, epoch: RuntimeEpoch,
     authority: OriginalWriteAuthority): Promise<StoreResult<OpenOperation>>;

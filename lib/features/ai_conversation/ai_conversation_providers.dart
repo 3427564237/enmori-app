@@ -148,6 +148,13 @@ class AiConversationController extends Notifier<AiConversationState> {
           _reads.isEmpty &&
           phase != AiConversationPhase.deleting &&
           phase != AiConversationPhase.unauthenticated,
+      canStartNewConversation:
+          available &&
+          !generating &&
+          _reads.isEmpty &&
+          !_memory.deleting &&
+          _memory.conversationId != null &&
+          (!_memory.unresolved || _memory.deleted),
       readBusy: _reads.isNotEmpty,
     );
   }
@@ -728,6 +735,36 @@ class AiConversationController extends Notifier<AiConversationState> {
       statusMessage: state.statusMessage,
     );
     return true;
+  }
+
+  /// Uses the existing reserved-new prepare path on the next explicit send.
+  /// No DELETE, automatic resend, unknown-result escape or message replacement.
+  void startNewConversation() {
+    if (!state.canStartNewConversation) return;
+    final previousWasDeleted = _memory.deleted;
+    _invalidateReads();
+    _retryUser = null;
+    _messageVersions.clear();
+    _assistantUsers.clear();
+    _assistantObservations.clear();
+    _assistantRevision = 0;
+    _memory.conversationId = null;
+    _memory.operationId = null;
+    _memory.operationUserId = null;
+    _memory.operationUserSequence = null;
+    _memory.operationUserPersistedAt = null;
+    _memory.operationHasAssistant = false;
+    _memory.operationAssistantId = null;
+    _memory.unresolved = false;
+    _memory.established = false;
+    _memory.deleted = false;
+    _show(
+      AiConversationPhase.idle,
+      clear: true,
+      message: previousWasDeleted
+          ? 'New conversation.'
+          : 'New conversation. Previous messages remain saved.',
+    );
   }
 
   Future<void> deleteConversation() async {

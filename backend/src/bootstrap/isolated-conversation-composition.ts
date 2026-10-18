@@ -34,6 +34,7 @@ export async function createIsolatedConversationComposition(options: {
   readonly environment: Readonly<Record<string,string|undefined>>;
   readonly transport: GenerationTransport<ConversationInput>;
   readonly gates: ConversationGates;
+  readonly conversationStrategy?: "open_conversation_v1";
   readonly notePrerequisites?: SourceBoundNotePrerequisites;
   readonly report: (phase: "expiry" | "source", result: MaintenanceResult) => void;
   readonly reportRetirement: (confirmed: boolean) => void;
@@ -63,6 +64,7 @@ export async function createIsolatedConversationComposition(options: {
     {uuid:randomUUID,operationKey:()=>randomBytes(32).toString("base64url")},
     {now:()=>clock.now(),at:(at,wake)=>clock.at(at,wake),utcMilliseconds},
     {create:(input,delivery)=>new AsyncConversationOperationExecutor({runtime,gates:options.gates,
+      ...(options.conversationStrategy ? {strategy:options.conversationStrategy} : {}),
       clock:{monotonicNow:()=>clock.now(),utcNow:()=>{const ms=utcMilliseconds(),seconds=Math.floor(ms/1000);return {seconds,nanoseconds:(ms-seconds*1000)*1000000};}},
       ports:original=>{
         const db=trackConversationFirestore(options.firestore,io,input.identity.ownerId,input.operation.conversationId,input.operation.operationId);

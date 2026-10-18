@@ -32,6 +32,7 @@ final class AiConversationState {
     this.canCancel = false,
     this.canLeaveWithoutRetrying = false,
     this.canDelete = false,
+    this.canStartNewConversation = false,
     this.readBusy = false,
   }) : messages = List.unmodifiable(messages);
 
@@ -49,6 +50,7 @@ final class AiConversationState {
   /// Stop this unresolved flow's local recovery without releasing its guard.
   final bool canLeaveWithoutRetrying;
   final bool canDelete;
+  final bool canStartNewConversation;
   final bool readBusy;
   bool get isBusy =>
       canCancel || readBusy || phase == AiConversationPhase.deleting;

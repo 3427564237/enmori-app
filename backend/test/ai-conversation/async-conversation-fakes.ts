@@ -141,7 +141,7 @@ export class FakeAsyncStore implements AsyncConversationStore {
       user: row?.user, assistantMessageId: row?.assistantMessageId };
   }
 }
-export function fixture() {
+export function fixture(strategy?: "open_conversation_v1") {
   const clock = new FakeClock(), auth = new FakeAuthority(), reads = new FakeReads(), store = new FakeAsyncStore();
   const calls: { input: ConversationInput; budget: RequestBudget; completion: ReturnType<typeof deferred<Uint8Array>> }[] = [];
   const model: GenerationTransport<ConversationInput> = { generate(input, budget) {
@@ -158,7 +158,7 @@ export function fixture() {
     candidate: async () => ({ ok: true as const, value: undefined }) };
   let utc = { ...timestamp };
   const app = new AsyncConversationApplication(runtime, auth, reads, store, gates, delivery,
-    { monotonicNow: () => clock.now(), utcNow: () => ({ ...utc }) });
+    { monotonicNow: () => clock.now(), utcNow: () => ({ ...utc }) }, strategy);
   const who = identity();
   const create = (op = operation(), text = "Synthetic current input", retryUser?: AsyncSavedUser) => app.create({ identity: who,
     operation: op, text, ...(retryUser ? { retryUser } : {}) });

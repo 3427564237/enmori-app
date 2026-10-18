@@ -9,6 +9,51 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final social in [false, true]) {
+    testWidgets(
+      'New conversation preserves draft, selection and focus social=$social',
+      (tester) async {
+        final controller = _PageController(
+          _state(canSend: true, canStartNewConversation: true),
+        );
+        await _pump(tester, controller, socialStyle: social);
+        final input = find.byKey(const Key('ai-message-input'));
+        await tester.enterText(input, 'An unfinished draft');
+        final field = tester.widget<TextField>(input);
+        const selection = TextSelection(baseOffset: 3, extentOffset: 9);
+        field.controller!.selection = selection;
+        if (social) {
+          await _tap(tester, 'ai-conversation-actions');
+        }
+        // Invoke the exact action without moving platform focus to a pointer.
+        if (social) {
+          tester
+              .widget<PopupMenuButton<String>>(
+                find.byKey(const Key('ai-conversation-actions')),
+              )
+              .onSelected!('new');
+          Navigator.of(
+            tester.element(find.byKey(const Key('ai-new-conversation'))),
+          ).pop();
+        } else {
+          tester
+              .widget<OutlinedButton>(
+                find.byKey(const Key('ai-new-conversation')),
+              )
+              .onPressed!();
+        }
+        await tester.pumpAndSettle();
+        final current = tester.widget<TextField>(input);
+        expect(current.controller!.text, 'An unfinished draft');
+        expect(current.controller!.selection, selection);
+        expect(current.focusNode!.hasFocus, isTrue);
+        expect(controller.events, ['new']);
+        expect(controller.sent, isEmpty);
+        expect(controller.deletes, 0);
+      },
+    );
+  }
+
   for (final action in ['discard', 'leave', 'delete']) {
     for (final authRejected in [false, true]) {
       testWidgets(
@@ -1003,6 +1048,7 @@ AiConversationState _state({
   bool canCancel = false,
   bool canLeaveWithoutRetrying = false,
   bool canDelete = false,
+  bool canStartNewConversation = false,
   bool readBusy = false,
 }) => AiConversationState(
   sessionKey: sessionKey,
@@ -1016,6 +1062,7 @@ AiConversationState _state({
   canCancel: canCancel,
   canLeaveWithoutRetrying: canLeaveWithoutRetrying,
   canDelete: canDelete,
+  canStartNewConversation: canStartNewConversation,
   readBusy: readBusy,
 );
 
@@ -1160,6 +1207,13 @@ class _PageController extends AiConversationController {
 
   @override
   Future<void> loadMessages({String? before}) async => reads.add(before);
+
+  @override
+  void startNewConversation() {
+    if (!state.canStartNewConversation) return;
+    events.add('new');
+    state = _state(canSend: true);
+  }
 
   @override
   Future<void> deleteConversation() async {
