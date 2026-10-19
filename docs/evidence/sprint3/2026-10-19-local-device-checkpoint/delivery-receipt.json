@@ -17,7 +17,7 @@
   "nativeCheckInSavedAndReread": "2026-10-19T13:24:06.178Z",
   "nativeCheckInVisibility": "Private",
   "scope": "Bounded local checkpoint, not full UAT or all five batches",
-  "realEmailSent": "providerAccepted; delivery not yet confirmed",
+  "realEmailSent": "verification delivery and link confirmed by user screenshot and Firebase lookup",
   "controlledRestart": {
     "stoppedAt": "2026-10-19T13:11:30.370Z",
     "exportConfirmed": true
@@ -48,6 +48,9 @@
     "emailVerifiedAtInitialLookup": false,
     "provider": "Firebase production Auth",
     "businessBackend": "not connected to real identity",
-    "passwordReset": "not sent yet"
+    "passwordReset": "provider accepted; user completion pending",
+    "emailVerifiedAfterUserLink": true,
+    "verificationConfirmedAt": "2026-10-19T13:34:43.602495+00:00",
+    "passwordResetRequestHttpStatus": 200
   }
 }

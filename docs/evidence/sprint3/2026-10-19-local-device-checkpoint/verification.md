@@ -45,3 +45,7 @@
 用户随后指定收件邮箱，授权测试注册与邮件。通过 Firebase 正式 REST API 创建独立测试账号（HTTP200），随机密码与登录 token 仅写入原本机私有目录；未将真实身份送往 Emulator 业务后端。VERIFY_EMAIL 请求 HTTP200，随后 lookup 的 emailVerified=false。只记录供应商已接受请求，实际收到并点击链接等待用户确认，不把发信 API 成功当作投递成功。未自动重发，未修改原有账号密码。
 
 本轮新增业务数据已于 2026-10-19T13:27:54.005Z 正常导出（exportConfirmed=true），随后同目录重新启动 ready=true。原账号资料、签到及对话不删除。恢复系统定位和 App 权限后重新完成 v6 私有交接。
+
+## 真实验证邮件确认与密码重置请求
+
+用户提供手机截图，Firebase 托管页面显示“您的电子邮件地址已通过验证”。随后对原真实账号执行 accounts:lookup，HTTP200 且 emailVerified=true，确认实际收件、点击链接及服务端验证状态。之后按已授权流程发送 PASSWORD_RESET，HTTP200；这仅确认供应商接受重置邮件请求，仍待用户收件并完成重设。未重新注册、自动重发或把真实账号接入 Emulator 业务后端。新密码不要求在聊天中提供。

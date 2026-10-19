@@ -13,3 +13,5 @@
 参考：[Firebase 配置](https://firebase.google.com/docs/projects/learn-more)、[Auth 配置读取](https://docs.cloud.google.com/identity-platform/docs/reference/rest/v2/projects/getConfig)。
 
 后续：用户已指定收件邮箱并授权注册测试；正式 Auth 创建测试账号和 VERIFY_EMAIL 均 HTTP200，等待收件并点击。账号凭据在上述私有目录，不在 APK 或 Git。后续只核对原账号状态，不自动重发。最新结果见 docs/evidence/sprint3/2026-10-19-local-device-checkpoint/verification.md。
+
+最新核对：用户手机截图及正式 Auth lookup 均确认邮箱已验证（emailVerified=true）；PASSWORD_RESET 请求 HTTP200，等待用户完成重设。此阶段仍不是同一 coretest APK 的真实账号完整闭环。
