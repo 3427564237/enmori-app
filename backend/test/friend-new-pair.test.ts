@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { FirestoreFriendRepository,friendPairKey } from "../src/friends/infrastructure/firestore-friend-repository.js";
+import { InMemoryFirestoreGateway } from "./support/in-memory-firestore-gateway.js";
+import { myFriendsSeed,clock } from "./support/my-friends-fixture.js";
+test("two eligible newly registered accounts can lookup, send and accept without a preseeded pair",async()=>{
+  const seed=myFriendsSeed(1), pairPath=`friend_pairs/${friendPairKey("owner","target_1")}`;
+  delete seed[pairPath];
+  for(const path of Object.keys(seed))if(path.includes("/members/"))delete seed[path];
+  const store=new InMemoryFirestoreGateway(seed),friends=new FirestoreFriendRepository(store,clock);
+  const before=store.entries();
+  const lookup=await friends.lookup("owner","member_target_1",false);
+  assert.equal(lookup.ok&&lookup.value.relationshipState,"can_send_request");
+  assert.deepEqual(store.entries(),before,"lookup cannot create a relationship");
+  const sent=await friends.lookup("owner","member_target_1",true);
+  assert.equal(sent.ok&&sent.value.relationshipState,"outgoing_request_pending");
+  const inbox=await friends.inbox("target_1");
+  assert.equal(inbox.ok&&inbox.value.requests.length,1);
+  if(!inbox.ok)return;
+  assert.equal((await friends.act("target_1",inbox.value.requests[0]!.requestRef,"accept")).ok,true);
+  assert.equal((await friends.lookup("owner","member_target_1",false)).ok,true);
+});

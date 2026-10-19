@@ -1,0 +1,331 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../check_in/domain/check_in_repository.dart';
+import '../../weather/presentation/weather_card.dart';
+import '../domain/social_repository.dart';
+import 'social_profile_controller.dart';
+import 'check_in_points_map.dart';
+
+typedef ParticipationBuilder = Widget Function(
+  BuildContext context,
+  String username,
+);
+
+/// LI supplies the existing device civil date/time-zone and approved URL opener.
+/// SHI's participation builder must use its server-authorized people projection.
+final class SocialProfilePage extends ConsumerStatefulWidget {
+  const SocialProfilePage({
+    required this.username,
+    required this.initialDate,
+    required this.timeZone,
+    required this.openAttribution,
+    this.participationBuilder,
+    this.onOpenRequest,
+    this.tileLayerBuilder,
+    super.key,
+  });
+  final String username, initialDate, timeZone;
+  final Future<bool> Function(Uri) openAttribution;
+  final ParticipationBuilder? participationBuilder;
+  final Future<void> Function(String)? onOpenRequest;
+  final Widget Function()? tileLayerBuilder;
+  @override
+  ConsumerState<SocialProfilePage> createState() => _SocialProfilePageState();
+}
+
+final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
+    with WidgetsBindingObserver {
+  late String _date;
+  String? _selectedRecord;
+  SocialProfileController get controller =>
+      ref.read(socialProfileControllerProvider(widget.username).notifier);
+  @override
+  void initState() {
+    super.initState();
+    _date = widget.initialDate;
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _load(SocialTab.profile);
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant SocialProfilePage old) {
+    super.didUpdateWidget(old);
+    if (old.username != widget.username || old.timeZone != widget.timeZone) {
+      _date = widget.initialDate;
+      _selectedRecord = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _load(SocialTab.profile);
+      });
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted) return;
+    if (state == AppLifecycleState.resumed) {
+      _load(ref.read(socialProfileControllerProvider(widget.username)).tab);
+    } else {
+      controller.clear();
+      _selectedRecord = null;
+    }
+  }
+
+  Future<void> _load(SocialTab tab, {bool next = false}) =>
+      controller.load(tab, date: _date, timeZone: widget.timeZone, next: next);
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(socialProfileControllerProvider(widget.username));
+    return Scaffold(
+      appBar: AppBar(title: Text('@${widget.username}')),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: ListView(
+              padding: const EdgeInsets.all(24),
+              children: [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final tab in SocialTab.values)
+                      ChoiceChip(
+                        label: Text(switch (tab) {
+                          SocialTab.profile => 'Profile',
+                          SocialTab.records => 'Records',
+                          SocialTab.calendar => 'Calendar',
+                          SocialTab.map => 'Map',
+                        }),
+                        selected: state.tab == tab,
+                        onSelected: state.busy
+                            ? null
+                            : (_) {
+                                _selectedRecord = null;
+                                _load(tab);
+                              },
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (state.tab != SocialTab.profile)
+                  TextButton.icon(
+                    icon: const Icon(Icons.calendar_month),
+                    label: Text(_date),
+                    onPressed: state.busy
+                        ? null
+                        : () async {
+                            final epoch = controller.epoch,
+                                selected = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.parse(_date),
+                                  firstDate: DateTime(1),
+                                  lastDate: DateTime(9999),
+                                );
+                            if (!mounted ||
+                                epoch != controller.epoch ||
+                                selected == null) {
+                              return;
+                            }
+                            setState(
+                              () => _date =
+                                  '${selected.year.toString().padLeft(4, '0')}-${selected.month.toString().padLeft(2, '0')}-${selected.day.toString().padLeft(2, '0')}',
+                            );
+                            _load(state.tab);
+                          },
+                  ),
+                if (state.busy)
+                  Semantics(
+                    liveRegion: true,
+                    child: const Text('Loading current access…'),
+                  ),
+                if (state.failure case final failure?)
+                  Semantics(liveRegion: true, child: Text(failure.message)),
+                if (state.removed)
+                  Semantics(
+                    liveRegion: true,
+                    child: const Text(
+                      'Friend removed. Shared access has been updated.',
+                    ),
+                  ),
+                if (state.profile case final profile?)
+                  ..._profile(profile, state),
+                if (state.records case final records?) ...[
+                  if (records.checkIns.isEmpty)
+                    const Text('No visible records on this page.'),
+                  for (final record in records.checkIns) _record(record),
+                  if (_selectedRecord != null &&
+                      !records.checkIns.any(
+                        (r) => r.checkInId == _selectedRecord,
+                      ))
+                    const Text(
+                      'The selected record is not on this page. Continue or reload to check current access.',
+                    ),
+                  if (records.nextCursor != null)
+                    OutlinedButton(
+                      onPressed: () => _load(SocialTab.records, next: true),
+                      child: const Text('Next page'),
+                    ),
+                ],
+                if (state.month case final month?)
+                  state.tab == SocialTab.map
+                      ? CheckInPointsMap(
+                          points: month.points,
+                          openAttribution: widget.openAttribution,
+                          tileLayerBuilder: widget.tileLayerBuilder,
+                          onSelect: (point) {
+                            setState(() => _selectedRecord = point.checkInId);
+                            controller.record(point.checkInId);
+                          },
+                        )
+                      : Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final entry in month.counts.entries)
+                              OutlinedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _date = entry.key;
+                                    _selectedRecord = null;
+                                  });
+                                  _load(SocialTab.records);
+                                },
+                                child: Text(
+                                  '${entry.key.substring(8)} · ${entry.value}',
+                                ),
+                              ),
+                          ],
+                        ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: state.busy ? null : () => _load(state.tab),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reload'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _profile(SocialProfile profile, SocialState state) => [
+    Text(
+      profile.displayName ?? profile.username,
+      style: Theme.of(context).textTheme.headlineMedium,
+    ),
+    if (profile.relationship == SocialRelationship.other &&
+        widget.onOpenRequest != null)
+      OutlinedButton(
+        onPressed: () async {
+          controller.clear();
+          await widget.onOpenRequest!(profile.username);
+          if (mounted) _load(SocialTab.profile);
+        },
+        child: const Text('Friend request'),
+      ),
+    if (profile.details.bio case final bio?)
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text(bio),
+      ),
+    if (profile.details.affiliationName case final affiliation?)
+      Text(affiliation),
+    if (profile.details.region case final region?) Text(region),
+    if (profile.interests.isNotEmpty)
+      Wrap(
+        spacing: 8,
+        children: [
+          for (final interest in profile.interests)
+            Chip(label: Text(interest.name)),
+        ],
+      ),
+    if (profile.relationship == SocialRelationship.friend) ...[
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: const Text('Special Care'),
+        subtitle: const Text('Only you can see this choice.'),
+        value: profile.specialCare,
+        onChanged: state.busy
+            ? null
+            : (value) =>
+                  controller.care(value, expectedEpoch: controller.epoch),
+      ),
+      OutlinedButton.icon(
+        icon: const Icon(Icons.person_remove_outlined),
+        label: const Text('Remove friend'),
+        onPressed: () async {
+          final epoch = controller.epoch;
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Remove friend?'),
+              content: const Text(
+                'This removes the friendship for both people and ends access to friends-only content.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Keep friend'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Remove friend'),
+                ),
+              ],
+            ),
+          );
+          if (mounted && confirmed == true) {
+            await controller.remove(expectedEpoch: epoch);
+          }
+        },
+      ),
+    ],
+    if (profile.participationAvailable && widget.participationBuilder != null)
+      OutlinedButton(
+        child: const Text('Event participation'),
+        onPressed: () async {
+          controller.clear();
+          await Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (context) =>
+                  widget.participationBuilder!(context, widget.username),
+            ),
+          );
+          if (mounted) _load(SocialTab.profile);
+        },
+      ),
+  ];
+  Widget _record(CheckIn record) => Card(
+    color: record.checkInId == _selectedRecord
+        ? Theme.of(context).colorScheme.secondaryContainer
+        : null,
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(record.createdAt.toLocal().toString()),
+          Text(record.note),
+          if (record.mood case final mood?) Text(mood),
+          if (record.activity case final activity?) Text(activity),
+          if (record.weather case final weather?)
+            WeatherCard(
+              snapshot: weather,
+              openAttribution: widget.openAttribution,
+            ),
+        ],
+      ),
+    ),
+  );
+}

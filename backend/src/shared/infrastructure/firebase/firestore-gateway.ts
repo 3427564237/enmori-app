@@ -30,6 +30,9 @@ export interface FirestoreTransactionGateway {
   listWherePage?(collectionPath: string, equal: Readonly<Record<string, string>>, afterId: string | undefined, limit: number): Promise<readonly StoredDocumentEntry[]>;
   listGroupPage?(collectionId: string, afterPath: string | undefined, limit: number): Promise<readonly (StoredDocumentSnapshot & { readonly path: string })[]>;
   listMessagePage?(collectionPath:string,before:number|undefined):Promise<readonly StoredDocumentSnapshot[]>;
+  /** Purpose-bound metadata reads; never return Check-in content to ranking. */
+  listActivityCheckInPage?(ownerAccountId:string,afterId:string|undefined,limit:number):Promise<readonly StoredDocumentEntry[]>;
+  listDiscoverableAccountPage?(afterId:string|undefined,limit:number):Promise<readonly StoredDocumentEntry[]>;
 }
 
 export interface FirestoreGateway {
@@ -83,6 +86,21 @@ class FirebaseAdminTransactionGateway
   }
 
   public delete(path: string): void { this.transaction.delete(this.firestore.doc(path)); }
+  public async listActivityCheckInPage(ownerAccountId:string,afterId:string|undefined,limit:number):Promise<readonly StoredDocumentEntry[]> {
+    if(!Number.isInteger(limit)||limit<1||limit>25)throw new Error("Invalid metadata page");
+    let query=this.firestore.collection("check_ins").where("ownerAccountId","==",ownerAccountId)
+      .orderBy(FieldPath.documentId()).select("ownerAccountId","createdAt","checkInVisibility").limit(limit);
+    if(afterId!==undefined)query=query.startAfter(afterId);
+    const snapshot=await this.transaction.get(query);
+    return snapshot.docs.map(doc=>({id:doc.id,data:{...doc.data()}}));
+  }
+  public async listDiscoverableAccountPage(afterId:string|undefined,limit:number):Promise<readonly StoredDocumentEntry[]> {
+    if(!Number.isInteger(limit)||limit<1||limit>25)throw new Error("Invalid discovery page");
+    let query=this.firestore.collection("accounts").orderBy(FieldPath.documentId()).select("profileVisibility").limit(limit);
+    if(afterId!==undefined)query=query.startAfter(afterId);
+    const snapshot=await this.transaction.get(query);
+    return snapshot.docs.map(doc=>({id:doc.id,data:{...doc.data()}}));
+  }
   public async listPage(collectionPath: string, afterId: string | undefined, limit: number): Promise<readonly StoredDocumentEntry[]> {
     let query = this.firestore.collection(collectionPath).orderBy(FieldPath.documentId()).limit(limit);
     if (afterId !== undefined) query = query.startAfter(afterId);

@@ -120,7 +120,10 @@ final class BackendFriendRepository implements FriendRepository {
     final friends = <MyFriend>[];
     for (final row in rows) {
       if (row is! Map<String, dynamic> ||
-          row.length != 2 ||
+          !row.keys.every(
+            {'username', 'displayName', 'specialCare'}.contains,
+          ) ||
+          (row.containsKey('specialCare') && row['specialCare'] is! bool) ||
           row['username'] is! String ||
           row['displayName'] is! String ||
           !_validUsername(row['username'] as String) ||
@@ -131,6 +134,7 @@ final class BackendFriendRepository implements FriendRepository {
         MyFriend(
           username: row['username'] as String,
           displayName: row['displayName'] as String,
+          specialCare: row['specialCare'] == true,
         ),
       );
     }

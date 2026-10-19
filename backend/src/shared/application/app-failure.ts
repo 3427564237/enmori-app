@@ -1,4 +1,5 @@
 export const APP_FAILURE_CATALOGUE = {
+  FRIEND_REVISION_PRECONDITION_FAILED: { statusCode: 412, message: "This friendship changed. Reload before changing it." },
   CATALOGUE_INVALID: { statusCode: 422, message: "Use a valid catalogue name of 1–50 characters." },
   CATALOGUE_NAME_CONFLICT: { statusCode: 409, message: "This catalogue name is already reserved." },
   PERSONA_INVALID: { statusCode: 422, message: "Use a name of 1–50 characters, valid style options and valid versions." },

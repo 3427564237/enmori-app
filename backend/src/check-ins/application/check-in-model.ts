@@ -1,4 +1,6 @@
 export interface CheckInProjection {
+  readonly location?: import("../../weather/domain/weather.js").Position;
+  readonly weather?: import("../../weather/domain/weather.js").WeatherProjection;
   readonly checkInId: string;
   readonly mood?: string;
   readonly activity?: string;

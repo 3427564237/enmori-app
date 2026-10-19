@@ -18,6 +18,7 @@ enum AppFailureKind {
   personaRevisionPreconditionFailed,
   addFriendTargetUnavailable,
   friendRequestUnavailable,
+  friendRevisionPreconditionFailed,
   eventUnavailable,
   profileInvalid,
   profileRevisionPreconditionFailed,

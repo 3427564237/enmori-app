@@ -43,6 +43,14 @@ export class InMemoryFirestoreGateway implements FirestoreGateway {
           }));
       },
       delete: path => { candidate.delete(path); },
+      listDiscoverableAccountPage: async (afterId,limit) => [...candidate.entries()]
+        .filter(([path])=>path.startsWith("accounts/")&&!path.slice(9).includes("/"))
+        .map(([path,data])=>({id:path.slice(9),data:{profileVisibility:data.profileVisibility}}))
+        .filter(r=>afterId===undefined||r.id>afterId).sort((a,b)=>a.id<b.id?-1:1).slice(0,limit),
+      listActivityCheckInPage: async (owner,afterId,limit)=>[...candidate.entries()]
+        .filter(([path,data])=>path.startsWith("check_ins/")&&!path.slice(10).includes("/")&&data.ownerAccountId===owner)
+        .map(([path,data])=>({id:path.slice(10),data:{ownerAccountId:data.ownerAccountId,createdAt:data.createdAt,checkInVisibility:data.checkInVisibility}}))
+        .filter(r=>afterId===undefined||r.id>afterId).sort((a,b)=>a.id<b.id?-1:1).slice(0,limit),
       listPage: async (collection, afterId, limit) => [...candidate.entries()]
         .filter(([path]) => path.startsWith(`${collection}/`) && !path.slice(collection.length + 1).includes("/"))
         .map(([path, data]) => ({ id: path.slice(collection.length + 1), data: copyDocument(data) }))

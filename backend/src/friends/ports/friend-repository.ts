@@ -4,7 +4,7 @@ export type FriendResult<T> = Result<T, FriendFailure>;
 export type RelationshipState = "self" | "already_friends" | "outgoing_request_pending" | "incoming_request_pending" | "can_send_request";
 export interface FriendTarget { readonly username: string; readonly displayName: string; readonly relationshipState: RelationshipState }
 export interface FriendInbox { readonly requests: readonly { readonly username: string; readonly displayName: string; readonly requestRef: string }[]; readonly nextCursor: string | null }
-export interface MyFriendsPage { readonly friends: readonly { readonly username: string; readonly displayName: string }[]; readonly nextCursor: string | null }
+export interface MyFriendsPage { readonly friends: readonly { readonly username: string; readonly displayName: string; readonly specialCare?:boolean }[]; readonly nextCursor: string | null }
 export interface FriendRepository {
   authorize(uid: string): Promise<FriendResult<void>>;
   lookup(uid: string, username: string, send: boolean): Promise<FriendResult<FriendTarget>>;

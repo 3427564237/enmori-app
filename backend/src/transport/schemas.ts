@@ -1,6 +1,8 @@
 import type { FastifySchema } from "fastify";
+import { positionSchema, weatherRequestSchema, weatherProjectionSchema } from "../weather/transport/schemas.js";
 
 export const approvedFailureCodes = [
+  "FRIEND_REVISION_PRECONDITION_FAILED",
   "CATALOGUE_INVALID",
   "CATALOGUE_NAME_CONFLICT",
   "PERSONA_INVALID",
@@ -61,6 +63,7 @@ export const checkInSchema = {
   additionalProperties: false,
   required: ["checkInId", "note", "createdAt"],
   properties: {
+    location:positionSchema,weather:weatherProjectionSchema,
     checkInVisibility: { type: "string", enum: ["private", "friends_only", "public"] },
     mood: { type: "string", minLength: 1, maxLength: 50 },
     activity: { type: "string", minLength: 1, maxLength: 50 },
@@ -149,6 +152,7 @@ const checkInBody = {
   additionalProperties: false,
   required: ["note"],
   properties: {
+    location:{anyOf:[positionSchema,{type:"null"}]},weatherRequest:weatherRequestSchema,
     mood: { anyOf: [{ type: "string", maxLength: 50 }, {type:"null"}] },
     activity: { anyOf: [{ type: "string", maxLength: 50 }, {type:"null"}] },
     checkInVisibility: {type:"string",enum:["private","friends_only","public"]},
@@ -196,7 +200,7 @@ const checkInEnvelope = {
   type: "object",
   additionalProperties: false,
   required: ["checkIn"],
-  properties: { checkIn: checkInSchema },
+  properties: { checkIn: checkInSchema, notice:{const:"Check-in saved without weather."} },
 } as const;
 
 const checkInHistoryQuery = {
