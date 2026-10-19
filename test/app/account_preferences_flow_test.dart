@@ -485,7 +485,7 @@ Future<void> tap(WidgetTester tester, String key) async {
     await tester.scrollUntilVisible(
       finder,
       200,
-      scrollable: find.byType(Scrollable).last,
+      scrollable: find.byType(Scrollable).first,
     );
   }
   await tester.ensureVisible(finder);

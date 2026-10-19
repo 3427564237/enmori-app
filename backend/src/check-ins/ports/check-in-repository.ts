@@ -23,6 +23,9 @@ export interface CheckInCreationCandidate {
 }
 
 export interface CreateCheckInCommand {
+  readonly mood?: string | null;
+  readonly activity?: string | null;
+  readonly checkInVisibility?: "private" | "friends_only" | "public";
   readonly firebaseUid: string;
   readonly note: NormalizedNote;
   readonly idempotencyKey: IdempotencyKey;

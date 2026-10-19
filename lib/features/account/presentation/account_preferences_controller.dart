@@ -1,3 +1,6 @@
+import '../domain/profile_location_repository.dart';
+import '../domain/profile_details.dart';
+
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,11 +40,13 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
   AccountPreferencesController(this.view);
   final PreferencesView view;
   late AccountPreferencesRepository _repository;
+  late ProfileLocationRepository _locationRepository;
   int _operation = 0;
 
   @override
   PreferencesState build() {
     _repository = ref.watch(accountPreferencesRepositoryProvider);
+    _locationRepository = ref.watch(profileLocationRepositoryProvider);
     // A replacement observation is a new session even for the same subject.
     // Rebuild the request fence so old reads/saves cannot settle this session.
     final session = ref.watch(authSessionProvider).asData?.value;
@@ -54,6 +59,9 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
     }
     return const PreferencesState();
   }
+
+  Future<Result<String>> locateRegion() =>
+      _locationRepository.currentRegionCoordinates();
 
   Future<void> load({bool saved = false}) async {
     if (!ref.mounted || state.phase == PreferencesPhase.saving) return;
@@ -90,11 +98,16 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
     }
   }
 
-  Future<void> saveProfile(String? name, ProfileVisibility visibility) async {
+  Future<void> saveProfile(
+    String? name,
+    ProfileVisibility visibility, {
+    ProfileDetails? details,
+  }) async {
     final profile = state.profile;
     if (state.phase != PreferencesPhase.ready || profile == null) return;
     await _save(
       () => _repository.saveProfile(
+        details: details,
         displayName: name,
         visibility: visibility,
         expectedRevision: profile.revision,
@@ -104,12 +117,14 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
 
   Future<void> saveSettings(
     CheckInVisibility visibility,
-    OptionalProcessingConsent consent,
-  ) async {
+    OptionalProcessingConsent consent, {
+    FieldPrivacy? fieldPrivacy,
+  }) async {
     final settings = state.settings;
     if (state.phase != PreferencesPhase.ready || settings == null) return;
     await _save(
       () => _repository.saveSettings(
+        fieldPrivacy: fieldPrivacy,
         visibility: visibility,
         consent: consent,
         expectedRevision: settings.revision,

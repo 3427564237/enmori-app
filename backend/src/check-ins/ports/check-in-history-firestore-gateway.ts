@@ -1,6 +1,7 @@
 import type { StoredDocument, StoredDocumentEntry } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 
 export interface CheckInHistoryTransaction {
+  countCheckIns?(input:{readonly ownerAccountId:string;readonly startUtc:string;readonly endUtc:string|null}):Promise<number>;
   get(path: string): Promise<StoredDocument | undefined>;
   listCheckInHistoryPage(input: {
     readonly ownerAccountId: string;

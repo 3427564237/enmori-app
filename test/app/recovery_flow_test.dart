@@ -59,6 +59,9 @@ void main() {
       find.byKey(const Key('r6-register-confirm-password')),
       'test-password',
     );
+    await tester.ensureVisible(find.byKey(const Key('register-terms')));
+    await tester.tap(find.byKey(const Key('register-terms')));
+    await tester.ensureVisible(find.byKey(const Key('r6-register-submit')));
     await tester.tap(find.byKey(const Key('r6-register-submit')));
     await tester.pumpAndSettle();
 
@@ -68,6 +71,8 @@ void main() {
       ),
       findsOneWidget,
     );
+    await tester.ensureVisible(find.byKey(const Key('register-sign-in')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('register-sign-in')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('route-sign-in')), findsOneWidget);

@@ -8,19 +8,25 @@ import '../../features/event_browse/presentation/activity_page.dart';
 /// Explicit controlled composition only; key presence never enables browsing.
 final activityBrowseEnabledProvider = Provider<bool>((ref) => false);
 
-List<GoRoute> activityRoutes({required bool Function() current}) => [
+List<GoRoute> activityRoutes({
+  required bool Function() current,
+  Widget Function(BuildContext, Widget)? wrapList,
+}) => [
   GoRoute(
     path: '/activities',
-    builder: (context, state) => ActivityPage(
-      onSelect: (id) {
-        if (context.mounted &&
-            current() &&
-            validBrowseId(id) &&
-            GoRouter.of(context).state.uri.path == '/activities') {
-          context.push<void>('/activities/${Uri.encodeComponent(id)}');
-        }
-      },
-    ),
+    builder: (context, state) {
+      final page = ActivityPage(
+        onSelect: (id) {
+          if (context.mounted &&
+              current() &&
+              validBrowseId(id) &&
+              GoRouter.of(context).state.uri.path == '/activities') {
+            context.push<void>('/activities/${Uri.encodeComponent(id)}');
+          }
+        },
+      );
+      return wrapList?.call(context, page) ?? page;
+    },
   ),
   GoRoute(
     path: '/activities/:browseId',

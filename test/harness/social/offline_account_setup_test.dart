@@ -54,6 +54,7 @@ Future<void> register(WidgetTester tester) async {
     find.byKey(const Key('r6-register-confirm-password')),
     'SampleOnly123',
   );
+  await tap(tester, 'register-terms');
   await tap(tester, 'r6-register-submit');
 }
 
@@ -140,12 +141,7 @@ void main() {
               ? OptionalProcessingConsent.accepted
               : OptionalProcessingConsent.rejected,
         );
-        expect(
-          store.settings.checkInVisibility,
-          choice == InitialChoice.accept
-              ? CheckInVisibility.public
-              : CheckInVisibility.private,
-        );
+        expect(store.settings.checkInVisibility, CheckInVisibility.private);
         expect(store.notes.single.checkInVisibility, CheckInVisibility.private);
         final container = ProviderScope.containerOf(
           tester.element(find.byType(OfflineSocialHub)),
@@ -242,6 +238,7 @@ void main() {
       final store = OfflineSocialStore(onboardingCompleted: false);
       addTearDown(store.dispose);
       await start(tester, store, width: 320, textScale: 1.5);
+      await tap(tester, 'register-terms');
       await tap(tester, 'r6-register-submit');
       expect(
         find.byKey(const Key('sp01-register-error-summary')),

@@ -179,6 +179,9 @@ void main() {
         'SyntheticPassword1!',
       );
       await tester.ensureVisible(find.byKey(const Key('r6-register-submit')));
+      await tester.ensureVisible(find.byKey(const Key('register-terms')));
+      await tester.tap(find.byKey(const Key('register-terms')));
+      await tester.ensureVisible(find.byKey(const Key('r6-register-submit')));
       await tester.tap(find.byKey(const Key('r6-register-submit')));
       await tester.pumpAndSettle();
       expect(auth.registrations, 1);
@@ -300,7 +303,8 @@ void main() {
           destination.$3,
         );
       }
-      await tester.tap(find.byKey(const Key('social-nav-check-in')));
+      await tester.scrollUntilVisible(find.byKey(const Key('r6-new-check-in-button')), 250, scrollable: find.byType(Scrollable).first);
+      await tester.tap(find.byKey(const Key('r6-new-check-in-button')));
       await tester.pumpAndSettle();
       expect(find.text('Keep a little moment'), findsOneWidget);
       router.go(AppRoutes.home);

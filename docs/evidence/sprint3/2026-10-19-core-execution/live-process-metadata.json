@@ -1,0 +1,26 @@
+[
+  {
+    "pid": 47965,
+    "kind": "controlled_phone_service",
+    "commandSha256": "3f73a4063f52b7df8941239f00f92bee07a456450074061103774593e60cea2f",
+    "cwdReadable": false
+  },
+  {
+    "pid": 48044,
+    "kind": "firestore",
+    "commandSha256": "e41ccf0c32927cfd70658857fe659aa9ecba3015c76eb79a4fce28cf85741b95",
+    "cwdReadable": false
+  },
+  {
+    "pid": 48188,
+    "kind": "controlled_phone_service",
+    "commandSha256": "86119fc84b78ba871943431d71483eed4e0d5d76452a21c885b1732e4b034dfc",
+    "cwdReadable": false
+  },
+  {
+    "pid": 48207,
+    "kind": "controlled_phone_service",
+    "commandSha256": "f6ba1e4469eac3720a5d074ac0cefac6c7f70d8fbfac7a2aaa14b41655018e67",
+    "cwdReadable": false
+  }
+]

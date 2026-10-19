@@ -123,6 +123,9 @@ final class FakeCheckInRepository implements CheckInRepository {
 
   @override
   Future<Result<CheckIn>> create({
+    String? mood,
+    String? activity,
+    CheckInVisibility? visibility,
     required String note,
     required String idempotencyKey,
   }) async {
@@ -140,8 +143,11 @@ final class FakeCheckInRepository implements CheckInRepository {
   }
 
   @override
-  Future<Result<CheckInHistoryPage>> readOwnForDate({required String date, required String timeZone, String? cursor}) async =>
-      const Success(CheckInHistoryPage(checkIns: [], nextCursor: null));
+  Future<Result<CheckInHistoryPage>> readOwnForDate({
+    required String date,
+    required String timeZone,
+    String? cursor,
+  }) async => const Success(CheckInHistoryPage(checkIns: [], nextCursor: null));
 }
 
 final class FakeInterestRepository implements InterestRepository {

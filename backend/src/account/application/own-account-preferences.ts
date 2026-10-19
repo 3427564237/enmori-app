@@ -1,3 +1,4 @@
+import { parseProfileDetails, parseFieldPrivacy } from '../domain/profile-details.js';
 import { appFailure, type AppFailure } from "../../shared/application/app-failure.js";
 import { err, ok, type Result } from "../../shared/domain/result.js";
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
@@ -17,24 +18,28 @@ export class OwnAccountPreferences {
   }
 
   public async saveProfile(input: { readonly principal: AuthPrincipal; readonly displayName: unknown;
-    readonly profileVisibility: unknown; readonly expectedRevision: unknown }): Promise<Result<OwnProfile, AppFailure>> {
+    readonly profileVisibility: unknown; readonly details?: unknown; readonly expectedRevision: unknown }): Promise<Result<OwnProfile, AppFailure>> {
     const displayName = normalizeDisplayName(input.displayName);
+    const details = input.details === undefined ? undefined : parseProfileDetails(input.details);
+    if (input.details !== undefined && details === undefined) return err(appFailure("PROFILE_INVALID"));
     if (displayName === undefined || !isVisibility(input.profileVisibility) || !isRevision(input.expectedRevision)) {
       return err(appFailure("PROFILE_INVALID"));
     }
     return this.saveResult(await this.repository.saveProfile(input.principal.firebaseUid, {
-      displayName, profileVisibility: input.profileVisibility, expectedRevision: input.expectedRevision,
+      ...(details === undefined ? {} : { details }), displayName, profileVisibility: input.profileVisibility, expectedRevision: input.expectedRevision,
     }), "PROFILE_REVISION_PRECONDITION_FAILED");
   }
 
   public async saveSettings(input: { readonly principal: AuthPrincipal; readonly checkInVisibility: unknown;
-    readonly optionalProcessingConsent: unknown; readonly expectedRevision: unknown }): Promise<Result<OwnSettings, AppFailure>> {
+    readonly optionalProcessingConsent: unknown; readonly fieldPrivacy?: unknown; readonly expectedRevision: unknown }): Promise<Result<OwnSettings, AppFailure>> {
+    const fieldPrivacy = input.fieldPrivacy === undefined ? undefined : parseFieldPrivacy(input.fieldPrivacy);
+    if (input.fieldPrivacy !== undefined && fieldPrivacy === undefined) return err(appFailure("SETTINGS_INVALID"));
     if (!isVisibility(input.checkInVisibility) || !isRevision(input.expectedRevision) ||
       (input.optionalProcessingConsent !== "accepted" && input.optionalProcessingConsent !== "rejected")) {
       return err(appFailure("SETTINGS_INVALID"));
     }
     return this.saveResult(await this.repository.saveSettings(input.principal.firebaseUid, {
-      checkInVisibility: input.checkInVisibility, optionalProcessingConsent: input.optionalProcessingConsent,
+      ...(fieldPrivacy === undefined ? {} : { fieldPrivacy }), checkInVisibility: input.checkInVisibility, optionalProcessingConsent: input.optionalProcessingConsent,
       expectedRevision: input.expectedRevision,
     }), "SETTINGS_REVISION_PRECONDITION_FAILED");
   }

@@ -51,7 +51,7 @@ void main() {
             );
             expect(
               find.bySemanticsLabel(
-                RegExp('Accept.*optional processing.*Public'),
+                RegExp('Allow optional data use.*personalised'),
               ),
               findsWidgets,
             );
@@ -64,7 +64,7 @@ void main() {
             );
             expect(
               find.bySemanticsLabel(
-                RegExp('Reject.*optional processing.*Private'),
+                RegExp('Continue without optional data use.*Keep using'),
               ),
               findsWidgets,
             );
@@ -324,7 +324,7 @@ void main() {
       await tester.tap(find.byKey(const Key('r6-check-in-create')));
       await tester.pump();
 
-      expect(find.text('Enter a Note before saving.'), findsOneWidget);
+      expect(find.text('Enter a Note or select a Mood before saving.'), findsOneWidget);
       expect(checkIn.createdNotes, isEmpty);
     },
   );
@@ -458,6 +458,13 @@ void main() {
         find.byKey(const Key('r6-register-confirm-password')),
         'password1',
       );
+      await tester.ensureVisible(find.byKey(const Key('register-terms')));
+      if (!tester
+          .widget<CheckboxListTile>(find.byKey(const Key('register-terms')))
+          .value!) {
+        await tester.tap(find.byKey(const Key('register-terms')));
+      }
+      await tester.ensureVisible(find.byKey(const Key('r6-register-submit')));
       await tester.tap(find.byKey(const Key('r6-register-submit')));
       await tester.pumpAndSettle();
       expect(find.text(entry.$2), findsOneWidget);

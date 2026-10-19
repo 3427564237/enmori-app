@@ -1,3 +1,5 @@
+import 'package:enmori/features/account/domain/profile_details.dart';
+
 import '../../../core/network/backend_api_client.dart';
 import '../../../core/result/result.dart';
 import '../domain/account_repository.dart';
@@ -20,6 +22,7 @@ final class BackendAccountPreferencesRepository
       _settings(await _client.get('/v1/me/settings'));
   @override
   Future<Result<OwnProfile>> saveProfile({
+    ProfileDetails? details,
     required String? displayName,
     required ProfileVisibility visibility,
     required int expectedRevision,
@@ -27,6 +30,13 @@ final class BackendAccountPreferencesRepository
     await _client.put(
       '/v1/me/profile',
       body: {
+        if (details != null)
+          'details': {
+            'bio': details.bio,
+            'affiliationType': details.affiliationType?.name,
+            'affiliationName': details.affiliationName,
+            'region': details.region,
+          },
         'displayName': displayName,
         'profileVisibility': _profileVisibility(visibility),
         'expectedRevision': expectedRevision,
@@ -35,6 +45,7 @@ final class BackendAccountPreferencesRepository
   );
   @override
   Future<Result<OwnSettings>> saveSettings({
+    FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,
     required int expectedRevision,
@@ -42,6 +53,13 @@ final class BackendAccountPreferencesRepository
     await _client.put(
       '/v1/me/settings',
       body: {
+        if (fieldPrivacy != null)
+          'fieldPrivacy': {
+            'interests': _profileVisibility(fieldPrivacy.interests),
+            'location': _profileVisibility(fieldPrivacy.location),
+            'participation': _profileVisibility(fieldPrivacy.participation),
+            'mapSharedWithFriends': fieldPrivacy.mapSharedWithFriends,
+          },
         'checkInVisibility': _checkInVisibility(visibility),
         'optionalProcessingConsent': consent.name,
         'expectedRevision': expectedRevision,
@@ -58,6 +76,7 @@ final class BackendAccountPreferencesRepository
     if (envelope.length != 1 ||
         p is! Map<String, dynamic> ||
         !_keys(p, [
+          if (p.containsKey('details')) 'details',
           'username',
           'displayName',
           'profileVisibility',
@@ -65,6 +84,10 @@ final class BackendAccountPreferencesRepository
         ])) {
       return _invalid();
     }
+    final details = p.containsKey('details')
+        ? _details(p['details'])
+        : const ProfileDetails();
+    if (details == null) return _invalid();
     final username = p['username'];
     final name = p['displayName'];
     final revision = p['revision'];
@@ -89,6 +112,7 @@ final class BackendAccountPreferencesRepository
     }
     return Success(
       OwnProfile(
+        details: details,
         username: username,
         displayName: name as String?,
         visibility: visibility,
@@ -106,6 +130,7 @@ final class BackendAccountPreferencesRepository
     if (envelope.length != 1 ||
         p is! Map<String, dynamic> ||
         !_keys(p, [
+          if (p.containsKey('fieldPrivacy')) 'fieldPrivacy',
           'checkInVisibility',
           'optionalProcessingConsent',
           'revision',
@@ -118,6 +143,10 @@ final class BackendAccountPreferencesRepository
       'public' => CheckInVisibility.public,
       _ => null,
     };
+    final privacy = p.containsKey('fieldPrivacy')
+        ? _privacy(p['fieldPrivacy'])
+        : const FieldPrivacy();
+    if (privacy == null) return _invalid();
     final consent = switch (p['optionalProcessingConsent']) {
       'accepted' => OptionalProcessingConsent.accepted,
       'rejected' => OptionalProcessingConsent.rejected,
@@ -128,10 +157,74 @@ final class BackendAccountPreferencesRepository
     }
     return Success(
       OwnSettings(
+        fieldPrivacy: privacy,
         checkInVisibility: visibility,
         consent: consent,
         revision: p['revision'] as int,
       ),
+    );
+  }
+
+  ProfileDetails? _details(Object? value) {
+    if (value is! Map<String, dynamic> ||
+        !_keys(value, [
+          'bio',
+          'affiliationType',
+          'affiliationName',
+          'region',
+        ])) {
+      return null;
+    }
+    for (final key in ['bio', 'affiliationName', 'region']) {
+      final field = value[key];
+      if (field != null &&
+          (field is! String ||
+              field.runes.length > (key == 'bio' ? 500 : 120) ||
+              _unsafeName.hasMatch(field))) {
+        return null;
+      }
+    }
+    final kind = value['affiliationType'];
+    if (kind != null && kind != 'school' && kind != 'company') return null;
+    if (kind == null && value['affiliationName'] != null) return null;
+    return ProfileDetails(
+      bio: value['bio'] as String?,
+      region: value['region'] as String?,
+      affiliationName: value['affiliationName'] as String?,
+      affiliationType: kind == null
+          ? null
+          : AffiliationType.values.byName(kind as String),
+    );
+  }
+
+  FieldPrivacy? _privacy(Object? value) {
+    if (value is! Map<String, dynamic> ||
+        !_keys(value, [
+          'interests',
+          'location',
+          'participation',
+          'mapSharedWithFriends',
+        ]) ||
+        value['mapSharedWithFriends'] is! bool) {
+      return null;
+    }
+    ProfileVisibility? visibility(Object? v) => switch (v) {
+      'private' => ProfileVisibility.private,
+      'friends_only' => ProfileVisibility.friendsOnly,
+      'public' => ProfileVisibility.public,
+      _ => null,
+    };
+    final interests = visibility(value['interests']),
+        location = visibility(value['location']),
+        participation = visibility(value['participation']);
+    if (interests == null || location == null || participation == null) {
+      return null;
+    }
+    return FieldPrivacy(
+      interests: interests,
+      location: location,
+      participation: participation,
+      mapSharedWithFriends: value['mapSharedWithFriends'] as bool,
     );
   }
 

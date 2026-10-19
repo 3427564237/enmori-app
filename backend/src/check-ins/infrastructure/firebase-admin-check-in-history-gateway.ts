@@ -5,6 +5,12 @@ import type { CheckInHistoryFirestoreGateway, CheckInHistoryTransaction } from "
 class FirebaseAdminCheckInHistoryTransaction implements CheckInHistoryTransaction {
   public constructor(private readonly firestore: Firestore, private readonly transaction: Transaction) {}
 
+  public async countCheckIns(input:{ownerAccountId:string;startUtc:string;endUtc:string|null}):Promise<number>{
+    let query=this.firestore.collection("check_ins").where("ownerAccountId","==",input.ownerAccountId).where("createdAt",">=",input.startUtc);
+    if(input.endUtc!==null)query=query.where("createdAt","<",input.endUtc);
+    return (await this.transaction.get(query.count())).data().count;
+  }
+
   public async get(path: string): Promise<StoredDocument | undefined> {
     const snapshot = await this.transaction.get(this.firestore.doc(path));
     if (!snapshot.exists) return undefined;

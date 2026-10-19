@@ -13,7 +13,7 @@ import type {
 const account = {
   username: "alex_7",
   optionalProcessingConsent: "accepted",
-  checkInVisibility: "public",
+  checkInVisibility: "private",
   onboardingCompletedAt: "2026-09-03T03:15:00Z",
 } as const;
 
@@ -62,7 +62,7 @@ test("canonicalizes and creates onboarding through the Port", async () => {
       firebaseUid: "firebase-1",
       canonicalUsername: "alex_7",
       optionalProcessingConsent: "accepted",
-      checkInVisibility: "public",
+      checkInVisibility: "private",
       idempotencyKey: "A".repeat(22),
       currentInstant: "2026-09-03T03:15:00.000Z",
       creation: {
@@ -97,7 +97,7 @@ test("recovers an exact onboarding retry when new ID generation is unavailable",
         firebaseUid: "firebase-1",
         canonicalUsername: "alex_7",
         optionalProcessingConsent: "accepted",
-        checkInVisibility: "public",
+        checkInVisibility: "private",
         idempotencyKey: "A".repeat(22),
         currentInstant: "2026-09-03T03:15:00.000Z",
       },
@@ -124,7 +124,7 @@ test("does not offer an unbounded onboarding replay when Clock is unavailable", 
       firebaseUid: "firebase-1",
       canonicalUsername: "alex_7",
       optionalProcessingConsent: "accepted",
-      checkInVisibility: "public",
+      checkInVisibility: "private",
       idempotencyKey: "A".repeat(22),
     },
   ]);

@@ -1,3 +1,4 @@
+import 'package:enmori/features/account/domain/account_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/result/result.dart';
@@ -17,6 +18,9 @@ final class _UnavailableCheckInRepository implements CheckInRepository {
 
   @override
   Future<Result<CheckIn>> create({
+    String? mood,
+    String? activity,
+    CheckInVisibility? visibility,
     required String note,
     required String idempotencyKey,
   }) async => const Failure(_configurationFailure);

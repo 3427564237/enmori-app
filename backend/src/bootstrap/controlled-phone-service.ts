@@ -1,3 +1,11 @@
+import type {CheckInHistoryFirestoreGateway} from "../check-ins/ports/check-in-history-firestore-gateway.js";
+import {OwnCheckInCalendar} from "../check-ins/application/check-in-calendar.js";
+import {FirestoreCheckInCalendar} from "../check-ins/infrastructure/firestore-check-in-calendar.js";
+import { EditCheckIn } from "../check-ins/application/edit-check-in.js";
+import { FirestoreCheckInMutations } from "../check-ins/infrastructure/firestore-check-in-mutations.js";
+import { CreateInterestTag } from '../interests/application/create-interest-tag.js';
+import { FirebaseInterestAdmin } from '../interests/infrastructure/firebase-interest-admin.js';
+import { FirestoreCatalogueWriter } from '../interests/infrastructure/firestore-catalogue-writer.js';
 import { CreateCheckIn } from "../check-ins/application/create-check-in.js";
 import { GetCheckIn } from "../check-ins/application/get-check-in.js";
 import { FirestoreCheckInRepository } from "../check-ins/infrastructure/firestore-check-in-repository.js";
@@ -331,12 +339,13 @@ export async function createControlledPhoneService(options: {
     const checkIns = new FirestoreCheckInRepository(gateway);
     const interests = new FirestoreInterestRepository(gateway);
     const rawHistory = new FirebaseAdminCheckInHistoryGateway(db);
-    const history = new ListOwnCheckInsForDate(new FirestoreCheckInHistoryRepository({
+    const historyGateway: CheckInHistoryFirestoreGateway = {
       runTransaction: work => {
         if (phase !== "running") return Promise.reject(unavailable());
         return tracked(() => rawHistory.runTransaction(work));
       },
-    }), createHistoryCursorCodec(), clock);
+    };
+    const history = new ListOwnCheckInsForDate(new FirestoreCheckInHistoryRepository(historyGateway), createHistoryCursorCodec(), clock);
     const rawEvents = new FirebaseAdminEventReadGateway(db);
     const eventGateway: EventReadGateway = {
       get: path => {
@@ -355,6 +364,9 @@ export async function createControlledPhoneService(options: {
       execute: input => input.principal.firebaseUid === primaryUid ? completePrimary.execute(input) : Promise.resolve(err(appFailure("AUTH_FORBIDDEN"))),
     } : unavailableOperation;
     app = await buildApp({
+      ...(options.demoFeatures ? {checkInCalendar:new OwnCheckInCalendar(new FirestoreCheckInCalendar(historyGateway))}:{}),
+      editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
+      createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(auth), new FirestoreCatalogueWriter(gateway)),
       ...(options.diagnostics ? { controlledPhoneDiagnostics: options.diagnostics } : {}),
       ...(realEvents ? { recommendEvents: realEvents.recommendEvents } : {}),
       identityVerifier: { verifyIdToken: async token => {

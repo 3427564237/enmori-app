@@ -6,9 +6,10 @@ import '../domain/interest_repository.dart';
 import 'interest_editor_controller.dart';
 
 final class InterestEditorPage extends ConsumerStatefulWidget {
-  const InterestEditorPage({this.onSaved, super.key});
+  const InterestEditorPage({this.onSaved, this.onSkip, super.key});
 
   final ValueChanged<InterestSelection>? onSaved;
+  final VoidCallback? onSkip;
 
   @override
   ConsumerState<InterestEditorPage> createState() => _InterestEditorPageState();
@@ -34,7 +35,18 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(interestEditorControllerProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Your interests')),
+      appBar: AppBar(
+        title: const Text('Your interests'),
+        actions: [
+          if (widget.onSkip != null)
+            TextButton(
+              onPressed: state.phase == InterestEditorPhase.saving
+                  ? null
+                  : widget.onSkip,
+              child: const Text('Skip for now'),
+            ),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

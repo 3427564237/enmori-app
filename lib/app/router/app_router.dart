@@ -36,6 +36,7 @@ abstract final class AppRoutes {
   static const register = '/register';
   static const signIn = '/sign-in';
   static const onboarding = '/onboarding';
+  static const setupInterests = '/setup-interests';
   static const home = '/home';
   static const profile = '/profile';
   static const personas = '/personas';
@@ -79,16 +80,12 @@ void selectConnectedSocialTab(
   const paths = [
     AppRoutes.home,
     '/friends',
-    AppRoutes.checkIn,
+    AppRoutes.activities,
     AppRoutes.aiAssistant,
     AppRoutes.profile,
   ];
   if (index < 0 || index >= paths.length || paths[index] == sourcePath) return;
-  if (index == 2) {
-    context.push<void>(paths[index]);
-  } else {
-    context.go(paths[index]);
-  }
+  context.go(paths[index]);
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -205,7 +202,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       signedOutEntry: ref.read(signOutEntryProvider),
     ),
     routes: [
-      if (activitiesEnabled) ...activityRoutes(current: canNavigateActivity),
+      if (activitiesEnabled)
+        ...activityRoutes(
+          current: canNavigateActivity,
+          wrapList: (context, child) =>
+              rootTab(context, AppRoutes.activities, 2, child),
+        ),
       if (historyPage != null)
         GoRoute(
           path: AppRoutes.checkInHistory,
@@ -315,8 +317,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (context, state) =>
-            OnboardingPage(onCompleted: () => context.go(AppRoutes.checkIn)),
+        builder: (context, state) => OnboardingPage(
+          onCompleted: () => context.go(AppRoutes.setupInterests),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.setupInterests,
+        builder: (context, state) => InterestEditorPage(
+          onSaved: (_) => context.go(AppRoutes.home),
+          onSkip: () => context.go(AppRoutes.home),
+        ),
       ),
       GoRoute(
         path: AppRoutes.home,
@@ -521,7 +531,7 @@ String? redirectFor({
       AppRoutes.configurationUnavailable ||
       AppRoutes.forbidden ||
       AppRoutes.unavailable => AppRoutes.home,
-      AppRoutes.onboarding => AppRoutes.checkIn,
+      AppRoutes.onboarding => AppRoutes.setupInterests,
       _ => null,
     },
   };

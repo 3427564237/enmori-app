@@ -1,3 +1,5 @@
+import 'package:enmori/features/account/domain/account_repository.dart';
+
 import 'dart:async';
 
 import 'package:enmori/core/network/idempotency_key_provider.dart';
@@ -20,6 +22,9 @@ final class _DelayedCheckIns implements CheckInRepository {
   final keys = <String>[];
   @override
   Future<Result<CheckIn>> create({
+    String? mood,
+    String? activity,
+    CheckInVisibility? visibility,
     required String note,
     required String idempotencyKey,
   }) {

@@ -444,7 +444,7 @@ test("strict schemas reject undeclared fields", async () => {
     method: "POST",
     url: "/v1/check-ins",
     headers: commandHeaders,
-    payload: { note: checkIn.note, mood: "happy" },
+    payload: { note: checkIn.note, ownerAccountId: "other" },
   });
   const extraOnboardingField = await app.inject({
     method: "PUT",

@@ -505,6 +505,7 @@ final class OfflineSocialNavigation extends StatelessWidget {
   final ValueChanged<int> onSelected;
   @override
   Widget build(BuildContext context) => SocialDemoNavigation(
+    legacyCheckInTab: true,
     selectedIndex: selectedIndex,
     onSelected: onSelected,
   );

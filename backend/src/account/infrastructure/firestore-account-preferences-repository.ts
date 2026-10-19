@@ -1,3 +1,4 @@
+import { emptyProfileDetails, privateFields, parseProfileDetails, parseFieldPrivacy } from '../domain/profile-details.js';
 import type { AccountPreferencesRepository, AccountRead, AccountSave } from "../ports/account-preferences-repository.js";
 import type { OwnProfile, OwnSettings, ProfileChange, SettingsChange } from "../application/account-model.js";
 import { isRevision, isVisibility, normalizeDisplayName } from "../domain/profile-values.js";
@@ -26,23 +27,27 @@ async function resolveAccount(transaction: FirestoreTransactionGateway, uid: str
 export function parseOwnProfile(data: StoredDocument): OwnProfile | undefined {
   const account = parseAccountProjection(data);
   if (account === undefined) return undefined;
+  const details = data.profileDetails === undefined ? emptyProfileDetails : parseProfileDetails(data.profileDetails);
+  if (details === undefined) return undefined;
   const fields = ["displayName", "profileVisibility", "profileRevision"];
   if (fields.every((key) => !Object.hasOwn(data, key))) {
-    return { username: account.username, displayName: null, profileVisibility: "private", revision: 0 };
+    return { details, username: account.username, displayName: null, profileVisibility: "private", revision: 0 };
   }
   if (!fields.every((key) => Object.hasOwn(data, key)) || !isVisibility(data.profileVisibility) ||
     !isRevision(data.profileRevision) || data.profileRevision < 1) return undefined;
   const displayName = normalizeDisplayName(data.displayName);
   if (displayName === undefined || displayName !== data.displayName) return undefined;
-  return { username: account.username, displayName, profileVisibility: data.profileVisibility, revision: data.profileRevision };
+  return { details, username: account.username, displayName, profileVisibility: data.profileVisibility, revision: data.profileRevision };
 }
 
 export function parseOwnSettings(data: StoredDocument): OwnSettings | undefined {
   const account = parseAccountProjection(data);
   if (account === undefined) return undefined;
+  const fieldPrivacy = data.fieldPrivacy === undefined ? privateFields : parseFieldPrivacy(data.fieldPrivacy);
+  if (fieldPrivacy === undefined) return undefined;
   const revision = Object.hasOwn(data, "settingsRevision") ? data.settingsRevision : 0;
   if (!isRevision(revision) || (Object.hasOwn(data, "settingsRevision") && revision < 1)) return undefined;
-  return { checkInVisibility: account.checkInVisibility, optionalProcessingConsent: account.optionalProcessingConsent, revision };
+  return { fieldPrivacy, checkInVisibility: account.checkInVisibility, optionalProcessingConsent: account.optionalProcessingConsent, revision };
 }
 
 export class FirestoreAccountPreferencesRepository implements AccountPreferencesRepository {
@@ -62,12 +67,12 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
 
   public saveProfile(uid: string, change: ProfileChange): Promise<AccountSave<OwnProfile>> {
     return this.save(uid, change.expectedRevision, parseOwnProfile, (revision) => ({
-      displayName: change.displayName, profileVisibility: change.profileVisibility, profileRevision: revision,
+      ...(change.details === undefined ? {} : { profileDetails: change.details }), displayName: change.displayName, profileVisibility: change.profileVisibility, profileRevision: revision,
     }));
   }
   public saveSettings(uid: string, change: SettingsChange): Promise<AccountSave<OwnSettings>> {
     return this.save(uid, change.expectedRevision, parseOwnSettings, (revision) => ({
-      checkInVisibility: change.checkInVisibility, optionalProcessingConsent: change.optionalProcessingConsent, settingsRevision: revision,
+      ...(change.fieldPrivacy === undefined ? {} : { fieldPrivacy: change.fieldPrivacy }), checkInVisibility: change.checkInVisibility, optionalProcessingConsent: change.optionalProcessingConsent, settingsRevision: revision,
     }));
   }
 

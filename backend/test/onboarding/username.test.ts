@@ -52,7 +52,7 @@ test("derives the exact Initial Choice pair", () => {
     value: {
       initialChoice: "accept",
       optionalProcessingConsent: "accepted",
-      checkInVisibility: "public",
+      checkInVisibility: "private",
     },
   });
   assert.deepEqual(deriveInitialChoice("reject"), {

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/unavailable_auth_repository.dart';
 import 'domain/auth_repository.dart';
+import 'domain/auth_email_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => const UnavailableAuthRepository(),
@@ -17,4 +18,11 @@ final currentAuthSubjectProvider = Provider<String?>((ref) {
       subject,
     _ => null,
   };
+});
+
+final authEmailRepositoryProvider = Provider<AuthEmailRepository?>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return repository is AuthEmailRepository
+      ? repository as AuthEmailRepository
+      : null;
 });

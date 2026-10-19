@@ -1,3 +1,4 @@
+import { emptyProfileDetails, privateFields } from "../src/account/domain/profile-details.js";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { normalizeDisplayName } from "../src/account/domain/profile-values.js";
@@ -27,8 +28,8 @@ test("DisplayName normalization counts scalars and rejects unsafe/name-invalid i
 
 test("legacy reads are minimized, private and read-only; missing binding is onboarding required", async () => {
   const { store, repo } = fixture(); const before = store.entries();
-  assert.deepEqual(await repo.getProfile(uid), { kind: "found", value: { username: "member_a", displayName: null, profileVisibility: "private", revision: 0 } });
-  assert.deepEqual(await repo.getSettings(uid), { kind: "found", value: { checkInVisibility: "public", optionalProcessingConsent: "accepted", revision: 0 } });
+  assert.deepEqual(await repo.getProfile(uid), { kind: "found", value: { details: emptyProfileDetails, username: "member_a", displayName: null, profileVisibility: "private", revision: 0 } });
+  assert.deepEqual(await repo.getSettings(uid), { kind: "found", value: { fieldPrivacy: privateFields, checkInVisibility: "public", optionalProcessingConsent: "accepted", revision: 0 } });
   assert.equal((await repo.getProfile("unbound")).kind, "onboarding_required");
   assert.deepEqual(store.entries(), before);
 });
@@ -36,7 +37,7 @@ test("legacy reads are minimized, private and read-only; missing binding is onbo
 test("Profile saves normalize, allow explicit clearing and preserve Settings/unrelated fields", async () => {
   const { use, repo, store } = fixture({ settingsRevision: 3, unrelated: "retained" });
   const first = await use.saveProfile({ principal, displayName: " Alex ", profileVisibility: "friends_only", expectedRevision: 0 });
-  assert.deepEqual(first, { ok: true, value: { username: "member_a", displayName: "Alex", profileVisibility: "friends_only", revision: 1 } });
+  assert.deepEqual(first, { ok: true, value: { details: emptyProfileDetails, username: "member_a", displayName: "Alex", profileVisibility: "friends_only", revision: 1 } });
   assert.deepEqual(await repo.getProfile(uid), { kind: "found", value: first.ok ? first.value : undefined });
   assert.equal(store.read("accounts/owner")!.settingsRevision, 3);
   assert.equal(store.read("accounts/owner")!.unrelated, "retained");
@@ -93,4 +94,39 @@ test("vendor failures map to stable unavailable results", async () => {
   const use = new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(new FailingFirestoreGateway()));
   const r = await use.getProfile(principal);
   assert.deepEqual(r, { ok: false, failure: { code: "SERVICE_UNAVAILABLE", message: "This service is temporarily unavailable. Try again." } });
+});
+
+test('expanded profile persists across repository recreation and old writers preserve details', async () => {
+  const { use, store } = fixture();
+  const details = { bio: ' Photography ', affiliationType: 'school', affiliationName: ' University ', region: ' Singapore ' };
+  const result = await use.saveProfile({ principal, displayName: 'Alex', profileVisibility: 'private', details, expectedRevision: 0 });
+  assert.equal(result.ok, true);
+  const restarted = new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(store));
+  const read = await restarted.getProfile(principal);
+  assert.equal(read.ok, true);
+  if (read.ok) assert.deepEqual(read.value.details, { bio: 'Photography', affiliationType: 'school', affiliationName: 'University', region: 'Singapore' });
+  assert.equal((await restarted.saveProfile({ principal, displayName: 'New name', profileVisibility: 'private', expectedRevision: 1 })).ok, true);
+  const again = await restarted.getProfile(principal);
+  if (read.ok && again.ok) assert.deepEqual(again.value.details, read.value.details);
+  const before = store.entries();
+  assert.equal((await restarted.saveProfile({ principal, displayName: 'Overwrite', profileVisibility: 'public', details, expectedRevision: 1 })).ok, false);
+  assert.deepEqual(store.entries(), before);
+});
+
+test('field privacy persists independently of consent without rewriting history or another account', async () => {
+  const { use, store } = fixture();
+  await store.runTransaction(async tx => tx.create('check_ins/history', { ownerAccountId: 'owner', visibility: 'private' }));
+  const other = store.read('accounts/other');
+  const fieldPrivacy = { interests: 'friends_only', location: 'private', participation: 'public', mapSharedWithFriends: false };
+  assert.equal((await use.saveSettings({ principal, checkInVisibility: 'public', optionalProcessingConsent: 'rejected', fieldPrivacy, expectedRevision: 0 })).ok, true);
+  const read = await new FirestoreAccountPreferencesRepository(store).getSettings(uid);
+  assert.equal(read.kind, 'found');
+  if (read.kind === 'found') assert.deepEqual(read.value.fieldPrivacy, fieldPrivacy);
+  assert.deepEqual(store.read('check_ins/history'), { ownerAccountId: 'owner', visibility: 'private' });
+  assert.deepEqual(store.read('accounts/other'), other);
+  const before = store.entries();
+  for (const malformed of [{ ...fieldPrivacy, mapSharedWithFriends: 'true' }, { ...fieldPrivacy, location: 'everyone' }, { ...fieldPrivacy, uid: 'other' }]) {
+    assert.equal((await use.saveSettings({ principal, checkInVisibility: 'private', optionalProcessingConsent: 'accepted', fieldPrivacy: malformed, expectedRevision: 1 })).ok, false);
+  }
+  assert.deepEqual(store.entries(), before);
 });

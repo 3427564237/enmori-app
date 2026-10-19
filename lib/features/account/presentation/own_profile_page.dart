@@ -1,3 +1,5 @@
+import '../../auth/presentation/auth_email_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,6 +39,7 @@ final class OwnProfilePage extends ConsumerWidget {
               key: const Key('route-own-profile'),
               padding: const EdgeInsets.all(24),
               children: [
+                const VerifyEmailButton(),
                 if (state.username case final username?) ...[
                   Text(
                     'Username',
@@ -110,9 +113,21 @@ final class OwnProfilePage extends ConsumerWidget {
                   AsyncData<Result<OwnProfile>>(
                     value: Success<OwnProfile>(:final value),
                   ) =>
-                    Text(
-                      value.displayName ?? 'Display name not set',
-                      key: const Key('profile-name'),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          value.displayName ?? 'Display name not set',
+                          key: const Key('profile-name'),
+                        ),
+                        if (value.details.bio != null) Text(value.details.bio!),
+                        if (value.details.affiliationName != null)
+                          Text(
+                            '${value.details.affiliationType?.name}: ${value.details.affiliationName}',
+                          ),
+                        if (value.details.region != null)
+                          Text(value.details.region!),
+                      ],
                     ),
                   AsyncData<Result<OwnProfile>>(value: Failure<OwnProfile>()) ||
                   AsyncError<Result<OwnProfile>>() => const Text(

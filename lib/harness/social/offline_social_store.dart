@@ -1,3 +1,4 @@
+import 'package:enmori/features/account/domain/profile_details.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -185,9 +186,7 @@ final class OfflineAccountRepository implements AccountRepository {
       optionalProcessingConsent: accepted
           ? OptionalProcessingConsent.accepted
           : OptionalProcessingConsent.rejected,
-      checkInVisibility: accepted
-          ? CheckInVisibility.public
-          : CheckInVisibility.private,
+      checkInVisibility: CheckInVisibility.private,
       onboardingCompletedAt: store.now,
     );
     store.profile = OwnProfile(
@@ -223,6 +222,7 @@ final class OfflinePreferencesRepository
   Future<Result<OwnSettings>> readSettings() async => Success(store.settings);
   @override
   Future<Result<OwnProfile>> saveProfile({
+    ProfileDetails? details,
     required String? displayName,
     required ProfileVisibility visibility,
     required int expectedRevision,
@@ -245,6 +245,7 @@ final class OfflinePreferencesRepository
 
   @override
   Future<Result<OwnSettings>> saveSettings({
+    FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,
     required int expectedRevision,
@@ -318,15 +319,21 @@ final class OfflineCheckInRepository implements CheckInRepository {
   final OfflineSocialStore store;
   @override
   Future<Result<CheckIn>> create({
+    String? mood,
+    String? activity,
+    CheckInVisibility? visibility,
     required String note,
     required String idempotencyKey,
   }) async {
-    final valid = normalizeCheckInNote(note);
+    final valid = normalizeCheckInNote(note, mood: mood);
     if (valid case Failure<String>(:final failure)) return Failure(failure);
     final normalized = (valid as Success<String>).value;
     final existing = store.noteReceipts[idempotencyKey];
     if (existing != null) {
-      return existing.note == normalized
+      return existing.note == normalized &&
+              existing.mood == mood &&
+              existing.activity == activity &&
+              (visibility == null || existing.checkInVisibility == visibility)
           ? Success(existing)
           : _failure(
               AppFailureKind.idempotencyConflict,
@@ -334,10 +341,12 @@ final class OfflineCheckInRepository implements CheckInRepository {
             );
     }
     final created = CheckIn(
+      mood: mood,
+      activity: activity,
       checkInId: 'offline_note_${store.notes.length + 1}',
       note: normalized,
       createdAt: DateTime.now().toUtc(),
-      checkInVisibility: store.settings.checkInVisibility,
+      checkInVisibility: visibility ?? store.settings.checkInVisibility,
     );
     store.notes.insert(0, created);
     store.noteReceipts[idempotencyKey] = created;

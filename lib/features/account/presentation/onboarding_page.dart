@@ -1,3 +1,5 @@
+import '../../auth/presentation/auth_email_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -69,6 +71,7 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               key: const Key('route-onboarding'),
               padding: const EdgeInsets.all(24),
               children: [
+                const VerifyEmailButton(),
                 Text(title, style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: 16),
                 ...switch (_step) {
@@ -178,21 +181,21 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   List<Widget> _choiceStep(bool pending) {
     return [
       const Text(
-        'Accept saves optional processing as accepted and current Check-in visibility as Public. Reject saves optional processing as rejected and current Check-in visibility as Private. Either choice lets you continue.',
+        'Optional data use is separate from privacy. New Check-ins start Private with either choice. You can change the default in Settings without changing past records.',
         key: Key('r6-initial-choice-statement'),
       ),
       const SizedBox(height: 20),
       _ChoicePanel(
-        title: 'Accept — Public',
-        body: 'Accept saves optional processing as accepted and current Check-in visibility as Public.',
+        title: 'Allow optional data use',
+        body: 'Allow personalised recommendations and AI using permitted data.',
         icon: Icons.public,
         onPressed: pending ? null : () => _complete(InitialChoice.accept),
         buttonKey: const Key('r6-initial-choice-accept'),
       ),
       const SizedBox(height: 12),
       _ChoicePanel(
-        title: 'Reject — Private',
-        body: 'Reject saves optional processing as rejected and current Check-in visibility as Private.',
+        title: 'Continue without optional data use',
+        body: 'Keep using your account, activities, friends and Check-ins. AI will be limited.',
         icon: Icons.lock_outline,
         onPressed: pending ? null : () => _complete(InitialChoice.reject),
         buttonKey: const Key('r6-initial-choice-reject'),
@@ -229,8 +232,8 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   String _choiceLabel(InitialChoice? choice) {
     return switch (choice) {
-      InitialChoice.accept => 'Accept — Public',
-      InitialChoice.reject => 'Reject — Private',
+      InitialChoice.accept => 'Allow optional data use',
+      InitialChoice.reject => 'Continue without optional data use',
       null => 'selected',
     };
   }

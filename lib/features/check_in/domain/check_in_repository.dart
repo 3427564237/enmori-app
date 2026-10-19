@@ -9,8 +9,14 @@ final class CheckIn {
     required this.note,
     required this.createdAt,
     this.checkInVisibility,
+    this.revision = 1,
+    this.mood,
+    this.activity,
   });
 
+  final String? mood;
+  final String? activity;
+  final int revision;
   final String checkInId;
   final String note;
   final DateTime createdAt;
@@ -26,6 +32,9 @@ final class CheckInHistoryPage {
 
 abstract interface class CheckInRepository {
   Future<Result<CheckIn>> create({
+    String? mood,
+    String? activity,
+    CheckInVisibility? visibility,
     required String note,
     required String idempotencyKey,
   });
@@ -39,10 +48,10 @@ abstract interface class CheckInRepository {
   });
 }
 
-Result<String> normalizeCheckInNote(String input) {
+Result<String> normalizeCheckInNote(String input, {String? mood}) {
   final normalized = input.trim();
   final length = normalized.characters.length;
-  if (length < 1 || length > 500) {
+  if ((length < 1 && (mood == null || mood.trim().isEmpty)) || length > 500) {
     return const Failure(
       AppFailure(
         kind: AppFailureKind.checkInInvalid,

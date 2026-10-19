@@ -1,3 +1,5 @@
+import 'package:enmori/features/account/domain/account_repository.dart';
+
 import 'dart:async';
 
 import 'package:enmori/core/presentation/command_state.dart';
@@ -85,6 +87,9 @@ final class _PendingCheckInRepository implements CheckInRepository {
   final pending = Completer<Result<CheckIn>>();
   @override
   Future<Result<CheckIn>> create({
+    String? mood,
+    String? activity,
+    CheckInVisibility? visibility,
     required String note,
     required String idempotencyKey,
   }) => pending.future;

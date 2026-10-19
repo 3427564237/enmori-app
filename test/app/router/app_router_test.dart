@@ -62,7 +62,7 @@ void main() {
           gate: RouterGateState.authenticated,
           location: AppRoutes.onboarding,
         ),
-        AppRoutes.checkIn,
+        AppRoutes.setupInterests,
       );
     });
 

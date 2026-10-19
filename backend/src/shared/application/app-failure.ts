@@ -1,4 +1,6 @@
 export const APP_FAILURE_CATALOGUE = {
+  CATALOGUE_INVALID: { statusCode: 422, message: "Use a valid catalogue name of 1–50 characters." },
+  CATALOGUE_NAME_CONFLICT: { statusCode: 409, message: "This catalogue name is already reserved." },
   PERSONA_INVALID: { statusCode: 422, message: "Use a name of 1–50 characters, valid style options and valid versions." },
   PERSONA_UNAVAILABLE: { statusCode: 404, message: "This Persona is unavailable." },
   PERSONA_LIMIT_REACHED: { statusCode: 409, message: "You can save up to 5 Personas. Delete one before creating another." },
@@ -51,6 +53,7 @@ export const APP_FAILURE_CATALOGUE = {
     statusCode: 409,
     message: "Account setup could not be completed with these details.",
   },
+  CHECKIN_REVISION_PRECONDITION_FAILED: { statusCode: 412, message: "This Check-in changed. Reload before saving or deleting." },
   CHECKIN_INVALID: {
     statusCode: 400,
     message: "Check-in details are invalid.",

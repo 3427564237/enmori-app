@@ -1,3 +1,8 @@
+import { EditCheckIn } from "../check-ins/application/edit-check-in.js";
+import { FirestoreCheckInMutations } from "../check-ins/infrastructure/firestore-check-in-mutations.js";
+import { CreateInterestTag } from '../interests/application/create-interest-tag.js';
+import { FirebaseInterestAdmin } from '../interests/infrastructure/firebase-interest-admin.js';
+import { FirestoreCatalogueWriter } from '../interests/infrastructure/firestore-catalogue-writer.js';
 import { pathToFileURL } from "node:url";
 import { OwnAccountPreferences } from "../account/application/own-account-preferences.js";
 import { FirestoreAccountPreferencesRepository } from "../account/infrastructure/firestore-account-preferences-repository.js";
@@ -56,6 +61,8 @@ async function createControlledRuntime(
     const clock = new SystemClock();
     const ids = new CryptoOpaqueIdGenerator();
     const app = await buildApp({
+      editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
+      createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(getAuth(firebaseApp)), new FirestoreCatalogueWriter(gateway)),
       accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway)),
       recommendEvents: new RecommendEvents(new FirestoreEventRecommendationRepository(
         new FirebaseAdminEventReadGateway(getFirestore(firebaseApp)),

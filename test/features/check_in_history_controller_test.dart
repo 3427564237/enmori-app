@@ -1,3 +1,5 @@
+import 'package:enmori/features/account/domain/account_repository.dart';
+
 import 'dart:async';
 
 import 'package:enmori/core/result/result.dart';
@@ -45,6 +47,9 @@ final class _HistoryRepository implements CheckInRepository {
 
   @override
   Future<Result<CheckIn>> create({
+    String? mood,
+    String? activity,
+    CheckInVisibility? visibility,
     required String note,
     required String idempotencyKey,
   }) async => throw UnimplementedError();

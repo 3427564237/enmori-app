@@ -1,3 +1,9 @@
+import 'dart:async';
+
+import '../check_in_providers.dart';
+import '../domain/check_in_calendar_repository.dart';
+import 'check_in_calendar_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,7 +18,7 @@ Widget buildCheckInHistoryPage({
 }) =>
     CheckInHistoryPage(onBack: onBack, onOpenSavedCheckIn: onOpenSavedCheckIn);
 
-final class CheckInHistoryPage extends ConsumerWidget {
+final class CheckInHistoryPage extends ConsumerStatefulWidget {
   const CheckInHistoryPage({
     required this.onBack,
     required this.onOpenSavedCheckIn,
@@ -23,18 +29,100 @@ final class CheckInHistoryPage extends ConsumerWidget {
   final ValueChanged<String> onOpenSavedCheckIn;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CheckInHistoryPage> createState() => _CheckInHistoryPageState();
+}
+
+class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
+  String? _highlight;
+  final _anchor = GlobalKey();
+  Timer? _highlightTimer;
+  @override
+  void dispose() {
+    _highlightTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _openCalendar(
+    CheckInHistoryState current,
+    CheckInHistoryController controller,
+  ) async {
+    final selection = await Navigator.of(context).push<CalendarSelection>(
+      MaterialPageRoute(
+        builder: (_) => CheckInCalendarPage(
+          initialDate: current.selectedDate!,
+          latestDate: current.latestDate!,
+          timeZone: current.ianaZone!,
+        ),
+      ),
+    );
+    if (!mounted || selection == null) return;
+    await controller.selectDate(selection.date);
+    if (!mounted || selection.checkInId == null) return;
+    var state = ref.read(checkInHistoryControllerProvider);
+    final seen = <String>{};
+    while (state.phase == CheckInHistoryPhase.ready &&
+        !state.entries.any(
+          (entry) => entry.checkIn.checkInId == selection.checkInId,
+        ) &&
+        state.nextCursor != null &&
+        seen.add(state.nextCursor!)) {
+      await controller.loadNext();
+      if (!mounted) return;
+      state = ref.read(checkInHistoryControllerProvider);
+      if (state.nextPageFailure != null) break;
+    }
+    if (!state.entries.any(
+      (entry) => entry.checkIn.checkInId == selection.checkInId,
+    )) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This record could not be located. Reload the date.'),
+        ),
+      );
+      return;
+    }
+    setState(() => _highlight = selection.checkInId);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final target = _anchor.currentContext;
+      if (mounted && target != null) {
+        Scrollable.ensureVisible(
+          target,
+          duration: const Duration(milliseconds: 200),
+          alignment: .25,
+        );
+      }
+    });
+    _highlightTimer?.cancel();
+    _highlightTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _highlight = null);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(checkInHistoryControllerProvider);
     final controller = ref.read(checkInHistoryControllerProvider.notifier);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           tooltip: 'Back',
-          onPressed: onBack,
+          onPressed: widget.onBack,
           icon: const Icon(Icons.arrow_back),
         ),
         title: const Text('Footprint'),
         actions: [
+          if (ref.watch(checkInRepositoryProvider) is CheckInCalendarRepository)
+            IconButton(
+              key: const Key('history-month-calendar'),
+              tooltip: 'Month calendar',
+              onPressed:
+                  state.selectedDate == null ||
+                      state.latestDate == null ||
+                      state.ianaZone == null
+                  ? null
+                  : () => _openCalendar(state, controller),
+              icon: const Icon(Icons.calendar_month),
+            ),
           IconButton(
             key: const Key('history-reload'),
             tooltip: 'Reload',
@@ -80,7 +168,9 @@ final class CheckInHistoryPage extends ConsumerWidget {
             Expanded(
               child: _HistoryBody(
                 state: state,
-                onOpen: onOpenSavedCheckIn,
+                onOpen: widget.onOpenSavedCheckIn,
+                highlight: _highlight,
+                anchor: _anchor,
                 onRetry: controller.reload,
               ),
             ),
@@ -162,11 +252,15 @@ final class _HistoryBody extends StatelessWidget {
     required this.state,
     required this.onOpen,
     required this.onRetry,
+    this.highlight,
+    this.anchor,
   });
 
   final CheckInHistoryState state;
   final ValueChanged<String> onOpen;
   final VoidCallback onRetry;
+  final String? highlight;
+  final GlobalKey? anchor;
 
   @override
   Widget build(BuildContext context) {
@@ -204,14 +298,25 @@ final class _HistoryBody extends StatelessWidget {
         title: 'No Check-ins for this date.',
         action: null,
       ),
-      CheckInHistoryPhase.ready => ListView.separated(
+      CheckInHistoryPhase.ready => SingleChildScrollView(
         key: const Key('history-list'),
         padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: state.entries.length,
-        separatorBuilder: (_, _) => const Divider(height: 1, indent: 72),
-        itemBuilder: (context, index) => _HistoryTile(
-          entry: state.entries[index],
-          onTap: () => onOpen(state.entries[index].checkIn.checkInId),
+        child: Column(
+          children: [
+            for (final entry in state.entries) ...[
+              Material(
+                key: entry.checkIn.checkInId == highlight ? anchor : null,
+                color: entry.checkIn.checkInId == highlight
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : Colors.transparent,
+                child: _HistoryTile(
+                  entry: entry,
+                  onTap: () => onOpen(entry.checkIn.checkInId),
+                ),
+              ),
+              const Divider(height: 1, indent: 72),
+            ],
+          ],
         ),
       ),
     };
@@ -237,7 +342,9 @@ final class _HistoryTile extends StatelessWidget {
       onTap: onTap,
       leading: const Icon(Icons.edit_note_outlined),
       title: Text(
-        entry.checkIn.note,
+        entry.checkIn.note.isEmpty
+            ? (entry.checkIn.mood ?? '')
+            : entry.checkIn.note,
         maxLines: 3,
         overflow: TextOverflow.ellipsis,
       ),

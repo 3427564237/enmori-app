@@ -43,6 +43,9 @@ interface CommandHeaders {
 }
 
 interface CreateCheckInBody {
+  readonly mood?: string | null;
+  readonly activity?: string | null;
+  readonly checkInVisibility?: "private" | "friends_only" | "public";
   readonly note: string;
 }
 
@@ -106,7 +109,7 @@ export async function registerR4Routes(
     async (request, reply) => {
       const result = await dependencies.createCheckIn.execute({
         principal: requirePrincipal(request),
-        note: request.body.note,
+        ...request.body,
         idempotencyKey: request.headers["idempotency-key"],
       });
       if (!result.ok) return sendFailure(request, reply, result.failure);
@@ -180,7 +183,10 @@ function accountResponse(account: AccountProjection): AccountProjection {
 function checkInResponse(checkIn: CheckInProjection): CheckInProjection {
   return {
     checkInId: checkIn.checkInId,
+    ...(checkIn.revision === undefined ? {} : { revision: checkIn.revision }),
     note: checkIn.note,
+    ...(checkIn.mood === undefined ? {} : {mood:checkIn.mood}),
+    ...(checkIn.activity === undefined ? {} : {activity:checkIn.activity}),
     createdAt: checkIn.createdAt,
     ...(checkIn.checkInVisibility === undefined ? {} : { checkInVisibility: checkIn.checkInVisibility }),
   };

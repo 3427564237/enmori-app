@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/presentation/command_state.dart';
 import '../../../core/result/result.dart';
 import 'sign_in_controller.dart';
+import 'auth_email_page.dart';
 
 final class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({
@@ -21,6 +22,7 @@ final class SignInPage extends ConsumerStatefulWidget {
 
 final class _SignInPageState extends ConsumerState<SignInPage> {
   late final SignInController _controller;
+  bool _showPassword = false;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -95,10 +97,22 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                         key: const Key('sign-in-password'),
                         controller: _passwordController,
                         autofillHints: const [AutofillHints.password],
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
+                          suffixIcon: IconButton(
+                            tooltip: _showPassword
+                                ? 'Hide password'
+                                : 'Show password',
+                            onPressed: () =>
+                                setState(() => _showPassword = !_showPassword),
+                            icon: Icon(
+                              _showPassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                          ),
                           labelText: 'Password',
                         ),
-                        obscureText: true,
+                        obscureText: !_showPassword,
                         textInputAction: TextInputAction.done,
                         validator: (value) => (value ?? '').isEmpty
                             ? 'Enter your password.'
@@ -128,6 +142,18 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                               )
                             : const Icon(Icons.login),
                         label: Text(pending ? 'Signing in' : 'Sign in'),
+                      ),
+                      TextButton(
+                        key: const Key('forgot-password'),
+                        onPressed: pending
+                            ? null
+                            : () => Navigator.of(context).push<void>(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const AuthEmailPage(resetPassword: true),
+                                ),
+                              ),
+                        child: const Text('Forgot password?'),
                       ),
                       TextButton(
                         key: const Key('sign-in-create-account'),

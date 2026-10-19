@@ -1,3 +1,7 @@
+import '../check_in_providers.dart';
+import '../domain/check_in_mutations.dart';
+import 'check_in_edit_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,7 +34,10 @@ final class _CheckInComposerPageState
     extends ConsumerState<CheckInComposerPage> {
   late final CheckInController _controller;
   final _noteController = TextEditingController();
+  final _scroll = ScrollController();
   CheckIn? _committedCheckIn;
+  String? _mood, _activity;
+  CheckInVisibility? _visibility;
   _CheckInAction? _lastAction;
   String? _noteErrorText;
   int? _activeOperation;
@@ -44,6 +51,7 @@ final class _CheckInComposerPageState
   @override
   void dispose() {
     _noteController.dispose();
+    _scroll.dispose();
     if (_activeOperation case final operation?) _controller.abandon(operation);
     super.dispose();
   }
@@ -58,6 +66,13 @@ final class _CheckInComposerPageState
       if (next case CommandSucceeded<CheckIn>(:final value)) {
         setState(() => _committedCheckIn = value);
       }
+      if (next is CommandSucceeded<CheckIn> || next is CommandFailed<CheckIn>) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _scroll.hasClients) {
+            _scroll.jumpTo(_scroll.position.maxScrollExtent);
+          }
+        });
+      }
     });
 
     final state = ref.watch(checkInControllerProvider);
@@ -71,108 +86,189 @@ final class _CheckInComposerPageState
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
-            child: ListView(
+            child: SingleChildScrollView(
+              controller: _scroll,
               key: const Key('route-check-in'),
               padding: const EdgeInsets.all(24),
-              children: [
-                if (widget.socialStyle) ...[
-                  Container(
-                    padding: const EdgeInsets.all(22),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.edit_note,
-                          size: 36,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Keep a little moment',
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -.5,
-                              ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Something you noticed. Something you want to remember.',
-                          style: TextStyle(height: 1.6),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  if (widget.visibility case final visibility?)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Chip(
-                        avatar: Icon(
-                          visibility == CheckInVisibility.private
-                              ? Icons.lock_outline
-                              : visibility == CheckInVisibility.public
-                              ? Icons.public
-                              : Icons.people_outline,
-                          size: 18,
-                        ),
-                        label: Text(switch (visibility) {
-                          CheckInVisibility.private => 'Private',
-                          CheckInVisibility.public => 'Public',
-                          CheckInVisibility.friendsOnly => 'Friends only',
-                        }),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (widget.socialStyle) ...[
+                    Container(
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.edit_note,
+                            size: 36,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Keep a little moment',
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -.5,
+                                ),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Something you noticed. Something you want to remember.',
+                            style: TextStyle(height: 1.6),
+                          ),
+                        ],
                       ),
                     ),
-                ] else ...[
-                  Text(
-                    'Note-only Check-in',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    const SizedBox(height: 20),
+                    if (widget.visibility case final visibility?)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Chip(
+                          avatar: Icon(
+                            visibility == CheckInVisibility.private
+                                ? Icons.lock_outline
+                                : visibility == CheckInVisibility.public
+                                ? Icons.public
+                                : Icons.people_outline,
+                            size: 18,
+                          ),
+                          label: Text(switch (visibility) {
+                            CheckInVisibility.private => 'Private',
+                            CheckInVisibility.public => 'Public',
+                            CheckInVisibility.friendsOnly => 'Friends only',
+                          }),
+                        ),
+                      ),
+                  ] else ...[
+                    Text(
+                      'New Check-in',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Add a Note or Mood. A Note can contain up to 500 characters.',
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+                  ExpansionTile(
+                    title: const Text('Mood, activity and visibility'),
+                    children: [
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          for (final mood in [
+                            'Happy',
+                            'Calm',
+                            'Focused',
+                            'Tired',
+                            'Stressed',
+                            'Not sure',
+                          ])
+                            ChoiceChip(
+                              label: Text(mood),
+                              selected: _mood == mood,
+                              onSelected: pending
+                                  ? null
+                                  : (selected) => setState(() {
+                                      _mood = selected ? mood : null;
+                                      _noteErrorText = null;
+                                    }),
+                            ),
+                        ],
+                      ),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          for (final activity in [
+                            'Study',
+                            'Fitness',
+                            'Social',
+                            'Food',
+                            'Travel',
+                          ])
+                            FilterChip(
+                              label: Text(activity),
+                              selected: _activity == activity,
+                              onSelected: pending
+                                  ? null
+                                  : (selected) => setState(
+                                      () => _activity = selected
+                                          ? activity
+                                          : null,
+                                    ),
+                            ),
+                        ],
+                      ),
+                      DropdownButtonFormField<CheckInVisibility>(
+                        initialValue:
+                            widget.visibility ?? CheckInVisibility.private,
+                        decoration: const InputDecoration(
+                          labelText: 'This Check-in visibility',
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: CheckInVisibility.private,
+                            child: Text('Private'),
+                          ),
+                          DropdownMenuItem(
+                            value: CheckInVisibility.friendsOnly,
+                            child: Text('Friends-only'),
+                          ),
+                          DropdownMenuItem(
+                            value: CheckInVisibility.public,
+                            child: Text('Public'),
+                          ),
+                        ],
+                        onChanged: pending
+                            ? null
+                            : (value) => setState(() => _visibility = value),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  const Text('Write a note between 1 and 500 characters.'),
+                  TextField(
+                    key: const Key('r6-check-in-note'),
+                    controller: _noteController,
+                    minLines: widget.socialStyle ? 7 : 5,
+                    maxLines: widget.socialStyle ? 12 : 8,
+                    maxLength: 500,
+                    onChanged: (_) => setState(() => _noteErrorText = null),
+                    decoration: InputDecoration(
+                      alignLabelWithHint: true,
+                      errorText: _noteErrorText,
+                      helperText: widget.socialStyle
+                          ? 'A note of up to 500 characters.'
+                          : '$noteLength / 500 characters',
+                      counterText: widget.socialStyle
+                          ? '$noteLength / 500'
+                          : null,
+                      hintText: widget.socialStyle
+                          ? 'What would you like to keep from today?'
+                          : null,
+                      labelText: 'Note',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    key: const Key('r6-check-in-create'),
+                    onPressed: pending ? null : _create,
+                    icon: pending && _lastAction == _CheckInAction.create
+                        ? const SizedBox.square(
+                            dimension: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.check_circle_outline),
+                    label: const Text('Save Check-in'),
+                  ),
+                  const SizedBox(height: 20),
+                  _statusBlock(state),
                 ],
-                const SizedBox(height: 20),
-                TextField(
-                  key: const Key('r6-check-in-note'),
-                  controller: _noteController,
-                  minLines: widget.socialStyle ? 7 : 5,
-                  maxLines: widget.socialStyle ? 12 : 8,
-                  maxLength: 500,
-                  onChanged: (_) => setState(() => _noteErrorText = null),
-                  decoration: InputDecoration(
-                    alignLabelWithHint: true,
-                    errorText: _noteErrorText,
-                    helperText: widget.socialStyle
-                        ? 'A note of up to 500 characters.'
-                        : '$noteLength / 500 characters',
-                    counterText: widget.socialStyle
-                        ? '$noteLength / 500'
-                        : null,
-                    hintText: widget.socialStyle
-                        ? 'What would you like to keep from today?'
-                        : null,
-                    labelText: 'Note',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  key: const Key('r6-check-in-create'),
-                  onPressed: pending ? null : _create,
-                  icon: pending && _lastAction == _CheckInAction.create
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.check_circle_outline),
-                  label: const Text('Save Check-in'),
-                ),
-                const SizedBox(height: 20),
-                _statusBlock(state),
-              ],
+              ),
             ),
           ),
         ),
@@ -232,7 +328,7 @@ final class _CheckInComposerPageState
       icon: confirmed ? Icons.verified : Icons.task_alt,
       title: confirmed ? 'Saved Check-in confirmed.' : 'Check-in saved.',
       body:
-          '${checkIn.note}\nSaved at ${checkIn.createdAt.toUtc().toIso8601String()}'
+          '${checkIn.note}${checkIn.mood == null ? '' : '\nMood: ${checkIn.mood}'}${checkIn.activity == null ? '' : '\nActivity: ${checkIn.activity}'}\nSaved at ${checkIn.createdAt.toUtc().toIso8601String()}'
           '${switch (checkIn.checkInVisibility) {
             CheckInVisibility.private => '\nVisibility: Private',
             CheckInVisibility.friendsOnly => '\nVisibility: Friends-only',
@@ -258,8 +354,10 @@ final class _CheckInComposerPageState
   void _create() {
     final normalized = _noteController.text.trim();
     final noteLength = normalized.characters.length;
-    if (noteLength == 0) {
-      setState(() => _noteErrorText = 'Enter a Note before saving.');
+    if (noteLength == 0 && _mood == null) {
+      setState(
+        () => _noteErrorText = 'Enter a Note or select a Mood before saving.',
+      );
       return;
     }
     if (noteLength > 500) {
@@ -267,7 +365,12 @@ final class _CheckInComposerPageState
       return;
     }
     _lastAction = _CheckInAction.create;
-    _controller.create(note: normalized);
+    _controller.create(
+      note: normalized,
+      mood: _mood,
+      activity: _activity,
+      visibility: _visibility,
+    );
     _activeOperation = _controller.operationToken;
   }
 
@@ -279,7 +382,8 @@ final class _CheckInComposerPageState
 
   String _createFailureCopy(AppFailureKind kind) {
     return switch (kind) {
-      AppFailureKind.checkInInvalid => 'Enter a Note before saving.',
+      AppFailureKind.checkInInvalid =>
+        'Enter a Note or select a Mood before saving.',
       AppFailureKind.idempotencyConflict => 'This Check-in attempt changed after it was submitted. Start a new attempt.',
       AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
       AppFailureKind.authForbidden => 'This account cannot continue.',
@@ -335,7 +439,42 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(checkInControllerProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Saved Check-in')),
+      appBar: AppBar(
+        title: const Text('Saved Check-in'),
+        actions: [
+          if (state case CommandSucceeded<CheckIn>(:final value))
+            if (ref.watch(checkInRepositoryProvider) is CheckInMutations)
+              IconButton(
+                key: const Key('saved-check-in-edit'),
+                tooltip: 'Edit Check-in',
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () async {
+                  final result = await Navigator.of(context)
+                      .push<CheckInEditResult>(
+                        MaterialPageRoute(
+                          builder: (_) => CheckInEditPage(checkIn: value),
+                        ),
+                      );
+                  if (!context.mounted) return;
+                  if (result == CheckInEditResult.deleted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Check-in deleted.')),
+                    );
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                    } else {
+                      widget.onReturnHome();
+                    }
+                  } else if (result == CheckInEditResult.saved) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Check-in updated.')),
+                    );
+                    _readPersisted();
+                  }
+                },
+              ),
+        ],
+      ),
       body: SafeArea(
         child: ListView(
           key: const Key('route-check-in-saved'),
@@ -354,7 +493,7 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
                 icon: Icons.verified,
                 title: 'Saved Check-in confirmed.',
                 body:
-                    '${value.note}\nSaved at ${value.createdAt.toUtc().toIso8601String()}'
+                    '${value.note}${value.mood == null ? '' : '\nMood: ${value.mood}'}${value.activity == null ? '' : '\nActivity: ${value.activity}'}\nSaved at ${value.createdAt.toUtc().toIso8601String()}'
                     '${switch (value.checkInVisibility) {
                       CheckInVisibility.private => '\nVisibility: Private',
                       CheckInVisibility.friendsOnly => '\nVisibility: Friends-only',

@@ -1,4 +1,8 @@
 export const ROUTE_INVENTORY = [
+  {method:"GET",path:"/v1/me/check-ins/calendar",successStatuses:[200],requiresIdempotencyKey:false,environment:"isolated-emulator"},
+  { method: "PUT", path: "/v1/check-ins/{checkInId}", successStatuses: [200], requiresIdempotencyKey: false },
+  { method: "DELETE", path: "/v1/check-ins/{checkInId}", successStatuses: [200], requiresIdempotencyKey: false },
+  { method: "POST", path: "/v1/admin/interest-tags", successStatuses: [201], requiresIdempotencyKey: false },
   { method: "GET", path: "/v1/event-browse", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
   { method: "GET", path: "/v1/event-browse/{browseId}", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
   { method: "POST", path: "/v1/me/ai/operations", successStatuses: [201], requiresIdempotencyKey: false, environment: "isolated-emulator" },

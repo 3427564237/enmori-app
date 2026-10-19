@@ -3,21 +3,29 @@ import { errorEnvelopeSchema } from "../../transport/schemas.js";
 const visibility = { type: "string", enum: ["private", "friends_only", "public"] } as const;
 const revision = { type: "integer", minimum: 0, maximum: Number.MAX_SAFE_INTEGER } as const;
 const name = { type: ["string", "null"] } as const;
+export const profileDetailsSchema = {
+  type: "object", additionalProperties: false, required: ["bio", "affiliationType", "affiliationName", "region"],
+  properties: { bio: name, affiliationType: { enum: ["school", "company", null] }, affiliationName: name, region: name },
+} as const;
+export const fieldPrivacySchema = {
+  type: "object", additionalProperties: false, required: ["interests", "location", "participation", "mapSharedWithFriends"],
+  properties: { interests: visibility, location: visibility, participation: visibility, mapSharedWithFriends: { type: "boolean" } },
+} as const;
 export const profileSchema = {
   type: "object", additionalProperties: false, required: ["username", "displayName", "profileVisibility", "revision"],
-  properties: { username: { type: "string" }, displayName: name, profileVisibility: visibility, revision },
+  properties: { details: profileDetailsSchema, username: { type: "string" }, displayName: name, profileVisibility: visibility, revision },
 } as const;
 export const settingsSchema = {
   type: "object", additionalProperties: false, required: ["checkInVisibility", "optionalProcessingConsent", "revision"],
-  properties: { checkInVisibility: visibility, optionalProcessingConsent: { type: "string", enum: ["accepted", "rejected"] }, revision },
+  properties: { fieldPrivacy: fieldPrivacySchema, checkInVisibility: visibility, optionalProcessingConsent: { type: "string", enum: ["accepted", "rejected"] }, revision },
 } as const;
 export const saveProfileBody = {
   type: "object", additionalProperties: false, required: ["displayName", "profileVisibility", "expectedRevision"],
-  properties: { displayName: name, profileVisibility: visibility, expectedRevision: revision },
+  properties: { details: profileDetailsSchema, displayName: name, profileVisibility: visibility, expectedRevision: revision },
 } as const;
 export const saveSettingsBody = {
   type: "object", additionalProperties: false, required: ["checkInVisibility", "optionalProcessingConsent", "expectedRevision"],
-  properties: { checkInVisibility: visibility, optionalProcessingConsent: settingsSchema.properties.optionalProcessingConsent, expectedRevision: revision },
+  properties: { fieldPrivacy: fieldPrivacySchema, checkInVisibility: visibility, optionalProcessingConsent: settingsSchema.properties.optionalProcessingConsent, expectedRevision: revision },
 } as const;
 const response = (key: string, resource: unknown, write: boolean) => Object.fromEntries([
   [200, { type: "object", additionalProperties: false, required: [key], properties: { [key]: resource } }],

@@ -1,3 +1,9 @@
+import {registerCheckInCalendar} from "../check-ins/transport/calendar-route.js";
+import type {OwnCheckInCalendar} from "../check-ins/application/check-in-calendar.js";
+import { registerCheckInMutations } from "../check-ins/transport/mutation-routes.js";
+import type { EditCheckIn } from "../check-ins/application/edit-check-in.js";
+import { registerInterestAdmin } from '../interests/transport/admin-routes.js';
+import type { CreateInterestTag } from '../interests/application/create-interest-tag.js';
 import { createIsolatedEventBrowse, type IsolatedEventBrowseInput } from "./isolated-event-browse.js";
 import { buildEventBrowseFrameworkErrors } from "./event-browse-framework-errors.js";
 import { registerEventBrowseRoutes } from "../event-browse/transport/register-routes.js";
@@ -27,7 +33,7 @@ import {
 } from "../transport/register-routes.js";
 
 export async function buildApp(
-  dependencies: R4RouteDependencies & { readonly recommendEvents?: Pick<RecommendEvents, "execute">;
+  dependencies: R4RouteDependencies & { readonly checkInCalendar?:OwnCheckInCalendar; readonly editCheckIn?: EditCheckIn; readonly createInterestTag?: CreateInterestTag; readonly recommendEvents?: Pick<RecommendEvents, "execute">;
     readonly accountPreferences?: OwnAccountPreferences;
     readonly controlledPhoneDiagnostics?: ControlledPhoneDiagnostics;
     readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput } },
@@ -58,6 +64,9 @@ export async function buildApp(
   });
 
   await registerR4Routes(app, dependencies);
+  if(dependencies.checkInCalendar)await registerCheckInCalendar(app,dependencies.identityVerifier,dependencies.checkInCalendar);
+  if (dependencies.editCheckIn) await registerCheckInMutations(app, dependencies.identityVerifier, dependencies.editCheckIn);
+  if (dependencies.createInterestTag) await registerInterestAdmin(app, dependencies.identityVerifier, dependencies.createInterestTag);
   if (dependencies.accountPreferences !== undefined) {
     await registerAccountPreferencesRoutes(app, dependencies.identityVerifier, dependencies.accountPreferences);
   }
@@ -101,6 +110,8 @@ function validationFailureCode(
     if (context === "headers") return "IDEMPOTENCY_KEY_INVALID";
 
     const route = request.routeOptions.url;
+    if(route === "/v1/me/check-ins/calendar")return "REQUEST_INVALID";
+    if (route === "/v1/admin/interest-tags") return "REQUEST_INVALID";
     if (route?.startsWith("/v1/friend") || route === "/v1/me/friend-requests" || route === "/v1/me/friends" || route === "/v1/me/friends/search" || route === "/v1/events/:eventId") return "REQUEST_INVALID";
     if (route === "/v1/me/profile" || route === "/v1/me/settings") {
       const validation = fastifyError.validation as readonly { readonly keyword?: string }[] | undefined;
@@ -120,6 +131,7 @@ function validationFailureCode(
     if (request.method === "POST" && route === "/v1/check-ins") {
       return "CHECKIN_INVALID";
     }
+    if (["PUT", "DELETE"].includes(request.method) && route === "/v1/check-ins/:checkInId") return "CHECKIN_INVALID";
     if (request.method === "GET" && route === "/v1/check-ins/:checkInId") {
       return "CHECKIN_UNAVAILABLE";
     }

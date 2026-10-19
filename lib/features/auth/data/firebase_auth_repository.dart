@@ -2,8 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/result/result.dart';
 import '../domain/auth_repository.dart';
+import '../domain/auth_email_repository.dart';
 
-final class FirebaseAuthRepository implements AuthRepository {
+final class FirebaseAuthRepository
+    implements AuthRepository, AuthEmailRepository {
   FirebaseAuthRepository(this._firebaseAuth);
 
   final FirebaseAuth _firebaseAuth;
@@ -65,6 +67,13 @@ final class FirebaseAuthRepository implements AuthRepository {
           message: 'Registration is unavailable. Try again.',
         ),
       );
+    } catch (_) {
+      return const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'Registration is unavailable. Try again.',
+        ),
+      );
     }
   }
 
@@ -82,6 +91,13 @@ final class FirebaseAuthRepository implements AuthRepository {
     } on FirebaseAuthException catch (error) {
       return Failure(_mapFirebaseFailure(error));
     } on FirebaseException {
+      return const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'Authentication is unavailable. Try again.',
+        ),
+      );
+    } catch (_) {
       return const Failure(
         AppFailure(
           kind: AppFailureKind.serviceUnavailable,
@@ -121,6 +137,88 @@ final class FirebaseAuthRepository implements AuthRepository {
         AppFailure(
           kind: AppFailureKind.serviceUnavailable,
           message: 'Authentication is unavailable. Try again.',
+        ),
+      );
+    } catch (_) {
+      return const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'Authentication is unavailable. Try again.',
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<bool>> readEmailVerified() async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) {
+        return const Failure(
+          AppFailure(
+            kind: AppFailureKind.authRequired,
+            message: 'Sign in again.',
+          ),
+        );
+      }
+      await user.reload();
+      if (_firebaseAuth.currentUser?.uid != user.uid) {
+        return const Failure(
+          AppFailure(
+            kind: AppFailureKind.authRequired,
+            message: 'Sign in again.',
+          ),
+        );
+      }
+      return Success(_firebaseAuth.currentUser?.emailVerified == true);
+    } catch (_) {
+      return const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'Verification could not be checked. Try again.',
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> sendVerificationEmail() async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) {
+        return const Failure(
+          AppFailure(
+            kind: AppFailureKind.authRequired,
+            message: 'Sign in again.',
+          ),
+        );
+      }
+      await user.sendEmailVerification();
+      return const Success(null);
+    } catch (_) {
+      return const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'The email could not be sent. Wait a moment and try again.',
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void>> sendPasswordResetEmail(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
+      return const Success(null);
+    } on FirebaseAuthException catch (error) {
+      // Do not reveal account existence through password recovery.
+      if (error.code == 'user-not-found') return const Success(null);
+      return Failure(_mapFirebaseFailure(error));
+    } catch (_) {
+      return const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'The email could not be sent. Wait a moment and try again.',
         ),
       );
     }

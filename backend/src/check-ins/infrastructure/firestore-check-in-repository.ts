@@ -121,7 +121,7 @@ export class FirestoreCheckInRepository implements CheckInRepository {
           operation,
           rawKey: command.idempotencyKey,
         });
-        const requestFingerprint = createRequestFingerprint([command.note]);
+        const requestFingerprint = createRequestFingerprint([command.note, ...(command.mood === undefined && command.activity === undefined && command.checkInVisibility === undefined ? [] : [JSON.stringify({mood:command.mood??null,activity:command.activity??null,visibility:command.checkInVisibility??null})])]);
         const operationPath = idempotencyPath(identity.documentId);
         const storedOperation = await transaction.get(operationPath);
         if (storedOperation !== undefined) {
@@ -161,7 +161,9 @@ export class FirestoreCheckInRepository implements CheckInRepository {
           ownerAccountId: accountId,
           note: command.note,
           createdAt: creation.createdAt,
-          checkInVisibility: parseAccountProjection(account)!.checkInVisibility,
+          ...(command.mood == null ? {} : {mood:command.mood}),
+          ...(command.activity == null ? {} : {activity:command.activity}),
+          checkInVisibility: command.checkInVisibility ?? parseAccountProjection(account)!.checkInVisibility,
         };
         const idempotency: IdempotencyRecord = {
           scope: accountId,
@@ -184,7 +186,9 @@ export class FirestoreCheckInRepository implements CheckInRepository {
             checkInId: creation.checkInId,
             note: command.note,
             createdAt: creation.createdAt,
-          checkInVisibility: parseAccountProjection(account)!.checkInVisibility,
+          ...(command.mood == null ? {} : {mood:command.mood}),
+          ...(command.activity == null ? {} : {activity:command.activity}),
+          checkInVisibility: command.checkInVisibility ?? parseAccountProjection(account)!.checkInVisibility,
           },
         };
       });

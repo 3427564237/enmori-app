@@ -19,7 +19,7 @@ export function deriveInitialChoice(
     return ok({
       initialChoice: input,
       optionalProcessingConsent: "accepted",
-      checkInVisibility: "public",
+      checkInVisibility: "private",
     });
   }
   if (input === "reject") {

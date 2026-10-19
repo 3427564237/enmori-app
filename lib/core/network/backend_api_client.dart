@@ -51,6 +51,11 @@ final class BackendApiClient {
   final http.Client _httpClient;
   final Duration _operationTimeout;
 
+  Future<Result<JsonObject>> deleteJson(
+    String path, {
+    required JsonObject body,
+  }) => _send('DELETE', path, body: body);
+
   Future<Result<JsonObject>> get(String path) => _send('GET', path);
 
   Future<Result<JsonObject>> put(
@@ -461,6 +466,8 @@ final class BackendApiClient {
       'USERNAME_UNAVAILABLE' => AppFailureKind.usernameUnavailable,
       'ONBOARDING_REQUIRED' => AppFailureKind.onboardingRequired,
       'ONBOARDING_CONFLICT' => AppFailureKind.onboardingConflict,
+      'CHECKIN_REVISION_PRECONDITION_FAILED' =>
+        AppFailureKind.checkInRevisionPreconditionFailed,
       'CHECKIN_INVALID' => AppFailureKind.checkInInvalid,
       'CHECKIN_UNAVAILABLE' => AppFailureKind.checkInUnavailable,
       'INTEREST_SELECTION_INVALID' => AppFailureKind.interestSelectionInvalid,

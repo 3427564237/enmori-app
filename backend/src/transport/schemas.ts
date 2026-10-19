@@ -1,6 +1,8 @@
 import type { FastifySchema } from "fastify";
 
 export const approvedFailureCodes = [
+  "CATALOGUE_INVALID",
+  "CATALOGUE_NAME_CONFLICT",
   "PERSONA_INVALID",
   "PERSONA_UNAVAILABLE",
   "PERSONA_LIMIT_REACHED",
@@ -60,6 +62,9 @@ export const checkInSchema = {
   required: ["checkInId", "note", "createdAt"],
   properties: {
     checkInVisibility: { type: "string", enum: ["private", "friends_only", "public"] },
+    mood: { type: "string", minLength: 1, maxLength: 50 },
+    activity: { type: "string", minLength: 1, maxLength: 50 },
+    revision: { type: "integer", minimum: 1 },
     checkInId: { type: "string", minLength: 1 },
     note: { type: "string" },
     createdAt: utcTimestamp,
@@ -144,6 +149,9 @@ const checkInBody = {
   additionalProperties: false,
   required: ["note"],
   properties: {
+    mood: { anyOf: [{ type: "string", maxLength: 50 }, {type:"null"}] },
+    activity: { anyOf: [{ type: "string", maxLength: 50 }, {type:"null"}] },
+    checkInVisibility: {type:"string",enum:["private","friends_only","public"]},
     note: { type: "string" },
   },
 } as const;

@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import '../../account/domain/account_repository.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/idempotency_key_generator.dart';
@@ -37,15 +41,26 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
     return const CommandIdle();
   }
 
-  Future<void> create({required String note}) async {
-    final normalizedResult = normalizeCheckInNote(note);
+  Future<void> create({
+    required String note,
+    String? mood,
+    String? activity,
+    CheckInVisibility? visibility,
+  }) async {
+    final normalizedResult = normalizeCheckInNote(note, mood: mood);
     if (normalizedResult case Failure<String>(:final failure)) {
       state = CommandFailed(failure);
       return;
     }
     final normalized = (normalizedResult as Success<String>).value;
-    if (_createNote != normalized || _createIdempotencyKey == null) {
-      _createNote = normalized;
+    final fingerprint = jsonEncode([
+      normalized,
+      mood,
+      activity,
+      visibility?.name,
+    ]);
+    if (_createNote != fingerprint || _createIdempotencyKey == null) {
+      _createNote = fingerprint;
       _createIdempotencyKey = _keyGenerator.generate();
     }
 
@@ -53,6 +68,9 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
     state = const CommandPending();
     final result = await _repository.create(
       note: normalized,
+      mood: mood,
+      activity: activity,
+      visibility: visibility,
       idempotencyKey: _createIdempotencyKey!,
     );
     if (!ref.mounted || operation != _operation) return;

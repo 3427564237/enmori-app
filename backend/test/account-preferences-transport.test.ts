@@ -1,3 +1,4 @@
+import { emptyProfileDetails, privateFields } from "../src/account/domain/profile-details.js";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { buildApp } from "../src/bootstrap/build-app.js";
@@ -39,7 +40,7 @@ test("authenticated transport serializes only owner fields and classifies malfor
   assert.equal((await request({ ...payload, profileVisibility: "unknown" })).statusCode, 422);
   assert.equal((await request({ ...payload, displayName: "a\u202eb" })).statusCode, 422);
   const saved = await request(payload); assert.equal(saved.statusCode, 200);
-  assert.deepEqual(saved.json(), { profile: { username: "member_a", displayName: "Alex", profileVisibility: "public", revision: 1 } });
+  assert.deepEqual(saved.json(), { profile: { details: emptyProfileDetails, username: "member_a", displayName: "Alex", profileVisibility: "public", revision: 1 } });
   const stale = await request(payload); assert.equal(stale.statusCode, 412); assert.equal(stale.json().error.code, "PROFILE_REVISION_PRECONDITION_FAILED");
   const settings = await app.inject({ method: "PUT", url: "/v1/me/settings", headers, payload: { checkInVisibility: "friends_only", optionalProcessingConsent: "accepted", expectedRevision: 0 } });
   assert.equal(settings.statusCode, 200); assert.equal(settings.json().settings.checkInVisibility, "friends_only");

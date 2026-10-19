@@ -1,3 +1,5 @@
+import 'package:enmori/features/account/domain/profile_details.dart';
+
 import 'dart:async';
 
 import 'package:enmori/core/result/result.dart';
@@ -40,6 +42,7 @@ final class FakeAccountPreferences implements AccountPreferencesRepository {
 
   @override
   Future<Result<OwnProfile>> saveProfile({
+    ProfileDetails? details,
     required String? displayName,
     required ProfileVisibility visibility,
     required int expectedRevision,
@@ -49,6 +52,7 @@ final class FakeAccountPreferences implements AccountPreferencesRepository {
     if (saveFailure case final failure?) return Failure(failure);
     if (pendingSave case final pending?) return pending.future;
     profile = OwnProfile(
+      details: details ?? profile.details,
       username: profile.username,
       displayName: displayName?.trim(),
       visibility: visibility,
@@ -59,6 +63,7 @@ final class FakeAccountPreferences implements AccountPreferencesRepository {
 
   @override
   Future<Result<OwnSettings>> saveSettings({
+    FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,
     required int expectedRevision,
@@ -66,6 +71,7 @@ final class FakeAccountPreferences implements AccountPreferencesRepository {
     settingsSaveCount++;
     if (saveFailure case final failure?) return Failure(failure);
     settings = OwnSettings(
+      fieldPrivacy: fieldPrivacy ?? settings.fieldPrivacy,
       checkInVisibility: visibility,
       consent: consent,
       revision: expectedRevision + 1,

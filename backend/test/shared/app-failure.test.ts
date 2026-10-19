@@ -15,7 +15,9 @@ test("maps the approved error catalogue to exact HTTP statuses", () => {
       ]),
     ),
     {
-      PERSONA_INVALID: 422,
+      CATALOGUE_INVALID: 422,
+    CATALOGUE_NAME_CONFLICT: 409,
+    PERSONA_INVALID: 422,
       PERSONA_UNAVAILABLE: 404,
       PERSONA_LIMIT_REACHED: 409,
       PERSONA_COMMAND_CONFLICT: 409,
@@ -34,6 +36,7 @@ test("maps the approved error catalogue to exact HTTP statuses", () => {
       USERNAME_UNAVAILABLE: 409,
       ONBOARDING_REQUIRED: 409,
       ONBOARDING_CONFLICT: 409,
+      CHECKIN_REVISION_PRECONDITION_FAILED: 412,
       CHECKIN_INVALID: 400,
       CHECKIN_UNAVAILABLE: 404,
       INTEREST_SELECTION_INVALID: 422,

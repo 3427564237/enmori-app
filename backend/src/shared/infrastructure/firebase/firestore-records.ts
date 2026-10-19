@@ -1,8 +1,9 @@
+import { normalizeCheckInContent } from "../../../check-ins/domain/content.js";
 import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
 
 import type { CheckInProjection } from "../../../check-ins/application/check-in-model.js";
-import { normalizeNote } from "../../../check-ins/domain/note.js";
+
 import type { AccountProjection } from "../../../onboarding/application/onboarding-model.js";
 import { canonicalizeUsername } from "../../../onboarding/domain/username.js";
 
@@ -174,18 +175,22 @@ export function parseCheckInProjection(
 ): CheckInProjection | undefined {
   const { note, createdAt } = data;
   const normalizedNote =
-    typeof note === "string" ? normalizeNote(note) : undefined;
+    typeof note === "string" ? normalizeCheckInContent(note, data.mood as string | null | undefined, data.activity as string | null | undefined) : undefined;
   if (
     !isSafeDocumentId(checkInId) ||
     normalizedNote === undefined ||
     !normalizedNote.ok ||
-    normalizedNote.value !== note ||
+    normalizedNote.value.note !== note ||
     !isUtcIsoInstant(createdAt)
   ) {
     return undefined;
   }
   if (Object.hasOwn(data, "checkInVisibility") &&
     data.checkInVisibility !== "private" && data.checkInVisibility !== "friends_only" && data.checkInVisibility !== "public") return undefined;
-  return { checkInId, note: normalizedNote.value, createdAt,
+  if (data.revision !== undefined && (!Number.isSafeInteger(data.revision) || Number(data.revision) < 1)) return undefined;
+  return { checkInId, note: normalizedNote.value.note, createdAt,
+    ...(normalizedNote.value.mood === null ? {} : {mood:normalizedNote.value.mood}),
+    ...(normalizedNote.value.activity === null ? {} : {activity:normalizedNote.value.activity}),
+    ...(data.revision === undefined ? {} : { revision: Number(data.revision) }),
     ...(Object.hasOwn(data, "checkInVisibility") ? { checkInVisibility: data.checkInVisibility as "private" | "friends_only" | "public" } : {}) };
 }

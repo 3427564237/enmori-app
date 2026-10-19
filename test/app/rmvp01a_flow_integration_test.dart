@@ -49,6 +49,11 @@ void main() {
           .read(onboardingControllerProvider.notifier)
           .complete(username: 'miku_01', initialChoice: InitialChoice.accept);
       await tester.pumpAndSettle();
+      expect(find.text('Skip for now'), findsOneWidget);
+      await tester.tap(find.text('Skip for now'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('r6-new-check-in-button')));
+      await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-check-in')), findsOneWidget);
 
       await container

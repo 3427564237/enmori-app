@@ -1,7 +1,9 @@
+import type { ProfileDetails, FieldPrivacy } from '../domain/profile-details.js';
 import type { ProfileVisibility } from "../domain/profile-values.js";
 import type { OptionalProcessingConsent, CheckInVisibility } from "../../onboarding/domain/initial-choice.js";
 
 export interface OwnProfile {
+  readonly details?: ProfileDetails;
   readonly username: string;
   readonly displayName: string | null;
   readonly profileVisibility: ProfileVisibility;
@@ -9,6 +11,7 @@ export interface OwnProfile {
 }
 
 export interface OwnSettings {
+  readonly fieldPrivacy?: FieldPrivacy;
   readonly checkInVisibility: CheckInVisibility;
   readonly optionalProcessingConsent: OptionalProcessingConsent;
   readonly revision: number;

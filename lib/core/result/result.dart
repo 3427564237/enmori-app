@@ -31,6 +31,7 @@ enum AppFailureKind {
   usernameUnavailable,
   onboardingRequired,
   onboardingConflict,
+  checkInRevisionPreconditionFailed,
   checkInInvalid,
   checkInUnavailable,
   interestSelectionInvalid,

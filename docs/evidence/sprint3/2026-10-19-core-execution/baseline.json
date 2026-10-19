@@ -1,0 +1,18 @@
+{
+  "base": "ac4021dd13efc2bc6aa8676ccce0a1901311ef0d",
+  "historicalEvidence": [
+    {
+      "path": "docs/evidence/sprint3/2026-10-19-zhou-demo-request-failure.md",
+      "sha256": "620e527dbbef36be5aa6a8830b3ec13baa0ef8ecbc4c6b8a53e46e1db3c557e7"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-19-li-sponsor-demo-acceptance.md",
+      "sha256": "b9842c73e0b1d9bae3c4a3b66ee9a8a4c7bc0d8abf6c5da9500eb0219a1f2438"
+    },
+    {
+      "path": "docs/planning/2026-10-19-li-sponsor-demo-known-limits.md",
+      "sha256": "12b3d73f796ec1b931257dc53237d955c872568dedf360a263ef91f598f60895"
+    }
+  ],
+  "ai": "Historical rejection and diagnostic latch preserved; no retry, model call, reset or restart performed."
+}

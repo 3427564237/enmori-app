@@ -33,7 +33,7 @@ function canonicalUtc(instant: Temporal.Instant): string | undefined {
   return year >= 1 && year <= 9999 ? formatted : undefined;
 }
 
-function parseCivilDay(dateInput: string, zoneInput: string): CivilDay | undefined {
+export function parseCivilDay(dateInput: string, zoneInput: string): CivilDay | undefined {
   const match = CIVIL_DATE.exec(dateInput);
   if (
     match === null ||

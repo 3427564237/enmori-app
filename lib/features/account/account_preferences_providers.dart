@@ -1,3 +1,7 @@
+import 'domain/profile_location_repository.dart';
+import 'data/geolocator_profile_location_repository.dart';
+
+import 'package:enmori/features/account/domain/profile_details.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/result/result.dart';
@@ -36,14 +40,20 @@ final class _UnavailablePreferences implements AccountPreferencesRepository {
   Future<Result<OwnSettings>> readSettings() async => const Failure(_failure);
   @override
   Future<Result<OwnProfile>> saveProfile({
+    ProfileDetails? details,
     required String? displayName,
     required ProfileVisibility visibility,
     required int expectedRevision,
   }) async => const Failure(_failure);
   @override
   Future<Result<OwnSettings>> saveSettings({
+    FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,
     required int expectedRevision,
   }) async => const Failure(_failure);
 }
+
+final profileLocationRepositoryProvider = Provider<ProfileLocationRepository>(
+  (ref) => const GeolocatorProfileLocationRepository(),
+);
