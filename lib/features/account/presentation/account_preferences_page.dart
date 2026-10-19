@@ -445,8 +445,9 @@ final class _AccountPreferencesPageState
             busy ||
             !dirty ||
             _allowPopAfterDiscard ||
-            _confirmingLeave)
+            _confirmingLeave) {
           return;
+        }
         _confirmingLeave = true;
         final discard = await showDialog<bool>(
           context: context,

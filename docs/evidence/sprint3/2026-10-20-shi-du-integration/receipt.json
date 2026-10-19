@@ -1,0 +1,23 @@
+{
+  "integrationBase": "065ab3880f7da9814ff6c6c73954e880e2e1d737",
+  "shiSource": "538b34dad804853b318bba3b149c304e564a1f3b",
+  "duSource": "403950e18fdfe050538728b8766eee5ad634ea83",
+  "contractApproval": "pending-human-P01-P06",
+  "flutter": {
+    "shi": 16,
+    "duFinal": 35,
+    "initialFailures": 3
+  },
+  "backendPolicy": 5,
+  "fullAnalyze": "passed",
+  "device": "Not Run",
+  "newApk": false,
+  "logs": {
+    "analyze-final.log": "9c2f3367c96935ee4677f21e3ffb60e39f6bedc358304e45997fc2aa8ed53115",
+    "analyze.log": "062bb6a7fcd5ea4a407c99bd605bfc3b7d6598de259a0e241c0cafaea1d05937",
+    "backend-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "backend-test.log": "9c486aeba4290b3ce435509a19f0edb522517dfef39181db48b6314b15ec8b85",
+    "flutter-du-rerun.log": "cb8a60cba37f797283dca9823d5889a5db6dd398095b742d521d1fcb7f1cacc8",
+    "flutter.log": "8d6ed4fb9d818c71b6714cb8c6a9fb9c485643e0765f7667764a1d17edfabd5e"
+  }
+}

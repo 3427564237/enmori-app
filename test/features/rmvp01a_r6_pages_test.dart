@@ -19,6 +19,35 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fakes.dart';
 
 void main() {
+  testWidgets('registration Sign in also protects the draft', (tester) async {
+    final auth = FakeAuthRepository();
+    addTearDown(auth.close);
+    var signIns = 0;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [authRepositoryProvider.overrideWithValue(auth)],
+        child: MaterialApp(home: RegistrationPage(onSignIn: () => signIns++)),
+      ),
+    );
+    await tester.enterText(
+      find.byKey(const Key('r6-register-email')),
+      'draft@example.com',
+    );
+    await tester.pump();
+    final signIn = find.byKey(const Key('register-sign-in'));
+    await tester.ensureVisible(signIn);
+    await tester.tap(signIn);
+    await tester.pumpAndSettle();
+    expect(find.text('Leave registration?'), findsOneWidget);
+    await tester.tap(find.text('Stay'));
+    await tester.pumpAndSettle();
+    expect(signIns, 0);
+    await tester.tap(signIn);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Discard details'));
+    await tester.pumpAndSettle();
+    expect(signIns, 1);
+  });
   testWidgets('R6 surfaces render at approved bounds and text scales', (
     tester,
   ) async {
@@ -187,6 +216,7 @@ void main() {
       find.byKey(const Key('r6-register-email')),
       'draft@example.com',
     );
+    await tester.pump();
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.text('Leave registration?'), findsOneWidget);
@@ -368,7 +398,10 @@ void main() {
       await tester.tap(find.byKey(const Key('r6-check-in-create')));
       await tester.pump();
 
-      expect(find.text('Enter a Note or select a Mood before saving.'), findsOneWidget);
+      expect(
+        find.text('Enter a Note or select a Mood before saving.'),
+        findsOneWidget,
+      );
       expect(checkIn.createdNotes, isEmpty);
     },
   );

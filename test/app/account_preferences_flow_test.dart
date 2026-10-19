@@ -20,6 +20,44 @@ import '../support/fakes.dart';
 import '../support/fake_account_preferences.dart';
 
 void main() {
+  for (final key in ['profile-bio', 'profile-region']) {
+    testWidgets('$key draft is guarded and discard never saves', (
+      tester,
+    ) async {
+      final h = await start(tester);
+      await tap(tester, 'profile-edit');
+      await tester.ensureVisible(find.byKey(Key(key)));
+      await tester.enterText(find.byKey(Key(key)), 'Unsaved field');
+      await frames(tester);
+      await tester.pageBack();
+      await frames(tester);
+      expect(find.text('Leave without saving?'), findsOneWidget);
+      await tester.tap(find.text('Stay'));
+      await frames(tester);
+      expect(find.text('Unsaved field'), findsOneWidget);
+      await tester.pageBack();
+      await frames(tester);
+      await tester.tap(find.text('Discard changes'));
+      await frames(tester);
+      expect(find.byKey(const Key('route-profile-edit')), findsNothing);
+      expect(h.prefs.profileNames, isEmpty);
+    });
+  }
+  testWidgets(
+    'map-sharing draft is guarded without saving consent or privacy',
+    (tester) async {
+      final h = await start(tester);
+      await tap(tester, 'profile-settings');
+      await tap(tester, 'settings-map-sharing');
+      await tester.pageBack();
+      await frames(tester);
+      expect(find.text('Leave without saving?'), findsOneWidget);
+      await tester.tap(find.text('Discard changes'));
+      await frames(tester);
+      expect(h.prefs.settingsSaveCount, 0);
+      expect(h.prefs.settings.fieldPrivacy.mapSharedWithFriends, isFalse);
+    },
+  );
   testWidgets('old signout feedback cannot enter a replacement Settings form', (
     tester,
   ) async {
@@ -239,6 +277,7 @@ void main() {
         find.byKey(const Key('profile-display-name')),
         'Unsaved',
       );
+      await tester.pump();
       await tester.pageBack();
       await frames(tester);
       expect(find.text('Leave without saving?'), findsOneWidget);
