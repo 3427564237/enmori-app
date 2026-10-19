@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "transport": "real localhost HTTPS with certificate validation",
+  "environment": "same retained directory after normal export and import",
+  "primaryLogin": true,
+  "profileBioRead": true,
+  "settingsRejectedConsentAndMapOff": true,
+  "savedCheckInNoteMoodRead": true,
+  "calendarCount": 1,
+  "nativeSecondaryNotOnboardedReadStatus": 409,
+  "existingOtherOnboardedAccountPrivateReadStatus": 404,
+  "nativeUiAccountIsolation": "not_completed",
+  "noBusinessWritesDuringHostRead": true
+}

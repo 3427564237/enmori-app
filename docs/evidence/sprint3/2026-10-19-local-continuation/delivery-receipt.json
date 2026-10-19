@@ -1,0 +1,43 @@
+{
+  "sourceCommit": "b2bb02e99efa1892510e46e65c883dd09879c88b",
+  "baseCommit": "cf9605e",
+  "apk": {
+    "path": "/home/miku/.codex/worktrees/li-core-priority-oct19/ENMORI/build/deliverables/core-local-oct19/enmori-core-local-debug.apk",
+    "sha256": "687515b161a31d062a152513a92862f56e6c0f975bcfc238f4851c25763fe8dd",
+    "bytes": 173564689,
+    "package": "com.enmori.app.coretest",
+    "versionCode": 5,
+    "versionName": "1.0.0-core20261019",
+    "entrypoint": "lib/controlled_demo.dart",
+    "debugSigningCertificateSha256": "0353f50d507f56ee2d8344e56b7b84d6afccdff31cab5a4ca8a69060a9979106",
+    "signatureVerified": true,
+    "installed": true,
+    "launch": "cold-start-success",
+    "fullNativeUat": "not_completed"
+  },
+  "privateHandoff": {
+    "status": "Pass",
+    "category": null,
+    "apkVerified": true,
+    "installedApkMatched": true,
+    "readyNonceVerified": true,
+    "configurationConsumed": true,
+    "failureCleanupConfirmed": true,
+    "createdReverseCount": 0,
+    "apkSha256": "687515b161a31d062a152513a92862f56e6c0f975bcfc238f4851c25763fe8dd"
+  },
+  "retainedRuntime": {
+    "ready": true,
+    "normalStopAndRestartVerified": true,
+    "oldRuntimeDataMigrated": false,
+    "aiEnabled": false,
+    "eventsProviderEnabled": false
+  },
+  "externalActions": {
+    "pushed": false,
+    "merged": false,
+    "publishedApp": false,
+    "membersMessaged": false,
+    "issuesClosed": false
+  }
+}
