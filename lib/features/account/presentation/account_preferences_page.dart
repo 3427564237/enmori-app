@@ -58,6 +58,8 @@ final class _AccountPreferencesPageState
   CheckInVisibility _checkInVisibility = CheckInVisibility.private;
   OptionalProcessingConsent _consent = OptionalProcessingConsent.rejected;
   bool _signingOut = false;
+  bool _allowPopAfterDiscard = false;
+  bool _confirmingLeave = false;
   bool _locating = false;
   String? _locationMessage;
   String? _signOutError;
@@ -95,6 +97,28 @@ final class _AccountPreferencesPageState
         state.phase == PreferencesPhase.ready && !_signingOut && !_locating;
     final profile = widget.view == PreferencesView.profile;
     final controller = ref.read(provider.notifier);
+    final details = state.profile?.details ?? const ProfileDetails();
+    final privacy = state.settings?.fieldPrivacy ?? const FieldPrivacy();
+    final dirty = profile
+        ? _name.text != (state.profile?.displayName ?? '') ||
+              _bio.text != (details.bio ?? '') ||
+              _affiliationType != details.affiliationType ||
+              _affiliation.text != (details.affiliationName ?? '') ||
+              _region.text != (details.region ?? '') ||
+              _profileVisibility !=
+                  (state.profile?.visibility ?? ProfileVisibility.private)
+        : _checkInVisibility !=
+                  (state.settings?.checkInVisibility ??
+                      CheckInVisibility.private) ||
+              _consent !=
+                  (state.settings?.consent ??
+                      OptionalProcessingConsent.rejected) ||
+              _privacy.interests != privacy.interests ||
+              _privacy.location != privacy.location ||
+              _privacy.participation != privacy.participation ||
+              _privacy.mapSharedWithFriends != privacy.mapSharedWithFriends;
+    final busy =
+        state.phase == PreferencesPhase.saving || _signingOut || _locating;
     final saveButton = FilledButton(
       key: Key(profile ? 'profile-save' : 'settings-save'),
       onPressed: ready
@@ -123,7 +147,7 @@ final class _AccountPreferencesPageState
           : null,
       child: Text(state.phase == PreferencesPhase.saving ? 'Saving…' : 'Save'),
     );
-    return Scaffold(
+    final page = Scaffold(
       appBar: AppBar(title: Text(profile ? 'Edit profile' : 'Settings')),
       bottomNavigationBar: SafeArea(
         child: Padding(padding: const EdgeInsets.all(16), child: saveButton),
@@ -150,6 +174,7 @@ final class _AccountPreferencesPageState
                       TextField(
                         key: const Key('profile-display-name'),
                         controller: _name,
+                        onChanged: (_) => setState(() {}),
                         enabled: ready,
                         decoration: const InputDecoration(
                           labelText: 'Display name (optional)',
@@ -161,6 +186,7 @@ final class _AccountPreferencesPageState
                       TextField(
                         key: const Key('profile-bio'),
                         controller: _bio,
+                        onChanged: (_) => setState(() {}),
                         enabled: ready,
                         maxLength: 500,
                         decoration: const InputDecoration(labelText: 'BIO'),
@@ -193,6 +219,7 @@ final class _AccountPreferencesPageState
                       TextField(
                         key: const Key('profile-affiliation-name'),
                         controller: _affiliation,
+                        onChanged: (_) => setState(() {}),
                         enabled: ready && _affiliationType != null,
                         maxLength: 120,
                         decoration: const InputDecoration(
@@ -202,6 +229,7 @@ final class _AccountPreferencesPageState
                       TextField(
                         key: const Key('profile-region'),
                         controller: _region,
+                        onChanged: (_) => setState(() {}),
                         enabled: ready,
                         maxLength: 120,
                         decoration: const InputDecoration(labelText: 'Region'),
@@ -409,6 +437,43 @@ final class _AccountPreferencesPageState
           ),
         ),
       ),
+    );
+    return PopScope<void>(
+      canPop: (!dirty && !busy) || _allowPopAfterDiscard,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop ||
+            busy ||
+            !dirty ||
+            _allowPopAfterDiscard ||
+            _confirmingLeave)
+          return;
+        _confirmingLeave = true;
+        final discard = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Leave without saving?'),
+            content: const Text('Your unsaved changes will be lost.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Stay'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Discard changes'),
+              ),
+            ],
+          ),
+        );
+        _confirmingLeave = false;
+        if (discard == true && mounted) {
+          setState(() => _allowPopAfterDiscard = true);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) Navigator.of(context).pop();
+          });
+        }
+      },
+      child: page,
     );
   }
 

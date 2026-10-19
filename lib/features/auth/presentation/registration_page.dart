@@ -25,6 +25,8 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final _passwordFocusNode = FocusNode();
   final _confirmFocusNode = FocusNode();
   bool _submitted = false;
+  bool _allowPopAfterDiscard = false;
+  bool _confirmingLeave = false;
   bool _termsAccepted = false;
 
   @override
@@ -63,7 +65,12 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
     final state = ref.watch(registrationControllerProvider);
     final pending = state is CommandPending<void>;
-    return Scaffold(
+    final hasDraft =
+        _emailController.text.isNotEmpty ||
+        _passwordController.text.isNotEmpty ||
+        _confirmController.text.isNotEmpty ||
+        _termsAccepted;
+    final page = Scaffold(
       appBar: AppBar(title: const Text('Create account')),
       body: SafeArea(
         child: Center(
@@ -90,6 +97,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         TextFormField(
                           key: const Key('r6-register-email'),
                           controller: _emailController,
+                          onChanged: (_) => setState(() {}),
                           focusNode: _emailFocusNode,
                           autofillHints: const [AutofillHints.email],
                           decoration: const InputDecoration(
@@ -104,6 +112,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         TextFormField(
                           key: const Key('r6-register-password'),
                           controller: _passwordController,
+                          onChanged: (_) => setState(() {}),
                           focusNode: _passwordFocusNode,
                           autofillHints: const [AutofillHints.newPassword],
                           decoration: InputDecoration(
@@ -131,6 +140,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         TextFormField(
                           key: const Key('r6-register-confirm-password'),
                           controller: _confirmController,
+                          onChanged: (_) => setState(() {}),
                           focusNode: _confirmFocusNode,
                           autofillHints: const [AutofillHints.newPassword],
                           decoration: InputDecoration(
@@ -201,7 +211,13 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         if (widget.onSignIn case final onSignIn?)
                           TextButton(
                             key: const Key('register-sign-in'),
-                            onPressed: pending ? null : onSignIn,
+                            onPressed: pending
+                                ? null
+                                : () async {
+                                    if (!hasDraft || await _confirmDiscard()) {
+                                      if (mounted) onSignIn();
+                                    }
+                                  },
                             child: const Text('Sign in'),
                           ),
                       ],
@@ -214,6 +230,44 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
         ),
       ),
     );
+    return PopScope<void>(
+      canPop: (!pending && !hasDraft) || _allowPopAfterDiscard,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop || pending || !hasDraft || _allowPopAfterDiscard) return;
+        final discard = await _confirmDiscard();
+        if (discard == true && mounted) {
+          setState(() => _allowPopAfterDiscard = true);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) Navigator.of(context).pop();
+          });
+        }
+      },
+      child: page,
+    );
+  }
+
+  Future<bool> _confirmDiscard() async {
+    if (_confirmingLeave) return false;
+    _confirmingLeave = true;
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Leave registration?'),
+        content: const Text('Your unsaved account details will be lost.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Stay'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Discard details'),
+          ),
+        ],
+      ),
+    );
+    _confirmingLeave = false;
+    return mounted && discard == true;
   }
 
   List<_FieldError> get _fieldErrors => [
