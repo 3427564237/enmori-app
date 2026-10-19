@@ -53,9 +53,9 @@
 |5|独立草稿Try预览、不保存/激活/历史|缺失|当前无完整独立预览链|
 |5|AI Safety/Limited、深绿Playfair一致交互|需补齐|受限状态已有；当前主题indigo|
 
-## 验证环境
+## 最初检查点验证环境（后续事实见local-continuation）
 
-本轮ADB无已连接设备，旧受控运行目录指针不存在。真实邮件、真机定位、同一APK双账号及真实三轮模型：尚未验证。源码回归与APK构建另记实际结果，不以此替代用户流程。
+该检查点ADB无已连接设备，旧受控运行目录指针不存在。真实邮件、真机定位、同一APK双账号及真实三轮模型：尚未验证。源码回归与APK构建另记实际结果，不以此替代用户流程。
 
 ## 第一批执行增量（持续更新）
 
@@ -75,4 +75,8 @@
 - 实际Emulator：签到创建→修改→回读→旧版本412→删除→404；月历数量减少；正常停止/重启后原签到回读。结果见restart-pass.json。
 - 已检查参考截图friend-profile.png：明确为OFFLINE SAMPLE，不能证明真实他人资料已实现；核对Figma导出的Check-in编辑/活动/心情区域仅用于遗漏检查，未引入样例天气或样例活动数据。
 
-后续负责人：AI/Persona→ZHOU；社交/位置/地图/天气/统一运行组合→JIN；Events→SHI；已有账号/记录及视觉收尾→DU；少量本机联调验收→LI。详见docs/planning/core-checkpoint-oct19/。
+旧分工草稿：AI/Persona→ZHOU；社交/位置/地图/天气→JIN；Events→SHI；已有功能收尾→DU；本机→LI。已被S-PM-1019-LI-LOCAL-FIRST暂停，不执行派发；当前单对话优先推进本机依赖。原草稿保留在docs/planning/core-checkpoint-oct19/。
+
+## 本机继续执行的最新范围
+
+设备已连接，普通coretest APK已安装；此前原生分段流程与失败见local-continuation/verification.md。本次后端显式组合真实Events和简化Ollama，取消项目自设内容正则审查与root诊断前置。运行/恢复结果见local-continuation/simple-chat-and-events.md。本次未改Flutter，不重打相同APK，不把主机API通过写成手机完整流程通过。AI自由Persona字段/独立预览、地图天气、完整社交与Events参与闭环仍未完成，旧分工继续暂停。

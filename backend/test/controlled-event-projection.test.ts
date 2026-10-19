@@ -79,3 +79,33 @@ test("source failure is service failure even with empty interests; interest read
   const joined = createControlledEventRecommendations({ gateway: { get: async path => records[path], listEvents: async () => [] }, source: { firstBatch: async () => { throw Error("source unavailable"); }, detail: async () => undefined }, clock: { now: () => ok(new Date(EVENT_AS_OF)) } });
   const result = await joined.recommendEvents.execute({ principal: { firebaseUid: EVENT_TEST_UID }, view: "all" }); assert.equal(result.ok, false); if (!result.ok) assert.equal(result.failure.code, "SERVICE_UNAVAILABLE");
 });
+
+test("retained Music binding preserves the existing ID; another Music label is never mapped", async () => {
+  const records = eventTestRecords();
+  records['accounts/s2-account']!.optionalProcessingConsent = 'accepted';
+  records['interest_tags/existing_music'] = records['interest_tags/interest_music']!;
+  records['account_interests/s2-account'] = { interestTagIds: ['existing_music'], revision: 2 };
+  const joined = createControlledEventRecommendations({
+    gateway: { get: async path => records[path], listEvents: async () => [] },
+    source: { firstBatch: async () => [item()], detail: async () => undefined },
+    clock: { now: () => ok(new Date(EVENT_AS_OF)) },
+    musicInterestTagId: 'existing_music', requireRecommendationConsent: true,
+  });
+  const read = () => joined.recommendEvents.execute({ principal: { firebaseUid: EVENT_TEST_UID }, view: 'all' });
+  const matched = await read(); assert.ok(matched.ok && matched.value.items.length === 1);
+  records['account_interests/s2-account'] = { interestTagIds: ['interest_music'], revision: 3 };
+  const unmapped = await read(); assert.ok(unmapped.ok && unmapped.value.items.length === 0);
+});
+
+test("retained rejected consent never reads interests; revocation during source read drops personalization", async () => {
+  const records = eventTestRecords(); let interestReads = 0, revoke = false;
+  const joined = createControlledEventRecommendations({
+    gateway: { get: async path => { if (path.startsWith('account_interests/')) interestReads++; return records[path]; }, listEvents: async () => [] },
+    source: { firstBatch: async () => { if (revoke) records['accounts/s2-account']!.optionalProcessingConsent = 'rejected'; return [item()]; }, detail: async () => undefined },
+    clock: { now: () => ok(new Date(EVENT_AS_OF)) }, requireRecommendationConsent: true,
+  });
+  const read = () => joined.recommendEvents.execute({ principal: { firebaseUid: EVENT_TEST_UID }, view: 'all' });
+  const rejected = await read(); assert.ok(rejected.ok && rejected.value.items.length === 0); assert.equal(interestReads, 0);
+  records['accounts/s2-account']!.optionalProcessingConsent = 'accepted'; revoke = true;
+  const revoked = await read(); assert.ok(revoked.ok && revoked.value.items.length === 0); assert.equal(interestReads, 1);
+});

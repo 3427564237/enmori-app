@@ -1,0 +1,57 @@
+{
+  "scope": "retained local backend API, not native full UAT",
+  "baselineCommit": "c7b934ad384d19140baf62e15655d45c1ec1d203",
+  "model": "qwen3.5:9b",
+  "ollamaVersion": "0.40.4",
+  "rounds": [
+    {
+      "round": 1,
+      "httpStatus": 200,
+      "elapsedSeconds": 17.78,
+      "nonempty": true,
+      "relevant": false
+    },
+    {
+      "round": 2,
+      "httpStatus": 200,
+      "elapsedSeconds": 9.14,
+      "nonempty": true,
+      "relevant": true
+    },
+    {
+      "round": 3,
+      "httpStatus": 200,
+      "elapsedSeconds": 12.2,
+      "nonempty": true,
+      "relevant": true
+    }
+  ],
+  "manualRelevanceReview": {
+    "allThreeRelevant": true,
+    "firstKeywordCheckFalsePositive": "Reply described ten-minute piano keyboard and beginner piece practice without the literal instrument name."
+  },
+  "restart": {
+    "freshLogin": true,
+    "originalTimestampsPreserved": true,
+    "restartHistoryCount": 6,
+    "continuationStatus": 200,
+    "continuationRelevant": true,
+    "continuedHistoryCount": 8,
+    "musicRecommendationStatus": 200,
+    "musicRecommendationCount": 2,
+    "withdrawnPrepareStatus": 403,
+    "withdrawnCode": "AI_CONTEXT_NOT_PERMITTED",
+    "rejectedRecommendationCount": 0,
+    "consentRestored": true
+  },
+  "tests": {
+    "typescriptBuild": "passed",
+    "chatEventConfigurationTargeted": 11,
+    "retainedTimestampAndChatTargeted": 4,
+    "fullSuite": "not_rerun",
+    "flutter": "unchanged_not_rerun"
+  },
+  "legacyConversationMaintenance": "failed_for_preserved_pre_fix_synthetic_history; no global chat admission block; per-record checks retained",
+  "nativeFullChatUat": "not_run",
+  "apkUnchanged": true
+}

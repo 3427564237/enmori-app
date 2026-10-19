@@ -14,6 +14,7 @@ import { FirebaseAdminFirestoreGateway } from '../backend/dist/src/shared/infras
 import { catalogueName, coreInterestNames } from '../backend/dist/src/interests/domain/catalogue-name.js';
 
 import { startRetainedCorePhone } from './retained_core_phone.mjs';
+import { retainedCoreEvents } from './retained_core_events.mjs';
 
 const directory = process.env.ENMORI_RETAINED_CORE_DIRECTORY;
 assert(directory);
@@ -23,11 +24,16 @@ if (process.env.FIREBASE_CONFIG !== undefined) {
   const env = buildControlledEmulatorTestEnvironment(process.env, process.env.ENMORI_CONTROLLED_PROFILE_DIRECTORY);
   env.ENMORI_RETAINED_CORE_DIRECTORY = directory;
   env.ENMORI_RETAINED_CORE_VERIFY = process.env.ENMORI_RETAINED_CORE_VERIFY;
+  env.ENMORI_RETAINED_CORE_EVENTS = process.env.ENMORI_RETAINED_CORE_EVENTS;
+  env.ENMORI_RETAINED_CORE_AI = process.env.ENMORI_RETAINED_CORE_AI;
   const child = spawn(process.execPath, [fileURLToPath(import.meta.url)], { env, stdio: 'inherit' });
   const code = await new Promise((done, reject) => { child.once('error', reject); child.once('exit', done); });
   process.exit(code ?? 1);
 }
-const runtime = await createRetainedCoreRuntime(process.env);
+let runtime;
+const events = retainedCoreEvents(directory, process.env.ENMORI_RETAINED_CORE_EVENTS === 'true',
+  () => runtime?.eventBrowseControl.observation().enabled === true);
+runtime = await createRetainedCoreRuntime(process.env, events.input, process.env.ENMORI_RETAINED_CORE_AI === 'true' ? 'qwen3.5:9b' : undefined);
 try {
   const auth = getAuth(runtime.firebaseApp), firestore = getFirestore(runtime.firebaseApp);
   const writer = new FirestoreCatalogueWriter(new FirebaseAdminFirestoreGateway(firestore));
@@ -36,6 +42,15 @@ try {
     const name = catalogueName(label);
     const result = await writer.create(name.displayName, name.comparisonKey);
     assert(['created', 'conflict'].includes(result.kind), 'Catalogue conflict/corruption requires inspection');
+  }
+  if (events.input) {
+    try {
+    const music = await firestore.doc(`interest_tags/${events.input.musicInterestTagId}`).get();
+    const data = music.data();
+    // Validate an operator-supplied ID; never discover mappings from catalogue labels.
+    if (data?.displayName === 'Music' && data.lifecycleState === 'active') runtime.eventBrowseControl.enable();
+    else events.configuration = 'mapping_unavailable';
+    } catch { events.configuration = 'mapping_unavailable'; }
   }
   const mode = process.env.ENMORI_RETAINED_CORE_VERIFY;
   if (mode === '--verify-write' || mode === '--verify-read') {
@@ -104,9 +119,9 @@ try {
     writeFileSync(join(directory, mode === '--verify-write'  ? 'write-pass.json' : 'restart-pass.json'), JSON.stringify({ passed: true, profile: true, settings: true, authLogin: true, ...(mode==='--verify-read'?{checkInCreateEditReadDelete:true,calendarCountAfterDelete:true,checkInRestartRead}:{}), mode }), { mode: 0o600 });
   } else {
     assert(!mode || mode === '--phone', 'Unknown verification mode');
-    const closePhone = mode === '--phone' ? await startRetainedCorePhone(runtime, auth, directory) : null;
+    const closePhone = mode === '--phone' ? await startRetainedCorePhone(runtime, auth, directory, events.configuration) : null;
     if (!closePhone) await runtime.app.listen({ host: '127.0.0.1', port: 9380 });
     try { while (!existsSync(join(directory, 'stop-requested'))) await wait(250); }
-    finally { await closePhone?.(); }
+    finally { await runtime.stopAi(); await runtime.stopEvents(); await closePhone?.(); }
   }
 } finally { await closeControlledRuntime(runtime); }

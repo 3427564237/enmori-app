@@ -33,6 +33,7 @@ export interface RealContextReaderOptions {
   readonly originalAuthority: OriginalContextAuthority;
   readonly monotonicNow: () => number;
   readonly notePrerequisites?: SourceBoundNotePrerequisites;
+  readonly includeCheckIns?: false;
 }
 const unavailable = { kind: "unavailable" } as const;
 const terminated = { kind: "terminated" } as const;
@@ -175,6 +176,9 @@ class FixedFirebaseStartView implements FixedStartReadView {
   }
   readNotePage(query: Parameters<FixedStartReadView["readNotePage"]>[0]): Promise<ContextReadResult<FixedViewValue<ReadNotePage>>> {
     return this.#read(async (db, tx, context, options) => {
+      if (this.#authorized && options.includeCheckIns === false && query.ownerId === context.ownerId) {
+        return { kind: "read", value: Object.freeze({ rows: Object.freeze([]), next: undefined }) };
+      }
       if (!this.#authorized || !prerequisites(db, options.notePrerequisites) || query.ownerId !== context.ownerId || query.limit !== 25)
         return unavailable;
       const from = parseReadInstant(query.fromInclusive), to = parseReadInstant(query.toInclusive);

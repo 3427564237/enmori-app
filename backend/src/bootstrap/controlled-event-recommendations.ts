@@ -23,21 +23,27 @@ export function createControlledEventRecommendations(options: {
   readonly gateway: EventReadGateway;
   readonly source: BrowseSource;
   readonly clock: Clock;
+  /** Explicit identity binding for the approved Music concept; never inferred from labels. */
+  readonly musicInterestTagId?: string;
+  /** New core decision; legacy compositions retain their earlier contract. */
+  readonly requireRecommendationConsent?: true;
 }) {
-  async function owner(uid: string): Promise<string | undefined> {
+  async function owner(uid: string): Promise<{ id: string; consent: string } | undefined> {
     const bindingId = createAuthBindingDocumentId(uid);
     if (!bindingId) return undefined;
     const binding = await options.gateway.get(`auth_bindings/${bindingId}`);
     const id = binding && parseAuthBinding(binding);
     const account = id && await options.gateway.get(`accounts/${id}`);
-    return id && account && parseAccountProjection(account) ? id : undefined;
+    const parsed = account && parseAccountProjection(account);
+    return id && parsed ? { id, consent: parsed.optionalProcessingConsent } : undefined;
   }
   const repository: EventRecommendationRepository = {
     async readForRequester({ firebaseUid, asOf }) {
       try {
-        const id = await owner(firebaseUid);
-        if (!id) return { kind: "onboarding_required" };
-        const data = await options.gateway.get(`account_interests/${id}`);
+        const account = await owner(firebaseUid);
+        if (!account) return { kind: "onboarding_required" };
+        const mayPersonalize = !options.requireRecommendationConsent || account.consent === "accepted";
+        const data = mayPersonalize ? await options.gateway.get(`account_interests/${account.id}`) : undefined;
         const selected = data === undefined ? [] : parseSelectedInterests(data);
         if (!selected) return { kind: "dependency_unavailable" };
         const interestTags = [];
@@ -49,10 +55,15 @@ export function createControlledEventRecommendations(options: {
         // Always establish current source health, even with no selected tags.
         // Source failure must not masquerade as an empty recommendation batch.
         const rows = await options.source.firstBatch(asOf, new AbortController().signal);
+        if (options.requireRecommendationConsent) {
+          const current = await owner(firebaseUid);
+          if (!current || current.id !== account.id) return { kind: "onboarding_required" };
+          if (current.consent !== "accepted") return { kind: "ready", sources: { selectedInterestTagIds: [], interestTags: [], events: [] } };
+        }
         return { kind: "ready", sources: { selectedInterestTagIds: selected, interestTags,
           events: rows.map(row => ({ scoring: {
             eventId: sourceEventId(row.browseId), active: true, published: true,
-            startInstant: parseEventInstant(row.startAt)!, interestTagIds: row.musicSegment === true ? ["interest_music"] : [],
+            startInstant: parseEventInstant(row.startAt)!, interestTagIds: row.musicSegment === true ? [options.musicInterestTagId ?? "interest_music"] : [],
           }, presentation: { title: row.title, startAt: row.startAt, ...(row.endAt === undefined ? {} : { endAt: row.endAt }) } })) } };
       } catch { return { kind: "dependency_unavailable" }; }
     },

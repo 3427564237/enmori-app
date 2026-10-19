@@ -6,7 +6,7 @@ import { randomUUID, X509Certificate } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:https';
 
-export async function startRetainedCorePhone(runtime, auth, directory) {
+export async function startRetainedCorePhone(runtime, auth, directory, eventConfiguration = 'not_requested') {
   const publish = (name, value) => {
     const target = join(directory, name);
     writeFileSync(target + '.pending', JSON.stringify(value), { mode: 0o600, flag: 'wx', flush: true });
@@ -57,7 +57,8 @@ export async function startRetainedCorePhone(runtime, auth, directory) {
       authEmulatorHost: '127.0.0.1:9099', lifetime: 'until-explicit-stop-in-this-owned-process', syntheticOwnerOnly: true,
     });
     publish('phone-ready.json', { ready: true, port: 9380, authPort: 9099,
-      mode: 'retained-core-only', aiEnabled: false, eventsProviderEnabled: false });
+      mode: 'retained-core', aiEnabled: runtime.aiStatus().available, aiMaintenanceHealthy: runtime.aiStatus().maintenanceHealthy,
+      eventConfiguration, eventsProviderEnabled: runtime.eventBrowseControl.observation().enabled });
   } catch (error) {
     await new Promise(resolve => server.close(resolve));
     throw error;

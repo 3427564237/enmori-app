@@ -1,3 +1,4 @@
+import { withRetainedMessageTimes } from "../ai-conversation/infrastructure/retained-message-times.js";
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Firestore } from "firebase-admin/firestore";
 import { BoundedAiRuntime } from "../ai-runtime/application/bounded-ai-runtime.js";
@@ -36,6 +37,7 @@ export async function createIsolatedConversationComposition(options: {
   readonly gates: ConversationGates;
   readonly conversationStrategy?: "open_conversation_v1";
   readonly notePrerequisites?: SourceBoundNotePrerequisites;
+  readonly simpleChat?: true;
   readonly report: (phase: "expiry" | "source", result: MaintenanceResult) => void;
   readonly reportRetirement: (confirmed: boolean) => void;
   readonly schedule?: MaintenanceSchedule;
@@ -46,7 +48,8 @@ export async function createIsolatedConversationComposition(options: {
   requireIsolatedContextFirestore(options.firestore,options.environment);
   if (options.notePrerequisites && options.notePrerequisites.firestore !== options.firestore) throw new Error("Mismatched Note authority");
   const clock = new MonotonicRuntimeClock(), io = new ConversationIoTracker(), utcMilliseconds=options.utcMilliseconds??Date.now;
-  const gateway = new FirebaseAdminFirestoreGateway(options.firestore);
+  const rawGateway = new FirebaseAdminFirestoreGateway(options.firestore);
+  const gateway = options.simpleChat ? withRetainedMessageTimes(rawGateway) : rawGateway;
   const notePrerequisites = options.notePrerequisites ? { ...options.notePrerequisites, gateway } : undefined;
   const store = new FirestoreConversationStore(gateway,options.environment,utcMilliseconds,notePrerequisites);
   const start = await store.startEpoch(randomUUID());
@@ -54,7 +57,7 @@ export async function createIsolatedConversationComposition(options: {
   const epoch = start.value;
   const restart = await retirePreviousConversationEpoch(gateway,store,epoch,options.environment);
   if (!restart.complete) throw new Error("Previous runtime controls unresolved");
-  const runtime = new BoundedAiRuntime(clock,new AuthorizedAsyncConversationGenerationTransport(options.transport));
+  const runtime = new BoundedAiRuntime(clock,new AuthorizedAsyncConversationGenerationTransport(options.transport), options.simpleChat === true);
   let consumer!: ApplicationConversationOperations;
   const quiescence = new ConversationIoQuiescence({ acquireTargetLease: (...args) => consumer.acquireTargetLease(...args) },io);
   const cleanup = new FirestoreConversationCleanup(gateway,options.environment,quiescence,utcMilliseconds);
@@ -71,6 +74,7 @@ export async function createIsolatedConversationComposition(options: {
         const authority=new FirebaseAdminAsyncConversationAuthority(db,original,options.environment);
         const reads=new FirebaseAdminRealContextReader(db,{controlledEnvironment:options.environment,
           originalAuthority:{verify:original.verifyRead},monotonicNow:()=>clock.now(),
+          ...(options.simpleChat ? {includeCheckIns:false as const} : {}),
           ...(options.notePrerequisites ? {notePrerequisites:{...options.notePrerequisites,firestore:db}} : {})});
         const bridge=new TrackedAsyncConversationStore(new AsyncFirestoreConversationStore(store,epoch,authority),io,store,epoch,options.reportRetirement);
         return {authority,reads,store:bridge,acknowledgedPair:bridge};

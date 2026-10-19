@@ -105,7 +105,7 @@ export class BoundedAiRuntime<Input> {
   private active: Entry<Input> | undefined;
   private stopped = false;
 
-  constructor(private readonly clock: RuntimeClock, private readonly transport: GenerationTransport<Input>) {}
+  constructor(private readonly clock: RuntimeClock, private readonly transport: GenerationTransport<Input>, private readonly plainTextOutput = false) {}
 
   get state(): { readonly admission: "open" | "busy" | "stopped"; readonly quarantined: boolean; readonly queued: number; readonly nonTerminal: number } {
     return {
@@ -281,7 +281,7 @@ export class BoundedAiRuntime<Input> {
     if (this.expired(entry)) return;
     if (this.clock.now() >= entry.generationEnd!) { this.fail(entry, "generation_timed_out"); return; }
     try {
-      const parsed = parseOutput(raw, entry.pipeline.work!.purpose);
+      const parsed = parseOutput(raw, entry.pipeline.work!.purpose, this.plainTextOutput);
       if (this.expired(entry)) return;
       if (!parsed.ok) { this.fail(entry, parsed.failure); return; }
       entry.phase = "checking";

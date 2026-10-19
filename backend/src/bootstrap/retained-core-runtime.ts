@@ -1,3 +1,9 @@
+import { setTimeout as wait } from "node:timers/promises";
+import { createIsolatedConversationComposition } from "./isolated-conversation-composition.js";
+import { LocalChatTransport, simpleChatGates } from "../ai-runtime/infrastructure/local-chat-transport.js";
+import { createControlledEventBrowse } from "./controlled-event-browse.js";
+import { createControlledEventRecommendations } from "./controlled-event-recommendations.js";
+import type { BrowseSource } from "../event-browse/ports/event-browse.js";
 import {OwnCheckInCalendar} from "../check-ins/application/check-in-calendar.js";
 import {FirestoreCheckInCalendar} from "../check-ins/infrastructure/firestore-check-in-calendar.js";
 import { EditCheckIn } from "../check-ins/application/edit-check-in.js";
@@ -18,9 +24,7 @@ import { FirebaseInterestAdmin } from '../interests/infrastructure/firebase-inte
 import { FirestoreCatalogueWriter } from '../interests/infrastructure/firestore-catalogue-writer.js';
 import { OwnAccountPreferences } from "../account/application/own-account-preferences.js";
 import { FirestoreAccountPreferencesRepository } from "../account/infrastructure/firestore-account-preferences-repository.js";
-import { RecommendEvents } from "../event-recommendations/application/recommend-events.js";
 import { FirebaseAdminEventReadGateway } from "../event-recommendations/infrastructure/event-read-gateway.js";
-import { FirestoreEventRecommendationRepository } from "../event-recommendations/infrastructure/firestore-event-recommendation-repository.js";
 
 import {
   deleteApp,
@@ -53,11 +57,17 @@ import {
 interface ControlledRuntime {
   readonly app: FastifyInstance;
   readonly firebaseApp: FirebaseApp;
+  readonly eventBrowseControl: ReturnType<typeof createControlledEventBrowse>;
+  readonly stopEvents: () => Promise<void>;
+  readonly stopAi: () => Promise<void>;
+  readonly aiStatus: () => { configured: boolean; available: boolean; maintenanceHealthy: boolean; pending: boolean; outcomeUnknown: boolean };
 }
 
 async function createControlledRuntime(
   configuration: ControlledRuntimeConfiguration,
   isolatedEnvironment?: Readonly<Record<string, string | undefined>>,
+  eventInput?: { readonly source: BrowseSource; readonly musicInterestTagId: string },
+  chatModel?: string,
 ): Promise<ControlledRuntime> {
   const firebaseApp = initializeApp(
     { projectId: configuration.firebaseProjectId },
@@ -73,9 +83,63 @@ async function createControlledRuntime(
     const clock = new SystemClock();
     const ids = new CryptoOpaqueIdGenerator();
     const complete = new CompleteOnboarding(onboardingRepository, clock, ids);
+    let running = true;
+    const pending = new Set<Promise<unknown>>();
+    const eventBrowseControl = createControlledEventBrowse({
+      ...(eventInput ? { source: eventInput.source } : {}), projectionCache: true,
+      running: () => running,
+      track: async work => {
+        const result = work(); pending.add(result);
+        try { return await result; } finally { pending.delete(result); }
+      },
+    });
+    const stopEvents = async () => {
+      running = false; eventBrowseControl.disable();
+      await Promise.allSettled([...pending]);
+    };
+    const realEvents = createControlledEventRecommendations({
+      gateway: new FirebaseAdminEventReadGateway(getFirestore(firebaseApp)),
+      source: eventBrowseControl.source, clock, requireRecommendationConsent: true,
+      ...(eventInput ? { musicInterestTagId: eventInput.musicInterestTagId } : {}),
+    });
+    let chat: Awaited<ReturnType<typeof createIsolatedConversationComposition>> | undefined;
+    let healthy = true;
+    let maintenanceHealthy = true;
+    const chatTransport = chatModel ? new LocalChatTransport(chatModel) : undefined;
+    if (chatTransport && isolatedEnvironment) {
+      try {
+        await chatTransport.prepareModel();
+        chat = await createIsolatedConversationComposition({
+          firestore: getFirestore(firebaseApp), environment: isolatedEnvironment,
+          transport: chatTransport, gates: simpleChatGates, simpleChat: true,
+          conversationStrategy: 'open_conversation_v1',
+          report: (_phase, result) => { if (!result.complete) maintenanceHealthy = false; },
+          reportRetirement: confirmed => { if (!confirmed) healthy = false; },
+        });
+      } catch { healthy = false; }
+    }
+    const stopAi = async () => {
+      if (!chat) return;
+      await chat.stopAdmissionAndMaintenance();
+      // Let accepted work settle normally. Unknown generation outcomes retain
+      // the process/data rather than exporting a false clean shutdown.
+      while (chat.runtime.state.nonTerminal > 0 || chatTransport?.state.pending) await wait(250);
+      chat.runtime.shutdown();
+    };
+    const aiStatus = () => ({ configured: !!chatTransport, available: !!chat && healthy,
+      maintenanceHealthy, pending: chatTransport?.state.pending ?? false, outcomeUnknown: chatTransport?.state.outcomeUnknown ?? false });
     const app = await buildApp({
       ...(isolatedEnvironment ? { isolatedSlices: {
         environment: isolatedEnvironment,
+        ...(chat && healthy ? { conversations: {
+          ...chat.operations,
+          prepare: (...args: Parameters<typeof chat.operations.prepare>) => healthy
+            ? chat!.operations.prepare(...args) : Promise.resolve({ kind: 'failure' as const, code: 'AI_UNAVAILABLE' as const }),
+          execute: (...args: Parameters<typeof chat.operations.execute>) => healthy
+            ? chat!.operations.execute(...args) : Promise.resolve({ kind: 'failure' as const, code: 'AI_UNAVAILABLE' as const }),
+        } } : {}),
+        eventBrowse: { source: eventBrowseControl.source },
+        eventDetail: realEvents.eventDetail,
         friends: new FriendRequests(new FirestoreFriendRepository(gateway, clock), clock),
         checkInHistory: new ListOwnCheckInsForDate(new FirestoreCheckInHistoryRepository(new FirebaseAdminCheckInHistoryGateway(getFirestore(firebaseApp))), createHistoryCursorCodec(), clock),
         personas: new OwnPersonas(new FirestorePersonaRepository(gateway, { now: () => ok(new Date()) })),
@@ -84,9 +148,7 @@ async function createControlledRuntime(
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
       createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(getAuth(firebaseApp)), new FirestoreCatalogueWriter(gateway)),
       accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, isolatedEnvironment)),
-      recommendEvents: new RecommendEvents(new FirestoreEventRecommendationRepository(
-        new FirebaseAdminEventReadGateway(getFirestore(firebaseApp)),
-      ), clock),
+      recommendEvents: realEvents.recommendEvents,
       identityVerifier: new FirebaseIdentityVerifier(getAuth(firebaseApp)),
       completeOnboarding: { execute: async input => {
         const result = await complete.execute(input);
@@ -117,7 +179,7 @@ async function createControlledRuntime(
       getOwnInterests: new GetOwnInterests(interestRepository),
       replaceOwnInterests: new ReplaceOwnInterests(interestRepository),
     });
-    return { app, firebaseApp };
+    return { app, firebaseApp, eventBrowseControl, stopEvents, stopAi, aiStatus };
   } catch (error: unknown) {
     await deleteApp(firebaseApp);
     throw error;
@@ -125,15 +187,20 @@ async function createControlledRuntime(
 }
 
 export async function closeControlledRuntime(runtime: ControlledRuntime): Promise<void> {
+  await runtime.stopAi();
+  await runtime.stopEvents();
   await runtime.app.close();
   await deleteApp(runtime.firebaseApp);
 }
 
-/** Core-only controlled environment. No AI epoch, model activation or destructive cleanup. */
-export async function createRetainedCoreRuntime(environment: Readonly<Record<string, string | undefined>>): Promise<ControlledRuntime> {
+/** Retained local environment; optional explicitly selected real Events and simple chat. */
+export async function createRetainedCoreRuntime(environment: Readonly<Record<string, string | undefined>>,
+  events?: { readonly source: BrowseSource; readonly musicInterestTagId: string },
+  chatModel?: string,
+): Promise<ControlledRuntime> {
   const checked = requireControlledEmulatorEnvironment(environment);
   if (JSON.stringify(requireControlledEmulatorEnvironment(process.env)) !== JSON.stringify(checked)) {
     throw new Error('Core SDK environment does not match the verified endpoints');
   }
-  return createControlledRuntime({ firebaseProjectId: checked.projectId, host: '127.0.0.1', port: 9380 }, environment);
+  return createControlledRuntime({ firebaseProjectId: checked.projectId, host: '127.0.0.1', port: 9380 }, environment, events, chatModel);
 }

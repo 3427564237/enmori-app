@@ -8,6 +8,8 @@ import { buildControlledEmulatorTestEnvironment } from '../backend/dist/src/shar
 import { quoteFixedWorkerCommand } from './zhou_real_model_store_probe.mjs';
 
 const phoneMode = process.argv[3] === '--phone';
+const extras = process.argv.slice(4);
+assert((extras.length === 0 || phoneMode) && extras.every(value => ['--events', '--ai'].includes(value)) && new Set(extras).size === extras.length, 'Invalid retained core arguments');
 const authPort = phoneMode ? 9099 : 9098;
 const directory = resolve(process.argv[2] ?? '');
 assert(process.argv[2] && directory !== process.cwd(), 'Supply a private data directory outside the repository');
@@ -33,6 +35,7 @@ try {
       server.listen(port, '127.0.0.1', () => server.close(done));
     });
   }
+  if (phoneMode) writeFileSync(join(directory, 'phone-ready.json'), JSON.stringify({ ready: false, reason: 'starting' }), { mode: 0o600 });
   const profile = join(directory, 'credential-profile');
   mkdirSync(profile, { recursive: true, mode: 0o700 });
   if (existsSync(stop)) unlinkSync(stop);
@@ -50,6 +53,8 @@ try {
   env.FIREBASE_EMULATORS_PATH = process.env.FIREBASE_EMULATORS_PATH;
   env.ENMORI_RETAINED_CORE_DIRECTORY = directory;
   env.ENMORI_RETAINED_CORE_VERIFY = process.argv[3] ?? '';
+  env.ENMORI_RETAINED_CORE_EVENTS = extras.includes('--events') ? 'true' : 'false';
+  env.ENMORI_RETAINED_CORE_AI = extras.includes('--ai') ? 'true' : 'false';
   const args = [resolve('node_modules/firebase-tools/lib/bin/firebase.js'), 'emulators:exec', '--project', 'demo-enmori-rmvp01a-r10',
     '--only', 'auth,firestore', '--config', config, '--non-interactive', `--export-on-exit=${snapshot}`,
     ...(existsSync(snapshot) ? [`--import=${snapshot}`] : []),

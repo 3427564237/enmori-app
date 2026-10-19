@@ -21,7 +21,7 @@ const toolSyntax = /\b(?:functions|tools)\s*\.\s*\w+\s*\(|\b(?:tool_call|tool_ca
  * strings: nested objects/arrays (including any nested duplicate) are rejected
  * before materialization, not handed to a duplicate-losing object parser.
  */
-export function parseOutput(raw: Uint8Array, purpose: OutputPurpose): Result<OutputCandidate, "invalid_output"> {
+export function parseOutput(raw: Uint8Array, purpose: OutputPurpose, plainText = false): Result<OutputCandidate, "invalid_output"> {
   if (purpose !== "ai_assistant_message_v1" && purpose !== "recommendation_explanation_v1") return err("invalid_output");
   try {
     // Preserve BOM so it fails the JSON grammar; fatal decoding rejects bad UTF-8.
@@ -65,10 +65,10 @@ export function parseOutput(raw: Uint8Array, purpose: OutputPurpose): Result<Out
     space();
     if (offset !== source.length || fields.size !== 2 || fields.get("schemaVersion") !== purpose) return err("invalid_output");
     const untrimmed = fields.get("message");
-    if (untrimmed === undefined || prohibitedCharacters.test(untrimmed)) return err("invalid_output");
+    if (untrimmed === undefined || (!plainText && prohibitedCharacters.test(untrimmed))) return err("invalid_output");
     const message = untrimmed.trim();
     const maximum = purpose === "ai_assistant_message_v1" ? 2400 : 800;
-    if (!message || [...message].length > maximum || markupOrObject.test(message) || url.test(message) || toolSyntax.test(message)) return err("invalid_output");
+    if (!message || [...message].length > maximum || (!plainText && (markupOrObject.test(message) || url.test(message) || toolSyntax.test(message)))) return err("invalid_output");
     return ok(Object.freeze({ schemaVersion: purpose, message }));
   } catch {
     return err("invalid_output");
