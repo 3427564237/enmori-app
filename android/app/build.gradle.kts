@@ -19,7 +19,9 @@ val sponsorDemoFlag = providers.environmentVariable("ENMORI_SPONSOR_DEMO").orNul
 check(sponsorDemoFlag == null || sponsorDemoFlag == "true") {
     "ENMORI_SPONSOR_DEMO must be absent or exactly true"
 }
-check(listOf(personaAndroidTestFlag, hciAndroidTestFlag, sponsorDemoFlag).count { it != null } <= 1) {
+val coreAndroidTestFlag = providers.environmentVariable("ENMORI_CORE_ANDROID_TEST").orNull
+check(coreAndroidTestFlag == null || coreAndroidTestFlag == "true")
+check(listOf(personaAndroidTestFlag, hciAndroidTestFlag, sponsorDemoFlag, coreAndroidTestFlag).count { it != null } <= 1) {
     "Select only one isolated Android test package"
 }
 
@@ -53,6 +55,10 @@ android {
         getByName("debug") {
             if (personaAndroidTestFlag == "true") {
                 applicationIdSuffix = ".personatest"
+            }
+            if (coreAndroidTestFlag == "true") {
+                applicationIdSuffix = ".coretest"
+                manifestPlaceholders["enmoriApplicationLabel"] = "ENMORI Core verification"
             }
             if (sponsorDemoFlag == "true") {
                 applicationIdSuffix = ".sponsordemo"

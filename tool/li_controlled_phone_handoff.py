@@ -170,7 +170,7 @@ def transfer(apk: Path, private_handoff: Path, serial: str, *, adb: str, aapt: s
         return result
 
     try:
-        require(package in (PACKAGE, "com.enmori.app.sponsordemo"))
+        require(package in (PACKAGE, "com.enmori.app.sponsordemo", "com.enmori.app.coretest"))
         require(re.fullmatch(r"[A-Za-z0-9]{6,64}", serial) is not None)
         require(re.fullmatch(r"[0-9a-f]{32}", token) is not None)
         require(consume_timeout > 0)
@@ -265,10 +265,14 @@ def main(argv=None) -> int:
     parser.add_argument("--serial", required=True)
     parser.add_argument("--adb", default="/home/miku/Android/Sdk/platform-tools/adb")
     parser.add_argument("--aapt", default="/home/miku/Android/Sdk/build-tools/36.0.0/aapt")
-    parser.add_argument("--sponsor-demo", action="store_true", help="Require the independent Sponsor demo package")
+    packages = parser.add_mutually_exclusive_group()
+    packages.add_argument("--sponsor-demo", action="store_true", help="Require the independent Sponsor demo package")
+    packages.add_argument("--core-verification", action="store_true", help="Require the independent retained core package")
     options = parser.parse_args(argv)
+    package = ("com.enmori.app.coretest" if options.core_verification else
+               "com.enmori.app.sponsordemo" if options.sponsor_demo else PACKAGE)
     report = transfer(options.apk, options.handoff, options.serial, adb=options.adb, aapt=options.aapt,
-                      package="com.enmori.app.sponsordemo" if options.sponsor_demo else PACKAGE)
+                      package=package)
     sys.stdout.write(json.dumps(report, separators=(",", ":")) + "\n")
     return 0 if report["status"] == "Pass" else 2
 

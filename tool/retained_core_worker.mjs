@@ -13,6 +13,8 @@ import { FirestoreCatalogueWriter } from '../backend/dist/src/interests/infrastr
 import { FirebaseAdminFirestoreGateway } from '../backend/dist/src/shared/infrastructure/firebase/firestore-gateway.js';
 import { catalogueName, coreInterestNames } from '../backend/dist/src/interests/domain/catalogue-name.js';
 
+import { startRetainedCorePhone } from './retained_core_phone.mjs';
+
 const directory = process.env.ENMORI_RETAINED_CORE_DIRECTORY;
 assert(directory);
 // Firebase CLI adds its own config variables. Re-enter with the established
@@ -101,8 +103,10 @@ try {
     }
     writeFileSync(join(directory, mode === '--verify-write'  ? 'write-pass.json' : 'restart-pass.json'), JSON.stringify({ passed: true, profile: true, settings: true, authLogin: true, ...(mode==='--verify-read'?{checkInCreateEditReadDelete:true,calendarCountAfterDelete:true,checkInRestartRead}:{}), mode }), { mode: 0o600 });
   } else {
-    assert(!mode, 'Unknown verification mode');
-    await runtime.app.listen({ host: '127.0.0.1', port: 9380 });
-    while (!existsSync(join(directory, 'stop-requested'))) await wait(250);
+    assert(!mode || mode === '--phone', 'Unknown verification mode');
+    const closePhone = mode === '--phone' ? await startRetainedCorePhone(runtime, auth, directory) : null;
+    if (!closePhone) await runtime.app.listen({ host: '127.0.0.1', port: 9380 });
+    try { while (!existsSync(join(directory, 'stop-requested'))) await wait(250); }
+    finally { await closePhone?.(); }
   }
 } finally { await closeControlledRuntime(runtime); }

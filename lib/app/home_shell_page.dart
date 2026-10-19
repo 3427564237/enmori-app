@@ -181,6 +181,13 @@ final class HomeShellPage extends StatelessWidget {
                 'Discover activities and keep a moment for yourself.',
                 style: TextStyle(color: Color(0xff696963), height: 1.6),
               ),
+              FilledButton.icon(
+                key: const Key('r6-new-check-in-button'),
+                onPressed: onStartCheckIn,
+                icon: const Icon(Icons.edit_note),
+                label: const Text('New Check-in'),
+              ),
+              const SizedBox(height: 14),
               const SizedBox(height: 22),
               Card(
                 color: const Color(0xffeeedff),
@@ -259,12 +266,6 @@ final class HomeShellPage extends StatelessWidget {
                 spacing: 10,
                 runSpacing: 10,
                 children: [
-                  OutlinedButton.icon(
-                    key: const Key('r6-new-check-in-button'),
-                    onPressed: onStartCheckIn,
-                    icon: const Icon(Icons.edit_note),
-                    label: const Text('New Check-in'),
-                  ),
                   OutlinedButton.icon(
                     key: const Key('home-manage-personas'),
                     onPressed: onManagePersonas,

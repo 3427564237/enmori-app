@@ -7,6 +7,8 @@ import { createServer } from 'node:net';
 import { buildControlledEmulatorTestEnvironment } from '../backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js';
 import { quoteFixedWorkerCommand } from './zhou_real_model_store_probe.mjs';
 
+const phoneMode = process.argv[3] === '--phone';
+const authPort = phoneMode ? 9099 : 9098;
 const directory = resolve(process.argv[2] ?? '');
 assert(process.argv[2] && directory !== process.cwd(), 'Supply a private data directory outside the repository');
 assert(!directory.startsWith(process.cwd() + '/'), 'Runtime data must stay outside the repository');
@@ -25,7 +27,7 @@ writeFileSync(lock, '', { flag: 'wx', mode: 0o600 });
 const stop = join(directory, 'stop-requested');
 let child;
 try {
-  for (const port of [9098, 8088, 4408, 4508, 9158, 9380]) {
+  for (const port of [authPort, 8088, 4408, 4508, 9158, 9380]) {
     await new Promise((done, reject) => {
       const server = createServer(); server.once('error', reject);
       server.listen(port, '127.0.0.1', () => server.close(done));
@@ -36,14 +38,14 @@ try {
   if (existsSync(stop)) unlinkSync(stop);
   const config = join(directory, 'firebase.json');
   writeFileSync(config, JSON.stringify({ firestore: { indexes: resolve('firestore.indexes.json') }, emulators: {
-    auth: { host: '127.0.0.1', port: 9098 }, firestore: { host: '127.0.0.1', port: 8088, websocketPort: 9158 },
+    auth: { host: '127.0.0.1', port: authPort }, firestore: { host: '127.0.0.1', port: 8088, websocketPort: 9158 },
     hub: { host: '127.0.0.1', port: 4408 }, logging: { host: '127.0.0.1', port: 4508 },
     ui: { enabled: false }, singleProjectMode: true,
   } }), { mode: 0o600 });
   const snapshot = join(directory, 'snapshot');
   if (existsSync(snapshot)) assert(existsSync(join(snapshot, 'firebase-export-metadata.json')), 'Incomplete snapshot: preserve and investigate');
   const env = buildControlledEmulatorTestEnvironment({ ...process.env, GCLOUD_PROJECT: 'demo-enmori-rmvp01a-r10',
-    GOOGLE_CLOUD_PROJECT: 'demo-enmori-rmvp01a-r10', FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9098', FIRESTORE_EMULATOR_HOST: '127.0.0.1:8088' }, profile);
+    GOOGLE_CLOUD_PROJECT: 'demo-enmori-rmvp01a-r10', FIREBASE_AUTH_EMULATOR_HOST: `127.0.0.1:${authPort}`, FIRESTORE_EMULATOR_HOST: '127.0.0.1:8088' }, profile);
   env.CI = 'true'; env.FIREBASE_CLI_DISABLE_USAGE = 'true';
   env.FIREBASE_EMULATORS_PATH = process.env.FIREBASE_EMULATORS_PATH;
   env.ENMORI_RETAINED_CORE_DIRECTORY = directory;

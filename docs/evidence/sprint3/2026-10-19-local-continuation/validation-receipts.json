@@ -1,0 +1,73 @@
+{
+  "baseSource": "cf9605e",
+  "evidenceIsStagedNotSingleApkFullUat": true,
+  "logs": [
+    {
+      "localLog": "/tmp/enmori-core-native-account-stages.log",
+      "sha256": "b90a2d94665ad6c12ec48d7f51a903898888c91bd93b5086a0e2bb4e7b07701b",
+      "bytes": 1863,
+      "nativePassedStages": [
+        "registration_rejected_consent_skipped_interests",
+        "profile_settings_saved_reread"
+      ],
+      "wholeNativeSuitePassed": false
+    },
+    {
+      "localLog": "/tmp/enmori-core-native-records-final.log",
+      "sha256": "c7b31a8b0fa6b75a18c1a0f71f8aaaece79d9f2c8bdda3a05c5511b2c95dac13",
+      "bytes": 7812,
+      "nativePassedStages": [
+        "checkin_create_calendar_exact_record_edit_reread"
+      ],
+      "wholeNativeSuitePassed": false
+    },
+    {
+      "localLog": "/tmp/enmori-core-native-restart.log",
+      "sha256": "9d88b86341e920c834c11ca94f4d23be255c79778e0af4d4eae7411057500372",
+      "bytes": 3646,
+      "nativePassedStages": [],
+      "wholeNativeSuitePassed": false
+    },
+    {
+      "localLog": "/tmp/enmori-core-native-restart-complete.log",
+      "sha256": "e7aedd29cb418ff5c7ddfbb5103268e4e4f87098014718268c6e8926084d3873",
+      "bytes": 1778,
+      "nativePassedStages": [],
+      "wholeNativeSuitePassed": false
+    },
+    {
+      "localLog": "/tmp/enmori-core-ai-policy.log",
+      "sha256": "9860c2303a1329e2735ccf2161f01ea879360171e360816870d2815aebe26af7",
+      "bytes": 4866,
+      "nativePassedStages": [],
+      "wholeNativeSuitePassed": false
+    },
+    {
+      "localLog": "/tmp/enmori-core-static-final.log",
+      "sha256": "48afe111118f67411d311920f5a3eab1c0a8d5996e7ab128161a902e7f9cb38c",
+      "bytes": 83,
+      "nativePassedStages": [],
+      "wholeNativeSuitePassed": false
+    }
+  ],
+  "retainedCoreRestart": {
+    "normalStopExit": 0,
+    "snapshotConfirmed": true,
+    "sameDirectoryRestartReady": true,
+    "nativeLoginAndProfileRead": true,
+    "nativeCheckInReadAndAccountIsolation": "not_completed"
+  },
+  "phoneHandoff": {
+    "status": "Pass",
+    "category": null,
+    "apkVerified": true,
+    "installedApkMatched": true,
+    "readyNonceVerified": true,
+    "configurationConsumed": true,
+    "failureCleanupConfirmed": true,
+    "createdReverseCount": 0,
+    "apkSha256": "917fda250d604a9967d3a2ec3abe41fe48aa9b5eb94df95ea93c3f85e720ab55"
+  },
+  "newModelRequests": 0,
+  "repeatedFullSuites": 0
+}

@@ -47,8 +47,12 @@ const prohibited = [
 ];
 function accepts(input: ConversationInput, output: OutputCandidate): boolean {
   if (!validOpenConversationInput(input) || !record(output) || !fields(output,["schemaVersion","message"],["schemaVersion","message"]) ||
-      output.schemaVersion !== "ai_assistant_message_v1" || !text(output.message) || [...output.message].length > 2400 ||
-      prohibited.some(rule => rule.test(output.message))) return false;
+      output.schemaVersion !== "ai_assistant_message_v1" || !text(output.message) || [...output.message].length > 2400) return false;
+  // This fixed preference-question head asks rather than asserts a user fact.
+  // Remove only that head from the assertion-checking view. Keep the rest of
+  // the question for every independent safety check; never rewrite the reply.
+  const assertions = output.message.replace(/(^|[.!?\n]\s*)(?:do\s+)?you\s+have\s+a\s+preference\b(?=[^.!?\n]*\?)/giu,"$1a preference");
+  if (prohibited.some(rule => rule.test(assertions))) return false;
   // Numbers and quoted attributions require exact support in the actual supplied
   // data. Prior model claims alone cannot establish a new user fact.
   const sources = [input.currentMessage,...input.checkIns.map(n => n.noteText!),...(input.history ?? []).map(p => p.user)];
@@ -58,7 +62,7 @@ function accepts(input: ConversationInput, output: OutputCandidate): boolean {
   // a speculative paraphrase is rejected instead of becoming a user fact.
   const normalizedSources = sources.map(s => s.toLocaleLowerCase("en").replace(/\bi am\b|\bi['’]m\b/gu,"you are")
     .replace(/\bi have\b|\bi['’]ve\b/gu,"you have").replace(/\bi\b/gu,"you").replace(/\bmy\b/gu,"your"));
-  const claims = output.message.matchAll(/\byou(?:['’]re|['’]ve| are| have| live| reside| work| study| earn| weigh| own| belong)[^.!?\n]*|\byour (?:home|address|location|name|age|job|salary|income|family|partner|children|religion|nationality)[^.!?\n]*/giu);
+  const claims = assertions.matchAll(/\byou(?:['’]re|['’]ve| are| have| live| reside| work| study| earn| weigh| own| belong)[^.!?\n]*|\byour (?:home|address|location|name|age|job|salary|income|family|partner|children|religion|nationality)[^.!?\n]*/giu);
   for (const match of claims) {
     const claim=match[0].toLocaleLowerCase("en").replace(/\byou['’]re\b/gu,"you are").replace(/\byou['’]ve\b/gu,"you have");
     if (!normalizedSources.some(s=>s.includes(claim))) return false;

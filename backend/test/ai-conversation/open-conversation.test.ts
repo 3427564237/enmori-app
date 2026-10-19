@@ -12,6 +12,16 @@ const input: ConversationInput = {strategy:"open_conversation_v1",currentMessage
   history:[{user:"I enjoyed reading on Sunday.",assistant:"What did you like about it?"}]};
 const budget = () => ({signal:new AbortController().signal,deadline:60000,remainingMs:()=>60000});
 const candidate = (message:string) => ({schemaVersion:"ai_assistant_message_v1" as const,message});
+for (const message of ["Do you have a preference?", "You have a preference?", "A quiet walk sounds pleasant. Do you have a preference between piano music and walking?"]) {
+  test(`open policy accepts a preference question without inventing a user fact: ${message}`, async () => {
+    assert.equal((await openConversationSemanticCandidate(()=>input,()=>candidate(message),budget())).ok,true);
+  });
+}
+for (const message of ["You have a preference.", "You have a preference for walking.", "Do you have a preference because you live alone in Singapore?", "Do you have a preference? You have a piano.", "Do you have a preference for medication?", "Do you have a preference? I've saved your note.", "Do you have a preference between 2 activities?"]) {
+  test(`preference-question handling retains the independent rejection boundaries: ${message}`, async () => {
+    assert.deepEqual(await openConversationSemanticCandidate(()=>input,()=>candidate(message),budget()),{ok:false,failure:"unsafe_output"});
+  });
+}
 for (const message of ["You mentioned enjoying reading. What was the book like?", "Sounds like you had a satisfying day. Would you like to talk about it?", "听起来阅读让你很开心。你愿意多说一点吗？"]) {
   test(`open policy allows ordinary connected conversation: ${message}`,async () => {
     assert.equal(openConversationSemanticPolicyVersion,"open_conversation_v1");
