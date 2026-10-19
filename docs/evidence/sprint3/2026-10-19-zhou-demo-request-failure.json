@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "scope": "ordinary-client-request-exception-boundary-and-pending-state-recovery",
+  "observedAtUtc": "2026-10-19T04:12:37.215357+00:00",
+  "workspace": "D:/3851",
+  "branch": "codex/zhou-demo-request-failure-20261019",
+  "base": "01e0f1714ae804d143ca00cb52c5a1e29794581d",
+  "sourceCommit": "faf00b89c73bdab0f5d66c97798cd8d559cf267f",
+  "sourceTree": "26e902a71e8b12aa85d0800bd72503d091015296",
+  "toolchain": {
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "http": "1.6.0",
+    "host": "Windows"
+  },
+  "testedInputs": [
+    {
+      "path": "lib/core/network/backend_api_client.dart",
+      "gitBlob": "485037a5701e5a628636250edb94038883684c46",
+      "workingSha256": "515de42d6ac80fee05a64384f90caa2484eb2c8654a5f0fc66bddbc82f6e7f5b"
+    },
+    {
+      "path": "test/features/backend_transport_failure_test.dart",
+      "gitBlob": "9520df4639f4a64b58b8e344aa9e8d8ee1a3ae19",
+      "workingSha256": "924cca444ad8d8219200b0411f0e6ea2f24c9c31800b39b5dfacf714010c3362"
+    }
+  ],
+  "latestCandidateCompatibility": {
+    "pr": 158,
+    "head": "78757646953ccf80f47180f9443d81a055844615",
+    "baseClientBlob": "e7e9d2aa427219438f25c9503393e2588cf647c0",
+    "candidateClientBlob": "e7e9d2aa427219438f25c9503393e2588cf647c0",
+    "sameOriginalClient": true,
+    "containsThisCorrection": false
+  },
+  "baselineCounterfactual": {
+    "export": "build/zhou-demo-request-failure-20261019/baseline",
+    "archiveSha256": "15c317f98ed3360cce5ffce3032eb02c27b1d6784d961325e540d54d9171f9f4",
+    "originalTrackedBlobsVerified": 1304,
+    "configuredCrlfCheckoutConversions": 1237,
+    "onlyAddedTest": "test/features/backend_transport_failure_test.dart",
+    "addedTestMatchesCurrentBytes": true,
+    "otherGeneratedInputs": "Existing package_config.json and package_graph.json reused; no dependency update",
+    "passed": 2,
+    "failed": 4,
+    "exitCode": 1,
+    "failedCases": [
+      "token platform failure",
+      "native IOClient TLS failure",
+      "response body TLS failure",
+      "Check-in remains CommandPending after TLS failure"
+    ],
+    "positiveControls": [
+      "existing AI 75-second deadline",
+      "existing malformed-response classification"
+    ]
+  },
+  "sourceManifest": {
+    "path": "build/zhou-demo-request-failure-20261019/tested-git-manifest.txt",
+    "sha256": "28c943f7154275b88b0f76b004c9dfeaed611ebf711e33c72e80daf6929b6688",
+    "blobCount": 1305
+  },
+  "checks": {
+    "newCases": {
+      "passed": 6,
+      "failed": 0,
+      "exitCode": 0
+    },
+    "affected": {
+      "passed": 268,
+      "failed": 0,
+      "exitCode": 0,
+      "newCasesIncluded": 6,
+      "paths": [
+        "test/features/backend_transport_failure_test.dart",
+        "test/features/backend_repositories_test.dart",
+        "test/features/backend_account_preferences_test.dart",
+        "test/features/rmvp01a_r6_pages_test.dart",
+        "test/features/check_in_pending_recovery_test.dart",
+        "test/app/account_preferences_flow_test.dart",
+        "test/features/interest_editor_controller_test.dart",
+        "test/features/interest_editor_page_test.dart",
+        "test/features/blocker_slices_test.dart",
+        "test/features/friend_search_test.dart",
+        "test/features/my_friends_test.dart",
+        "test/features/my_friends_parser_test.dart",
+        "test/features/event_browse_test.dart",
+        "test/features/event_detail_unicode_test.dart",
+        "test/features/personas/backend_persona_repository_test.dart",
+        "test/features/personas/persona_client_session_test.dart",
+        "test/features/personas/persona_session_adversarial_test.dart",
+        "test/app/check_in_history_shared_router_test.dart",
+        "test/app/controlled_demo_app_test.dart",
+        "test/harness/controlled_phone_harness_test.dart",
+        "test/harness/social/offline_social_app_test.dart",
+        "test/features/ai_conversation/ai_conversation_controller_test.dart"
+      ]
+    },
+    "analysis": {
+      "issues": 0,
+      "exitCode": 0,
+      "fatalInfos": true
+    },
+    "format": {
+      "files": 2,
+      "changed": 0,
+      "exitCode": 0,
+      "nonWriting": true
+    },
+    "whitespace": {
+      "exitCode": 0
+    },
+    "independentReadOnlySourceReview": "No actionable issue; not LI formal approval",
+    "realIOClient": true,
+    "nativeHttpClientSynthetic": true,
+    "socketsOpened": 0,
+    "explicitRecoverySameIdempotencyKey": true,
+    "automaticResend": false,
+    "notePreserved": true,
+    "sharedClientUnsolicitedClose": false,
+    "tlsBypass": false,
+    "timeoutBudgetChanged": false,
+    "aiDeadlineControlAlsoPassesOnBase": true
+  },
+  "commands": {
+    "newCases": [
+      "fvm",
+      "flutter",
+      "test",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "test/features/backend_transport_failure_test.dart"
+    ],
+    "affected": [
+      "fvm",
+      "flutter",
+      "test",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "test/features/backend_transport_failure_test.dart",
+      "test/features/backend_repositories_test.dart",
+      "test/features/backend_account_preferences_test.dart",
+      "test/features/rmvp01a_r6_pages_test.dart",
+      "test/features/check_in_pending_recovery_test.dart",
+      "test/app/account_preferences_flow_test.dart",
+      "test/features/interest_editor_controller_test.dart",
+      "test/features/interest_editor_page_test.dart",
+      "test/features/blocker_slices_test.dart",
+      "test/features/friend_search_test.dart",
+      "test/features/my_friends_test.dart",
+      "test/features/my_friends_parser_test.dart",
+      "test/features/event_browse_test.dart",
+      "test/features/event_detail_unicode_test.dart",
+      "test/features/personas/backend_persona_repository_test.dart",
+      "test/features/personas/persona_client_session_test.dart",
+      "test/features/personas/persona_session_adversarial_test.dart",
+      "test/app/check_in_history_shared_router_test.dart",
+      "test/app/controlled_demo_app_test.dart",
+      "test/harness/controlled_phone_harness_test.dart",
+      "test/harness/social/offline_social_app_test.dart",
+      "test/features/ai_conversation/ai_conversation_controller_test.dart"
+    ],
+    "analysis": [
+      "fvm",
+      "dart",
+      "analyze",
+      "--fatal-infos",
+      "lib/core/network/backend_api_client.dart",
+      "test/features/backend_transport_failure_test.dart"
+    ],
+    "format": [
+      "fvm",
+      "dart",
+      "format",
+      "--output=none",
+      "--set-exit-if-changed",
+      "lib/core/network/backend_api_client.dart",
+      "test/features/backend_transport_failure_test.dart"
+    ],
+    "whitespace": [
+      "git",
+      "diff",
+      "--check",
+      "01e0f1714ae804d143ca00cb52c5a1e29794581d",
+      "faf00b89c73bdab0f5d66c97798cd8d559cf267f"
+    ]
+  },
+  "logs": {
+    "baseline-final-red.log": {
+      "path": "build/zhou-demo-request-failure-20261019/baseline-final-red.log",
+      "bytes": 4774,
+      "sha256": "7f6f2a52d443c0ab2b1160bb3edb08ee6d5be57963cc2559a0756a063e49ddf3"
+    },
+    "transport-final-green.log": {
+      "path": "build/zhou-demo-request-failure-20261019/transport-final-green.log",
+      "bytes": 547,
+      "sha256": "3db93ac4b7b384a401e566f313cbd5253afd0e625f648c2aef73e4fcee0da7f3"
+    },
+    "affected-final-green.log": {
+      "path": "build/zhou-demo-request-failure-20261019/affected-final-green.log",
+      "bytes": 39166,
+      "sha256": "0b546b0b9d7db0d8a9631ea60228fb5702331674c7fb5dd836c3bad634ae5b4c"
+    },
+    "analysis-final.log": {
+      "path": "build/zhou-demo-request-failure-20261019/analysis-final.log",
+      "bytes": 93,
+      "sha256": "38866f96f4ad8167ca34b729d7874e40bccbd34dd4bb67594f17566d81524bd5"
+    },
+    "format-final.log": {
+      "path": "build/zhou-demo-request-failure-20261019/format-final.log",
+      "bytes": 48,
+      "sha256": "d3c51591a0bccbeeaefbae7e3d4ad257f8b0f4cd3371d73ccb769d9b63d2aab3"
+    },
+    "whitespace-final.log": {
+      "path": "build/zhou-demo-request-failure-20261019/whitespace-final.log",
+      "bytes": 44,
+      "sha256": "07569c881c7293b4a86d50fffd61e8c052c6d19560546e0774a1de0e2d5643d5"
+    },
+    "devices-final.json": {
+      "path": "build/zhou-demo-request-failure-20261019/devices-final.json",
+      "bytes": 1188,
+      "sha256": "3b2d0b3174b46ce577407178bcccba3ff57dfbb9ab68a1a0d0595100165b355a"
+    },
+    "input-verification.json": {
+      "path": "build/zhou-demo-request-failure-20261019/input-verification.json",
+      "bytes": 784,
+      "sha256": "64dc1a6a43eabf3663971c9e47f32756e917155bbecd25dda56d6b7bf292e07e"
+    },
+    "tested-git-manifest.txt": {
+      "path": "build/zhou-demo-request-failure-20261019/tested-git-manifest.txt",
+      "bytes": 146318,
+      "sha256": "28c943f7154275b88b0f76b004c9dfeaed611ebf711e33c72e80daf6929b6688"
+    },
+    "transport-red.log": {
+      "path": "build/zhou-demo-request-failure-20261019/transport-red.log",
+      "bytes": 4343,
+      "sha256": "2c0accee8466ea398eff1f328abc00a1bc99cc512cf920e4d8644b5604c6f38e"
+    },
+    "fixture-compile.log": {
+      "path": "build/zhou-demo-request-failure-20261019/fixture-compile.log",
+      "bytes": 957,
+      "sha256": "ccf9a7c835b596a98210dc1efacb67583e669603cabb17446fb9bd7434642866"
+    }
+  },
+  "notRun": [
+    "phone actual APK identity and failure reproduction",
+    "new APK build/install",
+    "actual AI Send and Persona Save recovery",
+    "real Backend persistence",
+    "continuous 9B/service availability",
+    "whole-app acceptance"
+  ],
+  "unconfirmed": [
+    "user phone root cause is TLS",
+    "Backend did not commit an ambiguous failed write",
+    "demo restored"
+  ],
+  "realModelRequests": 0,
+  "privateHandoffRead": false,
+  "servicesStarted": false,
+  "reviewer": "3427564237 (LI)",
+  "candidateCompositionOwner": "JIN",
+  "mergeIssueProjectChanges": false
+}
