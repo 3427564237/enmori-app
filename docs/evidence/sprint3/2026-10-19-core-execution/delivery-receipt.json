@@ -1,0 +1,88 @@
+{
+  "sourceCommit": "9e45b1ebc13c1287fc903a6edf4059f4eeb792ec",
+  "baselineCommit": "ac4021dd13efc2bc6aa8676ccce0a1901311ef0d",
+  "branch": "souma/li-core-priority-20261019",
+  "apk": {
+    "file": "enmori-core-checkpoint-9e45b1e-debug.apk",
+    "sha256": "a8044a052e9e5c2d682572a7e5cd495b5431f8789910dc2b1c059e4a6d4117aa",
+    "bytes": 173564589,
+    "package": "com.enmori.app.sponsordemo",
+    "versionCode": 4,
+    "versionName": "1.0.0",
+    "minSdk": 24,
+    "engineAbis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "signatureVerified": true,
+    "signerCertificateSha256": "0353f50d507f56ee2d8344e56b7b84d6afccdff31cab5a4ca8a69060a9979106",
+    "installedOnDevice": false
+  },
+  "buildCommand": "ENMORI_SPONSOR_DEMO=true flutter build apk --debug --no-pub --target lib/controlled_demo.dart --build-number 4",
+  "toolchain": {
+    "node": "24.19.0",
+    "flutter": "3.47.2",
+    "dart": "3.13.2"
+  },
+  "verification": {
+    "backendTestsPassed": 1024,
+    "flutterTestsPassed": 764,
+    "flutterAnalyze": "No issues found",
+    "realAuthFirestoreRestartRead": true,
+    "realCheckInCreateEditReadDelete": true,
+    "realCalendarCountAfterDelete": true,
+    "realCheckInRestartRead": true,
+    "gitDiffCheck": true
+  },
+  "notRunOrIncomplete": [
+    "phone installation and same-APK journeys",
+    "actual email delivery",
+    "native GPS permission flow",
+    "map and weather implementation",
+    "Events participation",
+    "friend profile/privacy projections and social completion",
+    "full Persona fields and draft preview",
+    "real model three related turns",
+    "retained runtime plus Events/AI/phone TLS composition",
+    "migration of original service data"
+  ],
+  "bundle": {
+    "file": "enmori-core-checkpoint.bundle",
+    "sha256": "de51181a1aefe47c1ff96967b2c7f4de85014c2d6b84e5d4a8820f9a3b35674f",
+    "gitBundleVerify": true
+  },
+  "logs": {
+    "backend-tests.log": {
+      "sha256": "1e4abd71a51731edea9232bc44be75801f606783f8140bbcddc28544a52ec95f",
+      "bytes": 98793
+    },
+    "flutter-tests.log": {
+      "sha256": "97e4e6f78467dc8273b03921faf115b2c9751c5dac40fc0bce72157980f50db8",
+      "bytes": 145154
+    },
+    "flutter-analysis.log": {
+      "sha256": "29509aabd8dfe8d90d7666a9898d8b338217a340e3ca4d79d24ef7a49c338922",
+      "bytes": 96
+    },
+    "apk-build.log": {
+      "sha256": "380bd847f9bbf2abbe326aee3a35280201e8cec31cb6a96f1e3bac8f2ce6fcae",
+      "bytes": 1493
+    },
+    "apk-signature.log": {
+      "sha256": "f44847308a717635e4625e937bf91eae103db1c44d3e99adccc99fb28b919a1b",
+      "bytes": 307
+    },
+    "emulator-restart.log": {
+      "sha256": "b3d2c46634662fb3ee50c1dd0576cd1cb418ed801cc131a9d9d2646b9ffe849d",
+      "bytes": 52
+    }
+  },
+  "externalActions": {
+    "pushed": false,
+    "merged": false,
+    "publishedApp": false,
+    "membersMessaged": false,
+    "issuesClosed": false
+  }
+}
