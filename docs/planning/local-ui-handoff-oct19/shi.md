@@ -1,5 +1,7 @@
 请以 SHI 身份执行“Events 参与与返回闭环包”，复用已完成的真实来源/浏览/详情。
 
+执行顺序补充：LI 将先接收队友 HCI 优化版本并对齐全局 UI/UX 基线。UI 部分以该核对后的基线继续完善，不把现有主题当作已冻结设计，也不各自重建风格。可以独立推进包内业务合同/后端及逻辑；交接材料尚未到位不阻塞这些部分。功能页面必须在实现过程中落实 UI/UX，不延后到全部功能做完。
+
 源码基线为 `436b56632fe2f0f741132aab19893f50e6281f7e`（本机功能源码 ad4dfeb，后续为真实邮件证据）。使用本次新源码包，核对 manifest 中的 HEAD，并确认包含该基线；不要使用旧 9e45b1e 包或从旧 main 重做。每人独立分支/worktree，保留已有文件，不与别人共写 LI 的运行工作区。
 
 先读 AGENTS.md、docs/tooling/skill-routing.md、ARCHITECTURE.md，以及 docs/decisions/2026-10-19-li-core-feature-delivery.md、2026-10-19-li-ai-mvp-simplification.md、2026-10-19-li-local-verification-entry.md 和 docs/evidence/sprint3/2026-10-19-local-device-checkpoint/。产品、身份/隐私/版本并发仍按已批准规则；旧记录缺字段安全显示为空，新增分享默认关闭，不清库。现有实现不是需求权威。
