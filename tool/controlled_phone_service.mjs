@@ -19,6 +19,7 @@ import { ControlledOllamaTransport } from '../backend/dist/src/ai-runtime/infras
 import { createControlledPhoneService } from '../backend/dist/src/bootstrap/controlled-phone-service.js';
 import { TicketmasterBrowseSource } from '../backend/dist/src/event-browse/infrastructure/ticketmaster-browse-source.js';
 import { createHostDiagnostics } from './diagnostic_capture_client.mjs';
+import { ControlledPhoneDiagnostics } from '../backend/dist/src/bootstrap/controlled-phone-diagnostics.js';
 
 // Child main URLs must match Node's canonical import.meta.url main guard,
 // even when the writable project points to this immutable tool directory.
@@ -33,11 +34,12 @@ const exact = (value, keys) => value && typeof value === 'object' && !Array.isAr
   Object.keys(value).length === keys.length && Object.keys(value).every(key => keys.includes(key));
 export function validatePhoneServiceConfiguration(config) {
   const keys = ['controlledHostVerified', 'existingHostGenerationLeaseSettled', 'binding', 'tokenizerFiles', 'phone'];
-  const allowed = [...keys, 'eventBrowse', 'demoFeatures', 'dualAccounts'];
+  const allowed = [...keys, 'eventBrowse', 'demoFeatures', 'dualAccounts', 'nonAiDemo'];
   assert(config && typeof config === 'object' && keys.every(key => Object.hasOwn(config, key)) && Object.keys(config).every(key => allowed.includes(key)));
   if (Object.hasOwn(config, 'dualAccounts')) assert(config.dualAccounts === true && config.demoFeatures === true);
   if (Object.hasOwn(config, 'demoFeatures')) assert.equal(config.demoFeatures, true);
-  const { phone, eventBrowse, demoFeatures, dualAccounts, ...existing } = config; validateZhouModelConfiguration(existing);
+  if (Object.hasOwn(config, 'nonAiDemo')) assert(config.nonAiDemo === true && config.demoFeatures === true && config.dualAccounts === true);
+  const { phone, eventBrowse, demoFeatures, dualAccounts, nonAiDemo, ...existing } = config; validateZhouModelConfiguration(existing);
   if (Object.hasOwn(config, 'eventBrowse')) {
     assert(exact(eventBrowse, ['key']));
     assert(typeof eventBrowse.key === 'string' && /^[A-Za-z0-9_-]{1,256}$/u.test(eventBrowse.key));
@@ -116,8 +118,9 @@ function lockedStack() {
 
 async function outer() {
   assert.equal(process.platform, 'linux'); lockedStack();
-  assert.equal(createHostDiagnostics().healthy, true); // Before emulators or model preflight.
-  const config = await configuration(); privateDirectory(config.phone.sessionDirectory, true);
+  const config = await configuration();
+  if (!config.nonAiDemo) assert.equal(createHostDiagnostics().healthy, true); // Before emulators or model preflight.
+  privateDirectory(config.phone.sessionDirectory, true);
   // Reuse operator-supplied existing TLS files. Never generate/install/copy them.
   privateFile(config.phone.keyPath, 16384);
   const certificate = lstatSync(config.phone.certificatePath);
@@ -189,29 +192,33 @@ export async function runPhoneService(config, dependencies = {}) {
   const eventCommand = dependencies.eventCommand ?? (() => takeEventBrowseCommand(phone.sessionDirectory));
   const wait = dependencies.wait ?? (() => delay(500));
   let live = true, service, listener, listenerClosed = false, cleaned = false, constructing = false, cleanupConfirmed = false;
-  const compiler = dependencies.compiler ?? new ControlledConversationPrompt(new ControlledTokenizerProcess({ ...config.tokenizerFiles, current: () => live }), ...(config.dualAccounts ? ["open_conversation_v1"] : []));
+  const compiler = config.nonAiDemo ? { compile: async () => { throw new Error('AI_UNAVAILABLE'); } } : dependencies.compiler ?? new ControlledConversationPrompt(new ControlledTokenizerProcess({ ...config.tokenizerFiles, current: () => live }), ...(config.dualAccounts ? ["open_conversation_v1"] : []));
   // The actual CLI supplies the installed Q14 capture. Test seams retain the
   // existing isolated in-process path; ordinary application bootstrap is unchanged.
-  const diagnostics = dependencies.diagnostics;
-  const transport = dependencies.transport ?? new ControlledOllamaTransport({ ...config.binding, current: () => live }, compiler, undefined,
+  // An explicit unavailable collector uses the existing authenticated AI503 gate.
+  // No installed capture/model/tokenizer call occurs in non-AI mode.
+  const diagnostics = config.nonAiDemo ? new ControlledPhoneDiagnostics(() => {}, () => false) : dependencies.diagnostics;
+  const transport = config.nonAiDemo ? { state: 'stopped', generate: async () => { throw new Error('AI_UNAVAILABLE'); } } : dependencies.transport ?? new ControlledOllamaTransport({ ...config.binding, current: () => live }, compiler, undefined,
     diagnostics?.observe, diagnostics ? () => diagnostics.healthy : undefined);
   try {
-    assert(!diagnostics || diagnostics.healthy === true);
-    const abort = new AbortController(), end = performance.now() + 60_000;
-    const timer = setTimeout(() => abort.abort(), 60_000);
-    try {
-      const budget = { signal: abort.signal, deadline: end, remainingMs: () => Math.max(0, end - performance.now()) };
-      await transport.preflight(budget);
-      const probe = await (diagnostics?.compiler('startup_compile', compiler) ?? compiler).compile({ currentMessage: '今天读书了。', checkIns: [], persona: undefined,
-        ...(config.dualAccounts ? { strategy: 'open_conversation_v1', history: [] } : {}) }, budget);
-      assert(probe.includesAllFraming === true && Number.isSafeInteger(probe.tokens) && probe.tokens >= 1 && probe.tokens <= 4096);
-      assert.equal(probe.manifestDigest, config.binding.manifestDigest);
-      assert.equal(probe.tokenizerDigest, config.binding.tokenizerDigest);
-      assert(!budget.signal.aborted && budget.remainingMs() > 0);
+    if (!config.nonAiDemo) {
       assert(!diagnostics || diagnostics.healthy === true);
-      // No generation, storage, saved content, raw prompt or count is published.
+      const abort = new AbortController(), end = performance.now() + 60_000;
+      const timer = setTimeout(() => abort.abort(), 60_000);
+      try {
+        const budget = { signal: abort.signal, deadline: end, remainingMs: () => Math.max(0, end - performance.now()) };
+        await transport.preflight(budget);
+        const probe = await (diagnostics?.compiler('startup_compile', compiler) ?? compiler).compile({ currentMessage: '今天读书了。', checkIns: [], persona: undefined,
+          ...(config.dualAccounts ? { strategy: 'open_conversation_v1', history: [] } : {}) }, budget);
+        assert(probe.includesAllFraming === true && Number.isSafeInteger(probe.tokens) && probe.tokens >= 1 && probe.tokens <= 4096);
+        assert.equal(probe.manifestDigest, config.binding.manifestDigest);
+        assert.equal(probe.tokenizerDigest, config.binding.tokenizerDigest);
+        assert(!budget.signal.aborted && budget.remainingMs() > 0);
+        assert(!diagnostics || diagnostics.healthy === true);
+        // No generation, storage, saved content, raw prompt or count is published.
+      }
+      finally { clearTimeout(timer); abort.abort(); }
     }
-    finally { clearTimeout(timer); abort.abort(); }
     constructing = true;
     // A supplied private key constructs a source only; it NEVER enables it.
     const eventBrowse = config.eventBrowse ? { source: new TicketmasterBrowseSource({
@@ -248,7 +255,8 @@ export async function runPhoneService(config, dependencies = {}) {
       if (result?.cleanupConfirmed) cleanupConfirmed = true;
       // No model/key/token/URL/identity/content is included in readiness output.
       publish('status.json', { schemaVersion: 1, scope: 'isolated-phone-service', ...service.observation(),
-        hostPreflightPassed: true, tokenizerReadinessPassed: true, adapterState: transport.state, httpsListening: !listenerClosed,
+        ...(config.nonAiDemo ? { nonAiDemo: true } : {}),
+        hostPreflightPassed: !config.nonAiDemo, tokenizerReadinessPassed: !config.nonAiDemo, adapterState: transport.state, httpsListening: !listenerClosed,
         stopRequested: stopping, cleanupConfirmed: result?.cleanupConfirmed === true,
         eventControlFailed,
         ...(diagnostics ? { diagnosticCaptureHealthy: diagnostics.healthy } : {}),
@@ -306,6 +314,7 @@ async function execute() {
   assert.equal(process.platform, 'linux');
   requireControlledEmulatorEnvironment(process.env);
   const config = await configuration(); privateDirectory(config.phone.sessionDirectory);
+  if (config.nonAiDemo) return runPhoneService(config);
   const diagnostics = createHostDiagnostics();
   assert.equal(diagnostics.healthy, true);
   return runPhoneService(config, { diagnostics });

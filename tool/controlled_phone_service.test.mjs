@@ -6,6 +6,7 @@ import { mkdtempSync, symlinkSync, rmSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import Fastify from 'fastify';
 import { runPhoneService, validatePhoneServiceConfiguration, validateEventBrowseCommand } from './controlled_phone_service.mjs';
 import { ControlledPhoneDiagnostics } from '../backend/dist/src/bootstrap/controlled-phone-diagnostics.js';
 
@@ -285,4 +286,50 @@ test('child entrypoints run the guarded CLI from a symlinked writable project wi
     assert.equal(fixed.stdout, 'CONTROLLED_PHONE_SERVICE_START_FAILED_NO_PRIVATE_DIAGNOSTICS\n');
     assert.equal(fixed.stderr, '');
   } finally { rmSync(directory, { recursive: true, force: true }); }
+});
+
+
+test('non-AI opt-in is bounded to explicit dual-account demo configuration', () => {
+  const selected = { ...config(), demoFeatures: true, dualAccounts: true, nonAiDemo: true };
+  assert.equal(validatePhoneServiceConfiguration(selected), selected);
+  for (const change of [{ demoFeatures: undefined }, { dualAccounts: undefined }, { nonAiDemo: false }, { nonAiDemo: 'true' }]) {
+    assert.throws(() => validatePhoneServiceConfiguration({ ...selected, ...change }));
+  }
+});
+
+test('non-AI starts and hands off without model/tokenizer/capture access while existing AI503 gate stays closed', async () => {
+  const selected = { ...config(), demoFeatures: true, dualAccounts: true, nonAiDemo: true }, f = fixture();
+  f.deps.compiler = { compile: async () => assert.fail('No tokenizer/compiler call') };
+  f.deps.transport = { preflight: async () => assert.fail('No model preflight'), generate: async () => assert.fail('No physical generation') };
+  f.deps.diagnostics = { get healthy() { assert.fail('No installed capture access'); } };
+  const create = f.deps.createService;
+  f.deps.createService = async options => {
+    assert.equal(options.demoFeatures, true); assert.equal(options.dualAccounts, true);
+    assert.equal(options.diagnostics.healthy, false); assert.equal(options.transport.state, 'stopped');
+    await assert.rejects(options.compiler.compile({}), /AI_UNAVAILABLE/u);
+    await assert.rejects(options.transport.generate({}), /AI_UNAVAILABLE/u);
+    // Exercise the actual existing Fastify collector gate, not a fixed AI reply.
+    const app = Fastify({ logger: false }); options.diagnostics.install(app);
+    let aiInvocations = 0;
+    app.post('/v1/me/ai/operations', async () => { aiInvocations++; return {}; });
+    app.post('/v1/me/ai/operations/:operationId/execute', async () => { aiInvocations++; return {}; });
+    app.get('/v1/me/profile', async () => ({ available: true }));
+    try {
+      for (const url of ['/v1/me/ai/operations', '/v1/me/ai/operations/synthetic/execute']) {
+        const response = await app.inject({ method: 'POST', url });
+        assert.equal(response.statusCode, 503); assert.equal(response.json().error.code, 'AI_UNAVAILABLE');
+        assert.equal(response.headers['cache-control'], 'no-store');
+      }
+      assert.equal(aiInvocations, 0);
+      assert.equal((await app.inject({ method: 'GET', url: '/v1/me/profile' })).statusCode, 200);
+    } finally { await app.close(); }
+    return create(options);
+  };
+  assert.equal(await runPhoneService(selected, f.deps), 0);
+  assert.equal(f.state().preflights, 0);
+  assert.equal(f.reports.filter(row => row.name === 'handoff.json').length, 1);
+  const statuses = f.reports.filter(row => row.name === 'status.json' && row.report.phase === 'running');
+  assert(statuses.length > 0);
+  assert(statuses.every(row => row.report.nonAiDemo === true && row.report.hostPreflightPassed === false &&
+    row.report.tokenizerReadinessPassed === false && row.report.adapterState === 'stopped' && row.report.diagnosticCaptureHealthy === false));
 });
