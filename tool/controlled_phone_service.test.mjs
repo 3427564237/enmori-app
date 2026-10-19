@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { EventEmitter } from 'node:events';
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
+import { mkdtempSync, symlinkSync, rmSync, realpathSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { pathToFileURL } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { runPhoneService, validatePhoneServiceConfiguration, validateEventBrowseCommand } from './controlled_phone_service.mjs';
 import { ControlledPhoneDiagnostics } from '../backend/dist/src/bootstrap/controlled-phone-diagnostics.js';
 
@@ -254,4 +258,31 @@ test('v2 explicitly selects dual accounts and matched open strategy; private cre
   assert.equal(f.reports.find(row => row.name === 'handoff.json').report.secondaryAccount.password, 'private-second-only');
   assert(!JSON.stringify(f.reports.filter(row => row.name !== 'handoff.json')).includes('private-'));
   for (const bad of [{ dualAccounts: true }, { demoFeatures: true, dualAccounts: false }, { demoFeatures: true, dualAccounts: 'true' }]) assert.throws(() => validatePhoneServiceConfiguration({ ...config(), ...bad }));
+});
+
+
+test('child entrypoints run the guarded CLI from a symlinked writable project without silently exiting', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'enmori-phone-entrypoint-test-'));
+  try {
+    // Same immutable tool / writable project symlink arrangement as the owned host.
+    symlinkSync(realpathSync(new URL('.', import.meta.url)), join(directory, 'tool'), 'dir');
+    const alias = join(directory, 'tool', 'controlled_phone_service.mjs');
+    const loaded = await import(pathToFileURL(alias).href);
+    const { phoneServiceChildEntrypoints } = loaded;
+    assert(phoneServiceChildEntrypoints, 'Production child launch must expose its fixed entrypoints');
+    assert.equal(phoneServiceChildEntrypoints.main, realpathSync(alias));
+    assert.notEqual(phoneServiceChildEntrypoints.main, alias);
+    assert.equal(phoneServiceChildEntrypoints.gatewayBinding, pathToFileURL(realpathSync(join(directory, 'tool', 'ai_store_gateway_binding.mjs'))).href);
+    const run = main => spawnSync(process.execPath, [main, '--test-invalid-mode'], { cwd: directory, encoding: 'utf8', timeout: 10000 });
+    // Prove the regression exists at the actual guard, without entering any live mode.
+    const imported = spawnSync(process.execPath, ['--input-type=module', '--eval', `await import(${JSON.stringify(pathToFileURL(alias).href)}); console.log('IMPORTED');`], { cwd: directory, encoding: 'utf8', timeout: 10000 });
+    assert.ifError(imported.error); assert.equal(imported.status, 0);
+    assert.equal(imported.stdout, 'IMPORTED\n'); assert.equal(imported.stderr, '');
+    const broken = run(alias);
+    assert.ifError(broken.error); assert.equal(broken.status, 0); assert.equal(broken.stdout, '');
+    const fixed = run(phoneServiceChildEntrypoints.main);
+    assert.ifError(fixed.error); assert.equal(fixed.status, 1);
+    assert.equal(fixed.stdout, 'CONTROLLED_PHONE_SERVICE_START_FAILED_NO_PRIVATE_DIAGNOSTICS\n');
+    assert.equal(fixed.stderr, '');
+  } finally { rmSync(directory, { recursive: true, force: true }); }
 });

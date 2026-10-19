@@ -9,7 +9,7 @@ import { createServer as createHttpsServer } from 'node:https';
 import { mkdtempSync, readFileSync, writeFileSync, renameSync, lstatSync, realpathSync, rmSync, unlinkSync, existsSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, relative, isAbsolute } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import { validateZhouModelConfiguration, quoteFixedWorkerCommand } from './zhou_real_model_store_probe.mjs';
 import { buildControlledEmulatorTestEnvironment, requireControlledEmulatorEnvironment } from '../backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js';
@@ -19,6 +19,13 @@ import { ControlledOllamaTransport } from '../backend/dist/src/ai-runtime/infras
 import { createControlledPhoneService } from '../backend/dist/src/bootstrap/controlled-phone-service.js';
 import { TicketmasterBrowseSource } from '../backend/dist/src/event-browse/infrastructure/ticketmaster-browse-source.js';
 import { createHostDiagnostics } from './diagnostic_capture_client.mjs';
+
+// Child main URLs must match Node's canonical import.meta.url main guard,
+// even when the writable project points to this immutable tool directory.
+export const phoneServiceChildEntrypoints = Object.freeze({
+  main: fileURLToPath(import.meta.url),
+  gatewayBinding: new URL('./ai_store_gateway_binding.mjs', import.meta.url).href,
+});
 
 const ports = [8080, 9099, 4400, 4500, 9150];
 const transfer = 'phone-service-model-handoff.json';
@@ -131,7 +138,7 @@ async function outer() {
       // it must not kill Firebase/Java while the original model is unresolved.
       const child = spawn(process.execPath, [resolve('node_modules/firebase-tools/lib/bin/firebase.js'),
         'emulators:exec', '--project', 'demo-enmori-rmvp01a-r10', '--only', 'auth,firestore', '--config', 'firebase.json',
-        '--non-interactive', quoteFixedWorkerCommand(process.execPath, resolve('tool/controlled_phone_service.mjs'))],
+        '--non-interactive', quoteFixedWorkerCommand(process.execPath, phoneServiceChildEntrypoints.main)],
       { env, stdio: ['ignore', 'ignore', 'ignore'], detached: true, windowsHide: true });
       child.once('error', reject); child.once('exit', done);
     });
@@ -154,8 +161,8 @@ async function worker() {
   try {
     const env = buildControlledEmulatorTestEnvironment(process.env, directory);
     const code = await new Promise((done, reject) => {
-      const child = spawn(process.execPath, ['--import', pathToFileURL(resolve('tool/ai_store_gateway_binding.mjs')).href,
-        resolve('tool/controlled_phone_service.mjs'), '--execute'], { env, stdio: ['pipe', 'ignore', 'ignore'], windowsHide: true });
+      const child = spawn(process.execPath, ['--import', phoneServiceChildEntrypoints.gatewayBinding,
+        phoneServiceChildEntrypoints.main, '--execute'], { env, stdio: ['pipe', 'ignore', 'ignore'], windowsHide: true });
       child.stdin.on('error', () => {}); child.once('error', reject); child.once('exit', done);
       child.stdin.end(JSON.stringify(config));
     });
