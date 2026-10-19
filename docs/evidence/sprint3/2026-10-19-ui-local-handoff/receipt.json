@@ -1,0 +1,43 @@
+{
+  "sourceBaseline": "51ecb5c11ff23ce3bf36fbf9280d2e00646ac857",
+  "apk": {
+    "file": "enmori-core-local-v7-debug.apk",
+    "sha256": "6a7ca89f28f37003cb90e5ec3a7b37e178016ab75fe4bb8be0b48e153fbe114e",
+    "bytes": 173727333,
+    "package": "com.enmori.app.coretest",
+    "versionCode": 7,
+    "versionName": "1.0.0-core20261019c",
+    "signatureVerified": true,
+    "signerSha256": "0353f50d507f56ee2d8344e56b7b84d6afccdff31cab5a4ca8a69060a9979106",
+    "installedThisRun": false,
+    "nativeVerification": "Not Run: user cannot connect device"
+  },
+  "checks": {
+    "targetedFlutterAnalyze": "pass: 7 changed Dart files",
+    "existingWidgetAndLifecycleTests": "pass: 8 distinct checks across 3 files; one stale consent fixture corrected",
+    "backendTests": "Not Run: no backend implementation changed",
+    "realFirebaseAdminRead": "pass",
+    "realFirestoreCanonicalBindingRead": "pass: absent",
+    "realNativeAccountBusinessFlow": "Not Run"
+  },
+  "runtime": {
+    "previousStop": "2026-10-19T14:12:34.749Z exportConfirmed=false; preserved original logs/snapshot",
+    "restoredPrimaryCheckIns": 2,
+    "restoredSecondaryCheckIns": 0,
+    "bothAccountsLoginProfileSettings": "pass",
+    "bothConsentRejected": true,
+    "normalStop": "2026-10-19T14:48:51.345Z exportConfirmed=true",
+    "subsequentStartReady": true,
+    "aiMaintenanceHealthy": false
+  },
+  "previews": {
+    "home": {
+      "sha256": "c0184715c5a529a4d4e34ef8c11e645b70a9b582820fe980f4e91828b57688bb",
+      "type": "actual Flutter widget capture, no backend, not phone screenshot"
+    },
+    "sign-in": {
+      "sha256": "dbb07b0e042578bee059778165e36c4e6fb45d60268bc7800122aabd026e7ffe",
+      "type": "actual Flutter widget capture, no backend, not phone screenshot"
+    }
+  }
+}

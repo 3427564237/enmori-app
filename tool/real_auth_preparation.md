@@ -17,3 +17,9 @@
 最新核对：用户手机截图及正式 Auth lookup 均确认邮箱已验证（emailVerified=true）；PASSWORD_RESET 请求 HTTP200，等待用户完成重设。此阶段仍不是同一 coretest APK 的真实账号完整闭环。
 
 密码重置后续：用户已完成重设，一次旧密码登录返回 INVALID_LOGIN_CREDENTIALS，旧凭据失效已确认。不要继续使用私有 test-identity.json 中的原密码；不索取新密码。新密码登录及真实账号与 App/Backend 的完整组合尚待验证。
+
+## 本轮真实 Backend 预检
+
+2026-10-19T14:50:34Z，以原有 ADC、精确项目 enmori-rmvp-controlled 只读运行 Firebase Admin getUserByEmail，并按 createAuthBindingDocumentId 读取规范 auth_bindings 文档：Auth/Firestore 读取均成功、邮箱已验证、业务绑定不存在。第一次通用连接探测的裸 UID 路径不是合同路径，不用于业务状态结论；以上规范路径读回已更正该判断。未写云端资料、未再次发信、未使用已失效旧密码。
+
+现有 controlled-runtime.ts 是真实 Auth+Firestore 组合，明确拒绝 Emulator 环境变量；完整 retained-core-runtime.ts 仍要求 Emulator。新密码原生登录、真实 UID 的引导及资料业务回读、整套 AI/好友/Events 的真实环境组合仍未完成。私有配置/ADC 已可用，接手时复用，不重建项目或要求把密码发到聊天中。

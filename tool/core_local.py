@@ -90,7 +90,7 @@ def main():
     parser.add_argument('--ai', action='store_true')
     parser.add_argument('--events', action='store_true')
     parser.add_argument('--serial')
-    parser.add_argument('--apk', type=Path, default=REPO / 'build/deliverables/core-local-oct19/enmori-core-local-v6-debug.apk')
+    parser.add_argument('--apk', type=Path, default=REPO / 'build/deliverables/core-local-oct19/enmori-core-local-v7-debug.apk')
     parser.add_argument('--adb', default=str(Path.home() / 'Android/Sdk/platform-tools/adb'))
     parser.add_argument('--aapt', default=str(Path.home() / 'Android/Sdk/build-tools/36.0.0/aapt'))
     args = parser.parse_args()
