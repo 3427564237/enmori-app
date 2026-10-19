@@ -453,7 +453,8 @@ final class BackendApiClient {
       'ADD_FRIEND_TARGET_UNAVAILABLE' =>
         AppFailureKind.addFriendTargetUnavailable,
       'FRIEND_REQUEST_UNAVAILABLE' => AppFailureKind.friendRequestUnavailable,
-      'FRIEND_REVISION_PRECONDITION_FAILED' => AppFailureKind.friendRevisionPreconditionFailed,
+      'FRIEND_REVISION_PRECONDITION_FAILED' =>
+        AppFailureKind.friendRevisionPreconditionFailed,
       'EVENT_UNAVAILABLE' => AppFailureKind.eventUnavailable,
       'PROFILE_INVALID' => AppFailureKind.profileInvalid,
       'PROFILE_REVISION_PRECONDITION_FAILED' =>

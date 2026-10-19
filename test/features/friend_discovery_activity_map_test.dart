@@ -150,7 +150,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.textContaining('OpenStreetMap'), findsOneWidget);
+      expect(
+        find.widgetWithText(TextButton, '© OpenStreetMap contributors'),
+        findsOneWidget,
+      );
       expect(find.text('Check-in point connections'), findsOneWidget);
       final button = find.byType(ListTile);
       expect(button, findsOneWidget);
