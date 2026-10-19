@@ -1,0 +1,53 @@
+{
+  "sourceCommit": "ad4dfeb1b60ad5bbfb372c210730fa5770e0fe94",
+  "backendSourceCommit": "f87d6b4afef3d0917d8c5576722d79d0e730d90e",
+  "apk": "build/deliverables/core-local-oct19/enmori-core-local-v6-debug.apk",
+  "apkSha256": "b6b64105144cc21fd4130d02ea825a40e2dfd1e7d3c7eebb9709bbe339bc7bed",
+  "package": "com.enmori.app.coretest",
+  "versionCode": 6,
+  "versionName": "1.0.0-core20261019b",
+  "device": "V2405A",
+  "privateHandoff": "Pass; installed APK matched; nonce consumed",
+  "nativeAiRelatedRounds": 3,
+  "nativeAiReplySavedTimes": [
+    "2026-10-19T13:20:30.995Z",
+    "2026-10-19T13:21:24.226Z",
+    "2026-10-19T13:22:39.614Z"
+  ],
+  "nativeCheckInSavedAndReread": "2026-10-19T13:24:06.178Z",
+  "nativeCheckInVisibility": "Private",
+  "scope": "Bounded local checkpoint, not full UAT or all five batches",
+  "realEmailSent": "providerAccepted; delivery not yet confirmed",
+  "controlledRestart": {
+    "stoppedAt": "2026-10-19T13:11:30.370Z",
+    "exportConfirmed": true
+  },
+  "weatherProviderProbe": {
+    "status": 200,
+    "elapsedSeconds": 0.69,
+    "syntheticPublicGrid": true,
+    "conditionCodePresent": true,
+    "temperaturePresent": true,
+    "withinTwoSeconds": true
+  },
+  "secondaryOnboarding": "Username, reject consent, skip interests, own profile and AI Limited confirmed",
+  "secondarySignedOut": true,
+  "locationRestoration": {
+    "systemLocationEnabled": false,
+    "coarsePermissionGranted": false,
+    "draftSaved": false,
+    "sentToWeather": false
+  },
+  "checkpointExport": {
+    "stoppedAt": "2026-10-19T13:27:54.005Z",
+    "exportConfirmed": true
+  },
+  "realFirebase": {
+    "registrationHttpStatus": 200,
+    "verificationRequestHttpStatus": 200,
+    "emailVerifiedAtInitialLookup": false,
+    "provider": "Firebase production Auth",
+    "businessBackend": "not connected to real identity",
+    "passwordReset": "not sent yet"
+  }
+}

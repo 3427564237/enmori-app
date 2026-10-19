@@ -80,3 +80,7 @@
 ## 本机继续执行的最新范围
 
 设备已连接，普通coretest APK已安装；此前原生分段流程与失败见local-continuation/verification.md。本次后端显式组合真实Events和简化Ollama，取消项目自设内容正则审查与root诊断前置。运行/恢复结果见local-continuation/simple-chat-and-events.md。本次未改Flutter，不重打相同APK，不把主机API通过写成手机完整流程通过。AI自由Persona字段/独立预览、地图天气、完整社交与Events参与闭环仍未完成，旧分工继续暂停。
+
+## v6 本机检查点追加
+
+上段“本次未改Flutter”仅描述前一个检查点。本轮已修复 AI 首屏同意门禁和定位反馈，新增日常运行入口，并完成 v6 原生定位草稿、三轮真实聊天、同意撤回后签到保存回读及活动浏览。详细状态与仍缺功能见[本机验证记录](../2026-10-19-local-device-checkpoint/verification.md)；真实邮件已完成配置及独立测试注册，供应商接受验证邮件请求；收件/链接及重置返回仍待确认。继续单对话，未派发旧任务包。
