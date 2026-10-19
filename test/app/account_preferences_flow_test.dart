@@ -41,6 +41,14 @@ void main() {
       );
       await tester.pageBack();
       await frames(tester);
+      expect(find.text('Leave without saving?'), findsOneWidget);
+      await tester.tap(find.text('Stay'));
+      await frames(tester);
+      expect(find.text('Unsaved'), findsOneWidget);
+      await tester.pageBack();
+      await frames(tester);
+      await tester.tap(find.text('Discard changes'));
+      await frames(tester);
       expect(h.prefs.profileNames.length, 1);
       expect(find.text('Unsaved'), findsNothing);
     },
@@ -65,6 +73,30 @@ void main() {
       expect(h.prefs.settingsSaveCount, 2);
     },
   );
+  testWidgets('unsaved Settings changes require an explicit discard', (
+    tester,
+  ) async {
+    await start(tester);
+    await tap(tester, 'profile-settings');
+    await tap(tester, 'settings-consent');
+    await tester.pageBack();
+    await frames(tester);
+    expect(find.text('Leave without saving?'), findsOneWidget);
+    await tester.tap(find.text('Stay'));
+    await frames(tester);
+    expect(find.byKey(const Key('route-settings')), findsOneWidget);
+    expect(
+      tester
+          .widget<SwitchListTile>(find.byKey(const Key('settings-consent')))
+          .value,
+      isTrue,
+    );
+    await tester.pageBack();
+    await frames(tester);
+    await tester.tap(find.text('Discard changes'));
+    await frames(tester);
+    expect(find.byKey(const Key('route-settings')), findsNothing);
+  });
   testWidgets('stale save requires explicit reload and emits no success', (
     tester,
   ) async {

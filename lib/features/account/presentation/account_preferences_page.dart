@@ -29,6 +29,7 @@ final class _AccountPreferencesPageState
   CheckInVisibility _checkInVisibility = CheckInVisibility.private;
   OptionalProcessingConsent _consent = OptionalProcessingConsent.rejected;
   bool _signingOut = false;
+  bool _allowPopAfterDiscard = false;
   String? _signOutError;
   @override
   void dispose() {
@@ -55,7 +56,19 @@ final class _AccountPreferencesPageState
     final ready = state.phase == PreferencesPhase.ready && !_signingOut;
     final profile = widget.view == PreferencesView.profile;
     final controller = ref.read(provider.notifier);
-    return Scaffold(
+    final dirty = profile
+        ? _name.text != (state.profile?.displayName ?? '') ||
+              _profileVisibility !=
+                  (state.profile?.visibility ?? ProfileVisibility.private)
+        : _checkInVisibility !=
+                  (state.settings?.checkInVisibility ??
+                      CheckInVisibility.private) ||
+              _consent !=
+                  (state.settings?.consent ??
+                      OptionalProcessingConsent.rejected);
+    final busy =
+        state.phase == PreferencesPhase.saving || _signingOut;
+    final page = Scaffold(
       appBar: AppBar(title: Text(profile ? 'Edit profile' : 'Settings')),
       body: SafeArea(
         child: Center(
@@ -73,6 +86,7 @@ final class _AccountPreferencesPageState
                       key: const Key('profile-display-name'),
                       controller: _name,
                       enabled: ready,
+                      onChanged: (_) => setState(() {}),
                       decoration: const InputDecoration(
                         labelText: 'Display name (optional)',
                         helperText:
@@ -238,6 +252,36 @@ final class _AccountPreferencesPageState
           ),
         ),
       ),
+    );
+    return PopScope<void>(
+      canPop: (!dirty && !busy) || _allowPopAfterDiscard,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop || busy || !dirty || _allowPopAfterDiscard) return;
+        final discard = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Leave without saving?'),
+            content: const Text('Your unsaved changes will be lost.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Stay'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Discard changes'),
+              ),
+            ],
+          ),
+        );
+        if (discard == true && mounted) {
+          setState(() => _allowPopAfterDiscard = true);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) Navigator.of(context).pop();
+          });
+        }
+      },
+      child: page,
     );
   }
 

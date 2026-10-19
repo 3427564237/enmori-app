@@ -24,6 +24,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final _passwordFocusNode = FocusNode();
   final _confirmFocusNode = FocusNode();
   bool _submitted = false;
+  bool _allowPopAfterDiscard = false;
 
   @override
   void initState() {
@@ -61,7 +62,10 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
     final state = ref.watch(registrationControllerProvider);
     final pending = state is CommandPending<void>;
-    return Scaffold(
+    final hasDraft = _emailController.text.isNotEmpty ||
+        _passwordController.text.isNotEmpty ||
+        _confirmController.text.isNotEmpty;
+    final page = Scaffold(
       appBar: AppBar(title: const Text('Create account')),
       body: SafeArea(
         child: Center(
@@ -91,6 +95,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         decoration: const InputDecoration(labelText: 'Email'),
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
+                        onChanged: (_) => setState(() {}),
                         validator: _validateEmail,
                       ),
                       const SizedBox(height: 12),
@@ -104,6 +109,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         ),
                         obscureText: true,
                         textInputAction: TextInputAction.next,
+                        onChanged: (_) => setState(() {}),
                         validator: _validatePassword,
                       ),
                       const SizedBox(height: 12),
@@ -117,6 +123,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                         ),
                         obscureText: true,
                         textInputAction: TextInputAction.done,
+                        onChanged: (_) => setState(() {}),
                         validator: _validateConfirmPassword,
                       ),
                       if (_submitted && _fieldErrors.isNotEmpty) ...[
@@ -160,6 +167,38 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
           ),
         ),
       ),
+    );
+    return PopScope<void>(
+      canPop: (!pending && !hasDraft) || _allowPopAfterDiscard,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop || pending || !hasDraft || _allowPopAfterDiscard) return;
+        final discard = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Leave registration?'),
+            content: const Text(
+              'Your unsaved account details will be lost.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Stay'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Discard details'),
+              ),
+            ],
+          ),
+        );
+        if (discard == true && mounted) {
+          setState(() => _allowPopAfterDiscard = true);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) Navigator.of(context).pop();
+          });
+        }
+      },
+      child: page,
     );
   }
 
