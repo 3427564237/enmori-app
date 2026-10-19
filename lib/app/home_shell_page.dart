@@ -212,6 +212,13 @@ final class HomeShellPage extends StatelessWidget {
                         icon: const Icon(Icons.arrow_forward),
                         label: const Text('Browse activities'),
                       ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        key: const Key('home-recommended-activities'),
+                        onPressed: onSeeAllEvents,
+                        icon: const Icon(Icons.event_outlined),
+                        label: const Text('Recommended activities'),
+                      ),
                     ],
                   ),
                 ),

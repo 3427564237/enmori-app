@@ -44,6 +44,97 @@ final class AuthDouble implements AuthRepository {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   testWidgets(
+    'v2 social Home opens existing recommendations using its authenticated Backend repository',
+    (tester) async {
+      final auth = AuthDouble();
+      final recommendationViews = <String?>[];
+      final client = MockClient((request) async {
+        expect(request.url.origin, 'https://127.0.0.1:42001');
+        expect(request.method, 'GET');
+        expect(request.headers['authorization'], 'Bearer synthetic-test-token');
+        final Map<String, Object?> body;
+        if (request.url.path == '/v1/me/onboarding') {
+          body = {
+            'status': 'completed',
+            'account': {
+              'username': 'controlled_primary',
+              'optionalProcessingConsent': 'accepted',
+              'checkInVisibility': 'private',
+              'onboardingCompletedAt': '2026-10-19T00:00:00.000Z',
+            },
+          };
+        } else {
+          expect(request.url.path, '/v1/recommendations/events');
+          recommendationViews.add(request.url.queryParameters['view']);
+          body = {
+            'asOf': '2026-10-19T00:00:00.000Z',
+            'formulaVersion': 'event_recommendation_v1',
+            'items': [
+              {
+                'eventId': 'synthetic-source-projection-id',
+                'title': 'Synthetic source Music recommendation',
+                'startAt': '2026-10-20T10:00:00.000Z',
+                'matchedInterests': [
+                  {'interestTagId': 'interest_music', 'displayName': 'Music'},
+                ],
+                'reasonCode': 'interest_match',
+              },
+            ],
+          };
+        }
+        return http.Response(
+          jsonEncode(body),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+      await tester.pumpWidget(
+        ControlledDemoApp(
+          baseUri: Uri.parse('https://127.0.0.1:42001/'),
+          auth: auth,
+          client: client,
+          dualAccounts: true,
+          onClose: () async => const Success(null),
+        ),
+      );
+      await tester.pump();
+      auth.sessions.add(
+        const AuthSessionAuthenticated(subject: 'controlled_primary'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('route-home')), findsOneWidget);
+      expect(recommendationViews, isEmpty);
+      final action = find.byKey(const Key('home-recommended-activities'));
+      await tester.ensureVisible(action);
+      await tester.pumpAndSettle();
+      await tester.tap(action);
+      await tester.pumpAndSettle();
+      expect(
+        GoRouterState.of(
+          tester.element(find.byKey(const Key('route-event-recommendations'))),
+        ).uri.path,
+        AppRoutes.eventRecommendations,
+      );
+      expect(recommendationViews, ['all']);
+      expect(
+        find.text('Synthetic source Music recommendation'),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('event-recommendations-error')),
+        findsNothing,
+      );
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('route-home')), findsOneWidget);
+      expect(recommendationViews, ['all', 'home']);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await auth.sessions.close();
+      client.close();
+    },
+  );
+  testWidgets(
     'v2 enters registration through the existing router and keeps login available after observed signout',
     (tester) async {
       final auth = AuthDouble();
