@@ -40,3 +40,7 @@
 - SHI：组件级接收。Interested/Going/ignore 真实写入、参与者分页、Home/列表/资料状态回读、外部返回真实保存仍未实现。本轮不接管 SHI 后续全模块实现，ZHOU 仍是独立审查者。
 - [P01–P06 集中确认稿](../../../planning/2026-10-20-li-event-participation-selection-preview.md)已准备，等待人类批准。不能把转发的队友建议当成 PM 确认。确认后先记录 decisions，再转交一份完整续作 prompt；无需主机凭据。
 - 不 auto-merge，不发布、不关闭 Issue、不标项目 Done；本机与手机后续集中验证，当前不要求用户连接手机。
+
+## 后续批准记录
+
+LI已答复“批准 P01–P06，按限定范围继续（推荐）”，见[正式决定](../../../decisions/2026-10-20-li-event-participation-selection.md)。此前等待确认是本检查点当时状态；现在该合同门禁解除，SHI可按限定范围续作。本次仅改文档及打包，沿用上述源码检查，不重跑未变实现的测试，不增加APK/设备通过结论。

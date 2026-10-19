@@ -1,5 +1,7 @@
 # Event participation — one concentrated contract decision
 
+> 20Oct 后续：LI 已批准 P01–P06 及限定实施委托，见[正式决定](../decisions/2026-10-20-li-event-participation-selection.md)。本文件是 SHI538b34d 当时的缺口记录；对应 Pending 已解除，历史原文保留。
+
 Status: candidate / NOT approved as a physical API or datastore contract.
 Owner: SHI. Product decision: LI. Implementation review: ZHOU.
 

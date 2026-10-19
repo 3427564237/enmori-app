@@ -1,10 +1,10 @@
-# SHI 完整续作 prompt（P01–P06 获批后转交）
+# SHI 完整续作 prompt（P01–P06 已批准）
 
-**执行前提：**只有 LI 已明确批准 `docs/planning/2026-10-20-li-event-participation-selection-preview.md` 的 P01–P06 且确认已记录到 `docs/decisions/`，才能执行以下物理合同实施。当前文件准备完成不代表已批准。若仅收到草稿，请读取并保留现有组件，不自行宣称确认。
+**已获批准，可以执行。** LI 已明确答复“批准 P01–P06，按限定范围继续（推荐）”，并记录于 `docs/decisions/2026-10-20-li-event-participation-selection.md`。该决定引用准确确认稿版本；先读正式决定及其引用，不因旧草稿的历史 Pending 再次索要相同批准。当前源码准确 HEAD 和独立 checkout 方法见本包 `manifest.json`、`README.md`。
 
 继续你提交的 `538b34d` Events 包，在独立分支一次完成 Events 的前端、后端、实际 Repository 持久保存回读、严格合同/fixtures 和必要隔离验证。沿用本次包提供的整合基线，包含最新主题、真实账号配置边界和 DU 返回保护；不要以旧 main 覆盖。先核对 HEAD 和未提交文件，保留现有改动。
 
-先读 AGENTS、适用 Backend/Flutter skill、P01–P06 的真实确认记录和最终选择稿；旧合同/失败证据保留。P05 若已获批，允许你在明确范围内选择精确 DTO、键、索引、游标、扫描界限和错误标识，先持久化精确合同，再实施；不为每个字段反复等待。范围外的新产品/权限/依赖冲突集中一次报告，只停受影响行为。
+先读 AGENTS、适用 Backend/Flutter skill、P01–P06 的真实确认记录和最终选择稿；旧合同/失败证据保留。P05 已获批，允许你在明确范围内选择精确 DTO、键、索引、游标、扫描界限和错误标识，先持久化精确合同，再实施；不为每个字段反复等待。范围外的新产品/权限/依赖冲突集中一次报告，只停受影响行为。
 
 将已交付 EventCard 和 ExternalRegistrationAction 接到实际 stable Event ID 页面与 Riverpod Repository；完成 Interested/Going/取消/忽略，Home/Events/详情/资料回读一致。外部跳转先提示，返回明确 Yes 才写 Going，No 不写，不新增 Booked；未知结果先读，不盲重发。浏览器期间父页面普通 rebuild 不得重置 flow：稳定 callback/依赖身份并加入一项针对性回归。会话变更清空旧状态和回调，现有来源有效期规则仍适用。
 

@@ -19,5 +19,11 @@
     "backend-test.log": "9c486aeba4290b3ce435509a19f0edb522517dfef39181db48b6314b15ec8b85",
     "flutter-du-rerun.log": "cb8a60cba37f797283dca9823d5889a5db6dd398095b742d521d1fcb7f1cacc8",
     "flutter.log": "8d6ed4fb9d818c71b6714cb8c6a9fb9c485643e0765f7667764a1d17edfabd5e"
+  },
+  "subsequentContractApproval": {
+    "status": "approved-human-P01-P06",
+    "source": "S-PM-1020-LI-EVENT-PARTICIPATION",
+    "originalPreviewSha256": "3fe8b76181bafc813a536c29ac60dc08b1d1f931a1d2b1d3ac548a6420fa1d05",
+    "newImplementationTests": "Not Run; documentation-only approval update"
   }
 }
