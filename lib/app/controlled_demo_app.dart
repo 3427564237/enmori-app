@@ -20,6 +20,7 @@ import '../features/ai_conversation/ai_conversation_providers.dart';
 import '../features/ai_conversation/data/ai_wire_repository.dart';
 import '../features/ai_conversation/data/http_ai_wire_transport.dart';
 import '../features/ai_conversation/presentation/ai_conversation_page.dart';
+import '../features/ai_conversation/presentation/ai_consent_gate.dart';
 import '../features/personas/persona_providers.dart';
 import '../features/personas/data/backend_persona_repository.dart';
 import '../features/personas/presentation/persona_overview_page.dart';
@@ -141,26 +142,44 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
               context,
               listen: false,
             ).read(authSessionProvider).value;
-            return AiConversationPage(
-              socialStyle: true,
-              navigationBarBuilder: (navigate) => SocialDemoNavigation(
-                selectedIndex: 3,
-                onSelected: (index) => navigate(() {
-                  if (context.mounted) {
-                    selectConnectedSocialTab(
-                      context,
-                      index,
-                      session: session,
-                      sourcePath: AppRoutes.aiAssistant,
-                    );
-                  }
-                }),
-              ),
-              onBack: onBack,
+            void selectTab(int index) {
+              if (context.mounted) {
+                selectConnectedSocialTab(
+                  context,
+                  index,
+                  session: session,
+                  sourcePath: AppRoutes.aiAssistant,
+                );
+              }
+            }
+
+            return AiConsentGate(
               onOpenSettings: onOpenSettings,
-              onOpenPersonas: () {
-                if (context.mounted) context.push<void>(AppRoutes.personas);
-              },
+              navigationBar: SocialDemoNavigation(
+                selectedIndex: 3,
+                onSelected: selectTab,
+              ),
+              child: AiConversationPage(
+                socialStyle: true,
+                navigationBarBuilder: (navigate) => SocialDemoNavigation(
+                  selectedIndex: 3,
+                  onSelected: (index) => navigate(() {
+                    if (context.mounted) {
+                      selectConnectedSocialTab(
+                        context,
+                        index,
+                        session: session,
+                        sourcePath: AppRoutes.aiAssistant,
+                      );
+                    }
+                  }),
+                ),
+                onBack: onBack,
+                onOpenSettings: onOpenSettings,
+                onOpenPersonas: () {
+                  if (context.mounted) context.push<void>(AppRoutes.personas);
+                },
+              ),
             );
           },
         ),

@@ -1,7 +1,7 @@
 /** Retained Auth/Firestore core environment. No reset, model call or cleanup API. */
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { existsSync, mkdirSync, lstatSync, writeFileSync, unlinkSync, openSync, closeSync, readdirSync, realpathSync } from 'node:fs';
+import { existsSync, readFileSync, mkdirSync, lstatSync, writeFileSync, unlinkSync, openSync, closeSync, readdirSync, realpathSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { createServer } from 'node:net';
 import { buildControlledEmulatorTestEnvironment } from '../backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js';
@@ -25,9 +25,10 @@ if (!existsSync(marker)) {
   writeFileSync(marker, 'ENMORI retained core v1\n', { flag: 'wx', mode: 0o600 });
 }
 const lock = join(directory, 'running.lock');
-writeFileSync(lock, '', { flag: 'wx', mode: 0o600 });
+writeFileSync(lock, JSON.stringify({ pid: process.pid, startTicks: readFileSync(`/proc/${process.pid}/stat`, 'utf8').split(') ').at(-1).split(' ')[19], bootId: readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim() }), { flag: 'wx', mode: 0o600 });
 const stop = join(directory, 'stop-requested');
 let child;
+let exportConfirmed = false;
 try {
   for (const port of [authPort, 8088, 4408, 4508, 9158, 9380]) {
     await new Promise((done, reject) => {
@@ -68,7 +69,10 @@ try {
   process.off('SIGINT', onSignal); process.off('SIGTERM', onSignal);
   assert.equal(code, 0, 'Core process or export failed; preserve the data directory');
   assert(existsSync(join(snapshot, 'firebase-export-metadata.json')), 'Snapshot was not confirmed');
+  exportConfirmed = true;
   console.log('Core stopped; Auth and Firestore snapshot retained.');
 } finally {
+  writeFileSync(join(directory, 'phone-ready.json'), JSON.stringify({ ready: false }), { mode: 0o600 });
+  writeFileSync(join(directory, 'last-stop.json'), JSON.stringify({ stoppedAt: new Date().toISOString(), exportConfirmed }), { mode: 0o600 });
   unlinkSync(lock);
 }

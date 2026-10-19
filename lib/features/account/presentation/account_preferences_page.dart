@@ -451,6 +451,10 @@ final class _AccountPreferencesPageState
           _locationMessage = failure.message;
       }
     });
+    if (_locationMessage case final message?) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   String? _nullable(String value) => value.trim().isEmpty ? null : value.trim();

@@ -45,3 +45,20 @@ ENMORI_CORE_ANDROID_TEST=true fvm flutter test integration_test/retained_core_de
 Emulator export/import会重建服务createTime。简化聊天在新消息原事务内附加内部`retainedCreatedAt:serverTimestamp()`；仅本机组合的Firestore适配器读取/保留它，公共消息合同不变，客户端不能指定。旧无字段会话保持原读取规则，若导入后保留期链不一致，显示不可用，不伪造历史或延长期限。维护仍检查旧记录，`aiMaintenanceHealthy:false`表示存在需处理的记录；它不全局封锁其他有效会话。
 
 空提示预加载与keep_alive沿用[Ollama官方FAQ](https://github.com/ollama/ollama/blob/main/docs/faq.mdx)，不发送额外聊天，不启动循环保活任务。
+
+## 本机日常入口
+
+在本工作区执行（默认使用原`~/.local/state/enmori-core-verification-oct19`，不自动创建替代数据目录）：
+
+```sh
+python3 tool/core_local.py start --events --ai
+python3 tool/core_local.py status
+python3 tool/core_local.py connect --serial 10AF5N20E0004UH --apk /absolute/path/to/verified.apk
+python3 tool/core_local.py stop
+```
+
+`start`复用现有Node24.19.0和已构建Backend，后台启动，模型准备完成后`status`才报告ready；找不到版本可通过`--node`指定现有文件，不安装软件。修改Backend后先构建一次。`status`核对进程启动标识、boot ID、TLS响应和Auth端口；旧ready文件或陈旧锁不视为运行成功。AI维护字段为启动检查结果，不能替代正在进行的操作结果查询。
+
+`connect`只打开已安装的coretest应用，核对APK并通过原私有nonce交接，不安装、不清缓存、不强行结束原操作。没有新nonce时保留现有会话并明确返回，不能把这个状态当成新的交接成功。仅选择一次的系统外部跳转确认由设备正常处理。
+
+`stop`只向原运行目录发停止请求；正常导出后写入`last-stop.json`。40秒内未结束返回stopping，不强杀或清锁，可稍后status查看。旧版本的空running.lock可通过原停止请求关闭，但没有last-stop回执时入口不声称导出已确认；应读原启动进程退出和导出结果。新启动写入所有权元数据，不修改历史数据。
