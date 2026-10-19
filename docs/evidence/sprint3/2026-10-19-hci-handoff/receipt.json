@@ -1,0 +1,50 @@
+{
+  "archiveName": "ENMORI-HCI-7848b5a-v3-handoff(1).zip",
+  "archiveSha256": "a15d710248d04bfa83af2753c8eb264d80dd3bcce0562c53fd68bb0dd9152e91",
+  "entryCount": 8,
+  "listedFileHashesVerified": 7,
+  "declaredSourceCommit": "7848b5a75c65b5455394684512cb8f4cf58d6743",
+  "verifiedSourceTree": "dd185879fd6626e0465162418722fcee0fe0e2d3",
+  "comparedWith": "3534962bc0ac440c10de0ce2e2d5f266ba3c9b0d",
+  "sourceIsAncestor": true,
+  "incomingPathComparison": {
+    "docs/decisions/2026-10-18-li-complete-user-journey-delivery.md": "unchanged",
+    "docs/decisions/2026-10-18-li-functionality-and-reliability-priority.md": "unchanged",
+    "docs/evidence/sprint3/2026-10-18-li-interest-session-reliability.json": "unchanged",
+    "docs/evidence/sprint3/2026-10-18-li-interest-session-reliability.md": "unchanged",
+    "docs/evidence/sprint3/2026-10-18-zhou-ai-local-admission.json": "unchanged",
+    "docs/evidence/sprint3/2026-10-18-zhou-ai-local-admission.md": "unchanged",
+    "docs/planning/2026-10-18-li-interest-catalogue-expansion-options.md": "unchanged",
+    "lib/features/ai_conversation/presentation/ai_conversation_page.dart": "subsequently_modified",
+    "lib/features/check_in/presentation/check_in_history_controller.dart": "unchanged",
+    "lib/features/check_in/presentation/check_in_history_page.dart": "subsequently_modified",
+    "lib/features/friends/presentation/friend_controller.dart": "unchanged",
+    "lib/features/interests/presentation/interest_editor_controller.dart": "unchanged",
+    "test/app/check_in_history_shared_router_test.dart": "unchanged",
+    "test/features/ai_conversation/ai_conversation_page_test.dart": "subsequently_modified",
+    "test/features/check_in_history_controller_test.dart": "subsequently_modified",
+    "test/features/friend_request_session_test.dart": "unchanged",
+    "test/features/interest_editor_session_test.dart": "unchanged",
+    "test/harness/ai_local_rejection_journey_test.dart": "subsequently_modified"
+  },
+  "receivedApk": {
+    "sha256": "f190eea12850fd2debe34982c91ccf5c79a1f97b9ea709b758aa746e126bc21e",
+    "package": "com.enmori.app.hcitest",
+    "versionCode": 3,
+    "signerSha256": "a6ff83fa12ff92d4b33e5efde167aee3b0f3f4590bd843def55d9584f7724dd3",
+    "signatureVerified": true
+  },
+  "installedHci": {
+    "versionCode": 2,
+    "sha256": "6bef23b5352d170483852aab2bd91ac02c6ed04bc9a6aa98dd3b0006db5c024a",
+    "sameSigner": true,
+    "matchesReceived": false
+  },
+  "actions": {
+    "installed": false,
+    "launched": false,
+    "packageScriptsExecuted": false,
+    "productCodeChanged": false,
+    "testSuitesRepeated": false
+  }
+}
