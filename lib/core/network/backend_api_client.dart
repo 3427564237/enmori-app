@@ -395,6 +395,11 @@ final class BackendApiClient {
           message: 'The service returned an invalid response.',
         ),
       );
+    } on Object {
+      // Native TLS, token-channel and response-stream failures need not be
+      // ClientException. Keep them inside the Result boundary so consumers
+      // can leave their pending state without publishing transport details.
+      return const Failure(_unavailable);
     }
   }
 
