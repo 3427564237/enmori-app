@@ -122,17 +122,21 @@ final class HomeShellPage extends StatelessWidget {
 
   Widget _socialHome(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Row(
+      title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.fiber_manual_record, size: 11, color: Color(0xff4f46e5)),
+          Icon(
+            Icons.fiber_manual_record,
+            size: 11,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           SizedBox(width: 8),
           Text(
             'enmori',
             style: TextStyle(
               fontSize: 26,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
+              fontFamily: 'Playfair Display',
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -167,14 +171,9 @@ final class HomeShellPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Find your people.\nMake a little room.',
-                style: TextStyle(
-                  fontSize: 30,
-                  height: 1.16,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -1,
-                ),
+                style: Theme.of(context).textTheme.headlineLarge,
               ),
               const SizedBox(height: 12),
               const Text(
@@ -187,19 +186,18 @@ final class HomeShellPage extends StatelessWidget {
                 icon: const Icon(Icons.edit_note),
                 label: const Text('New Check-in'),
               ),
-              const SizedBox(height: 14),
-              const SizedBox(height: 22),
+              const SizedBox(height: 24),
               Card(
-                color: const Color(0xffeeedff),
+                color: Theme.of(context).colorScheme.primaryContainer,
                 child: Padding(
                   padding: const EdgeInsets.all(22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.explore_outlined,
                         size: 36,
-                        color: Color(0xff4f46e5),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(height: 14),
                       Text(
@@ -235,9 +233,9 @@ final class HomeShellPage extends StatelessWidget {
                 child: ListTile(
                   key: const Key('social-ai-card'),
                   contentPadding: const EdgeInsets.all(17),
-                  leading: const Icon(
+                  leading: Icon(
                     Icons.auto_awesome_outlined,
-                    color: Color(0xff4f46e5),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   title: const Text('A moment for yourself'),
                   subtitle: const Text(

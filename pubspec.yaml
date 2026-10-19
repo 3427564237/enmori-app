@@ -67,6 +67,17 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/fonts/playfair_display/OFL.txt
+  fonts:
+    - family: Playfair Display
+      fonts:
+        - asset: assets/fonts/playfair_display/PlayfairDisplay[wght].ttf
+          weight: 400
+        - asset: assets/fonts/playfair_display/PlayfairDisplay[wght].ttf
+          weight: 600
+        - asset: assets/fonts/playfair_display/PlayfairDisplay[wght].ttf
+          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:

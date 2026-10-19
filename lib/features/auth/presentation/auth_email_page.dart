@@ -89,7 +89,10 @@ final class _AuthEmailPageState extends ConsumerState<AuthEmailPage> {
             controller: _email,
             enabled: !_pending,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              prefixIcon: Icon(Icons.mail_outline),
+            ),
           ),
         const SizedBox(height: 20),
         FilledButton(

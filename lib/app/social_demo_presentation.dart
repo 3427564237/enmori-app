@@ -1,45 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'enmori_theme.dart';
+
 /// Presentation opt-in only; never selects repositories or grants a session.
 final socialDemoPresentationProvider = Provider<bool>((ref) => false);
 
-/// The existing offline preview's warm-white/indigo presentation.
-ThemeData socialDemoTheme() => ThemeData(
-  useMaterial3: true,
-  scaffoldBackgroundColor: const Color(0xfffafaf8),
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: const Color(0xff4f46e5),
-    surface: const Color(0xfffafaf8),
-  ).copyWith(primary: const Color(0xff4f46e5), onPrimary: Colors.white),
-  appBarTheme: const AppBarTheme(
-    backgroundColor: Color(0xfffafaf8),
-    surfaceTintColor: Colors.transparent,
-  ),
-  cardTheme: CardThemeData(
-    color: Colors.white,
-    elevation: 0,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20),
-      side: const BorderSide(color: Color(0xffe9e9e3)),
-    ),
-  ),
-  inputDecorationTheme: InputDecorationTheme(
-    filled: true,
-    fillColor: Colors.white,
-    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-  ),
-  filledButtonTheme: FilledButtonThemeData(
-    style: FilledButton.styleFrom(
-      minimumSize: const Size(48, 48),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
-    ),
-  ),
-  navigationBarTheme: const NavigationBarThemeData(
-    backgroundColor: Colors.white,
-    indicatorColor: Color(0xffeeedff),
-  ),
-);
+/// Keep preview and connected app on the same approved visual baseline.
+ThemeData socialDemoTheme() => enmoriTheme();
 
 final class SocialDemoNavigation extends StatelessWidget {
   const SocialDemoNavigation({

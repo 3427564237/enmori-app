@@ -229,6 +229,13 @@ void main() {
               'onboardingCompletedAt': '2026-10-15T00:00:00.000Z',
             },
           },
+          '/v1/me/settings' => {
+            'settings': {
+              'checkInVisibility': 'private',
+              'optionalProcessingConsent': 'accepted',
+              'revision': 0,
+            },
+          },
           '/v1/me/profile' => {
             'profile': {
               'username': 'synthetic_owner',

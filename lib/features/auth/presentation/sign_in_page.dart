@@ -82,7 +82,10 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                         key: const Key('sign-in-email'),
                         controller: _emailController,
                         autofillHints: const [AutofillHints.email],
-                        decoration: const InputDecoration(labelText: 'Email'),
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.mail_outline),
+                        ),
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         validator: (value) {
@@ -111,6 +114,7 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                             ),
                           ),
                           labelText: 'Password',
+                          prefixIcon: const Icon(Icons.lock_outline),
                         ),
                         obscureText: !_showPassword,
                         textInputAction: TextInputAction.done,
