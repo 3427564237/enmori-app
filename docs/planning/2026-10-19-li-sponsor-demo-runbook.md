@@ -17,14 +17,20 @@ Runtime handoff contains private credentials and TLS trust. Transfer only throug
 5. Verify current service status, startup epoch/retirement/maintenance, TLS readiness, diagnostic health and no pending model/HTTP/compile/operation hold. Verify real Event source and current interest catalogue/count through the actual service. A running HTTP listener alone does not establish model/source readiness.
 6. Keep the vivo connected, unlocked and powered. Verify device package/version and installed APK bytes against the frozen receipt, then transfer the private handoff once through the nonce protocol. Verify actual consumption and only the owned USB reverses. No reinstall/data clear is a login-recovery step.
 
-## Demonstration journey
+## Current manual handover state
+
+LI has narrowed automatic execution to the current round and then manual acceptance. Preserve the current v2 process, accounts and data. The primary is already registered; use Sign in, not Create account. Both controlled accounts are already friends after an actual request/accept flow. The private local manual guide contains their exact credentials and lookup names; do not put them in this document or a public package. Current APK source is `9f44c3dd668dca8b596a71594f94d164a98b5971`, SHA256 `1be5087a645efc4f9f5f00bc96e9783dd46509738f7e2b01fb9e8ec40ada8ed2`, version code2.
+
+Music is saved, “Evening Buddy” is active, and Notes contain two actual UI saves plus20 labelled API paging samples. Footprint failure/retry has been observed on this APK. The first real AI reply failed and its original result was checked once; no assistant was saved. Current diagnostic health is failed and prevents new AI work. Do not ask the manual tester to retry AI, clear data or run old bringup scripts as a recovery action. Complete the diagnosis before declaring chat ready.
+
+## Original demonstration journey
 
 1. Register the reserved primary account in the app, make the real privacy choice, select Music from the actual catalogue and save. Reenter the editor, return Home and read real interest-based recommendations. Explain catalogue size honestly; the per-user selection cap is a different number.
 2. Open a real recommendation and its detail. Show the missing-end label if applicable, open the exact validated source URL in the external browser and return. Open Browse, detail and Reload. Reload fetches the current first batch and may show the same activities; opening a website is not registration or Going.
 3. Save a nonempty public display name through the existing Profile screen, then find the precreated secondary account and send a request. Sign out, sign in as secondary, accept and read its friend list. Sign out and return to primary; reread its friend list. Verify no prior-account content remains on screen after switching.
 4. Save a short controlled Note, select its date in Footprint, open detail and return. Reopen to prove persistence. Use enough owned controlled records for pagination. On a controlled page failure retain the prior records and cursor, then retry that cursor after recovery.
 5. Create or select a Persona and open AI. Send three ordinary messages, with the second and third referring to prior text. Leave and reenter to read persisted messages, then send again. The model receives at most the recent two eligible complete question/answer pairs; rejected/deleted/expired/unauthorized pairs do not backfill from older history. Full-input budget rejection has no silent truncation. A new conversation is available only after the prior operation result is determined.
-6. Repeat the complete journey on the same APK/service; include logout/login, reentry and another actual use. Test cancellation last, then follow the original settlement result before any later action or cleanup.
+6. The original plan required repeating the complete journey on the same APK/service, including logout/login, reentry and another actual use. LI's later instruction replaces the automatic second round with manual acceptance after completing the current round; retain unperformed second-round rows as Not Run. Test cancellation last only when AI is ready and the original settlement is determined.
 
 ## Recovery and stop rules
 
