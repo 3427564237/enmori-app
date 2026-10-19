@@ -5,6 +5,7 @@ commands, never this interpreter, source directory, config or raw store.
 """
 import contextlib
 import datetime as dt
+import errno
 import json
 import math
 import os
@@ -25,6 +26,9 @@ DAY = 86_400_000
 SWEEP_MAX_AGE = 65 * 60_000  # Hourly timer, 5 minute failure-detection allowance.
 MAX_RECORD = 4096
 MAX_FILES = 100_000  # Resource ceiling; reaching it closes admission, never evicts.
+LOCK_WAIT_SECONDS = 0.2
+CLEANUP_LOCK_WAIT_SECONDS = 5.0
+LOCK_RETRY_SECONDS = 0.01
 FAILURES = {"CAPTURE_UNAVAILABLE", "CAPTURE_HOST_RESTARTED", "CAPTURE_RUNNER_STALE", "CAPTURE_DEADLINE_MISSED"}
 FIELDS = {"loggedAt", "requestId", "routeTemplate", "method", "httpStatus", "latencyMs",
           "errorCategory", "dependencyStage", "dependencyStatus", "durationMs"}
@@ -193,12 +197,32 @@ def runner_healthy():
         require(result.returncode == 0 and result.stdout == expected and result.stderr == "")
 
 
+def acquire_lock(handle, cleanup=False):
+    # Retry only acquisition on the same pinned fd, never the operation body.
+    # Fixed budgets leave the existing 2s/60s overall watchdogs unchanged.
+    deadline = time.monotonic() + (CLEANUP_LOCK_WAIT_SECONDS if cleanup else LOCK_WAIT_SECONDS)
+    while True:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return
+        except OSError as error:
+            if error.errno not in {errno.EAGAIN, errno.EACCES}:
+                raise
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise
+            time.sleep(min(LOCK_RETRY_SECONDS, remaining))
+            # A late wakeup must not acquire and start work beyond the budget.
+            if time.monotonic() >= deadline:
+                raise
+
+
 class Store:
     def __init__(self, path, now=lambda: time.time_ns() // 1_000_000, boot=boot_started, runner=runner_healthy):
         self.path, self.clock, self.boot, self.runner = path, now, boot, runner
 
     @contextlib.contextmanager
-    def locked(self):
+    def locked(self, cleanup=False):
         with contextlib.ExitStack() as stack:
             fd = open_directory(self.path)
             stack.callback(os.close, fd)
@@ -206,8 +230,7 @@ class Store:
             lock = os.open("lock", os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600, dir_fd=fd)
             stack.callback(os.close, lock)
             private_stat(os.fstat(lock))
-            # A bounded refusal instead of waiting behind another invocation.
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            acquire_lock(lock, cleanup)
             yield fd
 
     def initialize(self):
@@ -217,7 +240,7 @@ class Store:
                                          "bootStartedAt": self.boot(), "sweeping": False, "failed": False, "failures": []}, True)
 
     def run(self, command, row=None, emit=None):
-        with self.locked() as fd:
+        with self.locked(cleanup=command == "cleanup") as fd:
             state = read_at(fd, "state.json")
             require(type(state) is dict and set(state) == {"schemaVersion", "lastNow", "lastSweep", "bootStartedAt", "sweeping", "failed", "failures"}
                     and state["schemaVersion"] == 1 and type(state["failed"]) is bool

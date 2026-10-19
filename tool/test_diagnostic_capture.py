@@ -3,6 +3,7 @@ No installed config, sudo policy, services, model or product database touched.
 """
 import contextlib
 import datetime as dt
+import errno
 import json
 import os
 from pathlib import Path
@@ -11,6 +12,8 @@ import stat
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 import unittest
 from unittest import mock
 
@@ -86,6 +89,170 @@ class Portable(unittest.TestCase):
         self.assertEqual({k: int(v) for k, v in re.findall(r"([A-Z_]+): \[(\d+),", block)}, c.ERRORS)
         collector = (root / "backend/src/bootstrap/controlled-phone-diagnostics.ts").read_text()
         self.assertEqual(dict(re.findall(r'\["(/v1/[^\"]+)", "([A-Z]+)"\]', collector)), c.ROUTES)
+
+
+@unittest.skipUnless(sys.platform == "linux", "requires Linux flock, not root")
+class PortableLocking(unittest.TestCase):
+    def test_real_contender_waits_for_release_then_enters_body_once(self):
+        for cleanup in (False, True):
+            with self.subTest(cleanup=cleanup), tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "synthetic-lock"
+                owner = os.open(path, os.O_RDWR | os.O_CREAT | os.O_EXCL, 0o600)
+                contender = os.open(path, os.O_RDWR)
+                attempted, finished = threading.Event(), threading.Event()
+                body, errors = [], []
+                flock = c.fcntl.flock
+                flock(owner, c.fcntl.LOCK_EX | c.fcntl.LOCK_NB)
+
+                def observed(handle, flags):
+                    try:
+                        return flock(handle, flags)
+                    except BlockingIOError:
+                        attempted.set()  # Actual kernel contention, before release.
+                        raise
+
+                def invoke():
+                    try:
+                        c.acquire_lock(contender, cleanup)
+                        body.append("one invocation")
+                    except BaseException as error:
+                        errors.append(error)
+                    finally:
+                        finished.set()
+
+                thread = threading.Thread(target=invoke, daemon=True)
+                try:
+                    with mock.patch.object(c.fcntl, "flock", side_effect=observed):
+                        thread.start()
+                        self.assertTrue(attempted.wait(1))
+                        self.assertEqual(body, [])
+                        flock(owner, c.fcntl.LOCK_UN)
+                        self.assertTrue(finished.wait(1))
+                        thread.join(1)
+                    self.assertFalse(thread.is_alive())
+                    self.assertEqual(errors, [])
+                    self.assertEqual(body, ["one invocation"])
+                finally:
+                    flock(owner, c.fcntl.LOCK_UN)
+                    thread.join(6)
+                    os.close(contender)
+                    os.close(owner)
+
+    def test_real_lock_exhaustion_does_not_enter_or_change_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "synthetic-lock"
+            path.write_bytes(b"original")
+            owner, contender = os.open(path, os.O_RDWR), os.open(path, os.O_RDWR)
+            try:
+                c.fcntl.flock(owner, c.fcntl.LOCK_EX | c.fcntl.LOCK_NB)
+                started = time.monotonic()
+                with self.assertRaises(BlockingIOError):
+                    c.acquire_lock(contender)
+                    self.fail("A timed-out invocation must not enter its body")
+                elapsed = time.monotonic() - started
+                self.assertGreaterEqual(elapsed, c.LOCK_WAIT_SECONDS)
+                self.assertLess(elapsed, 1.5)  # Existing client/health deadline is 2s.
+                self.assertEqual(path.read_bytes(), b"original")
+            finally:
+                os.close(contender)
+                os.close(owner)
+
+    def test_fixed_budgets_expire_before_a_late_wakeup_can_acquire(self):
+        for cleanup, budget in ((False, 0.2), (True, 5.0)):
+            with self.subTest(cleanup=cleanup), \
+                    mock.patch.object(c.time, "monotonic", side_effect=[10.0, 10.01, 10.0 + budget]), \
+                    mock.patch.object(c.time, "sleep") as sleep, \
+                    mock.patch.object(c.fcntl, "flock", side_effect=BlockingIOError(errno.EAGAIN, "synthetic busy")) as flock:
+                with self.assertRaises(BlockingIOError):
+                    c.acquire_lock(123, cleanup)
+                self.assertEqual(flock.call_count, 1)  # Never acquire after deadline.
+                sleep.assert_called_once_with(0.01)
+
+    def test_only_contention_errors_wait_and_other_errors_fail_immediately(self):
+        for number in (errno.EBADF, errno.EIO, errno.ENOLCK, errno.EINTR):
+            error = OSError(number, "synthetic non-contention failure")
+            with self.subTest(errno=number), \
+                    mock.patch.object(c.fcntl, "flock", side_effect=error) as flock, \
+                    mock.patch.object(c.time, "sleep") as sleep:
+                with self.assertRaises(OSError) as raised:
+                    c.acquire_lock(123)
+                self.assertIs(raised.exception, error)
+                flock.assert_called_once()
+                sleep.assert_not_called()
+        for number in (errno.EAGAIN, errno.EACCES):
+            with self.subTest(errno=number), \
+                    mock.patch.object(c.time, "monotonic", side_effect=[10.0, 10.01, 10.02]), \
+                    mock.patch.object(c.time, "sleep") as sleep, \
+                    mock.patch.object(c.fcntl, "flock", side_effect=[OSError(number, "synthetic busy"), None]) as flock:
+                c.acquire_lock(123)
+                self.assertEqual(flock.call_count, 2)
+                sleep.assert_called_once_with(0.01)
+
+    def test_store_waits_once_without_replaying_body_or_clearing_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            # Replace only root ownership/path policy for this exact owned fixture;
+            # retain real flock, Store.run, schema checks, file writes and fsync.
+            def owned_directory(path):
+                self.assertEqual(path, directory)
+                return os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+
+            def owned_stat(info, is_directory=False):
+                self.assertEqual(info.st_uid, os.getuid())
+                self.assertEqual(stat.S_IMODE(info.st_mode), 0o700 if is_directory else 0o600)
+                self.assertTrue(stat.S_ISDIR(info.st_mode) if is_directory else stat.S_ISREG(info.st_mode))
+                if not is_directory:
+                    self.assertEqual(info.st_nlink, 1)
+
+            os.chmod(directory, 0o700)
+            with mock.patch.object(c, "open_directory", side_effect=owned_directory), \
+                    mock.patch.object(c, "private_stat", side_effect=owned_stat):
+                store = c.Store(directory, lambda: NOW, boot=lambda: 1, runner=lambda: None)
+                store.initialize()
+                store.run("cleanup")
+                store.run("append", row())
+                record = next(p for p in Path(directory).glob("*.json") if p.name != "state.json")
+                original = record.read_bytes()
+                attempted, finished = threading.Event(), threading.Event()
+                errors = []
+                flock = c.fcntl.flock
+
+                def observed(handle, flags):
+                    try:
+                        return flock(handle, flags)
+                    except BlockingIOError:
+                        attempted.set()
+                        raise
+
+                def cleanup():
+                    try:
+                        store.run("cleanup")
+                    except BaseException as error:
+                        errors.append(error)
+                    finally:
+                        finished.set()
+
+                thread = threading.Thread(target=cleanup, daemon=True)
+                with mock.patch.object(c, "write_at", wraps=c.write_at) as write:
+                    with store.locked(), mock.patch.object(c.fcntl, "flock", side_effect=observed):
+                        thread.start()
+                        self.assertTrue(attempted.wait(1))
+                        self.assertEqual(write.call_count, 0)
+                    self.assertTrue(finished.wait(1))
+                    thread.join(1)
+                    self.assertEqual(errors, [])
+                    # Exactly one cleanup intent + one completion, no body replay.
+                    self.assertEqual(write.call_count, 2)
+                self.assertEqual(record.read_bytes(), original)
+                store.run("health")
+                self.assertFalse(json.loads(Path(directory, "state.json").read_bytes())["failed"])
+                store.runner = lambda: c.require(False)
+                with self.assertRaises(c.CaptureUnavailable):
+                    store.run("health")
+                store.runner = lambda: None
+                with self.assertRaises(c.CaptureUnavailable):
+                    store.run("cleanup")
+                self.assertTrue(json.loads(Path(directory, "state.json").read_bytes())["failed"])
+                self.assertEqual(record.read_bytes(), original)
 
 
 @unittest.skipUnless(sys.platform == "linux" and hasattr(os, "geteuid") and os.geteuid() == 0, "requires isolated Linux root-owned files")
