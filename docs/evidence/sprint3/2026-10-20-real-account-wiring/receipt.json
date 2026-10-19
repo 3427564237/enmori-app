@@ -1,0 +1,49 @@
+{
+  "source": "f3c733adca0737d4561fe4cd1fe8b1b303094a98",
+  "baseline": "927f77527b32d349aa08020f7de0e88402edb9c7",
+  "scope": "real Firebase account/profile/settings wiring on local HTTPS; no phone connected",
+  "apk": {
+    "file": "enmori-real-account-v8-debug.apk",
+    "sha256": "d952a97d9700e0fecaee2e326839e01fb3bca1074c6b9ded74ecb13d23de3b8d",
+    "bytes": 173513277,
+    "package": "com.enmori.app",
+    "versionCode": 8,
+    "versionName": "1.0.0-realaccount20261020",
+    "signatureVerified": true,
+    "signerSha256": "0353f50d507f56ee2d8344e56b7b84d6afccdff31cab5a4ca8a69060a9979106",
+    "installed": false,
+    "containsFirebaseClientConfiguration": true,
+    "containsPasswordAdcOrServerPrivateKey": false
+  },
+  "checks": {
+    "typescriptBuild": "pass",
+    "flutterAnalyze": "pass: 6 changed files",
+    "backendTests": "18/18 passed in one run",
+    "flutterTests": "16/16 passed in one run",
+    "liveDartHttps": {
+      "missingIdentityStatus": 401,
+      "invalidIdentityStatus": 401,
+      "unsignedEmulatorIdentityStatus": 401,
+      "unpinnedCertificateRejected": true
+    },
+    "runtimeAfterNormalStopAndStart": {
+      "phase": "listening",
+      "ready": true,
+      "authAdminRead": true,
+      "firestoreRead": true,
+      "emailVerified": true,
+      "bindingExists": false,
+      "checkedAt": "2026-10-19T16:16:08.388Z"
+    },
+    "cloudMutationsThisTurn": 0,
+    "emailsSentThisTurn": 0,
+    "modelConversationsThisTurn": 0
+  },
+  "notRun": [
+    "installation on vivo",
+    "real password login and Backend verification of that live session",
+    "onboarding/profile/settings save and readback under the real account",
+    "real-account logout/relogin and business readback after service restart",
+    "complete real-environment social/AI/Events composition"
+  ]
+}

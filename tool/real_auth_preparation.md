@@ -23,3 +23,7 @@
 2026-10-19T14:50:34Z，以原有 ADC、精确项目 enmori-rmvp-controlled 只读运行 Firebase Admin getUserByEmail，并按 createAuthBindingDocumentId 读取规范 auth_bindings 文档：Auth/Firestore 读取均成功、邮箱已验证、业务绑定不存在。第一次通用连接探测的裸 UID 路径不是合同路径，不用于业务状态结论；以上规范路径读回已更正该判断。未写云端资料、未再次发信、未使用已失效旧密码。
 
 现有 controlled-runtime.ts 是真实 Auth+Firestore 组合，明确拒绝 Emulator 环境变量；完整 retained-core-runtime.ts 仍要求 Emulator。新密码原生登录、真实 UID 的引导及资料业务回读、整套 AI/好友/Events 的真实环境组合仍未完成。私有配置/ADC 已可用，接手时复用，不重建项目或要求把密码发到聊天中。
+
+## 20 Oct 接线完成至安装前
+
+真实账号模式、本机 TLS 服务及私有配置已经准备，APK v8 使用 com.enmori.app。账号模式明确拒绝 Emulator；已完成无手机的配置/身份拒绝/证书检查与正常停止启动。后续以 tool/real_account_local.md 和 docs/evidence/sprint3/2026-10-20-real-account-wiring/ 为准。仍未做真实新密码登录与资料保存，旧“尚未准备入口”的状态由此条替代，既往邮件及失败证据保留。
