@@ -2,6 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+
+import '../core/network/backend_api_client.dart';
+import 'platform/controlled_account_http_client.dart';
 
 import '../features/account/account_providers.dart';
 import '../features/account/account_preferences_providers.dart';
@@ -24,10 +28,30 @@ import 'providers.dart';
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
   final configuration = FirebaseRuntimeConfiguration.fromEnvironment();
+  const controlledAccount = bool.fromEnvironment(
+    'ENMORI_CONTROLLED_REAL_ACCOUNT',
+  );
+  const backendUrl = String.fromEnvironment('ENMORI_API_BASE_URL');
+  const certificate = String.fromEnvironment('ENMORI_API_CERTIFICATE_BASE64');
+  final baseUri = parseApprovedBackendBaseUri(backendUrl);
+  final configurationValid = validAccountRuntimeConfiguration(
+    configuration,
+    controlledAccount: controlledAccount,
+    certificateBase64: certificate,
+    baseUri: baseUri,
+  );
+  http.Client? controlledClient;
   var firebaseReady = false;
 
-  if (configuration.options case final options?) {
+  if (configurationValid && configuration.options != null) {
+    final options = configuration.options!;
     try {
+      if (controlledAccount) {
+        controlledClient = createControlledAccountHttpClient(
+          baseUri!,
+          certificate,
+        );
+      }
       await Firebase.initializeApp(options: options);
       if (configuration.useAuthEmulator) {
         await FirebaseAuth.instance.useAuthEmulator(
@@ -36,7 +60,10 @@ Future<void> bootstrap() async {
         );
       }
       firebaseReady = true;
-    } on FirebaseException {
+    } catch (_) {
+      // Invalid TLS/configuration must not fall back to another environment.
+      controlledClient?.close();
+      controlledClient = null;
       firebaseReady = false;
     }
   }
@@ -44,6 +71,20 @@ Future<void> bootstrap() async {
   runApp(
     ProviderScope(
       overrides: [
+        if (controlledAccount)
+          backendBaseUriProvider.overrideWithValue(
+            firebaseReady ? baseUri : null,
+          ),
+        if (controlledClient case final client?)
+          backendApiClientProvider.overrideWith((ref) {
+            final api = BackendApiClient(
+              baseUri,
+              ref.watch(authRepositoryProvider).getIdToken,
+              httpClient: client,
+            );
+            ref.onDispose(api.close);
+            return api;
+          }),
         externalActivityOpenerProvider.overrideWithValue(
           const PlatformExternalActivityOpener(),
         ),
@@ -75,7 +116,11 @@ Future<void> bootstrap() async {
           ),
         ),
       ],
-      child: const EnmoriApp(),
+      child: EnmoriApp(
+        environmentLabel: controlledAccount
+            ? 'Real account verification · Account, profile & settings'
+            : null,
+      ),
     ),
   );
 }
@@ -131,4 +176,24 @@ final class FirebaseRuntimeConfiguration {
   final bool useAuthEmulator;
   final String authEmulatorHost;
   final int authEmulatorPort;
+}
+
+/// Validate before contacting Firebase; a real-account build cannot use emulators.
+bool validAccountRuntimeConfiguration(
+  FirebaseRuntimeConfiguration configuration, {
+  required bool controlledAccount,
+  required String certificateBase64,
+  required Uri? baseUri,
+}) {
+  if (!controlledAccount) return certificateBase64.isEmpty;
+  return configuration.options?.projectId == 'enmori-rmvp-controlled' &&
+      !configuration.useAuthEmulator &&
+      certificateBase64.isNotEmpty &&
+      baseUri?.scheme == 'https' &&
+      baseUri?.host == '127.0.0.1' &&
+      baseUri?.port == 9381 &&
+      baseUri!.userInfo.isEmpty &&
+      !baseUri.hasQuery &&
+      !baseUri.hasFragment &&
+      (baseUri.path.isEmpty || baseUri.path == '/');
 }

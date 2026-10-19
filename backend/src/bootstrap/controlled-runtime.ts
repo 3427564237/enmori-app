@@ -36,7 +36,6 @@ import { SystemClock } from "../shared/infrastructure/system-clock.js";
 import { buildApp } from "./build-app.js";
 import {
   requireControlledRuntimeConfiguration,
-  type ControlledRuntimeConfiguration,
 } from "./controlled-runtime-configuration.js";
 
 interface ControlledRuntime {
@@ -44,9 +43,15 @@ interface ControlledRuntime {
   readonly firebaseApp: FirebaseApp;
 }
 
-async function createControlledRuntime(
-  configuration: ControlledRuntimeConfiguration,
+export async function createControlledRuntime(
+  environment: NodeJS.ProcessEnv = process.env,
 ): Promise<ControlledRuntime> {
+  const configuration = requireControlledRuntimeConfiguration(environment);
+  // Firebase Admin reads process environment; reject an emulator even if the caller
+  // supplies a clean configuration object.
+  for (const name of ["FIREBASE_AUTH_EMULATOR_HOST", "FIRESTORE_EMULATOR_HOST"]) {
+    if (process.env[name] !== undefined) throw new Error("Emulator configuration is forbidden at runtime");
+  }
   const firebaseApp = initializeApp(
     { projectId: configuration.firebaseProjectId },
     "enmori-controlled-backend",
@@ -87,7 +92,7 @@ async function createControlledRuntime(
   }
 }
 
-async function closeControlledRuntime(runtime: ControlledRuntime): Promise<void> {
+export async function closeControlledRuntime(runtime: ControlledRuntime): Promise<void> {
   await runtime.app.close();
   await deleteApp(runtime.firebaseApp);
 }
@@ -96,7 +101,7 @@ export async function startControlledRuntime(
   environment: NodeJS.ProcessEnv = process.env,
 ): Promise<void> {
   const configuration = requireControlledRuntimeConfiguration(environment);
-  const runtime = await createControlledRuntime(configuration);
+  const runtime = await createControlledRuntime(environment);
   try {
     await runtime.app.listen({
       host: configuration.host,

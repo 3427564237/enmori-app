@@ -5,7 +5,7 @@
 - 来源：本轮用户提交的《ENMORI 功能补齐计划：单对话执行，先完成核心体验》；已确认并授权实施。
 - 工作区：`/home/miku/.codex/worktrees/li-core-priority-oct19/ENMORI`；核对起点 `ac4021dd13efc2bc6aa8676ccce0a1901311ef0d`，保留两份原有未跟踪草稿。
 
-> 当前执行：依据[本机依赖优先决定](2026-10-19-li-local-dependencies-first.md)继续单对话推进。五任务包暂缓，保留历史替代链；以下产品规则继续有效。
+> 当前执行：依据[本机与 UI 分工决定](2026-10-19-li-local-ui-handoff-preparation.md)及[20Oct 真实账号接线](2026-10-20-li-real-account-local-wiring.md)，队友任务包已由用户转达，LI 留本机与最终组合；旧暂停安排为历史，以下产品规则继续有效。
 
 ## 替代范围与保留来源
 

@@ -5,13 +5,35 @@ import 'router/app_router.dart';
 import 'enmori_theme.dart';
 
 final class EnmoriApp extends ConsumerWidget {
-  const EnmoriApp({super.key});
+  const EnmoriApp({this.environmentLabel, super.key});
+
+  final String? environmentLabel;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
       title: 'ENMORI',
       theme: enmoriTheme(),
+      builder: environmentLabel == null
+          ? null
+          : (context, child) => Column(
+              children: [
+                Material(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(
+                        environmentLabel!,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(child: child ?? const SizedBox.shrink()),
+              ],
+            ),
       routerConfig: ref.watch(appRouterProvider),
     );
   }
