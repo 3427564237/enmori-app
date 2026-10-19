@@ -59,6 +59,7 @@ final class _AccountPreferencesPageState
   OptionalProcessingConsent _consent = OptionalProcessingConsent.rejected;
   bool _signingOut = false;
   bool _locating = false;
+  bool _allowPopAfterDiscard = false;
   String? _locationMessage;
   String? _signOutError;
   @override
@@ -123,293 +124,355 @@ final class _AccountPreferencesPageState
           : null,
       child: Text(state.phase == PreferencesPhase.saving ? 'Saving…' : 'Save'),
     );
+    final dirty = profile
+        ? _profileHasChanges(state)
+        : _settingsHaveChanges(state);
+    final busy = state.phase == PreferencesPhase.saving ||
+        _locating ||
+        _signingOut;
     return Scaffold(
       appBar: AppBar(title: Text(profile ? 'Edit profile' : 'Settings')),
       bottomNavigationBar: SafeArea(
         child: Padding(padding: const EdgeInsets.all(16), child: saveButton),
       ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
-            child: SingleChildScrollView(
-              key: Key(profile ? 'route-profile-edit' : 'route-settings'),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (state.phase == PreferencesPhase.loading)
-                    const Center(child: CircularProgressIndicator())
-                  else if (state.phase != PreferencesPhase.failed) ...[
-                    if (profile) ...[
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Username (cannot be changed)'),
-                        subtitle: Text(state.profile?.username ?? ''),
-                      ),
-                      TextField(
-                        key: const Key('profile-display-name'),
-                        controller: _name,
-                        enabled: ready,
-                        decoration: const InputDecoration(
-                          labelText: 'Display name (optional)',
-                          helperText:
-                              'Use up to 50 characters. Leave blank to unset.',
+      body: PopScope<void>(
+        canPop: (!dirty && !busy) || _allowPopAfterDiscard,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop || busy || !dirty || _allowPopAfterDiscard) return;
+          final discard = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Leave without saving?'),
+              content: const Text('Your unsaved changes will be lost.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Stay'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Discard changes'),
+                ),
+              ],
+            ),
+          );
+          if (discard == true && mounted) {
+            setState(() => _allowPopAfterDiscard = true);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) Navigator.of(context).pop();
+            });
+          }
+        },
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: SingleChildScrollView(
+                key: Key(profile ? 'route-profile-edit' : 'route-settings'),
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (state.phase == PreferencesPhase.loading)
+                      const Center(child: CircularProgressIndicator())
+                    else if (state.phase != PreferencesPhase.failed) ...[
+                      if (profile) ...[
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Username (cannot be changed)'),
+                          subtitle: Text(state.profile?.username ?? ''),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        key: const Key('profile-bio'),
-                        controller: _bio,
-                        enabled: ready,
-                        maxLength: 500,
-                        decoration: const InputDecoration(labelText: 'BIO'),
-                      ),
-                      DropdownButton<AffiliationType?>(
-                        key: const Key('profile-affiliation-type'),
-                        value: _affiliationType,
-                        isExpanded: true,
-                        items: const [
-                          DropdownMenuItem(
-                            value: null,
-                            child: Text('No school or company'),
+                        TextField(
+                          key: const Key('profile-display-name'),
+                          controller: _name,
+                          enabled: ready,
+                          onChanged: (_) => setState(() {}),
+                          decoration: const InputDecoration(
+                            labelText: 'Display name (optional)',
+                            helperText:
+                                'Use up to 50 characters. Leave blank to unset.',
                           ),
-                          DropdownMenuItem(
-                            value: AffiliationType.school,
-                            child: Text('School'),
-                          ),
-                          DropdownMenuItem(
-                            value: AffiliationType.company,
-                            child: Text('Company'),
-                          ),
-                        ],
-                        onChanged: ready
-                            ? (value) => setState(() {
-                                _affiliationType = value;
-                                if (value == null) _affiliation.clear();
-                              })
-                            : null,
-                      ),
-                      TextField(
-                        key: const Key('profile-affiliation-name'),
-                        controller: _affiliation,
-                        enabled: ready && _affiliationType != null,
-                        maxLength: 120,
-                        decoration: const InputDecoration(
-                          labelText: 'School / company name',
                         ),
-                      ),
-                      TextField(
-                        key: const Key('profile-region'),
-                        controller: _region,
-                        enabled: ready,
-                        maxLength: 120,
-                        decoration: const InputDecoration(labelText: 'Region'),
-                      ),
-                      OutlinedButton.icon(
-                        key: const Key('profile-sync-location'),
-                        onPressed: ready ? _syncLocation : null,
-                        icon: const Icon(Icons.my_location),
-                        label: Text(
-                          _locating
-                              ? 'Getting location…'
-                              : 'Use current coarse location',
+                        const SizedBox(height: 16),
+                        TextField(
+                          key: const Key('profile-bio'),
+                          controller: _bio,
+                          enabled: ready,
+                          onChanged: (_) => setState(() {}),
+                          maxLength: 500,
+                          decoration: const InputDecoration(labelText: 'BIO'),
                         ),
-                      ),
-                      const Text(
-                        'Uses your location once and fills coarse coordinates. You can replace them with a region name before saving.',
-                      ),
-                      if (_locationMessage != null) Text(_locationMessage!),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Profile visibility',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      DropdownButton<ProfileVisibility>(
-                        key: const Key('profile-visibility'),
-                        isExpanded: true,
-                        value: _profileVisibility,
-                        items: [
-                          for (final v in ProfileVisibility.values)
+                        DropdownButton<AffiliationType?>(
+                          key: const Key('profile-affiliation-type'),
+                          value: _affiliationType,
+                          isExpanded: true,
+                          items: const [
                             DropdownMenuItem(
-                              value: v,
-                              child: Text(_profileLabel(v)),
+                              value: null,
+                              child: Text('No school or company'),
                             ),
-                        ],
-                        onChanged: ready
-                            ? (v) {
-                                if (v != null) {
-                                  setState(() => _profileVisibility = v);
-                                }
-                              }
-                            : null,
-                      ),
-                    ] else ...[
-                      Text(
-                        'Profile visibility',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const Text(
-                        'Profile visibility controls who may view your profile. Check-in visibility is the default for future check-ins.',
-                      ),
-                      OutlinedButton(
-                        key: const Key('settings-profile'),
-                        onPressed: ready ? widget.onEditProfile : null,
-                        child: const Text('Edit profile visibility'),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Check-in default visibility',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      DropdownButton<CheckInVisibility>(
-                        key: const Key('settings-visibility'),
-                        isExpanded: true,
-                        value: _checkInVisibility,
-                        items: [
-                          for (final v in CheckInVisibility.values)
                             DropdownMenuItem(
-                              value: v,
-                              child: Text(_checkInLabel(v)),
+                              value: AffiliationType.school,
+                              child: Text('School'),
                             ),
-                        ],
-                        onChanged: ready
-                            ? (v) {
-                                if (v != null) {
-                                  setState(() => _checkInVisibility = v);
+                            DropdownMenuItem(
+                              value: AffiliationType.company,
+                              child: Text('Company'),
+                            ),
+                          ],
+                          onChanged: ready
+                              ? (value) => setState(() {
+                                  _affiliationType = value;
+                                  if (value == null) _affiliation.clear();
+                                })
+                              : null,
+                        ),
+                        TextField(
+                          key: const Key('profile-affiliation-name'),
+                          controller: _affiliation,
+                          enabled: ready && _affiliationType != null,
+                          onChanged: (_) => setState(() {}),
+                          maxLength: 120,
+                          decoration: const InputDecoration(
+                            labelText: 'School / company name',
+                          ),
+                        ),
+                        TextField(
+                          key: const Key('profile-region'),
+                          controller: _region,
+                          enabled: ready,
+                          onChanged: (_) => setState(() {}),
+                          maxLength: 120,
+                          decoration: const InputDecoration(labelText: 'Region'),
+                        ),
+                        OutlinedButton.icon(
+                          key: const Key('profile-sync-location'),
+                          onPressed: ready ? _syncLocation : null,
+                          icon: const Icon(Icons.my_location),
+                          label: Text(
+                            _locating
+                                ? 'Getting location…'
+                                : 'Use current coarse location',
+                          ),
+                        ),
+                        const Text(
+                          'Uses your location once and fills coarse coordinates. You can replace them with a region name before saving.',
+                        ),
+                        if (_locationMessage != null) Text(_locationMessage!),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Profile visibility',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        DropdownButton<ProfileVisibility>(
+                          key: const Key('profile-visibility'),
+                          isExpanded: true,
+                          value: _profileVisibility,
+                          items: [
+                            for (final v in ProfileVisibility.values)
+                              DropdownMenuItem(
+                                value: v,
+                                child: Text(_profileLabel(v)),
+                              ),
+                          ],
+                          onChanged: ready
+                              ? (v) {
+                                  if (v != null) {
+                                    setState(() => _profileVisibility = v);
+                                  }
                                 }
-                              }
-                            : null,
-                      ),
+                              : null,
+                        ),
+                      ] else ...[
+                        Text(
+                          'Profile visibility',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const Text(
+                          'Profile visibility controls who may view your profile. Check-in visibility is the default for future check-ins.',
+                        ),
+                        OutlinedButton(
+                          key: const Key('settings-profile'),
+                          onPressed: ready ? widget.onEditProfile : null,
+                          child: const Text('Edit profile visibility'),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Check-in default visibility',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        DropdownButton<CheckInVisibility>(
+                          key: const Key('settings-visibility'),
+                          isExpanded: true,
+                          value: _checkInVisibility,
+                          items: [
+                            for (final v in CheckInVisibility.values)
+                              DropdownMenuItem(
+                                value: v,
+                                child: Text(_checkInLabel(v)),
+                              ),
+                          ],
+                          onChanged: ready
+                              ? (v) {
+                                  if (v != null) {
+                                    setState(() => _checkInVisibility = v);
+                                  }
+                                }
+                              : null,
+                        ),
+                        const SizedBox(height: 24),
+                        _privacyChoice(
+                          'Interests',
+                          _privacy.interests,
+                          ready,
+                          (v) => FieldPrivacy(
+                            interests: v,
+                            location: _privacy.location,
+                            participation: _privacy.participation,
+                            mapSharedWithFriends: _privacy.mapSharedWithFriends,
+                          ),
+                        ),
+                        _privacyChoice(
+                          'Location',
+                          _privacy.location,
+                          ready,
+                          (v) => FieldPrivacy(
+                            interests: _privacy.interests,
+                            location: v,
+                            participation: _privacy.participation,
+                            mapSharedWithFriends: _privacy.mapSharedWithFriends,
+                          ),
+                        ),
+                        _privacyChoice(
+                          'Activity participation',
+                          _privacy.participation,
+                          ready,
+                          (v) => FieldPrivacy(
+                            interests: _privacy.interests,
+                            location: _privacy.location,
+                            participation: v,
+                            mapSharedWithFriends: _privacy.mapSharedWithFriends,
+                          ),
+                        ),
+                        SwitchListTile(
+                          key: const Key('settings-map-sharing'),
+                          title: const Text('Share Check-in map with friends'),
+                          subtitle: const Text(
+                            'Only points allowed by each Check-in and location setting can be shown.',
+                          ),
+                          value: _privacy.mapSharedWithFriends,
+                          onChanged: ready
+                              ? (v) => setState(
+                                  () => _privacy = FieldPrivacy(
+                                    interests: _privacy.interests,
+                                    location: _privacy.location,
+                                    participation: _privacy.participation,
+                                    mapSharedWithFriends: v,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Optional data use',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const Text(
+                          'Choose whether to allow optional data use for relevant personalised suggestions. This choice can be changed later.',
+                        ),
+                        SwitchListTile(
+                          key: const Key('settings-consent'),
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Allow optional data use'),
+                          value: _consent == OptionalProcessingConsent.accepted,
+                          onChanged: ready
+                              ? (v) => setState(
+                                  () => _consent = v
+                                      ? OptionalProcessingConsent.accepted
+                                      : OptionalProcessingConsent.rejected,
+                                )
+                              : null,
+                        ),
+                      ],
                       const SizedBox(height: 24),
-                      _privacyChoice(
-                        'Interests',
-                        _privacy.interests,
-                        ready,
-                        (v) => FieldPrivacy(
-                          interests: v,
-                          location: _privacy.location,
-                          participation: _privacy.participation,
-                          mapSharedWithFriends: _privacy.mapSharedWithFriends,
-                        ),
-                      ),
-                      _privacyChoice(
-                        'Location',
-                        _privacy.location,
-                        ready,
-                        (v) => FieldPrivacy(
-                          interests: _privacy.interests,
-                          location: v,
-                          participation: _privacy.participation,
-                          mapSharedWithFriends: _privacy.mapSharedWithFriends,
-                        ),
-                      ),
-                      _privacyChoice(
-                        'Activity participation',
-                        _privacy.participation,
-                        ready,
-                        (v) => FieldPrivacy(
-                          interests: _privacy.interests,
-                          location: _privacy.location,
-                          participation: v,
-                          mapSharedWithFriends: _privacy.mapSharedWithFriends,
-                        ),
-                      ),
-                      SwitchListTile(
-                        key: const Key('settings-map-sharing'),
-                        title: const Text('Share Check-in map with friends'),
-                        subtitle: const Text(
-                          'Only points allowed by each Check-in and location setting can be shown.',
-                        ),
-                        value: _privacy.mapSharedWithFriends,
-                        onChanged: ready
-                            ? (v) => setState(
-                                () => _privacy = FieldPrivacy(
-                                  interests: _privacy.interests,
-                                  location: _privacy.location,
-                                  participation: _privacy.participation,
-                                  mapSharedWithFriends: v,
-                                ),
-                              )
-                            : null,
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Optional data use',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const Text(
-                        'Choose whether to allow optional data use for relevant personalised suggestions. This choice can be changed later.',
-                      ),
-                      SwitchListTile(
-                        key: const Key('settings-consent'),
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Allow optional data use'),
-                        value: _consent == OptionalProcessingConsent.accepted,
-                        onChanged: ready
-                            ? (v) => setState(
-                                () => _consent = v
-                                    ? OptionalProcessingConsent.accepted
-                                    : OptionalProcessingConsent.rejected,
-                              )
-                            : null,
-                      ),
                     ],
-                    const SizedBox(height: 24),
-                  ],
-                  if (state.saved)
-                    Text(
-                      profile ? 'Profile saved.' : 'Settings saved.',
-                      key: const Key('preferences-save-success'),
-                    ),
-                  if (state.message case final message?) ...[
-                    Text(message, key: const Key('preferences-error')),
-                    if (state.phase == PreferencesPhase.failed ||
-                        state.phase == PreferencesPhase.reloadRequired)
-                      OutlinedButton(
-                        key: const Key('preferences-reload'),
-                        onPressed: () {
-                          _revision = null;
-                          controller.load();
-                        },
-                        child: const Text('Reload'),
+                    if (state.saved)
+                      Text(
+                        profile ? 'Profile saved.' : 'Settings saved.',
+                        key: const Key('preferences-save-success'),
                       ),
+                    if (state.message case final message?) ...[
+                      Text(message, key: const Key('preferences-error')),
+                      if (state.phase == PreferencesPhase.failed ||
+                          state.phase == PreferencesPhase.reloadRequired)
+                        OutlinedButton(
+                          key: const Key('preferences-reload'),
+                          onPressed: () {
+                            _revision = null;
+                            controller.load();
+                          },
+                          child: const Text('Reload'),
+                        ),
+                    ],
+                    if (!profile) ...[
+                      const SizedBox(height: 24),
+                      OutlinedButton(
+                        key: const Key('settings-sign-out'),
+                        onPressed:
+                            _signingOut || state.phase == PreferencesPhase.saving
+                            ? null
+                            : () async {
+                                final command = widget.onSignOut;
+                                if (command == null) return;
+                                setState(() {
+                                  _signingOut = true;
+                                  _signOutError = null;
+                                });
+                                final result = await command();
+                                if (!mounted) return;
+                                setState(() {
+                                  _signingOut = false;
+                                  if (result is Failure<void>) {
+                                    _signOutError =
+                                        'Could not sign out. Try again.';
+                                  }
+                                });
+                              },
+                        child: const Text('Sign out'),
+                      ),
+                      if (_signOutError case final error?) Text(error),
+                    ],
                   ],
-                  if (!profile) ...[
-                    const SizedBox(height: 24),
-                    OutlinedButton(
-                      key: const Key('settings-sign-out'),
-                      onPressed:
-                          _signingOut || state.phase == PreferencesPhase.saving
-                          ? null
-                          : () async {
-                              final command = widget.onSignOut;
-                              if (command == null) return;
-                              setState(() {
-                                _signingOut = true;
-                                _signOutError = null;
-                              });
-                              final result = await command();
-                              if (!mounted) return;
-                              setState(() {
-                                _signingOut = false;
-                                if (result is Failure<void>) {
-                                  _signOutError =
-                                      'Could not sign out. Try again.';
-                                }
-                              });
-                            },
-                      child: const Text('Sign out'),
-                    ),
-                    if (_signOutError case final error?) Text(error),
-                  ],
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  bool _profileHasChanges(PreferencesState state) {
+    final profile = state.profile;
+    if (profile == null) return false;
+    return _name.text != (profile.displayName ?? '') ||
+        _bio.text != (profile.details.bio ?? '') ||
+        _affiliationType != profile.details.affiliationType ||
+        _affiliation.text != (profile.details.affiliationName ?? '') ||
+        _region.text != (profile.details.region ?? '') ||
+        _profileVisibility != profile.visibility;
+  }
+
+  bool _settingsHaveChanges(PreferencesState state) {
+    final settings = state.settings;
+    if (settings == null) return false;
+    final original = settings.fieldPrivacy;
+    return _checkInVisibility != settings.checkInVisibility ||
+        _consent != settings.consent ||
+        _privacy.interests != original.interests ||
+        _privacy.location != original.location ||
+        _privacy.participation != original.participation ||
+        _privacy.mapSharedWithFriends != original.mapSharedWithFriends;
   }
 
   Future<void> _syncLocation() async {

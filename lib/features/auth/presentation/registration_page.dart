@@ -26,6 +26,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   final _confirmFocusNode = FocusNode();
   bool _submitted = false;
   bool _termsAccepted = false;
+  bool _allowPopAfterDiscard = false;
 
   @override
   void initState() {
@@ -63,154 +64,191 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
     final state = ref.watch(registrationControllerProvider);
     final pending = state is CommandPending<void>;
+    final hasDraft = _emailController.text.isNotEmpty ||
+        _passwordController.text.isNotEmpty ||
+        _confirmController.text.isNotEmpty ||
+        _termsAccepted;
     return Scaffold(
       appBar: AppBar(title: const Text('Create account')),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: SingleChildScrollView(
-              key: const Key('route-register'),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Register for ENMORI',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text('Create access before completing onboarding.'),
-                  const SizedBox(height: 24),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        TextFormField(
-                          key: const Key('r6-register-email'),
-                          controller: _emailController,
-                          focusNode: _emailFocusNode,
-                          autofillHints: const [AutofillHints.email],
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.mail_outline),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          validator: _validateEmail,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          key: const Key('r6-register-password'),
-                          controller: _passwordController,
-                          focusNode: _passwordFocusNode,
-                          autofillHints: const [AutofillHints.newPassword],
-                          decoration: InputDecoration(
-                            suffixIcon: IconButton(
-                              tooltip: _showPassword
-                                  ? 'Hide password'
-                                  : 'Show password',
-                              onPressed: () => setState(
-                                () => _showPassword = !_showPassword,
-                              ),
-                              icon: Icon(
-                                _showPassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                              ),
-                            ),
-                            labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                          ),
-                          obscureText: !_showPassword,
-                          textInputAction: TextInputAction.next,
-                          validator: _validatePassword,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          key: const Key('r6-register-confirm-password'),
-                          controller: _confirmController,
-                          focusNode: _confirmFocusNode,
-                          autofillHints: const [AutofillHints.newPassword],
-                          decoration: InputDecoration(
-                            suffixIcon: IconButton(
-                              tooltip: _showPassword
-                                  ? 'Hide password'
-                                  : 'Show password',
-                              onPressed: () => setState(
-                                () => _showPassword = !_showPassword,
-                              ),
-                              icon: Icon(
-                                _showPassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                              ),
-                            ),
-                            labelText: 'Confirm password',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                          ),
-                          obscureText: !_showPassword,
-                          textInputAction: TextInputAction.done,
-                          validator: _validateConfirmPassword,
-                        ),
-                        if (_submitted && _fieldErrors.isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          _ValidationSummary(
-                            errors: _fieldErrors,
-                            onFocus: _focusField,
-                          ),
-                        ],
-                        if (state case CommandFailed<void>(:final failure)) ...[
-                          const SizedBox(height: 12),
-                          _FailureText(failure: failure),
-                        ],
-                        CheckboxListTile(
-                          key: const Key('register-terms'),
-                          value: _termsAccepted,
-                          onChanged: pending
-                              ? null
-                              : (value) => setState(
-                                  () => _termsAccepted = value ?? false,
-                                ),
-                          title: const Text('I agree to the terms of use'),
-                          subtitle: const Text(
-                            'This is separate from optional data use and sharing preferences.',
-                          ),
-                        ),
-                        if (_submitted && !_termsAccepted)
-                          const Text(
-                            'Please accept the terms before creating an account.',
-                          ),
-                        const SizedBox(height: 20),
-                        FilledButton.icon(
-                          key: const Key('r6-register-submit'),
-                          onPressed: pending ? null : _submit,
-                          icon: pending
-                              ? const SizedBox.square(
-                                  dimension: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.person_add),
-                          label: Text(
-                            pending ? 'Creating account' : 'Create account',
-                          ),
-                        ),
-                        if (widget.onSignIn case final onSignIn?)
-                          TextButton(
-                            key: const Key('register-sign-in'),
-                            onPressed: pending ? null : onSignIn,
-                            child: const Text('Sign in'),
-                          ),
-                      ],
+      body: PopScope<void>(
+        canPop: (!pending && !hasDraft) || _allowPopAfterDiscard,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop || pending || !hasDraft || _allowPopAfterDiscard) return;
+          final discard = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Leave registration?'),
+              content: const Text(
+                'Your unsaved account details will be lost.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Stay'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Discard details'),
+                ),
+              ],
+            ),
+          );
+          if (discard == true && mounted) {
+            setState(() => _allowPopAfterDiscard = true);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) Navigator.of(context).pop();
+            });
+          }
+        },
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: SingleChildScrollView(
+                key: const Key('route-register'),
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Register for ENMORI',
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    const Text('Create access before completing onboarding.'),
+                    const SizedBox(height: 24),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextFormField(
+                            key: const Key('r6-register-email'),
+                            controller: _emailController,
+                            focusNode: _emailFocusNode,
+                            autofillHints: const [AutofillHints.email],
+                            decoration: const InputDecoration(
+                              labelText: 'Email',
+                              prefixIcon: Icon(Icons.mail_outline),
+                            ),
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            onChanged: (_) => setState(() {}),
+                            validator: _validateEmail,
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            key: const Key('r6-register-password'),
+                            controller: _passwordController,
+                            focusNode: _passwordFocusNode,
+                            autofillHints: const [AutofillHints.newPassword],
+                            decoration: InputDecoration(
+                              suffixIcon: IconButton(
+                                tooltip: _showPassword
+                                    ? 'Hide password'
+                                    : 'Show password',
+                                onPressed: () => setState(
+                                  () => _showPassword = !_showPassword,
+                                ),
+                                icon: Icon(
+                                  _showPassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                ),
+                              ),
+                              labelText: 'Password',
+                              prefixIcon: const Icon(Icons.lock_outline),
+                            ),
+                            obscureText: !_showPassword,
+                            textInputAction: TextInputAction.next,
+                            onChanged: (_) => setState(() {}),
+                            validator: _validatePassword,
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            key: const Key('r6-register-confirm-password'),
+                            controller: _confirmController,
+                            focusNode: _confirmFocusNode,
+                            autofillHints: const [AutofillHints.newPassword],
+                            decoration: InputDecoration(
+                              suffixIcon: IconButton(
+                                tooltip: _showPassword
+                                    ? 'Hide password'
+                                    : 'Show password',
+                                onPressed: () => setState(
+                                  () => _showPassword = !_showPassword,
+                                ),
+                                icon: Icon(
+                                  _showPassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                ),
+                              ),
+                              labelText: 'Confirm password',
+                              prefixIcon: const Icon(Icons.lock_outline),
+                            ),
+                            obscureText: !_showPassword,
+                            textInputAction: TextInputAction.done,
+                            onChanged: (_) => setState(() {}),
+                            validator: _validateConfirmPassword,
+                          ),
+                          if (_submitted && _fieldErrors.isNotEmpty) ...[
+                            const SizedBox(height: 16),
+                            _ValidationSummary(
+                              errors: _fieldErrors,
+                              onFocus: _focusField,
+                            ),
+                          ],
+                          if (state case CommandFailed<void>(:final failure)) ...[
+                            const SizedBox(height: 12),
+                            _FailureText(failure: failure),
+                          ],
+                          CheckboxListTile(
+                            key: const Key('register-terms'),
+                            value: _termsAccepted,
+                            onChanged: pending
+                                ? null
+                                : (value) => setState(
+                                    () => _termsAccepted = value ?? false,
+                                  ),
+                            title: const Text('I agree to the terms of use'),
+                            subtitle: const Text(
+                              'This is separate from optional data use and sharing preferences.',
+                            ),
+                          ),
+                          if (_submitted && !_termsAccepted)
+                            const Text(
+                              'Please accept the terms before creating an account.',
+                            ),
+                          const SizedBox(height: 20),
+                          FilledButton.icon(
+                            key: const Key('r6-register-submit'),
+                            onPressed: pending ? null : _submit,
+                            icon: pending
+                                ? const SizedBox.square(
+                                    dimension: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.person_add),
+                            label: Text(
+                              pending ? 'Creating account' : 'Create account',
+                            ),
+                          ),
+                          if (widget.onSignIn case final onSignIn?)
+                            TextButton(
+                              key: const Key('register-sign-in'),
+                              onPressed: pending ? null : onSignIn,
+                              child: const Text('Sign in'),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
         ),
       ),
     );

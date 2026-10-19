@@ -157,6 +157,47 @@ void main() {
     },
   );
 
+  testWidgets('registration draft asks before leaving and survives Stay', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const RegistrationPage(),
+                  ),
+                ),
+                child: const Text('Open registration'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open registration'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('r6-register-email')),
+      'draft@example.com',
+    );
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Leave registration?'), findsOneWidget);
+    await tester.tap(find.text('Stay'));
+    await tester.pumpAndSettle();
+    expect(find.text('draft@example.com'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Discard details'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('route-register')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('registration renders linked SP-01 multi-error summary', (
     tester,
   ) async {
