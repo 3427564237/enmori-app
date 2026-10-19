@@ -1,8 +1,25 @@
 # SHI 完整续作 prompt（P01–P06 已批准）
 
-**已获批准，可以执行。** LI 已明确答复“批准 P01–P06，按限定范围继续（推荐）”，并记录于 `docs/decisions/2026-10-20-li-event-participation-selection.md`。该决定引用准确确认稿版本；先读正式决定及其引用，不因旧草稿的历史 Pending 再次索要相同批准。当前源码准确 HEAD 和独立 checkout 方法见本包 `manifest.json`、`README.md`。
+**已获批准，可以执行。** LI 已明确答复“批准 P01–P06，按限定范围继续（推荐）”，并记录于 `docs/decisions/2026-10-20-li-event-participation-selection.md`。该决定引用准确确认稿版本；先读正式决定及其引用，不因旧草稿的历史 Pending 再次索要相同批准。本次改为 GitHub 分支交接，不再需要下载 ZIP；具体起点和执行方法如下。
 
-继续你提交的 `538b34d` Events 包，在独立分支一次完成 Events 的前端、后端、实际 Repository 持久保存回读、严格合同/fixtures 和必要隔离验证。沿用本次包提供的整合基线，包含最新主题、真实账号配置边界和 DU 返回保护；不要以旧 main 覆盖。先核对 HEAD 和未提交文件，保留现有改动。
+继续你提交的 `538b34d` Events 包，在独立分支一次完成 Events 的前端、后端、实际 Repository 持久保存回读、严格合同/fixtures 和必要隔离验证。沿用以下 GitHub 分支提供的整合基线，包含最新主题、真实账号配置边界和 DU 返回保护；不要以旧 main 覆盖。先核对 HEAD 和未提交文件，保留现有改动。
+
+## 从 GitHub 整合分支继续
+
+仓库：`https://github.com/3427564237/enmori-app.git`。
+交接分支：`souma/li-shi-du-integration-20261020`（包含已批准检查点 `7cff386e17f3d99a4613f77770786ae4865e006a` 及本次 GitHub 交接文档）。不要从旧 main 开始，不重复 cherry-pick538b34d/403950e。先确认 origin 指向上述仓库，保存当前未提交工作，再执行：
+
+```sh
+git fetch origin refs/heads/souma/li-shi-du-integration-20261020:refs/remotes/origin/souma/li-shi-du-integration-20261020
+git worktree add -b souma/shi-events-complete-20261020 ../ENMORI-SHI-continue origin/souma/li-shi-du-integration-20261020
+git -C ../ENMORI-SHI-continue rev-parse HEAD
+```
+
+记录这个实际 HEAD 作为交付 base。若分支/目录已存在，先检查它是否是本任务已有工作，再复用；不要 reset、清目录或覆盖。没有仓库时先正常 clone 上述仓库到新目录。独立 worktree 不含 LI 的私有配置、凭据或 node_modules，按锁文件准备已有依赖即可。
+
+完成后推送自己的分支并开 **Draft PR，base 为 `souma/li-shi-du-integration-20261020`**；PR正文放准确 base/head、实现/测试/Not Run 和接线说明。不要直接写入整合分支，不合并 main。只需回传 PR链接和简短回执；用户不需要再搬运工作ZIP。
+
+## 一次完成的任务
 
 先读 AGENTS、适用 Backend/Flutter skill、P01–P06 的真实确认记录和最终选择稿；旧合同/失败证据保留。P05 已获批，允许你在明确范围内选择精确 DTO、键、索引、游标、扫描界限和错误标识，先持久化精确合同，再实施；不为每个字段反复等待。范围外的新产品/权限/依赖冲突集中一次报告，只停受影响行为。
 
@@ -14,4 +31,4 @@
 
 合并一批完成受影响的定向 Flutter/Backend/合同测试与静态检查，避免反复全量跑。设备/外部真实报名/本机实际保存不在你机器可验证时标 Not Run，不能以组件替代。标准 shader 失败只有本机实证修复才改状态。给出你新增函数/路由注册/构造依赖、LI 最终 router/bootstrap 接入位置、JIN username 资料回调与隐私 seam，保留 ZHOU 独立审查。
 
-一次交付代码 commit/bundle、准确 base/head 与文件范围、精确合同/最少索引、测试命令和实际结果、保存→重读→冲突/错误恢复证据、未完成/Not Run 和最小接线说明。不 merge main、不公开发布、不要求 LI 重复运行你已完成且未变的测试、不标整个项目 Done。
+一次通过上述 Draft PR 交付代码、准确 base/head 与文件范围、精确合同/最少索引、测试命令和实际结果、保存→重读→冲突/错误恢复证据、未完成/Not Run 和最小接线说明。不 merge main、不发布应用或部署、不要求 LI 重复运行你已完成且未变的测试、不标整个项目 Done。
