@@ -1,3 +1,5 @@
+> 新检查点：本目录旧包继续仅作历史。最新可转交建议见 [local-ui-handoff-oct19](../local-ui-handoff-oct19/README.md)，请勿分发旧源码包。
+
 # 核心检查点与剩余任务包
 
 > 暂缓执行：最新[本机依赖优先决定](../../decisions/2026-10-19-li-local-dependencies-first.md)要求继续单对话，设备现已连接。下列分工与未连接状态为检查点历史记录，prompt不得作为当前开工指令。
