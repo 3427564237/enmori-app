@@ -15,3 +15,5 @@
 后续：用户已指定收件邮箱并授权注册测试；正式 Auth 创建测试账号和 VERIFY_EMAIL 均 HTTP200，等待收件并点击。账号凭据在上述私有目录，不在 APK 或 Git。后续只核对原账号状态，不自动重发。最新结果见 docs/evidence/sprint3/2026-10-19-local-device-checkpoint/verification.md。
 
 最新核对：用户手机截图及正式 Auth lookup 均确认邮箱已验证（emailVerified=true）；PASSWORD_RESET 请求 HTTP200，等待用户完成重设。此阶段仍不是同一 coretest APK 的真实账号完整闭环。
+
+密码重置后续：用户已完成重设，一次旧密码登录返回 INVALID_LOGIN_CREDENTIALS，旧凭据失效已确认。不要继续使用私有 test-identity.json 中的原密码；不索取新密码。新密码登录及真实账号与 App/Backend 的完整组合尚待验证。

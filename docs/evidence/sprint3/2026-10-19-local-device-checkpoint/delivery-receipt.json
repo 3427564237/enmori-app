@@ -48,9 +48,18 @@
     "emailVerifiedAtInitialLookup": false,
     "provider": "Firebase production Auth",
     "businessBackend": "not connected to real identity",
-    "passwordReset": "provider accepted; user completion pending",
+    "passwordReset": "user confirmed completed; old password rejected",
     "emailVerifiedAfterUserLink": true,
     "verificationConfirmedAt": "2026-10-19T13:34:43.602495+00:00",
-    "passwordResetRequestHttpStatus": 200
+    "passwordResetRequestHttpStatus": 200,
+    "passwordResetUserConfirmed": true,
+    "oldPasswordCheck": {
+      "state": "old_password_rejected",
+      "checkedAt": "2026-10-19T13:37:03.255677+00:00",
+      "httpStatus": 400,
+      "oldPasswordRejected": true,
+      "category": "INVALID_LOGIN_CREDENTIALS"
+    },
+    "newPasswordLogin": "not run; new password remains with user"
   }
 }
