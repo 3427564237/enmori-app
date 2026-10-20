@@ -16,6 +16,19 @@ const item = (id = "occurrence_a", title = "Same concert"): BrowseOccurrence => 
 });
 const after = (ms: number) => new Date(Date.parse(EVENT_AS_OF) + ms).toISOString();
 
+test('participation ignore filters only the selected Music rows and final consent check follows async filter',async()=>{
+  const records=eventTestRecords();records['accounts/s2-account']!.optionalProcessingConsent='accepted';
+  const {musicSegment:_unused,...nonMusic}=item('other');
+  let revoke=false;
+  const joined=createControlledEventRecommendations({gateway:{get:async path=>records[path],listEvents:async()=>[]},
+    source:{firstBatch:async()=>[item('a'),item('b'),nonMusic],detail:async()=>undefined},
+    clock:{now:()=>ok(new Date(EVENT_AS_OF))},requireRecommendationConsent:true,
+    ignoredEventIds:async(_uid,ids)=>{if(revoke)records['accounts/s2-account']!.optionalProcessingConsent='rejected';return ids.filter(id=>id===sourceEventId(item('a').browseId));},
+  });
+  const first=await joined.recommendEvents.execute({principal:{firebaseUid:EVENT_TEST_UID},view:'all'});assert.ok(first.ok);if(first.ok)assert.deepEqual(first.value.items.map(i=>i.eventId),[sourceEventId(item('b').browseId)]);
+  revoke=true;const second=await joined.recommendEvents.execute({principal:{firebaseUid:EVENT_TEST_UID},view:'all'});assert.ok(second.ok);if(second.ok)assert.deepEqual(second.value.items,[]);
+});
+
 test("one atomic source generation serves browse/recommend/detail; exact identity survives rename, equal titles remain distinct", async () => {
   let calls = 0, now = EVENT_AS_OF;
   const source: BrowseSource = { firstBatch: async () => { calls++; return [item(), item("occurrence_b")]; }, detail: async () => { throw Error("no separate detail read"); } };

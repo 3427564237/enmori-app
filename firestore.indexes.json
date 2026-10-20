@@ -1,5 +1,10 @@
 {
   "indexes": [
+    { "collectionGroup": "event_participations", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "eventId", "order": "ASCENDING" },
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "__name__", "order": "ASCENDING" }
+    ] },
     {
       "collectionGroup": "check_ins",
       "queryScope": "COLLECTION",

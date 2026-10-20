@@ -38,6 +38,16 @@ function parsePair(data: StoredDocument | undefined, a: string, b: string): Pair
   return pair;
 }
 const inboxPath = (accountId: string, ref: string) => `friend_inboxes/${accountId}/requests/${ref}`;
+/** Read-only trusted seam for composition; reuses the existing pair parser.
+ * The caller supplies its active transaction. No new relation is synthesized. */
+export async function readFriendVisibility(tx: FirestoreTransactionGateway, a: string, b: string): Promise<{ isFriend: boolean; isBlocked: boolean }> {
+  if (a === b) return { isFriend: false, isBlocked: false };
+  const data = await tx.get(`friend_pairs/${friendPairKey(a,b)}`);
+  if (data === undefined) return { isFriend: false, isBlocked: false };
+  const pair = parsePair(data,a,b);
+  if (pair === undefined) throw new Error('Invalid relationship facts');
+  return { isFriend: pair.friendship, isBlocked: pair.blockedByAccountIds.length !== 0 };
+}
 const listPath = (accountId: string, ref: string) => `friend_lists/${accountId}/members/${ref}`;
 const initialized = (data: StoredDocument | undefined): boolean => data?.initialized === true && Object.keys(data).length === 1;
 const validPointer = (data: StoredDocument | undefined): data is StoredDocument & { pairKey: string } =>
