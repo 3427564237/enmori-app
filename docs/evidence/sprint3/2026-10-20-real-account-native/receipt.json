@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-20",
+  "scope": "one real account on vivo V2405A; v8 account/profile/settings persistence",
+  "apkSource": "f3c733adca0737d4561fe4cd1fe8b1b303094a98",
+  "runtimeCheckoutHead": "065ab3880f7da9814ff6c6c73954e880e2e1d737",
+  "apk": {
+    "file": "enmori-real-account-v8-debug.apk",
+    "sha256": "d952a97d9700e0fecaee2e326839e01fb3bca1074c6b9ded74ecb13d23de3b8d",
+    "package": "com.enmori.app",
+    "versionCode": 8,
+    "versionName": "1.0.0-realaccount20261020",
+    "installedAndHashMatched": true
+  },
+  "checks": {
+    "humanLoginAndOnboarding": "pass",
+    "emailVerified": true,
+    "canonicalBindingExists": true,
+    "profileSaveAndNativeReadback": "pass",
+    "settingsSaveWithoutChangingChoices": "pass",
+    "profileRevision": 2,
+    "settingsRevision": 1,
+    "interestCount": 2,
+    "normalBackendStopStart": "pass",
+    "profileLoadFailureThenRecovery": "pass",
+    "signOutThenAndroidBack": "exited app; previous account page not restored",
+    "relogin": "Home without repeated onboarding; profile readback retained",
+    "authSignInTimeAdvanced": true,
+    "savedBaselineUtc": "2026-10-20T03:08:32.929Z",
+    "readbacks": [
+      {
+        "stage": "after-service-restart",
+        "checkedAt": "2026-10-20T03:09:20.292Z",
+        "accountDigestUnchanged": true,
+        "privacyDigestUnchanged": true,
+        "interestsDigestUnchanged": true,
+        "revisionsUnchanged": true
+      },
+      {
+        "stage": "after-relogin",
+        "checkedAt": "2026-10-20T03:14:00.050Z",
+        "accountDigestUnchanged": true,
+        "privacyDigestUnchanged": true,
+        "interestsDigestUnchanged": true,
+        "revisionsUnchanged": true
+      }
+    ],
+    "repeatTestSuites": 0,
+    "newBuilds": 0,
+    "emailsSent": 0,
+    "modelCalls": 0
+  },
+  "knownFinding": "Home still renders a legacy synthetic Community event; not accepted as real recommendation evidence",
+  "notRun": [
+    "second real account isolation",
+    "both consent paths and withdrawal",
+    "mail link return flow in v8",
+    "complete Check-in, calendar and map flows",
+    "two-account friendship and permission revocation",
+    "real Events participation and external registration flow",
+    "real AI multi-turn and Persona flows",
+    "SHI/DU integration APK and keyboard-open unsaved-exit behavior"
+  ]
+}
