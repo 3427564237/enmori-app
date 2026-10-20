@@ -47,7 +47,10 @@ final class BackendCheckInPlaceRepository implements CheckInPlaceRepository {
       return Failure(failure);
     }
     final value = (response as Success<JsonObject>).value,
-        checkIn = parseCheckInProjection(value['checkIn']);
+        checkIn = parseCheckInProjection(
+          value['checkIn'],
+          canonicalTime: false,
+        );
     if (checkIn == null ||
         !value.keys.every({'checkIn', 'notice'}.contains) ||
         (value.containsKey('notice') &&
@@ -88,7 +91,7 @@ final class BackendCheckInPlaceRepository implements CheckInPlaceRepository {
       return Failure(failure);
     }
     final body = (response as Success<JsonObject>).value,
-        result = parseCheckInProjection(body['checkIn']);
+        result = parseCheckInProjection(body['checkIn'], canonicalTime: false);
     return body.length == 1 && result != null ? Success(result) : _invalid();
   }
 

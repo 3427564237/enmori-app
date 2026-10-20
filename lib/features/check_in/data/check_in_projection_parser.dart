@@ -6,7 +6,7 @@ import '../../weather/domain/weather.dart';
 import '../domain/check_in_repository.dart';
 
 /// Same allowlisted projection for own and server-authorized other-user reads.
-CheckIn? parseCheckInProjection(Object? raw) {
+CheckIn? parseCheckInProjection(Object? raw, {bool canonicalTime = true}) {
   const keys = {
     'checkInId',
     'note',
@@ -36,7 +36,7 @@ CheckIn? parseCheckInProjection(Object? raw) {
       revision is! int ||
       revision < 1 ||
       time == null ||
-      time.toIso8601String() != raw['createdAt']) {
+      (canonicalTime && time.toIso8601String() != raw['createdAt'])) {
     return null;
   }
   for (final key in ['mood', 'activity']) {

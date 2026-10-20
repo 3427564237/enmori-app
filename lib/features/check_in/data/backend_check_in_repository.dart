@@ -214,7 +214,12 @@ final class BackendCheckInRepository
             value['notice'] != 'Check-in saved without weather.')) {
       return _invalidCheckIn();
     }
-    final checkIn = parseCheckInProjection(value['checkIn']);
+    // The existing single-record contract accepts UTC seconds/+00:00 too;
+    // history pagination keeps its canonical timestamp requirement.
+    final checkIn = parseCheckInProjection(
+      value['checkIn'],
+      canonicalTime: false,
+    );
     return checkIn == null ? _invalidCheckIn() : Success(checkIn);
   }
 

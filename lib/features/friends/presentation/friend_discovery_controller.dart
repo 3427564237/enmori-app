@@ -59,8 +59,11 @@ final class FriendDiscoveryController extends Notifier<FriendDiscoveryState> {
 
   Future<void> load() async {
     final preference = ref.read(friendIgnoreControllerProvider);
-    if (state.busy || preference.busy || preference.unresolvedUsername != null)
+    if (state.busy ||
+        preference.busy ||
+        preference.unresolvedUsername != null) {
       return;
+    }
     final epoch = ++_epoch, repository = _repository;
     state = const FriendDiscoveryState(busy: true);
     // Independent responses keep count availability separate from suggestions.
