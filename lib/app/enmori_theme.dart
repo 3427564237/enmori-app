@@ -65,8 +65,22 @@ ThemeData enmoriTheme() {
       focusedBorder: inputBorder.copyWith(
         borderSide: const BorderSide(color: green, width: 2),
       ),
+      errorBorder: inputBorder.copyWith(
+        borderSide: BorderSide(color: scheme.error),
+      ),
+      focusedErrorBorder: inputBorder.copyWith(
+        borderSide: BorderSide(color: scheme.error, width: 2),
+      ),
       prefixIconColor: scheme.onSurfaceVariant,
+      helperMaxLines: 3,
       errorMaxLines: 3,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(48, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: buttonShape,
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -83,7 +97,10 @@ ThemeData enmoriTheme() {
       ),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+      style: TextButton.styleFrom(
+        minimumSize: const Size(48, 48),
+        shape: buttonShape,
+      ),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: Colors.white,

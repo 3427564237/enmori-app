@@ -119,7 +119,11 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('private backend detail'), findsNothing);
-    await tester.tap(find.byKey(const Key('event-recommendations-retry')));
+    final retry = find.byKey(const Key('event-recommendations-retry'));
+    await tester.ensureVisible(retry);
+    await tester.pumpAndSettle();
+    expect(retry.hitTestable(), findsOneWidget);
+    await tester.tap(retry);
     await tester.pumpAndSettle();
     expect(repository.views, [
       EventRecommendationView.home,
