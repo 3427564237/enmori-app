@@ -23,3 +23,5 @@
 只审 JIN 相对上述基线的好友/资料/位置/Weather/本轮忽略新代码及组合影响；继承组件和旧 #135/#136/#137/#139/#141/#142/#146/#150/#158 等已完成评审不重开。各源码和执行记录按当前交付回执区分；早期 154 Backend / 119 Flutter / 5 SDK 只属于旧 source，不直接移记成新树全绿。本轮仅针对改变的推荐、忽略、transport 和 composition 编译/测试，不重复未变全套。
 
 原始失败记录保留。手写 HTTP/Auth fixtures、实际隔离 Firebase SDK 和真实设备/外部 provider 分开；没有手机定位撤权、真实双账号、OSM native cache/实际瓦片或本轮公网 Open-Meteo 验收声明。SHI 完成新审查后 LI 处理最终组合和设备；不等待手机/模型来交代码，不在本包合并 main、发布 APK、部署服务、关闭 Issue 或改 Project 状态。
+
+最终产品源为 `c71c0c675d9a1dedd2d6972d7cbb54cc5c352bea`，完整执行、失败修正、来源复用和 Not Run 见 [本轮验证](../../evidence/sprint3/2026-10-20-jin-ignore-validation.md) 及其机器回执；后续证据提交不修改该可执行源。
