@@ -1,0 +1,124 @@
+{
+  "source": "2d0f17baf09457311d5df8cede7979cbc876c3fc",
+  "file": "enmori-uiux-v12-debug.apk",
+  "package": "com.enmori.app.coretest",
+  "versionCode": 12,
+  "sha256": "88b95722c8def562acc1632304de40604e7e0a7b97c9bafb27a941bbff39e1a7",
+  "bytes": 173768121,
+  "date": "2026-10-20",
+  "device": "vivo V2405A",
+  "installed": true,
+  "handoff": {
+    "status": "Pass",
+    "category": null,
+    "apkVerified": true,
+    "installedApkMatched": true,
+    "readyNonceVerified": true,
+    "configurationConsumed": true,
+    "failureCleanupConfirmed": true,
+    "createdReverseCount": 0,
+    "apkSha256": "88b95722c8def562acc1632304de40604e7e0a7b97c9bafb27a941bbff39e1a7"
+  },
+  "profileNative": {
+    "keyboardOpened": true,
+    "firstBackRetainedDraft": true,
+    "secondBackConfirmedLeave": true,
+    "stayRetainedDraft": true,
+    "discardAndServerReloadUnchanged": true
+  },
+  "nativeObserved": {
+    "homeNoBanner": "pass",
+    "activityListDetailAndSystemBack": "pass; real Ticketmaster content",
+    "recommendations": "service unavailable; one manual Retry also unavailable; success not established",
+    "aiHistorySelectionAndRead": "pass; no message sent",
+    "personaOverviewAndManagement": "pass; no Persona created",
+    "finalPhonePage": "Home"
+  },
+  "testBoundaries": {
+    "initialUiBatch": {
+      "source": "dd2fbebc4bc554c538824794d6788cca822861de",
+      "passed": 97,
+      "failed": 0
+    },
+    "initialControlledRoot": {
+      "source": "7ed6474b2d77e47a30d4e6e5a8ef5d4f42492b2c",
+      "passed": 3,
+      "failed": 1,
+      "failure": "old registration navigation test omitted discard confirmation"
+    },
+    "correctedRegistrationSubset": {
+      "source": "23e381214d32b0f6baeafae0856fb08c5add76b4",
+      "passed": 1,
+      "failed": 0
+    },
+    "controlledRootFollowup": {
+      "source": "5b4fab9d74a6c650c927a901412870ea1322186f",
+      "passed": 4,
+      "failed": 0
+    },
+    "finalNoBannerSource": {
+      "source": "2d0f17baf09457311d5df8cede7979cbc876c3fc",
+      "standardApkBuild": "pass",
+      "nativeChecks": "above",
+      "fullSuiteRerun": false
+    }
+  },
+  "intermediateVersions": {
+    "v10": "installed; stale banner found; profile keyboard/Back/Stay/Discard/reload passed",
+    "v11": "installed; shortened banner exposed width/safe-area issue",
+    "intermediateV12": "built at 5b4fab9 but not installed; superseded by user-requested removal and final v12"
+  },
+  "statePreserved": {
+    "recordsPersonasParticipationAndMessagesCreated": 0,
+    "profileOrSettingsSaved": false,
+    "modelCalls": 0,
+    "serviceRestarts": 0,
+    "realAccountAppChanged": false
+  },
+  "localEvidence": [
+    {
+      "path": "build/li-uiux-review/native-banner-tests.log",
+      "sha256": "7e4475970cf598840fcd807f1ee9ea1067049ca9328b41f520f90a2648649fae"
+    },
+    {
+      "path": "build/li-uiux-review/native-banner-corrected-test.log",
+      "sha256": "447ec7808f43c1ae7a95ebc634ebe3c326755c7ef05a6ec95f12857f8f1a943c"
+    },
+    {
+      "path": "build/li-uiux-review/native-wrapper-final-tests.log",
+      "sha256": "3dc8a2a52f4a9a7b524faa513910b73751538f3f9f638198da9073c3c147f61a"
+    },
+    {
+      "path": "build/li-uiux-review/native-wrapper-final-analyze.log",
+      "sha256": "735e209a0e4aaca684bdf325d6ed0f07d5a9531ebab78b7df76a67438881ae9f"
+    },
+    {
+      "path": "build/li-uiux-review/apk-v12-final-build.log",
+      "sha256": "c90e3df0c1f1aadce4429f3255b69bc82bf184f0a51d874300f8af4f8d9e0b11"
+    },
+    {
+      "path": "build/li-uiux-review/install-v12.log",
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "path": "build/li-uiux-review/native-handoff-v12.json",
+      "sha256": "028ef0e1fa74be188b5341405356c1cbe3935d73b112b0d8a3c8fa6ba39d826c"
+    },
+    {
+      "path": "build/li-uiux-review/native-profile-v12.json",
+      "sha256": "27de87f7675f9994eb420cda7c44c4057d045d0daaaf5279069801655ba3fa0d"
+    },
+    {
+      "path": "build/li-uiux-review/native-home-v10.png",
+      "sha256": "08b721b62a4b1be5ea92f6d5bc04b4ad644abc046479d5d2c088850ad6e80e9a"
+    },
+    {
+      "path": "build/li-uiux-review/native-home-v11.png",
+      "sha256": "d836a10b53b1782eb1ecd404d1e2a9874af22a90df434cd3f4eb5fbc6a50de4c"
+    },
+    {
+      "path": "build/li-uiux-review/native-home-v12-final.png",
+      "sha256": "9a7de2b6375926256b5f82944fb5fa8ffec99869b3936c99e3727e3fce83992c"
+    }
+  ]
+}
