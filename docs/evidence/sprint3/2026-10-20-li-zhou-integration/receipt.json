@@ -171,5 +171,14 @@
     "unsaved draft preview returned a greeting",
     "Android Back discard prompt",
     "discard returned to management"
+  ],
+  "commands": [
+    "Node 24.19.0: node node_modules/typescript/bin/tsc --project backend/tsconfig.json",
+    "Node 24.19.0: node --test backend/dist/test/personas/*.test.js backend/dist/test/ai-conversation/*.test.js backend/dist/test/simple-chat.test.js backend/dist/test/contract/openapi.test.js",
+    "After correction only: node --test backend/dist/test/ai-conversation/lifecycle.test.js",
+    "Flutter 3.47.2: flutter test --no-pub --reporter expanded test/features/personas test/features/ai_conversation test/app/persona_preview_composition_test.dart test/app/persona_home_router_test.dart test/app/ai_conversation_shared_router_test.dart",
+    "After fixture correction only: flutter test --no-pub --reporter expanded test/app/ai_conversation_shared_router_test.dart",
+    "Flutter 3.47.2: flutter analyze --no-pub",
+    "ENMORI_CORE_ANDROID_TEST=true flutter build apk --debug --target lib/controlled_demo.dart --no-pub --build-number 9 --build-name 1.0.0-zhou20261020"
   ]
 }
