@@ -23,3 +23,7 @@
 ## 20Oct 接收更新
 
 SHI538b34d部分组件及DU403950e已在独立整合分支处理，主机运行版本不变。见[接收与验证](../../evidence/sprint3/2026-10-20-shi-du-integration/verification.md)。DU当前适配35项widget通过；SHI16项组件和5项策略通过，仍缺参与持久化/分页。SHI的[P01–P06](../2026-10-20-li-event-participation-selection-preview.md)已由LI明确批准，见[正式决定](../../decisions/2026-10-20-li-event-participation-selection.md)；[单prompt续作](shi-continuation-oct20.md)可直接转交执行。旧分工及回执不改写成已完成。
+
+## 20Oct JIN 持续忽略更新
+
+LI已[批准持续忽略、恢复及Undo](../../decisions/2026-10-20-li-friend-recommendation-ignore.md)，对应Issue84局部决策等待解除。[JIN完整prompt](jin.md)已更新；保留其927f775上的在途实现，通过GitHub分支/Draft PR交回，不要求重开任务。Undo尚待JIN实现，不能把批准记为功能已可用。
