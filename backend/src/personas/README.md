@@ -1,5 +1,11 @@
 # Isolated Persona management
 
+The 20 Oct full package extends this historical first slice with full expression
+and a draft-only preview. Its [bounded contract and supersession trail](../../../docs/planning/2026-10-20-zhou-persona-expression-preview-contract.md)
+describe the seven optional strings, legacy empty defaults, simplified-local-chat
+projection opt-in, and authenticated/consenting preview with no business writes.
+The original slice account below is retained as historical implementation context.
+
 This slice implements Issue #63's approved Backend-only P01–P03 contract. The
 [pinned contract](https://github.com/3427564237/enmori-app/blob/55fa4a7ab77b32b08d300d391ebee4293ad6f963/docs/planning/2026-10-07-zhou-persona-first-contract-delta.md)
 and [LI's recorded selection](https://github.com/3427564237/enmori-app/blob/b5f3dbef6d5a04d35c30369efe2b9a4a66075a22/docs/decisions/2026-10-08-li-persona-backend-first-approval.md)
@@ -62,3 +68,10 @@ also runs the shared Port cases and actual Auth/Firestore transaction, race and
 failure-injection cases. See the [local evidence packet](../../../docs/evidence/backend/2026-10-08-issue-63-persona-backend-local.md)
 for executed results and scope limits. P08, Flutter/Android and AI integration
 remain outside this Backend delivery.
+
+For the 20 Oct extension, `node backend/scripts/run-persona-emulators.mjs` runs
+only the actual Persona suite, with the same sanitized environment guards,
+confirmed demo project, existing fixed ports and checksum-verified cached JAR.
+It refuses occupied ports and never imports/exports retained LI data. The
+[20 Oct evidence](../../../docs/evidence/backend/2026-10-20-zhou-persona-expression-preview-local.md)
+records the populated-field and legacy-storage checks separately from model/device gates.

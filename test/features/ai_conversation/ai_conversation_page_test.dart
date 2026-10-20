@@ -10,6 +10,134 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   for (final social in [false, true]) {
+    for (final phase in [
+      AiConversationPhase.limited,
+      AiConversationPhase.authorityChanged,
+    ]) {
+      testWidgets(
+        'withdrawn AI authority clears the editor social=$social phase=$phase',
+        (tester) async {
+          final controller = _PageController(_state(canSend: true));
+          await _pump(tester, controller, socialStyle: social);
+          final input = find.byKey(const Key('ai-message-input'));
+          await tester.enterText(input, 'Private unsent input');
+          final editor = tester.widget<TextField>(input).controller!;
+          controller.publish(_state(phase: phase));
+          await tester.pumpAndSettle();
+          expect(input, findsNothing);
+          expect(editor.text, isEmpty);
+          expect(controller.sent, isEmpty);
+        },
+      );
+    }
+  }
+  testWidgets(
+    'history selection protects draft and empty scanned page exposes continuation at large text',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final summary = AiConversationSummary(
+        conversationId: '11111111-1111-4111-8111-111111111111',
+        lastMessageAt: DateTime.utc(2026, 10, 20),
+      );
+      final controller = _PageController(
+        _state(
+          canSend: true,
+          canBrowseHistory: true,
+          canSelectConversation: true,
+          historyLoaded: true,
+          conversations: [summary],
+        ),
+      );
+      await _pump(tester, controller, socialStyle: true, textScale: 2);
+      await tester.enterText(
+        find.byKey(const Key('ai-message-input')),
+        'Keep this draft',
+      );
+      await _tap(tester, 'ai-history');
+      await _tap(tester, 'ai-history-${summary.conversationId}');
+      await tester.tap(find.text('Keep editing'));
+      await tester.pumpAndSettle();
+      expect(controller.selected, isEmpty);
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('ai-message-input')))
+            .controller!
+            .text,
+        'Keep this draft',
+      );
+      await _tap(tester, 'ai-history-${summary.conversationId}');
+      await tester.tap(find.byKey(const Key('ai-confirm-discard')));
+      await tester.pumpAndSettle();
+      expect(controller.selected, [summary.conversationId]);
+      expect(controller.sent, isEmpty);
+      controller.publish(
+        _state(
+          canSend: true,
+          canBrowseHistory: true,
+          historyLoaded: true,
+          historyCursor: summary.conversationId,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('No saved conversations.'), findsNothing);
+      await _tap(tester, 'ai-history-more');
+      expect(controller.historyLoads, [true]);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  for (final social in [false, true]) {
+    testWidgets('new replies follow only near the bottom social=$social', (
+      tester,
+    ) async {
+      final messages = [
+        for (var i = 0; i < 24; i++)
+          _message('saved-$i', i + 1, AiRole.user, 'Saved message $i'),
+      ];
+      final controller = _PageController(
+        _state(canSend: true, messages: messages),
+      );
+      await _pump(tester, controller, socialStyle: social);
+      final scroll = tester
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byKey(const Key('route-ai-conversation')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
+          .position;
+      // Settle lazy layout at the actual end before the next reply arrives.
+      for (var i = 0; i < 4; i++) {
+        scroll.jumpTo(scroll.maxScrollExtent);
+        await tester.pumpAndSettle();
+      }
+      messages.add(
+        _message('reply-1', 25, AiRole.assistant, 'A new reply. ' * 20),
+      );
+      controller.publish(_state(canSend: true, messages: messages));
+      await tester.pumpAndSettle();
+      expect(scroll.extentAfter, lessThanOrEqualTo(1));
+
+      scroll.jumpTo(0);
+      await tester.pumpAndSettle();
+      final readingOffset = scroll.pixels;
+      messages.add(
+        _message('reply-2', 26, AiRole.assistant, 'Another reply. ' * 20),
+      );
+      controller.publish(_state(canSend: true, messages: messages));
+      await tester.pumpAndSettle();
+      expect(scroll.pixels, readingOffset);
+      expect(scroll.extentAfter, greaterThan(100));
+      expect(controller.sent, isEmpty);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final social in [false, true]) {
     testWidgets(
       'New conversation preserves draft, selection and focus social=$social',
       (tester) async {
@@ -740,7 +868,7 @@ void main() {
 
   const outcomes = {
     AiConversationPhase.limited:
-        'Check-in context is not available under your current permissions.',
+        'AI Limited. Your current data consent does not permit AI chat.',
     AiConversationPhase.busy: 'AI is busy. Try again later.',
     AiConversationPhase.unavailable:
         'AI is unavailable right now. Try again later.',
@@ -1050,6 +1178,11 @@ AiConversationState _state({
   bool canDelete = false,
   bool canStartNewConversation = false,
   bool readBusy = false,
+  bool canBrowseHistory = false,
+  bool canSelectConversation = false,
+  bool historyLoaded = false,
+  String? historyCursor,
+  Iterable<AiConversationSummary> conversations = const [],
 }) => AiConversationState(
   sessionKey: sessionKey,
   phase: phase,
@@ -1064,6 +1197,11 @@ AiConversationState _state({
   canDelete: canDelete,
   canStartNewConversation: canStartNewConversation,
   readBusy: readBusy,
+  canBrowseHistory: canBrowseHistory,
+  canSelectConversation: canSelectConversation,
+  historyLoaded: historyLoaded,
+  historyCursor: historyCursor,
+  conversations: conversations,
 );
 
 AiMessage _message(
@@ -1136,6 +1274,7 @@ Future<void> _tap(WidgetTester tester, String key) async {
     );
   }
   await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
@@ -1149,6 +1288,8 @@ class _PageController extends AiConversationController {
   final retried = <String>[];
   final reads = <String?>[];
   final events = <String>[];
+  final selected = <String>[];
+  final historyLoads = <bool>[];
   int cancels = 0;
   int detaches = 0;
   int checks = 0;
@@ -1207,6 +1348,13 @@ class _PageController extends AiConversationController {
 
   @override
   Future<void> loadMessages({String? before}) async => reads.add(before);
+
+  @override
+  Future<void> loadConversations({bool more = false}) async =>
+      historyLoads.add(more);
+
+  @override
+  Future<void> selectConversation(String id) async => selected.add(id);
 
   @override
   void startNewConversation() {

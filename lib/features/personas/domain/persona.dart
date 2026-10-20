@@ -12,18 +12,49 @@ final class PersonaFields {
     required this.tone,
     required this.responseLength,
     required this.formatStyle,
+    this.relationship = '',
+    this.shortIntroduction = '',
+    this.description = '',
+    this.personality = '',
+    this.communicationStyle = '',
+    this.interests = '',
+    this.extraInstructions = '',
   });
 
   final String displayName;
   final PersonaTone tone;
   final PersonaResponseLength responseLength;
   final PersonaFormatStyle formatStyle;
+  final String relationship;
+  final String shortIntroduction;
+  final String description;
+  final String personality;
+  final String communicationStyle;
+  final String interests;
+  final String extraInstructions;
+
+  Map<String, String> get expressionFields => {
+    'relationship': relationship,
+    'shortIntroduction': shortIntroduction,
+    'description': description,
+    'personality': personality,
+    'communicationStyle': communicationStyle,
+    'interests': interests,
+    'extraInstructions': extraInstructions,
+  };
 
   PersonaFields get normalized => PersonaFields(
     displayName: normalizePersonaName(displayName),
     tone: tone,
     responseLength: responseLength,
     formatStyle: formatStyle,
+    relationship: relationship,
+    shortIntroduction: shortIntroduction,
+    description: description,
+    personality: personality,
+    communicationStyle: communicationStyle,
+    interests: interests,
+    extraInstructions: extraInstructions,
   );
 
   static String? nameValidationMessage(String value) {
@@ -43,11 +74,29 @@ final class PersonaFields {
       displayName == other.displayName &&
       tone == other.tone &&
       responseLength == other.responseLength &&
-      formatStyle == other.formatStyle;
+      formatStyle == other.formatStyle &&
+      relationship == other.relationship &&
+      shortIntroduction == other.shortIntroduction &&
+      description == other.description &&
+      personality == other.personality &&
+      communicationStyle == other.communicationStyle &&
+      interests == other.interests &&
+      extraInstructions == other.extraInstructions;
 
   @override
-  int get hashCode =>
-      Object.hash(displayName, tone, responseLength, formatStyle);
+  int get hashCode => Object.hash(
+    displayName,
+    tone,
+    responseLength,
+    formatStyle,
+    relationship,
+    shortIntroduction,
+    description,
+    personality,
+    communicationStyle,
+    interests,
+    extraInstructions,
+  );
 }
 
 // ECMAScript trim, deliberately excluding Dart's additional U+0085 trimming.
@@ -76,6 +125,10 @@ bool _wellFormed(String value) {
   }
   return true;
 }
+
+/// Free expression is not a permission or content policy. Reject only malformed
+/// Unicode; transport and model resource limits remain separate boundaries.
+bool isPersonaExpressionText(String value) => _wellFormed(value);
 
 bool isPersonaId(String value) =>
     value.length == 64 && RegExp(r'^[a-f0-9]{64}$').hasMatch(value);

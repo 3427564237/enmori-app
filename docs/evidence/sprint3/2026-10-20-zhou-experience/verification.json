@@ -1,0 +1,558 @@
+{
+  "recordedAt": "2026-10-20T11:54:50.767405+08:00",
+  "sourceHead": "5f949a596bea2385200e7ccac10f9ca9e973cc16",
+  "sourceTree": "da009ec63bf63931ebbaabc4241ed1f346ee7ddf",
+  "handoffHead": "927f77527b32d349aa08020f7de0e88402edb9c7",
+  "featureBaseline": "51ecb5c11ff23ce3bf36fbf9280d2e00646ac857",
+  "branch": "codex/zhou-ai-persona-experience-20261020",
+  "observedIntegrationHead": "900ca6fcdefb77e9aa95d96fa80994ebf826398f",
+  "nonMutatingMergeTree": "efa76fef349623d6f4cec18fae35508a14a062ec",
+  "mergeAndPatchPreflight": "clean; text compatibility only, no combined runtime claim",
+  "sourceBindings": [
+    {
+      "path": ".fvmrc",
+      "gitBlob": "e4d3c12ba6b5d2d8aa826f6a17991244de812d7d",
+      "sha256WorktreeBytes": "f35519711e24b639f1ca79cfa7847307ba6b75f0b6d1d76734ecc9f2cf0cceb0"
+    },
+    {
+      "path": "AGENTS.md",
+      "gitBlob": "c26d513fb391c631bc780004276c93e046f185a9",
+      "sha256WorktreeBytes": "b844b4d49b595dc0dfcd5c01283311a5d02156f58c008ec78c31c80ee44f151c"
+    },
+    {
+      "path": "ARCHITECTURE.md",
+      "gitBlob": "0dcfb502ed97a878b7c2f1c69e72d8b350490c2f",
+      "sha256WorktreeBytes": "b335122e535c9a5dd40bc6ff57188cfe98c623b5c4930f468e754985d3a9b86e"
+    },
+    {
+      "path": "api/openapi.json",
+      "gitBlob": "6188a2e8464d3e812e8ea5015b78f5cd2651e2de",
+      "sha256WorktreeBytes": "c0a0f4e9bfed073b3c092cd73ba042ce9729f126b8aea8afe81de438557c5a60"
+    },
+    {
+      "path": "backend/emulator-test/personas.integration.test.ts",
+      "gitBlob": "35fbd23c51909a438f530f95f17e8b52eed00bff",
+      "sha256WorktreeBytes": "dabc5df0be0509ab2f3e05a80ced6507d37f8ef98d8013fe59bdb6755fc4463d"
+    },
+    {
+      "path": "backend/scripts/run-persona-emulators.mjs",
+      "gitBlob": "075d6b90e1323bd281293a985b35348f978e20b9",
+      "sha256WorktreeBytes": "6d693f0753757578a180209b9a057ad911f84b3a875959f37ab878a0b4884aec"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/application-conversation-operations.ts",
+      "gitBlob": "1a1d776977d74708eec07133dcb113c75b1e01c9",
+      "sha256WorktreeBytes": "95ef9f8ea19240bb012f6e6c63d6061909dce1230acaf0492aad980cdf6c017e"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/capture-context.ts",
+      "gitBlob": "ee8c320f9ddf919f30ec0108d55576e4a6d4ce8b",
+      "sha256WorktreeBytes": "298113cad644e715c9e3d75995f286c627c8c6af8eed3cbceccb11ab339a40d6"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/open-conversation-semantic-policy.ts",
+      "gitBlob": "310e65055c3a7250b61703667c8f17640751837a",
+      "sha256WorktreeBytes": "2dc7fbddc7efb20fc0ab6c13be474c469efafa28e2a20d4f079f680135b5ce21"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/persona-expression.ts",
+      "gitBlob": "acc85279c9a9ba70bd15f125157c79c74a20b5d3",
+      "sha256WorktreeBytes": "b06f226c2240d80ce984c6a6952281ef7602c8e78d9b53f6ec8e7b1062cc7e10"
+    },
+    {
+      "path": "backend/src/ai-conversation/application/real-context-reader.ts",
+      "gitBlob": "c0350481950d260a8b62a349a68b20145f0a082b",
+      "sha256WorktreeBytes": "30067db9fb051f14d169de1ff0623b06c11ecfec87bf31728512e6ab79818ec5"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firebase-admin-real-context-reader.ts",
+      "gitBlob": "6e63003fc59c7ffe8e0052d95a06dd3ffc01d912",
+      "sha256WorktreeBytes": "c0ceb281615bb21c208cdb92a45995a5a2a92d62e8e716363fb0dd23a56e5392"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-operation-readers.ts",
+      "gitBlob": "40cdf7b37b360c5cef726752291c880ed8fc965e",
+      "sha256WorktreeBytes": "5a7423374ff309ca86cc894312737e50ab7c1acaf965a269f5f7dd017ce64fe1"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/firestore-conversation-store.ts",
+      "gitBlob": "e1387a5448191f4f960f5127c34ee4393cdef68c",
+      "sha256WorktreeBytes": "f62ce67ecd9ee0df3d8cdd6e0cea452eaa4efd486ca0cdc12a944d5ac6049d49"
+    },
+    {
+      "path": "backend/src/ai-conversation/infrastructure/real-context-records.ts",
+      "gitBlob": "8caa85af195ea6838e13713ea65e08442c3c4ac4",
+      "sha256WorktreeBytes": "adf7aa1a349978e824310705b17fbc84d741f1dc0f42a2d21fb8b9bebf369ead"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/application-conversation-operations.ts",
+      "gitBlob": "8de682edc5ee37d5d209a7bcc7e53afbfde3b4e1",
+      "sha256WorktreeBytes": "b6ceedcf8cd7362a3dc3ad756047b200438f6ceea06c0bf97653b25f698a68ba"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/conversation-lifecycle.ts",
+      "gitBlob": "370c45e09e7faa07daa49878bfdcc2cf0a89e785",
+      "sha256WorktreeBytes": "ab5054ada3f7a373e2829510a82fccae41a97c418608d57d208c353b26e5630b"
+    },
+    {
+      "path": "backend/src/ai-conversation/ports/conversation-operations.ts",
+      "gitBlob": "c00202550c3f050fa4b426fae0910fde92d4d8e6",
+      "sha256WorktreeBytes": "5fda509e42b2230e698b7598a6c373c77c141ec54289423d91745127324c2556"
+    },
+    {
+      "path": "backend/src/ai-conversation/transport/register-routes.ts",
+      "gitBlob": "0edbf0c152c85ed7ae8a5348ba88a5e5bf8fcd46",
+      "sha256WorktreeBytes": "eae4c0a239649ce32d6875b5e0f1a65369de1313505af5279beb183af5ee05ad"
+    },
+    {
+      "path": "backend/src/bootstrap/build-app.ts",
+      "gitBlob": "edd1d65436bdc486b84baccf18c0c8e0ba6e7609",
+      "sha256WorktreeBytes": "bbeb0dd1ec20e4e02296b3b9f4f797290a9f9f3f1c843040fa93f33e8dabb419"
+    },
+    {
+      "path": "backend/src/bootstrap/isolated-conversation-composition.ts",
+      "gitBlob": "92a8b43023faa5e6552c3506274613bce28ca1b9",
+      "sha256WorktreeBytes": "004213e1b10c72fa088e680cddf7ec3631ba17e2ad5a5387b47d9b7b30305b3f"
+    },
+    {
+      "path": "backend/src/bootstrap/retained-core-runtime.ts",
+      "gitBlob": "cb394d98fd2b647dce6a3b063999894aeeab8032",
+      "sha256WorktreeBytes": "bce839430b6fa41728ef5c57086a8c53cf26e0c64f3028e6903b40cce1c8770f"
+    },
+    {
+      "path": "backend/src/personas/README.md",
+      "gitBlob": "934560956b5f5289eb1775b75f08d1e5be20cd91",
+      "sha256WorktreeBytes": "06bed4c7f7fd840f03768bef08450b4ac2c17003bf25a77e6fec23101f80d23e"
+    },
+    {
+      "path": "backend/src/personas/application/own-personas.ts",
+      "gitBlob": "dc0d753baf4d964c7bcebdf8b1f179099908d56b",
+      "sha256WorktreeBytes": "5df8e48013b432b4c5a83d862272c1b52bbe236cae0e78aa522f1c5c8586901a"
+    },
+    {
+      "path": "backend/src/personas/application/persona-model.ts",
+      "gitBlob": "890f453258378f741d5aa23de88e953dcf5b21e0",
+      "sha256WorktreeBytes": "71fdb9bbc2aa853f9c8eb2f0a03f392cf5ed2563f2683e26e291dbffb9863169"
+    },
+    {
+      "path": "backend/src/personas/application/preview-persona.ts",
+      "gitBlob": "c07b2e7b5db8868cc008da7282ebed984ecf562b",
+      "sha256WorktreeBytes": "521f8988371a7250fa79ea73f10f2e5e3f33b042ccf60dd92186bc693aa3e70e"
+    },
+    {
+      "path": "backend/src/personas/domain/persona-values.ts",
+      "gitBlob": "d0eb7e8b00d5b087c8ab26edf5760fb6f9cc26ca",
+      "sha256WorktreeBytes": "1dfe83134dd78aebb256b5b21061155c08c2bbd361da9132ec8098df02f4366e"
+    },
+    {
+      "path": "backend/src/personas/infrastructure/firestore-persona-preview-authority.ts",
+      "gitBlob": "6d84cf6cef23e9d22b752bb562f7446540694cac",
+      "sha256WorktreeBytes": "fc6dab00592a9b449444ba94f4da3613cf5583bc034ec2dd39614fd4dd919aca"
+    },
+    {
+      "path": "backend/src/personas/infrastructure/firestore-persona-repository.ts",
+      "gitBlob": "51f2f647a72bb4e6ec2cd475fe96e40e28aab1f3",
+      "sha256WorktreeBytes": "14c681e5e51c1ee9a0db0eb771dc5ed43173d9eefbc8908c7743a27a8e0a9890"
+    },
+    {
+      "path": "backend/src/personas/ports/persona-preview-authority.ts",
+      "gitBlob": "dc512188b06b5a955df0ff60ad31a4e0ea3f3d98",
+      "sha256WorktreeBytes": "52e3c8e3844b9b358a75fada7ce6138bb2246bf4068ffb4316cd4cd09564be1c"
+    },
+    {
+      "path": "backend/src/personas/transport/preview-route.ts",
+      "gitBlob": "acb2f2bca38e929a3aaff43777f53709d76f84e7",
+      "sha256WorktreeBytes": "a00c8a6f22d0c19de8d6a6c631aec50172e6fd8dc8781042848d46de194dbbe5"
+    },
+    {
+      "path": "backend/src/personas/transport/register-routes.ts",
+      "gitBlob": "782670a7fbc8328390508e20fb7f27b5bfd7a4a6",
+      "sha256WorktreeBytes": "ce2c166bbc7481fa34e0181e0329b53932382d44f353711f516fbe734453f8ac"
+    },
+    {
+      "path": "backend/src/personas/transport/schemas.ts",
+      "gitBlob": "957916f75e2bb9c528b5112ea22974656ccf1dfe",
+      "sha256WorktreeBytes": "ca3eb7c5a35828319cfb7760c2af4fdf7acf96fecd28147ae208b7ad5d0e120e"
+    },
+    {
+      "path": "backend/src/transport/route-inventory.ts",
+      "gitBlob": "bae5376572dd627869c8a0b07e67fd032c566505",
+      "sha256WorktreeBytes": "f515208cae6875f1c0a791a55193fae941ad5a7b3ed63569f4b1e1f50e288b73"
+    },
+    {
+      "path": "backend/test/ai-conversation/conversation-history.test.ts",
+      "gitBlob": "ca1338eee080653d8b0985e07fbf9a7bf2e4fe6b",
+      "sha256WorktreeBytes": "94958d925db8831e1b06cf66bd54b5716711cf8566dbe155965da447db6c61f7"
+    },
+    {
+      "path": "backend/test/ai-conversation/firebase-admin-real-context-reader.test.ts",
+      "gitBlob": "33d7d91e08279b9162d4a8838592985eb482faa7",
+      "sha256WorktreeBytes": "e6d6d362508dd38165204c7d826dadf2954083913191a383cf2528e2e78a454c"
+    },
+    {
+      "path": "backend/test/personas/full-expression.test.ts",
+      "gitBlob": "847b86678d03440d620561288df311fa280da257",
+      "sha256WorktreeBytes": "cd1369d4e58eade01f0f4ba40ea86c77203fa2c3a0815be59bc3a6532fc6af59"
+    },
+    {
+      "path": "backend/test/personas/preview.test.ts",
+      "gitBlob": "4d2f9d1bcd0f2b86181b49a2a576d7f7e3935298",
+      "sha256WorktreeBytes": "1490b14152b1d2d1e473f2398ce7625d29289b1a7785a4d4e5d27b1e320802a6"
+    },
+    {
+      "path": "backend/test/personas/transport.test.ts",
+      "gitBlob": "2a47e066a0351cae1b2efb3e6193aa48082c50c0",
+      "sha256WorktreeBytes": "b4787cd7e51b1fb5941a88c12d60453cf14ff33e7f10f6a51a2d6337d0ef02b7"
+    },
+    {
+      "path": "backend/test/support/persona-repository-contract.ts",
+      "gitBlob": "050a23adf7fc410098559f160676bffcdf55f666",
+      "sha256WorktreeBytes": "03aabf162b34a06a9c7301d5d89a8b866d7236fc6e143f2a59a41e4c615fe1e0"
+    },
+    {
+      "path": "docs/decisions/2026-10-19-li-ai-mvp-simplification.md",
+      "gitBlob": "62db2e11a96e48078224dafbd43fce876ccbb5cb",
+      "sha256WorktreeBytes": "43d7121f9b879a5f0cac2605f048bbc60e608f96d1bbba98861f9aef95ae5985"
+    },
+    {
+      "path": "docs/decisions/2026-10-19-li-core-feature-delivery.md",
+      "gitBlob": "44d886aa9aaff9e83965b5809670e202def7092f",
+      "sha256WorktreeBytes": "4811ed4e67faa0d90de621b52441cff78c557a2ea0bf173d6f366aba159301f8"
+    },
+    {
+      "path": "docs/decisions/2026-10-19-li-local-ui-handoff-preparation.md",
+      "gitBlob": "ef00ed20f5732a8433e50a111907348774ae8898",
+      "sha256WorktreeBytes": "258f6c221d8d452eeb83b8b50dad2bb42b34be30891aa703403262db5efc2777"
+    },
+    {
+      "path": "docs/decisions/2026-10-20-user-zhou-complete-package-execution.md",
+      "gitBlob": "b980dfe89ec337c6318840a8f4ff4f773c7ec00b",
+      "sha256WorktreeBytes": "87e0a46c2fbec53c5717cbb0a8b0ad3688a7e6985c3c6a437f65beac668ba6ae"
+    },
+    {
+      "path": "docs/evidence/backend/2026-10-20-zhou-persona-expression-preview-local.md",
+      "gitBlob": "ceb9cecaa0da0711e730a77802147526793891fc",
+      "sha256WorktreeBytes": "a998170c0d7d0848514780031c846e56506a640b7cba7ff14a9e1784228384d5"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-20-zhou-persona-client.md",
+      "gitBlob": "a73d38d5c009d5a4ff381765c96aaee799fd30b4",
+      "sha256WorktreeBytes": "d58eeef95810c6a5234ce84c6fc6200c37ef28e7b7fa8f61698c5d74292a5500"
+    },
+    {
+      "path": "docs/integration/2026-10-20-zhou-persona-runtime.md",
+      "gitBlob": "1562dae19d6afebc1ba1cb1139affd4829dcde56",
+      "sha256WorktreeBytes": "ac7ae514be442a47cf32588ccdc0d6df5c740723b5ca550af88d86f18a848c23"
+    },
+    {
+      "path": "docs/integration/2026-10-20-zhou-persona-runtime.patch",
+      "gitBlob": "ae79969ac06242dba2f578ee1a61798a55f8a72e",
+      "sha256WorktreeBytes": "e98702246359121bb4de70f4e5b5ffb41529fc4b7c17599a235d0df56cd9908e"
+    },
+    {
+      "path": "docs/planning/2026-10-20-zhou-persona-expression-preview-contract.md",
+      "gitBlob": "eb7e98697bdaa14696274c0b6b9490ff9132f073",
+      "sha256WorktreeBytes": "504b0ff19251e4bafb5ac44fd1db8f58ed89a4413ba9c5a27c556308c91aff61"
+    },
+    {
+      "path": "docs/tooling/skill-routing.md",
+      "gitBlob": "fa099a40a5b759f03e223eb236420b39e08decd9",
+      "sha256WorktreeBytes": "d3b2f0cbf30c0e8a945610a165ca08e5dbcd0bf5b17a22b6dcbb18a955e8ead8"
+    },
+    {
+      "path": "lib/app/controlled_demo_app.dart",
+      "gitBlob": "43e94a8939181af81f5b5be21f4632ca0c5e700f",
+      "sha256WorktreeBytes": "409106afd5dec5c95ae88ddebedf9abac03374a5b4e5b02dfeb141caa1e592d5"
+    },
+    {
+      "path": "lib/app/enmori_theme.dart",
+      "gitBlob": "1a7ae23584316d62eff821ae444a161a56f3aa9b",
+      "sha256WorktreeBytes": "47b994890eba14b5c79a7384dddaad2818eb561d529d99205be0bfb803d69cba"
+    },
+    {
+      "path": "lib/app/persona_preview_composition.dart",
+      "gitBlob": "c5739eabc0ce01a3d2482aecf6ff7983136c56b5",
+      "sha256WorktreeBytes": "9f6237d6a16bdadc5113ca98635581abe9ebc57a9ae54de9cbde86bacf3a66f3"
+    },
+    {
+      "path": "lib/features/ai_conversation/ai_conversation_providers.dart",
+      "gitBlob": "023ef1808e916e876b16c4ee2b3732de24f53cd1",
+      "sha256WorktreeBytes": "e16326274fdca468def335188c8343d0db3d9faf7709342c83a00dd89544d195"
+    },
+    {
+      "path": "lib/features/ai_conversation/data/ai_wire_repository.dart",
+      "gitBlob": "b2d30cb8268b743707076afd37287e93ace490d6",
+      "sha256WorktreeBytes": "5b699b4d856c8ee31a84c172ab1673a7dd4e51a507ed585b222c62b0e47d9349"
+    },
+    {
+      "path": "lib/features/ai_conversation/domain/ai_conversation.dart",
+      "gitBlob": "97a59a1711c2ea28552f7b83a19dbda450bcaa15",
+      "sha256WorktreeBytes": "e5f03f01bd33e776a51b85c6e44178b878a26acafd5f866f81bedddffcc32c7d"
+    },
+    {
+      "path": "lib/features/ai_conversation/domain/ai_conversation_repository.dart",
+      "gitBlob": "593de6c73cee4b3a044bbe9d290a21ab75ba3845",
+      "sha256WorktreeBytes": "49eb1432334cabe4fe0d53fff3b9aebd402cbc531d5d64b0eb0df3bde7a71735"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+      "gitBlob": "b3d6ed9ba738c5f67a413e33696245110285a46b",
+      "sha256WorktreeBytes": "9536837636ea9f64658a3b19e89df78feb88f89cb09e518bc2af4fe91f549879"
+    },
+    {
+      "path": "lib/features/ai_conversation/presentation/ai_conversation_state.dart",
+      "gitBlob": "a7f1cf66e880f9b687167bed18475a656fa4314a",
+      "sha256WorktreeBytes": "739ea2c4111a93846b9151a24b1a3e6eba35939c25e1163cc637969e863713c2"
+    },
+    {
+      "path": "lib/features/personas/data/backend_persona_preview_repository.dart",
+      "gitBlob": "e785449b72963dc79ad214ad583353d4451e33b3",
+      "sha256WorktreeBytes": "9e0f5687cb55ac054a3b88ecae65ccaee02cd6c0a65c760cd7e29e052c096e63"
+    },
+    {
+      "path": "lib/features/personas/data/backend_persona_repository.dart",
+      "gitBlob": "377cbaf4d4a2c0224951a3ab4e1413dfdf98a0c6",
+      "sha256WorktreeBytes": "ca32d90f3c02c214d4b83fa7c8c286f5b1e5b8697fe09aa01aeade1d6bcb0bfe"
+    },
+    {
+      "path": "lib/features/personas/domain/persona.dart",
+      "gitBlob": "a01799437024d62e7e023a164ccbf3a39ddced37",
+      "sha256WorktreeBytes": "8c75c580d7335cd0beb71c3f11fe355c47be2c018c740210e90decc797651436"
+    },
+    {
+      "path": "lib/features/personas/domain/persona_preview_repository.dart",
+      "gitBlob": "a915f8785403238619c706670654992a0a8a552e",
+      "sha256WorktreeBytes": "bf868b4dc7dcf5356297da97a54271e3b8006542d011ae5b7701002696549dc9"
+    },
+    {
+      "path": "lib/features/personas/persona_preview_providers.dart",
+      "gitBlob": "bf7df668ae49ced6ec28d59fd9beb7a5482d47ad",
+      "sha256WorktreeBytes": "9f215350dbb90eccc644a9aa835773fea35e13ba3f331da8f2c7c10a7c5353d7"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_editor_page.dart",
+      "gitBlob": "ecce56d4b11e2669a81e9cc04c71ab9d0893de06",
+      "sha256WorktreeBytes": "ce2cad4748c9c0e80cb408e19a03dd6ad96cfe33704cc007f54bc6a01f605cf4"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_management_page.dart",
+      "gitBlob": "2210a181a8bb813226c4e4da317583bb1552ec6d",
+      "sha256WorktreeBytes": "b8d8193a392c81538bd6de4c56c9c47c82036f979425b45af547422887586ca7"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_page_parts.dart",
+      "gitBlob": "53c6a2701d234c00e94ba7fa1ebd0992e3808653",
+      "sha256WorktreeBytes": "83b03a1f03934a64315d211335b05b60d65685345577e56667ff818bdb5df2d3"
+    },
+    {
+      "path": "lib/features/personas/presentation/persona_preview_page.dart",
+      "gitBlob": "f98f7d9d2ae8721dece525fe9e7c910a374f73de",
+      "sha256WorktreeBytes": "26be03918bb820084e7ca1209590192df4c6d25598939e2f6768bcea95f4e0ac"
+    },
+    {
+      "path": "package.json",
+      "gitBlob": "29dfaec7b84e61c6adda06f03bb833e65f30f1d5",
+      "sha256WorktreeBytes": "294606089e27f91b7101d62c4aab30b032ea47bcd5913287c447f12296822bf0"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "gitBlob": "c5ba2bc1905864af343e2186db093503f38d4e51",
+      "sha256WorktreeBytes": "2db26b46c583886ef4db5b58258b78cedd325dd3bf4e469e380a62f2a3321351"
+    },
+    {
+      "path": "pubspec.lock",
+      "gitBlob": "de5c9825d3aa24956a871958df07e2a5fe42a41b",
+      "sha256WorktreeBytes": "ed8b80a2d2eb19164859b1101ce6a893ee05843b2ac7fb5851afbda88bc379b9"
+    },
+    {
+      "path": "pubspec.yaml",
+      "gitBlob": "e2942a9b38ffa0e8e690bd9a6c60923356d79afe",
+      "sha256WorktreeBytes": "a157c0af34571380c92a01f8bd82fe402afb75c0a6aac1e00830e4b1b8f358b9"
+    },
+    {
+      "path": "test/app/persona_preview_composition_test.dart",
+      "gitBlob": "37afe898383ef0ba0463e8f8d008992145e38f9d",
+      "sha256WorktreeBytes": "4a4567ce8ed34ec375e3313197c995219302b843e99fdf274fe2c64be40d42ba"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_controller_test.dart",
+      "gitBlob": "699b9ef949775bbbe03f51fb522e451fba28d1a0",
+      "sha256WorktreeBytes": "fef451e588014c1ce84121ac23dd3f3a62866a98df64ce98b08d510e761ce9d9"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "gitBlob": "9c8bb7dcf100a13e65fd5f506ab5e8625dd4a472",
+      "sha256WorktreeBytes": "0b52e1aad8cc8ce4e04d26d8bf7f09e24cb8cc89a1f80cd8a6fbb136a163171c"
+    },
+    {
+      "path": "test/features/ai_conversation/ai_wire_client_test.dart",
+      "gitBlob": "7ab5bbdc3a94f3bf69b58ac1f6e3df3666616580",
+      "sha256WorktreeBytes": "55ab31f12f3652b1135b838d930390a7f2b8e4d44698f335b09808be0b34d2da"
+    },
+    {
+      "path": "test/features/personas/backend_persona_repository_test.dart",
+      "gitBlob": "eaa61a1fcda9e8e514566b60f5615902e032b2bd",
+      "sha256WorktreeBytes": "5fb3a220300a761bbb8c9686d20499b3e4bdc602b847f91686f848588139d8f6"
+    },
+    {
+      "path": "test/features/personas/persona_accessibility_test.dart",
+      "gitBlob": "97cfa0f341b5f857ed5daef5676e4bf9a7a7f5a6",
+      "sha256WorktreeBytes": "4e5a1bfd4721042fcd544c27a23de5cb2c63150149c9b75621afc89f4d9ef9d2"
+    },
+    {
+      "path": "test/features/personas/persona_client_session_test.dart",
+      "gitBlob": "1f878c0f39d0bd3728285bd26d6abe85b167ab72",
+      "sha256WorktreeBytes": "363b5928bc158cf805cf534267411c2d49875c9d17a1a21f7630c2e676a5c29f"
+    },
+    {
+      "path": "test/features/personas/persona_pages_test.dart",
+      "gitBlob": "2dd8def55138142cfd48b6a291ac07322a08bd24",
+      "sha256WorktreeBytes": "5f876397c3963151a0cdc7805096c9e0f40a377904e91b7d359041eb64e6318b"
+    },
+    {
+      "path": "test/features/personas/persona_preview_test.dart",
+      "gitBlob": "823e70c4de1a0e6719d1cbcecec7cd7175d0dd44",
+      "sha256WorktreeBytes": "afa011090b196553a102854999b11c972d832d5ee17657f5b8b2e98a2afc8405"
+    }
+  ],
+  "logs": [
+    {
+      "label": "source-bound Flutter",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-source-bound-flutter-tests.log",
+      "sha256": "e647d3ba4cfd7a3fbc1983e05fa0643de3474dc580f84d81dde6fd33a3f9683d",
+      "bytes": 63386,
+      "passed": 317,
+      "failed": 0
+    },
+    {
+      "label": "Backend affected",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-backend-final-tests.log",
+      "sha256": "4c90dcdd6d8502ef35ffa0042c31539205fe88b55ad6e36e8dfb9ca821aebaa5",
+      "bytes": 21984,
+      "passed": 212,
+      "failed": 0
+    },
+    {
+      "label": "actual Persona Auth/Firestore Emulator",
+      "path": "D:\\3851 AI\\artifacts\\persona-emulator-20261020\\run.log",
+      "sha256": "5a155c1cc5c24c30430c6a31e451859c6181fb607dcdbcc3555518506e49340d",
+      "bytes": 5580,
+      "passed": 29,
+      "failed": 0
+    },
+    {
+      "label": "patched app subset (2 overlap317)",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-patched-app-tests.log",
+      "sha256": "bc98e98d6a4458bc0d5ff5b2c1c0c8e4ae7cee8d71bbf71ae326f2c29eebbd8f",
+      "bytes": 1267,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "label": "source strict Backend build",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-backend-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "passed": null,
+      "failed": 0
+    },
+    {
+      "label": "patched strict Backend build",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-patched-backend-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "passed": null,
+      "failed": 0
+    },
+    {
+      "label": "source scoped analysis",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-final-analysis.log",
+      "sha256": "8e759d2fb08bbe60b7020579ff11c1353b1c6e0edc763114e95d7f317356e127",
+      "bytes": 98,
+      "passed": null,
+      "failed": 0
+    },
+    {
+      "label": "patched scoped analysis",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-patched-analysis.log",
+      "sha256": "128449f8a393f620158e7a3ac7b004c562e7bd4581066bec3da8a9b3ac59d529",
+      "bytes": 98,
+      "passed": null,
+      "failed": 0
+    },
+    {
+      "label": "scroll initial red reproduction",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-scroll-red.log",
+      "sha256": "29557ccc25f28c1389599cea893110fdbe71d03e2163b98aa1d8423872ea16b6",
+      "bytes": 5827,
+      "passed": 0,
+      "failed": 2
+    },
+    {
+      "label": "authority-editor initial red reproduction",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-authority-editor-red.log",
+      "sha256": "a3185f3557c19c687e4e441b7e09de994bc2e59daa4ad959b0c75c2156fc3dc6",
+      "bytes": 12138,
+      "passed": 0,
+      "failed": 4
+    },
+    {
+      "label": "Safety placement initial failure",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-final-page-tests.log",
+      "sha256": "44b003173f379a0d06a5c646162cb26536eb0332c7dd3f0e63d4a1171f3cd945",
+      "bytes": 7157,
+      "passed": 62,
+      "failed": 1
+    },
+    {
+      "label": "Safety final page subset (overlap317)",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-final-page-corrected-tests.log",
+      "sha256": "bed77e42048ff5e806840a1f665e56398fe4ef8e59c4315671cc239c016f280e",
+      "bytes": 5080,
+      "passed": 63,
+      "failed": 0
+    },
+    {
+      "label": "SHI independent negative probe",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-shi-review\\review-callback-probe-final.log",
+      "sha256": "1c981e21690ccc171fbf7949ac73584432867b1e372a1497650ab26e0907f976",
+      "bytes": 4189,
+      "passed": 2,
+      "failed": 2
+    }
+  ],
+  "review": {
+    "pr": 162,
+    "head": "900ca6fcdefb77e9aa95d96fa80994ebf826398f",
+    "action": "COMMENT",
+    "reviewId": 5580479564,
+    "findings": [
+      {
+        "priority": "P2",
+        "scope": "SHI equivalent-callback rebuild loses pending/unknown registration flow"
+      }
+    ]
+  },
+  "notRun": [
+    "LI active host composition",
+    "live Ollama three turns and draft preview",
+    "real-model candidate explanation",
+    "new APK/device",
+    "real-account complete combined journey",
+    "same-candidate normal restart journey",
+    "LI independent review/acceptance"
+  ],
+  "countNote": "317,212,29 are separate boundaries. Patched6 overlaps317 by2; page63 is a subset. SHI probes intentionally fail2 and are separate review evidence.",
+  "patchedCompositionBindings": [
+    {
+      "path": "lib/app/controlled_demo_app.dart",
+      "gitBlob": "3df22c9dfd0e09a7727f0500f3d1561a5babf5d7",
+      "sha256WorktreeBytes": "fe4d7e17f84bd8ce5ffcb1c09b6102e6480f9c08675fcdb630ee531a59d14ca9"
+    },
+    {
+      "path": "backend/src/bootstrap/retained-core-runtime.ts",
+      "gitBlob": "26e00edafb4890a53eed1f77381feb04f103efd0",
+      "sha256WorktreeBytes": "f89cf61f0f5ec95ffeca07748f52bb83a7ec9ee1d507df068e6c92261a2e8b54"
+    }
+  ]
+}

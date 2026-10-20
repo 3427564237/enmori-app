@@ -85,3 +85,21 @@ final class AiMessagePage {
   final List<AiMessage> messages;
   final String? nextCursor;
 }
+
+final class AiConversationSummary {
+  const AiConversationSummary({
+    required this.conversationId,
+    required this.lastMessageAt,
+  });
+  final String conversationId;
+  final DateTime lastMessageAt;
+}
+
+final class AiConversationHistoryPage {
+  AiConversationHistoryPage({
+    required Iterable<AiConversationSummary> conversations,
+    this.nextCursor,
+  }) : conversations = List.unmodifiable(conversations);
+  final List<AiConversationSummary> conversations;
+  final String? nextCursor;
+}

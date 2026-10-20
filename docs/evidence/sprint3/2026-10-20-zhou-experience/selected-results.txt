@@ -1,0 +1,71 @@
+source-bound Flutter
+pass=317 fail=0 (None means diagnostic/build only)
+00:07 +306: D:/3851 AI/formal/enmori-zhou-experience-20261020/test/features/personas/persona_pages_test.dart: delete rechecks the reviewed set after confirmation
+00:07 +307: D:/3851 AI/formal/enmori-zhou-experience-20261020/test/features/personas/persona_pages_test.dart: create uses structured defaults, validates name and independently rereads
+00:07 +308: D:/3851 AI/formal/enmori-zhou-experience-20261020/test/features/personas/persona_pages_test.dart: dirty Back supports keep editing and discard without a request
+00:07 +309: D:/3851 AI/formal/enmori-zhou-experience-20261020/test/features/personas/persona_pages_test.dart: in-flight leave does not cancel session command or update disposed view
+00:08 +310: D:/3851 AI/formal/enmori-zhou-experience-20261020/test/features/personas/persona_pages_test.dart: uncertain create recovery 412 closes retry and requires explicit disposition
+00:08 +311: D:/3851 AI/formal/enmori-zhou-experience-20261020/test/features/personas/persona_pages_test.dart: late create success updates a mounted form after rendering and leaves it clean
+00:08 +312: D:/3851 AI/formal/enmori-zhou-experience-20261020/test/features/personas/persona_pages_test.dart: empty reconciliation still displays accepted empty and no-Active states
+00:08 +313: D:/3851 AI/formal/enmori-zhou-experience-20261020/test/features/personas/persona_pages_test.dart: same UID new observed session clears the previous private draft
+00:08 +314: D:/3851 AI/formal/enmori-zhou-experience-20261020/test/features/personas/persona_pages_test.dart: edit unavailable target reveals no previous private fields
+00:08 +315: D:/3851 AI/formal/enmori-zhou-experience-20261020/test/features/personas/persona_pages_test.dart: edit saves explicit fields and keeps successful form clean on Back
+00:08 +316: D:/3851 AI/formal/enmori-zhou-experience-20261020/test/features/personas/persona_pages_test.dart: small phone, landscape, dark mode and enlarged text stay scrollable
+00:09 +317: All tests passed!
+
+Backend affected
+pass=212 fail=0 (None means diagnostic/build only)
+✔ simple chat keeps numbers, questions, code and links as text; authorized history reaches local model (17.4535ms)
+✔ simple chat retains malformed output, revoked request and unauthorized source boundaries (0.4203ms)
+✔ late provider completion releases lane without delivering cancelled text; HTTP failure is settled (0.6283ms)
+✔ retained messages preserve original server timestamp across imported metadata and replacement writes (251.1089ms)
+ℹ tests 212
+ℹ suites 0
+ℹ pass 212
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 777.7152
+
+actual Persona Auth/Firestore Emulator
+pass=29 fail=0 (None means diagnostic/build only)
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 35151.2103
+[32m[1m+ [22m[39m Script exited successfully (code 0)
+[36m[1mi  emulators:[22m[39m Shutting down emulators.
+[36m[1mi  firestore:[22m[39m Stopping Firestore Emulator
+[33m[1m! [22m[39m Firestore Emulator has exited upon receiving signal: SIGINT
+[36m[1mi  auth:[22m[39m Stopping Authentication Emulator
+[36m[1mi  hub:[22m[39m Stopping emulator hub
+[36m[1mi  logging:[22m[39m Stopping Logging Emulator
+Persona Emulator shutdown: CLI exit 0; required ports free true.
+
+patched app subset (2 overlap317)
+pass=6 fail=0 (None means diagnostic/build only)
+00:00 +0: loading D:/3851 AI/drafts/2026-10-20-runtime-patch-check/test/app/controlled_demo_app_test.dart
+00:00 +0: D:/3851 AI/drafts/2026-10-20-runtime-patch-check/test/app/controlled_demo_app_test.dart: v2 social Home opens existing recommendations using its authenticated Backend repository
+00:00 +1: D:/3851 AI/drafts/2026-10-20-runtime-patch-check/test/app/controlled_demo_app_test.dart: v2 social Home opens existing recommendations using its authenticated Backend repository
+00:00 +2: D:/3851 AI/drafts/2026-10-20-runtime-patch-check/test/app/controlled_demo_app_test.dart: v2 social Home opens existing recommendations using its authenticated Backend repository
+00:00 +3: D:/3851 AI/drafts/2026-10-20-runtime-patch-check/test/app/controlled_demo_app_test.dart: v2 enters registration through the existing router and keeps login available after observed signout
+00:01 +4: D:/3851 AI/drafts/2026-10-20-runtime-patch-check/test/app/controlled_demo_app_test.dart: one observed owner and HTTPS client serve Home, Profile, interests, Friend, Footprint and Persona
+00:02 +5: D:/3851 AI/drafts/2026-10-20-runtime-patch-check/test/app/controlled_demo_app_test.dart: replacing the connection removes the old authenticated route tree
+00:02 +6: All tests passed!
+
+source strict Backend build
+pass=None fail=0 (None means diagnostic/build only)
+
+patched strict Backend build
+pass=None fail=0 (None means diagnostic/build only)
+
+source scoped analysis
+pass=None fail=0 (None means diagnostic/build only)
+Analyzing 6 items...
+No issues found! (ran in 9.2s)
+
+patched scoped analysis
+pass=None fail=0 (None means diagnostic/build only)
+Analyzing 2 items...
+No issues found! (ran in 3.8s)

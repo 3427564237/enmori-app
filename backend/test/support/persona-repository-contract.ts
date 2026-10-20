@@ -5,7 +5,8 @@ import type { PersonaRepository, PersonaResult } from "../../src/personas/ports/
 import { createAuthBindingDocumentId } from "../../src/shared/infrastructure/firebase/firestore-records.js";
 
 export const PERSONA_TEST_TIME = "2026-10-08T01:02:03.004Z";
-export const PERSONA_TEST_FIELDS = { displayName: "Synthetic Persona", tone: "neutral", responseLength: "balanced", formatStyle: "plain" } as const;
+export const PERSONA_TEST_FIELDS = { displayName: "Synthetic Persona", tone: "neutral", responseLength: "balanced", formatStyle: "plain",
+  relationship: "", shortIntroduction: "", description: "", personality: "", communicationStyle: "", interests: "", extraInstructions: "" } as const;
 export const personaTestKey = (index: number): string => `00000000-0000-4000-8000-${index.toString(16).padStart(12, "0")}`;
 export const personaCommand = (expectedStateRevision: number, index = expectedStateRevision): PersonaCreate => ({
   ...PERSONA_TEST_FIELDS, expectedStateRevision, idempotencyKey: personaTestKey(index),
@@ -60,7 +61,7 @@ export function personaRepositoryContract(label: string, create: (scenario: stri
     assert.deepEqual(personaValue(await r.get(uid, first.persona.personaId)), { persona: first.persona, stateRevision: 2 });
     const records = await f.dump();
     for (const p of view.items) assert.deepEqual(Object.keys(records[`accounts/${f.accountId}/personas/${p.personaId}`]!).sort(),
-      ["displayName", "tone", "responseLength", "formatStyle", "createdAt", "updatedAt", "revision"].sort());
+      [...Object.keys(PERSONA_TEST_FIELDS), "createdAt", "updatedAt", "revision"].sort());
     assert.equal(Object.keys(records).some(path => path.includes("idempotency") || path.includes("receipt")), false);
   });
 

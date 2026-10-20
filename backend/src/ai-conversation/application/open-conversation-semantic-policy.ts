@@ -2,6 +2,7 @@ import type { ConversationGates, ConversationInput } from "../ports/conversation
 import type { OutputCandidate } from "../../ai-runtime/domain/parse-output.js";
 import type { RequestBudget } from "../../ai-runtime/ports/generation-transport.js";
 import { err, ok } from "../../shared/domain/result.js";
+import { copyPersonaProjection } from "./persona-expression.js";
 
 /** S-PM-1019-LI-SPONSOR-DEMO-LOCAL-TAKEOVER. Internal only; public JSON stays v1. */
 export const openConversationSemanticPolicyVersion = "open_conversation_v1";
@@ -25,9 +26,7 @@ export function validOpenConversationInput(v: ConversationInput): boolean {
   for (const p of v.history) if (!record(p) || !fields(p,["user","assistant"],["user","assistant"]) ||
       !text(p.user) || !text(p.assistant) || [...p.user].length > 2400 || [...p.assistant].length > 2400) return false;
   const p = v.persona;
-  return p === undefined || (record(p) && fields(p,["schemaVersion","tone","responseLength","formatStyle"],["schemaVersion","tone","responseLength","formatStyle"]) &&
-    p.schemaVersion === "persona_presentation_v1" && ["neutral","warm","encouraging"].includes(p.tone) &&
-    ["concise","balanced","detailed"].includes(p.responseLength) && ["plain","bulleted"].includes(p.formatStyle));
+  return p === undefined || copyPersonaProjection(p) !== undefined;
 }
 // Concrete conservative semantic rejection categories, independently applied to
 // model output. The prompt is never taken as proof the model obeyed them.

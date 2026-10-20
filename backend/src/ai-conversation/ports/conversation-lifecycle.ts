@@ -2,6 +2,7 @@ import type { RequestBudget } from "../../ai-runtime/ports/generation-transport.
 import type { RuntimeFailure } from "../../ai-runtime/application/bounded-ai-runtime.js";
 import type { OutputCandidate } from "../../ai-runtime/domain/parse-output.js";
 import type { Result } from "../../shared/domain/result.js";
+import type { PersonaInput } from "../../personas/application/persona-model.js";
 
 /** Internal synthetic capabilities, never a public identifier/DTO or Auth adapter. */
 export interface TrustedCaller { readonly owner: string; readonly session: object }
@@ -13,6 +14,8 @@ export interface PersonaProjection {
   readonly tone: "neutral" | "warm" | "encouraging";
   readonly responseLength: "concise" | "balanced" | "detailed";
   readonly formatStyle: "plain" | "bulleted";
+  /** S-PM-1019 local-MVP extension only. Old bounded mode still accepts only v1 structured fields. */
+  readonly expression?: PersonaInput;
 }
 export interface CheckInProjection {
   readonly occurredAt: string;

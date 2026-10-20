@@ -165,7 +165,8 @@ final class BackendPersonaRepository implements PersonaRepository {
   }
 
   bool _validFields(PersonaFields fields) =>
-      PersonaFields.nameValidationMessage(fields.displayName) == null;
+      PersonaFields.nameValidationMessage(fields.displayName) == null &&
+      fields.expressionFields.values.every(isPersonaExpressionText);
   bool _validVersions(int target, int state) =>
       target >= 1 &&
       isPersonaStateRevision(target) &&
@@ -176,6 +177,7 @@ final class BackendPersonaRepository implements PersonaRepository {
     'tone': fields.tone.name,
     'responseLength': fields.responseLength.name,
     'formatStyle': fields.formatStyle.name,
+    ...fields.expressionFields,
   };
 
   Result<PersonaMutation> _mutationResult(
@@ -266,7 +268,7 @@ final class BackendPersonaRepository implements PersonaRepository {
           'createdAt',
           'updatedAt',
           'revision',
-        })) {
+        }, optional: _expressionKeys)) {
       return null;
     }
     final id = value['personaId'];
@@ -290,6 +292,12 @@ final class BackendPersonaRepository implements PersonaRepository {
         format == null ||
         created == null ||
         updated == null ||
+        _expressionKeys.any(
+          (key) =>
+              value.containsKey(key) &&
+              (value[key] is! String ||
+                  !isPersonaExpressionText(value[key] as String)),
+        ) ||
         !_revision(revision, minimum: 1)) {
       return null;
     }
@@ -300,6 +308,13 @@ final class BackendPersonaRepository implements PersonaRepository {
         tone: tone,
         responseLength: length,
         formatStyle: format,
+        relationship: value['relationship'] as String? ?? '',
+        shortIntroduction: value['shortIntroduction'] as String? ?? '',
+        description: value['description'] as String? ?? '',
+        personality: value['personality'] as String? ?? '',
+        communicationStyle: value['communicationStyle'] as String? ?? '',
+        interests: value['interests'] as String? ?? '',
+        extraInstructions: value['extraInstructions'] as String? ?? '',
       ),
       createdAt: created,
       updatedAt: updated,
@@ -307,6 +322,16 @@ final class BackendPersonaRepository implements PersonaRepository {
     );
   }
 }
+
+const _expressionKeys = {
+  'relationship',
+  'shortIntroduction',
+  'description',
+  'personality',
+  'communicationStyle',
+  'interests',
+  'extraInstructions',
+};
 
 bool _keys(
   Map<String, Object?> value,

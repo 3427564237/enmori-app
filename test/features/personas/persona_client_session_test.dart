@@ -94,6 +94,12 @@ void main() {
         'tone': 'neutral',
         'responseLength': 'balanced',
         'formatStyle': 'plain',
+        ...const PersonaFields(
+          displayName: 'Guide',
+          tone: PersonaTone.neutral,
+          responseLength: PersonaResponseLength.balanced,
+          formatStyle: PersonaFormatStyle.plain,
+        ).expressionFields,
         'expectedStateRevision': 0,
       });
       expect(tokens, 3);

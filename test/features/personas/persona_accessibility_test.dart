@@ -100,6 +100,14 @@ void main() {
         'persona-tone',
         'persona-response-length',
         'persona-format',
+        'persona-relationship',
+        'persona-shortIntroduction',
+        'persona-description',
+        'persona-personality',
+        'persona-communicationStyle',
+        'persona-interests',
+        'persona-extraInstructions',
+        'persona-preview',
         'persona-save',
       ]) {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -394,7 +402,7 @@ bool _ownsPrimaryFocus(WidgetTester tester, Finder owner) {
 }
 
 Future<void> _focusByTraversal(WidgetTester tester, Finder target) async {
-  for (var attempt = 0; attempt < 16; attempt++) {
+  for (var attempt = 0; attempt < 32; attempt++) {
     if (_ownsPrimaryFocus(tester, target)) return;
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
@@ -404,7 +412,9 @@ Future<void> _focusByTraversal(WidgetTester tester, Finder target) async {
 
 Future<void> _tap(WidgetTester tester, String key) async {
   final finder = find.byKey(Key(key));
+  await tester.pumpAndSettle();
   await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }

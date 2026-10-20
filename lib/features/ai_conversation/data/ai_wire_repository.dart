@@ -6,10 +6,61 @@ import '../domain/ai_conversation.dart';
 import '../domain/ai_conversation_repository.dart';
 import 'ai_wire_transport.dart';
 
-final class AiWireRepository implements AiConversationRepository {
+final class AiWireRepository
+    implements AiConversationRepository, AiConversationHistoryRepository {
   AiWireRepository(this._transport);
 
   final AiWireTransport _transport;
+
+  @override
+  Future<Result<AiConversationHistoryPage>> listConversations({
+    required String token,
+    required AiAbortSignal abort,
+    String? after,
+  }) {
+    if (after != null && !_uuid(after)) return _invalid();
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'GET',
+      path: '/v1/me/conversations${after == null ? '' : '?after=$after'}',
+      status: 200,
+      parse: (value) {
+        final dto = _object(value, {'conversations'}, {'nextCursor'});
+        final rows = dto['conversations'];
+        _require(rows is List && rows.length <= 20);
+        final summaries = <AiConversationSummary>[];
+        for (final row in rows as List) {
+          final item = _object(row, {'conversationId', 'lastMessageAt'});
+          final id = _id(item['conversationId']);
+          _require(
+            (after == null || id.compareTo(after) > 0) &&
+                (summaries.isEmpty ||
+                    id.compareTo(summaries.last.conversationId) > 0),
+          );
+          summaries.add(
+            AiConversationSummary(
+              conversationId: id,
+              lastMessageAt: _utc(item['lastMessageAt']),
+            ),
+          );
+        }
+        final cursor = dto.containsKey('nextCursor')
+            ? _id(dto['nextCursor'])
+            : null;
+        _require(
+          cursor == null ||
+              ((after == null || cursor.compareTo(after) > 0) &&
+                  (summaries.isEmpty ||
+                      cursor.compareTo(summaries.last.conversationId) >= 0)),
+        );
+        return AiConversationHistoryPage(
+          conversations: summaries,
+          nextCursor: cursor,
+        );
+      },
+    );
+  }
 
   @override
   Future<Result<AiTicket>> prepare({

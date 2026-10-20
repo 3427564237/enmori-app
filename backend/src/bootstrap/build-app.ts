@@ -11,6 +11,7 @@ import { registerIsolatedSlices } from "../transport/register-isolated-slices.js
 import { registerConversationRoutes } from "../ai-conversation/transport/register-routes.js";
 import type { ConversationOperations } from "../ai-conversation/ports/conversation-operations.js";
 import { registerPersonaRoutes, type PersonaOperations } from "../personas/transport/register-routes.js";
+import { registerPersonaPreviewRoute, type PersonaPreviewOperations } from "../personas/transport/preview-route.js";
 import { buildPersonaFrameworkErrors } from "../personas/transport/framework-errors.js";
 import { requireControlledEmulatorEnvironment } from "../shared/infrastructure/firebase/controlled-emulator-environment.js";
 import type { FriendRequests } from "../friends/application/friend-requests.js";
@@ -36,7 +37,7 @@ export async function buildApp(
   dependencies: R4RouteDependencies & { readonly checkInCalendar?:OwnCheckInCalendar; readonly editCheckIn?: EditCheckIn; readonly createInterestTag?: CreateInterestTag; readonly recommendEvents?: Pick<RecommendEvents, "execute">;
     readonly accountPreferences?: OwnAccountPreferences;
     readonly controlledPhoneDiagnostics?: ControlledPhoneDiagnostics;
-    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput } },
+    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly personaPreview?: PersonaPreviewOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput } },
 ): Promise<FastifyInstance> {
   if (dependencies.isolatedSlices !== undefined) {
     requireControlledEmulatorEnvironment(dependencies.isolatedSlices.environment);
@@ -80,6 +81,9 @@ export async function buildApp(
     await registerIsolatedSlices(app, dependencies.identityVerifier, dependencies.isolatedSlices.friends, dependencies.isolatedSlices.eventDetail, dependencies.isolatedSlices.checkInHistory);
     if (dependencies.isolatedSlices.personas !== undefined) {
       await registerPersonaRoutes(app, dependencies.identityVerifier, dependencies.isolatedSlices.personas);
+    }
+    if (dependencies.isolatedSlices.personaPreview !== undefined) {
+      await registerPersonaPreviewRoute(app, dependencies.identityVerifier, dependencies.isolatedSlices.personaPreview);
     }
     if (dependencies.isolatedSlices.eventBrowse !== undefined) {
       await registerEventBrowseRoutes(app, dependencies.identityVerifier,

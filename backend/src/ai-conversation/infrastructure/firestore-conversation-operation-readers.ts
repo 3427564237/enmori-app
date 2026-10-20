@@ -22,6 +22,7 @@ export class FirestoreConversationOperationReaders {
     return this.result(await this.store.readRetryUser(c.principal,c.ownerId,operation.conversationId,operation.userMessageId,text,()=>this.current(c)),c);
   }
   async listMessages(c:OrdinaryContext,id:string,before:number|undefined){return this.result(await this.store.listOwnedMessages(c.principal,c.ownerId,id,before,()=>this.current(c)),c);}
+  async listConversations(c:OrdinaryContext,after:string|undefined){return this.result(await this.store.listOwnedConversations(c.principal,c.ownerId,after,()=>this.current(c)),c);}
   async readOutcome(c:OrdinaryContext,id:string,operationId:string,original?:AsyncOperation){return this.result(await this.store.readOwnedOutcome(c.principal,c.ownerId,id,operationId,original,()=>this.current(c)),c);}
   async deleteConversation(c:OrdinaryContext,id:string):Promise<ConversationResult<void>>{
     if(!this.current(c))return {kind:"failure",code:"AI_UNAVAILABLE"};
