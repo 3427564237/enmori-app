@@ -196,7 +196,12 @@ void main() {
       await tester.ensureVisible(find.byKey(const Key('register-sign-in')));
       await tester.tap(find.byKey(const Key('register-sign-in')));
       await tester.pumpAndSettle();
+      expect(find.text('Leave registration?'), findsOneWidget);
+      expect(find.byKey(const Key('route-register')), findsOneWidget);
+      await tester.tap(find.text('Discard details'));
+      await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-sign-in')), findsOneWidget);
+      expect(auth.registrations, 1);
       auth.sessions.add(
         const AuthSessionAuthenticated(subject: 'controlled_primary'),
       );
