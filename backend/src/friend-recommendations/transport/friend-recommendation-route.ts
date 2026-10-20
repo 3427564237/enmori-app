@@ -6,10 +6,10 @@ import { errorEnvelopeSchema } from "../../transport/schemas.js";
 import type { FriendRecommendations } from "../ports/friend-recommendations.js";
 export const friendSuggestionSchema={
   type:"object",additionalProperties:false,
-  required:["username","displayName","sharedInterests","commonEventCount","reason"],
+  required:["username","displayName","sharedInterests","commonEventCount","reason","ignoreVersion"],
   properties:{username:{type:"string"},displayName:{anyOf:[{type:"string"},{type:"null"}]},
     sharedInterests:{type:"array",maxItems:10,items:{type:"string"}},
-    commonEventCount:{type:"integer",minimum:0,maximum:2000},reason:{type:"string"}},
+    commonEventCount:{type:"integer",minimum:0,maximum:2000},reason:{type:"string"},ignoreVersion:{type:"string",pattern:"^[a-f0-9]{64}$"}},
 };
 export const friendRecommendationsSchema={
   querystring:{type:"object",additionalProperties:false,required:["view"],properties:{view:{enum:["home","all"]}}},

@@ -14,6 +14,8 @@ import { FirestoreFriendSummary } from "../infrastructure/firestore-friend-summa
 import { registerFriendSummary } from "./friend-summary-route.js";
 import { FirestoreFriendRecommendations } from "../../friend-recommendations/infrastructure/firestore-friend-recommendations.js";
 import { registerFriendRecommendations } from "../../friend-recommendations/transport/friend-recommendation-route.js";
+import { FirestoreFriendIgnoreRepository } from "../../friend-recommendations/infrastructure/firestore-friend-ignore-repository.js";
+import { registerFriendIgnoreRoutes } from "../../friend-recommendations/transport/friend-ignore-routes.js";
 import { FirestoreFriendActivity } from "../../friend-activity/infrastructure/firestore-friend-activity.js";
 import { registerFriendActivity } from "../../friend-activity/transport/friend-activity-route.js";
 import { HomeWeather } from "../../weather/application/home-weather.js";
@@ -28,6 +30,7 @@ export async function registerSocialModule(app:FastifyInstance,input:{identity:I
   await registerSocialRoutes(app,input.identity,new SocialProfiles(new FirestoreSocialRepository(input.store,input.history,input.cursor,input.clock)));
   await registerFriendSummary(app,input.identity,new FirestoreFriendSummary(input.store,input.clock));
   await registerFriendRecommendations(app,input.identity,new FirestoreFriendRecommendations(input.store,input.clock,input.recommendationEvents));
+  await registerFriendIgnoreRoutes(app,input.identity,new FirestoreFriendIgnoreRepository(input.store,input.clock));
   await registerFriendActivity(app,input.identity,new FirestoreFriendActivity(input.store,input.clock,input.activityEvents));
   await registerHomeWeather(app,input.identity,new HomeWeather(new FirestoreWeatherPurposeAuthority(input.store),input.weather,input.clock));
 }

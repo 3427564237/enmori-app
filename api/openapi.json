@@ -3968,6 +3968,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -4045,6 +4046,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -4122,6 +4124,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -4199,6 +4202,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -4276,6 +4280,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -4353,6 +4358,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -4430,6 +4436,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -4697,6 +4704,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -4774,6 +4782,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -4851,6 +4860,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -4928,6 +4938,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -5005,6 +5016,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -5082,6 +5094,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -5159,6 +5172,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -5394,6 +5408,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -5471,6 +5486,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -5548,6 +5564,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -5625,6 +5642,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -5702,6 +5720,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -5779,6 +5798,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -5856,6 +5876,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6065,6 +6086,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6142,6 +6164,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6219,6 +6242,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6296,6 +6320,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6373,6 +6398,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6450,6 +6476,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6527,6 +6554,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6656,6 +6684,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6733,6 +6762,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6810,6 +6840,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6887,6 +6918,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -6964,6 +6996,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -7041,6 +7074,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -7118,6 +7152,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -7266,6 +7301,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -7343,6 +7379,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -7420,6 +7457,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -7497,6 +7535,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -7574,6 +7613,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -7651,6 +7691,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -7728,6 +7769,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -7863,6 +7905,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -7940,6 +7983,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -8017,6 +8061,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -8094,6 +8139,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -8171,6 +8217,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -8267,7 +8314,8 @@
                           "displayName",
                           "sharedInterests",
                           "commonEventCount",
-                          "reason"
+                          "reason",
+                          "ignoreVersion"
                         ],
                         "properties": {
                           "username": {
@@ -8297,6 +8345,10 @@
                           },
                           "reason": {
                             "type": "string"
+                          },
+                          "ignoreVersion": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
                           }
                         }
                       }
@@ -8337,6 +8389,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -8414,6 +8467,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -8491,6 +8545,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -8568,6 +8623,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -8645,6 +8701,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -8822,6 +8879,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -8899,6 +8957,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -8976,6 +9035,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -9053,6 +9113,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -9130,6 +9191,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -9280,6 +9342,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -9357,6 +9420,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -9434,6 +9498,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -9511,6 +9576,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -9588,6 +9654,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -9665,6 +9732,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "FRIEND_IGNORE_PRECONDITION_FAILED",
                             "FRIEND_REVISION_PRECONDITION_FAILED",
                             "CATALOGUE_INVALID",
                             "CATALOGUE_NAME_CONFLICT",
@@ -9753,6 +9821,611 @@
                     "minimum": 0,
                     "maximum": 9007199254740991
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/friend-recommendation-ignores": {
+      "get": {
+        "summary": "List currently available ignored people",
+        "description": "S-PM-1020-LI-FRIEND-IGNORE. Current authenticated owner and current target visibility/eligibility only; never cached. A timed-out or unknown write must be read back before another explicit command. Restore and Undo use the same version-checked PUT; no notification or blocking behavior.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Current authorized preference",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "people"
+                  ],
+                  "properties": {
+                    "people": {
+                      "type": "array",
+                      "maxItems": 999,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "username",
+                          "displayName",
+                          "ignored",
+                          "version"
+                        ],
+                        "properties": {
+                          "username": {
+                            "type": "string"
+                          },
+                          "displayName": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "ignored": {
+                            "type": "boolean"
+                          },
+                          "version": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/friend-recommendation-ignores/{username}": {
+      "get": {
+        "summary": "Read current recommendation preference",
+        "description": "S-PM-1020-LI-FRIEND-IGNORE. Current authenticated owner and current target visibility/eligibility only; never cached. A timed-out or unknown write must be read back before another explicit command. Restore and Undo use the same version-checked PUT; no notification or blocking behavior.",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 30,
+              "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authorized preference",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "username",
+                    "displayName",
+                    "ignored",
+                    "version"
+                  ],
+                  "properties": {
+                    "username": {
+                      "type": "string"
+                    },
+                    "displayName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "ignored": {
+                      "type": "boolean"
+                    },
+                    "version": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Ignore or restore a friend recommendation",
+        "description": "S-PM-1020-LI-FRIEND-IGNORE. Current authenticated owner and current target visibility/eligibility only; never cached. A timed-out or unknown write must be read back before another explicit command. Restore and Undo use the same version-checked PUT; no notification or blocking behavior.",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 30,
+              "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "ignored",
+                  "expectedVersion"
+                ],
+                "properties": {
+                  "ignored": {
+                    "type": "boolean"
+                  },
+                  "expectedVersion": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Current authorized preference",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "username",
+                    "displayName",
+                    "ignored",
+                    "version"
+                  ],
+                  "properties": {
+                    "username": {
+                      "type": "string"
+                    },
+                    "displayName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "ignored": {
+                      "type": "boolean"
+                    },
+                    "version": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Declared failure",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
                 }
               }
             }
@@ -11000,6 +11673,7 @@
               "code": {
                 "type": "string",
                 "enum": [
+                  "FRIEND_IGNORE_PRECONDITION_FAILED",
                   "FRIEND_REVISION_PRECONDITION_FAILED",
                   "CATALOGUE_INVALID",
                   "CATALOGUE_NAME_CONFLICT",

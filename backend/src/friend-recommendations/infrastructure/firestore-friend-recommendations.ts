@@ -7,6 +7,7 @@ import { isSafeDocumentId } from "../../shared/infrastructure/firebase/firestore
 import type { Clock } from "../../shared/ports/clock.js";
 import { ok,err } from "../../shared/domain/result.js";
 import type { FriendSuggestion,FriendRecommendations } from "../ports/friend-recommendations.js";
+import { readPreference,preferenceVersion } from "./recommendation-preference.js";
 const emptyEvents={authorizedInterestedEventIds:[],authorizedGoingEventIds:[]} as const;
 async function tags(tx:Reader,id:string):Promise<Map<string,string>>{
   const selected=await tx.get(`account_interests/${id}`),values=new Map<string,string>();
@@ -51,7 +52,7 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
       // Q17 consent precedes candidate construction; manual Friend paths remain available.
       if(own.data.optionalProcessingConsent!=="accepted")return ok({suggestions:[]});
       const ownTags=await tags(tx,own.id),candidates:AuthorizedFriendRankingCandidateProjection[]=[],
-        displays=new Map<string,{username:string;displayName:string|null;sharedInterests:string[]}>();
+        displays=new Map<string,{username:string;displayName:string|null;sharedInterests:string[];ignoreVersion:string}>();
       let ownEvents:Omit<AuthorizedFriendRankingProjection,"authorizedInterestTagIds">|undefined;
       for(const row of await this.pool(tx)){
         if(row.id===own.id||row.data.profileVisibility!=="public")continue;
@@ -66,6 +67,8 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
         if(stored&&!pair)return fail("SERVICE_UNAVAILABLE");
         if(pair?.friendship||pair?.blockedByAccountIds.length||
           (pair?.pending&&Date.parse(pair.pending.expiresAt)>now.value.getTime()))continue;
+        const preference=await readPreference(tx,own.id,candidate.id);
+        if(preference.ignored)continue;
         const permittedTags=visible(candidate.fields.interests,false,false)?await tags(tx,candidate.id):new Map<string,string>();
         let eventProjection=emptyEvents as Omit<AuthorizedFriendRankingProjection,"authorizedInterestTagIds">;
         if(visible(candidate.fields.participation,false,false)){
@@ -74,6 +77,7 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
         }
         candidates.push({candidateAccountId:candidate.id,authorizedInterestTagIds:[...permittedTags.keys()],...eventProjection});
         displays.set(candidate.id,{username:candidate.username,displayName:candidate.displayName,
+          ignoreVersion:preferenceVersion(own.id,candidate.id,preference.revision),
           sharedInterests:[...permittedTags].filter(([id])=>ownTags.has(id)).map(([,name])=>name)});
       }
       const ranked=rankAuthorizedFriendCandidates({authorizedInterestTagIds:[...ownTags.keys()],...(ownEvents??emptyEvents)},candidates);

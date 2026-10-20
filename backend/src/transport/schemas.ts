@@ -2,6 +2,7 @@ import type { FastifySchema } from "fastify";
 import { positionSchema, weatherRequestSchema, weatherProjectionSchema } from "../weather/transport/schemas.js";
 
 export const approvedFailureCodes = [
+  "FRIEND_IGNORE_PRECONDITION_FAILED",
   "FRIEND_REVISION_PRECONDITION_FAILED",
   "CATALOGUE_INVALID",
   "CATALOGUE_NAME_CONFLICT",

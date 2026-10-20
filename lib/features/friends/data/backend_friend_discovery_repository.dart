@@ -30,15 +30,19 @@ final class BackendFriendDiscoveryRepository
           'sharedInterests',
           'commonEventCount',
           'reason',
+          'ignoreVersion',
         };
         if (row is! Map ||
-            row.length != 5 ||
+            row.length != 6 ||
             !row.keys.every(keys.contains) ||
             row['username'] is! String ||
             row['displayName'] != null && row['displayName'] is! String ||
             row['sharedInterests'] is! List ||
             row['commonEventCount'] is! int ||
-            row['reason'] is! String) {
+            row['reason'] is! String ||
+            row['ignoreVersion'] is! String ||
+            !RegExp(r'^[a-f0-9]{64}$')
+                .hasMatch(row['ignoreVersion'] as String)) {
           return _invalid();
         }
         final name = row['username'] as String,
@@ -62,6 +66,7 @@ final class BackendFriendDiscoveryRepository
             sharedInterests: List.unmodifiable(tags.cast<String>()),
             commonEventCount: count,
             reason: row['reason'] as String,
+            ignoreVersion: row['ignoreVersion'] as String,
           ),
         );
       }

@@ -1,4 +1,7 @@
 export const ROUTE_INVENTORY = [
+  { method: "GET", path: "/v1/me/friend-recommendation-ignores", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "GET", path: "/v1/me/friend-recommendation-ignores/{username}", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
+  { method: "PUT", path: "/v1/me/friend-recommendation-ignores/{username}", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },
   {method:"GET",path:"/v1/people/{username}",successStatuses:[200],requiresIdempotencyKey:false},
   {method:"GET",path:"/v1/people/{username}/check-ins",successStatuses:[200],requiresIdempotencyKey:false},
   {method:"GET",path:"/v1/people/{username}/check-ins/{checkInId}",successStatuses:[200],requiresIdempotencyKey:false},

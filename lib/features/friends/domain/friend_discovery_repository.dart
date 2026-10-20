@@ -7,8 +7,10 @@ final class FriendSuggestion {
     required this.sharedInterests,
     required this.commonEventCount,
     required this.reason,
+    required this.ignoreVersion,
   });
   final String username, reason;
+  final String ignoreVersion;
   final String? displayName;
   final List<String> sharedInterests;
   final int commonEventCount;

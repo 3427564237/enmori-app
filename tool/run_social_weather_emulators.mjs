@@ -10,6 +10,9 @@ import {createServer} from 'node:net';
 import {buildControlledEmulatorTestEnvironment} from '../backend/dist/src/shared/infrastructure/firebase/controlled-emulator-environment.js';
 assert.equal(process.version,'v24.19.0');
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const args=process.argv.slice(2);
+assert.ok(args.every(arg=>['--child','--friend-ignore'].includes(arg)));
+const suite=args.includes('--friend-ignore')?'friend-ignore':'social-weather';
 const run=(program,args,env)=>new Promise((done,reject)=>{
   const child=spawn(program,args,{cwd:root,env,stdio:'inherit',windowsHide:true});
   child.on('error',reject);child.on('exit',code=>code===0?done():reject(new Error(`Test child exited ${code}`)));
@@ -18,11 +21,11 @@ const ports=[8080,9099,4400,4500,9150];
 const free=async()=>{for(const port of ports)await new Promise((done,reject)=>{
   const server=createServer();server.once('error',reject);server.listen(port,'127.0.0.1',()=>server.close(done));
 });};
-if(process.argv[2]==='--child'){
+if(args.includes('--child')){
   const env=buildControlledEmulatorTestEnvironment(process.env,process.env.ENMORI_CONTROLLED_PROFILE_DIRECTORY);
-  await run(process.execPath,['--test','--test-concurrency=1','--test-timeout=90000','backend/dist/emulator-test/social-weather.integration.test.js'],env);
+  await run(process.execPath,['--test','--test-concurrency=1','--test-timeout=90000',`backend/dist/emulator-test/${suite}.integration.test.js`],env);
 }else{
-  await free();const directory=mkdtempSync(join(tmpdir(),'enmori-social-weather-')),parent=realpathSync(tmpdir());
+  await free();const directory=mkdtempSync(join(tmpdir(),`enmori-${suite}-`)),parent=realpathSync(tmpdir());
   try{
     const env=buildControlledEmulatorTestEnvironment({...process.env,
       GCLOUD_PROJECT:'demo-enmori-rmvp01a-r10',GOOGLE_CLOUD_PROJECT:'demo-enmori-rmvp01a-r10',
@@ -31,7 +34,8 @@ if(process.argv[2]==='--child'){
     if(process.env.FIREBASE_EMULATORS_PATH)env.FIREBASE_EMULATORS_PATH=process.env.FIREBASE_EMULATORS_PATH;
     const script=fileURLToPath(import.meta.url);assert.ok(!script.includes('"'));
     const quote=s=>`'${s.replaceAll("'","'\\''")}'`;
-    const command=process.platform==='win32'?`"${process.execPath}" "${script}" --child`:`${quote(process.execPath)} ${quote(script)} --child`;
+    const selection=suite==='friend-ignore'?' --friend-ignore':'';
+    const command=process.platform==='win32'?`"${process.execPath}" "${script}" --child${selection}`:`${quote(process.execPath)} ${quote(script)} --child${selection}`;
     const cli=createRequire(import.meta.url).resolve('firebase-tools/lib/bin/firebase.js');
     await run(process.execPath,[cli,'emulators:exec','--project','demo-enmori-rmvp01a-r10','--only','auth,firestore','--config','firebase.json','--non-interactive',command],env);
   }finally{

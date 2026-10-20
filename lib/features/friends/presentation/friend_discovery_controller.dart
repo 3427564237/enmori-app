@@ -1,16 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/providers.dart';
 import '../../../core/result/result.dart';
 import '../../auth/auth_providers.dart';
 import '../../auth/domain/auth_repository.dart';
-import '../data/backend_friend_discovery_repository.dart';
+import '../discovery_providers.dart';
 import '../domain/friend_discovery_repository.dart';
+import 'friend_ignore_controller.dart';
 
-final friendDiscoveryRepositoryProvider = Provider<FriendDiscoveryRepository>(
-  (ref) =>
-      BackendFriendDiscoveryRepository(ref.watch(backendApiClientProvider)),
-);
+export '../discovery_providers.dart' show friendDiscoveryRepositoryProvider;
+
 final friendDiscoveryControllerProvider = NotifierProvider.autoDispose
     .family<FriendDiscoveryController, FriendDiscoveryState, bool>(
       FriendDiscoveryController.new,
@@ -35,8 +33,13 @@ final class FriendDiscoveryController extends Notifier<FriendDiscoveryState> {
   FriendDiscoveryController(this.home);
   final bool home;
   int _epoch = 0;
+  late FriendDiscoveryRepository _repository;
   @override
   FriendDiscoveryState build() {
+    _repository = ref.watch(friendDiscoveryRepositoryProvider);
+    ref.watch(
+      friendIgnoreControllerProvider.select((value) => value.generation),
+    );
     ref.watch(
       authSessionProvider.select(
         (v) => v.asData?.value is AuthSessionAuthenticated
@@ -55,9 +58,10 @@ final class FriendDiscoveryController extends Notifier<FriendDiscoveryState> {
   }
 
   Future<void> load() async {
-    if (state.busy) return;
-    final epoch = ++_epoch,
-        repository = ref.read(friendDiscoveryRepositoryProvider);
+    final preference = ref.read(friendIgnoreControllerProvider);
+    if (state.busy || preference.busy || preference.unresolvedUsername != null)
+      return;
+    final epoch = ++_epoch, repository = _repository;
     state = const FriendDiscoveryState(busy: true);
     // Independent responses keep count availability separate from suggestions.
     final results = await Future.wait<Object>([

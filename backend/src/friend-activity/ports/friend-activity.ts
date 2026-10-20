@@ -1,7 +1,7 @@
 import type { ActivityType } from "../domain/rank-activity.js";
 import type { Result } from "../../shared/domain/result.js";
 import type { AppFailure } from "../../shared/application/app-failure.js";
-import type { FirestoreTransactionGateway } from "../../shared/infrastructure/firebase/firestore-gateway.js";
+import type { SocialSourceReader } from "../../friend-recommendations/ports/friend-event-projection.js";
 export interface ActivityItem {readonly type:ActivityType;readonly sourceRecordId:string;readonly occurredAt:string;readonly username:string;readonly displayName:string|null;}
 export type ActivityCategory="all"|ActivityType;
 export interface FriendActivity {
@@ -11,6 +11,6 @@ export interface FriendActivity {
  * IDs identify the participation source (not an ambiguous actor/event concat).
  * Missing adapter is unavailable, not a successful empty event feed. */
 export interface EventActivitySource {
-  read(tx:FirestoreTransactionGateway,viewerAccountId:string,ownerAccountId:string,asOf:string,
+  read(tx:SocialSourceReader,viewerAccountId:string,ownerAccountId:string,asOf:string,
     purpose:"friends_activity_v1"):Promise<readonly {readonly type:"event_interested"|"event_going";readonly sourceRecordId:string;readonly occurredAt:string}[]|undefined>;
 }

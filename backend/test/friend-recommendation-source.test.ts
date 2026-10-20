@@ -23,7 +23,7 @@ test("producer orders whole authorized candidate pool before Home Top 2 and expo
   assert.equal(all.ok,true);assert.equal(home.ok,true);if(!all.ok||!home.ok)return;
   assert.deepEqual(all.value.suggestions.map(c=>c.username),["member_target_2","member_target_1","member_target_3","member_target_4"]);
   assert.deepEqual(home.value.suggestions,all.value.suggestions.slice(0,2));
-  for(const row of all.value.suggestions)assert.deepEqual(Object.keys(row).sort(),["commonEventCount","displayName","reason","sharedInterests","username"]);
+  for(const row of all.value.suggestions)assert.deepEqual(Object.keys(row).sort(),["commonEventCount","displayName","ignoreVersion","reason","sharedInterests","username"]);
   assert.deepEqual(store.entries(),before);
 });
 test("withdrawn recommendation consent stops before candidate reads and excludes a withdrawn target",async()=>{
