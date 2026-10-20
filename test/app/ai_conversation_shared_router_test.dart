@@ -40,20 +40,12 @@ void main() {
       await _openAi(tester);
       await _send(tester);
       expect(f.transport.executeCalls, 1);
-      expect(find.text(_note), findsOneWidget);
-      expect(
-        find.textContaining('Synthetic reply for client testing'),
-        findsOneWidget,
-      );
+      await _expectSavedPair(tester);
       await _tap(tester, 'ai-back');
       expect(f.router.state.uri.path, AppRoutes.home);
       expect(find.text(_note), findsNothing);
       await _openAi(tester);
-      expect(find.text(_note), findsOneWidget);
-      expect(
-        find.textContaining('Synthetic reply for client testing'),
-        findsOneWidget,
-      );
+      await _expectSavedPair(tester);
       expect(f.transport.executeCalls, 1);
       expect(tester.takeException(), isNull);
     },
@@ -184,6 +176,22 @@ Future<void> _send(WidgetTester tester) async {
   await tester.enterText(find.byKey(const Key('ai-message-input')), _note);
   await tester.pump();
   await _tap(tester, 'ai-send');
+}
+
+Future<void> _expectSavedPair(WidgetTester tester) async {
+  // Following a new reply may move the earlier user row outside the lazy
+  // viewport. Inspect both rows through normal scrolling, including on reread.
+  final scroll = find
+      .descendant(
+        of: find.byType(AiConversationPage),
+        matching: find.byType(Scrollable),
+      )
+      .first;
+  await tester.scrollUntilVisible(find.text(_note), -180, scrollable: scroll);
+  expect(find.text(_note), findsOneWidget);
+  final reply = find.textContaining('Synthetic reply for client testing');
+  await tester.scrollUntilVisible(reply, 180, scrollable: scroll);
+  expect(reply, findsOneWidget);
 }
 
 Future<void> _exit(WidgetTester tester, bool settings) async {

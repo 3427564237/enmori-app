@@ -12,6 +12,8 @@ import { requireControlledEmulatorEnvironment } from '../shared/infrastructure/f
 import { FriendRequests } from "../friends/application/friend-requests.js";
 import { FirestoreFriendRepository } from "../friends/infrastructure/firestore-friend-repository.js";
 import { OwnPersonas } from "../personas/application/own-personas.js";
+import { PreviewPersona } from "../personas/application/preview-persona.js";
+import { FirestorePersonaPreviewAuthority } from "../personas/infrastructure/firestore-persona-preview-authority.js";
 import { FirestorePersonaRepository } from "../personas/infrastructure/firestore-persona-repository.js";
 import { ListOwnCheckInsForDate } from '../check-ins/application/check-in-history.js';
 import { FirestoreCheckInHistoryRepository } from '../check-ins/infrastructure/firestore-check-in-history-repository.js';
@@ -104,6 +106,7 @@ async function createControlledRuntime(
     });
     let chat: Awaited<ReturnType<typeof createIsolatedConversationComposition>> | undefined;
     let healthy = true;
+    let previewAccepting = true;
     let maintenanceHealthy = true;
     const chatTransport = chatModel ? new LocalChatTransport(chatModel) : undefined;
     if (chatTransport && isolatedEnvironment) {
@@ -119,6 +122,7 @@ async function createControlledRuntime(
       } catch { healthy = false; }
     }
     const stopAi = async () => {
+      previewAccepting = false;
       if (!chat) return;
       await chat.stopAdmissionAndMaintenance();
       // Let accepted work settle normally. Unknown generation outcomes retain
@@ -128,6 +132,10 @@ async function createControlledRuntime(
     };
     const aiStatus = () => ({ configured: !!chatTransport, available: !!chat && healthy,
       maintenanceHealthy, pending: chatTransport?.state.pending ?? false, outcomeUnknown: chatTransport?.state.outcomeUnknown ?? false });
+    const personaPreview = chat && healthy && chatTransport ? new PreviewPersona(
+      new FirestorePersonaPreviewAuthority(gateway), chatTransport,
+      () => performance.now(), () => chatTransport.state.pending,
+    ) : undefined;
     const app = await buildApp({
       ...(isolatedEnvironment ? { isolatedSlices: {
         environment: isolatedEnvironment,
@@ -137,6 +145,12 @@ async function createControlledRuntime(
             ? chat!.operations.prepare(...args) : Promise.resolve({ kind: 'failure' as const, code: 'AI_UNAVAILABLE' as const }),
           execute: (...args: Parameters<typeof chat.operations.execute>) => healthy
             ? chat!.operations.execute(...args) : Promise.resolve({ kind: 'failure' as const, code: 'AI_UNAVAILABLE' as const }),
+        } } : {}),
+        ...(personaPreview ? { personaPreview: {
+          execute: (...args: Parameters<PreviewPersona["execute"]>) => personaPreview.execute(
+            args[0], args[1], args[2], { ...args[3],
+              current: () => previewAccepting && healthy && args[3].current(),
+            }),
         } } : {}),
         eventBrowse: { source: eventBrowseControl.source },
         eventDetail: realEvents.eventDetail,

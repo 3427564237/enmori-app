@@ -23,6 +23,8 @@ import '../features/ai_conversation/presentation/ai_conversation_page.dart';
 import '../features/ai_conversation/presentation/ai_consent_gate.dart';
 import '../features/personas/persona_providers.dart';
 import '../features/personas/data/backend_persona_repository.dart';
+import '../features/personas/data/backend_persona_preview_repository.dart';
+import '../features/personas/persona_preview_providers.dart';
 import '../features/personas/presentation/persona_overview_page.dart';
 import '../features/personas/presentation/persona_management_page.dart';
 import '../features/personas/presentation/persona_editor_page.dart';
@@ -32,6 +34,7 @@ import '../features/event_recommendations/event_recommendations_providers.dart';
 import '../features/event_recommendations/data/backend_event_recommendation_repository.dart';
 import 'platform/external_activity_opener.dart';
 import 'providers.dart';
+import 'persona_preview_composition.dart';
 import 'social_demo_presentation.dart';
 import 'router/app_router.dart';
 import 'router/activity_routes.dart';
@@ -61,6 +64,7 @@ final class ControlledDemoApp extends StatefulWidget {
 final class _ControlledDemoAppState extends State<ControlledDemoApp> {
   late BackendApiClient _api;
   late AiWireRepository _ai;
+  late BackendPersonaPreviewRepository _personaPreview;
   @override
   void initState() {
     super.initState();
@@ -85,6 +89,11 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
     );
     _ai = AiWireRepository(
       HttpAiWireTransport(baseUri: widget.baseUri, client: widget.client),
+    );
+    _personaPreview = BackendPersonaPreviewRepository(
+      baseUri: widget.baseUri,
+      tokenProvider: widget.auth.getIdToken,
+      client: widget.client,
     );
   }
 
@@ -123,6 +132,10 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       ),
       personaRepositoryProvider.overrideWithValue(
         BackendPersonaRepository(_api),
+      ),
+      personaPreviewRepositoryProvider.overrideWithValue(_personaPreview),
+      personaPreviewAccessProvider.overrideWith(
+        (ref) => ref.watch(connectedPersonaPreviewAccessProvider),
       ),
       aiConversationRepositoryProvider.overrideWithValue(_ai),
       isolatedHistoryPageProvider.overrideWithValue(
