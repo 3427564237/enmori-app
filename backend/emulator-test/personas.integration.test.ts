@@ -9,6 +9,8 @@ import type { FastifyInstance } from "fastify";
 
 import { buildApp } from "../src/bootstrap/build-app.js";
 import { OwnPersonas } from "../src/personas/application/own-personas.js";
+import type { PersonaInput } from "../src/personas/application/persona-model.js";
+import { personaExpressionFields } from "../src/personas/domain/persona-values.js";
 import { FirestorePersonaRepository, derivePersonaId } from "../src/personas/infrastructure/firestore-persona-repository.js";
 import { appFailure } from "../src/shared/application/app-failure.js";
 import { err, ok } from "../src/shared/domain/result.js";
@@ -16,7 +18,7 @@ import { requireControlledEmulatorEnvironment } from "../src/shared/infrastructu
 import { FirebaseIdentityVerifier } from "../src/shared/infrastructure/firebase/firebase-identity-verifier.js";
 import { FirebaseAdminFirestoreGateway, type FirestoreGateway, type FirestoreTransactionGateway, type StoredDocument } from "../src/shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId } from "../src/shared/infrastructure/firebase/firestore-records.js";
-import { personaRepositoryContract, PERSONA_TEST_TIME } from "../test/support/persona-repository-contract.js";
+import { personaRepositoryContract, PERSONA_TEST_TIME, PERSONA_TEST_FIELDS } from "../test/support/persona-repository-contract.js";
 
 // Validate the actual runner-filtered environment before obtaining either service.
 // The same process.env is passed to buildApp. No alternate environment/store exists.
@@ -27,14 +29,13 @@ const auth = getAuth(firebase);
 const firestore = getFirestore(firebase);
 const baseGateway = new FirebaseAdminFirestoreGateway(firestore);
 const instant = "2026-10-08T00:00:00.000Z";
-const fields = { displayName: "Synthetic Persona", tone: "neutral", responseLength: "balanced", formatStyle: "plain" } as const;
+const fields = PERSONA_TEST_FIELDS;
 const unavailable = { execute: async () => err(appFailure("SERVICE_UNAVAILABLE")) };
 const maximum = Number.MAX_SAFE_INTEGER;
 const unknownId = "f".repeat(64);
 
-interface PersonaView {
-  personaId: string; displayName: string; tone: string; responseLength: string;
-  formatStyle: string; createdAt: string; updatedAt: string; revision: number;
+interface PersonaView extends PersonaInput {
+  personaId: string; createdAt: string; updatedAt: string; revision: number;
 }
 interface PersonaSet { items: PersonaView[]; stateRevision: number; activePersonaId?: string }
 interface PersonaReply { persona: PersonaView; stateRevision: number }
@@ -578,7 +579,7 @@ test("PC14 live persistence and permanent deletion retain only approved records 
     const beforeReceipts = (await firestore.collection("idempotency").get()).size;
     const key = randomUUID(); const initial = created(await h.create(0, key));
     const id = initial.persona.personaId;
-    assert.deepEqual(Object.keys((await h.stored(id))!).sort(), ["createdAt", "displayName", "formatStyle", "responseLength", "revision", "tone", "updatedAt"]);
+    assert.deepEqual(Object.keys((await h.stored(id))!).sort(), [...Object.keys(fields), "createdAt", "revision", "updatedAt"].sort());
     assert.deepEqual(Object.keys((await h.state())!).sort(), ["livePersonaIds", "stateRevision"]);
     assert.equal((await firestore.collection("idempotency").get()).size, beforeReceipts);
     assert.deepEqual((await firestore.doc(`accounts/${h.owner().accountId}`).listCollections()).map((collection) => collection.id).sort(), ["persona_state", "personas"]);
@@ -587,6 +588,48 @@ test("PC14 live persistence and permanent deletion retain only approved records 
     assert.equal(await h.stored(id), undefined);
     assert.equal((await firestore.collection(`accounts/${h.owner().accountId}/personas`).get()).empty, true);
     failure(await h.create(0, key), 412, "PERSONA_REVISION_PRECONDITION_FAILED");
+  });
+});
+
+test("20Oct actual populated expression saves, reads, conflicts, edits, activates and deletes without changing owner state semantics", async () => {
+  const full = { ...fields, displayName: "Kai", relationship: "Companion", shortIntroduction: "Hello 🌿",
+    description: "A thoughtful voice", personality: "Curious", communicationStyle: "One question\nThen pause.",
+    interests: "Piano, 自定义兴趣", extraInstructions: "  Keep this spacing.\nReply naturally.  " };
+  await run([{}], async h => {
+    const key = randomUUID(), first = created(await h.create(0, key, full)), id = first.persona.personaId;
+    for (const field of personaExpressionFields) assert.equal(first.persona[field], full[field]);
+    assert.deepEqual((await h.request("GET", `/v1/me/personas/${id}`)).json(), first);
+    assert.deepEqual(await h.stored(id), row(full));
+    assert.equal((await h.create(0, key, full)).statusCode, 200);
+    for (const field of personaExpressionFields) failure(await h.create(0, key, { ...full, [field]: full[field] + " changed" }), 409, "PERSONA_COMMAND_CONFLICT");
+    const changed = { ...full, relationship: "Guide", shortIntroduction: "Changed", description: "A new description", personality: "Calm",
+      communicationStyle: "Plain words", interests: "Custom reading", extraInstructions: "Use Chinese" };
+    const edit = await h.request("PUT", `/v1/me/personas/${id}`, { ...changed, ...expected(first) });
+    assert.equal(edit.statusCode, 200);
+    const edited = edit.json() as PersonaReply;
+    assert.equal(edited.stateRevision, 2); assert.equal(edited.persona.revision, 2);
+    for (const field of personaExpressionFields) assert.equal(edited.persona[field], changed[field]);
+    assert.deepEqual((await h.request("GET", `/v1/me/personas/${id}`)).json(), edited);
+    failure(await h.request("PUT", `/v1/me/personas/${id}`, { ...full, ...expected(first) }), 412, "PERSONA_REVISION_PRECONDITION_FAILED");
+    const active = await h.request("PUT", "/v1/me/persona-selection", { personaId: id, ...expected(edited) });
+    assert.equal(active.statusCode, 200); assert.equal((active.json() as { personas: PersonaSet }).personas.activePersonaId, id);
+    assert.equal((await h.request("DELETE", `/v1/me/personas/${id}`, { expectedRevision: 2, expectedStateRevision: 3 })).statusCode, 204);
+    assert.deepEqual(await h.list(), { items: [], stateRevision: 4 }); assert.equal(await h.stored(id), undefined);
+  });
+});
+
+test("20Oct actual legacy expression reads empty without migration; malformed free fields remain unavailable", async () => {
+  const id = "9".repeat(64), legacy = { ...row() };
+  for (const field of personaExpressionFields) delete legacy[field];
+  await run([{ state: { livePersonaIds: [id], stateRevision: 1 }, rows: { [id]: legacy } }], async h => {
+    const view = (await h.list()).items[0]!;
+    for (const field of personaExpressionFields) assert.equal(view[field], "");
+    assert.deepEqual(await h.stored(id), legacy);
+    assert.equal(h.gateway.attempts().every(attempt => attempt.writes === 0), true);
+  });
+  for (const value of [null, 7, ["not-text"]]) await run([{ state: { livePersonaIds: [id], stateRevision: 1 }, rows: { [id]: row({ interests: value }) } }], async h => {
+    failure(await h.request("GET", "/v1/me/personas"), 503, "SERVICE_UNAVAILABLE");
+    assert.equal(h.gateway.attempts().every(attempt => attempt.writes === 0), true);
   });
 });
 

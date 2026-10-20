@@ -34,6 +34,8 @@ export interface RealContextReaderOptions {
   readonly monotonicNow: () => number;
   readonly notePrerequisites?: SourceBoundNotePrerequisites;
   readonly includeCheckIns?: false;
+  /** Opt-in only for S-PM-1019 simplified local chat; no additional data reads. */
+  readonly includePersonaExpression?: true;
 }
 const unavailable = { kind: "unavailable" } as const;
 const terminated = { kind: "terminated" } as const;
@@ -85,7 +87,7 @@ async function authority(firestore: Firestore, transaction: Transaction,
   return !requireConsent || value.consent === "accepted" ? { kind: "read", value } : denied;
 }
 async function personas(firestore: Firestore, transaction: Transaction, context: AcceptedContextRead,
-  now: () => number, fixedAsOf?: FullPrecisionInstant): Promise<ReadPersonaSet | undefined> {
+  now: () => number, fixedAsOf?: FullPrecisionInstant, includeExpression = false): Promise<ReadPersonaSet | undefined> {
   const ownerId = context.ownerId;
   const stateSnapshot = await guardedGet(firestore, transaction, `accounts/${ownerId}/persona_state/current`, context, now, fixedAsOf);
   const state = parseReadPersonaState(stateSnapshot.data());
@@ -93,7 +95,7 @@ async function personas(firestore: Firestore, transaction: Transaction, context:
   const items: ReadPersonaSet["items"][number][] = [];
   for (const id of state.livePersonaIds) {
     const item = await guardedGet(firestore, transaction, `accounts/${ownerId}/personas/${id}`, context, now, fixedAsOf);
-    const parsed = parseReadPersona(item.data(), id);
+    const parsed = parseReadPersona(item.data(), id, includeExpression);
     if (!parsed) return undefined;
     items.push(parsed);
   }
@@ -170,7 +172,7 @@ class FixedFirebaseStartView implements FixedStartReadView {
   readPersonas(): Promise<ContextReadResult<FixedViewValue<ReadPersonaSet>>> {
     return this.#read(async (db, tx, context, options) => {
       if (!this.#authorized) return unavailable;
-      const value = await personas(db, tx, context, options.monotonicNow, this.asOf);
+      const value = await personas(db, tx, context, options.monotonicNow, this.asOf, options.includePersonaExpression === true);
       return value ? { kind: "read", value } : unavailable;
     });
   }

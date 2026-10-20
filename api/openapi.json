@@ -3757,6 +3757,295 @@
           }
         }
       }
+    },
+    "/v1/me/persona-preview": {
+      "post": {
+        "operationId": "previewOwnPersonaDraft",
+        "x-enmori-environment": "isolated-emulator",
+        "description": "Draft-only one-turn preview, explicitly composed into the retained local AI environment. Original verified Auth and accepted consent are rechecked before generation and delivery; consent revocation generation must remain equal. Current draft expression and current text only: no saved Persona access, activation, history, Notes, candidate queries, or writes. No automatic retry; shares the existing single-model lane. Free text affects expression only and never grants data access. Responses use Cache-Control: no-store.",
+        "requestBody": {
+          "required": true,
+          "description": "Exact draft and text JSON object; maximum 16384 UTF-8 bytes, no per-field free-text product limit. Text retains the existing 2400 Unicode scalar limit. No identity, Persona ID, version, operation key, history or candidate fields. Unknown fields/query, operation/idempotency headers and wrong types reject without coercion.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonaPreviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A transient preview reply. No business record has been created or changed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaPreviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "REQUEST_INVALID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaPreviewError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "AUTH_REQUIRED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaPreviewError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AUTH_FORBIDDEN or AI_CONTEXT_NOT_PERMITTED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaPreviewError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ONBOARDING_REQUIRED or AI_AUTHORITY_CHANGED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaPreviewError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "REQUEST_TOO_LARGE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaPreviewError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "AI_INPUT_INVALID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaPreviewError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "AI_BUSY",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaPreviewError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "AI_REPLY_REJECTED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaPreviewError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "AI_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaPreviewError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/conversations": {
+      "get": {
+        "operationId": "listOwnConversations",
+        "summary": "Select an own live saved conversation",
+        "description": "Explicit isolated composition only. Fresh completed owner and accepted consent, rechecked after reads. Metadata only: no title, message or model output. Stable document-ID ascending pages of at most 20 scanned parent records; expired rows are omitted, so a page may be empty with a last-scanned-ID nextCursor. Existing full-precision retention remains authoritative. Only after query is accepted; duplicate/unknown query, body, operation/idempotency keys and HEAD reject. No automatic resend or unknown-operation escape.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "description": "Last scanned own conversation ID from the preceding response."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Own conversation metadata page. Cache-Control: no-store.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "conversations"
+                  ],
+                  "properties": {
+                    "conversations": {
+                      "type": "array",
+                      "maxItems": 20,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "conversationId",
+                          "lastMessageAt"
+                        ],
+                        "properties": {
+                          "conversationId": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                          },
+                          "lastMessageAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                          }
+                        }
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe selected failure; not proof of no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3801,6 +4090,13 @@
           "tone",
           "responseLength",
           "formatStyle",
+          "relationship",
+          "shortIntroduction",
+          "description",
+          "personality",
+          "communicationStyle",
+          "interests",
+          "extraInstructions",
           "createdAt",
           "updatedAt",
           "revision"
@@ -3839,6 +4135,34 @@
               "bulleted"
             ]
           },
+          "relationship": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "shortIntroduction": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "personality": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "communicationStyle": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "interests": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "extraInstructions": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
           "createdAt": {
             "type": "string",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
@@ -3876,6 +4200,13 @@
                 "tone",
                 "responseLength",
                 "formatStyle",
+                "relationship",
+                "shortIntroduction",
+                "description",
+                "personality",
+                "communicationStyle",
+                "interests",
+                "extraInstructions",
                 "createdAt",
                 "updatedAt",
                 "revision"
@@ -3913,6 +4244,34 @@
                     "plain",
                     "bulleted"
                   ]
+                },
+                "relationship": {
+                  "type": "string",
+                  "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                },
+                "shortIntroduction": {
+                  "type": "string",
+                  "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                },
+                "personality": {
+                  "type": "string",
+                  "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                },
+                "communicationStyle": {
+                  "type": "string",
+                  "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                },
+                "interests": {
+                  "type": "string",
+                  "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                },
+                "extraInstructions": {
+                  "type": "string",
+                  "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
                 },
                 "createdAt": {
                   "type": "string",
@@ -3963,6 +4322,13 @@
               "tone",
               "responseLength",
               "formatStyle",
+              "relationship",
+              "shortIntroduction",
+              "description",
+              "personality",
+              "communicationStyle",
+              "interests",
+              "extraInstructions",
               "createdAt",
               "updatedAt",
               "revision"
@@ -4000,6 +4366,34 @@
                   "plain",
                   "bulleted"
                 ]
+              },
+              "relationship": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "shortIntroduction": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "description": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "personality": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "communicationStyle": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "interests": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "extraInstructions": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
               },
               "createdAt": {
                 "type": "string",
@@ -4052,6 +4446,13 @@
                     "tone",
                     "responseLength",
                     "formatStyle",
+                    "relationship",
+                    "shortIntroduction",
+                    "description",
+                    "personality",
+                    "communicationStyle",
+                    "interests",
+                    "extraInstructions",
                     "createdAt",
                     "updatedAt",
                     "revision"
@@ -4089,6 +4490,34 @@
                         "plain",
                         "bulleted"
                       ]
+                    },
+                    "relationship": {
+                      "type": "string",
+                      "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                    },
+                    "shortIntroduction": {
+                      "type": "string",
+                      "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                    },
+                    "personality": {
+                      "type": "string",
+                      "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                    },
+                    "communicationStyle": {
+                      "type": "string",
+                      "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                    },
+                    "interests": {
+                      "type": "string",
+                      "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+                    },
+                    "extraInstructions": {
+                      "type": "string",
+                      "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
                     },
                     "createdAt": {
                       "type": "string",
@@ -4162,6 +4591,34 @@
               "bulleted"
             ]
           },
+          "relationship": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "shortIntroduction": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "personality": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "communicationStyle": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "interests": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "extraInstructions": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
           "expectedStateRevision": {
             "type": "integer",
             "minimum": 0,
@@ -4207,6 +4664,34 @@
               "plain",
               "bulleted"
             ]
+          },
+          "relationship": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "shortIntroduction": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "personality": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "communicationStyle": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "interests": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+          },
+          "extraInstructions": {
+            "type": "string",
+            "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
           },
           "expectedStateRevision": {
             "type": "integer",
@@ -5614,6 +6099,131 @@
           },
           "mapSharedWithFriends": {
             "type": "boolean"
+          }
+        }
+      },
+      "PersonaPreviewRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "draft",
+          "text"
+        ],
+        "properties": {
+          "draft": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "displayName",
+              "tone",
+              "responseLength",
+              "formatStyle"
+            ],
+            "properties": {
+              "displayName": {
+                "type": "string",
+                "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+              },
+              "tone": {
+                "type": "string",
+                "enum": [
+                  "neutral",
+                  "warm",
+                  "encouraging"
+                ]
+              },
+              "responseLength": {
+                "type": "string",
+                "enum": [
+                  "concise",
+                  "balanced",
+                  "detailed"
+                ]
+              },
+              "formatStyle": {
+                "type": "string",
+                "enum": [
+                  "plain",
+                  "bulleted"
+                ]
+              },
+              "relationship": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "shortIntroduction": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "description": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "personality": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "communicationStyle": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "interests": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              },
+              "extraInstructions": {
+                "type": "string",
+                "description": "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority."
+              }
+            }
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2400
+          }
+        }
+      },
+      "PersonaPreviewResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2400
+          }
+        }
+      },
+      "PersonaPreviewError": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "error",
+          "requestId"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
+          "requestId": {
+            "type": "string"
           }
         }
       }

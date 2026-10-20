@@ -1,0 +1,136 @@
+import 'dart:async';
+
+import 'package:enmori/core/result/result.dart';
+import 'package:enmori/features/auth/auth_providers.dart';
+import 'package:enmori/features/auth/domain/auth_repository.dart';
+import 'package:enmori/features/event_participation/domain/participation_repository.dart';
+import 'package:enmori/features/event_participation/participation_providers.dart';
+import 'package:enmori/features/event_participation/presentation/participation_controls.dart';
+import 'package:enmori/features/event_participation/presentation/participation_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  for (final sameUid in [false, true]) {
+    testWidgets('frame boundary session replacement sameUid=$sameUid must fence old visible Cancel', (tester) async {
+      final sessions = StreamController<AuthSession>();
+      final repository = _ReviewParticipationRepository();
+      final container = ProviderContainer(overrides: [
+        authSessionProvider.overrideWith((ref) => sessions.stream),
+        participationRepositoryProvider.overrideWithValue(repository),
+      ]);
+      addTearDown(() { container.dispose(); unawaited(sessions.close()); });
+      await tester.pumpWidget(UncontrolledProviderScope(container: container,
+        child: MaterialApp(theme: ThemeData(splashFactory: NoSplash.splashFactory),
+          home: const Scaffold(body: ParticipationControls(eventId: 'event-a')))));
+      sessions.add(AuthSessionAuthenticated(subject: 'review-account-A'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Read participation'));
+      await tester.pumpAndSettle();
+      expect(find.text('Your participation: going'), findsOneWidget);
+      final originalSession = container.read(authSessionProvider).asData!.value;
+
+      // Auth and an application-owned read can finish between rendered frames.
+      // Do not pump the Widget tree: dispatch a real tap to the old visible UI.
+      repository.account = 'B';
+      sessions.add(AuthSessionAuthenticated(subject: sameUid ? 'review-account-A' : 'review-account-B'));
+      await container.pump();
+      expect(container.read(authSessionProvider).asData!.value, isNot(same(originalSession)));
+      await container.read(participationControllerProvider.notifier).load('event-a');
+      expect(container.read(participationControllerProvider)['event-a']!.value!.ignored, isTrue);
+      expect(find.text('Your participation: going'), findsOneWidget);
+      expect(find.text('Your participation: going · recommendation ignored'), findsNothing);
+      await tester.tap(find.widgetWithText(TextButton, 'Cancel participation'));
+      await tester.pumpAndSettle();
+      expect(repository.writes, isEmpty,
+        reason: 'A real tap on the stale rendered button must not use the new session revision: ${repository.writes}');
+    });
+  }
+
+  testWidgets('current B Cancel writes only B and preserves its ignored flag', (tester) async {
+    final sessions = StreamController<AuthSession>();
+    final repository = _ReviewParticipationRepository()..account = 'B';
+    final container = ProviderContainer(overrides: [
+      authSessionProvider.overrideWith((ref) => sessions.stream),
+      participationRepositoryProvider.overrideWithValue(repository),
+    ]);
+    addTearDown(() { container.dispose(); unawaited(sessions.close()); });
+    await tester.pumpWidget(UncontrolledProviderScope(container: container,
+      child: MaterialApp(theme: ThemeData(splashFactory: NoSplash.splashFactory),
+        home: const Scaffold(body: ParticipationControls(eventId: 'event-a')))));
+    sessions.add(AuthSessionAuthenticated(subject: 'review-account-B'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Read participation'));
+    await tester.pumpAndSettle();
+    expect(find.text('Your participation: going · recommendation ignored'), findsOneWidget);
+    await tester.tap(find.widgetWithText(TextButton, 'Cancel participation'));
+    await tester.pumpAndSettle();
+    expect(repository.writes, ['B:7:none:ignored=true']);
+  });
+
+  testWidgets('a retained participation callback from A must not mutate B', (tester) async {
+    final sessions = StreamController<AuthSession>();
+    final repository = _ReviewParticipationRepository();
+    final container = ProviderContainer(overrides: [
+      authSessionProvider.overrideWith((ref) => sessions.stream),
+      participationRepositoryProvider.overrideWithValue(repository),
+    ]);
+    addTearDown(() { container.dispose(); unawaited(sessions.close()); });
+    await tester.pumpWidget(UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        theme: ThemeData(splashFactory: NoSplash.splashFactory),
+        home: const Scaffold(body: ParticipationControls(eventId: 'event-a')),
+      ),
+    ));
+    sessions.add(AuthSessionAuthenticated(subject: 'review-account-A'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Read participation'));
+    await tester.pumpAndSettle();
+    final cancelA = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, 'Cancel participation'),
+    ).onPressed!;
+
+    repository.account = 'B';
+    sessions.add(AuthSessionAuthenticated(subject: 'review-account-B'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Read participation'));
+    await tester.pumpAndSettle();
+    expect(find.text('Your participation: going · recommendation ignored'), findsOneWidget);
+    cancelA();
+    await tester.pumpAndSettle();
+    expect(repository.writes, isEmpty,
+      reason: 'The callback captured in A must not cancel or unignore B. Actual writes: ${repository.writes}');
+  });
+}
+
+final class _ReviewParticipationRepository implements ParticipationRepository {
+  String account = 'A';
+  final writes = <String>[];
+  EventParticipation get value => EventParticipation(
+    eventId: 'event-a', status: ParticipationStatus.going,
+    ignored: account == 'B', revision: account == 'B' ? 7 : 1,
+    updatedAt: DateTime.utc(2026, 10, 20),
+  );
+  @override
+  Future<Result<EventParticipation>> read(String id, bool Function() current) async => Success(value);
+  @override
+  Future<Result<EventParticipation>> save(EventParticipation previous,
+    ParticipationStatus status, bool ignored, bool Function() current) async {
+    if (!current()) return const Failure(participationUnavailable);
+    writes.add('$account:${previous.revision}:${status.name}:ignored=$ignored');
+    return Success(EventParticipation(eventId: previous.eventId, status: status,
+      ignored: ignored, revision: previous.revision + 1, updatedAt: value.updatedAt));
+  }
+  @override
+  Future<Result<EventParticipantPage>> participants(String id, ParticipationStatus status,
+    ParticipantGroup group, String? cursor, bool Function() current) async =>
+    Success(EventParticipantPage(items: []));
+  @override
+  Future<Result<EventParticipationPage>> own(String? cursor, bool Function() current) async =>
+    Success(EventParticipationPage([], null));
+  @override
+  Future<Result<PublicParticipationPage>> forUsername(String name, String? cursor,
+    bool Function() current) async => Success(PublicParticipationPage([], null));
+}

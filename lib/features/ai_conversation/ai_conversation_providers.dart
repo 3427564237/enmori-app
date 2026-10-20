@@ -62,6 +62,10 @@ class AiConversationController extends Notifier<AiConversationState> {
   int _requestNumber = 0;
   int _commandVersion = 0;
   AiMessage? _retryUser;
+  List<AiConversationSummary> _conversations = const [];
+  String? _historyCursor;
+  String? _historyError;
+  bool _historyLoaded = false;
 
   @override
   AiConversationState build() {
@@ -83,6 +87,10 @@ class AiConversationController extends Notifier<AiConversationState> {
     _assistantObservations.clear();
     _assistantRevision = 0;
     _retryUser = null;
+    _conversations = const [];
+    _historyCursor = null;
+    _historyError = null;
+    _historyLoaded = false;
     ref.onDispose(_shutdown);
     final phase = !_memory.authenticated
         ? AiConversationPhase.unauthenticated
@@ -156,6 +164,23 @@ class AiConversationController extends Notifier<AiConversationState> {
           _memory.conversationId != null &&
           (!_memory.unresolved || _memory.deleted),
       readBusy: _reads.isNotEmpty,
+      conversations: _conversations,
+      historyLoaded: _historyLoaded,
+      historyCursor: _historyCursor,
+      historyError: _historyError,
+      canBrowseHistory:
+          available &&
+          (!terminalView || phase == AiConversationPhase.deleted) &&
+          !generating &&
+          !_memory.deleting &&
+          _repository is AiConversationHistoryRepository,
+      canSelectConversation:
+          available &&
+          (!terminalView || phase == AiConversationPhase.deleted) &&
+          !generating &&
+          !_memory.deleting &&
+          _reads.isEmpty &&
+          !_memory.unresolved,
     );
   }
 
@@ -352,6 +377,10 @@ class AiConversationController extends Notifier<AiConversationState> {
       _invalidateReads();
       _retryUser = null;
       _memory.unresolved = true;
+      _conversations = const [];
+      _historyCursor = null;
+      _historyLoaded = false;
+      _historyError = null;
       _show(phase, clear: true);
     } else {
       _show(phase);
@@ -573,6 +602,61 @@ class AiConversationController extends Notifier<AiConversationState> {
     }
   }
 
+  Future<void> loadConversations({bool more = false}) async {
+    final repository = _repository;
+    if (!state.canBrowseHistory ||
+        state.readBusy ||
+        repository is! AiConversationHistoryRepository) {
+      return;
+    }
+    final history = repository as AiConversationHistoryRepository;
+    final after = more ? _historyCursor : null;
+    if (more && after == null) return;
+    final epoch = _epoch, command = _commandVersion;
+    _historyError = null;
+    final result = await _ordinary(
+      (token, abort) =>
+          history.listConversations(token: token, abort: abort, after: after),
+    );
+    if (!_validReadResult(epoch, command)) return;
+    switch (result) {
+      case Success<AiConversationHistoryPage>(:final value):
+        _conversations = more
+            ? [..._conversations, ...value.conversations]
+            : value.conversations;
+        _historyCursor = value.nextCursor;
+        _historyLoaded = true;
+        _show(state.phase);
+      case Failure<AiConversationHistoryPage>(:final failure):
+        _historyError = 'Could not load conversation history. Try again.';
+        _failure(failure);
+    }
+  }
+
+  Future<void> selectConversation(String conversationId) async {
+    if (!state.canSelectConversation ||
+        !_conversations.any((c) => c.conversationId == conversationId)) {
+      return;
+    }
+    _invalidateReads();
+    _retryUser = null;
+    _messageVersions.clear();
+    _assistantUsers.clear();
+    _assistantObservations.clear();
+    _assistantRevision = 0;
+    _memory.conversationId = conversationId;
+    _memory.operationId = null;
+    _memory.operationUserId = null;
+    _memory.operationUserSequence = null;
+    _memory.operationUserPersistedAt = null;
+    _memory.operationAssistantId = null;
+    _memory.operationHasAssistant = false;
+    _memory.established = true;
+    _memory.deleted = false;
+    _show(AiConversationPhase.idle, clear: true);
+    await loadMessages();
+  }
+
   Future<void> loadMessages({String? before}) async {
     final conversation = _memory.conversationId;
     if (!_alive ||
@@ -599,6 +683,23 @@ class AiConversationController extends Notifier<AiConversationState> {
     if (!_validReadResult(epoch, command)) return;
     switch (result) {
       case Failure<AiMessagePage>(:final failure):
+        // Discovery is an ordinary read: a subsequently expired/deleted target
+        // has no unresolved write. Keep actual operation fences untouched.
+        if (failure.kind == AppFailureKind.conversationUnavailable &&
+            _memory.operationId == null) {
+          _conversations = _conversations
+              .where((c) => c.conversationId != conversation)
+              .toList();
+          _memory.conversationId = null;
+          _memory.established = false;
+          _memory.unresolved = false;
+          _show(
+            AiConversationPhase.idle,
+            clear: true,
+            message: 'This conversation is no longer available. Choose another conversation or send a new message.',
+          );
+          return;
+        }
         _failure(failure);
       case Success<AiMessagePage>(:final value):
         _memory.established = true;
@@ -791,6 +892,10 @@ class AiConversationController extends Notifier<AiConversationState> {
       case Success<void>():
         _memory.deleting = false;
         _memory.deleted = true;
+        _memory.unresolved = false;
+        _conversations = _conversations
+            .where((c) => c.conversationId != conversation)
+            .toList();
         _memory.operationId = null;
         _show(AiConversationPhase.deleted, clear: true);
       case Failure<void>(:final failure):

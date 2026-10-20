@@ -39,6 +39,131 @@ const _unresolved = AppFailure(
 
 void main() {
   testWidgets(
+    'expired discovered target permits history selection or a new conversation without releasing a write fence',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      await r.controller.loadConversations();
+      r.repo.messagesResult = Future.value(
+        const Failure(
+          AppFailure(
+            kind: AppFailureKind.conversationUnavailable,
+            message: 'not available',
+          ),
+        ),
+      );
+      await r.controller.selectConversation('previous');
+      expect(r.state.conversationId, isNull);
+      expect(r.state.conversations, isEmpty);
+      expect(r.state.canSend, isTrue);
+      expect(r.state.canSelectConversation, isTrue);
+      expect(r.state.canCheckResult, isFalse);
+      expect(r.repo.prepares, isEmpty);
+      r.dispose();
+    },
+  );
+  testWidgets(
+    'history selects only a discovered owner conversation and reads without sending',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      await r.controller.loadConversations();
+      expect(r.state.historyLoaded, isTrue);
+      expect(r.state.conversations.single.conversationId, 'previous');
+      await r.controller.selectConversation('not-discovered');
+      expect(r.repo.messageTargets, isEmpty);
+      await r.controller.selectConversation('previous');
+      expect(r.repo.messageTargets, ['previous']);
+      expect(r.state.conversationId, 'previous');
+      expect(r.repo.prepares, isEmpty);
+      expect(r.repo.executes, isEmpty);
+      r.dispose();
+    },
+  );
+
+  testWidgets(
+    'history failures retain rows and explicit retry; new session drops late results',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      await r.controller.loadConversations();
+      r.repo.historyResult = Future.value(
+        const Failure(
+          AppFailure(
+            kind: AppFailureKind.serviceUnavailable,
+            message: 'private vendor error',
+          ),
+        ),
+      );
+      await r.controller.loadConversations();
+      expect(r.state.conversations, hasLength(1));
+      expect(r.state.historyError, isNotNull);
+      r.repo.historyResult = null;
+      await r.controller.loadConversations();
+      expect(r.state.historyError, isNull);
+      final late = Completer<Result<AiConversationHistoryPage>>();
+      r.repo.historyResult = late.future;
+      final pending = r.controller.loadConversations();
+      await tester.pump();
+      r.auth.sessions.add(AuthSessionAuthenticated(subject: 'same-user'));
+      await tester.pump();
+      late.complete(
+        Success(
+          AiConversationHistoryPage(
+            conversations: [
+              AiConversationSummary(
+                conversationId: 'old-secret',
+                lastMessageAt: _date,
+              ),
+            ],
+          ),
+        ),
+      );
+      await pending;
+      await tester.pump();
+      expect(r.state.conversations, isEmpty);
+      expect(r.state.historyLoaded, isFalse);
+      expect(r.repo.prepares, isEmpty);
+      r.dispose();
+    },
+  );
+
+  testWidgets(
+    'unknown request cannot be bypassed by history selection or New',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      await r.controller.loadConversations();
+      r.repo.executeResult = Future.value(const Failure(_unresolved));
+      await r.controller.send('note');
+      expect(r.state.canSelectConversation, isFalse);
+      await r.controller.selectConversation('previous');
+      r.controller.startNewConversation();
+      expect(r.state.conversationId, 'conversation');
+      expect(r.repo.messageTargets, isEmpty);
+      expect(r.repo.executes, hasLength(1));
+      r.dispose();
+    },
+  );
+
+  testWidgets('withdrawn consent clears history and blocks selection', (
+    tester,
+  ) async {
+    final r = await _Rig.create(tester);
+    await r.controller.loadConversations();
+    r.repo.historyResult = Future.value(
+      const Failure(
+        AppFailure(
+          kind: AppFailureKind.aiContextNotPermitted,
+          message: 'withdrawn',
+        ),
+      ),
+    );
+    await r.controller.loadConversations();
+    expect(r.state.phase, AiConversationPhase.limited);
+    expect(r.state.conversations, isEmpty);
+    expect(r.state.canBrowseHistory, isFalse);
+    expect(r.state.canSelectConversation, isFalse);
+    r.dispose();
+  });
+
+  testWidgets(
     'New conversation retains old messages and reserves a new target on next explicit send',
     (tester) async {
       final r = await _Rig.create(tester);
@@ -677,7 +802,27 @@ final class _Call {
   final String? conversationId;
 }
 
-final class _Repository implements AiConversationRepository {
+final class _Repository
+    implements AiConversationRepository, AiConversationHistoryRepository {
+  Future<Result<AiConversationHistoryPage>>? historyResult;
+  final messageTargets = <String>[];
+  @override
+  Future<Result<AiConversationHistoryPage>> listConversations({
+    required String token,
+    required AiAbortSignal abort,
+    String? after,
+  }) async =>
+      historyResult ??
+      Success(
+        AiConversationHistoryPage(
+          conversations: [
+            AiConversationSummary(
+              conversationId: 'previous',
+              lastMessageAt: _date,
+            ),
+          ],
+        ),
+      );
   final prepares = <_Call>[],
       executes = <_Call>[],
       cancels = <_Call>[],
@@ -751,7 +896,11 @@ final class _Repository implements AiConversationRepository {
     required AiAbortSignal abort,
     required String conversationId,
     String? before,
-  }) async => messagesResult ?? Success(AiMessagePage(messages: []));
+  }) async {
+    messageTargets.add(conversationId);
+    return messagesResult ?? Success(AiMessagePage(messages: []));
+  }
+
   @override
   Future<Result<void>> deleteConversation({
     required String token,

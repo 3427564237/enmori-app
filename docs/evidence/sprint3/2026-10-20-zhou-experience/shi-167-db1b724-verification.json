@@ -1,0 +1,89 @@
+{
+  "recordedAt": "2026-10-20T22:42:56.821394+08:00",
+  "pr": 167,
+  "reviewedHead": "db1b7249c7b97d0e0f8e68e3d9024efcc4e1b9be",
+  "product": "ac849740ead323d19419eaf7b3dcd3098445f411",
+  "productTree": "7bb11f90a38f7ac01f318cb4879ffd5920f04a3b",
+  "previousHead": "fba5a82ebd0074b875f40153381eee6c746a4772",
+  "reviewId": 5586692615,
+  "action": "APPROVE",
+  "r2ReplyId": 4326298907,
+  "R1": "fixed/closed at0158ca6,unchanged",
+  "R2": "fixed; original reviewer resolved",
+  "changedBindings": [
+    {
+      "path": "backend/src/event-browse/infrastructure/controlled-source-projection.ts",
+      "gitBlob": "cddb0568e0f4264ad2e4a96491b58cf73349e8fc"
+    },
+    {
+      "path": "backend/test/event-source-generation-regression.test.ts",
+      "gitBlob": "578858cdbd4a0a590f77793899cf1de8abf9910a"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-20-shi-event-participation/r2-ordinary-detail-revision.md",
+      "gitBlob": "d8f65238bd12143e3fd05c80cdf4660525bf2abd"
+    }
+  ],
+  "actualChecks": {
+    "strictCompileExit": 0,
+    "affectedBackend": {
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0
+    },
+    "fullPrWhitespace": "pass"
+  },
+  "commands": [
+    "node node_modules/typescript/bin/tsc --project backend/tsconfig.json --pretty false",
+    "node --test backend/dist/test/event-source-generation-regression.test.js backend/dist/test/controlled-event-projection.test.js backend/dist/test/event-browse-pagination.test.js backend/dist/test/controlled-event-browse.test.js \"D:/3851 AI/drafts/2026-10-20-pr167-db1b724-probes/r2-ordinary-detail-refresh.test.mjs\"",
+    "git diff --check 900ca6f HEAD"
+  ],
+  "logs": [
+    {
+      "label": "strict compile",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-db1b724-probes\\build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "passed": null,
+      "failed": 0
+    },
+    {
+      "label": "affected28 and unchanged reviewer probe1",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-db1b724-probes\\backend-affected.log",
+      "bytes": 3451,
+      "sha256": "e5f6df03968662189e7e3c015ced31702e893a81ea97091ea42972602cb8a7f7",
+      "passed": 29,
+      "failed": 0
+    }
+  ],
+  "reviewerProbe": {
+    "assertionsUnchanged": true,
+    "onlyRootPathAdapted": true,
+    "copy": "shi-167-db1b724-ordinary-probe.mjs.txt",
+    "sha256": "a757c248ba72bfea4cf1a328cf522383df8becbbcdcd25768857fca01879a0d4"
+  },
+  "compiledProjectionSha256": "c4444a862cd75ef43785108784a937a81a9feea53438c2ce9c65c978b0b16a9b",
+  "observed": {
+    "firstPageReads": 2,
+    "laterPageReads": 1,
+    "rawDetailReads": 1,
+    "freshDetail": "NEW title",
+    "lateOrdinaryDetail": "SERVICE_UNAVAILABLE",
+    "pendingAfter": 0,
+    "unchangedGenerationLaterPagePositiveControl": "Pass"
+  },
+  "ownerCurrent28": "SHI executed; current independent29 overlaps28,not added",
+  "unchangedNotRerun": [
+    "R1 and Flutter",
+    "API/OpenAPI",
+    "participation storage/indexes",
+    "dependencies",
+    "Emulator/SDK/runner",
+    "real provider/model/host/APK/device"
+  ],
+  "oldEvidence": "72/43/SDK4 and later17/51/22/23/19/15 retain their actual source and executor; not current full-suite proof",
+  "privateAuthorRawLogsRehashed": false,
+  "authorProductOrOriginalTestsModified": false,
+  "remainingOwner": "LI final router/bootstrap/provider/account/browser/device acceptance; JIN Home friend activity separate",
+  "mainMergedReleasedOrTasksClosed": false
+}

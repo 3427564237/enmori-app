@@ -6,6 +6,8 @@ import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/personas/domain/persona.dart';
 import 'package:enmori/features/personas/domain/persona_repository.dart';
 import 'package:enmori/features/personas/persona_providers.dart';
+import 'package:enmori/features/personas/persona_preview_providers.dart';
+import 'package:enmori/features/personas/domain/persona_preview_repository.dart';
 import 'package:enmori/features/personas/presentation/persona_editor_page.dart';
 import 'package:enmori/features/personas/presentation/persona_management_page.dart';
 import 'package:enmori/features/personas/presentation/persona_overview_page.dart';
@@ -14,6 +16,131 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('More options edits or opens the existing delete confirmation', (
+    tester,
+  ) async {
+    final repository = _Repository()..items.add(_persona('a'));
+    String? edited;
+    await _pump(
+      tester,
+      repository,
+      PersonaManagementPage(
+        onCreate: () {},
+        onEdit: (id) => edited = id,
+        onBack: () {},
+      ),
+    );
+    await _tapVisible(tester, 'persona-more-${'a' * 64}');
+    await tester.tap(find.text('Edit Persona'));
+    await tester.pumpAndSettle();
+    expect(edited, 'a' * 64);
+    await _tapVisible(tester, 'persona-more-${'a' * 64}');
+    await tester.tap(find.text('Delete Persona'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('persona-confirm-delete')), findsOneWidget);
+    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+    await tester.pumpAndSettle();
+    expect(repository.deletions, 0);
+  });
+  testWidgets(
+    'all approved fields save, reread and reopen with current draft preview isolated',
+    (tester) async {
+      final repository = _Repository();
+      final preview = _ImmediatePreview();
+      final auth = StreamController<AuthSession>();
+      final container = ProviderContainer(
+        overrides: [
+          authSessionProvider.overrideWith((ref) => auth.stream),
+          personaRepositoryProvider.overrideWithValue(repository),
+          personaPreviewAccessProvider.overrideWithValue(true),
+          personaPreviewRepositoryProvider.overrideWithValue(preview),
+        ],
+      );
+      addTearDown(() {
+        container.dispose();
+        unawaited(auth.close());
+      });
+      final authSub = container.listen(authSessionProvider, (_, _) {});
+      addTearDown(authSub.close);
+      auth.add(AuthSessionAuthenticated(subject: 'synthetic-owner'));
+      await container.pump();
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(home: PersonaEditorPage(onBack: () {})),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('persona-name')),
+        'Full draft',
+      );
+      final values = {
+        'relationship': 'Companion',
+        'shortIntroduction': 'A small step at a time',
+        'description': 'A calm guide',
+        'personality': 'Curious',
+        'communicationStyle': 'Use examples',
+        'interests': 'Handmade interests',
+        'extraInstructions': 'Ask one question',
+      };
+      for (final entry in values.entries) {
+        await tester.pumpAndSettle();
+        final field = find.byKey(Key('persona-${entry.key}'));
+        await tester.ensureVisible(field);
+        await tester.pumpAndSettle();
+        await tester.enterText(field, entry.value);
+      }
+      await _tapVisible(tester, 'persona-preview');
+      await tester.enterText(
+        find.byKey(const Key('persona-preview-input')),
+        'Hello preview',
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('persona-preview-send')));
+      await tester.pumpAndSettle();
+      expect(preview.draft?.expressionFields, values);
+      expect(repository.creates, isEmpty);
+      expect(repository.activations, 0);
+      expect(repository.items, isEmpty);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      for (final entry in values.entries) {
+        expect(
+          tester
+              .widget<TextFormField>(find.byKey(Key('persona-${entry.key}')))
+              .controller!
+              .text,
+          entry.value,
+        );
+      }
+      await _tapVisible(tester, 'persona-save');
+      expect(repository.creates.single.fields.expressionFields, values);
+      expect(repository.items.single.fields.expressionFields, values);
+      expect(repository.active, isNull);
+      expect(repository.reads, greaterThan(1));
+      final saved = repository.items.single;
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: PersonaEditorPage(personaId: saved.personaId, onBack: () {}),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      for (final entry in values.entries) {
+        expect(
+          tester
+              .widget<TextFormField>(find.byKey(Key('persona-${entry.key}')))
+              .controller!
+              .text,
+          entry.value,
+        );
+      }
+      expect(tester.takeException(), isNull);
+    },
+  );
   for (final signOut in [false, true]) {
     for (final deleting in [false, true]) {
       testWidgets(
@@ -482,7 +609,9 @@ void main() {
         PersonaEditorPage(onBack: () => back++),
       );
       await tester.enterText(find.byKey(const Key('persona-name')), 'Late');
+      await tester.pumpAndSettle();
       await tester.ensureVisible(find.byKey(const Key('persona-save')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('persona-save')));
       await tester.pump();
       expect(
@@ -878,7 +1007,9 @@ Future<void> _replaceObservedSession(
 
 Future<void> _tapVisible(WidgetTester tester, String key) async {
   final finder = find.byKey(Key(key));
+  await tester.pumpAndSettle();
   await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
@@ -888,19 +1019,25 @@ const _offline = AppFailure(
   message: 'offline',
 );
 
-Persona _persona(String id, {String name = 'Sample', int revision = 0}) =>
-    Persona(
-      personaId: id * 64,
-      fields: PersonaFields(
+Persona _persona(
+  String id, {
+  String name = 'Sample',
+  int revision = 0,
+  PersonaFields? fields,
+}) => Persona(
+  personaId: id * 64,
+  fields:
+      fields ??
+      PersonaFields(
         displayName: name,
         tone: PersonaTone.neutral,
         responseLength: PersonaResponseLength.balanced,
         formatStyle: PersonaFormatStyle.plain,
       ),
-      createdAt: DateTime.utc(2026, 10, 9),
-      updatedAt: DateTime.utc(2026, 10, 9),
-      revision: revision,
-    );
+  createdAt: DateTime.utc(2026, 10, 9),
+  updatedAt: DateTime.utc(2026, 10, 9),
+  revision: revision,
+);
 
 final class _Repository implements PersonaRepository {
   final items = <Persona>[];
@@ -952,7 +1089,7 @@ final class _Repository implements PersonaRepository {
   }) {
     creates.add(command);
     if (nextAttempt case final attempt?) return attempt;
-    final persona = _persona('a', name: command.fields.displayName);
+    final persona = _persona('a', fields: command.fields);
     items.add(persona);
     revision++;
     final result = Future<Result<PersonaMutation>>.value(
@@ -1013,5 +1150,18 @@ final class _Repository implements PersonaRepository {
     if (active == personaId) active = null;
     revision++;
     return const Success(null);
+  }
+}
+
+final class _ImmediatePreview implements PersonaPreviewRepository {
+  PersonaFields? draft;
+  @override
+  Future<Result<String>> preview({
+    required PersonaFields draft,
+    required String text,
+    required bool Function() isEligible,
+  }) async {
+    this.draft = draft;
+    return const Success('A synthetic preview');
   }
 }

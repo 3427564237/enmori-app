@@ -24,16 +24,28 @@ final class PersonaPageScaffold extends StatelessWidget {
     onPopInvokedWithResult: (didPop, _) {
       if (!didPop) onBack();
     },
-    child: Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        leading: BackButton(key: const Key('persona-back'), onPressed: onBack),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
-            child: child,
+    child: FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(title),
+          leading: FocusTraversalOrder(
+            order: const NumericFocusOrder(0),
+            child: BackButton(
+              key: const Key('persona-back'),
+              onPressed: onBack,
+            ),
+          ),
+        ),
+        body: FocusTraversalOrder(
+          order: const NumericFocusOrder(1),
+          child: SafeArea(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: child,
+              ),
+            ),
           ),
         ),
       ),
@@ -193,9 +205,25 @@ final class PersonaSummary extends StatelessWidget {
       Text('Tone: ${persona.fields.tone.name}'),
       Text('Response length: ${persona.fields.responseLength.name}'),
       Text('Format: ${persona.fields.formatStyle.name}'),
+      for (final entry in persona.fields.expressionFields.entries)
+        if (entry.value.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text('${_personaFieldLabels[entry.key]}: ${entry.value}'),
+          ),
     ],
   );
 }
+
+const _personaFieldLabels = {
+  'relationship': 'Relationship',
+  'shortIntroduction': 'Short Introduction',
+  'description': 'Description',
+  'personality': 'Personality',
+  'communicationStyle': 'Communication Style',
+  'interests': 'Custom interests',
+  'extraInstructions': 'Extra instructions',
+};
 
 /// A confirmation belongs to the invoking page, including its session-key
 /// lifetime. An old callback must never pop a later page or confirmation.

@@ -74,7 +74,7 @@ export async function createIsolatedConversationComposition(options: {
         const authority=new FirebaseAdminAsyncConversationAuthority(db,original,options.environment);
         const reads=new FirebaseAdminRealContextReader(db,{controlledEnvironment:options.environment,
           originalAuthority:{verify:original.verifyRead},monotonicNow:()=>clock.now(),
-          ...(options.simpleChat ? {includeCheckIns:false as const} : {}),
+          ...(options.simpleChat ? {includeCheckIns:false as const,includePersonaExpression:true as const} : {}),
           ...(options.notePrerequisites ? {notePrerequisites:{...options.notePrerequisites,firestore:db}} : {})});
         const bridge=new TrackedAsyncConversationStore(new AsyncFirestoreConversationStore(store,epoch,authority),io,store,epoch,options.reportRetirement);
         return {authority,reads,store:bridge,acknowledgedPair:bridge};
@@ -90,6 +90,7 @@ export async function createIsolatedConversationComposition(options: {
     execute:(...args)=>accepting?consumer.execute(...args):refused(),
     cancel:(...args)=>consumer.cancel(...args),readOutcome:(...args)=>consumer.readOutcome(...args),
     listMessages:(...args)=>consumer.listMessages(...args),deleteConversation:(...args)=>consumer.deleteConversation(...args),
+    listConversations:(caller,after)=>consumer.listConversations(caller,after),
   };
   return {operations,runtime,epoch,io,maintenance,quiescence,restart,
     /** Call before closing the owned HTTP listener; existing terminal closure is

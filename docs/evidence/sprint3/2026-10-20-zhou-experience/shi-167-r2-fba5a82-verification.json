@@ -1,0 +1,101 @@
+{
+  "recordedAt": "2026-10-20T21:29:06.327309+08:00",
+  "pr": 167,
+  "reviewedHead": "fba5a82ebd0074b875f40153381eee6c746a4772",
+  "parent": "0158ca6588e115323f4776d974c778a1d95352ca",
+  "product": "ed63795719534f1e3834a0d3a88305cb083d0dce",
+  "productTree": "8eda719df18075991a0319d8a1421ecb61da8a4e",
+  "reviewId": 5585687685,
+  "action": "REQUEST_CHANGES",
+  "r2ReplyId": 4325494513,
+  "changedBindings": [
+    {
+      "path": "backend/src/event-browse/infrastructure/controlled-source-projection.ts",
+      "gitBlob": "f716333fe145fdd6d668f1d5c707fcc6e6d879f6"
+    },
+    {
+      "path": "backend/test/event-source-generation-regression.test.ts",
+      "gitBlob": "5db3cfaf8211c48e7e0813d5d89ccae0e048c5b0"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-20-shi-event-participation/r2-concurrent-revision.md",
+      "gitBlob": "8af5c0761708d1083aaba9c61efcc6a3e93feeab"
+    }
+  ],
+  "R1": "unchanged; previously resolved",
+  "R2": {
+    "stablePendingRace": "fixed",
+    "ordinaryRawFallback": "still returns OLD across page0 replacement",
+    "state": "open",
+    "path": "backend/src/event-browse/infrastructure/controlled-source-projection.ts",
+    "lines": [
+      87,
+      89
+    ],
+    "sourceBlob": "f716333fe145fdd6d668f1d5c707fcc6e6d879f6"
+  },
+  "actualChecks": {
+    "strictCompileExit": 0,
+    "affectedBackendPassed": 23,
+    "affectedBackendFailed": 0,
+    "separateOrdinaryProbePassed": 0,
+    "separateOrdinaryProbeFailed": 1,
+    "fullPrRangeWhitespace": "pass"
+  },
+  "commands": [
+    "node node_modules/typescript/bin/tsc --project backend/tsconfig.json --pretty false",
+    "node --test backend/dist/test/event-source-generation-regression.test.js backend/dist/test/controlled-event-projection.test.js backend/dist/test/event-browse-pagination.test.js backend/dist/test/controlled-event-browse.test.js \"D:/3851 AI/drafts/2026-10-20-pr167-r2-final-probes/r2-pending-stable-detail.test.mjs\"",
+    "node --test \"D:/3851 AI/drafts/2026-10-20-pr167-probes/r2-ordinary-detail-refresh.test.mjs\"",
+    "git diff --check 900ca6f HEAD"
+  ],
+  "probeDriverAdaptation": "Old raw-detail-entry wait replaced by event-loop flush + pending3 assertion; NEW result checks retained and rawDetailReads0 asserted. Fixed behavior no longer dispatches a raw Detail call.",
+  "logs": [
+    {
+      "label": "strict compile",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-r2-final-probes\\build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "passed": null,
+      "failed": 0
+    },
+    {
+      "label": "affected22 plus adapted reviewer probe1",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-r2-final-probes\\backend-affected.log",
+      "sha256": "f4c74ffa0098e942deb140722ca746031cbf273a67f8dc190e9b38fe7332c859",
+      "bytes": 2925,
+      "passed": 23,
+      "failed": 0
+    },
+    {
+      "label": "ordinary Detail fallback residual",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-probes\\r2-ordinary-detail-refresh-20261020-212625-721.log",
+      "sha256": "067cfba27b001840b0480290603711b2afe8e245fa3228394f91797098bf354e",
+      "bytes": 1215,
+      "passed": 0,
+      "failed": 1
+    }
+  ],
+  "probeCopies": [
+    {
+      "path": "shi-167-r2-stable-probe-adapted.mjs.txt",
+      "sha256": "34fbb1b527ab8388fabdcb927e4aa340843ba6ec1299035e8efcb9aac4549ce5"
+    },
+    {
+      "path": "shi-167-r2-ordinary-probe.mjs.txt",
+      "sha256": "62191b85972396c38279fd5ec2a1fbb3053938ab00554a5a16bca8b880ffa914"
+    }
+  ],
+  "unchangedNotRerun": [
+    "R1/Flutter",
+    "API and OpenAPI",
+    "dependencies",
+    "participation storage and indexes",
+    "Emulator tests/runners",
+    "real provider/model/shared host/phone"
+  ],
+  "priorAttribution": "Old72/43/SDK4, owner17/51/22, ZHOU19/15 retain old sources; current23 overlaps owner22 and is not added to it",
+  "privateAuthorRawLogsRehashed": false,
+  "authorProductOrTestsModified": false,
+  "remainingOwner": "SHI ordinary-Detail R2 guard/new head; LI final composition/provider/device acceptance",
+  "mergedOrReleasedOrTasksClosed": false
+}

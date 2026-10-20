@@ -227,6 +227,33 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Align(
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: PopupMenuButton<String>(
+                                key: Key('persona-more-${persona.personaId}'),
+                                enabled: enabled,
+                                tooltip:
+                                    'More options for ${persona.fields.displayName}',
+                                onSelected: (action) {
+                                  if (!mounted || !enabled) return;
+                                  if (action == 'edit') {
+                                    widget.onEdit(persona.personaId);
+                                  } else if (action == 'delete') {
+                                    _confirm(persona, deleting: true);
+                                  }
+                                },
+                                itemBuilder: (_) => const [
+                                  PopupMenuItem(
+                                    value: 'edit',
+                                    child: Text('Edit Persona'),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'delete',
+                                    child: Text('Delete Persona'),
+                                  ),
+                                ],
+                              ),
+                            ),
                             PersonaSummary(persona: persona),
                             const SizedBox(height: 8),
                             Text(
