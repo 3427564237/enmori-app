@@ -38,14 +38,21 @@ export class ControlledSourceProjection implements BrowseSource {
       if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;return result;
     };
     if(source.event)this.event=async(id,asOf,signal)=>{
-      const now=parseBrowseInstant(asOf),cached=this.snapshot;
+      const epoch=this.epoch,pending=this.pending;
       if(signal.aborted)throw dependencyUnavailable;
+      // Stable IDs obey the same pending replacement as ordinary browse Detail.
+      // Do not start an independent old provider lookup in the new epoch.
+      if(pending)await pending;
+      if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;
+      const now=parseBrowseInstant(asOf),cached=this.snapshot;
       if(now!==undefined&&cached&&now>=cached.at&&now-cached.at<300_000_000_000n){
         const found=cached.items.find(item=>sourceEventId(item.browseId)===id&&parseBrowseInstant(item.startAt)!>now);
         if(found)return found;
       }
-      const epoch=this.epoch,result=await source.event!(id,asOf,signal);
-      if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;return result;
+      const result=await source.event!(id,asOf,signal);
+      // A refresh can also begin/publish after the initial cache miss. Raw
+      // later-page results may not escape across that generation boundary.
+      if(epoch!==this.epoch||cached!==this.snapshot||this.pending!==undefined||signal.aborted)throw dependencyUnavailable;return result;
     };
   }
   private current() { return this.snapshot; }
@@ -59,7 +66,7 @@ export class ControlledSourceProjection implements BrowseSource {
     }
     this.snapshot = undefined; // Expired generation cannot become a fallback.
     if (!this.pending) {
-      const admitted = this.epoch;
+      const admitted = {};this.epoch=admitted;
       const work = this.source.firstBatch(asOf, signal).then(items => {
         if (admitted !== this.epoch || signal.aborted) throw dependencyUnavailable;
         // Clone and freeze the complete generation before publishing one pointer.
