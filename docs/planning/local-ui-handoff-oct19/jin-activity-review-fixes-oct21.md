@@ -21,7 +21,8 @@ Check-in Note/Mood display is after ranking; no score/AI expansion. Current
 relationship/consent/source checks and stable-ID Detail reread are shared by Home
 and See all. Interested/Going metadata/title callback fixtures are implemented;
 actual EP1 timestamp/producer is explicitly not connected. See FA2's exact local
-decision point; #167 source approval is already complete, not a blocker.
+producer gap; SHI P05 already delegates the field implementation, so no repeated
+PM approval is requested. #167 source approval is complete, not a blocker.
 
 ## LI's minimal integration patch
 

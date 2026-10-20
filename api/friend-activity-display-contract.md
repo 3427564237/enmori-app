@@ -66,13 +66,22 @@ rows expose only Event ID/status. It does **not** establish the time of the late
 Interested/Going selection after preference-only writes. This package does not
 mislabel that timestamp, infer a historical time or add an unapproved storage field.
 
-Small remaining decision for LI, with SHI owning the participation producer:
-confirm whether activity means the latest participation-record mutation (including
-Ignore/restore, with explicit display wording), or requires the actual status-selection
-instant retained by SHI. The latter requires an explicit physical-field/history
-rule for existing records. JIN will adapt the approved producer at the existing
-composition point. Check-in activity and strict Event callback fixtures proceed
-independently. No real Event read/participation/time acceptance is claimed here.
+Remaining producer delivery belongs to SHI: expose the actual Interested/Going
+selection instant, current participation metadata and gated title through the
+existing cross-feature seam. P05 explicitly delegates the participation physical
+fields and exact API/DTO implementation to SHI; it is **not** a renewed PM approval
+wait. JIN owns the consuming adapter and LI coordinates final composition. Do not
+substitute preference-only updatedAt/private save time for the approved activity
+occurrence. If SHI identifies a concrete conflict outside P05, report only that
+conflict to LI; this package does not pre-emptively create another approval gate.
+Check-in activity and strict Event callback fixtures proceed independently. No
+real Event participation/time acceptance is claimed here.
+
+Authority reconciliation after the executable freeze: the early local proposal
+at source `77781dc` asked LI to choose timestamp semantics. Reading the complete
+P05 selection and preview at SHI `db1b7249` shows the field implementation is already
+delegated. This paragraph supersedes only that proposed waiting/ownership statement,
+not the approved actual-activity-time requirement, DTO, runtime code or past results.
 
 ## Composition correction from review R3
 
