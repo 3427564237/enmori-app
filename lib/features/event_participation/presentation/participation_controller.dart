@@ -122,6 +122,29 @@ final class ParticipationController
     return Failure(failure);
   }
 
+  /// A still-visible button cannot adopt another observation's current version.
+  /// Capture both values during render; reject before changing local state or I/O.
+  Future<Result<void>> changeRendered(
+    String id,
+    ParticipationStatus status,
+    bool ignored, {
+    required AuthSessionAuthenticated? renderedSession,
+    required EventParticipation expected,
+  }) {
+    if (!ref.mounted ||
+        renderedSession == null ||
+        !identical(_session, renderedSession) ||
+        !identical(
+          participationSession(ref.read(authSessionProvider)),
+          renderedSession,
+        ) ||
+        expected.eventId != id ||
+        !identical(state[id]?.value, expected)) {
+      return Future.value(const Failure(participationUnavailable));
+    }
+    return change(id, status, ignored);
+  }
+
   Future<Result<void>> confirmGoing(String id) =>
       change(id, ParticipationStatus.going, false);
   Future<Result<bool>> readGoing(String id) async {

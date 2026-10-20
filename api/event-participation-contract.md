@@ -122,4 +122,3 @@ Source-only identity lookup for newly observed occurrences is bounded to 1,000
 IDs/five minutes in process memory, no titles/provider documents persisted. New
 participation rechecks current source detail; process loss/expired lookup fails
 closed and requires a fresh list read. Cancel/unignore remain source-independent.
-

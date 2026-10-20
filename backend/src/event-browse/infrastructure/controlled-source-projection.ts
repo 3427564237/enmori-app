@@ -14,8 +14,24 @@ export class ControlledSourceProjection implements BrowseSource {
   readonly event?:NonNullable<BrowseSource['event']>;
   constructor(private readonly source: BrowseSource) {
     if(source.batch)this.batch=async(asOf,page,signal)=>{
-      const epoch=this.epoch,result=await source.batch!(asOf,page,signal);
-      if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;return result;
+      if(page!==0){
+        const epoch=this.epoch,result=await source.batch!(asOf,page,signal);
+        if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;return result;
+      }
+      const now=parseBrowseInstant(asOf);
+      if(now===undefined||signal.aborted)throw dependencyUnavailable;
+      // Explicit first-page refresh replaces the one shared generation. Old
+      // pending first/next reads cannot publish over it; other readers join it.
+      const epoch={};this.epoch=epoch;this.snapshot=undefined;
+      const work=source.batch!(asOf,0,signal).then(result=>{
+        if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;
+        const items=Object.freeze(result.items.map(item=>Object.freeze({...item})));
+        this.snapshot={at:now,items};
+        return {...result,items};
+      });
+      const pending=work.then(result=>result.items);this.pending=pending;
+      void pending.finally(()=>{if(this.pending===pending)this.pending=undefined;}).catch(()=>{});
+      return work;
     };
     if(source.availableEvent)this.availableEvent=async(id,asOf,signal)=>{
       const epoch=this.epoch,result=await source.availableEvent!(id,asOf,signal);

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../auth/auth_providers.dart';
+import '../participation_providers.dart';
 import '../domain/participation_repository.dart';
 import 'participation_controller.dart';
 
@@ -36,6 +38,9 @@ final class _ParticipationControlsState
     final entry = ref.watch(participationControllerProvider)[widget.eventId],
         value = entry?.value;
     final controller = ref.read(participationControllerProvider.notifier);
+    final renderedSession = participationSession(
+      ref.watch(authSessionProvider),
+    );
     final enabled =
         value != null && entry?.busy != true && entry?.uncertain != true;
     return Column(
@@ -56,40 +61,48 @@ final class _ParticipationControlsState
           children: [
             FilledButton(
               onPressed: enabled
-                  ? () => controller.change(
+                  ? () => controller.changeRendered(
                       widget.eventId,
                       ParticipationStatus.interested,
                       false,
+                      renderedSession: renderedSession,
+                      expected: value,
                     )
                   : null,
               child: const Text('Interested'),
             ),
             FilledButton(
               onPressed: enabled
-                  ? () => controller.change(
+                  ? () => controller.changeRendered(
                       widget.eventId,
                       ParticipationStatus.going,
                       false,
+                      renderedSession: renderedSession,
+                      expected: value,
                     )
                   : null,
               child: const Text('Going'),
             ),
             TextButton(
               onPressed: enabled && value.status != ParticipationStatus.none
-                  ? () => controller.change(
+                  ? () => controller.changeRendered(
                       widget.eventId,
                       ParticipationStatus.none,
                       value.ignored,
+                      renderedSession: renderedSession,
+                      expected: value,
                     )
                   : null,
               child: const Text('Cancel participation'),
             ),
             OutlinedButton(
               onPressed: enabled
-                  ? () => controller.change(
+                  ? () => controller.changeRendered(
                       widget.eventId,
                       value.status,
                       !value.ignored,
+                      renderedSession: renderedSession,
+                      expected: value,
                     )
                   : null,
               child: Text(
