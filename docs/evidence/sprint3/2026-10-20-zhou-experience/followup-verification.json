@@ -1,0 +1,441 @@
+{
+  "recordedAt": "2026-10-20T17:13:47.491118+08:00",
+  "authenticatedGitHubUser": "YaoyinZhou3922",
+  "pmSource": "https://github.com/3427564237/enmori-app/issues/44#issuecomment-6283507691",
+  "originalZhouReviewedHead": "5cf060cd8ee722a3ade85dac967d15d48e0d5382",
+  "noNewProductImplementationInThisFollowup": true,
+  "li165": {
+    "head": "a822091071ddd206eea4d1041b7349006214ffb6",
+    "correctedSource": "52f494bbfd02f85dadbdf0e9f38189772be16edf",
+    "action": "APPROVE",
+    "reviewId": 5582994488,
+    "url": "https://github.com/3427564237/enmori-app/pull/165#pullrequestreview-5582994488",
+    "scope": "legacy projection compatibility, backend/client preview composition, history router scroll adaptation only",
+    "fileBindings": [
+      {
+        "path": "backend/src/ai-conversation/application/capture-context.ts",
+        "testedSourceBlob": "fc72f57fcc6d2a123420dbf5b2cae1937c49849b",
+        "currentHeadBlob": "fc72f57fcc6d2a123420dbf5b2cae1937c49849b"
+      },
+      {
+        "path": "backend/src/bootstrap/retained-core-runtime.ts",
+        "testedSourceBlob": "26e00edafb4890a53eed1f77381feb04f103efd0",
+        "currentHeadBlob": "26e00edafb4890a53eed1f77381feb04f103efd0"
+      },
+      {
+        "path": "lib/app/controlled_demo_app.dart",
+        "testedSourceBlob": "3df22c9dfd0e09a7727f0500f3d1561a5babf5d7",
+        "currentHeadBlob": "0743697ce30ede2ac4196c22c247af8e5d1a1072"
+      },
+      {
+        "path": "test/app/ai_conversation_shared_router_test.dart",
+        "testedSourceBlob": "e6c3649e1779053a1f9fbf9b54866130dbb0640b",
+        "currentHeadBlob": "e6c3649e1779053a1f9fbf9b54866130dbb0640b"
+      }
+    ],
+    "legacyProjectionMatchesHandoff927f775": true,
+    "backendApiDependenciesUnchangedAfterCorrection": true,
+    "reusedLIValidation": {
+      "backendInitial": {
+        "passed": 505,
+        "failed": 1
+      },
+      "correctedLifecycle": {
+        "passed": 78,
+        "failed": 0
+      },
+      "flutterInitial": {
+        "passed": 340,
+        "failed": 1
+      },
+      "correctedRouter": {
+        "passed": 7,
+        "failed": 0
+      },
+      "countsOverlap": true,
+      "realOllamaRestartAndNativePreview": "LI source52f494b / v9 synthetic-account controlled environment; not ZHOU-run or real-user cloud acceptance"
+    },
+    "privateRawHostLogsAvailableToThisReview": false,
+    "newModelDeviceOrRuntimeCalls": false
+  },
+  "shi167": {
+    "head": "02197c93abd1ff6bfdc9ece6fc43ab2da2979f32",
+    "sourceHead": "71e0f4083d3ad88aaad11e890796bbe04a3f091e",
+    "sourceTree": "3c9e690e7ee9cedba63256ad3b3f07d5321e7b9b",
+    "base": "900ca6fcdefb77e9aa95d96fa80994ebf826398f",
+    "action": "REQUEST_CHANGES",
+    "reviewId": 5583042964,
+    "url": "https://github.com/3427564237/enmori-app/pull/167#pullrequestreview-5583042964",
+    "fileBindings": [
+      {
+        "path": "api/event-participation-contract.md",
+        "gitBlob": "d39c7997b0a2868759c4f6aa7c780d24c55c4eb6"
+      },
+      {
+        "path": "api/event-participation.json",
+        "gitBlob": "28f29d5992cac113e7300cef2445f370aca9c362"
+      },
+      {
+        "path": "api/openapi.json",
+        "gitBlob": "6df4bedeb758babef41c6e8c9c5f476c8fd07ed1"
+      },
+      {
+        "path": "backend/emulator-test/event-participation.integration.test.ts",
+        "gitBlob": "cd6c1dd962e37a837db94395032a5a3f80226aaa"
+      },
+      {
+        "path": "backend/scripts/run-event-participation-emulator.mjs",
+        "gitBlob": "91e3883a5ab7a34f76cb22cb2b02d150a5b02537"
+      },
+      {
+        "path": "backend/scripts/run-event-participation-sdk.mjs",
+        "gitBlob": "92642a05e32ad3abe7bc4b0af9bad74c81d8a5d8"
+      },
+      {
+        "path": "backend/scripts/sync-event-participation-openapi.mjs",
+        "gitBlob": "dd7dff8703510c1bb6dffc583e027f6b1c04bfc4"
+      },
+      {
+        "path": "backend/src/bootstrap/controlled-event-browse.ts",
+        "gitBlob": "bb58123e3c2bd9e6c26359108ee97917e051d3d8"
+      },
+      {
+        "path": "backend/src/bootstrap/controlled-event-recommendations.ts",
+        "gitBlob": "3be140d620ac755747c6b8018ef114112e8456a1"
+      },
+      {
+        "path": "backend/src/bootstrap/event-participation.ts",
+        "gitBlob": "23df8d61ae45bb9ca9a8d0247b32f63a81619130"
+      },
+      {
+        "path": "backend/src/event-browse/application/event-browse.ts",
+        "gitBlob": "5ae0919295edd14dd2f99bb5506c6e42009b0758"
+      },
+      {
+        "path": "backend/src/event-browse/domain/source-event-id.ts",
+        "gitBlob": "2d7da77a46fef416850c28af26831dfb167468ef"
+      },
+      {
+        "path": "backend/src/event-browse/infrastructure/browse-cursor.ts",
+        "gitBlob": "b0c0ade49d4ea166ce5c50f8c3b6142302ef9209"
+      },
+      {
+        "path": "backend/src/event-browse/infrastructure/controlled-source-projection.ts",
+        "gitBlob": "3d33ffe64522a205c7e136a63c0fdfd91db5794c"
+      },
+      {
+        "path": "backend/src/event-browse/infrastructure/ticketmaster-browse-source.ts",
+        "gitBlob": "f940db0dfa9139fecbad49d933b9794179a481fd"
+      },
+      {
+        "path": "backend/src/event-browse/ports/event-browse.ts",
+        "gitBlob": "529304449f2a060760d3a87fe66e564a594787cb"
+      },
+      {
+        "path": "backend/src/event-browse/transport/register-routes.ts",
+        "gitBlob": "bb1f0247ed7c615813504414fe402cffe3c6e0a4"
+      },
+      {
+        "path": "backend/src/event-browse/transport/schemas.ts",
+        "gitBlob": "e8038c35f7aaa1d4f73d8c4c1ac849d24335a63d"
+      },
+      {
+        "path": "backend/src/event-participation/application/participation-operations.ts",
+        "gitBlob": "aad4a546bee4fb00d900aebc98d66d7867e33c2c"
+      },
+      {
+        "path": "backend/src/event-participation/domain/participation-values.ts",
+        "gitBlob": "b3ffe2073747fc7d6afd1aa66d7b835eca19e4b8"
+      },
+      {
+        "path": "backend/src/event-participation/infrastructure/firestore-participation-repository.ts",
+        "gitBlob": "91f526348b3d621fe8ef60685ec4b2caaf7601f1"
+      },
+      {
+        "path": "backend/src/event-participation/ports/participation-repository.ts",
+        "gitBlob": "ca1866b0c36d23659a431e91e9fbb649d8f5d0fa"
+      },
+      {
+        "path": "backend/src/event-participation/transport/register-routes.ts",
+        "gitBlob": "1fb792e080aa8ef9d9e6f18f6b0a7a0f4ad0c86d"
+      },
+      {
+        "path": "backend/src/event-participation/transport/schemas.ts",
+        "gitBlob": "69a19b1c8b1a3be6914601737083b4fd4bbdeae8"
+      },
+      {
+        "path": "backend/src/friends/infrastructure/firestore-friend-repository.ts",
+        "gitBlob": "180da73dfb7bd10fdd36e31c82211cc858107cb0"
+      },
+      {
+        "path": "backend/src/shared/application/app-failure.ts",
+        "gitBlob": "9dcb8aca8130a9716117637dbeea2533662f8d8c"
+      },
+      {
+        "path": "backend/src/transport/route-inventory.ts",
+        "gitBlob": "62867a090ce4b622be0c9e01e7a9cda9357fdc7d"
+      },
+      {
+        "path": "backend/src/transport/schemas.ts",
+        "gitBlob": "a1b5d15cd74e217fbad618d7e5bc52b164ffa4ac"
+      },
+      {
+        "path": "backend/test/controlled-event-projection.test.ts",
+        "gitBlob": "8b71267b4c307b903b60ccfcbf790fdfb716d1fd"
+      },
+      {
+        "path": "backend/test/event-browse-pagination.test.ts",
+        "gitBlob": "26415f23b1f3371fe22828d21cca9d82ce31dc22"
+      },
+      {
+        "path": "backend/test/event-participation.test.ts",
+        "gitBlob": "badc259e106db6ae977c64c9d345186e954f7e84"
+      },
+      {
+        "path": "backend/test/support/in-memory-firestore-gateway.ts",
+        "gitBlob": "5adce03c79758b6a0472eeddb41fd1725f653ec2"
+      },
+      {
+        "path": "docs/decisions/2026-10-20-li-event-batches-friends-activity.md",
+        "gitBlob": "a03564e680181930d0e913cf3bae9ed9ce599428"
+      },
+      {
+        "path": "docs/evidence/sprint3/2026-10-20-shi-event-participation/verification.md",
+        "gitBlob": "697b94990f6e16ff6dd7e9774634f8a5bba88345"
+      },
+      {
+        "path": "docs/planning/local-ui-handoff-oct19/shi-event-integration-oct20.md",
+        "gitBlob": "78ea7a6a1db565c01c37a607c56f87519fa95058"
+      },
+      {
+        "path": "firestore.indexes.json",
+        "gitBlob": "7fbd6aca500e4d2e2e275c212f81ceeb2903b6e9"
+      },
+      {
+        "path": "lib/app/router/event_participation_routes.dart",
+        "gitBlob": "55b68ef616993ea16caefd8db504cfd0cd302154"
+      },
+      {
+        "path": "lib/core/network/backend_api_client.dart",
+        "gitBlob": "89309127debde6f9ec723383affbe1a7bd6ea3fe"
+      },
+      {
+        "path": "lib/core/result/result.dart",
+        "gitBlob": "152cd62ae6141be888b54b106b76e8797aca60d0"
+      },
+      {
+        "path": "lib/features/event_browse/data/backend_activity_repository.dart",
+        "gitBlob": "61fb59d4da8ed2a39f195b8770b9fffa0f5e627b"
+      },
+      {
+        "path": "lib/features/event_browse/domain/activity_repository.dart",
+        "gitBlob": "47d5ca7829a2de87937924b92d2d86ab0f7e8438"
+      },
+      {
+        "path": "lib/features/event_participation/data/backend_participation_repository.dart",
+        "gitBlob": "d7ea56590e995ece2f8452f83fba845e815556bc"
+      },
+      {
+        "path": "lib/features/event_participation/domain/participation_repository.dart",
+        "gitBlob": "15a30e6aa1bf05abeee5feaeba176fd5c14781f6"
+      },
+      {
+        "path": "lib/features/event_participation/participation_providers.dart",
+        "gitBlob": "c851ca500ef578688b3002ceb153b3e919ca2aa9"
+      },
+      {
+        "path": "lib/features/event_participation/presentation/event_batches_controller.dart",
+        "gitBlob": "4b4a6204c3dba68376075200293bb30da2d2dc21"
+      },
+      {
+        "path": "lib/features/event_participation/presentation/event_card.dart",
+        "gitBlob": "6b464809402c3dbeb9fdba9e2e6484afbff51e7c"
+      },
+      {
+        "path": "lib/features/event_participation/presentation/external_registration_action.dart",
+        "gitBlob": "8fd2f46addb0a19fe21b1475b898a59c5a41a91a"
+      },
+      {
+        "path": "lib/features/event_participation/presentation/own_participation_section.dart",
+        "gitBlob": "39f44e0f7fdb71991721b6628173d4d5bc3dae92"
+      },
+      {
+        "path": "lib/features/event_participation/presentation/participants_page.dart",
+        "gitBlob": "1bb54e9edfbfc1e4b148a1b5000369c2aa6f9267"
+      },
+      {
+        "path": "lib/features/event_participation/presentation/participation_controller.dart",
+        "gitBlob": "f52f46d9d9b32d1c81eefd16d42eab3513f24c90"
+      },
+      {
+        "path": "lib/features/event_participation/presentation/participation_controls.dart",
+        "gitBlob": "c6346900fa4c148961af5d3b4e8594b143d1a194"
+      },
+      {
+        "path": "lib/features/event_participation/presentation/participation_event_page.dart",
+        "gitBlob": "e955392e349befc2901bd6749c09bad6bedcb892"
+      },
+      {
+        "path": "lib/features/event_participation/presentation/participation_events_page.dart",
+        "gitBlob": "c9eaf10df80047daabbe0c2ecf7be92f86d638be"
+      },
+      {
+        "path": "lib/features/event_participation/presentation/user_participation_section.dart",
+        "gitBlob": "e6306035ab217d38cae6c601e2abd09f1179192c"
+      },
+      {
+        "path": "test/features/event_batches_test.dart",
+        "gitBlob": "dd31cfd0f606021a7e6986ff727615387a0cd392"
+      },
+      {
+        "path": "test/features/participation_journey_test.dart",
+        "gitBlob": "1e93b50b231a18955ed4c81f93d34cf1c78737e1"
+      },
+      {
+        "path": "test/features/participation_repository_test.dart",
+        "gitBlob": "09b16f08dd2457053e9801a34d100a18431a2fb4"
+      }
+    ],
+    "findings": [
+      {
+        "priority": "P2",
+        "id": "R1",
+        "path": "lib/features/event_participation/presentation/participation_controls.dart",
+        "startLine": 78,
+        "endLine": 82,
+        "thread": "https://github.com/3427564237/enmori-app/pull/167#discussion_r4323330389",
+        "behavior": "Old rendered Cancel uses new-session revision with old ignored flag; crossUID and sameUID replacement both write B:7:none:ignored=false; current B action control writes ignored=true"
+      },
+      {
+        "priority": "P2",
+        "id": "R2",
+        "path": "backend/src/event-browse/infrastructure/controlled-source-projection.ts",
+        "startLine": 16,
+        "endLine": 18,
+        "thread": "https://github.com/3427564237/enmori-app/pull/167#discussion_r4323330398",
+        "behavior": "EB2 batch page0 returns NEW occurrence title while warmed browse/stable Detail return OLD title"
+      }
+    ],
+    "environment": {
+      "node": "24.19.0",
+      "flutter": "3.47.2",
+      "dart": "3.13.2",
+      "existingNodeModulesJunction": true,
+      "flutterOfflineEnforcedLockResolution": true,
+      "packageOrLockChanges": false
+    },
+    "executed": {
+      "strictCompileExit": 0,
+      "backend": {
+        "passed": 72,
+        "failed": 0,
+        "skipped": 0
+      },
+      "flutter": {
+        "passed": 43,
+        "failed": 0,
+        "noTestAssets": true
+      },
+      "mainIndependentProbes": {
+        "passed": 2,
+        "failed": 3,
+        "distinctFindings": 2
+      },
+      "fullPrRangeWhitespace": {
+        "exit": 2,
+        "nonblocking": "api/event-participation-contract.md:125 extra blank line at EOF"
+      }
+    },
+    "commands": [
+      "node node_modules/typescript/bin/tsc --project backend/tsconfig.json --pretty false",
+      "node --test backend/dist/test/event-participation.test.js backend/dist/test/event-participation-visibility.test.js backend/dist/test/contract/openapi.test.js backend/dist/test/event-browse-composition.test.js backend/dist/test/controlled-event-projection.test.js backend/dist/test/event-browse-pagination.test.js backend/dist/test/event-browse/event-browse.test.js backend/dist/test/controlled-event-browse.test.js",
+      "fvm flutter test --no-pub --no-test-assets --reporter expanded test/features/external_registration_flow_test.dart test/features/event_participation_components_test.dart test/features/participation_repository_test.dart test/features/participation_journey_test.dart test/features/event_batches_test.dart",
+      "fvm flutter test --no-pub --no-test-assets --reporter expanded --name \"frame boundary|current B Cancel\" test/review_zhou_pr167_callback_probe_test.dart",
+      "node --test \"D:/3851 AI/drafts/2026-10-20-pr167-probes/source-coherence.test.mjs\"",
+      "git diff --check 900ca6f HEAD"
+    ],
+    "ownerActualEmulatorEvidence": {
+      "passed": 4,
+      "failed": 0,
+      "attribution": "SHI executed; reused committed evidence, not rerun by ZHOU"
+    },
+    "old162CallbackIdentityReset": "repaired in167; R1/R2 are separate newly verified paths",
+    "authorProductAndOriginalTestsModified": false,
+    "newProbeFilesOnly": "untracked review Widget probe and standalone mjs in drafts; textual copies committed as evidence",
+    "noRealProviderModelHostOrDeviceCalls": true
+  },
+  "logs": [
+    {
+      "label": "ZHOU strict TypeScript compile",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-review-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "passed": null,
+      "failed": 0
+    },
+    {
+      "label": "ZHOU eight affected Backend suites",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-review-backend.log",
+      "bytes": 7424,
+      "sha256": "f113328c432bab966c2ad3492a28b164bfafa4cb98d8930100a7fc27d588f8b8",
+      "passed": 72,
+      "failed": 0
+    },
+    {
+      "label": "ZHOU five scoped Flutter suites with no-test-assets",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-review-flutter.log",
+      "bytes": 7768,
+      "sha256": "e2361d87656371640796a21366e0a4cc6978ed8ba2db2859ced631f323bf0e97",
+      "passed": 43,
+      "failed": 0
+    },
+    {
+      "label": "ZHOU real frame-boundary Widget probe, filtered3 cases",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-probes\\zhou_callback_frame_probe_completed.log",
+      "bytes": 4445,
+      "sha256": "b8fca9fc9a481fc5f84828cc76219375d0fe40eba53e4a4f2018da4d52bdb017",
+      "passed": 1,
+      "failed": 2
+    },
+    {
+      "label": "ZHOU source-generation and disable-boundary probes",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-probes\\source-coherence-rerun-20261020-171008-669.log",
+      "bytes": 1180,
+      "sha256": "391e20b526c67a38333f2e03e6a399fd28c58d7ba8d48c8bd80894cb76096ff4",
+      "passed": 1,
+      "failed": 1
+    },
+    {
+      "label": "initial callback-only probe, process evidence not main result",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-probes\\zhou_callback_probe.log",
+      "bytes": 2161,
+      "sha256": "80f4a2722530c066bd1ebc1e4706e450584b9891cb4f37cf0c88918e467af8d9",
+      "passed": 0,
+      "failed": 1
+    },
+    {
+      "label": "intermediate probe cleanup hang, not counted as final suite",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-probes\\zhou_callback_frame_probe.log",
+      "bytes": 4039,
+      "sha256": "f633c7c0bc86d4eb61f785d400ef18b5d8a9e02da19dd50e59bc920e6ef32591",
+      "passed": null,
+      "failed": null
+    }
+  ],
+  "probeCopies": [
+    {
+      "path": "shi-167-callback-probe.dart.txt",
+      "sha256": "6c1f7f1f19e99d2a1b66f64cdafb8624a00ecb5d5c883d43cca0e56508817010"
+    },
+    {
+      "path": "shi-167-source-probe.mjs.txt",
+      "sha256": "fe7579380bd557b8fb13da511ad02322939ace4a72dbae042bc79c631ce4df79"
+    }
+  ],
+  "remainingOwners": {
+    "SHI": "R1/R2 correction plus source-bound changed checks; ETA not supplied",
+    "ZHOU": "Current review delivery complete; subsequent re-review depends on corrected head",
+    "LI": "Final composition/source/device/real-user and rollout acceptance; ETA not supplied"
+  },
+  "noMainMergeReleaseClosureOrWholeAppAcceptance": true
+}

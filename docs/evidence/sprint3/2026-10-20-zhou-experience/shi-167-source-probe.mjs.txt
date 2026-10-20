@@ -1,0 +1,55 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { pathToFileURL } from 'node:url';
+
+const root = 'D:/3851 AI/drafts/2026-10-20-pr167-zhou-review/backend/dist/';
+const load = path => import(pathToFileURL(root + path).href);
+const {createControlledEventBrowse} = await load('src/bootstrap/controlled-event-browse.js');
+const {createControlledEventRecommendations,sourceEventId} = await load('src/bootstrap/controlled-event-recommendations.js');
+const {TicketmasterBrowseSource} = await load('src/event-browse/infrastructure/ticketmaster-browse-source.js');
+const {EventBrowse} = await load('src/event-browse/application/event-browse.js');
+const {BrowseCursor} = await load('src/event-browse/infrastructure/browse-cursor.js');
+const {browseId} = await load('src/event-browse/domain/browse-values.js');
+const {ok} = await load('src/shared/domain/result.js');
+const {eventTestRecords,EVENT_TEST_UID,EVENT_AS_OF} = await load('test/support/event-repository-contract.js');
+const signal = () => new AbortController().signal;
+const raw = title => ({id:'same_occurrence',name:title,url:'https://ticketmaster.sg/event/same',
+  dates:{start:{dateTime:'2026-11-10T00:00:00Z'},status:{code:'onsale'}},
+  classifications:[{segment:{id:'KZFzniwnSyZfZ7v7nJ',name:'Music'}}],
+  _embedded:{venues:[{country:{countryCode:'SG'}}]}});
+
+test('EB2 first page refresh must agree with its own browse detail in the shared source generation',async()=>{
+  let reads=0;
+  const source = new TicketmasterBrowseSource({enabled:()=>true,key:()=> 'synthetic'},async()=>
+    Response.json({page:{number:0,totalElements:1},_embedded:{events:[raw(++reads===1?'OLD title':'NEW title')]}}));
+  const controlled=createControlledEventBrowse({source,projectionCache:true,running:()=>true,track:work=>work()});
+  controlled.enable();
+  const records=eventTestRecords();
+  const joined=createControlledEventRecommendations({gateway:{get:async path=>records[path],listEvents:async()=>[]},
+    source:controlled.source,clock:{now:()=>ok(new Date(EVENT_AS_OF))}});
+  // Existing recommendation read legitimately warms the approved five-minute projection.
+  const ranked=await joined.recommendEvents.execute({principal:{firebaseUid:EVENT_TEST_UID},view:'all'});
+  assert.equal(ranked.ok,true);assert.equal(ranked.value.items[0].title,'OLD title');
+  const browse=new EventBrowse({verify:async()=>ok(undefined)},controlled.source,()=>new Date(EVENT_AS_OF),true,new BrowseCursor(new Uint8Array(32).fill(1)));
+  // The new EB2 page-0 path performs a second provider read.
+  const listed=await browse.read({firebaseUid:EVENT_TEST_UID},undefined,signal());
+  const detail=await browse.read({firebaseUid:EVENT_TEST_UID},browseId('same_occurrence'),signal());
+  const stableDetail=await joined.eventDetail.execute({firebaseUid:EVENT_TEST_UID},sourceEventId(browseId('same_occurrence')));
+  assert.equal(listed.ok,true);assert.equal(detail.ok,true);assert.equal(stableDetail.ok,true);
+  console.log(JSON.stringify({reads,list:listed.value.items[0].title,browseDetail:detail.value.title,stableDetail:stableDetail.value.title}));
+  assert.equal(detail.value.title,listed.value.items[0].title);
+});
+
+test('outer controlled gate rejects fallback detail completed after disable',async()=>{
+  let complete;
+  const detailPending=new Promise(resolve=>{complete=resolve;});
+  const controlled=createControlledEventBrowse({projectionCache:true,running:()=>true,track:work=>work(),source:{
+    firstBatch:async()=>[],batch:async()=>({items:[]}),detail:async()=>detailPending,
+  }});
+  controlled.enable();
+  const result=controlled.source.detail(browseId('later_occurrence'),EVENT_AS_OF,signal());
+  await new Promise(resolve=>setImmediate(resolve));
+  controlled.disable();complete({browseId:browseId('later_occurrence'),title:'late',startAt:'2026-11-10T00:00:00Z',externalSourceUrl:'https://ticketmaster.sg/event/late'});
+  await assert.rejects(result,/CONTROLLED_EVENT_BROWSE_UNAVAILABLE/);
+  assert.equal(controlled.observation().pending,0);
+});

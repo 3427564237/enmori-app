@@ -1,5 +1,7 @@
 # LI 接线说明：AI/Persona 预览
 
+> 后续状态：LI 已在 #165 的52f494b完成此接线并纠正 legacy 投影，ZHOU 已对a822091中的指定范围提交独立批准。当前候选不要重复应用以下补丁；参见 [绑定源码的复核与原验证归属](../evidence/sprint3/2026-10-20-zhou-experience/li-integration-review.md)。下文保留首次独立交付的接入说明，适用于尚未接线的基线。
+
 权威：`docs/decisions/2026-10-20-user-zhou-complete-package-execution.md`及所保留19Oct产品/AI-MVP/分工来源。此处是可复核接入补丁；未接管LI主机，未修改两个实际组合文件。
 
 ## 一次接入
