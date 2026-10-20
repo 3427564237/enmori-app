@@ -2,11 +2,12 @@ import type { BrowseOccurrence, BrowseSource } from "../ports/event-browse.js";
 import { dependencyUnavailable } from "../../shared/ports/dependency-failure.js";
 import { parseBrowseInstant } from "../domain/browse-values.js";
 import { sourceEventId } from '../domain/source-event-id.js';
+type SourceSnapshot = { at: bigint; items: readonly BrowseOccurrence[] };
 
 /** One process-owned source generation, shared by browse, recommendation and
  * detail. No persistence, title merging, retry, or stale-on-error fallback. */
 export class ControlledSourceProjection implements BrowseSource {
-  private snapshot: { at: bigint; items: readonly BrowseOccurrence[] } | undefined;
+  private snapshot: SourceSnapshot | undefined;
   private pending: Promise<readonly BrowseOccurrence[]> | undefined;
   private epoch = {};
   readonly batch?:NonNullable<BrowseSource['batch']>;
@@ -52,10 +53,13 @@ export class ControlledSourceProjection implements BrowseSource {
       const result=await source.event!(id,asOf,signal);
       // A refresh can also begin/publish after the initial cache miss. Raw
       // later-page results may not escape across that generation boundary.
-      if(epoch!==this.epoch||cached!==this.snapshot||this.pending!==undefined||signal.aborted)throw dependencyUnavailable;return result;
+      this.requireCurrent(epoch,cached,signal);return result;
     };
   }
   private current() { return this.snapshot; }
+  private requireCurrent(epoch: object, snapshot: SourceSnapshot | undefined, signal: AbortSignal): void {
+    if(epoch!==this.epoch||snapshot!==this.snapshot||this.pending!==undefined||signal.aborted)throw dependencyUnavailable;
+  }
   clear(): void { this.snapshot = undefined; this.pending = undefined; this.epoch = {}; }
   async firstBatch(asOf: string, signal: AbortSignal): Promise<readonly BrowseOccurrence[]> {
     const now = parseBrowseInstant(asOf);
@@ -77,15 +81,29 @@ export class ControlledSourceProjection implements BrowseSource {
       this.pending = work;
       void work.finally(() => { if (this.pending === work) this.pending = undefined; }).catch(() => {});
     }
-    const items = await this.pending;
-    if (signal.aborted) throw dependencyUnavailable;
+    const epoch=this.epoch,items = await this.pending;
+    if (epoch!==this.epoch||signal.aborted) throw dependencyUnavailable;
     // A concurrent request can only consume a complete, still-current generation.
     const published = this.current();
-    if (!published || now < published.at || now - published.at >= 300_000_000_000n) throw dependencyUnavailable;
+    if (!published || published.items!==items || now < published.at || now - published.at >= 300_000_000_000n) throw dependencyUnavailable;
     return items.filter(item => parseBrowseInstant(item.startAt)! > now);
   }
   async detail(id: string, asOf: string, signal: AbortSignal): Promise<BrowseOccurrence | undefined> {
-    const found=(await this.firstBatch(asOf, signal)).find(item => item.browseId === id);
-    return found??(this.source.batch?this.source.detail(id,asOf,signal):undefined);
+    // firstBatch may admit a new generation synchronously. Bind that generation
+    // before yielding, then consume its current snapshot, never an old returned array.
+    const first=this.firstBatch(asOf,signal),epoch=this.epoch;
+    await first;
+    const cached=this.snapshot;
+    this.requireCurrent(epoch,cached,signal);
+    const now=parseBrowseInstant(asOf);
+    if(now===undefined)throw dependencyUnavailable;
+    const found=cached?.items.find(item=>item.browseId===id&&parseBrowseInstant(item.startAt)!>now);
+    if(found)return found;
+    if(!this.source.batch)return undefined;
+    const result=await this.source.detail(id,asOf,signal);
+    // Legitimate later-page reads remain available only within their admitted
+    // generation, including when replacement fails rather than publishes.
+    this.requireCurrent(epoch,cached,signal);
+    return result;
   }
 }

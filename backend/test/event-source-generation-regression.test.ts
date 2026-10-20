@@ -104,3 +104,56 @@ test('a failed first-generation refresh also invalidates a raw stable lookup alr
   const stable=cache.event!(sourceEventId(browseId('same')!),instant,signal()),denied=assert.rejects(stable);
   await assert.rejects(cache.firstBatch(instant,signal()));old.resolve(occurrence('OLD'));await denied;
 });
+
+test('ordinary cached Detail cannot cross a replacement admitted while awaiting firstBatch',async()=>{
+  let rawReads=0;
+  const cache=new ControlledSourceProjection({firstBatch:async()=>[occurrence('OLD')],batch:async()=>({items:[occurrence('NEW')]}),detail:async()=>{rawReads++;return occurrence('OLD');}});
+  await cache.firstBatch(instant,signal());
+  const detail=cache.detail(browseId('same')!,instant,signal()),denied=assert.rejects(detail);
+  await cache.batch!(instant,0,signal());await denied;
+  assert.equal((await cache.detail(browseId('same')!,instant,signal()))?.title,'NEW');assert.equal(rawReads,0);
+});
+
+for(const finish of ['unchanged','refresh','failed-refresh','disable','cancel'] as const){
+  test(`ordinary later-page Detail revalidates its generation: ${finish}`,async()=>{
+    const held=Promise.withResolvers<Response>(),entered=Promise.withResolvers<void>();
+    let firstReads=0,laterReads=0,detailReads=0;
+    const row=(id:string,title:string)=>({id,name:title,url:`https://ticketmaster.sg/event/${id}`,dates:{start:{dateTime:'2026-11-01T00:00:00Z'},status:{code:'onsale'}},_embedded:{venues:[{country:{countryCode:'SG'}}]}});
+    const raw=new TicketmasterBrowseSource({key:()=> 'synthetic-only',enabled:()=>true},async input=>{
+      const url=new URL(String(input));
+      if(url.pathname.includes('/events/')){detailReads++;entered.resolve();return held.promise;}
+      const page=Number(url.searchParams.get('page'));
+      if(page===1){laterReads++;return Response.json({page:{number:1,totalElements:21},_embedded:{events:[row('B','OLD')]}});}
+      firstReads++;
+      if(firstReads>1&&finish==='failed-refresh')throw new Error('Synthetic refresh failure');
+      return Response.json({page:{number:0,totalElements:firstReads===1?21:1},_embedded:{events:[firstReads===1?row('A','FIRST'):row('B','NEW')]}});
+    });
+    const gate=createControlledEventBrowse({source:raw,projectionCache:true,running:()=>true,track:work=>work()});gate.enable();
+    const browse=new EventBrowse({verify:async()=>ok(undefined)},gate.source,()=>new Date(instant),true,new BrowseCursor(new Uint8Array(32).fill(9)));
+    const principal={firebaseUid:'synthetic'};
+    const first=await browse.read(principal,undefined,signal());
+    assert.ok(first.ok&&'nextCursor'in first.value&&first.value.nextCursor);
+    if(!first.ok||!('nextCursor'in first.value)||!first.value.nextCursor)return;
+    const later=await browse.read(principal,undefined,signal(),first.value.nextCursor);
+    assert.ok(later.ok&&'items'in later.value);if(later.ok&&'items'in later.value)assert.equal(later.value.items[0]!.title,'OLD');
+    const abort=new AbortController(),pending=browse.read(principal,browseId('B')!,abort.signal);
+    await entered.promise;
+    if(finish==='refresh'||finish==='failed-refresh'){
+      const refresh=await browse.read(principal,undefined,signal());
+      if(finish==='refresh'){
+        assert.ok(refresh.ok&&'items'in refresh.value);if(refresh.ok&&'items'in refresh.value)assert.equal(refresh.value.items[0]!.title,'NEW');
+        const fresh=await browse.read(principal,browseId('B')!,signal());
+        assert.ok(fresh.ok&&'title'in fresh.value);if(fresh.ok&&'title'in fresh.value)assert.equal(fresh.value.title,'NEW');
+      }else assert.equal(refresh.ok,false);
+    }
+    if(finish==='disable')gate.disable();
+    if(finish==='cancel')abort.abort();
+    held.resolve(Response.json(row('B','OLD')));
+    const result=await pending;
+    if(finish==='unchanged'){
+      assert.ok(result.ok&&'title'in result.value);if(result.ok&&'title'in result.value)assert.equal(result.value.title,'OLD');
+    }else{assert.equal(result.ok,false);if(!result.ok)assert.equal(result.failure.code,'SERVICE_UNAVAILABLE');}
+    assert.equal(firstReads,finish==='refresh'||finish==='failed-refresh'?2:1);
+    assert.equal(laterReads,1);assert.equal(detailReads,1);assert.equal(gate.observation().pending,0);gate.disable();
+  });
+}
