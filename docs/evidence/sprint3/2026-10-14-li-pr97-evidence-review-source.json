@@ -1,0 +1,169 @@
+{
+  "head": "c5bc9457d09a758c97a9afc46880065a63ef461f",
+  "tree": "ec3275e92af12336a95427d6cc89218f09139506",
+  "productHead": "bfee3639ede6e2f406ea5253db523110545c7671",
+  "productTree": "4adc2ea32a09f8393cf2110f7c05eef6a197d42c",
+  "additionsOnly": [
+    "A\tdocs/evidence/sprint3/2026-10-13-jin-history-shared-source-gate-manifest.json",
+    "A\tdocs/evidence/sprint3/2026-10-13-jin-history-shared-source-gate.md",
+    "A\tintegration_test/jin_history_shared_real_backend_test.dart",
+    "A\ttool/ExportPkcs12Pem.java",
+    "A\ttool/jin_history_shared_gate.mjs"
+  ],
+  "verifiedFixtureIdentities": [
+    {
+      "path": "tool/jin_history_shared_gate.mjs",
+      "blob": "fde928ede246d77c0ef6f0b2f2cd76fe223f8e8a",
+      "sha256": "c119c988e3f8ce82257340cd417515fea82ea8b6ed07383d1ae052933ae2a59d"
+    },
+    {
+      "path": "integration_test/jin_history_shared_real_backend_test.dart",
+      "blob": "a5a19287ea83b95d265c783a4805d1671676e69c",
+      "sha256": "eba0652071b6a9c00988309973223aa002a509675a7a64338ecc8cf3b0bf6a16"
+    },
+    {
+      "path": "tool/ExportPkcs12Pem.java",
+      "blob": "2c4acac6f8fdb487e0340881fa5c1908a03dc9c9",
+      "sha256": "331cdf0afa82114f9c8e98d48f3de16c8b7891bcd8a8ee27557beff8773c66aa"
+    }
+  ],
+  "ownerSourceBindings": 10,
+  "independentlyComparedDUFiles": [
+    "lib/features/check_in/history_device_port.dart",
+    "lib/features/check_in/presentation/check_in_history_controller.dart",
+    "lib/features/check_in/presentation/check_in_history_page.dart",
+    "test/features/check_in_history_controller_test.dart",
+    "android/app/src/main/kotlin/com/enmori/app/MainActivity.kt"
+  ],
+  "unchangedBoundaries": [
+    "backend",
+    "api",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pubspec.yaml",
+    "pubspec.lock",
+    "firebase.json",
+    "firestore.indexes.json",
+    "android/app/build.gradle.kts",
+    "lib/main.dart",
+    "tool/run_my_friends_emulators.mjs",
+    "tool/run_persona_android_emulators.mjs"
+  ],
+  "contributionWhitespaceExit": 0,
+  "historicalLogApkHashesRecomputed": false,
+  "actualDeviceRerun": false,
+  "recordedAtSgt": "2026-10-14T00:09:06.888470+08:00",
+  "liFormalReview": {
+    "id": 5506530307,
+    "state": "APPROVED",
+    "url": "https://github.com/3427564237/enmori-app/pull/97#pullrequestreview-5506530307",
+    "scope": "JIN gate evidence; combined acceptance pending distinct SHI composition/fixture review"
+  },
+  "negativeGuards": {
+    "scope": "Exact wrapper in a VM with controlled adb reads and real existing environment guard; no device, Firebase, network or installer execution",
+    "cases": [
+      {
+        "name": "invalid device selector",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "unpinned Node",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "cloud project",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "other demo project",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "ambient credential",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "profile escape",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "remote Firestore",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "ordinary mode",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "API35 device",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "physical phone",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "other AVD",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "existing ENMORI installation",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      },
+      {
+        "name": "nonregional zone",
+        "result": "Pass",
+        "sdkInitialized": false,
+        "childMutation": false
+      }
+    ]
+  },
+  "newChecks": {
+    "nodeWrapperSyntax": "Pass, exit0",
+    "dartFixtureAnalysis": "No issues found",
+    "dartFixtureNonWritingFormat": "1 file, 0 changed, exit0",
+    "fullSuitesRerun": false,
+    "windowsAndroidWrapperRerunOnLinux": false
+  },
+  "localReceipts": [
+    {
+      "name": "guard-probes.mjs",
+      "bytes": 3911,
+      "sha256": "679ae77c3d79f24b8d3e22613c1feb38450a17e268c71817e55192898fbaf388"
+    },
+    {
+      "name": "guard-receipt.json",
+      "bytes": 1873,
+      "sha256": "9344acb8a560f7ffd8c99fdee97205813292b6b14f00f7743e38ef4b9a742bb3"
+    },
+    {
+      "name": "analysis.log",
+      "bytes": 72,
+      "sha256": "ea9ebd7f514f37d3cc216e39cb20cae79c10f5a0b310cb1e7a8a0f24ccbabfc1"
+    }
+  ]
+}

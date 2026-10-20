@@ -1,0 +1,101 @@
+{
+  "source": "67056c778a03595c386a69ec7ea33046fdd4205d",
+  "filesBound": 68,
+  "portableCopiesBound": 26,
+  "liAuthorityFilesMatched": 3,
+  "backend": {
+    "buildExit": 0,
+    "passed": 610,
+    "failed": 0
+  },
+  "flutter": {
+    "passed": 459,
+    "failed": 0,
+    "analysisIssues": 0
+  },
+  "probes": {
+    "nodeTestGroups": 20,
+    "retentionBigIntScenarios": 170,
+    "readerRollbackClassification": "pass"
+  },
+  "fullWhitespaceExit": 2,
+  "scopedWhitespaceExit": 0,
+  "preflight": {
+    "scope": "object-only, not a runtime gate",
+    "history": "bfee3639ede6e2f406ea5253db523110545c7671",
+    "zhou": "67056c778a03595c386a69ec7ea33046fdd4205d",
+    "exitCode": 0,
+    "tree": "4588aaa2d0b60045a6771582a9116b836b8ed1f3"
+  },
+  "logs": [
+    {
+      "name": "backend-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "backend-tests.log",
+      "sha256": "70f63b75acef2786acf790b31a6919ae9e4cd0bde025313dd778d537d21867a6",
+      "bytes": 55679
+    },
+    {
+      "name": "flutter-tests.log",
+      "sha256": "655ebbe911195a651e6015ab6a1dd6a4328926ffac6cbb819d61e52865aa8a5f",
+      "bytes": 465
+    },
+    {
+      "name": "flutter-tests-final.log",
+      "sha256": "bc2f576a128aa82d6b48b3f821760878f3ac1404e97e115f608e38bdb4ca8096",
+      "bytes": 80951
+    },
+    {
+      "name": "flutter-analysis.log",
+      "sha256": "cb37e71020e0b6c9b9f4c837df2457ab7a5316112fb00883a3523bc5b3ebe56e",
+      "bytes": 97
+    },
+    {
+      "name": "review-probes.log",
+      "sha256": "730807f731f2bdb9a7750ff0de95406bf11eb7e0e1c9a14c6f6aae3c2e81f43b",
+      "bytes": 2138
+    },
+    {
+      "name": "retention-bigint.log",
+      "sha256": "aaf96bf40000fd1aed9c3a929d1110fd94299e87cae4dd40e9ddb04e6fcda90a",
+      "bytes": 106
+    },
+    {
+      "name": "reader-rollback.log",
+      "sha256": "e544516032adeed1000f93e5fa0d66d8c5d03a565d44c169aad470185b2c1d71",
+      "bytes": 54
+    },
+    {
+      "name": "canonical-location-review-probes.mjs",
+      "sha256": "07c44944ddabac8725f10b7924611bace04360303e14aee72af209f8223b6fe8",
+      "bytes": 5081,
+      "relocatedReviewerInput": true
+    },
+    {
+      "name": "query-runner-negative-review.mjs",
+      "sha256": "85937c44095874577579b329bc0dba3c59f20c9fc46854495d75e8f2fed65272",
+      "bytes": 2341,
+      "relocatedReviewerInput": true
+    },
+    {
+      "name": "fence-runner-negative-review.mjs",
+      "sha256": "09017974d4634320afe8cd6afa545940c5ab9b6fe692e5284fffd1bfb21de60f",
+      "bytes": 2348,
+      "relocatedReviewerInput": true
+    },
+    {
+      "name": "reader-rollback-probe.mjs",
+      "sha256": "1ff5aa53a018fae089244e52804652754fd1f60e27914fd1c13ecd24bad0b6ba",
+      "bytes": 1596,
+      "relocatedReviewerInput": true
+    }
+  ],
+  "recordedAtSGT": "2026-10-13T19:58:03.209885+08:00",
+  "formalJinReviewAtCheckpoint": "pending",
+  "liAcceptance": "pending JIN conclusion; prechecks complete",
+  "reviewer": "LI",
+  "sourceFilesChangedByReview": 0
+}

@@ -1,0 +1,36 @@
+{
+  "recordedAtSgt": "2026-10-14T10:38:40.115167+08:00",
+  "head": "c5bc9457d09a758c97a9afc46880065a63ef461f",
+  "tree": "ec3275e92af12336a95427d6cc89218f09139506",
+  "base": "bfee3639ede6e2f406ea5253db523110545c7671",
+  "disposition": "Bounded isolated History/shared-source candidate accepted; no merge/closure/runtime or whole-product acceptance",
+  "formalReviews": [
+    {
+      "id": 5506530307,
+      "state": "APPROVED",
+      "commit_id": "c5bc9457d09a758c97a9afc46880065a63ef461f",
+      "submitted_at": "2026-10-13T16:08:18Z",
+      "html_url": "https://github.com/3427564237/enmori-app/pull/97#pullrequestreview-5506530307",
+      "body": "LI / PM \u2014 independent JIN gate-evidence review, exact head `c5bc9457d09a758c97a9afc46880065a63ef461f` (tree `ec3275e92af12336a95427d6cc89218f09139506`). **APPROVE for the submitted gate evidence within its stated scope. Bounded combined acceptance remains pending SHI's distinct new-fixture/composition review.**\n\nIndependently verified five additions only over accepted #94 `bfee363`; recomputed all three fixture Git blobs/SHA-256/lengths, all ten final owner source bindings and the accepted #89 Java helper identity. Backend/API/dependencies/default bootstrap/Firebase/index/Gradle and existing Search/Persona wrappers retain accepted #87 bytes; scoped contribution whitespace passes. The five directly compared DU files also retain their accepted #89 bytes.\n\nNew LI checks: exact Node wrapper syntax passes; exact Dart fixture strict analysis reports no issues and non-writing format changes zero files. Thirteen VM negative probes pass with the real existing environment guard and mocked adb reads: invalid selector/runtime, cloud/other project, ambient credential, profile escape, remote endpoint, ordinary mode, API35, physical phone, other AVD, existing ENMORI package and GMT. Each rejects before SDK initialization/child mutation. These probes are not real device or Emulator runs.\n\nJIN's 543/73/489, two synthetic device7/7 groups and four separate actual Auth/HTTPS Backend/Firestore fixtures remain attributed to JIN. His private Windows logs, compiled-file archive and six APKs were not downloaded or independently rehashed here. Published source identities were rehashed; historical artifact fingerprints remain JIN-held identifiers. No old LI or JIN suite is relabelled onto this packet and overlapping cases are not added.\n\nThe packet preserves GMT precondition failure, omitted-receipt teardown failure and complete rerun, Search uninstall/signature warnings, asynchronous AVD cleanup failure plus separate settled verifier, and inherited EOF whitespace exit2. Host22/341, atomic pair/pointers and Persona revision evidence retain their fixture limits. Programmatic saved return is not hardware Back; controlled session observer is not production Auth lifecycle; trusted Admin path is not client Firestore rules proof. The Java executable paths in this wrapper are Windows-specific; this review claims no Linux Android-wrapper reproduction or screenshot run.\n\nSHI only needs the new #97 fixture/composition and affected Event/privacy/isolation contribution; completed component approvals and LI evidence review need no repetition. #95/#96 stay excluded from #97; #96 already has separate LI bounded acceptance. A later source including them needs its own applicable execution. Keep Draft/Open: no merge, Issue closure, board transition, runtime/provider/model enablement, API24/25/human-accessibility or whole-module/Sprint/UAT/Release acceptance.\n"
+    },
+    {
+      "id": 5512103858,
+      "state": "APPROVED",
+      "commit_id": "c5bc9457d09a758c97a9afc46880065a63ef461f",
+      "submitted_at": "2026-10-14T01:44:56Z",
+      "html_url": "https://github.com/3427564237/enmori-app/pull/97#pullrequestreview-5512103858",
+      "body": "APPROVE \u2014 SHI scoped new-composition/fixture and affected Event/privacy/isolation review at #97 exact head `c5bc9457d09a758c97a9afc46880065a63ef461f`, tree `ec3275e92af12336a95427d6cc89218f09139506`, accepted product parent #94 `bfee3639ede6e2f406ea5253db523110545c7671`.\n\nI independently verified the five-file fixture/evidence-only delta, all three published fixture Git blobs/normalized SHA-256 values, ten final owner-source bindings, six copied DU inputs and unchanged accepted certificate-helper provenance. Backend/API/Auth/AI/default-bootstrap/dependency configuration retains the accepted payload; OpenAPI remains 27 operations/33 schemas. #95/#96 remain excluded. No blocking finding was identified within my assigned scope; completed component approvals are not repeated.\n\nThe new History wrapper is fixed-demo/loopback and guarded by isolated credential profiles, dedicated named API36 AVD and package preconditions. The test uses actual Emulator Auth tokens and HTTPS Backend/Firestore through accepted shared Home/repositories with a controlled session observer. Host readback and cleanup are scoped to this owned fixture, including its exact onboarding receipt. Programmatic saved-item return is not hardware Back or production Auth-lifecycle proof; ordinary enablement and real AI/store/model remain absent.\n\nIndependent validation on this exact head: Node24.19.0 strict compile and Backend543/543; Flutter489/489; fatal-info analysis; non-writing nine source files plus the new fixture; Node wrapper syntax and source probe all passed. Exact contribution/new-packet whitespace passes. Full baseline whitespace retains the inherited line-56 EOF warning (my invocation exit1), not Pass.\n\nEmulator73 and all Android results, raw log/APK fingerprints, owner archive/compiled-file equality and device cleanup remain JIN-attributed, not my reruns or raw-artifact verification. Intermediate GMT/receipt/uninstall/reinstall/ADB cleanup failures remain disclosed; later successful invocations do not erase them. Overlapping synthetic/device cases are not extra Flutter cases or a single all-feature flow.\n\nLI's independent evidence-only approval is now visible; bounded combined acceptance remains LI's separate decision after the distinct review conclusions. This approval does not incorporate #95/#96, authorize merge/closure/Project changes, enable ordinary/provider/model/index runtime, or accept API24/25/human accessibility/whole-module/Sprint/UAT/Release/Done. Keep Draft/Open; changed executable contributions require applicable exact-head review and validation."
+    }
+  ],
+  "inlineReviewCommentsAtReadback": 0,
+  "priorLiEvidenceReceipt": "2026-10-14-li-pr97-evidence-review-source.json",
+  "newProductOrDeviceSuiteRerun": false,
+  "rawHistoricalJinArtifactsRehashed": false,
+  "sourceUnchanged": true,
+  "draft": true,
+  "state": "OPEN",
+  "excludedContributions": [
+    "#95",
+    "#96"
+  ]
+}
