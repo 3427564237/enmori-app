@@ -1,5 +1,7 @@
 # PR #167：两项 P2 修复的限定复审
 
+> 后续head fba5a82已复审：本页的稳定ID并发残留已修复，普通详情raw fallback仍可越过新投影，R2继续保留。见 [新源码结论及反例](shi-167-r2-fba5a82-review.md)。本页保留0158ca6时点。
+
 2026-10-20，SGT。用户要求检查两项修复，复用已有验证，不重复运行未受影响的测试。复审 head **`0158ca6588e115323f4776d974c778a1d95352ca`**，修复源码 **`01d46d80ddddd5c61457d4111240ac75209dd427`** / tree `e22c7575e71fae65e5c41d350d0c8d98e311e010`，对照原 head `02197c93abd1ff6bfdc9ece6fc43ab2da2979f32`，base 仍为整合分支 `900ca6fcdefb77e9aa95d96fa80994ebf826398f`。
 
 **结论：R1 已修复并关闭线程；R2 顺序路径已修复，但并发稳定详情仍可返回旧投影，保留 P2。** 已提交 [REQUEST_CHANGES 5585364546](https://github.com/3427564237/enmori-app/pull/167#pullrequestreview-5585364546)。这不是新增第三项缺陷，也没有新增产品要求。
