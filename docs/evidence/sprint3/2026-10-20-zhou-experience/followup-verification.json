@@ -350,7 +350,7 @@
       "node node_modules/typescript/bin/tsc --project backend/tsconfig.json --pretty false",
       "node --test backend/dist/test/event-participation.test.js backend/dist/test/event-participation-visibility.test.js backend/dist/test/contract/openapi.test.js backend/dist/test/event-browse-composition.test.js backend/dist/test/controlled-event-projection.test.js backend/dist/test/event-browse-pagination.test.js backend/dist/test/event-browse/event-browse.test.js backend/dist/test/controlled-event-browse.test.js",
       "fvm flutter test --no-pub --no-test-assets --reporter expanded test/features/external_registration_flow_test.dart test/features/event_participation_components_test.dart test/features/participation_repository_test.dart test/features/participation_journey_test.dart test/features/event_batches_test.dart",
-      "fvm flutter test --no-pub --no-test-assets --reporter expanded --name \"frame boundary|current B Cancel\" test/review_zhou_pr167_callback_probe_test.dart",
+      "fvm flutter test --no-pub --no-test-assets test/review_zhou_pr167_callback_probe_test.dart --name 'frame boundary|current B' --reporter expanded 2>&1 | Tee-Object -LiteralPath 'D:/3851 AI/drafts/2026-10-20-pr167-probes/zhou_callback_frame_probe_completed.log'",
       "node --test \"D:/3851 AI/drafts/2026-10-20-pr167-probes/source-coherence.test.mjs\"",
       "git diff --check 900ca6f HEAD"
     ],

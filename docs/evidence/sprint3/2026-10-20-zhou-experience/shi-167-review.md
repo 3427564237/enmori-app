@@ -41,4 +41,4 @@ SHI 负责在同一完整包修复 R1/R2，回复一个新 source/head 和有意
 
 精确文件 blob、命令、原始日志路径/SHA256 和两份 probe 源码见 [本轮统一校验清单](followup-verification.json)。
 
-复现：在 #167 的准确 head 独立 checkout，将 [Flutter probe](shi-167-callback-probe.dart.txt) 复制为 `test/review_zhou_pr167_callback_probe_test.dart`，按清单的 `--name "frame boundary|current B Cancel"` 执行三个主用例；文件中另保留最早的闭包补充用例，不计入该三个主用例。将 [来源 probe](shi-167-source-probe.mjs.txt) 复制为 `.mjs`，仅调整文件顶部 `root` 为该 checkout 的已严格编译 `backend/dist/` 绝对路径，再运行 `node --test`。仅使用合成 HTTP 和 Repository，不注入真实供应商密钥/账号。
+复现：在 #167 的准确 head 独立 checkout，将 [Flutter probe](shi-167-callback-probe.dart.txt) 复制为 `test/review_zhou_pr167_callback_probe_test.dart`，按清单的实际 `--name 'frame boundary|current B'` 执行三个主用例；文件中另保留最早的闭包补充用例，不计入该三个主用例。将 [来源 probe](shi-167-source-probe.mjs.txt) 复制为 `.mjs`，仅调整文件顶部 `root` 为该 checkout 的已严格编译 `backend/dist/` 绝对路径，再运行 `node --test`。仅使用合成 HTTP 和 Repository，不注入真实供应商密钥/账号。
