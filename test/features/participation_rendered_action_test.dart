@@ -38,8 +38,9 @@ void main() {
             Uri.https('controlled.invalid'),
             () async => const Success('synthetic'),
             httpClient: MockClient((req) async {
-              if (req.method == 'PUT')
+              if (req.method == 'PUT') {
                 writes.add(jsonDecode(req.body) as Map<String, dynamic>);
+              }
               return http.Response(
                 jsonEncode({
                   'participation': {
