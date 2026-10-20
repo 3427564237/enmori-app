@@ -1,0 +1,176 @@
+{
+  "recordedAt": "2026-10-20T21:05:25.431994+08:00",
+  "request": "Check both P2 repairs on GitHub, reuse unaffected verification, re-review and sync PM",
+  "pr": 167,
+  "reviewedHead": "0158ca6588e115323f4776d974c778a1d95352ca",
+  "productRepair": "01d46d80ddddd5c61457d4111240ac75209dd427",
+  "productTree": "e22c7575e71fae65e5c41d350d0c8d98e311e010",
+  "previousReviewedHead": "02197c93abd1ff6bfdc9ece6fc43ab2da2979f32",
+  "integrationBase": "900ca6fcdefb77e9aa95d96fa80994ebf826398f",
+  "changedBindings": [
+    {
+      "path": "api/event-participation-contract.md",
+      "gitBlob": "dd62e44c4a8b4c12a4eb83c42669b7d0b1160831",
+      "sha256WorktreeBytes": "fc7e15fdda38542cd416d6b21c1d4d5bf98fd50e187c5a8bbde90e92e035c06a"
+    },
+    {
+      "path": "backend/src/event-browse/infrastructure/controlled-source-projection.ts",
+      "gitBlob": "2b822474abd10d3183a244b79ce9214a4b3829fd",
+      "sha256WorktreeBytes": "62c2536544eaceb840867fad11827036686c1a099e9dfcc0da691f248b961e85"
+    },
+    {
+      "path": "backend/test/event-source-generation-regression.test.ts",
+      "gitBlob": "6bcb39bf86f4c0de186520d79207c50f7d2ddb22",
+      "sha256WorktreeBytes": "af058054f4a71bb01042666bc6b6157e59d7a82e730e3f32d1010adf09035983"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-20-shi-event-participation/r1-r2-revision.md",
+      "gitBlob": "140499eb040c035ddc1204a67e9ddc5c08faf4d5",
+      "sha256WorktreeBytes": "5f127a69ad2593c42dc92cc6c5a2f002a3ef6c14cec635b58a2a0e473202a252"
+    },
+    {
+      "path": "lib/features/event_participation/presentation/participation_controller.dart",
+      "gitBlob": "f3cf5e8dde4ca35a9afe4e218c0546b1f4af9dc8",
+      "sha256WorktreeBytes": "2695f776c45a414214d92fe10e229555c5714bf9cd077120a6493ea6aa41967b"
+    },
+    {
+      "path": "lib/features/event_participation/presentation/participation_controls.dart",
+      "gitBlob": "11d0e799a5974322bc09203b30808c80ee083ecc",
+      "sha256WorktreeBytes": "f17247ea579ab977b330af18f39654c09534b627d7cf049ef3184a8ae36e900b"
+    },
+    {
+      "path": "test/features/participation_rendered_action_test.dart",
+      "gitBlob": "4c87aee3c80b3d1d9f2dbfb49959aa30b9bce611",
+      "sha256WorktreeBytes": "6e7a9240dd8a1a4e81bbc925d1ca127e4d3bb70a35b60805bf808924d4ade603"
+    }
+  ],
+  "previous57BindingComparison": {
+    "unchanged": 53,
+    "changed": [
+      "api/event-participation-contract.md",
+      "backend/src/event-browse/infrastructure/controlled-source-projection.ts",
+      "lib/features/event_participation/presentation/participation_controller.dart",
+      "lib/features/event_participation/presentation/participation_controls.dart"
+    ],
+    "newFiles": [
+      "backend/test/event-source-generation-regression.test.ts",
+      "docs/evidence/sprint3/2026-10-20-shi-event-participation/r1-r2-revision.md",
+      "test/features/participation_rendered_action_test.dart"
+    ]
+  },
+  "decisions": {
+    "R1": {
+      "state": "fixed; reviewer resolved thread",
+      "thread": "PRRT_kwDOUMZtlc6uRGym",
+      "replyId": 4325234233,
+      "checks": "four controls capture original observation/facts; guard rejects crossUID/sameUID/new facts before state/I/O"
+    },
+    "R2": {
+      "state": "sequential case fixed; concurrent stable Detail remains P2",
+      "thread": "PRRT_kwDOUMZtlc6uRGyr",
+      "replyId": 4325234922,
+      "resolved": false,
+      "sourceBlob": "2b822474abd10d3183a244b79ce9214a4b3829fd",
+      "path": "backend/src/event-browse/infrastructure/controlled-source-projection.ts",
+      "lines": [
+        25,
+        40,
+        48
+      ],
+      "trace": {
+        "listReads": 2,
+        "detailReads": 1,
+        "list": "NEW title",
+        "browseDetail": "NEW title",
+        "stableDetail": "OLD title",
+        "recommendationAfter": "NEW title",
+        "pendingAfter": 0
+      }
+    },
+    "review": {
+      "action": "REQUEST_CHANGES",
+      "reviewId": 5585364546,
+      "url": "https://github.com/3427564237/enmori-app/pull/167#pullrequestreview-5585364546"
+    }
+  },
+  "actualVerification": {
+    "strictTypeScriptExit": 0,
+    "backend": {
+      "passed": 19,
+      "failed": 0,
+      "overlapWithOwner17": 17
+    },
+    "flutter": {
+      "passed": 15,
+      "failed": 0,
+      "noTestAssets": true,
+      "testOnlyNoSplash": true
+    },
+    "additionalConcurrentProbe": {
+      "passed": 0,
+      "failed": 1,
+      "exit": 1
+    },
+    "fullPrRangeWhitespace": "pass"
+  },
+  "commands": [
+    "node node_modules/typescript/bin/tsc --project backend/tsconfig.json --pretty false",
+    "node --test backend/dist/test/event-source-generation-regression.test.js backend/dist/test/controlled-event-projection.test.js backend/dist/test/event-browse-pagination.test.js backend/dist/test/controlled-event-browse.test.js \"D:/3851 AI/drafts/2026-10-20-pr167-rereview-probes/source-coherence.test.mjs\"",
+    "fvm flutter test --no-pub --no-test-assets test/features/participation_rendered_action_test.dart test/review_zhou_pr167_callback_probe_test.dart --name '^old |frame boundary|current B' --reporter expanded",
+    "node --test \"D:/3851 AI/drafts/2026-10-20-pr167-probes/r2-pending-stable-detail.test.mjs\"",
+    "git diff --check 900ca6f HEAD"
+  ],
+  "reviewerProbeReuse": {
+    "callbackSourceUnchanged": true,
+    "callbackSha256": "6c1f7f1f19e99d2a1b66f64cdafb8624a00ecb5d5c883d43cca0e56508817010",
+    "sequentialSourceProbeOnlyRootPathAdapted": true,
+    "adaptedSourceSha256": "43d94567c754d69e9888d839460f0ee0b77895fdac1add7d88cea03da605530b",
+    "concurrentProbeTextCopySha256": "be0269be35d0ffc68ff2f4a43f35850936157250f3ffeab62f0f0fb1dd8092b9"
+  },
+  "compiledProjectionSha256": "24c546abf04b0d15b0c4555ece59c36422f01475058ef56e6981c98e63e9fb4e",
+  "logs": [
+    {
+      "label": "strict TypeScript",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-rereview-probes\\build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "passed": null,
+      "failed": 0
+    },
+    {
+      "label": "affected Backend17 plus original reviewer2",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-rereview-probes\\backend-affected.log",
+      "sha256": "6b70d18b62d5dc0b86936093b30954ddaad49d434fe7a8a3ff509b34c0601f68",
+      "bytes": 2354,
+      "passed": 19,
+      "failed": 0
+    },
+    {
+      "label": "new R1 twelve plus original reviewer3",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-rereview-probes\\flutter-r1.log",
+      "sha256": "8de053ee09e6dacca22adcda51065b2886c45b372cc7de7a8eb3e418edd3ee51",
+      "bytes": 3042,
+      "passed": 15,
+      "failed": 0
+    },
+    {
+      "label": "concurrent stable Detail residual",
+      "path": "D:\\3851 AI\\drafts\\2026-10-20-pr167-probes\\r2-pending-stable-detail-20261020-210134-411.log",
+      "sha256": "fb1d39f55135bcaf9eae258e3e680d97a5258512e0649f2bc8d263495acddb1c",
+      "bytes": 1218,
+      "passed": 0,
+      "failed": 1
+    }
+  ],
+  "reusedNotRerun": {
+    "oldReviewerBackend72Flutter43": "original source71e0f4 attribution retained",
+    "actualSDK4": "SHI original unchanged storage/CAS/privacy evidence, not new concurrent source proof",
+    "ownerCurrent17And51": "SHI attributed;19 overlaps17,15 is a focused subset with original reviewer controls; counts not added",
+    "unchanged": "API semantics/OpenAPI,dependencies,participation storage/indexes,Emulator tests/runners,real provider/model/device"
+  },
+  "privateAuthorLogsRehashed": false,
+  "authorProductAndOriginalTestsModified": false,
+  "newHostProviderModelEmulatorDeviceCalls": false,
+  "remainingOwner": "SHI R2 residual correction/new head; LI final composition/provider/device acceptance",
+  "mainMergedReleaseOrTasksClosed": false
+}

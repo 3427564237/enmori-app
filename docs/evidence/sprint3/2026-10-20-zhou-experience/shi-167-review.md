@@ -1,5 +1,7 @@
 # ZHOU：SHI PR #167 独立审查
 
+> 后续修复已复审：head0158ca6 的 R1 已通过并关闭，R2 顺序路径通过但并发稳定详情仍有残留，维持请求修改。见 [新源码限定复审](shi-167-rereview.md)。下文保留02197c9首次审查时点。
+
 2026-10-20，SGT。按 [本轮 PM/用户指派](../../../decisions/2026-10-20-pm-zhou-integration-followup.md) 执行。
 
 已提交 [REQUEST_CHANGES 5583042964](https://github.com/3427564237/enmori-app/pull/167#pullrequestreview-5583042964)，绑定 head **`02197c93abd1ff6bfdc9ece6fc43ab2da2979f32`**、产品 source **`71e0f4083d3ad88aaad11e890796bbe04a3f091e`**、tree `3c9e690e7ee9cedba63256ad3b3f07d5321e7b9b`；目标整合分支 base `900ca6fcdefb77e9aa95d96fa80994ebf826398f`。head 相对产品 source 只增加验证文档。

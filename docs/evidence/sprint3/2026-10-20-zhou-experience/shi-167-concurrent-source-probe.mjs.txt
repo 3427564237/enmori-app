@@ -1,0 +1,57 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {pathToFileURL} from 'node:url';
+const root='D:/3851 AI/drafts/2026-10-20-pr167-rereview-0158ca6/backend/dist/';
+const load=path=>import(pathToFileURL(root+path).href);
+const {createControlledEventBrowse}=await load('src/bootstrap/controlled-event-browse.js');
+const {createControlledEventRecommendations,sourceEventId}=await load('src/bootstrap/controlled-event-recommendations.js');
+const {TicketmasterBrowseSource}=await load('src/event-browse/infrastructure/ticketmaster-browse-source.js');
+const {EventBrowse}=await load('src/event-browse/application/event-browse.js');
+const {BrowseCursor}=await load('src/event-browse/infrastructure/browse-cursor.js');
+const {browseId}=await load('src/event-browse/domain/browse-values.js');
+const {ok}=await load('src/shared/domain/result.js');
+const {eventTestRecords,EVENT_TEST_UID,EVENT_AS_OF}=await load('test/support/event-repository-contract.js');
+const signal=()=>new AbortController().signal;
+const raw=title=>({id:'same_occurrence',name:title,url:'https://ticketmaster.sg/event/same',
+  dates:{start:{dateTime:'2026-11-10T00:00:00Z'},status:{code:'onsale'}},
+  classifications:[{segment:{id:'KZFzniwnSyZfZ7v7nJ',name:'Music'}}],
+  _embedded:{venues:[{country:{countryCode:'SG'}}]}});
+const page=title=>Response.json({page:{number:0,totalElements:1},_embedded:{events:[raw(title)]}});
+
+test('stable detail started during page-zero replacement must not return OLD after NEW is published',async()=>{
+  const refreshEntered=Promise.withResolvers(),detailEntered=Promise.withResolvers();
+  const refreshResponse=Promise.withResolvers(),lateDetailResponse=Promise.withResolvers();
+  let listReads=0,detailReads=0;
+  const provider=new TicketmasterBrowseSource({enabled:()=>true,key:()=> 'synthetic-only'},async input=>{
+    const url=new URL(String(input));
+    if(url.pathname.includes('/events/')){detailReads++;detailEntered.resolve();return lateDetailResponse.promise;}
+    listReads++;if(listReads===1)return page('OLD title');
+    refreshEntered.resolve();return refreshResponse.promise;
+  });
+  const controlled=createControlledEventBrowse({source:provider,projectionCache:true,running:()=>true,track:work=>work()});
+  controlled.enable();
+  const records=eventTestRecords();
+  const joined=createControlledEventRecommendations({gateway:{get:async path=>records[path],listEvents:async()=>[]},
+    source:controlled.source,clock:{now:()=>ok(new Date(EVENT_AS_OF))}});
+  const ranked=await joined.recommendEvents.execute({principal:{firebaseUid:EVENT_TEST_UID},view:'all'});
+  assert.equal(ranked.ok,true);assert.equal(ranked.value.items[0].title,'OLD title');
+  const browse=new EventBrowse({verify:async()=>ok(undefined)},controlled.source,()=>new Date(EVENT_AS_OF),true,new BrowseCursor(new Uint8Array(32).fill(1)));
+  const refresh=browse.read({firebaseUid:EVENT_TEST_UID},undefined,signal());
+  await refreshEntered.promise;
+  // Ordinary browse detail joins replacement; stable Event detail takes the raw lookup path.
+  const ordinaryDetail=browse.read({firebaseUid:EVENT_TEST_UID},browseId('same_occurrence'),signal());
+  const stableDetail=joined.eventDetail.execute({firebaseUid:EVENT_TEST_UID},sourceEventId(browseId('same_occurrence')));
+  await detailEntered.promise;
+  refreshResponse.resolve(page('NEW title'));
+  const listed=await refresh,ordinary=await ordinaryDetail;
+  assert.equal(listed.ok,true);assert.equal(ordinary.ok,true);
+  assert.equal(listed.value.items[0].title,'NEW title');assert.equal(ordinary.value.title,'NEW title');
+  lateDetailResponse.resolve(Response.json(raw('OLD title')));
+  const stable=await stableDetail;
+  assert.equal(stable.ok,true);
+  const recommendationAfter=await joined.recommendEvents.execute({principal:{firebaseUid:EVENT_TEST_UID},view:'all'});
+  assert.equal(recommendationAfter.ok,true);
+  console.log(JSON.stringify({listReads,detailReads,list:listed.value.items[0].title,browseDetail:ordinary.value.title,
+    stableDetail:stable.value.title,recommendationAfter:recommendationAfter.value.items[0].title,gate:controlled.observation()}));
+  assert.equal(stable.value.title,listed.value.items[0].title);
+});
