@@ -263,33 +263,6 @@ final class _ConnectedPages extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: socialDemoTheme(),
       routerConfig: ref.watch(appRouterProvider),
-      builder: (context, child) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Material(
-            color: const Color(0xffffedbc),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  dualAccounts
-                      ? 'Controlled test • two synthetic accounts'
-                      : 'Controlled test • synthetic account',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: MediaQuery.removePadding(
-              context: context,
-              removeTop: true,
-              child: child!,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
