@@ -264,6 +264,7 @@ final class _ConnectedPages extends ConsumerWidget {
       theme: socialDemoTheme(),
       routerConfig: ref.watch(appRouterProvider),
       builder: (context, child) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Material(
             color: const Color(0xffffedbc),
@@ -280,7 +281,13 @@ final class _ConnectedPages extends ConsumerWidget {
               ),
             ),
           ),
-          Expanded(child: child!),
+          Expanded(
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: child!,
+            ),
+          ),
         ],
       ),
     );
