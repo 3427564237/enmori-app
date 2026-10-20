@@ -231,6 +231,18 @@ final class HomeShellPage extends StatelessWidget {
                   ),
                 ),
               ),
+              if (onOpenEvent != null) ...[
+                const SizedBox(height: 20),
+                Text(
+                  'Events for you',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 12),
+                EventRecommendationsSection(
+                  onSeeAll: onSeeAllEvents,
+                  onOpenEvent: onOpenEvent,
+                ),
+              ],
               const SizedBox(height: 14),
               Semantics(
                 header: true,

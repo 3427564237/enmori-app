@@ -171,6 +171,21 @@ final class _RecommendationContent extends StatelessWidget {
         body: 'Checking for upcoming events that match your interests.',
         icon: Icons.hourglass_top,
       ),
+      AsyncError<EventRecommendationResponse>(
+        error: EventRecommendationsRefreshRequired(),
+      ) =>
+        StatusPanel(
+          key: const Key('event-recommendations-refresh-required'),
+          title: 'Refresh event recommendations',
+          body: 'Refresh to check for current matches for your interests.',
+          icon: Icons.refresh,
+          action: OutlinedButton.icon(
+            key: const Key('event-recommendations-refresh'),
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Refresh'),
+          ),
+        ),
       AsyncError<EventRecommendationResponse>(:final error) => StatusPanel(
         key: const Key('event-recommendations-error'),
         title: 'Event recommendations unavailable',
@@ -222,6 +237,15 @@ final class _RecommendationContent extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         content,
+        if (state is AsyncData<EventRecommendationResponse>) ...[
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            key: const Key('event-recommendations-refresh'),
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Refresh'),
+          ),
+        ],
       ],
     );
   }

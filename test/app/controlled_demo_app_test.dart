@@ -103,7 +103,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-home')), findsOneWidget);
-      expect(recommendationViews, isEmpty);
+      expect(recommendationViews, ['home']);
       final action = find.byKey(const Key('home-recommended-activities'));
       await tester.ensureVisible(action);
       await tester.pumpAndSettle();
@@ -115,7 +115,7 @@ void main() {
         ).uri.path,
         AppRoutes.eventRecommendations,
       );
-      expect(recommendationViews, ['all']);
+      expect(recommendationViews, ['home', 'all']);
       expect(
         find.text('Synthetic source Music recommendation'),
         findsOneWidget,
@@ -127,7 +127,7 @@ void main() {
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-home')), findsOneWidget);
-      expect(recommendationViews, ['all', 'home']);
+      expect(recommendationViews, ['home', 'all', 'home']);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       await auth.sessions.close();
@@ -315,7 +315,11 @@ void main() {
           destination.$3,
         );
       }
-      await tester.scrollUntilVisible(find.byKey(const Key('r6-new-check-in-button')), 250, scrollable: find.byType(Scrollable).first);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('r6-new-check-in-button')),
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.byKey(const Key('r6-new-check-in-button')));
       await tester.pumpAndSettle();
       expect(find.text('Keep a little moment'), findsOneWidget);
