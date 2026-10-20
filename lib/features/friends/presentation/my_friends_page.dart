@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'my_friends_controller.dart';
+import '../../auth/auth_providers.dart';
 
 final class MyFriendsListPage extends ConsumerStatefulWidget {
   const MyFriendsListPage({this.onOpenFriend, super.key});
-  final ValueChanged<String>? onOpenFriend;
+  final FutureOr<void> Function(String)? onOpenFriend;
 
   @override
   ConsumerState<MyFriendsListPage> createState() => _MyFriendsListPageState();
@@ -15,6 +19,7 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
     with WidgetsBindingObserver {
   final _query = TextEditingController();
   final _queryFocus = FocusNode();
+  bool _specialCareOnly = false;
   @override
   void initState() {
     super.initState();
@@ -115,15 +120,50 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
                     ? 'No matching friends on this page.'
                     : 'No friends available on this page.',
               ),
-            for (final friend in state.friends)
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Special Care only'),
+              subtitle: const Text(
+                'Filter the current page. Use Next page to continue.',
+              ),
+              value: _specialCareOnly,
+              onChanged: (value) => setState(() => _specialCareOnly = value),
+            ),
+            if (state.loaded &&
+                _specialCareOnly &&
+                !state.friends.any((friend) => friend.specialCare))
+              const Text('No Special Care friends on this page.'),
+            for (final friend in state.friends.where(
+              (friend) => !_specialCareOnly || friend.specialCare,
+            ))
               Card(
                 child: widget.onOpenFriend != null
                     ? ListTile(
                         key: Key('my-friend-profile-${friend.username}'),
                         title: Text(friend.displayName),
+                        leading: friend.specialCare
+                            ? const Icon(
+                                Icons.star,
+                                semanticLabel: 'Special Care',
+                              )
+                            : null,
                         subtitle: Text('Username: ${friend.username}'),
                         trailing: const Icon(Icons.chevron_right),
-                        onTap: () => widget.onOpenFriend?.call(friend.username),
+                        onTap: () async {
+                          final session = ref
+                              .read(authSessionProvider)
+                              .asData
+                              ?.value;
+                          controller.clear();
+                          await widget.onOpenFriend?.call(friend.username);
+                          if (mounted &&
+                              identical(
+                                session,
+                                ref.read(authSessionProvider).asData?.value,
+                              )) {
+                            await controller.load();
+                          }
+                        },
                       )
                     : Padding(
                         padding: const EdgeInsets.all(16),

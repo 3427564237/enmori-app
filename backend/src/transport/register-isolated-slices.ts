@@ -16,7 +16,7 @@ export const friendInboxSchema = { type: "object", additionalProperties: false, 
   requests: { type: "array", maxItems: 20, items: { type: "object", additionalProperties: false, required: ["username","displayName","requestRef"], properties: { username: { type:"string" }, displayName: { type:"string" }, requestRef: { type:"string" } } } }, nextCursor: { anyOf: [{type:"string"},{type:"null"}] } } } as const;
 export const friendActionSchema = { type: "object", additionalProperties: false, required: ["result"], properties: { result: { type:"string", enum:["accepted","declined"] } } } as const;
 export const myFriendsSchema = { type: "object", additionalProperties: false, required: ["friends", "nextCursor"], properties: {
-  friends: { type: "array", maxItems: 20, items: { type: "object", additionalProperties: false, required: ["username", "displayName"], properties: { username: { type: "string" }, displayName: { type: "string" } } } },
+  friends: { type: "array", maxItems: 20, items: { type: "object", additionalProperties: false, required: ["username", "displayName"], properties: { username: { type: "string" }, displayName: { type: "string" }, specialCare:{type:"boolean"} } } },
   nextCursor: { anyOf: [{ type: "string" }, { type: "null" }] } } } as const;
 function responses(success: unknown) { return { 200: success, 400:errorEnvelopeSchema,401:errorEnvelopeSchema,403:errorEnvelopeSchema,404:errorEnvelopeSchema,409:errorEnvelopeSchema,503:errorEnvelopeSchema }; }
 const emptyQuery = { type:"object", additionalProperties:false, properties:{} };

@@ -1,4 +1,5 @@
 import { normalizeCheckInContent } from "../../../check-ins/domain/content.js";
+import { parsePosition, parseWeatherProjection } from "../../../weather/domain/weather.js";
 import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
 
@@ -188,7 +189,16 @@ export function parseCheckInProjection(
   if (Object.hasOwn(data, "checkInVisibility") &&
     data.checkInVisibility !== "private" && data.checkInVisibility !== "friends_only" && data.checkInVisibility !== "public") return undefined;
   if (data.revision !== undefined && (!Number.isSafeInteger(data.revision) || Number(data.revision) < 1)) return undefined;
+  const location = data.location === undefined ? undefined : parsePosition(data.location);
+  const weather = data.weather === undefined ? undefined : parseWeatherProjection(data.weather);
+  if (data.location !== undefined && !location) return undefined;
+  // Legacy unversioned weather was not a Q13 snapshot; do not invent a value.
+  // A corrupt declared v1 projection still fails closed.
+  if (data.weather !== undefined && typeof data.weather === "object" && data.weather !== null &&
+      "projectionVersion" in data.weather && data.weather.projectionVersion === "weather_projection_v1" && !weather) return undefined;
   return { checkInId, note: normalizedNote.value.note, createdAt,
+    ...(location === undefined ? {} : {location}),
+    ...(weather === undefined ? {} : {weather}),
     ...(normalizedNote.value.mood === null ? {} : {mood:normalizedNote.value.mood}),
     ...(normalizedNote.value.activity === null ? {} : {activity:normalizedNote.value.activity}),
     ...(data.revision === undefined ? {} : { revision: Number(data.revision) }),

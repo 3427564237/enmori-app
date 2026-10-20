@@ -56,19 +56,34 @@ final class BackendApiClient {
     required JsonObject body,
   }) => _send('DELETE', path, body: body);
 
-  Future<Result<JsonObject>> get(String path) => _send('GET', path);
+  Future<Result<JsonObject>> get(String path, {bool Function()? isEligible}) =>
+      _send('GET', path, isEligible: isEligible);
 
   Future<Result<JsonObject>> put(
     String path, {
     required JsonObject body,
     String? idempotencyKey,
-  }) => _send('PUT', path, body: body, idempotencyKey: idempotencyKey);
+    bool Function()? isEligible,
+  }) => _send(
+    'PUT',
+    path,
+    body: body,
+    idempotencyKey: idempotencyKey,
+    isEligible: isEligible,
+  );
 
   Future<Result<JsonObject>> post(
     String path, {
     JsonObject? body,
     String? idempotencyKey,
-  }) => _send('POST', path, body: body, idempotencyKey: idempotencyKey);
+    bool Function()? isEligible,
+  }) => _send(
+    'POST',
+    path,
+    body: body,
+    idempotencyKey: idempotencyKey,
+    isEligible: isEligible,
+  );
 
   Future<Result<JsonObject>> getPersona(
     String path, {
@@ -321,6 +336,7 @@ final class BackendApiClient {
     String path, {
     JsonObject? body,
     String? idempotencyKey,
+    bool Function()? isEligible,
   }) async {
     final baseUri = _baseUri;
     if (baseUri == null || !isApprovedBackendBaseUri(baseUri)) {
@@ -334,6 +350,9 @@ final class BackendApiClient {
 
     final elapsed = Stopwatch()..start();
     try {
+      if (isEligible != null && !isEligible()) {
+        return const Failure(_unavailable);
+      }
       final tokenResult = await _withinBudget(_authTokenProvider(), elapsed);
       if (tokenResult case Failure<String>(:final failure)) {
         return Failure(failure);
@@ -353,6 +372,9 @@ final class BackendApiClient {
         ..headers.addAll(headers);
       if (body != null) {
         request.body = jsonEncode(body);
+      }
+      if (isEligible != null && !isEligible()) {
+        return const Failure(_unavailable);
       }
       if (elapsed.elapsed >= _operationTimeout) {
         throw TimeoutException('Backend operation timed out');
@@ -453,6 +475,10 @@ final class BackendApiClient {
       'ADD_FRIEND_TARGET_UNAVAILABLE' =>
         AppFailureKind.addFriendTargetUnavailable,
       'FRIEND_REQUEST_UNAVAILABLE' => AppFailureKind.friendRequestUnavailable,
+      'FRIEND_REVISION_PRECONDITION_FAILED' =>
+        AppFailureKind.friendRevisionPreconditionFailed,
+      'FRIEND_IGNORE_PRECONDITION_FAILED' =>
+        AppFailureKind.friendIgnorePreconditionFailed,
       'EVENT_UNAVAILABLE' => AppFailureKind.eventUnavailable,
       'PROFILE_INVALID' => AppFailureKind.profileInvalid,
       'PROFILE_REVISION_PRECONDITION_FAILED' =>

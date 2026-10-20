@@ -1,5 +1,6 @@
 import '../../../core/result/result.dart';
 import '../../account/domain/account_repository.dart';
+import '../../weather/domain/weather.dart';
 
 import 'package:characters/characters.dart';
 
@@ -12,6 +13,8 @@ final class CheckIn {
     this.revision = 1,
     this.mood,
     this.activity,
+    this.location,
+    this.weather,
   });
 
   final String? mood;
@@ -21,6 +24,8 @@ final class CheckIn {
   final String note;
   final DateTime createdAt;
   final CheckInVisibility? checkInVisibility;
+  final GeoPoint? location;
+  final WeatherSnapshot? weather;
 }
 
 final class CheckInHistoryPage {

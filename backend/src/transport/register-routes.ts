@@ -42,12 +42,13 @@ interface CommandHeaders {
   readonly "idempotency-key": string;
 }
 
-interface CreateCheckInBody {
+interface CreateCheckInBody extends CheckInLocationInput {
   readonly mood?: string | null;
   readonly activity?: string | null;
   readonly checkInVisibility?: "private" | "friends_only" | "public";
   readonly note: string;
 }
+type CheckInLocationInput = import("../check-ins/domain/check-in-location.js").CheckInLocationInput;
 
 interface CheckInParams {
   readonly checkInId: string;
@@ -115,7 +116,8 @@ export async function registerR4Routes(
       if (!result.ok) return sendFailure(request, reply, result.failure);
       return reply
         .code(result.value.disposition === "created" ? 201 : 200)
-        .send({ checkIn: checkInResponse(result.value.checkIn) });
+        .send({ checkIn: checkInResponse(result.value.checkIn),
+          ...(result.value.notice === undefined ? {} : {notice:result.value.notice}) });
     },
   );
 
@@ -182,6 +184,8 @@ function accountResponse(account: AccountProjection): AccountProjection {
 
 function checkInResponse(checkIn: CheckInProjection): CheckInProjection {
   return {
+    ...(checkIn.location === undefined ? {} : {location:checkIn.location}),
+    ...(checkIn.weather === undefined ? {} : {weather:checkIn.weather}),
     checkInId: checkIn.checkInId,
     ...(checkIn.revision === undefined ? {} : { revision: checkIn.revision }),
     note: checkIn.note,

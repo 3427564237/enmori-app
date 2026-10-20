@@ -1,0 +1,1117 @@
+{
+  "source": "b882680c616c461cf4a7fe8dfd0a5f6cf78a9e9a",
+  "tree": "55978ec0d7590af0ef66dc306bbf57eaa221a56b",
+  "base": "927f77527b32d349aa08020f7de0e88402edb9c7",
+  "implementation": "cb23d6a660291e6f5660cd0c0c7bb33ab2ff914e",
+  "backendSubtree": "06790f26a77049aa926963d540e48de4b8c5ec19",
+  "trackedInputs": 1558,
+  "inputs": [
+    {
+      "path": "api/openapi.json",
+      "gitBlob": "9cd94bfaa26a1b8427414bc0d4419585a8ff580e",
+      "bytes": 426056,
+      "sha256": "7500ab7374fc640b70f30b5e5392f5dba76da1258bce84e18cb4b78d351c2472",
+      "normalizedSha256": "7500ab7374fc640b70f30b5e5392f5dba76da1258bce84e18cb4b78d351c2472"
+    },
+    {
+      "path": "backend/emulator-test/social-weather.integration.test.ts",
+      "gitBlob": "add0fad9d689681f692b190a97c37664e164d729",
+      "bytes": 9347,
+      "sha256": "75e51382cca40abc678ae6e83de8b901261040d5a89d12b04dc3aae80d2cddf3",
+      "normalizedSha256": "75e51382cca40abc678ae6e83de8b901261040d5a89d12b04dc3aae80d2cddf3"
+    },
+    {
+      "path": "backend/src/check-ins/application/check-in-model.ts",
+      "gitBlob": "9b0c4b8eae99ce020014d44acefc290f1ecff079",
+      "bytes": 436,
+      "sha256": "a34db014ab50ebf0e9d476757e5f38bcb67c38106a68d24fdac1626acdf7b9eb",
+      "normalizedSha256": "a34db014ab50ebf0e9d476757e5f38bcb67c38106a68d24fdac1626acdf7b9eb"
+    },
+    {
+      "path": "backend/src/check-ins/application/create-check-in.ts",
+      "gitBlob": "2a5d16267f6e8456eb506db6bd9178f916983793",
+      "bytes": 3980,
+      "sha256": "8ff7d7398bf6ebccf9bcefd8ed58f355bb5fa6f70b11c26e2031a09144001666",
+      "normalizedSha256": "8ff7d7398bf6ebccf9bcefd8ed58f355bb5fa6f70b11c26e2031a09144001666"
+    },
+    {
+      "path": "backend/src/check-ins/application/edit-check-in.ts",
+      "gitBlob": "38e8de594215dbbd7b85cf968ccbb52dc42029da",
+      "bytes": 2266,
+      "sha256": "49df567484e4ebd9ff791ee924421f371b1e205ff5b5bd371961682b6e2798f1",
+      "normalizedSha256": "49df567484e4ebd9ff791ee924421f371b1e205ff5b5bd371961682b6e2798f1"
+    },
+    {
+      "path": "backend/src/check-ins/domain/check-in-location.ts",
+      "gitBlob": "468b5da331a3d78cfa2de66b36d74942788c14b0",
+      "bytes": 1486,
+      "sha256": "54ee5f5df1e005eac96d971776f9c7d498a31d0495a89812b2884d917cb85b44",
+      "normalizedSha256": "54ee5f5df1e005eac96d971776f9c7d498a31d0495a89812b2884d917cb85b44"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/firestore-check-in-mutations.ts",
+      "gitBlob": "5e05ca44eaa90fa38d1c2c06901a324fba39a9d4",
+      "bytes": 4178,
+      "sha256": "328b6c924343a6a89dc823aed4d88d00acebb6301fe433f756a60e7432f059c0",
+      "normalizedSha256": "328b6c924343a6a89dc823aed4d88d00acebb6301fe433f756a60e7432f059c0"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/firestore-check-in-repository.ts",
+      "gitBlob": "93fcb526c5bfb418759bf485f935d8fb5c5cde79",
+      "bytes": 12491,
+      "sha256": "0e7d31a907fbbd724d4056da7e36623b6dcde5edd3da50003235255efa2da22c",
+      "normalizedSha256": "0e7d31a907fbbd724d4056da7e36623b6dcde5edd3da50003235255efa2da22c"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-mutations.ts",
+      "gitBlob": "ed0d74779703fc973832bf5a0eeea5bd999e4cad",
+      "bytes": 730,
+      "sha256": "a3e3f04e6f6dfcad63434153659a213d0e4877da776c0aa12e6ca882d7745629",
+      "normalizedSha256": "a3e3f04e6f6dfcad63434153659a213d0e4877da776c0aa12e6ca882d7745629"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-repository.ts",
+      "gitBlob": "fc6a10b95aed36fe5ea9a8be3cca73d9b3a0c4ec",
+      "bytes": 2436,
+      "sha256": "99f41866aafe7dc946af8c7d9336ecbc277afc764d9b0f383e559ca85266ccd4",
+      "normalizedSha256": "99f41866aafe7dc946af8c7d9336ecbc277afc764d9b0f383e559ca85266ccd4"
+    },
+    {
+      "path": "backend/src/check-ins/transport/mutation-routes.ts",
+      "gitBlob": "83d2269089185f0423a132c2fb2434c9384617d3",
+      "bytes": 3225,
+      "sha256": "f865e35c391f60ba655ee0c018107b76d0d30a5a8c3be0bd9d774cfcc9989240",
+      "normalizedSha256": "f865e35c391f60ba655ee0c018107b76d0d30a5a8c3be0bd9d774cfcc9989240"
+    },
+    {
+      "path": "backend/src/friend-activity/domain/rank-activity.ts",
+      "gitBlob": "72b3808612c1fae09974f23f2626b0ee223fe2bc",
+      "bytes": 957,
+      "sha256": "23cd850452b87208336d69e2e7eb58a3bfadd7c1cf324ac11a77f00b08a2bdd8",
+      "normalizedSha256": "23cd850452b87208336d69e2e7eb58a3bfadd7c1cf324ac11a77f00b08a2bdd8"
+    },
+    {
+      "path": "backend/src/friend-activity/infrastructure/firestore-friend-activity.ts",
+      "gitBlob": "d0dbdbe486b1ca4f035107747664a963b9661f23",
+      "bytes": 5231,
+      "sha256": "b0ba5906435793204922a3f5a8eca67ad419ee80cf63eb589e4a0fae5b5ee813",
+      "normalizedSha256": "b0ba5906435793204922a3f5a8eca67ad419ee80cf63eb589e4a0fae5b5ee813"
+    },
+    {
+      "path": "backend/src/friend-activity/ports/friend-activity.ts",
+      "gitBlob": "51f3a45d8b98b397f8360edf57143c4e24972707",
+      "bytes": 1254,
+      "sha256": "8e5998cc422e74a64604499a79adda3023bdbc6bdf2cd3d902ef7c6c4f0ccc11",
+      "normalizedSha256": "8e5998cc422e74a64604499a79adda3023bdbc6bdf2cd3d902ef7c6c4f0ccc11"
+    },
+    {
+      "path": "backend/src/friend-activity/transport/friend-activity-route.ts",
+      "gitBlob": "83df222357ce44fd5cc09871c578525cc512eef1",
+      "bytes": 2300,
+      "sha256": "760c6947c926257165ee2a119464a8b7e2166ca308a86c561c1a7deb02d03e3b",
+      "normalizedSha256": "760c6947c926257165ee2a119464a8b7e2166ca308a86c561c1a7deb02d03e3b"
+    },
+    {
+      "path": "backend/src/friend-recommendations/infrastructure/firestore-friend-recommendations.ts",
+      "gitBlob": "de665c56ea968e74807b0fb14319167c134bfdc3",
+      "bytes": 6678,
+      "sha256": "08e5cf3e62fda910ff766c28133ef53e3173af797399ec1d95704260ea7b7f64",
+      "normalizedSha256": "08e5cf3e62fda910ff766c28133ef53e3173af797399ec1d95704260ea7b7f64"
+    },
+    {
+      "path": "backend/src/friend-recommendations/ports/friend-event-projection.ts",
+      "gitBlob": "9024917f33f7b02c721627e6fd6ac3f90806fab0",
+      "bytes": 696,
+      "sha256": "445f00da3fb045132ecc1fc676e14f5900278642f82c1ed67e36282851f0a6c2",
+      "normalizedSha256": "445f00da3fb045132ecc1fc676e14f5900278642f82c1ed67e36282851f0a6c2"
+    },
+    {
+      "path": "backend/src/friend-recommendations/ports/friend-recommendations.ts",
+      "gitBlob": "8aee4bc47c304b896e7df5624035b0cd3518af11",
+      "bytes": 493,
+      "sha256": "7d91917a8b8a1c0111e34bd7df39e75af27d40b562d0e553a1d4f81b0d8c074a",
+      "normalizedSha256": "7d91917a8b8a1c0111e34bd7df39e75af27d40b562d0e553a1d4f81b0d8c074a"
+    },
+    {
+      "path": "backend/src/friend-recommendations/transport/friend-recommendation-route.ts",
+      "gitBlob": "d374334ae984856a6c4c66bdc8116c9e8ad1b553",
+      "bytes": 2238,
+      "sha256": "b81137144060f2134812784b8944dfcf288c7bbecfcaf895dfbbfc04b82bfd9c",
+      "normalizedSha256": "b81137144060f2134812784b8944dfcf288c7bbecfcaf895dfbbfc04b82bfd9c"
+    },
+    {
+      "path": "backend/src/friends/application/social-profile.ts",
+      "gitBlob": "aa30ddf5f55eb54642f7a8e58de4bf6777aea767",
+      "bytes": 1257,
+      "sha256": "cce11c64e3050cf4b10f7826f821329006b3af59b2ee701881013902e3c324a0",
+      "normalizedSha256": "cce11c64e3050cf4b10f7826f821329006b3af59b2ee701881013902e3c324a0"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/authorized-participation.ts",
+      "gitBlob": "9cba654f02cacc05e93a5fe1d4aeb4f3c7cfc74e",
+      "bytes": 1255,
+      "sha256": "3178df0f6cc6f7993ddafc1f94edaaa6449b5a363328235d134de7da24089783",
+      "normalizedSha256": "3178df0f6cc6f7993ddafc1f94edaaa6449b5a363328235d134de7da24089783"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/firestore-friend-repository.ts",
+      "gitBlob": "1935362e036be59b3256941ff4c3a213f0f171b4",
+      "bytes": 20873,
+      "sha256": "5cb39a6e5d35011072cc024d4412662d86355a2b53b6f80a0fc484686bb69dcb",
+      "normalizedSha256": "5cb39a6e5d35011072cc024d4412662d86355a2b53b6f80a0fc484686bb69dcb"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/firestore-friend-summary.ts",
+      "gitBlob": "528d6156a686c0e4958e5d790553260c76ce8903",
+      "bytes": 2393,
+      "sha256": "1a021716b61ba1b6fd42f40eae1fd51dc8b08dd27b104244b602076308aa6810",
+      "normalizedSha256": "1a021716b61ba1b6fd42f40eae1fd51dc8b08dd27b104244b602076308aa6810"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/firestore-social-repository.ts",
+      "gitBlob": "d16641a1b4f48fdacaa30b5eb9276857d7b0773c",
+      "bytes": 11934,
+      "sha256": "a5bdfb3458dbbfefe78908a5e96a3605dc8eeeb540d10503b2014a135c8fb624",
+      "normalizedSha256": "a5bdfb3458dbbfefe78908a5e96a3605dc8eeeb540d10503b2014a135c8fb624"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/social-authority.ts",
+      "gitBlob": "aa41184fdaf127d2f1d02d4ccd451bc21b94c708",
+      "bytes": 5376,
+      "sha256": "f7703672c79154c8dd1db4d0e8fcef16389a1065f01315c6a0cae59da830f07a",
+      "normalizedSha256": "f7703672c79154c8dd1db4d0e8fcef16389a1065f01315c6a0cae59da830f07a"
+    },
+    {
+      "path": "backend/src/friends/ports/friend-repository.ts",
+      "gitBlob": "036209478d80f0132fc1c9b70cfa077733a005ce",
+      "bytes": 1496,
+      "sha256": "c6f9adedfa625a67b0f015202ac3986c445d424bb3f18ef2eadc08e549193308",
+      "normalizedSha256": "c6f9adedfa625a67b0f015202ac3986c445d424bb3f18ef2eadc08e549193308"
+    },
+    {
+      "path": "backend/src/friends/ports/friend-summary.ts",
+      "gitBlob": "82c577d1a0055bb802b689b747d7cb8b0aa2f614",
+      "bytes": 251,
+      "sha256": "d04b604b11ca58e08e6d15b682532a8c73da4405c4d55af8f85b8f94e226d9c7",
+      "normalizedSha256": "d04b604b11ca58e08e6d15b682532a8c73da4405c4d55af8f85b8f94e226d9c7"
+    },
+    {
+      "path": "backend/src/friends/ports/social-repository.ts",
+      "gitBlob": "0a6e9a05fb892e25a572881392ae1e983988a3b1",
+      "bytes": 1903,
+      "sha256": "ae1db935aa919d62ba2631d3ffab6c4a507ab585feb6dce311950afb2b9ff7bd",
+      "normalizedSha256": "ae1db935aa919d62ba2631d3ffab6c4a507ab585feb6dce311950afb2b9ff7bd"
+    },
+    {
+      "path": "backend/src/friends/transport/friend-summary-route.ts",
+      "gitBlob": "c411c02485547eb913a9a4a441ade0c1f17727b5",
+      "bytes": 1638,
+      "sha256": "adc12f8d1685dc329c7d46042de9f643d0e4aceaf595a8d49a352a15a5d419cb",
+      "normalizedSha256": "adc12f8d1685dc329c7d46042de9f643d0e4aceaf595a8d49a352a15a5d419cb"
+    },
+    {
+      "path": "backend/src/friends/transport/register-social-module.ts",
+      "gitBlob": "6d04c205b9b32220ebcbd3045888ee0fcf8e92ab",
+      "bytes": 3120,
+      "sha256": "e623aa2cde4159fed21fded17d67a1dfba667f6b405c27cbb677d4bf3f305249",
+      "normalizedSha256": "e623aa2cde4159fed21fded17d67a1dfba667f6b405c27cbb677d4bf3f305249"
+    },
+    {
+      "path": "backend/src/friends/transport/social-routes.ts",
+      "gitBlob": "e8b849ce3373379771c9549b9a1e6565362e6d78",
+      "bytes": 7303,
+      "sha256": "87db20a10a213109acd9d8759814632b41a77500fa1b355a05a16cb7a1bc3ea7",
+      "normalizedSha256": "87db20a10a213109acd9d8759814632b41a77500fa1b355a05a16cb7a1bc3ea7"
+    },
+    {
+      "path": "backend/src/shared/application/app-failure.ts",
+      "gitBlob": "715b8e5b55ae2410645702a6a4140c874abe77e9",
+      "bytes": 3776,
+      "sha256": "21a612113f0e60fc4e4d76b94518f734edf09c4482c825bef63231ee7c0c2c1a",
+      "normalizedSha256": "21a612113f0e60fc4e4d76b94518f734edf09c4482c825bef63231ee7c0c2c1a"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-gateway.ts",
+      "gitBlob": "8214771339a6a90bac2dfbe4d34063b7603e69af",
+      "bytes": 8975,
+      "sha256": "b58f847d2270fa12a9ff4918b3dc0be38ff39b57dbc88033de74845266efd678",
+      "normalizedSha256": "b58f847d2270fa12a9ff4918b3dc0be38ff39b57dbc88033de74845266efd678"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-records.ts",
+      "gitBlob": "a022ec9e3ab599b6b4f9c53fc6195523105ebd1c",
+      "bytes": 7202,
+      "sha256": "5b039c81054ce22436ab5585228919a18e492d26bd09921f67fb1623ef9fa52b",
+      "normalizedSha256": "5b039c81054ce22436ab5585228919a18e492d26bd09921f67fb1623ef9fa52b"
+    },
+    {
+      "path": "backend/src/transport/register-isolated-slices.ts",
+      "gitBlob": "bab6b65bd4208a17463a903604876fd7e2ae64a6",
+      "bytes": 9443,
+      "sha256": "7a5165a3ac1595f2604dce3875b510fd6bc9bb9cb28660c561f6b93a9b9ea293",
+      "normalizedSha256": "7a5165a3ac1595f2604dce3875b510fd6bc9bb9cb28660c561f6b93a9b9ea293"
+    },
+    {
+      "path": "backend/src/transport/register-routes.ts",
+      "gitBlob": "ca96040064ad0bea567245dfb3518772abbfcb34",
+      "bytes": 7884,
+      "sha256": "7d8da1497812a3ddae4063790647ae9f542a6b0722bc2a0f41def03a1f0cf440",
+      "normalizedSha256": "7d8da1497812a3ddae4063790647ae9f542a6b0722bc2a0f41def03a1f0cf440"
+    },
+    {
+      "path": "backend/src/transport/route-inventory.ts",
+      "gitBlob": "ac74d86d44e365eedd99d212565844f890b39293",
+      "bytes": 6367,
+      "sha256": "08f0aa074c63bca03932eedc3a73316be31fad8c9c4579219793483344fdd47c",
+      "normalizedSha256": "08f0aa074c63bca03932eedc3a73316be31fad8c9c4579219793483344fdd47c"
+    },
+    {
+      "path": "backend/src/transport/schemas.ts",
+      "gitBlob": "44db8d56391b68396d5e06f8ed5cc3791e7fac8b",
+      "bytes": 8538,
+      "sha256": "cc5c3cb30db3b523e1fb692c387c7124c7c4bcd32ee1af7581c3eb70e93144cf",
+      "normalizedSha256": "cc5c3cb30db3b523e1fb692c387c7124c7c4bcd32ee1af7581c3eb70e93144cf"
+    },
+    {
+      "path": "backend/src/weather/application/home-weather.ts",
+      "gitBlob": "76a725d9b4a65652229859b2587798ab8bda8a03",
+      "bytes": 1931,
+      "sha256": "181af67e86caeca905e51038924c92470b135730a0432e6318b0c21ed6fbea1d",
+      "normalizedSha256": "181af67e86caeca905e51038924c92470b135730a0432e6318b0c21ed6fbea1d"
+    },
+    {
+      "path": "backend/src/weather/domain/weather.ts",
+      "gitBlob": "37e0bb74ef2b69446c31a2e64a06f10a54439b50",
+      "bytes": 5663,
+      "sha256": "d4c8eb5260261b0cbf6e50d0a38f7b24a3e4a5a6ae0994d66da4159f3e5dd151",
+      "normalizedSha256": "d4c8eb5260261b0cbf6e50d0a38f7b24a3e4a5a6ae0994d66da4159f3e5dd151"
+    },
+    {
+      "path": "backend/src/weather/infrastructure/firestore-weather-purpose-authority.ts",
+      "gitBlob": "8b9cf3b803031bc6ad327f4ff9c6c8d44a924f02",
+      "bytes": 1428,
+      "sha256": "59dc05765802623a97e491a6d266be65b2976ce8eb60bfc5a3b4fc3f10c9c6c7",
+      "normalizedSha256": "59dc05765802623a97e491a6d266be65b2976ce8eb60bfc5a3b4fc3f10c9c6c7"
+    },
+    {
+      "path": "backend/src/weather/infrastructure/open-meteo-weather-provider.ts",
+      "gitBlob": "02ce2927a58e0dfd6c9c78454df62fa89a81bbf9",
+      "bytes": 3861,
+      "sha256": "ac03a6fed7b11bfca7e786725665a052bc1f859ffbf31d9b81a276bb660c4594",
+      "normalizedSha256": "ac03a6fed7b11bfca7e786725665a052bc1f859ffbf31d9b81a276bb660c4594"
+    },
+    {
+      "path": "backend/src/weather/ports/weather-provider.ts",
+      "gitBlob": "1e0d5cfe59734ab2d4385a5669d781ce3fcf5b11",
+      "bytes": 289,
+      "sha256": "f29193913d86f91279a4a0db87faf1ed9fe6b2fe4aaa13e73170d3f4c8522e9d",
+      "normalizedSha256": "f29193913d86f91279a4a0db87faf1ed9fe6b2fe4aaa13e73170d3f4c8522e9d"
+    },
+    {
+      "path": "backend/src/weather/ports/weather-purpose-authority.ts",
+      "gitBlob": "e990fa8eed6d47dbaca5a9b02de983a20323ebaf",
+      "bytes": 366,
+      "sha256": "3d34065fd20b100bb892c2a8115ece4a7ef09e6b4f48656b9383b87609e2fd77",
+      "normalizedSha256": "3d34065fd20b100bb892c2a8115ece4a7ef09e6b4f48656b9383b87609e2fd77"
+    },
+    {
+      "path": "backend/src/weather/transport/home-weather-route.ts",
+      "gitBlob": "6ab0353548212869e2b8a2284e82e2ae3ccf9db9",
+      "bytes": 1780,
+      "sha256": "cbfd3e6ab011c1c8457efd580e8c0c580a26daf81475e8c74d99eac5dbb5d786",
+      "normalizedSha256": "cbfd3e6ab011c1c8457efd580e8c0c580a26daf81475e8c74d99eac5dbb5d786"
+    },
+    {
+      "path": "backend/src/weather/transport/schemas.ts",
+      "gitBlob": "f20ffec072dbc4a12c3b4c47e17583d58dd417f3",
+      "bytes": 1118,
+      "sha256": "9085d7b301da88aeccc6f039364bc56db45b4cf19214e02411b6e59f1b92e3fc",
+      "normalizedSha256": "9085d7b301da88aeccc6f039364bc56db45b4cf19214e02411b6e59f1b92e3fc"
+    },
+    {
+      "path": "backend/test/check-in-weather.test.ts",
+      "gitBlob": "6653976a3ff7f6252bae5d8fec8abf5adfb848b1",
+      "bytes": 7492,
+      "sha256": "38a77acd87f014c9120dafa052d5493d00b739972c1636a698c274b04312da85",
+      "normalizedSha256": "38a77acd87f014c9120dafa052d5493d00b739972c1636a698c274b04312da85"
+    },
+    {
+      "path": "backend/test/friend-activity.test.ts",
+      "gitBlob": "52da85b606081d92cffc19f75366a2137bea6f3c",
+      "bytes": 8165,
+      "sha256": "0fdc38ca7de0c24e6a97d64abeb22879aa108a5a9213eeda4328d54647bc11f9",
+      "normalizedSha256": "0fdc38ca7de0c24e6a97d64abeb22879aa108a5a9213eeda4328d54647bc11f9"
+    },
+    {
+      "path": "backend/test/friend-new-pair.test.ts",
+      "gitBlob": "860c65326a0a276aac5220da0a2a1842f04529cb",
+      "bytes": 1488,
+      "sha256": "706c2e97b654d028c586563dd0392e87838a1e54d3f33060b76b71f17ba33770",
+      "normalizedSha256": "706c2e97b654d028c586563dd0392e87838a1e54d3f33060b76b71f17ba33770"
+    },
+    {
+      "path": "backend/test/friend-recommendation-source.test.ts",
+      "gitBlob": "d89dfe0e21772f29be95f9de94799a2568266393",
+      "bytes": 5732,
+      "sha256": "2eebc4b20826dc429e392982864c60947445d92f1fb1c04f33b9745aaba2cc02",
+      "normalizedSha256": "2eebc4b20826dc429e392982864c60947445d92f1fb1c04f33b9745aaba2cc02"
+    },
+    {
+      "path": "backend/test/home-weather.test.ts",
+      "gitBlob": "60661d3780aad5e23bcd102078d742c66993c3e9",
+      "bytes": 3316,
+      "sha256": "60f89174f359f5c442ceeaa9a96608cdc7acfdcb632b4712a54af679ca57cb7b",
+      "normalizedSha256": "60f89174f359f5c442ceeaa9a96608cdc7acfdcb632b4712a54af679ca57cb7b"
+    },
+    {
+      "path": "backend/test/social-profile.test.ts",
+      "gitBlob": "ba12894cefff224c904a90bb096409be420a51d3",
+      "bytes": 12876,
+      "sha256": "3f71cd0482abc93a326dfa24f326e9bffe9428ea31436ef6eaf44b34b4ee26b2",
+      "normalizedSha256": "3f71cd0482abc93a326dfa24f326e9bffe9428ea31436ef6eaf44b34b4ee26b2"
+    },
+    {
+      "path": "backend/test/support/in-memory-firestore-gateway.ts",
+      "gitBlob": "5b436bf51e52be056f695a58401ff225e38b7a09",
+      "bytes": 3972,
+      "sha256": "a4e49c0b54e287293b6cb61eac7dd07773ffbb3f3c2e3b3b1b8eeb4964caf45d",
+      "normalizedSha256": "a4e49c0b54e287293b6cb61eac7dd07773ffbb3f3c2e3b3b1b8eeb4964caf45d"
+    },
+    {
+      "path": "backend/test/weather.test.ts",
+      "gitBlob": "48567a13a922e8045fe779e30d3e91b0b805de5e",
+      "bytes": 6591,
+      "sha256": "b3a7e3fbf4e776901d2fcc60e49cceb7078690fccddf7d15d25a3599ecc4c047",
+      "normalizedSha256": "b3a7e3fbf4e776901d2fcc60e49cceb7078690fccddf7d15d25a3599ecc4c047"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-20-jin-module-integration.md",
+      "gitBlob": "a850f5854d9083ca4df90cd5cd6780ec373d31cf",
+      "bytes": 5253,
+      "sha256": "ba28acd644b51c87c381281c6df905b4359931b9070f554433d4daea7cd8d372",
+      "normalizedSha256": "ba28acd644b51c87c381281c6df905b4359931b9070f554433d4daea7cd8d372"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-20-jin-social-weather-contract.md",
+      "gitBlob": "4fe87ba65e9c25a5d21cab4345886b7f77e67c97",
+      "bytes": 7508,
+      "sha256": "8597890cdc69b19b377a49962682386828dcd80f82dd8ae295e0ef6ba78ba2d0",
+      "normalizedSha256": "8597890cdc69b19b377a49962682386828dcd80f82dd8ae295e0ef6ba78ba2d0"
+    },
+    {
+      "path": "lib/core/network/backend_api_client.dart",
+      "gitBlob": "fade0696b7235535d9bf05243c81aab4e0067834",
+      "bytes": 17463,
+      "sha256": "a52572cd9f069c48212b85d6a43f73debdbdc3e82d3d6d256bb2f32e93ed1ea2",
+      "normalizedSha256": "a52572cd9f069c48212b85d6a43f73debdbdc3e82d3d6d256bb2f32e93ed1ea2"
+    },
+    {
+      "path": "lib/core/result/result.dart",
+      "gitBlob": "d8c979a699b98fccf134094abf70bb3dd99af96b",
+      "bytes": 1481,
+      "sha256": "a90dff58089769e5c2ef28b8ecda56842fb20a1c9094eba9e4704eba00576c3c",
+      "normalizedSha256": "a90dff58089769e5c2ef28b8ecda56842fb20a1c9094eba9e4704eba00576c3c"
+    },
+    {
+      "path": "lib/features/check_in/data/backend_check_in_place_repository.dart",
+      "gitBlob": "3b04f9be58fc31d668ad4fd1da439c88dc9b2d20",
+      "bytes": 4027,
+      "sha256": "8ce85483ee9fd6f289524747057b1e9c2ce89a07099788d56aa1e0c1c1b41a1d",
+      "normalizedSha256": "8ce85483ee9fd6f289524747057b1e9c2ce89a07099788d56aa1e0c1c1b41a1d"
+    },
+    {
+      "path": "lib/features/check_in/data/backend_check_in_repository.dart",
+      "gitBlob": "8247ccbb29b1b0933d1e17c0fb98f0e19828a655",
+      "bytes": 7263,
+      "sha256": "5c9f81a7c80c4dc327c588b6e97e3dd381b06e92b43bfbe12a3f5ce667978d58",
+      "normalizedSha256": "5c9f81a7c80c4dc327c588b6e97e3dd381b06e92b43bfbe12a3f5ce667978d58"
+    },
+    {
+      "path": "lib/features/check_in/data/check_in_projection_parser.dart",
+      "gitBlob": "7bce07994c475ef49afe8217652bb0ec4bcb7ad3",
+      "bytes": 2247,
+      "sha256": "2701b83aaffd86d41e990a09670cce4f7e0856572ef8754a689c35f19d50066a",
+      "normalizedSha256": "2701b83aaffd86d41e990a09670cce4f7e0856572ef8754a689c35f19d50066a"
+    },
+    {
+      "path": "lib/features/check_in/domain/check_in_place_repository.dart",
+      "gitBlob": "2705735c63dee02401d903b1bf0a25d1ad9b4199",
+      "bytes": 1358,
+      "sha256": "e4e32dc65bc63b8c5d574e8f55a54a21653456464c6c4df486f4f36a058510be",
+      "normalizedSha256": "e4e32dc65bc63b8c5d574e8f55a54a21653456464c6c4df486f4f36a058510be"
+    },
+    {
+      "path": "lib/features/check_in/domain/check_in_repository.dart",
+      "gitBlob": "7a74195c1f5ec891ae75df6fba5b28ae639833bd",
+      "bytes": 1723,
+      "sha256": "33f5a54a0f21bc15a7ad560dd30f1684aed481168a0692a4be26e01929a9d27f",
+      "normalizedSha256": "33f5a54a0f21bc15a7ad560dd30f1684aed481168a0692a4be26e01929a9d27f"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_place_controller.dart",
+      "gitBlob": "2fba00ebbdbfd541f0b5e0c8316761a582b53533",
+      "bytes": 3259,
+      "sha256": "9b24b48aaf76fbeedba90b1a2c67c1203118afd3de9dcf2dcf3466a11f2ae1d2",
+      "normalizedSha256": "9b24b48aaf76fbeedba90b1a2c67c1203118afd3de9dcf2dcf3466a11f2ae1d2"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_place_controls.dart",
+      "gitBlob": "2ff7c3e10c27f1ab1466b18c1c67d16f3fbb050b",
+      "bytes": 5658,
+      "sha256": "847da696db74c5db746f85f2d44ff25abccc3604847766a0734872e59c683416",
+      "normalizedSha256": "847da696db74c5db746f85f2d44ff25abccc3604847766a0734872e59c683416"
+    },
+    {
+      "path": "lib/features/check_in/presentation/located_check_in_actions.dart",
+      "gitBlob": "fc1cbda968dad082d131ea5b3bea2c64a9b1b95a",
+      "bytes": 5852,
+      "sha256": "00bbc3a661c3b2c72c6572e83c1b81d05dafc9e0f36caf876cf79d674a2f35f2",
+      "normalizedSha256": "00bbc3a661c3b2c72c6572e83c1b81d05dafc9e0f36caf876cf79d674a2f35f2"
+    },
+    {
+      "path": "lib/features/check_in/presentation/located_check_in_controller.dart",
+      "gitBlob": "07ecd40ec9ab360e839de49456610764a34013a3",
+      "bytes": 7426,
+      "sha256": "05e0b7d05c67e037abfe8c4721a4c97b44acbd62a3b22adf3c933227785c13b8",
+      "normalizedSha256": "05e0b7d05c67e037abfe8c4721a4c97b44acbd62a3b22adf3c933227785c13b8"
+    },
+    {
+      "path": "lib/features/friends/data/backend_friend_activity_repository.dart",
+      "gitBlob": "7928df1fdd75a662316f81a2efabab7bed97f254",
+      "bytes": 2484,
+      "sha256": "d772ee1e0752da5a77f3d65b242ac3ad156e4eed6b82e5c334a077b28b2607d0",
+      "normalizedSha256": "d772ee1e0752da5a77f3d65b242ac3ad156e4eed6b82e5c334a077b28b2607d0"
+    },
+    {
+      "path": "lib/features/friends/data/backend_friend_discovery_repository.dart",
+      "gitBlob": "4b7b080425e2493afee5d65338ec9d034a95b10e",
+      "bytes": 3101,
+      "sha256": "6d12396649db26d3e99dbcef35333de559016133c54461e863cf420633b9d1d1",
+      "normalizedSha256": "6d12396649db26d3e99dbcef35333de559016133c54461e863cf420633b9d1d1"
+    },
+    {
+      "path": "lib/features/friends/data/backend_friend_repository.dart",
+      "gitBlob": "bcbf6dad2c0ba43fe08ac531704a528fe3bbc272",
+      "bytes": 8156,
+      "sha256": "408cfec9aad56264cdfe5f6690186c7609a25a6f09523d85fa443d0ff43fab7e",
+      "normalizedSha256": "408cfec9aad56264cdfe5f6690186c7609a25a6f09523d85fa443d0ff43fab7e"
+    },
+    {
+      "path": "lib/features/friends/data/backend_social_repository.dart",
+      "gitBlob": "f16480e943f142b4d4471fdaf3dc54f23d1f4095",
+      "bytes": 8917,
+      "sha256": "1af412ee40cd2784a0cce5932da270892b00751aebfa74f8482a8317b26f87cd",
+      "normalizedSha256": "1af412ee40cd2784a0cce5932da270892b00751aebfa74f8482a8317b26f87cd"
+    },
+    {
+      "path": "lib/features/friends/domain/friend_activity_repository.dart",
+      "gitBlob": "62fe8ccb3a61833db9e220cacd003bbdd71f6ead",
+      "bytes": 829,
+      "sha256": "8e0cc78b181440642927d0e79be6a97aa53063a5884a4187e59a2d90734cbc3f",
+      "normalizedSha256": "8e0cc78b181440642927d0e79be6a97aa53063a5884a4187e59a2d90734cbc3f"
+    },
+    {
+      "path": "lib/features/friends/domain/friend_discovery_repository.dart",
+      "gitBlob": "6dc04c4e5c36b9887fdcfc97f3a39cd6f03f74d0",
+      "bytes": 566,
+      "sha256": "04230e9dc814a4532e3f17d357e78e3b9a75911771f5d64fd34411d72b17badd",
+      "normalizedSha256": "04230e9dc814a4532e3f17d357e78e3b9a75911771f5d64fd34411d72b17badd"
+    },
+    {
+      "path": "lib/features/friends/domain/friend_repository.dart",
+      "gitBlob": "58596114dee9b7fedf0513ce2986805540e2725d",
+      "bytes": 1444,
+      "sha256": "dab6e6df8cf93a8544f76cba3772c060f52ab844d4aa45cc2efb3c27b57f88f5",
+      "normalizedSha256": "dab6e6df8cf93a8544f76cba3772c060f52ab844d4aa45cc2efb3c27b57f88f5"
+    },
+    {
+      "path": "lib/features/friends/domain/social_repository.dart",
+      "gitBlob": "5bc692289c5c6065669202605f252b48d5f1f589",
+      "bytes": 2245,
+      "sha256": "d57cb0c519c1f1ad9af208ea150bd4f68bdab8453573dd2e3f4ae56886a3701c",
+      "normalizedSha256": "d57cb0c519c1f1ad9af208ea150bd4f68bdab8453573dd2e3f4ae56886a3701c"
+    },
+    {
+      "path": "lib/features/friends/presentation/check_in_points_map.dart",
+      "gitBlob": "18cce3f9fb2f1c7de6e2360be88b05bd1f88866c",
+      "bytes": 5949,
+      "sha256": "1f32e56f504bfc89f65471096bbef22e00d6b0d503275c9c7ddd61464c09d644",
+      "normalizedSha256": "1f32e56f504bfc89f65471096bbef22e00d6b0d503275c9c7ddd61464c09d644"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_activity_panel.dart",
+      "gitBlob": "b13c601ba53737feebb6b7070368aaa9fd2581aa",
+      "bytes": 5425,
+      "sha256": "7615c81f45b1748dd495df809fb1b9f41dfc65eb1314ee77097dfb9c2a320cbb",
+      "normalizedSha256": "7615c81f45b1748dd495df809fb1b9f41dfc65eb1314ee77097dfb9c2a320cbb"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_discovery_controller.dart",
+      "gitBlob": "e59baa82c41d56e4967dada8bcf0f2314f99e603",
+      "bytes": 2651,
+      "sha256": "b399d78b7d083d520de92075a70d8facc0cc66cb6b7f2a058eaf763e95143ffb",
+      "normalizedSha256": "b399d78b7d083d520de92075a70d8facc0cc66cb6b7f2a058eaf763e95143ffb"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_discovery_panel.dart",
+      "gitBlob": "a5d27a175700e9e4d9b2ea58d825c00e0c723710",
+      "bytes": 4336,
+      "sha256": "b044d6ef269ab9c7e7784eb5c42197b83d33ad68a44ad4d5e3e6ca91cd0e8a84",
+      "normalizedSha256": "b044d6ef269ab9c7e7784eb5c42197b83d33ad68a44ad4d5e3e6ca91cd0e8a84"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_module_page.dart",
+      "gitBlob": "51864e10157a56ba8d946cab5a9d714661b632fa",
+      "bytes": 5304,
+      "sha256": "a854a017d5320f575d3bad2c30143380134a2299cbcc519ae6aa1e2c2e815737",
+      "normalizedSha256": "a854a017d5320f575d3bad2c30143380134a2299cbcc519ae6aa1e2c2e815737"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_page.dart",
+      "gitBlob": "895dcf815be355f7c62f418e42286704912b6941",
+      "bytes": 7890,
+      "sha256": "f33d634b99aae9d1e38fa6d8c44dd0e783cdf03c66c51e10f08e905e1c174f45",
+      "normalizedSha256": "f33d634b99aae9d1e38fa6d8c44dd0e783cdf03c66c51e10f08e905e1c174f45"
+    },
+    {
+      "path": "lib/features/friends/presentation/my_friends_page.dart",
+      "gitBlob": "84a7d740fee73dd6cd0fff34d1fb37189aa58464",
+      "bytes": 7258,
+      "sha256": "f6e88c361bf1c5a9b97f4702677fa1b5fcfd7e1fabbcc1ce9a750010bd34b078",
+      "normalizedSha256": "f6e88c361bf1c5a9b97f4702677fa1b5fcfd7e1fabbcc1ce9a750010bd34b078"
+    },
+    {
+      "path": "lib/features/friends/presentation/social_profile_controller.dart",
+      "gitBlob": "7b777a4d80f1e784cf66887f183f2f38a6a4e671",
+      "bytes": 5547,
+      "sha256": "0aad7fbe2f3aaf7d0cd213a7eb438a597e3fb435fd909751b36a2fbc37ddf2e0",
+      "normalizedSha256": "0aad7fbe2f3aaf7d0cd213a7eb438a597e3fb435fd909751b36a2fbc37ddf2e0"
+    },
+    {
+      "path": "lib/features/friends/presentation/social_profile_page.dart",
+      "gitBlob": "12eea50a37c8ff40e91578170b063cd69c9ca4f6",
+      "bytes": 12489,
+      "sha256": "c2232dcfc6544a7a8af7921b15d40b3b835aa7263d21cf4a15d786eb076b06be",
+      "normalizedSha256": "c2232dcfc6544a7a8af7921b15d40b3b835aa7263d21cf4a15d786eb076b06be"
+    },
+    {
+      "path": "lib/features/friends/social_providers.dart",
+      "gitBlob": "bced32679d7ec7719422a4240878903bc226d397",
+      "bytes": 317,
+      "sha256": "cc72933a981a7b81af077e1f4373772d1aaed9a036866d9a90d31d37bb7ac07c",
+      "normalizedSha256": "cc72933a981a7b81af077e1f4373772d1aaed9a036866d9a90d31d37bb7ac07c"
+    },
+    {
+      "path": "lib/features/weather/data/backend_home_weather_repository.dart",
+      "gitBlob": "46e9d0ebb8841100baaa3ba7d3726c75a09e1790",
+      "bytes": 1338,
+      "sha256": "285bba6422767ea49e9e144829c21cb2d86fa703eb11314767d97ba85295bb37",
+      "normalizedSha256": "285bba6422767ea49e9e144829c21cb2d86fa703eb11314767d97ba85295bb37"
+    },
+    {
+      "path": "lib/features/weather/data/geolocator_foreground_location.dart",
+      "gitBlob": "4b7968f78659fe57b89ef42cb4278fad328c3655",
+      "bytes": 2934,
+      "sha256": "1a353c44a23ff0673f851c9b93ecd7b558c87a3412a96b6478151af22fd3cbf7",
+      "normalizedSha256": "1a353c44a23ff0673f851c9b93ecd7b558c87a3412a96b6478151af22fd3cbf7"
+    },
+    {
+      "path": "lib/features/weather/domain/foreground_location.dart",
+      "gitBlob": "ba94a3ec3f06efe1b7ad89673ad562a05ecec217",
+      "bytes": 332,
+      "sha256": "54e25dde77ce80c41daa7eb1de9b08ab7d85ba7e18fc301e780bcee8e8c5894d",
+      "normalizedSha256": "54e25dde77ce80c41daa7eb1de9b08ab7d85ba7e18fc301e780bcee8e8c5894d"
+    },
+    {
+      "path": "lib/features/weather/domain/home_weather_repository.dart",
+      "gitBlob": "6efcf563cc41cdf3f4150f103071b897aec44d5e",
+      "bytes": 223,
+      "sha256": "3f040d22fcb3309ace2481008744d753f647757468985a13c67e53c5685739d4",
+      "normalizedSha256": "3f040d22fcb3309ace2481008744d753f647757468985a13c67e53c5685739d4"
+    },
+    {
+      "path": "lib/features/weather/domain/weather.dart",
+      "gitBlob": "323d21ff5dcec1aee1196ca3e9ac7017e9c4e49c",
+      "bytes": 2569,
+      "sha256": "bf5c4afc5eeca97c477f345abd2680049fba856ff41e646a4d83cda6b7e9d1dc",
+      "normalizedSha256": "bf5c4afc5eeca97c477f345abd2680049fba856ff41e646a4d83cda6b7e9d1dc"
+    },
+    {
+      "path": "lib/features/weather/presentation/home_weather_card.dart",
+      "gitBlob": "8360ddc4e9c2aa72be4216202fbe6db31f7a045a",
+      "bytes": 4293,
+      "sha256": "5148e68025238b70806444e046f647e72931b245f0d19b679e20176fbfa57d4b",
+      "normalizedSha256": "5148e68025238b70806444e046f647e72931b245f0d19b679e20176fbfa57d4b"
+    },
+    {
+      "path": "lib/features/weather/presentation/home_weather_controller.dart",
+      "gitBlob": "81dad056e71d4dd45ab0a5352d35016399e09956",
+      "bytes": 2863,
+      "sha256": "b97222bb6a45f9dbc4bd70ad7c7f6186ccf536b7f1329055a2dc5d29e9cb3d6f",
+      "normalizedSha256": "b97222bb6a45f9dbc4bd70ad7c7f6186ccf536b7f1329055a2dc5d29e9cb3d6f"
+    },
+    {
+      "path": "lib/features/weather/presentation/weather_card.dart",
+      "gitBlob": "757328fe6419bb2bc750804a339970af1068152a",
+      "bytes": 1913,
+      "sha256": "b6c8240b79272cf6ad1800e1bc51025673f153bc45a3b923152c280199761045",
+      "normalizedSha256": "b6c8240b79272cf6ad1800e1bc51025673f153bc45a3b923152c280199761045"
+    },
+    {
+      "path": "lib/features/weather/weather_providers.dart",
+      "gitBlob": "8450dc908a4e8d6f18863f73da789b531dcaad75",
+      "bytes": 280,
+      "sha256": "f628e6a6d36606a3de7edd0b56fb62d4fc9d93bc949088a297b751ac69b18ede",
+      "normalizedSha256": "f628e6a6d36606a3de7edd0b56fb62d4fc9d93bc949088a297b751ac69b18ede"
+    },
+    {
+      "path": "pubspec.lock",
+      "gitBlob": "179307b86fed4144e534c24c3002a016bcf2fddb",
+      "bytes": 29895,
+      "sha256": "c58dfde1680a8c375f8e51ae66d4aa1130479e8567da3d379efd95d28f7301a3",
+      "normalizedSha256": "c58dfde1680a8c375f8e51ae66d4aa1130479e8567da3d379efd95d28f7301a3"
+    },
+    {
+      "path": "pubspec.yaml",
+      "gitBlob": "1731c5e7a6fad87d2b0a6bbf7baac2dca32cd250",
+      "bytes": 4493,
+      "sha256": "df0d00e4e75c7ba198e87761ab0e135838abdf58edbf7034da169da7ad299d59",
+      "normalizedSha256": "df0d00e4e75c7ba198e87761ab0e135838abdf58edbf7034da169da7ad299d59"
+    },
+    {
+      "path": "test/features/friend_discovery_activity_map_test.dart",
+      "gitBlob": "2ed7d907b14301bbf9f174010eea058e34c26649",
+      "bytes": 7109,
+      "sha256": "524e7ebc8af395e6d13fc423d4c8d63a0a4a8283845c5197d7f9a87bcb3e3e94",
+      "normalizedSha256": "524e7ebc8af395e6d13fc423d4c8d63a0a4a8283845c5197d7f9a87bcb3e3e94"
+    },
+    {
+      "path": "test/features/located_check_in_flow_test.dart",
+      "gitBlob": "dd32810da5b205870fd29ad5941ff7c7d231b20e",
+      "bytes": 16085,
+      "sha256": "cb1d46831e0471429cda48d459d2617d409a778be56816342627bdb5acf22dd4",
+      "normalizedSha256": "cb1d46831e0471429cda48d459d2617d409a778be56816342627bdb5acf22dd4"
+    },
+    {
+      "path": "test/features/social_profile_flow_test.dart",
+      "gitBlob": "a8c1015eed641564bfe0bbaacb9657197e8dab63",
+      "bytes": 10538,
+      "sha256": "241399b65c3744433372c0a68351f537e8174fe00a4f095b2b2697e524e31735",
+      "normalizedSha256": "241399b65c3744433372c0a68351f537e8174fe00a4f095b2b2697e524e31735"
+    },
+    {
+      "path": "tool/run_social_weather_emulators.mjs",
+      "gitBlob": "0d1190ea339c6745079fa5adf2f0e8271a4e115f",
+      "bytes": 2961,
+      "sha256": "4d0c4f1ced24af3468624a6280dbe5fd7317b58838e0024443a4aca250aa8ec9",
+      "normalizedSha256": "4d0c4f1ced24af3468624a6280dbe5fd7317b58838e0024443a4aca250aa8ec9"
+    }
+  ],
+  "logs": [
+    {
+      "path": "build/jin-social/activity-contract-04.log",
+      "bytes": 1368,
+      "sha256": "b5f02cb89512404c3349e9a298483cb2ee778bd68b19bc3ec37e12d1520c8540"
+    },
+    {
+      "path": "build/jin-social/activity-tests-02.log",
+      "bytes": 2416,
+      "sha256": "15a0b67e818e29bc9adaa4d8043120d68fc37815fbbcac0b5041f90b4997197e"
+    },
+    {
+      "path": "build/jin-social/affected-backend-01.log",
+      "bytes": 13704,
+      "sha256": "68dff4dd61c1122b01d5b36c4881818a47d6000d0898870ef8f6b116f993d708"
+    },
+    {
+      "path": "build/jin-social/compile-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-03.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-04.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-05.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-06.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-07.log",
+      "bytes": 1150,
+      "sha256": "b4242128a29d3db7c57bcde7c4930d62b2097aa33eeef658e898afda9442d290"
+    },
+    {
+      "path": "build/jin-social/compile-08.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-09.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-10.log",
+      "bytes": 1021,
+      "sha256": "215abee781854ad7b7092ae1be4140a9c2c3aca24d6fcd80b862fe6884b4fb8c"
+    },
+    {
+      "path": "build/jin-social/compile-11.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-12.log",
+      "bytes": 108,
+      "sha256": "aa1124c46c189c7688801e0aa0b48e3ab4bcee143f34c0b1668957f03a91bc62"
+    },
+    {
+      "path": "build/jin-social/compile-13.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-14.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-15.log",
+      "bytes": 1232,
+      "sha256": "34bc93e4485889550faa3f2362e119f3a1ce429bf3a0e41610e11584042d8c1b"
+    },
+    {
+      "path": "build/jin-social/compile-16.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-17.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-after-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/compile-before-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/final-backend-files.json",
+      "bytes": 998,
+      "sha256": "12fa4c797646af629557c9ee810f1ce67117e737b13894b6dd996bac63ae23d7"
+    },
+    {
+      "path": "build/jin-social/final-backend.log",
+      "bytes": 13930,
+      "sha256": "6bd614060ade0fc6fb6f61555409ad565a35fc12b1108e875ba78301145cd5b1"
+    },
+    {
+      "path": "build/jin-social/final-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/final-inputs-after.json",
+      "bytes": 207780,
+      "sha256": "b2605cca3d46d14a70ff04514b3aeffdde9612978d84342a842204bd3533aae5"
+    },
+    {
+      "path": "build/jin-social/final-inputs-before.json",
+      "bytes": 207780,
+      "sha256": "b2605cca3d46d14a70ff04514b3aeffdde9612978d84342a842204bd3533aae5"
+    },
+    {
+      "path": "build/jin-social/final-sdk.log",
+      "bytes": 2465,
+      "sha256": "366e4e0ea71bd12236a067955c81251c003dc08888e2c8950c436ef3bb5056ce"
+    },
+    {
+      "path": "build/jin-social/final-whitespace-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/final-whitespace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/new-pair-after-01.log",
+      "bytes": 230,
+      "sha256": "5f8756599235c2ec77feb3fc868822299f11189b213c801a9e7fe44345c4e7c3"
+    },
+    {
+      "path": "build/jin-social/new-pair-before-01.log",
+      "bytes": 1104,
+      "sha256": "5b73195894eb1dce07a0295f937e84f4314e4b38699df49d51d9023f87b2aa69"
+    },
+    {
+      "path": "build/jin-social/profile-tests-01.log",
+      "bytes": 951,
+      "sha256": "fdb871943fa051d429e32eff73de3fdfc0479f89e55671594d8938836f23cb41"
+    },
+    {
+      "path": "build/jin-social/profile-tests-02.log",
+      "bytes": 1165,
+      "sha256": "20085056beca161fe43d491ac9a8842f4422065a33f9d1314a767ed9517a8359"
+    },
+    {
+      "path": "build/jin-social/repair-inputs-after.json",
+      "bytes": 207780,
+      "sha256": "9f6aea5a9e97fe467e294820d7c48ddbdb576d110edadede9534f706fe07d197"
+    },
+    {
+      "path": "build/jin-social/repair-inputs-before.json",
+      "bytes": 207780,
+      "sha256": "9f6aea5a9e97fe467e294820d7c48ddbdb576d110edadede9534f706fe07d197"
+    },
+    {
+      "path": "build/jin-social/sdk-01-firestore-debug.log",
+      "bytes": 813,
+      "sha256": "f04e39a5dc40a9c01d2f468ee6619f9347e4a86c3feeabfb31f36aae6416d776"
+    },
+    {
+      "path": "build/jin-social/sdk-01.log",
+      "bytes": 2466,
+      "sha256": "edfff5821c82bc75a2098d3d460ddf6db4164fe51f9d172a3be69b2a698747c9"
+    },
+    {
+      "path": "build/jin-social/source-tests-02.log",
+      "bytes": 1677,
+      "sha256": "6e82f37476eb6ac98bbf0446436b3699e50c7b8b222ceb770370ca66802e0ba5"
+    },
+    {
+      "path": "build/jin-social/staged-whitespace-01.log",
+      "bytes": 20097,
+      "sha256": "92deecb13031d28fd500d478930585d902527445c25dca8bc68b809a84144526"
+    },
+    {
+      "path": "build/jin-social/staged-whitespace-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/whitespace-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-social/whitespace-03.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-client/affected-flutter-01.log",
+      "bytes": 36437,
+      "sha256": "13ff0ecf4e095a3539bcd84cefc39125819d135435d325f87149fb85e9d11782"
+    },
+    {
+      "path": "build/jin-client/analysis-01.log",
+      "bytes": 1714,
+      "sha256": "8eaa1ce63bab01692ceeae05dad36fdb2a47858438e8c6870a797efa44d401ed"
+    },
+    {
+      "path": "build/jin-client/analysis-02.log",
+      "bytes": 1962,
+      "sha256": "006186accd12fdc935c036b59470b742c6d3f4ebcd5a0c8f4577cb52735ccb70"
+    },
+    {
+      "path": "build/jin-client/analysis-03.log",
+      "bytes": 10940,
+      "sha256": "8d4ddf7afd00d4d328f00707794d5202d5a1f5aa870f5e86b3e7cd34a7b57738"
+    },
+    {
+      "path": "build/jin-client/analysis-04.log",
+      "bytes": 3861,
+      "sha256": "de07358ed574f109339bd801bd4b42681ed36924ded1c879c7a9c580b445b6f4"
+    },
+    {
+      "path": "build/jin-client/analysis-05.log",
+      "bytes": 566,
+      "sha256": "1004353b93e847942ea706fb3d2e9cd98d52b8bcddbe4d3daa37f81ef0b34d3c"
+    },
+    {
+      "path": "build/jin-client/analysis-06.log",
+      "bytes": 5207,
+      "sha256": "bd806f0e30ad5e294a555db14a3994487649775af540c30c4cd38459facff9e5"
+    },
+    {
+      "path": "build/jin-client/analysis-07.log",
+      "bytes": 295,
+      "sha256": "a8387c58484c2ae5c90b08db2e296b52a8c8351e15107c7e592378b036d960a4"
+    },
+    {
+      "path": "build/jin-client/final-analysis-02.log",
+      "bytes": 1233,
+      "sha256": "0724979fdcadde0ce536d7ed7df24919c6d08c2bca285d45f73cb8cd3a2ec817"
+    },
+    {
+      "path": "build/jin-client/final-analysis.log",
+      "bytes": 1233,
+      "sha256": "0724979fdcadde0ce536d7ed7df24919c6d08c2bca285d45f73cb8cd3a2ec817"
+    },
+    {
+      "path": "build/jin-client/final-flutter-02.log",
+      "bytes": 36031,
+      "sha256": "b439fe4eb17a664ae7612848bd304b3a38d9fafaabe18e9d4ef68c488445ec6a"
+    },
+    {
+      "path": "build/jin-client/final-flutter-files.json",
+      "bytes": 681,
+      "sha256": "7de28f9fc151ff116799cce154ee0213cfb44c4934781e6765ac36a4db7d19e7"
+    },
+    {
+      "path": "build/jin-client/final-flutter.log",
+      "bytes": 39682,
+      "sha256": "a2a9f1bc281a047612d2b2b69241cdd97646691f898259252ec338ba774f20e3"
+    },
+    {
+      "path": "build/jin-client/final-format-02.log",
+      "bytes": 49,
+      "sha256": "c1f338c609a6c04ecf7800e04f0b12b7fc92a73cfcf8e93da0cfbe9fc70781ae"
+    },
+    {
+      "path": "build/jin-client/final-format.log",
+      "bytes": 99,
+      "sha256": "fe92498c219c411e5ee49eb7b5fbb695362dec7b746c4110252c304a00f89e25"
+    },
+    {
+      "path": "build/jin-client/fix-style-01.log",
+      "bytes": 525,
+      "sha256": "826f35fa9b1e46812d2fdac84714399b12aa86850014d70ebd473676b1d4c878"
+    },
+    {
+      "path": "build/jin-client/fix-style-02.log",
+      "bytes": 458,
+      "sha256": "5002c6bca365bc9c115e3d1421bef39519b339bec4f3a22682a17e17430701c1"
+    },
+    {
+      "path": "build/jin-client/fix-style-03.log",
+      "bytes": 463,
+      "sha256": "8f8c90c2b4feb8f5ea91c4b4612d281ba171f6aa87846c5a59740216b5176d2e"
+    },
+    {
+      "path": "build/jin-client/format-01.log",
+      "bytes": 1418,
+      "sha256": "dfa20477cc29ea8f232eb39e4a24cefdf6a5a5bbdea29c6d5caedca2c1b1eeb2"
+    },
+    {
+      "path": "build/jin-client/format-06.log",
+      "bytes": 1391,
+      "sha256": "2ec5f7849f3b99d0625ffbab8f6d465c257f47a510da45c8058d9cdb4b995c07"
+    },
+    {
+      "path": "build/jin-client/format-07.log",
+      "bytes": 542,
+      "sha256": "649550680d57a1e3c6069b66376b601d2bdc2c98500eebc015fa6e8ddae0fb25"
+    },
+    {
+      "path": "build/jin-client/format-08.log",
+      "bytes": 117,
+      "sha256": "bf6a18cfb47dd40cb2d066838acbec767877ca78121585b5922b9106308a6547"
+    },
+    {
+      "path": "build/jin-client/location-discovery-tests-04.log",
+      "bytes": 4262,
+      "sha256": "5f451e2a90b2499f3597ecc951ab9df623c195d62905265fc72e17ff99071275"
+    },
+    {
+      "path": "build/jin-client/location-tests-01.log",
+      "bytes": 3019,
+      "sha256": "1b9d764cd27fde5316f1f69268144b62f4b36efe94d81861a0cd76d9bc2d0043"
+    },
+    {
+      "path": "build/jin-client/location-tests-02.log",
+      "bytes": 3977,
+      "sha256": "17d4419d9e5e2a954ad6b20389e1c3069287e1b878a12931bb1cf88a8e8e03b9"
+    },
+    {
+      "path": "build/jin-client/location-tests-03.log",
+      "bytes": 2435,
+      "sha256": "5be4ee280c42f75bcb2a8b55593151c202d731c5595d228f6f85222f7221b699"
+    },
+    {
+      "path": "build/jin-client/pub-get-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-client/pub-get-02.log",
+      "bytes": 197,
+      "sha256": "fd46127986be098cccc82a8a443c783a74b541bcf3d2b12469d4c31e76709134"
+    },
+    {
+      "path": "build/jin-client/pub-get-03.log",
+      "bytes": 191,
+      "sha256": "dfe21e8167bce0ff8bbfdabb18d6ed288ac45d7e3d8ca3b6b35528505aa51d98"
+    },
+    {
+      "path": "build/jin-client/pub-get-04.log",
+      "bytes": 2332,
+      "sha256": "9270cb42147b137bb28780037f894bd5e8b23817dc212aa2c685367a3a2ea6bd"
+    },
+    {
+      "path": "build/jin-client/repair-format-01.log",
+      "bytes": 165,
+      "sha256": "0509b7ee910fbce68a2e7c2659d555a9d1aea3d48bcef2934d19548166e17292"
+    },
+    {
+      "path": "build/jin-client/social-tests-01.log",
+      "bytes": 1396,
+      "sha256": "3d1b49b183245b7981b7a68d34a300f459acd595253d9430cc16f36659fd8574"
+    },
+    {
+      "path": "build/jin-client/stylefix-04.log",
+      "bytes": 645,
+      "sha256": "4567982b6ebcb92dceb953bc3a77f08b97e55b3b2e6f8aba3ac4da24716b7992"
+    },
+    {
+      "path": "build/jin-client/stylefix-05.log",
+      "bytes": 256,
+      "sha256": "5e7145e7a204860ce39eeed0c2b138d7fbda21e96a7ff5f70673e9812f9e4484"
+    },
+    {
+      "path": "build/jin-client/stylefix-06.log",
+      "bytes": 48,
+      "sha256": "9eda1be457387b621e7191c095a4d895fb56dc8c7fe0d02a468e4be5bcce98d2"
+    },
+    {
+      "path": "build/jin-weather/compile-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-weather/compile-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-weather/store-tests-01.log",
+      "bytes": 1006,
+      "sha256": "a98eccd21e3a5b475348b5d7b6cda8d9147496a950e742df9bf6af701b9c6b32"
+    },
+    {
+      "path": "build/jin-weather/tests-01.log",
+      "bytes": 1148,
+      "sha256": "1b08eacf7809ef8c8c453a0063acae26218cdf771b250dfb0382b5262fea51b4"
+    }
+  ]
+}
