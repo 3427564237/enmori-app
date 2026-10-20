@@ -1,5 +1,7 @@
 # PR #167：fba5a82 的剩余 R2 复审
 
+> 后续状态：db1b724已补齐普通详情围栏，ZHOU独立29/29通过，已关闭R2并正式批准当前Event包。见 [新源码批准与证据归属](shi-167-db1b724-approval.md)。下文保留fba5a82失败时点。
+
 2026-10-20，SGT。按用户要求只复核 R2 新修复，复用未变验证。准确 head `fba5a82ebd0074b875f40153381eee6c746a4772`，产品 `ed63795719534f1e3834a0d3a88305cb083d0dce` / tree `8eda719df18075991a0319d8a1421ecb61da8a4e`，对照 `0158ca6588e115323f4776d974c778a1d95352ca`。
 
 **原稳定 ID 并发窗口已修复；普通浏览详情的 raw fallback 仍能越过新投影，R2 保留。** 已提交 [REQUEST_CHANGES 5585687685](https://github.com/3427564237/enmori-app/pull/167#pullrequestreview-5585687685)，并在 [原 R2 线程回复](https://github.com/3427564237/enmori-app/pull/167#discussion_r4325494513)。R1 不变，继续保持已通过/已解决状态。

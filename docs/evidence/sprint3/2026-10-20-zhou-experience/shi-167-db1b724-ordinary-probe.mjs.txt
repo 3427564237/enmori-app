@@ -1,0 +1,50 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {pathToFileURL} from 'node:url';
+const root='D:/3851 AI/drafts/2026-10-20-pr167-db1b724-review/backend/dist/';
+const load=path=>import(pathToFileURL(root+path).href);
+const {createControlledEventBrowse}=await load('src/bootstrap/controlled-event-browse.js');
+const {TicketmasterBrowseSource}=await load('src/event-browse/infrastructure/ticketmaster-browse-source.js');
+const {EventBrowse}=await load('src/event-browse/application/event-browse.js');
+const {BrowseCursor}=await load('src/event-browse/infrastructure/browse-cursor.js');
+const {browseId}=await load('src/event-browse/domain/browse-values.js');
+const {ok}=await load('src/shared/domain/result.js');
+const instant='2026-10-20T00:00:00.000Z',signal=()=>new AbortController().signal;
+const row=(id,title)=>({id,name:title,url:`https://ticketmaster.sg/event/${id}`,
+  dates:{start:{dateTime:'2026-11-10T00:00:00Z'},status:{code:'onsale'}},
+  classifications:[{segment:{id:'KZFzniwnSyZfZ7v7nJ',name:'Music'}}],
+  _embedded:{venues:[{country:{countryCode:'SG'}}]}});
+const page=(number,events,totalElements=21)=>Response.json({page:{number,totalElements},_embedded:{events}});
+
+test('ordinary Detail for an observed later-page B must not return OLD after page-zero publishes the same B NEW',async()=>{
+  const detailEntered=Promise.withResolvers(),lateDetail=Promise.withResolvers();
+  let firstPageReads=0,laterPageReads=0,rawDetailReads=0;
+  const provider=new TicketmasterBrowseSource({enabled:()=>true,key:()=> 'synthetic-only'},async input=>{
+    const url=new URL(String(input));
+    if(url.pathname.includes('/events/')){
+      assert.equal(url.pathname.endsWith('/B.json'),true);
+      rawDetailReads++;detailEntered.resolve();return lateDetail.promise;
+    }
+    const position=Number(url.searchParams.get('page'));
+    if(position===1){laterPageReads++;return page(1,[row('B','OLD title')]);}
+    assert.equal(position,0);firstPageReads++;
+    return firstPageReads===1?page(0,[row('A','First activity')]):page(0,[row('B','NEW title')],1);
+  });
+  const gate=createControlledEventBrowse({source:provider,projectionCache:true,running:()=>true,track:work=>work()});gate.enable();
+  const browse=new EventBrowse({verify:async()=>ok(undefined)},gate.source,()=>new Date(instant),true,new BrowseCursor(new Uint8Array(32).fill(2)));
+  const principal={firebaseUid:'synthetic-reviewed-member'};
+  const first=await browse.read(principal,undefined,signal());assert.equal(first.ok,true);
+  assert.equal(first.value.items[0].browseId,browseId('A'));assert.equal(typeof first.value.nextCursor,'string');
+  const later=await browse.read(principal,undefined,signal(),first.value.nextCursor);assert.equal(later.ok,true);
+  assert.equal(later.value.items[0].browseId,browseId('B'));assert.equal(later.value.items[0].title,'OLD title');
+  // B has been observed in an actual later-page response, and misses cached first page A.
+  const inFlight=browse.read(principal,browseId('B'),signal());await detailEntered.promise;
+  const refresh=await browse.read(principal,undefined,signal());assert.equal(refresh.ok,true);
+  assert.equal(refresh.value.items[0].browseId,browseId('B'));assert.equal(refresh.value.items[0].title,'NEW title');
+  const freshDetail=await browse.read(principal,browseId('B'),signal());assert.equal(freshDetail.ok,true);assert.equal(freshDetail.value.title,'NEW title');
+  lateDetail.resolve(Response.json(row('B','OLD title')));
+  const delivered=await inFlight;
+  console.log(JSON.stringify({firstPageReads,laterPageReads,rawDetailReads,refresh:refresh.value.items[0].title,
+    freshDetail:freshDetail.value.title,lateOrdinaryDetail:delivered.ok?delivered.value.title:delivered.failure.code,gate:gate.observation()}));
+  assert.equal(delivered.ok&&delivered.value.title==='OLD title',false,'obsolete raw Detail must be refused across replacement');
+});
