@@ -1,3 +1,4 @@
+import { firestoreSocialAuthority } from "../src/friends/infrastructure/social-authority.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { FirestoreFriendRecommendations } from "../src/friend-recommendations/infrastructure/firestore-friend-recommendations.js";
@@ -15,7 +16,7 @@ function fixture(){
   seed["account_interests/owner"]={interestTagIds:["music","art"],revision:1};
   seed["interest_tags/music"]={displayName:"Music",lifecycleState:"active",revision:1};
   seed["interest_tags/art"]={displayName:"Art",lifecycleState:"active",revision:1};
-  const store=new InMemoryFirestoreGateway(seed);return {store,repo:new FirestoreFriendRecommendations(store,clock)};
+  const store=new InMemoryFirestoreGateway(seed);return {store,repo:new FirestoreFriendRecommendations(store,clock, firestoreSocialAuthority)};
 }
 test("producer orders whole authorized candidate pool before Home Top 2 and exposes no IDs/scores/history",async()=>{
   const {store,repo}=fixture(),before=store.entries();
@@ -32,7 +33,7 @@ test("withdrawn recommendation consent stops before candidate reads and excludes
   const filtered=await repo.recommend("owner","all");assert.equal(filtered.ok,true);
   if(filtered.ok)assert.equal(filtered.value.suggestions.some(row=>row.username==="member_target_2"),false);
   await store.runTransaction(async tx=>tx.set("accounts/owner",{...store.read("accounts/owner"),optionalProcessingConsent:"rejected"}));
-  const denied=new FirestoreFriendRecommendations({runTransaction:work=>store.runTransaction(tx=>work({...tx,listDiscoverableAccountPage:async()=>{throw new Error("must not construct candidates");}}))},clock);
+  const denied=new FirestoreFriendRecommendations({runTransaction:work=>store.runTransaction(tx=>work({...tx,listDiscoverableAccountPage:async()=>{throw new Error("must not construct candidates");}}))},clock, firestoreSocialAuthority);
   assert.deepEqual(await denied.recommend("owner","home"),ok({suggestions:[]}));
 });
 test("private, ineligible, current friends, blocks and valid pending requests never enter ranking",async()=>{
@@ -59,7 +60,7 @@ test("private candidate interests produce no match; missing permitted Events pro
     fieldPrivacy:{interests:"private",location:"private",participation:"public",mapSharedWithFriends:false}}));
   const missing=await repo.recommend("owner","home");assert.equal(!missing.ok&&missing.failure.code,"SERVICE_UNAVAILABLE");
   const purposeCalls:string[]=[];
-  const withEvents=new FirestoreFriendRecommendations(store,clock,{read:async(_reader,viewer,subject,purpose)=>{
+  const withEvents=new FirestoreFriendRecommendations(store,clock, firestoreSocialAuthority,{read:async(_reader,viewer,subject,purpose)=>{
     purposeCalls.push(`${viewer}:${subject}:${purpose}`);return {interestedEventIds:["event-a"],goingEventIds:["event-a"]};
   }});
   const result=await withEvents.recommend("owner","home");assert.equal(result.ok,true);

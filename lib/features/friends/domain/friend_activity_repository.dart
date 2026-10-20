@@ -16,11 +16,15 @@ final class FriendActivityItem {
     required this.occurredAt,
     required this.username,
     required this.displayName,
+    this.note,
+    this.mood,
+    this.eventId,
+    this.eventTitle,
   });
   final FriendActivityType type;
   final String sourceRecordId, username;
   final DateTime occurredAt;
-  final String? displayName;
+  final String? displayName, note, mood, eventId, eventTitle;
 }
 
 abstract interface class FriendActivityRepository {

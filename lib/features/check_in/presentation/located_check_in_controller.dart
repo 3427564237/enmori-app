@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/idempotency_key_provider.dart';
 import '../../../core/result/result.dart';
 import '../../auth/auth_providers.dart';
+import '../../auth/domain/auth_repository.dart';
 import '../../account/domain/account_repository.dart';
 import '../check_in_providers.dart';
 import '../domain/check_in_repository.dart';
@@ -42,16 +43,22 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
   int _epoch = 0;
   String? _fingerprint, _key;
   int get epoch => _epoch;
+  AuthSession? _session;
+  bool _valid(int epoch) =>
+      ref.mounted &&
+      epoch == _epoch &&
+      _session is AuthSessionAuthenticated &&
+      identical(_session, ref.read(authSessionProvider).asData?.value);
   Future<void> replaceLocation({required int expectedEpoch}) async {
     final current = state.value;
-    if (state.busy || current == null || expectedEpoch != _epoch) return;
+    if (state.busy || current == null || !_valid(expectedEpoch)) return;
     final epoch = ++_epoch,
         location = ref.read(foregroundLocationProvider),
         repository = ref.read(checkInPlaceRepositoryProvider);
     state = LocatedCheckInState(busy: true, savedId: current.checkInId);
     try {
       final point = await location.capture(precise: true);
-      if (!ref.mounted || epoch != _epoch) return;
+      if (!_valid(epoch)) return;
       if (point case Failure<GeoPoint>(:final failure)) {
         state = LocatedCheckInState(
           failure: failure,
@@ -62,8 +69,9 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
       final result = await repository.replaceLocation(
         checkIn: current,
         location: (point as Success<GeoPoint>).value,
+        isEligible: () => _valid(epoch),
       );
-      if (!ref.mounted || epoch != _epoch) return;
+      if (!_valid(epoch)) return;
       state = switch (result) {
         Success<CheckIn>(:final value) => LocatedCheckInState(
           value: value,
@@ -75,7 +83,7 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
         ),
       };
     } catch (_) {
-      if (ref.mounted && epoch == _epoch) {
+      if (_valid(epoch)) {
         state = LocatedCheckInState(
           failure: _unconfirmed,
           savedId: current.checkInId,
@@ -86,7 +94,7 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
 
   @override
   LocatedCheckInState build() {
-    ref.watch(authSessionProvider.select((v) => v.asData?.value));
+    _session = ref.watch(authSessionProvider.select((v) => v.asData?.value));
     _epoch++;
     _fingerprint = null;
     _key = null;
@@ -95,12 +103,13 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
   }
 
   Future<void> save({
+    required int expectedEpoch,
     required String note,
     String? mood,
     String? activity,
     required CheckInVisibility visibility,
   }) async {
-    if (state.busy || state.savedId != null) return;
+    if (!_valid(expectedEpoch) || state.busy || state.savedId != null) return;
     final placeState = ref.read(checkInPlaceControllerProvider(draftKey));
     if (placeState.busy) return;
     final normalized = normalizeCheckInNote(note, mood: mood);
@@ -140,8 +149,9 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
         visibility: visibility,
         place: place,
         idempotencyKey: _key!,
+        isEligible: () => _valid(epoch),
       );
-      if (!ref.mounted || epoch != _epoch) return;
+      if (!_valid(epoch)) return;
       switch (result) {
         case Success(:final value):
           state = LocatedCheckInState(
@@ -154,7 +164,7 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
           state = LocatedCheckInState(failure: failure, uncertain: true);
       }
     } catch (_) {
-      if (ref.mounted && epoch == _epoch) {
+      if (_valid(epoch)) {
         state = const LocatedCheckInState(
           failure: _unconfirmed,
           uncertain: true,
@@ -169,7 +179,7 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
     state = LocatedCheckInState(busy: true, savedId: id);
     try {
       final result = await repository.readOwned(checkInId: id);
-      if (!ref.mounted || epoch != _epoch) return;
+      if (!_valid(epoch)) return;
       state = switch (result) {
         Success<CheckIn>(:final value) => LocatedCheckInState(
           value: value,
@@ -181,7 +191,7 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
         ),
       };
     } catch (_) {
-      if (ref.mounted && epoch == _epoch) {
+      if (_valid(epoch)) {
         state = LocatedCheckInState(failure: _unconfirmed, savedId: id);
       }
     }
@@ -192,15 +202,21 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
     required int expectedEpoch,
   }) async {
     final current = state.value;
-    if (state.busy || current == null || expectedEpoch != _epoch) return;
+    if (state.busy || current == null || !_valid(expectedEpoch)) return;
     final epoch = ++_epoch,
         repository = ref.read(checkInPlaceRepositoryProvider);
     state = LocatedCheckInState(busy: true, savedId: current.checkInId);
     try {
       final result = await (location
-          ? repository.removeLocation(checkIn: current)
-          : repository.removeWeatherPermission(checkIn: current));
-      if (!ref.mounted || epoch != _epoch) return;
+          ? repository.removeLocation(
+              checkIn: current,
+              isEligible: () => _valid(epoch),
+            )
+          : repository.removeWeatherPermission(
+              checkIn: current,
+              isEligible: () => _valid(epoch),
+            ));
+      if (!_valid(epoch)) return;
       state = switch (result) {
         Success<CheckIn>(:final value) => LocatedCheckInState(
           value: value,
@@ -212,7 +228,7 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
         ),
       };
     } catch (_) {
-      if (ref.mounted && epoch == _epoch) {
+      if (_valid(epoch)) {
         state = LocatedCheckInState(
           failure: _unconfirmed,
           savedId: current.checkInId,

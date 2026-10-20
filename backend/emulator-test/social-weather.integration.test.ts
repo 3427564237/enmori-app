@@ -15,7 +15,7 @@ import { FirestoreCheckInRepository } from "../src/check-ins/infrastructure/fire
 import { CreateCheckIn } from "../src/check-ins/application/create-check-in.js";
 import { FirestoreFriendRepository,friendPairKey } from "../src/friends/infrastructure/firestore-friend-repository.js";
 import { FirestoreSocialRepository } from "../src/friends/infrastructure/firestore-social-repository.js";
-import { registerSocialModule } from "../src/friends/transport/register-social-module.js";
+import { registerSocialModule } from "../src/bootstrap/register-social-module.js";
 import { ok } from "../src/shared/domain/result.js";
 const environment=requireControlledEmulatorEnvironment(process.env);
 assert.equal(environment.projectId,"demo-enmori-rmvp01a-r10");

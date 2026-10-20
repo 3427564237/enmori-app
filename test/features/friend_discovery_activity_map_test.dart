@@ -64,6 +64,7 @@ void main() {
       'occurredAt': '2026-10-20T00:00:00.000Z',
       'username': 'member_a',
       'displayName': 'A',
+      'checkIn': {'note': 'Authorized note', 'mood': 'Calm'},
     };
     for (final data in [
       row,
@@ -103,7 +104,13 @@ void main() {
       final repo = ActivityFake();
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [friendActivityRepositoryProvider.overrideWithValue(repo)],
+          overrides: [
+            friendActivityRepositoryProvider.overrideWithValue(repo),
+            authSessionProvider.overrideWith(
+              (ref) =>
+                  Stream.value(AuthSessionAuthenticated(subject: 'fixture')),
+            ),
+          ],
           child: MaterialApp(
             home: Scaffold(
               body: SingleChildScrollView(

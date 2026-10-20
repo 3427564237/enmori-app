@@ -36,11 +36,19 @@ abstract interface class CheckInPlaceRepository {
     required CheckInVisibility visibility,
     CheckInPlace? place,
     required String idempotencyKey,
+    bool Function()? isEligible,
   });
-  Future<Result<CheckIn>> removeLocation({required CheckIn checkIn});
-  Future<Result<CheckIn>> removeWeatherPermission({required CheckIn checkIn});
+  Future<Result<CheckIn>> removeLocation({
+    required CheckIn checkIn,
+    bool Function()? isEligible,
+  });
+  Future<Result<CheckIn>> removeWeatherPermission({
+    required CheckIn checkIn,
+    bool Function()? isEligible,
+  });
   Future<Result<CheckIn>> replaceLocation({
     required CheckIn checkIn,
     required GeoPoint location,
+    bool Function()? isEligible,
   });
 }

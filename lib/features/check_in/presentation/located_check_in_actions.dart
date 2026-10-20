@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../account/domain/account_repository.dart';
-import '../../weather/presentation/weather_card.dart';
+import '../../auth/auth_providers.dart';
+import '../../weather/weather_providers.dart';
 import 'check_in_place_controls.dart';
 import 'located_check_in_controller.dart';
 
@@ -25,10 +26,12 @@ final class LocatedCheckInActions extends ConsumerWidget {
   final Future<bool> Function(Uri) openAttribution;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(authSessionProvider);
     final state = ref.watch(locatedCheckInControllerProvider(draftKey)),
         controller = ref.read(
           locatedCheckInControllerProvider(draftKey).notifier,
         );
+    final renderedEpoch = controller.epoch;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -41,6 +44,7 @@ final class LocatedCheckInActions extends ConsumerWidget {
             onPressed: state.busy
                 ? null
                 : () => controller.save(
+                    expectedEpoch: renderedEpoch,
                     note: note,
                     mood: mood,
                     activity: activity,
@@ -68,7 +72,7 @@ final class LocatedCheckInActions extends ConsumerWidget {
             onPressed: state.busy
                 ? null
                 : () async {
-                    final epoch = controller.epoch;
+                    final epoch = renderedEpoch;
                     final confirmed = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
@@ -95,7 +99,7 @@ final class LocatedCheckInActions extends ConsumerWidget {
             child: const Text('Replace saved location'),
           ),
           if (value.weather case final weather?)
-            WeatherCard(snapshot: weather, openAttribution: openAttribution),
+            ref.watch(weatherCardBuilderProvider)(weather, openAttribution),
           if (value.location != null || value.weather != null)
             Wrap(
               spacing: 8,
@@ -105,14 +109,20 @@ final class LocatedCheckInActions extends ConsumerWidget {
                   OutlinedButton(
                     onPressed: state.busy
                         ? null
-                        : () => _remove(context, controller, true),
+                        : () =>
+                              _remove(context, controller, true, renderedEpoch),
                     child: const Text('Remove saved location'),
                   ),
                 if (value.weather != null)
                   OutlinedButton(
                     onPressed: state.busy
                         ? null
-                        : () => _remove(context, controller, false),
+                        : () => _remove(
+                            context,
+                            controller,
+                            false,
+                            renderedEpoch,
+                          ),
                     child: const Text('Remove saved weather'),
                   ),
               ],
@@ -126,8 +136,8 @@ final class LocatedCheckInActions extends ConsumerWidget {
     BuildContext context,
     LocatedCheckInController controller,
     bool location,
+    int epoch,
   ) async {
-    final epoch = controller.epoch;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

@@ -1,23 +1,14 @@
 import { emptyProfileDetails,parseFieldPrivacy,parseProfileDetails,privateFields,type FieldPrivacy,type ProfileDetails } from "../../account/domain/profile-details.js";
 import { isVisibility,normalizeDisplayName,type ProfileVisibility } from "../../account/domain/profile-values.js";
 import { canonicalizeUsername } from "../../onboarding/domain/username.js";
-import { appFailure,type AppFailureCode } from "../../shared/application/app-failure.js";
 import { createAuthBindingDocumentId,isSafeDocumentId,parseAccountProjection,parseAuthBinding } from "../../shared/infrastructure/firebase/firestore-records.js";
 import type { StoredDocument } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { friendPairKey,parsePair } from "./firestore-friend-repository.js";
 
-export interface Reader { get(path:string):Promise<StoredDocument|undefined> }
-export class SocialFailure extends Error { constructor(readonly code:AppFailureCode){super(code);} }
-export const fail=(code:AppFailureCode):never=>{throw new SocialFailure(code);};
-export const failure=(error:unknown)=>appFailure(error instanceof SocialFailure?error.code:"SERVICE_UNAVAILABLE");
-export interface Member {
-  id:string; data:StoredDocument; username:string; displayName:string|null;
-  visibility:ProfileVisibility; fields:FieldPrivacy; details:ProfileDetails;
-}
-export interface SocialContext {
-  viewer:Member;target:Member;self:boolean;friend:boolean;pairPath:string;
-  pair:StoredDocument|undefined;revision:number;specialCare:boolean;
-}
+import type { Reader, Member, SocialContext, SocialAuthority } from "../ports/social-authority.js";
+import { fail, failure, visible, SocialFailure } from "../domain/social-failure.js";
+export type { Reader, Member, SocialContext } from "../ports/social-authority.js";
+export { fail, failure, visible, SocialFailure } from "../domain/social-failure.js";
 export async function member(reader:Reader,id:string):Promise<Member> {
   if(!isSafeDocumentId(id))return fail("SERVICE_UNAVAILABLE");
   const data=await reader.get(`accounts/${id}`), access=await reader.get(`friend_access/${id}`);
@@ -42,9 +33,6 @@ export async function viewer(reader:Reader,uid:string):Promise<Member> {
     if(error instanceof SocialFailure&&error.code==="ADD_FRIEND_TARGET_UNAVAILABLE")return fail("AUTH_FORBIDDEN");
     throw error;
   }
-}
-export function visible(value:unknown,self:boolean,friend:boolean):boolean {
-  return self||value==="public"||(value==="friends_only"&&friend);
 }
 export function revision(pair:StoredDocument|undefined,accountId:string):number {
   const revisions=pair?.revisions;
@@ -75,3 +63,5 @@ export async function context(reader:Reader,uid:string,username:string,profileRe
   return {viewer:own,target,self,friend,pairPath:path,pair:stored,revision:revision(stored,own.id),
     specialCare:friend&&!!(preferences as Record<string,boolean>|undefined)?.[own.id]};
 }
+
+export const firestoreSocialAuthority: SocialAuthority = { member, viewer, context, pairKey: friendPairKey, parsePair, revision };

@@ -91,6 +91,7 @@ final class _FriendDiscoveryPanelState
     final state = ref.watch(friendDiscoveryControllerProvider(widget.home));
     final preference = ref.watch(friendIgnoreControllerProvider);
     final preferences = ref.read(friendIgnoreControllerProvider.notifier);
+    final renderedEpoch = preferences.epoch;
     final locked = preference.busy || preference.unresolvedUsername != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -156,6 +157,7 @@ final class _FriendDiscoveryPanelState
                             final undo = await preferences.ignore(
                               person.username,
                               person.ignoreVersion,
+                              expectedEpoch: renderedEpoch,
                             );
                             if (!mounted ||
                                 !context.mounted ||

@@ -4,6 +4,14 @@ import '../../../core/network/utc_timestamp_parser.dart';
 import '../../account/domain/account_repository.dart';
 import '../../weather/domain/weather.dart';
 import '../domain/check_in_repository.dart';
+import '../domain/check_in_projection_decoder.dart';
+
+final class BackendCheckInProjectionDecoder
+    implements CheckInProjectionDecoder {
+  const BackendCheckInProjectionDecoder();
+  @override
+  CheckIn? decode(Object? value) => parseCheckInProjection(value);
+}
 
 /// Same allowlisted projection for own and server-authorized other-user reads.
 CheckIn? parseCheckInProjection(Object? raw, {bool canonicalTime = true}) {

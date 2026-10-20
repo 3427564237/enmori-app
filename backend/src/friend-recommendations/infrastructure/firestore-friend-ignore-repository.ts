@@ -1,6 +1,6 @@
 import type { FriendIgnoreRepository, FriendIgnoreState } from "../ports/friend-ignore-repository.js";
-import { context, viewer, member, fail, failure, SocialFailure, type Member, type Reader } from "../../friends/infrastructure/social-authority.js";
-import { friendPairKey, parsePair } from "../../friends/infrastructure/firestore-friend-repository.js";
+import { fail, failure, SocialFailure, visible } from "../../friends/domain/social-failure.js";
+import type { Member, Reader, SocialAuthority } from "../../friends/ports/social-authority.js";
 import { ok, err } from "../../shared/domain/result.js";
 import type { Clock } from "../../shared/ports/clock.js";
 import type { FirestoreGateway, FirestoreTransactionGateway } from "../../shared/infrastructure/firebase/firestore-gateway.js";
@@ -8,13 +8,13 @@ import { parsePreference, preferenceCollection, preferenceKey, preferenceVersion
 import { isSafeDocumentId } from "../../shared/infrastructure/firebase/firestore-records.js";
 
 /** Current discoverability, without using an old card as identity/privacy authority. */
-async function eligible(reader: Reader, own: Member, target: Member, now: number) {
+async function eligible(authority: SocialAuthority, reader: Reader, own: Member, target: Member, now: number) {
   if (own.id === target.id || own.data.optionalProcessingConsent !== "accepted" ||
       target.data.optionalProcessingConsent !== "accepted" || target.visibility !== "public") return false;
   const reservation = await reader.get(`username_reservations/${target.username}`);
   if (reservation?.accountId !== target.id) return false;
-  const stored = await reader.get(`friend_pairs/${friendPairKey(own.id, target.id)}`);
-  const pair = stored && parsePair(stored, own.id, target.id);
+  const stored = await reader.get(`friend_pairs/${authority.pairKey(own.id, target.id)}`);
+  const pair = stored && authority.parsePair(stored, own.id, target.id);
   if (stored && !pair) return fail("SERVICE_UNAVAILABLE");
   return !pair?.friendship && !pair?.blockedByAccountIds.length &&
     !(pair?.pending && Date.parse(pair.pending.expiresAt) > now);
@@ -24,15 +24,15 @@ function projection(target: Member, owner: string, ignored: boolean, revision: n
     version: preferenceVersion(owner, target.id, revision) };
 }
 export class FirestoreFriendIgnoreRepository implements FriendIgnoreRepository {
-  constructor(private readonly store: FirestoreGateway, private readonly clock: Clock) {}
+  constructor(private readonly store: FirestoreGateway, private readonly clock: Clock, private readonly authority: SocialAuthority) {}
   private now(): number {
     const result = this.clock.now();
     return result.ok ? result.value.getTime() : fail("SERVICE_UNAVAILABLE");
   }
   async read(uid: string, username: string) {
     try { return await this.store.runTransaction(async tx => {
-      const { viewer: own, target } = await context(tx, uid, username);
-      if (!await eligible(tx, own, target, this.now())) return fail("ADD_FRIEND_TARGET_UNAVAILABLE");
+      const { viewer: own, target } = await this.authority.context(tx, uid, username);
+      if (!await eligible(this.authority, tx, own, target, this.now())) return fail("ADD_FRIEND_TARGET_UNAVAILABLE");
       const preference = await readPreference(tx, own.id, target.id);
       return ok(projection(target, own.id, preference.ignored, preference.revision));
     }); } catch (error) { return err(failure(error)); }
@@ -40,8 +40,8 @@ export class FirestoreFriendIgnoreRepository implements FriendIgnoreRepository {
   async set(uid: string, username: string, ignored: boolean, expectedVersion: string) {
     if (typeof ignored !== "boolean" || !/^[a-f0-9]{64}$/.test(expectedVersion)) return err(failure(new SocialFailure("REQUEST_INVALID")));
     try { return await this.store.runTransaction(async tx => {
-      const { viewer: own, target } = await context(tx, uid, username);
-      if (!await eligible(tx, own, target, this.now())) return fail("ADD_FRIEND_TARGET_UNAVAILABLE");
+      const { viewer: own, target } = await this.authority.context(tx, uid, username);
+      if (!await eligible(this.authority, tx, own, target, this.now())) return fail("ADD_FRIEND_TARGET_UNAVAILABLE");
       const preference = await readPreference(tx, own.id, target.id);
       if (preferenceVersion(own.id, target.id, preference.revision) !== expectedVersion) {
         return fail("FRIEND_IGNORE_PRECONDITION_FAILED");
@@ -56,7 +56,7 @@ export class FirestoreFriendIgnoreRepository implements FriendIgnoreRepository {
   }
   async list(uid: string) {
     try { return await this.store.runTransaction(async tx => {
-      const own = await viewer(tx, uid), now = this.now(), people: FriendIgnoreState[] = [];
+      const own = await this.authority.viewer(tx, uid), now = this.now(), people: FriendIgnoreState[] = [];
       if (own.data.optionalProcessingConsent !== "accepted") return ok({ people });
       if (!tx.listWherePage) return fail("SERVICE_UNAVAILABLE");
       let after: string | undefined;
@@ -69,11 +69,11 @@ export class FirestoreFriendIgnoreRepository implements FriendIgnoreRepository {
           after = row.id;
           if (!pref.ignored) continue;
           let target: Member;
-          try { target = await member(tx, pref.targetAccountId); } catch (error) {
+          try { target = await this.authority.member(tx, pref.targetAccountId); } catch (error) {
             if (error instanceof SocialFailure && error.code === "ADD_FRIEND_TARGET_UNAVAILABLE") continue;
             throw error;
           }
-          if (await eligible(tx, own, target, now)) people.push(projection(target, own.id, true, pref.revision));
+          if (await eligible(this.authority, tx, own, target, now)) people.push(projection(target, own.id, true, pref.revision));
         }
         if (rows.length < 25) return ok({ people });
       }

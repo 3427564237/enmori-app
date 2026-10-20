@@ -41,6 +41,7 @@ final class _IgnoredPeoplePageState extends ConsumerState<IgnoredPeoplePage>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(friendIgnoreControllerProvider);
+    final renderedEpoch = controller.epoch;
     return Scaffold(
       appBar: AppBar(title: const Text('已忽略的人')),
       body: ListView(
@@ -85,7 +86,10 @@ final class _IgnoredPeoplePageState extends ConsumerState<IgnoredPeoplePage>
                         onPressed: state.busy
                             ? null
                             : () async {
-                                await controller.restore(person);
+                                await controller.restore(
+                                  person,
+                                  expectedEpoch: renderedEpoch,
+                                );
                                 if (mounted) await controller.loadPeople();
                               },
                         child: const Text('Restore'),

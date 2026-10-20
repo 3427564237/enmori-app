@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/providers.dart';
 import '../../../core/result/result.dart';
 import '../../auth/auth_providers.dart';
+import '../../auth/domain/auth_repository.dart';
 import '../domain/friend_activity_repository.dart';
 import '../data/backend_friend_activity_repository.dart';
 
@@ -17,11 +18,15 @@ final class FriendActivityPanel extends ConsumerStatefulWidget {
     required this.home,
     required this.onOpenProfile,
     this.onSeeAll,
+    this.onOpenEvent,
+    this.source,
     super.key,
   });
   final bool home;
+  final FriendActivityLocator? source;
+  final Future<void> Function(String eventId)? onOpenEvent;
   final Future<void> Function(String) onOpenProfile;
-  final VoidCallback? onSeeAll;
+  final Future<void> Function()? onSeeAll;
   @override
   ConsumerState<FriendActivityPanel> createState() =>
       _FriendActivityPanelState();
@@ -31,6 +36,7 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
     with WidgetsBindingObserver {
   int _epoch = 0;
   bool _busy = false;
+  bool _active = true;
   FriendActivityType? _category;
   Result<List<FriendActivityItem>>? _result;
   @override
@@ -49,6 +55,7 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _active = state == AppLifecycleState.resumed;
     _epoch++;
     if (mounted) {
       setState(() {
@@ -59,18 +66,47 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
     if (state == AppLifecycleState.resumed) _load();
   }
 
+  @override
+  void didUpdateWidget(covariant FriendActivityPanel old) {
+    super.didUpdateWidget(old);
+    if (old.home != widget.home || old.source != widget.source) {
+      _epoch++;
+      _result = null;
+      _busy = false;
+      _category = null;
+      Future.microtask(_load);
+    }
+  }
+
+  bool _valid(int epoch, AuthSession? session) =>
+      mounted &&
+      _active &&
+      epoch == _epoch &&
+      session is AuthSessionAuthenticated &&
+      identical(session, ref.read(authSessionProvider).asData?.value);
+
   Future<void> _load() async {
-    if (!mounted || _busy) return;
+    if (!mounted || !_active || _busy) return;
     final epoch = ++_epoch,
         session = ref.read(authSessionProvider).asData?.value,
         repository = ref.read(friendActivityRepositoryProvider);
+    if (session is! AuthSessionAuthenticated) {
+      setState(() {
+        _busy = false;
+        _result = null;
+      });
+      return;
+    }
     setState(() {
       _busy = true;
       _result = null;
     });
     Result<List<FriendActivityItem>> result;
     try {
-      result = await repository.read(home: widget.home, category: _category);
+      result = await repository.read(
+        home: widget.home,
+        category: widget.source?.type ?? _category,
+      );
     } catch (_) {
       result = const Failure(
         AppFailure(
@@ -83,6 +119,19 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
         epoch != _epoch ||
         !identical(session, ref.read(authSessionProvider).asData?.value)) {
       return;
+    }
+    if (widget.source case final source?) {
+      if (result case Success<List<FriendActivityItem>>(:final value)) {
+        final matches = value.where(source.matches).toList();
+        result = matches.length == 1
+            ? Success<List<FriendActivityItem>>(matches)
+            : const Failure<List<FriendActivityItem>>(
+                AppFailure(
+                  kind: AppFailureKind.addFriendTargetUnavailable,
+                  message: 'This activity is no longer available under current access.',
+                ),
+              );
+      }
     }
     setState(() {
       _result = result;
@@ -100,13 +149,18 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
           _busy = false;
           _category = null;
         });
+        if (after.asData?.value is AuthSessionAuthenticated) {
+          Future.microtask(_load);
+        }
       }
     });
+    final renderedEpoch = _epoch,
+        renderedSession = ref.watch(authSessionProvider).asData?.value;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text('Friends Activity', style: Theme.of(context).textTheme.titleLarge),
-        if (!widget.home)
+        if (!widget.home && widget.source == null)
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -134,25 +188,106 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
           if (value.isEmpty) const Text('No friends activity to show.'),
           for (final item in value)
             Card(
-              child: ListTile(
-                title: Text(item.displayName ?? item.username),
-                subtitle: Text(
-                  '${item.type.label}\n${item.occurredAt.toLocal()}',
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FriendActivityContent(item: item),
+                    if (widget.source == null)
+                      TextButton(
+                        onPressed: () async {
+                          if (!_valid(renderedEpoch, renderedSession)) return;
+                          _epoch++;
+                          setState(() => _result = null);
+                          await Navigator.of(context).push<void>(
+                            MaterialPageRoute(
+                              builder: (_) => Scaffold(
+                                appBar: AppBar(
+                                  title: const Text('Friends Activity'),
+                                ),
+                                body: SafeArea(
+                                  child: ListView(
+                                    padding: const EdgeInsets.all(16),
+                                    children: [
+                                      FriendActivityPanel(
+                                        home: false,
+                                        source: FriendActivityLocator.fromItem(
+                                          item,
+                                        ),
+                                        onOpenProfile: widget.onOpenProfile,
+                                        onOpenEvent: widget.onOpenEvent,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                          if (mounted &&
+                              identical(
+                                renderedSession,
+                                ref.read(authSessionProvider).asData?.value,
+                              )) {
+                            await _load();
+                          }
+                        },
+                        child: const Text('View activity'),
+                      ),
+                    TextButton(
+                      onPressed: () async {
+                        if (!_valid(renderedEpoch, renderedSession)) return;
+                        _epoch++;
+                        setState(() => _result = null);
+                        await widget.onOpenProfile(item.username);
+                        if (mounted &&
+                            identical(
+                              renderedSession,
+                              ref.read(authSessionProvider).asData?.value,
+                            )) {
+                          await _load();
+                        }
+                      },
+                      child: const Text('View Profile'),
+                    ),
+                    if (widget.source != null &&
+                        item.eventId != null &&
+                        widget.onOpenEvent != null)
+                      TextButton(
+                        onPressed: () async {
+                          if (!_valid(renderedEpoch, renderedSession)) return;
+                          // Re-read the same purpose-bound activity before handing its stable Event ID to the host.
+                          await _load();
+                          if (!mounted ||
+                              !identical(
+                                renderedSession,
+                                ref.read(authSessionProvider).asData?.value,
+                              )) {
+                            return;
+                          }
+                          if (_result case Success<List<FriendActivityItem>>(
+                            :final value,
+                          )) {
+                            if (value.length != 1 ||
+                                value.single.eventId != item.eventId) {
+                              return;
+                            }
+                            _epoch++;
+                            setState(() => _result = null);
+                            await widget.onOpenEvent!(item.eventId!);
+                            if (mounted &&
+                                identical(
+                                  renderedSession,
+                                  ref.read(authSessionProvider).asData?.value,
+                                )) {
+                              await _load();
+                            }
+                          }
+                        },
+                        child: const Text('Open event'),
+                      ),
+                  ],
                 ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () async {
-                  final session = ref.read(authSessionProvider).asData?.value;
-                  _epoch++;
-                  setState(() => _result = null);
-                  await widget.onOpenProfile(item.username);
-                  if (mounted &&
-                      identical(
-                        session,
-                        ref.read(authSessionProvider).asData?.value,
-                      )) {
-                    await _load();
-                  }
-                },
               ),
             ),
         ],
@@ -165,7 +300,19 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
             ),
             if (widget.home && widget.onSeeAll != null)
               TextButton(
-                onPressed: widget.onSeeAll,
+                onPressed: () async {
+                  if (!_valid(renderedEpoch, renderedSession)) return;
+                  _epoch++;
+                  setState(() => _result = null);
+                  await widget.onSeeAll!();
+                  if (mounted &&
+                      identical(
+                        renderedSession,
+                        ref.read(authSessionProvider).asData?.value,
+                      )) {
+                    await _load();
+                  }
+                },
                 child: const Text('See all activity'),
               ),
           ],
@@ -173,4 +320,46 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
       ],
     );
   }
+}
+
+/// Only immutable public source identity crosses navigation, never cached content.
+final class FriendActivityLocator {
+  const FriendActivityLocator(this.username, this.type, this.sourceRecordId);
+  factory FriendActivityLocator.fromItem(FriendActivityItem item) =>
+      FriendActivityLocator(item.username, item.type, item.sourceRecordId);
+  final String username, sourceRecordId;
+  final FriendActivityType type;
+  bool matches(FriendActivityItem item) =>
+      item.username == username &&
+      item.type == type &&
+      item.sourceRecordId == sourceRecordId;
+  @override
+  bool operator ==(Object other) =>
+      other is FriendActivityLocator &&
+      other.username == username &&
+      other.type == type &&
+      other.sourceRecordId == sourceRecordId;
+  @override
+  int get hashCode => Object.hash(username, type, sourceRecordId);
+}
+
+final class FriendActivityContent extends StatelessWidget {
+  const FriendActivityContent({required this.item, super.key});
+  final FriendActivityItem item;
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Text(
+        item.displayName ?? item.username,
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      Text('@${item.username}'),
+      Text(item.type.label),
+      Text('${item.occurredAt.toLocal()}'),
+      if (item.eventTitle case final title?) Text(title),
+      if (item.note case final note?) Text(note),
+      if (item.mood case final mood?) Text('Mood at this Check-in: $mood'),
+    ],
+  );
 }

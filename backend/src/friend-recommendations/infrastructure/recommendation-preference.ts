@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { fail, type Reader } from "../../friends/infrastructure/social-authority.js";
+import { fail, failure, SocialFailure, visible } from "../../friends/domain/social-failure.js";
+import type { Member, Reader, SocialAuthority } from "../../friends/ports/social-authority.js";
 import { isSafeDocumentId } from "../../shared/infrastructure/firebase/firestore-records.js";
 import type { StoredDocument } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 

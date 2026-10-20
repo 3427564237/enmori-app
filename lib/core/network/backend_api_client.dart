@@ -76,7 +76,14 @@ final class BackendApiClient {
     String path, {
     JsonObject? body,
     String? idempotencyKey,
-  }) => _send('POST', path, body: body, idempotencyKey: idempotencyKey);
+    bool Function()? isEligible,
+  }) => _send(
+    'POST',
+    path,
+    body: body,
+    idempotencyKey: idempotencyKey,
+    isEligible: isEligible,
+  );
 
   Future<Result<JsonObject>> getPersona(
     String path, {

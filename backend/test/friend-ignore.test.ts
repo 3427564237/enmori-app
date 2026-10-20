@@ -1,3 +1,4 @@
+import { firestoreSocialAuthority } from "../src/friends/infrastructure/social-authority.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import Fastify from "fastify";
@@ -23,15 +24,15 @@ function fixture() {
     if (id !== "owner") delete seed[`friend_pairs/${friendPairKey("owner", id)}`];
   }
   seed["interest_tags/music"] = { displayName: "Music", lifecycleState: "active", revision: 1 };
-  const store = new InMemoryFirestoreGateway(seed), repo = new FirestoreFriendIgnoreRepository(store, clock);
-  return { store, repo, recommend: new FirestoreFriendRecommendations(store, clock) };
+  const store = new InMemoryFirestoreGateway(seed), repo = new FirestoreFriendIgnoreRepository(store, clock, firestoreSocialAuthority);
+  return { store, repo, recommend: new FirestoreFriendRecommendations(store, clock, firestoreSocialAuthority) };
 }
 test("ignore persists independently of repository/session and filters before Home Top 2", async () => {
   const { store, repo, recommend } = fixture();
   const card = value(await recommend.recommend("owner", "home")).suggestions[0]!;
   const saved = value(await repo.set("owner", card.username, true, card.ignoreVersion));
   assert.equal(saved.ignored, true);
-  assert.equal(value(await new FirestoreFriendIgnoreRepository(store, clock).read("owner", name)).version, saved.version);
+  assert.equal(value(await new FirestoreFriendIgnoreRepository(store, clock, firestoreSocialAuthority).read("owner", name)).version, saved.version);
   assert.equal(value(await recommend.recommend("owner", "home")).suggestions.length, 2);
   assert.equal(value(await recommend.recommend("owner", "all")).suggestions.some(row => row.username === name), false);
   assert.deepEqual(value(await repo.list("owner")).people, [saved]);
@@ -56,7 +57,7 @@ test("unknown committed result is authoritatively read; replay cannot clobber th
     const result = await store.runTransaction(work);
     if (loseResponse) { loseResponse = false; throw new Error("lost after commit"); }
     return result;
-  } }, clock);
+  } }, clock, firestoreSocialAuthority);
   assert.equal((await uncertain.set("owner", name, true, initial.version)).ok, false);
   const read = value(await repo.read("owner", name)); assert.equal(read.ignored, true);
   assert.equal((await repo.set("owner", name, false, initial.version)).ok, false);

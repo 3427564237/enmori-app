@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../check_in/domain/check_in_repository.dart';
-import '../../weather/presentation/weather_card.dart';
+import '../../weather/weather_providers.dart';
 import '../domain/social_repository.dart';
 import 'social_profile_controller.dart';
 import 'check_in_points_map.dart';
@@ -320,9 +320,9 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
           if (record.mood case final mood?) Text(mood),
           if (record.activity case final activity?) Text(activity),
           if (record.weather case final weather?)
-            WeatherCard(
-              snapshot: weather,
-              openAttribution: widget.openAttribution,
+            ref.watch(weatherCardBuilderProvider)(
+              weather,
+              widget.openAttribution,
             ),
         ],
       ),

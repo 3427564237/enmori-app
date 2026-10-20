@@ -1,3 +1,4 @@
+import { firestoreSocialAuthority } from "../src/friends/infrastructure/social-authority.js";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { test } from "node:test";
@@ -11,7 +12,7 @@ import { FirebaseIdentityVerifier } from "../src/shared/infrastructure/firebase/
 import { createAuthBindingDocumentId } from "../src/shared/infrastructure/firebase/firestore-records.js";
 import { FirestoreFriendIgnoreRepository, cleanupDeletedAccountPreferences } from "../src/friend-recommendations/infrastructure/firestore-friend-ignore-repository.js";
 import { preferenceCollection, preferenceKey } from "../src/friend-recommendations/infrastructure/recommendation-preference.js";
-import { registerSocialModule } from "../src/friends/transport/register-social-module.js";
+import { registerSocialModule } from "../src/bootstrap/register-social-module.js";
 import { FirebaseAdminCheckInHistoryGateway } from "../src/check-ins/infrastructure/firebase-admin-check-in-history-gateway.js";
 import { AesGcmHistoryCursorCodec } from "../src/check-ins/infrastructure/aes-gcm-history-cursor-codec.js";
 import { ok } from "../src/shared/domain/result.js";
@@ -99,7 +100,7 @@ test("isolated actual Auth/HTTP/Firestore ignore, reread, competing restore, pri
       assert.equal(restoredList.json().people[0].displayName, "Current synthetic");
     });
     await t.test("permanent-deletion seam deletes both directions; revoked owner cannot regain access", async () => {
-      const repository = new FirestoreFriendIgnoreRepository(gateway, clock);
+      const repository = new FirestoreFriendIgnoreRepository(gateway, clock, firestoreSocialAuthority);
       const current = await repository.read(third, names[0]!); assert.ok(current.ok);
       if (!current.ok) return;
       assert.equal((await repository.set(third, names[0]!, true, current.value.version)).ok, true);

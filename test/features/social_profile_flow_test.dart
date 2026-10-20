@@ -1,4 +1,7 @@
 import 'dart:async';
+
+import 'package:enmori/features/check_in/data/check_in_projection_parser.dart';
+
 import 'dart:convert';
 
 import 'package:enmori/core/network/backend_api_client.dart';
@@ -151,7 +154,10 @@ void main() {
           return http.Response(jsonEncode(response), 200);
         }),
       );
-      final result = await BackendSocialRepository(client).profile('member_b');
+      final result = await BackendSocialRepository(
+        client,
+        const BackendCheckInProjectionDecoder(),
+      ).profile('member_b');
       client.close();
       expect(
         result,

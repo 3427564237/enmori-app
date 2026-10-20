@@ -5,13 +5,18 @@ import { sendFailure,sendFailureCode } from "../../transport/error-response.js";
 import { errorEnvelopeSchema } from "../../transport/schemas.js";
 import type { FriendActivity,ActivityCategory } from "../ports/friend-activity.js";
 const types=["check_in_created","event_interested","event_going"];
-export const activityItemSchema={
-  type:"object",additionalProperties:false,
-  required:["type","sourceRecordId","occurredAt","username","displayName"],
-  properties:{type:{enum:types},sourceRecordId:{type:"string"},
-    occurredAt:{type:"string",format:"date-time"},username:{type:"string"},
-    displayName:{anyOf:[{type:"string"},{type:"null"}]}},
-};
+const common={sourceRecordId:{type:"string",minLength:1,maxLength:128},
+  occurredAt:{type:"string",format:"date-time"},username:{type:"string"},
+  displayName:{anyOf:[{type:"string"},{type:"null"}]}};
+const required=["type","sourceRecordId","occurredAt","username","displayName"];
+export const activityItemSchema={oneOf:[
+  {type:"object",additionalProperties:false,required:[...required,"checkIn"],properties:{...common,
+    type:{const:"check_in_created"},checkIn:{type:"object",additionalProperties:false,required:["note"],properties:{
+      note:{type:"string"},mood:{type:"string",minLength:1,maxLength:50}}}}},
+  {type:"object",additionalProperties:false,required:[...required,"event"],properties:{...common,
+    type:{enum:["event_interested","event_going"]},event:{type:"object",additionalProperties:false,required:["eventId","title"],properties:{
+      eventId:{type:"string",pattern:"^(?!tm_)[A-Za-z0-9_-]{1,128}$"},title:{type:"string",minLength:1,maxLength:500}}}}}
+]};
 export const friendActivitySchema={
   querystring:{type:"object",additionalProperties:false,required:["view","category"],
     properties:{view:{enum:["home","all"]},category:{enum:["all",...types]}}},

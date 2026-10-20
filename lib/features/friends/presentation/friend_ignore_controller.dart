@@ -40,6 +40,7 @@ final class FriendIgnoreUndo {
 
 final class FriendIgnoreController extends Notifier<FriendIgnoreView> {
   int _epoch = 0;
+  int get epoch => _epoch;
   AuthSessionAuthenticated? _session;
   String? _writeTarget;
   late FriendIgnoreRepository _repository;
@@ -90,23 +91,31 @@ final class FriendIgnoreController extends Notifier<FriendIgnoreView> {
     };
   }
 
-  Future<FriendIgnoreUndo?> ignore(String username, String version) =>
-      _write(username, version, true);
-  Future<void> restore(FriendIgnoreState person) async {
+  Future<FriendIgnoreUndo?> ignore(
+    String username,
+    String version, {
+    required int expectedEpoch,
+  }) => _write(username, version, true, expectedEpoch);
+  Future<void> restore(
+    FriendIgnoreState person, {
+    required int expectedEpoch,
+  }) async {
     if (!person.ignored) return;
-    await _write(person.username, person.version, false);
+    await _write(person.username, person.version, false, expectedEpoch);
   }
 
   Future<void> undo(FriendIgnoreUndo undo) async {
     if (!canUndo(undo)) return;
-    await restore(undo.value);
+    await restore(undo.value, expectedEpoch: _epoch);
   }
 
   Future<FriendIgnoreUndo?> _write(
     String username,
     String version,
     bool ignored,
+    int expectedEpoch,
   ) async {
+    if (!_valid(expectedEpoch, _session)) return null;
     if (state.busy || state.unresolvedUsername != null || _session == null) {
       return null;
     }

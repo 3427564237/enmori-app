@@ -17,6 +17,7 @@ final class BackendCheckInPlaceRepository implements CheckInPlaceRepository {
     required CheckInVisibility visibility,
     CheckInPlace? place,
     required String idempotencyKey,
+    bool Function()? isEligible,
   }) async {
     final normalized = normalizeCheckInNote(note, mood: mood);
     if (normalized case Failure<String>(:final failure)) {
@@ -34,6 +35,7 @@ final class BackendCheckInPlaceRepository implements CheckInPlaceRepository {
     }
     final response = await client.post(
       '/v1/check-ins',
+      isEligible: isEligible,
       idempotencyKey: idempotencyKey,
       body: {
         'note': (normalized as Success<String>).value,
@@ -65,6 +67,7 @@ final class BackendCheckInPlaceRepository implements CheckInPlaceRepository {
   Future<Result<CheckIn>> _update(
     CheckIn value,
     Map<String, Object?> changes,
+    bool Function()? isEligible,
   ) async {
     final visibility = value.checkInVisibility;
     if (visibility == null) {
@@ -78,6 +81,7 @@ final class BackendCheckInPlaceRepository implements CheckInPlaceRepository {
     }
     final response = await client.put(
       '/v1/check-ins/${Uri.encodeComponent(value.checkInId)}',
+      isEligible: isEligible,
       body: {
         'note': value.note,
         'mood': value.mood,
@@ -96,17 +100,22 @@ final class BackendCheckInPlaceRepository implements CheckInPlaceRepository {
   }
 
   @override
-  Future<Result<CheckIn>> removeLocation({required CheckIn checkIn}) =>
-      _update(checkIn, {'location': null});
+  Future<Result<CheckIn>> removeLocation({
+    required CheckIn checkIn,
+    bool Function()? isEligible,
+  }) => _update(checkIn, {'location': null}, isEligible);
   @override
-  Future<Result<CheckIn>> removeWeatherPermission({required CheckIn checkIn}) =>
-      _update(checkIn, {'removeWeather': true});
+  Future<Result<CheckIn>> removeWeatherPermission({
+    required CheckIn checkIn,
+    bool Function()? isEligible,
+  }) => _update(checkIn, {'removeWeather': true}, isEligible);
   @override
   Future<Result<CheckIn>> replaceLocation({
     required CheckIn checkIn,
     required GeoPoint location,
+    bool Function()? isEligible,
   }) async => location.valid
-      ? _update(checkIn, {'location': location.toJson()})
+      ? _update(checkIn, {'location': location.toJson()}, isEligible)
       : _invalid();
 }
 

@@ -1,13 +1,14 @@
 import '../../../core/network/backend_api_client.dart';
 import '../../../core/result/result.dart';
 import '../../account/domain/profile_details.dart';
-import '../../check_in/data/check_in_projection_parser.dart';
+import '../../check_in/domain/check_in_projection_decoder.dart';
 import '../../check_in/domain/check_in_repository.dart';
 import '../../weather/domain/weather.dart';
 import '../domain/social_repository.dart';
 
 final class BackendSocialRepository implements SocialRepository {
-  BackendSocialRepository(this.client);
+  BackendSocialRepository(this.client, this.decoder);
+  final CheckInProjectionDecoder decoder;
   final BackendApiClient client;
   String _person(String username) =>
       '/v1/people/${Uri.encodeComponent(username)}';
@@ -96,7 +97,7 @@ final class BackendSocialRepository implements SocialRepository {
     ),
     (json) {
       _keys(json, {'checkIn'});
-      final value = parseCheckInProjection(json['checkIn']);
+      final value = decoder.decode(json['checkIn']);
       if (value == null || value.checkInId != checkInId) {
         throw const FormatException();
       }
@@ -123,10 +124,7 @@ final class BackendSocialRepository implements SocialRepository {
     (json) {
       _keys(json, {'checkIns', 'nextCursor'});
       final values = _list(json['checkIns'], 20)
-          .map(
-            (raw) =>
-                parseCheckInProjection(raw) ?? (throw const FormatException()),
-          )
+          .map((raw) => decoder.decode(raw) ?? (throw const FormatException()))
           .toList();
       if (values.map((v) => v.checkInId).toSet().length != values.length) {
         throw const FormatException();

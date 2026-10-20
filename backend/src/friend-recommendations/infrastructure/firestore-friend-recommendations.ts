@@ -1,7 +1,7 @@
 import { rankAuthorizedFriendCandidates,type AuthorizedFriendRankingCandidateProjection,type AuthorizedFriendRankingProjection } from "../domain/friend-ranking.js";
 import type { FriendEventProjection } from "../ports/friend-event-projection.js";
-import { member,viewer,visible,fail,failure,SocialFailure,type Reader } from "../../friends/infrastructure/social-authority.js";
-import { friendPairKey,parsePair } from "../../friends/infrastructure/firestore-friend-repository.js";
+import { fail, failure, SocialFailure, visible } from "../../friends/domain/social-failure.js";
+import type { Member, Reader, SocialAuthority } from "../../friends/ports/social-authority.js";
 import type { FirestoreGateway,FirestoreTransactionGateway,StoredDocumentEntry } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { isSafeDocumentId } from "../../shared/infrastructure/firebase/firestore-records.js";
 import type { Clock } from "../../shared/ports/clock.js";
@@ -25,7 +25,7 @@ async function tags(tx:Reader,id:string):Promise<Map<string,string>>{
 }
 /** Request-local computation; no persisted recommendations or result history. */
 export class FirestoreFriendRecommendations implements FriendRecommendations {
-  constructor(private readonly store:FirestoreGateway,private readonly clock:Clock,private readonly events?:FriendEventProjection){}
+  constructor(private readonly store:FirestoreGateway,private readonly clock:Clock,private readonly authority:SocialAuthority,private readonly events?:FriendEventProjection){}
   private async eventProjection(tx:Reader,requester:string,subject:string){
     if(!this.events)return fail("SERVICE_UNAVAILABLE");
     const value=await this.events.read(tx,requester,subject,"friend_recommendation_v1");
@@ -47,7 +47,7 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
   }
   async recommend(uid:string,view:"home"|"all"){
     try{return await this.store.runTransaction(async tx=>{
-      const own=await viewer(tx,uid),now=this.clock.now();
+      const own=await this.authority.viewer(tx,uid),now=this.clock.now();
       if(!now.ok)return fail("SERVICE_UNAVAILABLE");
       // Q17 consent precedes candidate construction; manual Friend paths remain available.
       if(own.data.optionalProcessingConsent!=="accepted")return ok({suggestions:[]});
@@ -57,13 +57,13 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
       for(const row of await this.pool(tx)){
         if(row.id===own.id||row.data.profileVisibility!=="public")continue;
         let candidate;
-        try{candidate=await member(tx,row.id);}catch(e){
+        try{candidate=await this.authority.member(tx,row.id);}catch(e){
           if(e instanceof SocialFailure&&e.code==="ADD_FRIEND_TARGET_UNAVAILABLE")continue;throw e;
         }
         if(candidate.visibility!=="public"||candidate.data.optionalProcessingConsent!=="accepted")continue;
         const reservation=await tx.get(`username_reservations/${candidate.username}`);
         if(reservation?.accountId!==candidate.id)continue;
-        const stored=await tx.get(`friend_pairs/${friendPairKey(own.id,candidate.id)}`),pair=stored&&parsePair(stored,own.id,candidate.id);
+        const stored=await tx.get(`friend_pairs/${this.authority.pairKey(own.id,candidate.id)}`),pair=stored&&this.authority.parsePair(stored,own.id,candidate.id);
         if(stored&&!pair)return fail("SERVICE_UNAVAILABLE");
         if(pair?.friendship||pair?.blockedByAccountIds.length||
           (pair?.pending&&Date.parse(pair.pending.expiresAt)>now.value.getTime()))continue;

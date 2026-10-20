@@ -161,7 +161,11 @@ void main() {
           .read(friendDiscoveryControllerProvider(home).notifier)
           .load();
     }
-    final undo = await f.controller.ignore('alpha', version(0));
+    final undo = await f.controller.ignore(
+      'alpha',
+      version(0),
+      expectedEpoch: f.controller.epoch,
+    );
     expect(undo, isNotNull);
     for (final home in [true, false]) {
       expect(
@@ -181,9 +185,14 @@ void main() {
     }
     await f.controller.undo(undo!);
     expect(f.repo.rows['alpha']!.ignored, isFalse);
-    await f.controller.ignore('alpha', version(2));
+    await f.controller.ignore(
+      'alpha',
+      version(2),
+      expectedEpoch: f.controller.epoch,
+    );
     await f.controller.loadPeople();
     await f.controller.restore(
+      expectedEpoch: f.controller.epoch,
       f.container.read(friendIgnoreControllerProvider).people.single,
     );
     expect(f.repo.rows['alpha']!.ignored, isFalse);
@@ -192,9 +201,20 @@ void main() {
   test('unknown committed ignore blocks duplicate writes across page cleanup until explicit read, without automatic replay', () async {
     final f = await setup();
     f.repo.loseWriteResponse = true;
-    expect(await f.controller.ignore('alpha', version(0)), isNull);
+    expect(
+      await f.controller.ignore(
+        'alpha',
+        version(0),
+        expectedEpoch: f.controller.epoch,
+      ),
+      isNull,
+    );
     f.controller.clearPrivateViews();
-    await f.controller.ignore('alpha', version(0));
+    await f.controller.ignore(
+      'alpha',
+      version(0),
+      expectedEpoch: f.controller.epoch,
+    );
     await f.controller.loadPeople();
     expect(f.repo.writes, 1);
     expect(f.repo.lists, 0);
@@ -214,17 +234,30 @@ void main() {
     f.repo.loseWriteResponse = false;
     await f.controller.loadPeople();
     await f.controller.restore(
+      expectedEpoch: f.controller.epoch,
       f.container.read(friendIgnoreControllerProvider).people.single,
     );
     expect(f.repo.rows['alpha']!.ignored, isFalse);
   });
   test('duplicate while awaiting result is suppressed; same UID replacement discards late response and old Undo', () async {
     final f = await setup();
-    final undo = await f.controller.ignore('bravo', version(0));
+    final undo = await f.controller.ignore(
+      'bravo',
+      version(0),
+      expectedEpoch: f.controller.epoch,
+    );
     final pending = Completer<Result<FriendIgnoreState>>();
     f.repo.pending = pending;
-    final first = f.controller.ignore('alpha', version(0));
-    await f.controller.ignore('alpha', version(0));
+    final first = f.controller.ignore(
+      'alpha',
+      version(0),
+      expectedEpoch: f.controller.epoch,
+    );
+    await f.controller.ignore(
+      'alpha',
+      version(0),
+      expectedEpoch: f.controller.epoch,
+    );
     expect(f.repo.writes, 2); // bravo plus one alpha.
     f.auth.emit(AuthSessionAuthenticated(subject: 'owner'));
     await f.container.pump();
@@ -236,13 +269,25 @@ void main() {
   });
   test('two distinct ignores bind Undo to the right target; stale Undo cannot reverse a later ignore', () async {
     final f = await setup();
-    final a = (await f.controller.ignore('alpha', version(0)))!;
-    final b = (await f.controller.ignore('bravo', version(0)))!;
+    final a = (await f.controller.ignore(
+      'alpha',
+      version(0),
+      expectedEpoch: f.controller.epoch,
+    ))!;
+    final b = (await f.controller.ignore(
+      'bravo',
+      version(0),
+      expectedEpoch: f.controller.epoch,
+    ))!;
     await f.controller.undo(b);
     expect(f.repo.rows['alpha']!.ignored, isTrue);
     expect(f.repo.rows['bravo']!.ignored, isFalse);
     await f.controller.undo(a);
-    await f.controller.ignore('alpha', version(2));
+    await f.controller.ignore(
+      'alpha',
+      version(2),
+      expectedEpoch: f.controller.epoch,
+    );
     await f.controller.undo(a);
     expect(f.repo.rows['alpha']!.ignored, isTrue);
     expect(
@@ -252,7 +297,11 @@ void main() {
   });
   test('restore failure retains server ignore; revoked target clears stale identity only after authoritative unavailable', () async {
     final f = await setup();
-    final undo = (await f.controller.ignore('alpha', version(0)))!;
+    final undo = (await f.controller.ignore(
+      'alpha',
+      version(0),
+      expectedEpoch: f.controller.epoch,
+    ))!;
     f.repo.hidden = true;
     await f.controller.undo(undo);
     expect(f.repo.rows['alpha']!.ignored, isTrue);
@@ -268,7 +317,11 @@ void main() {
   });
   test('new client session reads existing ignore instead of reconstructing an old card', () async {
     final f = await setup();
-    await f.controller.ignore('alpha', version(0));
+    await f.controller.ignore(
+      'alpha',
+      version(0),
+      expectedEpoch: f.controller.epoch,
+    );
     final second = await setup(f.repo);
     await second.controller.loadPeople();
     expect(
@@ -486,7 +539,11 @@ void main() {
     'management remains scrollable at large text and narrow landscape; restore action reachable',
     (tester) async {
       final f = await setup();
-      await f.controller.ignore('alpha', version(0));
+      await f.controller.ignore(
+        'alpha',
+        version(0),
+        expectedEpoch: f.controller.epoch,
+      );
       tester.view.physicalSize = const Size(600, 320);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);

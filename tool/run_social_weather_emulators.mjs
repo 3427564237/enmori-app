@@ -11,8 +11,8 @@ import {buildControlledEmulatorTestEnvironment} from '../backend/dist/src/shared
 assert.equal(process.version,'v24.19.0');
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const args=process.argv.slice(2);
-assert.ok(args.every(arg=>['--child','--friend-ignore'].includes(arg)));
-const suite=args.includes('--friend-ignore')?'friend-ignore':'social-weather';
+assert.ok(args.every(arg=>['--child','--friend-ignore','--friend-activity'].includes(arg)));
+const suite=args.includes('--friend-activity')?'friend-activity':args.includes('--friend-ignore')?'friend-ignore':'social-weather';
 const run=(program,args,env)=>new Promise((done,reject)=>{
   const child=spawn(program,args,{cwd:root,env,stdio:'inherit',windowsHide:true});
   child.on('error',reject);child.on('exit',code=>code===0?done():reject(new Error(`Test child exited ${code}`)));
@@ -34,7 +34,7 @@ if(args.includes('--child')){
     if(process.env.FIREBASE_EMULATORS_PATH)env.FIREBASE_EMULATORS_PATH=process.env.FIREBASE_EMULATORS_PATH;
     const script=fileURLToPath(import.meta.url);assert.ok(!script.includes('"'));
     const quote=s=>`'${s.replaceAll("'","'\\''")}'`;
-    const selection=suite==='friend-ignore'?' --friend-ignore':'';
+    const selection=suite==='social-weather'?'':` --${suite}`;
     const command=process.platform==='win32'?`"${process.execPath}" "${script}" --child${selection}`:`${quote(process.execPath)} ${quote(script)} --child${selection}`;
     const cli=createRequire(import.meta.url).resolve('firebase-tools/lib/bin/firebase.js');
     await run(process.execPath,[cli,'emulators:exec','--project','demo-enmori-rmvp01a-r10','--only','auth,firestore','--config','firebase.json','--non-interactive',command],env);

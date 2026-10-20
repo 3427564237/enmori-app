@@ -8803,44 +8803,125 @@
                     "activities": {
                       "type": "array",
                       "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                          "type",
-                          "sourceRecordId",
-                          "occurredAt",
-                          "username",
-                          "displayName"
-                        ],
-                        "properties": {
-                          "type": {
-                            "enum": [
-                              "check_in_created",
-                              "event_interested",
-                              "event_going"
-                            ]
-                          },
-                          "sourceRecordId": {
-                            "type": "string"
-                          },
-                          "occurredAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "username": {
-                            "type": "string"
-                          },
-                          "displayName": {
-                            "anyOf": [
-                              {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "type",
+                              "sourceRecordId",
+                              "occurredAt",
+                              "username",
+                              "displayName",
+                              "checkIn"
+                            ],
+                            "properties": {
+                              "sourceRecordId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 128
+                              },
+                              "occurredAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "username": {
                                 "type": "string"
                               },
-                              {
-                                "type": "null"
+                              "displayName": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "type": {
+                                "const": "check_in_created"
+                              },
+                              "checkIn": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "note"
+                                ],
+                                "properties": {
+                                  "note": {
+                                    "type": "string"
+                                  },
+                                  "mood": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 50
+                                  }
+                                }
                               }
-                            ]
+                            }
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "type",
+                              "sourceRecordId",
+                              "occurredAt",
+                              "username",
+                              "displayName",
+                              "event"
+                            ],
+                            "properties": {
+                              "sourceRecordId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 128
+                              },
+                              "occurredAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "username": {
+                                "type": "string"
+                              },
+                              "displayName": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "type": {
+                                "enum": [
+                                  "event_interested",
+                                  "event_going"
+                                ]
+                              },
+                              "event": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "eventId",
+                                  "title"
+                                ],
+                                "properties": {
+                                  "eventId": {
+                                    "type": "string",
+                                    "pattern": "^(?!tm_)[A-Za-z0-9_-]{1,128}$"
+                                  },
+                                  "title": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  }
+                                }
+                              }
+                            }
                           }
-                        }
+                        ]
                       }
                     }
                   }

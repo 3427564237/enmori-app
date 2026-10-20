@@ -15,10 +15,12 @@ final class FriendModulePage extends ConsumerWidget {
   const FriendModulePage({
     required this.openAttribution,
     this.participationBuilder,
+    this.onOpenEvent,
     super.key,
   });
   final Future<bool> Function(Uri) openAttribution;
   final ParticipationBuilder? participationBuilder;
+  final Future<void> Function(String eventId)? onOpenEvent;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Future<void> profile(String username) async {
@@ -126,6 +128,7 @@ final class FriendModulePage extends ConsumerWidget {
             discovery(true),
             const SizedBox(height: 24),
             FriendActivityPanel(
+              onOpenEvent: onOpenEvent,
               home: true,
               onOpenProfile: profile,
               onSeeAll: () => Navigator.of(context).push<void>(
@@ -137,6 +140,7 @@ final class FriendModulePage extends ConsumerWidget {
                         padding: const EdgeInsets.all(24),
                         children: [
                           FriendActivityPanel(
+                            onOpenEvent: onOpenEvent,
                             home: false,
                             onOpenProfile: profile,
                           ),

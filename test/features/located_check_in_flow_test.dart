@@ -74,7 +74,11 @@ void main() {
     final h = await harness();
     h.location.result = const Failure(unavailable);
     await h.place.capture(expectedEpoch: h.place.epoch);
-    await h.save.save(note: 'A walk', visibility: CheckInVisibility.private);
+    await h.save.save(
+      expectedEpoch: h.save.epoch,
+      note: 'A walk',
+      visibility: CheckInVisibility.private,
+    );
     expect(h.repository.places, [null]);
     expect(h.state.savedId, 'saved-point');
     await h.save.read('saved-point');
@@ -86,10 +90,15 @@ void main() {
         pending = Completer<Result<CheckInSaveReceipt>>();
     h.repository.pending = pending;
     final first = h.save.save(
+      expectedEpoch: h.save.epoch,
       note: 'A walk',
       visibility: CheckInVisibility.private,
     );
-    await h.save.save(note: 'A walk', visibility: CheckInVisibility.private);
+    await h.save.save(
+      expectedEpoch: h.save.epoch,
+      note: 'A walk',
+      visibility: CheckInVisibility.private,
+    );
     expect(h.repository.keys.length, 1);
     h.auth.emit(AuthSessionAuthenticated(subject: 'same'));
     await h.container.pump();
@@ -101,10 +110,22 @@ void main() {
   test('unconfirmed save retains exact key/payload; changed text cannot start a second operation', () async {
     final h = await harness();
     h.repository.result = const Failure(unavailable);
-    await h.save.save(note: 'A walk', visibility: CheckInVisibility.private);
-    await h.save.save(note: 'Changed', visibility: CheckInVisibility.private);
+    await h.save.save(
+      expectedEpoch: h.save.epoch,
+      note: 'A walk',
+      visibility: CheckInVisibility.private,
+    );
+    await h.save.save(
+      expectedEpoch: h.save.epoch,
+      note: 'Changed',
+      visibility: CheckInVisibility.private,
+    );
     expect(h.repository.keys.length, 1);
-    await h.save.save(note: 'A walk', visibility: CheckInVisibility.private);
+    await h.save.save(
+      expectedEpoch: h.save.epoch,
+      note: 'A walk',
+      visibility: CheckInVisibility.private,
+    );
     expect(h.repository.keys, ['fixed-key', 'fixed-key']);
   });
   test('saved location/weather removal uses a confirmation epoch and current revision; failed read clears old value', () async {
@@ -231,6 +252,10 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            authSessionProvider.overrideWith(
+              (ref) =>
+                  Stream.value(AuthSessionAuthenticated(subject: 'fixture')),
+            ),
             checkInPlaceRepositoryProvider.overrideWithValue(repository),
             checkInRepositoryProvider.overrideWithValue(own),
             idempotencyKeyGeneratorProvider.overrideWithValue(
@@ -308,6 +333,7 @@ class PlaceFake implements CheckInPlaceRepository {
     required CheckInVisibility visibility,
     CheckInPlace? place,
     required String idempotencyKey,
+    bool Function()? isEligible,
   }) {
     keys.add(idempotencyKey);
     places.add(place);
@@ -315,7 +341,10 @@ class PlaceFake implements CheckInPlaceRepository {
   }
 
   @override
-  Future<Result<CheckIn>> removeLocation({required CheckIn checkIn}) async {
+  Future<Result<CheckIn>> removeLocation({
+    required CheckIn checkIn,
+    bool Function()? isEligible,
+  }) async {
     removals++;
     return Success(
       CheckIn(
@@ -329,12 +358,15 @@ class PlaceFake implements CheckInPlaceRepository {
   }
 
   @override
-  Future<Result<CheckIn>> removeWeatherPermission({required CheckIn checkIn}) =>
-      removeLocation(checkIn: checkIn);
+  Future<Result<CheckIn>> removeWeatherPermission({
+    required CheckIn checkIn,
+    bool Function()? isEligible,
+  }) => removeLocation(checkIn: checkIn);
   @override
   Future<Result<CheckIn>> replaceLocation({
     required CheckIn checkIn,
     required GeoPoint location,
+    bool Function()? isEligible,
   }) async => Success(
     CheckIn(
       checkInId: checkIn.checkInId,
