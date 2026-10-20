@@ -14,7 +14,7 @@ export interface PersonaPreviewControl {
 
 /** One draft/message only. This use case has no repository or history/write Port. */
 export class PreviewPersona {
-  private pending = false;
+  private pending: object | undefined;
   constructor(private readonly authority: PersonaPreviewAuthority,
     private readonly generation: GenerationTransport<ConversationInput>,
     private readonly monotonicNow: () => number,
@@ -26,14 +26,30 @@ export class PreviewPersona {
     if (!expression || typeof text !== "string" || !text.isWellFormed() || !text.trim() || [...text].length > 2400) {
       return { kind: "failure", code: "AI_INPUT_INVALID" };
     }
+    const controller = new AbortController();
+    let active = true;
     const started = this.monotonicNow(), deadline = started + 60_000;
-    const live = () => !control.signal.aborted && control.current() && Number.isFinite(this.monotonicNow()) && this.monotonicNow() < deadline;
+    const live = () => active && !controller.signal.aborted && !control.signal.aborted && control.current() &&
+      Number.isFinite(this.monotonicNow()) && this.monotonicNow() >= started && this.monotonicNow() < deadline;
     if (!live()) return { kind: "terminated" };
     if (this.pending || this.modelBusy()) return { kind: "failure", code: "AI_BUSY" };
-    this.pending = true;
-    const controller = new AbortController();
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let disconnect: (() => void) | undefined;
+    const request = Object.freeze({});
+    this.pending = request;
+    let generationTimer: ReturnType<typeof setTimeout> | undefined;
+    let resolveStopped!: (value: ConversationResult<void>) => void;
+    const stopped = new Promise<ConversationResult<void>>(resolve => { resolveStopped = resolve; });
+    const stop = (value: ConversationResult<void>) => {
+      if (!active) return;
+      // Revoke the original continuation before a new request can be admitted.
+      active = false;
+      controller.abort();
+      resolveStopped(value);
+    };
+    const disconnect = () => stop({ kind: "terminated" });
+    control.signal.addEventListener("abort", disconnect, { once: true });
+    const requestTimer = setTimeout(() => stop({ kind: "failure", code: "AI_UNAVAILABLE" }),
+      Math.max(0, deadline - this.monotonicNow()));
+    requestTimer.unref();
     const permission = async (): Promise<ConversationResult<PersonaPreviewPermission>> => {
       if (!live()) return { kind: "terminated" };
       const verified = await caller.verifyCurrentAuth();
@@ -46,39 +62,48 @@ export class PreviewPersona {
       const result = await this.authority.read(verified.principal);
       return live() ? result : { kind: "terminated" };
     };
+    const work = async (): Promise<ConversationResult<void>> => {
+      try {
+        const before = await permission();
+        if (before.kind !== "success") return before;
+        if (!live()) return { kind: "terminated" };
+        const input: ConversationInput = Object.freeze({ strategy: "open_conversation_v1", currentMessage: text,
+          checkIns: Object.freeze([]), history: Object.freeze([]), persona: personaExpressionProjection(expression) });
+        const budget = { signal: controller.signal, deadline, remainingMs: () => Math.max(0, deadline - this.monotonicNow()) };
+        // Generation has its own 45-second limit inside the original request.
+        // The transport retains the physical lane if its provider is unresolved.
+        generationTimer = setTimeout(() => stop({ kind: "failure", code: "AI_UNAVAILABLE" }),
+          Math.min(45_000, budget.remainingMs()));
+        generationTimer.unref();
+        if (!live()) return { kind: "terminated" };
+        const raw = await this.generation.generate(input, budget);
+        clearTimeout(generationTimer);
+        if (!live()) return { kind: "terminated" };
+        if (!raw || controller.signal.aborted) return { kind: "failure", code: "AI_UNAVAILABLE" };
+        const output = parseOutput(raw, "ai_assistant_message_v1", true);
+        if (!output.ok) return { kind: "failure", code: "AI_REPLY_REJECTED" };
+        const after = await permission();
+        if (after.kind !== "success") return after;
+        if (before.value.ownerId !== after.value.ownerId || before.value.purposeRevocationGeneration !== after.value.purposeRevocationGeneration) {
+          return { kind: "failure", code: "AI_AUTHORITY_CHANGED" };
+        }
+        if (!live() || controller.signal.aborted || !control.accept(output.value.message)) return { kind: "terminated" };
+        return { kind: "success", value: undefined };
+      } catch { return live() ? { kind: "failure", code: "AI_UNAVAILABLE" } : { kind: "terminated" }; }
+    };
     try {
-      const before = await permission();
-      if (before.kind !== "success") return before;
-      if (!live()) return { kind: "terminated" };
-      const input: ConversationInput = Object.freeze({ strategy: "open_conversation_v1", currentMessage: text,
-        checkIns: Object.freeze([]), history: Object.freeze([]), persona: personaExpressionProjection(expression) });
-      const budget = { signal: controller.signal, deadline, remainingMs: () => Math.max(0, deadline - this.monotonicNow()) };
-      const stopped = new Promise<undefined>(resolve => {
-        disconnect = () => { controller.abort(); resolve(undefined); };
-        control.signal.addEventListener("abort", disconnect, { once: true });
-        // Same single-generation capacity as the existing local chat runtime.
-        timer = setTimeout(disconnect, Math.min(45_000, budget.remainingMs()));
-        timer.unref();
-      });
-      if (!live()) return { kind: "terminated" };
-      const raw = await Promise.race([this.generation.generate(input, budget), stopped]);
-      if (!live()) return { kind: "terminated" };
-      if (!raw || controller.signal.aborted) return { kind: "failure", code: "AI_UNAVAILABLE" };
-      const output = parseOutput(raw, "ai_assistant_message_v1", true);
-      if (!output.ok) return { kind: "failure", code: "AI_REPLY_REJECTED" };
-      const after = await permission();
-      if (after.kind !== "success") return after;
-      if (before.value.ownerId !== after.value.ownerId || before.value.purposeRevocationGeneration !== after.value.purposeRevocationGeneration) {
-        return { kind: "failure", code: "AI_AUTHORITY_CHANGED" };
-      }
-      if (!live() || controller.signal.aborted || !control.accept(output.value.message)) return { kind: "terminated" };
-      return { kind: "success", value: undefined };
-    } catch { return live() ? { kind: "failure", code: "AI_UNAVAILABLE" } : { kind: "terminated" }; }
+      if (!live()) disconnect();
+      // Permission I/O before and after generation shares this same stop race.
+      // Detached work is consumed but has no authority to dispatch or deliver.
+      return await Promise.race([stopped, work()]);
+    }
     finally {
+      active = false;
       controller.abort();
-      if (timer) clearTimeout(timer);
-      if (disconnect) control.signal.removeEventListener("abort", disconnect);
-      this.pending = false;
+      clearTimeout(requestTimer);
+      if (generationTimer) clearTimeout(generationTimer);
+      control.signal.removeEventListener("abort", disconnect);
+      if (this.pending === request) this.pending = undefined;
     }
   }
 }

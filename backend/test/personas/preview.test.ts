@@ -6,7 +6,7 @@ import { PreviewPersona } from "../../src/personas/application/preview-persona.j
 import { FirestorePersonaPreviewAuthority } from "../../src/personas/infrastructure/firestore-persona-preview-authority.js";
 import { registerPersonaPreviewRoute, personaPreviewRequestSchema, personaPreviewResponseSchema, personaPreviewErrorSchema } from "../../src/personas/transport/preview-route.js";
 import type { PersonaPreviewAuthority } from "../../src/personas/ports/persona-preview-authority.js";
-import type { ConversationCaller } from "../../src/ai-conversation/ports/conversation-operations.js";
+import type { ConversationCaller, ConversationResult } from "../../src/ai-conversation/ports/conversation-operations.js";
 import type { ConversationInput } from "../../src/ai-conversation/ports/conversation-lifecycle.js";
 import type { GenerationTransport } from "../../src/ai-runtime/ports/generation-transport.js";
 import { LocalChatTransport } from "../../src/ai-runtime/infrastructure/local-chat-transport.js";
@@ -33,6 +33,93 @@ function setup(consent = "accepted") {
 const control = (messages: string[], signal = new AbortController().signal) => ({ signal, current: () => !signal.aborted,
   accept: (message: string) => { messages.push(message); return true; } });
 const result = (code: string) => ({ kind: "failure", code });
+
+for (const stage of ["before-auth", "before-account", "after-auth", "after-account"] as const) {
+  for (const stop of ["deadline", "disconnect"] as const) {
+    test(`preview ${stop} settles a stalled ${stage} read and stale work cannot affect a newer request`, async t => {
+      t.mock.timers.enable({ apis: ["setTimeout"] });
+      let now = 0, authReads = 0, accountReads = 0, generated = 0;
+      let releaseOld!: () => void, enteredOld!: () => void;
+      let releaseFresh!: () => void, enteredFresh!: () => void;
+      const oldGate = new Promise<void>(resolve => { releaseOld = resolve; });
+      const oldEntered = new Promise<void>(resolve => { enteredOld = resolve; });
+      const freshGate = new Promise<void>(resolve => { releaseFresh = resolve; });
+      const freshEntered = new Promise<void>(resolve => { enteredFresh = resolve; });
+      const blockedRead = stage.startsWith("before") ? 1 : 2;
+      const original: ConversationCaller = { ...caller, verifyCurrentAuth: async () => {
+        authReads++;
+        if (stage.endsWith("auth") && authReads === blockedRead) { enteredOld(); await oldGate; }
+        return { kind: "verified", principal };
+      } };
+      const authority: PersonaPreviewAuthority = { read: async () => {
+        accountReads++;
+        if (stage.endsWith("account") && accountReads === blockedRead) { enteredOld(); await oldGate; }
+        return { kind: "success", value: { ownerId: accountId, purposeRevocationGeneration: 0 } };
+      } };
+      const generation: GenerationTransport<ConversationInput> = { generate: async input => {
+        generated++;
+        if (input.currentMessage === "fresh") { enteredFresh(); await freshGate; }
+        return raw();
+      } };
+      const preview = new PreviewPersona(authority, generation, () => now, () => false);
+      const messages: string[] = [], abort = new AbortController();
+      let settled: ConversationResult<void> | undefined;
+      const pending = preview.execute(original, draft, "original", control(messages, abort.signal));
+      void pending.then(value => { settled = value; });
+      await oldEntered;
+      if (stop === "deadline") { now = 60_000; t.mock.timers.tick(60_000); }
+      else abort.abort();
+      await new Promise<void>(resolve => setImmediate(resolve));
+      assert.deepEqual(settled, stop === "deadline" ? result("AI_UNAVAILABLE") : { kind: "terminated" });
+      assert.deepEqual(messages, []);
+
+      // The request admission flag may be released; the old async continuation
+      // must remain revoked, including while a new request owns that flag.
+      const fresh = preview.execute(caller, draft, "fresh", control(messages));
+      await freshEntered;
+      releaseOld();
+      await new Promise<void>(resolve => setImmediate(resolve));
+      assert.deepEqual(messages, []);
+      assert.equal(generated, stage.startsWith("after") ? 2 : 1);
+      assert.deepEqual(await preview.execute(caller, draft, "third", control(messages)), result("AI_BUSY"));
+      releaseFresh();
+      assert.deepEqual(await fresh, { kind: "success", value: undefined });
+      assert.deepEqual(messages, ["Preview hello 2? https://example.org"]);
+      assert.deepEqual(await pending, settled);
+    });
+  }
+}
+
+test("preview stops the generation timer after model completion but keeps the original request deadline", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let now = 0, reads = 0, enteredModel!: () => void, releaseModel!: () => void;
+  let enteredDelivery!: () => void, releaseDelivery!: () => void;
+  const modelEntered = new Promise<void>(resolve => { enteredModel = resolve; });
+  const modelGate = new Promise<void>(resolve => { releaseModel = resolve; });
+  const deliveryEntered = new Promise<void>(resolve => { enteredDelivery = resolve; });
+  const deliveryGate = new Promise<void>(resolve => { releaseDelivery = resolve; });
+  const authority: PersonaPreviewAuthority = { read: async () => {
+    if (++reads === 2) { enteredDelivery(); await deliveryGate; }
+    return { kind: "success", value: { ownerId: accountId, purposeRevocationGeneration: 0 } };
+  } };
+  const preview = new PreviewPersona(authority, { generate: async () => {
+    enteredModel(); await modelGate; return raw();
+  } }, () => now, () => false);
+  const messages: string[] = [];
+  let settled: ConversationResult<void> | undefined;
+  const pending = preview.execute(caller, draft, "Hello", control(messages));
+  void pending.then(value => { settled = value; });
+  await modelEntered;
+  now = 10_000; t.mock.timers.tick(10_000); releaseModel();
+  await deliveryEntered;
+  now = 45_000; t.mock.timers.tick(35_000);
+  await new Promise<void>(resolve => setImmediate(resolve));
+  assert.equal(settled, undefined);
+  now = 60_000; t.mock.timers.tick(15_000);
+  assert.deepEqual(await pending, result("AI_UNAVAILABLE"));
+  releaseDelivery(); await new Promise<void>(resolve => setImmediate(resolve));
+  assert.deepEqual(messages, []);
+});
 
 test("preview uses only current draft/message; no save/activation/history/source reads and every response is transient", async () => {
   const f = setup(), messages: string[] = [];
