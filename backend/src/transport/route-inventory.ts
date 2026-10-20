@@ -1,4 +1,6 @@
 export const ROUTE_INVENTORY = [
+  {method:"POST",path:"/v1/me/persona-preview",successStatuses:[200],requiresIdempotencyKey:false,environment:"isolated-emulator"},
+  {method:"GET",path:"/v1/me/conversations",successStatuses:[200],requiresIdempotencyKey:false,environment:"isolated-emulator"},
   {method:"GET",path:"/v1/me/check-ins/calendar",successStatuses:[200],requiresIdempotencyKey:false,environment:"isolated-emulator"},
   { method: "PUT", path: "/v1/check-ins/{checkInId}", successStatuses: [200], requiresIdempotencyKey: false },
   { method: "DELETE", path: "/v1/check-ins/{checkInId}", successStatuses: [200], requiresIdempotencyKey: false },

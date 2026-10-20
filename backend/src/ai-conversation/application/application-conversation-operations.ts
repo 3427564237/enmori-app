@@ -1,6 +1,6 @@
 import type { AsyncConversationIdentity, AsyncOperation, AsyncSavedUser } from "../ports/async-conversation.js";
 import type { ConversationCaller, ConversationFailureCode, ConversationOperations, ConversationReadback,
-  ConversationResult, PrepareConversation, PreparedConversationOperation } from "../ports/conversation-operations.js";
+  ConversationResult, ConversationSummaryPage, PrepareConversation, PreparedConversationOperation } from "../ports/conversation-operations.js";
 import type { ConversationExecution, ConversationExecutionDelivery, ConversationOperationAuthority,
   ConversationOperationClock, ConversationOperationExecutor, ConversationOperationIdentifiers,
   ConversationOperationReaders, ConversationOperationQuiescence, ConversationOrdinaryContext,
@@ -250,6 +250,35 @@ export class ApplicationConversationOperations implements ConversationOperations
       } else if (value.state !== "active" && value.state !== "unresolved") return failure("AI_OUTCOME_UNRESOLVED");
       if (original?.phase === "terminal" && value.state !== "unresolved" && value.state !== "active") this.forget(original);
       return result;
+    });
+  }
+  listConversations(caller: ConversationCaller, after: string | undefined): Promise<ConversationResult<ConversationSummaryPage>> {
+    if (after !== undefined && !uuid(after)) return Promise.resolve(failure("REQUEST_INVALID"));
+    return this.ordinary(caller, true, async context => {
+      if (!this.readers.listConversations) return failure("AI_UNAVAILABLE");
+      const result = await this.readers.listConversations(context, after);
+      if (!context.current()) return failure("AI_UNAVAILABLE");
+      if (result.kind !== "success") return result;
+      const page = result.value;
+      if (!page || !Array.isArray(page.conversations) || page.conversations.length > 20 ||
+          page.conversations.some((row, i) => !row || !uuid(row.conversationId) ||
+            (after !== undefined && row.conversationId <= after) ||
+            (i > 0 && row.conversationId <= page.conversations[i - 1]!.conversationId) ||
+            typeof row.lastMessageAt !== "string" || new Date(row.lastMessageAt).toISOString() !== row.lastMessageAt) ||
+          (page.nextCursor !== undefined && (!uuid(page.nextCursor) ||
+            (after !== undefined && page.nextCursor <= after) ||
+            page.conversations.some(row => row.conversationId > page.nextCursor!)))) return failure("AI_UNAVAILABLE");
+      // A history read is not a capability to retain results across revocation.
+      // Recheck both actual Auth and purpose after the awaited storage work.
+      const verified = await caller.verifyCurrentAuth();
+      if (!context.current()) return failure("AI_UNAVAILABLE");
+      if (verified.kind !== "verified") return failure(verified.kind === "invalid" ? "AUTH_REQUIRED" :
+        verified.kind === "forbidden" ? "AUTH_FORBIDDEN" : "AI_UNAVAILABLE");
+      if (verified.principal.firebaseUid !== context.principal.firebaseUid) return failure("AUTH_FORBIDDEN");
+      const current = await this.authority.resolve(caller, true, context);
+      if (!context.current()) return failure("AI_UNAVAILABLE");
+      if (current.kind !== "success") return current;
+      return current.value.ownerId === context.ownerId ? result : failure("AUTH_FORBIDDEN");
     });
   }
   listMessages(caller: ConversationCaller, conversationId: string, before: number | undefined): Promise<ConversationResult<{ readonly messages: readonly StoredConversationMessage[]; readonly nextBefore?: number }>> {

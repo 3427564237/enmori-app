@@ -4,7 +4,7 @@ import type { Clock } from "../../shared/ports/clock.js";
 import type { FirestoreGateway, FirestoreTransactionGateway, StoredDocument } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId, parseAccountProjection, parseAuthBinding } from "../../shared/infrastructure/firebase/firestore-records.js";
 import type { PersonaCreate, PersonaCreateResult, PersonaEdit, PersonaPreconditions, PersonaRead, PersonaSet, PersonaView } from "../application/persona-model.js";
-import { isPersonaCreateKey, isPersonaId, isPersonaRevision, isStateRevision, normalizePersonaInput, samePersonaInput } from "../domain/persona-values.js";
+import { isPersonaCreateKey, isPersonaId, isPersonaRevision, isStateRevision, normalizePersonaInput, personaExpressionFields, samePersonaInput } from "../domain/persona-values.js";
 import type { PersonaRepository, PersonaResult } from "../ports/persona-repository.js";
 
 interface OwnerState {
@@ -53,10 +53,9 @@ function parseState(data: StoredDocument | undefined): OwnerState | undefined {
 }
 
 function parsePersona(data: StoredDocument | undefined, personaId: string): PersonaView | undefined {
-  if (data === undefined || !hasExactKeys(data, ["displayName", "tone", "responseLength", "formatStyle", "createdAt", "updatedAt", "revision"]) ||
+  if (data === undefined || !hasExactKeys(data, ["displayName", "tone", "responseLength", "formatStyle", "createdAt", "updatedAt", "revision"], personaExpressionFields) ||
     !isPersonaRevision(data.revision) || !isPersonaInstant(data.createdAt) || !isPersonaInstant(data.updatedAt)) return undefined;
-  const fields = normalizePersonaInput({ displayName: data.displayName, tone: data.tone,
-    responseLength: data.responseLength, formatStyle: data.formatStyle });
+  const fields = normalizePersonaInput(data);
   if (fields === undefined || fields.displayName !== data.displayName) return undefined;
   return { personaId, ...fields, createdAt: data.createdAt, updatedAt: data.updatedAt, revision: data.revision };
 }
@@ -69,6 +68,7 @@ function setView(snapshot: Snapshot, state: OwnerState = snapshot.state): Person
 
 function storedPersona(view: PersonaView): StoredDocument {
   return { displayName: view.displayName, tone: view.tone, responseLength: view.responseLength, formatStyle: view.formatStyle,
+    ...Object.fromEntries(personaExpressionFields.map(field => [field, view[field] ?? ""])),
     createdAt: view.createdAt, updatedAt: view.updatedAt, revision: view.revision };
 }
 

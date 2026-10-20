@@ -29,7 +29,19 @@ export interface ExecutedConversationPair {
   readonly operationId:string;readonly conversationId:string;
   readonly userMessage:StoredConversationMessage;readonly assistantMessage:StoredConversationMessage;
 }
+/** Owner-only history metadata. Message content is read through listMessages. */
+export interface ConversationSummary {
+  readonly conversationId: string;
+  readonly lastMessageAt: string;
+}
+export interface ConversationSummaryPage {
+  readonly conversations: readonly ConversationSummary[];
+  /** Last scanned parent ID, including when every scanned row has expired. */
+  readonly nextCursor?: string;
+}
 export interface ConversationOperations {
+  /** Optional for older isolated suppliers: absence fails unavailable. */
+  listConversations?(caller: ConversationCaller, after: string | undefined): Promise<ConversationResult<ConversationSummaryPage>>;
   prepare(caller: ConversationCaller, input: PrepareConversation): Promise<ConversationResult<PreparedConversationOperation>>;
   execute(caller: ConversationCaller, input: { readonly operationId: string; readonly operationKey: string; readonly text: string },
     delivery: { readonly signal: AbortSignal; current(): boolean;

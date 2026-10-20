@@ -1,16 +1,11 @@
 import { appFailure, type AppFailure, type AppFailureCode } from "../../shared/application/app-failure.js";
 import { err, type Result } from "../../shared/domain/result.js";
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
-import { isPersonaCreateKey, isPersonaId, isPersonaRevision, isStateRevision, normalizePersonaInput } from "../domain/persona-values.js";
+import { isPersonaCreateKey, isPersonaId, isPersonaRevision, isStateRevision, normalizePersonaInput, type UnknownPersonaInput } from "../domain/persona-values.js";
 import type { PersonaFailure, PersonaRepository, PersonaResult } from "../ports/persona-repository.js";
 import type { PersonaCreateResult, PersonaRead, PersonaSet } from "./persona-model.js";
 
-interface InputFields {
-  readonly displayName: unknown;
-  readonly tone: unknown;
-  readonly responseLength: unknown;
-  readonly formatStyle: unknown;
-}
+type InputFields = UnknownPersonaInput;
 interface Preconditions {
   readonly principal: AuthPrincipal;
   readonly personaId: unknown;

@@ -75,6 +75,68 @@ final class _Transport implements AiWireTransport {
 }
 
 void main() {
+  test(
+    'history sends metadata-only owner GET and strictly parses the page',
+    () async {
+      final transport = _Transport(
+        (_) async => _json({
+          'conversations': [
+            {'conversationId': _other, 'lastMessageAt': _time},
+          ],
+          'nextCursor': _other,
+        }),
+      );
+      final result = await AiWireRepository(transport).listConversations(
+        token: _token,
+        abort: AiAbortSignal(),
+        after: _conversation,
+      );
+      expect(
+        (result as Success<AiConversationHistoryPage>)
+            .value
+            .conversations
+            .single
+            .conversationId,
+        _other,
+      );
+      expect(
+        transport.requests.single.path,
+        '/v1/me/conversations?after=$_conversation',
+      );
+      expect(transport.requests.single.method, 'GET');
+      expect(transport.requests.single.body, isNull);
+    },
+  );
+  test('history rejects unknown fields, duplicate ids, backward cursor and invalid time', () async {
+    for (final body in [
+      {'conversations': [], 'text': 'private'},
+      {
+        'conversations': [
+          {'conversationId': _other, 'lastMessageAt': _time},
+          {'conversationId': _other, 'lastMessageAt': _time},
+        ],
+      },
+      {'conversations': [], 'nextCursor': _conversation},
+      {
+        'conversations': [
+          {
+            'conversationId': _other,
+            'lastMessageAt': '2026-02-30T00:00:00.000Z',
+          },
+        ],
+      },
+    ]) {
+      final repository = AiWireRepository(_Transport((_) async => _json(body)));
+      expect(
+        await repository.listConversations(
+          token: _token,
+          abort: AiAbortSignal(),
+          after: _conversation,
+        ),
+        isA<Failure<AiConversationHistoryPage>>(),
+      );
+    }
+  });
   group('N01 wire requests', () {
     test('prepares Send and Retry with exactly selected fields', () async {
       final transport = _Transport((_) async => _json(_ticketJson(), 201));

@@ -1,4 +1,5 @@
 import { errorEnvelopeSchema } from "../../transport/schemas.js";
+import { personaExpressionFields } from "../domain/persona-values.js";
 
 export const personaIdSchema = { type: "string", minLength: 64, maxLength: 64, pattern: "^[0-9a-f]{64}$" } as const;
 export const personaCreateKeySchema = {
@@ -10,11 +11,12 @@ const name = {
   type: "string",
   description: "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement.",
 } as const;
-const editable = {
+export const personaEditableProperties = {
   displayName: name,
   tone: { type: "string", enum: ["neutral", "warm", "encouraging"] },
   responseLength: { type: "string", enum: ["concise", "balanced", "detailed"] },
   formatStyle: { type: "string", enum: ["plain", "bulleted"] },
+  ...Object.fromEntries(personaExpressionFields.map(field => [field, { type: "string", description: "Optional expression-only free text; omitted legacy values read as an empty string. Well-formed Unicode, preserved verbatim; no data-access authority." }])),
 } as const;
 const timestamp = {
   type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
@@ -22,8 +24,8 @@ const timestamp = {
 } as const;
 export const personaViewSchema = {
   type: "object", additionalProperties: false,
-  required: ["personaId", "displayName", "tone", "responseLength", "formatStyle", "createdAt", "updatedAt", "revision"],
-  properties: { personaId: personaIdSchema, ...editable, createdAt: timestamp, updatedAt: timestamp, revision: targetRevision },
+  required: ["personaId", "displayName", "tone", "responseLength", "formatStyle", ...personaExpressionFields, "createdAt", "updatedAt", "revision"],
+  properties: { personaId: personaIdSchema, ...personaEditableProperties, createdAt: timestamp, updatedAt: timestamp, revision: targetRevision },
 } as const;
 export const personaSetSchema = {
   type: "object", additionalProperties: false, required: ["items", "stateRevision"],
@@ -43,7 +45,7 @@ export const personasEnvelopeSchema = {
 export const createPersonaBody = {
   type: "object", additionalProperties: false,
   required: ["displayName", "tone", "responseLength", "formatStyle", "expectedStateRevision"],
-  properties: { ...editable, expectedStateRevision: ownerRevision },
+  properties: { ...personaEditableProperties, expectedStateRevision: ownerRevision },
 } as const;
 export const editPersonaBody = {
   type: "object", additionalProperties: false,

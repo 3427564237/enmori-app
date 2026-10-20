@@ -11,7 +11,7 @@ import type { ConversationHistory, HistoryPairIdentity } from "../ports/real-con
 import { parseReadNote } from "./real-context-records.js";
 import type { PresentationMetadata } from "../ports/conversation-lifecycle.js";
 import { normalizePersonaInput } from "../../personas/domain/persona-values.js";
-import type { ConversationReadback } from "../ports/conversation-operations.js";
+import type { ConversationReadback, ConversationSummary, ConversationSummaryPage } from "../ports/conversation-operations.js";
 
 import { inspectNoteSources, inspectProvenance, parseProvenance, validDependencies, type TransactionalNotePrerequisites } from "./transactional-note-sources.js";
 
@@ -518,6 +518,37 @@ export class FirestoreConversationStore implements RealConversationStore {
       const user=this.requireUser(inv,userId);this.readCurrent(current);
       if(user.data.pendingOperationId!==undefined||user.data.acceptedAssistantMessageId!==undefined||borrow()!==user.data.text)refuse("conflict");
       return this.message(user);
+    });
+  }
+  async listOwnedConversations(principal:AuthPrincipal,owner:string,after:string|undefined,current:()=>boolean):Promise<StoreResult<ConversationSummaryPage>> {
+    return this.run(async tx => {
+      const check = () => this.readCurrent(current); check();
+      if (!UUID.test(owner) || (after !== undefined && !UUID.test(after)) || !tx.listPage) refuse("unavailable");
+      const account = await this.owner(tx,principal,owner,check);
+      if (account.optionalProcessingConsent !== "accepted") refuse("denied");
+      const scanned = await readWhileCurrent(check, () => tx.listPage!(`accounts/${owner}/conversations`,after,20));
+      if (scanned.length > 20 || scanned.some((row,i) => !UUID.test(row.id) ||
+          (after !== undefined && row.id <= after) || (i > 0 && row.id <= scanned[i - 1]!.id))) refuse("unavailable");
+      const conversations: ConversationSummary[] = [];
+      for (const row of scanned) {
+        const location = this.location(owner,row.id);
+        let inv: Inventory | undefined;
+        try { inv = await this.inventory(tx,location,false,check); }
+        catch (error) {
+          // Expired/deleting conversations are unavailable, not revived. Unknown
+          // or malformed inventory must fail the whole page, never look absent.
+          if (error instanceof Refusal && error.kind === "conversation_unavailable") continue;
+          throw error;
+        }
+        if (!inv) refuse("unavailable");
+        const latest = inv.rows.find(message => message.id === inv.parent.latestMessageId);
+        if (!latest) refuse("unavailable");
+        const created = this.message(latest).persistedAt;
+        const lastMessageAt = new Date(created.seconds * 1000 + Math.floor(created.nanoseconds / 1_000_000)).toISOString();
+        conversations.push({ conversationId:row.id,lastMessageAt });
+      }
+      check();
+      return { conversations,...(scanned.length === 20 ? { nextCursor:scanned.at(-1)!.id } : {}) };
     });
   }
   async listOwnedMessages(principal:AuthPrincipal,owner:string,id:string,before:number|undefined,current:()=>boolean):Promise<StoreResult<{

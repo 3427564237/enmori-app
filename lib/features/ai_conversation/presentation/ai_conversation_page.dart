@@ -72,6 +72,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     with WidgetsBindingObserver {
   final _message = TextEditingController();
   final _messageFocus = FocusNode();
+  final _historyScroll = ScrollController();
+  int _scrollGeneration = 0;
   late final AiConversationController _controller;
   late final Object _sessionKey;
   DialogRoute<bool>? _confirmationRoute;
@@ -106,6 +108,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     _controller.detach(sessionKey: _sessionKey);
     _message.dispose();
     _messageFocus.dispose();
+    _historyScroll.dispose();
     super.dispose();
   }
 
@@ -177,6 +180,92 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     _message.value = value;
     if (focused) _messageFocus.requestFocus();
   }
+
+  Future<void> _openConversation(String id) async {
+    if (!_ownsCurrentSession ||
+        _confirming ||
+        _leaving ||
+        !ref.read(aiConversationControllerProvider).canSelectConversation) {
+      return;
+    }
+    if (_message.text.isNotEmpty) {
+      _confirming = true;
+      final discard = await _confirm(
+        message: 'Discard unsaved changes?',
+        keepLabel: 'Keep editing',
+        actionLabel: 'Discard',
+        actionKey: 'ai-confirm-discard',
+      );
+      if (!_ownsCurrentSession) return;
+      _confirming = false;
+      if (!discard) return;
+    }
+    _message.clear();
+    _messageFocus.unfocus();
+    _scrollGeneration++;
+    if (_historyScroll.hasClients) _historyScroll.jumpTo(0);
+    await _controller.selectConversation(id);
+  }
+
+  Widget _historyPanel(AiConversationState state) => ExpansionTile(
+    key: const Key('ai-history'),
+    leading: const Icon(Icons.history),
+    title: const Text('Conversation history'),
+    onExpansionChanged: (open) {
+      if (open && !state.historyLoaded && !state.readBusy) {
+        unawaited(_controller.loadConversations());
+      }
+    },
+    children: [
+      if (state.readBusy) const LinearProgressIndicator(),
+      if (state.historyError case final error?)
+        Padding(padding: const EdgeInsets.all(12), child: Text(error)),
+      if (state.historyLoaded &&
+          state.conversations.isEmpty &&
+          state.historyCursor == null)
+        const Padding(
+          padding: EdgeInsets.all(12),
+          child: Text('No saved conversations.'),
+        ),
+      for (final conversation in state.conversations)
+        ListTile(
+          key: ValueKey('ai-history-${conversation.conversationId}'),
+          selected: state.conversationId == conversation.conversationId,
+          title: Text(
+            'Conversation · ${conversation.lastMessageAt.toLocal().toIso8601String().substring(0, 16).replaceFirst('T', ' ')}',
+          ),
+          subtitle: Text(
+            'Local time · ${conversation.conversationId.substring(0, 8)}',
+          ),
+          enabled: state.canSelectConversation,
+          onTap: () =>
+              unawaited(_openConversation(conversation.conversationId)),
+        ),
+      if (!state.canSelectConversation && state.canCheckResult)
+        const Padding(
+          padding: EdgeInsets.all(12),
+          child: Text(
+            'Check the current request result before switching conversations.',
+          ),
+        ),
+      TextButton.icon(
+        key: const Key('ai-history-reload'),
+        icon: const Icon(Icons.refresh),
+        onPressed: state.readBusy
+            ? null
+            : () => unawaited(_controller.loadConversations()),
+        label: const Text('Reload history'),
+      ),
+      if (state.historyCursor != null)
+        TextButton(
+          key: const Key('ai-history-more'),
+          onPressed: state.readBusy
+              ? null
+              : () => unawaited(_controller.loadConversations(more: true)),
+          child: const Text('Load more conversations'),
+        ),
+    ],
+  );
 
   Future<void> _delete() async {
     if (!_ownsCurrentSession || _confirming || _leaving) return;
@@ -290,15 +379,73 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     minimumSize: WidgetStatePropertyAll(Size(48, 48)),
   );
 
+  void _followMessages(
+    AiConversationState? previous,
+    AiConversationState next,
+  ) {
+    if (!{
+      AiConversationPhase.idle,
+      AiConversationPhase.success,
+      AiConversationPhase.waiting,
+    }.contains(next.phase)) {
+      return;
+    }
+    if (!_ownsCurrentSession ||
+        !_historyScroll.hasClients ||
+        next.messages.isEmpty) {
+      return;
+    }
+    final oldLast = previous?.messages.lastOrNull;
+    if (oldLast != null && next.messages.last.sequence <= oldLast.sequence) {
+      return;
+    }
+    if (_historyScroll.position.extentAfter > 96) return;
+    final generation = ++_scrollGeneration;
+    void settle(int remaining) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_ownsCurrentSession ||
+            generation != _scrollGeneration ||
+            !_historyScroll.hasClients) {
+          return;
+        }
+        final position = _historyScroll.position;
+        if (!position.hasContentDimensions) return;
+        _historyScroll.jumpTo(position.maxScrollExtent);
+        // Lazy children can refine the extent after the first jump. Continue
+        // only this admitted follow; a user's scroll immediately cancels it.
+        if (remaining > 0) settle(remaining - 1);
+      });
+      WidgetsBinding.instance.scheduleFrame();
+    }
+
+    settle(2);
+  }
+
+  Widget _withHistoryScroll(Widget child) => PrimaryScrollController(
+    controller: _historyScroll,
+    child: NotificationListener<UserScrollNotification>(
+      onNotification: (_) {
+        _scrollGeneration++;
+        return false;
+      },
+      child: child,
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     ref.listen<AiConversationState>(aiConversationControllerProvider, (
-      _,
+      previous,
       next,
     ) {
+      _followMessages(previous, next);
       if (_ownsCurrentSession &&
-          next.phase == AiConversationPhase.unauthenticated) {
-        // A Backend auth rejection can precede an observed session replacement.
+          {
+            AiConversationPhase.unauthenticated,
+            AiConversationPhase.limited,
+            AiConversationPhase.authorityChanged,
+          }.contains(next.phase)) {
+        // Backend rejection can precede observed session/consent replacement.
         // Removing the input widget alone would retain its private draft.
         _message.clear();
         _messageFocus.unfocus();
@@ -312,192 +459,208 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         state.phase == AiConversationPhase.deleting ||
         state.phase == AiConversationPhase.deleteUnknown ||
         state.phase == AiConversationPhase.deleted ||
+        state.phase == AiConversationPhase.limited ||
+        state.phase == AiConversationPhase.authorityChanged ||
         state.phase == AiConversationPhase.unauthenticated;
 
     if (widget.socialStyle) {
-      return _socialScaffold(state, status, contentHidden, hasText);
+      return _withHistoryScroll(
+        _socialScaffold(state, status, contentHidden, hasText),
+      );
     }
 
-    return PopScope<void>(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) unawaited(_navigate(widget.onBack));
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            key: const Key('ai-back'),
-            tooltip: 'Back',
-            onPressed: () => unawaited(_navigate(widget.onBack)),
-            icon: const Icon(Icons.arrow_back),
-          ),
-          actions: [
-            if (widget.onOpenPersonas case final openPersonas?)
-              IconButton(
-                key: const Key('ai-personas'),
-                tooltip: 'Manage Personas',
-                onPressed: () => unawaited(_navigate(openPersonas)),
-                icon: const Icon(Icons.person_outline),
-              ),
-            IconButton(
-              key: const Key('ai-settings'),
-              tooltip: 'Settings',
-              onPressed: () => unawaited(_navigate(widget.onOpenSettings)),
-              icon: const Icon(Icons.settings_outlined),
+    return _withHistoryScroll(
+      PopScope<void>(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) unawaited(_navigate(widget.onBack));
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              key: const Key('ai-back'),
+              tooltip: 'Back',
+              onPressed: () => unawaited(_navigate(widget.onBack)),
+              icon: const Icon(Icons.arrow_back),
             ),
-          ],
-        ),
-        body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 640),
-              child: ListView(
-                key: const Key('route-ai-conversation'),
-                padding: const EdgeInsets.all(24),
-                children: [
-                  Text(
-                    'AI Conversation',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  if (status != null) ...[
-                    const SizedBox(height: 16),
-                    Semantics(
-                      key: const Key('ai-status'),
-                      liveRegion: true,
-                      child: Text(status),
+            actions: [
+              if (widget.onOpenPersonas case final openPersonas?)
+                IconButton(
+                  key: const Key('ai-personas'),
+                  tooltip: 'Manage Personas',
+                  onPressed: () => unawaited(_navigate(openPersonas)),
+                  icon: const Icon(Icons.person_outline),
+                ),
+              IconButton(
+                key: const Key('ai-settings'),
+                tooltip: 'Settings',
+                onPressed: () => unawaited(_navigate(widget.onOpenSettings)),
+                icon: const Icon(Icons.settings_outlined),
+              ),
+            ],
+          ),
+          body: SafeArea(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: ListView(
+                  key: const Key('route-ai-conversation'),
+                  primary: true,
+                  padding: const EdgeInsets.all(24),
+                  children: [
+                    Text(
+                      'AI Conversation',
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
-                  ],
-                  if (state.canStartNewConversation) ...[
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      key: const Key('ai-new-conversation'),
-                      style: _buttonStyle,
-                      onPressed: _newConversation,
-                      child: const Text('New conversation'),
-                    ),
-                  ],
-                  if (state.canCancel) ...[
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      key: const Key('ai-cancel'),
-                      style: _buttonStyle,
-                      onPressed: _controller.cancel,
-                      child: const Text('Cancel'),
-                    ),
-                  ],
-                  if (state.canCheckResult) ...[
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      key: const Key('ai-check-result'),
-                      style: _buttonStyle,
-                      onPressed: state.readBusy
-                          ? null
-                          : () => unawaited(_controller.checkResult()),
-                      child: const Text('Check result'),
-                    ),
-                  ],
-                  if (state.canLeaveWithoutRetrying) ...[
-                    const SizedBox(height: 12),
-                    const Text(
-                      'We may not be able to confirm whether this message was '
-                      'saved. You can leave without retrying it. Leaving does '
-                      'not delete saved messages.',
-                      key: Key('ai-recovery-explanation'),
-                    ),
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      key: const Key('ai-leave-without-retrying'),
-                      style: _buttonStyle,
-                      onPressed: () => unawaited(
-                        _navigate(widget.onBack, explicitUnknownExit: true),
-                      ),
-                      child: const Text('Leave without retrying'),
-                    ),
-                  ],
-                  if (!contentHidden) ...[
-                    if (state.conversationId != null) ...[
-                      const SizedBox(height: 12),
-                      OutlinedButton(
-                        key: const Key('ai-reload-messages'),
-                        style: _buttonStyle,
-                        onPressed: state.readBusy
-                            ? null
-                            : () => unawaited(_controller.loadMessages()),
-                        child: const Text('Reload messages'),
-                      ),
-                    ],
-                    for (final message in state.messages) ...[
+                    if (state.canBrowseHistory) _historyPanel(state),
+                    if (status != null) ...[
                       const SizedBox(height: 16),
-                      _MessageTile(message: message),
+                      Semantics(
+                        key: const Key('ai-status'),
+                        liveRegion: true,
+                        child: Text(status),
+                      ),
                     ],
-                    if (state.nextCursor case final before?) ...[
+                    if (state.canStartNewConversation) ...[
                       const SizedBox(height: 12),
                       OutlinedButton(
-                        key: const Key('ai-load-earlier'),
+                        key: const Key('ai-new-conversation'),
+                        style: _buttonStyle,
+                        onPressed: _newConversation,
+                        child: const Text('New conversation'),
+                      ),
+                    ],
+                    if (state.canCancel) ...[
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        key: const Key('ai-cancel'),
+                        style: _buttonStyle,
+                        onPressed: _controller.cancel,
+                        child: const Text('Cancel'),
+                      ),
+                    ],
+                    if (state.canCheckResult) ...[
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        key: const Key('ai-check-result'),
                         style: _buttonStyle,
                         onPressed: state.readBusy
                             ? null
-                            : () => unawaited(
-                                _controller.loadMessages(before: before),
-                              ),
-                        child: const Text('Load earlier messages'),
+                            : () => unawaited(_controller.checkResult()),
+                        child: const Text('Check result'),
                       ),
                     ],
-                    const SizedBox(height: 24),
-                    TextField(
-                      key: const Key('ai-message-input'),
-                      controller: _message,
-                      focusNode: _messageFocus,
-                      enabled: state.canSend || state.canRetry,
-                      minLines: 2,
-                      maxLines: 6,
-                      onChanged: (_) => setState(() {}),
-                      decoration: const InputDecoration(
-                        labelText: 'Message',
-                        alignLabelWithHint: true,
-                        border: OutlineInputBorder(),
+                    if (state.canLeaveWithoutRetrying) ...[
+                      const SizedBox(height: 12),
+                      const Text(
+                        'We may not be able to confirm whether this message was '
+                        'saved. You can leave without retrying it. Leaving does '
+                        'not delete saved messages.',
+                        key: Key('ai-recovery-explanation'),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    FilledButton(
-                      key: const Key('ai-send'),
-                      style: _buttonStyle,
-                      onPressed: state.canSend && hasText
-                          ? () => _submit(retry: false)
-                          : null,
-                      child: const Text('Send'),
-                    ),
-                    if (state.canRetry) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       OutlinedButton(
-                        key: const Key('ai-retry'),
+                        key: const Key('ai-leave-without-retrying'),
                         style: _buttonStyle,
-                        onPressed: hasText ? () => _submit(retry: true) : null,
-                        child: const Text('Retry'),
+                        onPressed: () => unawaited(
+                          _navigate(widget.onBack, explicitUnknownExit: true),
+                        ),
+                        child: const Text('Leave without retrying'),
                       ),
                     ],
-                  ],
-                  if (state.canDelete && !contentHidden) ...[
-                    const SizedBox(height: 24),
-                    OutlinedButton(
-                      key: const Key('ai-delete'),
-                      style: _buttonStyle,
-                      onPressed: () => unawaited(_delete()),
-                      child: const Text('Delete conversation'),
+                    if (!contentHidden) ...[
+                      if (state.conversationId != null) ...[
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          key: const Key('ai-reload-messages'),
+                          style: _buttonStyle,
+                          onPressed: state.readBusy
+                              ? null
+                              : () => unawaited(_controller.loadMessages()),
+                          child: const Text('Reload messages'),
+                        ),
+                      ],
+                      for (final message in state.messages) ...[
+                        const SizedBox(height: 16),
+                        _MessageTile(message: message),
+                      ],
+                      if (state.nextCursor case final before?) ...[
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          key: const Key('ai-load-earlier'),
+                          style: _buttonStyle,
+                          onPressed: state.readBusy
+                              ? null
+                              : () => unawaited(
+                                  _controller.loadMessages(before: before),
+                                ),
+                          child: const Text('Load earlier messages'),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      TextField(
+                        key: const Key('ai-message-input'),
+                        controller: _message,
+                        focusNode: _messageFocus,
+                        enabled: state.canSend || state.canRetry,
+                        minLines: 2,
+                        maxLines: 6,
+                        onChanged: (_) => setState(() {}),
+                        decoration: const InputDecoration(
+                          labelText: 'Message',
+                          alignLabelWithHint: true,
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        key: const Key('ai-send'),
+                        style: _buttonStyle,
+                        onPressed: state.canSend && hasText
+                            ? () => _submit(retry: false)
+                            : null,
+                        child: const Text('Send'),
+                      ),
+                      if (state.canRetry) ...[
+                        const SizedBox(height: 8),
+                        OutlinedButton(
+                          key: const Key('ai-retry'),
+                          style: _buttonStyle,
+                          onPressed: hasText
+                              ? () => _submit(retry: true)
+                              : null,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ],
+                    if (state.canDelete && !contentHidden) ...[
+                      const SizedBox(height: 24),
+                      OutlinedButton(
+                        key: const Key('ai-delete'),
+                        style: _buttonStyle,
+                        onPressed: () => unawaited(_delete()),
+                        child: const Text('Delete conversation'),
+                      ),
+                    ],
+                    if (state.phase == AiConversationPhase.deleteUnknown) ...[
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        key: const Key('ai-check-delete'),
+                        style: _buttonStyle,
+                        onPressed: state.readBusy
+                            ? null
+                            : () => unawaited(_controller.deleteConversation()),
+                        child: const Text('Check again'),
+                      ),
+                    ],
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        'AI Safety · AI can make mistakes. Persona preferences do not change data permissions.',
+                      ),
                     ),
                   ],
-                  if (state.phase == AiConversationPhase.deleteUnknown) ...[
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      key: const Key('ai-check-delete'),
-                      style: _buttonStyle,
-                      onPressed: state.readBusy
-                          ? null
-                          : () => unawaited(_controller.deleteConversation()),
-                      child: const Text('Check again'),
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
           ),
@@ -513,6 +676,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     bool hasText,
   ) {
     final content = <Widget>[
+      if (state.canBrowseHistory) _historyPanel(state),
       if (state.messages.isEmpty && !contentHidden) ...[
         const SizedBox(height: 28),
         Center(
@@ -596,6 +760,12 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
               ? null
               : () => unawaited(_controller.deleteConversation()),
         ),
+      const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Text(
+          'AI Safety · AI can make mistakes. Persona preferences do not change data permissions.',
+        ),
+      ),
     ];
     final composer = Padding(
       key: const Key('ai-pinned-composer'),
@@ -735,6 +905,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                     children: [
                       Expanded(
                         child: ListView(
+                          primary: true,
                           padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
                           children: content,
                         ),
@@ -773,6 +944,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       AiConversationPhase.deleting,
       AiConversationPhase.deleteUnknown,
       AiConversationPhase.deleted,
+      AiConversationPhase.limited,
+      AiConversationPhase.authorityChanged,
       AiConversationPhase.unauthenticated,
     }.contains(state.phase);
     switch (action) {
@@ -812,7 +985,7 @@ String? _statusCopy(AiConversationPhase phase) => switch (phase) {
   AiConversationPhase.preparing => 'Sending…',
   AiConversationPhase.waiting => 'Waiting for a reply…',
   AiConversationPhase.limited =>
-    'Check-in context is not available under your current permissions.',
+    'AI Limited. Your current data consent does not permit AI chat.',
   AiConversationPhase.busy => 'AI is busy. Try again later.',
   AiConversationPhase.unavailable =>
     'AI is unavailable right now. Try again later.',

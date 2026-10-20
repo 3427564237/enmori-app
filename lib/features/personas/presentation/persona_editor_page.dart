@@ -5,6 +5,7 @@ import '../../../core/result/result.dart';
 import '../domain/persona.dart';
 import '../persona_providers.dart';
 import 'persona_page_parts.dart';
+import 'persona_preview_page.dart';
 
 final class PersonaEditorPage extends ConsumerWidget {
   const PersonaEditorPage({this.personaId, required this.onBack, super.key});
@@ -43,6 +44,10 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
       'Enter a name of 1–50 characters without control characters.';
   GlobalKey<FormState> _form = GlobalKey<FormState>();
   final _name = TextEditingController();
+  final _scroll = ScrollController();
+  final _expression = {
+    for (final field in _expressionLabels.keys) field: TextEditingController(),
+  };
   final _nameFocus = FocusNode();
   final _confirmation = PersonaConfirmation();
   PersonaTone _tone = PersonaTone.neutral;
@@ -69,6 +74,13 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
     tone: _tone,
     responseLength: _responseLength,
     formatStyle: _formatStyle,
+    relationship: _expression['relationship']!.text,
+    shortIntroduction: _expression['shortIntroduction']!.text,
+    description: _expression['description']!.text,
+    personality: _expression['personality']!.text,
+    communicationStyle: _expression['communicationStyle']!.text,
+    interests: _expression['interests']!.text,
+    extraInstructions: _expression['extraInstructions']!.text,
   );
 
   bool get _dirty => _fields != _baseline;
@@ -104,6 +116,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
           _setFields(submitted);
           _savedCreate = true;
         });
+        _showFeedback();
       });
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -116,6 +129,10 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
     _pageOperation++;
     _confirmation.dispose();
     _name.dispose();
+    _scroll.dispose();
+    for (final controller in _expression.values) {
+      controller.dispose();
+    }
     _nameFocus.dispose();
     super.dispose();
   }
@@ -123,6 +140,9 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
   void _setFields(PersonaFields fields) {
     _form = GlobalKey<FormState>();
     _name.text = fields.displayName;
+    for (final entry in fields.expressionFields.entries) {
+      _expression[entry.key]!.text = entry.value;
+    }
     _tone = fields.tone;
     _responseLength = fields.responseLength;
     _formatStyle = fields.formatStyle;
@@ -286,6 +306,33 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
         }
       });
     }
+    _showFeedback();
+  }
+
+  void _showFeedback() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scroll.hasClients) return;
+      if (MediaQuery.disableAnimationsOf(context)) {
+        _scroll.jumpTo(0);
+      } else {
+        _scroll.animateTo(
+          0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  Future<void> _preview() async {
+    if (!(_form.currentState?.validate() ?? false)) {
+      _nameFocus.requestFocus();
+      return;
+    }
+    final draft = _fields.normalized;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => PersonaPreviewPage(fields: draft)),
+    );
   }
 
   @override
@@ -307,6 +354,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
       child: _loading
           ? const PersonaLoading()
           : ListView(
+              controller: _scroll,
               key: Key(create ? 'route-persona-create' : 'route-persona-edit'),
               padding: const EdgeInsets.all(24),
               children: [
@@ -359,9 +407,12 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                             controller: _name,
                             focusNode: _nameFocus,
                             enabled: enabled,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
                               labelText: 'Name',
+                              prefixIcon: const Icon(Icons.person_outline),
                               helperText: _nameGuidance,
                               // These fixed messages can wrap as far as one
                               // character per line without an arbitrary cap.
@@ -384,6 +435,9 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                             isExpanded: true,
                             decoration: const InputDecoration(
                               labelText: 'Tone',
+                              prefixIcon: Icon(
+                                Icons.record_voice_over_outlined,
+                              ),
                             ),
                             items: [
                               for (final value in PersonaTone.values)
@@ -407,6 +461,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                             isExpanded: true,
                             decoration: const InputDecoration(
                               labelText: 'Response length',
+                              prefixIcon: Icon(Icons.subject),
                             ),
                             items: [
                               for (final value in PersonaResponseLength.values)
@@ -430,6 +485,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                             isExpanded: true,
                             decoration: const InputDecoration(
                               labelText: 'Format',
+                              prefixIcon: Icon(Icons.format_list_bulleted),
                             ),
                             items: [
                               for (final value in PersonaFormatStyle.values)
@@ -445,6 +501,45 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                                     }
                                   }
                                 : null,
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Make it your own',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'These optional details shape expression only. '
+                            'They do not grant access to your data or actions.',
+                          ),
+                          for (final entry in _expressionLabels.entries) ...[
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              key: Key('persona-${entry.key}'),
+                              controller: _expression[entry.key],
+                              enabled: enabled,
+                              minLines: 1,
+                              maxLines: 4,
+                              textInputAction: TextInputAction.newline,
+                              decoration: InputDecoration(
+                                labelText: entry.value,
+                                prefixIcon: Icon(_expressionIcons[entry.key]),
+                                helperText: 'Optional',
+                              ),
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ],
+                          const SizedBox(height: 24),
+                          OutlinedButton.icon(
+                            key: const Key('persona-preview'),
+                            onPressed: enabled ? _preview : null,
+                            icon: const Icon(Icons.chat_bubble_outline),
+                            label: const Text('Try Your Persona'),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Try the current draft without saving, activating '
+                            'or adding to conversation history.',
                           ),
                           const SizedBox(height: 24),
                           FilledButton(
@@ -477,3 +572,23 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
     );
   }
 }
+
+const _expressionLabels = {
+  'relationship': 'Relationship',
+  'shortIntroduction': 'Short Introduction',
+  'description': 'Description',
+  'personality': 'Personality',
+  'communicationStyle': 'Communication Style',
+  'interests': 'Custom interests',
+  'extraInstructions': 'Extra instructions',
+};
+
+const _expressionIcons = {
+  'relationship': Icons.people_outline,
+  'shortIntroduction': Icons.waving_hand_outlined,
+  'description': Icons.description_outlined,
+  'personality': Icons.psychology_outlined,
+  'communicationStyle': Icons.forum_outlined,
+  'interests': Icons.interests_outlined,
+  'extraInstructions': Icons.edit_note_outlined,
+};

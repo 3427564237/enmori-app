@@ -266,3 +266,22 @@ test("late current/Auth failure and raw SDK error return stable safe categories"
     originalAuthority: { verify: async c => { now = c.deadline; return { kind: "read", value: c.principal }; } } });
   assert.deepEqual(await r.openStart(context()), { kind: "terminated" });
 });
+
+test("simple local reader opts into all current Persona expression while issuing no Check-in queries", async () => {
+  const f = seed();
+  f.put(`accounts/${ownerId}/personas/${personaId}`, { ...persona(), relationship: "Companion", shortIntroduction: "Hello",
+    description: "A voice", personality: "Curious", communicationStyle: "One question", interests: "custom piano", extraInstructions: "Chinese" });
+  const r = new FirebaseAdminRealContextReader(f.db, { controlledEnvironment: environment, monotonicNow: () => 10,
+    includeCheckIns: false, includePersonaExpression: true,
+    originalAuthority: { verify: async c => ({ kind: "read", value: c.principal }) } });
+  const prepared = new PreparedRealContextReader(context(), r, () => 10, () => true);
+  assert.equal(await prepared.prepare(), "ready");
+  const input = prepared.modelContext()!;
+  assert.deepEqual(input.checkIns, []);
+  assert.deepEqual(input.persona?.expression, { displayName: "private display name", tone: "warm", responseLength: "balanced", formatStyle: "plain",
+    relationship: "Companion", shortIntroduction: "Hello", description: "A voice", personality: "Curious", communicationStyle: "One question", interests: "custom piano", extraInstructions: "Chinese" });
+  assert.equal(f.queries.length, 0);
+  assert.ok(f.gets.every(path => path === bindingPath || path === `accounts/${ownerId}` ||
+    path === `accounts/${ownerId}/persona_state/current` || path === `accounts/${ownerId}/personas/${personaId}`));
+  prepared.dispose(); assert.equal(prepared.modelContext(), undefined);
+});
