@@ -144,7 +144,9 @@ final class HomeShellPage extends StatelessWidget {
       actions: [
         IconButton(
           key: const Key('social-settings'),
-          tooltip: 'Settings & privacy',
+          tooltip: onOpenSettings == null
+              ? 'Settings & privacy unavailable in this version'
+              : 'Settings & privacy',
           onPressed: onOpenSettings,
           icon: const Icon(Icons.settings_outlined),
         ),
@@ -162,24 +164,26 @@ final class HomeShellPage extends StatelessWidget {
             key: const Key('route-home'),
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
             children: [
-              const Text(
+              Text(
                 'YOUR WORLD, A LITTLE CLOSER',
-                style: TextStyle(
-                  color: Color(0xff696963),
-                  fontSize: 11,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   letterSpacing: 1.2,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Find your people.\nMake a little room.',
-                style: Theme.of(context).textTheme.headlineLarge,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Discover activities and keep a moment for yourself.',
-                style: TextStyle(color: Color(0xff696963), height: 1.6),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
+              const SizedBox(height: 20),
               FilledButton.icon(
                 key: const Key('r6-new-check-in-button'),
                 onPressed: onStartCheckIn,
@@ -190,24 +194,17 @@ final class HomeShellPage extends StatelessWidget {
               Card(
                 color: Theme.of(context).colorScheme.primaryContainer,
                 child: Padding(
-                  padding: const EdgeInsets.all(22),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.explore_outlined,
-                        size: 36,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(height: 14),
                       Text(
                         'Discover activities',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w700),
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 10),
                       const Text(
-                        'Browse current source-backed events, then view the original event page.',
+                        'Browse activities from Ticketmaster or explore recommendations for your interests.',
                         style: TextStyle(height: 1.5),
                       ),
                       const SizedBox(height: 16),
@@ -217,6 +214,12 @@ final class HomeShellPage extends StatelessWidget {
                         icon: const Icon(Icons.arrow_forward),
                         label: const Text('Browse activities'),
                       ),
+                      if (onBrowseActivities == null) ...[
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Activity browsing is unavailable in this version.',
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       OutlinedButton.icon(
                         key: const Key('home-recommended-activities'),
@@ -229,59 +232,115 @@ final class HomeShellPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 14),
-              Card(
-                child: ListTile(
-                  key: const Key('social-ai-card'),
-                  contentPadding: const EdgeInsets.all(17),
-                  leading: Icon(
-                    Icons.auto_awesome_outlined,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: const Text('A moment for yourself'),
-                  subtitle: const Text(
-                    'Talk with your active Persona and saved Notes.',
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: onOpenAi,
+              Semantics(
+                header: true,
+                child: Text(
+                  'Your space',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
-              const SizedBox(height: 14),
-              Card(
-                child: ListTile(
-                  key: const Key('home-check-in-history'),
-                  contentPadding: const EdgeInsets.all(17),
-                  leading: const Icon(Icons.history),
-                  title: const Text('Your own moments'),
-                  subtitle: const Text(
-                    'Open your saved Check-ins in Footprint.',
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: onOpenHistory,
-                ),
+              const SizedBox(height: 12),
+              _HomeShortcut(
+                key: const Key('social-ai-card'),
+                icon: Icons.auto_awesome_outlined,
+                title: 'AI conversation',
+                description: 'Talk with your active Persona.',
+                onTap: onOpenAi,
+              ),
+              const SizedBox(height: 12),
+              _HomeShortcut(
+                key: const Key('home-check-in-history'),
+                icon: Icons.history,
+                title: 'Footprint',
+                description: 'Open your saved Check-ins.',
+                onTap: onOpenHistory,
               ),
               const SizedBox(height: 14),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  OutlinedButton.icon(
-                    key: const Key('home-manage-personas'),
-                    onPressed: onManagePersonas,
-                    icon: const Icon(Icons.manage_accounts_outlined),
-                    label: const Text('Manage Personas'),
-                  ),
-                  OutlinedButton.icon(
-                    key: const Key('edit-interests-button'),
-                    onPressed: onEditInterests,
-                    icon: const Icon(Icons.interests_outlined),
-                    label: const Text('Edit interests'),
-                  ),
-                ],
+              _HomeSecondaryAction(
+                actionKey: const Key('home-manage-personas'),
+                onPressed: onManagePersonas,
+                icon: Icons.manage_accounts_outlined,
+                label: 'Manage Personas',
+              ),
+              const SizedBox(height: 12),
+              _HomeSecondaryAction(
+                actionKey: const Key('edit-interests-button'),
+                onPressed: onEditInterests,
+                icon: Icons.interests_outlined,
+                label: 'Edit interests',
               ),
             ],
           ),
         ),
       ),
     ),
+  );
+}
+
+/// Availability follows the existing route callback, never a simulated result.
+final class _HomeShortcut extends StatelessWidget {
+  const _HomeShortcut({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+    super.key,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: ListTile(
+      contentPadding: const EdgeInsets.all(16),
+      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+      title: Text(title),
+      subtitle: Text(
+        onTap == null ? 'Unavailable in this version.' : description,
+        style: Theme.of(context).textTheme.bodyMedium
+            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+      ),
+      trailing: onTap == null ? null : const Icon(Icons.chevron_right),
+      enabled: onTap != null,
+      onTap: onTap,
+    ),
+  );
+}
+
+final class _HomeSecondaryAction extends StatelessWidget {
+  const _HomeSecondaryAction({
+    required this.actionKey,
+    required this.onPressed,
+    required this.icon,
+    required this.label,
+  });
+
+  final Key actionKey;
+  final VoidCallback? onPressed;
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      OutlinedButton.icon(
+        key: actionKey,
+        onPressed: onPressed,
+        icon: Icon(icon),
+        label: Text(label),
+      ),
+      if (onPressed == null) ...[
+        const SizedBox(height: 8),
+        Text(
+          '$label is unavailable in this version.',
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+      ],
+    ],
   );
 }

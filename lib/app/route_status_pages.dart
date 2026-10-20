@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../core/presentation/status_panel.dart';
+
 final class StartupPage extends StatelessWidget {
   const StartupPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: SafeArea(
-        child: Center(
-          key: Key('route-startup'),
-          child: CircularProgressIndicator(),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const _StatusPage(
+    routeKey: Key('route-startup'),
+    panel: StatusPanel(
+      title: 'Opening ENMORI',
+      body: 'Checking your session. Please wait.',
+      icon: Icons.hourglass_top,
+      loading: true,
+    ),
+  );
 }
 
 final class UnavailablePage extends StatelessWidget {
@@ -22,77 +23,73 @@ final class UnavailablePage extends StatelessWidget {
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('ENMORI')),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: ListView(
-              key: const Key('route-unavailable'),
-              padding: const EdgeInsets.all(24),
-              shrinkWrap: true,
-              children: [
-                const Icon(Icons.cloud_off, size: 40),
-                const SizedBox(height: 16),
-                const Text('Service unavailable'),
-                const SizedBox(height: 8),
-                const Text(
-                  'This service is temporarily unavailable. Try again.',
-                ),
-                const SizedBox(height: 20),
-                FilledButton.icon(
-                  key: const Key('startup-retry'),
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
-        ),
+  Widget build(BuildContext context) => _StatusPage(
+    routeKey: const Key('route-unavailable'),
+    panel: StatusPanel(
+      title: 'Service unavailable',
+      body: 'This service is temporarily unavailable. Try again.',
+      icon: Icons.cloud_off_outlined,
+      isError: true,
+      action: FilledButton.icon(
+        key: const Key('startup-retry'),
+        onPressed: onRetry,
+        icon: const Icon(Icons.refresh),
+        label: const Text('Retry'),
       ),
-    );
-  }
+    ),
+  );
 }
 
 final class ConfigurationUnavailablePage extends StatelessWidget {
   const ConfigurationUnavailablePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('ENMORI')),
-      body: const SafeArea(
-        child: Center(
-          key: Key('route-configuration-unavailable'),
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text('The required service configuration is unavailable.'),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const _StatusPage(
+    routeKey: Key('route-configuration-unavailable'),
+    panel: StatusPanel(
+      title: 'Setup unavailable',
+      body: 'The required service configuration is unavailable.',
+      icon: Icons.settings_outlined,
+    ),
+  );
 }
 
 final class AccountUnavailablePage extends StatelessWidget {
   const AccountUnavailablePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('ENMORI')),
-      body: const SafeArea(
-        child: Center(
-          key: Key('route-account-unavailable'),
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text('This account cannot continue.'),
+  Widget build(BuildContext context) => const _StatusPage(
+    routeKey: Key('route-account-unavailable'),
+    panel: StatusPanel(
+      title: 'Account unavailable',
+      body: 'This account cannot continue.',
+      icon: Icons.person_off_outlined,
+      isError: true,
+    ),
+  );
+}
+
+final class _StatusPage extends StatelessWidget {
+  const _StatusPage({required this.routeKey, required this.panel});
+
+  final Key routeKey;
+  final Widget panel;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('ENMORI')),
+    body: SafeArea(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: ListView(
+            key: routeKey,
+            padding: const EdgeInsets.all(24),
+            shrinkWrap: true,
+            children: [panel],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }

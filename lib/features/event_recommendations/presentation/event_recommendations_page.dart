@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/status_panel.dart';
 import '../../../core/result/result.dart';
 import '../domain/event_recommendation_repository.dart';
 import 'event_recommendations_controller.dart';
@@ -163,15 +164,17 @@ final class _RecommendationContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = switch (state) {
-      AsyncLoading<EventRecommendationResponse>() => const _StatusPanel(
+      AsyncLoading<EventRecommendationResponse>() => const StatusPanel(
         key: Key('event-recommendations-loading'),
         title: 'Loading event recommendations',
+        loading: true,
         body: 'Checking for upcoming events that match your interests.',
         icon: Icons.hourglass_top,
       ),
-      AsyncError<EventRecommendationResponse>(:final error) => _StatusPanel(
+      AsyncError<EventRecommendationResponse>(:final error) => StatusPanel(
         key: const Key('event-recommendations-error'),
         title: 'Event recommendations unavailable',
+        isError: true,
         body: _errorCopy(error),
         icon: Icons.error_outline,
         action: FilledButton.icon(
@@ -183,7 +186,7 @@ final class _RecommendationContent extends StatelessWidget {
       ),
       AsyncData<EventRecommendationResponse>(:final value) =>
         value.items.isEmpty
-            ? _StatusPanel(
+            ? StatusPanel(
                 key: const Key('event-recommendations-empty'),
                 title: eventEmptyTitle,
                 body: eventEmptyBody,
@@ -289,49 +292,4 @@ final class _RecommendationList extends StatelessWidget {
 
   String _formatTime(DateTime value) =>
       value.toLocal().toString().substring(0, 16);
-}
-
-final class _StatusPanel extends StatelessWidget {
-  const _StatusPanel({
-    required this.title,
-    required this.body,
-    required this.icon,
-    this.action,
-    super.key,
-  });
-
-  final String title;
-  final String body;
-  final IconData icon;
-  final Widget? action;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon),
-            const SizedBox(height: 12),
-            Semantics(
-              header: true,
-              child: Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(body),
-            if (action != null) ...[const SizedBox(height: 12), action!],
-          ],
-        ),
-      ),
-    );
-  }
 }
