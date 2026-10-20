@@ -273,12 +273,8 @@ final class _ConnectedPages extends ConsumerWidget {
                 padding: const EdgeInsets.all(8),
                 child: Text(
                   dualAccounts
-                      ? 'Controlled demo • two test accounts; data clears when the host stops. '
-                            'Activity and recommendations use Ticketmaster when enabled by the host. '
-                            'External links open the organiser website.'
-                      : 'Test account • data clears when the host stops. '
-                            'AI uses only eligible Check-in Notes from this test account. Music and Friends are fixtures; '
-                            'Activity needs host permission. Recommendations and participation are unavailable.',
+                      ? 'Controlled test • two synthetic accounts'
+                      : 'Controlled test • synthetic account',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
