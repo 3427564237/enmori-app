@@ -1,4 +1,6 @@
 enum AppFailureKind {
+  eventParticipationInvalid,
+  eventParticipationRevisionPreconditionFailed,
   requestInvalid,
   aiContextNotPermitted,
   conversationUnavailable,

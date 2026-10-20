@@ -1,6 +1,8 @@
 import type { FastifySchema } from "fastify";
 
 export const approvedFailureCodes = [
+  "EVENT_PARTICIPATION_INVALID",
+  "EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED",
   "CATALOGUE_INVALID",
   "CATALOGUE_NAME_CONFLICT",
   "PERSONA_INVALID",

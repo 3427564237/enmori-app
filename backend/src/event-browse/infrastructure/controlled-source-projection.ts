@@ -39,6 +39,25 @@ export class ControlledSourceProjection implements BrowseSource {
     return items.filter(item => parseBrowseInstant(item.startAt)! > now);
   }
   async detail(id: string, asOf: string, signal: AbortSignal): Promise<BrowseOccurrence | undefined> {
-    return (await this.firstBatch(asOf, signal)).find(item => item.browseId === id);
+    const found=(await this.firstBatch(asOf, signal)).find(item => item.browseId === id);
+    return found??(this.source.batch?this.source.detail(id,asOf,signal):undefined);
+  }
+  async batch(asOf:string,page:number,signal:AbortSignal){
+    if(!this.source.batch)throw dependencyUnavailable;
+    const epoch=this.epoch,result=await this.source.batch(asOf,page,signal);
+    if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;
+    return result;
+  }
+  async availableEvent(id:string,asOf:string,signal:AbortSignal){
+    if(!this.source.availableEvent)throw dependencyUnavailable;
+    const epoch=this.epoch,result=await this.source.availableEvent(id,asOf,signal);
+    if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;
+    return result;
+  }
+  async event(id:string,asOf:string,signal:AbortSignal){
+    if(!this.source.event)throw dependencyUnavailable;
+    const epoch=this.epoch,result=await this.source.event(id,asOf,signal);
+    if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;
+    return result;
   }
 }
