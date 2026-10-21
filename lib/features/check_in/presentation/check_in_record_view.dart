@@ -25,17 +25,28 @@ final class CheckInRecordView extends ConsumerWidget {
           '${labels.formatMediumDate(time)} · ${labels.formatTimeOfDay(TimeOfDay.fromDateTime(time))} (local time)',
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        const SizedBox(height: 16),
-        if (record.note.isNotEmpty)
-          Text(record.note, style: Theme.of(context).textTheme.bodyLarge),
+        if (record.note.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Text(
+            record.note,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5),
+          ),
+        ],
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            if (record.mood case final mood?) Chip(label: Text('Mood: $mood')),
+            if (record.mood case final mood?)
+              Chip(
+                avatar: const Icon(Icons.mood_outlined, size: 18),
+                label: Text(mood),
+              ),
             if (record.activity case final activity?)
-              Chip(label: Text('Activity: $activity')),
+              Chip(
+                avatar: const Icon(Icons.local_activity_outlined, size: 18),
+                label: Text(activity),
+              ),
             if (record.checkInVisibility case final visibility?)
               Chip(
                 label: Text(switch (visibility) {
@@ -52,7 +63,7 @@ final class CheckInRecordView extends ConsumerWidget {
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.place_outlined),
             title: Text(label),
-            subtitle: const Text('Place name'),
+            subtitle: const Text('Your place label'),
           ),
         if (record.location case final location?)
           ListTile(

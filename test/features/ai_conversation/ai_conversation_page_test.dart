@@ -422,7 +422,7 @@ void main() {
     );
   }
 
-  for (final action in ['discard', 'leave', 'delete']) {
+  for (final action in ['delete']) {
     for (final authRejected in [false, true]) {
       testWidgets(
         'session dialog AI $action closes on ${authRejected ? 'auth rejection' : 'session replacement'} and permits fresh use',
@@ -490,15 +490,15 @@ void main() {
   testWidgets('session dialog cleanup preserves a newer route above it', (
     tester,
   ) async {
-    final controller = _PageController(_state(canSend: true));
+    final controller = _PageController(_state(canSend: true, canDelete: true));
     await _pump(tester, controller);
     await tester.enterText(
       find.byKey(const Key('ai-message-input')),
       'Old session draft',
     );
-    await _tap(tester, 'ai-back');
+    await _tap(tester, 'ai-delete');
     final staleAction = tester
-        .widget<TextButton>(find.byKey(const Key('ai-confirm-discard')))
+        .widget<TextButton>(find.byKey(const Key('ai-confirm-delete')))
         .onPressed!;
     final navigator = Navigator.of(
       tester.element(find.byType(AiConversationPage)),
@@ -519,7 +519,7 @@ void main() {
     expect(find.text('New session destination'), findsOneWidget);
     navigator.pop();
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('ai-confirm-discard')), findsNothing);
+    expect(find.byKey(const Key('ai-confirm-delete')), findsNothing);
     expect(controller.events, isEmpty);
     expect(controller.sent, isEmpty);
     expect(tester.takeException(), isNull);
@@ -665,7 +665,7 @@ void main() {
 
   for (final destination in [0, 1, 2, 4]) {
     testWidgets(
-      'social AI tab $destination passes through cancel/leave before navigation',
+      'social AI tab $destination navigates without cancel or confirmation',
       (tester) async {
         final controller = _PageController(
           _state(phase: AiConversationPhase.waiting, canCancel: true),
@@ -685,13 +685,9 @@ void main() {
         expect(find.text('Stay'), findsNothing);
         final key = ['home', 'friends', 'check-in', 'ai', 'me'][destination];
         await _tap(tester, 'social-nav-$key');
-        expect(find.text('Request cancel and leave'), findsOneWidget);
-        await tester.tap(find.text('Stay'));
-        await tester.pumpAndSettle();
-        expect(controller.events, isEmpty);
-        await _tap(tester, 'social-nav-$key');
-        await _tap(tester, 'ai-confirm-leave');
-        expect(controller.events, ['leave', 'tab-$destination']);
+        expect(find.text('Request cancel and leave'), findsNothing);
+        expect(controller.events, ['tab-$destination']);
+        expect(controller.cancels, 0);
         expect(controller.sent, isEmpty);
       },
     );
@@ -801,32 +797,7 @@ void main() {
   });
 
   for (final destination in ['back', 'settings', 'personas']) {
-    testWidgets('$destination confirms and leaves before navigation', (
-      tester,
-    ) async {
-      final controller = _PageController(
-        _state(phase: AiConversationPhase.waiting, canCancel: true),
-      );
-      await _pump(
-        tester,
-        controller,
-        onBack: () => controller.events.add('back'),
-        onSettings: () => controller.events.add('settings'),
-        onPersonas: () => controller.events.add('personas'),
-      );
-      await _tap(tester, 'ai-$destination');
-      expect(find.text('Request cancel and leave'), findsOneWidget);
-      await tester.tap(find.text('Stay'));
-      await tester.pumpAndSettle();
-      expect(controller.events, isEmpty);
-      await _tap(tester, 'ai-$destination');
-      await _tap(tester, 'ai-confirm-leave');
-      expect(controller.events, ['leave', destination]);
-    });
-  }
-
-  for (final destination in ['back', 'settings', 'personas']) {
-    testWidgets('$destination preserves a draft until discard is confirmed', (
+    testWidgets('$destination freely navigates and keeps the session draft', (
       tester,
     ) async {
       final controller = _PageController(_state(canSend: true));
@@ -842,28 +813,11 @@ void main() {
         'private draft',
       );
       await _tap(tester, 'ai-$destination');
-      expect(find.text('Discard unsaved changes?'), findsOneWidget);
-      await tester.tap(find.text('Keep editing'));
-      await tester.pumpAndSettle();
-      expect(controller.events, isEmpty);
-      expect(
-        tester
-            .widget<TextField>(find.byKey(const Key('ai-message-input')))
-            .controller!
-            .text,
-        'private draft',
-      );
-      await _tap(tester, 'ai-$destination');
-      await _tap(tester, 'ai-confirm-discard');
-      expect(controller.events, ['leave', destination]);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(controller.events, [destination]);
+      expect(controller.draft.text, 'private draft');
+      expect(controller.cancels, 0);
       expect(controller.sent, isEmpty);
-      expect(
-        tester
-            .widget<TextField>(find.byKey(const Key('ai-message-input')))
-            .controller!
-            .text,
-        isEmpty,
-      );
     });
   }
 
@@ -874,44 +828,11 @@ void main() {
     expect(find.byKey(const Key('ai-personas')), findsNothing);
   });
 
-  testWidgets('same-UID session replacement invalidates a pending discard', (
-    tester,
-  ) async {
-    final controller = _PageController(_state(canSend: true));
-    await _pump(
-      tester,
-      controller,
-      onPersonas: () => controller.events.add('personas'),
-    );
-    await tester.enterText(
-      find.byKey(const Key('ai-message-input')),
-      'private draft',
-    );
-    await _tap(tester, 'ai-personas');
-    final staleAction = tester
-        .widget<TextButton>(find.byKey(const Key('ai-confirm-discard')))
-        .onPressed!;
-    controller.publish(_state(sessionKey: 'replacement', canSend: true));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('ai-confirm-discard')), findsNothing);
-    staleAction();
-    await tester.pumpAndSettle();
-    expect(controller.events, isEmpty);
-    expect(controller.sent, isEmpty);
-    expect(
-      tester
-          .widget<TextField>(find.byKey(const Key('ai-message-input')))
-          .controller!
-          .text,
-      isEmpty,
-    );
-  });
-
   for (final phase in [
     AiConversationPhase.success,
     AiConversationPhase.deleting,
   ]) {
-    testWidgets('Persona navigation confirms pending ${phase.name} work', (
+    testWidgets('Persona navigation retains pending ${phase.name} work', (
       tester,
     ) async {
       final controller = _PageController(
@@ -923,17 +844,13 @@ void main() {
         onPersonas: () => controller.events.add('personas'),
       );
       await _tap(tester, 'ai-personas');
-      expect(
-        find.text('The request may still complete. Leave this screen?'),
-        findsOneWidget,
-      );
-      expect(controller.events, isEmpty);
-      await _tap(tester, 'ai-confirm-leave');
-      expect(controller.events, ['leave', 'personas']);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(controller.events, ['personas']);
+      expect(controller.cancels, 0);
     });
   }
 
-  testWidgets('Persona return keeps private input empty and never resends', (
+  testWidgets('Persona return keeps the private draft and never resends', (
     tester,
   ) async {
     final controller = _PageController(_state(canSend: true));
@@ -957,11 +874,10 @@ void main() {
       'private draft',
     );
     await _tap(tester, 'ai-personas');
-    await _tap(tester, 'ai-confirm-discard');
     expect(find.text('Persona destination fixture'), findsOneWidget);
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
-    expect(controller.events, ['leave']);
+    expect(controller.events, isEmpty);
     expect(controller.sent, isEmpty);
     expect(controller.retried, isEmpty);
     expect(controller.detaches, 0);
@@ -970,62 +886,61 @@ void main() {
           .widget<TextField>(find.byKey(const Key('ai-message-input')))
           .controller!
           .text,
-      isEmpty,
+      'private draft',
     );
   });
 
-  testWidgets('returning from Settings permits only a new explicit action', (
-    tester,
-  ) async {
-    final controller = _PageController(
-      _state(phase: AiConversationPhase.waiting, canCancel: true),
-    );
-    await _pump(
-      tester,
-      controller,
-      onSettings: () {
-        Navigator.of(
-          tester.element(find.byType(AiConversationPage)),
-        ).push<void>(
-          MaterialPageRoute(
-            builder: (_) =>
-                Scaffold(appBar: AppBar(title: const Text('Settings fixture'))),
-          ),
-        );
-      },
-    );
-    await _tap(tester, 'ai-settings');
-    await _tap(tester, 'ai-confirm-leave');
-    expect(find.text('Settings fixture'), findsOneWidget);
-    expect(controller.events, ['leave']);
-    expect(controller.detaches, 0);
-    expect(controller.sent, isEmpty);
-    await tester.tap(find.byType(BackButton));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('ai-message-input')), findsOneWidget);
-    expect(controller.sent, isEmpty);
-    expect(controller.retried, isEmpty);
-    await tester.enterText(
-      find.byKey(const Key('ai-message-input')),
-      'new explicit input',
-    );
-    await _tap(tester, 'ai-send');
-    expect(controller.sent, ['new explicit input']);
-  });
+  testWidgets(
+    'returning from Settings keeps the running request without resending',
+    (tester) async {
+      final controller = _PageController(
+        _state(phase: AiConversationPhase.waiting, canCancel: true),
+      );
+      await _pump(
+        tester,
+        controller,
+        onSettings: () {
+          Navigator.of(tester.element(find.byType(AiConversationPage)))
+              .push<void>(
+                MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: const Text('Settings fixture')),
+                  ),
+                ),
+              );
+        },
+      );
+      await _tap(tester, 'ai-settings');
+      expect(find.text('Settings fixture'), findsOneWidget);
+      expect(controller.events, isEmpty);
+      expect(controller.detaches, 0);
+      expect(controller.sent, isEmpty);
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-message-input')), findsOneWidget);
+      expect(controller.sent, isEmpty);
+      expect(controller.retried, isEmpty);
+      expect(controller.view.canCancel, isTrue);
+      expect(controller.cancels, 0);
+    },
+  );
 
-  testWidgets('system Back uses the same in-progress confirmation', (
+  testWidgets('system Back leaves a running request without confirmation', (
     tester,
   ) async {
     final controller = _PageController(
       _state(phase: AiConversationPhase.preparing, canCancel: true),
     );
-    await _pump(tester, controller);
+    await _pump(
+      tester,
+      controller,
+      onBack: () => controller.events.add('back'),
+    );
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
-    expect(find.text('Stay'), findsOneWidget);
-    expect(controller.events, isEmpty);
-    await tester.tap(find.text('Stay'));
-    await tester.pumpAndSettle();
+    expect(find.text('Stay'), findsNothing);
+    expect(controller.events, ['back']);
+    expect(controller.cancels, 0);
   });
 
   testWidgets(
@@ -1047,7 +962,7 @@ void main() {
     },
   );
 
-  testWidgets('disposal synchronously detaches without a provider write', (
+  testWidgets('route disposal does not detach the session controller', (
     tester,
   ) async {
     final controller = _PageController(
@@ -1055,7 +970,7 @@ void main() {
     );
     await _pump(tester, controller);
     await tester.pumpWidget(const SizedBox());
-    expect(controller.detaches, 1);
+    expect(controller.detaches, 0);
     expect(tester.takeException(), isNull);
   });
 
@@ -1072,7 +987,7 @@ void main() {
       find.byKey(const Key('ai-message-input')),
     );
     expect(input.controller!.text, isEmpty);
-    expect(controller.detaches, 1);
+    expect(controller.detaches, 0);
     expect(controller.sent, isEmpty);
   });
 
@@ -1108,7 +1023,7 @@ void main() {
 
   const outcomes = {
     AiConversationPhase.limited:
-        'AI Limited. Your current data consent does not permit AI chat.',
+        'AI chat is turned off. You can allow AI data use in Settings.',
     AiConversationPhase.busy: 'AI is busy. Try again later.',
     AiConversationPhase.unavailable:
         'AI is unavailable right now. Try again later.',

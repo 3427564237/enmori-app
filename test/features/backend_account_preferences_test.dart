@@ -31,12 +31,15 @@ void main() {
       final legacy = await repository.readSettings() as Success<OwnSettings>;
       expect(legacy.value.defaultCheckInLocation, isFalse);
       expect(legacy.value.defaultCheckInWeather, isFalse);
+      expect(legacy.value.homeWeatherAuto, isFalse);
+      settings['homeWeatherAuto'] = true;
       settings['defaultCheckInWeather'] = true;
       final explicit = await repository.readSettings() as Success<OwnSettings>;
       expect(explicit.value.defaultCheckInWeather, isTrue);
+      expect(explicit.value.homeWeatherAuto, isTrue);
       expect(explicit.value.defaultCheckInLocation, isFalse);
       for (final invalid in ['true', null, 1]) {
-        settings['defaultCheckInLocation'] = invalid;
+        settings['homeWeatherAuto'] = invalid;
         expect(await repository.readSettings(), isA<Failure<OwnSettings>>());
       }
     },

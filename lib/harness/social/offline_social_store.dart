@@ -247,6 +247,7 @@ final class OfflinePreferencesRepository
   Future<Result<OwnSettings>> saveSettings({
     bool? defaultCheckInLocation,
     bool? defaultCheckInWeather,
+    bool? homeWeatherAuto,
     FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,
@@ -263,6 +264,7 @@ final class OfflinePreferencesRepository
           defaultCheckInLocation ?? store.settings.defaultCheckInLocation,
       defaultCheckInWeather:
           defaultCheckInWeather ?? store.settings.defaultCheckInWeather,
+      homeWeatherAuto: homeWeatherAuto ?? store.settings.homeWeatherAuto,
       checkInVisibility: visibility,
       consent: consent,
       revision: expectedRevision + 1,

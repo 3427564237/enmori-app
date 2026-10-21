@@ -28,7 +28,7 @@ void main() {
       expect(find.byKey(const Key('home-ai-conversation')), findsNothing);
       await _open(tester);
       expect(find.byType(CheckInHistoryPage), findsOneWidget);
-      expect(find.text('Device time zone: Asia/Singapore'), findsOneWidget);
+      expect(find.text('Local time · Asia/Singapore'), findsOneWidget);
       expect(find.text('First synthetic Note'), findsOneWidget);
       expect(f.historyQueries.single, {
         'date': '2026-10-13',
@@ -61,10 +61,10 @@ void main() {
       expect(f.router.state.uri.path, AppRoutes.checkInHistory);
       final zoneLabel = find.byKey(const Key('history-device-zone'));
       expect(find.text('2026-10-13'), findsOneWidget);
-      expect(find.text('Device time zone: $zone'), findsOneWidget);
+      expect(find.text('Local time · $zone'), findsOneWidget);
       final semantics = tester.ensureSemantics();
       try {
-        expect(tester.getSemantics(zoneLabel).label, 'Device time zone: $zone');
+        expect(tester.getSemantics(zoneLabel).label, 'Local time · $zone');
         expect(tester.getRect(zoneLabel).left, greaterThanOrEqualTo(0));
         expect(tester.getRect(zoneLabel).right, lessThanOrEqualTo(320));
         expect(tester.takeException(), isNull);

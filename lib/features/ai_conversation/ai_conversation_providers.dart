@@ -1,6 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/widgets.dart';
+
+import '../account/account_preferences_providers.dart';
+import '../account/domain/account_repository.dart';
 
 import '../../core/result/result.dart';
 import '../auth/auth_providers.dart';
@@ -28,18 +32,16 @@ final aiConversationUtcNowProvider = Provider<DateTime Function()>(
       () => DateTime.now().toUtc(),
 );
 
-// Only target/operation references, status, the original U's non-content identity
-// and known tombstone IDs for this session's current conversation survive route
-// disposal, never messages, input, tokens or keys.
-// A new observed session (including the same UID) replaces this record; the
-// app-owned Auth provider remains the sole session observer. No disk restoration.
+// Operation identity is session-owned. The controller also keeps messages and
+// the unsent editor value in RAM across routes; all are replaced on a new auth
+// observation, including the same UID. Nothing is restored from disk.
 final _memoryProvider = Provider<_Memory>((ref) {
   final auth = ref.watch(authSessionProvider).asData?.value;
   return _Memory(auth is AuthSessionAuthenticated);
 });
 
 final aiConversationControllerProvider =
-    NotifierProvider.autoDispose<AiConversationController, AiConversationState>(
+    NotifierProvider<AiConversationController, AiConversationState>(
       AiConversationController.new,
     );
 
@@ -69,9 +71,30 @@ class AiConversationController extends Notifier<AiConversationState> {
   String? _historyError;
   bool _historyLoaded = false;
 
+  TextEditingValue _draft = TextEditingValue.empty;
+  Object? _draftSessionKey;
+  TextEditingValue get draft => _draft;
+  TextEditingValue draftFor(Object sessionKey) =>
+      identical(_draftSessionKey, sessionKey) ? _draft : TextEditingValue.empty;
+  void updateDraft(TextEditingValue value, {required Object sessionKey}) {
+    if (!ref.mounted || state.sessionKey != sessionKey) return;
+    _draftSessionKey = sessionKey;
+    if ({
+      AiConversationPhase.limited,
+      AiConversationPhase.unauthenticated,
+      AiConversationPhase.authorityChanged,
+    }.contains(state.phase)) {
+      _draft = TextEditingValue.empty;
+    } else {
+      _draft = value;
+    }
+  }
+
   @override
   AiConversationState build() {
     _shutdown();
+    _draft = TextEditingValue.empty;
+    _draftSessionKey = null;
     _localOutgoingText = null;
     _localOutgoingKey = null;
     _outgoingMessageId = null;
@@ -97,8 +120,33 @@ class AiConversationController extends Notifier<AiConversationState> {
     _historyError = null;
     _historyLoaded = false;
     ref.onDispose(_shutdown);
+    final lifecycle = _AiLifecycleObserver(cancel);
+    WidgetsBinding.instance.addObserver(lifecycle);
+    ref.onDispose(() => WidgetsBinding.instance.removeObserver(lifecycle));
+    ref.listen(accountSettingsSnapshotProvider, (previous, next) {
+      if (next?.consent == OptionalProcessingConsent.rejected) {
+        cancel();
+        _failure(
+          const AppFailure(
+            kind: AppFailureKind.aiContextNotPermitted,
+            message: 'AI data use is turned off.',
+          ),
+          preserveOutcome: true,
+        );
+      } else if (next?.consent == OptionalProcessingConsent.accepted &&
+          state.phase == AiConversationPhase.limited) {
+        _show(
+          _memory.unresolved
+              ? AiConversationPhase.unknown
+              : AiConversationPhase.idle,
+        );
+      }
+    });
     final phase = !_memory.authenticated
         ? AiConversationPhase.unauthenticated
+        : ref.read(accountSettingsSnapshotProvider)?.consent ==
+              OptionalProcessingConsent.rejected
+        ? AiConversationPhase.limited
         : _repository == null
         ? AiConversationPhase.unavailable
         : _memory.deleting
@@ -377,7 +425,7 @@ class AiConversationController extends Notifier<AiConversationState> {
     _failure(failure);
   }
 
-  void _failure(AppFailure failure) {
+  void _failure(AppFailure failure, {bool preserveOutcome = false}) {
     final phase = switch (failure.kind) {
       AppFailureKind.authRequired ||
       AppFailureKind.authForbidden => AiConversationPhase.unauthenticated,
@@ -394,9 +442,10 @@ class AiConversationController extends Notifier<AiConversationState> {
         phase == AiConversationPhase.limited ||
         phase == AiConversationPhase.authorityChanged ||
         failure.kind == AppFailureKind.conversationUnavailable) {
+      _draft = TextEditingValue.empty;
       _invalidateReads();
       _retryUser = null;
-      _memory.unresolved = true;
+      if (!preserveOutcome) _memory.unresolved = true;
       _conversations = const [];
       _historyCursor = null;
       _historyLoaded = false;
@@ -961,8 +1010,7 @@ class AiConversationController extends Notifier<AiConversationState> {
     _show(phase, clear: true);
   }
 
-  // Safe during widget disposal: close control synchronously without a provider
-  // write. Auto-disposal drops page content; only _Memory's references survive.
+  // Explicit ownership teardown only; ordinary route disposal must not call this.
   void detach({Object? sessionKey}) {
     if (sessionKey != null && !identical(sessionKey, _memory.key)) return;
     _shutdown();
@@ -1100,3 +1148,15 @@ const _unknown = AppFailure(
   kind: AppFailureKind.aiOutcomeUnresolved,
   message: 'The result could not be confirmed.',
 );
+
+final class _AiLifecycleObserver extends WidgetsBindingObserver {
+  _AiLifecycleObserver(this.cancel);
+  final VoidCallback cancel;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      cancel();
+    }
+  }
+}

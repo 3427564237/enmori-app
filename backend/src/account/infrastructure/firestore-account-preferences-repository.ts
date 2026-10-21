@@ -47,8 +47,8 @@ export function parseOwnSettings(data: StoredDocument): OwnSettings | undefined 
   if (fieldPrivacy === undefined) return undefined;
   const revision = Object.hasOwn(data, "settingsRevision") ? data.settingsRevision : 0;
   if (!isRevision(revision) || (Object.hasOwn(data, "settingsRevision") && revision < 1)) return undefined;
-  if ([data.defaultCheckInLocation, data.defaultCheckInWeather].some(v => v !== undefined && typeof v !== "boolean")) return undefined;
-  return { defaultCheckInLocation: data.defaultCheckInLocation === true, defaultCheckInWeather: data.defaultCheckInWeather === true, fieldPrivacy, checkInVisibility: account.checkInVisibility, optionalProcessingConsent: account.optionalProcessingConsent, revision };
+  if ([data.defaultCheckInLocation, data.defaultCheckInWeather, data.homeWeatherAuto].some(v => v !== undefined && typeof v !== "boolean")) return undefined;
+  return { defaultCheckInLocation: data.defaultCheckInLocation === true, defaultCheckInWeather: data.defaultCheckInWeather === true, homeWeatherAuto: data.homeWeatherAuto === true, fieldPrivacy, checkInVisibility: account.checkInVisibility, optionalProcessingConsent: account.optionalProcessingConsent, revision };
 }
 
 export class FirestoreAccountPreferencesRepository implements AccountPreferencesRepository {
@@ -75,6 +75,7 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
     return this.save(uid, change.expectedRevision, parseOwnSettings, (revision) => ({
       ...(change.defaultCheckInLocation === undefined ? {} : { defaultCheckInLocation: change.defaultCheckInLocation }),
       ...(change.defaultCheckInWeather === undefined ? {} : { defaultCheckInWeather: change.defaultCheckInWeather }),
+      ...(change.homeWeatherAuto === undefined ? {} : { homeWeatherAuto: change.homeWeatherAuto }),
       ...(change.fieldPrivacy === undefined ? {} : { fieldPrivacy: change.fieldPrivacy }), checkInVisibility: change.checkInVisibility, optionalProcessingConsent: change.optionalProcessingConsent, settingsRevision: revision,
     }));
   }

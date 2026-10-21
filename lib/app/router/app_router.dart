@@ -1,3 +1,4 @@
+import '../../features/weather/presentation/home_weather_card.dart';
 import '../remote_social_composition.dart';
 import '../../features/friends/presentation/friend_module_page.dart';
 import '../../features/event_browse/event_browse_providers.dart';
@@ -411,6 +412,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'root-home',
         builder: (context, state) => HomeShellPage(
           socialSection: remoteGroup ? const GroupHomeSocial() : null,
+          weatherSection: remoteGroup
+              ? HomeWeatherCard(openAttribution: openGroupAttribution)
+              : null,
           socialStyle: socialPresentation,
           onSelectTab: socialPresentation
               ? (index) => selectConnectedSocialTab(

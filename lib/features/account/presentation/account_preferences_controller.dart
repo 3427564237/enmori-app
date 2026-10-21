@@ -84,6 +84,9 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
     } else {
       final result = await _repository.readSettings();
       if (!ref.mounted || operation != _operation) return;
+      if (result case Success<OwnSettings>(:final value)) {
+        ref.read(accountSettingsSnapshotProvider.notifier).observe(value);
+      }
       state = switch (result) {
         Success<OwnSettings>(:final value) => PreferencesState(
           phase: PreferencesPhase.ready,
@@ -120,6 +123,7 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
     OptionalProcessingConsent consent, {
     bool? defaultCheckInLocation,
     bool? defaultCheckInWeather,
+    bool? homeWeatherAuto,
     FieldPrivacy? fieldPrivacy,
   }) async {
     final settings = state.settings;
@@ -128,6 +132,7 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
       () => _repository.saveSettings(
         defaultCheckInLocation: defaultCheckInLocation,
         defaultCheckInWeather: defaultCheckInWeather,
+        homeWeatherAuto: homeWeatherAuto,
         fieldPrivacy: fieldPrivacy,
         visibility: visibility,
         consent: consent,
@@ -147,6 +152,9 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
     final result = await command();
     if (!ref.mounted || operation != _operation) return;
     if (result is Success<T>) {
+      if (result.value case final OwnSettings confirmed) {
+        ref.read(accountSettingsSnapshotProvider.notifier).observe(confirmed);
+      }
       state = PreferencesState(
         phase: PreferencesPhase.ready,
         profile: profile,

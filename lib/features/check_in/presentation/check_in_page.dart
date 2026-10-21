@@ -595,7 +595,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
       icon: confirmed ? Icons.verified : Icons.task_alt,
       title: confirmed ? 'Saved Check-in confirmed.' : 'Check-in saved.',
       body:
-          '${checkIn.note}${checkIn.mood == null ? '' : '\nMood: ${checkIn.mood}'}${checkIn.activity == null ? '' : '\nActivity: ${checkIn.activity}'}\nSaved at ${checkIn.createdAt.toUtc().toIso8601String()}'
+          '${checkIn.note}${checkIn.mood == null ? '' : '\nMood: ${checkIn.mood}'}${checkIn.activity == null ? '' : '\nActivity: ${checkIn.activity}'}\nSaved at ${MaterialLocalizations.of(context).formatMediumDate(checkIn.createdAt.toLocal())} · ${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(checkIn.createdAt.toLocal()))}'
           '${switch (checkIn.checkInVisibility) {
             CheckInVisibility.private => '\nVisibility: Private',
             CheckInVisibility.friendsOnly => '\nVisibility: Friends-only',

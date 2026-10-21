@@ -1,5 +1,9 @@
 import 'dart:async';
 
+import 'package:enmori/features/account/account_preferences_providers.dart';
+import 'package:enmori/features/account/domain/account_preferences_repository.dart';
+import 'package:enmori/features/account/domain/account_repository.dart';
+
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
 import 'package:enmori/features/ai_conversation/domain/ai_conversation_repository.dart';
@@ -689,7 +693,7 @@ void main() {
   );
 
   testWidgets(
-    'navigation clears data and cancels; returning to retained page can read again',
+    'explicit unknown-flow exit clears data; retained page can read again',
     (tester) async {
       final r = await _Rig.create(tester);
       await r.controller.send('note');
@@ -705,21 +709,71 @@ void main() {
   );
 
   testWidgets(
-    'route recreation retains references, never message bodies or ticket keys',
+    'route recreation keeps the same request and session draft, then shows its reply',
     (tester) async {
       final r = await _Rig.create(tester);
-      r.repo.executeResult = Completer<Result<AiReply>>().future;
-      unawaited(r.controller.send('note'));
+      final reply = Completer<Result<AiReply>>();
+      r.repo.executeResult = reply.future;
+      final controller = r.controller;
+      final sent = controller.send('note');
       await tester.pump();
+      controller.updateDraft(
+        const TextEditingValue(text: 'next thought'),
+        sessionKey: r.state.sessionKey,
+      );
       r.subscription.close();
       await tester.pump(const Duration(milliseconds: 1));
-      await tester.pump();
+      expect(r.repo.cancels, isEmpty);
+      expect(r.state.canCancel, isTrue);
+      reply.complete(Success(_reply('A')));
+      await sent;
       r.listen();
-      expect(r.state.phase, AiConversationPhase.unknown);
+      expect(r.controller, same(controller));
+      expect(r.state.messages.map((m) => m.messageId), ['user', 'assistant']);
+      expect(r.controller.draft.text, 'next thought');
+      expect(r.repo.executes, hasLength(1));
+      r.auth.sessions.add(AuthSessionAuthenticated(subject: 'same-user'));
+      await tester.pump();
       expect(r.state.messages, isEmpty);
-      expect(r.state.conversationId, 'conversation');
+      expect(r.controller.draft.text, isEmpty);
+      r.dispose();
+    },
+  );
+
+  testWidgets(
+    'off-page privacy revocation fences late replies; idle reapproval is not stuck unknown',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      final settings = r.container.read(
+        accountSettingsSnapshotProvider.notifier,
+      );
+      OwnSettings permission(bool accepted, int revision) => OwnSettings(
+        checkInVisibility: CheckInVisibility.private,
+        consent: accepted
+            ? OptionalProcessingConsent.accepted
+            : OptionalProcessingConsent.rejected,
+        revision: revision,
+      );
+      settings.observe(permission(false, 1));
+      expect(r.state.phase, AiConversationPhase.limited);
+      settings.observe(permission(true, 2));
+      expect(r.state.canSend, isTrue);
+      final reply = Completer<Result<AiReply>>();
+      r.repo.executeResult = reply.future;
+      final pending = r.controller.send('note');
+      await tester.pump();
+      r.subscription.close();
+      await tester.pump();
+      settings.observe(permission(false, 3));
+      expect(r.state.phase, AiConversationPhase.limited);
+      reply.complete(Success(_reply('A')));
+      await pending;
+      expect(r.state.messages, isEmpty);
+      expect(r.repo.cancels, hasLength(1));
+      settings.observe(permission(true, 4));
       expect(r.state.canSend, isFalse);
       expect(r.state.canCheckResult, isTrue);
+      r.listen();
       r.dispose();
     },
   );

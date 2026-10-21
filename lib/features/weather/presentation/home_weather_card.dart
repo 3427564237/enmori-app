@@ -19,6 +19,9 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) controller.openHome();
+    });
   }
 
   @override
@@ -33,7 +36,7 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
         (state == AppLifecycleState.paused ||
             state == AppLifecycleState.hidden ||
             state == AppLifecycleState.detached)) {
-      controller.clear();
+      controller.suspend();
     }
   }
 
@@ -42,16 +45,18 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
     final state = ref.watch(homeWeatherControllerProvider);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               'Current weather',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
-            const Text(
-              'Optional approximate location for this Home lookup. It does not add location to a Check-in.',
+            Text(
+              state.automatic
+                  ? 'Updates when you visit Home. Change this in Settings.'
+                  : 'A little context for your day. Optional and separate from Check-ins.',
             ),
             if (state.weather case final weather?)
               WeatherCard(
@@ -69,37 +74,46 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
             OutlinedButton.icon(
               icon: const Icon(Icons.cloud_outlined),
               label: Text(
-                state.weather == null
-                    ? 'Use approximate location once'
-                    : 'Update with location once',
+                state.weather == null ? 'Get local weather' : 'Refresh weather',
               ),
               onPressed: state.busy
                   ? null
                   : () async {
                       final epoch = controller.epoch;
-                      final allowed = await showDialog<bool>(
+                      if (state.automatic) {
+                        await controller.load(expectedEpoch: epoch);
+                        return;
+                      }
+                      final allowed = await showDialog<String>(
                         context: context,
                         builder: (context) => AlertDialog(
                           title: const Text('Allow current weather?'),
                           content: const SingleChildScrollView(
                             child: Text(
-                              'ENMORI will obtain one foreground location, round it to 0.1°, and send the approximate coordinate through its Backend to Open-Meteo. Open-Meteo may retain request metadata. No precise point, identity or Check-in is sent. This lookup is separate from Check-in weather.',
+                              'ENMORI will obtain one foreground location, round it to 0.1°, and send the approximate coordinate through its Backend to Open-Meteo. Open-Meteo may retain request metadata. No precise point, identity or Check-in is sent. Choose automatic weather to remember this preference, refresh at most every 15 minutes while on Home, and change it anytime in Settings. No background tracking. Separate from Check-in weather.',
                             ),
                           ),
                           actions: [
                             TextButton(
-                              onPressed: () => Navigator.pop(context, false),
+                              onPressed: () => Navigator.pop(context),
                               child: const Text('Not now'),
                             ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, 'once'),
+                              child: const Text('Only this time'),
+                            ),
                             FilledButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Allow once'),
+                              onPressed: () => Navigator.pop(context, 'auto'),
+                              child: const Text('Automatically on Home'),
                             ),
                           ],
                         ),
                       );
-                      if (mounted && allowed == true) {
-                        await controller.load(expectedEpoch: epoch);
+                      if (mounted && allowed != null) {
+                        await controller.load(
+                          expectedEpoch: epoch,
+                          remember: allowed == 'auto',
+                        );
                       }
                     },
             ),
