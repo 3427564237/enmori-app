@@ -879,9 +879,7 @@ final class _ComposerLabelChip extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) => AnimatedSize(
-    duration: EnmoriMotion.duration(context, EnmoriMotion.content),
-    curve: EnmoriMotion.settle,
+  Widget build(BuildContext context) => MotionSize(
     alignment: Alignment.centerLeft,
     child: AnimatedContainer(
       duration: EnmoriMotion.duration(context, EnmoriMotion.feedback),

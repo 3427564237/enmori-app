@@ -1,3 +1,15 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:enmori/app/event_recommendation_card.dart';
+import 'package:enmori/core/network/backend_api_client.dart';
+import 'package:enmori/features/event_participation/data/backend_participation_repository.dart';
+import 'package:enmori/features/event_participation/participation_providers.dart';
+import 'package:enmori/features/weather/domain/foreground_location.dart';
+import 'package:enmori/features/weather/domain/weather.dart';
+import 'package:enmori/features/weather/weather_providers.dart';
 import 'package:enmori/app/social_demo_presentation.dart';
 import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 import 'package:enmori/app/home_shell_page.dart';
@@ -39,6 +51,27 @@ void main() {
   testWidgets('five production pages fit phone and large-text landscape', (
     tester,
   ) async {
+    final feedback = Platform.environment['ENMORI_FEEDBACK_PREVIEW'] != null;
+    final participation = BackendApiClient(
+      Uri.parse('https://preview.invalid'),
+      () async => const Success('synthetic-preview'),
+      httpClient: MockClient(
+        (request) async => http.Response(
+          jsonEncode({
+            'participation': {
+              'eventId': request.url.pathSegments[2],
+              'status': 'going',
+              'ignored': false,
+              'revision': 1,
+              'updatedAt': '2026-10-21T09:00:00.000Z',
+            },
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      ),
+    );
+    addTearDown(participation.close);
     for (final (family, path) in [
       ('Roboto', Platform.environment['ENMORI_CAPTURE_FONT']),
       ('MaterialIcons', Platform.environment['ENMORI_CAPTURE_ICONS']),
@@ -61,7 +94,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     for (final (size, scale, label) in [
       (const Size(375, 812), 1.0, 'phone'),
-      (const Size(812, 375), 2.0, 'landscape-2x'),
+      if (!feedback) (const Size(812, 375), 2.0, 'landscape-2x'),
     ]) {
       tester.view.physicalSize = size;
       for (final (name, page) in <(String, Widget)>[
@@ -69,6 +102,8 @@ void main() {
           'home',
           HomeShellPage(
             socialStyle: true,
+            recommendationCardBuilder: (context, event, onOpen) =>
+                ConnectedRecommendationCard(event: event, onOpen: (_) {}),
             onStartCheckIn: () {},
             onSeeAllEvents: () {},
             onBrowseActivities: () {},
@@ -110,10 +145,18 @@ void main() {
           ),
         ),
       ]) {
+        if (feedback && name == 'profile') continue;
         await tester.pumpWidget(
           ProviderScope(
             key: ValueKey('$name-$label'),
             overrides: [
+              participationRepositoryProvider.overrideWithValue(
+                BackendParticipationRepository(participation),
+              ),
+              if (feedback)
+                foregroundLocationProvider.overrideWithValue(
+                  _PendingLocation(),
+                ),
               authSessionProvider.overrideWithValue(
                 const AsyncData(AuthSessionAuthenticated(subject: 'preview')),
               ),
@@ -126,6 +169,13 @@ void main() {
               ),
               accountPreferencesRepositoryProvider.overrideWithValue(
                 FakeAccountPreferences()
+                  ..settings = OwnSettings(
+                    defaultCheckInLocation: feedback,
+                    defaultCheckInWeather: feedback,
+                    checkInVisibility: CheckInVisibility.private,
+                    consent: OptionalProcessingConsent.rejected,
+                    revision: 1,
+                  )
                   ..profile = const OwnProfile(
                     username: 'alex_w',
                     displayName: 'Alex Williams',
@@ -215,7 +265,25 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
-        final output = Platform.environment['ENMORI_PRODUCT_PREVIEW'];
+        if (feedback && name == 'home') {
+          await Scrollable.ensureVisible(
+            tester.element(find.byKey(const ValueKey('event-card-preview-1'))),
+            alignment: 0,
+          );
+          await tester.pumpAndSettle();
+        }
+        if (feedback && name == 'check-in') {
+          await tester.enterText(
+            find.byType(TextField).first,
+            'A quiet walk after class.',
+          );
+          tester.testTextInput.hide();
+          FocusManager.instance.primaryFocus?.unfocus();
+          await tester.pumpAndSettle();
+        }
+        final output =
+            Platform.environment['ENMORI_FEEDBACK_PREVIEW'] ??
+            Platform.environment['ENMORI_PRODUCT_PREVIEW'];
         if (output != null) {
           final boundary = tester.renderObject<RenderRepaintBoundary>(
             find.byKey(const Key('capture')),
@@ -234,7 +302,9 @@ void main() {
           bitmap!.dispose();
         }
         if (name == 'check-in') {
-          final save = find.text('Save Check-in');
+          final save = find.text(
+            feedback ? 'Preparing location…' : 'Save Check-in',
+          );
           await tester.ensureVisible(save);
           await tester.pumpAndSettle();
           expect(save.hitTestable(), findsOneWidget);
@@ -293,3 +363,9 @@ Widget _tab(Widget page, int index) => Scaffold(
     onSelected: (_) {},
   ),
 );
+
+class _PendingLocation implements ForegroundLocation {
+  @override
+  Future<Result<GeoPoint>> capture({required bool precise}) =>
+      Completer<Result<GeoPoint>>().future;
+}

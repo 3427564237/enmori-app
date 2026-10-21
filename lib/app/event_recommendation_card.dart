@@ -39,8 +39,8 @@ final class ConnectedRecommendationCard extends ConsumerWidget {
           authorizedReason:
               'Matches: ${event.matchedInterests.map((interest) => interest.displayName).join(', ')}',
           onSelect: onOpen,
+          actions: ParticipationControls(eventId: event.eventId),
         ),
-        ParticipationControls(eventId: event.eventId),
       ],
     );
   }

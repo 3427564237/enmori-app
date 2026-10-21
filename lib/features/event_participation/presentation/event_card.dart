@@ -13,6 +13,7 @@ final class EventCard extends StatelessWidget {
     required this.onSelect,
     this.authorizedReason,
     this.visibleParticipantCount,
+    this.actions,
     super.key,
   }) : summary = null;
   const EventCard.summary({
@@ -20,6 +21,7 @@ final class EventCard extends StatelessWidget {
     required this.onSelect,
     this.authorizedReason,
     this.visibleParticipantCount,
+    this.actions,
     super.key,
   }) : event = null;
 
@@ -28,6 +30,7 @@ final class EventCard extends StatelessWidget {
   final ValueChanged<String>? onSelect;
   final String? authorizedReason;
   final int? visibleParticipantCount;
+  final Widget? actions;
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +54,13 @@ final class EventCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                height: 88,
+                height: 56,
                 width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
@@ -63,7 +69,7 @@ final class EventCard extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.event_outlined,
-                      size: 32,
+                      size: 26,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 12),
@@ -95,6 +101,7 @@ final class EventCard extends StatelessWidget {
                   icon: const Icon(Icons.event),
                   label: const Text('Event details'),
                 ),
+              if (actions != null) ...[const SizedBox(height: 8), actions!],
             ],
           ),
         ),

@@ -6,6 +6,7 @@ import '../../../core/presentation/enmori_motion.dart';
 import '../../account/domain/account_repository.dart';
 import '../../auth/auth_providers.dart';
 import 'check_in_record_view.dart';
+import 'check_in_place_controller.dart';
 import '../domain/check_in_repository.dart';
 import 'check_in_place_controls.dart';
 import 'located_check_in_controller.dart';
@@ -44,6 +45,11 @@ final class LocatedCheckInActions extends ConsumerWidget {
         controller = ref.read(
           locatedCheckInControllerProvider(draftKey).notifier,
         );
+    final place = ref.watch(checkInPlaceControllerProvider(draftKey));
+    final placeController = ref.read(
+      checkInPlaceControllerProvider(draftKey).notifier,
+    );
+    final placeEpoch = placeController.epoch;
     final renderedEpoch = controller.epoch;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -55,7 +61,7 @@ final class LocatedCheckInActions extends ConsumerWidget {
               saving: state.busy || state.uncertain,
             ),
           FilledButton(
-            onPressed: state.busy
+            onPressed: state.busy || place.busy
                 ? null
                 : () => controller.save(
                     expectedEpoch: renderedEpoch,
@@ -66,11 +72,13 @@ final class LocatedCheckInActions extends ConsumerWidget {
                     visibility: visibility,
                   ),
             child: MotionReveal(
-              trigger: (state.busy, state.uncertain),
+              trigger: (state.busy, state.uncertain, place.busy),
               distance: 0,
               child: Text(
-                key: ValueKey((state.busy, state.uncertain)),
-                state.busy
+                key: ValueKey((state.busy, state.uncertain, place.busy)),
+                place.busy
+                    ? 'Preparing location…'
+                    : state.busy
                     ? 'Saving…'
                     : state.uncertain
                     ? 'Retry same save'
@@ -79,6 +87,38 @@ final class LocatedCheckInActions extends ConsumerWidget {
             ),
           ),
         ],
+        if (place.busy &&
+            !state.busy &&
+            !state.uncertain &&
+            !manageOnly &&
+            state.savedId == null)
+          Semantics(
+            liveRegion: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Wait for location, or cancel to save without it.'),
+                TextButton(
+                  onPressed: () {
+                    if (placeController.epoch == placeEpoch) {
+                      placeController.clear();
+                    }
+                  },
+                  child: const Text('Cancel location'),
+                ),
+              ],
+            ),
+          ),
+        if (place.failure != null &&
+            !showPlaceControls &&
+            !manageOnly &&
+            state.savedId == null)
+          Semantics(
+            liveRegion: true,
+            child: const Text(
+              'Location unavailable. Save without it, or try again in Permissions.',
+            ),
+          ),
         if (state.busy)
           const LinearProgressIndicator(
             semanticsLabel: 'Saving or reading Check-in',

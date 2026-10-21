@@ -37,6 +37,27 @@ abstract final class EnmoriMotion {
   }
 }
 
+/// AnimatedSize cannot relayout synchronously with a zero-duration controller.
+/// Reduced motion renders the final size directly, including after text changes.
+final class MotionSize extends StatelessWidget {
+  const MotionSize({
+    required this.child,
+    this.alignment = Alignment.topCenter,
+    super.key,
+  });
+  final Widget child;
+  final AlignmentGeometry alignment;
+  @override
+  Widget build(BuildContext context) => MediaQuery.disableAnimationsOf(context)
+      ? child
+      : AnimatedSize(
+          duration: EnmoriMotion.content,
+          curve: EnmoriMotion.settle,
+          alignment: alignment,
+          child: child,
+        );
+}
+
 /// Reveals the current child only. Replaced/private content is removed at once;
 /// unlike a cross-fade, it cannot remain in an outgoing overlay or receive input.
 /// The stable child subtree keeps form focus and owns all business state.
