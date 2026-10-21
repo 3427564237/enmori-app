@@ -3,18 +3,18 @@
 Continue in `/home/miku/.codex/worktrees/li-zhou-integration-oct20/ENMORI`, branch
 `souma/li-zhou-runtime-20261020`, Draft PR #165. Current product source is
 `5529f7b4d5cf91489aa0b1b4ff118ec53a7fd522`: reviewed SHI #167 is merged and
-connected to the isolated core candidate; v14 is built but not installed.
+connected to the isolated core candidate; v14 is installed; selected native Events/Home flows passed (see native follow-up).
 This supersedes only the older package/workspace/startup-status instructions below;
 retain their product scope and historical evidence. The real-account v8 checkout
 is separate and was not changed by this checkpoint.
 
 Read [the Events verification record](../../evidence/sprint3/2026-10-21-li-events-integration/verification.md)
-before continuing. The retained environment is **normally stopped with export
-confirmed**, after one save/restart/read/cancel verification. Start from this
-candidate with `python3 tool/core_local.py start --events --ai` when needed;
+before continuing. The retained environment has **confirmed normal export** after both service and
+native checks and is being restarted for the connected phone. Check status before
+starting; use `python3 tool/core_local.py start --events --ai` only when stopped;
 use existing private handoff, not a new credential flow. Prior SIGTERM/export
-failure and possible loss after the earlier snapshot remain recorded. No device
-was connected; installation and native Events flow are pending.
+failure and possible loss after the earlier snapshot remain recorded. Device subsequently connected; see the native verification record for passed
+Events/Home flows and the remaining nonempty profile/privacy/error scenarios.
 
 JIN #166 `124a1f86` still needs SHI's latest-head rereview. Full public profile and
 Home friend activity are not integrated. Activity producer needs a real

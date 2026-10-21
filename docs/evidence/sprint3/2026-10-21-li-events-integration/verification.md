@@ -86,7 +86,7 @@ The runtime is normally stopped after verification to export the cancellation
 and preserve the completed checkpoint; use `python3 tool/core_local.py start
 --events --ai` from this candidate when resuming device work.
 
-## Acceptance still pending
+## Initial acceptance boundary (superseded in part by device follow-up)
 
 ADB reported no connected device. v14 installation, native Next/Reload, external
 browser return Yes/No, keyboard/system Back and native account-switch behavior
@@ -95,3 +95,7 @@ this APK. Full friend profile/Home activity awaits #166 and the missing Event
 activity producer; real-account participation rollout remains separate. Current
 LI composition requires independent review. No release, main merge or whole-app
 Done claim. See `receipt.json` for APK metadata and final export status.
+
+Device subsequently connected. See [v14 native follow-up](native-verification.md)
+for the exact passed flows, retained failures and remaining boundaries. No product
+code or APK changed between these checkpoints.

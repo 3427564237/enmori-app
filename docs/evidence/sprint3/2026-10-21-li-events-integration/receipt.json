@@ -8,14 +8,14 @@
   "sha256": "a16cc4dcd2d6759f96786119e6d82c624ec7cac6f3e67b7472779e9cfa1cceb4",
   "bytes": 173847445,
   "apkSignatureVerified": true,
-  "native": "Not Run \u2014 no ADB device",
+  "native": "Selected v14 flows passed; see native-verification.md",
   "backendCasesPassed": 36,
   "flutterDistinctCasesPassedAcrossRuns": 40,
   "normalFinalStop": {
-    "stoppedAt": "2026-10-21T02:52:28.252Z",
+    "stoppedAt": "2026-10-21T03:08:57.139Z",
     "exportConfirmed": true
   },
   "priorSnapshotAuthUsersPreserved": true,
-  "runtimeLeftRunning": false,
+  "runtimeLeftRunning": true,
   "aiMaintenanceHealthyDuringRun": false
 }

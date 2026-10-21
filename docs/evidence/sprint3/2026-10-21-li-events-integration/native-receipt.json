@@ -1,0 +1,24 @@
+{
+  "nativeWritesFreshRead": true,
+  "finalParticipation": "none",
+  "finalIgnored": false,
+  "finalRevision": 7,
+  "realHomeRecommendations": 2,
+  "syntheticOnly": true,
+  "musicSelectedAndConsentAcceptedForNativeVerification": true,
+  "installedApkSha256": "a16cc4dcd2d6759f96786119e6d82c624ec7cac6f3e67b7472779e9cfa1cceb4",
+  "device": "vivo V2405A",
+  "nativeFlows": [
+    "login",
+    "home_real_music_cards",
+    "events_interested_detail",
+    "participants_authorized_empty",
+    "external_return_no",
+    "external_return_yes_going",
+    "profile_to_same_event",
+    "ignore_preserves_going",
+    "restore_recommendation",
+    "category_and_next_batch",
+    "cancel_profile_sync"
+  ]
+}
