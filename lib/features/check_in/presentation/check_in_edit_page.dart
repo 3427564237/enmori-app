@@ -103,6 +103,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
         appBar: AppBar(title: const Text('Edit Check-in')),
         body: SafeArea(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

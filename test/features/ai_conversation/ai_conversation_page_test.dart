@@ -10,6 +10,57 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
+    'returning chat opens latest and explicit latest preserves draft and older reading',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final messages = [
+        for (var i = 0; i < 30; i++)
+          _message('saved-$i', i + 1, AiRole.user, 'Saved message $i'),
+      ];
+      final controller = _PageController(
+        _state(canSend: true, messages: messages),
+      );
+      await _pump(tester, controller, socialStyle: true, textScale: 2);
+      final scroll = tester
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byKey(const Key('route-ai-conversation')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
+          .position;
+      expect(scroll.extentAfter, lessThanOrEqualTo(1));
+      final input = find.byKey(const Key('ai-message-input'));
+      await tester.enterText(input, 'Keep this draft');
+      scroll.jumpTo(0);
+      await tester.pumpAndSettle();
+      final olderOffset = scroll.pixels;
+      messages.add(
+        _message('reply', 31, AiRole.assistant, 'Here is the latest reply.'),
+      );
+      controller.publish(_state(canSend: true, messages: messages));
+      await tester.pumpAndSettle();
+      expect(scroll.pixels, olderOffset);
+      await tester.tap(find.byKey(const Key('ai-latest-messages')));
+      await tester.pumpAndSettle();
+      expect(scroll.extentAfter, lessThanOrEqualTo(1));
+      expect(find.byKey(const Key('ai-latest-messages')), findsNothing);
+      expect(
+        tester.widget<TextField>(input).controller!.text,
+        'Keep this draft',
+      );
+      expect(controller.sent, isEmpty);
+      expect(controller.reads, isEmpty);
+      expect(controller.cancels, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
     'typing dots animate only while waiting and reduced motion stays static',
     (tester) async {
       for (final reduced in [false, true]) {
@@ -544,6 +595,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(settingsFocus.hasFocus, isTrue);
     final primary = PrimaryScrollController.of(settingsContext);
+    // Chat now opens at the latest message; move up before testing PageDown.
+    primary.jumpTo(0);
+    await tester.pumpAndSettle();
     final initialOffset = primary.positions.first.pixels;
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();

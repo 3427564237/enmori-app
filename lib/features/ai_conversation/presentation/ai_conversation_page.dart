@@ -81,6 +81,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   final _message = TextEditingController();
   final _messageFocus = FocusNode();
   final _historyScroll = ScrollController();
+  final _latestVisible = ValueNotifier(false);
+  bool _latestUpdatePending = false;
   int _scrollGeneration = 0;
   late final AiConversationController _controller;
   late final Object _sessionKey;
@@ -98,9 +100,14 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       _controller.updateDraft(_message.value, sessionKey: _sessionKey);
     });
     WidgetsBinding.instance.addObserver(this);
+    _historyScroll.addListener(_updateLatestVisibility);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_ownsCurrentSession) return;
       final state = ref.read(aiConversationControllerProvider);
+      if (widget.socialStyle &&
+          (state.messages.isNotEmpty || state.localOutgoingText != null)) {
+        _jumpToLatest();
+      }
       if (state.conversationId != null &&
           !state.isBusy &&
           state.phase != AiConversationPhase.deleted &&
@@ -119,6 +126,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     _message.dispose();
     _messageFocus.dispose();
     _historyScroll.dispose();
+    _latestVisible.dispose();
     super.dispose();
   }
 
@@ -402,6 +410,10 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       return;
     }
     if (_historyScroll.position.extentAfter > 96) return;
+    _jumpToLatest();
+  }
+
+  void _jumpToLatest() {
     final generation = ++_scrollGeneration;
     void settle(int remaining) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -423,14 +435,35 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     settle(2);
   }
 
+  void _updateLatestVisibility() {
+    if (_latestUpdatePending) return;
+    _latestUpdatePending = true;
+    // Scroll metrics can change during layout, including keyboard resizing.
+    // Rebuild only the affordance, after layout, rather than the conversation.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _latestUpdatePending = false;
+      if (!_ownsCurrentSession || !_historyScroll.hasClients) return;
+      final position = _historyScroll.position;
+      _latestVisible.value =
+          position.hasContentDimensions && position.extentAfter > 96;
+    });
+    WidgetsBinding.instance.scheduleFrame();
+  }
+
   Widget _withHistoryScroll(Widget child) => PrimaryScrollController(
     controller: _historyScroll,
-    child: NotificationListener<UserScrollNotification>(
-      onNotification: (_) {
-        _scrollGeneration++;
+    child: NotificationListener<ScrollMetricsNotification>(
+      onNotification: (notification) {
+        if (notification.depth == 0) _updateLatestVisibility();
         return false;
       },
-      child: child,
+      child: NotificationListener<UserScrollNotification>(
+        onNotification: (notification) {
+          if (notification.depth == 0) _scrollGeneration++;
+          return false;
+        },
+        child: child,
+      ),
     ),
   );
 
@@ -1010,15 +1043,56 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                     key: const Key('route-ai-conversation'),
                     children: [
                       Expanded(
-                        child: MotionReveal(
-                          trigger: state.conversationId,
-                          enabled: !contentHidden,
-                          distance: 4,
-                          child: ListView(
-                            primary: true,
-                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                            children: content,
-                          ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            MotionReveal(
+                              trigger: state.conversationId,
+                              enabled: !contentHidden,
+                              distance: 4,
+                              child: ListView(
+                                primary: true,
+                                keyboardDismissBehavior:
+                                    ScrollViewKeyboardDismissBehavior.onDrag,
+                                padding: const EdgeInsets.fromLTRB(
+                                  20,
+                                  8,
+                                  20,
+                                  16,
+                                ),
+                                children: content,
+                              ),
+                            ),
+                            if (!contentHidden &&
+                                (state.messages.isNotEmpty ||
+                                    state.localOutgoingText != null))
+                              Positioned(
+                                left: 16,
+                                right: 16,
+                                bottom: 8,
+                                child: ValueListenableBuilder<bool>(
+                                  valueListenable: _latestVisible,
+                                  builder: (context, visible, _) => Align(
+                                    alignment: Alignment.centerRight,
+                                    child: visible
+                                        ? FilledButton.tonalIcon(
+                                            key: const Key(
+                                              'ai-latest-messages',
+                                            ),
+                                            onPressed: _jumpToLatest,
+                                            icon: const Icon(
+                                              Icons.arrow_downward,
+                                              size: 18,
+                                            ),
+                                            label: const Text(
+                                              'Latest messages',
+                                            ),
+                                          )
+                                        : const SizedBox.shrink(),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                       if (!contentHidden)

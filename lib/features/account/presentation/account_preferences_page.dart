@@ -198,6 +198,7 @@ final class _AccountPreferencesPageState
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               key: Key(profile ? 'route-profile-edit' : 'route-settings'),
               padding: const EdgeInsets.all(16),
               child: Column(
