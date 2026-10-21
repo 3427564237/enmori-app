@@ -20,6 +20,7 @@ import 'package:enmori/features/check_in/data/backend_check_in_place_repository.
 import 'package:enmori/features/check_in/domain/check_in_place_repository.dart';
 import 'package:enmori/features/check_in/domain/check_in_repository.dart';
 import 'package:enmori/features/check_in/presentation/check_in_place_controller.dart';
+import 'package:enmori/features/check_in/presentation/check_in_page.dart';
 import 'package:enmori/features/check_in/presentation/check_in_place_controls.dart';
 import 'package:enmori/features/check_in/presentation/located_check_in_controller.dart';
 import 'package:enmori/features/check_in/presentation/located_check_in_actions.dart';
@@ -112,6 +113,92 @@ void main() {
         expect(h.placeState.place!.settingsRevision, isNull);
         expect(h.preferences.settingsReadCount, 0);
         expect(h.location.calls, [true, true]);
+      },
+    );
+  }
+  for (final cancel in [false, true]) {
+    testWidgets(
+      'location preparation explains disabled save and recovers cancel=$cancel',
+      (tester) async {
+        final h = await harness();
+        h.preferences.settings = const OwnSettings(
+          defaultCheckInLocation: true,
+          defaultCheckInWeather: true,
+          checkInVisibility: CheckInVisibility.private,
+          consent: OptionalProcessingConsent.rejected,
+          revision: 2,
+        );
+        final gps = Completer<Result<GeoPoint>>();
+        h.location.pending = gps;
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: h.container,
+            child: MaterialApp(
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: child!,
+              ),
+              home: const CheckInComposerPage(socialStyle: true, located: true),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final input = find.byType(TextField).first;
+        await tester.enterText(input, 'Keep my walking note');
+        await tester.pumpAndSettle();
+        final preparing = find.widgetWithText(
+          FilledButton,
+          'Preparing location…',
+        );
+        await tester.ensureVisible(preparing);
+        expect(tester.widget<FilledButton>(preparing).onPressed, isNull);
+        expect(
+          find.text('Wait for location, or cancel to save without it.'),
+          findsOneWidget,
+        );
+        expect(h.repository.keys, isEmpty);
+        if (cancel) {
+          await tester.ensureVisible(find.text('Cancel location'));
+          await tester.tap(find.text('Cancel location'));
+          await tester.pumpAndSettle();
+          gps.complete(const Success(GeoPoint(1.3, 103.8)));
+        } else {
+          gps.complete(const Failure(unavailable));
+        }
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<TextField>(input).controller!.text,
+          'Keep my walking note',
+        );
+        expect(
+          tester
+              .widget<FilledButton>(
+                find.widgetWithText(FilledButton, 'Save Check-in'),
+              )
+              .onPressed,
+          isNotNull,
+        );
+        if (!cancel) {
+          expect(find.textContaining('Location unavailable.'), findsOneWidget);
+        }
+        if (cancel) h.repository.result = const Failure(unavailable);
+        await tester.ensureVisible(find.text('Save Check-in'));
+        await tester.tap(find.text('Save Check-in'));
+        await tester.pumpAndSettle();
+        expect(h.repository.places, [null]);
+        if (cancel) {
+          expect(find.text('Retry same save'), findsOneWidget);
+          expect(
+            tester.widget<TextField>(input).controller!.text,
+            'Keep my walking note',
+          );
+          await tester.ensureVisible(find.text('Retry same save'));
+          await tester.tap(find.text('Retry same save'));
+          await tester.pumpAndSettle();
+          expect(h.repository.keys, ['fixed-key', 'fixed-key']);
+          expect(h.repository.places, [null, null]);
+        }
+        expect(tester.takeException(), isNull);
       },
     );
   }

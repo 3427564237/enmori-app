@@ -49,6 +49,88 @@ void main() {
   );
 
   testWidgets(
+    'chat keeps safety reachable without repeating it below messages',
+    (tester) async {
+      final controller = _PageController(
+        _state(
+          phase: AiConversationPhase.success,
+          canSend: true,
+          messages: [
+            _message('u', 1, AiRole.user, 'A quiet walk after class.'),
+            _message(
+              'a',
+              2,
+              AiRole.assistant,
+              'What did you notice on your walk?',
+            ),
+          ],
+        ),
+      );
+      await _pump(tester, controller, socialStyle: true);
+      final input = find.byKey(const Key('ai-message-input'));
+      await tester.enterText(input, 'Keep this draft');
+      expect(find.textContaining('AI can make mistakes'), findsNothing);
+      expect(find.byKey(const Key('ai-status')), findsNothing);
+      await tester.tap(find.byTooltip('Open conversation menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('ai-safety')));
+      await tester.pumpAndSettle();
+      expect(
+        tester.state<ScaffoldState>(find.byType(Scaffold)).isDrawerOpen,
+        isFalse,
+      );
+      expect(
+        find.text(
+          'AI can make mistakes. Persona preferences do not change data permissions.',
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TextField>(input).controller!.text,
+        'Keep this draft',
+      );
+      expect(find.text('What did you notice on your walk?'), findsOneWidget);
+      expect(controller.sent, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'chat waiting feedback is single and unknown recovery stays visible',
+    (tester) async {
+      final controller = _PageController(
+        _state(
+          phase: AiConversationPhase.waiting,
+          canCancel: true,
+          localOutgoingKey: 'pending',
+          localOutgoingText: 'My message',
+        ),
+      );
+      await _pump(tester, controller, socialStyle: true);
+      expect(find.text('Waiting for a reply…'), findsOneWidget);
+      expect(find.byKey(const Key('ai-cancel')), findsOneWidget);
+      expect(find.byKey(const Key('ai-status')), findsOneWidget);
+      controller.publish(
+        _state(
+          phase: AiConversationPhase.unknown,
+          canCheckResult: true,
+          canLeaveWithoutRetrying: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-check-result')), findsOneWidget);
+      expect(find.byKey(const Key('ai-recovery-explanation')), findsOneWidget);
+      expect(
+        find.byKey(const Key('ai-leave-without-retrying')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('ai-cancel')), findsNothing);
+      expect(controller.sent, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
     'pending bubbles follow the bottom and preserve deliberate older reading',
     (tester) async {
       final messages = [
@@ -240,6 +322,7 @@ void main() {
       await tester.tap(find.byTooltip('Open conversation menu'));
       await tester.pumpAndSettle();
       expect(scaffold.isDrawerOpen, isTrue);
+      await tester.ensureVisible(find.byKey(const Key('ai-history')));
       await tester.tap(find.byKey(const Key('ai-history')));
       await tester.pumpAndSettle();
       await tester.tap(
@@ -1431,6 +1514,7 @@ Future<void> _tap(WidgetTester tester, String key) async {
     await tester.tap(find.byTooltip('Open conversation menu'));
     await tester.pumpAndSettle();
     if (key != 'ai-history' && finder.evaluate().isEmpty) {
+      await tester.ensureVisible(find.byKey(const Key('ai-history')));
       await tester.tap(find.byKey(const Key('ai-history')));
       await tester.pumpAndSettle();
     }

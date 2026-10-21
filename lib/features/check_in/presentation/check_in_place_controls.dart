@@ -79,9 +79,7 @@ final class _CheckInPlaceControlsState
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: AnimatedSize(
-          duration: EnmoriMotion.duration(context, EnmoriMotion.content),
-          curve: EnmoriMotion.settle,
+        child: MotionSize(
           alignment: Alignment.topCenter,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -141,12 +141,17 @@ void main() {
       sessions.add(AuthSessionAuthenticated(subject: 'synthetic-member'));
       await tester.pumpAndSettle();
       // Auth observation arrives after first post-frame load, so explicitly read.
-      await tester.tap(find.text('Read participation').first);
+      await tester.tap(find.text('Load your plans').first);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Going').first);
       await tester.pumpAndSettle();
       expect(writes, 1);
-      expect(find.text('Your participation: going'), findsNWidgets(2));
+      expect(
+        find.byWidgetPredicate(
+          (widget) => widget is Semantics && widget.properties.selected == true,
+        ),
+        findsNWidgets(2),
+      );
     },
   );
   testWidgets(

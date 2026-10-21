@@ -768,13 +768,36 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             alignment: Alignment.centerLeft,
             child: Card(
               child: Padding(
-                padding: EdgeInsets.all(16),
-                child: const _TypingIndicator(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                child: Row(
+                  children: [
+                    const ExcludeSemantics(child: _TypingIndicator()),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Semantics(
+                        key: const Key('ai-status'),
+                        liveRegion: true,
+                        child: Text(
+                          status ?? 'Waiting for a reply…',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      key: const Key('ai-cancel'),
+                      onPressed: _controller.cancel,
+                      child: const Text('Cancel'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
       ],
-      if (status != null)
+      if (status != null && (!state.canCancel || contentHidden))
         Semantics(
           key: const Key('ai-status'),
           liveRegion: true,
@@ -787,7 +810,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             ),
           ),
         ),
-      if (state.canCancel)
+      if (state.canCancel && contentHidden)
         _socialAction('ai-cancel', 'Cancel', _controller.cancel),
       if (state.canCheckResult &&
           state.phase != AiConversationPhase.idle &&
@@ -821,12 +844,6 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
               ? null
               : () => unawaited(_controller.deleteConversation()),
         ),
-      const Padding(
-        padding: EdgeInsets.symmetric(vertical: 12),
-        child: Text(
-          'AI Safety · AI can make mistakes. Persona preferences do not change data permissions.',
-        ),
-      ),
     ];
     final composer = Padding(
       key: const Key('ai-pinned-composer'),
@@ -919,6 +936,31 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                 ),
                 const Divider(),
                 if (state.canBrowseHistory) _historyPanel(state),
+                Builder(
+                  builder: (drawerContext) => ListTile(
+                    key: const Key('ai-safety'),
+                    leading: const Icon(Icons.info_outline),
+                    title: const Text('AI Safety & permissions'),
+                    onTap: () {
+                      Scaffold.of(drawerContext).closeDrawer();
+                      showDialog<void>(
+                        context: context,
+                        builder: (dialogContext) => AlertDialog(
+                          title: const Text('AI Safety & permissions'),
+                          content: const Text(
+                            'AI can make mistakes. Persona preferences do not change data permissions.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(dialogContext),
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           ),

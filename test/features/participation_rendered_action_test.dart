@@ -79,9 +79,13 @@ void main() {
           );
           sessions.add(AuthSessionAuthenticated(subject: 'synthetic-a'));
           await tester.pumpAndSettle();
-          await tester.tap(find.text('Read participation'));
+          await tester.tap(find.text('Load your plans'));
           await tester.pumpAndSettle();
-          expect(find.text('Ignore recommendation'), findsOneWidget);
+          if (label == 'Cancel participation' ||
+              label == 'Ignore recommendation') {
+            await tester.tap(find.byTooltip('More event options'));
+            await tester.pumpAndSettle();
+          }
           await tester.runAsync(() async {
             if (replacement != 'same-session-new-facts') {
               sessions.add(
@@ -110,6 +114,8 @@ void main() {
           // Actual still-rendered button hit, not direct invocation of a discarded closure.
           await tester.tap(find.text(label));
           expect(writes, isEmpty);
+          await tester.pumpAndSettle();
+          await tester.tap(find.byTooltip('More event options'));
           await tester.pumpAndSettle();
           await tester.tap(find.text('Cancel participation'));
           await tester.pumpAndSettle();
