@@ -43,6 +43,27 @@ final saved = CheckIn(
   location: const GeoPoint(1.3521, 103.8198),
 );
 void main() {
+  test('guarded GET still rejects creation status and revoked POST never dispatches', () async {
+    var dispatched = 0;
+    final client = BackendApiClient(
+      Uri.parse('https://example.test'),
+      () async => const Success('fixture-token'),
+      httpClient: MockClient((_) async {
+        dispatched++;
+        return http.Response('{}', 201);
+      }),
+    );
+    addTearDown(client.close);
+    expect(
+      await client.getGuarded('/v1/me/settings', () => true),
+      isA<Failure<JsonObject>>(),
+    );
+    expect(
+      await client.post('/v1/check-ins', isEligible: () => false),
+      isA<Failure<JsonObject>>(),
+    );
+    expect(dispatched, 1);
+  });
   test('location is single explicit acquisition; weather consent stays separate and carries current settings revision', () async {
     final h = await harness();
     expect(h.location.calls, isEmpty);
@@ -187,6 +208,7 @@ void main() {
       note: 'A walk',
       visibility: CheckInVisibility.private,
       idempotencyKey: 'key',
+      isEligible: () => true,
       place: const CheckInPlace(
         location: GeoPoint(1.3521, 103.8198),
         includeWeather: true,

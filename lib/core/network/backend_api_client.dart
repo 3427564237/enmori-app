@@ -408,7 +408,11 @@ final class BackendApiClient {
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        if (isEligible != null && response.statusCode != 200) {
+        // Guarded creates use 201; their idempotent replays use 200. Session
+        // eligibility must not turn a committed first save into a false failure.
+        if (isEligible != null &&
+            response.statusCode != 200 &&
+            !(method == 'POST' && response.statusCode == 201)) {
           return const Failure(_invalidResponse);
         }
         if (decoded == null) {
