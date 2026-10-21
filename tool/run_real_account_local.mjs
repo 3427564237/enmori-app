@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, unlinkSync, lstatSync, realpathSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { createServer } from 'node:https';
+import { createServer as createHttpServer } from 'node:http';
 import { X509Certificate } from 'node:crypto';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -18,7 +19,7 @@ function privateOwned(path, directory = false) {
   assert.equal(stat.mode & 0o077, 0, 'Private owner-only configuration required');
   assert.equal(realpathSync(path), path);
 }
-let runtime, server, lockOwned = false;
+let runtime, server, remoteServer, lockOwned = false;
 const lock = join(directory, 'real-account.lock');
 const statePath = join(directory, 'real-account-status.json');
 const publish = (state) => writeFileSync(statePath, JSON.stringify({ ...state, checkedAt: new Date().toISOString() }), { mode: 0o600 });
@@ -28,6 +29,8 @@ try {
   assert.equal(process.versions.node, '24.19.0');
   assert.equal(config.projectId, 'enmori-rmvp-controlled');
   assert.equal(config.host, '127.0.0.1'); assert.equal(config.port, 9381);
+  // Explicit opt-in for the public HTTPS edge; never bind this HTTP hop to LAN.
+  assert(config.remotePort === undefined || config.remotePort === 9382);
   assert.equal(typeof config.verificationEmail, 'string');
   for (const name of ['FIREBASE_AUTH_EMULATOR_HOST', 'FIRESTORE_EMULATOR_HOST']) assert.equal(process.env[name], undefined);
   privateOwned(config.keyPath);
@@ -51,7 +54,15 @@ try {
   await new Promise((resolve, reject) => {
     server.once('error', reject); server.listen(config.port, config.host, resolve);
   });
+  if (config.remotePort === 9382) {
+    remoteServer = createHttpServer(runtime.app.routing);
+    await new Promise((resolve, reject) => {
+      remoteServer.once('error', reject);
+      remoteServer.listen(config.remotePort, '127.0.0.1', resolve);
+    });
+  }
   publish({ phase: 'listening', ready: true, authAdminRead: true, firestoreRead: true,
+    remoteLoopbackEnabled: Boolean(remoteServer?.listening),
     emailVerified: user.emailVerified, bindingExists: binding.exists });
   console.log('Real account HTTPS ready; Firebase identity verification remains required.');
   await new Promise((resolve) => {
@@ -64,6 +75,7 @@ try {
   process.exitCode = 1;
 } finally {
   try {
+    if (remoteServer?.listening) await new Promise((resolve, reject) => remoteServer.close(error => error ? reject(error) : resolve()));
     if (server?.listening) await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
     if (runtime) await closeControlledRuntime(runtime);
   } catch (_) { process.exitCode = 1; }

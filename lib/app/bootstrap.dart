@@ -31,12 +31,14 @@ Future<void> bootstrap() async {
   const controlledAccount = bool.fromEnvironment(
     'ENMORI_CONTROLLED_REAL_ACCOUNT',
   );
+  const remoteAccount = bool.fromEnvironment('ENMORI_REMOTE_GROUP');
   const backendUrl = String.fromEnvironment('ENMORI_API_BASE_URL');
   const certificate = String.fromEnvironment('ENMORI_API_CERTIFICATE_BASE64');
   final baseUri = parseApprovedBackendBaseUri(backendUrl);
   final configurationValid = validAccountRuntimeConfiguration(
     configuration,
     controlledAccount: controlledAccount,
+    remoteAccount: remoteAccount,
     certificateBase64: certificate,
     baseUri: baseUri,
   );
@@ -71,7 +73,7 @@ Future<void> bootstrap() async {
   runApp(
     ProviderScope(
       overrides: [
-        if (controlledAccount)
+        if (controlledAccount || remoteAccount)
           backendBaseUriProvider.overrideWithValue(
             firebaseReady ? baseUri : null,
           ),
@@ -182,9 +184,23 @@ final class FirebaseRuntimeConfiguration {
 bool validAccountRuntimeConfiguration(
   FirebaseRuntimeConfiguration configuration, {
   required bool controlledAccount,
+  bool remoteAccount = false,
   required String certificateBase64,
   required Uri? baseUri,
 }) {
+  if (remoteAccount) {
+    return !controlledAccount &&
+        configuration.options?.projectId == 'enmori-rmvp-controlled' &&
+        !configuration.useAuthEmulator &&
+        certificateBase64.isEmpty &&
+        baseUri?.scheme == 'https' &&
+        baseUri?.host == 'enmori-rmvp-demo.tail29ae43.ts.net' &&
+        baseUri?.port == 8443 &&
+        baseUri!.userInfo.isEmpty &&
+        !baseUri.hasQuery &&
+        !baseUri.hasFragment &&
+        (baseUri.path.isEmpty || baseUri.path == '/');
+  }
   if (!controlledAccount) return certificateBase64.isEmpty;
   return configuration.options?.projectId == 'enmori-rmvp-controlled' &&
       !configuration.useAuthEmulator &&

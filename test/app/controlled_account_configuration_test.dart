@@ -19,6 +19,43 @@ FirebaseRuntimeConfiguration configuration({
 );
 
 void main() {
+  test(
+    'remote group uses real identity and the selected public TLS edge only',
+    () {
+      bool valid({
+        FirebaseRuntimeConfiguration? config,
+        String url = 'https://enmori-rmvp-demo.tail29ae43.ts.net:8443',
+        bool local = false,
+        String cert = '',
+      }) => validAccountRuntimeConfiguration(
+        config ?? configuration(),
+        controlledAccount: local,
+        remoteAccount: true,
+        certificateBase64: cert,
+        baseUri: Uri.tryParse(url),
+      );
+      expect(valid(), isTrue);
+      expect(valid(local: true), isFalse);
+      expect(valid(cert: 'local-pinned-root'), isFalse);
+      expect(valid(config: configuration(emulator: true)), isFalse);
+      expect(
+        valid(config: configuration(project: 'demo-enmori-rmvp01a-r10')),
+        isFalse,
+      );
+      for (final url in [
+        'http://enmori-rmvp-demo.tail29ae43.ts.net:8443',
+        'https://enmori-rmvp-demo.tail29ae43.ts.net',
+        'https://other.tail29ae43.ts.net:8443',
+        'https://127.0.0.1:9381',
+        'https://user@enmori-rmvp-demo.tail29ae43.ts.net:8443',
+        'https://enmori-rmvp-demo.tail29ae43.ts.net:8443/other',
+        'https://enmori-rmvp-demo.tail29ae43.ts.net:8443/?q=1',
+        'https://enmori-rmvp-demo.tail29ae43.ts.net:8443/#fragment',
+      ]) {
+        expect(valid(url: url), isFalse, reason: url);
+      }
+    },
+  );
   test('real account build rejects emulator, other project and wrong edge before SDK initialization', () {
     bool valid(
       FirebaseRuntimeConfiguration config,
