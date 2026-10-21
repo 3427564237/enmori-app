@@ -145,50 +145,60 @@ final class _FriendDiscoveryPanelState
                           Chip(label: Text(name)),
                       ],
                     ),
-                  TextButton(
-                    onPressed: () =>
-                        _open(() => widget.onOpenProfile(person.username)),
-                    child: const Text('View Profile'),
-                  ),
-                  TextButton(
-                    onPressed: locked
-                        ? null
-                        : () async {
-                            final undo = await preferences.ignore(
-                              person.username,
-                              person.ignoreVersion,
-                              expectedEpoch: renderedEpoch,
-                            );
-                            if (!mounted ||
-                                !context.mounted ||
-                                undo == null ||
-                                !preferences.canUndo(undo)) {
-                              return;
-                            }
-                            _closeSnack();
-                            final snack = ScaffoldMessenger.of(context)
-                                .showSnackBar(
-                                  SnackBar(
-                                    // Keep the normal SnackBar duration, while
-                                    // accessible navigation retains the action.
-                                    persist: MediaQuery.accessibleNavigationOf(
-                                      context,
-                                    ),
-                                    content: const Text('已忽略此推荐'),
-                                    action: SnackBarAction(
-                                      label: 'Undo',
-                                      onPressed: () {
-                                        if (mounted) preferences.undo(undo);
-                                      },
-                                    ),
-                                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      TextButton(
+                        onPressed: () =>
+                            _open(() => widget.onOpenProfile(person.username)),
+                        child: const Text('View Profile'),
+                      ),
+                      TextButton(
+                        onPressed: locked
+                            ? null
+                            : () async {
+                                final undo = await preferences.ignore(
+                                  person.username,
+                                  person.ignoreVersion,
+                                  expectedEpoch: renderedEpoch,
                                 );
-                            _snack = snack;
-                            snack.closed.then((_) {
-                              if (identical(_snack, snack)) _snack = null;
-                            });
-                          },
-                    child: Text('Ignore @${person.username}'),
+                                if (!mounted ||
+                                    !context.mounted ||
+                                    undo == null ||
+                                    !preferences.canUndo(undo)) {
+                                  return;
+                                }
+                                _closeSnack();
+                                final snack = ScaffoldMessenger.of(context)
+                                    .showSnackBar(
+                                      SnackBar(
+                                        // Keep the normal SnackBar duration, while
+                                        // accessible navigation retains the action.
+                                        persist:
+                                            MediaQuery.accessibleNavigationOf(
+                                              context,
+                                            ),
+                                        content: const Text(
+                                          'Recommendation ignored',
+                                        ),
+                                        action: SnackBarAction(
+                                          label: 'Undo',
+                                          onPressed: () {
+                                            if (mounted) preferences.undo(undo);
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                _snack = snack;
+                                snack.closed.then((_) {
+                                  if (identical(_snack, snack)) _snack = null;
+                                });
+                              },
+                        child: Text('Ignore @${person.username}'),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -212,7 +222,7 @@ final class _FriendDiscoveryPanelState
                   MaterialPageRoute(builder: (_) => const IgnoredPeoplePage()),
                 ),
               ),
-              child: const Text('已忽略的人'),
+              child: const Text('Ignored people'),
             ),
           ],
         ),

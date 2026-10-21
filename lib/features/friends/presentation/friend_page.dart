@@ -67,6 +67,7 @@ final class _FriendPageState extends ConsumerState<FriendPage>
       body: SafeArea(
         child: ListView(
           key: const Key('route-friends'),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(16),
           children: [
             if (widget.onOpenMyFriends != null)
@@ -79,14 +80,30 @@ final class _FriendPageState extends ConsumerState<FriendPage>
               key: const Key('friend-username'),
               controller: _username,
               enabled: !state.busy,
-              decoration: const InputDecoration(labelText: 'Exact Username'),
+              autocorrect: false,
+              enableSuggestions: false,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) {
+                FocusScope.of(context).unfocus();
+                controller.lookup(_username.text);
+              },
+              decoration: const InputDecoration(
+                labelText: 'Username',
+                helperText:
+                    'Enter their full username to find the right person.',
+                helperMaxLines: 2,
+                prefixIcon: Icon(Icons.alternate_email),
+              ),
             ),
             const SizedBox(height: 12),
             FilledButton(
               key: const Key('friend-lookup'),
               onPressed: state.busy
                   ? null
-                  : () => controller.lookup(_username.text),
+                  : () {
+                      FocusScope.of(context).unfocus();
+                      controller.lookup(_username.text);
+                    },
               child: const Text('Find person'),
             ),
             if (state.busy)
@@ -97,8 +114,11 @@ final class _FriendPageState extends ConsumerState<FriendPage>
               Semantics(liveRegion: true, child: Text(message)),
             if (target != null) ...[
               const SizedBox(height: 16),
-              Text(target.displayName),
-              Text('Username: ${target.username}'),
+              Text(
+                target.displayName,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Text('@${target.username}'),
               if (widget.onOpenProfile != null)
                 TextButton(
                   onPressed: state.busy
@@ -147,8 +167,11 @@ final class _FriendPageState extends ConsumerState<FriendPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(request.displayName),
-                      Text('Username: ${request.username}'),
+                      Text(
+                        request.displayName,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Text('@${request.username}'),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,

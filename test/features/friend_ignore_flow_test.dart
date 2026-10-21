@@ -473,7 +473,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Ignore @alpha'));
       await tester.pumpAndSettle();
-      expect(find.text('已忽略此推荐'), findsOneWidget);
+      expect(find.text('Recommendation ignored'), findsOneWidget);
       expect(find.text('Undo'), findsOneWidget);
       await tester.tap(find.text('Undo'));
       await tester.pumpAndSettle();
@@ -483,8 +483,8 @@ void main() {
       await tester.pump(const Duration(seconds: 5));
       await tester.pumpAndSettle();
       expect(find.text('Undo'), findsNothing);
-      await tester.ensureVisible(find.text('已忽略的人'));
-      await tester.tap(find.text('已忽略的人'));
+      await tester.ensureVisible(find.text('Ignored people'));
+      await tester.tap(find.text('Ignored people'));
       await tester.pumpAndSettle();
       expect(find.byType(IgnoredPeoplePage), findsOneWidget);
       await tester.tap(find.text('Restore'));
@@ -521,7 +521,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Undo'), findsNothing);
       expect(find.text('Read current state'), findsOneWidget);
-      expect(find.text('已忽略的人'), findsOneWidget);
+      expect(find.text('Ignored people'), findsOneWidget);
       await tester.tap(find.text('Read current state'));
       await tester.pumpAndSettle();
       expect(f.repo.writes, 1);
