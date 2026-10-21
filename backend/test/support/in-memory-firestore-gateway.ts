@@ -43,6 +43,11 @@ export class InMemoryFirestoreGateway implements FirestoreGateway {
           }));
       },
       delete: path => { candidate.delete(path); },
+      listWherePage: async (collection, equal, afterId, limit) => [...candidate.entries()]
+        .filter(([path,data]) => path.startsWith(`${collection}/`) && !path.slice(collection.length+1).includes('/') && Object.entries(equal).every(([k,v])=>data[k]===v))
+        .map(([path,data])=>({id:path.slice(collection.length+1),data:copyDocument(data)}))
+        .filter(entry=>afterId===undefined||entry.id>afterId)
+        .sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0).slice(0,limit),
       listPage: async (collection, afterId, limit) => [...candidate.entries()]
         .filter(([path]) => path.startsWith(`${collection}/`) && !path.slice(collection.length + 1).includes("/"))
         .map(([path, data]) => ({ id: path.slice(collection.length + 1), data: copyDocument(data) }))

@@ -63,6 +63,12 @@ BigInt? _instant(Object? value) {
 ActivitySummary? _summary(Map<String, Object?> raw) {
   final start = _instant(raw['startAt']), end = _instant(raw['endAt']);
   if (!validBrowseId(raw['browseId']) ||
+      (raw.containsKey('locationLabel') && !_text(raw['locationLabel'], 200)) ||
+      (raw.containsKey('categoryLabel') && !_text(raw['categoryLabel'], 100)) ||
+      (raw.containsKey('eventId') &&
+          (raw['eventId'] is! String ||
+              !RegExp(r'^tm_event_[0-9a-f]{64}$')
+                  .hasMatch(raw['eventId'] as String))) ||
       !_text(raw['title'], 200) ||
       start == null ||
       (raw.containsKey('endAt') && (end == null || end <= start))) {
@@ -73,10 +79,13 @@ ActivitySummary? _summary(Map<String, Object?> raw) {
     title: raw['title']! as String,
     startAt: raw['startAt']! as String,
     endAt: raw['endAt'] as String?,
+    eventId: raw['eventId'] as String?,
+    locationLabel: raw['locationLabel'] as String?,
+    categoryLabel: raw['categoryLabel'] as String?,
   );
 }
 
-final class BackendActivityRepository implements ActivityRepository {
+final class BackendActivityRepository implements PagedActivityRepository {
   BackendActivityRepository(this.client);
   final BackendApiClient client;
   Failure<ActivityRead> _invalid() => const Failure(
@@ -86,11 +95,23 @@ final class BackendActivityRepository implements ActivityRepository {
     ),
   );
   @override
-  Future<Result<ActivityRead>> read(String? browseId) async {
+  Future<Result<ActivityRead>> read(String? browseId) => _read(browseId, null);
+  @override
+  Future<Result<ActivityRead>> readNext(String cursor) {
+    if (!_cursor(cursor)) return Future.value(_invalid());
+    return _read(null, cursor);
+  }
+
+  bool _cursor(Object? value) =>
+      value is String &&
+      value.length <= 512 &&
+      RegExp(r'^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]{43}$').hasMatch(value) &&
+      !value.endsWith('\n');
+  Future<Result<ActivityRead>> _read(String? browseId, String? cursor) async {
     if (browseId != null && !validBrowseId(browseId)) return _invalid();
     final result = await client.get(
       browseId == null
-          ? '/v1/event-browse'
+          ? '/v1/event-browse${cursor == null ? '' : '?cursor=${Uri.encodeQueryComponent(cursor)}'}'
           : '/v1/event-browse/${Uri.encodeComponent(browseId)}',
     );
     if (result case Failure<JsonObject>(:final failure)) {
@@ -100,11 +121,13 @@ final class BackendActivityRepository implements ActivityRepository {
       final raw = (result as Success<JsonObject>).value;
       if (browseId == null) {
         if (raw.keys.any(
-              (k) => !const ['asOf', 'scope', 'items'].contains(k),
+              (k) =>
+                  !const ['asOf', 'scope', 'items', 'nextCursor'].contains(k),
             ) ||
             raw['scope'] != 'ticketmaster_sg_first_batch_v1' ||
             _instant(raw['asOf']) == null ||
-            raw['items'] is! List) {
+            raw['items'] is! List ||
+            (raw.containsKey('nextCursor') && !_cursor(raw['nextCursor']))) {
           return _invalid();
         }
         final rows = raw['items']! as List;
@@ -116,6 +139,9 @@ final class BackendActivityRepository implements ActivityRepository {
               row.keys.any(
                 (k) => !const [
                   'browseId',
+                  'eventId',
+                  'locationLabel',
+                  'categoryLabel',
                   'title',
                   'startAt',
                   'endAt',
@@ -128,12 +154,17 @@ final class BackendActivityRepository implements ActivityRepository {
           items.add(item);
         }
         return Success(
-          ActivityBatch(asOf: raw['asOf']! as String, items: items),
+          ActivityBatch(
+            asOf: raw['asOf']! as String,
+            items: items,
+            nextCursor: raw['nextCursor'] as String?,
+          ),
         );
       }
       if (raw.keys.any(
             (k) => !const [
               'browseId',
+              'eventId',
               'title',
               'startAt',
               'endAt',

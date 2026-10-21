@@ -58,6 +58,16 @@ final class BackendApiClient {
 
   Future<Result<JsonObject>> get(String path) => _send('GET', path);
 
+  /// Session-bound feature operations: recheck after token acquisition and
+  /// immediately before dispatch. Existing unguarded callers are unchanged.
+  Future<Result<JsonObject>> getGuarded(String path, bool Function() current) =>
+      _send('GET', path, isEligible: current);
+  Future<Result<JsonObject>> putGuarded(
+    String path,
+    JsonObject body,
+    bool Function() current,
+  ) => _send('PUT', path, body: body, isEligible: current);
+
   Future<Result<JsonObject>> put(
     String path, {
     required JsonObject body,
@@ -321,6 +331,7 @@ final class BackendApiClient {
     String path, {
     JsonObject? body,
     String? idempotencyKey,
+    bool Function()? isEligible,
   }) async {
     final baseUri = _baseUri;
     if (baseUri == null || !isApprovedBackendBaseUri(baseUri)) {
@@ -334,6 +345,9 @@ final class BackendApiClient {
 
     final elapsed = Stopwatch()..start();
     try {
+      if (isEligible != null && !isEligible()) {
+        return const Failure(_unavailable);
+      }
       final tokenResult = await _withinBudget(_authTokenProvider(), elapsed);
       if (tokenResult case Failure<String>(:final failure)) {
         return Failure(failure);
@@ -357,6 +371,9 @@ final class BackendApiClient {
       if (elapsed.elapsed >= _operationTimeout) {
         throw TimeoutException('Backend operation timed out');
       }
+      if (isEligible != null && !isEligible()) {
+        return const Failure(_unavailable);
+      }
       final streamedResponse = await _withinBudget(
         _httpClient.send(request),
         elapsed,
@@ -365,9 +382,17 @@ final class BackendApiClient {
         http.Response.fromStream(streamedResponse),
         elapsed,
       );
-      final decoded = _decodeObject(response.body);
+      if (isEligible != null && !isEligible()) {
+        return const Failure(_unavailable);
+      }
+      final decoded = _decodeObject(
+        isEligible == null ? response.body : utf8.decode(response.bodyBytes),
+      );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (isEligible != null && response.statusCode != 200) {
+          return const Failure(_invalidResponse);
+        }
         if (decoded == null) {
           return const Failure(
             AppFailure(
@@ -454,6 +479,9 @@ final class BackendApiClient {
         AppFailureKind.addFriendTargetUnavailable,
       'FRIEND_REQUEST_UNAVAILABLE' => AppFailureKind.friendRequestUnavailable,
       'EVENT_UNAVAILABLE' => AppFailureKind.eventUnavailable,
+      'EVENT_PARTICIPATION_INVALID' => AppFailureKind.eventParticipationInvalid,
+      'EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED' =>
+        AppFailureKind.eventParticipationRevisionPreconditionFailed,
       'PROFILE_INVALID' => AppFailureKind.profileInvalid,
       'PROFILE_REVISION_PRECONDITION_FAILED' =>
         AppFailureKind.profileRevisionPreconditionFailed,

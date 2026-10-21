@@ -11,6 +11,493 @@
     }
   ],
   "paths": {
+    "/v1/events/{eventId}/participation": {
+      "get": {
+        "description": "Completed owner; no-store. Never requires live source or data consent. Missing fact is none/false/revision0 without updatedAt.",
+        "responses": {
+          "200": {
+            "description": "Own fact",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "event-participation.json#/components/schemas/OwnEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 REQUEST_INVALID;401 AUTH_REQUIRED;403 AUTH_FORBIDDEN;404 EVENT_UNAVAILABLE/ADD_FRIEND_TARGET_UNAVAILABLE;409 ONBOARDING_REQUIRED;412 EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED;422 EVENT_PARTICIPATION_INVALID;503 SERVICE_UNAVAILABLE. Safe requestId envelope and no-store. Authenticate then completed-owner check before validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "openapi.json#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "description": "Canonical internal Event ID; not tm_ browse locator."
+          }
+        ],
+        "x-enmori-environment": "isolated-emulator",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "description": "Complete replacement and expectedRevision. Shape400/value422/stale412; no Idempotency-Key. New selection clears ignore. No-op checks version first. Unknown result and412 require GET, no automatic retry. Existing cancellation/unignore works offline from provider.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "status",
+                  "ignored",
+                  "expectedRevision"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "none",
+                      "interested",
+                      "going"
+                    ]
+                  },
+                  "ignored": {
+                    "type": "boolean"
+                  },
+                  "expectedRevision": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saved or version-checked no-op",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "event-participation.json#/components/schemas/OwnEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 REQUEST_INVALID;401 AUTH_REQUIRED;403 AUTH_FORBIDDEN;404 EVENT_UNAVAILABLE/ADD_FRIEND_TARGET_UNAVAILABLE;409 ONBOARDING_REQUIRED;412 EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED;422 EVENT_PARTICIPATION_INVALID;503 SERVICE_UNAVAILABLE. Safe requestId envelope and no-store. Authenticate then completed-owner check before validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "openapi.json#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "description": "Canonical internal Event ID; not tm_ browse locator."
+          }
+        ],
+        "x-enmori-environment": "isolated-emulator",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/events/{eventId}/participants": {
+      "get": {
+        "description": "Owner excluded. Current privacy/relationship/block/eligibility on every page. Scan20 raw records plus lookahead, sparse pages may continue. Accurate count only if independent scan completes within200 facts; otherwise omitted with countState unavailable. No raw total or page-length-as-total. Cursor is requester/event/status/group bound EP1 HMAC token. no-store.",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "interested",
+                "going"
+              ]
+            }
+          },
+          {
+            "name": "group",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "friends",
+                "others"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 512
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized people only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "items",
+                    "countState"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "maxItems": 20,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "username"
+                        ],
+                        "properties": {
+                          "username": {
+                            "type": "string"
+                          },
+                          "displayName": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "countState": {
+                      "enum": [
+                        "exact",
+                        "unavailable"
+                      ]
+                    },
+                    "visibleCount": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200
+                    },
+                    "nextCursor": {
+                      "type": "string",
+                      "maxLength": 512
+                    }
+                  },
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "countState": {
+                          "const": "exact"
+                        }
+                      },
+                      "required": [
+                        "visibleCount"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "countState": {
+                          "const": "unavailable"
+                        }
+                      },
+                      "not": {
+                        "required": [
+                          "visibleCount"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 REQUEST_INVALID;401 AUTH_REQUIRED;403 AUTH_FORBIDDEN;404 EVENT_UNAVAILABLE/ADD_FRIEND_TARGET_UNAVAILABLE;409 ONBOARDING_REQUIRED;412 EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED;422 EVENT_PARTICIPATION_INVALID;503 SERVICE_UNAVAILABLE. Safe requestId envelope and no-store. Authenticate then completed-owner check before validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "openapi.json#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        },
+        "x-enmori-environment": "isolated-emulator",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/me/event-participations": {
+      "get": {
+        "description": "Own facts including none/ignore tombstones; same owner source as detail/list/profile. no-store.",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 512
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Own page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "maxItems": 20,
+                      "items": {
+                        "$ref": "event-participation.json#/components/schemas/Participation"
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string",
+                      "maxLength": 512
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 REQUEST_INVALID;401 AUTH_REQUIRED;403 AUTH_FORBIDDEN;404 EVENT_UNAVAILABLE/ADD_FRIEND_TARGET_UNAVAILABLE;409 ONBOARDING_REQUIRED;412 EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED;422 EVENT_PARTICIPATION_INVALID;503 SERVICE_UNAVAILABLE. Safe requestId envelope and no-store. Authenticate then completed-owner check before validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "openapi.json#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        },
+        "x-enmori-environment": "isolated-emulator",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/users/{username}/event-participations": {
+      "get": {
+        "description": "Canonical immutable username; current trusted profile/participation seam. Only authorized interested/going. No ignored/revision/timestamp/content archive; content unavailable is not reconstructed. Does not authorize other profile fields.",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 512
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized public projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "maxItems": 20,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "eventId",
+                          "status"
+                        ],
+                        "properties": {
+                          "eventId": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "enum": [
+                              "interested",
+                              "going"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string",
+                      "maxLength": 512
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 REQUEST_INVALID;401 AUTH_REQUIRED;403 AUTH_FORBIDDEN;404 EVENT_UNAVAILABLE/ADD_FRIEND_TARGET_UNAVAILABLE;409 ONBOARDING_REQUIRED;412 EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED;422 EVENT_PARTICIPATION_INVALID;503 SERVICE_UNAVAILABLE. Safe requestId envelope and no-store. Authenticate then completed-owner check before validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "openapi.json#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        },
+        "x-enmori-environment": "isolated-emulator",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/me/friends/search": {
       "get": {
         "x-enmori-environment": "isolated-emulator",
@@ -3161,6 +3648,12 @@
                       "type": "string",
                       "const": "ticketmaster_sg_first_batch_v1"
                     },
+                    "nextCursor": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 512,
+                      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]{43}$"
+                    },
                     "items": {
                       "type": "array",
                       "maxItems": 20,
@@ -3178,6 +3671,20 @@
                             "minLength": 5,
                             "maxLength": 174,
                             "pattern": "^tm_[A-Za-z0-9_-]+$"
+                          },
+                          "eventId": {
+                            "type": "string",
+                            "pattern": "^tm_event_[0-9a-f]{64}$"
+                          },
+                          "locationLabel": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "categoryLabel": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
                           },
                           "title": {
                             "type": "string",
@@ -3305,7 +3812,19 @@
             }
           }
         },
-        "description": "Isolated Emulator composition only; verified Firebase identity and completed Account required before any source read. No query parameters or request body. No pagination or database write. The approved Sponsor demo composition may reuse one atomic server-owned source projection for at most five minutes, shared with recommendations and detail; disable invalidates it and source failure never serves stale success. Other compositions retain request-only source reads. Real provider activation remains separately gated."
+        "description": "Isolated Emulator composition only; verified Firebase identity and completed Account required before any source read. No query parameters or request body. No pagination or database write. The approved Sponsor demo composition may reuse one atomic server-owned source projection for at most five minutes, shared with recommendations and detail; disable invalidates it and source failure never serves stale success. Other compositions retain request-only source reads. Real provider activation remains separately gated.",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          }
+        ]
       }
     },
     "/v1/event-browse/{browseId}": {
@@ -3336,6 +3855,20 @@
                       "maxLength": 174,
                       "pattern": "^tm_[A-Za-z0-9_-]+$"
                     },
+                    "eventId": {
+                      "type": "string",
+                      "pattern": "^tm_event_[0-9a-f]{64}$"
+                    },
+                    "locationLabel": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "categoryLabel": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
                     "title": {
                       "type": "string",
                       "minLength": 1,
@@ -3353,16 +3886,6 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 2048
-                    },
-                    "locationLabel": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 200
-                    },
-                    "categoryLabel": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 100
                     }
                   }
                 }
@@ -5371,6 +5894,8 @@
                   "PERSONA_LIMIT_REACHED",
                   "PERSONA_COMMAND_CONFLICT",
                   "PERSONA_REVISION_PRECONDITION_FAILED",
+                  "EVENT_PARTICIPATION_INVALID",
+                  "EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED",
                   "ADD_FRIEND_TARGET_UNAVAILABLE",
                   "FRIEND_REQUEST_UNAVAILABLE",
                   "EVENT_UNAVAILABLE",

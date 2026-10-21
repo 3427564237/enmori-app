@@ -8,11 +8,12 @@ import {browseBatchSchema,browseDetailSchema} from "./schemas.js";
 export async function registerEventBrowseRoutes(app:FastifyInstance,identity:IdentityVerifier,browse:EventBrowse):Promise<void>{
   const auth=buildAuthenticate(identity);
   for(const path of ["/v1/event-browse","/v1/event-browse/:browseId"]){
-    app.get<{Params:{browseId?:string}}>(path,{exposeHeadRoute:false,schema:{response:{200:path.endsWith(":browseId")?browseDetailSchema:browseBatchSchema}},onRequest:async(req,reply)=>{reply.header("Cache-Control","no-store");await auth(req,reply);},
+    app.get<{Params:{browseId?:string};Querystring:{cursor?:string}}>(path,{exposeHeadRoute:false,schema:{response:{200:path.endsWith(":browseId")?browseDetailSchema:browseBatchSchema}},onRequest:async(req,reply)=>{reply.header("Cache-Control","no-store");await auth(req,reply);},
       errorHandler:(error,req,reply)=>sendFailureCode(req,reply,error.statusCode===400||error.statusCode===415?"REQUEST_INVALID":"SERVICE_UNAVAILABLE")},async(req,reply)=>{
-      if(Object.keys(req.query as object).length!==0||req.body!==undefined||Number(req.headers["content-length"]??0)!==0||req.headers["transfer-encoding"]!==undefined)return sendFailureCode(req,reply,"REQUEST_INVALID");
+      const query=req.query;
+      if(Object.keys(query).some(k=>k!=='cursor')||(query.cursor!==undefined&&(req.params.browseId!==undefined||typeof query.cursor!=='string'||query.cursor.length===0||query.cursor.length>512))||req.body!==undefined||Number(req.headers["content-length"]??0)!==0||req.headers["transfer-encoding"]!==undefined)return sendFailureCode(req,reply,"REQUEST_INVALID");
       const abort=new AbortController();const gone=()=>{if(!reply.raw.writableEnded)abort.abort();};req.raw.once("aborted",gone);reply.raw.once("close",gone);
-      try{const r=await browse.read(requirePrincipal(req),req.params.browseId,abort.signal);if(abort.signal.aborted){reply.hijack();reply.raw.destroy();return reply;}return r.ok?reply.send(r.value):sendFailure(req,reply,r.failure);}
+      try{const r=await browse.read(requirePrincipal(req),req.params.browseId,abort.signal,query.cursor);if(abort.signal.aborted){reply.hijack();reply.raw.destroy();return reply;}return r.ok?reply.send(r.value):sendFailure(req,reply,r.failure);}
       finally{req.raw.off("aborted",gone);reply.raw.off("close",gone);}
     });
   }
