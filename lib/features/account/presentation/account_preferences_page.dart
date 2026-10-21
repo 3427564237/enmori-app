@@ -3,6 +3,8 @@ import '../domain/profile_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_motion.dart';
+
 import '../../../core/result/result.dart';
 import '../../auth/auth_providers.dart';
 import '../domain/account_preferences_repository.dart';
@@ -164,7 +166,13 @@ final class _AccountPreferencesPageState
               }
             }
           : null,
-      child: Text(state.phase == PreferencesPhase.saving ? 'Saving…' : 'Save'),
+      child: MotionReveal(
+        trigger: state.phase,
+        distance: 0,
+        child: Text(
+          state.phase == PreferencesPhase.saving ? 'Saving…' : 'Save',
+        ),
+      ),
     );
     final page = Scaffold(
       appBar: AppBar(
@@ -469,9 +477,11 @@ final class _AccountPreferencesPageState
                     const SizedBox(height: 24),
                   ],
                   if (state.saved)
-                    Text(
-                      profile ? 'Profile saved.' : 'Settings saved.',
-                      key: const Key('preferences-save-success'),
+                    MotionReveal(
+                      child: Text(
+                        profile ? 'Profile saved.' : 'Settings saved.',
+                        key: const Key('preferences-save-success'),
+                      ),
                     ),
                   if (state.message case final message?) ...[
                     Text(message, key: const Key('preferences-error')),

@@ -18,6 +18,7 @@ List<GoRoute> eventParticipationRoutes({
 }) => [
   GoRoute(
     path: listPath,
+    name: 'root-events',
     builder: (context, state) {
       final page = ParticipationEventsPage(
         onSelect: (id) {

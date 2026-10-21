@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_motion.dart';
+
 import '../../../core/presentation/status_panel.dart';
 import '../../../core/result/result.dart';
 import '../domain/event_recommendation_repository.dart';
@@ -251,7 +253,13 @@ final class _RecommendationContent extends StatelessWidget {
           ),
           const SizedBox(height: 12),
         ],
-        content,
+        MotionReveal(
+          trigger: state.runtimeType,
+          enabled:
+              recommendationCardBuilder == null &&
+              state is AsyncData<EventRecommendationResponse>,
+          child: content,
+        ),
         if (state is AsyncData<EventRecommendationResponse>) ...[
           const SizedBox(height: 12),
           TextButton.icon(

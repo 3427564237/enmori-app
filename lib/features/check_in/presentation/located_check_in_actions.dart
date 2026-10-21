@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_motion.dart';
+
 import '../../account/domain/account_repository.dart';
 import '../../auth/auth_providers.dart';
 import 'check_in_record_view.dart';
@@ -63,10 +65,9 @@ final class LocatedCheckInActions extends ConsumerWidget {
                     locationLabel: locationLabel,
                     visibility: visibility,
                   ),
-            child: AnimatedSwitcher(
-              duration: MediaQuery.disableAnimationsOf(context)
-                  ? Duration.zero
-                  : const Duration(milliseconds: 160),
+            child: MotionReveal(
+              trigger: (state.busy, state.uncertain),
+              distance: 0,
               child: Text(
                 key: ValueKey((state.busy, state.uncertain)),
                 state.busy
@@ -99,11 +100,13 @@ final class LocatedCheckInActions extends ConsumerWidget {
         if (state.notice case final notice?)
           Semantics(liveRegion: true, child: Text(notice)),
         if (!manageOnly && state.savedId != null) ...[
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              'Check-in saved.',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          MotionReveal(
+            child: Semantics(
+              liveRegion: true,
+              child: Text(
+                'Check-in saved.',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
           const SizedBox(height: 16),

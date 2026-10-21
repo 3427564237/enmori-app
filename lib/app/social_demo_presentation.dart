@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'enmori_theme.dart';
+import '../core/presentation/enmori_motion.dart';
 
 /// Presentation opt-in only; never selects repositories or grants a session.
 final socialDemoPresentationProvider = Provider<bool>((ref) => false);
@@ -22,6 +23,7 @@ final class SocialDemoNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) => NavigationBar(
     key: const Key('social-bottom-navigation'),
+    animationDuration: EnmoriMotion.duration(context, EnmoriMotion.content),
     selectedIndex: selectedIndex,
     onDestinationSelected: (index) {
       if (index != selectedIndex) onSelected(index);

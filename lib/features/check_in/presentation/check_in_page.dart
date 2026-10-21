@@ -13,6 +13,8 @@ import 'check_in_edit_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_motion.dart';
+
 import '../../../core/presentation/command_state.dart';
 import '../../../core/result/result.dart';
 import '../domain/check_in_repository.dart';
@@ -268,9 +270,10 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          ActionChip(
+                          _ComposerLabelChip(
+                            selected: _mood != null,
                             avatar: const Icon(Icons.mood_outlined, size: 18),
-                            label: Text(_mood ?? 'Mood'),
+                            label: _mood ?? 'Mood',
                             onPressed: pending
                                 ? null
                                 : () => _chooseLabel('Mood', _mood, [
@@ -282,9 +285,10 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                                     'Not sure',
                                   ], (v) => _mood = v),
                           ),
-                          ActionChip(
+                          _ComposerLabelChip(
+                            selected: _locationLabel != null,
                             avatar: const Icon(Icons.place_outlined, size: 18),
-                            label: Text(_locationLabel ?? 'Location'),
+                            label: _locationLabel ?? 'Location',
                             onPressed: pending
                                 ? null
                                 : () => _chooseLabel(
@@ -294,12 +298,13 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                                     (v) => _locationLabel = v,
                                   ),
                           ),
-                          ActionChip(
+                          _ComposerLabelChip(
+                            selected: _activity != null,
                             avatar: const Icon(
                               Icons.local_activity_outlined,
                               size: 18,
                             ),
-                            label: Text(_activity ?? 'Activity'),
+                            label: _activity ?? 'Activity',
                             onPressed: pending
                                 ? null
                                 : () => _chooseLabel('Activity', _activity, [
@@ -318,12 +323,21 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                           key: const Key('check-in-permissions'),
                           leading: const Icon(Icons.tune),
                           title: const Text('Permissions'),
-                          subtitle: Text(
-                            '$_visibilityLabel · ${placeState?.busy == true
-                                ? 'Getting GPS…'
-                                : placeState?.place == null
-                                ? 'No GPS'
-                                : 'GPS attached'} · ${placeState?.place?.includeWeather == true ? 'Weather on' : 'Weather off'}',
+                          subtitle: MotionReveal(
+                            trigger: (
+                              _visibility,
+                              placeState?.busy,
+                              placeState?.place?.includeWeather,
+                              placeState?.place?.location,
+                            ),
+                            distance: 0,
+                            child: Text(
+                              '$_visibilityLabel · ${placeState?.busy == true
+                                  ? 'Getting GPS…'
+                                  : placeState?.place == null
+                                  ? 'No GPS'
+                                  : 'GPS attached'} · ${placeState?.place?.includeWeather == true ? 'Weather on' : 'Weather off'}',
+                            ),
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: pending || (widget.located && !_settingsReady)
@@ -406,9 +420,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
     final value = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
-          ? AnimationStyle.noAnimation
-          : null,
+      sheetAnimationStyle: EnmoriMotion.surface(context),
       builder: (context) => SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
           16,
@@ -436,6 +448,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                   children: [
                     for (final choice in choices)
                       ActionChip(
+                        chipAnimationStyle: EnmoriMotion.chips(context),
                         label: Text(choice),
                         onPressed: () => Navigator.pop(context, choice),
                       ),
@@ -474,9 +487,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
-          ? AnimationStyle.noAnimation
-          : null,
+      sheetAnimationStyle: EnmoriMotion.surface(context),
       builder: (context) => SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
@@ -853,4 +864,41 @@ final class _ResultPanel extends StatelessWidget {
       ),
     );
   }
+}
+
+final class _ComposerLabelChip extends StatelessWidget {
+  const _ComposerLabelChip({
+    required this.label,
+    required this.avatar,
+    required this.selected,
+    required this.onPressed,
+  });
+  final String label;
+  final Widget avatar;
+  final bool selected;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => AnimatedSize(
+    duration: EnmoriMotion.duration(context, EnmoriMotion.content),
+    curve: EnmoriMotion.settle,
+    alignment: Alignment.centerLeft,
+    child: AnimatedContainer(
+      duration: EnmoriMotion.duration(context, EnmoriMotion.feedback),
+      curve: EnmoriMotion.settle,
+      decoration: ShapeDecoration(
+        shape: const StadiumBorder(),
+        color: selected
+            ? Theme.of(context).colorScheme.primaryContainer
+            : Colors.transparent,
+      ),
+      child: ActionChip(
+        chipAnimationStyle: EnmoriMotion.chips(context),
+        backgroundColor: Colors.transparent,
+        avatar: avatar,
+        label: MotionReveal(trigger: label, distance: 0, child: Text(label)),
+        onPressed: onPressed,
+      ),
+    ),
+  );
 }
