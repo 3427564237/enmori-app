@@ -63,12 +63,36 @@ try {
   const user = await getAuth(runtime.firebaseApp).getUserByEmail(config.verificationEmail);
   const binding = await getFirestore(runtime.firebaseApp)
     .doc(`${FIRESTORE_COLLECTIONS.authBindings}/${createAuthBindingDocumentId(user.uid)}`).get();
-  server = createServer({ cert: certificate, key: readFileSync(config.keyPath) }, runtime.app.routing);
+  // Operational metadata only: never log tokens, query strings or response bodies.
+  const identity = getAuth(runtime.firebaseApp);
+  const verifyIdToken = identity.verifyIdToken.bind(identity);
+  identity.verifyIdToken = async (...args) => {
+    try { return await verifyIdToken(...args); }
+    catch (error) {
+      const code = typeof error?.code === 'string' && /^auth\/[a-z-]+$/.test(error.code)
+        ? error.code : 'identity-dependency-failure';
+      console.error(JSON.stringify({ diagnostic: 'identity-verification', code }));
+      throw error;
+    }
+  };
+  const route = (request, response) => {
+    const started = Date.now();
+    // A fixed label avoids identifiers or user text from arbitrary URLs.
+    const onboarding = request.url === '/v1/me/onboarding';
+    response.once('finish', () => {
+      if (onboarding || response.statusCode >= 500) console.log(JSON.stringify({
+        diagnostic: 'api-response', route: onboarding ? 'onboarding' : 'other',
+        status: response.statusCode, elapsedMs: Date.now() - started,
+      }));
+    });
+    runtime.app.routing(request, response);
+  };
+  server = createServer({ cert: certificate, key: readFileSync(config.keyPath) }, route);
   await new Promise((resolve, reject) => {
     server.once('error', reject); server.listen(config.port, config.host, resolve);
   });
   if (config.remotePort === 9382) {
-    remoteServer = createHttpServer(runtime.app.routing);
+    remoteServer = createHttpServer(route);
     await new Promise((resolve, reject) => {
       remoteServer.once('error', reject);
       remoteServer.listen(config.remotePort, '127.0.0.1', resolve);
