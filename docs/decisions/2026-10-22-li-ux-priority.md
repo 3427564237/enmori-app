@@ -1,0 +1,13 @@
+# LI UX priorities — 2026-10-22
+
+Status: PM approved for this increment. Source: LI's explicit request in the UI work chat on 2026-10-22. This records requested behavior, not APK acceptance.
+
+- Event plan buttons toggle their selected status to None, or directly select the other status. Existing revision/session fences, uncertain-result readback and advanced menu remain.
+- Ordinary navigation keeps the AI controller, progress, messages and unsent draft in memory for the same observed login session. It neither cancels nor asks to discard. Explicit cancellation, timeout, actual app backgrounding, logout/session replacement, authorization withdrawal and unknown-operation recovery remain guarded; navigation never resends. No disk chat/draft persistence is introduced.
+- Home weather gets an independent, default-off persisted `homeWeatherAuto` preference in the existing revision-protected Settings resource. Omitted PUT values preserve the previous value; absent legacy values read as false. The UI offers only-this-time or automatic-on-Home permission, and Settings can change it. Automatic lookup occurs only while foregrounded, at most once per 15 minutes per session; completed weather is held in session memory, never coordinates. Manual refresh is explicit. No background tracking, shared cache, Check-in setting reuse or provider/API change.
+- Home weather retains approximate 0.1-degree coordinates, Android permission checks, Backend-only Open-Meteo access and provider/privacy/licence notices. Check-in weather contracts are unchanged.
+- Improve Home hierarchy, compact conversation/record layouts and local-time presentation without changing fonts or branding.
+
+This narrowly supersedes route-disposal cancellation/draft loss and one-time-only Home permission in the prior UI implementation and derived specifications. It extends the existing standalone Home lookup, and supersedes Q13's original exclusions only for this independent foreground Home preference and per-session display cache. [Q13](2026-09-02-production-weather-contract.md), [Q19](2026-09-01-persona-conversation-lifecycle.md), and all unaffected consent, request-authority, retention and duplicate-send protections remain authoritative. No Release, main merge, infrastructure or actual-device acceptance is implied.
+
+The route-bound mobile guard selected in [the 12 October AI decision](2026-10-12-li-isolated-note-conversation-conditional-a.md) is replaced only for ordinary in-app navigation by the current session/attempt guard. The existing live transport remains attached to that controller; this does not permit detached Backend execution, extend deadlines or redefine delivery confirmation. Only a mounted page from the current session renders returned content.

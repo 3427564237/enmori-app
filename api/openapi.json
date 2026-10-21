@@ -12201,6 +12201,9 @@
           },
           "defaultCheckInWeather": {
             "type": "boolean"
+          },
+          "homeWeatherAuto": {
+            "type": "boolean"
           }
         }
       },
@@ -12343,6 +12346,9 @@
             "type": "boolean"
           },
           "defaultCheckInWeather": {
+            "type": "boolean"
+          },
+          "homeWeatherAuto": {
             "type": "boolean"
           }
         }

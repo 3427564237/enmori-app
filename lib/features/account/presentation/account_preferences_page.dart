@@ -69,7 +69,9 @@ final class _AccountPreferencesPageState
   ProfileVisibility _profileVisibility = ProfileVisibility.private;
   CheckInVisibility _checkInVisibility = CheckInVisibility.private;
   OptionalProcessingConsent _consent = OptionalProcessingConsent.rejected;
-  bool _defaultLocation = false, _defaultWeather = false;
+  bool _defaultLocation = false,
+      _defaultWeather = false,
+      _homeWeatherAuto = false;
   bool _signingOut = false;
   bool _allowPopAfterDiscard = false;
   bool _confirmingLeave = false;
@@ -101,6 +103,7 @@ final class _AccountPreferencesPageState
       _affiliationType = state.profile?.details.affiliationType;
       _defaultLocation = state.settings?.defaultCheckInLocation ?? false;
       _defaultWeather = state.settings?.defaultCheckInWeather ?? false;
+      _homeWeatherAuto = state.settings?.homeWeatherAuto ?? false;
       _privacy = state.settings?.fieldPrivacy ?? const FieldPrivacy();
       _profileVisibility =
           state.profile?.visibility ?? ProfileVisibility.private;
@@ -122,7 +125,8 @@ final class _AccountPreferencesPageState
               _region.text != (details.region ?? '') ||
               _profileVisibility !=
                   (state.profile?.visibility ?? ProfileVisibility.private)
-        : _defaultLocation !=
+        : _homeWeatherAuto != (state.settings?.homeWeatherAuto ?? false) ||
+              _defaultLocation !=
                   (state.settings?.defaultCheckInLocation ?? false) ||
               _defaultWeather !=
                   (state.settings?.defaultCheckInWeather ?? false) ||
@@ -162,6 +166,7 @@ final class _AccountPreferencesPageState
                   fieldPrivacy: _privacy,
                   defaultCheckInLocation: _defaultLocation,
                   defaultCheckInWeather: _defaultWeather,
+                  homeWeatherAuto: _homeWeatherAuto,
                 );
               }
             }
@@ -344,6 +349,25 @@ final class _AccountPreferencesPageState
                                     setState(() => _checkInVisibility = v);
                                   }
                                 }
+                              : null,
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Home weather',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        SwitchListTile(
+                          key: const Key('settings-home-weather'),
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text(
+                            'Get weather automatically on Home',
+                          ),
+                          subtitle: const Text(
+                            'Use one foreground approximate location, rounded to 0.1°, to get weather through ENMORI from Open-Meteo. Open-Meteo may retain request metadata. No precise point or identity is sent. Refreshes at most every 15 minutes automatically; no background tracking. Independent of Check-in defaults. Save to apply.',
+                          ),
+                          value: _homeWeatherAuto,
+                          onChanged: ready
+                              ? (v) => setState(() => _homeWeatherAuto = v)
                               : null,
                         ),
                         const SizedBox(height: 24),

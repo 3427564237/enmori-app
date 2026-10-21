@@ -92,6 +92,10 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     super.initState();
     _controller = ref.read(aiConversationControllerProvider.notifier);
     _sessionKey = ref.read(aiConversationControllerProvider).sessionKey;
+    _message.value = _controller.draftFor(_sessionKey);
+    _message.addListener(() {
+      _controller.updateDraft(_message.value, sessionKey: _sessionKey);
+    });
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_ownsCurrentSession) return;
@@ -110,9 +114,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _dismissConfirmation();
-    // No deferred callback: disposal must close dispatch before a late token.
-    // detach deliberately does not publish Riverpod state during disposal.
-    _controller.detach(sessionKey: _sessionKey);
+    // The session owns the request and draft; route removal only releases UI.
     _message.dispose();
     _messageFocus.dispose();
     _historyScroll.dispose();
@@ -145,42 +147,15 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     bool explicitUnknownExit = false,
   }) async {
     if (!_ownsCurrentSession || _confirming || _leaving) return;
-    final state = ref.read(aiConversationControllerProvider);
-    if (state.canCancel || (!explicitUnknownExit && state.isBusy)) {
-      _confirming = true;
-      final leave = await _confirm(
-        message: state.canCancel
-            ? 'Leave this conversation?'
-            : 'The request may still complete. Leave this screen?',
-        keepLabel: 'Stay',
-        actionLabel: state.canCancel ? 'Request cancel and leave' : 'Leave',
-        actionKey: 'ai-confirm-leave',
-      );
-      if (!_ownsCurrentSession) return;
-      _confirming = false;
-      if (!leave) return;
-    } else if (!explicitUnknownExit && _message.text.isNotEmpty) {
-      _confirming = true;
-      final discard = await _confirm(
-        message: 'Discard unsaved changes?',
-        keepLabel: 'Keep editing',
-        actionLabel: 'Discard',
-        actionKey: 'ai-confirm-discard',
-      );
-      if (!_ownsCurrentSession) return;
-      _confirming = false;
-      if (!discard) return;
-    }
-    if (!_ownsCurrentSession || _leaving) return;
     _leaving = true;
-    _message.clear();
     _messageFocus.unfocus();
-    _controller.leave();
+    if (explicitUnknownExit) {
+      _message.clear();
+      _controller.leave();
+    }
     try {
       navigate();
     } finally {
-      // A Settings push may retain this page below the new route. Returning
-      // permits a new explicit action; it never resumes the cancelled request.
       if (_ownsCurrentSession) _leaving = false;
     }
   }
@@ -1120,7 +1095,7 @@ String? _statusCopy(AiConversationPhase phase) => switch (phase) {
   AiConversationPhase.preparing => 'Sending…',
   AiConversationPhase.waiting => 'Waiting for a reply…',
   AiConversationPhase.limited =>
-    'AI Limited. Your current data consent does not permit AI chat.',
+    'AI chat is turned off. You can allow AI data use in Settings.',
   AiConversationPhase.busy => 'AI is busy. Try again later.',
   AiConversationPhase.unavailable =>
     'AI is unavailable right now. Try again later.',
@@ -1148,16 +1123,15 @@ final class _MessageTile extends StatelessWidget {
   Widget build(BuildContext context) {
     if (bubble) {
       final fromUser = message.role == AiRole.user;
-      final time = message.persistedAt.toUtc();
-      final clock =
-          '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} UTC';
+      final time = message.persistedAt.toLocal();
+      final clock = MaterialLocalizations.of(context)
+          .formatTimeOfDay(TimeOfDay.fromDateTime(time));
       return Align(
         alignment: fromUser ? Alignment.centerRight : Alignment.centerLeft,
-        child: FractionallySizedBox(
-          widthFactor: .88,
+        child: _BubbleWidth(
           child: Container(
             key: ValueKey('ai-message-${message.messageId}'),
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: fromUser
                   ? Theme.of(context).colorScheme.primaryContainer
@@ -1175,20 +1149,21 @@ final class _MessageTile extends StatelessWidget {
               ),
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   fromUser ? 'You' : 'AI',
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   message.availability == AiAvailability.unavailable
                       ? 'This reply is no longer available.'
                       : message.text ?? '',
-                  style: const TextStyle(height: 1.6),
+                  style: const TextStyle(height: 1.45),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 Semantics(
                   label: 'Saved at ${time.toIso8601String()}',
                   child: Text(
@@ -1205,23 +1180,26 @@ final class _MessageTile extends StatelessWidget {
     return Card(
       key: ValueKey('ai-message-${message.messageId}'),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               message.role == AiRole.user ? 'You' : 'AI',
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               message.availability == AiAvailability.unavailable
                   ? 'This reply is no longer available.'
                   : message.text ?? '',
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
-              message.persistedAt.toUtc().toIso8601String(),
+              MaterialLocalizations.of(context).formatTimeOfDay(
+                TimeOfDay.fromDateTime(message.persistedAt.toLocal()),
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -1239,23 +1217,20 @@ final class _LocalOutgoing extends StatelessWidget {
   Widget build(BuildContext context) => Align(
     key: ObjectKey(identity),
     alignment: Alignment.centerRight,
-    child: FractionallySizedBox(
-      widthFactor: .88,
+    child: _BubbleWidth(
       child: Card(
         color: Theme.of(context).colorScheme.primaryContainer,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('You', style: Theme.of(context).textTheme.labelMedium),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(text, key: const Key('ai-local-outgoing')),
-              const SizedBox(height: 8),
-              Text(
-                'Save not yet confirmed',
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
+              const SizedBox(height: 6),
+              Text('Sending…', style: Theme.of(context).textTheme.labelSmall),
             ],
           ),
         ),
@@ -1330,6 +1305,19 @@ class _TypingIndicatorState extends State<_TypingIndicator>
           ],
         ),
       ),
+    ),
+  );
+}
+
+// Bound long replies while allowing short messages to fit their content.
+final class _BubbleWidth extends StatelessWidget {
+  const _BubbleWidth({required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: constraints.maxWidth * .88),
+      child: child,
     ),
   );
 }

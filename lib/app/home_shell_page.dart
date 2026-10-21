@@ -8,6 +8,7 @@ final class HomeShellPage extends StatelessWidget {
     required this.onStartCheckIn,
     this.socialStyle = false,
     this.socialSection,
+    this.weatherSection,
     this.onSelectTab,
     this.onOpenSettings,
     this.onEditInterests,
@@ -26,6 +27,7 @@ final class HomeShellPage extends StatelessWidget {
 
   final bool socialStyle;
   final Widget? socialSection;
+  final Widget? weatherSection;
   final ValueChanged<int>? onSelectTab;
   final VoidCallback? onOpenSettings;
   final VoidCallback onStartCheckIn;
@@ -172,6 +174,8 @@ final class HomeShellPage extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
               Text('Today', style: Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 4),
+              const Text('Take a moment for yourself. What’s on your mind?'),
               const SizedBox(height: 12),
               FilledButton.icon(
                 key: const Key('r6-new-check-in-button'),
@@ -179,12 +183,16 @@ final class HomeShellPage extends StatelessWidget {
                 icon: const Icon(Icons.edit_note),
                 label: const Text('New Check-in'),
               ),
+              if (weatherSection != null) ...[
+                const SizedBox(height: 16),
+                weatherSection!,
+              ],
               const SizedBox(height: 24),
               Row(
                 children: [
                   Expanded(
                     child: Text(
-                      'Events',
+                      'Events for you',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),

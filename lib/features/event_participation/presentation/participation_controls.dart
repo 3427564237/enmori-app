@@ -59,7 +59,12 @@ final class _ParticipationControlsState
         value == null || entry?.uncertain == true || entry?.failure != null;
     Widget planButton(ParticipationStatus status, String label, IconData icon) {
       final selected = value?.status == status;
-      final action = enabled ? () => change(status, false) : null;
+      final action = enabled
+          ? () => change(
+              selected ? ParticipationStatus.none : status,
+              selected ? value.ignored : false,
+            )
+          : null;
       return Semantics(
         selected: selected,
         child: selected

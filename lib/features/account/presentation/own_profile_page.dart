@@ -120,10 +120,28 @@ final class OwnProfilePage extends ConsumerWidget {
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                             ),
-                          if (value.details.affiliationName case final name?)
-                            Text(name),
-                          if (value.details.region case final region?)
-                            Text(region),
+                          if (value.details.affiliationName != null ||
+                              value.details.region != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Wrap(
+                                spacing: 16,
+                                runSpacing: 8,
+                                children: [
+                                  if (value.details.affiliationName
+                                      case final name?)
+                                    _ProfileDetail(
+                                      icon: Icons.school_outlined,
+                                      label: name,
+                                    ),
+                                  if (value.details.region case final region?)
+                                    _ProfileDetail(
+                                      icon: Icons.place_outlined,
+                                      label: region,
+                                    ),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
                     AsyncData<Result<OwnProfile>>(
@@ -262,4 +280,25 @@ final class OwnProfilePage extends ConsumerWidget {
       ),
     );
   }
+}
+
+final class _ProfileDetail extends StatelessWidget {
+  const _ProfileDetail({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(
+        icon,
+        size: 16,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      const SizedBox(width: 6),
+      Flexible(
+        child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+      ),
+    ],
+  );
 }

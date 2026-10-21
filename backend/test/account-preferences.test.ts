@@ -29,7 +29,7 @@ test("DisplayName normalization counts scalars and rejects unsafe/name-invalid i
 test("legacy reads are minimized, private and read-only; missing binding is onboarding required", async () => {
   const { store, repo } = fixture(); const before = store.entries();
   assert.deepEqual(await repo.getProfile(uid), { kind: "found", value: { details: emptyProfileDetails, username: "member_a", displayName: null, profileVisibility: "private", revision: 0 } });
-  assert.deepEqual(await repo.getSettings(uid), { kind: "found", value: { defaultCheckInLocation:false, defaultCheckInWeather:false, fieldPrivacy: privateFields, checkInVisibility: "public", optionalProcessingConsent: "accepted", revision: 0 } });
+  assert.deepEqual(await repo.getSettings(uid), { kind: "found", value: { defaultCheckInLocation:false, defaultCheckInWeather:false, homeWeatherAuto:false, fieldPrivacy: privateFields, checkInVisibility: "public", optionalProcessingConsent: "accepted", revision: 0 } });
   assert.equal((await repo.getProfile("unbound")).kind, "onboarding_required");
   assert.deepEqual(store.entries(), before);
 });
@@ -150,4 +150,27 @@ test('explicit Check-in defaults persist, revoke independently, and legacy write
   assert.equal((await use.saveSettings({...common,defaultCheckInLocation:true,expectedRevision:1})).ok,false);
   assert.deepEqual(store.entries(),before); assert.deepEqual(store.read('check_ins/history'),historical);
   assert.equal((await fixture({defaultCheckInLocation:'true'}).repo.getSettings(uid)).kind,'dependency_unavailable');
+});
+
+
+test('Home weather preference is independent, persisted, omission preserving and revision protected', async () => {
+  const {use, store} = fixture();
+  const common = {principal, checkInVisibility:'private', optionalProcessingConsent:'rejected'};
+  assert.equal((await use.saveSettings({...common, homeWeatherAuto:true, expectedRevision:0})).ok, true);
+  const restarted = new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(store));
+  const saved = await restarted.getSettings(principal);
+  assert.ok(saved.ok);
+  if (saved.ok) {
+    assert.equal(saved.value.homeWeatherAuto, true);
+    assert.equal(saved.value.defaultCheckInWeather, false);
+    assert.equal(saved.value.defaultCheckInLocation, false);
+  }
+  assert.equal((await restarted.saveSettings({...common, defaultCheckInWeather:true, expectedRevision:1})).ok, true);
+  const legacy = await restarted.getSettings(principal);
+  if (legacy.ok) assert.equal(legacy.value.homeWeatherAuto, true);
+  assert.equal((await restarted.saveSettings({...common, homeWeatherAuto:false, expectedRevision:1})).ok, false);
+  assert.equal((await restarted.saveSettings({...common, homeWeatherAuto:'true', expectedRevision:2})).ok, false);
+  assert.equal((await restarted.saveSettings({...common, homeWeatherAuto:false, expectedRevision:2})).ok, true);
+  const revoked = await restarted.getSettings(principal);
+  if (revoked.ok) { assert.equal(revoked.value.homeWeatherAuto, false); assert.equal(revoked.value.defaultCheckInWeather, true); }
 });

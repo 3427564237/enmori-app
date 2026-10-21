@@ -49,6 +49,7 @@ final class _UnavailablePreferences implements AccountPreferencesRepository {
   Future<Result<OwnSettings>> saveSettings({
     bool? defaultCheckInLocation,
     bool? defaultCheckInWeather,
+    bool? homeWeatherAuto,
     FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,
@@ -59,3 +60,22 @@ final class _UnavailablePreferences implements AccountPreferencesRepository {
 final profileLocationRepositoryProvider = Provider<ProfileLocationRepository>(
   (ref) => const GeolocatorProfileLocationRepository(),
 );
+
+// Confirmed Settings observations, scoped to the observed login session. A
+// revision fence prevents late reads from undoing a newer privacy decision.
+final accountSettingsSnapshotProvider =
+    NotifierProvider<AccountSettingsSnapshot, OwnSettings?>(
+      AccountSettingsSnapshot.new,
+    );
+
+class AccountSettingsSnapshot extends Notifier<OwnSettings?> {
+  @override
+  OwnSettings? build() {
+    ref.watch(authSessionProvider);
+    return null;
+  }
+
+  void observe(OwnSettings settings) {
+    if (state == null || settings.revision >= state!.revision) state = settings;
+  }
+}

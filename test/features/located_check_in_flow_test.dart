@@ -46,6 +46,59 @@ final saved = CheckIn(
   location: const GeoPoint(1.3521, 103.8198),
 );
 void main() {
+  test('Home automatic preference survives navigation, caches, revokes late GPS and resets on logout', () async {
+    var now = DateTime.utc(2026, 10, 22);
+    final h = await harness(now: () => now);
+    final home = h.container.read(homeWeatherControllerProvider.notifier);
+    await home.openHome();
+    expect(h.location.calls, isEmpty);
+    h.home.result = Success(
+      WeatherSnapshot(
+        observedAt: DateTime.utc(2026, 10, 22),
+        temperatureCelsius: 25,
+        condition: WeatherCondition.clear,
+      ),
+    );
+    await home.load(expectedEpoch: home.epoch, remember: true);
+    expect(h.preferences.settings.homeWeatherAuto, isTrue);
+    expect(h.preferences.settings.defaultCheckInLocation, isFalse);
+    expect(h.preferences.settings.defaultCheckInWeather, isFalse);
+    final cached = h.container.read(homeWeatherControllerProvider).weather;
+    expect(cached, isNotNull);
+    await h.container.pump();
+    expect(
+      h.container.read(homeWeatherControllerProvider.notifier),
+      same(home),
+    );
+    await home.openHome();
+    expect(h.location.calls, [false]);
+    expect(
+      h.container.read(homeWeatherControllerProvider).weather,
+      same(cached),
+    );
+    now = now.add(const Duration(minutes: 16));
+    await home.openHome();
+    expect(h.location.calls, [false, false]);
+    h.location.pending = Completer<Result<GeoPoint>>();
+    final refresh = home.load(expectedEpoch: home.epoch);
+    await Future<void>.delayed(Duration.zero);
+    final revoked = OwnSettings(
+      homeWeatherAuto: false,
+      checkInVisibility: h.preferences.settings.checkInVisibility,
+      consent: h.preferences.settings.consent,
+      revision: h.preferences.settings.revision + 1,
+    );
+    h.preferences.settings = revoked;
+    h.container.read(accountSettingsSnapshotProvider.notifier).observe(revoked);
+    h.location.pending!.complete(const Success(GeoPoint(1.3, 103.8)));
+    await refresh;
+    expect(h.home.points, hasLength(2));
+    expect(h.container.read(homeWeatherControllerProvider).weather, isNull);
+    h.auth.emit(const AuthSessionUnauthenticated());
+    await h.container.pump();
+    expect(h.container.read(homeWeatherControllerProvider).automatic, isFalse);
+  });
+
   test('saved defaults capture once, keep weather separate, and revoke late GPS results', () async {
     final h = await harness();
     const enabled = OwnSettings(
@@ -494,13 +547,14 @@ class LocationFake implements ForegroundLocation {
 
 class HomeFake implements HomeWeatherRepository {
   final points = <GeoPoint>[];
+  Result<WeatherSnapshot> result = const Failure(unavailable);
   @override
   Future<Result<WeatherSnapshot>> current(
     GeoPoint position, {
     required int settingsRevision,
   }) async {
     points.add(position);
-    return const Failure(unavailable);
+    return result;
   }
 }
 
@@ -599,7 +653,7 @@ class Harness {
       container.read(locatedCheckInControllerProvider(key));
 }
 
-Future<Harness> harness() async {
+Future<Harness> harness({DateTime Function()? now}) async {
   final auth = FakeAuthRepository(),
       location = LocationFake(),
       preferences = FakeAccountPreferences(),
@@ -614,6 +668,7 @@ Future<Harness> harness() async {
       checkInPlaceRepositoryProvider.overrideWithValue(repository),
       checkInRepositoryProvider.overrideWithValue(own),
       homeWeatherRepositoryProvider.overrideWithValue(home),
+      if (now != null) homeWeatherNowProvider.overrideWithValue(now),
       idempotencyKeyGeneratorProvider.overrideWithValue(
         FakeIdempotencyKeyGenerator(['fixed-key', 'new-key']),
       ),

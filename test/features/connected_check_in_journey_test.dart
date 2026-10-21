@@ -273,8 +273,8 @@ void main() {
       await tester.tap(find.text('View saved Check-in'));
       await tester.pumpAndSettle();
       expect(own.readIds, ['stable-id']);
-      expect(find.text('Mood: Calm'), findsOneWidget);
-      expect(find.text('Activity: Travel'), findsOneWidget);
+      expect(find.text('Calm'), findsOneWidget);
+      expect(find.text('Travel'), findsOneWidget);
       expect(find.text('Weather at Check-in'), findsOneWidget);
       await tester.ensureVisible(find.text('Saved location and recovery'));
       await tester.tap(find.text('Saved location and recovery'));

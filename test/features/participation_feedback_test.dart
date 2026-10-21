@@ -19,6 +19,43 @@ import 'package:http/testing.dart';
 
 void main() {
   testWidgets(
+    'plan buttons toggle off and switch directly with fresh revisions',
+    (tester) async {
+      final peer = _Peer()..status = 'none';
+      await _pump(
+        tester,
+        peer,
+        const ParticipationControls(eventId: 'event-a'),
+      );
+      for (final step in [
+        ('Interested', 'interested'),
+        ('Interested', 'none'),
+        ('Going', 'going'),
+        ('Going', 'none'),
+        ('Interested', 'interested'),
+        ('Going', 'going'),
+        ('Interested', 'interested'),
+      ]) {
+        final revision = peer.revision;
+        await tester.tap(find.text(step.$1));
+        // A second stale tap cannot submit the same rendered revision again.
+        await tester.tap(find.text(step.$1));
+        await tester.pumpAndSettle();
+        expect(peer.writes.last, {
+          'status': step.$2,
+          'ignored': false,
+          'expectedRevision': revision,
+        });
+        expect(peer.writes.length, revision);
+        if (step.$2 != 'none') {
+          expect(find.widgetWithText(FilledButton, step.$1), findsOneWidget);
+        }
+      }
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'Home production card groups plans and hides only after confirmed ignore',
     (tester) async {
       final peer = _Peer();

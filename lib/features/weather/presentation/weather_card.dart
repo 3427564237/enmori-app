@@ -38,9 +38,15 @@ final class _WeatherCardState extends State<WeatherCard> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.snapshot.label),
+        Text(
+          widget.snapshot.label,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         if (widget.showUpdated)
-          Text('Updated ${widget.snapshot.observedAt.toLocal()}'),
+          Text(
+            'Updated ${MaterialLocalizations.of(context).formatMediumDate(widget.snapshot.observedAt.toLocal())} · ${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(widget.snapshot.observedAt.toLocal()))}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         Wrap(
           spacing: 8,
           children: [

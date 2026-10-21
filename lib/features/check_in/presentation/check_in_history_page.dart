@@ -157,7 +157,7 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
                   ),
                   if (state.ianaZone case final zone?)
                     Text(
-                      'Device time zone: $zone',
+                      'Local time · $zone',
                       key: const Key('history-device-zone'),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
@@ -348,15 +348,39 @@ final class _HistoryTile extends StatelessWidget {
         maxLines: 3,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text(
-        [
-          visibility == null
-              ? entry.localTime
-              : '${entry.localTime} · $visibility',
-          if (entry.checkIn.weather != null) 'Weather snapshot available',
-          if (entry.checkIn.location != null)
-            'Saved location · Open record to view',
-        ].join('\n'),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              [entry.localTime, ?visibility].join(' · '),
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 10,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (entry.checkIn.note.isNotEmpty && entry.checkIn.mood != null)
+                  Text(entry.checkIn.mood!),
+                if (entry.checkIn.activity case final activity?) Text(activity),
+                if (entry.checkIn.weather != null)
+                  const Tooltip(
+                    message: 'Weather saved',
+                    child: Icon(Icons.cloud_outlined, size: 16),
+                  ),
+                if (entry.checkIn.location != null)
+                  const Tooltip(
+                    message: 'Location saved',
+                    child: Icon(Icons.location_on_outlined, size: 16),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
       trailing: const Icon(Icons.chevron_right),
     );

@@ -47,6 +47,7 @@ final class BackendAccountPreferencesRepository
   Future<Result<OwnSettings>> saveSettings({
     bool? defaultCheckInLocation,
     bool? defaultCheckInWeather,
+    bool? homeWeatherAuto,
     FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,
@@ -64,6 +65,7 @@ final class BackendAccountPreferencesRepository
           },
         'defaultCheckInLocation': ?defaultCheckInLocation,
         'defaultCheckInWeather': ?defaultCheckInWeather,
+        'homeWeatherAuto': ?homeWeatherAuto,
         'checkInVisibility': _checkInVisibility(visibility),
         'optionalProcessingConsent': consent.name,
         'expectedRevision': expectedRevision,
@@ -136,6 +138,7 @@ final class BackendAccountPreferencesRepository
         !_keys(p, [
           if (p.containsKey('defaultCheckInLocation')) 'defaultCheckInLocation',
           if (p.containsKey('defaultCheckInWeather')) 'defaultCheckInWeather',
+          if (p.containsKey('homeWeatherAuto')) 'homeWeatherAuto',
           if (p.containsKey('fieldPrivacy')) 'fieldPrivacy',
           'checkInVisibility',
           'optionalProcessingConsent',
@@ -143,7 +146,11 @@ final class BackendAccountPreferencesRepository
         ])) {
       return _invalid();
     }
-    for (final key in ['defaultCheckInLocation', 'defaultCheckInWeather']) {
+    for (final key in [
+      'defaultCheckInLocation',
+      'defaultCheckInWeather',
+      'homeWeatherAuto',
+    ]) {
       if (p.containsKey(key) && p[key] is! bool) return _invalid();
     }
     final visibility = switch (p['checkInVisibility']) {
@@ -168,6 +175,7 @@ final class BackendAccountPreferencesRepository
       OwnSettings(
         defaultCheckInLocation: p['defaultCheckInLocation'] as bool? ?? false,
         defaultCheckInWeather: p['defaultCheckInWeather'] as bool? ?? false,
+        homeWeatherAuto: p['homeWeatherAuto'] as bool? ?? false,
         fieldPrivacy: privacy,
         checkInVisibility: visibility,
         consent: consent,

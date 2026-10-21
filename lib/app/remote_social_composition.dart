@@ -12,7 +12,6 @@ import '../features/event_participation/presentation/user_participation_section.
 import '../features/friends/presentation/social_profile_page.dart';
 import '../features/friends/presentation/friend_activity_panel.dart';
 import '../features/friends/presentation/friend_discovery_panel.dart';
-import '../features/weather/presentation/home_weather_card.dart';
 
 import 'package:flutter/services.dart';
 
@@ -158,18 +157,21 @@ final class GroupHomeSocial extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        HomeWeatherCard(openAttribution: openGroupAttribution),
-        FriendDiscoveryPanel(
-          home: true,
-          onOpenProfile: profile,
-          onOpenRequests: () => context.push<void>('/friends'),
-          onSeeAll: () => all(false),
-        ),
+        const SizedBox(height: 20),
+        Text('Around you', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
         FriendActivityPanel(
           home: true,
           onOpenProfile: profile,
           onOpenEvent: event,
           onSeeAll: () => all(true),
+        ),
+        const SizedBox(height: 12),
+        FriendDiscoveryPanel(
+          home: true,
+          onOpenProfile: profile,
+          onOpenRequests: () => context.push<void>('/friends'),
+          onSeeAll: () => all(false),
         ),
       ],
     );
