@@ -17,6 +17,8 @@ final class OwnProfilePage extends ConsumerWidget {
     this.onOpenSettings,
     this.participationSection,
     this.onOpenRecords,
+    this.onOpenHistory,
+    this.onOpenFootprint,
     super.key,
   });
 
@@ -25,6 +27,7 @@ final class OwnProfilePage extends ConsumerWidget {
   final Future<void> Function()? onOpenSettings;
   final Widget? participationSection;
   final Future<void> Function(String)? onOpenRecords;
+  final VoidCallback? onOpenHistory, onOpenFootprint;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,7 +47,21 @@ final class OwnProfilePage extends ConsumerWidget {
               padding: const EdgeInsets.all(24),
               children: [
                 const VerifyEmailButton(),
-                if (onOpenRecords != null && state.username != null)
+                if (onOpenHistory != null)
+                  OutlinedButton.icon(
+                    onPressed: onOpenHistory,
+                    icon: const Icon(Icons.history),
+                    label: const Text('Check-in History'),
+                  ),
+                if (onOpenFootprint != null)
+                  OutlinedButton.icon(
+                    onPressed: onOpenFootprint,
+                    icon: const Icon(Icons.map_outlined),
+                    label: const Text('Footprint'),
+                  ),
+                if (onOpenHistory == null &&
+                    onOpenRecords != null &&
+                    state.username != null)
                   OutlinedButton.icon(
                     onPressed: () => onOpenRecords!(state.username!),
                     icon: const Icon(Icons.calendar_month),

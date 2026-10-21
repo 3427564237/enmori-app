@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/auth_providers.dart';
+import '../features/account/account_providers.dart';
+import '../features/account/domain/account_repository.dart';
+import '../core/result/result.dart';
+import '../features/friends/presentation/social_profile_controller.dart';
 import '../features/check_in/check_in_providers.dart';
 import '../features/event_participation/presentation/user_participation_section.dart';
 import '../features/friends/presentation/social_profile_page.dart';
@@ -39,8 +43,14 @@ Widget groupParticipationBuilder(BuildContext context, String username) =>
     );
 
 final class ConnectedSocialProfile extends ConsumerStatefulWidget {
-  const ConnectedSocialProfile({required this.username, super.key});
+  const ConnectedSocialProfile({
+    required this.username,
+    this.footprint = false,
+    this.own = false,
+    super.key,
+  });
   final String username;
+  final bool footprint, own;
   @override
   ConsumerState<ConnectedSocialProfile> createState() =>
       _ConnectedSocialProfileState();
@@ -91,6 +101,14 @@ final class _ConnectedSocialProfileState
         }
         return SocialProfilePage(
           username: widget.username,
+          initialTab: widget.footprint ? SocialTab.map : SocialTab.profile,
+          onOpenFootprint: () => context.push<void>(
+            '/people/${Uri.encodeComponent(widget.username)}/footprint',
+          ),
+          onOpenOwnRecord: widget.own
+              ? (id) =>
+                    context.push<void>('/check-in/${Uri.encodeComponent(id)}')
+              : null,
           initialDate: value.date,
           timeZone: value.zone,
           openAttribution: openGroupAttribution,
@@ -154,6 +172,43 @@ final class GroupHomeSocial extends StatelessWidget {
           onSeeAll: () => all(true),
         ),
       ],
+    );
+  }
+}
+
+/// Resolve the signed-in username from the existing account projection only.
+final class ConnectedOwnFootprint extends ConsumerWidget {
+  const ConnectedOwnFootprint({super.key});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final subject = ref.watch(currentAuthSubjectProvider);
+    final account = subject == null
+        ? null
+        : ref.watch(onboardingStatusProvider(subject));
+    if (account case AsyncData<Result<OnboardingStatus>>(
+      value: Success<OnboardingStatus>(
+        value: OnboardingCompleted(account: final user),
+      ),
+    )) {
+      return ConnectedSocialProfile(
+        key: ValueKey(subject),
+        username: user.username,
+        footprint: true,
+        own: true,
+      );
+    }
+    return Scaffold(
+      appBar: AppBar(title: const Text('Footprint')),
+      body: Center(
+        child: account?.isLoading == true
+            ? const CircularProgressIndicator()
+            : FilledButton(
+                onPressed: subject == null
+                    ? null
+                    : () => ref.invalidate(onboardingStatusProvider(subject)),
+                child: const Text('Reload profile'),
+              ),
+      ),
     );
   }
 }

@@ -15,6 +15,7 @@ final class HomeShellPage extends StatelessWidget {
     this.onOpenFriends,
     this.onManagePersonas,
     this.onOpenHistory,
+    this.onOpenFootprint,
     this.onOpenAi,
     this.onOpenEvent,
     this.recommendationCardBuilder,
@@ -33,6 +34,7 @@ final class HomeShellPage extends StatelessWidget {
   final VoidCallback? onOpenFriends;
   final VoidCallback? onManagePersonas;
   final VoidCallback? onOpenHistory;
+  final VoidCallback? onOpenFootprint;
   final VoidCallback? onOpenAi;
   final void Function(String)? onOpenEvent;
   final RecommendationCardBuilder? recommendationCardBuilder;
@@ -92,7 +94,7 @@ final class HomeShellPage extends StatelessWidget {
                 key: const Key('home-check-in-history'),
                 onPressed: onOpenHistory,
                 icon: const Icon(Icons.history),
-                label: const Text('Footprint'),
+                label: const Text('Check-in History'),
               ),
             if (onOpenAi != null)
               OutlinedButton.icon(
@@ -270,10 +272,20 @@ final class HomeShellPage extends StatelessWidget {
               _HomeShortcut(
                 key: const Key('home-check-in-history'),
                 icon: Icons.history,
-                title: 'Footprint',
+                title: 'Check-in History',
                 description: 'Open your saved Check-ins.',
                 onTap: onOpenHistory,
               ),
+              if (onOpenFootprint != null) ...[
+                const SizedBox(height: 12),
+                _HomeShortcut(
+                  key: const Key('home-footprint'),
+                  icon: Icons.map_outlined,
+                  title: 'Footprint',
+                  description: 'See your Check-in points on the map.',
+                  onTap: onOpenFootprint,
+                ),
+              ],
               const SizedBox(height: 14),
               _HomeSecondaryAction(
                 actionKey: const Key('home-manage-personas'),

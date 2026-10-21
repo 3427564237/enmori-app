@@ -39,6 +39,79 @@ const _unresolved = AppFailure(
 
 void main() {
   testWidgets(
+    'local outgoing appears before token/prepare and reconciles only with authoritative pair',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      final token = Completer<Result<String>>();
+      r.auth.nextToken = token.future;
+      final sent = r.controller.send('note');
+      expect(r.state.localOutgoingText, 'note');
+      expect(r.state.localOutgoingKey, isNotNull);
+      expect(r.state.messages, isEmpty);
+      expect(r.repo.prepares, isEmpty);
+      token.complete(const Success('token'));
+      await sent;
+      expect(r.state.localOutgoingText, isNull);
+      expect(r.state.messages.map((m) => m.messageId), ['user', 'assistant']);
+      r.dispose();
+    },
+  );
+  testWidgets(
+    'unknown outgoing is retained until exact readback and retry never adds another user bubble',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      r.repo.executeResult = Future.value(const Failure(_unresolved));
+      await r.controller.send('note');
+      expect(r.state.localOutgoingText, 'note');
+      expect(r.state.canSend, isFalse);
+      r.repo.readResult = Future.value(
+        Success(
+          AiReadback(
+            operationId: 'A',
+            state: AiOutcomeState.userSaved,
+            userMessage: _user,
+          ),
+        ),
+      );
+      await r.controller.checkResult();
+      expect(r.state.localOutgoingText, isNull);
+      expect(r.state.messages.map((m) => m.messageId), ['user']);
+      final reply = Completer<Result<AiReply>>();
+      r.repo.executeResult = reply.future;
+      final pending = r.controller.retry('note');
+      expect(r.state.localOutgoingText, isNull);
+      expect(r.state.outgoingMessageId, 'user');
+      await tester.pump();
+      reply.complete(Success(_reply('B')));
+      await pending;
+      expect(
+        r.state.messages.where((m) => m.role == AiRole.user),
+        hasLength(1),
+      );
+      r.dispose();
+    },
+  );
+  testWidgets(
+    'local validation creates no bubble and session replacement drops pending text',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      await r.controller.send('');
+      expect(r.state.localOutgoingText, isNull);
+      final token = Completer<Result<String>>();
+      r.auth.nextToken = token.future;
+      final pending = r.controller.send('private draft');
+      expect(r.state.localOutgoingText, 'private draft');
+      r.auth.sessions.add(AuthSessionAuthenticated(subject: 'another'));
+      await tester.pump();
+      expect(r.state.localOutgoingText, isNull);
+      token.complete(const Success('old'));
+      await pending;
+      expect(r.repo.executes, isEmpty);
+      r.dispose();
+    },
+  );
+
+  testWidgets(
     'expired discovered target permits history selection or a new conversation without releasing a write fence',
     (tester) async {
       final r = await _Rig.create(tester);

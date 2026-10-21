@@ -9,6 +9,120 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets(
+    'typing dots animate only while waiting and reduced motion stays static',
+    (tester) async {
+      for (final reduced in [false, true]) {
+        final controller = _PageController(_state(canSend: true));
+        await _pump(
+          tester,
+          controller,
+          socialStyle: true,
+          reduceMotion: reduced,
+        );
+        controller.publish(
+          _state(
+            phase: AiConversationPhase.waiting,
+            canCancel: true,
+            localOutgoingKey: 'attempt',
+            localOutgoingText: 'Waiting input',
+          ),
+        );
+        await tester.pump();
+        final first = tester
+            .widget<Opacity>(find.byKey(const Key('ai-typing-dot-0')))
+            .opacity;
+        await tester.pump(const Duration(milliseconds: 300));
+        final next = tester
+            .widget<Opacity>(find.byKey(const Key('ai-typing-dot-0')))
+            .opacity;
+        expect(next, reduced ? first : isNot(first));
+        controller.publish(
+          _state(phase: AiConversationPhase.success, canSend: true),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('ai-pending-assistant')), findsNothing);
+        await tester.pumpWidget(const SizedBox.shrink());
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
+
+  testWidgets(
+    'pending bubbles follow the bottom and preserve deliberate older reading',
+    (tester) async {
+      final messages = [
+        for (var i = 0; i < 20; i++)
+          _message('old-$i', i + 1, AiRole.user, 'Old message $i'),
+      ];
+      final controller = _PageController(
+        _state(canSend: true, messages: messages),
+      );
+      await _pump(tester, controller, socialStyle: true);
+      final scroll = tester
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byKey(const Key('route-ai-conversation')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
+          .position;
+      for (var i = 0; i < 4; i++) {
+        scroll.jumpTo(scroll.maxScrollExtent);
+        await tester.pumpAndSettle();
+      }
+      controller.publish(
+        _state(
+          phase: AiConversationPhase.preparing,
+          canCancel: true,
+          messages: messages,
+          localOutgoingText: 'New local input',
+          localOutgoingKey: 'attempt',
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-local-outgoing')), findsOneWidget);
+      expect(find.byKey(const Key('ai-pending-assistant')), findsOneWidget);
+      expect(scroll.extentAfter, lessThanOrEqualTo(1));
+      expect(
+        tester.getTopLeft(find.byKey(const Key('ai-status'))).dy,
+        greaterThan(
+          tester.getTopLeft(find.byKey(const Key('ai-local-outgoing'))).dy,
+        ),
+      );
+      scroll.jumpTo(0);
+      await tester.pumpAndSettle();
+      controller.publish(
+        _state(
+          phase: AiConversationPhase.waiting,
+          canCancel: true,
+          messages: messages,
+          localOutgoingText: 'New local input',
+          localOutgoingKey: 'attempt',
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(scroll.pixels, 0);
+      controller.publish(
+        _state(
+          phase: AiConversationPhase.success,
+          canSend: true,
+          messages: [
+            ...messages,
+            _message('committed', 21, AiRole.user, 'New local input'),
+            _message('reply', 22, AiRole.assistant, 'Saved reply'),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-local-outgoing')), findsNothing);
+      expect(find.byKey(const Key('ai-pending-assistant')), findsNothing);
+      expect(scroll.pixels, 0);
+    },
+  );
+
   for (final social in [false, true]) {
     for (final phase in [
       AiConversationPhase.limited,
@@ -1169,6 +1283,8 @@ AiConversationState _state({
   AiConversationPhase phase = AiConversationPhase.idle,
   Iterable<AiMessage> messages = const [],
   String? conversationId,
+  String? localOutgoingText,
+  Object? localOutgoingKey,
   String? nextCursor,
   bool canSend = false,
   bool canRetry = false,
@@ -1188,6 +1304,8 @@ AiConversationState _state({
   phase: phase,
   messages: messages,
   conversationId: conversationId,
+  localOutgoingText: localOutgoingText,
+  localOutgoingKey: localOutgoingKey,
   nextCursor: nextCursor,
   canSend: canSend,
   canRetry: canRetry,
@@ -1228,6 +1346,7 @@ Future<void> _pump(
   VoidCallback? onSettings,
   VoidCallback? onPersonas,
   double textScale = 1,
+  bool reduceMotion = true,
   bool socialStyle = false,
   Widget Function(ValueChanged<VoidCallback>)? navigationBarBuilder,
 }) async {
@@ -1238,8 +1357,10 @@ Future<void> _pump(
       ],
       child: MaterialApp(
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context)
-              .copyWith(textScaler: TextScaler.linear(textScale)),
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScale),
+            disableAnimations: reduceMotion,
+          ),
           child: child!,
         ),
         home: AiConversationPage(

@@ -49,6 +49,13 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
       epoch == _epoch &&
       _session is AuthSessionAuthenticated &&
       identical(_session, ref.read(authSessionProvider).asData?.value);
+
+  /// Seed detail actions with the owner's already-read server projection.
+  void useSavedRecord(CheckIn record, {required int expectedEpoch}) {
+    if (!_valid(expectedEpoch) || state.busy) return;
+    state = LocatedCheckInState(value: record, savedId: record.checkInId);
+  }
+
   Future<void> replaceLocation({required int expectedEpoch}) async {
     final current = state.value;
     if (state.busy || current == null || !_valid(expectedEpoch)) return;

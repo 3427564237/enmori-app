@@ -23,9 +23,17 @@ final class SocialProfilePage extends ConsumerStatefulWidget {
     this.participationBuilder,
     this.onOpenRequest,
     this.tileLayerBuilder,
+    this.initialTab = SocialTab.profile,
+    this.recordId,
+    this.onOpenFootprint,
+    this.onOpenOwnRecord,
     super.key,
   });
   final String username, initialDate, timeZone;
+  final SocialTab initialTab;
+  final String? recordId;
+  final Future<void> Function()? onOpenFootprint;
+  final Future<void> Function(String)? onOpenOwnRecord;
   final Future<bool> Function(Uri) openAttribution;
   final ParticipationBuilder? participationBuilder;
   final Future<void> Function(String)? onOpenRequest;
@@ -46,7 +54,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
     _date = widget.initialDate;
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _load(SocialTab.profile);
+      if (mounted) _loadInitial();
     });
   }
 
@@ -63,19 +71,66 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
       _date = widget.initialDate;
       _selectedRecord = null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _load(SocialTab.profile);
+        if (mounted) _loadInitial();
       });
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!mounted) return;
+    if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
     if (state == AppLifecycleState.resumed) {
-      _load(ref.read(socialProfileControllerProvider(widget.username)).tab);
+      if (widget.recordId != null) {
+        _loadInitial();
+      } else {
+        _load(ref.read(socialProfileControllerProvider(widget.username)).tab);
+      }
     } else {
       controller.clear();
       _selectedRecord = null;
+    }
+  }
+
+  void _loadInitial() {
+    if (widget.recordId case final id?) {
+      controller.record(id);
+    } else {
+      _load(widget.initialTab);
+    }
+  }
+
+  Future<void> _openFootprint() async {
+    controller.clear();
+    await widget.onOpenFootprint!();
+    if (mounted) {
+      controller.clear();
+      _load(SocialTab.profile);
+    }
+  }
+
+  Future<void> _openRecord(String id) async {
+    final returnTab = ref
+        .read(socialProfileControllerProvider(widget.username))
+        .tab;
+    controller.clear();
+    if (widget.onOpenOwnRecord case final open?) {
+      await open(id);
+    } else {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => SocialProfilePage(
+            username: widget.username,
+            initialDate: _date,
+            timeZone: widget.timeZone,
+            openAttribution: widget.openAttribution,
+            recordId: id,
+          ),
+        ),
+      );
+    }
+    if (mounted) {
+      controller.clear();
+      _load(returnTab);
     }
   }
 
@@ -85,7 +140,15 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
   Widget build(BuildContext context) {
     final state = ref.watch(socialProfileControllerProvider(widget.username));
     return Scaffold(
-      appBar: AppBar(title: Text('@${widget.username}')),
+      appBar: AppBar(
+        title: Text(
+          widget.recordId != null
+              ? 'Saved Check-in'
+              : widget.initialTab == SocialTab.map
+              ? 'Footprint'
+              : '@${widget.username}',
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -93,30 +156,37 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
             child: ListView(
               padding: const EdgeInsets.all(24),
               children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final tab in SocialTab.values)
-                      ChoiceChip(
-                        label: Text(switch (tab) {
-                          SocialTab.profile => 'Profile',
-                          SocialTab.records => 'Records',
-                          SocialTab.calendar => 'Calendar',
-                          SocialTab.map => 'Map',
-                        }),
-                        selected: state.tab == tab,
-                        onSelected: state.busy
-                            ? null
-                            : (_) {
-                                _selectedRecord = null;
-                                _load(tab);
-                              },
-                      ),
-                  ],
-                ),
+                if (widget.recordId == null &&
+                    widget.initialTab != SocialTab.map)
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final tab in SocialTab.values)
+                        ChoiceChip(
+                          label: Text(switch (tab) {
+                            SocialTab.profile => 'Profile',
+                            SocialTab.records => 'Check-in History',
+                            SocialTab.calendar => 'Calendar',
+                            SocialTab.map => 'Footprint',
+                          }),
+                          selected: state.tab == tab,
+                          onSelected: state.busy
+                              ? null
+                              : (_) {
+                                  _selectedRecord = null;
+                                  if (tab == SocialTab.map &&
+                                      widget.onOpenFootprint != null) {
+                                    _openFootprint();
+                                  } else {
+                                    _load(tab);
+                                  }
+                                },
+                        ),
+                    ],
+                  ),
                 const SizedBox(height: 16),
-                if (state.tab != SocialTab.profile)
+                if (state.tab != SocialTab.profile && widget.recordId == null)
                   TextButton.icon(
                     icon: const Icon(Icons.calendar_month),
                     label: Text(_date),
@@ -128,7 +198,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                                   context: context,
                                   initialDate: DateTime.parse(_date),
                                   firstDate: DateTime(1),
-                                  lastDate: DateTime(9999),
+                                  lastDate: DateTime.parse(widget.initialDate),
                                 );
                             if (!mounted ||
                                 epoch != controller.epoch ||
@@ -161,7 +231,24 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                 if (state.records case final records?) ...[
                   if (records.checkIns.isEmpty)
                     const Text('No visible records on this page.'),
-                  for (final record in records.checkIns) _record(record),
+                  for (final record in records.checkIns)
+                    if (widget.recordId != null)
+                      _record(record)
+                    else
+                      Card(
+                        child: ListTile(
+                          title: Text(
+                            record.note.isEmpty
+                                ? record.mood ?? 'Check-in'
+                                : record.note,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(record.createdAt.toLocal().toString()),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => _openRecord(record.checkInId),
+                        ),
+                      ),
                   if (_selectedRecord != null &&
                       !records.checkIns.any(
                         (r) => r.checkInId == _selectedRecord,
@@ -182,8 +269,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                           openAttribution: widget.openAttribution,
                           tileLayerBuilder: widget.tileLayerBuilder,
                           onSelect: (point) {
-                            setState(() => _selectedRecord = point.checkInId);
-                            controller.record(point.checkInId);
+                            _openRecord(point.checkInId);
                           },
                         )
                       : Wrap(
@@ -207,7 +293,11 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                         ),
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
-                  onPressed: state.busy ? null : () => _load(state.tab),
+                  onPressed: state.busy
+                      ? null
+                      : () => widget.recordId != null
+                            ? controller.record(widget.recordId!)
+                            : _load(state.tab),
                   icon: const Icon(Icons.refresh),
                   label: const Text('Reload'),
                 ),
@@ -230,7 +320,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
         onPressed: () async {
           controller.clear();
           await widget.onOpenRequest!(profile.username);
-          if (mounted) _load(SocialTab.profile);
+          if (mounted) _loadInitial();
         },
         child: const Text('Friend request'),
       ),
@@ -302,7 +392,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                   widget.participationBuilder!(context, widget.username),
             ),
           );
-          if (mounted) _load(SocialTab.profile);
+          if (mounted) _loadInitial();
         },
       ),
   ];
@@ -316,7 +406,13 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(record.createdAt.toLocal().toString()),
-          Text(record.note),
+          if (record.note.isNotEmpty) Text(record.note),
+          if (record.checkInVisibility case final visibility?)
+            Text(
+              'Visibility: ${visibility.name == 'friendsOnly' ? 'Friends-only' : visibility.name}',
+            ),
+          if (record.location case final location?)
+            Text('Saved location: ${location.latitude}, ${location.longitude}'),
           if (record.mood case final mood?) Text(mood),
           if (record.activity case final activity?) Text(activity),
           if (record.weather case final weather?)

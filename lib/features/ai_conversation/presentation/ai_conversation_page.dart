@@ -121,6 +121,14 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     }
   }
 
+  @override
+  void didChangeMetrics() {
+    // Capture bottom proximity before keyboard/viewport layout changes.
+    if (widget.socialStyle && _ownsCurrentSession) {
+      _followMessages(null, ref.read(aiConversationControllerProvider));
+    }
+  }
+
   bool get _ownsCurrentSession =>
       mounted &&
       ref.read(aiConversationControllerProvider).sessionKey == _sessionKey;
@@ -383,20 +391,25 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     AiConversationState? previous,
     AiConversationState next,
   ) {
-    if (!{
-      AiConversationPhase.idle,
-      AiConversationPhase.success,
-      AiConversationPhase.waiting,
-    }.contains(next.phase)) {
+    if (!widget.socialStyle &&
+        !{
+          AiConversationPhase.idle,
+          AiConversationPhase.success,
+          AiConversationPhase.preparing,
+          AiConversationPhase.waiting,
+        }.contains(next.phase)) {
       return;
     }
     if (!_ownsCurrentSession ||
         !_historyScroll.hasClients ||
-        next.messages.isEmpty) {
+        (next.messages.isEmpty && next.localOutgoingText == null)) {
       return;
     }
     final oldLast = previous?.messages.lastOrNull;
-    if (oldLast != null && next.messages.last.sequence <= oldLast.sequence) {
+    if (previous?.localOutgoingKey == next.localOutgoingKey &&
+        previous?.phase == next.phase &&
+        oldLast != null &&
+        (next.messages.lastOrNull?.sequence ?? 0) <= oldLast.sequence) {
       return;
     }
     if (_historyScroll.position.extentAfter > 96) return;
@@ -584,6 +597,12 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         const SizedBox(height: 16),
                         _MessageTile(message: message),
                       ],
+                      if (state.localOutgoingText case final text?)
+                        _LocalOutgoing(
+                          text: text,
+                          identity: state.localOutgoingKey!,
+                        ),
+                      if (state.canCancel) const _TypingIndicator(),
                       if (state.nextCursor case final before?) ...[
                         const SizedBox(height: 12),
                         OutlinedButton(
@@ -677,7 +696,9 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   ) {
     final content = <Widget>[
       if (state.canBrowseHistory) _historyPanel(state),
-      if (state.messages.isEmpty && !contentHidden) ...[
+      if (state.messages.isEmpty &&
+          state.localOutgoingText == null &&
+          !contentHidden) ...[
         const SizedBox(height: 28),
         Center(
           child: Container(
@@ -708,15 +729,32 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         ),
         const SizedBox(height: 28),
       ],
+      if (!contentHidden) ...[
+        for (final message in state.messages)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 7),
+            child: _MessageTile(message: message, bubble: true),
+          ),
+        if (state.localOutgoingText case final text?)
+          _LocalOutgoing(text: text, identity: state.localOutgoingKey!),
+        if (state.canCancel)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: const _TypingIndicator(),
+              ),
+            ),
+          ),
+      ],
       if (status != null)
         Semantics(
           key: const Key('ai-status'),
           liveRegion: true,
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(status, style: const TextStyle(height: 1.5)),
-            ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(status, style: Theme.of(context).textTheme.bodySmall),
           ),
         ),
       if (state.canCancel)
@@ -744,13 +782,6 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           'Leave without retrying',
           () => unawaited(_navigate(widget.onBack, explicitUnknownExit: true)),
         ),
-      ],
-      if (!contentHidden) ...[
-        for (final message in state.messages)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 7),
-            child: _MessageTile(message: message, bubble: true),
-          ),
       ],
       if (state.phase == AiConversationPhase.deleteUnknown)
         _socialAction(
@@ -1094,4 +1125,107 @@ final class _MessageTile extends StatelessWidget {
       ),
     );
   }
+}
+
+final class _LocalOutgoing extends StatelessWidget {
+  const _LocalOutgoing({required this.text, required this.identity});
+  final String text;
+  final Object identity;
+  @override
+  Widget build(BuildContext context) => Align(
+    key: ObjectKey(identity),
+    alignment: Alignment.centerRight,
+    child: FractionallySizedBox(
+      widthFactor: .88,
+      child: Card(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('You', style: Theme.of(context).textTheme.labelMedium),
+              const SizedBox(height: 8),
+              Text(text, key: const Key('ai-local-outgoing')),
+              const SizedBox(height: 8),
+              Text(
+                'Save not yet confirmed',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+final class _TypingIndicator extends StatefulWidget {
+  const _TypingIndicator();
+  @override
+  State<_TypingIndicator> createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<_TypingIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
+  bool _reduceMotion = false;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final media = MediaQuery.of(context);
+    _reduceMotion = media.disableAnimations || media.accessibleNavigation;
+    if (_reduceMotion) {
+      _pulse.stop();
+    } else if (!_pulse.isAnimating) {
+      _pulse.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    key: const Key('ai-pending-assistant'),
+    label: 'AI is preparing a reply',
+    liveRegion: true,
+    child: ExcludeSemantics(
+      child: AnimatedBuilder(
+        animation: _pulse,
+        builder: (context, _) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < 3; i++)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
+                child: Opacity(
+                  key: Key('ai-typing-dot-$i'),
+                  opacity: _reduceMotion
+                      ? 1
+                      : .35 +
+                            .65 *
+                                (1 -
+                                    (((_pulse.value - i / 3) % 1) * 2 - 1)
+                                        .abs()),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const SizedBox.square(dimension: 6),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
