@@ -67,9 +67,12 @@ final class CheckInPlaceController extends Notifier<CheckInPlaceState> {
   /// Revalidate the saved default after OS permission/GPS returns. A changed
   /// revision never silently reuses the point under a different authorization.
   Future<void> captureDefaults(OwnSettings settings) async {
-    if (!settings.defaultCheckInLocation) return;
+    if (!settings.defaultCheckInLocation || state.busy) return;
+    // capture claims the next epoch synchronously. Keep that identity across
+    // the await: clear/session replacement/manual capture can supersede it.
+    final captureEpoch = _epoch + 1;
     await capture(expectedEpoch: _epoch);
-    if (!ref.mounted || state.place == null) return;
+    if (!ref.mounted || _epoch != captureEpoch || state.place == null) return;
     final epoch = _epoch, point = state.place!.location;
     state = const CheckInPlaceState(busy: true);
     final current = await ref

@@ -159,6 +159,8 @@ void main() {
       final controller = _PageController(
         _state(
           canSend: true,
+          conversationId: 'old-conversation',
+          messages: [_message('old', 1, AiRole.user, 'Saved original message')],
           canBrowseHistory: true,
           canSelectConversation: true,
           historyLoaded: true,
@@ -170,11 +172,17 @@ void main() {
         find.byKey(const Key('ai-message-input')),
         'Keep this draft',
       );
+      final scaffold = tester.state<ScaffoldState>(find.byType(Scaffold));
       await _tap(tester, 'ai-history');
+      expect(scaffold.isDrawerOpen, isTrue);
       await _tap(tester, 'ai-history-${summary.conversationId}');
+      expect(scaffold.isDrawerOpen, isFalse);
       await tester.tap(find.text('Keep editing'));
       await tester.pumpAndSettle();
       expect(controller.selected, isEmpty);
+      expect(controller.view.conversationId, 'old-conversation');
+      expect(controller.view.messages.single.text, 'Saved original message');
+      expect(find.text('Saved original message'), findsOneWidget);
       expect(
         tester
             .widget<TextField>(find.byKey(const Key('ai-message-input')))
@@ -183,10 +191,19 @@ void main() {
         'Keep this draft',
       );
       await _tap(tester, 'ai-history-${summary.conversationId}');
+      expect(scaffold.isDrawerOpen, isFalse);
       await tester.tap(find.byKey(const Key('ai-confirm-discard')));
       await tester.pumpAndSettle();
       expect(controller.selected, [summary.conversationId]);
       expect(controller.sent, isEmpty);
+      expect(controller.view.messages.single.text, 'Saved original message');
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('ai-message-input')))
+            .controller!
+            .text,
+        isEmpty,
+      );
       controller.publish(
         _state(
           canSend: true,
@@ -199,6 +216,40 @@ void main() {
       expect(find.text('No saved conversations.'), findsNothing);
       await _tap(tester, 'ai-history-more');
       expect(controller.historyLoads, [true]);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'social history selection without a draft closes its own drawer',
+    (tester) async {
+      final summary = AiConversationSummary(
+        conversationId: '11111111-1111-4111-8111-111111111111',
+        lastMessageAt: DateTime.utc(2026, 10, 20),
+      );
+      final controller = _PageController(
+        _state(
+          canSend: true,
+          canBrowseHistory: true,
+          canSelectConversation: true,
+          historyLoaded: true,
+          conversations: [summary],
+        ),
+      );
+      await _pump(tester, controller, socialStyle: true, reduceMotion: false);
+      final scaffold = tester.state<ScaffoldState>(find.byType(Scaffold));
+      await tester.tap(find.byTooltip('Open conversation menu'));
+      await tester.pumpAndSettle();
+      expect(scaffold.isDrawerOpen, isTrue);
+      await tester.tap(find.byKey(const Key('ai-history')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(ValueKey('ai-history-${summary.conversationId}')),
+      );
+      await tester.pumpAndSettle();
+      expect(scaffold.isDrawerOpen, isFalse);
+      expect(controller.selected, [summary.conversationId]);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(controller.sent, isEmpty);
       expect(tester.takeException(), isNull);
     },
   );

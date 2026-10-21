@@ -222,68 +222,70 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     await _controller.selectConversation(id);
   }
 
-  Widget _historyPanel(AiConversationState state) => ExpansionTile(
-    key: const Key('ai-history'),
-    expansionAnimationStyle: EnmoriMotion.surface(context),
-    leading: const Icon(Icons.history),
-    title: const Text('Conversation history'),
-    onExpansionChanged: (open) {
-      if (open && !state.historyLoaded && !state.readBusy) {
-        unawaited(_controller.loadConversations());
-      }
-    },
-    children: [
-      if (state.readBusy) const LinearProgressIndicator(),
-      if (state.historyError case final error?)
-        Padding(padding: const EdgeInsets.all(12), child: Text(error)),
-      if (state.historyLoaded &&
-          state.conversations.isEmpty &&
-          state.historyCursor == null)
-        const Padding(
-          padding: EdgeInsets.all(12),
-          child: Text('No saved conversations.'),
-        ),
-      for (final conversation in state.conversations)
-        ListTile(
-          key: ValueKey('ai-history-${conversation.conversationId}'),
-          selected: state.conversationId == conversation.conversationId,
-          title: Text(
-            'Conversation · ${conversation.lastMessageAt.toLocal().toIso8601String().substring(0, 16).replaceFirst('T', ' ')}',
+  Widget _historyPanel(AiConversationState state) => Builder(
+    builder: (panelContext) => ExpansionTile(
+      key: const Key('ai-history'),
+      expansionAnimationStyle: EnmoriMotion.surface(context),
+      leading: const Icon(Icons.history),
+      title: const Text('Conversation history'),
+      onExpansionChanged: (open) {
+        if (open && !state.historyLoaded && !state.readBusy) {
+          unawaited(_controller.loadConversations());
+        }
+      },
+      children: [
+        if (state.readBusy) const LinearProgressIndicator(),
+        if (state.historyError case final error?)
+          Padding(padding: const EdgeInsets.all(12), child: Text(error)),
+        if (state.historyLoaded &&
+            state.conversations.isEmpty &&
+            state.historyCursor == null)
+          const Padding(
+            padding: EdgeInsets.all(12),
+            child: Text('No saved conversations.'),
           ),
-          subtitle: Text(
-            'Local time · ${conversation.conversationId.substring(0, 8)}',
+        for (final conversation in state.conversations)
+          ListTile(
+            key: ValueKey('ai-history-${conversation.conversationId}'),
+            selected: state.conversationId == conversation.conversationId,
+            title: Text(
+              'Conversation · ${conversation.lastMessageAt.toLocal().toIso8601String().substring(0, 16).replaceFirst('T', ' ')}',
+            ),
+            subtitle: Text(
+              'Local time · ${conversation.conversationId.substring(0, 8)}',
+            ),
+            enabled: state.canSelectConversation,
+            onTap: () {
+              final scaffold = Scaffold.maybeOf(panelContext);
+              if (scaffold?.isDrawerOpen == true) scaffold!.closeDrawer();
+              unawaited(_openConversation(conversation.conversationId));
+            },
           ),
-          enabled: state.canSelectConversation,
-          onTap: () {
-            final scaffold = Scaffold.maybeOf(context);
-            if (scaffold?.isDrawerOpen == true) Navigator.pop(context);
-            unawaited(_openConversation(conversation.conversationId));
-          },
-        ),
-      if (!state.canSelectConversation && state.canCheckResult)
-        const Padding(
-          padding: EdgeInsets.all(12),
-          child: Text(
-            'Check the current request result before switching conversations.',
+        if (!state.canSelectConversation && state.canCheckResult)
+          const Padding(
+            padding: EdgeInsets.all(12),
+            child: Text(
+              'Check the current request result before switching conversations.',
+            ),
           ),
-        ),
-      TextButton.icon(
-        key: const Key('ai-history-reload'),
-        icon: const Icon(Icons.refresh),
-        onPressed: state.readBusy
-            ? null
-            : () => unawaited(_controller.loadConversations()),
-        label: const Text('Reload history'),
-      ),
-      if (state.historyCursor != null)
-        TextButton(
-          key: const Key('ai-history-more'),
+        TextButton.icon(
+          key: const Key('ai-history-reload'),
+          icon: const Icon(Icons.refresh),
           onPressed: state.readBusy
               ? null
-              : () => unawaited(_controller.loadConversations(more: true)),
-          child: const Text('Load more conversations'),
+              : () => unawaited(_controller.loadConversations()),
+          label: const Text('Reload history'),
         ),
-    ],
+        if (state.historyCursor != null)
+          TextButton(
+            key: const Key('ai-history-more'),
+            onPressed: state.readBusy
+                ? null
+                : () => unawaited(_controller.loadConversations(more: true)),
+            child: const Text('Load more conversations'),
+          ),
+      ],
+    ),
   );
 
   Future<void> _delete() async {
