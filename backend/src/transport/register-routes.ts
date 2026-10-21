@@ -8,7 +8,7 @@ import type { GetOwnInterests } from "../interests/application/get-own-interests
 import type { ReplaceOwnInterests } from "../interests/application/replace-own-interests.js";
 import type { OwnInterestsProjection } from "../interests/application/interest-model.js";
 import type { AccountProjection } from "../onboarding/application/onboarding-model.js";
-import type { CheckInProjection } from "../check-ins/application/check-in-model.js";
+import { checkInResponse } from "../check-ins/transport/check-in-response.js";
 import type { IdentityVerifier } from "../shared/ports/identity-verifier.js";
 import { buildAuthenticate, requirePrincipal } from "./authenticate.js";
 import { sendFailure } from "./error-response.js";
@@ -182,19 +182,6 @@ function accountResponse(account: AccountProjection): AccountProjection {
   };
 }
 
-function checkInResponse(checkIn: CheckInProjection): CheckInProjection {
-  return {
-    ...(checkIn.location === undefined ? {} : {location:checkIn.location}),
-    ...(checkIn.weather === undefined ? {} : {weather:checkIn.weather}),
-    checkInId: checkIn.checkInId,
-    ...(checkIn.revision === undefined ? {} : { revision: checkIn.revision }),
-    note: checkIn.note,
-    ...(checkIn.mood === undefined ? {} : {mood:checkIn.mood}),
-    ...(checkIn.activity === undefined ? {} : {activity:checkIn.activity}),
-    createdAt: checkIn.createdAt,
-    ...(checkIn.checkInVisibility === undefined ? {} : { checkInVisibility: checkIn.checkInVisibility }),
-  };
-}
 
 function interestsResponse(
   interests: OwnInterestsProjection,

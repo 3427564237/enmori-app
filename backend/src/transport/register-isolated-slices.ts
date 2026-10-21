@@ -1,3 +1,4 @@
+import { checkInResponse } from "../check-ins/transport/check-in-response.js";
 import type { FastifyInstance, FastifySchema } from "fastify";
 import type { IdentityVerifier } from "../shared/ports/identity-verifier.js";
 import type { FriendRequests } from "../friends/application/friend-requests.js";
@@ -86,12 +87,7 @@ export async function registerIsolatedSlices(app: FastifyInstance, identity: Ide
         });
         if (!result.ok) return sendFailure(request, reply, result.failure);
         return reply.code(200).send({
-          checkIns: result.value.checkIns.map(row => ({
-            checkInId: row.checkInId,
-            note: row.note,
-            createdAt: row.createdAt,
-            ...(row.checkInVisibility === undefined ? {} : { checkInVisibility: row.checkInVisibility }),
-          })),
+          checkIns: result.value.checkIns.map(checkInResponse),
           nextCursor: result.value.nextCursor,
         });
       },
