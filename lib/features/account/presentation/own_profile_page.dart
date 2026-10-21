@@ -16,6 +16,7 @@ final class OwnProfilePage extends ConsumerWidget {
     this.onEditProfile,
     this.onOpenSettings,
     this.participationSection,
+    this.onOpenRecords,
     super.key,
   });
 
@@ -23,6 +24,7 @@ final class OwnProfilePage extends ConsumerWidget {
   final Future<void> Function()? onEditProfile;
   final Future<void> Function()? onOpenSettings;
   final Widget? participationSection;
+  final Future<void> Function(String)? onOpenRecords;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,6 +44,13 @@ final class OwnProfilePage extends ConsumerWidget {
               padding: const EdgeInsets.all(24),
               children: [
                 const VerifyEmailButton(),
+                if (onOpenRecords != null && state.username != null)
+                  OutlinedButton.icon(
+                    onPressed: () => onOpenRecords!(state.username!),
+                    icon: const Icon(Icons.calendar_month),
+                    label: const Text('My records, calendar & map'),
+                  ),
+
                 if (state.username case final username?) ...[
                   Text(
                     'Username',

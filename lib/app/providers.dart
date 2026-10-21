@@ -88,3 +88,5 @@ RouterGateState _foldOnboarding(AsyncValue<Result<OnboardingStatus>> status) {
 
 // Disabled in normal builds; isolated integration tests explicitly override it.
 final isolatedSlicesEnabledProvider = Provider<bool>((ref) => false);
+
+final remoteGroupFeaturesEnabledProvider = Provider<bool>((ref) => false);

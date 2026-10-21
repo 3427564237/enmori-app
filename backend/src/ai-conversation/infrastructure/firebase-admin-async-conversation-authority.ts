@@ -4,7 +4,7 @@ import { createAuthBindingDocumentId, isSafeDocumentId, parseAuthBinding } from 
 import type { AsyncAuthorityObservation, AsyncConversationAuthority, AsyncConversationIdentity,
   AsyncOperation } from "../ports/async-conversation.js";
 import { parseReadAuthority } from "./real-context-records.js";
-import { requireIsolatedContextFirestore } from "./isolated-context-firestore.js";
+import { requireFeatureContextFirestore } from "./isolated-context-firestore.js";
 
 export interface FreshOriginalConversationIdentity {
   /** Caller-bound original token-instance/session/request; no token bytes passed inward. */
@@ -18,7 +18,7 @@ export interface FreshOriginalConversationIdentity {
 export class FirebaseAdminAsyncConversationAuthority implements AsyncConversationAuthority {
   constructor(private readonly firestore: Firestore, private readonly original: FreshOriginalConversationIdentity,
     controlledEnvironment: Readonly<Record<string, string | undefined>>) {
-    requireIsolatedContextFirestore(firestore, controlledEnvironment);
+    requireFeatureContextFirestore(firestore, controlledEnvironment);
   }
   current(identity: AsyncConversationIdentity): boolean {
     try { return this.original.current(identity) === true; } catch { return false; }

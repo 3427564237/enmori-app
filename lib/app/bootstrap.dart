@@ -1,3 +1,5 @@
+import 'controlled_demo_app.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
@@ -68,6 +70,22 @@ Future<void> bootstrap() async {
       controlledClient = null;
       firebaseReady = false;
     }
+  }
+
+  if (remoteAccount && firebaseReady && baseUri != null) {
+    final auth = FirebaseAuthRepository(FirebaseAuth.instance);
+    runApp(
+      ControlledDemoApp(
+        baseUri: baseUri,
+        auth: auth,
+        client: http.Client(),
+        onClose: auth.signOut,
+        dualAccounts: true,
+        eventParticipationEnabled: true,
+        remoteGroupEnabled: true,
+      ),
+    );
+    return;
   }
 
   runApp(

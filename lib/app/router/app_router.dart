@@ -1,3 +1,5 @@
+import '../remote_social_composition.dart';
+import '../../features/friends/presentation/friend_module_page.dart';
 import '../../features/event_browse/event_browse_providers.dart';
 import '../../features/event_participation/presentation/own_participation_section.dart';
 import '../event_recommendation_card.dart';
@@ -99,7 +101,9 @@ final eventParticipationEnabledProvider = Provider<bool>((ref) => false);
 final appRouterProvider = Provider<GoRouter>((ref) {
   // An account-owned route stack must not survive an identity replacement.
   final routeSubject = ref.watch(currentAuthSubjectProvider);
-  final isolatedSlices = ref.watch(isolatedSlicesEnabledProvider);
+  final remoteGroup = ref.watch(remoteGroupFeaturesEnabledProvider);
+  final isolatedSlices =
+      ref.watch(isolatedSlicesEnabledProvider) || remoteGroup;
   final socialPresentation = ref.watch(socialDemoPresentationProvider);
   final activitiesEnabled = ref.watch(activityBrowseEnabledProvider);
   final participationEnabled =
@@ -154,7 +158,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       identical(ref.read(authSessionProvider).asData?.value, routeSession) &&
       ref.read(currentAuthSubjectProvider) == routeSubject &&
       ref.read(routerGateProvider) == RouterGateState.authenticated &&
-      ref.read(isolatedSlicesEnabledProvider) &&
+      (ref.read(isolatedSlicesEnabledProvider) ||
+          ref.read(remoteGroupFeaturesEnabledProvider)) &&
       GoRouter.of(context).state.uri.path == sourcePath;
 
   void openShared(BuildContext context, String sourcePath, String destination) {
@@ -219,6 +224,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       signedOutEntry: ref.read(signOutEntryProvider),
     ),
     routes: [
+      if (remoteGroup)
+        GoRoute(
+          path: '/people/:username',
+          builder: (context, state) => ConnectedSocialProfile(
+            username: state.pathParameters['username']!,
+          ),
+        ),
+
       if (participationEnabled && eventOpener != null) ...[
         ...eventParticipationRoutes(
           opener: eventOpener,
@@ -231,10 +244,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
         GoRoute(
           path: '/event-people/:username',
-          builder: (context, state) => FriendPage(
-            key: ValueKey(state.pathParameters['username']),
-            initialUsername: state.pathParameters['username'],
-          ),
+          builder: (context, state) => remoteGroup
+              ? ConnectedSocialProfile(
+                  username: state.pathParameters['username']!,
+                )
+              : FriendPage(
+                  key: ValueKey(state.pathParameters['username']),
+                  initialUsername: state.pathParameters['username'],
+                ),
         ),
       ],
       if (activitiesEnabled && !participationEnabled)
@@ -313,9 +330,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             context,
             '/friends',
             1,
-            FriendPage(
-              onOpenMyFriends: () => context.push<void>('/friends/list'),
-            ),
+            remoteGroup
+                ? FriendModulePage(
+                    openAttribution: openGroupAttribution,
+                    participationBuilder: groupParticipationBuilder,
+                    onOpenEvent: (id) => context.push<void>(eventPath(id)),
+                  )
+                : FriendPage(
+                    onOpenMyFriends: () => context.push<void>('/friends/list'),
+                  ),
           ),
         ),
       if (isolatedSlices)
@@ -366,6 +389,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.home,
         builder: (context, state) => HomeShellPage(
+          socialSection: remoteGroup ? const GroupHomeSocial() : null,
           socialStyle: socialPresentation,
           onSelectTab: socialPresentation
               ? (index) => selectConnectedSocialTab(
@@ -453,6 +477,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           AppRoutes.profile,
           4,
           OwnProfilePage(
+            onOpenRecords: remoteGroup
+                ? (username) => context.push<void>(
+                    '/people/${Uri.encodeComponent(username)}',
+                  )
+                : null,
             participationSection: participationEnabled
                 ? OwnParticipationSection(
                     onSelect: (id) {
@@ -516,6 +545,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.checkIn,
         builder: (context, state) => CheckInComposerPage(
+          located: remoteGroup,
+          openAttribution: openGroupAttribution,
           socialStyle: socialPresentation,
           onReturnHome: () => context.go(AppRoutes.home),
         ),

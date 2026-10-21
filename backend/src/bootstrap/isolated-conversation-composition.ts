@@ -1,3 +1,4 @@
+import { requireRemoteGroupEnvironment } from '../shared/infrastructure/firebase/feature-environment.js';
 import { withRetainedMessageTimes } from "../ai-conversation/infrastructure/retained-message-times.js";
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Firestore } from "firebase-admin/firestore";
@@ -19,7 +20,7 @@ import { FirestoreConversationOperationReaders } from "../ai-conversation/infras
 import { FirestoreConversationCleanup } from "../ai-conversation/infrastructure/firestore-conversation-cleanup.js";
 import { FirestoreConversationMaintenance } from "../ai-conversation/infrastructure/firestore-conversation-maintenance.js";
 import { retirePreviousConversationEpoch } from "../ai-conversation/infrastructure/firestore-conversation-restart.js";
-import { requireIsolatedContextFirestore } from "../ai-conversation/infrastructure/isolated-context-firestore.js";
+import { requireFeatureContextFirestore } from "../ai-conversation/infrastructure/isolated-context-firestore.js";
 import { FirebaseAdminFirestoreGateway } from "../shared/infrastructure/firebase/firestore-gateway.js";
 import { requireControlledEmulatorEnvironment } from "../shared/infrastructure/firebase/controlled-emulator-environment.js";
 import type { ConversationInput, ConversationGates } from "../ai-conversation/ports/conversation-lifecycle.js";
@@ -30,7 +31,7 @@ import { startConversationMaintenance, type MaintenanceSchedule } from "./conver
 /** Explicit isolated composition; ordinary buildApp/main never invokes it.
  * Caller validates and owns the actual Emulator Firestore instance. No fake
  * model, policy, Note prerequisite or identity is supplied as a default. */
-export async function createIsolatedConversationComposition(options: {
+interface ConversationCompositionOptions {
   readonly firestore: Firestore;
   readonly environment: Readonly<Record<string,string|undefined>>;
   readonly transport: GenerationTransport<ConversationInput>;
@@ -43,9 +44,18 @@ export async function createIsolatedConversationComposition(options: {
   readonly schedule?: MaintenanceSchedule;
   /** Trusted host clock/test seam only; never taken from a request or DTO. */
   readonly utcMilliseconds?: () => number;
-}) {
+}
+
+export async function createIsolatedConversationComposition(options: ConversationCompositionOptions) {
   requireControlledEmulatorEnvironment(options.environment);
-  requireIsolatedContextFirestore(options.firestore,options.environment);
+  return createConversationComposition(options);
+}
+export async function createRemoteConversationComposition(options: ConversationCompositionOptions) {
+  requireRemoteGroupEnvironment(options.environment);
+  return createConversationComposition(options);
+}
+async function createConversationComposition(options: ConversationCompositionOptions) {
+  requireFeatureContextFirestore(options.firestore,options.environment);
   if (options.notePrerequisites && options.notePrerequisites.firestore !== options.firestore) throw new Error("Mismatched Note authority");
   const clock = new MonotonicRuntimeClock(), io = new ConversationIoTracker(), utcMilliseconds=options.utcMilliseconds??Date.now;
   const rawGateway = new FirebaseAdminFirestoreGateway(options.firestore);

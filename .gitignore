@@ -57,3 +57,10 @@ app.*.map.json
 
 # Android Gradle generated reports
 /android/build/
+
+# Private Android release signing material
+*.jks
+*.keystore
+*.p12
+key.properties
+signing.properties

@@ -61,3 +61,24 @@ at the final composed checkpoint. No repeated broad test loops.
 If Tailscale requires interactive enablement, the owner completes that account
 action. This document records delegated selection, not a claim that Funnel is
 already enabled or an APK has passed off-network verification.
+
+## Confirmed full wiring follow-up
+
+The owner subsequently requested completion of public access and the full real-account
+composition, a privately signed APK suitable for group installation, one concentrated
+verification batch and no main merge. This authorizes promoting the already approved
+feature adapters through a separate, explicitly selected real-project entry. It does
+not authorize treating Emulator credentials as real identities or weakening the
+original isolated entry guards. Real SDK project/endpoint checks, consent, field
+visibility and current relationship authorization remain mandatory. Missing account
+support records may be initialized idempotently on that authenticated account's next
+onboarding read, using existing saved consent; existing records are never overwritten.
+No historical Check-in position/weather or Event participation time is fabricated.
+
+The installable group candidate uses Firebase Android app `com.enmori.app.group`
+and a durable private PKCS12 release key, avoiding replacement/uninstall of the
+existing debug-signed account application. Both use the same real Firebase project
+and Backend account records. The release key and client build files remain outside
+Git. LI may operate this Backend as a systemd user service, restart on process failure,
+with a graceful unbounded drain for unknown AI outcomes. Login-start is explicit;
+this does not change host suspend or machine power policy.

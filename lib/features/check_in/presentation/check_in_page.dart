@@ -1,3 +1,7 @@
+import '../../account/account_preferences_providers.dart';
+import '../../account/domain/account_preferences_repository.dart';
+import '../../auth/auth_providers.dart';
+import 'located_check_in_actions.dart';
 import '../check_in_providers.dart';
 import '../domain/check_in_mutations.dart';
 import 'check_in_edit_page.dart';
@@ -17,12 +21,16 @@ final class CheckInComposerPage extends ConsumerStatefulWidget {
   const CheckInComposerPage({
     this.onReturnHome,
     this.socialStyle = false,
+    this.located = false,
+    this.openAttribution,
     this.visibility,
     super.key,
   });
 
   final VoidCallback? onReturnHome;
   final bool socialStyle;
+  final bool located;
+  final Future<bool> Function(Uri)? openAttribution;
   final CheckInVisibility? visibility;
 
   @override
@@ -36,6 +44,9 @@ final class _CheckInComposerPageState
   final _noteController = TextEditingController();
   final _scroll = ScrollController();
   CheckIn? _committedCheckIn;
+  final _locationDraft = Object();
+  bool _settingsReady = false;
+  bool _settingsFailed = false;
   String? _mood, _activity;
   CheckInVisibility? _visibility;
   _CheckInAction? _lastAction;
@@ -46,6 +57,27 @@ final class _CheckInComposerPageState
   void initState() {
     super.initState();
     _controller = ref.read(checkInControllerProvider.notifier);
+    if (widget.located) Future.microtask(_loadVisibility);
+  }
+
+  Future<void> _loadVisibility() async {
+    final session = ref.read(authSessionProvider).asData?.value;
+    final result = await ref
+        .read(accountPreferencesRepositoryProvider)
+        .readSettings();
+    if (!mounted ||
+        !identical(session, ref.read(authSessionProvider).asData?.value)) {
+      return;
+    }
+    setState(() {
+      if (result case Success<OwnSettings>(:final value)) {
+        _visibility ??= value.checkInVisibility;
+        _settingsReady = true;
+        _settingsFailed = false;
+      } else {
+        _settingsFailed = true;
+      }
+    });
   }
 
   @override
@@ -206,8 +238,11 @@ final class _CheckInComposerPageState
                         ],
                       ),
                       DropdownButtonFormField<CheckInVisibility>(
+                        key: ValueKey(_settingsReady),
                         initialValue:
-                            widget.visibility ?? CheckInVisibility.private,
+                            _visibility ??
+                            widget.visibility ??
+                            CheckInVisibility.private,
                         decoration: const InputDecoration(
                           labelText: 'This Check-in visibility',
                         ),
@@ -254,17 +289,35 @@ final class _CheckInComposerPageState
                     ),
                   ),
                   const SizedBox(height: 12),
-                  FilledButton.icon(
-                    key: const Key('r6-check-in-create'),
-                    onPressed: pending ? null : _create,
-                    icon: pending && _lastAction == _CheckInAction.create
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                  if (widget.located && !_settingsReady)
+                    _settingsFailed
+                        ? TextButton(
+                            onPressed: _loadVisibility,
+                            child: const Text('Retry privacy settings'),
                           )
-                        : const Icon(Icons.check_circle_outline),
-                    label: const Text('Save Check-in'),
-                  ),
+                        : const LinearProgressIndicator()
+                  else if (widget.located)
+                    LocatedCheckInActions(
+                      draftKey: _locationDraft,
+                      note: _noteController.text,
+                      mood: _mood,
+                      activity: _activity,
+                      visibility: _visibility ?? CheckInVisibility.private,
+                      openAttribution:
+                          widget.openAttribution ?? (uri) async => false,
+                    )
+                  else
+                    FilledButton.icon(
+                      key: const Key('r6-check-in-create'),
+                      onPressed: pending ? null : _create,
+                      icon: pending && _lastAction == _CheckInAction.create
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.check_circle_outline),
+                      label: const Text('Save Check-in'),
+                    ),
                   const SizedBox(height: 20),
                   _statusBlock(state),
                 ],

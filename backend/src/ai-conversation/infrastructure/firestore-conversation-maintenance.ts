@@ -1,5 +1,5 @@
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx, StoredDocument as Row } from "../../shared/infrastructure/firebase/firestore-gateway.js";
-import { requireControlledEmulatorEnvironment } from "../../shared/infrastructure/firebase/controlled-emulator-environment.js";
+import { requireFeatureEnvironment } from "../../shared/infrastructure/firebase/feature-environment.js";
 import type { RuntimeEpoch } from "../ports/real-conversation-store.js";
 import type { ConversationCleanup, ConversationQuiescence } from "../ports/conversation-cleanup.js";
 import { parseCanonicalAiMessageLocation, type CanonicalAiMessageCollection } from "../domain/canonical-ai-message-location.js";
@@ -35,7 +35,7 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
   private lastNow=Number.NEGATIVE_INFINITY;
   constructor(private readonly gateway:FirestoreGateway, environment:Readonly<Record<string,string|undefined>>,
     private readonly cleanup:ConversationCleanup,private readonly quiescence:ConversationQuiescence,
-    private readonly utcMilliseconds:()=>number=Date.now,private readonly notePrerequisites?:TransactionalNotePrerequisites){requireControlledEmulatorEnvironment(environment);}
+    private readonly utcMilliseconds:()=>number=Date.now,private readonly notePrerequisites?:TransactionalNotePrerequisites){requireFeatureEnvironment(environment);}
   private tx<T>(work:(tx:Tx)=>Promise<T>):Promise<T>{return this.gateway.runTransaction(work,{maxAttempts:1});}
   private now():FullPrecisionInstant{
     const ms=this.utcMilliseconds();if(!Number.isSafeInteger(ms)||ms<this.lastNow)unavailable();this.lastNow=ms;

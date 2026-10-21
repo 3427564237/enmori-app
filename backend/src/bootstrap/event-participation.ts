@@ -1,3 +1,4 @@
+import { requireRemoteGroupEnvironment } from '../shared/infrastructure/firebase/feature-environment.js';
 import type { FirestoreGateway, FirestoreTransactionGateway } from '../shared/infrastructure/firebase/firestore-gateway.js';
 import { parseOwnProfile } from '../account/infrastructure/firestore-account-preferences-repository.js';
 import { isVisibility,type ProfileVisibility } from '../account/domain/profile-values.js';
@@ -44,12 +45,20 @@ export function participationAccess(tx: FirestoreTransactionGateway): Participat
 }
 
 /** Deliberate isolated-only entry. No ordinary/real-account rollout by presence. */
-export function createIsolatedEventParticipation(options: {
+interface ParticipationOptions {
   readonly environment: Readonly<Record<string,string|undefined>>;
   readonly firestore: FirestoreGateway; readonly clock: Clock;
   readonly source: BrowseSource; readonly cursorKey: Uint8Array;
-}) {
+}
+export function createIsolatedEventParticipation(options: ParticipationOptions) {
   requireControlledEmulatorEnvironment(options.environment);
+  return createParticipation(options);
+}
+export function createRemoteEventParticipation(options: ParticipationOptions) {
+  requireRemoteGroupEnvironment(options.environment);
+  return createParticipation(options);
+}
+function createParticipation(options: ParticipationOptions) {
   const repository=new FirestoreParticipationRepository(options.firestore,options.clock,async id=>{
     const now=options.clock.now();if(!now.ok)throw new Error('Clock unavailable');
     if(options.source.availableEvent)return options.source.availableEvent(id,now.value.toISOString(),new AbortController().signal);

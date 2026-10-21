@@ -1,3 +1,4 @@
+import { requireRemoteGroupEnvironment } from '../../shared/infrastructure/firebase/feature-environment.js';
 import type { Firestore } from "firebase-admin/firestore";
 import { requireControlledEmulatorEnvironment } from "../../shared/infrastructure/firebase/controlled-emulator-environment.js";
 
@@ -17,5 +18,22 @@ export function requireIsolatedContextFirestore(firestore: Firestore,
   if (bound.projectId !== expected.projectId || settings?.servicePath !== target.hostname ||
       settings.port !== Number(target.port) || settings.ssl !== false) {
     throw new Error("Isolated context Firestore binding unavailable");
+  }
+}
+
+/** Real callers must select the approved project and the default Google endpoint. */
+export function requireFeatureContextFirestore(firestore: Firestore,
+  environment: Readonly<Record<string, string | undefined>>): void {
+  if (environment.ENMORI_REMOTE_GROUP !== 'true') return requireIsolatedContextFirestore(firestore, environment);
+  requireRemoteGroupEnvironment(environment);
+  const bound = firestore as unknown as { projectId?: unknown; _settings?: {
+    host?: unknown; servicePath?: unknown; port?: unknown; ssl?: unknown } };
+  const settings = bound._settings;
+  if (bound.projectId !== 'enmori-rmvp-controlled' || !settings ||
+      settings.ssl === false ||
+      (settings.host !== undefined && settings.host !== 'firestore.googleapis.com') ||
+      (settings.servicePath !== undefined && settings.servicePath !== 'firestore.googleapis.com') ||
+      (settings.port !== undefined && settings.port !== 443)) {
+    throw new Error('Remote Firestore binding unavailable');
   }
 }

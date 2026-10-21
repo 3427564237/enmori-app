@@ -118,3 +118,16 @@ test('opt-in browse stableID is the original occurrence mapping',async()=>{
   const browse=new EventBrowse({verify:async()=>ok(undefined)},{firstBatch:async()=>[item],detail:async()=>item},()=>new Date(at),true);
   const batch=unwrap(await browse.read({firebaseUid:'uid-0'},undefined,new AbortController().signal));assert.ok('items'in batch);if('items'in batch)assert.equal(batch.items[0]?.eventId,sourceEventId('tm_YQ'));
 });
+
+test('activity selection time survives ignore, is removed on cancel, and old rows are not backfilled', async()=>{
+  const f=fixture(1),path=`event_participations/${participationKey('person-0',event)}`;
+  unwrap(await f.repo.save('uid-0',event,{status:'interested',ignored:false,expectedRevision:0}));
+  let row=await f.db.runTransaction(tx=>tx.get(path));assert.equal(row?.selectedAt,at);
+  unwrap(await f.repo.save('uid-0',event,{status:'interested',ignored:true,expectedRevision:1}));
+  row=await f.db.runTransaction(tx=>tx.get(path));assert.equal(row?.selectedAt,at);
+  unwrap(await f.repo.save('uid-0',event,{status:'none',ignored:true,expectedRevision:2}));
+  row=await f.db.runTransaction(tx=>tx.get(path));assert.equal(row?.selectedAt,undefined);
+  unwrap(await f.repo.save('uid-1',event,{status:'going',ignored:true,expectedRevision:1}));
+  const legacy=await f.db.runTransaction(tx=>tx.get(`event_participations/${participationKey('person-1',event)}`));
+  assert.equal(legacy?.selectedAt,undefined);
+});

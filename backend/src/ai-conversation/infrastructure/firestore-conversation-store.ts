@@ -1,7 +1,7 @@
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx, StoredDocument as RecordData,
   StoredDocumentSnapshot as Snapshot } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId, parseAuthBinding, parseAccountProjection } from "../../shared/infrastructure/firebase/firestore-records.js";
-import { requireControlledEmulatorEnvironment } from "../../shared/infrastructure/firebase/controlled-emulator-environment.js";
+import { requireFeatureEnvironment } from "../../shared/infrastructure/firebase/feature-environment.js";
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
 import { resolveRealRetention } from "../domain/real-retention-resolver.js";
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
@@ -57,7 +57,7 @@ export class FirestoreConversationStore implements RealConversationStore {
   constructor(private readonly gateway: FirestoreGateway, environment: Readonly<Record<string, string | undefined>>,
     private readonly utcMilliseconds: () => number = Date.now,
     private readonly notePrerequisites?: TransactionalNotePrerequisites) {
-    requireControlledEmulatorEnvironment(environment);
+    requireFeatureEnvironment(environment);
   }
 
   private async run<T>(work: (tx: Tx) => Promise<T>): Promise<StoreResult<T>> {

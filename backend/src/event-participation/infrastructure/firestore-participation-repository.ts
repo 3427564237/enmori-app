@@ -16,7 +16,8 @@ class CursorError extends Error {}
 type Row = Participation & { readonly accountId: string };
 function parseRow(entry: StoredDocumentEntry): Row {
   const d = entry.data;
-  if (Object.keys(d).sort().join(',') !== 'accountId,eventId,ignored,revision,status,updatedAt' ||
+  if (Object.keys(d).filter(k=>k!=='selectedAt').sort().join(',') !== 'accountId,eventId,ignored,revision,status,updatedAt' ||
+      (d.selectedAt !== undefined && (!isUtcIsoInstant(d.selectedAt) || d.status === 'none')) ||
       typeof d.accountId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(d.accountId) || /[^A-Za-z0-9_-]/.test(d.accountId) || !validEventId(d.eventId) ||
       !validStatus(d.status) || typeof d.ignored !== 'boolean' || !validRevision(d.revision) || d.revision < 1 ||
       !isUtcIsoInstant(d.updatedAt) || entry.id !== participationKey(d.accountId, d.eventId)) throw new Error('Invalid participation');
@@ -92,7 +93,8 @@ export class FirestoreParticipationRepository implements ParticipationRepository
       if(old.revision>=Number.MAX_SAFE_INTEGER)return err(participationFailure('SERVICE_UNAVAILABLE'));
       const now=this.clock.now();if(!now.ok||!Number.isFinite(now.value.getTime()))return err(participationFailure('SERVICE_UNAVAILABLE'));
       const next:Participation={eventId,status:change.status,ignored:change.ignored,revision:old.revision+1,updatedAt:now.value.toISOString()};
-      tx.set(path,{accountId:id,...next});return ok(next);
+      const selectedAt = change.status === 'none' ? undefined : selecting ? next.updatedAt : data?.selectedAt;
+      tx.set(path,{accountId:id,...next,...(selectedAt ? {selectedAt} : {})});return ok(next);
     });}catch{return err(participationFailure('SERVICE_UNAVAILABLE'));}
   }
   async participants(uid:string,eventId:string,status:'interested'|'going',group:'friends'|'others',cursor?:string):ReturnType<ParticipationRepository['participants']>{

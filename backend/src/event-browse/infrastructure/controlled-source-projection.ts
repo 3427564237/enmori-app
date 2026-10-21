@@ -56,6 +56,16 @@ export class ControlledSourceProjection implements BrowseSource {
       this.requireCurrent(epoch,cached,signal);return result;
     };
   }
+  ready(asOf: string): boolean {
+    const now = parseBrowseInstant(asOf), snapshot = this.snapshot;
+    return now !== undefined && snapshot !== undefined && !this.pending && now >= snapshot.at && now - snapshot.at < 300_000_000_000n;
+  }
+  /** Synchronous current projection only: no source IO inside social transactions. */
+  peek(id: string, asOf: string): BrowseOccurrence | undefined {
+    const now = parseBrowseInstant(asOf), snapshot = this.snapshot;
+    if (now === undefined || !snapshot || this.pending || now < snapshot.at || now - snapshot.at >= 300_000_000_000n) return undefined;
+    return snapshot.items.find(item => sourceEventId(item.browseId) === id && parseBrowseInstant(item.startAt)! > now);
+  }
   private current() { return this.snapshot; }
   private requireCurrent(epoch: object, snapshot: SourceSnapshot | undefined, signal: AbortSignal): void {
     if(epoch!==this.epoch||snapshot!==this.snapshot||this.pending!==undefined||signal.aborted)throw dependencyUnavailable;

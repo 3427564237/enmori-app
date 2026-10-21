@@ -31,8 +31,11 @@ final class EventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final id = event?.eventId ?? summary?.eventId,
         title = event?.title ?? summary!.title;
-    final start = event?.startAt.toLocal().toString() ?? summary!.startAt;
-    final end = event?.endAt?.toLocal().toString() ?? summary?.endAt;
+    final start = _localTime(
+      event?.startAt.toIso8601String() ?? summary!.startAt,
+    );
+    final endValue = event?.endAt?.toIso8601String() ?? summary?.endAt;
+    final end = endValue == null ? null : _localTime(endValue);
     final location = event?.locationLabel ?? summary?.locationLabel,
         category = event?.categoryLabel ?? summary?.categoryLabel;
     return Card(
@@ -65,4 +68,11 @@ final class EventCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _localTime(String value) {
+  final date = DateTime.tryParse(value)?.toLocal();
+  if (date == null) return 'Time unavailable';
+  String two(int number) => number.toString().padLeft(2, '0');
+  return '${date.year}-${two(date.month)}-${two(date.day)} ${two(date.hour)}:${two(date.minute)} (local time)';
 }

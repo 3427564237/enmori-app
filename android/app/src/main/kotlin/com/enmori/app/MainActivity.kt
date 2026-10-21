@@ -17,11 +17,11 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/external_activity")
             .setMethodCallHandler { call, result ->
-                if (call.method != "open") {
+                if (call.method != "open" && call.method != "openAttribution") {
                     result.notImplemented()
                 } else {
                     val url = call.argument<String>("url")
-                    result.success(openActivitySource(url))
+                    result.success(openActivitySource(url, call.method == "openAttribution"))
                 }
             }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/time_zone")
@@ -56,13 +56,13 @@ class MainActivity : FlutterActivity() {
             }
     }
 
-    private fun openActivitySource(value: String?): Boolean {
+    private fun openActivitySource(value: String?, attribution: Boolean = false): Boolean {
         if (value == null || value.length > 2048 || isFinishing || isDestroyed || !hasWindowFocus()) return false
         return try {
             if (Regex("[\\s\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]").containsMatchIn(value)) return false
             val url = URI(value)
             if (url.scheme != "https" ||
-                url.host?.lowercase(Locale.ROOT) !in setOf("ticketmaster.sg", "www.ticketmaster.sg") ||
+                url.host?.lowercase(Locale.ROOT) !in (if (attribution) setOf("open-meteo.com", "creativecommons.org", "www.openstreetmap.org") else setOf("ticketmaster.sg", "www.ticketmaster.sg")) ||
                 url.rawUserInfo != null || url.rawFragment != null || url.port !in setOf(-1, 443)) return false
             val nativeUri = Uri.parse(value)
             if (nativeUri.queryParameterNames.any {

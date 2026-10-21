@@ -1,3 +1,5 @@
+import 'authorized_event_title.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -77,7 +79,7 @@ final class _OwnParticipationSectionState
                   ),
                 for (final row in value.items)
                   ListTile(
-                    title: Text(row.eventId),
+                    title: AuthorizedEventTitle(row.eventId),
                     subtitle: Text(
                       '${row.status.name}${row.ignored ? ' · recommendation ignored' : ''}',
                     ),

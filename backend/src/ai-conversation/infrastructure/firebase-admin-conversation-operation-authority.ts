@@ -2,7 +2,7 @@ import type { Firestore } from "firebase-admin/firestore";
 import type { ConversationOperationAuthority, ConversationOrdinaryContext } from "../ports/application-conversation-operations.js";
 import type { ConversationCaller, ConversationResult } from "../ports/conversation-operations.js";
 import { createAuthBindingDocumentId, parseAccountProjection, parseAuthBinding } from "../../shared/infrastructure/firebase/firestore-records.js";
-import { requireIsolatedContextFirestore } from "./isolated-context-firestore.js";
+import { requireFeatureContextFirestore } from "./isolated-context-firestore.js";
 
 type Control = Pick<ConversationOrdinaryContext, "signal" | "deadline" | "current">;
 type Resolution = ConversationResult<{ readonly ownerId: string }>;
@@ -14,7 +14,7 @@ export class FirebaseAdminConversationOperationAuthority implements Conversation
   constructor(private readonly firestore: Firestore,
     environment: Readonly<Record<string, string | undefined>>,
     private readonly monotonicNow: () => number) {
-    requireIsolatedContextFirestore(firestore, environment);
+    requireFeatureContextFirestore(firestore, environment);
   }
 
   private live(control: Control): boolean {

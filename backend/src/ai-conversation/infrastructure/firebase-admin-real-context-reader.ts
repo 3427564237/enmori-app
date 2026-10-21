@@ -7,7 +7,7 @@ import type { AcceptedContextRead, ContextDependencies, ContextReadResult, Curre
   FixedStartReadView, FixedViewValue, ReadAuthority, ReadNotePage, ReadPersonaSet, RealContextReadPort } from "../ports/real-context-reader.js";
 import { canonicalNoteInstant, compareInstant, noteQueryInstant, parseReadAuthority, parseReadInstant,
   parseReadNote, parseReadPersona, parseReadPersonaState, validGeneration } from "./real-context-records.js";
-import { requireIsolatedContextFirestore } from "./isolated-context-firestore.js";
+import { requireFeatureContextFirestore } from "./isolated-context-firestore.js";
 
 /** Trusted composition only. This injection is a prerequisite declaration, not proof.
  * The composition owner must verify the references against the exact producer and
@@ -218,7 +218,7 @@ class FixedFirebaseStartView implements FixedStartReadView {
 /** Selected F03 Infrastructure component; deliberately absent from Bootstrap. */
 export class FirebaseAdminRealContextReader implements RealContextReadPort {
   constructor(private readonly firestore: Firestore, private readonly options: RealContextReaderOptions) {
-    requireIsolatedContextFirestore(firestore, options.controlledEnvironment);
+    requireFeatureContextFirestore(firestore, options.controlledEnvironment);
   }
 
   async #original(context: AcceptedContextRead): Promise<ContextReadResult<AuthPrincipal>> {

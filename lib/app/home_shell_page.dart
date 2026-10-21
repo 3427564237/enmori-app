@@ -7,6 +7,7 @@ final class HomeShellPage extends StatelessWidget {
   const HomeShellPage({
     required this.onStartCheckIn,
     this.socialStyle = false,
+    this.socialSection,
     this.onSelectTab,
     this.onOpenSettings,
     this.onEditInterests,
@@ -23,6 +24,7 @@ final class HomeShellPage extends StatelessWidget {
   });
 
   final bool socialStyle;
+  final Widget? socialSection;
   final ValueChanged<int>? onSelectTab;
   final VoidCallback? onOpenSettings;
   final VoidCallback onStartCheckIn;
@@ -247,6 +249,7 @@ final class HomeShellPage extends StatelessWidget {
                   recommendationCardBuilder: recommendationCardBuilder,
                 ),
               ],
+              ?socialSection,
               const SizedBox(height: 14),
               Semantics(
                 header: true,

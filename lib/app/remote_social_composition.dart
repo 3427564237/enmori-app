@@ -1,0 +1,159 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../features/auth/auth_providers.dart';
+import '../features/check_in/check_in_providers.dart';
+import '../features/event_participation/presentation/user_participation_section.dart';
+import '../features/friends/presentation/social_profile_page.dart';
+import '../features/friends/presentation/friend_activity_panel.dart';
+import '../features/friends/presentation/friend_discovery_panel.dart';
+import '../features/weather/presentation/home_weather_card.dart';
+
+import 'package:flutter/services.dart';
+
+Future<bool> openGroupAttribution(Uri uri) async {
+  if (uri.scheme != 'https' ||
+      uri.userInfo.isNotEmpty ||
+      !const [
+        'open-meteo.com',
+        'creativecommons.org',
+        'www.openstreetmap.org',
+      ].contains(uri.host)) {
+    return false;
+  }
+  try {
+    return await const MethodChannel('com.enmori.app/external_activity')
+            .invokeMethod<bool>('openAttribution', {'url': uri.toString()}) ??
+        false;
+  } catch (_) {
+    return false;
+  }
+}
+
+Widget groupParticipationBuilder(BuildContext context, String username) =>
+    UserParticipationSection(
+      username: username,
+      onSelect: (id) =>
+          context.push('/events/${Uri.encodeComponent(id)}/participation'),
+    );
+
+final class ConnectedSocialProfile extends ConsumerStatefulWidget {
+  const ConnectedSocialProfile({required this.username, super.key});
+  final String username;
+  @override
+  ConsumerState<ConnectedSocialProfile> createState() =>
+      _ConnectedSocialProfileState();
+}
+
+final class _ConnectedSocialProfileState
+    extends ConsumerState<ConnectedSocialProfile> {
+  late Future<({String date, String zone})> _date;
+  @override
+  void initState() {
+    super.initState();
+    _date = _capture();
+  }
+
+  Future<({String date, String zone})> _capture() async {
+    final device = ref.read(historyDevicePortProvider);
+    final zone = await device.captureIanaZone(),
+        date = await device.todayInZone(zone);
+    return (
+      date:
+          '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+      zone: zone,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(authSessionProvider);
+    return FutureBuilder(
+      future: _date,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Profile')),
+            body: Center(
+              child: FilledButton(
+                onPressed: () => setState(() => _date = _capture()),
+                child: const Text('Retry date and time zone'),
+              ),
+            ),
+          );
+        }
+        final value = snapshot.data;
+        if (value == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return SocialProfilePage(
+          username: widget.username,
+          initialDate: value.date,
+          timeZone: value.zone,
+          openAttribution: openGroupAttribution,
+          participationBuilder: groupParticipationBuilder,
+          onOpenRequest: (_) => context.push<void>('/friends'),
+        );
+      },
+    );
+  }
+}
+
+final class GroupHomeSocial extends StatelessWidget {
+  const GroupHomeSocial({super.key});
+  @override
+  Widget build(BuildContext context) {
+    Future<void> profile(String username) =>
+        context.push<void>('/people/${Uri.encodeComponent(username)}');
+    Future<void> event(String id) =>
+        context.push<void>('/events/${Uri.encodeComponent(id)}/participation');
+    Future<void> all(bool activity) => Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text(
+              activity ? 'Friends activity' : 'People You May Want To Know',
+            ),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              activity
+                  ? FriendActivityPanel(
+                      home: false,
+                      onOpenProfile: profile,
+                      onOpenEvent: event,
+                    )
+                  : FriendDiscoveryPanel(
+                      home: false,
+                      onOpenProfile: profile,
+                      onOpenRequests: () => context.push<void>('/friends'),
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        HomeWeatherCard(openAttribution: openGroupAttribution),
+        FriendDiscoveryPanel(
+          home: true,
+          onOpenProfile: profile,
+          onOpenRequests: () => context.push<void>('/friends'),
+          onSeeAll: () => all(false),
+        ),
+        FriendActivityPanel(
+          home: true,
+          onOpenProfile: profile,
+          onOpenEvent: event,
+          onSeeAll: () => all(true),
+        ),
+      ],
+    );
+  }
+}

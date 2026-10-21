@@ -6,7 +6,7 @@ import type { FirestoreGateway, FirestoreTransactionGateway, StoredDocument } fr
 import { createAuthBindingDocumentId, parseAuthBinding, parseAccountProjection } from "../../shared/infrastructure/firebase/firestore-records.js";
 import { dependencyUnavailable } from "../../shared/ports/dependency-failure.js";
 import { nextPurposeRevocationGeneration } from "../domain/purpose-revocation-generation.js";
-import { requireControlledEmulatorEnvironment } from "../../shared/infrastructure/firebase/controlled-emulator-environment.js";
+import { requireFeatureEnvironment } from "../../shared/infrastructure/firebase/feature-environment.js";
 
 type ResolvedAccount = { readonly kind: "found"; readonly path: string; readonly data: StoredDocument }
   | { readonly kind: "onboarding_required" } | typeof dependencyUnavailable;
@@ -55,7 +55,7 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
   public constructor(private readonly firestore: FirestoreGateway,
     isolatedAiEnvironment?: Readonly<Record<string, string | undefined>>) {
     this.isolatedAiPurpose = isolatedAiEnvironment !== undefined;
-    if (isolatedAiEnvironment !== undefined) requireControlledEmulatorEnvironment(isolatedAiEnvironment);
+    if (isolatedAiEnvironment !== undefined) requireFeatureEnvironment(isolatedAiEnvironment);
   }
 
   public getProfile(uid: string): Promise<AccountRead<OwnProfile>> {

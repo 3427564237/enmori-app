@@ -1,3 +1,5 @@
+import { retainedCoreEvents } from './retained_core_events.mjs';
+import { createRemoteGroupRuntime, closeControlledRuntime as closeRemoteRuntime } from '../backend/dist/src/bootstrap/retained-core-runtime.js';
 /** Existing real Firebase composition behind the established localhost TLS edge. */
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, unlinkSync, lstatSync, realpathSync } from 'node:fs';
@@ -19,7 +21,7 @@ function privateOwned(path, directory = false) {
   assert.equal(stat.mode & 0o077, 0, 'Private owner-only configuration required');
   assert.equal(realpathSync(path), path);
 }
-let runtime, server, remoteServer, lockOwned = false;
+let runtime, server, remoteServer, fullFeatures = false, lockOwned = false;
 const lock = join(directory, 'real-account.lock');
 const statePath = join(directory, 'real-account-status.json');
 const publish = (state) => writeFileSync(statePath, JSON.stringify({ ...state, checkedAt: new Date().toISOString() }), { mode: 0o600 });
@@ -43,9 +45,20 @@ try {
     bootId: readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim() }), { flag: 'wx', mode: 0o600 });
   lockOwned = true;
   publish({ phase: 'starting', ready: false });
-  runtime = await createControlledRuntime({ ...process.env,
+  fullFeatures = config.fullFeatures === true;
+  const events = retainedCoreEvents(config.eventDirectory ?? directory, fullFeatures,
+    () => runtime?.eventBrowseControl?.observation().enabled === true);
+  if (fullFeatures && events.configuration !== 'configured') throw new Error('Event configuration unavailable');
+  const environment = { ...process.env,
     ENMORI_ENVIRONMENT: 'controlled-demo', ENMORI_FIREBASE_PROJECT_ID: config.projectId,
-    ENMORI_BACKEND_HOST: config.host, ENMORI_BACKEND_PORT: String(config.port) });
+    ENMORI_BACKEND_HOST: config.host, ENMORI_BACKEND_PORT: String(config.port) };
+  runtime = fullFeatures ? await createRemoteGroupRuntime({...environment, ENMORI_REMOTE_GROUP:'true'}, events.input, 'qwen3.5:9b')
+    : await createControlledRuntime(environment);
+  if (fullFeatures) {
+    const music = await getFirestore(runtime.firebaseApp).doc(`interest_tags/${events.input.musicInterestTagId}`).get();
+    if (music.data()?.displayName !== 'Music' || music.data()?.lifecycleState !== 'active') throw new Error('Music mapping unavailable');
+    runtime.eventBrowseControl.enable();
+  }
   // Read-only readiness; no custom token, synthetic account or business writes.
   const user = await getAuth(runtime.firebaseApp).getUserByEmail(config.verificationEmail);
   const binding = await getFirestore(runtime.firebaseApp)
@@ -62,7 +75,8 @@ try {
     });
   }
   publish({ phase: 'listening', ready: true, authAdminRead: true, firestoreRead: true,
-    remoteLoopbackEnabled: Boolean(remoteServer?.listening),
+    remoteLoopbackEnabled: Boolean(remoteServer?.listening), fullFeatures,
+    ...(fullFeatures ? {ai: runtime.aiStatus(), events: runtime.eventBrowseControl.observation()} : {}),
     emailVerified: user.emailVerified, bindingExists: binding.exists });
   console.log('Real account HTTPS ready; Firebase identity verification remains required.');
   await new Promise((resolve) => {
@@ -77,7 +91,7 @@ try {
   try {
     if (remoteServer?.listening) await new Promise((resolve, reject) => remoteServer.close(error => error ? reject(error) : resolve()));
     if (server?.listening) await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
-    if (runtime) await closeControlledRuntime(runtime);
+    if (runtime) await (fullFeatures ? closeRemoteRuntime(runtime) : closeControlledRuntime(runtime));
   } catch (_) { process.exitCode = 1; }
   if (lockOwned) {
     publish({ phase: process.exitCode ? 'failed' : 'stopped', ready: false });

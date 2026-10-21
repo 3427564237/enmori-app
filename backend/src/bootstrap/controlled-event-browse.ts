@@ -45,6 +45,8 @@ export function createControlledEventBrowse(options: {
     detail: (id, asOf, signal) => read(signal, (value, current) => value.detail(id, asOf, current)),
   };
   return { source, enable, disable,
+    projectionReady: (asOf: string) => enabled && options.running() && projection?.ready(asOf) === true,
+    peek: (id: string, asOf: string) => enabled && options.running() ? projection?.peek(id, asOf) : undefined,
     observation: () => ({ configured: options.source !== undefined, enabled: enabled && options.running(), pending: pending.size }),
   };
 }

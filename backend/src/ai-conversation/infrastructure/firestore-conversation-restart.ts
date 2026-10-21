@@ -1,12 +1,12 @@
 import type { FirestoreGateway } from "../../shared/infrastructure/firebase/firestore-gateway.js";
-import { requireControlledEmulatorEnvironment } from "../../shared/infrastructure/firebase/controlled-emulator-environment.js";
+import { requireFeatureEnvironment } from "../../shared/infrastructure/firebase/feature-environment.js";
 import type { RealConversationStore, OperationTarget, RuntimeEpoch } from "../ports/real-conversation-store.js";
 const uuid=(v:unknown):v is string=>typeof v==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(v);
 /** After startEpoch is confirmed, before new admission. Previous operations are
  * settled through their canonical effect/pair, never replayed or re-accepted. */
 export async function retirePreviousConversationEpoch(gateway:FirestoreGateway,store:RealConversationStore,epoch:RuntimeEpoch,
   environment:Readonly<Record<string,string|undefined>>):Promise<{complete:boolean;inspected:number;retired:number;failures:number}>{
-  requireControlledEmulatorEnvironment(environment);
+  requireFeatureEnvironment(environment);
   const result={complete:false,inspected:0,retired:0,failures:0};let after:string|undefined;
   try{for(;;){
     const page=await gateway.runTransaction(async tx=>{

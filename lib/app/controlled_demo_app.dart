@@ -54,10 +54,12 @@ final class ControlledDemoApp extends StatefulWidget {
     required this.onClose,
     this.dualAccounts = false,
     this.eventParticipationEnabled = false,
+    this.remoteGroupEnabled = false,
     super.key,
   });
   final bool dualAccounts;
   final bool eventParticipationEnabled;
+  final bool remoteGroupEnabled;
   final Uri baseUri;
   final AuthRepository auth;
   final http.Client client;
@@ -109,7 +111,12 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       authRepositoryProvider.overrideWithValue(widget.auth),
       backendBaseUriProvider.overrideWithValue(widget.baseUri),
       backendApiClientProvider.overrideWithValue(_api),
-      isolatedSlicesEnabledProvider.overrideWithValue(true),
+      isolatedSlicesEnabledProvider.overrideWithValue(
+        !widget.remoteGroupEnabled,
+      ),
+      remoteGroupFeaturesEnabledProvider.overrideWithValue(
+        widget.remoteGroupEnabled,
+      ),
       socialDemoPresentationProvider.overrideWithValue(true),
       activityBrowseEnabledProvider.overrideWithValue(true),
       eventParticipationEnabledProvider.overrideWithValue(
@@ -271,7 +278,7 @@ final class _ConnectedPages extends ConsumerWidget {
       );
     }
     return MaterialApp.router(
-      title: 'ENMORI controlled demo',
+      title: 'ENMORI',
       debugShowCheckedModeBanner: false,
       theme: socialDemoTheme(),
       routerConfig: ref.watch(appRouterProvider),

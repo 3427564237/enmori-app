@@ -91,3 +91,16 @@ Recommendations and Ignore; consumer adapters no longer import Friends Infrastru
 Storage/path/read behavior stays inside the owning adapter. Shared Check-in decoding
 uses `CheckInProjectionDecoder` injected through the owning feature provider;
 Weather rendering uses its public builder slot. No new dependency or architecture.
+
+## 21Oct LI integration extension under approved P05
+
+Remote real-account composition now provides the existing producer Ports. An
+optional internal `event_participations.selectedAt` records an actual transition
+to Interested/Going; Ignore/Restore preserves it, cancellation removes it. Old
+rows remain absent until an actual status transition; `updatedAt` is never used
+as the selection time. Public EP1 DTOs stay unchanged. Source IDs remain the
+existing canonical participation document IDs. Current transaction permission,
+consent and the process-only live Event projection gate both metadata and display.
+Cold/expired source is unavailable, not an invented successful empty Event feed.
+This initial projection includes only currently held provider records; no archived
+Event title fallback or background provider call occurs inside transactions.
