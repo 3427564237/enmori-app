@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/status_panel.dart';
+import '../../../core/presentation/local_time.dart';
 import '../../../core/result/result.dart';
 import '../domain/activity_repository.dart';
 import 'activity_controller.dart';
@@ -84,7 +85,7 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
           children: [
             if (widget.browseId.isEmpty)
               const Text(
-                'Showing eligible activities from the first source batch; this is not the full catalogue.',
+                'Explore a selection of events near and far. This is not Ticketmaster’s full catalogue.',
               ),
             const Text('Source: Ticketmaster'),
             const SizedBox(height: 16),
@@ -108,16 +109,26 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                   children: [
                     if (items.isEmpty)
                       const StatusPanel(
-                        title: 'No activities in this batch',
-                        body: 'No eligible activities were found in this source batch.',
+                        title: 'No activities to show',
+                        body: 'This available selection is empty. You can check again later.',
                         icon: Icons.event_busy_outlined,
                       ),
                     for (final item in items)
                       Card(
                         child: ListTile(
-                          title: Text(item.title),
+                          title: Text(
+                            item.title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          trailing: widget.onSelect == null
+                              ? null
+                              : const Icon(Icons.chevron_right),
                           subtitle: Text(
-                            '${item.startAt}\n${item.endAt ?? 'End time not provided.'}',
+                            '${_time(context, item.startAt)}${item.endAt == null ? '' : '\nUntil ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
                           ),
                           onTap: widget.onSelect == null
                               ? null
@@ -144,11 +155,11 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                       summary.title,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    Text('Starts: ${summary.startAt}'),
+                    Text('Starts: ${_time(context, summary.startAt)}'),
                     Text(
                       summary.endAt == null
                           ? 'End time not provided.'
-                          : 'Ends: ${summary.endAt}',
+                          : 'Ends: ${_time(context, summary.endAt!)}',
                     ),
                     Text(locationLabel ?? 'Location unavailable.'),
                     Text(categoryLabel ?? 'Category unavailable.'),
@@ -188,4 +199,9 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
       ),
     );
   }
+}
+
+String _time(BuildContext context, String value) {
+  final date = DateTime.tryParse(value);
+  return date == null ? 'Time unavailable' : localTimeLabel(context, date);
 }

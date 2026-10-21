@@ -178,7 +178,7 @@ void main() {
       expect(find.text('Your participation: interested'), findsOneWidget);
       router.pop();
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Get next batch'));
+      await tester.tap(find.text('Load more events'));
       await tester.pumpAndSettle();
       expect(batchCursors, [
         null,

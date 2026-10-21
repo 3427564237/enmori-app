@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/enmori_motion.dart';
+import '../../../core/presentation/status_panel.dart';
 
 import '../../event_browse/domain/activity_repository.dart';
 import 'event_batches_controller.dart';
@@ -69,8 +70,24 @@ final class _ParticipationEventsPageState
           children: [
             const Text('Browse current events from Ticketmaster.'),
             const SizedBox(height: 16),
-            if (state.busy) const Text('Loading activities…'),
-            if (state.failure case final failure?) Text(failure.message),
+            if (state.busy)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: LinearProgressIndicator(
+                  semanticsLabel: 'Loading events',
+                ),
+              ),
+            if (state.failure case final failure?)
+              StatusPanel(
+                title: value == null
+                    ? 'Events unavailable'
+                    : 'More events couldn’t be loaded',
+                body: value == null
+                    ? failure.message
+                    : '${failure.message} Your current events are still shown.',
+                icon: Icons.cloud_off_outlined,
+                isError: true,
+              ),
             if (value != null) ...[
               if (categories.isNotEmpty)
                 Wrap(
@@ -93,7 +110,7 @@ final class _ParticipationEventsPageState
                 ),
               if (items.isEmpty)
                 const Text(
-                  'No eligible activities were found in this source batch.',
+                  'No events in this available selection. Check again later.',
                 ),
               for (final item in items.where(
                 (s) => _category == null || s.categoryLabel == _category,
@@ -113,22 +130,25 @@ final class _ParticipationEventsPageState
                   onPressed: state.busy ? null : controller.next,
                   child: Text(
                     state.failure == null
-                        ? 'Get next batch'
-                        : 'Retry next batch',
+                        ? 'Load more events'
+                        : 'Try loading more again',
                   ),
                 )
               else
-                const Text(
-                  'No more activities in this available source window.',
-                ),
+                const Text('You’ve reached the end of the available events.'),
             ] else if (!state.busy && state.failure == null)
-              const Text('Reload to request current activities.'),
-            TextButton(
-              onPressed: state.busy ? null : controller.load,
-              child: Text(
-                value == null && state.failure != null ? 'Retry' : 'Reload',
+              const StatusPanel(
+                title: 'Refresh your events',
+                body: 'This view has expired or was cleared. Reload to see current events.',
+                icon: Icons.event_outlined,
               ),
-            ),
+            if (value == null)
+              TextButton(
+                onPressed: state.busy ? null : controller.load,
+                child: Text(
+                  value == null && state.failure != null ? 'Retry' : 'Reload',
+                ),
+              ),
             const ExpansionTile(
               title: Text('About these events'),
               children: [

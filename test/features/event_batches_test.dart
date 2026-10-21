@@ -75,8 +75,7 @@ void main() {
       sessions.add(AuthSessionAuthenticated(subject: 'a'));
       await tester.pumpAndSettle();
       // Initial auth observation can arrive after post-frame load; explicit Reload is safe.
-      await tester.scrollUntilVisible(find.text('Reload'), 200);
-      await tester.tap(find.text('Reload'));
+      await tester.tap(find.byTooltip('Refresh events'));
       await tester.pumpAndSettle();
       repo.result = const Failure(
         AppFailure(
@@ -84,11 +83,11 @@ void main() {
           message: 'Synthetic next failure',
         ),
       );
-      await tester.scrollUntilVisible(find.text('Get next batch'), -100);
-      await tester.tap(find.text('Get next batch'));
+      await tester.scrollUntilVisible(find.text('Load more events'), -100);
+      await tester.tap(find.text('Load more events'));
       await tester.pumpAndSettle();
-      expect(find.text('Synthetic next failure'), findsOneWidget);
-      expect(find.text('Retry next batch'), findsOneWidget);
+      expect(find.textContaining('Synthetic next failure'), findsOneWidget);
+      expect(find.text('Try loading more again'), findsOneWidget);
       repo.result = Success(
         ActivityBatch(
           asOf: instant,
@@ -106,22 +105,25 @@ void main() {
           ],
         ),
       );
-      await tester.tap(find.text('Retry next batch'));
+      await tester.tap(find.text('Try loading more again'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.text('No more activities in this available source window.'),
+        find.text('You’ve reached the end of the available events.'),
         200,
       );
       expect(
-        find.text('No more activities in this available source window.'),
+        find.text('You’ve reached the end of the available events.'),
         findsOneWidget,
       );
       expect(repo.cursors, ['page1', 'page1']);
+      final container = ProviderScope.containerOf(tester.element(find.byType(ParticipationEventsPage)));
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pump();
-      expect(find.text('Get next batch'), findsNothing);
-      expect(find.text('Second activity'), findsNothing);
+      expect(container.read(eventBatchesProvider).batch, isNull);
+      // Paused apps do not draw frames. The first resumed frame must stay clear.
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      expect(find.text('Load more events'), findsNothing);
+      expect(find.text('Second activity'), findsNothing);
       await tester.pumpWidget(const SizedBox());
     },
   );

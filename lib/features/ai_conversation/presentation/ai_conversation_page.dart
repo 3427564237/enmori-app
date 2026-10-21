@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/enmori_motion.dart';
+import '../../../core/presentation/local_time.dart';
 
 import '../ai_conversation_providers.dart';
 
@@ -1124,8 +1125,7 @@ final class _MessageTile extends StatelessWidget {
     if (bubble) {
       final fromUser = message.role == AiRole.user;
       final time = message.persistedAt.toLocal();
-      final clock = MaterialLocalizations.of(context)
-          .formatTimeOfDay(TimeOfDay.fromDateTime(time));
+      final clock = localTimeLabel(context, time, includeDate: false);
       return Align(
         alignment: fromUser ? Alignment.centerRight : Alignment.centerLeft,
         child: _BubbleWidth(
@@ -1165,7 +1165,7 @@ final class _MessageTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Semantics(
-                  label: 'Saved at ${time.toIso8601String()}',
+                  label: 'Saved at ${localTimeLabel(context, time)}',
                   child: Text(
                     clock,
                     style: Theme.of(context).textTheme.labelSmall,
@@ -1197,9 +1197,7 @@ final class _MessageTile extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              MaterialLocalizations.of(context).formatTimeOfDay(
-                TimeOfDay.fromDateTime(message.persistedAt.toLocal()),
-              ),
+              localTimeLabel(context, message.persistedAt),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
