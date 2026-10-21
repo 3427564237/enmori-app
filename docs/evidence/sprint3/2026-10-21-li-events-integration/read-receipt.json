@@ -1,0 +1,7 @@
+{
+  "phase": "read",
+  "authLogin": true,
+  "exactFactsAfterRestart": true,
+  "ownListAfterRestart": true,
+  "cancelAndRead": true
+}

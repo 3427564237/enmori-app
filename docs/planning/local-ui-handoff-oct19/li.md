@@ -1,3 +1,30 @@
+## 21 October continuation checkpoint (operational baseline update)
+
+Continue in `/home/miku/.codex/worktrees/li-zhou-integration-oct20/ENMORI`, branch
+`souma/li-zhou-runtime-20261020`, Draft PR #165. Current product source is
+`5529f7b4d5cf91489aa0b1b4ff118ec53a7fd522`: reviewed SHI #167 is merged and
+connected to the isolated core candidate; v14 is built but not installed.
+This supersedes only the older package/workspace/startup-status instructions below;
+retain their product scope and historical evidence. The real-account v8 checkout
+is separate and was not changed by this checkpoint.
+
+Read [the Events verification record](../../evidence/sprint3/2026-10-21-li-events-integration/verification.md)
+before continuing. The retained environment is **normally stopped with export
+confirmed**, after one save/restart/read/cancel verification. Start from this
+candidate with `python3 tool/core_local.py start --events --ai` when needed;
+use existing private handoff, not a new credential flow. Prior SIGTERM/export
+failure and possible loss after the earlier snapshot remain recorded. No device
+was connected; installation and native Events flow are pending.
+
+JIN #166 `124a1f86` still needs SHI's latest-head rereview. Full public profile and
+Home friend activity are not integrated. Activity producer needs a real
+Interested/Going transition timestamp and currently authorized title; `updatedAt`
+also changes for ignore/unignore and must not be treated as participation time.
+No speculative mapping/title/history may be substituted. Retain P05 scope and
+independent review, no main merge or overall Done.
+
+---
+
 请在 LI 的本机对话执行“HCI/UIUX 基线优先与本机接线工作”，本 prompt 完整推进可做部分，不要求 PM 为每个小步骤再次开工。
 
 源码功能与 UI 基线为 `51ecb5c11ff23ce3bf36fbf9280d2e00646ac857`（全局深绿、本地 Playfair、HCI 继承及 v6 已验证核心流程均已在源码内；v7 已构建但未做真机验证）。使用同一压缩包内的 Git bundle，核对 manifest.json 中的 HEAD，并确认包含该基线。不要使用旧 9e45b1e 包或从旧 main 重做。每人独立分支/worktree，保留已有文件，不与别人共写 LI 的运行工作区。

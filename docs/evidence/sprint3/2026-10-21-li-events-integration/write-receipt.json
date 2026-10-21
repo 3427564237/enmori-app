@@ -1,0 +1,13 @@
+{
+  "phase": "write",
+  "authLogin": true,
+  "firstBatchItems": 18,
+  "hasNextCursor": true,
+  "nextBatchItems": 19,
+  "differentBatch": true,
+  "rejectedConsentManualBrowse": true,
+  "stableDetail": true,
+  "saveReadOwnList": true,
+  "staleRevision412": true,
+  "participantRead": true
+}
