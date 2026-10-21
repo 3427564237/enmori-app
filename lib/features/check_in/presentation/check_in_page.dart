@@ -13,6 +13,7 @@ import 'check_in_edit_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/local_time.dart';
 import '../../../core/presentation/enmori_motion.dart';
 
 import '../../../core/presentation/command_state.dart';
@@ -233,6 +234,8 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 640),
               child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 controller: _scroll,
                 key: const Key('route-check-in'),
                 padding: const EdgeInsets.all(16),
@@ -595,7 +598,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
       icon: confirmed ? Icons.verified : Icons.task_alt,
       title: confirmed ? 'Saved Check-in confirmed.' : 'Check-in saved.',
       body:
-          '${checkIn.note}${checkIn.mood == null ? '' : '\nMood: ${checkIn.mood}'}${checkIn.activity == null ? '' : '\nActivity: ${checkIn.activity}'}\nSaved at ${MaterialLocalizations.of(context).formatMediumDate(checkIn.createdAt.toLocal())} · ${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(checkIn.createdAt.toLocal()))}'
+          '${checkIn.note}${checkIn.mood == null ? '' : '\nMood: ${checkIn.mood}'}${checkIn.activity == null ? '' : '\nActivity: ${checkIn.activity}'}\nSaved at ${localTimeLabel(context, checkIn.createdAt)}'
           '${switch (checkIn.checkInVisibility) {
             CheckInVisibility.private => '\nVisibility: Private',
             CheckInVisibility.friendsOnly => '\nVisibility: Friends-only',

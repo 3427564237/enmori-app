@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/local_time.dart';
 import '../../account/domain/account_repository.dart';
 import '../../weather/weather_providers.dart';
 import '../domain/check_in_repository.dart';
@@ -16,13 +17,11 @@ final class CheckInRecordView extends ConsumerWidget {
   final Future<bool> Function(Uri) openAttribution;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final time = record.createdAt.toLocal();
-    final labels = MaterialLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          '${labels.formatMediumDate(time)} · ${labels.formatTimeOfDay(TimeOfDay.fromDateTime(time))} (local time)',
+          '${localTimeLabel(context, record.createdAt)} (local time)',
           style: Theme.of(context).textTheme.labelLarge,
         ),
         if (record.note.isNotEmpty) ...[
