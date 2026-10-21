@@ -56,7 +56,8 @@ final class BackendApiClient {
     required JsonObject body,
   }) => _send('DELETE', path, body: body);
 
-  Future<Result<JsonObject>> get(String path) => _send('GET', path);
+  Future<Result<JsonObject>> get(String path, {bool Function()? isEligible}) =>
+      _send('GET', path, isEligible: isEligible);
 
   /// Session-bound feature operations: recheck after token acquisition and
   /// immediately before dispatch. Existing unguarded callers are unchanged.
@@ -72,13 +73,27 @@ final class BackendApiClient {
     String path, {
     required JsonObject body,
     String? idempotencyKey,
-  }) => _send('PUT', path, body: body, idempotencyKey: idempotencyKey);
+    bool Function()? isEligible,
+  }) => _send(
+    'PUT',
+    path,
+    body: body,
+    idempotencyKey: idempotencyKey,
+    isEligible: isEligible,
+  );
 
   Future<Result<JsonObject>> post(
     String path, {
     JsonObject? body,
     String? idempotencyKey,
-  }) => _send('POST', path, body: body, idempotencyKey: idempotencyKey);
+    bool Function()? isEligible,
+  }) => _send(
+    'POST',
+    path,
+    body: body,
+    idempotencyKey: idempotencyKey,
+    isEligible: isEligible,
+  );
 
   Future<Result<JsonObject>> getPersona(
     String path, {
@@ -368,6 +383,9 @@ final class BackendApiClient {
       if (body != null) {
         request.body = jsonEncode(body);
       }
+      if (isEligible != null && !isEligible()) {
+        return const Failure(_unavailable);
+      }
       if (elapsed.elapsed >= _operationTimeout) {
         throw TimeoutException('Backend operation timed out');
       }
@@ -478,6 +496,10 @@ final class BackendApiClient {
       'ADD_FRIEND_TARGET_UNAVAILABLE' =>
         AppFailureKind.addFriendTargetUnavailable,
       'FRIEND_REQUEST_UNAVAILABLE' => AppFailureKind.friendRequestUnavailable,
+      'FRIEND_REVISION_PRECONDITION_FAILED' =>
+        AppFailureKind.friendRevisionPreconditionFailed,
+      'FRIEND_IGNORE_PRECONDITION_FAILED' =>
+        AppFailureKind.friendIgnorePreconditionFailed,
       'EVENT_UNAVAILABLE' => AppFailureKind.eventUnavailable,
       'EVENT_PARTICIPATION_INVALID' => AppFailureKind.eventParticipationInvalid,
       'EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED' =>

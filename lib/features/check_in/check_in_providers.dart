@@ -4,6 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/result/result.dart';
 import 'domain/check_in_repository.dart';
 import 'history_device_port.dart';
+import 'domain/check_in_projection_decoder.dart';
+import 'data/check_in_projection_parser.dart';
+
+final checkInProjectionDecoderProvider = Provider<CheckInProjectionDecoder>(
+  (ref) => const BackendCheckInProjectionDecoder(),
+);
 
 final checkInRepositoryProvider = Provider<CheckInRepository>(
   (ref) => const _UnavailableCheckInRepository(),

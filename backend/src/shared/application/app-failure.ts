@@ -1,6 +1,8 @@
 export const APP_FAILURE_CATALOGUE = {
   EVENT_PARTICIPATION_INVALID: { statusCode: 422, message: "Choose a valid Event participation state and revision." },
   EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED: { statusCode: 412, message: "Your participation changed. Read it before saving again." },
+  FRIEND_IGNORE_PRECONDITION_FAILED: { statusCode: 412, message: "Your recommendation preference changed. Read its current state before trying again." },
+  FRIEND_REVISION_PRECONDITION_FAILED: { statusCode: 412, message: "This friendship changed. Reload before changing it." },
   CATALOGUE_INVALID: { statusCode: 422, message: "Use a valid catalogue name of 1–50 characters." },
   CATALOGUE_NAME_CONFLICT: { statusCode: 409, message: "This catalogue name is already reserved." },
   PERSONA_INVALID: { statusCode: 422, message: "Use a name of 1–50 characters, valid style options and valid versions." },

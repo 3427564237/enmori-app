@@ -1,0 +1,37 @@
+# JIN social/location/weather physical mapping
+
+Implementation scope: accepted Oct19 `jin.md` package, S-PM-1019-LI-CORE-SINGLE-CHAT product rules, Q03/Q13/Q16/Q17/Q18. This mapping uses the existing TypeScript/Fastify/Firebase and Flutter/Riverpod architecture; it is not a new PM decision. The user's later instruction resumes this independent JIN package and assigns final composition to LI; the historical single-chat/five-package pause in the baseline remains visible rather than rewritten. Original workspace and its old branch/artifacts are preserved.
+
+## Wire contract
+
+`api/openapi.json` and `ROUTE_INVENTORY` add six authenticated people/friend mutation routes, pending-count, recommendations, activity and Home weather. All ten module routes use no-store. No UID/account ID, arbitrary context map, provider URL or client clock is accepted. Username resolves through its current canonical reservation. Same authenticated viewer/target relationship and field privacy are reread for each profile/record/day/month request; a cursor is an encrypted continuation, never authority.
+
+- `GET /v1/people/{username}` returns permitted profile, interest summaries and relationship controls. Location field privacy also gates region. No private counterparty Special Care value or revision is returned.
+- `/check-ins` reads a civil day in a validated IANA zone; `/check-ins/{checkInId}` rereads an exact authorized point's record; `/calendar-map` returns day counts and chronological permitted points. Legacy missing Check-in visibility is private. Map points additionally require accepted friendship, location field permission and map sharing; self can inspect own records. A map point is not a tracked route.
+- `PUT /v1/me/friends/{username}/special-care` and `DELETE /v1/me/friends/{username}` require the requesting member's `expectedRevision`. Conflict is 412 `FRIEND_REVISION_PRECONDITION_FAILED`. Removal deletes both accepted list pointers in the same transaction and invalidates previous relationship commands. A later re-accept increments both member revisions.
+- `GET /v1/me/friends/summary` counts valid pending incoming requests, without notification history or push. Recommendation only returns public display identity, shared labels/common count and deterministic reason. Activity returns type, source identity, server occurrence time and permitted display identity; never Note/Mood/weather/location, raw scores or Special Care. Both rankers require current optional processing consent for viewer and subject before construction, in addition to current privacy. Manual friends/records remain separate.
+- Home/See All use a single Q03 total order before Top 2. The complete bounded source pool is required; capacity exhaustion yields unavailable rather than a silently biased prefix. Current limits are fewer than 1000 source entries per scan and 2000 monthly records; these are protective implementation limits, not a product data quota. Paged friend search/list retains the existing scanned-page continuation and can show an empty filtered page with Next.
+
+## Existing storage extensions only
+
+`check_ins/{id}` optionally gains exact `{latitude, longitude}` `location` and the five-field `weather_projection_v1` snapshot (projectionVersion/source/observedAt/temperatureCelsius/condition). Ownership, revision and existing visibility remain authoritative. Missing old fields stay absent; no data migration/backfill. Existing deletion removes the whole record. Normal Note/Mood edits retain weather; explicit weather removal or location change/removal clears it. No provider retry occurs on edits.
+
+`friend_pairs/{pairKey}` optionally adds private per-member `specialCareByAccount` booleans and per-member `revisions`. Missing flags are false and missing revisions start at zero. Care increments only the actor's revision; accept/remove advance both. No new independent friend relationship is introduced. Fresh lookup treats a missing pair as empty and send creates it atomically; no quadratic pre-seeding is required. Existing `friend_lists/.../members` references remain authoritative, validated and bidirectionally removed.
+
+Check-in Weather uses the existing 24-hour idempotency identity. Before external IO it atomically records an exact six-field provisional claim (scope, operation, keyDigest, requestFingerprint, expiresAt, weatherAttempted). It contains no coordinates or provider payload and is replaced by the ordinary committed reference. Concurrent/replayed same-key saves cannot dispatch the provider twice; a competing save may commit without weather. Changed same-key payload conflicts. No new weather/history/recommendation/activity collection is introduced. Existing idempotency retention remains applicable.
+
+Ranking adapters use a metadata-only Firestore projection for Check-in activity (owner, timestamp, visibility) and profile visibility for candidate enumeration. Complete Check-in bodies never enter ranking. SHI's Event callbacks must provide equally bounded, current purpose-authorized projections in the transaction. No new Firestore composite index is introduced; SDK evidence exercises the owner-filtered metadata query and direct authorizations.
+
+## Q13 and provider boundary
+
+Explicit per-Check-in purpose consent supplies a current Settings revision. Client and server validate a 0.1° Weather grid separate from the exact point; an invalid/unrelated/precise grid skips enrichment while the valid Check-in can save. Settings identity/revision is rechecked after the provider response. Home has a separate foreground coarse lookup and does not persist weather or reuse Check-in coordinates.
+
+Only the minimum fixed HTTPS Open-Meteo request leaves the Backend. No Note, UID, exact coordinate or custom URL is forwarded. One 2000 ms monotonic budget covers fetch, bounded 16 KiB body, parse and validation; no retry/redirect/backfill. JSON number tokens use exact decimal half-away-from-zero normalization. Q13 WMO groups, units, range, [-30m,+15m] freshness and frozen attribution apply. Temporary failure yields one creation notice, not a stored placeholder. The five-field response has no coordinates. Every presented snapshot has application-owned attribution and links.
+
+Sources: [Open-Meteo API](https://open-meteo.com/en/docs), [terms](https://open-meteo.com/en/terms), [licence](https://open-meteo.com/en/licence), [OSM tile policy](https://operations.osmfoundation.org/policies/tiles/), [flutter_map caching](https://docs.fleaflet.dev/layers/tile-layer/caching). Actual network/usage eligibility and cross-restart quota evidence remain the existing host's responsibility; the adapter's conservative in-memory ceilings do not prove those facts.
+
+Dependency change is flutter_map pinned 8.3.2 and direct latlong2 ^0.9.1, using the already-approved geolocator. Lock adds 24 packages, no existing package version replacement. Map uses built-in caching and stable User-Agent, visible OSM attribution and no bulk download. Actual Android/iOS/browser cache and provider operation remain separately verified after LI composition.
+
+## Local decision still open
+
+Persistent ignore was chosen by the user, but undo entry, expiry and account/target deletion handling were referred to LI at [#84](https://github.com/3427564237/enmori-app/issues/84#issuecomment-6274517573). Nothing here establishes those rules or persists an ignore edge. Source review remains JIN → SHI; LI final combination/evidence acceptance is separate. No unchanged historical gate is reopened.
