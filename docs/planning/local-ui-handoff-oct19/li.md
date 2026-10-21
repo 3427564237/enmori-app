@@ -1,3 +1,10 @@
+# 21Oct remote access updateThe PM subsequently authorized different-location group access and delegated a
+free/simple implementation choice. Follow
+`docs/decisions/2026-10-21-li-remote-group-access.md`; this replaces the same-Wi-Fi
+delivery limit below. The first real-account Funnel entry is prepared and owner
+enablement completed. Track public DNS/external acceptance, full real-identity
+feature composition and release signing/APK separately. Keep main unmerged.
+
 ## 21 October PM follow-up: local fixes and wireless demonstration
 
 See [the confirmed decision](../../decisions/2026-10-21-li-wireless-demo-and-local-ownership.md).

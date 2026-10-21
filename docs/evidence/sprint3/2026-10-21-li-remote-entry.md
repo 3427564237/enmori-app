@@ -18,7 +18,16 @@ network entry, not the complete integrated feature set.
 - HTTP 9382 `/v1/me/onboarding` and `/v1/me/settings` each rejected an unauthenticated
   request with 401. Existing HTTPS 9381 identity gate remained healthy.
 - `tailscale funnel --bg --https=8443 http://127.0.0.1:9382` requested human account
-  enablement. No successful public exposure has been reported at this checkpoint.
+  enablement. The owner subsequently confirmed completion; the waiting command
+  exited successfully and Funnel reports public HTTPS 8443 -> loopback 9382.
+  Private Serve 443 -> loopback 3000 remains unchanged.
+- The selected HTTPS hostname returned 401 from this host with normal TLS
+  validation. Public DNS resolver lookup still returned NXDOMAIN immediately
+  after enablement. Thus the host-side check may use the tailnet route and is
+  **not external-network acceptance**. Official documentation allows DNS propagation
+  time; do not repeatedly restart Funnel or request certificates to force it.
+- Found INTERNET permission only in Android debug/profile manifests. Added it to
+  main for release builds; no cleartext allowance or TLS bypass was added.
 
 ## Concentrated checks
 
@@ -32,7 +41,7 @@ network entry, not the complete integrated feature set.
 
 ## Pending
 
-Owner Funnel enablement; external-network reachability; real authenticated remote
+External DNS/reachability; real authenticated remote
 save/readback; real feature composition; release signing/build; off-USB device
 verification. Existing v14 tests do not establish any of these. AI was not called
 and no broad regression suite or duplicate APK build was run for this checkpoint.
