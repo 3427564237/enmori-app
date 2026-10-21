@@ -131,14 +131,14 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('AI Settings callback enters existing Settings and returns', (
+  testWidgets('AI Settings callback enters scoped AI settings and returns', (
     tester,
   ) async {
     final pages = _TestPages();
     final f = await _pumpApp(tester, pages: pages, ai: true);
     await _tap(tester, 'home-ai-conversation');
     await _tap(tester, 'test-settings');
-    expect(f.router.state.uri.path, AppRoutes.settings);
+    expect(f.router.state.uri.path, AppRoutes.aiSettings);
     f.router.pop();
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('test-ai')), findsOneWidget);
@@ -254,7 +254,7 @@ void main() {
     oldBack();
     oldSettings();
     await _frames(tester);
-    expect(f.router.state.uri.path, AppRoutes.settings);
+    expect(f.router.state.uri.path, AppRoutes.aiSettings);
     f.router.pop();
     await tester.pumpAndSettle();
     await _tap(tester, 'test-back');

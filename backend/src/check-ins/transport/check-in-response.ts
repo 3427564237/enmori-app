@@ -9,6 +9,7 @@ export function checkInResponse(checkIn: CheckInProjection): CheckInProjection {
     ...(checkIn.revision === undefined ? {} : { revision: checkIn.revision }),
     note: checkIn.note,
     ...(checkIn.mood === undefined ? {} : {mood:checkIn.mood}),
+    ...(checkIn.locationLabel === undefined ? {} : {locationLabel:checkIn.locationLabel}),
     ...(checkIn.activity === undefined ? {} : {activity:checkIn.activity}),
     createdAt: checkIn.createdAt,
     ...(checkIn.checkInVisibility === undefined ? {} : { checkInVisibility: checkIn.checkInVisibility }),

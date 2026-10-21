@@ -54,6 +54,7 @@ abstract final class AppRoutes {
       '/personas/${Uri.encodeComponent(personaId)}/edit';
   static const profileEdit = '/profile/edit';
   static const settings = '/settings';
+  static const aiSettings = '/ai/settings';
   static const checkIn = '/check-in';
   static const checkInHistory = '/check-ins/history';
   static const footprint = '/check-ins/footprint';
@@ -299,8 +300,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           builder: (context, state) => aiPage.build(
             context,
             onBack: () => backFromShared(context, AppRoutes.aiAssistant),
-            onOpenSettings: () =>
-                openShared(context, AppRoutes.aiAssistant, AppRoutes.settings),
+            onOpenSettings: () => openShared(
+              context,
+              AppRoutes.aiAssistant,
+              AppRoutes.aiSettings,
+            ),
           ),
         ),
       if (personaPages != null) ...[
@@ -530,6 +534,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.profileEdit,
         builder: (context, state) =>
             const AccountPreferencesPage(view: PreferencesView.profile),
+      ),
+      GoRoute(
+        path: AppRoutes.aiSettings,
+        builder: (context, state) => AccountPreferencesPage(
+          view: PreferencesView.settings,
+          aiOnly: true,
+          onOpenPersonas: () => context.push<void>(AppRoutes.personas),
+        ),
       ),
       GoRoute(
         path: AppRoutes.settings,

@@ -11,6 +11,7 @@ final class BackendCheckInPlaceRepository implements CheckInPlaceRepository {
   final BackendApiClient client;
   @override
   Future<Result<CheckInSaveReceipt>> create({
+    String? locationLabel,
     required String note,
     String? mood,
     String? activity,
@@ -41,6 +42,7 @@ final class BackendCheckInPlaceRepository implements CheckInPlaceRepository {
         'note': (normalized as Success<String>).value,
         'mood': ?mood,
         'activity': ?activity,
+        'locationLabel': ?locationLabel,
         'checkInVisibility': _visibility(visibility),
         ...?place?.toJson(),
       },

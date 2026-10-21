@@ -172,7 +172,12 @@ void main() {
       );
       router.go(AppRoutes.activities);
       await tester.pumpAndSettle();
+      expect(find.text('Synthetic integration concert'), findsOneWidget);
+      await tester.tap(find.text('Event details'));
+      await tester.pumpAndSettle();
       expect(find.text('Your participation: interested'), findsOneWidget);
+      router.pop();
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Get next batch'));
       await tester.pumpAndSettle();
       expect(batchCursors, [
@@ -186,7 +191,7 @@ void main() {
     },
   );
   testWidgets(
-    'v2 social Home opens existing recommendations using its authenticated Backend repository',
+    'v2 social Home reads recommendations and opens manual Events using its authenticated Backend repository',
     (tester) async {
       final auth = AuthDouble();
       final recommendationViews = <String?>[];
@@ -204,6 +209,12 @@ void main() {
               'checkInVisibility': 'private',
               'onboardingCompletedAt': '2026-10-19T00:00:00.000Z',
             },
+          };
+        } else if (request.url.path == '/v1/event-browse') {
+          body = {
+            'asOf': '2026-10-21T00:00:00.000Z',
+            'scope': 'ticketmaster_sg_first_batch_v1',
+            'items': [],
           };
         } else {
           expect(request.url.path, '/v1/recommendations/events');
@@ -246,22 +257,19 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-home')), findsOneWidget);
       expect(recommendationViews, ['home']);
-      final action = find.byKey(const Key('home-recommended-activities'));
+      final action = find.byKey(const Key('home-browse-activities'));
       await tester.ensureVisible(action);
       await tester.pumpAndSettle();
       await tester.tap(action);
       await tester.pumpAndSettle();
       expect(
-        GoRouterState.of(
-          tester.element(find.byKey(const Key('route-event-recommendations'))),
-        ).uri.path,
-        AppRoutes.eventRecommendations,
+        GoRouterState.of(tester.element(find.text('Browse activities')))
+            .uri
+            .path,
+        AppRoutes.activities,
       );
-      expect(recommendationViews, ['home', 'all']);
-      expect(
-        find.text('Synthetic source Music recommendation'),
-        findsOneWidget,
-      );
+      expect(recommendationViews, ['home']);
+      expect(find.text('No activities in this batch'), findsOneWidget);
       expect(
         find.byKey(const Key('event-recommendations-error')),
         findsNothing,
@@ -269,7 +277,7 @@ void main() {
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-home')), findsOneWidget);
-      expect(recommendationViews, ['home', 'all', 'home']);
+      expect(recommendationViews, ['home']);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       await auth.sessions.close();
@@ -464,7 +472,7 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('r6-new-check-in-button')));
       await tester.pumpAndSettle();
-      expect(find.text('Keep a little moment'), findsOneWidget);
+      expect(find.byKey(const Key('r6-check-in-note')), findsOneWidget);
       router.go(AppRoutes.home);
       await tester.pumpAndSettle();
       final oldHomeTab = tester

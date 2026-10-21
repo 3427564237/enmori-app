@@ -124,7 +124,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text('End time not provided.'), findsOneWidget);
+      expect(find.textContaining('Until '), findsNothing);
       expect(find.textContaining('participants'), findsNothing);
       await tester.tap(find.text('Event details'));
       expect(selected, 'event-a');

@@ -64,10 +64,10 @@ void main() {
       expect(find.text('Art'), findsOneWidget);
       expect(
         tester.getTopLeft(find.text('Books')).dy,
-        lessThan(tester.getTopLeft(find.text('Art')).dy),
+        lessThanOrEqualTo(tester.getTopLeft(find.text('Art')).dy),
       );
       expect(
-        find.text('No longer available — you can remove it.'),
+        find.byTooltip('No longer available — you can remove it.'),
         findsOneWidget,
       );
       expect(find.text('public'), findsNothing);
@@ -155,10 +155,7 @@ void main() {
       ),
     );
     await _openProfile(tester);
-    expect(
-      find.text('Interests could not be loaded. Try again.'),
-      findsOneWidget,
-    );
+    expect(find.text('Interests could not be loaded.'), findsOneWidget);
     expect(find.text('private vendor diagnostic'), findsNothing);
     expect(find.text('No interests selected.'), findsNothing);
     harness.interests.fake.ownResult = Success(_selection(['Art']));
@@ -312,6 +309,13 @@ Future<void> _openEditor(WidgetTester tester) async {
 }
 
 Future<void> _tap(WidgetTester tester, Finder finder) async {
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      finder,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
   await tester.ensureVisible(finder);
   await tester.pump();
   await tester.tap(finder);

@@ -1,0 +1,57 @@
+Selected validation outputs — 2026-10-21
+Overlapping focused batches; do not sum as unique tests.
+Flutter: fvm flutter test --no-pub --reporter expanded <listed files>
+Backend: Node 24.19.0 node_modules/typescript/bin/tsc --project backend/tsconfig.json; then node --test <compiled test files>.
+
+Static analysis: fvm flutter analyze --no-pub
+Analyzing ENMORI...                                             
+No issues found! (ran in 5.7s)
+
+Focused correction subset: account_preferences_flow, history_ai_home_router, own_profile_flow, ai_conversation_page, check_in_edit_flow, event_participation_components, friend_discovery_activity_map
+00:16 +127: test/features/ai_conversation/ai_conversation_page_test.dart: small screen at 2x text keeps labeled Cancel reachable at 48dp
+00:17 +128: All tests passed!
+
+Final review: controlled_demo_app, event_social_preview, product_redesign_preview, account_preferences_flow
+00:12 +31: test/app/account_preferences_flow_test.dart: Settings remains reachable on a small phone with 2x text
+00:12 +32: All tests passed!
+
+Connected Check-in: connected_check_in_journey_test.dart
+00:02 +2: draft Back protection, same-request recovery, saved snapshot and exact detail read
+00:04 +3: All tests passed!
+
+Source expiry: event_source_projection_test.dart
+00:01 +1: recommendation omits unknown end and expired projection requires explicit refresh
+00:01 +2: All tests passed!
+
+Backend: account-preferences-transport.test.js
+✔ normative Profile/Settings schemas match transport without internal identities (5.070742ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 428.095448
+
+Backend: social-profile.test.js
+✔ HTTP boundary requires principal, rejects owner injection and returns only authorized noncached fields (243.951914ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 519.791685
+
+Backend: check-in-content.test.js, check-in-mutations.test.js
+✔ manual place label edits preserve GPS and omission; invalid input is atomic and null clears only the label (1.061496ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 444.405562

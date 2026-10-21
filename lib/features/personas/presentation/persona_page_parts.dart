@@ -40,7 +40,8 @@ final class PersonaPageScaffold extends StatelessWidget {
         body: FocusTraversalOrder(
           order: const NumericFocusOrder(1),
           child: SafeArea(
-            child: Center(
+            child: Align(
+              alignment: Alignment.topCenter,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 640),
                 child: child,

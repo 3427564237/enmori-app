@@ -102,6 +102,16 @@ ThemeData enmoriTheme() {
         shape: buttonShape,
       ),
     ),
+    chipTheme: base.chipTheme.copyWith(
+      shape: const StadiumBorder(),
+      side: BorderSide(color: scheme.outlineVariant),
+      selectedColor: scheme.primaryContainer,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+    ),
+    listTileTheme: ListTileThemeData(
+      iconColor: scheme.primary,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: Colors.white,
       indicatorColor: scheme.primaryContainer,

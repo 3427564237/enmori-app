@@ -47,6 +47,8 @@ final class _UnavailablePreferences implements AccountPreferencesRepository {
   }) async => const Failure(_failure);
   @override
   Future<Result<OwnSettings>> saveSettings({
+    bool? defaultCheckInLocation,
+    bool? defaultCheckInWeather,
     FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,

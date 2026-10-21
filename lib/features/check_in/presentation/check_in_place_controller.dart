@@ -64,6 +64,33 @@ final class CheckInPlaceController extends Notifier<CheckInPlaceState> {
     };
   }
 
+  /// Revalidate the saved default after OS permission/GPS returns. A changed
+  /// revision never silently reuses the point under a different authorization.
+  Future<void> captureDefaults(OwnSettings settings) async {
+    if (!settings.defaultCheckInLocation) return;
+    await capture(expectedEpoch: _epoch);
+    if (!ref.mounted || state.place == null) return;
+    final epoch = _epoch, point = state.place!.location;
+    state = const CheckInPlaceState(busy: true);
+    final current = await ref
+        .read(accountPreferencesRepositoryProvider)
+        .readSettings();
+    if (!ref.mounted || epoch != _epoch) return;
+    if (current case Success<OwnSettings>(:final value)
+        when value.revision == settings.revision &&
+            value.defaultCheckInLocation) {
+      state = CheckInPlaceState(
+        place: CheckInPlace(
+          location: point,
+          includeWeather: value.defaultCheckInWeather,
+          settingsRevision: value.defaultCheckInWeather ? value.revision : null,
+        ),
+      );
+    } else {
+      clear();
+    }
+  }
+
   Future<void> allowWeather(bool allowed, {required int expectedEpoch}) async {
     final place = state.place;
     if (state.busy || expectedEpoch != _epoch || place == null) return;

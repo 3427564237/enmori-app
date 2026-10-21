@@ -21,14 +21,11 @@ final class OwnProfilePage extends ConsumerWidget {
     this.onOpenFootprint,
     super.key,
   });
-
   final Future<void> Function() onEditInterests;
-  final Future<void> Function()? onEditProfile;
-  final Future<void> Function()? onOpenSettings;
+  final Future<void> Function()? onEditProfile, onOpenSettings;
   final Widget? participationSection;
   final Future<void> Function(String)? onOpenRecords;
   final VoidCallback? onOpenHistory, onOpenFootprint;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(ownProfileControllerProvider);
@@ -36,107 +33,47 @@ final class OwnProfilePage extends ConsumerWidget {
     final details = subject == null
         ? null
         : ref.watch(ownProfileDetailsProvider(subject));
+    Future<void> edit(Future<void> Function()? action) async {
+      await action?.call();
+      if (!context.mounted ||
+          subject == null ||
+          ref.read(currentAuthSubjectProvider) != subject) {
+        return;
+      }
+      ref.invalidate(ownProfileDetailsProvider(subject));
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text('My profile')),
+      appBar: AppBar(
+        title: const Text('My profile'),
+        actions: [
+          IconButton(
+            key: const Key('profile-edit'),
+            tooltip: 'Edit profile',
+            onPressed: state.username == null
+                ? null
+                : () => edit(onEditProfile),
+            icon: const Icon(Icons.edit_outlined),
+          ),
+          IconButton(
+            key: const Key('profile-settings'),
+            tooltip: 'Settings',
+            onPressed: state.username == null
+                ? null
+                : () => edit(onOpenSettings),
+            icon: const Icon(Icons.settings_outlined),
+          ),
+        ],
+      ),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: ListView(
               key: const Key('route-own-profile'),
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               children: [
-                const VerifyEmailButton(),
-                if (onOpenHistory != null)
-                  OutlinedButton.icon(
-                    onPressed: onOpenHistory,
-                    icon: const Icon(Icons.history),
-                    label: const Text('Check-in History'),
-                  ),
-                if (onOpenFootprint != null)
-                  OutlinedButton.icon(
-                    onPressed: onOpenFootprint,
-                    icon: const Icon(Icons.map_outlined),
-                    label: const Text('Footprint'),
-                  ),
-                if (onOpenHistory == null &&
-                    onOpenRecords != null &&
-                    state.username != null)
-                  OutlinedButton.icon(
-                    onPressed: () => onOpenRecords!(state.username!),
-                    icon: const Icon(Icons.calendar_month),
-                    label: const Text('My records, calendar & map'),
-                  ),
-
-                if (state.username case final username?) ...[
-                  Text(
-                    'Username',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    username,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Interests',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                if (state.phase == OwnProfilePhase.loading)
-                  const Center(
-                    key: Key('profile-loading'),
-                    child: CircularProgressIndicator(),
-                  )
-                else if (state.phase == OwnProfilePhase.failed) ...[
-                  const Text('Interests could not be loaded. Try again.'),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: () =>
-                        ref.read(ownProfileControllerProvider.notifier).load(),
-                    child: const Text('Retry'),
-                  ),
-                ] else if (state.interests.isEmpty)
-                  const Text('No interests selected.')
-                else
-                  for (final tag in state.interests)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(tag.displayName),
-                      subtitle:
-                          tag.lifecycleState == InterestLifecycleState.inactive
-                          ? const Text(
-                              'No longer available — you can remove it.',
-                            )
-                          : null,
-                    ),
-                const SizedBox(height: 24),
-                OutlinedButton.icon(
-                  key: const Key('profile-edit-interests'),
-                  onPressed: state.username == null
-                      ? null
-                      : () async {
-                          final subject = ref.read(currentAuthSubjectProvider);
-                          final controller = ref.read(
-                            ownProfileControllerProvider.notifier,
-                          );
-                          await onEditInterests();
-                          if (!context.mounted ||
-                              ref.read(currentAuthSubjectProvider) != subject) {
-                            return;
-                          }
-                          await controller.load();
-                        },
-                  icon: const Icon(Icons.interests_outlined),
-                  label: const Text('Edit interests'),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Display name',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
                 switch (details) {
                   AsyncData<Result<OwnProfile>>(
                     value: Success<OwnProfile>(:final value),
@@ -144,65 +81,173 @@ final class OwnProfilePage extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          value.displayName ?? 'Display name not set',
-                          key: const Key('profile-name'),
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 28,
+                              child: Text(
+                                value.username.substring(0, 1).toUpperCase(),
+                                style: const TextStyle(fontSize: 24),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    value.displayName ?? value.username,
+                                    key: const Key('profile-name'),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall,
+                                  ),
+                                  Text('@${value.username}'),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        if (value.details.bio != null) Text(value.details.bio!),
-                        if (value.details.affiliationName != null)
-                          Text(
-                            '${value.details.affiliationType?.name}: ${value.details.affiliationName}',
+                        if (value.details.bio case final bio?)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: Text(
+                              bio,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
                           ),
-                        if (value.details.region != null)
-                          Text(value.details.region!),
+                        if (value.details.affiliationName case final name?)
+                          Text(name),
+                        if (value.details.region case final region?)
+                          Text(region),
                       ],
                     ),
                   AsyncData<Result<OwnProfile>>(value: Failure<OwnProfile>()) ||
-                  AsyncError<Result<OwnProfile>>() => const Text(
-                    'Profile could not be loaded. Try again.',
+                  AsyncError<Result<OwnProfile>>() => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.username ?? 'My profile',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const Text('Profile could not be loaded.'),
+                      TextButton(
+                        onPressed: subject == null
+                            ? null
+                            : () => ref.invalidate(
+                                ownProfileDetailsProvider(subject),
+                              ),
+                        child: const Text('Reload profile'),
+                      ),
+                    ],
                   ),
                   _ => const LinearProgressIndicator(),
                 },
-                if (subject != null)
-                  TextButton(
-                    onPressed: () =>
-                        ref.invalidate(ownProfileDetailsProvider(subject)),
-                    child: const Text('Reload profile'),
+                const SizedBox(height: 20),
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  children: [
+                    Text(
+                      'Interests',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    TextButton.icon(
+                      key: const Key('profile-edit-interests'),
+                      onPressed: state.username == null
+                          ? null
+                          : () async {
+                              final controller = ref.read(
+                                ownProfileControllerProvider.notifier,
+                              );
+                              await onEditInterests();
+                              if (context.mounted &&
+                                  ref.read(currentAuthSubjectProvider) ==
+                                      subject) {
+                                await controller.load();
+                              }
+                            },
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: const Text('Edit interests'),
+                    ),
+                  ],
+                ),
+                if (state.phase == OwnProfilePhase.loading)
+                  const LinearProgressIndicator(key: Key('profile-loading'))
+                else if (state.phase == OwnProfilePhase.failed)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Interests could not be loaded.'),
+                    trailing: TextButton(
+                      onPressed: () => ref
+                          .read(ownProfileControllerProvider.notifier)
+                          .load(),
+                      child: const Text('Retry'),
+                    ),
+                  )
+                else if (state.interests.isEmpty)
+                  const Text('No interests selected.')
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final tag in state.interests)
+                        Chip(
+                          label: Text(tag.displayName),
+                          avatar:
+                              tag.lifecycleState ==
+                                  InterestLifecycleState.inactive
+                              ? const Tooltip(
+                                  message: 'No longer available — you can remove it.',
+                                  child: Icon(Icons.info_outline, size: 18),
+                                )
+                              : null,
+                        ),
+                    ],
                   ),
-                OutlinedButton(
-                  key: const Key('profile-edit'),
-                  onPressed: state.username == null
-                      ? null
-                      : () async {
-                          await onEditProfile?.call();
-                          if (!context.mounted ||
-                              ref.read(currentAuthSubjectProvider) != subject ||
-                              subject == null) {
-                            return;
-                          }
-                          ref.invalidate(ownProfileDetailsProvider(subject));
-                        },
-                  child: const Text('Edit profile'),
+                const SizedBox(height: 20),
+                Text(
+                  'Your records',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-                OutlinedButton(
-                  key: const Key('profile-settings'),
-                  onPressed: state.username == null
-                      ? null
-                      : () async {
-                          await onOpenSettings?.call();
-                          if (!context.mounted ||
-                              ref.read(currentAuthSubjectProvider) != subject ||
-                              subject == null) {
-                            return;
-                          }
-                          ref.invalidate(ownProfileDetailsProvider(subject));
-                        },
-                  child: const Text('Settings'),
-                ),
+                const SizedBox(height: 8),
+                if (onOpenHistory != null)
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.history),
+                      title: const Text('Check-in History'),
+                      subtitle: const Text('Notes, moods and saved moments'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: onOpenHistory,
+                    ),
+                  ),
+                if (onOpenFootprint != null)
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.map_outlined),
+                      title: const Text('Footprint'),
+                      subtitle: const Text('Your Check-in locations'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: onOpenFootprint,
+                    ),
+                  ),
+                if (onOpenHistory == null &&
+                    onOpenRecords != null &&
+                    state.username != null)
+                  ListTile(
+                    leading: const Icon(Icons.calendar_month),
+                    title: const Text('My records, calendar & map'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => onOpenRecords!(state.username!),
+                  ),
                 if (participationSection != null) ...[
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   participationSection!,
                 ],
+                const SizedBox(height: 20),
+                const VerifyEmailButton(),
               ],
             ),
           ),

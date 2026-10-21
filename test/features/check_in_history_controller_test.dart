@@ -47,6 +47,7 @@ final class _HistoryRepository implements CheckInRepository {
 
   @override
   Future<Result<CheckIn>> create({
+    String? locationLabel,
     String? mood,
     String? activity,
     CheckInVisibility? visibility,

@@ -24,7 +24,7 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
     super.key,
   });
 
-  final VoidCallback onSeeAll;
+  final VoidCallback? onSeeAll;
   final void Function(String)? onOpenEvent;
   final RecommendationCardBuilder? recommendationCardBuilder;
   final bool syntheticPreview;
@@ -254,7 +254,7 @@ final class _RecommendationContent extends StatelessWidget {
         content,
         if (state is AsyncData<EventRecommendationResponse>) ...[
           const SizedBox(height: 12),
-          OutlinedButton.icon(
+          TextButton.icon(
             key: const Key('event-recommendations-refresh'),
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
@@ -316,7 +316,7 @@ final class _RecommendationList extends StatelessWidget {
                     contentPadding: const EdgeInsets.all(16),
                     subtitle: Text(
                       '${_formatTime(item.startAt)}\n'
-                      '${item.endAt == null ? 'End time not provided.' : 'Ends: ${_formatTime(item.endAt!)}'}\n'
+                      '${item.endAt == null ? '' : 'Ends: ${_formatTime(item.endAt!)}\n'}'
                       'Matches: ${item.matchedInterests.map((interest) => interest.displayName).join(', ')}',
                     ),
                   ),

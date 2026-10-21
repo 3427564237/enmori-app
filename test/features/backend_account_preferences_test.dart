@@ -12,6 +12,37 @@ import 'package:enmori/features/account/domain/account_repository.dart';
 
 void main() {
   test(
+    'default booleans decode legacy as off and reject malformed present values',
+    () async {
+      final settings = <String, dynamic>{
+        'checkInVisibility': 'private',
+        'optionalProcessingConsent': 'rejected',
+        'revision': 0,
+      };
+      final client = BackendApiClient(
+        Uri.parse('https://example.invalid'),
+        () async => const Success('synthetic'),
+        httpClient: MockClient(
+          (_) async => http.Response(jsonEncode({'settings': settings}), 200),
+        ),
+      );
+      addTearDown(client.close);
+      final repository = BackendAccountPreferencesRepository(client);
+      final legacy = await repository.readSettings() as Success<OwnSettings>;
+      expect(legacy.value.defaultCheckInLocation, isFalse);
+      expect(legacy.value.defaultCheckInWeather, isFalse);
+      settings['defaultCheckInWeather'] = true;
+      final explicit = await repository.readSettings() as Success<OwnSettings>;
+      expect(explicit.value.defaultCheckInWeather, isTrue);
+      expect(explicit.value.defaultCheckInLocation, isFalse);
+      for (final invalid in ['true', null, 1]) {
+        settings['defaultCheckInLocation'] = invalid;
+        expect(await repository.readSettings(), isA<Failure<OwnSettings>>());
+      }
+    },
+  );
+
+  test(
     'malformed Profile names fail closed instead of rendering unsafe content',
     () async {
       Object? name;

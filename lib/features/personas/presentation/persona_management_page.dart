@@ -165,7 +165,7 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
           ? const PersonaLoading()
           : ListView(
               key: const Key('route-persona-management'),
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               children: [
                 PersonaStatusPanel(
                   state: state,

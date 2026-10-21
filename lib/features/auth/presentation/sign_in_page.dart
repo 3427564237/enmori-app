@@ -57,21 +57,20 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Sign in')),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: ListView(
               key: const Key('route-sign-in'),
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               children: [
                 Text(
                   'Sign in to ENMORI',
-                  style: Theme.of(context).textTheme.headlineMedium,
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Continue an existing account or recover your session.',
-                ),
+                const Text('Welcome back.'),
                 const SizedBox(height: 24),
                 Form(
                   key: _formKey,

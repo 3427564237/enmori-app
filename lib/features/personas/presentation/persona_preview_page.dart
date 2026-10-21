@@ -50,11 +50,12 @@ final class _PersonaPreviewPageState extends ConsumerState<PersonaPreviewPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Try Your Persona')),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

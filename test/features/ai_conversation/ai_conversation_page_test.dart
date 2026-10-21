@@ -264,19 +264,11 @@ void main() {
         final field = tester.widget<TextField>(input);
         const selection = TextSelection(baseOffset: 3, extentOffset: 9);
         field.controller!.selection = selection;
-        if (social) {
-          await _tap(tester, 'ai-conversation-actions');
-        }
-        // Invoke the exact action without moving platform focus to a pointer.
+        // Invoke the visible new-conversation action without moving focus.
         if (social) {
           tester
-              .widget<PopupMenuButton<String>>(
-                find.byKey(const Key('ai-conversation-actions')),
-              )
-              .onSelected!('new');
-          Navigator.of(
-            tester.element(find.byKey(const Key('ai-new-conversation'))),
-          ).pop();
+              .widget<IconButton>(find.byKey(const Key('ai-new-conversation')))
+              .onPressed!();
         } else {
           tester
               .widget<OutlinedButton>(
@@ -412,7 +404,7 @@ void main() {
       ),
     );
     await _pump(tester, controller, socialStyle: true);
-    final settingsContext = tester.element(find.byIcon(Icons.tune));
+    final settingsContext = tester.element(find.byIcon(Icons.menu));
     final settingsFocus = Focus.of(settingsContext);
     settingsFocus.requestFocus();
     await tester.pumpAndSettle();
@@ -1382,6 +1374,16 @@ FilledButton _filledButton(WidgetTester tester, String key) =>
 Future<void> _tap(WidgetTester tester, String key) async {
   await tester.pump();
   final finder = find.byKey(Key(key));
+  if (key.startsWith('ai-history') &&
+      finder.evaluate().isEmpty &&
+      find.byTooltip('Open conversation menu').evaluate().isNotEmpty) {
+    await tester.tap(find.byTooltip('Open conversation menu'));
+    await tester.pumpAndSettle();
+    if (key != 'ai-history' && finder.evaluate().isEmpty) {
+      await tester.tap(find.byKey(const Key('ai-history')));
+      await tester.pumpAndSettle();
+    }
+  }
   if (finder.evaluate().isEmpty) {
     await tester.scrollUntilVisible(
       finder,

@@ -118,12 +118,16 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
   Future<void> saveSettings(
     CheckInVisibility visibility,
     OptionalProcessingConsent consent, {
+    bool? defaultCheckInLocation,
+    bool? defaultCheckInWeather,
     FieldPrivacy? fieldPrivacy,
   }) async {
     final settings = state.settings;
     if (state.phase != PreferencesPhase.ready || settings == null) return;
     await _save(
       () => _repository.saveSettings(
+        defaultCheckInLocation: defaultCheckInLocation,
+        defaultCheckInWeather: defaultCheckInWeather,
         fieldPrivacy: fieldPrivacy,
         visibility: visibility,
         consent: consent,

@@ -30,6 +30,7 @@ final class CheckInSaveReceipt {
 
 abstract interface class CheckInPlaceRepository {
   Future<Result<CheckInSaveReceipt>> create({
+    String? locationLabel,
     required String note,
     String? mood,
     String? activity,

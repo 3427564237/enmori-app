@@ -42,6 +42,7 @@ final class CheckInEditController extends Notifier<CheckInEditState> {
     CheckInVisibility visibility, {
     String? mood,
     String? activity,
+    String? locationLabel,
   }) async {
     if (state.pending) return;
     final normalized = normalizeCheckInNote(note, mood: mood);
@@ -59,6 +60,7 @@ final class CheckInEditController extends Notifier<CheckInEditState> {
       visibility: visibility,
       mood: mood,
       activity: activity,
+      locationLabel: locationLabel,
       expectedRevision: current.revision,
     );
     if (!ref.mounted || generation != _generation) return;

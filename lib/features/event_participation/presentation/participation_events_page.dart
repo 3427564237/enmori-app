@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../event_browse/domain/activity_repository.dart';
 import 'event_batches_controller.dart';
 import 'event_card.dart';
-import 'participation_controls.dart';
 
 /// Explicit next source batches, with display-only categories and stable dedupe.
 final class ParticipationEventsPage extends ConsumerStatefulWidget {
@@ -52,14 +51,22 @@ final class _ParticipationEventsPageState
           ..sort();
     if (_category != null && !categories.contains(_category)) _category = null;
     return Scaffold(
-      appBar: AppBar(title: const Text('Events')),
+      appBar: AppBar(
+        title: const Text('Events'),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh events',
+            onPressed: state.busy ? null : controller.load,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           children: [
-            const Text(
-              'Source: Ticketmaster · current eligible batches, not the full catalogue. ENMORI sends the activity request and server connection information, not your sign-in token, profile or private content. Category labels are source labels, not new interest mappings.',
-            ),
+            const Text('Browse current events from Ticketmaster.'),
+            const SizedBox(height: 16),
             if (state.busy) const Text('Loading activities…'),
             if (state.failure case final failure?) Text(failure.message),
             if (value != null) ...[
@@ -95,12 +102,6 @@ final class _ParticipationEventsPageState
                     }
                   },
                 ),
-                if (item.eventId case final id?)
-                  ParticipationControls(key: ValueKey('list-$id'), eventId: id)
-                else
-                  const Text(
-                    'Participation unavailable: this source view has no stable Event ID.',
-                  ),
               ],
               if (value.nextCursor != null)
                 TextButton(
@@ -123,8 +124,16 @@ final class _ParticipationEventsPageState
                 value == null && state.failure != null ? 'Retry' : 'Reload',
               ),
             ),
-            const Text(
-              'Source views expire after five minutes and clear in the background. Opening the source website is not registration or payment.',
+            const ExpansionTile(
+              title: Text('About these events'),
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Text(
+                    'Ticketmaster supplies this available selection, not its full catalogue. ENMORI sends the activity request and server connection information, not your sign-in token, profile or private content. Category labels are source labels, not new interest mappings. Views expire after five minutes. Opening the source website does not register or pay for an event.',
+                  ),
+                ),
+              ],
             ),
           ],
         ),

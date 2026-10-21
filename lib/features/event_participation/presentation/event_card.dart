@@ -40,17 +40,45 @@ final class EventCard extends StatelessWidget {
         category = event?.categoryLabel ?? summary?.categoryLabel;
     return Card(
       key: ValueKey('event-card-${id ?? summary?.browseId}'),
+      clipBehavior: Clip.antiAlias,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Container(
+              height: 88,
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.event_outlined,
+                    size: 32,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      category ?? 'Event',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  const Icon(Icons.arrow_outward),
+                ],
+              ),
+            ),
             Text(title, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            Text('Starts: $start'),
-            Text(end == null ? 'End time not provided.' : 'Ends: $end'),
+            Text(start, style: Theme.of(context).textTheme.labelLarge),
+            if (end != null) Text('Until $end'),
             Text(location ?? 'Location not provided.'),
-            if (category != null) Text(category),
+
             if (event?.shortDescription case final description?)
               Text(description),
             if (authorizedReason case final reason?) Text(reason),
@@ -58,7 +86,7 @@ final class EventCard extends StatelessWidget {
               Text('$count visible participants'),
             const SizedBox(height: 8),
             if (onSelect != null && id != null)
-              OutlinedButton.icon(
+              TextButton.icon(
                 onPressed: () => onSelect!(id),
                 icon: const Icon(Icons.event),
                 label: const Text('Event details'),

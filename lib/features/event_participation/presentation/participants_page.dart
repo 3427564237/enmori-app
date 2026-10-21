@@ -64,9 +64,9 @@ final class _EventParticipantsPageState
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           children: [
-            if (state.busy) const Text('Loading authorized participants…'),
+            if (state.busy) const Text('Loading participants…'),
             if (state.failure case final failure?) Text(failure.message),
             if (page != null && state.failure == null && !state.busy) ...[
               Text(
@@ -82,6 +82,10 @@ final class _EventParticipantsPageState
                 ),
               for (final item in page.items)
                 ListTile(
+                  leading: CircleAvatar(
+                    child: Text(item.username.substring(0, 1).toUpperCase()),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
                   title: Text(item.displayName ?? item.username),
                   subtitle: item.displayName == null
                       ? null

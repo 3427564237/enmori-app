@@ -62,17 +62,18 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       _OnboardingStep.choice => 'Choose your initial settings',
     };
     return Scaffold(
-      appBar: AppBar(title: const Text('Onboarding')),
+      appBar: AppBar(title: const Text('Set up your account')),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
             child: ListView(
               key: const Key('route-onboarding'),
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               children: [
                 const VerifyEmailButton(),
-                Text(title, style: Theme.of(context).textTheme.headlineMedium),
+                Text(title, style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 16),
                 ...switch (_step) {
                   _OnboardingStep.username => _usernameStep(),

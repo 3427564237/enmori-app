@@ -356,7 +356,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
           : ListView(
               controller: _scroll,
               key: Key(create ? 'route-persona-create' : 'route-persona-edit'),
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               children: [
                 if (_unavailable) ...[
                   const Text('This Persona is unavailable.'),
@@ -428,7 +428,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                                 : _nameCorrection,
                             onChanged: (_) => setState(() {}),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
                           DropdownButtonFormField<PersonaTone>(
                             key: const Key('persona-tone'),
                             initialValue: _tone,
@@ -454,7 +454,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                                   }
                                 : null,
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
                           DropdownButtonFormField<PersonaResponseLength>(
                             key: const Key('persona-response-length'),
                             initialValue: _responseLength,
@@ -478,7 +478,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                                   }
                                 : null,
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
                           DropdownButtonFormField<PersonaFormatStyle>(
                             key: const Key('persona-format'),
                             initialValue: _formatStyle,
@@ -502,9 +502,9 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                                   }
                                 : null,
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
                           Text(
-                            'Make it your own',
+                            'Personal expression',
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const SizedBox(height: 8),
@@ -529,7 +529,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                               onChanged: (_) => setState(() {}),
                             ),
                           ],
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
                           OutlinedButton.icon(
                             key: const Key('persona-preview'),
                             onPressed: enabled ? _preview : null,
@@ -541,7 +541,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                             'Try the current draft without saving, activating '
                             'or adding to conversation history.',
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
                           FilledButton(
                             key: const Key('persona-save'),
                             onPressed:

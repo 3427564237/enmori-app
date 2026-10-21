@@ -114,6 +114,7 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
     required String note,
     String? mood,
     String? activity,
+    String? locationLabel,
     required CheckInVisibility visibility,
   }) async {
     if (!_valid(expectedEpoch) || state.busy || state.savedId != null) return;
@@ -130,6 +131,7 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
       value,
       mood,
       activity,
+      locationLabel,
       visibility.name,
       place?.toJson(),
     ]);
@@ -153,6 +155,7 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
         note: value,
         mood: mood,
         activity: activity,
+        locationLabel: locationLabel,
         visibility: visibility,
         place: place,
         idempotencyKey: _key!,

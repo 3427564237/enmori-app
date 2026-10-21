@@ -85,7 +85,7 @@ final class FriendModulePage extends ConsumerWidget {
             appBar: AppBar(title: const Text('People You May Want To Know')),
             body: SafeArea(
               child: ListView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(16),
                 children: [
                   FriendDiscoveryPanel(
                     home: false,
@@ -103,7 +103,7 @@ final class FriendModulePage extends ConsumerWidget {
       appBar: AppBar(title: const Text('Friends')),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           children: [
             Wrap(
               spacing: 8,
@@ -137,7 +137,7 @@ final class FriendModulePage extends ConsumerWidget {
                     appBar: AppBar(title: const Text('Friends Activity')),
                     body: SafeArea(
                       child: ListView(
-                        padding: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.all(16),
                         children: [
                           FriendActivityPanel(
                             onOpenEvent: onOpenEvent,

@@ -24,6 +24,7 @@ class _Repository implements CheckInRepository, CheckInMutations {
   bool conflict = false;
   @override
   Future<Result<CheckIn>> update({
+    String? locationLabel,
     required String checkInId,
     String? mood,
     String? activity,
@@ -66,6 +67,7 @@ class _Repository implements CheckInRepository, CheckInMutations {
       Success(current!);
   @override
   Future<Result<CheckIn>> create({
+    String? locationLabel,
     String? mood,
     String? activity,
     CheckInVisibility? visibility,
@@ -121,6 +123,8 @@ void main() {
         find.byKey(const Key('check-in-edit-note')),
         'Revised',
       );
+      await tester.ensureVisible(find.byKey(const Key('check-in-edit-save')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('check-in-edit-save')));
       await tester.pump();
       await tester.tap(find.byKey(const Key('check-in-edit-save')));
@@ -149,6 +153,8 @@ void main() {
         find.byKey(const Key('check-in-edit-note')),
         'Unsaved',
       );
+      await tester.ensureVisible(find.byKey(const Key('check-in-edit-save')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('check-in-edit-save')));
       await tester.pumpAndSettle();
       expect(find.textContaining('Your draft is still here'), findsOneWidget);
