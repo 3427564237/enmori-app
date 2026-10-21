@@ -77,6 +77,44 @@ void main() {
     expect(h.placeState.place, isNull);
     expect(h.placeState.busy, isFalse);
   });
+  for (final oldResult in <Result<GeoPoint>>[
+    const Success(GeoPoint(1.1, 103.1)),
+    const Failure(unavailable),
+  ]) {
+    test(
+      'superseded default capture cannot change a newer manual point: ${oldResult.runtimeType}',
+      () async {
+        final h = await harness();
+        const enabled = OwnSettings(
+          defaultCheckInLocation: true,
+          defaultCheckInWeather: true,
+          checkInVisibility: CheckInVisibility.private,
+          consent: OptionalProcessingConsent.rejected,
+          revision: 2,
+        );
+        h.preferences.settings = enabled;
+        final oldGps = Completer<Result<GeoPoint>>();
+        h.location.pending = oldGps;
+        final oldCapture = h.place.captureDefaults(enabled);
+        expect(h.placeState.busy, isTrue);
+        h.place.clear();
+        h.location.pending = null;
+        const manualPoint = GeoPoint(1.4, 103.9);
+        h.location.result = const Success(manualPoint);
+        await h.place.capture(expectedEpoch: h.place.epoch);
+        final manualState = h.placeState;
+        expect(manualState.place!.includeWeather, isFalse);
+        oldGps.complete(oldResult);
+        await oldCapture;
+        expect(h.placeState, same(manualState));
+        expect(h.placeState.place!.location, manualPoint);
+        expect(h.placeState.place!.includeWeather, isFalse);
+        expect(h.placeState.place!.settingsRevision, isNull);
+        expect(h.preferences.settingsReadCount, 0);
+        expect(h.location.calls, [true, true]);
+      },
+    );
+  }
   test('guarded GET still rejects creation status and revoked POST never dispatches', () async {
     var dispatched = 0;
     final client = BackendApiClient(
