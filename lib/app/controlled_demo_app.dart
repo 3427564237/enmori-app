@@ -5,6 +5,9 @@ import '../features/event_participation/participation_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../core/presentation/enmori_motion.dart';
+
 import 'package:http/http.dart' as http;
 
 import '../core/network/backend_api_client.dart';
@@ -283,6 +286,7 @@ final class _ConnectedPages extends ConsumerWidget {
       title: 'ENMORI',
       debugShowCheckedModeBanner: false,
       theme: socialDemoTheme(),
+      builder: (context, child) => EnmoriMotionPreferences(child: child!),
       routerConfig: ref.watch(appRouterProvider),
     );
   }

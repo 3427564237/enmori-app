@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_motion.dart';
+
 import '../../event_browse/domain/activity_repository.dart';
 import 'event_batches_controller.dart';
 import 'event_card.dart';
@@ -75,12 +77,14 @@ final class _ParticipationEventsPageState
                   spacing: 8,
                   children: [
                     ChoiceChip(
+                      chipAnimationStyle: EnmoriMotion.chips(context),
                       label: const Text('All categories'),
                       selected: _category == null,
                       onSelected: (_) => setState(() => _category = null),
                     ),
                     for (final c in categories)
                       ChoiceChip(
+                        chipAnimationStyle: EnmoriMotion.chips(context),
                         label: Text(c),
                         selected: _category == c,
                         onSelected: (_) => setState(() => _category = c),
@@ -95,6 +99,7 @@ final class _ParticipationEventsPageState
                 (s) => _category == null || s.categoryLabel == _category,
               )) ...[
                 EventCard.summary(
+                  key: ValueKey(item.eventId ?? item.browseId),
                   summary: item,
                   onSelect: (id) {
                     if (controller.isCurrentSnapshot(state)) {

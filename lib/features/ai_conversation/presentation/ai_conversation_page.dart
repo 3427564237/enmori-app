@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_motion.dart';
+
 import '../ai_conversation_providers.dart';
 
 Widget buildAiConversationPage(
@@ -222,6 +224,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
 
   Widget _historyPanel(AiConversationState state) => ExpansionTile(
     key: const Key('ai-history'),
+    expansionAnimationStyle: EnmoriMotion.surface(context),
     leading: const Icon(Icons.history),
     title: const Text('Conversation history'),
     onExpansionChanged: (open) {
@@ -738,12 +741,26 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       ],
       if (!contentHidden) ...[
         for (final message in state.messages)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 7),
-            child: _MessageTile(message: message, bubble: true),
+          MotionReveal(
+            key: ValueKey('arrival-${message.messageId}'),
+            enabled:
+                message == state.messages.last &&
+                state.phase == AiConversationPhase.success,
+            distance: 8,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 7),
+              child: _MessageTile(message: message, bubble: true),
+            ),
           ),
         if (state.localOutgoingText case final text?)
-          _LocalOutgoing(text: text, identity: state.localOutgoingKey!),
+          MotionReveal(
+            key: ValueKey(state.localOutgoingKey!),
+            distance: 8,
+            child: _LocalOutgoing(
+              text: text,
+              identity: state.localOutgoingKey!,
+            ),
+          ),
         if (state.canCancel)
           Align(
             alignment: Alignment.centerLeft,
@@ -759,9 +776,13 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         Semantics(
           key: const Key('ai-status'),
           liveRegion: true,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(status, style: Theme.of(context).textTheme.bodySmall),
+          child: MotionReveal(
+            trigger: status,
+            distance: 0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(status, style: Theme.of(context).textTheme.bodySmall),
+            ),
           ),
         ),
       if (state.canCancel)
@@ -969,10 +990,15 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                     key: const Key('route-ai-conversation'),
                     children: [
                       Expanded(
-                        child: ListView(
-                          primary: true,
-                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                          children: content,
+                        child: MotionReveal(
+                          trigger: state.conversationId,
+                          enabled: !contentHidden,
+                          distance: 4,
+                          child: ListView(
+                            primary: true,
+                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                            children: content,
+                          ),
                         ),
                       ),
                       if (!contentHidden)

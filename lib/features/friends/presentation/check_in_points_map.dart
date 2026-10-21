@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/presentation/enmori_motion.dart';
+
 import '../domain/social_repository.dart';
 
 final class CheckInPointsMap extends StatefulWidget {
@@ -24,16 +26,23 @@ final class CheckInPointsMap extends StatefulWidget {
 
 final class _CheckInPointsMapState extends State<CheckInPointsMap> {
   bool _tileError = false, _linkError = false;
+  String? _selectedPointId;
   @override
   void didUpdateWidget(covariant CheckInPointsMap old) {
     super.didUpdateWidget(old);
-    if (!identical(old.points, widget.points)) _tileError = false;
+    if (!identical(old.points, widget.points)) {
+      _tileError = false;
+      if (!widget.points.any((p) => p.checkInId == _selectedPointId)) {
+        _selectedPointId = null;
+      }
+    }
   }
 
   Future<void> _selectPoint(
     CheckInMapPoint point,
     List<CheckInMapPoint> ordered,
   ) async {
+    setState(() => _selectedPointId = point.checkInId);
     const distance = Distance();
     final nearby = ordered
         .where(
@@ -51,9 +60,7 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
     }
     final selected = await showModalBottomSheet<CheckInMapPoint>(
       context: context,
-      sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
-          ? AnimationStyle.noAnimation
-          : null,
+      sheetAnimationStyle: EnmoriMotion.surface(context),
       builder: (context) => SafeArea(
         child: ListView(
           shrinkWrap: true,
@@ -86,6 +93,7 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
       ),
     );
     if (mounted && selected != null && widget.points.contains(selected)) {
+      setState(() => _selectedPointId = selected.checkInId);
       widget.onSelect(selected);
     }
   }
@@ -171,18 +179,36 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
                         point: coordinates[i],
                         width: 48,
                         height: 48,
-                        child: IconButton(
-                          tooltip:
-                              'Open Check-in ${ordered.indexOf(points[i]) + 1}',
-                          onPressed: () => _selectPoint(points[i], ordered),
-                          icon: Text(
-                            '${ordered.indexOf(points[i]) + 1}',
-                            style: const TextStyle(fontWeight: FontWeight.w700),
+                        child: AnimatedScale(
+                          key: ValueKey(points[i].checkInId),
+                          scale: _selectedPointId == points[i].checkInId
+                              ? 1.08
+                              : 1,
+                          duration: EnmoriMotion.duration(
+                            context,
+                            EnmoriMotion.feedback,
                           ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
+                          curve: EnmoriMotion.settle,
+                          child: IconButton(
+                            tooltip:
+                                'Open Check-in ${ordered.indexOf(points[i]) + 1}',
+                            onPressed: () => _selectPoint(points[i], ordered),
+                            icon: Text(
+                              '${ordered.indexOf(points[i]) + 1}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            style: IconButton.styleFrom(
+                              backgroundColor:
+                                  _selectedPointId == points[i].checkInId
+                                  ? Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer
+                                  : Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest,
+                            ),
                           ),
                         ),
                       ),

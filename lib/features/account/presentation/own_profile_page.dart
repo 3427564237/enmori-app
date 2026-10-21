@@ -3,6 +3,8 @@ import '../../auth/presentation/auth_email_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_motion.dart';
+
 import '../../auth/auth_providers.dart';
 import '../account_preferences_providers.dart';
 import '../domain/account_preferences_repository.dart';
@@ -70,185 +72,190 @@ final class OwnProfilePage extends ConsumerWidget {
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
-            child: ListView(
-              key: const Key('route-own-profile'),
-              padding: const EdgeInsets.all(16),
-              children: [
-                switch (details) {
-                  AsyncData<Result<OwnProfile>>(
-                    value: Success<OwnProfile>(:final value),
-                  ) =>
-                    Column(
+            child: MotionReveal(
+              trigger: (subject, details.runtimeType),
+              child: ListView(
+                key: const Key('route-own-profile'),
+                padding: const EdgeInsets.all(16),
+                children: [
+                  switch (details) {
+                    AsyncData<Result<OwnProfile>>(
+                      value: Success<OwnProfile>(:final value),
+                    ) =>
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 28,
+                                child: Text(
+                                  value.username.substring(0, 1).toUpperCase(),
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      value.displayName ?? value.username,
+                                      key: const Key('profile-name'),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall,
+                                    ),
+                                    Text('@${value.username}'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (value.details.bio case final bio?)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Text(
+                                bio,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                          if (value.details.affiliationName case final name?)
+                            Text(name),
+                          if (value.details.region case final region?)
+                            Text(region),
+                        ],
+                      ),
+                    AsyncData<Result<OwnProfile>>(
+                      value: Failure<OwnProfile>(),
+                    ) ||
+                    AsyncError<Result<OwnProfile>>() => Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 28,
-                              child: Text(
-                                value.username.substring(0, 1).toUpperCase(),
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    value.displayName ?? value.username,
-                                    key: const Key('profile-name'),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall,
-                                  ),
-                                  Text('@${value.username}'),
-                                ],
-                              ),
-                            ),
-                          ],
+                        Text(
+                          state.username ?? 'My profile',
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
-                        if (value.details.bio case final bio?)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Text(
-                              bio,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          ),
-                        if (value.details.affiliationName case final name?)
-                          Text(name),
-                        if (value.details.region case final region?)
-                          Text(region),
+                        const Text('Profile could not be loaded.'),
+                        TextButton(
+                          onPressed: subject == null
+                              ? null
+                              : () => ref.invalidate(
+                                  ownProfileDetailsProvider(subject),
+                                ),
+                          child: const Text('Reload profile'),
+                        ),
                       ],
                     ),
-                  AsyncData<Result<OwnProfile>>(value: Failure<OwnProfile>()) ||
-                  AsyncError<Result<OwnProfile>>() => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    _ => const LinearProgressIndicator(),
+                  },
+                  const SizedBox(height: 20),
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 12,
                     children: [
                       Text(
-                        state.username ?? 'My profile',
-                        style: Theme.of(context).textTheme.headlineSmall,
+                        'Interests',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      const Text('Profile could not be loaded.'),
-                      TextButton(
-                        onPressed: subject == null
+                      TextButton.icon(
+                        key: const Key('profile-edit-interests'),
+                        onPressed: state.username == null
                             ? null
-                            : () => ref.invalidate(
-                                ownProfileDetailsProvider(subject),
-                              ),
-                        child: const Text('Reload profile'),
+                            : () async {
+                                final controller = ref.read(
+                                  ownProfileControllerProvider.notifier,
+                                );
+                                await onEditInterests();
+                                if (context.mounted &&
+                                    ref.read(currentAuthSubjectProvider) ==
+                                        subject) {
+                                  await controller.load();
+                                }
+                              },
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: const Text('Edit interests'),
                       ),
                     ],
                   ),
-                  _ => const LinearProgressIndicator(),
-                },
-                const SizedBox(height: 20),
-                Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 12,
-                  children: [
-                    Text(
-                      'Interests',
-                      style: Theme.of(context).textTheme.titleLarge,
+                  if (state.phase == OwnProfilePhase.loading)
+                    const LinearProgressIndicator(key: Key('profile-loading'))
+                  else if (state.phase == OwnProfilePhase.failed)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Interests could not be loaded.'),
+                      trailing: TextButton(
+                        onPressed: () => ref
+                            .read(ownProfileControllerProvider.notifier)
+                            .load(),
+                        child: const Text('Retry'),
+                      ),
+                    )
+                  else if (state.interests.isEmpty)
+                    const Text('No interests selected.')
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final tag in state.interests)
+                          Chip(
+                            label: Text(tag.displayName),
+                            avatar:
+                                tag.lifecycleState ==
+                                    InterestLifecycleState.inactive
+                                ? const Tooltip(
+                                    message: 'No longer available — you can remove it.',
+                                    child: Icon(Icons.info_outline, size: 18),
+                                  )
+                                : null,
+                          ),
+                      ],
                     ),
-                    TextButton.icon(
-                      key: const Key('profile-edit-interests'),
-                      onPressed: state.username == null
-                          ? null
-                          : () async {
-                              final controller = ref.read(
-                                ownProfileControllerProvider.notifier,
-                              );
-                              await onEditInterests();
-                              if (context.mounted &&
-                                  ref.read(currentAuthSubjectProvider) ==
-                                      subject) {
-                                await controller.load();
-                              }
-                            },
-                      icon: const Icon(Icons.edit_outlined, size: 18),
-                      label: const Text('Edit interests'),
-                    ),
-                  ],
-                ),
-                if (state.phase == OwnProfilePhase.loading)
-                  const LinearProgressIndicator(key: Key('profile-loading'))
-                else if (state.phase == OwnProfilePhase.failed)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Interests could not be loaded.'),
-                    trailing: TextButton(
-                      onPressed: () => ref
-                          .read(ownProfileControllerProvider.notifier)
-                          .load(),
-                      child: const Text('Retry'),
-                    ),
-                  )
-                else if (state.interests.isEmpty)
-                  const Text('No interests selected.')
-                else
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final tag in state.interests)
-                        Chip(
-                          label: Text(tag.displayName),
-                          avatar:
-                              tag.lifecycleState ==
-                                  InterestLifecycleState.inactive
-                              ? const Tooltip(
-                                  message: 'No longer available — you can remove it.',
-                                  child: Icon(Icons.info_outline, size: 18),
-                                )
-                              : null,
-                        ),
-                    ],
-                  ),
-                const SizedBox(height: 20),
-                Text(
-                  'Your records',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                if (onOpenHistory != null)
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.history),
-                      title: const Text('Check-in History'),
-                      subtitle: const Text('Notes, moods and saved moments'),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: onOpenHistory,
-                    ),
-                  ),
-                if (onOpenFootprint != null)
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.map_outlined),
-                      title: const Text('Footprint'),
-                      subtitle: const Text('Your Check-in locations'),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: onOpenFootprint,
-                    ),
-                  ),
-                if (onOpenHistory == null &&
-                    onOpenRecords != null &&
-                    state.username != null)
-                  ListTile(
-                    leading: const Icon(Icons.calendar_month),
-                    title: const Text('My records, calendar & map'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => onOpenRecords!(state.username!),
-                  ),
-                if (participationSection != null) ...[
                   const SizedBox(height: 20),
-                  participationSection!,
+                  Text(
+                    'Your records',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  if (onOpenHistory != null)
+                    Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.history),
+                        title: const Text('Check-in History'),
+                        subtitle: const Text('Notes, moods and saved moments'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: onOpenHistory,
+                      ),
+                    ),
+                  if (onOpenFootprint != null)
+                    Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.map_outlined),
+                        title: const Text('Footprint'),
+                        subtitle: const Text('Your Check-in locations'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: onOpenFootprint,
+                      ),
+                    ),
+                  if (onOpenHistory == null &&
+                      onOpenRecords != null &&
+                      state.username != null)
+                    ListTile(
+                      leading: const Icon(Icons.calendar_month),
+                      title: const Text('My records, calendar & map'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => onOpenRecords!(state.username!),
+                    ),
+                  if (participationSection != null) ...[
+                    const SizedBox(height: 20),
+                    participationSection!,
+                  ],
+                  const SizedBox(height: 20),
+                  const VerifyEmailButton(),
                 ],
-                const SizedBox(height: 20),
-                const VerifyEmailButton(),
-              ],
+              ),
             ),
           ),
         ),

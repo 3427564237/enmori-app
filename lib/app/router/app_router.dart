@@ -297,6 +297,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (aiPage != null)
         GoRoute(
           path: AppRoutes.aiAssistant,
+          name: 'root-ai',
           builder: (context, state) => aiPage.build(
             context,
             onBack: () => backFromShared(context, AppRoutes.aiAssistant),
@@ -344,6 +345,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isolatedSlices)
         GoRoute(
           path: '/friends',
+          name: 'root-friends',
           builder: (context, state) => rootTab(
             context,
             '/friends',
@@ -406,6 +408,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.home,
+        name: 'root-home',
         builder: (context, state) => HomeShellPage(
           socialSection: remoteGroup ? const GroupHomeSocial() : null,
           socialStyle: socialPresentation,
@@ -493,6 +496,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.profile,
+        name: 'root-profile',
         builder: (context, state) => rootTab(
           context,
           AppRoutes.profile,

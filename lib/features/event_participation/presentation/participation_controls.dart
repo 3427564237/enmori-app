@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_motion.dart';
+
 import '../../auth/auth_providers.dart';
 import '../participation_providers.dart';
 import '../domain/participation_repository.dart';
@@ -46,10 +48,14 @@ final class _ParticipationControlsState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          value == null
-              ? 'Participation not loaded.'
-              : 'Your participation: ${value.status.name}${value.ignored ? ' · recommendation ignored' : ''}',
+        MotionReveal(
+          trigger: (value?.status, value?.ignored),
+          distance: 0,
+          child: Text(
+            value == null
+                ? 'Participation not loaded.'
+                : 'Your participation: ${value.status.name}${value.ignored ? ' · recommendation ignored' : ''}',
+          ),
         ),
         if (entry?.busy == true) const Text('Loading participation…'),
         if (entry?.failure case final failure?) Text(failure.message),

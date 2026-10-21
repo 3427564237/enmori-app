@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/presentation/enmori_motion.dart';
+
 /// Shared by the app and controlled preview. Feature pages inherit these tokens.
 ThemeData enmoriTheme() {
   const green = Color(0xff244b3f);
@@ -39,6 +41,16 @@ ThemeData enmoriTheme() {
   );
   return base.copyWith(
     scaffoldBackgroundColor: paper,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: EnmoriPageTransitions(),
+        TargetPlatform.iOS: EnmoriPageTransitions(cupertino: true),
+        TargetPlatform.macOS: EnmoriPageTransitions(cupertino: true),
+        TargetPlatform.linux: EnmoriPageTransitions(),
+        TargetPlatform.windows: EnmoriPageTransitions(),
+        TargetPlatform.fuchsia: EnmoriPageTransitions(),
+      },
+    ),
     textTheme: text,
     appBarTheme: AppBarTheme(
       backgroundColor: paper,
@@ -77,6 +89,7 @@ ThemeData enmoriTheme() {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
+        animationDuration: EnmoriMotion.feedback,
         minimumSize: const Size(48, 48),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         shape: buttonShape,
@@ -84,6 +97,7 @@ ThemeData enmoriTheme() {
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
+        animationDuration: EnmoriMotion.feedback,
         minimumSize: const Size(48, 48),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         shape: buttonShape,
@@ -91,6 +105,7 @@ ThemeData enmoriTheme() {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
+        animationDuration: EnmoriMotion.feedback,
         minimumSize: const Size(48, 48),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         shape: buttonShape,
@@ -98,6 +113,7 @@ ThemeData enmoriTheme() {
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
+        animationDuration: EnmoriMotion.feedback,
         minimumSize: const Size(48, 48),
         shape: buttonShape,
       ),
