@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/providers.dart';
 import '../../../core/result/result.dart';
+import '../../../core/presentation/local_time.dart';
 import '../../auth/auth_providers.dart';
 import '../../auth/domain/auth_repository.dart';
 import '../domain/friend_activity_repository.dart';
@@ -356,7 +357,12 @@ final class FriendActivityContent extends StatelessWidget {
       ),
       Text('@${item.username}'),
       Text(item.type.label),
-      Text('${item.occurredAt.toLocal()}'),
+      const SizedBox(height: 4),
+      Text(
+        localTimeLabel(context, item.occurredAt),
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
+      const SizedBox(height: 8),
       if (item.eventTitle case final title?) Text(title),
       if (item.note case final note?) Text(note),
       if (item.mood case final mood?) Text('Mood at this Check-in: $mood'),

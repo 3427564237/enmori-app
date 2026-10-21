@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/presentation/enmori_motion.dart';
+import '../../../core/presentation/local_time.dart';
 
 import '../../event_detail/domain/event_detail_repository.dart';
 import '../../event_browse/domain/activity_repository.dart';
@@ -36,11 +37,11 @@ final class EventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final id = event?.eventId ?? summary?.eventId,
         title = event?.title ?? summary!.title;
-    final start = _localTime(
+    final start = DateTime.tryParse(
       event?.startAt.toIso8601String() ?? summary!.startAt,
     );
-    final endValue = event?.endAt?.toIso8601String() ?? summary?.endAt;
-    final end = endValue == null ? null : _localTime(endValue);
+    final end = event?.endAt ?? DateTime.tryParse(summary?.endAt ?? '');
+    final open = onSelect != null && id != null ? () => onSelect!(id) : null;
     final location = event?.locationLabel ?? summary?.locationLabel,
         category = event?.categoryLabel ?? summary?.categoryLabel;
     return MotionReveal(
@@ -48,71 +49,85 @@ final class EventCard extends StatelessWidget {
       child: Card(
         key: ValueKey('event-card-${id ?? summary?.browseId}'),
         clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 56,
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            InkWell(
+              key: ValueKey('event-open-${id ?? summary?.browseId}'),
+              onTap: open,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.event_outlined,
-                      size: 26,
-                      color: Theme.of(context).colorScheme.primary,
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primaryContainer,
+                          child: const Icon(Icons.event_outlined),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            category ?? 'Event',
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                        ),
+                        if (open != null) const Icon(Icons.chevron_right),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        category ?? 'Event',
-                        style: Theme.of(context).textTheme.titleMedium,
+                    const SizedBox(height: 12),
+                    Text(title, style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 8),
+                    Text(
+                      start == null
+                          ? 'Time unavailable'
+                          : localTimeLabel(context, start),
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    if (end != null)
+                      Text('Until ${localTimeLabel(context, end)}'),
+                    const SizedBox(height: 4),
+                    Text(location ?? 'Location not provided.'),
+                    if (event?.shortDescription case final description?) ...[
+                      const SizedBox(height: 8),
+                      Text(description),
+                    ],
+                    if (authorizedReason case final reason?) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        reason,
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
-                    ),
-                    const Icon(Icons.arrow_outward),
+                    ],
+                    if (visibleParticipantCount case final count?
+                        when count >= 0)
+                      Text('$count visible participants'),
+                    if (open != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Event details',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 8),
-              Text(start, style: Theme.of(context).textTheme.labelLarge),
-              if (end != null) Text('Until $end'),
-              Text(location ?? 'Location not provided.'),
-
-              if (event?.shortDescription case final description?)
-                Text(description),
-              if (authorizedReason case final reason?) Text(reason),
-              if (visibleParticipantCount case final count? when count >= 0)
-                Text('$count visible participants'),
-              const SizedBox(height: 8),
-              if (onSelect != null && id != null)
-                TextButton.icon(
-                  onPressed: () => onSelect!(id),
-                  icon: const Icon(Icons.event),
-                  label: const Text('Event details'),
-                ),
-              if (actions != null) ...[const SizedBox(height: 8), actions!],
+            ),
+            if (actions != null) ...[
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                child: actions!,
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );
   }
-}
-
-String _localTime(String value) {
-  final date = DateTime.tryParse(value)?.toLocal();
-  if (date == null) return 'Time unavailable';
-  String two(int number) => number.toString().padLeft(2, '0');
-  return '${date.year}-${two(date.month)}-${two(date.day)} ${two(date.hour)}:${two(date.minute)} (local time)';
 }
