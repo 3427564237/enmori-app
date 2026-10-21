@@ -1,3 +1,15 @@
+## 21 October PM follow-up: local fixes and wireless demonstration
+
+See [the confirmed decision](../../decisions/2026-10-21-li-wireless-demo-and-local-ownership.md).
+LI directly owns the small participation-label and shared EventCard time display
+fixes; do not wait for SHI to implement them merely to distribute work evenly.
+Retain independent review and avoid overlapping edits with an active teammate.
+The next demonstration entry must work over the same Wi-Fi/hotspot without USB
+or ADB. v14 remains the USB coretest checkpoint, not the final release. Host-local
+Ollama is retained; no public server exposure or Emulator-guard bypass is selected.
+
+---
+
 ## 21 October continuation checkpoint (operational baseline update)
 
 Continue in `/home/miku/.codex/worktrees/li-zhou-integration-oct20/ENMORI`, branch
