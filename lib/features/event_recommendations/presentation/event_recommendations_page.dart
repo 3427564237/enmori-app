@@ -6,6 +6,12 @@ import '../../../core/result/result.dart';
 import '../domain/event_recommendation_repository.dart';
 import 'event_recommendations_controller.dart';
 
+typedef RecommendationCardBuilder = Widget Function(
+  BuildContext context,
+  EventRecommendation event,
+  ValueChanged<String>? onOpen,
+);
+
 const eventEmptyTitle = 'No event recommendations right now';
 const eventEmptyBody = 'Update your interests or check again later.';
 
@@ -13,12 +19,14 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
   const EventRecommendationsSection({
     required this.onSeeAll,
     this.onOpenEvent,
+    this.recommendationCardBuilder,
     this.syntheticPreview = false,
     super.key,
   });
 
   final VoidCallback onSeeAll;
   final void Function(String)? onOpenEvent;
+  final RecommendationCardBuilder? recommendationCardBuilder;
   final bool syntheticPreview;
 
   @override
@@ -66,6 +74,7 @@ final class _EventRecommendationsSectionState
       onSeeAll: widget.onSeeAll,
       home: true,
       onOpenEvent: widget.onOpenEvent,
+      recommendationCardBuilder: widget.recommendationCardBuilder,
       syntheticPreview: widget.syntheticPreview,
     );
   }
@@ -74,10 +83,12 @@ final class _EventRecommendationsSectionState
 final class EventRecommendationsPage extends ConsumerStatefulWidget {
   const EventRecommendationsPage({
     this.onOpenEvent,
+    this.recommendationCardBuilder,
     this.syntheticPreview = false,
     super.key,
   });
   final void Function(String)? onOpenEvent;
+  final RecommendationCardBuilder? recommendationCardBuilder;
   final bool syntheticPreview;
 
   @override
@@ -135,6 +146,7 @@ final class _EventRecommendationsPageState
               state: state,
               onRetry: _load,
               onOpenEvent: widget.onOpenEvent,
+              recommendationCardBuilder: widget.recommendationCardBuilder,
               syntheticPreview: widget.syntheticPreview,
             ),
           ],
@@ -151,6 +163,7 @@ final class _RecommendationContent extends StatelessWidget {
     this.onSeeAll,
     this.home = false,
     this.onOpenEvent,
+    this.recommendationCardBuilder,
     this.syntheticPreview = false,
   });
 
@@ -160,6 +173,7 @@ final class _RecommendationContent extends StatelessWidget {
   final bool home;
   final bool syntheticPreview;
   final void Function(String)? onOpenEvent;
+  final RecommendationCardBuilder? recommendationCardBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -218,6 +232,7 @@ final class _RecommendationContent extends StatelessWidget {
                 items: home ? value.items.take(2).toList() : value.items,
                 onSeeAll: onSeeAll,
                 onOpenEvent: onOpenEvent,
+                recommendationCardBuilder: recommendationCardBuilder,
               ),
     };
     return Column(
@@ -266,10 +281,12 @@ final class _RecommendationList extends StatelessWidget {
     required this.items,
     this.onSeeAll,
     this.onOpenEvent,
+    this.recommendationCardBuilder,
   });
 
   final List<EventRecommendation> items;
   final void Function(String)? onOpenEvent;
+  final RecommendationCardBuilder? recommendationCardBuilder;
   final VoidCallback? onSeeAll;
 
   @override
@@ -280,28 +297,30 @@ final class _RecommendationList extends StatelessWidget {
         ...items.map(
           (item) => Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: Card(
-              child: ListTile(
-                key: Key('event-recommendation-${item.eventId}'),
-                onTap: onOpenEvent == null
-                    ? null
-                    : () => onOpenEvent!(item.eventId),
-                title: Text(item.title),
-                leading: Icon(
-                  Icons.event_outlined,
-                  color: Theme.of(context).colorScheme.primary,
+            child:
+                recommendationCardBuilder?.call(context, item, onOpenEvent) ??
+                Card(
+                  child: ListTile(
+                    key: Key('event-recommendation-${item.eventId}'),
+                    onTap: onOpenEvent == null
+                        ? null
+                        : () => onOpenEvent!(item.eventId),
+                    title: Text(item.title),
+                    leading: Icon(
+                      Icons.event_outlined,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    trailing: onOpenEvent == null
+                        ? null
+                        : const Icon(Icons.chevron_right),
+                    contentPadding: const EdgeInsets.all(16),
+                    subtitle: Text(
+                      '${_formatTime(item.startAt)}\n'
+                      '${item.endAt == null ? 'End time not provided.' : 'Ends: ${_formatTime(item.endAt!)}'}\n'
+                      'Matches: ${item.matchedInterests.map((interest) => interest.displayName).join(', ')}',
+                    ),
+                  ),
                 ),
-                trailing: onOpenEvent == null
-                    ? null
-                    : const Icon(Icons.chevron_right),
-                contentPadding: const EdgeInsets.all(16),
-                subtitle: Text(
-                  '${_formatTime(item.startAt)}\n'
-                  '${item.endAt == null ? 'End time not provided.' : 'Ends: ${_formatTime(item.endAt!)}'}\n'
-                  'Matches: ${item.matchedInterests.map((interest) => interest.displayName).join(', ')}',
-                ),
-              ),
-            ),
           ),
         ),
         if (onSeeAll != null)

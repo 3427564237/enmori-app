@@ -44,6 +44,148 @@ final class AuthDouble implements AuthRepository {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   testWidgets(
+    'explicit Events root connects Home, paged list, detail and saved state',
+    (tester) async {
+      tester.view.physicalSize = const Size(1200, 2200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auth = AuthDouble();
+      var status = 'none', revision = 0;
+      final batchCursors = <String?>[];
+      final client = MockClient((request) async {
+        expect(request.headers['authorization'], 'Bearer synthetic-test-token');
+        final path = request.url.path;
+        Object body;
+        if (path == '/v1/me/onboarding') {
+          body = {
+            'status': 'completed',
+            'account': {
+              'username': 'controlled_primary',
+              'optionalProcessingConsent': 'accepted',
+              'checkInVisibility': 'private',
+              'onboardingCompletedAt': '2026-10-19T00:00:00.000Z',
+            },
+          };
+        } else if (path == '/v1/recommendations/events') {
+          body = {
+            'asOf': '2026-10-21T00:00:00.000Z',
+            'formulaVersion': 'event_recommendation_v1',
+            'items': [
+              {
+                'eventId': 'tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                'title': 'Synthetic integration concert',
+                'startAt': '2026-10-25T00:00:00.000Z',
+                'reasonCode': 'interest_match',
+                'matchedInterests': [
+                  {'interestTagId': 'interest_music', 'displayName': 'Music'},
+                ],
+              },
+            ],
+          };
+        } else if (path ==
+            '/v1/events/tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/participation') {
+          if (request.method == 'PUT') {
+            final change = jsonDecode(request.body) as Map<String, dynamic>;
+            expect(change['expectedRevision'], revision);
+            status = change['status'] as String;
+            revision++;
+          }
+          body = {
+            'participation': {
+              'eventId': 'tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+              'status': status,
+              'ignored': false,
+              'revision': revision,
+              if (revision > 0) 'updatedAt': '2026-10-21T00:00:00.000Z',
+            },
+          };
+        } else if (path ==
+            '/v1/events/tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') {
+          body = {
+            'event': {
+              'eventId': 'tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+              'title': 'Synthetic integration concert',
+              'startAt': '2026-10-25T00:00:00.000Z',
+              'externalSourceUrl': 'https://ticketmaster.sg/event/a',
+            },
+          };
+        } else if (path == '/v1/event-browse') {
+          final cursor = request.url.queryParameters['cursor'];
+          batchCursors.add(cursor);
+          body = {
+            'asOf': '2026-10-21T00:00:00.000Z',
+            'scope': 'ticketmaster_sg_first_batch_v1',
+            'items': cursor == null
+                ? [
+                    {
+                      'browseId': 'tm_YQ',
+                      'eventId': 'tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                      'title': 'Synthetic integration concert',
+                      'startAt': '2026-10-25T00:00:00.000Z',
+                    },
+                  ]
+                : [],
+            if (cursor == null)
+              'nextCursor':
+                  'synthetic.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+          };
+        } else {
+          throw StateError('Unexpected integration request: $path');
+        }
+        return http.Response(
+          jsonEncode(body),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+      await tester.pumpWidget(
+        ControlledDemoApp(
+          baseUri: Uri.parse('https://127.0.0.1:42001/'),
+          auth: auth,
+          client: client,
+          dualAccounts: true,
+          eventParticipationEnabled: true,
+          onClose: () async => const Success(null),
+        ),
+      );
+      await tester.pump();
+      auth.sessions.add(
+        const AuthSessionAuthenticated(subject: 'controlled_primary'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Synthetic integration concert'), findsOneWidget);
+      await tester.ensureVisible(find.text('Interested').first);
+      await tester.tap(find.text('Interested').first);
+      await tester.pumpAndSettle();
+      expect(status, 'interested');
+      expect(revision, 1);
+      await tester.tap(find.text('Event details').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Your participation: interested'), findsOneWidget);
+      final router = GoRouter.of(
+        tester.element(find.text('Your participation: interested')),
+      );
+      expect(
+        router.state.uri.path,
+        '/events/tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/participation',
+      );
+      router.go(AppRoutes.activities);
+      await tester.pumpAndSettle();
+      expect(find.text('Your participation: interested'), findsOneWidget);
+      await tester.tap(find.text('Get next batch'));
+      await tester.pumpAndSettle();
+      expect(batchCursors, [
+        null,
+        'synthetic.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+      ]);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await auth.sessions.close();
+      client.close();
+    },
+  );
+  testWidgets(
     'v2 social Home opens existing recommendations using its authenticated Backend repository',
     (tester) async {
       final auth = AuthDouble();

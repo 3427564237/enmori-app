@@ -1,3 +1,6 @@
+import '../features/event_participation/data/backend_participation_repository.dart';
+import '../features/event_participation/participation_providers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,9 +53,11 @@ final class ControlledDemoApp extends StatefulWidget {
     required this.client,
     required this.onClose,
     this.dualAccounts = false,
+    this.eventParticipationEnabled = false,
     super.key,
   });
   final bool dualAccounts;
+  final bool eventParticipationEnabled;
   final Uri baseUri;
   final AuthRepository auth;
   final http.Client client;
@@ -107,6 +112,13 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       isolatedSlicesEnabledProvider.overrideWithValue(true),
       socialDemoPresentationProvider.overrideWithValue(true),
       activityBrowseEnabledProvider.overrideWithValue(true),
+      eventParticipationEnabledProvider.overrideWithValue(
+        widget.eventParticipationEnabled,
+      ),
+      if (widget.eventParticipationEnabled)
+        participationRepositoryProvider.overrideWithValue(
+          BackendParticipationRepository(_api),
+        ),
       if (widget.dualAccounts)
         eventDetailSourceActionsProvider.overrideWith(
           (ref) => ref.watch(activitySourceActionsProvider),

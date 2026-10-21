@@ -11,18 +11,23 @@ import '../../features/event_participation/presentation/participation_events_pag
 /// after overriding ParticipationRepository, Detail repository and session source.
 List<GoRoute> eventParticipationRoutes({
   required ExternalActivityOpener opener,
-  required ValueChanged<String> onProfile,
+  required void Function(BuildContext, String) onProfile,
+  String listPath = '/participation-events',
+  Widget Function(BuildContext, Widget)? wrapList,
   required bool Function() current,
 }) => [
   GoRoute(
-    path: '/participation-events',
-    builder: (context, state) => ParticipationEventsPage(
-      onSelect: (id) {
-        if (context.mounted && current()) {
-          context.push('/events/${Uri.encodeComponent(id)}/participation');
-        }
-      },
-    ),
+    path: listPath,
+    builder: (context, state) {
+      final page = ParticipationEventsPage(
+        onSelect: (id) {
+          if (context.mounted && current()) {
+            context.push('/events/${Uri.encodeComponent(id)}/participation');
+          }
+        },
+      );
+      return wrapList?.call(context, page) ?? page;
+    },
   ),
   GoRoute(
     path: '/events/:eventId/participation',
@@ -65,7 +70,7 @@ List<GoRoute> eventParticipationRoutes({
           group: group,
         ),
         onProfile: (username) {
-          if (context.mounted && current()) onProfile(username);
+          if (context.mounted && current()) onProfile(context, username);
         },
       );
     },

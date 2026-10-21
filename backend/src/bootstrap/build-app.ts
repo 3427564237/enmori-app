@@ -1,3 +1,5 @@
+import type { createIsolatedEventParticipation } from "./event-participation.js";
+import { registerParticipationRoutes } from "../event-participation/transport/register-routes.js";
 import {registerCheckInCalendar} from "../check-ins/transport/calendar-route.js";
 import type {OwnCheckInCalendar} from "../check-ins/application/check-in-calendar.js";
 import { registerCheckInMutations } from "../check-ins/transport/mutation-routes.js";
@@ -37,7 +39,7 @@ export async function buildApp(
   dependencies: R4RouteDependencies & { readonly checkInCalendar?:OwnCheckInCalendar; readonly editCheckIn?: EditCheckIn; readonly createInterestTag?: CreateInterestTag; readonly recommendEvents?: Pick<RecommendEvents, "execute">;
     readonly accountPreferences?: OwnAccountPreferences;
     readonly controlledPhoneDiagnostics?: ControlledPhoneDiagnostics;
-    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly personaPreview?: PersonaPreviewOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput } },
+    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly personaPreview?: PersonaPreviewOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput; readonly eventParticipation?: ReturnType<typeof createIsolatedEventParticipation> } },
 ): Promise<FastifyInstance> {
   if (dependencies.isolatedSlices !== undefined) {
     requireControlledEmulatorEnvironment(dependencies.isolatedSlices.environment);
@@ -48,7 +50,7 @@ export async function buildApp(
   const app = Fastify({
     logger: false,
     ajv: { customOptions: { removeAdditional: false } },
-    ...(dependencies.isolatedSlices?.eventBrowse !== undefined ? {
+    ...((dependencies.isolatedSlices?.eventBrowse !== undefined || dependencies.isolatedSlices?.eventParticipation !== undefined) ? {
       routerOptions: { maxParamLength: 174 },
       frameworkErrors: buildEventBrowseFrameworkErrors(dependencies.identityVerifier,
         dependencies.getOnboarding, dependencies.isolatedSlices.personas !== undefined),
@@ -85,7 +87,10 @@ export async function buildApp(
     if (dependencies.isolatedSlices.personaPreview !== undefined) {
       await registerPersonaPreviewRoute(app, dependencies.identityVerifier, dependencies.isolatedSlices.personaPreview);
     }
-    if (dependencies.isolatedSlices.eventBrowse !== undefined) {
+    if (dependencies.isolatedSlices.eventParticipation !== undefined) {
+      await registerParticipationRoutes(app, dependencies.identityVerifier, dependencies.isolatedSlices.eventParticipation.operations);
+      await registerEventBrowseRoutes(app, dependencies.identityVerifier, dependencies.isolatedSlices.eventParticipation.browse);
+    } else if (dependencies.isolatedSlices.eventBrowse !== undefined) {
       await registerEventBrowseRoutes(app, dependencies.identityVerifier,
         createIsolatedEventBrowse(dependencies.getOnboarding, dependencies.isolatedSlices.eventBrowse));
     }

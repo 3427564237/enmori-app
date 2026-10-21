@@ -16,6 +16,7 @@ final class HomeShellPage extends StatelessWidget {
     this.onOpenHistory,
     this.onOpenAi,
     this.onOpenEvent,
+    this.recommendationCardBuilder,
     this.onBrowseActivities,
     required this.onSeeAllEvents,
     super.key,
@@ -32,6 +33,7 @@ final class HomeShellPage extends StatelessWidget {
   final VoidCallback? onOpenHistory;
   final VoidCallback? onOpenAi;
   final void Function(String)? onOpenEvent;
+  final RecommendationCardBuilder? recommendationCardBuilder;
   final VoidCallback onSeeAllEvents;
   final VoidCallback? onBrowseActivities;
 
@@ -113,6 +115,7 @@ final class HomeShellPage extends StatelessWidget {
             EventRecommendationsSection(
               onSeeAll: onSeeAllEvents,
               onOpenEvent: onOpenEvent,
+              recommendationCardBuilder: recommendationCardBuilder,
             ),
           ],
         ),
@@ -241,6 +244,7 @@ final class HomeShellPage extends StatelessWidget {
                 EventRecommendationsSection(
                   onSeeAll: onSeeAllEvents,
                   onOpenEvent: onOpenEvent,
+                  recommendationCardBuilder: recommendationCardBuilder,
                 ),
               ],
               const SizedBox(height: 14),

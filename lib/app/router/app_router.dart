@@ -1,3 +1,8 @@
+import '../../features/event_browse/event_browse_providers.dart';
+import '../../features/event_participation/presentation/own_participation_section.dart';
+import '../event_recommendation_card.dart';
+import 'event_participation_routes.dart';
+
 import 'package:flutter/widgets.dart';
 
 import '../social_demo_presentation.dart';
@@ -88,12 +93,24 @@ void selectConnectedSocialTab(
   context.go(paths[index]);
 }
 
+/// Explicit isolated composition only; ordinary/real-account root stays disabled.
+final eventParticipationEnabledProvider = Provider<bool>((ref) => false);
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   // An account-owned route stack must not survive an identity replacement.
   final routeSubject = ref.watch(currentAuthSubjectProvider);
   final isolatedSlices = ref.watch(isolatedSlicesEnabledProvider);
   final socialPresentation = ref.watch(socialDemoPresentationProvider);
   final activitiesEnabled = ref.watch(activityBrowseEnabledProvider);
+  final participationEnabled =
+      isolatedSlices &&
+      activitiesEnabled &&
+      ref.watch(eventParticipationEnabledProvider);
+  final eventOpener = participationEnabled
+      ? ref.watch(externalActivityOpenerProvider)
+      : null;
+  String eventPath(String id) =>
+      '/events/${Uri.encodeComponent(id)}${participationEnabled ? "/participation" : ""}';
   final personaPages = isolatedSlices
       ? ref.watch(isolatedPersonaPagesProvider)
       : null;
@@ -202,7 +219,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       signedOutEntry: ref.read(signOutEntryProvider),
     ),
     routes: [
-      if (activitiesEnabled)
+      if (participationEnabled && eventOpener != null) ...[
+        ...eventParticipationRoutes(
+          opener: eventOpener,
+          current: canNavigateActivity,
+          listPath: AppRoutes.activities,
+          wrapList: (context, child) =>
+              rootTab(context, AppRoutes.activities, 2, child),
+          onProfile: (context, username) =>
+              context.push('/event-people/${Uri.encodeComponent(username)}'),
+        ),
+        GoRoute(
+          path: '/event-people/:username',
+          builder: (context, state) => FriendPage(
+            key: ValueKey(state.pathParameters['username']),
+            initialUsername: state.pathParameters['username'],
+          ),
+        ),
+      ],
+      if (activitiesEnabled && !participationEnabled)
         ...activityRoutes(
           current: canNavigateActivity,
           wrapList: (context, child) =>
@@ -367,8 +402,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           onOpenFriends: isolatedSlices
               ? () => context.push<void>('/friends')
               : null,
+          recommendationCardBuilder: participationEnabled
+              ? (context, event, onOpen) =>
+                    ConnectedRecommendationCard(event: event, onOpen: onOpen)
+              : null,
           onOpenEvent: isolatedSlices
-              ? (id) => context.push<void>('/events/${Uri.encodeComponent(id)}')
+              ? (id) {
+                  if (context.mounted &&
+                      (!participationEnabled || canNavigateActivity())) {
+                    context.push<void>(eventPath(id));
+                  }
+                }
               : null,
           onOpenProfile: () async {
             final subject = ref.read(currentAuthSubjectProvider);
@@ -409,6 +453,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           AppRoutes.profile,
           4,
           OwnProfilePage(
+            participationSection: participationEnabled
+                ? OwnParticipationSection(
+                    onSelect: (id) {
+                      if (context.mounted && canNavigateActivity()) {
+                        context.push<void>(eventPath(id));
+                      }
+                    },
+                  )
+                : null,
             onEditProfile: () async {
               await context.push<void>(AppRoutes.profileEdit);
             },
@@ -446,8 +499,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.eventRecommendations,
         builder: (context, state) => EventRecommendationsPage(
+          recommendationCardBuilder: participationEnabled
+              ? (context, event, onOpen) =>
+                    ConnectedRecommendationCard(event: event, onOpen: onOpen)
+              : null,
           onOpenEvent: isolatedSlices
-              ? (id) => context.push<void>('/events/${Uri.encodeComponent(id)}')
+              ? (id) {
+                  if (context.mounted &&
+                      (!participationEnabled || canNavigateActivity())) {
+                    context.push<void>(eventPath(id));
+                  }
+                }
               : null,
         ),
       ),

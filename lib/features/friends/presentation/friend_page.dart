@@ -5,8 +5,9 @@ import '../domain/friend_repository.dart';
 import 'friend_controller.dart';
 
 final class FriendPage extends ConsumerStatefulWidget {
-  const FriendPage({super.key, this.onOpenMyFriends});
+  const FriendPage({super.key, this.onOpenMyFriends, this.initialUsername});
   final VoidCallback? onOpenMyFriends;
+  final String? initialUsername;
   @override
   ConsumerState<FriendPage> createState() => _FriendPageState();
 }
@@ -16,8 +17,15 @@ final class _FriendPageState extends ConsumerState<FriendPage> {
   @override
   void initState() {
     super.initState();
+    _username.text = widget.initialUsername ?? '';
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(friendControllerProvider.notifier).loadInbox();
+      if (!mounted) return;
+      final controller = ref.read(friendControllerProvider.notifier);
+      if (widget.initialUsername case final username?) {
+        controller.lookup(username);
+      } else {
+        controller.loadInbox();
+      }
     });
   }
 

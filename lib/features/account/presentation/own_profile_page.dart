@@ -15,12 +15,14 @@ final class OwnProfilePage extends ConsumerWidget {
     required this.onEditInterests,
     this.onEditProfile,
     this.onOpenSettings,
+    this.participationSection,
     super.key,
   });
 
   final Future<void> Function() onEditInterests;
   final Future<void> Function()? onEditProfile;
   final Future<void> Function()? onOpenSettings;
+  final Widget? participationSection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -171,6 +173,10 @@ final class OwnProfilePage extends ConsumerWidget {
                         },
                   child: const Text('Settings'),
                 ),
+                if (participationSection != null) ...[
+                  const SizedBox(height: 24),
+                  participationSection!,
+                ],
               ],
             ),
           ),

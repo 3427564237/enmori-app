@@ -1,3 +1,5 @@
+import { randomBytes } from "node:crypto";
+import { createIsolatedEventParticipation } from "./event-participation.js";
 import { setTimeout as wait } from "node:timers/promises";
 import { createIsolatedConversationComposition } from "./isolated-conversation-composition.js";
 import { LocalChatTransport, simpleChatGates } from "../ai-runtime/infrastructure/local-chat-transport.js";
@@ -99,9 +101,15 @@ async function createControlledRuntime(
       running = false; eventBrowseControl.disable();
       await Promise.allSettled([...pending]);
     };
+    // One host-owned key per process; restart invalidates positions, never facts.
+    const participation = isolatedEnvironment ? createIsolatedEventParticipation({
+      environment: isolatedEnvironment, firestore: gateway, clock,
+      source: eventBrowseControl.source, cursorKey: randomBytes(32),
+    }) : undefined;
     const realEvents = createControlledEventRecommendations({
       gateway: new FirebaseAdminEventReadGateway(getFirestore(firebaseApp)),
       source: eventBrowseControl.source, clock, requireRecommendationConsent: true,
+      ...(participation ? { ignoredEventIds: participation.ignoredEventIds } : {}),
       ...(eventInput ? { musicInterestTagId: eventInput.musicInterestTagId } : {}),
     });
     let chat: Awaited<ReturnType<typeof createIsolatedConversationComposition>> | undefined;
@@ -153,6 +161,7 @@ async function createControlledRuntime(
             }),
         } } : {}),
         eventBrowse: { source: eventBrowseControl.source },
+        ...(participation ? { eventParticipation: participation } : {}),
         eventDetail: realEvents.eventDetail,
         friends: new FriendRequests(new FirestoreFriendRepository(gateway, clock), clock),
         checkInHistory: new ListOwnCheckInsForDate(new FirestoreCheckInHistoryRepository(new FirebaseAdminCheckInHistoryGateway(getFirestore(firebaseApp))), createHistoryCursorCodec(), clock),
