@@ -1,24 +1,28 @@
-# Remote group entry (first account checkpoint)
+# Remote group entry and signed Android candidate
 
 Authority: `docs/decisions/2026-10-21-li-remote-group-access.md`.
-This prepares real-account access; it does not yet connect the whole coretest
-feature set to real identities or establish an accepted distribution APK.
+The explicit remote composition connects real identities to the approved feature
+modules. v15 is a privately signed distribution candidate; acceptance boundaries
+are recorded in `docs/evidence/sprint3/2026-10-21-li-group-v15.md`.
 
 ## Host
 
 Use the existing owner-only `~/.local/state/enmori-real-auth-oct19/local-backend.json`.
 An optional `remotePort: 9382` adds a loopback HTTP listener to the same real Firebase
 runtime. Missing `remotePort` retains the earlier local-only behavior; any other
-value is rejected. Normal start/stop/status remain:
+value is rejected. The full composition additionally requires `fullFeatures: true`
+and the private approved Music source configuration. The installed user service
+now owns the process. Normal start/stop/status are:
 
 ```sh
-python3 tool/real_account_local.py start
+systemctl --user start enmori-group.service
 python3 tool/real_account_local.py status
-python3 tool/real_account_local.py stop
+systemctl --user stop enmori-group.service
 ```
 
 The exact Node 24.19.0 and compiled backend prerequisites are unchanged. Do not
-start a second runner or remove an existing ownership lock. Stop and start this
+start a second runner or remove an existing ownership lock. The user service starts
+on host login, restarts after failure, and does not prevent host sleep or shutdown. Stop and start this
 owned runner normally when changing its config. Real Firestore data is not reset.
 
 After local readiness and the owner's Funnel enablement, the selected command is:
@@ -50,26 +54,46 @@ Main entry `lib/main.dart`, real Firebase project `enmori-rmvp-controlled`:
 - no `ENMORI_API_CERTIFICATE_BASE64`; use normal platform CA trust
 - existing Firebase client configuration; no user password or Admin credentials
 
-The owner-only `remote-group-dart-defines.json` is prepared beside the original
-account defines. Do not commit either file. Public host mismatch, loopback,
-emulator, mixed local/remote mode, private certificate, query/fragment/path and
-wrong project fail closed before Firebase initialization.
+Private group files live in `~/.local/state/enmori-group-release/` (owner-only):
+`dart-defines.json`, `signing.properties`, and the durable signing key. Never commit,
+attach, or include the signing key/passwords in the group handoff. Preserve them
+for future updates and make an owner-controlled off-host backup before relying on
+this key long term. The Firebase Android registration is `com.enmori.app.group`.
+This package coexists with older debug/test applications; do not uninstall them.
 
-## Remaining delivery work
+Build from the reviewed source with Flutter 3.47.2:
 
-1. Complete the owner's Funnel approval and verify public DNS/TLS/API identity
-   rejection from outside the tailnet; same-host reachability alone is insufficient.
-2. Reuse approved feature adapters in a deliberate real-identity composition for
-   Events, social, Check-in history/calendar/map and AI/Persona. Never remove the
-   isolated test guard to make real identities enter an Emulator feature slice.
-3. Configure a durable private release signing key (current Gradle release still
-   uses a debug key), back it up outside Git, then build the final shared APK once.
-   Existing debug-signed `com.enmori.app` cannot be replaced with a different key;
-   plan installation without automatically uninstalling or deleting app data.
-4. Verify two volunteer accounts and save/readback, offline recovery and host
-   restart, then a phone using mobile data with USB and Tailscale disconnected.
-5. Verify real AI through Backend; do not expose Ollama directly. Distributed users
-   share host capacity. Report host-offline and busy failures without auto-resending
-   an operation whose outcome is unknown.
+```sh
+ENMORI_GROUP_RELEASE=true \
+ENMORI_RELEASE_KEY_PROPERTIES="$HOME/.local/state/enmori-group-release/signing.properties" \
+fvm flutter build apk --release --target lib/main.dart \
+  --dart-define-from-file="$HOME/.local/state/enmori-group-release/dart-defines.json" \
+  --build-number 15 --build-name 1.0.0-group20261021
+```
 
-No remote end-to-end, release or complete-feature claim follows from this checkpoint.
+Allow Flutter to regenerate platform plugin tooling for release; do not reuse a
+test-generated Java registrant. Verify the APK package, version, non-debuggable
+flag and signature before handing it over. Increment the build number for updates.
+Public host mismatch, loopback, emulator, mixed local/remote mode, private
+certificate, query/fragment/path and wrong project fail closed before Firebase.
+
+## Use and acceptance
+
+Group members install only the APK, then register or log in through Firebase.
+They do not need USB, Tailscale, developer mode, Firebase Admin credentials or a
+shared password. The owner's host must stay online and awake with the service
+running; otherwise features needing Backend or Ollama are unavailable. There is
+no paid server or always-on cloud inference in this arrangement.
+
+The backend initializes only absent companion documents for a completed real
+account. Existing choices and business data remain authoritative. New sharing
+permissions stay private/off, and old events receive no invented selection time.
+
+Check the same signed APK on mobile data with USB and phone Tailscale disconnected,
+then real save/readback and normal service restart. Two-account privacy, real model
+conversation and account isolation must be observed separately. Never auto-resend
+an AI request with an unknown result. No broad UAT/Done claim follows from a build.
+
+Current Event activity uses actual selection timestamps and the provider's current
+short-lived first-page projection. Cold/expired source returns unavailable; events
+outside that projection are currently omitted. This coverage limit remains open.
