@@ -19,6 +19,7 @@ export class FirestoreCheckInMutations implements CheckInMutations {
       if (input.location === null) delete retained.location;
       else if (input.location !== undefined) retained.location = input.location;
       const updated = { ...retained,
+        ...(input.locationLabel === undefined ? {} : {locationLabel:input.locationLabel}),
         ...(input.mood === undefined ? {} : {mood:input.mood}), ...(input.activity === undefined ? {} : {activity:input.activity}), note: input.note, checkInVisibility: input.checkInVisibility, revision: revision + 1 };
       const projection = parseCheckInProjection(updated, input.checkInId);
       if (!projection) return err(appFailure('SERVICE_UNAVAILABLE'));

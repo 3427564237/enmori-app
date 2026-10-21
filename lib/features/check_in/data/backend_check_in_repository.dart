@@ -67,6 +67,7 @@ final class BackendCheckInRepository
 
   @override
   Future<Result<CheckIn>> update({
+    String? locationLabel,
     required String checkInId,
     String? mood,
     String? activity,
@@ -80,6 +81,7 @@ final class BackendCheckInRepository
         'note': note,
         'mood': mood,
         'activity': activity,
+        'locationLabel': locationLabel,
         'checkInVisibility': switch (visibility) {
           CheckInVisibility.private => 'private',
           CheckInVisibility.friendsOnly => 'friends_only',
@@ -119,6 +121,7 @@ final class BackendCheckInRepository
 
   @override
   Future<Result<CheckIn>> create({
+    String? locationLabel,
     String? mood,
     String? activity,
     CheckInVisibility? visibility,
@@ -131,6 +134,7 @@ final class BackendCheckInRepository
         'note': note,
         'mood': ?mood,
         'activity': ?activity,
+        'locationLabel': ?locationLabel,
         if (visibility != null)
           'checkInVisibility': switch (visibility) {
             CheckInVisibility.private => 'private',

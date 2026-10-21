@@ -36,7 +36,6 @@ void main() {
       for (final key in [
         'r6-new-check-in-button',
         'home-browse-activities',
-        'home-recommended-activities',
         'social-ai-card',
         'home-check-in-history',
         'home-manage-personas',
@@ -60,7 +59,6 @@ void main() {
       expect(actions, [
         'check-in',
         'browse',
-        'recommendations',
         'ai',
         'history',
         'personas',

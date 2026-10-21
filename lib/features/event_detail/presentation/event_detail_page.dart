@@ -52,7 +52,7 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
       body: SafeArea(
         child: ListView(
           key: const Key('route-event-detail'),
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           children: [
             if (widget.syntheticPreview) ...[
               const Card(

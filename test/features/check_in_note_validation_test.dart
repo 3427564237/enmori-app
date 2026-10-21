@@ -87,6 +87,7 @@ final class _PendingCheckInRepository implements CheckInRepository {
   final pending = Completer<Result<CheckIn>>();
   @override
   Future<Result<CheckIn>> create({
+    String? locationLabel,
     String? mood,
     String? activity,
     CheckInVisibility? visibility,

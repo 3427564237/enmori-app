@@ -143,10 +143,19 @@ final class _ParticipationEventPageState
     final controller = ref.read(participationControllerProvider.notifier);
     final details = _detail;
     return Scaffold(
-      appBar: AppBar(title: const Text('Event participation')),
+      appBar: AppBar(
+        title: const Text('Event details'),
+        actions: [
+          IconButton(
+            tooltip: 'Reload Event information',
+            onPressed: _loading ? null : _load,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           children: [
             if (_loading) const Text('Loading Event information…'),
             if (_failure case final failure?) Text(failure.message),
@@ -156,10 +165,6 @@ final class _ParticipationEventPageState
               const Text(
                 'Event information is currently unavailable. Your participation is retained.',
               ),
-            TextButton(
-              onPressed: _loading ? null : _load,
-              child: const Text('Reload Event information'),
-            ),
             ParticipationControls(
               key: ValueKey('participation-${widget.eventId}'),
               eventId: widget.eventId,
@@ -175,20 +180,27 @@ final class _ParticipationEventPageState
                 sourceAvailable: details != null,
               ),
             const SizedBox(height: 16),
+            Text('People', style: Theme.of(context).textTheme.titleLarge),
             for (final status in [
               ParticipationStatus.interested,
               ParticipationStatus.going,
             ])
               for (final group in ParticipantGroup.values)
-                OutlinedButton(
-                  onPressed: _session == null
+                ListTile(
+                  leading: Icon(
+                    status == ParticipationStatus.going
+                        ? Icons.event_available
+                        : Icons.star_outline,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _session == null
                       ? null
                       : () => widget.onParticipants((
                           eventId: widget.eventId,
                           status: status,
                           group: group,
                         )),
-                  child: Text('See all ${status.name} · ${group.name}'),
+                  title: Text('See all ${status.name} · ${group.name}'),
                 ),
           ],
         ),

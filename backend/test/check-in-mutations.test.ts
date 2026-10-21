@@ -74,3 +74,28 @@ test('Mood-only and Activity fields survive edit/read; removing the only content
  assert.equal((await edits.update({...input,expectedRevision:2,note:'Now a note',mood:null,activity:null})).ok,true);
  const result=await read.execute({principal,checkInId:'moment'});if(result.ok){assert.equal(result.value.mood,undefined);assert.equal(result.value.activity,undefined);}
 });
+
+
+test('manual place label edits preserve GPS and omission; invalid input is atomic and null clears only the label', async () => {
+ const {store,edits,read}=fixture();
+ const change={principal,checkInId:'moment',expectedRevision:1,note:'A walk',checkInVisibility:'private'};
+ const initial=await edits.update({...change,locationLabel:'  Campus garden  '});
+ assert.equal(initial.ok,true);
+ if(!initial.ok)return;
+ assert.equal(initial.value.locationLabel,'Campus garden');
+ assert.deepEqual(await read.execute({principal,checkInId:'moment'}),initial);
+ const preserved=await edits.update({...change,expectedRevision:2,note:'Updated note'});
+ assert.equal(preserved.ok,true);
+ if(preserved.ok)assert.equal(preserved.value.locationLabel,'Campus garden');
+ const before=store.read('check_ins/moment');
+ for(const locationLabel of ['x'.repeat(51),'a\nb','a\u202eb']) {
+  assert.deepEqual(await edits.update({...change,expectedRevision:3,locationLabel}),err(appFailure('CHECKIN_INVALID')));
+  assert.deepEqual(store.read('check_ins/moment'),before);
+ }
+ const cleared=await edits.update({...change,expectedRevision:3,locationLabel:null});
+ assert.equal(cleared.ok,true);
+ if(cleared.ok)assert.equal(cleared.value.locationLabel,undefined);
+ assert.deepEqual(store.read('check_ins/moment')?.location,before?.location);
+ assert.deepEqual(store.read('check_ins/moment')?.weather,before?.weather);
+ assert.deepEqual(await read.execute({principal,checkInId:'moment'}),cleared);
+});

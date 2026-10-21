@@ -47,6 +47,13 @@ final class CheckInRecordView extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 16),
+        if (record.locationLabel case final label?)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.place_outlined),
+            title: Text(label),
+            subtitle: const Text('Place name'),
+          ),
         if (record.location case final location?)
           ListTile(
             contentPadding: EdgeInsets.zero,

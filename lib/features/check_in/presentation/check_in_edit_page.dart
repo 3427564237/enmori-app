@@ -19,8 +19,9 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
   late CheckIn _current;
   late final TextEditingController _note;
   late CheckInVisibility _visibility;
-  String? _mood, _activity;
+  String? _mood, _activity, _locationLabel;
   bool get _dirty =>
+      _locationLabel != _current.locationLabel ||
       _mood != _current.mood ||
       _activity != _current.activity ||
       _note.text != _current.note ||
@@ -31,6 +32,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
     _current = widget.checkIn;
     _mood = _current.mood;
     _activity = _current.activity;
+    _locationLabel = _current.locationLabel;
     _note = TextEditingController(text: _current.note);
     _visibility = _current.checkInVisibility ?? CheckInVisibility.private;
   }
@@ -88,6 +90,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
             _note.text = _current.note;
             _mood = _current.mood;
             _activity = _current.activity;
+            _locationLabel = _current.locationLabel;
             _visibility =
                 _current.checkInVisibility ?? CheckInVisibility.private;
           });
@@ -100,7 +103,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
         appBar: AppBar(title: const Text('Edit Check-in')),
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -178,6 +181,20 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                TextFormField(
+                  key: ValueKey('edit-place-${_current.revision}'),
+                  initialValue: _locationLabel,
+                  enabled: !state.pending,
+                  maxLength: 50,
+                  decoration: const InputDecoration(
+                    labelText: 'Place name',
+                    helperText: 'A label only; GPS stays separate.',
+                  ),
+                  onChanged: (v) => setState(
+                    () => _locationLabel = v.trim().isEmpty ? null : v.trim(),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 DropdownButtonFormField<CheckInVisibility>(
                   key: ValueKey(
                     'check-in-edit-visibility-${_current.revision}',
@@ -235,6 +252,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                                 _current = latest;
                                 _mood = latest.mood;
                                 _activity = latest.activity;
+                                _locationLabel = latest.locationLabel;
                                 _note.text = latest.note;
                                 _visibility =
                                     latest.checkInVisibility ??
@@ -256,6 +274,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                           _visibility,
                           mood: _mood,
                           activity: _activity,
+                          locationLabel: _locationLabel,
                         ),
                   child: Text(state.pending ? 'Saving…' : 'Save changes'),
                 ),

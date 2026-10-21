@@ -22,6 +22,7 @@ final class _DelayedCheckIns implements CheckInRepository {
   final keys = <String>[];
   @override
   Future<Result<CheckIn>> create({
+    String? locationLabel,
     String? mood,
     String? activity,
     CheckInVisibility? visibility,

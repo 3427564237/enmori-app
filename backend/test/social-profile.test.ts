@@ -19,7 +19,7 @@ export function socialFixture(){
   seed["account_interests/target_1"]={interestTagIds:["music"],revision:1};
   seed["interest_tags/music"]={displayName:"Music",lifecycleState:"active",revision:1};
   seed["check_ins/visible"]={ownerAccountId:"target_1",note:"Visible note",createdAt:"2026-10-07T01:00:00.000Z",
-    checkInVisibility:"friends_only",location:{latitude:1.3521,longitude:103.8198}};
+    checkInVisibility:"friends_only",locationLabel:"Campus garden",location:{latitude:1.3521,longitude:103.8198}};
   seed["check_ins/private"]={...seed["check_ins/visible"],note:"Private note",checkInVisibility:"private"};
   seed["check_ins/legacy"]={ownerAccountId:"target_1",note:"Legacy",createdAt:"2026-10-07T01:00:00.000Z"};
   const store=new InMemoryFirestoreGateway(seed);
@@ -59,6 +59,7 @@ test("private field settings clear region/interests/points without hiding otherw
   const {store,repo}=socialFixture();
   await store.runTransaction(async tx=>tx.set("accounts/target_1",{...store.read("accounts/target_1"),fieldPrivacy:{
     interests:"private",location:"private",participation:"private",mapSharedWithFriends:true}}));
+  const records=await repo.records("owner",username,{date,timeZone});assert.equal(records.ok,true);if(records.ok)assert.equal(records.value.checkIns[0]?.locationLabel,undefined);
   const profile=await repo.profile("owner",username);assert.equal(profile.ok,true);
   if(profile.ok){assert.equal(profile.value.details.region,null);assert.deepEqual(profile.value.interests,[]);
     assert.equal(profile.value.mapAvailable,false);assert.equal(profile.value.participationAvailable,false);}

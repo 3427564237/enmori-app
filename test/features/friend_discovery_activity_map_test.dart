@@ -26,6 +26,49 @@ const failure = AppFailure(
   message: 'Activity is unavailable.',
 );
 void main() {
+  testWidgets(
+    'coincident map points open distinct chronological records without moving coordinates',
+    (tester) async {
+      final points = [
+        for (var i = 0; i < 2; i++)
+          CheckInMapPoint(
+            checkInId: 'point-$i',
+            createdAt: DateTime.utc(2026, 10, 21, i + 1),
+            location: const GeoPoint(1.35, 103.82),
+          ),
+      ];
+      String? selected;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: CheckInPointsMap(
+                points: points,
+                onSelect: (p) => selected = p.checkInId,
+                openAttribution: (_) async => false,
+                tileLayerBuilder: () => const ColoredBox(color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Open Check-in 2'));
+      await tester.pumpAndSettle();
+      expect(find.text('Check-ins near this point'), findsOneWidget);
+      final rows = find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(ListTile),
+      );
+      expect(rows, findsNWidgets(2));
+      await tester.tap(rows.first);
+      await tester.pumpAndSettle();
+      expect(selected, 'point-0');
+      expect(points[0].location.latitude, points[1].location.latitude);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   test('recommendation result and pending count have independent failures; replacement session discards late result', () async {
     final auth = FakeAuthRepository(),
         repo = DiscoveryFake(),
@@ -161,7 +204,7 @@ void main() {
         find.widgetWithText(TextButton, '© OpenStreetMap contributors'),
         findsOneWidget,
       );
-      expect(find.text('Check-in point connections'), findsOneWidget);
+      expect(find.text('Footprint'), findsOneWidget);
       final button = find.byType(ListTile);
       expect(button, findsOneWidget);
       await tester.ensureVisible(button);

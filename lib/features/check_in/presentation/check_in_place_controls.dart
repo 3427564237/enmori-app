@@ -9,10 +9,13 @@ final class CheckInPlaceControls extends ConsumerStatefulWidget {
   const CheckInPlaceControls({
     required this.draftKey,
     this.saving = false,
+    this.defaultLocationAuthorized = false,
+    this.defaultWeatherAuthorized = false,
     super.key,
   });
   final Object draftKey;
   final bool saving;
+  final bool defaultLocationAuthorized, defaultWeatherAuthorized;
   @override
   ConsumerState<CheckInPlaceControls> createState() =>
       _CheckInPlaceControlsState();
@@ -102,6 +105,7 @@ final class _CheckInPlaceControlsState
                     : (enabled) async {
                         final epoch = controller.epoch;
                         if (enabled &&
+                            !widget.defaultWeatherAuthorized &&
                             !await _confirm(
                               'Allow weather lookup?',
                               'ENMORI will send a coordinate rounded to 0.1° through its Backend to Open-Meteo for current conditions. Open-Meteo can retain request metadata under its terms. No precise Check-in point or Note is sent. Weather failure still allows saving.',
@@ -125,11 +129,12 @@ final class _CheckInPlaceControlsState
                     ? null
                     : () async {
                         final epoch = controller.epoch;
-                        if (await _confirm(
-                              'Save a precise Check-in point?',
-                              'Use your current precise location once while this app is open. The point is saved with this Check-in. Friends can see it on your map only when Check-in visibility, location privacy and map sharing all allow it.',
-                              'Use once',
-                            ) &&
+                        if ((widget.defaultLocationAuthorized ||
+                                await _confirm(
+                                  'Save a precise Check-in point?',
+                                  'Use your current precise location once while this app is open. The point is saved with this Check-in. Friends can see it on your map only when Check-in visibility, location privacy and map sharing all allow it.',
+                                  'Use once',
+                                )) &&
                             mounted) {
                           await controller.capture(expectedEpoch: epoch);
                         }

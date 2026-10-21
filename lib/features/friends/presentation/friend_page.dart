@@ -67,7 +67,7 @@ final class _FriendPageState extends ConsumerState<FriendPage>
       body: SafeArea(
         child: ListView(
           key: const Key('route-friends'),
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           children: [
             if (widget.onOpenMyFriends != null)
               OutlinedButton(

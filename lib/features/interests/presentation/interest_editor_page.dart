@@ -48,7 +48,8 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
         ],
       ),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: _body(state),
@@ -79,7 +80,7 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
     final conflict = state.phase == InterestEditorPhase.conflict;
     return ListView(
       key: const Key('route-interests'),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       children: [
         Text(
           'Choose up to 10',

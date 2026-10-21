@@ -28,7 +28,7 @@ final class StatusPanel extends StatelessWidget {
       child: Card(
         margin: EdgeInsets.zero,
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -50,7 +50,7 @@ final class StatusPanel extends StatelessWidget {
                         : theme.colorScheme.primary,
                   ),
                 ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Semantics(
                 header: true,
                 child: Text(
@@ -67,7 +67,7 @@ final class StatusPanel extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              if (action != null) ...[const SizedBox(height: 16), action!],
+              if (action != null) ...[const SizedBox(height: 12), action!],
             ],
           ),
         ),

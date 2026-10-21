@@ -1,3 +1,5 @@
+import 'check_in_place_controller.dart';
+import 'check_in_place_controls.dart';
 import '../../account/account_preferences_providers.dart';
 import '../../account/domain/account_preferences_repository.dart';
 import '../../auth/auth_providers.dart';
@@ -44,8 +46,8 @@ final class CheckInComposerPage extends ConsumerStatefulWidget {
       _CheckInComposerPageState();
 }
 
-final class _CheckInComposerPageState
-    extends ConsumerState<CheckInComposerPage> {
+final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
+    with WidgetsBindingObserver {
   late final CheckInController _controller;
   final _noteController = TextEditingController();
   final _scroll = ScrollController();
@@ -53,7 +55,10 @@ final class _CheckInComposerPageState
   final _locationDraft = Object();
   bool _settingsReady = false;
   bool _settingsFailed = false;
-  String? _mood, _activity;
+  String? _mood, _activity, _locationLabel;
+  OwnSettings? _defaults;
+  bool _defaultsApplied = false;
+  bool _foreground = true;
   CheckInVisibility? _visibility;
   _CheckInAction? _lastAction;
   String? _noteErrorText;
@@ -62,6 +67,12 @@ final class _CheckInComposerPageState
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    _foreground =
+        lifecycle != AppLifecycleState.paused &&
+        lifecycle != AppLifecycleState.hidden &&
+        lifecycle != AppLifecycleState.detached;
     _controller = ref.read(checkInControllerProvider.notifier);
     if (widget.located) Future.microtask(_loadVisibility);
   }
@@ -77,6 +88,7 @@ final class _CheckInComposerPageState
     }
     setState(() {
       if (result case Success<OwnSettings>(:final value)) {
+        _defaults = value;
         _visibility ??= value.checkInVisibility;
         _settingsReady = true;
         _settingsFailed = false;
@@ -84,10 +96,39 @@ final class _CheckInComposerPageState
         _settingsFailed = true;
       }
     });
+    if (!_defaultsApplied && _defaults != null && _foreground) {
+      _defaultsApplied = true;
+      final place = ref.read(
+        checkInPlaceControllerProvider(_locationDraft).notifier,
+      );
+      await place.captureDefaults(_defaults!);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _foreground = true;
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      _foreground = false;
+    }
+    if (widget.located &&
+        (state == AppLifecycleState.paused ||
+            state == AppLifecycleState.hidden ||
+            state == AppLifecycleState.detached)) {
+      final saving = ref.read(locatedCheckInControllerProvider(_locationDraft));
+      if (!saving.busy && !saving.uncertain) {
+        ref
+            .read(checkInPlaceControllerProvider(_locationDraft).notifier)
+            .clear();
+      }
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _noteController.dispose();
     _scroll.dispose();
     if (_activeOperation case final operation?) _controller.abandon(operation);
@@ -136,6 +177,9 @@ final class _CheckInComposerPageState
         }
       });
     }
+    final placeState = widget.located
+        ? ref.watch(checkInPlaceControllerProvider(_locationDraft))
+        : null;
     final noteLength = _noteController.text.trim().characters.length;
     return PopScope<void>(
       canPop:
@@ -144,7 +188,9 @@ final class _CheckInComposerPageState
           (!pending &&
               _noteController.text.isEmpty &&
               _mood == null &&
-              _activity == null),
+              _activity == null &&
+              _locationLabel == null &&
+              placeState?.place == null),
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop || !widget.located) return;
         final leave = await showDialog<bool>(
@@ -180,167 +226,26 @@ final class _CheckInComposerPageState
           title: Text(widget.socialStyle ? 'Check-in' : 'New Check-in'),
         ),
         body: SafeArea(
-          child: Center(
+          child: Align(
+            alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 640),
               child: SingleChildScrollView(
                 controller: _scroll,
                 key: const Key('route-check-in'),
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (!saved) ...[
-                      if (widget.socialStyle) ...[
-                        Container(
-                          padding: const EdgeInsets.all(22),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.edit_note,
-                                size: 36,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Keep a little moment',
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: -.5,
-                                    ),
-                              ),
-                              const SizedBox(height: 10),
-                              const Text(
-                                'Something you noticed. Something you want to remember.',
-                                style: TextStyle(height: 1.6),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        if (widget.visibility case final visibility?)
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Chip(
-                              avatar: Icon(
-                                visibility == CheckInVisibility.private
-                                    ? Icons.lock_outline
-                                    : visibility == CheckInVisibility.public
-                                    ? Icons.public
-                                    : Icons.people_outline,
-                                size: 18,
-                              ),
-                              label: Text(switch (visibility) {
-                                CheckInVisibility.private => 'Private',
-                                CheckInVisibility.public => 'Public',
-                                CheckInVisibility.friendsOnly => 'Friends only',
-                              }),
-                            ),
-                          ),
-                      ] else ...[
-                        Text(
-                          'New Check-in',
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Add a Note or Mood. A Note can contain up to 500 characters.',
-                        ),
-                      ],
-                      const SizedBox(height: 20),
-                      ExpansionTile(
-                        title: const Text('Mood, activity and visibility'),
-                        children: [
-                          Wrap(
-                            spacing: 8,
-                            children: [
-                              for (final mood in [
-                                'Happy',
-                                'Calm',
-                                'Focused',
-                                'Tired',
-                                'Stressed',
-                                'Not sure',
-                              ])
-                                ChoiceChip(
-                                  label: Text(mood),
-                                  selected: _mood == mood,
-                                  onSelected: pending
-                                      ? null
-                                      : (selected) => setState(() {
-                                          _mood = selected ? mood : null;
-                                          _noteErrorText = null;
-                                        }),
-                                ),
-                            ],
-                          ),
-                          Wrap(
-                            spacing: 8,
-                            children: [
-                              for (final activity in [
-                                'Study',
-                                'Fitness',
-                                'Social',
-                                'Food',
-                                'Travel',
-                              ])
-                                FilterChip(
-                                  label: Text(activity),
-                                  selected: _activity == activity,
-                                  onSelected: pending
-                                      ? null
-                                      : (selected) => setState(
-                                          () => _activity = selected
-                                              ? activity
-                                              : null,
-                                        ),
-                                ),
-                            ],
-                          ),
-                          DropdownButtonFormField<CheckInVisibility>(
-                            key: ValueKey(_settingsReady),
-                            initialValue:
-                                _visibility ??
-                                widget.visibility ??
-                                CheckInVisibility.private,
-                            decoration: const InputDecoration(
-                              labelText: 'This Check-in visibility',
-                            ),
-                            items: const [
-                              DropdownMenuItem(
-                                value: CheckInVisibility.private,
-                                child: Text('Private'),
-                              ),
-                              DropdownMenuItem(
-                                value: CheckInVisibility.friendsOnly,
-                                child: Text('Friends-only'),
-                              ),
-                              DropdownMenuItem(
-                                value: CheckInVisibility.public,
-                                child: Text('Public'),
-                              ),
-                            ],
-                            onChanged: pending
-                                ? null
-                                : (value) =>
-                                      setState(() => _visibility = value),
-                          ),
-                        ],
-                      ),
                       TextField(
                         key: const Key('r6-check-in-note'),
                         controller: _noteController,
                         enabled: !pending,
-                        minLines: widget.socialStyle ? 7 : 5,
-                        maxLines: widget.socialStyle ? 12 : 8,
+                        minLines: MediaQuery.sizeOf(context).height < 500
+                            ? 3
+                            : 6,
+                        maxLines: 12,
                         maxLength: 500,
                         onChanged: (_) => setState(() => _noteErrorText = null),
                         decoration: InputDecoration(
@@ -358,6 +263,82 @@ final class _CheckInComposerPageState
                           labelText: 'Note',
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          ActionChip(
+                            avatar: const Icon(Icons.mood_outlined, size: 18),
+                            label: Text(_mood ?? 'Mood'),
+                            onPressed: pending
+                                ? null
+                                : () => _chooseLabel('Mood', _mood, [
+                                    'Happy',
+                                    'Calm',
+                                    'Focused',
+                                    'Tired',
+                                    'Stressed',
+                                    'Not sure',
+                                  ], (v) => _mood = v),
+                          ),
+                          ActionChip(
+                            avatar: const Icon(Icons.place_outlined, size: 18),
+                            label: Text(_locationLabel ?? 'Location'),
+                            onPressed: pending
+                                ? null
+                                : () => _chooseLabel(
+                                    'Place name',
+                                    _locationLabel,
+                                    [],
+                                    (v) => _locationLabel = v,
+                                  ),
+                          ),
+                          ActionChip(
+                            avatar: const Icon(
+                              Icons.local_activity_outlined,
+                              size: 18,
+                            ),
+                            label: Text(_activity ?? 'Activity'),
+                            onPressed: pending
+                                ? null
+                                : () => _chooseLabel('Activity', _activity, [
+                                    'Study',
+                                    'Fitness',
+                                    'Social',
+                                    'Food',
+                                    'Travel',
+                                  ], (v) => _activity = v),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Card(
+                        child: ListTile(
+                          key: const Key('check-in-permissions'),
+                          leading: const Icon(Icons.tune),
+                          title: const Text('Permissions'),
+                          subtitle: Text(
+                            '$_visibilityLabel · ${placeState?.busy == true
+                                ? 'Getting GPS…'
+                                : placeState?.place == null
+                                ? 'No GPS'
+                                : 'GPS attached'} · ${placeState?.place?.includeWeather == true ? 'Weather on' : 'Weather off'}',
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: pending || (widget.located && !_settingsReady)
+                              ? null
+                              : _permissions,
+                        ),
+                      ),
+                      if (placeState?.failure case final failure?)
+                        Text(failure.message),
+                      if (_defaults?.defaultCheckInWeather == true &&
+                          placeState?.place == null &&
+                          placeState?.busy != true)
+                        const Text(
+                          'Weather needs a GPS point. You can still save this Check-in.',
+                        ),
                       const SizedBox(height: 12),
                     ],
                     if (widget.located && !_settingsReady)
@@ -376,6 +357,8 @@ final class _CheckInComposerPageState
                         note: _noteController.text,
                         mood: _mood,
                         activity: _activity,
+                        locationLabel: _locationLabel,
+                        showPlaceControls: false,
                         visibility: _visibility ?? CheckInVisibility.private,
                         openAttribution:
                             widget.openAttribution ?? (uri) async => false,
@@ -400,6 +383,149 @@ final class _CheckInComposerPageState
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String get _visibilityLabel =>
+      switch (_visibility ?? widget.visibility ?? CheckInVisibility.private) {
+        CheckInVisibility.private => 'Private',
+        CheckInVisibility.friendsOnly => 'Friends only',
+        CheckInVisibility.public => 'Public',
+      };
+
+  Future<void> _chooseLabel(
+    String title,
+    String? current,
+    List<String> choices,
+    void Function(String?) update,
+  ) async {
+    var input = current ?? '';
+    final value = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
+          ? AnimationStyle.noAnimation
+          : null,
+      builder: (context) => SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          0,
+          16,
+          16 + MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(title, style: Theme.of(context).textTheme.titleLarge),
+              if (title == 'Place name')
+                const Text(
+                  'A display label only. GPS and weather are managed in Permissions.',
+                ),
+              if (title == 'Activity')
+                const Text(
+                  'A personal label, separate from an official event.',
+                ),
+              if (choices.isNotEmpty)
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    for (final choice in choices)
+                      ActionChip(
+                        label: Text(choice),
+                        onPressed: () => Navigator.pop(context, choice),
+                      ),
+                  ],
+                ),
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: input,
+                onChanged: (value) => input = value,
+                maxLength: 50,
+                decoration: InputDecoration(labelText: 'Custom $title'),
+              ),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, input.trim()),
+                child: const Text('Apply'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, ''),
+                child: const Text('Clear'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (mounted && value != null) {
+      setState(() {
+        update(value.isEmpty ? null : value);
+        _noteErrorText = null;
+      });
+    }
+  }
+
+  Future<void> _permissions() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
+          ? AnimationStyle.noAnimation
+          : null,
+      builder: (context) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'This Check-in',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<CheckInVisibility>(
+                initialValue:
+                    _visibility ??
+                    widget.visibility ??
+                    CheckInVisibility.private,
+                decoration: const InputDecoration(labelText: 'Who can see it'),
+                items: const [
+                  DropdownMenuItem(
+                    value: CheckInVisibility.private,
+                    child: Text('Private'),
+                  ),
+                  DropdownMenuItem(
+                    value: CheckInVisibility.friendsOnly,
+                    child: Text('Friends only'),
+                  ),
+                  DropdownMenuItem(
+                    value: CheckInVisibility.public,
+                    child: Text('Public'),
+                  ),
+                ],
+                onChanged: (v) {
+                  if (mounted) setState(() => _visibility = v);
+                },
+              ),
+              if (widget.located)
+                CheckInPlaceControls(
+                  draftKey: _locationDraft,
+                  defaultLocationAuthorized:
+                      _defaults?.defaultCheckInLocation ?? false,
+                  defaultWeatherAuthorized:
+                      _defaults?.defaultCheckInWeather ?? false,
+                ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Done'),
+              ),
+            ],
           ),
         ),
       ),
@@ -499,6 +625,7 @@ final class _CheckInComposerPageState
       note: normalized,
       mood: _mood,
       activity: _activity,
+      locationLabel: _locationLabel,
       visibility: _visibility,
     );
     _activeOperation = _controller.operationToken;

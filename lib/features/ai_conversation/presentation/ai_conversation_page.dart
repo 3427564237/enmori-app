@@ -24,6 +24,7 @@ final class AiConversationPage extends ConsumerWidget {
     this.socialStyle = false,
     this.navigationBarBuilder,
     this.onOpenPersonas,
+    this.personaContext,
     super.key,
   });
 
@@ -33,6 +34,7 @@ final class AiConversationPage extends ConsumerWidget {
   final Widget Function(ValueChanged<VoidCallback> navigate)?
   navigationBarBuilder;
   final VoidCallback? onOpenPersonas;
+  final Widget? personaContext;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => _ConversationPage(
@@ -44,6 +46,7 @@ final class AiConversationPage extends ConsumerWidget {
     socialStyle: socialStyle,
     navigationBarBuilder: navigationBarBuilder,
     onOpenPersonas: onOpenPersonas,
+    personaContext: personaContext,
   );
 }
 
@@ -54,6 +57,7 @@ final class _ConversationPage extends ConsumerStatefulWidget {
     this.socialStyle = false,
     this.navigationBarBuilder,
     this.onOpenPersonas,
+    this.personaContext,
     super.key,
   });
 
@@ -63,6 +67,7 @@ final class _ConversationPage extends ConsumerStatefulWidget {
   final Widget Function(ValueChanged<VoidCallback> navigate)?
   navigationBarBuilder;
   final VoidCallback? onOpenPersonas;
+  final Widget? personaContext;
 
   @override
   ConsumerState<_ConversationPage> createState() => _ConversationPageState();
@@ -246,8 +251,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             'Local time · ${conversation.conversationId.substring(0, 8)}',
           ),
           enabled: state.canSelectConversation,
-          onTap: () =>
-              unawaited(_openConversation(conversation.conversationId)),
+          onTap: () {
+            final scaffold = Scaffold.maybeOf(context);
+            if (scaffold?.isDrawerOpen == true) Navigator.pop(context);
+            unawaited(_openConversation(conversation.conversationId));
+          },
         ),
       if (!state.canSelectConversation && state.canCheckResult)
         const Padding(
@@ -695,7 +703,6 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     bool hasText,
   ) {
     final content = <Widget>[
-      if (state.canBrowseHistory) _historyPanel(state),
       if (state.messages.isEmpty &&
           state.localOutgoingText == null &&
           !contentHidden) ...[
@@ -854,25 +861,64 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         if (!didPop) unawaited(_navigate(widget.onBack));
       },
       child: Scaffold(
+        drawer: Drawer(
+          child: SafeArea(
+            child: ListView(
+              primary: false,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                    'Your conversations',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                ?widget.personaContext,
+                if (widget.onOpenPersonas case final openPersonas?)
+                  ListTile(
+                    key: const Key('ai-personas'),
+                    leading: const Icon(Icons.person_outline),
+                    title: const Text('Current Persona'),
+                    subtitle: const Text('View and manage Personas'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      unawaited(_navigate(openPersonas));
+                    },
+                  ),
+                ListTile(
+                  key: const Key('ai-settings'),
+                  leading: const Icon(Icons.tune),
+                  title: const Text('AI settings'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    unawaited(_navigate(widget.onOpenSettings));
+                  },
+                ),
+                const Divider(),
+                if (state.canBrowseHistory) _historyPanel(state),
+              ],
+            ),
+          ),
+        ),
         appBar: AppBar(
           automaticallyImplyLeading: widget.navigationBarBuilder == null,
-          leading: widget.navigationBarBuilder == null
-              ? IconButton(
-                  key: const Key('ai-back'),
-                  tooltip: 'Back',
-                  onPressed: () => unawaited(_navigate(widget.onBack)),
-                  icon: const Icon(Icons.arrow_back),
-                )
-              : null,
+          leading: Builder(
+            builder: (context) => IconButton(
+              tooltip: 'Open conversation menu',
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+          ),
           title: const Text('AI companion'),
           actions: [
-            if (widget.onOpenPersonas case final openPersonas?)
-              IconButton(
-                key: const Key('ai-personas'),
-                tooltip: 'Manage Personas',
-                onPressed: () => unawaited(_navigate(openPersonas)),
-                icon: const Icon(Icons.person_outline),
-              ),
+            IconButton(
+              key: const Key('ai-new-conversation'),
+              tooltip: 'New conversation',
+              onPressed: state.canStartNewConversation
+                  ? _newConversation
+                  : null,
+              icon: const Icon(Icons.add_comment_outlined),
+            ),
             if (state.canStartNewConversation ||
                 state.canCheckResult ||
                 (!contentHidden && state.conversationId != null))
@@ -881,12 +927,6 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                 tooltip: 'Conversation actions',
                 onSelected: _selectSocialAction,
                 itemBuilder: (context) => [
-                  if (state.canStartNewConversation)
-                    const PopupMenuItem(
-                      value: 'new',
-                      key: Key('ai-new-conversation'),
-                      child: Text('New conversation'),
-                    ),
                   if (state.canCheckResult)
                     PopupMenuItem(
                       value: 'check',
@@ -916,12 +956,6 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                     ),
                 ],
               ),
-            IconButton(
-              key: const Key('ai-settings'),
-              tooltip: 'Settings',
-              onPressed: () => unawaited(_navigate(widget.onOpenSettings)),
-              icon: const Icon(Icons.tune),
-            ),
           ],
         ),
         body: SafeArea(

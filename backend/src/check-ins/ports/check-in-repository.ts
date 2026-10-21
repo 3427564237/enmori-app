@@ -25,6 +25,7 @@ export interface CheckInCreationCandidate {
 
 export interface CreateCheckInCommand extends CheckInLocationInput {
   readonly mood?: string | null;
+  readonly locationLabel?: string | null;
   readonly activity?: string | null;
   readonly checkInVisibility?: "private" | "friends_only" | "public";
   readonly firebaseUid: string;

@@ -88,7 +88,7 @@ void main() {
     },
   );
   testWidgets(
-    'recommendation missing end is explicit and expired projection requires reload',
+    'recommendation omits unknown end and expired projection requires explicit refresh',
     (tester) async {
       final repository = FakeEventRecommendationRepository();
       repository.allResult = Success(
@@ -120,14 +120,22 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.textContaining('End time not provided.'), findsOneWidget);
+      expect(find.textContaining('End time not provided.'), findsNothing);
+      expect(find.text('Live source example'), findsOneWidget);
       await tester.pump(const Duration(minutes: 5));
       expect(find.text('Live source example'), findsNothing);
       expect(
-        find.byKey(const Key('event-recommendations-retry')),
+        find.byKey(const Key('event-recommendations-refresh')),
         findsOneWidget,
       );
       expect(repository.views, [EventRecommendationView.all]);
+      await tester.tap(find.byKey(const Key('event-recommendations-refresh')));
+      await tester.pumpAndSettle();
+      expect(find.text('Live source example'), findsOneWidget);
+      expect(repository.views, [
+        EventRecommendationView.all,
+        EventRecommendationView.all,
+      ]);
     },
   );
 }

@@ -1,3 +1,4 @@
+import 'ai_persona_context.dart';
 import '../features/event_participation/data/backend_participation_repository.dart';
 import '../features/event_participation/participation_providers.dart';
 
@@ -192,6 +193,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
                 onSelected: selectTab,
               ),
               child: AiConversationPage(
+                personaContext: const AiPersonaContext(),
                 socialStyle: true,
                 navigationBarBuilder: (navigate) => SocialDemoNavigation(
                   selectedIndex: 3,

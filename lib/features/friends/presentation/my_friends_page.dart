@@ -57,11 +57,21 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
     final state = ref.watch(myFriendsControllerProvider);
     final controller = ref.read(myFriendsControllerProvider.notifier);
     return Scaffold(
-      appBar: AppBar(title: const Text('My Friends')),
+      appBar: AppBar(
+        title: const Text('My Friends'),
+        actions: [
+          IconButton(
+            key: const Key('my-friends-reload'),
+            tooltip: 'Refresh friends',
+            onPressed: state.busy ? null : () => controller.load(),
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: ListView(
           key: const Key('route-my-friends'),
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           children: [
             TextField(
               key: const Key('my-friends-search-query'),
@@ -69,6 +79,7 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
               focusNode: _queryFocus,
               decoration: InputDecoration(
                 labelText: 'Search by display name',
+                prefixIcon: const Icon(Icons.search),
                 errorText: state.queryError,
               ),
               textInputAction: TextInputAction.search,
@@ -103,12 +114,6 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
                   child: const Text('Clear'),
                 ),
               ],
-            ),
-            OutlinedButton(
-              key: const Key('my-friends-reload'),
-              style: OutlinedButton.styleFrom(minimumSize: const Size(64, 48)),
-              onPressed: state.busy ? null : () => controller.load(),
-              child: const Text('Reload'),
             ),
             if (state.busy)
               Semantics(liveRegion: true, child: const Text('Working…')),

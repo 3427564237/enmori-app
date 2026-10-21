@@ -29,7 +29,7 @@ test("DisplayName normalization counts scalars and rejects unsafe/name-invalid i
 test("legacy reads are minimized, private and read-only; missing binding is onboarding required", async () => {
   const { store, repo } = fixture(); const before = store.entries();
   assert.deepEqual(await repo.getProfile(uid), { kind: "found", value: { details: emptyProfileDetails, username: "member_a", displayName: null, profileVisibility: "private", revision: 0 } });
-  assert.deepEqual(await repo.getSettings(uid), { kind: "found", value: { fieldPrivacy: privateFields, checkInVisibility: "public", optionalProcessingConsent: "accepted", revision: 0 } });
+  assert.deepEqual(await repo.getSettings(uid), { kind: "found", value: { defaultCheckInLocation:false, defaultCheckInWeather:false, fieldPrivacy: privateFields, checkInVisibility: "public", optionalProcessingConsent: "accepted", revision: 0 } });
   assert.equal((await repo.getProfile("unbound")).kind, "onboarding_required");
   assert.deepEqual(store.entries(), before);
 });
@@ -129,4 +129,25 @@ test('field privacy persists independently of consent without rewriting history 
     assert.equal((await use.saveSettings({ principal, checkInVisibility: 'private', optionalProcessingConsent: 'accepted', fieldPrivacy: malformed, expectedRevision: 1 })).ok, false);
   }
   assert.deepEqual(store.entries(), before);
+});
+
+test('explicit Check-in defaults persist, revoke independently, and legacy writes preserve them', async () => {
+  const {use, store, repo} = fixture();
+  const historical = {ownerAccountId:'owner',note:'Historical',createdAt:'2026-10-19T00:00:00.000Z'};
+  await store.runTransaction(async tx => tx.create('check_ins/history',historical));
+  const common = {principal,checkInVisibility:'private',optionalProcessingConsent:'rejected'};
+  const enabled = await use.saveSettings({...common,defaultCheckInLocation:true,defaultCheckInWeather:true,expectedRevision:0});
+  assert.equal(enabled.ok,true);
+  const restarted = new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(store));
+  const read = await restarted.getSettings(principal);
+  assert.ok(read.ok); if(read.ok){assert.equal(read.value.defaultCheckInLocation,true);assert.equal(read.value.defaultCheckInWeather,true);}
+  assert.equal((await restarted.saveSettings({...common,expectedRevision:1})).ok,true);
+  assert.equal((await restarted.saveSettings({...common,defaultCheckInLocation:false,expectedRevision:2})).ok,true);
+  const revoked = await repo.getSettings(uid); assert.equal(revoked.kind,'found');
+  if(revoked.kind==='found'){assert.equal(revoked.value.defaultCheckInLocation,false);assert.equal(revoked.value.defaultCheckInWeather,true);}
+  const before=store.entries();
+  for(const invalid of ['true',1,null,{}]) assert.equal((await use.saveSettings({...common,defaultCheckInWeather:invalid,expectedRevision:3})).ok,false);
+  assert.equal((await use.saveSettings({...common,defaultCheckInLocation:true,expectedRevision:1})).ok,false);
+  assert.deepEqual(store.entries(),before); assert.deepEqual(store.read('check_ins/history'),historical);
+  assert.equal((await fixture({defaultCheckInLocation:'true'}).repo.getSettings(uid)).kind,'dependency_unavailable');
 });

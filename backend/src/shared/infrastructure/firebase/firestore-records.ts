@@ -1,4 +1,4 @@
-import { normalizeCheckInContent } from "../../../check-ins/domain/content.js";
+import { normalizeCheckInContent, normalizeCheckInLabel } from "../../../check-ins/domain/content.js";
 import { parsePosition, parseWeatherProjection } from "../../../weather/domain/weather.js";
 import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
@@ -175,6 +175,8 @@ export function parseCheckInProjection(
   checkInId: string,
 ): CheckInProjection | undefined {
   const { note, createdAt } = data;
+  const locationLabel = normalizeCheckInLabel(data.locationLabel);
+  if (locationLabel === undefined) return undefined;
   const normalizedNote =
     typeof note === "string" ? normalizeCheckInContent(note, data.mood as string | null | undefined, data.activity as string | null | undefined) : undefined;
   if (
@@ -196,7 +198,7 @@ export function parseCheckInProjection(
   // A corrupt declared v1 projection still fails closed.
   if (data.weather !== undefined && typeof data.weather === "object" && data.weather !== null &&
       "projectionVersion" in data.weather && data.weather.projectionVersion === "weather_projection_v1" && !weather) return undefined;
-  return { checkInId, note: normalizedNote.value.note, createdAt,
+  return { ...(locationLabel === null ? {} : {locationLabel}), checkInId, note: normalizedNote.value.note, createdAt,
     ...(location === undefined ? {} : {location}),
     ...(weather === undefined ? {} : {weather}),
     ...(normalizedNote.value.mood === null ? {} : {mood:normalizedNote.value.mood}),

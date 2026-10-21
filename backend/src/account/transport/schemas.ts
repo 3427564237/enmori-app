@@ -17,7 +17,7 @@ export const profileSchema = {
 } as const;
 export const settingsSchema = {
   type: "object", additionalProperties: false, required: ["checkInVisibility", "optionalProcessingConsent", "revision"],
-  properties: { fieldPrivacy: fieldPrivacySchema, checkInVisibility: visibility, optionalProcessingConsent: { type: "string", enum: ["accepted", "rejected"] }, revision },
+  properties: { defaultCheckInLocation: { type: "boolean" }, defaultCheckInWeather: { type: "boolean" }, fieldPrivacy: fieldPrivacySchema, checkInVisibility: visibility, optionalProcessingConsent: { type: "string", enum: ["accepted", "rejected"] }, revision },
 } as const;
 export const saveProfileBody = {
   type: "object", additionalProperties: false, required: ["displayName", "profileVisibility", "expectedRevision"],
@@ -25,7 +25,7 @@ export const saveProfileBody = {
 } as const;
 export const saveSettingsBody = {
   type: "object", additionalProperties: false, required: ["checkInVisibility", "optionalProcessingConsent", "expectedRevision"],
-  properties: { fieldPrivacy: fieldPrivacySchema, checkInVisibility: visibility, optionalProcessingConsent: settingsSchema.properties.optionalProcessingConsent, expectedRevision: revision },
+  properties: { defaultCheckInLocation: { type: "boolean" }, defaultCheckInWeather: { type: "boolean" }, fieldPrivacy: fieldPrivacySchema, checkInVisibility: visibility, optionalProcessingConsent: settingsSchema.properties.optionalProcessingConsent, expectedRevision: revision },
 } as const;
 const response = (key: string, resource: unknown, write: boolean) => Object.fromEntries([
   [200, { type: "object", additionalProperties: false, required: [key], properties: { [key]: resource } }],

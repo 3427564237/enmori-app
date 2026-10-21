@@ -169,28 +169,10 @@ final class HomeShellPage extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 660),
           child: ListView(
             key: const Key('route-home'),
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
-              Text(
-                'YOUR WORLD, A LITTLE CLOSER',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  letterSpacing: 1.2,
-                ),
-              ),
+              Text('Today', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 12),
-              Text(
-                'Find your people.\nMake a little room.',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Discover activities and keep a moment for yourself.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 20),
               FilledButton.icon(
                 key: const Key('r6-new-check-in-button'),
                 onPressed: onStartCheckIn,
@@ -198,55 +180,25 @@ final class HomeShellPage extends StatelessWidget {
                 label: const Text('New Check-in'),
               ),
               const SizedBox(height: 24),
-              Card(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Discover activities',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Browse activities from Ticketmaster or explore recommendations for your interests.',
-                        style: TextStyle(height: 1.5),
-                      ),
-                      const SizedBox(height: 16),
-                      FilledButton.icon(
-                        key: const Key('home-browse-activities'),
-                        onPressed: onBrowseActivities,
-                        icon: const Icon(Icons.arrow_forward),
-                        label: const Text('Browse activities'),
-                      ),
-                      if (onBrowseActivities == null) ...[
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Activity browsing is unavailable in this version.',
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-                      OutlinedButton.icon(
-                        key: const Key('home-recommended-activities'),
-                        onPressed: onSeeAllEvents,
-                        icon: const Icon(Icons.event_outlined),
-                        label: const Text('Recommended activities'),
-                      ),
-                    ],
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Events',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
-                ),
+                  TextButton(
+                    key: const Key('home-browse-activities'),
+                    onPressed: onBrowseActivities,
+                    child: const Text('Browse all'),
+                  ),
+                ],
               ),
               if (onOpenEvent != null) ...[
-                const SizedBox(height: 20),
-                Text(
-                  'Events for you',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 4),
                 EventRecommendationsSection(
-                  onSeeAll: onSeeAllEvents,
+                  onSeeAll: null,
                   onOpenEvent: onOpenEvent,
                   recommendationCardBuilder: recommendationCardBuilder,
                 ),
@@ -286,7 +238,7 @@ final class HomeShellPage extends StatelessWidget {
                   onTap: onOpenFootprint,
                 ),
               ],
-              const SizedBox(height: 14),
+              const SizedBox(height: 8),
               _HomeSecondaryAction(
                 actionKey: const Key('home-manage-personas'),
                 onPressed: onManagePersonas,

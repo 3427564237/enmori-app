@@ -150,11 +150,12 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
         ),
       ),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
             child: ListView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               children: [
                 if (widget.recordId == null &&
                     widget.initialTab != SocialTab.map)
@@ -310,9 +311,17 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
   }
 
   List<Widget> _profile(SocialProfile profile, SocialState state) => [
+    Align(
+      alignment: Alignment.centerLeft,
+      child: CircleAvatar(
+        radius: 26,
+        child: Text(profile.username.substring(0, 1).toUpperCase()),
+      ),
+    ),
+    const SizedBox(height: 12),
     Text(
       profile.displayName ?? profile.username,
-      style: Theme.of(context).textTheme.headlineMedium,
+      style: Theme.of(context).textTheme.headlineSmall,
     ),
     if (profile.relationship == SocialRelationship.other &&
         widget.onOpenRequest != null)
@@ -415,6 +424,13 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
             Text('Saved location: ${location.latitude}, ${location.longitude}'),
           if (record.mood case final mood?) Text(mood),
           if (record.activity case final activity?) Text(activity),
+          if (record.locationLabel case final label?)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.place_outlined),
+              title: Text(label),
+              subtitle: const Text('Place name'),
+            ),
           if (record.weather case final weather?)
             ref.watch(weatherCardBuilderProvider)(
               weather,

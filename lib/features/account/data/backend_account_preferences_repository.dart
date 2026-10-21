@@ -45,6 +45,8 @@ final class BackendAccountPreferencesRepository
   );
   @override
   Future<Result<OwnSettings>> saveSettings({
+    bool? defaultCheckInLocation,
+    bool? defaultCheckInWeather,
     FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,
@@ -60,6 +62,8 @@ final class BackendAccountPreferencesRepository
             'participation': _profileVisibility(fieldPrivacy.participation),
             'mapSharedWithFriends': fieldPrivacy.mapSharedWithFriends,
           },
+        'defaultCheckInLocation': ?defaultCheckInLocation,
+        'defaultCheckInWeather': ?defaultCheckInWeather,
         'checkInVisibility': _checkInVisibility(visibility),
         'optionalProcessingConsent': consent.name,
         'expectedRevision': expectedRevision,
@@ -130,12 +134,17 @@ final class BackendAccountPreferencesRepository
     if (envelope.length != 1 ||
         p is! Map<String, dynamic> ||
         !_keys(p, [
+          if (p.containsKey('defaultCheckInLocation')) 'defaultCheckInLocation',
+          if (p.containsKey('defaultCheckInWeather')) 'defaultCheckInWeather',
           if (p.containsKey('fieldPrivacy')) 'fieldPrivacy',
           'checkInVisibility',
           'optionalProcessingConsent',
           'revision',
         ])) {
       return _invalid();
+    }
+    for (final key in ['defaultCheckInLocation', 'defaultCheckInWeather']) {
+      if (p.containsKey(key) && p[key] is! bool) return _invalid();
     }
     final visibility = switch (p['checkInVisibility']) {
       'private' => CheckInVisibility.private,
@@ -157,6 +166,8 @@ final class BackendAccountPreferencesRepository
     }
     return Success(
       OwnSettings(
+        defaultCheckInLocation: p['defaultCheckInLocation'] as bool? ?? false,
+        defaultCheckInWeather: p['defaultCheckInWeather'] as bool? ?? false,
         fieldPrivacy: privacy,
         checkInVisibility: visibility,
         consent: consent,

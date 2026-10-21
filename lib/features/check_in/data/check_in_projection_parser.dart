@@ -23,6 +23,7 @@ CheckIn? parseCheckInProjection(Object? raw, {bool canonicalTime = true}) {
     'revision',
     'mood',
     'activity',
+    'locationLabel',
     'location',
     'weather',
   };
@@ -47,13 +48,14 @@ CheckIn? parseCheckInProjection(Object? raw, {bool canonicalTime = true}) {
       (canonicalTime && time.toIso8601String() != raw['createdAt'])) {
     return null;
   }
-  for (final key in ['mood', 'activity']) {
+  for (final key in ['mood', 'activity', 'locationLabel']) {
     final value = raw[key];
     if (value != null &&
         (value is! String ||
             value.trim() != value ||
             value.isEmpty ||
-            value.runes.length > 50)) {
+            value.runes.length > 50 ||
+            RegExp(r'[\p{Cc}\p{Cf}\p{Cs}]', unicode: true).hasMatch(value))) {
       return null;
     }
   }
@@ -78,6 +80,7 @@ CheckIn? parseCheckInProjection(Object? raw, {bool canonicalTime = true}) {
     checkInVisibility: visibility,
     mood: raw['mood'] as String?,
     activity: raw['activity'] as String?,
+    locationLabel: raw['locationLabel'] as String?,
     location: point,
     weather: weather,
   );

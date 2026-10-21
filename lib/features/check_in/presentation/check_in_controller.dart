@@ -45,6 +45,7 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
     required String note,
     String? mood,
     String? activity,
+    String? locationLabel,
     CheckInVisibility? visibility,
   }) async {
     final normalizedResult = normalizeCheckInNote(note, mood: mood);
@@ -57,6 +58,7 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
       normalized,
       mood,
       activity,
+      locationLabel,
       visibility?.name,
     ]);
     if (_createNote != fingerprint || _createIdempotencyKey == null) {
@@ -70,6 +72,7 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
       note: normalized,
       mood: mood,
       activity: activity,
+      locationLabel: locationLabel,
       visibility: visibility,
       idempotencyKey: _createIdempotencyKey!,
     );

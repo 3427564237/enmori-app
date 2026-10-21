@@ -1,3 +1,5 @@
+import 'package:enmori/features/account/domain/account_preferences_repository.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -43,6 +45,38 @@ final saved = CheckIn(
   location: const GeoPoint(1.3521, 103.8198),
 );
 void main() {
+  test('saved defaults capture once, keep weather separate, and revoke late GPS results', () async {
+    final h = await harness();
+    const enabled = OwnSettings(
+      defaultCheckInLocation: true,
+      defaultCheckInWeather: true,
+      checkInVisibility: CheckInVisibility.friendsOnly,
+      consent: OptionalProcessingConsent.rejected,
+      revision: 2,
+    );
+    h.preferences.settings = enabled;
+    await h.place.captureDefaults(enabled);
+    expect(h.location.calls, [true]);
+    expect(h.placeState.place!.includeWeather, isTrue);
+    expect(h.placeState.place!.settingsRevision, 2);
+    h.place.clear();
+    const weatherOnly = OwnSettings(
+      defaultCheckInWeather: true,
+      checkInVisibility: CheckInVisibility.private,
+      consent: OptionalProcessingConsent.rejected,
+      revision: 3,
+    );
+    await h.place.captureDefaults(weatherOnly);
+    expect(h.location.calls, [true]);
+    final pending = Completer<Result<GeoPoint>>();
+    h.location.pending = pending;
+    final capture = h.place.captureDefaults(enabled);
+    h.preferences.settings = weatherOnly;
+    pending.complete(const Success(GeoPoint(1.3, 103.8)));
+    await capture;
+    expect(h.placeState.place, isNull);
+    expect(h.placeState.busy, isFalse);
+  });
   test('guarded GET still rejects creation status and revoked POST never dispatches', () async {
     var dispatched = 0;
     final client = BackendApiClient(
@@ -347,6 +381,8 @@ class HomeFake implements HomeWeatherRepository {
 
 class PlaceFake implements CheckInPlaceRepository {
   final keys = <String>[], places = <CheckInPlace?>[];
+  final labels = <String?>[], moods = <String?>[], activities = <String?>[];
+  final visibilities = <CheckInVisibility>[];
   int removals = 0;
   Completer<Result<CheckInSaveReceipt>>? pending;
   Result<CheckInSaveReceipt> result = Success(
@@ -354,6 +390,7 @@ class PlaceFake implements CheckInPlaceRepository {
   );
   @override
   Future<Result<CheckInSaveReceipt>> create({
+    String? locationLabel,
     required String note,
     String? mood,
     String? activity,
@@ -363,6 +400,10 @@ class PlaceFake implements CheckInPlaceRepository {
     bool Function()? isEligible,
   }) {
     keys.add(idempotencyKey);
+    labels.add(locationLabel);
+    moods.add(mood);
+    activities.add(activity);
+    visibilities.add(visibility);
     places.add(place);
     return pending?.future ?? Future.value(result);
   }

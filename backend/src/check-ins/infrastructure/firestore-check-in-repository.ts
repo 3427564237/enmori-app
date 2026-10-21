@@ -104,7 +104,7 @@ export class FirestoreCheckInRepository implements CheckInRepository {
   public constructor(private readonly firestore: FirestoreGateway, private readonly weather?: WeatherProvider, private readonly weatherClock?:Clock) {}
 
   private fingerprint(command: CreateCommand): string {
-    const base = [command.note, ...(command.mood === undefined && command.activity === undefined && command.checkInVisibility === undefined
+    const base = [command.note, ...(command.locationLabel == null ? [] : [JSON.stringify({locationLabel:command.locationLabel})]), ...(command.mood === undefined && command.activity === undefined && command.checkInVisibility === undefined
       ? [] : [JSON.stringify({mood:command.mood??null,activity:command.activity??null,visibility:command.checkInVisibility??null})])];
     if (command.location !== undefined || command.weatherRequest !== undefined) base.push(JSON.stringify({
       location: command.location ?? null, weatherRequest: command.weatherRequest ?? null,
@@ -220,6 +220,7 @@ export class FirestoreCheckInRepository implements CheckInRepository {
           note: command.note,
           createdAt: creation.createdAt,
           ...(command.mood == null ? {} : {mood:command.mood}),
+          ...(command.locationLabel == null ? {} : {locationLabel:command.locationLabel}),
           ...(command.activity == null ? {} : {activity:command.activity}),
           checkInVisibility: command.checkInVisibility ?? parseAccountProjection(account)!.checkInVisibility,
           ...(command.location == null ? {} : {location:command.location}),

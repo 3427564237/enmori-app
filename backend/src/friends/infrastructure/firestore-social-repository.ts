@@ -24,8 +24,9 @@ function projectRecord(c:SocialContext,entry:StoredDocumentEntry):CheckInProject
   if(!visible(entry.data.checkInVisibility,c.self,c.friend))return undefined;
   const projection=parseCheckInProjection(entry.data,entry.id);
   if(!projection)return fail("SERVICE_UNAVAILABLE");
-  const {location,weather,...rest}=projection;
+  const {location,weather,locationLabel,...rest}=projection;
   return {...rest,...(location&&mapAllowed(c)?{location}:{}),
+    ...(locationLabel&&visible(c.target.fields.location,c.self,c.friend)?{locationLabel}:{}),
     ...(weather&&visible(c.target.fields.location,c.self,c.friend)?{weather}:{})};
 }
 export class FirestoreSocialRepository implements SocialRepository {

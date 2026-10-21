@@ -30,6 +30,66 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
     if (!identical(old.points, widget.points)) _tileError = false;
   }
 
+  Future<void> _selectPoint(
+    CheckInMapPoint point,
+    List<CheckInMapPoint> ordered,
+  ) async {
+    const distance = Distance();
+    final nearby = ordered
+        .where(
+          (p) =>
+              distance(
+                LatLng(point.location.latitude, point.location.longitude),
+                LatLng(p.location.latitude, p.location.longitude),
+              ) <=
+              100,
+        )
+        .toList();
+    if (nearby.length == 1) {
+      widget.onSelect(point);
+      return;
+    }
+    final selected = await showModalBottomSheet<CheckInMapPoint>(
+      context: context,
+      sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
+          ? AnimationStyle.noAnimation
+          : null,
+      builder: (context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          children: [
+            Text(
+              'Check-ins near this point',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const Text(
+              'Within 100 m. Each record keeps its original GPS point.',
+            ),
+            for (final p in nearby)
+              ListTile(
+                leading: CircleAvatar(child: Text('${ordered.indexOf(p) + 1}')),
+                title: Text(
+                  MaterialLocalizations.of(context)
+                      .formatMediumDate(p.createdAt.toLocal()),
+                ),
+                subtitle: Text(
+                  MaterialLocalizations.of(context).formatTimeOfDay(
+                    TimeOfDay.fromDateTime(p.createdAt.toLocal()),
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.pop(context, p),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (mounted && selected != null && widget.points.contains(selected)) {
+      widget.onSelect(selected);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final ordered = [...widget.points]
@@ -46,10 +106,7 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Check-in point connections',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        Text('Footprint', style: Theme.of(context).textTheme.titleLarge),
         const Text(
           'Lines connect visible Check-ins in time order. They do not show a continuous route.',
         ),
@@ -117,8 +174,11 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
                         child: IconButton(
                           tooltip:
                               'Open Check-in ${ordered.indexOf(points[i]) + 1}',
-                          onPressed: () => widget.onSelect(points[i]),
-                          icon: const Icon(Icons.location_on),
+                          onPressed: () => _selectPoint(points[i], ordered),
+                          icon: Text(
+                            '${ordered.indexOf(points[i]) + 1}',
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
                           style: IconButton.styleFrom(
                             backgroundColor: Theme.of(context)
                                 .colorScheme

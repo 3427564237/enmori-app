@@ -11,6 +11,8 @@ export interface OwnProfile {
 }
 
 export interface OwnSettings {
+  readonly defaultCheckInLocation?: boolean;
+  readonly defaultCheckInWeather?: boolean;
   readonly fieldPrivacy?: FieldPrivacy;
   readonly checkInVisibility: CheckInVisibility;
   readonly optionalProcessingConsent: OptionalProcessingConsent;

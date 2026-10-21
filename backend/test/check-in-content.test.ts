@@ -19,11 +19,13 @@ test('create Mood-only with explicit visibility, read back and replay; changing 
  const uid='fixture',principal={firebaseUid:uid};
  const store=new InMemoryFirestoreGateway({[`auth_bindings/${createAuthBindingDocumentId(uid)}`]:{accountId:'owner'},'accounts/owner':{username:'member_a',optionalProcessingConsent:'rejected',checkInVisibility:'private',onboardingCompletedAt:'2026-10-19T01:00:00.000Z'}});
  const repository=new FirestoreCheckInRepository(store),create=new CreateCheckIn(repository,new SystemClock(),new CryptoOpaqueIdGenerator());
- const input={principal,note:'',mood:'Happy',activity:'Social',checkInVisibility:'friends_only' as const,idempotencyKey:'A'.repeat(24)};
+ const input={principal,note:'',mood:'Happy',activity:'Social',locationLabel:'  Campus garden  ',checkInVisibility:'friends_only' as const,idempotencyKey:'A'.repeat(24)};
  const result=await create.execute(input);assert.equal(result.ok,true);
  if(!result.ok) return;
+ assert.equal(result.value.checkIn.locationLabel,'Campus garden'); assert.equal(result.value.checkIn.location,undefined); assert.equal(result.value.checkIn.weather,undefined);
  assert.equal(result.value.checkIn.mood,'Happy');assert.equal(result.value.checkIn.checkInVisibility,'friends_only');
  const read=await new GetCheckIn(repository).execute({principal,checkInId:result.value.checkIn.checkInId});assert.equal(read.ok,true);if(read.ok)assert.deepEqual(read.value,result.value.checkIn);
  const replay=await create.execute(input);assert.equal(replay.ok,true);if(replay.ok)assert.equal(replay.value.disposition,'replayed');
+ const labelConflict=await create.execute({...input,locationLabel:'Other place'});assert.equal(labelConflict.ok,false);if(!labelConflict.ok)assert.equal(labelConflict.failure.code,'IDEMPOTENCY_CONFLICT');
  const conflict=await create.execute({...input,mood:'Calm'});assert.equal(conflict.ok,false);if(!conflict.ok)assert.equal(conflict.failure.code,'IDEMPOTENCY_CONFLICT');
 });

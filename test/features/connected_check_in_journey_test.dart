@@ -1,3 +1,5 @@
+import 'package:enmori/features/account/domain/account_preferences_repository.dart';
+
 import 'dart:async';
 
 import 'package:enmori/app/enmori_theme.dart';
@@ -23,6 +25,128 @@ import '../support/fake_account_preferences.dart';
 import 'located_check_in_flow_test.dart' as fixtures;
 
 void main() {
+  testWidgets('late settings read in background does not start default GPS', (
+    tester,
+  ) async {
+    final pending = Completer<Result<OwnSettings>>();
+    final preferences = FakeAccountPreferences()
+      ..settingsReads.add(pending.future);
+    final location = fixtures.LocationFake();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authSessionProvider.overrideWithValue(
+            const AsyncData(AuthSessionAuthenticated(subject: 'owner')),
+          ),
+          accountPreferencesRepositoryProvider.overrideWithValue(preferences),
+          checkInRepositoryProvider.overrideWithValue(FakeCheckInRepository()),
+          foregroundLocationProvider.overrideWithValue(location),
+        ],
+        child: MaterialApp(
+          theme: enmoriTheme(),
+          home: const CheckInComposerPage(located: true, socialStyle: true),
+        ),
+      ),
+    );
+    await tester.pump();
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    pending.complete(
+      const Success(
+        OwnSettings(
+          defaultCheckInLocation: true,
+          defaultCheckInWeather: true,
+          checkInVisibility: CheckInVisibility.private,
+          consent: OptionalProcessingConsent.rejected,
+          revision: 2,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(location.calls, isEmpty);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(location.calls, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'defaults apply once; custom labels and per-draft GPS removal reach the saved request',
+    (tester) async {
+      tester.view.physicalSize = const Size(375, 812);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final preferences = FakeAccountPreferences()
+        ..settings = const OwnSettings(
+          defaultCheckInLocation: true,
+          defaultCheckInWeather: true,
+          checkInVisibility: CheckInVisibility.friendsOnly,
+          consent: OptionalProcessingConsent.rejected,
+          revision: 2,
+        );
+      final place = fixtures.PlaceFake(), location = fixtures.LocationFake();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authSessionProvider.overrideWithValue(
+              const AsyncData(AuthSessionAuthenticated(subject: 'owner')),
+            ),
+            accountPreferencesRepositoryProvider.overrideWithValue(preferences),
+            checkInRepositoryProvider.overrideWithValue(
+              FakeCheckInRepository(),
+            ),
+            checkInPlaceRepositoryProvider.overrideWithValue(place),
+            foregroundLocationProvider.overrideWithValue(location),
+            idempotencyKeyGeneratorProvider.overrideWithValue(
+              FakeIdempotencyKeyGenerator(['custom-draft']),
+            ),
+          ],
+          child: MaterialApp(
+            theme: enmoriTheme(),
+            home: const CheckInComposerPage(located: true, socialStyle: true),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(location.calls, [true]);
+      expect(find.byType(AlertDialog), findsNothing);
+      for (final pair in [
+        ('Mood', 'Grateful'),
+        ('Activity', 'Painting'),
+        ('Location', 'Campus garden'),
+      ]) {
+        await tester.tap(find.text(pair.$1));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextFormField), pair.$2);
+        await tester.ensureVisible(find.text('Apply'));
+        await tester.tap(find.text('Apply'));
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(find.byKey(const Key('check-in-permissions')));
+      await tester.pumpAndSettle();
+      expect(find.text('Friends only'), findsWidgets);
+      await tester.tap(find.text('Remove location'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Save Check-in'));
+      await tester.tap(find.text('Save Check-in'));
+      await tester.pumpAndSettle();
+      expect(place.labels, ['Campus garden']);
+      expect(place.moods, ['Grateful']);
+      expect(place.activities, ['Painting']);
+      expect(place.visibilities, [CheckInVisibility.friendsOnly]);
+      expect(place.places, [null]);
+      expect(location.calls, [true]);
+      expect(find.text('Check-in saved.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets(
     'draft Back protection, same-request recovery, saved snapshot and exact detail read',
     (tester) async {
@@ -104,6 +228,18 @@ void main() {
       await tester.pumpAndSettle();
       auth.emit(AuthSessionAuthenticated(subject: 'owner'));
       await tester.pumpAndSettle();
+      await tester.tap(find.text('Location'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField), 'Campus garden');
+      await tester.ensureVisible(find.text('Apply'));
+      await tester.tap(find.text('Apply'));
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Discard this draft?'), findsOneWidget);
+      await tester.tap(find.text('Keep editing'));
+      await tester.pumpAndSettle();
+      expect(find.text('Campus garden'), findsOneWidget);
       final note = find.byKey(const Key('r6-check-in-note'));
       await tester.enterText(note, 'A quiet walk');
       FocusManager.instance.primaryFocus?.unfocus();

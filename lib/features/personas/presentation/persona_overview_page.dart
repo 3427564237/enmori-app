@@ -87,7 +87,7 @@ final class _PersonaOverviewState extends ConsumerState<_PersonaOverview> {
           ? const PersonaLoading()
           : ListView(
               key: const Key('route-personas'),
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               children: [
                 PersonaStatusPanel(
                   state: state,

@@ -1,0 +1,13 @@
+# Check-in defaults and display place label
+
+Authority: [S-PM-1021-LI-PRODUCT-UI-DEFAULTS](../docs/decisions/2026-10-21-li-product-ui-redesign-and-defaults.md). This is the delegated minimal field contract for that decision. Existing 19Oct core and Q13 rules remain except the decision's explicit per-use consent supersession.
+
+`GET/PUT /v1/me/settings` and stored Account add optional booleans `defaultCheckInLocation` and `defaultCheckInWeather`. Missing stored or wire values mean false, never derived from visibility, map sharing or recommendation consent. Malformed present values fail closed. PUT omission preserves existing values for older clients; explicit false revokes that purpose's default. Existing `expectedRevision` CAS, ownership and error mapping apply. Defaults do not mutate historical records. Weather alone never enables GPS.
+
+The new composer uses `checkInVisibility` (not Profile visibility). Explicit default location permits one foreground current GPS acquisition after opening a fresh composer, still subject to OS permission. Revalidate settings revision/default after GPS resolves; clear if changed, revoked, backgrounded, session-replaced or left. Per-draft disable invalidates in-flight acquisition. No automatic recapture on resume, background location, trajectory collection or reuse of old coordinates. Default weather uses only a real selected point and the existing 0.1° weather grid/settings revision. Failure or absent GPS permits a location/weather-free save.
+
+Check-in create/read/history/edit projections and stored record add optional `locationLabel`, using existing short-label normalization: NFC trim, 1–50 Unicode scalar values, rejecting control/format/surrogate characters. Blank/null normalize to absence; update omission preserves it and explicit null clears it. It is included in create idempotency matching. Mood and Activity validation stay unchanged. Note or Mood is still required.
+
+`locationLabel` is display text, never a coordinate, Event ID, catalog tag, recommendation feature or AI/weather input. On other-user projections it follows existing record access plus location-field visibility; map sharing still separately gates precise points. Old records safely omit it. Changing/removing GPS never fabricates or geocodes a label. Existing point/weather mutations preserve this display label unless explicitly edited.
+
+No new endpoint, collection, runtime dependency, background service or new optional-processing authority is introduced. Shared consent in the AI settings surface remains the existing persisted setting and is labelled as shared with personalised suggestions.

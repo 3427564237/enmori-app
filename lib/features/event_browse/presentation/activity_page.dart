@@ -80,7 +80,7 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           children: [
             if (widget.browseId.isEmpty)
               const Text(

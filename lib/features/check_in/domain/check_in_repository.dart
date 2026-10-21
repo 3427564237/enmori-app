@@ -13,12 +13,14 @@ final class CheckIn {
     this.revision = 1,
     this.mood,
     this.activity,
+    this.locationLabel,
     this.location,
     this.weather,
   });
 
   final String? mood;
   final String? activity;
+  final String? locationLabel;
   final int revision;
   final String checkInId;
   final String note;
@@ -37,6 +39,7 @@ final class CheckInHistoryPage {
 
 abstract interface class CheckInRepository {
   Future<Result<CheckIn>> create({
+    String? locationLabel,
     String? mood,
     String? activity,
     CheckInVisibility? visibility,

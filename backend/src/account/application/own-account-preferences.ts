@@ -31,7 +31,9 @@ export class OwnAccountPreferences {
   }
 
   public async saveSettings(input: { readonly principal: AuthPrincipal; readonly checkInVisibility: unknown;
+    readonly defaultCheckInLocation?: unknown; readonly defaultCheckInWeather?: unknown;
     readonly optionalProcessingConsent: unknown; readonly fieldPrivacy?: unknown; readonly expectedRevision: unknown }): Promise<Result<OwnSettings, AppFailure>> {
+    if ([input.defaultCheckInLocation, input.defaultCheckInWeather].some(v => v !== undefined && typeof v !== "boolean")) return err(appFailure("SETTINGS_INVALID"));
     const fieldPrivacy = input.fieldPrivacy === undefined ? undefined : parseFieldPrivacy(input.fieldPrivacy);
     if (input.fieldPrivacy !== undefined && fieldPrivacy === undefined) return err(appFailure("SETTINGS_INVALID"));
     if (!isVisibility(input.checkInVisibility) || !isRevision(input.expectedRevision) ||
@@ -39,6 +41,8 @@ export class OwnAccountPreferences {
       return err(appFailure("SETTINGS_INVALID"));
     }
     return this.saveResult(await this.repository.saveSettings(input.principal.firebaseUid, {
+      ...(input.defaultCheckInLocation === undefined ? {} : { defaultCheckInLocation: input.defaultCheckInLocation as boolean }),
+      ...(input.defaultCheckInWeather === undefined ? {} : { defaultCheckInWeather: input.defaultCheckInWeather as boolean }),
       ...(fieldPrivacy === undefined ? {} : { fieldPrivacy }), checkInVisibility: input.checkInVisibility, optionalProcessingConsent: input.optionalProcessingConsent,
       expectedRevision: input.expectedRevision,
     }), "SETTINGS_REVISION_PRECONDITION_FAILED");

@@ -18,6 +18,8 @@ final class LocatedCheckInActions extends ConsumerWidget {
     required this.openAttribution,
     this.mood,
     this.activity,
+    this.locationLabel,
+    this.showPlaceControls = true,
     this.onOpenSaved,
     this.onOpenHistory,
     this.onReturnHome,
@@ -29,7 +31,8 @@ final class LocatedCheckInActions extends ConsumerWidget {
   final ValueChanged<String>? onOpenSaved;
   final VoidCallback? onOpenHistory, onReturnHome;
   final String note;
-  final String? mood, activity;
+  final String? mood, activity, locationLabel;
+  final bool showPlaceControls;
   final CheckInVisibility visibility;
   final Future<bool> Function(Uri) openAttribution;
   @override
@@ -44,10 +47,11 @@ final class LocatedCheckInActions extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (state.savedId == null && !manageOnly) ...[
-          CheckInPlaceControls(
-            draftKey: draftKey,
-            saving: state.busy || state.uncertain,
-          ),
+          if (showPlaceControls)
+            CheckInPlaceControls(
+              draftKey: draftKey,
+              saving: state.busy || state.uncertain,
+            ),
           FilledButton(
             onPressed: state.busy
                 ? null
@@ -56,14 +60,21 @@ final class LocatedCheckInActions extends ConsumerWidget {
                     note: note,
                     mood: mood,
                     activity: activity,
+                    locationLabel: locationLabel,
                     visibility: visibility,
                   ),
-            child: Text(
-              state.busy
-                  ? 'Saving…'
-                  : state.uncertain
-                  ? 'Retry same save'
-                  : 'Save Check-in',
+            child: AnimatedSwitcher(
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 160),
+              child: Text(
+                key: ValueKey((state.busy, state.uncertain)),
+                state.busy
+                    ? 'Saving…'
+                    : state.uncertain
+                    ? 'Retry same save'
+                    : 'Save Check-in',
+              ),
             ),
           ),
         ],
