@@ -303,9 +303,14 @@ void main() {
       await tester.tap(find.text('Save Check-in'));
       await tester.pumpAndSettle();
       expect(find.text('Check-in saved without weather.'), findsOneWidget);
+      await tester.ensureVisible(find.text('Saved location and recovery'));
+      await tester.tap(find.text('Saved location and recovery'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Read saved Check-in'));
       await tester.tap(find.text('Read saved Check-in'));
       await tester.pumpAndSettle();
       expect(own.readIds, ['saved-point']);
+      await tester.ensureVisible(find.text('Remove saved location'));
       await tester.tap(find.text('Remove saved location'));
       await tester.pumpAndSettle();
       expect(repository.removals, 0);

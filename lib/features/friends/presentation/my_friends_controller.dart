@@ -50,9 +50,11 @@ final class MyFriendsController extends Notifier<MyFriendsState> {
     return const MyFriendsState();
   }
 
-  void clear() {
+  void clear({bool preserveQuery = false}) {
     _operation++;
-    state = const MyFriendsState();
+    state = preserveQuery
+        ? MyFriendsState(query: state.query, searching: state.searching)
+        : const MyFriendsState();
   }
 
   void editQuery(String query) {

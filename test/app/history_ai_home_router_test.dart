@@ -1,3 +1,10 @@
+import 'package:enmori/app/social_demo_presentation.dart';
+import 'package:enmori/features/check_in/history_device_port.dart';
+import 'package:enmori/features/friends/social_providers.dart';
+import 'package:enmori/features/friends/presentation/check_in_points_map.dart';
+
+import '../features/social_profile_flow_test.dart' show SocialFake;
+
 import 'package:enmori/app/app.dart';
 import 'package:enmori/app/providers.dart';
 import 'package:enmori/app/router/app_router.dart';
@@ -17,6 +24,36 @@ import 'package:go_router/go_router.dart';
 import '../support/fakes.dart';
 
 void main() {
+  testWidgets(
+    'connected Home and Profile expose separate History and Footprint with five bottom destinations',
+    (tester) async {
+      final f = await _pumpApp(
+        tester,
+        pages: _TestPages(),
+        history: true,
+        remote: true,
+      );
+      expect(find.byType(NavigationDestination), findsNWidgets(5));
+      await _tap(tester, 'home-footprint');
+      expect(f.router.state.uri.path, AppRoutes.footprint);
+      expect(find.byType(CheckInPointsMap), findsOneWidget);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(f.router.state.uri.path, AppRoutes.home);
+      await _tap(tester, 'home-check-in-history');
+      expect(f.router.state.uri.path, AppRoutes.checkInHistory);
+      f.router.go(AppRoutes.profile);
+      await tester.pumpAndSettle();
+      expect(find.text('Check-in History'), findsOneWidget);
+      expect(find.text('Footprint'), findsOneWidget);
+      await tester.tap(find.text('Footprint'));
+      await tester.pumpAndSettle();
+      expect(f.router.state.uri.path, AppRoutes.footprint);
+      expect(find.byType(CheckInPointsMap), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   for (final supplied in [false, true]) {
     testWidgets('ordinary builds omit both new routes/entries ($supplied)', (
       tester,
@@ -281,7 +318,7 @@ void main() {
       final semantics = tester.ensureSemantics();
       try {
         for (final entry in {
-          'home-check-in-history': 'Footprint',
+          'home-check-in-history': 'Check-in History',
           'home-ai-conversation': 'AI conversation',
         }.entries) {
           final finder = find.byKey(Key(entry.key));
@@ -318,6 +355,7 @@ Future<_Fixture> _pumpApp(
   bool history = false,
   bool ai = false,
   bool isolated = true,
+  bool remote = false,
   RouterGateState gate = RouterGateState.authenticated,
   TextScaler? textScaler,
 }) async {
@@ -334,6 +372,10 @@ Future<_Fixture> _pumpApp(
       checkInRepositoryProvider.overrideWithValue(f.checkIns),
       routerGateProvider.overrideWith((ref) => f.gate),
       isolatedSlicesEnabledProvider.overrideWithValue(isolated),
+      remoteGroupFeaturesEnabledProvider.overrideWithValue(remote),
+      socialDemoPresentationProvider.overrideWithValue(remote),
+      if (remote) socialRepositoryProvider.overrideWithValue(SocialFake()),
+      if (remote) historyDevicePortProvider.overrideWithValue(_MapDevice()),
       isolatedHistoryPageProvider.overrideWith(
         (ref) => f.historyReady ? pages?.history : null,
       ),
@@ -440,3 +482,16 @@ Widget _surface(String name, List<Widget> children) => Scaffold(
 
 Widget _button(String key, VoidCallback action) =>
     TextButton(key: Key('test-$key'), onPressed: action, child: Text(key));
+
+class _MapDevice implements HistoryDevicePort {
+  @override
+  Future<String> captureIanaZone() async => 'Asia/Singapore';
+  @override
+  Future<DateTime> todayInZone(String ianaZone) async =>
+      DateTime.utc(2026, 10, 21);
+  @override
+  Future<List<String>> formatInstants(
+    List<DateTime> instants,
+    String ianaZone,
+  ) async => instants.map((v) => v.toString()).toList();
+}

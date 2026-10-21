@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:enmori/features/weather/domain/weather.dart';
+import 'package:enmori/features/friends/presentation/check_in_points_map.dart';
+
 import 'package:enmori/features/check_in/data/check_in_projection_parser.dart';
 
 import 'dart:convert';
@@ -40,6 +43,73 @@ const denied = AppFailure(
 );
 final provider = socialProfileControllerProvider('member_b');
 void main() {
+  testWidgets(
+    'Footprint opens exact node detail and Back rereads map with revoked points removed',
+    (tester) async {
+      final repository = SocialFake()
+        ..points = [
+          CheckInMapPoint(
+            checkInId: 'exact-point',
+            createdAt: DateTime.utc(2026, 10, 20),
+            location: const GeoPoint(1, 2),
+          ),
+        ];
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [socialRepositoryProvider.overrideWithValue(repository)],
+          child: MaterialApp(
+            home: SocialProfilePage(
+              username: 'member_b',
+              initialDate: '2026-10-20',
+              timeZone: 'UTC',
+              initialTab: SocialTab.map,
+              openAttribution: (_) async => true,
+              tileLayerBuilder: () => const SizedBox.shrink(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Footprint'), findsOneWidget);
+      await tester.tap(find.byTooltip('Open Check-in 1'));
+      await tester.pumpAndSettle();
+      expect(repository.readIds, ['exact-point']);
+      expect(find.text('Saved Check-in'), findsOneWidget);
+      expect(find.text('Point'), findsOneWidget);
+      repository.points = [];
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(CheckInPointsMap), findsOneWidget);
+      expect(find.byTooltip('Open Check-in 1'), findsNothing);
+      expect(find.text('Point'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'revoked exact record is unavailable and never falls back to another record',
+    (tester) async {
+      final repository = SocialFake()..detailResult = const Failure(denied);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [socialRepositoryProvider.overrideWithValue(repository)],
+          child: MaterialApp(
+            home: SocialProfilePage(
+              username: 'member_b',
+              initialDate: '2026-10-20',
+              timeZone: 'UTC',
+              recordId: 'revoked',
+              openAttribution: (_) async => true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(repository.readIds, ['revoked']);
+      expect(find.text('This profile is unavailable.'), findsOneWidget);
+      expect(find.text('Point'), findsNothing);
+    },
+  );
+
   test('changing tabs clears all previous details before waiting and rejection leaves no stale data', () async {
     final h = await harness();
     await h.controller.load(
@@ -216,6 +286,8 @@ class SocialFake implements SocialRepository {
   Completer<Result<CheckInHistoryPage>>? pendingRecords;
   Completer<Result<void>>? pendingRemove;
   int removes = 0;
+  List<CheckInMapPoint> points = [];
+  Result<CheckIn>? detailResult;
   final readIds = <String>[];
   @override
   Future<Result<SocialProfile>> profile(String username) =>
@@ -234,13 +306,14 @@ class SocialFake implements SocialRepository {
   @override
   Future<Result<CheckIn>> record(String username, String id) async {
     readIds.add(id);
-    return Success(
-      CheckIn(
-        checkInId: id,
-        note: 'Point',
-        createdAt: DateTime.utc(2026, 10, 20),
-      ),
-    );
+    return detailResult ??
+        Success(
+          CheckIn(
+            checkInId: id,
+            note: 'Point',
+            createdAt: DateTime.utc(2026, 10, 20),
+          ),
+        );
   }
 
   @override
@@ -249,7 +322,7 @@ class SocialFake implements SocialRepository {
     required String month,
     required String timeZone,
   }) async => Success(
-    SocialMonth(month: month, timeZone: timeZone, counts: {}, points: []),
+    SocialMonth(month: month, timeZone: timeZone, counts: {}, points: points),
   );
   @override
   Future<Result<FriendCare>> care(

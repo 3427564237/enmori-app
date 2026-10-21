@@ -62,6 +62,8 @@ class AiConversationController extends Notifier<AiConversationState> {
   int _requestNumber = 0;
   int _commandVersion = 0;
   AiMessage? _retryUser;
+  String? _localOutgoingText, _outgoingMessageId;
+  Object? _localOutgoingKey;
   List<AiConversationSummary> _conversations = const [];
   String? _historyCursor;
   String? _historyError;
@@ -70,6 +72,9 @@ class AiConversationController extends Notifier<AiConversationState> {
   @override
   AiConversationState build() {
     _shutdown();
+    _localOutgoingText = null;
+    _localOutgoingKey = null;
+    _outgoingMessageId = null;
     _repository = ref.watch(aiConversationRepositoryProvider);
     _auth = ref.watch(authRepositoryProvider);
     _memory = ref.watch(_memoryProvider);
@@ -131,6 +136,13 @@ class AiConversationController extends Notifier<AiConversationState> {
       sessionKey: _memory.key,
       phase: phase,
       messages: messages,
+      localOutgoingText:
+          _outgoingMessageId != null &&
+              messages.any((m) => m.messageId == _outgoingMessageId)
+          ? null
+          : _localOutgoingText,
+      localOutgoingKey: _localOutgoingKey,
+      outgoingMessageId: _outgoingMessageId,
       conversationId: _memory.conversationId,
       nextCursor: nextCursor,
       statusMessage: statusMessage,
@@ -186,6 +198,11 @@ class AiConversationController extends Notifier<AiConversationState> {
 
   void _show(AiConversationPhase phase, {String? message, bool clear = false}) {
     if (!_alive || !ref.mounted) return;
+    if (clear) {
+      _localOutgoingText = null;
+      _localOutgoingKey = null;
+      _outgoingMessageId = null;
+    }
     state = _snapshot(
       phase,
       messages: clear ? const [] : state.messages,
@@ -228,6 +245,9 @@ class AiConversationController extends Notifier<AiConversationState> {
       userSequence: retryUser?.sequence,
       userPersistedAt: retryUser?.persistedAt,
     );
+    _localOutgoingText = text;
+    _localOutgoingKey = attempt;
+    _outgoingMessageId = retryUser?.messageId;
     _attempt = attempt;
     attempt.prepareTimer = Timer(const Duration(seconds: 15), () {
       _close(attempt, AiConversationPhase.timedOut);
@@ -582,6 +602,8 @@ class AiConversationController extends Notifier<AiConversationState> {
                 _show(AiConversationPhase.unknown);
                 break;
               }
+              _outgoingMessageId = user.messageId;
+              _localOutgoingText = null;
               _memory.recordOperationUser(user);
               _retryUser = value.userMessage;
               _memory.unresolved = false;
@@ -733,6 +755,8 @@ class AiConversationController extends Notifier<AiConversationState> {
   );
 
   void _recordPair(AiMessage user, AiMessage assistant) {
+    _outgoingMessageId = user.messageId;
+    _localOutgoingText = null;
     _assistantUsers[assistant.messageId] = user.messageId;
     _memory.recordOperationUser(user);
     _memory.operationHasAssistant = true;
@@ -942,6 +966,9 @@ class AiConversationController extends Notifier<AiConversationState> {
   void detach({Object? sessionKey}) {
     if (sessionKey != null && !identical(sessionKey, _memory.key)) return;
     _shutdown();
+    _localOutgoingText = null;
+    _localOutgoingKey = null;
+    _outgoingMessageId = null;
   }
 
   void _shutdown() {

@@ -24,6 +24,9 @@ final class AiConversationState {
     this.phase = AiConversationPhase.idle,
     Iterable<AiMessage> messages = const [],
     this.conversationId,
+    this.localOutgoingText,
+    this.localOutgoingKey,
+    this.outgoingMessageId,
     this.nextCursor,
     this.statusMessage,
     this.canSend = false,
@@ -46,6 +49,11 @@ final class AiConversationState {
   final Object sessionKey;
   final AiConversationPhase phase;
   final List<AiMessage> messages;
+
+  /// Presentation-only input, never a persisted message or resend queue.
+  final String? localOutgoingText;
+  final Object? localOutgoingKey;
+  final String? outgoingMessageId;
   final String? conversationId;
   final String? nextCursor;
   final String? statusMessage;

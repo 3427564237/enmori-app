@@ -154,7 +154,7 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
                               .read(authSessionProvider)
                               .asData
                               ?.value;
-                          controller.clear();
+                          controller.clear(preserveQuery: true);
                           await widget.onOpenFriend?.call(friend.username);
                           if (mounted &&
                               identical(

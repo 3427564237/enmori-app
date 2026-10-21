@@ -32,7 +32,12 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
 
   @override
   Widget build(BuildContext context) {
-    final points = widget.points
+    final ordered = [...widget.points]
+      ..sort((a, b) {
+        final time = a.createdAt.compareTo(b.createdAt);
+        return time != 0 ? time : a.checkInId.compareTo(b.checkInId);
+      });
+    final points = ordered
         .where((p) => p.location.latitude.abs() <= 85.05112878)
         .toList();
     final coordinates = points
@@ -110,7 +115,8 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
                         width: 48,
                         height: 48,
                         child: IconButton(
-                          tooltip: 'Open Check-in ${i + 1}',
+                          tooltip:
+                              'Open Check-in ${ordered.indexOf(points[i]) + 1}',
                           onPressed: () => widget.onSelect(points[i]),
                           icon: const Icon(Icons.location_on),
                           style: IconButton.styleFrom(
@@ -149,12 +155,12 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
           const Text(
             'Some Check-ins are outside this map projection. Use the list to open them.',
           ),
-        for (var i = 0; i < widget.points.length; i++)
+        for (var i = 0; i < ordered.length; i++)
           ListTile(
             leading: Text('${i + 1}'),
-            title: Text(widget.points[i].createdAt.toLocal().toString()),
+            title: Text(ordered[i].createdAt.toLocal().toString()),
             subtitle: const Text('Open this Check-in'),
-            onTap: () => widget.onSelect(widget.points[i]),
+            onTap: () => widget.onSelect(ordered[i]),
           ),
       ],
     );

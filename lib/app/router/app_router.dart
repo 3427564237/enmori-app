@@ -56,6 +56,7 @@ abstract final class AppRoutes {
   static const settings = '/settings';
   static const checkIn = '/check-in';
   static const checkInHistory = '/check-ins/history';
+  static const footprint = '/check-ins/footprint';
   static const aiAssistant = '/ai-assistant';
   static const interests = '/interests';
   static const eventRecommendations = '/events';
@@ -224,6 +225,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       signedOutEntry: ref.read(signOutEntryProvider),
     ),
     routes: [
+      if (remoteGroup) ...[
+        GoRoute(
+          path: AppRoutes.footprint,
+          builder: (_, _) => const ConnectedOwnFootprint(),
+        ),
+        GoRoute(
+          path: '/people/:username/footprint',
+          builder: (_, state) => ConnectedSocialProfile(
+            username: state.pathParameters['username']!,
+            footprint: true,
+          ),
+        ),
+      ],
       if (remoteGroup)
         GoRoute(
           path: '/people/:username',
@@ -402,13 +416,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           onOpenSettings: socialPresentation
               ? () => openShared(context, AppRoutes.home, AppRoutes.settings)
               : null,
-          onStartCheckIn: () => context.go(AppRoutes.checkIn),
+          onStartCheckIn: () => context.push<void>(AppRoutes.checkIn),
           onBrowseActivities: activitiesEnabled
               ? () {
                   if (context.mounted && canNavigateActivity()) {
                     context.push<void>(AppRoutes.activities);
                   }
                 }
+              : null,
+          onOpenFootprint: remoteGroup
+              ? () => openShared(context, AppRoutes.home, AppRoutes.footprint)
               : null,
           onOpenHistory: historyPage != null
               ? () => openShared(
@@ -477,6 +494,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           AppRoutes.profile,
           4,
           OwnProfilePage(
+            onOpenHistory: historyPage != null
+                ? () => context.push<void>(AppRoutes.checkInHistory)
+                : null,
+            onOpenFootprint: remoteGroup
+                ? () => context.push<void>(AppRoutes.footprint)
+                : null,
             onOpenRecords: remoteGroup
                 ? (username) => context.push<void>(
                     '/people/${Uri.encodeComponent(username)}',
@@ -545,7 +568,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.checkIn,
         builder: (context, state) => CheckInComposerPage(
+          key: ValueKey(routeSession),
           located: remoteGroup,
+          onOpenSaved: (id) =>
+              context.pushReplacement(AppRoutes.savedCheckIn(id)),
+          onOpenHistory: historyPage != null
+              ? () => context.push<void>(AppRoutes.checkInHistory)
+              : null,
           openAttribution: openGroupAttribution,
           socialStyle: socialPresentation,
           onReturnHome: () => context.go(AppRoutes.home),
@@ -559,7 +588,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/check-in/:checkInId',
         builder: (context, state) => SavedCheckInPage(
+          key: ValueKey(routeSession),
+          placeActions: remoteGroup,
           checkInId: state.pathParameters['checkInId'] ?? '',
+          openAttribution: openGroupAttribution,
           onReturnHome: () => context.go(AppRoutes.home),
         ),
       ),

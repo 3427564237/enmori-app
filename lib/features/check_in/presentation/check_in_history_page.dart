@@ -109,7 +109,7 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
           onPressed: widget.onBack,
           icon: const Icon(Icons.arrow_back),
         ),
-        title: const Text('Footprint'),
+        title: const Text('Check-in History'),
         actions: [
           if (ref.watch(checkInRepositoryProvider) is CheckInCalendarRepository)
             IconButton(
@@ -349,9 +349,14 @@ final class _HistoryTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
-        visibility == null
-            ? entry.localTime
-            : '${entry.localTime} · $visibility',
+        [
+          visibility == null
+              ? entry.localTime
+              : '${entry.localTime} · $visibility',
+          if (entry.checkIn.weather != null) 'Weather snapshot available',
+          if (entry.checkIn.location != null)
+            'Saved location · Open record to view',
+        ].join('\n'),
       ),
       trailing: const Icon(Icons.chevron_right),
     );
