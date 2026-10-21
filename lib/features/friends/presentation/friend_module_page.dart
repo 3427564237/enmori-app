@@ -105,24 +105,35 @@ final class FriendModulePage extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton.icon(
-                  onPressed: requests,
-                  icon: const Icon(Icons.person_add_alt),
-                  label: const Text('Find people and requests'),
-                ),
-                OutlinedButton(
-                  onPressed: () => Navigator.of(context).push<void>(
-                    MaterialPageRoute(
-                      builder: (_) => MyFriendsListPage(onOpenFriend: profile),
+            Card(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.people_outline),
+                    title: const Text('My Friends'),
+                    subtitle: const Text(
+                      'Your connections and Special Care friends',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            MyFriendsListPage(onOpenFriend: profile),
+                      ),
                     ),
                   ),
-                  child: const Text('My Friends'),
-                ),
-              ],
+                  const Divider(height: 1, indent: 56),
+                  ListTile(
+                    leading: const Icon(Icons.person_add_alt),
+                    title: const Text('Find people and requests'),
+                    subtitle: const Text(
+                      'Search by username or respond to a request',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: requests,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
             discovery(true),

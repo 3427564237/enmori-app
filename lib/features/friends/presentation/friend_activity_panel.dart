@@ -195,87 +195,60 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     FriendActivityContent(item: item),
-                    if (widget.source == null)
-                      TextButton(
-                        onPressed: () async {
-                          if (!_valid(renderedEpoch, renderedSession)) return;
-                          _epoch++;
-                          setState(() => _result = null);
-                          await Navigator.of(context).push<void>(
-                            MaterialPageRoute(
-                              builder: (_) => Scaffold(
-                                appBar: AppBar(
-                                  title: const Text('Friends Activity'),
-                                ),
-                                body: SafeArea(
-                                  child: ListView(
-                                    padding: const EdgeInsets.all(16),
-                                    children: [
-                                      FriendActivityPanel(
-                                        home: false,
-                                        source: FriendActivityLocator.fromItem(
-                                          item,
-                                        ),
-                                        onOpenProfile: widget.onOpenProfile,
-                                        onOpenEvent: widget.onOpenEvent,
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        if (widget.source == null)
+                          TextButton(
+                            onPressed: () async {
+                              if (!_valid(renderedEpoch, renderedSession)) {
+                                return;
+                              }
+                              _epoch++;
+                              setState(() => _result = null);
+                              await Navigator.of(context).push<void>(
+                                MaterialPageRoute(
+                                  builder: (_) => Scaffold(
+                                    appBar: AppBar(
+                                      title: const Text('Friends Activity'),
+                                    ),
+                                    body: SafeArea(
+                                      child: ListView(
+                                        padding: const EdgeInsets.all(16),
+                                        children: [
+                                          FriendActivityPanel(
+                                            home: false,
+                                            source:
+                                                FriendActivityLocator.fromItem(
+                                                  item,
+                                                ),
+                                            onOpenProfile: widget.onOpenProfile,
+                                            onOpenEvent: widget.onOpenEvent,
+                                          ),
+                                        ],
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          );
-                          if (mounted &&
-                              identical(
-                                renderedSession,
-                                ref.read(authSessionProvider).asData?.value,
-                              )) {
-                            await _load();
-                          }
-                        },
-                        child: const Text('View activity'),
-                      ),
-                    TextButton(
-                      onPressed: () async {
-                        if (!_valid(renderedEpoch, renderedSession)) return;
-                        _epoch++;
-                        setState(() => _result = null);
-                        await widget.onOpenProfile(item.username);
-                        if (mounted &&
-                            identical(
-                              renderedSession,
-                              ref.read(authSessionProvider).asData?.value,
-                            )) {
-                          await _load();
-                        }
-                      },
-                      child: const Text('View Profile'),
-                    ),
-                    if (widget.source != null &&
-                        item.eventId != null &&
-                        widget.onOpenEvent != null)
-                      TextButton(
-                        onPressed: () async {
-                          if (!_valid(renderedEpoch, renderedSession)) return;
-                          // Re-read the same purpose-bound activity before handing its stable Event ID to the host.
-                          await _load();
-                          if (!mounted ||
-                              !identical(
-                                renderedSession,
-                                ref.read(authSessionProvider).asData?.value,
-                              )) {
-                            return;
-                          }
-                          if (_result case Success<List<FriendActivityItem>>(
-                            :final value,
-                          )) {
-                            if (value.length != 1 ||
-                                value.single.eventId != item.eventId) {
-                              return;
-                            }
+                              );
+                              if (mounted &&
+                                  identical(
+                                    renderedSession,
+                                    ref.read(authSessionProvider).asData?.value,
+                                  )) {
+                                await _load();
+                              }
+                            },
+                            child: const Text('View activity'),
+                          ),
+                        TextButton(
+                          onPressed: () async {
+                            if (!_valid(renderedEpoch, renderedSession)) return;
                             _epoch++;
                             setState(() => _result = null);
-                            await widget.onOpenEvent!(item.eventId!);
+                            await widget.onOpenProfile(item.username);
                             if (mounted &&
                                 identical(
                                   renderedSession,
@@ -283,10 +256,53 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
                                 )) {
                               await _load();
                             }
-                          }
-                        },
-                        child: const Text('Open event'),
-                      ),
+                          },
+                          child: const Text('View Profile'),
+                        ),
+                        if (widget.source != null &&
+                            item.eventId != null &&
+                            widget.onOpenEvent != null)
+                          TextButton(
+                            onPressed: () async {
+                              if (!_valid(renderedEpoch, renderedSession)) {
+                                return;
+                              }
+                              // Re-read the same purpose-bound activity before handing its stable Event ID to the host.
+                              await _load();
+                              if (!mounted ||
+                                  !identical(
+                                    renderedSession,
+                                    ref.read(authSessionProvider).asData?.value,
+                                  )) {
+                                return;
+                              }
+                              if (_result
+                                  case Success<List<FriendActivityItem>>(
+                                    :final value,
+                                  )) {
+                                if (value.length != 1 ||
+                                    value.single.eventId != item.eventId) {
+                                  return;
+                                }
+                                _epoch++;
+                                setState(() => _result = null);
+                                await widget.onOpenEvent!(item.eventId!);
+                                if (mounted &&
+                                    identical(
+                                      renderedSession,
+                                      ref
+                                          .read(authSessionProvider)
+                                          .asData
+                                          ?.value,
+                                    )) {
+                                  await _load();
+                                }
+                              }
+                            },
+                            child: const Text('Open event'),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
               ),

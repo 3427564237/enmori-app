@@ -43,7 +43,7 @@ final class _IgnoredPeoplePageState extends ConsumerState<IgnoredPeoplePage>
     final state = ref.watch(friendIgnoreControllerProvider);
     final renderedEpoch = controller.epoch;
     return Scaffold(
-      appBar: AppBar(title: const Text('已忽略的人')),
+      appBar: AppBar(title: const Text('Ignored people')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

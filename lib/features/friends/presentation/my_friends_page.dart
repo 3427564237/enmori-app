@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'my_friends_controller.dart';
+import '../../../core/presentation/status_panel.dart';
 import '../../auth/auth_providers.dart';
 
 final class MyFriendsListPage extends ConsumerStatefulWidget {
@@ -71,6 +72,7 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
       body: SafeArea(
         child: ListView(
           key: const Key('route-my-friends'),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.all(16),
           children: [
             TextField(
@@ -84,7 +86,10 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
               ),
               textInputAction: TextInputAction.search,
               onChanged: controller.editQuery,
-              onSubmitted: (_) => controller.search(),
+              onSubmitted: (_) {
+                _queryFocus.unfocus();
+                controller.search();
+              },
             ),
             const SizedBox(height: 12),
             Wrap(
@@ -96,10 +101,12 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(64, 48),
                   ),
-                  onPressed: () {
-                    _queryFocus.unfocus();
-                    controller.search();
-                  },
+                  onPressed: state.busy
+                      ? null
+                      : () {
+                          _queryFocus.unfocus();
+                          controller.search();
+                        },
                   child: const Text('Search'),
                 ),
                 OutlinedButton(
@@ -107,24 +114,47 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(64, 48),
                   ),
-                  onPressed: () {
-                    _queryFocus.unfocus();
-                    controller.clearSearch();
-                  },
+                  onPressed:
+                      state.busy || (!state.searching && state.query.isEmpty)
+                      ? null
+                      : () {
+                          _queryFocus.unfocus();
+                          controller.clearSearch();
+                        },
                   child: const Text('Clear'),
                 ),
               ],
             ),
+            const SizedBox(height: 12),
             if (state.busy)
-              Semantics(liveRegion: true, child: const Text('Working…')),
+              const LinearProgressIndicator(semanticsLabel: 'Loading friends'),
             if (state.failure case final failure?)
-              Semantics(liveRegion: true, child: Text(failure.message)),
+              StatusPanel(
+                title: 'Friends couldn’t be loaded',
+                body: failure.message,
+                icon: Icons.cloud_off_outlined,
+                isError: true,
+                action: TextButton(
+                  onPressed: state.busy ? null : () => controller.load(),
+                  child: const Text('Try again'),
+                ),
+              ),
             if (state.loaded && state.friends.isEmpty)
-              Text(
-                state.searching
+              StatusPanel(
+                title: state.searching
                     ? 'No matching friends on this page.'
                     : 'No friends available on this page.',
+                body: state.searching
+                    ? 'Try another display name, or clear your search.'
+                    : 'Find people from Friends to start connecting.',
+                icon: Icons.people_outline,
               ),
+            if (state.searching &&
+                !state.loaded &&
+                !state.busy &&
+                state.failure == null &&
+                state.queryError == null)
+              const Text('Tap Search to look for this display name.'),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Special Care only'),
@@ -135,6 +165,7 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
               onChanged: (value) => setState(() => _specialCareOnly = value),
             ),
             if (state.loaded &&
+                state.friends.isNotEmpty &&
                 _specialCareOnly &&
                 !state.friends.any((friend) => friend.specialCare))
               const Text('No Special Care friends on this page.'),
@@ -146,13 +177,17 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
                     ? ListTile(
                         key: Key('my-friend-profile-${friend.username}'),
                         title: Text(friend.displayName),
-                        leading: friend.specialCare
-                            ? const Icon(
-                                Icons.star,
-                                semanticLabel: 'Special Care',
-                              )
-                            : null,
-                        subtitle: Text('Username: ${friend.username}'),
+                        leading: CircleAvatar(
+                          child: Icon(
+                            friend.specialCare
+                                ? Icons.star
+                                : Icons.person_outline,
+                            semanticLabel: friend.specialCare
+                                ? 'Special Care'
+                                : null,
+                          ),
+                        ),
+                        subtitle: Text('@${friend.username}'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () async {
                           final session = ref
@@ -176,7 +211,7 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(friend.displayName),
-                            Text('Username: ${friend.username}'),
+                            Text('@${friend.username}'),
                           ],
                         ),
                       ),
