@@ -22,6 +22,8 @@ import '../features/check_in/check_in_providers.dart';
 import '../features/check_in/data/backend_check_in_repository.dart';
 import '../features/check_in/presentation/check_in_history_page.dart';
 import '../features/interests/interests_providers.dart';
+import '../features/interests/admin_interest_providers.dart';
+import '../features/interests/data/backend_admin_interest_repository.dart';
 import '../features/interests/data/backend_interest_repository.dart';
 import '../features/ai_conversation/ai_conversation_providers.dart';
 import '../features/ai_conversation/data/ai_wire_repository.dart';
@@ -149,6 +151,9 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
         ),
       interestRepositoryProvider.overrideWithValue(
         BackendInterestRepository(_api),
+      ),
+      adminInterestRepositoryProvider.overrideWithValue(
+        BackendAdminInterestRepository(_api),
       ),
       checkInRepositoryProvider.overrideWithValue(
         BackendCheckInRepository(_api),

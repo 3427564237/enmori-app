@@ -1,4 +1,6 @@
 enum AppFailureKind {
+  catalogueInvalid,
+  catalogueNameConflict,
   eventParticipationInvalid,
   eventParticipationRevisionPreconditionFailed,
   requestInvalid,

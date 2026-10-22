@@ -8,6 +8,8 @@ import '../result/result.dart';
 typedef AuthTokenProvider = Future<Result<String>> Function();
 typedef JsonObject = Map<String, Object?>;
 
+enum _InterestAdminOperation { capability, catalogue, create }
+
 const defaultBackendOperationTimeout = Duration(seconds: 15);
 
 /// Reserved for the approved Persona-create late-completion path.
@@ -58,6 +60,35 @@ final class BackendApiClient {
 
   Future<Result<JsonObject>> get(String path, {bool Function()? isEligible}) =>
       _send('GET', path, isEligible: isEligible);
+
+  Future<Result<JsonObject>> getInterestAdminCapability(
+    bool Function() current,
+  ) => _send(
+    'GET',
+    '/v1/me/interest-tag-admin-capability',
+    isEligible: current,
+    interestAdmin: _InterestAdminOperation.capability,
+  );
+
+  Future<Result<JsonObject>> getInterestAdminCatalogue(
+    bool Function() current,
+  ) => _send(
+    'GET',
+    '/v1/interest-tags',
+    isEligible: current,
+    interestAdmin: _InterestAdminOperation.catalogue,
+  );
+
+  Future<Result<JsonObject>> createInterestTag(
+    String displayName,
+    bool Function() current,
+  ) => _send(
+    'POST',
+    '/v1/admin/interest-tags',
+    body: {'displayName': displayName},
+    isEligible: current,
+    interestAdmin: _InterestAdminOperation.create,
+  );
 
   /// Session-bound feature operations: recheck after token acquisition and
   /// immediately before dispatch. Existing unguarded callers are unchanged.
@@ -347,6 +378,7 @@ final class BackendApiClient {
     JsonObject? body,
     String? idempotencyKey,
     bool Function()? isEligible,
+    _InterestAdminOperation? interestAdmin,
   }) async {
     final baseUri = _baseUri;
     if (baseUri == null || !isApprovedBackendBaseUri(baseUri)) {
@@ -408,6 +440,11 @@ final class BackendApiClient {
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (interestAdmin != null &&
+            response.statusCode !=
+                (interestAdmin == _InterestAdminOperation.create ? 201 : 200)) {
+          return const Failure(_invalidResponse);
+        }
         // Guarded creates use 201; their idempotent replays use 200. Session
         // eligibility must not turn a committed first save into a false failure.
         if (isEligible != null &&
@@ -424,6 +461,15 @@ final class BackendApiClient {
           );
         }
         return Success(decoded);
+      }
+      if (interestAdmin != null) {
+        return Failure(
+          _decodeInterestAdminFailure(
+            response.statusCode,
+            decoded,
+            interestAdmin,
+          ),
+        );
       }
       return Failure(_decodeFailure(decoded));
     } on TimeoutException {
@@ -468,6 +514,48 @@ final class BackendApiClient {
     final decoded = jsonDecode(body);
     if (decoded is! Map<String, dynamic>) return null;
     return decoded;
+  }
+
+  AppFailure _decodeInterestAdminFailure(
+    int status,
+    JsonObject? body,
+    _InterestAdminOperation operation,
+  ) {
+    final error = body?['error'];
+    if (error is! Map<String, dynamic> ||
+        error['message'] is! String ||
+        error['requestId'] is! String) {
+      return _invalidResponse;
+    }
+    final kind = switch ((status, error['code'])) {
+      (400, 'REQUEST_INVALID') => AppFailureKind.requestInvalid,
+      (401, 'AUTH_REQUIRED') => AppFailureKind.authRequired,
+      (403, 'AUTH_FORBIDDEN') => AppFailureKind.authForbidden,
+      (409, 'CATALOGUE_NAME_CONFLICT')
+          when operation == _InterestAdminOperation.create =>
+        AppFailureKind.catalogueNameConflict,
+      (422, 'CATALOGUE_INVALID')
+          when operation == _InterestAdminOperation.create =>
+        AppFailureKind.catalogueInvalid,
+      (503, 'SERVICE_UNAVAILABLE') => AppFailureKind.serviceUnavailable,
+      _ => null,
+    };
+    if (kind == null) return _invalidResponse;
+    final message = switch (kind) {
+      AppFailureKind.catalogueNameConflict =>
+        'This catalogue name is already reserved.',
+      AppFailureKind.catalogueInvalid =>
+        'Use a valid catalogue name of 1–50 characters.',
+      AppFailureKind.authRequired => 'Sign in again.',
+      AppFailureKind.authForbidden => 'Admin access is no longer available.',
+      AppFailureKind.requestInvalid => 'The request could not be accepted.',
+      _ => 'The service is unavailable. Try again.',
+    };
+    return AppFailure(
+      kind: kind,
+      message: message,
+      requestId: error['requestId'] as String,
+    );
   }
 
   AppFailure _decodeFailure(JsonObject? body) {
