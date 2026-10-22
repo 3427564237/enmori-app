@@ -54,7 +54,8 @@ final class BackendApiClient {
   Future<Result<JsonObject>> deleteJson(
     String path, {
     required JsonObject body,
-  }) => _send('DELETE', path, body: body);
+    bool Function()? isEligible,
+  }) => _send('DELETE', path, body: body, isEligible: isEligible);
 
   Future<Result<JsonObject>> get(String path, {bool Function()? isEligible}) =>
       _send('GET', path, isEligible: isEligible);

@@ -1,3 +1,5 @@
+import '../../account/content_access.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
@@ -116,7 +118,10 @@ final class FriendController extends Notifier<FriendScreenState> {
       nextCursor: previous.nextCursor,
       busy: true,
     );
-    final result = await repository.act(request.requestRef, accept: accept);
+    final result = await afterContentMutation(
+      ref,
+      () => repository.act(request.requestRef, accept: accept),
+    );
     if (!ref.mounted || operation != _operation) return;
     if (result case Failure<String>(:final failure)) {
       state = FriendScreenState(

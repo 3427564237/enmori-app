@@ -204,9 +204,11 @@ final class BackendSocialRepository implements SocialRepository {
     String username, {
     required bool specialCare,
     required int expectedRevision,
+    bool Function()? isEligible,
   }) => _read(
     client.put(
       '${_friend(username)}/special-care',
+      isEligible: isEligible,
       body: {'specialCare': specialCare, 'expectedRevision': expectedRevision},
     ),
     (json) {
@@ -222,9 +224,11 @@ final class BackendSocialRepository implements SocialRepository {
   Future<Result<void>> remove(
     String username, {
     required int expectedRevision,
+    bool Function()? isEligible,
   }) => _read(
     client.deleteJson(
       _friend(username),
+      isEligible: isEligible,
       body: {'expectedRevision': expectedRevision},
     ),
     (json) {

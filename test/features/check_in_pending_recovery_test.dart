@@ -1,3 +1,4 @@
+import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
 
 import 'dart:async';
@@ -65,6 +66,11 @@ Future<ProviderContainer> _start(
     overrides: [
       checkInRepositoryProvider.overrideWithValue(repo),
       currentAuthSubjectProvider.overrideWithValue('synthetic-owner'),
+      authSessionProvider.overrideWith(
+        (_) => Stream.value(
+          const AuthSessionAuthenticated(subject: 'synthetic-owner'),
+        ),
+      ),
       idempotencyKeyGeneratorProvider.overrideWithValue(
         FakeIdempotencyKeyGenerator([
           'first-command',
@@ -74,6 +80,7 @@ Future<ProviderContainer> _start(
       ),
     ],
   );
+  scope.listen(authSessionProvider, (_, _) {});
   addTearDown(scope.dispose);
   addTearDown(repo.finishRemaining);
   await tester.pumpWidget(
@@ -98,6 +105,7 @@ Future<ProviderContainer> _start(
       ),
     ),
   );
+  await tester.pumpAndSettle();
   return scope;
 }
 

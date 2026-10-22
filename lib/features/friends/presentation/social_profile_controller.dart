@@ -1,3 +1,5 @@
+import '../../account/content_access.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
@@ -38,6 +40,7 @@ final class SocialProfileController extends Notifier<SocialState> {
   final String username;
   late SocialRepository _repository;
   int _epoch = 0;
+  int _writesInFlight = 0;
   int get epoch => _epoch;
   @override
   SocialState build() {
@@ -50,6 +53,9 @@ final class SocialProfileController extends Notifier<SocialState> {
       ),
     );
     _repository = ref.watch(socialRepositoryProvider);
+    ref.listen(contentAccessProvider, (before, after) {
+      if (_writesInFlight == 0 || !after.foreground) clear();
+    });
     _epoch++;
     ref.onDispose(() => _epoch++);
     return const SocialState();
@@ -66,7 +72,7 @@ final class SocialProfileController extends Notifier<SocialState> {
     required String timeZone,
     bool next = false,
   }) async {
-    if (state.busy) return;
+    if (state.busy || !ref.read(contentAccessProvider).foreground) return;
     final cursor = next ? state.records?.nextCursor : null;
     if (next && cursor == null) return;
     final epoch = ++_epoch;
@@ -120,11 +126,24 @@ final class SocialProfileController extends Notifier<SocialState> {
     }
     final epoch = ++_epoch;
     state = const SocialState(busy: true);
-    final result = await _repository.care(
-      username,
-      specialCare: enabled,
-      expectedRevision: profile!.friendshipRevision,
-    );
+    _writesInFlight++;
+    final Result<FriendCare> result;
+    try {
+      result = await afterContentMutation(
+        ref,
+        () => _repository.care(
+          username,
+          specialCare: enabled,
+          expectedRevision: profile!.friendshipRevision,
+          isEligible: () =>
+              ref.mounted &&
+              epoch == _epoch &&
+              ref.read(contentAccessProvider).foreground,
+        ),
+      );
+    } finally {
+      _writesInFlight--;
+    }
     if (!ref.mounted || epoch != _epoch) return;
     if (result case Failure<FriendCare>(:final failure)) {
       state = SocialState(failure: failure);
@@ -136,7 +155,7 @@ final class SocialProfileController extends Notifier<SocialState> {
   }
 
   Future<void> record(String checkInId) async {
-    if (state.busy) return;
+    if (state.busy || !ref.read(contentAccessProvider).foreground) return;
     final epoch = ++_epoch;
     state = const SocialState(tab: SocialTab.records, busy: true);
     final result = await _repository.record(username, checkInId);
@@ -162,10 +181,23 @@ final class SocialProfileController extends Notifier<SocialState> {
     }
     final epoch = ++_epoch;
     state = const SocialState(busy: true);
-    final result = await _repository.remove(
-      username,
-      expectedRevision: profile!.friendshipRevision,
-    );
+    _writesInFlight++;
+    final Result<void> result;
+    try {
+      result = await afterContentMutation(
+        ref,
+        () => _repository.remove(
+          username,
+          expectedRevision: profile!.friendshipRevision,
+          isEligible: () =>
+              ref.mounted &&
+              epoch == _epoch &&
+              ref.read(contentAccessProvider).foreground,
+        ),
+      );
+    } finally {
+      _writesInFlight--;
+    }
     if (!ref.mounted || epoch != _epoch) return;
     ref.invalidate(myFriendsControllerProvider);
     state = switch (result) {

@@ -1,3 +1,6 @@
+import '../../auth/domain/auth_repository.dart';
+import '../../account/content_access.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
@@ -27,10 +30,22 @@ final checkInEditControllerProvider =
 
 final class CheckInEditController extends Notifier<CheckInEditState> {
   int _generation = 0;
+  int get epoch => _generation;
+  bool _valid(int epoch) =>
+      ref.mounted &&
+      epoch == _generation &&
+      ref.read(contentAccessProvider).foreground;
   late CheckInRepository _repository;
   @override
   CheckInEditState build() {
-    ref.watch(currentAuthSubjectProvider);
+    ref.watch(
+      authSessionProvider.select(
+        (value) => value.asData?.value is AuthSessionAuthenticated
+            ? value.asData?.value
+            : null,
+      ),
+    );
+    ref.onDispose(() => _generation++);
     _repository = ref.watch(checkInRepositoryProvider);
     _generation++;
     return const CheckInEditState();
@@ -40,11 +55,14 @@ final class CheckInEditController extends Notifier<CheckInEditState> {
     CheckIn current,
     String note,
     CheckInVisibility visibility, {
+    int? expectedEpoch,
     String? mood,
     String? activity,
     String? locationLabel,
   }) async {
-    if (state.pending) return;
+    if (state.pending || (expectedEpoch != null && !_valid(expectedEpoch))) {
+      return;
+    }
     final normalized = normalizeCheckInNote(note, mood: mood);
     if (normalized case Failure<String>(:final failure)) {
       state = CheckInEditState(failure: failure);
@@ -54,14 +72,18 @@ final class CheckInEditController extends Notifier<CheckInEditState> {
     if (repository is! CheckInMutations) return;
     final generation = ++_generation;
     state = const CheckInEditState(pending: true);
-    final result = await (repository as CheckInMutations).update(
-      checkInId: current.checkInId,
-      note: (normalized as Success<String>).value,
-      visibility: visibility,
-      mood: mood,
-      activity: activity,
-      locationLabel: locationLabel,
-      expectedRevision: current.revision,
+    final result = await afterContentMutation(
+      ref,
+      () => (repository as CheckInMutations).update(
+        checkInId: current.checkInId,
+        note: (normalized as Success<String>).value,
+        visibility: visibility,
+        mood: mood,
+        activity: activity,
+        locationLabel: locationLabel,
+        expectedRevision: current.revision,
+        isEligible: () => _valid(generation),
+      ),
     );
     if (!ref.mounted || generation != _generation) return;
     state = switch (result) {
@@ -70,15 +92,21 @@ final class CheckInEditController extends Notifier<CheckInEditState> {
     };
   }
 
-  Future<void> remove(CheckIn current) async {
-    if (state.pending) return;
+  Future<void> remove(CheckIn current, {int? expectedEpoch}) async {
+    if (state.pending || (expectedEpoch != null && !_valid(expectedEpoch))) {
+      return;
+    }
     final repository = _repository;
     if (repository is! CheckInMutations) return;
     final generation = ++_generation;
     state = const CheckInEditState(pending: true);
-    final result = await (repository as CheckInMutations).remove(
-      checkInId: current.checkInId,
-      expectedRevision: current.revision,
+    final result = await afterContentMutation(
+      ref,
+      () => (repository as CheckInMutations).remove(
+        checkInId: current.checkInId,
+        expectedRevision: current.revision,
+        isEligible: () => _valid(generation),
+      ),
     );
     if (!ref.mounted || generation != _generation) return;
     state = switch (result) {

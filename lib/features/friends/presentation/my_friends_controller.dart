@@ -1,3 +1,5 @@
+import '../../account/content_access.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
@@ -37,6 +39,7 @@ final class MyFriendsController extends Notifier<MyFriendsState> {
   @override
   MyFriendsState build() {
     ref.watch(currentAuthSubjectProvider);
+    ref.watch(contentAccessProvider);
     // Also observe session identity: a new session with the same UID is new authority.
     ref.watch(
       authSessionProvider.select(
@@ -74,6 +77,7 @@ final class MyFriendsController extends Notifier<MyFriendsState> {
   }
 
   Future<void> load({bool next = false}) async {
+    if (!ref.read(contentAccessProvider).foreground) return;
     if (next && (state.busy || state.nextCursor == null)) return;
     final cursor = next ? state.nextCursor : null, operation = ++_operation;
     final query = state.query, searching = state.searching;
