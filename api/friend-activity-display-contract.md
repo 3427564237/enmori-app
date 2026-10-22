@@ -104,3 +104,17 @@ consent and the process-only live Event projection gate both metadata and displa
 Cold/expired source is unavailable, not an invented successful empty Event feed.
 This initial projection includes only currently held provider records; no archived
 Event title fallback or background provider call occurs inside transactions.
+
+## 22Oct canonical ID compatibility correction
+
+The 21Oct producer already uses EP1/EB2's established
+tm_event_<64 lowercase hex> canonical occurrence ID. The earlier “not a
+tm_ browse locator” exclusion applies to opaque browse locators, not that exact
+canonical form. The Friend Activity adapter, response schema and client now
+accept that existing form plus the already-supported non-tm_ stable IDs.
+Malformed lengths, uppercase/nonhex hashes, opaque tm_ locators and additional
+characters remain rejected. This corrects the consumer/schema inconsistency
+reported in ZHOU's #170 review; it creates no ID mapping, stored field, provider
+authority or new Event feature. Current source/title/selection time, identity,
+relationship and participation permissions still gate every display/callback.
+The #170 producer race repair remains separately authored/reviewed by SHI/ZHOU.

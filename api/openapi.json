@@ -9748,7 +9748,7 @@
                                 "properties": {
                                   "eventId": {
                                     "type": "string",
-                                    "pattern": "^(?!tm_)[A-Za-z0-9_-]{1,128}$"
+                                    "pattern": "^(?:tm_event_[0-9a-f]{64}|(?!tm_)[A-Za-z0-9_-]{1,128})(?![\\s\\S])"
                                   },
                                   "title": {
                                     "type": "string",

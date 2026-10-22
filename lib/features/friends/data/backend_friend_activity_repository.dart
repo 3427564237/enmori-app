@@ -84,7 +84,9 @@ final class BackendFriendActivityRepository
               event.length != 2 ||
               !event.keys.toSet().containsAll({'eventId', 'title'}) ||
               !_id(event['eventId']) ||
-              (event['eventId'] as String).startsWith('tm_') ||
+              ((event['eventId'] as String).startsWith('tm_') &&
+                  !RegExp(r'^tm_event_[0-9a-f]{64}$')
+                      .hasMatch(event['eventId'] as String)) ||
               event['title'] is! String ||
               (event['title'] as String).isEmpty ||
               (event['title'] as String).trim() != event['title'] ||

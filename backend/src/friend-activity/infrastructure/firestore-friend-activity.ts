@@ -87,7 +87,7 @@ export class FirestoreFriendActivity implements FriendActivity {
             {type:row.type,sourceRecordId:row.sourceRecordId,occurredAt:row.occurredAt},now.value.toISOString(),"friends_activity_v1");
           if(event===undefined)continue;
           if(Object.keys(event).sort().join(",")!=="eventId,title"||
-            !/^[A-Za-z0-9_-]{1,128}$/.test(event.eventId)||/[^A-Za-z0-9_-]/.test(event.eventId)||event.eventId.startsWith("tm_")||
+            !/^[A-Za-z0-9_-]{1,128}$/.test(event.eventId)||/[^A-Za-z0-9_-]/.test(event.eventId)||(event.eventId.startsWith("tm_")&&!/^tm_event_[0-9a-f]{64}$/.test(event.eventId))||
             typeof event.title!=="string"||!event.title.trim()||event.title!==event.title.trim()||event.title.length>500)return fail("SERVICE_UNAVAILABLE");
           activities.push({...display,event:{eventId:event.eventId,title:event.title}});
         }
