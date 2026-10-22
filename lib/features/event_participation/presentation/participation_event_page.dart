@@ -163,7 +163,10 @@ final class _ParticipationEventPageState
               EventCard(event: details, onSelect: null)
             else if (!_loading)
               const Text(
-                'Event information is currently unavailable. Your participation is retained.',
+                'Event details are unavailable right now. Tap the refresh icon '
+                'above to try again. If that does not help, return to Events, '
+                'refresh the list and reopen this event. '
+                'Your saved Interested/Going choice is unchanged.',
               ),
             ParticipationControls(
               key: ValueKey('participation-${widget.eventId}'),
