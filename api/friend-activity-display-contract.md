@@ -122,3 +122,17 @@ not a successful empty Event category. Legacy missing selectedAt and selections
 outside that feed do not cause historical source fetch/backfill. Source expiry
 between metadata and display also fails unavailable; revoked participation is
 still omitted under the existing authorization rule.
+
+## 22Oct canonical ID compatibility correction
+
+The 21Oct producer already uses EP1/EB2's established
+tm_event_<64 lowercase hex> canonical occurrence ID. The earlier “not a
+tm_ browse locator” exclusion applies to opaque browse locators, not that exact
+canonical form. The Friend Activity adapter, response schema and client now
+accept that existing form plus the already-supported non-tm_ stable IDs.
+Malformed lengths, uppercase/nonhex hashes, opaque tm_ locators and additional
+characters remain rejected. This corrects the consumer/schema inconsistency
+reported in ZHOU's #170 review; it creates no ID mapping, stored field, provider
+authority or new Event feature. Current source/title/selection time, identity,
+relationship and participation permissions still gate every display/callback.
+The #170 producer race repair remains separately authored/reviewed by SHI/ZHOU.
