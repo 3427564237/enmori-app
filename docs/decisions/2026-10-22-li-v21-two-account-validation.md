@@ -1,0 +1,5 @@
+# Bounded v21 two-account validation
+
+LI / PM authorized in this chat on 22 October 2026: create one dedicated real test account for v21 permission validation, then clean up test relationships and records. This permits that single synthetic account in the existing real Firebase project, ordinary application API operations, and bounded cleanup of its own test data. It supersedes the earlier no-substitute-registration restriction in `2026-10-20-li-real-account-local-wiring.md` only for this validation account.
+
+Use unmistakable synthetic content and synthetic location points, no weather-provider request, no Admin grant and no real mailbox verification claim. The existing owner account remains on the phone; preserve its records and privacy choices. Test friendship creation/removal is authorized. Keep credentials, identities and request journals private. Record phone observations separately from second-account authenticated API observations; neither alone establishes two-device acceptance. No main merge or public release is authorized.
