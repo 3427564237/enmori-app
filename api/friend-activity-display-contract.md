@@ -104,3 +104,21 @@ consent and the process-only live Event projection gate both metadata and displa
 Cold/expired source is unavailable, not an invented successful empty Event feed.
 This initial projection includes only currently held provider records; no archived
 Event title fallback or background provider call occurs inside transactions.
+
+## Observed-page integration — 22 October
+
+S-PM-1021-LI-PARALLEL-COMPLETION assigns SHI the remaining observed-page coverage,
+not a replacement selectedAt producer. The existing process-only `peek` seam now
+also exposes successfully browsed later pages of the same bounded generation.
+See the observed-window supplement in event-participation-contract.md for bounds,
+expiry and invalidation. Public fields, ranking, consent and current transaction
+permissions are unchanged. Actual selectedAt is still required; preference
+updates and legacy missing times do not create activity timestamps. No unvisited
+page is fetched, title archived, runtime enabled or real account changed.
+
+A currently authorized selection inside the retained inclusive seven-day feed
+whose title is not in the observed window is a dependency-unavailable result,
+not a successful empty Event category. Legacy missing selectedAt and selections
+outside that feed do not cause historical source fetch/backfill. Source expiry
+between metadata and display also fails unavailable; revoked participation is
+still omitted under the existing authorization rule.
