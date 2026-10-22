@@ -21,6 +21,7 @@ final class OwnProfilePage extends ConsumerWidget {
     this.onOpenRecords,
     this.onOpenHistory,
     this.onOpenFootprint,
+    this.adminCatalogueEntry,
     super.key,
   });
   final Future<void> Function() onEditInterests;
@@ -28,6 +29,7 @@ final class OwnProfilePage extends ConsumerWidget {
   final Widget? participationSection;
   final Future<void> Function(String)? onOpenRecords;
   final VoidCallback? onOpenHistory, onOpenFootprint;
+  final Widget? adminCatalogueEntry;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(ownProfileControllerProvider);
@@ -272,6 +274,7 @@ final class OwnProfilePage extends ConsumerWidget {
                   ],
                   const SizedBox(height: 20),
                   const VerifyEmailButton(),
+                  ?adminCatalogueEntry,
                 ],
               ),
             ),

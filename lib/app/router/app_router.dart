@@ -29,6 +29,8 @@ import '../../features/event_recommendations/domain/event_recommendation_reposit
 import '../../features/event_recommendations/presentation/event_recommendations_controller.dart';
 import '../../features/event_recommendations/presentation/event_recommendations_page.dart';
 import '../../features/interests/presentation/interest_editor_page.dart';
+import '../../features/interests/presentation/admin_interest_catalogue_page.dart';
+import '../interest_admin_entry.dart';
 import '../home_shell_page.dart';
 import '../../features/event_detail/presentation/event_detail_page.dart';
 import '../../features/friends/presentation/friend_page.dart';
@@ -61,6 +63,7 @@ abstract final class AppRoutes {
   static const footprint = '/check-ins/footprint';
   static const aiAssistant = '/ai-assistant';
   static const interests = '/interests';
+  static const adminInterests = '/admin/interests';
   static const eventRecommendations = '/events';
   static const activities = '/activities';
   static const unavailable = '/unavailable';
@@ -506,6 +509,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           AppRoutes.profile,
           4,
           OwnProfilePage(
+            adminCatalogueEntry: InterestAdminEntry(
+              onOpen: () => context.push<void>(AppRoutes.adminInterests),
+            ),
             onOpenHistory: historyPage != null
                 ? () => context.push<void>(AppRoutes.checkInHistory)
                 : null,
@@ -536,6 +542,35 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               await context.push<bool>(AppRoutes.interests);
             },
           ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.adminInterests,
+        builder: (context, state) => Consumer(
+          builder: (context, widgetRef, _) {
+            final session = widgetRef.watch(authSessionProvider).asData?.value;
+            return AdminInterestCataloguePage(
+              onBack: () {
+                if (!context.mounted ||
+                    session is! AuthSessionAuthenticated ||
+                    !identical(
+                      widgetRef.read(authSessionProvider).asData?.value,
+                      session,
+                    ) ||
+                    widgetRef.read(routerGateProvider) !=
+                        RouterGateState.authenticated ||
+                    GoRouter.of(context).state.uri.path !=
+                        AppRoutes.adminInterests) {
+                  return;
+                }
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go(AppRoutes.profile);
+                }
+              },
+            );
+          },
         ),
       ),
       GoRoute(

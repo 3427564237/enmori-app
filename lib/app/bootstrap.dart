@@ -22,6 +22,8 @@ import '../features/event_recommendations/data/backend_event_recommendation_repo
 import '../features/event_recommendations/event_recommendations_providers.dart';
 import '../features/interests/data/backend_interest_repository.dart';
 import '../features/interests/interests_providers.dart';
+import '../features/interests/admin_interest_providers.dart';
+import '../features/interests/data/backend_admin_interest_repository.dart';
 import '../features/event_browse/event_browse_providers.dart';
 import 'platform/external_activity_opener.dart';
 import 'app.dart';
@@ -129,6 +131,11 @@ Future<void> bootstrap() async {
         interestRepositoryProvider.overrideWith(
           (ref) =>
               BackendInterestRepository(ref.watch(backendApiClientProvider)),
+        ),
+        adminInterestRepositoryProvider.overrideWith(
+          (ref) => BackendAdminInterestRepository(
+            ref.watch(backendApiClientProvider),
+          ),
         ),
         eventRecommendationRepositoryProvider.overrideWith(
           (ref) => BackendEventRecommendationRepository(

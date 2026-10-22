@@ -1,4 +1,5 @@
 export const ROUTE_INVENTORY = [
+  { method: 'GET', path: '/v1/me/interest-tag-admin-capability', successStatuses: [200], requiresIdempotencyKey: false },
   {method:"POST",path:"/v1/me/persona-preview",successStatuses:[200],requiresIdempotencyKey:false,environment:"isolated-emulator"},
   {method:"GET",path:"/v1/me/conversations",successStatuses:[200],requiresIdempotencyKey:false,environment:"isolated-emulator"},
   { method: "GET", path: "/v1/events/{eventId}/participation", successStatuses: [200], requiresIdempotencyKey: false, environment: "isolated-emulator" },

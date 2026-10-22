@@ -27,6 +27,7 @@ import { createHistoryCursorCodec } from '../check-ins/infrastructure/aes-gcm-hi
 import { createAuthBindingDocumentId, parseAuthBinding } from '../shared/infrastructure/firebase/firestore-records.js';
 import { ok } from '../shared/domain/result.js';
 import { CreateInterestTag } from '../interests/application/create-interest-tag.js';
+import { GetInterestAdminCapability } from '../interests/application/get-interest-admin-capability.js';
 import { FirebaseInterestAdmin } from '../interests/infrastructure/firebase-interest-admin.js';
 import { FirestoreCatalogueWriter } from '../interests/infrastructure/firestore-catalogue-writer.js';
 import { OwnAccountPreferences } from "../account/application/own-account-preferences.js";
@@ -201,6 +202,7 @@ async function createControlledRuntime(
       checkInCalendar:new OwnCheckInCalendar(new FirestoreCheckInCalendar(new FirebaseAdminCheckInHistoryGateway(getFirestore(firebaseApp)))),
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
       createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(getAuth(firebaseApp)), new FirestoreCatalogueWriter(gateway)),
+      getInterestAdminCapability: new GetInterestAdminCapability(new FirebaseInterestAdmin(getAuth(firebaseApp))),
       accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, isolatedEnvironment)),
       recommendEvents: realEvents.recommendEvents,
       identityVerifier: new FirebaseIdentityVerifier(getAuth(firebaseApp)),
