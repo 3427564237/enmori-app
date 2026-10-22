@@ -157,9 +157,7 @@ final class GroupHomeSocial extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 20),
-        Text('Around you', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 8),
+        const Divider(height: 32),
         FriendActivityPanel(
           home: true,
           onOpenProfile: profile,

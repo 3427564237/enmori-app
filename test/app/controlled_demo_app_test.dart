@@ -160,11 +160,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(status, 'interested');
       expect(revision, 1);
-      await tester.tap(find.text('Event details').first);
+      await tester.ensureVisible(find.text('Synthetic integration concert'));
+      await tester.tap(find.text('Synthetic integration concert'));
       await tester.pumpAndSettle();
-      expect(find.text('Your participation: interested'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Interested'), findsOneWidget);
       final router = GoRouter.of(
-        tester.element(find.text('Your participation: interested')),
+        tester.element(find.widgetWithText(FilledButton, 'Interested')),
       );
       expect(
         router.state.uri.path,
@@ -173,9 +174,10 @@ void main() {
       router.go(AppRoutes.activities);
       await tester.pumpAndSettle();
       expect(find.text('Synthetic integration concert'), findsOneWidget);
-      await tester.tap(find.text('Event details'));
+      await tester.ensureVisible(find.text('Synthetic integration concert'));
+      await tester.tap(find.text('Synthetic integration concert'));
       await tester.pumpAndSettle();
-      expect(find.text('Your participation: interested'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Interested'), findsOneWidget);
       router.pop();
       await tester.pumpAndSettle();
       await tester.tap(find.text('Load more events'));

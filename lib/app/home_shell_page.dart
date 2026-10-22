@@ -173,9 +173,18 @@ final class HomeShellPage extends StatelessWidget {
             key: const Key('route-home'),
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
-              Text('Today', style: Theme.of(context).textTheme.headlineSmall),
+              Semantics(
+                header: true,
+                child: Text(
+                  'Today',
+                  style: Theme.of(context).textTheme.headlineLarge,
+                ),
+              ),
               const SizedBox(height: 4),
-              const Text('Take a moment for yourself. What’s on your mind?'),
+              Text(
+                'A moment to make your own.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: 12),
               FilledButton.icon(
                 key: const Key('r6-new-check-in-button'),
@@ -188,31 +197,16 @@ final class HomeShellPage extends StatelessWidget {
                 weatherSection!,
               ],
               const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Events for you',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  TextButton(
-                    key: const Key('home-browse-activities'),
-                    onPressed: onBrowseActivities,
-                    child: const Text('Browse all'),
-                  ),
-                ],
-              ),
-              if (onOpenEvent != null) ...[
-                const SizedBox(height: 4),
+              if (onOpenEvent != null)
                 EventRecommendationsSection(
+                  heading: 'Events for you',
+                  onBrowseAll: onBrowseActivities,
                   onSeeAll: null,
                   onOpenEvent: onOpenEvent,
                   recommendationCardBuilder: recommendationCardBuilder,
                 ),
-              ],
               ?socialSection,
-              const SizedBox(height: 14),
+              const Divider(height: 32),
               Semantics(
                 header: true,
                 child: Text(
@@ -220,7 +214,7 @@ final class HomeShellPage extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 4),
               _HomeShortcut(
                 key: const Key('social-ai-card'),
                 icon: Icons.auto_awesome_outlined,
@@ -228,7 +222,7 @@ final class HomeShellPage extends StatelessWidget {
                 description: 'Talk with your active Persona.',
                 onTap: onOpenAi,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 4),
               _HomeShortcut(
                 key: const Key('home-check-in-history'),
                 icon: Icons.history,
@@ -237,7 +231,7 @@ final class HomeShellPage extends StatelessWidget {
                 onTap: onOpenHistory,
               ),
               if (onOpenFootprint != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 4),
                 _HomeShortcut(
                   key: const Key('home-footprint'),
                   icon: Icons.map_outlined,
@@ -246,19 +240,23 @@ final class HomeShellPage extends StatelessWidget {
                   onTap: onOpenFootprint,
                 ),
               ],
-              const SizedBox(height: 8),
-              _HomeSecondaryAction(
-                actionKey: const Key('home-manage-personas'),
-                onPressed: onManagePersonas,
-                icon: Icons.manage_accounts_outlined,
-                label: 'Manage Personas',
-              ),
-              const SizedBox(height: 12),
-              _HomeSecondaryAction(
-                actionKey: const Key('edit-interests-button'),
-                onPressed: onEditInterests,
-                icon: Icons.interests_outlined,
-                label: 'Edit interests',
+              const Divider(height: 24),
+              Wrap(
+                spacing: 12,
+                children: [
+                  _HomeSecondaryAction(
+                    actionKey: const Key('home-manage-personas'),
+                    onPressed: onManagePersonas,
+                    icon: Icons.manage_accounts_outlined,
+                    label: 'Manage Personas',
+                  ),
+                  _HomeSecondaryAction(
+                    actionKey: const Key('edit-interests-button'),
+                    onPressed: onEditInterests,
+                    icon: Icons.interests_outlined,
+                    label: 'Edit interests',
+                  ),
+                ],
               ),
             ],
           ),
@@ -284,20 +282,18 @@ final class _HomeShortcut extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => Card(
-    child: ListTile(
-      contentPadding: const EdgeInsets.all(16),
-      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
-      title: Text(title),
-      subtitle: Text(
-        onTap == null ? 'Unavailable in this version.' : description,
-        style: Theme.of(context).textTheme.bodyMedium
-            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-      ),
-      trailing: onTap == null ? null : const Icon(Icons.chevron_right),
-      enabled: onTap != null,
-      onTap: onTap,
+  Widget build(BuildContext context) => ListTile(
+    contentPadding: const EdgeInsets.symmetric(vertical: 4),
+    leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+    title: Text(title),
+    subtitle: Text(
+      onTap == null ? 'Unavailable in this version.' : description,
+      style: Theme.of(context).textTheme.bodyMedium
+          ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
     ),
+    trailing: onTap == null ? null : const Icon(Icons.chevron_right),
+    enabled: onTap != null,
+    onTap: onTap,
   );
 }
 
@@ -316,9 +312,10 @@ final class _HomeSecondaryAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      OutlinedButton.icon(
+      TextButton.icon(
         key: actionKey,
         onPressed: onPressed,
         icon: Icon(icon),

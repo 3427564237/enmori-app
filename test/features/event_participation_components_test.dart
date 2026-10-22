@@ -126,7 +126,7 @@ void main() {
       );
       expect(find.textContaining('Until '), findsNothing);
       expect(find.textContaining('participants'), findsNothing);
-      await tester.tap(find.text('Event details'));
+      await tester.tap(find.text('Source-backed title'));
       expect(selected, 'event-a');
     },
   );

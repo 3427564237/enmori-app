@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/presentation/enmori_motion.dart';
 
 import '../../../core/presentation/status_panel.dart';
+import '../../../core/presentation/section_heading.dart';
 import '../../../core/result/result.dart';
 import '../domain/event_recommendation_repository.dart';
 import 'event_recommendations_controller.dart';
@@ -20,6 +21,8 @@ const eventEmptyBody = 'Update your interests or check again later.';
 final class EventRecommendationsSection extends ConsumerStatefulWidget {
   const EventRecommendationsSection({
     required this.onSeeAll,
+    this.heading,
+    this.onBrowseAll,
     this.onOpenEvent,
     this.recommendationCardBuilder,
     this.syntheticPreview = false,
@@ -27,6 +30,8 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
   });
 
   final VoidCallback? onSeeAll;
+  final String? heading;
+  final VoidCallback? onBrowseAll;
   final void Function(String)? onOpenEvent;
   final RecommendationCardBuilder? recommendationCardBuilder;
   final bool syntheticPreview;
@@ -75,6 +80,8 @@ final class _EventRecommendationsSectionState
       onRetry: _load,
       onSeeAll: widget.onSeeAll,
       home: true,
+      heading: widget.heading,
+      onBrowseAll: widget.onBrowseAll,
       onOpenEvent: widget.onOpenEvent,
       recommendationCardBuilder: widget.recommendationCardBuilder,
       syntheticPreview: widget.syntheticPreview,
@@ -164,6 +171,8 @@ final class _RecommendationContent extends StatelessWidget {
     required this.onRetry,
     this.onSeeAll,
     this.home = false,
+    this.heading,
+    this.onBrowseAll,
     this.onOpenEvent,
     this.recommendationCardBuilder,
     this.syntheticPreview = false,
@@ -173,15 +182,75 @@ final class _RecommendationContent extends StatelessWidget {
   final VoidCallback onRetry;
   final VoidCallback? onSeeAll;
   final bool home;
+  final String? heading;
+  final VoidCallback? onBrowseAll;
   final bool syntheticPreview;
   final void Function(String)? onOpenEvent;
   final RecommendationCardBuilder? recommendationCardBuilder;
 
   @override
   Widget build(BuildContext context) {
+    final inlineHeader = home && heading != null;
+    Widget status({
+      required Key key,
+      required String title,
+      String? body,
+      required IconData icon,
+      bool loading = false,
+      bool isError = false,
+      Widget? action,
+    }) {
+      if (!home) {
+        return StatusPanel(
+          key: key,
+          title: title,
+          body: body ?? '',
+          icon: icon,
+          loading: loading,
+          isError: isError,
+          action: action,
+        );
+      }
+      return Padding(
+        key: key,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: isError
+                  ? Theme.of(context).colorScheme.error
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Semantics(liveRegion: true, child: Text(title)),
+                  if (body != null) ...[
+                    const SizedBox(height: 4),
+                    Text(body, style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                  if (loading)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: LinearProgressIndicator(),
+                    ),
+                  if (!inlineHeader && action != null) action,
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final content = switch (state) {
-      AsyncLoading<EventRecommendationResponse>() => const StatusPanel(
-        key: Key('event-recommendations-loading'),
+      AsyncLoading<EventRecommendationResponse>() => status(
+        key: const Key('event-recommendations-loading'),
         title: 'Loading event recommendations',
         loading: true,
         body: 'Checking for upcoming events that match your interests.',
@@ -190,7 +259,7 @@ final class _RecommendationContent extends StatelessWidget {
       AsyncError<EventRecommendationResponse>(
         error: EventRecommendationsRefreshRequired(),
       ) =>
-        StatusPanel(
+        status(
           key: const Key('event-recommendations-refresh-required'),
           title: 'Refresh event recommendations',
           body: 'Refresh to check for current matches for your interests.',
@@ -202,7 +271,7 @@ final class _RecommendationContent extends StatelessWidget {
             label: const Text('Refresh'),
           ),
         ),
-      AsyncError<EventRecommendationResponse>(:final error) => StatusPanel(
+      AsyncError<EventRecommendationResponse>(:final error) => status(
         key: const Key('event-recommendations-error'),
         title: 'Event recommendations unavailable',
         isError: true,
@@ -217,7 +286,7 @@ final class _RecommendationContent extends StatelessWidget {
       ),
       AsyncData<EventRecommendationResponse>(:final value) =>
         value.items.isEmpty
-            ? StatusPanel(
+            ? status(
                 key: const Key('event-recommendations-empty'),
                 title: eventEmptyTitle,
                 body: eventEmptyBody,
@@ -240,6 +309,31 @@ final class _RecommendationContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (inlineHeader)
+          SectionHeading(
+            title: heading!,
+            actions: [
+              if (onBrowseAll != null)
+                TextButton(
+                  key: const Key('home-browse-activities'),
+                  onPressed: onBrowseAll,
+                  child: const Text('Browse all'),
+                ),
+              IconButton(
+                key: Key(
+                  state.hasError &&
+                          state.error is! EventRecommendationsRefreshRequired
+                      ? 'event-recommendations-retry'
+                      : 'event-recommendations-refresh',
+                ),
+                tooltip: state.hasError
+                    ? 'Retry event recommendations'
+                    : 'Refresh event recommendations',
+                onPressed: state.isLoading ? null : onRetry,
+                icon: const Icon(Icons.refresh),
+              ),
+            ],
+          ),
         if (syntheticPreview) ...[
           const Card(
             key: Key('event-synthetic-notice'),
@@ -260,7 +354,8 @@ final class _RecommendationContent extends StatelessWidget {
               state is AsyncData<EventRecommendationResponse>,
           child: content,
         ),
-        if (state is AsyncData<EventRecommendationResponse>) ...[
+        if (state is AsyncData<EventRecommendationResponse> &&
+            !inlineHeader) ...[
           const SizedBox(height: 12),
           TextButton.icon(
             key: const Key('event-recommendations-refresh'),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'home_weather_controller.dart';
 import 'weather_card.dart';
+import '../../../core/presentation/section_heading.dart';
 
 final class HomeWeatherCard extends ConsumerStatefulWidget {
   const HomeWeatherCard({required this.openAttribution, super.key});
@@ -40,6 +41,57 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
     }
   }
 
+  static const _disclosure =
+      'ENMORI will obtain one foreground location, round it to 0.1°, and send the approximate coordinate through its Backend to Open-Meteo. Open-Meteo may retain request metadata. No precise point, identity or Check-in is sent. Choose automatic weather to remember this preference, refresh at most every 15 minutes while on Home, and change it anytime in Settings. No background tracking. Separate from Check-in weather.';
+
+  Future<void> _requestWeather() async {
+    final state = ref.read(homeWeatherControllerProvider);
+
+    final epoch = controller.epoch;
+    if (state.automatic) {
+      await controller.load(expectedEpoch: epoch);
+      return;
+    }
+    final allowed = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Allow current weather?'),
+        content: const SingleChildScrollView(child: Text(_disclosure)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Not now'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'once'),
+            child: const Text('Only this time'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, 'auto'),
+            child: const Text('Automatically on Home'),
+          ),
+        ],
+      ),
+    );
+    if (mounted && allowed != null) {
+      await controller.load(expectedEpoch: epoch, remember: allowed == 'auto');
+    }
+  }
+
+  void _showInfo() => showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('About Home weather'),
+      content: const SingleChildScrollView(child: Text(_disclosure)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Done'),
+        ),
+      ],
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeWeatherControllerProvider);
@@ -49,14 +101,38 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Current weather',
-              style: Theme.of(context).textTheme.titleMedium,
+            SectionHeading(
+              title: 'Current weather',
+              actions: [
+                if (state.weather != null)
+                  IconButton(
+                    tooltip: 'Refresh weather',
+                    onPressed: state.busy ? null : _requestWeather,
+                    icon: const Icon(Icons.refresh),
+                  ),
+                PopupMenuButton<String>(
+                  tooltip: 'Weather options',
+                  onSelected: (action) =>
+                      action == 'clear' ? controller.clear() : _showInfo(),
+                  itemBuilder: (_) => [
+                    const PopupMenuItem(
+                      value: 'info',
+                      child: Text('About Home weather'),
+                    ),
+                    if (state.weather != null)
+                      const PopupMenuItem(
+                        value: 'clear',
+                        child: Text('Clear weather'),
+                      ),
+                  ],
+                ),
+              ],
             ),
             Text(
               state.automatic
-                  ? 'Updates when you visit Home. Change this in Settings.'
-                  : 'A little context for your day. Optional and separate from Check-ins.',
+                  ? 'Approximate location · auto on'
+                  : 'Optional · approximate location',
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             if (state.weather case final weather?)
               WeatherCard(
@@ -65,62 +141,28 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
                 openAttribution: widget.openAttribution,
               ),
             if (state.failure case final failure?)
-              Semantics(liveRegion: true, child: Text(failure.message)),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Text(failure.message),
+                ),
+              ),
             if (state.busy)
-              Semantics(
-                liveRegion: true,
-                child: const Text('Getting current weather…'),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: LinearProgressIndicator(
+                  semanticsLabel: 'Getting current weather',
+                ),
               ),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.cloud_outlined),
-              label: Text(
-                state.weather == null ? 'Get local weather' : 'Refresh weather',
-              ),
-              onPressed: state.busy
-                  ? null
-                  : () async {
-                      final epoch = controller.epoch;
-                      if (state.automatic) {
-                        await controller.load(expectedEpoch: epoch);
-                        return;
-                      }
-                      final allowed = await showDialog<String>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Allow current weather?'),
-                          content: const SingleChildScrollView(
-                            child: Text(
-                              'ENMORI will obtain one foreground location, round it to 0.1°, and send the approximate coordinate through its Backend to Open-Meteo. Open-Meteo may retain request metadata. No precise point, identity or Check-in is sent. Choose automatic weather to remember this preference, refresh at most every 15 minutes while on Home, and change it anytime in Settings. No background tracking. Separate from Check-in weather.',
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Not now'),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, 'once'),
-                              child: const Text('Only this time'),
-                            ),
-                            FilledButton(
-                              onPressed: () => Navigator.pop(context, 'auto'),
-                              child: const Text('Automatically on Home'),
-                            ),
-                          ],
-                        ),
-                      );
-                      if (mounted && allowed != null) {
-                        await controller.load(
-                          expectedEpoch: epoch,
-                          remember: allowed == 'auto',
-                        );
-                      }
-                    },
-            ),
-            if (state.weather != null)
-              TextButton(
-                onPressed: controller.clear,
-                child: const Text('Clear weather'),
+            if (state.weather == null)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: state.busy ? null : _requestWeather,
+                  icon: const Icon(Icons.cloud_outlined),
+                  label: const Text('Get local weather'),
+                ),
               ),
           ],
         ),

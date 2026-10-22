@@ -61,25 +61,20 @@ final class EventCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CircleAvatar(
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer,
-                          child: const Icon(Icons.event_outlined),
-                        ),
-                        const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            category ?? 'Event',
-                            style: Theme.of(context).textTheme.labelLarge,
+                            title,
+                            style: Theme.of(context).textTheme.titleLarge,
                           ),
                         ),
-                        if (open != null) const Icon(Icons.chevron_right),
+                        if (open != null) ...[
+                          const SizedBox(width: 8),
+                          const Icon(Icons.chevron_right),
+                        ],
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Text(title, style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 8),
                     Text(
                       start == null
@@ -88,9 +83,22 @@ final class EventCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     if (end != null)
-                      Text('Until ${localTimeLabel(context, end)}'),
+                      Text(
+                        'Until ${localTimeLabel(context, end)}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     const SizedBox(height: 4),
-                    Text(location ?? 'Location not provided.'),
+                    Text(
+                      location ?? 'Location not provided.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    if (category != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        category,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
                     if (event?.shortDescription case final description?) ...[
                       const SizedBox(height: 8),
                       Text(description),
@@ -105,15 +113,6 @@ final class EventCard extends StatelessWidget {
                     if (visibleParticipantCount case final count?
                         when count >= 0)
                       Text('$count visible participants'),
-                    if (open != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        'Event details',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -121,7 +120,7 @@ final class EventCard extends StatelessWidget {
             if (actions != null) ...[
               const Divider(height: 1),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                 child: actions!,
               ),
             ],
