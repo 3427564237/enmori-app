@@ -1,0 +1,338 @@
+{
+  "date": "2026-10-22",
+  "timezone": "Asia/Shanghai",
+  "baseBranch": "souma/li-zhou-runtime-20261020",
+  "base": "986d4f895252f266c1f6bf785b7f0c24ee03643e",
+  "branch": "codex/zhou-admin-catalogue-20261022",
+  "product": "4fcd09f45cfcfb81e87233cd383f1f80149046f6",
+  "productTree": "b54e1b9f8e3c83eab38736cb882037a3e90c1a90",
+  "changedBlobs": [
+    {
+      "path": "api/interest-admin-capability-contract.md",
+      "blob": "6b864a3d69c506a44dbe059d81e015333f1eec35"
+    },
+    {
+      "path": "api/openapi.json",
+      "blob": "fe3be2089507f3b8d2f4cf13376cd7ed84429280"
+    },
+    {
+      "path": "backend/src/bootstrap/build-app.ts",
+      "blob": "be648c1e97f6c7b371680d29b72a85f0f8c22d3b"
+    },
+    {
+      "path": "backend/src/bootstrap/controlled-phone-service.ts",
+      "blob": "e94d0d7a033866285225df94809825608c456ee1"
+    },
+    {
+      "path": "backend/src/bootstrap/controlled-runtime.ts",
+      "blob": "11da38040f7dea167152fed1ad1e30ccb338bbc9"
+    },
+    {
+      "path": "backend/src/bootstrap/retained-core-runtime.ts",
+      "blob": "ddad46f86401b67d6e493a40b29d2032f1a68de2"
+    },
+    {
+      "path": "backend/src/interests/application/get-interest-admin-capability.ts",
+      "blob": "76928680d59782ea4864fd6f3b02ca1163dd4713"
+    },
+    {
+      "path": "backend/src/interests/transport/admin-routes.ts",
+      "blob": "bd047eb8b0d8e3067a730679c909e3c063fbe2c0"
+    },
+    {
+      "path": "backend/src/transport/route-inventory.ts",
+      "blob": "383c194836afb79e9ee96a6059701017728ec291"
+    },
+    {
+      "path": "backend/test/interests/admin-capability.test.ts",
+      "blob": "1b850595abeba2b61d7fb2fa757fea42a7df30a7"
+    },
+    {
+      "path": "lib/app/bootstrap.dart",
+      "blob": "bb23174055e6bac4074b15fea20a314f595c8fa0"
+    },
+    {
+      "path": "lib/app/controlled_demo_app.dart",
+      "blob": "d51081bd72df6eb87931056054726238092da6e7"
+    },
+    {
+      "path": "lib/app/interest_admin_entry.dart",
+      "blob": "d17bb2ca108d9a6d4c7fd69ec08eeadc80a63aab"
+    },
+    {
+      "path": "lib/app/router/app_router.dart",
+      "blob": "26d890d004f13e0a8a49ccdc6e4cccb031cf7ca4"
+    },
+    {
+      "path": "lib/core/network/backend_api_client.dart",
+      "blob": "0e15c8da2af889b69fa0f21359f6d3202781764c"
+    },
+    {
+      "path": "lib/core/result/result.dart",
+      "blob": "724dd3175c25527630207a6df78d3575d0388d0e"
+    },
+    {
+      "path": "lib/features/account/presentation/own_profile_page.dart",
+      "blob": "6f3d94bcc6a8358de9d80f33b3be315f908f6f1e"
+    },
+    {
+      "path": "lib/features/interests/admin_interest_providers.dart",
+      "blob": "33540175b39f2b79f9e610a5f5ff846726031079"
+    },
+    {
+      "path": "lib/features/interests/data/backend_admin_interest_repository.dart",
+      "blob": "c683f81058a5e9bcdc3e390ab6ef0741369b101a"
+    },
+    {
+      "path": "lib/features/interests/domain/admin_interest_repository.dart",
+      "blob": "8c8a24e092403f533a6e4312df81c6228e24019e"
+    },
+    {
+      "path": "lib/features/interests/presentation/admin_interest_catalogue_page.dart",
+      "blob": "45a91f75319bad33737eeb941544f70834b8d01f"
+    },
+    {
+      "path": "lib/features/interests/presentation/admin_interest_controller.dart",
+      "blob": "c8419a73064bad6fd66155407f6ed7d38afeee40"
+    },
+    {
+      "path": "test/app/admin_interest_flow_test.dart",
+      "blob": "4d7c72bffbbb5a7b384ca05aa39c9cecc41191f5"
+    },
+    {
+      "path": "test/features/admin_interest_catalogue_page_test.dart",
+      "blob": "9d78a453fdffdc31c736fe8223d9e6d9fa8930cf"
+    },
+    {
+      "path": "test/features/admin_interest_controller_test.dart",
+      "blob": "9a6eee7e29fbe0e04e020820ee6afecfa0c88245"
+    },
+    {
+      "path": "test/features/admin_interest_repository_test.dart",
+      "blob": "435346c14bd00bd243765c7f5fb3b8048cf127ea"
+    },
+    {
+      "path": "test/features/admin_interest_test_support.dart",
+      "blob": "45071c9a4d0f102745ca7abe8fccc86b77e41d57"
+    }
+  ],
+  "logs": [
+    {
+      "path": "build/zhou-admin-analysis-recheck.log",
+      "sha256": "2055c2e55cc22c0a0f861d30e84facb21931986d76039a53a2c0420f56c577d3"
+    },
+    {
+      "path": "build/zhou-admin-analysis.log",
+      "sha256": "e989d3781f1128cf19f115e76d7facab7df35dcb473f44f8c60f7310dbdfbef0"
+    },
+    {
+      "path": "build/zhou-admin-backend-capability-recheck.log",
+      "sha256": "d6a2cc3376fda4150f58a60dac71e5e16d71a14ef94b2303f8b8f0644afc9261"
+    },
+    {
+      "path": "build/zhou-admin-backend-focused.log",
+      "sha256": "22682636617615ea5245d503ab93b914c46642caf26a50e654c89fabe1d5fe32"
+    },
+    {
+      "path": "build/zhou-admin-direct-back-before.log",
+      "sha256": "4d15e8d726a41c494a1a2605c3078215186248ff37c5a7696513d1da9e593bf8"
+    },
+    {
+      "path": "build/zhou-admin-flutter-focused.log",
+      "sha256": "937336c9c02850033fe23450f0afcf81c04bc731619c42d0da59e919ebe8e125"
+    },
+    {
+      "path": "build/zhou-admin-format.log",
+      "sha256": "4eaa9e279288321e2ca747ab1629e3d127a54b58775d91b6a33c0d1066bfa103"
+    },
+    {
+      "path": "build/zhou-admin-shared-transport.log",
+      "sha256": "c7c95a4d1d5272f7ae57a984991c4e17c709ff10ab9a942bd8e4ed56a516e9ec"
+    }
+  ],
+  "commands": [
+    {
+      "command": "node node_modules/typescript/bin/tsc --project backend/tsconfig.json --pretty false",
+      "executions": 2,
+      "exitCodes": [
+        0,
+        0
+      ],
+      "stdout": "empty; no file generated"
+    },
+    {
+      "command": "node --test backend/dist/test/interests/admin-capability.test.js backend/dist/test/interests/catalogue-admin.test.js backend/dist/test/firebase-identity-verifier.contract.test.js backend/dist/test/contract/openapi.test.js",
+      "total": 30,
+      "passed": 29,
+      "failed": 1,
+      "skipped": 0,
+      "exitCode": 1,
+      "log": "build/zhou-admin-backend-focused.log",
+      "failure": "New test used wrong existing response envelope; product response was correct."
+    },
+    {
+      "command": "node --test backend/dist/test/interests/admin-capability.test.js",
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "exitCode": 0,
+      "log": "build/zhou-admin-backend-capability-recheck.log",
+      "scope": "Only corrected new file rerun; previous existing20 reused."
+    },
+    {
+      "command": "fvm flutter test --no-pub --reporter expanded --plain-name direct test/app/admin_interest_flow_test.dart",
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "exitCode": 1,
+      "log": "build/zhou-admin-direct-back-before.log",
+      "scope": "Pre-repair root Back regression; included unchanged in final batch."
+    },
+    {
+      "command": "fvm flutter test --no-pub --reporter expanded test/features/admin_interest_repository_test.dart test/features/admin_interest_controller_test.dart test/features/admin_interest_catalogue_page_test.dart test/app/admin_interest_flow_test.dart test/app/own_profile_flow_test.dart",
+      "total": 69,
+      "passed": 69,
+      "failed": 0,
+      "exitCode": 0,
+      "log": "build/zhou-admin-flutter-focused.log"
+    },
+    {
+      "command": "fvm flutter test --no-pub --reporter expanded --plain-name BackendApiClient test/features/backend_repositories_test.dart",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "exitCode": 0,
+      "log": "build/zhou-admin-shared-transport.log"
+    },
+    {
+      "command": "fvm dart analyze --fatal-infos <17 changed Dart paths>",
+      "infos": 5,
+      "errors": 0,
+      "exitCode": 1,
+      "log": "build/zhou-admin-analysis.log"
+    },
+    {
+      "command": "fvm dart analyze --fatal-infos lib/features/account/presentation/own_profile_page.dart lib/features/interests/presentation/admin_interest_catalogue_page.dart lib/features/interests/presentation/admin_interest_controller.dart",
+      "issues": 0,
+      "exitCode": 0,
+      "log": "build/zhou-admin-analysis-recheck.log"
+    },
+    {
+      "command": "fvm dart format --output=none --set-exit-if-changed <17 changed Dart paths>",
+      "files": 17,
+      "changed": 0,
+      "exitCode": 0,
+      "log": "build/zhou-admin-format.log"
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 0
+    }
+  ],
+  "finalPassingCoverage": {
+    "backendDistinct": 30,
+    "backendRunsAreNotAFreshFinal30Command": true,
+    "flutterDistinct": 76,
+    "flutterBatches": [
+      69,
+      7
+    ]
+  },
+  "postTestEdits": [
+    {
+      "paths": [
+        "lib/features/interests/presentation/admin_interest_catalogue_page.dart",
+        "lib/features/interests/presentation/admin_interest_controller.dart"
+      ],
+      "change": "Four if-return statements wrapped in equivalent control-flow braces; independent source review confirmed unchanged logic; only affected static analysis repeated."
+    },
+    {
+      "paths": [
+        "test/features/admin_interest_repository_test.dart"
+      ],
+      "change": "Formatting only after passing batch; no test logic change."
+    }
+  ],
+  "noClaimOfFreshFinalTreeFullTestExecution": true,
+  "reused": [
+    {
+      "path": "backend/src/interests/application/create-interest-tag.ts",
+      "baseBlob": "ee5511d42fca96dc3a32777e54c256e5b17be469",
+      "productBlob": "ee5511d42fca96dc3a32777e54c256e5b17be469",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/interests/infrastructure/firebase-interest-admin.ts",
+      "baseBlob": "15fb4441c6811a170e34be4bd76ce5feb49abe9f",
+      "productBlob": "15fb4441c6811a170e34be4bd76ce5feb49abe9f",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/interests/infrastructure/firestore-catalogue-writer.ts",
+      "baseBlob": "355a3c82c8c6181952a98ce8e5794275fbb6efac",
+      "productBlob": "355a3c82c8c6181952a98ce8e5794275fbb6efac",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/interests/domain/catalogue-name.ts",
+      "baseBlob": "fc4c0ed47245de4ac74146f06eb3e2f369145a5d",
+      "productBlob": "fc4c0ed47245de4ac74146f06eb3e2f369145a5d",
+      "unchanged": true
+    },
+    {
+      "path": "backend/src/interests/domain/unicode-case-fold.ts",
+      "baseBlob": "22315e6acbd03773e143f5a889a3aa2bfce5f5a7",
+      "productBlob": "22315e6acbd03773e143f5a889a3aa2bfce5f5a7",
+      "unchanged": true
+    },
+    {
+      "path": "backend/test/interests/catalogue-admin.test.ts",
+      "baseBlob": "97a88564efc81bcb06c201a197eeb582565c2127",
+      "productBlob": "97a88564efc81bcb06c201a197eeb582565c2127",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/interests/data/backend_interest_repository.dart",
+      "baseBlob": "a4d1ce9e3ed8c8a6815e7858d885fbd4021ee0cf",
+      "productBlob": "a4d1ce9e3ed8c8a6815e7858d885fbd4021ee0cf",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/interests/presentation/interest_editor_controller.dart",
+      "baseBlob": "21af5d7e7c19c47e2a3a6bc24e3eae3b729f8ca3",
+      "productBlob": "21af5d7e7c19c47e2a3a6bc24e3eae3b729f8ca3",
+      "unchanged": true
+    },
+    {
+      "path": "test/features/interest_editor_session_test.dart",
+      "baseBlob": "2f69b41f3a60b2951535704d35224bad2c81c6bf",
+      "productBlob": "2f69b41f3a60b2951535704d35224bad2c81c6bf",
+      "unchanged": true
+    }
+  ],
+  "priorEvidence": "docs/evidence/sprint3/2026-10-19-core-execution/runtime-and-validation.md; previous LI synthetic actual Emulator concurrency/ordinary/revoked results only, not rerun or relabelled current.",
+  "notRun": [
+    "new capability against actual Emulator",
+    "real Admin claim assignment",
+    "real catalogue/user data mutation",
+    "private host operation/deployment/restart",
+    "APK build/install",
+    "physical device acceptance",
+    "AI/model/Events/unrelated full suites"
+  ],
+  "reviewerPath": {
+    "formalFunctionReviewer": "LI (3427564237)",
+    "laterPermissionReviewer": "JIN (chuxi12483468), after his main package",
+    "internalReview": "independent collaboration agent read-only; no remaining blocker; not formal GitHub approval"
+  },
+  "invariants": {
+    "noMainMerge": true,
+    "noSelfApproval": true,
+    "noClaimGrant": true,
+    "noDependencyOrLockfileChange": true,
+    "noStorageOrIndexChange": true,
+    "noPrivateConfig": true,
+    "noBoardOrIssueClosure": true
+  }
+}
