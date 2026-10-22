@@ -143,35 +143,58 @@ final class LocatedCheckInActions extends ConsumerWidget {
           MotionReveal(
             child: Semantics(
               liveRegion: true,
-              child: Text(
-                'Check-in saved.',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.check_circle_outline,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Check-in saved.',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
           const SizedBox(height: 16),
           if (state.value case final value?)
             CheckInRecordView(record: value, openAttribution: openAttribution),
+          const SizedBox(height: 20),
           if (onOpenSaved != null)
             FilledButton.icon(
               onPressed: () => onOpenSaved!(state.savedId!),
               icon: const Icon(Icons.article_outlined),
               label: const Text('View saved Check-in'),
             ),
-          if (onOpenHistory != null)
-            OutlinedButton.icon(
-              onPressed: onOpenHistory,
-              icon: const Icon(Icons.history),
-              label: const Text('Check-in History'),
-            ),
-          if (onReturnHome != null)
-            TextButton(
-              onPressed: onReturnHome,
-              child: const Text('Return Home'),
-            ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              if (onReturnHome != null)
+                OutlinedButton.icon(
+                  onPressed: onReturnHome,
+                  icon: const Icon(Icons.home_outlined),
+                  label: const Text('Return Home'),
+                ),
+              if (onOpenHistory != null)
+                TextButton(
+                  onPressed: onOpenHistory,
+                  child: const Text('Check-in History'),
+                ),
+            ],
+          ),
         ],
         if (state.savedId != null)
           ExpansionTile(
+            expansionAnimationStyle: EnmoriMotion.surface(context),
+            tilePadding: EdgeInsets.zero,
+            leading: const Icon(Icons.tune),
             title: const Text('Saved location and recovery'),
             children: [
               OutlinedButton(

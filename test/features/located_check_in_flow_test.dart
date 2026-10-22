@@ -481,6 +481,8 @@ void main() {
   testWidgets(
     'module save slot surfaces fallback, then independently reads and confirms location removal',
     (tester) async {
+      final opened = <String>[];
+      var homeVisits = 0, historyVisits = 0;
       final repository = PlaceFake(),
           own = FakeCheckInRepository()..readResult = Success(saved);
       await tester.pumpWidget(
@@ -501,6 +503,9 @@ void main() {
               body: SingleChildScrollView(
                 child: LocatedCheckInActions(
                   draftKey: key,
+                  onOpenSaved: opened.add,
+                  onReturnHome: () => homeVisits++,
+                  onOpenHistory: () => historyVisits++,
                   note: 'A walk',
                   visibility: CheckInVisibility.private,
                   openAttribution: (_) async => true,
@@ -515,6 +520,31 @@ void main() {
       await tester.tap(find.text('Save Check-in'));
       await tester.pumpAndSettle();
       expect(find.text('Check-in saved without weather.'), findsOneWidget);
+      expect(
+        find.widgetWithText(FilledButton, 'View saved Check-in'),
+        findsOneWidget,
+      );
+      expect(
+        find.widgetWithText(OutlinedButton, 'Return Home'),
+        findsOneWidget,
+      );
+      expect(
+        find.widgetWithText(TextButton, 'Check-in History'),
+        findsOneWidget,
+      );
+      for (final label in [
+        'View saved Check-in',
+        'Return Home',
+        'Check-in History',
+      ]) {
+        await tester.ensureVisible(find.text(label));
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+      }
+      expect(opened, ['saved-point']);
+      expect(homeVisits, 1);
+      expect(historyVisits, 1);
+
       await tester.ensureVisible(find.text('Saved location and recovery'));
       await tester.tap(find.text('Saved location and recovery'));
       await tester.pumpAndSettle();

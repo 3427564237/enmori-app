@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/local_time.dart';
+import '../../../core/presentation/enmori_motion.dart';
 import '../../account/domain/account_repository.dart';
 import '../../weather/weather_providers.dart';
 import '../domain/check_in_repository.dart';
@@ -33,43 +34,48 @@ final class CheckInRecordView extends ConsumerWidget {
         ],
         const SizedBox(height: 12),
         Wrap(
-          spacing: 8,
+          spacing: 16,
           runSpacing: 8,
           children: [
             if (record.mood case final mood?)
-              Chip(
-                avatar: const Icon(Icons.mood_outlined, size: 18),
-                label: Text(mood),
-              ),
+              _RecordMeta(icon: Icons.mood_outlined, label: mood),
             if (record.activity case final activity?)
-              Chip(
-                avatar: const Icon(Icons.local_activity_outlined, size: 18),
-                label: Text(activity),
-              ),
+              _RecordMeta(icon: Icons.local_activity_outlined, label: activity),
             if (record.checkInVisibility case final visibility?)
-              Chip(
-                label: Text(switch (visibility) {
+              _RecordMeta(
+                icon: visibility == CheckInVisibility.private
+                    ? Icons.lock_outline
+                    : Icons.people_outline,
+                label: switch (visibility) {
                   CheckInVisibility.private => 'Private',
                   CheckInVisibility.friendsOnly => 'Friends-only',
                   CheckInVisibility.public => 'Public',
-                }),
+                },
               ),
           ],
         ),
-        const SizedBox(height: 16),
-        if (record.locationLabel case final label?)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.place_outlined),
-            title: Text(label),
-            subtitle: const Text('Your place label'),
-          ),
+        if (record.location != null ||
+            record.locationLabel != null ||
+            record.weather != null)
+          const Divider(height: 32),
         if (record.location case final location?)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.location_on_outlined),
-            title: const Text('Saved location'),
-            subtitle: Text('${location.latitude}, ${location.longitude}'),
+          ExpansionTile(
+            key: ValueKey('record-location-${record.checkInId}'),
+            expansionAnimationStyle: EnmoriMotion.surface(context),
+            tilePadding: EdgeInsets.zero,
+            leading: const Icon(Icons.place_outlined),
+            title: Text(record.locationLabel ?? 'Saved location'),
+            subtitle: const Text('Location details'),
+            childrenPadding: const EdgeInsets.only(bottom: 16),
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SelectableText('${location.latitude}, ${location.longitude}'),
+            ],
+          )
+        else if (record.locationLabel case final label?)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _RecordMeta(icon: Icons.place_outlined, label: label),
           ),
         if (record.weather case final weather?) ...[
           Text(
@@ -81,4 +87,25 @@ final class CheckInRecordView extends ConsumerWidget {
       ],
     );
   }
+}
+
+final class _RecordMeta extends StatelessWidget {
+  const _RecordMeta({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(
+        icon,
+        size: 18,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      const SizedBox(width: 6),
+      Flexible(
+        child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+      ),
+    ],
+  );
 }

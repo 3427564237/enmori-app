@@ -753,7 +753,7 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
       body: SafeArea(
         child: ListView(
           key: const Key('route-check-in-saved'),
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           children: [
             if (state is CommandPending<CheckIn>)
               const _ResultPanel(

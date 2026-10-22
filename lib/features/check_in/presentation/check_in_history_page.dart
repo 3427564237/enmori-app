@@ -145,7 +145,7 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
                 spacing: 12,
                 runSpacing: 8,
                 children: [
-                  OutlinedButton.icon(
+                  TextButton.icon(
                     key: const Key('history-select-date'),
                     onPressed:
                         state.latestDate == null ||
@@ -153,7 +153,12 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
                         ? null
                         : () => _selectDate(context, controller, state),
                     icon: const Icon(Icons.calendar_today_outlined),
-                    label: Text(_dateLabel(state.selectedDate)),
+                    label: Text(
+                      state.selectedDate == null
+                          ? 'Choose date'
+                          : MaterialLocalizations.of(context)
+                                .formatFullDate(state.selectedDate!),
+                    ),
                   ),
                   if (state.ianaZone case final zone?)
                     Text(
@@ -238,13 +243,6 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
     );
     if (selected != null) await controller.selectDate(selected);
   }
-
-  String _dateLabel(DateTime? date) {
-    if (date == null) return 'Choose date';
-    return '${date.year.toString().padLeft(4, '0')}-'
-        '${date.month.toString().padLeft(2, '0')}-'
-        '${date.day.toString().padLeft(2, '0')}';
-  }
 }
 
 final class _HistoryBody extends StatelessWidget {
@@ -314,7 +312,7 @@ final class _HistoryBody extends StatelessWidget {
                   onTap: () => onOpen(entry.checkIn.checkInId),
                 ),
               ),
-              const Divider(height: 1, indent: 72),
+              const Divider(height: 1, indent: 20, endIndent: 20),
             ],
           ],
         ),
@@ -340,11 +338,11 @@ final class _HistoryTile extends StatelessWidget {
     return ListTile(
       key: Key('history-entry-${entry.checkIn.checkInId}'),
       onTap: onTap,
-      leading: const Icon(Icons.edit_note_outlined),
       title: Text(
         entry.checkIn.note.isEmpty
             ? (entry.checkIn.mood ?? '')
             : entry.checkIn.note,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.4),
         maxLines: 3,
         overflow: TextOverflow.ellipsis,
       ),
