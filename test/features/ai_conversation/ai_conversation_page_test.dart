@@ -645,10 +645,13 @@ void main() {
           final input = find.byKey(const Key('ai-message-input'));
           if (longHistory) {
             expect(
-              find.byKey(const ValueKey('ai-message-history-39')),
+              find.byKey(const ValueKey('ai-message-history-0')),
               findsNothing,
-              reason:
-                  'The history should keep building its distant rows lazily.',
+              reason: 'Opening at latest should leave distant older rows lazy.',
+            );
+            expect(
+              find.byKey(const ValueKey('ai-message-history-39')),
+              findsOneWidget,
             );
           }
           await tester.enterText(input, 'An unfinished draft');
@@ -1117,6 +1120,17 @@ void main() {
         ),
       );
       await _pump(tester, controller);
+      final savedTime = tester
+          .widgetList<Text>(
+            find.descendant(
+              of: find.byKey(const Key('ai-message-user')),
+              matching: find.byType(Text),
+            ),
+          )
+          .last
+          .data!;
+      expect(savedTime, contains(' · '));
+      expect(savedTime, isNot(user.persistedAt.toUtc().toIso8601String()));
       await tester.ensureVisible(find.byKey(const Key('ai-retry')));
       expect(
         tester
@@ -1133,10 +1147,7 @@ void main() {
       expect(controller.retried, ['original text']);
       expect(controller.sent, isEmpty);
       expect(find.byKey(const Key('ai-message-user')), findsOneWidget);
-      expect(
-        find.text(user.persistedAt.toUtc().toIso8601String()),
-        findsOneWidget,
-      );
+      expect(find.text(savedTime), findsOneWidget);
     },
   );
 
@@ -1353,7 +1364,13 @@ void main() {
         final controller = _PageController(
           _state(phase: AiConversationPhase.waiting, canCancel: true),
         );
-        await _pump(tester, controller, textScale: 2);
+        var navigated = false;
+        await _pump(
+          tester,
+          controller,
+          textScale: 2,
+          onBack: () => navigated = true,
+        );
         expect(find.bySemanticsLabel('Waiting for a reply…'), findsOneWidget);
         expect(find.bySemanticsLabel('Cancel'), findsOneWidget);
         final size = tester.getSize(find.byKey(const Key('ai-cancel')));
@@ -1361,11 +1378,10 @@ void main() {
         expect(size.width, greaterThanOrEqualTo(48));
         expect(tester.takeException(), isNull);
         await _tap(tester, 'ai-back');
-        expect(find.text('Stay'), findsOneWidget);
-        expect(find.text('Request cancel and leave'), findsOneWidget);
+        expect(navigated, isTrue);
+        expect(find.byType(AlertDialog), findsNothing);
+        expect(controller.cancels, 0);
         expect(tester.takeException(), isNull);
-        await tester.tap(find.text('Stay'));
-        await tester.pumpAndSettle();
       } finally {
         semantics.dispose();
       }
