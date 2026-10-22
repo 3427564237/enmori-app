@@ -1,0 +1,539 @@
+{
+  "attribution": "JIN author execution; not DU/LI independent acceptance",
+  "base": "986d4f895252f266c1f6bf785b7f0c24ee03643e",
+  "productSource": "bbf3ce3e69dc762d1739db510497af33dfff5d9f",
+  "productTree": "1926a34782e2087eb940324262456aeaf8f1b10d",
+  "priorCoherenceSource": "decca1629b67cf470629c5b5d54955b28e61730b",
+  "inputs": [
+    {
+      "path": "api/friend-activity-display-contract.md",
+      "gitBlob": "7828e01f14df460da1ae5ccb1d44b497a3f6500e",
+      "normalizedSha256": "17c7dbce439d4f8e751ddd11b44bcefb477d6611d40ff2f71a25203330361407"
+    },
+    {
+      "path": "api/openapi.json",
+      "gitBlob": "dcf20e6aad9d0d15963e6316b1b5ee899f54e862",
+      "normalizedSha256": "1015c7841742779dea6324793410582b401fa504001b3d5db829a16089f4952d"
+    },
+    {
+      "path": "backend/emulator-test/content-coherence.integration.test.ts",
+      "gitBlob": "efe193ab862b9c7b24064cc6d4cb4523681783ff",
+      "normalizedSha256": "4ad83fcc4be774659bb75eead24870f807d2c4564b566a7d1895d1bc6c56ae38"
+    },
+    {
+      "path": "backend/src/friend-activity/infrastructure/firestore-friend-activity.ts",
+      "gitBlob": "7c3ef6934b0328d2921871ac0a763337b7b9be70",
+      "normalizedSha256": "bf567af758da4315d61dcdd738566471a3aa8fd831b1f5cd3431a20a2b452ce2"
+    },
+    {
+      "path": "backend/src/friend-activity/transport/friend-activity-route.ts",
+      "gitBlob": "127489f3725f6e53502e07d0ac010a530186ba69",
+      "normalizedSha256": "528f0cfd6c3bee5b0f175aef4322ecdd62595a068a3435b91b5a9c2dbfc97d6a"
+    },
+    {
+      "path": "backend/test/friend-activity-canonical.test.ts",
+      "gitBlob": "6101916af5c04299e39db64adea3ee664f4b65c6",
+      "normalizedSha256": "d725f69812f1138c3d8a5dbb5d047272a307b58be1512d644507df1f1b2e00b5"
+    },
+    {
+      "path": "lib/app/app.dart",
+      "gitBlob": "7f2699e5ad5bafdf10ca2f5d902a0861ffe2c2a2",
+      "normalizedSha256": "b478050609ca8922f5007b2ab9ae563d6482df9418a1d1f3ac7bcc56a5d0d418"
+    },
+    {
+      "path": "lib/app/controlled_demo_app.dart",
+      "gitBlob": "d0e5c3871ed6bf365dbd5fb5ce5dca4f97c9b12c",
+      "normalizedSha256": "38541534e7c0001516e858c30c1015d7692360e47d1df54ac259c199530db1e9"
+    },
+    {
+      "path": "lib/core/network/backend_api_client.dart",
+      "gitBlob": "72a86c8c58aef9ed4bfa3e235e06322c34d45ad1",
+      "normalizedSha256": "203cfb55baa51788fac2bfa7df1ef3afe125c0b1a0c75cae4835e3bfb116c552"
+    },
+    {
+      "path": "lib/features/account/account_preferences_providers.dart",
+      "gitBlob": "bc8f0e9729a46f9a674142aeb48c158af921e797",
+      "normalizedSha256": "3e6c1015c174da8da31bc7674856e7f2c10ac8425dfa901844373551b946b684"
+    },
+    {
+      "path": "lib/features/account/content_access.dart",
+      "gitBlob": "399fa5e2385404c84c44a769a25e758b22721d1e",
+      "normalizedSha256": "0849f65d7134fe6ba5b2743a015abe61fd29cfa5f80246e7094b2a2c418d9cce"
+    },
+    {
+      "path": "lib/features/account/presentation/account_preferences_controller.dart",
+      "gitBlob": "71e30007e28c9272ac8b7e738e28de049a2ea174",
+      "normalizedSha256": "433810d67118b1ae203a72c2f4017b546ca3e96f6b75fd4468ace9164dc81a39"
+    },
+    {
+      "path": "lib/features/account/presentation/own_profile_controller.dart",
+      "gitBlob": "60988da140f9c66fcd44bf506e65686c7bd215af",
+      "normalizedSha256": "25581ee0fa46001b62725bb8ca056038faeb756ba07330ca8927d8f6e02acb06"
+    },
+    {
+      "path": "lib/features/check_in/data/backend_check_in_repository.dart",
+      "gitBlob": "b77577334bc4270ec6e7832ff47be115360a8a7f",
+      "normalizedSha256": "e1b326159aab4c723a081279a0b288c275d0c6899fd7aa946758feb9bac749e3"
+    },
+    {
+      "path": "lib/features/check_in/domain/check_in_mutations.dart",
+      "gitBlob": "bedc9305dc06fcd61ab89879468c3dbfecd0ae48",
+      "normalizedSha256": "c5f2856d9d49e9192a3f3cfe14bfc113149c9e3b7a07e9abe4f34221eaa982c9"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_calendar_page.dart",
+      "gitBlob": "22b38135c873160398ed6a70275af0cdb2d3d020",
+      "normalizedSha256": "05a6a968e7004cd5c6ba324ac816f8fc11f87a252889e8bf5dd578332009bec6"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_controller.dart",
+      "gitBlob": "9aed38a3c98e0f623135880df0b8a8ed4386961f",
+      "normalizedSha256": "10068598624c81e21d3a5f5900bb3528220ca3b3b64aead56b8ee06524abad80"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_edit_controller.dart",
+      "gitBlob": "e21bf40380883e7a49152404085361e29dbbfd71",
+      "normalizedSha256": "8fd0003e52cc85ae9067071a48dd3d5d267ca79b195fe6355a4ee2d14513b0f9"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_edit_page.dart",
+      "gitBlob": "fae37ea67a2e1b47d469e8dd34b8c6b670fc1aee",
+      "normalizedSha256": "b2105f609d7f47b58331589619b0936f3475bc2a9b32e0ad808de2ec003e5c80"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_history_controller.dart",
+      "gitBlob": "9047f3dd4980c2ed1f850ede9671a6ccd0286c7b",
+      "normalizedSha256": "85edeba90ff1be1030539f1165c9bcfd6243883a93affe4914af5063919dca79"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_page.dart",
+      "gitBlob": "f83f96f84398d4d1e024504caf139c741477995b",
+      "normalizedSha256": "12ef51ce09115fec1df820c1ea44df3af715a167219f48ea8501829a84113498"
+    },
+    {
+      "path": "lib/features/check_in/presentation/located_check_in_controller.dart",
+      "gitBlob": "a968818e8835d9c52376258e785e37007f9aaa1b",
+      "normalizedSha256": "24a1b8f4e53f474af09a8a48915c62d5a2b1561b54d8a9966dd41c83acfa9d80"
+    },
+    {
+      "path": "lib/features/friends/data/backend_friend_activity_repository.dart",
+      "gitBlob": "c801f4bb6e56a17a44efb14c29ca878e0eb3c1c3",
+      "normalizedSha256": "c651fd3289684cfbad2864e4f2d2b83b4f79b325374a35aee2dc133779f26867"
+    },
+    {
+      "path": "lib/features/friends/data/backend_social_repository.dart",
+      "gitBlob": "8867f14b10d66f4b45d83be15aa27fdb4fda217f",
+      "normalizedSha256": "caa3613b6d2c90eaa1ff67377ce5c7eec7276001bba5b8adc78a846793cbd00d"
+    },
+    {
+      "path": "lib/features/friends/domain/social_repository.dart",
+      "gitBlob": "2cd75dd8cd47f4dc367e92fc0c6bdaadfc4cd145",
+      "normalizedSha256": "9808dfc8719cb35018d90579eec61dd1691c752b095bd3ade3d321673c466f57"
+    },
+    {
+      "path": "lib/features/friends/presentation/check_in_points_map.dart",
+      "gitBlob": "c5e3165c270c97c76acdffd8eb5b728f875e6e89",
+      "normalizedSha256": "cde795375b7fd054067325e4604af6f046095af83ec203befb34a2c41d55cda7"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_activity_panel.dart",
+      "gitBlob": "51c7eb27242de2aab241078b03b04a8efb1a108f",
+      "normalizedSha256": "48b5e420ae6cd0ab6e6f0eb151d490fbbfbc1576943bb39a8a0edef025586fbd"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_controller.dart",
+      "gitBlob": "13c63fb69d40195316e990a969b3144966fe6247",
+      "normalizedSha256": "aadf6635c4f3bb78ca12442ea80ddf7ae2d0e11657c35adfe1dcb3d7419d68f2"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_discovery_controller.dart",
+      "gitBlob": "93b66c8f187110b8cab02c1b52f63844cd08c61c",
+      "normalizedSha256": "5ef8c281276c0d49a7ef5500b60e364504ee77bc3eaa92a570157b0a95d1198e"
+    },
+    {
+      "path": "lib/features/friends/presentation/my_friends_controller.dart",
+      "gitBlob": "de0fdf6544f549b27076f13bc704cd21408115b1",
+      "normalizedSha256": "bdd8175020c5361518f0e057d0fe1fd130ca8cbb516642f9fe5281764ec8a41c"
+    },
+    {
+      "path": "lib/features/friends/presentation/osm_tiles.dart",
+      "gitBlob": "3bda4750faffd8275beb6465fd3f29fadd7ae984",
+      "normalizedSha256": "9e1afeef780ae690d58d4270558f251beb67390f4d8826d3c45e550fe4b90ced"
+    },
+    {
+      "path": "lib/features/friends/presentation/social_profile_controller.dart",
+      "gitBlob": "cf6a59874f526674a40bc8288368ab770e95fa48",
+      "normalizedSha256": "1ceed2e18487a7a4011b2d55ddc234831cf0965c75117bd65aefd69ed620113e"
+    },
+    {
+      "path": "lib/features/friends/presentation/social_profile_page.dart",
+      "gitBlob": "60949bd2693e2f7b1ef2a7023841c60c893a480c",
+      "normalizedSha256": "a1ee0427e9fe422c871e73c1010b9a80dafe6ea4258a3f03f0bfbb1acdc3c464"
+    },
+    {
+      "path": "test/features/check_in_edit_flow_test.dart",
+      "gitBlob": "1612af6300571b368aea5a8279e66a13edae3235",
+      "normalizedSha256": "34e759e68b17d326eb9208b4fa5342442a0f740d0ded7f5ee1762813d151e639"
+    },
+    {
+      "path": "test/features/check_in_pending_recovery_test.dart",
+      "gitBlob": "0bf2fa0660aea21fe03d1e206bdf2d52aa564e9e",
+      "normalizedSha256": "85f0bf28c29f0ffdfc1be5ddd26da72d18b9fe2375e170ebac9f3802ce0d7b49"
+    },
+    {
+      "path": "test/features/content_coherence_edges_test.dart",
+      "gitBlob": "1c4c8d92df011f655c77170788b0d36eab039e0d",
+      "normalizedSha256": "a096cfa264160743a7f0406b77976b7a41ef6d027a47343463b0aa12dffd9732"
+    },
+    {
+      "path": "test/features/content_coherence_test.dart",
+      "gitBlob": "6ef1ee8837e8616f07bf406f3385407563fa5bcd",
+      "normalizedSha256": "678cb86daa0f0eb8a2f8d40c2b74bdfe86194efb2a3a38bcc1d3957cca9911f1"
+    },
+    {
+      "path": "test/features/friend_activity_canonical_test.dart",
+      "gitBlob": "aff6e534d4c67d1a298e2dc4a33685034ea9e33f",
+      "normalizedSha256": "5d66cec64427fe8a6bfb7a7d0fb6fd8495a9a537a4c0a50ec649a790b22fe2a4"
+    },
+    {
+      "path": "test/features/osm_tile_cache_test.dart",
+      "gitBlob": "7245cc28013fb8b351357dee89d94c8f20978804",
+      "normalizedSha256": "1cf1b5a87a8d838232066fa757364951ee12611004a4376ac857acf2aacd99ea"
+    },
+    {
+      "path": "test/features/social_profile_flow_test.dart",
+      "gitBlob": "6f4b8bd6921410f2146d04f3c02e743b57632391",
+      "normalizedSha256": "cdfebf710d8db1e7b863a49a4ec3be36b5675c8c178c4654bade637404ac6fbb"
+    },
+    {
+      "path": "tool/run_social_weather_emulators.mjs",
+      "gitBlob": "94b9fc17e07b26e50743d23f7f4b7d172e4bf661",
+      "normalizedSha256": "bc515846884eccfed43a2503f195006054389d864538a9547ebe9182eecc392d"
+    }
+  ],
+  "finalCoherenceBatch": {
+    "files": [
+      "test/features/content_coherence_test.dart",
+      "test/features/content_coherence_edges_test.dart",
+      "test/features/social_profile_flow_test.dart",
+      "test/features/located_check_in_flow_test.dart",
+      "test/features/friend_discovery_activity_map_test.dart",
+      "test/features/friend_activity_display_test.dart",
+      "test/features/my_friends_test.dart",
+      "test/features/friend_request_session_test.dart",
+      "test/features/friend_ignore_flow_test.dart",
+      "test/features/check_in_edit_flow_test.dart",
+      "test/features/check_in_calendar_flow_test.dart",
+      "test/features/check_in_history_controller_test.dart",
+      "test/features/connected_check_in_journey_test.dart",
+      "test/features/check_in_pending_recovery_test.dart",
+      "test/features/check_in_note_validation_test.dart",
+      "test/features/check_in_content_transport_test.dart",
+      "test/app/account_preferences_flow_test.dart",
+      "test/app/own_profile_flow_test.dart",
+      "test/app/controlled_demo_app_test.dart",
+      "test/app/router/app_router_test.dart",
+      "test/app/check_in_history_shared_router_test.dart"
+    ],
+    "command": "flutter test --no-pub --reporter expanded test/features/content_coherence_test.dart test/features/content_coherence_edges_test.dart test/features/social_profile_flow_test.dart test/features/located_check_in_flow_test.dart test/features/friend_discovery_activity_map_test.dart test/features/friend_activity_display_test.dart test/features/my_friends_test.dart test/features/friend_request_session_test.dart test/features/friend_ignore_flow_test.dart test/features/check_in_edit_flow_test.dart test/features/check_in_calendar_flow_test.dart test/features/check_in_history_controller_test.dart test/features/connected_check_in_journey_test.dart test/features/check_in_pending_recovery_test.dart test/features/check_in_note_validation_test.dart test/features/check_in_content_transport_test.dart test/app/account_preferences_flow_test.dart test/app/own_profile_flow_test.dart test/app/controlled_demo_app_test.dart test/app/router/app_router_test.dart test/app/check_in_history_shared_router_test.dart",
+    "pass": 153,
+    "fail": 0,
+    "exit": 0,
+    "capturedInputCount": 763,
+    "manifestSha256": "7db002489a730010bb124e2be5357c4ff8e03bc918b16c55359e7b15ce447c03",
+    "scope": "Before canonical-ID correction; unchanged product except Friend Activity client ID validation is reused. Separate affected canonical run follows."
+  },
+  "tileCache": {
+    "pass": 3,
+    "fail": 0,
+    "exit": 0,
+    "command": "flutter test --no-pub --reporter expanded test/features/osm_tile_cache_test.dart",
+    "postRunChange": "Equivalent if braces only; final analysis/format repeated; no fresh final-tree cache invocation"
+  },
+  "canonicalBackend": {
+    "pass": 30,
+    "fail": 0,
+    "exit": 0,
+    "command": "node --test backend/dist/test/friend-activity-canonical.test.js backend/dist/test/friend-activity-display.test.js backend/dist/test/friend-activity.test.js backend/dist/test/social-event-source.test.js",
+    "postRunChange": "Removed one blank EOF line in the new test only"
+  },
+  "canonicalFlutter": {
+    "pass": 19,
+    "fail": 0,
+    "exit": 0,
+    "command": "flutter test --no-pub --reporter expanded test/features/friend_activity_canonical_test.dart test/features/friend_activity_display_test.dart",
+    "overlap": "13 cases already in the 153-case batch; do not add counts"
+  },
+  "isolatedSdk": {
+    "pass": 6,
+    "fail": 0,
+    "exit": 0,
+    "command": "node tool/run_social_weather_emulators.mjs --content-coherence",
+    "count": "one parent and five subtests",
+    "cleanup": "38 owned documents, 2 owned Auth users removed; outer profile removed; ports 8080/9099/4400/4500/9150 free",
+    "scope": "Executed before later client-only changes and canonical Event ID change; preserved check-in/permission/SDK input evidence, not a newly executed final combined-tree gate"
+  },
+  "logs": [
+    {
+      "localPath": "build/jin-coherence-20261022/analysis-dart-single.log",
+      "bytes": 225,
+      "sha256": "18a0a8669dfd27de6cc73510b589ed85b65ff11254ea9305c1d8186b910d903d",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/analysis-initial.log",
+      "bytes": 3862,
+      "sha256": "a6cd237eee98a20a43a08753cb63a75b301a784329e6dd7cdeac6e395ec600a5",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/analysis-lib-final.log",
+      "bytes": 36,
+      "sha256": "ba87f6f26467813c23830006a2681668cdbb6039186037bd20a9381bbd68e801",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/analysis-lib-release.log",
+      "bytes": 36,
+      "sha256": "ba87f6f26467813c23830006a2681668cdbb6039186037bd20a9381bbd68e801",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/analysis-lib.log",
+      "bytes": 2117,
+      "sha256": "76c56c2acc504a9904f6e4bea2e54ce1087cbebd63fbae7ce3964e29effe1bd8",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/analysis-tests-final.log",
+      "bytes": 220,
+      "sha256": "56bdface22b154be0c738d91a10e4e50c4e1050e2461233d93df7e273e81fd6b",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/analysis-tests-release.log",
+      "bytes": 23,
+      "sha256": "3b50c8dc3106b08a9468c859e33c2f68aa87dbbb1ec56ae3e89e6aa1059a3115",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/analysis-tests-resumed.log",
+      "bytes": 41,
+      "sha256": "10c8bcdf6842101c6b7faf16d9a999b64e32986397a969d88d291af71527c23a",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/analysis-tests.log",
+      "bytes": 220,
+      "sha256": "56bdface22b154be0c738d91a10e4e50c4e1050e2461233d93df7e273e81fd6b",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/cache-04.log",
+      "bytes": 2382,
+      "sha256": "a39e4caa1de1c73597d5b86cd026ce5f5bed0504b8c9e13654379897df7959af",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/cache-05.log",
+      "bytes": 532,
+      "sha256": "b50dc01ccc24499bbcb924672ec948dcbc7b576fa696cc17e0adc892804d04cf",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/cache-final.log",
+      "bytes": 532,
+      "sha256": "b50dc01ccc24499bbcb924672ec948dcbc7b576fa696cc17e0adc892804d04cf",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/canonical-analysis.log",
+      "bytes": 109,
+      "sha256": "8d20f2efddc94ad3d240351b370bc3f3bd02ed21b5d3fa0720cd9887184a725f",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/canonical-backend-final.log",
+      "bytes": 3382,
+      "sha256": "375a185a575a52e2f047bb9241b1cfe1a157f4baaec2d1196c8c821e306d532e",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/canonical-before.log",
+      "bytes": 2893,
+      "sha256": "de2eb771795f47a97c529c07b0d08daa6fc1e8b14ae6695b1d2cf5521d774d7f",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/canonical-compile-before-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/canonical-compile-before.log",
+      "bytes": 416,
+      "sha256": "1fc7e8e941367c097c1ed2ac6b9f44ae4df333b177e5e561f5f5d41157457c92",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/canonical-compile-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/canonical-flutter-before.log",
+      "bytes": 1811,
+      "sha256": "cf29d206c427fbf89daf1ad0a13221f570632f435e907e665ec41fffced644ab",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/canonical-flutter-final.log",
+      "bytes": 5367,
+      "sha256": "6d239f25a2a90c7074b2809beeb0d1a07108d3a25dfb1ead2d2ae76e352b5d28",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/edges-01.log",
+      "bytes": 4598,
+      "sha256": "e7bcee4b642c041137dc41a4c40705a6008bfeabb12ccbae0d78d72413395e8e",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/edges-02.log",
+      "bytes": 5246,
+      "sha256": "6c262c2b9f1e74f9293d4f023be5ada578084717876218ae4da18afc356f0ab0",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/edges-cache-03.log",
+      "bytes": 7036,
+      "sha256": "1cec5bac570422c7b9f795c12314c9c97fd22b53ff81334f41a934e24b4e6e85",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/first-fix.log",
+      "bytes": 354,
+      "sha256": "aa3f33ff8a7ec6f35cc2ceeeaaeefa1c56d29ce647e60b23b23ec80e63dd183f",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/fix-lint.log",
+      "bytes": 849,
+      "sha256": "0ae2e63dd0e4f03ca4dd149f434e1a70d9cb9886c8b346b6ceab0e45e80e6d04",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/flutter-gate-01.log",
+      "bytes": 67881,
+      "sha256": "88197bd24482a57d754348b32b8c479ae708a2ceee1927927bab3516e5e9926a",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/flutter-gate-final.log",
+      "bytes": 40275,
+      "sha256": "2ca2be78d1c82a0b33082a007dfc5600129b8cf3c90d4478bbc57a3814ae3179",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/flutter-repair-02.log",
+      "bytes": 35876,
+      "sha256": "ff5b8819e3df4b383743d171713eaa320af491e1bcaa92bdf400bba712ce88f0",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/flutter-repair-03.log",
+      "bytes": 36582,
+      "sha256": "ae6d699b5315936652142235399bf81d9514480650a356321289f96f8da3e245",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/flutter-repair-04.log",
+      "bytes": 15208,
+      "sha256": "68094bb34b67350b4964ea6b1c437cb0491c63cc885877b6f12b54a2c6b72c65",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/flutter-repair-05.log",
+      "bytes": 3893,
+      "sha256": "4afe9f91d68ce6c750886089c4fd33d27bdc755d1fa717ca9b6d4675d2a7872d",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/format-before-gate.log",
+      "bytes": 158,
+      "sha256": "adf7068c7c637e81774ca202decb5fa263ff27574360ca85accde7e0ddb6be1a",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/format-check.log",
+      "bytes": 49,
+      "sha256": "301cbeca47ab68b2b7ecad41851d4572ceec9e7a1327e14137674e65b5ab2e71",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/format-final.log",
+      "bytes": 434,
+      "sha256": "20df3c5bf26d97162dd0fc145d4c6bd5924383aef3844ec957e80de5ee63a44b",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/format-initial.log",
+      "bytes": 1719,
+      "sha256": "e67faa4d66a11ca0f53ed801403661de855bd79dab0bc6b544722dfc0ebade6c",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/format-release.log",
+      "bytes": 49,
+      "sha256": "344cdb8bb199dd2efac077a0645a5acd3f283105b9aa31c533e9db99db7082a1",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/reproduction-authorized.log",
+      "bytes": 2106,
+      "sha256": "c77130565fa80d6a20757e5c601b6e5d9a2e62f0ecab4209bddb2be319617656",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/reproduction.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/sdk-01.log",
+      "bytes": 2649,
+      "sha256": "91bc23ef40e2767b5ed7a865be029aa4c54e05ce16a5de7768ae6d1f7f9787ca",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/strict-compile-01.log",
+      "bytes": 891,
+      "sha256": "b76f72ecbae9ddd5892607f1aef5cf146125bf550bcf5cf4ac2450a718afbdf0",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/strict-compile-02.log",
+      "bytes": 138,
+      "sha256": "0a1994458ef097d3e8ea64588b693d12e8826fe29cf7b557a7f19575fd6d651d",
+      "uploaded": false
+    },
+    {
+      "localPath": "build/jin-coherence-20261022/strict-compile-03.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uploaded": false
+    }
+  ],
+  "notRun": [
+    "real accounts",
+    "device",
+    "real provider/model",
+    "live OSM traffic/quota",
+    "Android/iOS/browser cache behavior",
+    "APK",
+    "deployment"
+  ]
+}
