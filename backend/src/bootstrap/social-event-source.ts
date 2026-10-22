@@ -52,12 +52,15 @@ export function socialEventSource(peek: (id: string, asOf: string) => BrowseOccu
     },
     async display(tx, viewer, owner, source, asOf) {
       if (!await permitted(tx, viewer, owner)) return undefined;
-      if(!ready(asOf))throw new Error('Current event source unavailable');
       const row = await tx.get(`event_participations/${source.sourceRecordId}`);
       if (!row || row.accountId !== owner || !validEventId(row.eventId) || participationKey(owner, row.eventId) !== source.sourceRecordId ||
         row.selectedAt !== source.occurredAt || row.status !== (source.type === 'event_going' ? 'going' : 'interested')) return undefined;
       const event = peek(row.eventId, asOf);
-      return event ? {eventId: row.eventId, title: event.title} : undefined;
+      // tx.get yields: disable/refresh or replacement of just this observed page
+      // may remove the title while participation stays authorized and unchanged.
+      // Only actual participation/permission removal is omission, never source loss.
+      if(!ready(asOf)||!event)throw new Error('Current event source unavailable');
+      return {eventId: row.eventId, title: event.title};
     },
   };
   const recommendations: FriendEventProjection = {
