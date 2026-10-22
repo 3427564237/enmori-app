@@ -1,0 +1,168 @@
+{
+  "date": "2026-10-22",
+  "timezone": "Asia/Shanghai",
+  "pr": 170,
+  "base": "986d4f895252f266c1f6bf785b7f0c24ee03643e",
+  "head": "b39ec5e19cc462fc0f588480044766b249fc6104",
+  "product": "fdbac3c60ac6259120f4e65a78e0d7a272a37e74",
+  "productTree": "646e2916477ea55bdc14a5259104812017cff46a",
+  "sourceFiles": [
+    {
+      "path": "api/event-participation-contract.md",
+      "blob": "7cf029cc30576dd9042672fab90a154cf003622f"
+    },
+    {
+      "path": "api/friend-activity-display-contract.md",
+      "blob": "bf17fcf71627c5f46fcae9907395c96e32fceed4"
+    },
+    {
+      "path": "backend/src/bootstrap/social-event-source.ts",
+      "blob": "eec072f948ddfa7ee049bb47794354b20f6c1474"
+    },
+    {
+      "path": "backend/src/event-browse/infrastructure/controlled-source-projection.ts",
+      "blob": "fa0821e714281775291daeb26d4c46e74b5e2a28"
+    },
+    {
+      "path": "backend/test/event-observed-window.test.ts",
+      "blob": "46cd2c672e4665ce906fe3dfa9c5a3b3a81c1e81"
+    },
+    {
+      "path": "backend/test/social-event-source.test.ts",
+      "blob": "fa855d7236872426d1a8f709ea56fb974316c4a0"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-22-shi-observed-event-window.md",
+      "blob": "c64ed3520b9acada9f5317232203259b53e5899f"
+    }
+  ],
+  "unchanged": [
+    {
+      "path": "backend/src/friend-activity/infrastructure/firestore-friend-activity.ts",
+      "baseBlob": "dcc04d869472d80008be617313fc798fe37b938a",
+      "headBlob": "dcc04d869472d80008be617313fc798fe37b938a"
+    },
+    {
+      "path": "backend/src/friend-activity/transport/friend-activity-route.ts",
+      "baseBlob": "673f71af93d1c1335b35c9290f37656ee902349b",
+      "headBlob": "673f71af93d1c1335b35c9290f37656ee902349b"
+    },
+    {
+      "path": "backend/src/event-browse/domain/source-event-id.ts",
+      "baseBlob": "2d7da77a46fef416850c28af26831dfb167468ef",
+      "headBlob": "2d7da77a46fef416850c28af26831dfb167468ef"
+    },
+    {
+      "path": "backend/src/event-participation/domain/participation-values.ts",
+      "baseBlob": "b3ffe2073747fc7d6afd1aa66d7b835eca19e4b8",
+      "headBlob": "b3ffe2073747fc7d6afd1aa66d7b835eca19e4b8"
+    },
+    {
+      "path": "backend/src/bootstrap/controlled-event-browse.ts",
+      "baseBlob": "6852b880318db70d6a97c8033a1e3967712f6e8e",
+      "headBlob": "6852b880318db70d6a97c8033a1e3967712f6e8e"
+    }
+  ],
+  "localFiles": [
+    {
+      "path": "build/zhou-170-affected.log",
+      "sha256": "b4430b5bddcf9181634d98ad75a95deddd810e606925328a7d0fa6a02367dbf4"
+    },
+    {
+      "path": "build/zhou_pr170_producer_race_probe.mjs",
+      "sha256": "339884ab9129bc3da63aa286c7e6f4b4d20b86fbf550c3d2bdfc25daae00a53c"
+    },
+    {
+      "path": "build/zhou_pr170_producer_race_probe.log",
+      "sha256": "83e7e56b52c1baa02ad28b8de7864668811b926a6a36c9ed9ffe1a58c0902c21"
+    },
+    {
+      "path": "build/zhou_pr170_social_race_probe.mjs",
+      "sha256": "ff34034917b87ab07ffccd394e2410f1ae013380751e1f2ab3a30b220d96a30e"
+    },
+    {
+      "path": "build/zhou_pr170_social_race_probe.log",
+      "sha256": "0df811fcc671323882122095e7d9c5fbf7af22b6f305754a69d974443eb8be13"
+    },
+    {
+      "path": "build/zhou-page-detail-probe.test.mjs",
+      "sha256": "99ab37c787d0dfb4fb73bb7c87dd34985f2be38b8ad30ce2c8c34007f6adecd6"
+    },
+    {
+      "path": "build/zhou-page-detail-probe.log",
+      "sha256": "045234751d156e300ec791f6e35cd3d836b8ba9737a2f594dc234297404bc695"
+    }
+  ],
+  "strictCompile": {
+    "command": "node node_modules/typescript/bin/tsc --project backend/tsconfig.json --pretty false",
+    "exitCode": 0,
+    "stdout": "empty; no compile log generated"
+  },
+  "affected": {
+    "command": "node --test backend/dist/test/event-observed-window.test.js backend/dist/test/event-source-generation-regression.test.js backend/dist/test/controlled-event-projection.test.js backend/dist/test/event-browse-pagination.test.js backend/dist/test/controlled-event-browse.test.js backend/dist/test/event-participation.test.js backend/dist/test/event-participation-visibility.test.js backend/dist/test/social-event-source.test.js backend/dist/test/friend-activity.test.js backend/dist/test/friend-activity-display.test.js",
+    "pass": 83,
+    "fail": 0,
+    "skip": 0,
+    "cancel": 0,
+    "exitCode": 0,
+    "sameCasesAsAuthor": true
+  },
+  "newProbes": [
+    {
+      "file": "zhou_pr170_producer_race_probe.mjs",
+      "command": "node --test --test-reporter=tap build/zhou_pr170_producer_race_probe.mjs",
+      "pass": 2,
+      "fail": 3,
+      "exitCode": 1,
+      "controls": "normal canonical ID/title and actual privacy revocation pass",
+      "finding": "still-permitted participation with missing source resolves undefined after awaited document read"
+    },
+    {
+      "file": "zhou_pr170_social_race_probe.mjs",
+      "command": "node --test --test-reporter=tap build/zhou_pr170_social_race_probe.mjs",
+      "pass": 1,
+      "fail": 4,
+      "exitCode": 1,
+      "controls": "privacy passes; normal route fails503 due inherited canonical-ID incompatibility",
+      "races": "disable/page0/page1 replacement each returns200 empty instead503"
+    },
+    {
+      "file": "zhou-page-detail-probe.test.mjs",
+      "pass": 1,
+      "fail": 1,
+      "exitCode": 1,
+      "classification": "exploratory stronger raw/cache title equality; not introduced and not a new finding"
+    }
+  ],
+  "conclusion": {
+    "action": "REQUEST_CHANGES",
+    "newFindings": [
+      {
+        "priority": 2,
+        "path": "backend/src/bootstrap/social-event-source.ts",
+        "line": 55,
+        "scope": "recheck missing current source after asynchronous participation read; do not turn it into omitted revoked content"
+      }
+    ],
+    "inheritedCompatibility": {
+      "owners": [
+        "LI",
+        "JIN"
+      ],
+      "scope": "canonical tm_event_<hash> accepted by source/EP1 but rejected by unchanged FA consumer and response schema; not attributed to SHI delta"
+    }
+  },
+  "notRun": [
+    "unrelated complete suites",
+    "Flutter",
+    "actual Emulator",
+    "real provider",
+    "real accounts",
+    "model",
+    "APK",
+    "host",
+    "device"
+  ],
+  "noAuthorProductEdits": true,
+  "noMainMerge": true
+}
