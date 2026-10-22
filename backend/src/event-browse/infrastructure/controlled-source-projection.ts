@@ -10,23 +10,35 @@ export class ControlledSourceProjection implements BrowseSource {
   private snapshot: SourceSnapshot | undefined;
   private pending: Promise<readonly BrowseOccurrence[]> | undefined;
   private epoch = {};
+  // Explicitly browsed pages only. Recommendation candidates remain snapshot.items.
+  private readonly observedPages = new Map<number, readonly BrowseOccurrence[]>();
+  private readonly pageReads = new Map<number, object>();
   readonly batch?:NonNullable<BrowseSource['batch']>;
   readonly availableEvent?:NonNullable<BrowseSource['availableEvent']>;
   readonly event?:NonNullable<BrowseSource['event']>;
   constructor(private readonly source: BrowseSource) {
     if(source.batch)this.batch=async(asOf,page,signal)=>{
-      if(page!==0){
-        const epoch=this.epoch,result=await source.batch!(asOf,page,signal);
-        if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;return result;
-      }
       const now=parseBrowseInstant(asOf);
-      if(now===undefined||signal.aborted)throw dependencyUnavailable;
+      if(now===undefined||signal.aborted||!Number.isSafeInteger(page)||page<0||page>49)throw dependencyUnavailable;
+      if(page!==0){
+        const epoch=this.epoch,cached=this.snapshot,read={};
+        if(this.pending||(cached&&cached.at!==now))throw dependencyUnavailable;
+        this.pageReads.set(page,read);
+        try{
+          const result=await source.batch!(asOf,page,signal);
+          if(epoch!==this.epoch||cached!==this.snapshot||this.pending||this.pageReads.get(page)!==read||signal.aborted)throw dependencyUnavailable;
+          const items=this.freezePage(result.items);
+          // A cold cursor read cannot invent an initialized title projection.
+          if(cached)this.observedPages.set(page,items);
+          return {...result,items};
+        }finally{if(this.pageReads.get(page)===read)this.pageReads.delete(page);}
+      }
       // Explicit first-page refresh replaces the one shared generation. Old
       // pending first/next reads cannot publish over it; other readers join it.
-      const epoch={};this.epoch=epoch;this.snapshot=undefined;
+      const epoch={};this.epoch=epoch;this.snapshot=undefined;this.observedPages.clear();this.pageReads.clear();
       const work=source.batch!(asOf,0,signal).then(result=>{
         if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;
-        const items=Object.freeze(result.items.map(item=>Object.freeze({...item})));
+        const items=this.freezePage(result.items);
         this.snapshot={at:now,items};
         return {...result,items};
       });
@@ -64,13 +76,22 @@ export class ControlledSourceProjection implements BrowseSource {
   peek(id: string, asOf: string): BrowseOccurrence | undefined {
     const now = parseBrowseInstant(asOf), snapshot = this.snapshot;
     if (now === undefined || !snapshot || this.pending || now < snapshot.at || now - snapshot.at >= 300_000_000_000n) return undefined;
-    return snapshot.items.find(item => sourceEventId(item.browseId) === id && parseBrowseInstant(item.startAt)! > now);
+    // First page wins duplicate identities. No title merging or provider IO.
+    for(const items of [snapshot.items,...[...this.observedPages].sort(([a],[b])=>a-b).map(([,rows])=>rows)]){
+      const found=items.find(item=>sourceEventId(item.browseId)===id&&parseBrowseInstant(item.startAt)!>now);
+      if(found)return found;
+    }
+    return undefined;
+  }
+  private freezePage(items: readonly BrowseOccurrence[]): readonly BrowseOccurrence[] {
+    if(items.length>20||new Set(items.map(item=>item.browseId)).size!==items.length)throw dependencyUnavailable;
+    return Object.freeze(items.map(item=>Object.freeze({...item})));
   }
   private current() { return this.snapshot; }
   private requireCurrent(epoch: object, snapshot: SourceSnapshot | undefined, signal: AbortSignal): void {
     if(epoch!==this.epoch||snapshot!==this.snapshot||this.pending!==undefined||signal.aborted)throw dependencyUnavailable;
   }
-  clear(): void { this.snapshot = undefined; this.pending = undefined; this.epoch = {}; }
+  clear(): void { this.snapshot = undefined; this.pending = undefined; this.epoch = {}; this.observedPages.clear(); this.pageReads.clear(); }
   async firstBatch(asOf: string, signal: AbortSignal): Promise<readonly BrowseOccurrence[]> {
     const now = parseBrowseInstant(asOf);
     if (now === undefined || signal.aborted) throw dependencyUnavailable;
@@ -80,11 +101,11 @@ export class ControlledSourceProjection implements BrowseSource {
     }
     this.snapshot = undefined; // Expired generation cannot become a fallback.
     if (!this.pending) {
-      const admitted = {};this.epoch=admitted;
+      const admitted = {};this.epoch=admitted;this.observedPages.clear();this.pageReads.clear();
       const work = this.source.firstBatch(asOf, signal).then(items => {
         if (admitted !== this.epoch || signal.aborted) throw dependencyUnavailable;
         // Clone and freeze the complete generation before publishing one pointer.
-        const projected = Object.freeze(items.map(item => Object.freeze({ ...item })));
+        const projected = this.freezePage(items);
         this.snapshot = { at: now, items: projected };
         return projected;
       });

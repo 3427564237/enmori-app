@@ -122,3 +122,21 @@ Source-only identity lookup for newly observed occurrences is bounded to 1,000
 IDs/five minutes in process memory, no titles/provider documents persisted. New
 participation rechecks current source detail; process loss/expired lookup fails
 closed and requires a fresh list read. Cancel/unignore remain source-independent.
+
+## Observed source display window — 22 October implementation
+
+Under S-PM-1021-LI-PARALLEL-COMPLETION, existing `peek(eventId, asOf)` includes
+successfully browsed pages in the current page-zero generation: 20 rows/page,
+pages 0–49, at most 1,000 distinct IDs in process memory. Each later page replaces
+its own earlier page atomically. Duplicate IDs have one identity, with page zero
+taking display precedence. No auto-fetch, title archive, new storage/DTO field
+or change to first-page-only recommendation candidates is introduced.
+
+Later pages match the initialized generation's exact cursor `asOf` and never
+extend its five-minute lifetime. Page-zero admission (even a failed refresh),
+invalidation and disable clear observed display pages. Late/superseded/aborted
+page reads cannot republish them. Failed later-page reads leave published pages
+intact for explicit same-cursor retry. Cold cursor reads after process loss do
+not initialize a title projection. Missing/expired/unobserved title stays
+unavailable, not fabricated history or successful empty Detail. Source-current
+selection, selectedAt, cancel/unignore and authorized participant paging remain.

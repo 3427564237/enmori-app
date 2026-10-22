@@ -24,3 +24,11 @@ test('cold source is unavailable and old rows do not borrow preference update ti
  const source=socialEventSource(()=>({browseId:'b',title:'Current',startAt:at,externalSourceUrl:'https://ticketmaster.sg'}),()=>true);
  assert.deepEqual(await db.runTransaction(tx=>source.activity.read(tx,'viewer','owner',at,'friends_activity_v1')),[]);
 });
+
+test('a recent authorized selection with unobserved title is unavailable, not a successful empty feed',async()=>{
+ const db=fixture(),source=socialEventSource(()=>undefined,()=>true);
+ await assert.rejects(db.runTransaction(tx=>source.activity.read(tx,'viewer','owner',at,'friends_activity_v1')));
+ // Historical selections outside the retained seven-day feed do not demand a source fetch.
+ await db.runTransaction(async tx=>tx.set(`event_participations/${key}`,{accountId:'owner',eventId:event,status:'interested',selectedAt:'2026-10-01T00:00:00.000Z'}));
+ assert.deepEqual(await db.runTransaction(tx=>source.activity.read(tx,'viewer','owner',at,'friends_activity_v1')),[]);
+});

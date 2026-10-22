@@ -39,7 +39,12 @@ export function socialEventSource(peek: (id: string, asOf: string) => BrowseOccu
       const result: EventActivityMetadata[] = [];
       for (const row of await rows(tx, viewer, owner)) {
         const d = row.data;
-        if ((d.status === 'interested' || d.status === 'going') && isUtcIsoInstant(d.selectedAt) && peek(String(d.eventId), asOf)) {
+        if ((d.status === 'interested' || d.status === 'going') && isUtcIsoInstant(d.selectedAt)) {
+          const age=Date.parse(asOf)-Date.parse(d.selectedAt);
+          // The retained feed window is inclusive seven days. Do not demand
+          // source content for an old/noncandidate row or invent its history.
+          if(age<0||age>168*60*60*1000)continue;
+          if(!peek(String(d.eventId),asOf))throw new Error('Selected event source unavailable');
           result.push({sourceRecordId: row.id, type: d.status === 'going' ? 'event_going' : 'event_interested', occurredAt: d.selectedAt});
         }
       }
@@ -51,7 +56,11 @@ export function socialEventSource(peek: (id: string, asOf: string) => BrowseOccu
       if (!row || row.accountId !== owner || !validEventId(row.eventId) || participationKey(owner, row.eventId) !== source.sourceRecordId ||
         row.selectedAt !== source.occurredAt || row.status !== (source.type === 'event_going' ? 'going' : 'interested')) return undefined;
       const event = peek(row.eventId, asOf);
-      return event ? {eventId: row.eventId, title: event.title} : undefined;
+      // tx.get yields: disable/refresh or replacement of just this observed page
+      // may remove the title while participation stays authorized and unchanged.
+      // Only actual participation/permission removal is omission, never source loss.
+      if(!ready(asOf)||!event)throw new Error('Current event source unavailable');
+      return {eventId: row.eventId, title: event.title};
     },
   };
   const recommendations: FriendEventProjection = {
