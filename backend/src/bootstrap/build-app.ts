@@ -8,6 +8,7 @@ import { registerCheckInMutations } from "../check-ins/transport/mutation-routes
 import type { EditCheckIn } from "../check-ins/application/edit-check-in.js";
 import { registerInterestAdmin } from '../interests/transport/admin-routes.js';
 import type { CreateInterestTag } from '../interests/application/create-interest-tag.js';
+import type { GetInterestAdminCapability } from '../interests/application/get-interest-admin-capability.js';
 import { createIsolatedEventBrowse, type IsolatedEventBrowseInput } from "./isolated-event-browse.js";
 import { buildEventBrowseFrameworkErrors } from "./event-browse-framework-errors.js";
 import { registerEventBrowseRoutes } from "../event-browse/transport/register-routes.js";
@@ -38,7 +39,7 @@ import {
 } from "../transport/register-routes.js";
 
 export async function buildApp(
-  dependencies: R4RouteDependencies & { readonly checkInCalendar?:OwnCheckInCalendar; readonly editCheckIn?: EditCheckIn; readonly createInterestTag?: CreateInterestTag; readonly recommendEvents?: Pick<RecommendEvents, "execute">;
+  dependencies: R4RouteDependencies & { readonly checkInCalendar?:OwnCheckInCalendar; readonly editCheckIn?: EditCheckIn; readonly createInterestTag?: CreateInterestTag; readonly getInterestAdminCapability?: GetInterestAdminCapability; readonly recommendEvents?: Pick<RecommendEvents, "execute">;
     readonly accountPreferences?: OwnAccountPreferences;
     readonly socialModule?: Parameters<typeof registerSocialModule>[1];
     readonly controlledPhoneDiagnostics?: ControlledPhoneDiagnostics;
@@ -78,7 +79,7 @@ export async function buildApp(
   await registerR4Routes(app, dependencies);
   if(dependencies.checkInCalendar)await registerCheckInCalendar(app,dependencies.identityVerifier,dependencies.checkInCalendar);
   if (dependencies.editCheckIn) await registerCheckInMutations(app, dependencies.identityVerifier, dependencies.editCheckIn);
-  if (dependencies.createInterestTag) await registerInterestAdmin(app, dependencies.identityVerifier, dependencies.createInterestTag);
+  if (dependencies.createInterestTag) await registerInterestAdmin(app, dependencies.identityVerifier, dependencies.createInterestTag, dependencies.getInterestAdminCapability);
   if (dependencies.accountPreferences !== undefined) {
     await registerAccountPreferencesRoutes(app, dependencies.identityVerifier, dependencies.accountPreferences);
   }

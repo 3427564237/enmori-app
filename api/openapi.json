@@ -4078,6 +4078,109 @@
         "description": "Isolated Emulator composition only; verified Firebase identity and completed Account required before any source read. No query parameters or request body. No pagination or database write. The approved Sponsor demo composition may reuse one atomic server-owned source projection for at most five minutes, shared with recommendations and detail; disable invalidates it and source failure never serves stale success. Other compositions retain request-only source reads. Real provider activation remains separately gated."
       }
     },
+    "/v1/me/interest-tag-admin-capability": {
+      "get": {
+        "operationId": "getInterestAdminCapability",
+        "summary": "Read current single-create capability without exposing identity or role data",
+        "description": "Authenticated, current server-owned Firebase authority; no body/query, no-store. Ordinary or claim-revoked users receive false. This UI hint never authorizes POST. See interest-admin-capability-contract.md.",
+        "responses": {
+          "200": {
+            "description": "Current server-owned capability hint; every mutation reauthorizes independently",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "canCreateInterestTags"
+                  ],
+                  "properties": {
+                    "canCreateInterestTags": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure; no automatic retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure; no automatic retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure; no automatic retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure; no automatic retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/admin/interest-tags": {
       "post": {
         "operationId": "createInterestTag",
