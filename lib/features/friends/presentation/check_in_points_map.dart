@@ -1,3 +1,5 @@
+import 'osm_tiles.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -147,14 +149,8 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
               ),
               children: [
                 widget.tileLayerBuilder?.call() ??
-                    TileLayer(
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.enmori.app',
-                      panBuffer: 0,
-                      keepBuffer: 0,
-                      maxNativeZoom: 19,
-                      errorTileCallback: (_, _, _) {
+                    EnmoriOsmTiles(
+                      onError: () {
                         if (mounted && !_tileError) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             if (mounted) setState(() => _tileError = true);
@@ -214,6 +210,27 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
                       ),
                   ],
                 ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Material(
+                    color: Theme.of(context).colorScheme.surface,
+                    child: TextButton(
+                      onPressed: () async {
+                        try {
+                          final ok = await widget.openAttribution(
+                            Uri.parse(
+                              'https://www.openstreetmap.org/copyright',
+                            ),
+                          );
+                          if (mounted) setState(() => _linkError = !ok);
+                        } catch (_) {
+                          if (mounted) setState(() => _linkError = true);
+                        }
+                      },
+                      child: const Text('© OpenStreetMap contributors'),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -221,19 +238,6 @@ final class _CheckInPointsMapState extends State<CheckInPointsMap> {
             const Text(
               'Map tiles are unavailable. The visible Check-ins are listed below.',
             ),
-          TextButton(
-            onPressed: () async {
-              try {
-                final ok = await widget.openAttribution(
-                  Uri.parse('https://www.openstreetmap.org/copyright'),
-                );
-                if (mounted) setState(() => _linkError = !ok);
-              } catch (_) {
-                if (mounted) setState(() => _linkError = true);
-              }
-            },
-            child: const Text('© OpenStreetMap contributors'),
-          ),
           if (_linkError)
             const Text('The attribution link could not be opened.'),
         ],

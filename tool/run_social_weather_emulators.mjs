@@ -11,8 +11,8 @@ import {buildControlledEmulatorTestEnvironment} from '../backend/dist/src/shared
 assert.equal(process.version,'v24.19.0');
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const args=process.argv.slice(2);
-assert.ok(args.every(arg=>['--child','--friend-ignore','--friend-activity'].includes(arg)));
-const suite=args.includes('--friend-activity')?'friend-activity':args.includes('--friend-ignore')?'friend-ignore':'social-weather';
+assert.ok(args.every(arg=>['--child','--friend-ignore','--friend-activity','--content-coherence'].includes(arg)));
+const suite=args.includes('--content-coherence')?'content-coherence':args.includes('--friend-activity')?'friend-activity':args.includes('--friend-ignore')?'friend-ignore':'social-weather';
 const run=(program,args,env)=>new Promise((done,reject)=>{
   const child=spawn(program,args,{cwd:root,env,stdio:'inherit',windowsHide:true});
   child.on('error',reject);child.on('exit',code=>code===0?done():reject(new Error(`Test child exited ${code}`)));

@@ -1,3 +1,4 @@
+import '../../account/content_access.dart';
 import 'check_in_place_controller.dart';
 import 'check_in_place_controls.dart';
 import '../../account/account_preferences_providers.dart';
@@ -712,6 +713,13 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(contentAccessProvider, (before, after) {
+      if (after.foreground && ModalRoute.of(context)?.isCurrent == true) {
+        Future.microtask(() {
+          if (mounted) _readPersisted();
+        });
+      }
+    });
     final state = ref.watch(checkInControllerProvider);
     return Scaffold(
       appBar: AppBar(

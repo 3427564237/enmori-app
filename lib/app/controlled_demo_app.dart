@@ -1,3 +1,4 @@
+import '../features/account/content_access.dart';
 import 'ai_persona_context.dart';
 import '../features/event_participation/data/backend_participation_repository.dart';
 import '../features/event_participation/participation_providers.dart';
@@ -291,7 +292,8 @@ final class _ConnectedPages extends ConsumerWidget {
       title: 'ENMORI',
       debugShowCheckedModeBanner: false,
       theme: socialDemoTheme(),
-      builder: (context, child) => EnmoriMotionPreferences(child: child!),
+      builder: (context, child) =>
+          ContentAccessBoundary(child: EnmoriMotionPreferences(child: child!)),
       routerConfig: ref.watch(appRouterProvider),
     );
   }

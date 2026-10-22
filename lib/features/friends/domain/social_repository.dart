@@ -78,6 +78,11 @@ abstract interface class SocialRepository {
     String username, {
     required bool specialCare,
     required int expectedRevision,
+    bool Function()? isEligible,
   });
-  Future<Result<void>> remove(String username, {required int expectedRevision});
+  Future<Result<void>> remove(
+    String username, {
+    required int expectedRevision,
+    bool Function()? isEligible,
+  });
 }

@@ -70,7 +70,13 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Footprint'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(CheckInPointsMap),
+          matching: find.text('Footprint'),
+        ),
+        findsOneWidget,
+      );
       await tester.tap(find.byTooltip('Open Check-in 1'));
       await tester.pumpAndSettle();
       expect(repository.readIds, ['exact-point']);
@@ -262,14 +268,22 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Shared biography'), findsOneWidget);
       expect(tester.takeException(), isNull);
-      await tester.ensureVisible(find.text('Remove friend'));
+      await tester.scrollUntilVisible(
+        find.text('Remove friend'),
+        160,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.text('Remove friend'));
       await tester.pumpAndSettle();
       expect(repository.removes, 0);
       await tester.tap(find.text('Keep friend'));
       await tester.pumpAndSettle();
       expect(repository.removes, 0);
-      await tester.ensureVisible(find.text('Remove friend'));
+      await tester.scrollUntilVisible(
+        find.text('Remove friend'),
+        160,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.text('Remove friend'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Remove friend'));
@@ -329,11 +343,13 @@ class SocialFake implements SocialRepository {
     String username, {
     required bool specialCare,
     required int expectedRevision,
+    bool Function()? isEligible,
   }) async => Success(FriendCare(specialCare, expectedRevision + 1));
   @override
   Future<Result<void>> remove(
     String username, {
     required int expectedRevision,
+    bool Function()? isEligible,
   }) {
     removes++;
     return pendingRemove?.future ?? Future.value(const Success(null));

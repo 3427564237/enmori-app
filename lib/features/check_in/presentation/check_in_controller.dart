@@ -1,3 +1,6 @@
+import '../../auth/domain/auth_repository.dart';
+import '../../account/content_access.dart';
+
 import 'dart:convert';
 
 import '../../account/domain/account_repository.dart';
@@ -24,6 +27,8 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
   late CheckInRepository _repository;
   late IdempotencyKeyGenerator _keyGenerator;
   String? _authSubject;
+  Object? _authSession;
+  int _writesInFlight = 0;
 
   int get operationToken => _operation;
 
@@ -32,12 +37,26 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
     _repository = ref.watch(checkInRepositoryProvider);
     _keyGenerator = ref.watch(idempotencyKeyGeneratorProvider);
     final authSubject = ref.watch(currentAuthSubjectProvider);
-    if (_authSubject != authSubject) {
+    final session = ref.watch(
+      authSessionProvider.select(
+        (value) => value.asData?.value is AuthSessionAuthenticated
+            ? value.asData?.value
+            : null,
+      ),
+    );
+    ref.listen(contentAccessProvider, (before, after) {
+      if (_writesInFlight > 0 && after.foreground) return;
+      _operation++;
+      state = const CommandIdle();
+    });
+    ref.onDispose(() => _operation++);
+    if (_authSubject != authSubject || !identical(_authSession, session)) {
       _operation++;
       _createNote = null;
       _createIdempotencyKey = null;
     }
     _authSubject = authSubject;
+    _authSession = session;
     return const CommandIdle();
   }
 
@@ -68,14 +87,23 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
 
     final operation = ++_operation;
     state = const CommandPending();
-    final result = await _repository.create(
-      note: normalized,
-      mood: mood,
-      activity: activity,
-      locationLabel: locationLabel,
-      visibility: visibility,
-      idempotencyKey: _createIdempotencyKey!,
-    );
+    _writesInFlight++;
+    final Result<CheckIn> result;
+    try {
+      result = await afterContentMutation(
+        ref,
+        () => _repository.create(
+          note: normalized,
+          mood: mood,
+          activity: activity,
+          locationLabel: locationLabel,
+          visibility: visibility,
+          idempotencyKey: _createIdempotencyKey!,
+        ),
+      );
+    } finally {
+      _writesInFlight--;
+    }
     if (!ref.mounted || operation != _operation) return;
     state = switch (result) {
       Success<CheckIn>(:final value) => CommandSucceeded(value),
@@ -88,6 +116,7 @@ final class CheckInController extends Notifier<CommandState<CheckIn>> {
   }
 
   Future<void> readPersisted({required String checkInId}) async {
+    if (!ref.read(contentAccessProvider).foreground) return;
     await _run(() => _repository.readOwned(checkInId: checkInId));
   }
 

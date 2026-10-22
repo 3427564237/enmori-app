@@ -1,3 +1,4 @@
+import '../content_access.dart';
 import '../domain/profile_location_repository.dart';
 import '../domain/profile_details.dart';
 
@@ -50,6 +51,16 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
     // A replacement observation is a new session even for the same subject.
     // Rebuild the request fence so old reads/saves cannot settle this session.
     final session = ref.watch(authSessionProvider).asData?.value;
+    ref.listen(contentAccessProvider, (before, after) {
+      if (after.foreground && state.phase == PreferencesPhase.saving) return;
+      _operation++;
+      state = const PreferencesState();
+      if (after.foreground) {
+        scheduleMicrotask(() {
+          if (ref.mounted) unawaited(load());
+        });
+      }
+    });
     final operation = ++_operation;
     ref.onDispose(() => _operation++);
     if (session is AuthSessionAuthenticated) {
@@ -64,7 +75,11 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
       _locationRepository.currentRegionCoordinates();
 
   Future<void> load({bool saved = false}) async {
-    if (!ref.mounted || state.phase == PreferencesPhase.saving) return;
+    if (!ref.mounted ||
+        state.phase == PreferencesPhase.saving ||
+        !ref.read(contentAccessProvider).foreground) {
+      return;
+    }
     final operation = ++_operation;
     state = const PreferencesState();
     if (view == PreferencesView.profile) {
@@ -149,7 +164,7 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
       profile: profile,
       settings: settings,
     );
-    final result = await command();
+    final result = await afterContentMutation(ref, command);
     if (!ref.mounted || operation != _operation) return;
     if (result is Success<T>) {
       if (result.value case final OwnSettings confirmed) {

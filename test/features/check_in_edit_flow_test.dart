@@ -24,6 +24,7 @@ class _Repository implements CheckInRepository, CheckInMutations {
   bool conflict = false;
   @override
   Future<Result<CheckIn>> update({
+    bool Function()? isEligible,
     String? locationLabel,
     required String checkInId,
     String? mood,
@@ -54,6 +55,7 @@ class _Repository implements CheckInRepository, CheckInMutations {
 
   @override
   Future<Result<void>> remove({
+    bool Function()? isEligible,
     required String checkInId,
     required int expectedRevision,
   }) async {

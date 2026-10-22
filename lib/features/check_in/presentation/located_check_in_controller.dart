@@ -1,3 +1,5 @@
+import '../../account/content_access.dart';
+
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,10 +75,13 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
         );
         return;
       }
-      final result = await repository.replaceLocation(
-        checkIn: current,
-        location: (point as Success<GeoPoint>).value,
-        isEligible: () => _valid(epoch),
+      final result = await afterContentMutation(
+        ref,
+        () => repository.replaceLocation(
+          checkIn: current,
+          location: (point as Success<GeoPoint>).value,
+          isEligible: () => _valid(epoch),
+        ),
       );
       if (!_valid(epoch)) return;
       state = switch (result) {
@@ -102,6 +107,14 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
   @override
   LocatedCheckInState build() {
     _session = ref.watch(authSessionProvider.select((v) => v.asData?.value));
+    ref.listen(contentAccessProvider, (before, after) {
+      if (state.busy && after.foreground) return;
+      _epoch++;
+      state = LocatedCheckInState(
+        savedId: state.savedId,
+        uncertain: state.uncertain,
+      );
+    });
     _epoch++;
     _fingerprint = null;
     _key = null;
@@ -151,15 +164,18 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
         repository = ref.read(checkInPlaceRepositoryProvider);
     state = const LocatedCheckInState(busy: true, uncertain: true);
     try {
-      final result = await repository.create(
-        note: value,
-        mood: mood,
-        activity: activity,
-        locationLabel: locationLabel,
-        visibility: visibility,
-        place: place,
-        idempotencyKey: _key!,
-        isEligible: () => _valid(epoch),
+      final result = await afterContentMutation(
+        ref,
+        () => repository.create(
+          note: value,
+          mood: mood,
+          activity: activity,
+          locationLabel: locationLabel,
+          visibility: visibility,
+          place: place,
+          idempotencyKey: _key!,
+          isEligible: () => _valid(epoch),
+        ),
       );
       if (!_valid(epoch)) return;
       switch (result) {
@@ -184,7 +200,7 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
   }
 
   Future<void> read(String id) async {
-    if (state.busy) return;
+    if (state.busy || !ref.read(contentAccessProvider).foreground) return;
     final epoch = ++_epoch, repository = ref.read(checkInRepositoryProvider);
     state = LocatedCheckInState(busy: true, savedId: id);
     try {
@@ -217,15 +233,18 @@ final class LocatedCheckInController extends Notifier<LocatedCheckInState> {
         repository = ref.read(checkInPlaceRepositoryProvider);
     state = LocatedCheckInState(busy: true, savedId: current.checkInId);
     try {
-      final result = await (location
-          ? repository.removeLocation(
-              checkIn: current,
-              isEligible: () => _valid(epoch),
-            )
-          : repository.removeWeatherPermission(
-              checkIn: current,
-              isEligible: () => _valid(epoch),
-            ));
+      final result = await afterContentMutation(
+        ref,
+        () => (location
+            ? repository.removeLocation(
+                checkIn: current,
+                isEligible: () => _valid(epoch),
+              )
+            : repository.removeWeatherPermission(
+                checkIn: current,
+                isEligible: () => _valid(epoch),
+              )),
+      );
       if (!_valid(epoch)) return;
       state = switch (result) {
         Success<CheckIn>(:final value) => LocatedCheckInState(

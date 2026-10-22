@@ -1,3 +1,4 @@
+import 'content_access.dart';
 import 'domain/profile_location_repository.dart';
 import 'data/geolocator_profile_location_repository.dart';
 
@@ -16,7 +17,16 @@ final accountPreferencesRepositoryProvider =
 
 final ownProfileDetailsProvider = FutureProvider.autoDispose
     .family<Result<OwnProfile>, String>((ref, subject) {
+      final access = ref.watch(contentAccessProvider);
       final current = ref.watch(currentAuthSubjectProvider);
+      if (!access.foreground) {
+        return const Failure(
+          AppFailure(
+            kind: AppFailureKind.serviceUnavailable,
+            message: 'Return to reload current access.',
+          ),
+        );
+      }
       if (current != subject) {
         return const Failure(
           AppFailure(

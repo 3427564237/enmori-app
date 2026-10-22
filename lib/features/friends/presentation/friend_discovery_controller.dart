@@ -1,3 +1,5 @@
+import '../../account/content_access.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
@@ -37,6 +39,7 @@ final class FriendDiscoveryController extends Notifier<FriendDiscoveryState> {
   @override
   FriendDiscoveryState build() {
     _repository = ref.watch(friendDiscoveryRepositoryProvider);
+    ref.watch(contentAccessProvider);
     ref.watch(
       friendIgnoreControllerProvider.select((value) => value.generation),
     );
@@ -58,6 +61,7 @@ final class FriendDiscoveryController extends Notifier<FriendDiscoveryState> {
   }
 
   Future<void> load() async {
+    if (!ref.read(contentAccessProvider).foreground) return;
     final preference = ref.read(friendIgnoreControllerProvider);
     if (state.busy ||
         preference.busy ||
