@@ -271,7 +271,7 @@ void main() {
         AppRoutes.activities,
       );
       expect(recommendationViews, ['home']);
-      expect(find.text('No activities in this batch'), findsOneWidget);
+      expect(find.text('No activities to show'), findsOneWidget);
       expect(
         find.byKey(const Key('event-recommendations-error')),
         findsNothing,
@@ -498,13 +498,12 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('social-nav-home')));
       await tester.pumpAndSettle();
-      expect(find.text('Discard unsaved changes?'), findsOneWidget);
-      await tester.tap(find.text('Keep editing'));
+      expect(find.byKey(const Key('route-home')), findsOneWidget);
+      expect(find.byType(AlertDialog), findsNothing);
+      await tester.tap(find.byKey(const Key('social-nav-ai')));
       await tester.pumpAndSettle();
       expect(find.text('Unsaved demo draft'), findsOneWidget);
       await tester.tap(find.byKey(const Key('social-nav-home')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('ai-confirm-discard')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-home')), findsOneWidget);
       // A narrow viewport and large text keep the bottom bar and content usable.
