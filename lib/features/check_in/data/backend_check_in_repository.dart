@@ -67,6 +67,7 @@ final class BackendCheckInRepository
 
   @override
   Future<Result<CheckIn>> update({
+    bool Function()? isEligible,
     String? locationLabel,
     required String checkInId,
     String? mood,
@@ -77,6 +78,7 @@ final class BackendCheckInRepository
   }) async {
     final response = await _client.put(
       '/v1/check-ins/${Uri.encodeComponent(checkInId)}',
+      isEligible: isEligible,
       body: {
         'note': note,
         'mood': mood,
@@ -98,11 +100,13 @@ final class BackendCheckInRepository
 
   @override
   Future<Result<void>> remove({
+    bool Function()? isEligible,
     required String checkInId,
     required int expectedRevision,
   }) async {
     final response = await _client.deleteJson(
       '/v1/check-ins/${Uri.encodeComponent(checkInId)}',
+      isEligible: isEligible,
       body: {'expectedRevision': expectedRevision},
     );
     return switch (response) {

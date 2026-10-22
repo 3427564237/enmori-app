@@ -1,3 +1,6 @@
+import '../../auth/domain/auth_repository.dart';
+import '../../auth/auth_providers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,6 +19,8 @@ final class CheckInEditPage extends ConsumerStatefulWidget {
 }
 
 class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
+  Object? _openedSession;
+  bool _sessionBound = false;
   late CheckIn _current;
   late final TextEditingController _note;
   late CheckInVisibility _visibility;
@@ -29,6 +34,9 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
   @override
   void initState() {
     super.initState();
+    final initial = ref.read(authSessionProvider).asData?.value;
+    _openedSession = initial is AuthSessionAuthenticated ? initial : null;
+    _sessionBound = initial != null;
     _current = widget.checkIn;
     _mood = _current.mood;
     _activity = _current.activity;
@@ -64,8 +72,31 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
       false;
   @override
   Widget build(BuildContext context) {
+    final session = ref.watch(
+      authSessionProvider.select(
+        (value) => value.asData?.value is AuthSessionAuthenticated
+            ? value.asData?.value
+            : null,
+      ),
+    );
+    if (!_sessionBound && ref.read(authSessionProvider).asData != null) {
+      _openedSession = session;
+      _sessionBound = true;
+    }
+    if (!identical(session, _openedSession)) {
+      _note.clear();
+      return Scaffold(
+        appBar: AppBar(title: const Text('Edit Check-in')),
+        body: const Center(
+          child: Text(
+            'Session changed. Return to your records and reopen this Check-in.',
+          ),
+        ),
+      );
+    }
     final state = ref.watch(checkInEditControllerProvider);
     final controller = ref.read(checkInEditControllerProvider.notifier);
+    final renderedEpoch = controller.epoch;
     final mustReload =
         state.failure != null &&
         state.failure!.kind != AppFailureKind.checkInInvalid;
@@ -273,6 +304,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                           _current,
                           _note.text,
                           _visibility,
+                          expectedEpoch: renderedEpoch,
                           mood: _mood,
                           activity: _activity,
                           locationLabel: _locationLabel,
@@ -291,7 +323,10 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                                 'Delete',
                               ) &&
                               mounted) {
-                            await controller.remove(_current);
+                            await controller.remove(
+                              _current,
+                              expectedEpoch: renderedEpoch,
+                            );
                           }
                         },
                   icon: const Icon(Icons.delete_outline),

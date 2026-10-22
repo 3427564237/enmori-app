@@ -4,6 +4,7 @@ import 'check_in_repository.dart';
 
 abstract interface class CheckInMutations {
   Future<Result<CheckIn>> update({
+    bool Function()? isEligible,
     String? locationLabel,
     required String checkInId,
     String? mood,
@@ -13,6 +14,7 @@ abstract interface class CheckInMutations {
     required int expectedRevision,
   });
   Future<Result<void>> remove({
+    bool Function()? isEligible,
     required String checkInId,
     required int expectedRevision,
   });

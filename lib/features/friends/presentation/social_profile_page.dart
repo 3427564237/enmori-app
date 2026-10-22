@@ -78,8 +78,9 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
-    if (state == AppLifecycleState.resumed) {
+    if (!mounted) return;
+    if (state == AppLifecycleState.resumed &&
+        ModalRoute.of(context)?.isCurrent == true) {
       if (widget.recordId != null) {
         _loadInitial();
       } else {

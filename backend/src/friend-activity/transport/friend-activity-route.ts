@@ -15,7 +15,7 @@ export const activityItemSchema={oneOf:[
       note:{type:"string"},mood:{type:"string",minLength:1,maxLength:50}}}}},
   {type:"object",additionalProperties:false,required:[...required,"event"],properties:{...common,
     type:{enum:["event_interested","event_going"]},event:{type:"object",additionalProperties:false,required:["eventId","title"],properties:{
-      eventId:{type:"string",pattern:"^(?!tm_)[A-Za-z0-9_-]{1,128}$"},title:{type:"string",minLength:1,maxLength:500}}}}}
+      eventId:{type:"string",pattern:"^(?:tm_event_[0-9a-f]{64}|(?!tm_)[A-Za-z0-9_-]{1,128})(?![\\s\\S])"},title:{type:"string",minLength:1,maxLength:500}}}}}
 ]};
 export const friendActivitySchema={
   querystring:{type:"object",additionalProperties:false,required:["view","category"],

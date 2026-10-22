@@ -1,3 +1,5 @@
+import '../../account/content_access.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -88,7 +90,12 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
       identical(session, ref.read(authSessionProvider).asData?.value);
 
   Future<void> _load() async {
-    if (!mounted || !_active || _busy) return;
+    if (!mounted ||
+        !_active ||
+        _busy ||
+        !ref.read(contentAccessProvider).foreground) {
+      return;
+    }
     final epoch = ++_epoch,
         session = ref.read(authSessionProvider).asData?.value,
         repository = ref.read(friendActivityRepositoryProvider);
@@ -143,6 +150,14 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(contentAccessProvider, (before, after) {
+      _epoch++;
+      setState(() {
+        _result = null;
+        _busy = false;
+      });
+      if (after.foreground) Future.microtask(_load);
+    });
     ref.listen(authSessionProvider, (before, after) {
       if (!identical(before?.asData?.value, after.asData?.value)) {
         _epoch++;

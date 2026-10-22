@@ -1,3 +1,5 @@
+import '../../account/content_access.dart';
+
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,6 +61,16 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
     final auth = ref.watch(authSessionProvider);
     _repository = ref.watch(checkInRepositoryProvider);
     _device = ref.watch(historyDevicePortProvider);
+    ref.listen(contentAccessProvider, (before, after) {
+      _request++;
+      final old = state;
+      state = CheckInHistoryState(
+        selectedDate: old.selectedDate,
+        latestDate: old.latestDate,
+        ianaZone: old.ianaZone,
+      );
+      if (after.foreground) unawaited(reload());
+    });
     _session++;
     _request++;
     final session = switch (auth) {
@@ -72,7 +84,7 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
       _session++;
       _request++;
     });
-    if (session == null) {
+    if (session == null || !ref.read(contentAccessProvider).foreground) {
       return const CheckInHistoryState(phase: CheckInHistoryPhase.signedOut);
     }
     scheduleMicrotask(() {
@@ -82,6 +94,7 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
   }
 
   Future<void> initialize() async {
+    if (!ref.read(contentAccessProvider).foreground) return;
     final subject = _subject;
     if (!ref.mounted || subject == null) return;
     final session = _session;
@@ -108,6 +121,7 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
   }
 
   Future<void> selectDate(DateTime date) async {
+    if (!ref.read(contentAccessProvider).foreground) return;
     final current = state;
     final subject = _subject;
     final zone = current.ianaZone;
@@ -140,6 +154,7 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
   }
 
   Future<void> reload() async {
+    if (!ref.read(contentAccessProvider).foreground) return;
     final current = state;
     final subject = _subject;
     final date = current.selectedDate;
@@ -173,6 +188,7 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
   }
 
   Future<void> loadNext() async {
+    if (!ref.read(contentAccessProvider).foreground) return;
     final current = state;
     final subject = _subject;
     final date = current.selectedDate;
