@@ -110,8 +110,8 @@ void main() {
       expect(find.text('A shared walk'), findsNothing);
       expect(find.text('Fresh authorized note'), findsOneWidget);
       h.rows = [];
-      await tester.ensureVisible(find.text('Reload activity'));
-      await tester.tap(find.text('Reload activity'));
+      await tester.ensureVisible(find.byTooltip('Reload activity'));
+      await tester.tap(find.byTooltip('Reload activity'));
       await tester.pumpAndSettle();
       expect(find.text('Fresh authorized note'), findsNothing);
       expect(find.textContaining('Hopeful'), findsNothing);
@@ -158,8 +158,8 @@ void main() {
       await tester.pumpAndSettle();
       final pending = Completer<http.Response>();
       h.pending = pending;
-      await tester.ensureVisible(find.text('Reload activity'));
-      await tester.tap(find.text('Reload activity'));
+      await tester.ensureVisible(find.byTooltip('Reload activity'));
+      await tester.tap(find.byTooltip('Reload activity'));
       await tester.pump();
       expect(find.text('A shared walk'), findsNothing);
       h.rows = [];
@@ -214,7 +214,7 @@ void main() {
       expect(find.text('A shared walk'), findsNothing);
       h.status = 200;
       h.rows = [];
-      await tester.tap(find.text('Reload activity'));
+      await tester.tap(find.byTooltip('Reload activity'));
       await tester.pumpAndSettle();
       expect(find.text('No friends activity to show.'), findsOneWidget);
     },

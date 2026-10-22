@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/providers.dart';
 import '../../../core/result/result.dart';
 import '../../../core/presentation/local_time.dart';
+import '../../../core/presentation/section_heading.dart';
 import '../../auth/auth_providers.dart';
 import '../../auth/domain/auth_repository.dart';
 import '../domain/friend_activity_repository.dart';
@@ -160,7 +161,36 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Friends Activity', style: Theme.of(context).textTheme.titleLarge),
+        SectionHeading(
+          title: 'Friends Activity',
+          actions: [
+            if (widget.home &&
+                widget.onSeeAll != null &&
+                _result is Success<List<FriendActivityItem>> &&
+                (_result as Success<List<FriendActivityItem>>).value.isNotEmpty)
+              TextButton(
+                onPressed: () async {
+                  if (!_valid(renderedEpoch, renderedSession)) return;
+                  _epoch++;
+                  setState(() => _result = null);
+                  await widget.onSeeAll!();
+                  if (mounted &&
+                      identical(
+                        renderedSession,
+                        ref.read(authSessionProvider).asData?.value,
+                      )) {
+                    await _load();
+                  }
+                },
+                child: const Text('See all activity'),
+              ),
+            IconButton(
+              tooltip: 'Reload activity',
+              onPressed: _busy ? null : _load,
+              icon: const Icon(Icons.refresh),
+            ),
+          ],
+        ),
         if (!widget.home && widget.source == null)
           Wrap(
             spacing: 8,
@@ -186,11 +216,27 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
         if (_result case Failure<List<FriendActivityItem>>(:final failure))
           Semantics(liveRegion: true, child: Text(failure.message)),
         if (_result case Success<List<FriendActivityItem>>(:final value)) ...[
-          if (value.isEmpty) const Text('No friends activity to show.'),
+          if (value.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'No friends activity to show.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
           for (final item in value)
-            Card(
+            DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                ),
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -308,32 +354,6 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
               ),
             ),
         ],
-        Wrap(
-          spacing: 8,
-          children: [
-            OutlinedButton(
-              onPressed: _busy ? null : _load,
-              child: const Text('Reload activity'),
-            ),
-            if (widget.home && widget.onSeeAll != null)
-              TextButton(
-                onPressed: () async {
-                  if (!_valid(renderedEpoch, renderedSession)) return;
-                  _epoch++;
-                  setState(() => _result = null);
-                  await widget.onSeeAll!();
-                  if (mounted &&
-                      identical(
-                        renderedSession,
-                        ref.read(authSessionProvider).asData?.value,
-                      )) {
-                    await _load();
-                  }
-                },
-                child: const Text('See all activity'),
-              ),
-          ],
-        ),
       ],
     );
   }
@@ -371,17 +391,28 @@ final class FriendActivityContent extends StatelessWidget {
         item.displayName ?? item.username,
         style: Theme.of(context).textTheme.titleMedium,
       ),
-      Text('@${item.username}'),
-      Text(item.type.label),
+      Text(
+        '@${item.username} · ${item.type.label}',
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
       const SizedBox(height: 4),
       Text(
         localTimeLabel(context, item.occurredAt),
         style: Theme.of(context).textTheme.bodySmall,
       ),
       const SizedBox(height: 8),
-      if (item.eventTitle case final title?) Text(title),
-      if (item.note case final note?) Text(note),
-      if (item.mood case final mood?) Text('Mood at this Check-in: $mood'),
+      if (item.eventTitle case final title?)
+        Text(title, style: Theme.of(context).textTheme.titleMedium),
+      if (item.note case final note?)
+        Text(note, style: Theme.of(context).textTheme.bodyLarge),
+      if (item.mood case final mood?)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            'Mood at this Check-in: $mood',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
     ],
   );
 }

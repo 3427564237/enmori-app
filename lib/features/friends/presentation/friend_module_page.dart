@@ -7,6 +7,7 @@ import 'friend_page.dart';
 import 'my_friends_page.dart';
 import 'social_profile_page.dart';
 import 'friend_discovery_panel.dart';
+import 'friend_discovery_controller.dart';
 import 'friend_activity_panel.dart';
 
 /// Single JIN module builder; LI's existing authenticated router opens this page.
@@ -99,45 +100,56 @@ final class FriendModulePage extends ConsumerWidget {
         ),
       ),
     );
+    final pending = ref
+        .watch(friendDiscoveryControllerProvider(true))
+        .pendingCount;
     return Scaffold(
       appBar: AppBar(title: const Text('Friends')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.people_outline),
-                    title: const Text('My Friends'),
-                    subtitle: const Text(
-                      'Your connections and Special Care friends',
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => Navigator.of(context).push<void>(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            MyFriendsListPage(onOpenFriend: profile),
-                      ),
+            Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.people_outline),
+                  title: const Text('My Friends'),
+                  contentPadding: EdgeInsets.zero,
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => MyFriendsListPage(onOpenFriend: profile),
                     ),
                   ),
-                  const Divider(height: 1, indent: 56),
-                  ListTile(
-                    leading: const Icon(Icons.person_add_alt),
-                    title: const Text('Find people and requests'),
-                    subtitle: const Text(
-                      'Search by username or respond to a request',
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: requests,
+                ),
+                const Divider(height: 1, indent: 56),
+                ListTile(
+                  leading: const Icon(Icons.person_add_alt),
+                  title: const Text('Find people'),
+                  contentPadding: EdgeInsets.zero,
+                  subtitle: const Text('Search and friend requests'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (pending != null && pending > 0) ...[
+                        Semantics(
+                          label: '$pending friend requests',
+                          child: ExcludeSemantics(
+                            child: Badge(label: Text('$pending')),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      const Icon(Icons.chevron_right),
+                    ],
                   ),
-                ],
-              ),
+                  onTap: requests,
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
+            const Divider(height: 32),
             discovery(true),
-            const SizedBox(height: 24),
+            const Divider(height: 32),
             FriendActivityPanel(
               onOpenEvent: onOpenEvent,
               home: true,

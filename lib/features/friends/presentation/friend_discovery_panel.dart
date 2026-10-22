@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/section_heading.dart';
 import 'friend_discovery_controller.dart';
 import '../../auth/auth_providers.dart';
 import 'friend_ignore_controller.dart';
@@ -96,12 +97,58 @@ final class _FriendDiscoveryPanelState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'People You May Want To Know',
-          style: Theme.of(context).textTheme.titleLarge,
+        SectionHeading(
+          title: 'People to know',
+          actions: [
+            if (widget.home &&
+                widget.onSeeAll != null &&
+                state.suggestions.isNotEmpty)
+              TextButton(
+                onPressed: () => _open(widget.onSeeAll!),
+                child: const Text('See all'),
+              ),
+            IconButton(
+              tooltip: 'Reload recommendations',
+              onPressed: state.busy || locked ? null : controller.load,
+              icon: const Icon(Icons.refresh),
+            ),
+            PopupMenuButton<String>(
+              tooltip: 'Recommendation options',
+              onSelected: (action) => _open(
+                action == 'requests'
+                    ? widget.onOpenRequests
+                    : () => Navigator.of(context).push<void>(
+                        MaterialPageRoute(
+                          builder: (_) => const IgnoredPeoplePage(),
+                        ),
+                      ),
+              ),
+              itemBuilder: (_) => [
+                const PopupMenuItem(
+                  value: 'ignored',
+                  child: Text('Ignored people'),
+                ),
+                PopupMenuItem(
+                  value: 'requests',
+                  child: Text(
+                    state.pendingCount == null
+                        ? 'Friend requests'
+                        : 'Friend requests (${state.pendingCount})',
+                  ),
+                ),
+                if (state.countFailure != null)
+                  const PopupMenuItem(
+                    enabled: false,
+                    child: Text(
+                      'Request count is unavailable. Open requests to check.',
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
         if (state.busy)
-          Semantics(liveRegion: true, child: const Text('Loading friends…')),
+          const LinearProgressIndicator(semanticsLabel: 'Loading friends'),
         if (state.failure case final failure?)
           Semantics(liveRegion: true, child: Text(failure.message)),
         if (preference.busy)
@@ -120,123 +167,114 @@ final class _FriendDiscoveryPanelState
             child: const Text('Read current state'),
           ),
         ],
-        if (state.loaded && state.suggestions.isEmpty) ...[
-          const Text('No friend recommendations right now'),
-          const Text('Try searching for people or check again later.'),
-        ],
-        for (final person in state.suggestions)
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    person.displayName ?? person.username,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Text('@${person.username}'),
-                  Text(person.reason),
-                  if (person.sharedInterests.isNotEmpty)
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        for (final name in person.sharedInterests)
-                          Chip(label: Text(name)),
-                      ],
-                    ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
+        if (state.loaded && state.suggestions.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.people_outline,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextButton(
-                        onPressed: () =>
-                            _open(() => widget.onOpenProfile(person.username)),
-                        child: const Text('View Profile'),
+                      const Text('No friend recommendations right now'),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Find someone you know to get started.',
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                       TextButton(
-                        onPressed: locked
-                            ? null
-                            : () async {
-                                final undo = await preferences.ignore(
-                                  person.username,
-                                  person.ignoreVersion,
-                                  expectedEpoch: renderedEpoch,
-                                );
-                                if (!mounted ||
-                                    !context.mounted ||
-                                    undo == null ||
-                                    !preferences.canUndo(undo)) {
-                                  return;
-                                }
-                                _closeSnack();
-                                final snack = ScaffoldMessenger.of(context)
-                                    .showSnackBar(
-                                      SnackBar(
-                                        // Keep the normal SnackBar duration, while
-                                        // accessible navigation retains the action.
-                                        persist:
-                                            MediaQuery.accessibleNavigationOf(
-                                              context,
-                                            ),
-                                        content: const Text(
-                                          'Recommendation ignored',
-                                        ),
-                                        action: SnackBarAction(
-                                          label: 'Undo',
-                                          onPressed: () {
-                                            if (mounted) preferences.undo(undo);
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                _snack = snack;
-                                snack.closed.then((_) {
-                                  if (identical(_snack, snack)) _snack = null;
-                                });
-                              },
-                        child: Text('Ignore @${person.username}'),
+                        onPressed: () => _open(widget.onOpenRequests),
+                        child: const Text('Find people'),
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-          ),
-        Wrap(
-          spacing: 8,
-          children: [
-            OutlinedButton(
-              onPressed: state.busy || locked ? null : controller.load,
-              child: const Text('Reload'),
-            ),
-            if (widget.home && widget.onSeeAll != null)
-              TextButton(
-                onPressed: () => _open(widget.onSeeAll!),
-                child: const Text('See all'),
-              ),
-            TextButton(
-              onPressed: () => _open(
-                () => Navigator.of(context).push<void>(
-                  MaterialPageRoute(builder: (_) => const IgnoredPeoplePage()),
                 ),
-              ),
-              child: const Text('Ignored people'),
+              ],
             ),
-          ],
-        ),
-        OutlinedButton.icon(
-          icon: const Icon(Icons.person_add_alt),
-          onPressed: () => _open(widget.onOpenRequests),
-          label: Text(
-            state.pendingCount == null
-                ? 'Friend requests'
-                : 'Friend requests (${state.pendingCount})',
           ),
-        ),
-        if (state.countFailure != null)
-          const Text('Request count is unavailable. Open requests to check.'),
+        for (final person in state.suggestions)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const CircleAvatar(
+                      child: Icon(Icons.person_outline),
+                    ),
+                    title: Text(person.displayName ?? person.username),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '@${person.username}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(person.reason),
+                        if (person.sharedInterests.isNotEmpty)
+                          Text(
+                            person.sharedInterests.join(' · '),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                      ],
+                    ),
+                    onTap: () =>
+                        _open(() => widget.onOpenProfile(person.username)),
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Ignore @${person.username}',
+                  icon: const Icon(Icons.person_remove_outlined),
+                  onPressed: locked
+                      ? null
+                      : () async {
+                          final undo = await preferences.ignore(
+                            person.username,
+                            person.ignoreVersion,
+                            expectedEpoch: renderedEpoch,
+                          );
+                          if (!mounted ||
+                              !context.mounted ||
+                              undo == null ||
+                              !preferences.canUndo(undo)) {
+                            return;
+                          }
+                          _closeSnack();
+                          final snack = ScaffoldMessenger.of(context)
+                              .showSnackBar(
+                                SnackBar(
+                                  // Keep the normal SnackBar duration, while
+                                  // accessible navigation retains the action.
+                                  persist: MediaQuery.accessibleNavigationOf(
+                                    context,
+                                  ),
+                                  content: const Text('Recommendation ignored'),
+                                  action: SnackBarAction(
+                                    label: 'Undo',
+                                    onPressed: () {
+                                      if (mounted) preferences.undo(undo);
+                                    },
+                                  ),
+                                ),
+                              );
+                          _snack = snack;
+                          snack.closed.then((_) {
+                            if (identical(_snack, snack)) _snack = null;
+                          });
+                        },
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }

@@ -59,8 +59,8 @@ void main() {
             f.container.read(friendIgnoreControllerProvider);
           });
         }
-        await tester.ensureVisible(find.text('Ignore @alpha'));
-        await tester.tap(find.text('Ignore @alpha'));
+        await tester.ensureVisible(find.byTooltip('Ignore @alpha'));
+        await tester.tap(find.byTooltip('Ignore @alpha'));
         await tester.runAsync(() => Future<void>.delayed(Duration.zero));
         expect(f.repo.writes, replacement ? 0 : 1);
         await tester.pumpWidget(const SizedBox());

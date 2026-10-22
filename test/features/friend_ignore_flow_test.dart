@@ -153,6 +153,56 @@ setup([IgnoreFake? existing]) async {
 }
 
 void main() {
+  testWidgets(
+    'empty recommendations stay light at 320dp and 2x text with management reachable',
+    (tester) async {
+      final f = await setup(IgnoreFake()..rows.clear());
+      var requests = 0;
+      tester.view.physicalSize = const Size(320, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: f.container,
+          child: MaterialApp(
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: const TextScaler.linear(2)),
+              child: child!,
+            ),
+            home: Scaffold(
+              body: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: FriendDiscoveryPanel(
+                  onOpenProfile: (_) async {},
+                  onOpenRequests: () async {
+                    requests++;
+                  },
+                  onSeeAll: () async {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('See all'), findsNothing);
+      expect(find.text('Friend requests (0)'), findsNothing);
+      expect(find.byType(Card), findsNothing);
+      expect(find.byType(OutlinedButton), findsNothing);
+      await tester.ensureVisible(find.text('Find people'));
+      await tester.tap(find.text('Find people'));
+      await tester.pumpAndSettle();
+      expect(requests, 1);
+      await tester.ensureVisible(find.byTooltip('Recommendation options'));
+      await tester.tap(find.byTooltip('Recommendation options'));
+      await tester.pumpAndSettle();
+      expect(find.text('Ignored people'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   test('confirmed ignore invalidates both slices; Undo and management restore share persisted versioned operation', () async {
     final f = await setup();
     for (final home in [true, false]) {
@@ -471,18 +521,20 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Ignore @alpha'));
+      await tester.tap(find.byTooltip('Ignore @alpha'));
       await tester.pumpAndSettle();
       expect(find.text('Recommendation ignored'), findsOneWidget);
       expect(find.text('Undo'), findsOneWidget);
       await tester.tap(find.text('Undo'));
       await tester.pumpAndSettle();
       expect(f.repo.rows['alpha']!.ignored, isFalse);
-      await tester.tap(find.text('Ignore @alpha'));
+      await tester.tap(find.byTooltip('Ignore @alpha'));
       await tester.pumpAndSettle();
       await tester.pump(const Duration(seconds: 5));
       await tester.pumpAndSettle();
       expect(find.text('Undo'), findsNothing);
+      await tester.tap(find.byTooltip('Recommendation options'));
+      await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('Ignored people'));
       await tester.tap(find.text('Ignored people'));
       await tester.pumpAndSettle();
@@ -492,7 +544,7 @@ void main() {
       expect(f.repo.rows['alpha']!.ignored, isFalse);
       await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(find.text('Ignore @alpha'), findsOneWidget);
+      expect(find.byTooltip('Ignore @alpha'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
@@ -517,16 +569,20 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Ignore @alpha'));
+      await tester.tap(find.byTooltip('Ignore @alpha'));
       await tester.pumpAndSettle();
       expect(find.text('Undo'), findsNothing);
       expect(find.text('Read current state'), findsOneWidget);
+      await tester.tap(find.byTooltip('Recommendation options'));
+      await tester.pumpAndSettle();
       expect(find.text('Ignored people'), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Read current state'));
       await tester.pumpAndSettle();
       expect(f.repo.writes, 1);
       f.repo.loseWriteResponse = false;
-      await tester.tap(find.text('Ignore @bravo'));
+      await tester.tap(find.byTooltip('Ignore @bravo'));
       await tester.pumpAndSettle();
       expect(find.text('Undo'), findsOneWidget);
       f.auth.emit(AuthSessionAuthenticated(subject: 'owner'));
