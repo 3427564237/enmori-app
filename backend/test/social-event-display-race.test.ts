@@ -69,8 +69,8 @@ for(const removal of ['privacy','deleted','cancelled','changed-selection'] as co
   });
 }
 
-for(const invalidate of ['disable','page-zero','page-one'] as const){
-  test(`actual Friend Activity HTTP returns unavailable, never false empty after ${invalidate}`,async t=>{
+for(const invalidate of ['none','disable','page-zero','page-one'] as const){
+  test(`actual Friend Activity HTTP preserves canonical later-page content or reports source loss: ${invalidate}`,async t=>{
     const f=await fixture();
     const gateway:FirestoreGateway={runTransaction:work=>f.db.runTransaction(tx=>work(f.wrap(tx)))};
     const app=Fastify();t.after(()=>app.close());
@@ -83,7 +83,14 @@ for(const invalidate of ['disable','page-zero','page-one'] as const){
     if(invalidate==='page-zero')await f.gate.source.batch!(at,0,signal());
     if(invalidate==='page-one'){f.replace();await f.gate.source.batch!(at,1,signal());}
     f.release.resolve();const result=await response;
-    assert.equal(result.statusCode,503);assert.equal(result.json().error.code,'SERVICE_UNAVAILABLE');
+    if(invalidate==='none'){
+      assert.equal(result.statusCode,200,result.body);
+      assert.equal(result.json().activities.length,1);
+      assert.deepEqual(result.json().activities[0].event,{eventId:f.event,title:'later'});
+      assert.equal(result.json().activities[0].occurredAt,at);
+    }else{
+      assert.equal(result.statusCode,503);assert.equal(result.json().error.code,'SERVICE_UNAVAILABLE');
+    }
     assert.equal(result.headers['cache-control'],'no-store');assert.equal(f.gate.observation().pending,0);f.gate.disable();
   });
 }
