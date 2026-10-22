@@ -1,6 +1,6 @@
 # ZHOU independent source-boundary review — SHI #170
 
-22 October 2026, Asia/Shanghai. Conclusion: **changes required for one confirmed P2**.
+Historical review of `b39ec5e`, 22 October 2026, Asia/Shanghai: **changes required for one confirmed P2**. The subsequent exact-head repair review is [approved at ba53347](p2-recheck.md); the original failures and disposition below remain preserved.
 
 ## Reviewed source and authority
 

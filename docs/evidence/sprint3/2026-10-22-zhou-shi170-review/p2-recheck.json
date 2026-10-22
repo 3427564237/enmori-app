@@ -1,0 +1,191 @@
+{
+  "date": "2026-10-22",
+  "timezone": "Asia/Shanghai",
+  "originalReviewHead": "b39ec5e19cc462fc0f588480044766b249fc6104",
+  "head": "ba533475ead63e0e7a3e5f39c1ad12df4c5a8fc2",
+  "product": "8f821f9b67087610ee2e7976c5c898d778deef65",
+  "productTree": "b1cefde5f96fab013facbc23c06f9dc83b49fb7e",
+  "repair": [
+    {
+      "path": "backend/src/bootstrap/social-event-source.ts",
+      "blob": "097c90a1c7dba57da8e1e993b509889a8accf83b"
+    },
+    {
+      "path": "backend/test/social-event-display-race.test.ts",
+      "blob": "5c5da90da2ac084b07b9b3e9e4009b4d828be1f0"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-22-shi170-display-race-revision.md",
+      "blob": "21be2a93c22db0f3353e47bfb239ee143c349538"
+    }
+  ],
+  "strictCompile": {
+    "command": "node node_modules/typescript/bin/tsc --project backend/tsconfig.json --pretty false",
+    "exitCode": 0,
+    "stdout": "empty; no compile log generated"
+  },
+  "checks": [
+    {
+      "command": "node --test backend/dist/test/social-event-display-race.test.js backend/dist/test/social-event-source.test.js backend/dist/test/friend-activity.test.js backend/dist/test/friend-activity-display.test.js",
+      "pass": 36,
+      "fail": 0,
+      "skip": 0,
+      "cancel": 0,
+      "exitCode": 0,
+      "log": "build/zhou-170-p2-recheck-36.log"
+    },
+    {
+      "command": "node --test --test-reporter=tap build/zhou_pr170_producer_race_probe.mjs",
+      "pass": 5,
+      "fail": 0,
+      "skip": 0,
+      "cancel": 0,
+      "exitCode": 0,
+      "log": "build/zhou-170-p2-original-probe-recheck.log",
+      "originalProbe": "build/zhou_pr170_producer_race_probe.mjs",
+      "originalProbeSHA256": "339884ab9129bc3da63aa286c7e6f4b4d20b86fbf550c3d2bdfc25daae00a53c",
+      "unchangedProbeExpectedSHA256": "339884ab9129bc3da63aa286c7e6f4b4d20b86fbf550c3d2bdfc25daae00a53c",
+      "sameThreePriorFailures": true
+    }
+  ],
+  "logs": [
+    {
+      "path": "build/zhou-170-p2-recheck-36.log",
+      "sha256": "e42051dce114ebd71d8f724e240d04a92b6dad682b6887cc375ff0702ab5af3c"
+    },
+    {
+      "path": "build/zhou-170-p2-original-probe-recheck.log",
+      "sha256": "8a2bf2cdd9c4d68337a118c36946261feeaaaeaa5d462dc85906aa828802fc69"
+    }
+  ],
+  "unaffected83NotRerun": true,
+  "noLaterProductEdits": true,
+  "disposition": {
+    "review": 5613539307,
+    "state": "APPROVED",
+    "thread": "PRRT_kwDOUMZtlc6vFsYv",
+    "resolvedBy": "YaoyinZhou3922",
+    "reply": 4347839530
+  },
+  "idCompatibility": {
+    "jinHead": "6050aa68887f5c7794b65d8f178d49f009892546",
+    "jinProduct": "bbf3ce3e69dc762d1739db510497af33dfff5d9f",
+    "duApproval": 5613395493,
+    "liHead": "724fe7a68add709681bbbd1763cdc4b8c20a2686",
+    "liTested": "9b9c4e9a58a009b7c0ed411732bae5650927e681",
+    "liSourceEqualsJin": [
+      {
+        "path": "backend/src/friend-activity/infrastructure/firestore-friend-activity.ts",
+        "jinBlob": "7c3ef6934b0328d2921871ac0a763337b7b9be70",
+        "liBlob": "7c3ef6934b0328d2921871ac0a763337b7b9be70",
+        "identical": true
+      },
+      {
+        "path": "backend/src/friend-activity/transport/friend-activity-route.ts",
+        "jinBlob": "127489f3725f6e53502e07d0ac010a530186ba69",
+        "liBlob": "127489f3725f6e53502e07d0ac010a530186ba69",
+        "identical": true
+      },
+      {
+        "path": "lib/features/friends/data/backend_friend_activity_repository.dart",
+        "jinBlob": "c801f4bb6e56a17a44efb14c29ca878e0eb3c1c3",
+        "liBlob": "c801f4bb6e56a17a44efb14c29ca878e0eb3c1c3",
+        "identical": true
+      }
+    ],
+    "liProducerEqualsShi": {
+      "path": "backend/src/bootstrap/social-event-source.ts",
+      "shiBlob": "097c90a1c7dba57da8e1e993b509889a8accf83b",
+      "liBlob": "097c90a1c7dba57da8e1e993b509889a8accf83b"
+    },
+    "existingCombinedProof": "LI Backend37/37 + Flutter24/24 including positive later-page canonical actual HTTP, not rerun byZHOU"
+  },
+  "bootstrap": {
+    "originalPMComment": 6306898040,
+    "reviewHead": "724fe7a68add709681bbbd1763cdc4b8c20a2686",
+    "reviewAction": "COMMENT",
+    "reviewId": 5613582549,
+    "sourceOnly": true,
+    "seams": [
+      {
+        "path": "backend/src/bootstrap/build-app.ts",
+        "headBlob": "be648c1e97f6c7b371680d29b72a85f0f8c22d3b",
+        "testedBlob": "be648c1e97f6c7b371680d29b72a85f0f8c22d3b",
+        "identical": true
+      },
+      {
+        "path": "backend/src/bootstrap/retained-core-runtime.ts",
+        "headBlob": "ddad46f86401b67d6e493a40b29d2032f1a68de2",
+        "testedBlob": "ddad46f86401b67d6e493a40b29d2032f1a68de2",
+        "identical": true
+      },
+      {
+        "path": "backend/src/bootstrap/controlled-event-browse.ts",
+        "headBlob": "6852b880318db70d6a97c8033a1e3967712f6e8e",
+        "testedBlob": "6852b880318db70d6a97c8033a1e3967712f6e8e",
+        "identical": true
+      },
+      {
+        "path": "backend/src/bootstrap/controlled-event-recommendations.ts",
+        "headBlob": "3be140d620ac755747c6b8018ef114112e8456a1",
+        "testedBlob": "3be140d620ac755747c6b8018ef114112e8456a1",
+        "identical": true
+      },
+      {
+        "path": "backend/src/bootstrap/event-participation.ts",
+        "headBlob": "a5bab1dc3037c54eb063cdb64605758350403932",
+        "testedBlob": "a5bab1dc3037c54eb063cdb64605758350403932",
+        "identical": true
+      },
+      {
+        "path": "backend/src/shared/infrastructure/firebase/feature-environment.ts",
+        "headBlob": "8573efd1904cc066ed576c03b9544eb213ec47dd",
+        "testedBlob": "8573efd1904cc066ed576c03b9544eb213ec47dd",
+        "identical": true
+      },
+      {
+        "path": "backend/src/shared/infrastructure/firebase/controlled-emulator-environment.ts",
+        "headBlob": "5073f0d591e3d222deb69e6708a9c736ee4c4891",
+        "testedBlob": "5073f0d591e3d222deb69e6708a9c736ee4c4891",
+        "identical": true
+      }
+    ],
+    "noIndependentNewExecution": true,
+    "noBlanketPRApproval": true,
+    "noSelfApprovalOfAdmin": true
+  },
+  "admin": {
+    "head": "2252a44b9a30b821075859eefd7990f34a28b031",
+    "product": "4fcd09f45cfcfb81e87233cd383f1f80149046f6",
+    "jinApproval": 5612007775,
+    "liApproval": 5612750586,
+    "descriptionReconciledOnly": true
+  },
+  "remainingAssignmentAudit": {
+    "activeFormalRequestAtStart": [
+      170
+    ],
+    "openAssignedIssues": [
+      83,
+      78,
+      68,
+      63
+    ],
+    "newConcreteZhouImplementationFound": false,
+    "oldAcceptedScopesNotRepeated": true,
+    "realAdminHostDeviceRemainLI": true
+  },
+  "notRun": [
+    "unaffected complete suites",
+    "actual Emulator",
+    "provider",
+    "model",
+    "Flutter",
+    "real Admin/account/catalogue write",
+    "private host/restart",
+    "APK",
+    "device"
+  ],
+  "noMainMerge": true,
+  "noTaskOrBoardTransition": true
+}
