@@ -67,8 +67,8 @@ def main():
         raise ValueError('Unexpected account runtime target')
     lock_path = root / 'real-account.lock'
     if args.action == 'start':
-        if lock_path.exists():
-            raise ValueError('Runtime lock exists; inspect status, do not delete or start a duplicate')
+        # The Node runner owns the atomic lock check/acquisition, including
+        # proven prior-boot recovery. Do not delete or pre-approve a lock here.
         for name in ['FIREBASE_AUTH_EMULATOR_HOST', 'FIRESTORE_EMULATOR_HOST']:
             if name in os.environ:
                 raise ValueError('Emulator environment is forbidden')
