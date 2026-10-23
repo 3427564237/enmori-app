@@ -2,7 +2,7 @@ import { retainedCoreEvents } from './retained_core_events.mjs';
 import { createRemoteGroupRuntime, closeControlledRuntime as closeRemoteRuntime } from '../backend/dist/src/bootstrap/retained-core-runtime.js';
 /** Existing real Firebase composition behind the established localhost TLS edge. */
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, unlinkSync, lstatSync, realpathSync } from 'node:fs';
+import { readFileSync, writeFileSync, lstatSync, realpathSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { createServer } from 'node:https';
 import { createServer as createHttpServer } from 'node:http';
@@ -11,6 +11,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { createControlledRuntime, closeControlledRuntime } from '../backend/dist/src/bootstrap/controlled-runtime.js';
 import { createAuthBindingDocumentId, FIRESTORE_COLLECTIONS } from '../backend/dist/src/shared/infrastructure/firebase/firestore-records.js';
+import { acquireRealAccountLock } from './real_account_lock.mjs';
 
 const configPath = resolve(process.argv[2] ?? '');
 const directory = dirname(configPath);
@@ -21,8 +22,7 @@ function privateOwned(path, directory = false) {
   assert.equal(stat.mode & 0o077, 0, 'Private owner-only configuration required');
   assert.equal(realpathSync(path), path);
 }
-let runtime, server, remoteServer, fullFeatures = false, lockOwned = false;
-const lock = join(directory, 'real-account.lock');
+let runtime, server, remoteServer, fullFeatures = false, ownership;
 const statePath = join(directory, 'real-account-status.json');
 const publish = (state) => writeFileSync(statePath, JSON.stringify({ ...state, checkedAt: new Date().toISOString() }), { mode: 0o600 });
 try {
@@ -40,10 +40,7 @@ try {
   const parsed = new X509Certificate(certificate);
   assert.equal(parsed.checkIP(config.host), config.host);
   assert(Date.parse(parsed.validFrom) <= Date.now() && Date.parse(parsed.validTo) > Date.now());
-  writeFileSync(lock, JSON.stringify({ pid: process.pid,
-    startTicks: readFileSync(`/proc/${process.pid}/stat`, 'utf8').split(') ').at(-1).split(' ')[19],
-    bootId: readFileSync('/proc/sys/kernel/random/boot_id', 'utf8').trim() }), { flag: 'wx', mode: 0o600 });
-  lockOwned = true;
+  ownership = acquireRealAccountLock(directory);
   publish({ phase: 'starting', ready: false });
   fullFeatures = config.fullFeatures === true;
   const events = retainedCoreEvents(config.eventDirectory ?? directory, fullFeatures,
@@ -108,7 +105,7 @@ try {
   });
   publish({ phase: 'stopping', ready: false });
 } catch (_) {
-  if (lockOwned) publish({ phase: 'failed', ready: false });
+  if (ownership) publish({ phase: 'failed', ready: false });
   console.error('Real account service unavailable; inspect private configuration and access.');
   process.exitCode = 1;
 } finally {
@@ -117,8 +114,9 @@ try {
     if (server?.listening) await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
     if (runtime) await (fullFeatures ? closeRemoteRuntime(runtime) : closeControlledRuntime(runtime));
   } catch (_) { process.exitCode = 1; }
-  if (lockOwned) {
+  if (ownership) {
     publish({ phase: process.exitCode ? 'failed' : 'stopped', ready: false });
-    unlinkSync(lock);
+    try { ownership.release(); }
+    catch { process.exitCode = 1; console.error('Runtime lock changed; preserved for inspection.'); }
   }
 }
