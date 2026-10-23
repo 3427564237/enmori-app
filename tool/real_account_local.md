@@ -19,7 +19,13 @@ python3 tool/real_account_local.py status
 python3 tool/real_account_local.py stop
 ```
 
-真实 Firestore 为服务端保存业务数据，停止本机服务不会触发清库或导出覆盖。工具只操作带有本工具标识、相同 PID/start ticks/boot ID 的进程；遇到旧锁先诊断，不能随意删除锁或 kill 其他进程。
+真实 Firestore 为服务端保存业务数据，停止本机服务不会触发清库或导出覆盖。停止操作只向带有本工具标识、相同 PID/start ticks/boot ID 的进程发送信号。
+
+启动时 Node runner 是唯一的锁获取入口（Python start 与现有 systemd ExecStart 共用）。有效、0600、本人所有的普通锁文件只有在 boot ID 与当前 Linux 开机周期不同时才可自动恢复；同期开机的死进程、PID 复用、未知格式、不安全权限及链接仍拒绝启动，留给操作员核验。不存在自动重发 AI、重置数据或修改服务配置。
+
+跨开机恢复使用一次性原子硬链接 `real-account.lock.recovered-<old-boot-id>` 保留原来的 PID/start ticks/boot ID；同一旧开机周期只有一个恢复者。该文件是进程元数据证据，不是运行锁，不自动清除。恢复中断、标记冲突或主锁发生变化时停止恢复并保留证据；不要删除标记来反复尝试。新主锁仍以独占方式创建，退出时只移除本实例持有且未变化的锁。此机制仅适用于当前受控 Linux 本地文件系统，不扩大到共享网络文件系统或 retained Emulator 启动器。
+
+Python start 的 `starting` 只表示已启动 runner 子进程；继续以 status 的身份门和 ready 判断服务是否可用。代码交付本身不切换共享运行环境；由 Integration 安排授权的候选切换与启动/回读验收。
 
 APK 构建使用私有 account-dart-defines.json：
 
