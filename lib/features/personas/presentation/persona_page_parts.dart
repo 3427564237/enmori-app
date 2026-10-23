@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/result/result.dart';
 import '../domain/persona.dart';
+import 'persona_copy.dart';
 import '../domain/persona_session.dart';
 
 /// Common chrome for the approved isolated Persona surfaces. Navigation stays
@@ -58,8 +60,10 @@ final class PersonaLoading extends StatelessWidget {
   const PersonaLoading({super.key});
 
   @override
-  Widget build(BuildContext context) => const Center(
-    child: CircularProgressIndicator(semanticsLabel: 'Loading Personas'),
+  Widget build(BuildContext context) => Center(
+    child: CircularProgressIndicator(
+      semanticsLabel: context.tr('Loading Personas', '正在加载人设'),
+    ),
   );
 }
 
@@ -97,7 +101,7 @@ final class PersonaStatusPanel extends StatelessWidget {
               Semantics(
                 liveRegion: true,
                 child: Text(
-                  message,
+                  personaStatusCopy(context, message),
                   key: Key(
                     message == 'Your change was saved.'
                         ? 'persona-saved'
@@ -107,8 +111,8 @@ final class PersonaStatusPanel extends StatelessWidget {
               ),
             if (state.isBusy) ...[
               const SizedBox(height: 16),
-              const LinearProgressIndicator(
-                semanticsLabel: 'Saving Persona change',
+              LinearProgressIndicator(
+                semanticsLabel: context.tr('Saving Persona change', '正在保存人设修改'),
               ),
             ],
             if (!state.isBusy &&
@@ -124,13 +128,13 @@ final class PersonaStatusPanel extends StatelessWidget {
                         onBack != null)
                       TextButton(
                         onPressed: onBack,
-                        child: const Text('Back to Personas'),
+                        child: Text(context.tr('Back to Personas', '返回人设')),
                       ),
                     if (pending?.canRetry ?? false)
                       FilledButton(
                         key: const Key('persona-retry-create'),
                         onPressed: state.isLoading ? null : onRetryCreate,
-                        child: const Text('Retry same request'),
+                        child: Text(context.tr('Retry same request', '重试同一请求')),
                       ),
                     OutlinedButton(
                       key: Key(
@@ -139,10 +143,10 @@ final class PersonaStatusPanel extends StatelessWidget {
                       onPressed: state.isLoading ? null : onReload,
                       child: Text(
                         initialFailure
-                            ? 'Retry'
+                            ? context.tr('Retry', '重试')
                             : pending != null
-                            ? 'Reload Personas'
-                            : 'Reload',
+                            ? context.tr('Reload Personas', '重新加载人设')
+                            : context.tr('Reload', '重新加载'),
                       ),
                     ),
                   ],
@@ -150,36 +154,42 @@ final class PersonaStatusPanel extends StatelessWidget {
               ),
             if (pending?.canEnd ?? false) ...[
               const SizedBox(height: 16),
-              const Text(
-                'Review your saved Personas. Ending this request does not mean it failed.',
+              Text(
+                context.tr(
+                  'Review your saved Personas. Ending this request does not mean it failed.',
+                  '请核对已保存的人设。结束此请求不代表它已经失败。',
+                ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Current saved Personas',
+              Text(
+                context.tr('Current saved Personas', '当前已保存的人设'),
                 key: Key('persona-reconciled-set'),
               ),
               const SizedBox(height: 8),
               if (state.collection?.items.isEmpty ?? true)
-                const Text('You have no Personas yet.')
+                Text(context.tr('You have no Personas yet.', '你还没有人设。'))
               else
                 for (final persona in state.collection!.items) ...[
                   PersonaSummary(persona: persona),
                   Text(
                     state.collection!.activePersonaId == persona.personaId
-                        ? 'Active'
-                        : 'Inactive',
+                        ? context.tr('Active', '已启用')
+                        : context.tr('Inactive', '未启用'),
                   ),
                   const SizedBox(height: 8),
                 ],
               if (state.collection?.activePersonaId == null)
-                const Text(
-                  'No Persona is active. Future AI requests use default presentation until you activate one.',
+                Text(
+                  context.tr(
+                    'No Persona is active. Future AI requests use default presentation until you activate one.',
+                    '尚未启用人设。后续 AI 回复将使用默认表达，直到你启用一个人设。',
+                  ),
                 ),
               const SizedBox(height: 8),
               OutlinedButton(
                 key: const Key('persona-end-create'),
                 onPressed: state.isBusy || state.isLoading ? null : onEndCreate,
-                child: const Text('End unresolved request'),
+                child: Text(context.tr('End unresolved request', '结束结果未确认的请求')),
               ),
             ],
           ],
@@ -203,14 +213,22 @@ final class PersonaSummary extends StatelessWidget {
         style: Theme.of(context).textTheme.titleLarge,
       ),
       const SizedBox(height: 8),
-      Text('Tone: ${persona.fields.tone.name}'),
-      Text('Response length: ${persona.fields.responseLength.name}'),
-      Text('Format: ${persona.fields.formatStyle.name}'),
+      Text(
+        '${context.tr('Tone', '语气')}: ${personaLabel(context, persona.fields.tone.name)}',
+      ),
+      Text(
+        '${context.tr('Response length', '回复长度')}: ${personaLabel(context, persona.fields.responseLength.name)}',
+      ),
+      Text(
+        '${context.tr('Format', '格式')}: ${personaLabel(context, persona.fields.formatStyle.name)}',
+      ),
       for (final entry in persona.fields.expressionFields.entries)
         if (entry.value.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Text('${_personaFieldLabels[entry.key]}: ${entry.value}'),
+            child: Text(
+              '${personaLabel(context, _personaFieldLabels[entry.key]!)}: ${entry.value}',
+            ),
           ),
     ],
   );
@@ -283,9 +301,12 @@ final class PersonaConfirmation {
 
   Future<bool> exit(BuildContext context) => action(
     context,
-    message: 'The request may still complete. Leave this screen?',
-    cancelLabel: 'Stay',
-    actionLabel: 'Leave',
+    message: context.tr(
+      'The request may still complete. Leave this screen?',
+      '请求仍有可能完成。要离开此页面吗？',
+    ),
+    cancelLabel: context.tr('Stay', '留在此页'),
+    actionLabel: context.tr('Leave', '离开'),
     actionKey: 'persona-confirm-leave',
   );
 

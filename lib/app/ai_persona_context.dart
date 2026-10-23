@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/presentation/enmori_localizations.dart';
 import '../features/personas/persona_providers.dart';
 
 /// App composition joins the public Persona state to the conversation drawer.
@@ -32,11 +33,17 @@ class _AiPersonaContextState extends ConsumerState<AiPersonaContext> {
       child: Text(
         active == null
             ? (state.isLoading
-                  ? 'Loading Persona…'
+                  ? context.tr('Loading Persona…', '正在加载人设…')
                   : collection == null
-                  ? 'Persona details unavailable'
-                  : 'No active Persona · default presentation')
-            : 'Active: ${active.fields.displayName}',
+                  ? context.tr('Persona details unavailable', '人设详情暂不可用')
+                  : context.tr(
+                      'No active Persona · default presentation',
+                      '未启用人设 · 使用默认表达',
+                    ))
+            : context.tr(
+                'Active: ${active.fields.displayName}',
+                '当前人设：${active.fields.displayName}',
+              ),
         style: Theme.of(context).textTheme.bodyMedium,
       ),
     );
