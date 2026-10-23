@@ -1,3 +1,4 @@
+import 'package:enmori/core/presentation/enmori_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -56,8 +57,13 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
       if (!mounted) return;
       if (next case CommandSucceeded<void>()) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Account request submitted. Waiting for session.'),
+          SnackBar(
+            content: Text(
+              context.tr(
+                'Account request submitted. Waiting for session.',
+                "账号请求已提交，正在等待登录状态。",
+              ),
+            ),
           ),
         );
       }
@@ -71,7 +77,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
         _confirmController.text.isNotEmpty ||
         _termsAccepted;
     final page = Scaffold(
-      appBar: AppBar(title: const Text('Create account')),
+      appBar: AppBar(title: Text(context.tr('Create account', "创建账号"))),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -84,11 +90,16 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Register for ENMORI',
+                    context.tr('Register for ENMORI', "注册 ENMORI"),
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
-                  const Text('Start with your email and a password.'),
+                  Text(
+                    context.tr(
+                      'Start with your email and a password.',
+                      "使用邮箱和密码开始。",
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   Form(
                     key: _formKey,
@@ -101,8 +112,8 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                           onChanged: (_) => setState(() {}),
                           focusNode: _emailFocusNode,
                           autofillHints: const [AutofillHints.email],
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
+                          decoration: InputDecoration(
+                            labelText: context.tr('Email', "邮箱"),
                             prefixIcon: Icon(Icons.mail_outline),
                           ),
                           keyboardType: TextInputType.emailAddress,
@@ -119,8 +130,8 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                           decoration: InputDecoration(
                             suffixIcon: IconButton(
                               tooltip: _showPassword
-                                  ? 'Hide password'
-                                  : 'Show password',
+                                  ? context.tr('Hide password', "隐藏密码")
+                                  : context.tr('Show password', "显示密码"),
                               onPressed: () => setState(
                                 () => _showPassword = !_showPassword,
                               ),
@@ -130,7 +141,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                                     : Icons.visibility,
                               ),
                             ),
-                            labelText: 'Password',
+                            labelText: context.tr('Password', "密码"),
                             prefixIcon: const Icon(Icons.lock_outline),
                           ),
                           obscureText: !_showPassword,
@@ -147,8 +158,8 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                           decoration: InputDecoration(
                             suffixIcon: IconButton(
                               tooltip: _showPassword
-                                  ? 'Hide password'
-                                  : 'Show password',
+                                  ? context.tr('Hide password', "隐藏密码")
+                                  : context.tr('Show password', "显示密码"),
                               onPressed: () => setState(
                                 () => _showPassword = !_showPassword,
                               ),
@@ -158,7 +169,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                                     : Icons.visibility,
                               ),
                             ),
-                            labelText: 'Confirm password',
+                            labelText: context.tr('Confirm password', "确认密码"),
                             prefixIcon: const Icon(Icons.lock_outline),
                           ),
                           obscureText: !_showPassword,
@@ -184,14 +195,25 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                               : (value) => setState(
                                   () => _termsAccepted = value ?? false,
                                 ),
-                          title: const Text('I agree to the terms of use'),
-                          subtitle: const Text(
-                            'This is separate from optional data use and sharing preferences.',
+                          title: Text(
+                            context.tr(
+                              'I agree to the terms of use',
+                              "我同意使用条款",
+                            ),
+                          ),
+                          subtitle: Text(
+                            context.tr(
+                              'This is separate from optional data use and sharing preferences.',
+                              "此项与可选数据使用及分享偏好相互独立。",
+                            ),
                           ),
                         ),
                         if (_submitted && !_termsAccepted)
-                          const Text(
-                            'Please accept the terms before creating an account.',
+                          Text(
+                            context.tr(
+                              'Please accept the terms before creating an account.',
+                              "创建账号前请先同意使用条款。",
+                            ),
                           ),
                         const SizedBox(height: 20),
                         FilledButton.icon(
@@ -206,7 +228,9 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                                 )
                               : const Icon(Icons.person_add),
                           label: Text(
-                            pending ? 'Creating account' : 'Create account',
+                            pending
+                                ? context.tr('Creating account', "正在创建账号")
+                                : context.tr('Create account', "创建账号"),
                           ),
                         ),
                         if (widget.onSignIn case final onSignIn?)
@@ -219,7 +243,7 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                                       if (mounted) onSignIn();
                                     }
                                   },
-                            child: const Text('Sign in'),
+                            child: Text(context.tr('Sign in', "登录")),
                           ),
                       ],
                     ),
@@ -253,16 +277,21 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
     final discard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Leave registration?'),
-        content: const Text('Your unsaved account details will be lost.'),
+        title: Text(context.tr('Leave registration?', "离开注册？")),
+        content: Text(
+          context.tr(
+            'Your unsaved account details will be lost.',
+            "未保存的账号信息将丢失。",
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Stay'),
+            child: Text(context.tr('Stay', "继续编辑")),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Discard details'),
+            child: Text(context.tr('Discard details', "放弃填写")),
           ),
         ],
       ),
@@ -274,19 +303,19 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
   List<_FieldError> get _fieldErrors => [
     if (_validateEmail(_emailController.text) != null)
       _FieldError(
-        'Email',
+        context.tr('Email', "邮箱"),
         _validateEmail(_emailController.text)!,
         _RegistrationField.email,
       ),
     if (_validatePassword(_passwordController.text) != null)
       _FieldError(
-        'Password',
+        context.tr('Password', "密码"),
         _validatePassword(_passwordController.text)!,
         _RegistrationField.password,
       ),
     if (_validateConfirmPassword(_confirmController.text) != null)
       _FieldError(
-        'Confirm password',
+        context.tr('Confirm password', "确认密码"),
         _validateConfirmPassword(_confirmController.text)!,
         _RegistrationField.confirmPassword,
       ),
@@ -316,18 +345,22 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
 
   String? _validateEmail(String? value) {
     final email = value?.trim() ?? '';
-    if (email.isEmpty || !email.contains('@')) return 'Enter a valid email.';
+    if (email.isEmpty || !email.contains('@')) {
+      return context.tr('Enter a valid email.', "请输入有效邮箱。");
+    }
     return null;
   }
 
   String? _validatePassword(String? value) {
-    if ((value ?? '').length < 8) return 'Use at least 8 characters.';
+    if ((value ?? '').length < 8) {
+      return context.tr('Use at least 8 characters.', "请至少使用 8 个字符。");
+    }
     return null;
   }
 
   String? _validateConfirmPassword(String? value) {
     if ((value ?? '').isEmpty || value != _passwordController.text) {
-      return 'Passwords must match.';
+      return context.tr('Passwords must match.', "两次输入的密码必须一致。");
     }
     return null;
   }
@@ -342,23 +375,41 @@ final class _FailureText extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme.error;
     return Text(
-      _publicFailureCopy(failure.kind),
+      _publicFailureCopy(context, failure.kind),
       key: const Key('r6-register-failure'),
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: color),
     );
   }
 
-  String _publicFailureCopy(AppFailureKind kind) => switch (kind) {
-    AppFailureKind.authenticationInvalid =>
+  String _publicFailureCopy(
+    BuildContext context,
+    AppFailureKind kind,
+  ) => switch (kind) {
+    AppFailureKind.authenticationInvalid => context.tr(
       'Enter valid account details and try again.',
-    AppFailureKind.accountAlreadyExists =>
+      "请输入有效账号信息后重试。",
+    ),
+    AppFailureKind.accountAlreadyExists => context.tr(
       'This email is already registered. Sign in instead or use another email.',
+      "此邮箱已注册，请直接登录或使用其他邮箱。",
+    ),
     AppFailureKind.serviceUnavailable ||
-    AppFailureKind.configurationUnavailable =>
+    AppFailureKind.configurationUnavailable => context.tr(
       'This service is temporarily unavailable. Try again.',
-    AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
-    AppFailureKind.authForbidden => 'This account cannot continue.',
-    _ => 'This service is temporarily unavailable. Try again.',
+      "服务暂时不可用，请重试。",
+    ),
+    AppFailureKind.authRequired => context.tr(
+      'Your session has expired. Sign in again.',
+      "登录已过期，请重新登录。",
+    ),
+    AppFailureKind.authForbidden => context.tr(
+      'This account cannot continue.',
+      "此账号暂时无法继续。",
+    ),
+    _ => context.tr(
+      'This service is temporarily unavailable. Try again.',
+      "服务暂时不可用，请重试。",
+    ),
   };
 }
 
@@ -381,7 +432,10 @@ final class _ValidationSummary extends StatelessWidget {
     return Semantics(
       container: true,
       liveRegion: true,
-      label: 'Review ${errors.length} fields before continuing.',
+      label: context.tr(
+        'Review ${errors.length} fields before continuing.',
+        '请先检查 ${errors.length} 项输入。',
+      ),
       child: DecoratedBox(
         key: const Key('sp01-register-error-summary'),
         decoration: BoxDecoration(
@@ -393,7 +447,12 @@ final class _ValidationSummary extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Review ${errors.length} fields before continuing.'),
+              Text(
+                context.tr(
+                  'Review ${errors.length} fields before continuing.',
+                  '请先检查 ${errors.length} 项输入。',
+                ),
+              ),
               for (final error in errors)
                 TextButton(
                   key: Key('sp01-register-error-${error.field.name}-link'),

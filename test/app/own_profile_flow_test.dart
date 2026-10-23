@@ -87,11 +87,17 @@ void main() {
   testWidgets('empty Profile supports saving zero interests', (tester) async {
     final harness = await _start(tester);
     await _openProfile(tester);
-    expect(find.text('No interests selected.'), findsOneWidget);
+    expect(
+      find.text('No interests selected. Add up to 10 things you enjoy.'),
+      findsOneWidget,
+    );
     await _openEditor(tester);
     await _tap(tester, find.byKey(const Key('interest-save')));
     await _tap(tester, find.byKey(const Key('interest-done')));
-    expect(find.text('No interests selected.'), findsOneWidget);
+    expect(
+      find.text('No interests selected. Add up to 10 things you enjoy.'),
+      findsOneWidget,
+    );
     expect(harness.interests.fake.savedIds, [<String>[]]);
     expect(harness.interests.fake.ownReads, 3);
   });
@@ -138,7 +144,10 @@ void main() {
     await _tap(tester, find.byKey(const Key('interest-option-tag-art')));
     await tester.tap(find.byType(BackButton));
     await _frames(tester);
-    expect(find.text('No interests selected.'), findsOneWidget);
+    expect(
+      find.text('No interests selected. Add up to 10 things you enjoy.'),
+      findsOneWidget,
+    );
     expect(find.text('Art'), findsNothing);
     expect(find.text('Interests saved.'), findsNothing);
     expect(harness.interests.fake.savedIds, isEmpty);
@@ -157,7 +166,10 @@ void main() {
     await _openProfile(tester);
     expect(find.text('Interests could not be loaded.'), findsOneWidget);
     expect(find.text('private vendor diagnostic'), findsNothing);
-    expect(find.text('No interests selected.'), findsNothing);
+    expect(
+      find.text('No interests selected. Add up to 10 things you enjoy.'),
+      findsNothing,
+    );
     harness.interests.fake.ownResult = Success(_selection(['Art']));
     await _tap(tester, find.text('Retry'));
     expect(find.text('Art'), findsOneWidget);

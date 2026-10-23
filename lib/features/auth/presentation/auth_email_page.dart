@@ -1,3 +1,4 @@
+import 'package:enmori/core/presentation/enmori_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,12 +28,15 @@ final class _AuthEmailPageState extends ConsumerState<AuthEmailPage> {
     final repository = ref.read(authEmailRepositoryProvider);
     if (repository == null) {
       setState(
-        () => _message = 'Email actions are unavailable in this environment.',
+        () => _message = context.tr(
+          'Email actions are unavailable in this environment.',
+          "当前环境不支持邮箱操作。",
+        ),
       );
       return;
     }
     if (widget.resetPassword && !_email.text.trim().contains('@')) {
-      setState(() => _message = 'Enter a valid email.');
+      setState(() => _message = context.tr('Enter a valid email.', "请输入有效邮箱。"));
       return;
     }
     final session = ref.read(authSessionProvider).asData?.value;
@@ -57,15 +61,28 @@ final class _AuthEmailPageState extends ConsumerState<AuthEmailPage> {
     setState(() {
       _pending = false;
       _message = switch (result) {
-        Failure<Object?>() =>
+        Failure<Object?>() => context.tr(
           'Could not complete this request. Wait a moment and try again.',
-        Success<Object?>(value: true) => 'Email verified.',
-        Success<Object?>(value: false) =>
+          "请求未能完成，请稍后重试。",
+        ),
+        Success<Object?>(value: true) => context.tr(
+          'Email verified.',
+          "邮箱已验证。",
+        ),
+        Success<Object?>(value: false) => context.tr(
           'Your email is not verified yet. Open the link, then check again.',
+          "邮箱尚未验证，请打开邮件中的链接后再检查。",
+        ),
         _ =>
           widget.resetPassword
-              ? 'If this email has an account, a reset link has been sent. Complete it in your email, then return to sign in.'
-              : 'Verification email sent. Open the link in your email, then check again.',
+              ? context.tr(
+                  'If this email has an account, a reset link has been sent. Complete it in your email, then return to sign in.',
+                  "如果此邮箱已注册，重置链接已发送。请在邮件中完成重置后返回登录。",
+                )
+              : context.tr(
+                  'Verification email sent. Open the link in your email, then check again.',
+                  "验证邮件已发送，请打开邮件中的链接后再检查。",
+                ),
       };
     });
   }
@@ -73,15 +90,25 @@ final class _AuthEmailPageState extends ConsumerState<AuthEmailPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text(widget.resetPassword ? 'Reset password' : 'Verify email'),
+      title: Text(
+        widget.resetPassword
+            ? context.tr('Reset password', "重置密码")
+            : context.tr('Verify email', "验证邮箱"),
+      ),
     ),
     body: ListView(
       padding: const EdgeInsets.all(24),
       children: [
         Text(
           widget.resetPassword
-              ? 'Use a secure email link to choose a new password.'
-              : 'Verify ownership of your email using the Firebase email link.',
+              ? context.tr(
+                  'Use a secure email link to choose a new password.',
+                  "通过安全的邮件链接设置新密码。",
+                )
+              : context.tr(
+                  'Verify ownership of your email using the Firebase email link.',
+                  "通过 Firebase 邮件链接验证邮箱归属。",
+                ),
         ),
         if (widget.resetPassword)
           TextField(
@@ -89,8 +116,8 @@ final class _AuthEmailPageState extends ConsumerState<AuthEmailPage> {
             controller: _email,
             enabled: !_pending,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              labelText: 'Email',
+            decoration: InputDecoration(
+              labelText: context.tr('Email', "邮箱"),
               prefixIcon: Icon(Icons.mail_outline),
             ),
           ),
@@ -100,23 +127,23 @@ final class _AuthEmailPageState extends ConsumerState<AuthEmailPage> {
           onPressed: _pending ? null : () => _run(),
           child: Text(
             _pending
-                ? 'Please wait…'
+                ? context.tr('Please wait…', "请稍候…")
                 : widget.resetPassword
-                ? 'Send reset link'
-                : 'Send / resend verification link',
+                ? context.tr('Send reset link', "发送重置链接")
+                : context.tr('Send / resend verification link', "发送／重新发送验证链接"),
           ),
         ),
         if (!widget.resetPassword)
           OutlinedButton(
             key: const Key('email-check'),
             onPressed: _pending ? null : () => _run(check: true),
-            child: const Text('I have verified my email'),
+            child: Text(context.tr('I have verified my email', "我已完成邮箱验证")),
           ),
         if (_message != null) Text(_message!, key: const Key('email-feedback')),
         if (widget.resetPassword)
           TextButton(
             onPressed: _pending ? null : () => Navigator.of(context).pop(),
-            child: const Text('Back to sign in'),
+            child: Text(context.tr('Back to sign in', "返回登录")),
           ),
       ],
     ),
@@ -130,6 +157,6 @@ class VerifyEmailButton extends StatelessWidget {
     onPressed: () => Navigator.of(context)
         .push<void>(MaterialPageRoute(builder: (_) => const AuthEmailPage())),
     icon: const Icon(Icons.mark_email_read_outlined),
-    label: const Text('Verify email / resend link'),
+    label: Text(context.tr('Verify email / resend link', "验证邮箱／重新发送链接")),
   );
 }

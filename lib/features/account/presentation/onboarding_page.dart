@@ -1,3 +1,5 @@
+import 'package:enmori/core/presentation/enmori_localizations.dart';
+
 import '../../auth/presentation/auth_email_page.dart';
 
 import 'package:flutter/material.dart';
@@ -57,12 +59,15 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final state = ref.watch(onboardingControllerProvider);
     final pending = state is CommandPending<ProductAccount>;
     final title = switch (_step) {
-      _OnboardingStep.username => 'Choose your Username',
-      _OnboardingStep.purpose => 'Optional data use',
-      _OnboardingStep.choice => 'Choose your initial settings',
+      _OnboardingStep.username => context.tr('Choose your Username', "设置用户名"),
+      _OnboardingStep.purpose => context.tr('Optional data use', "可选数据使用"),
+      _OnboardingStep.choice => context.tr(
+        'Choose your initial settings',
+        "选择初始设置",
+      ),
     };
     return Scaffold(
-      appBar: AppBar(title: const Text('Set up your account')),
+      appBar: AppBar(title: Text(context.tr('Set up your account', "完善账号"))),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -83,11 +88,16 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 if (pending) ...[
                   const SizedBox(height: 16),
                   Semantics(
-                    label:
-                        'Submitting ${_choiceLabel(_chosenChoice)} initial settings.',
+                    label: context.tr(
+                      'Submitting ${_choiceLabel(_chosenChoice)} initial settings.',
+                      '正在提交初始设置：${_choiceLabel(_chosenChoice)}。',
+                    ),
                     liveRegion: true,
                     child: Text(
-                      'Submitting ${_choiceLabel(_chosenChoice)} settings...',
+                      context.tr(
+                        'Submitting ${_choiceLabel(_chosenChoice)} settings...',
+                        '正在提交设置：${_choiceLabel(_chosenChoice)}…',
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -111,7 +121,7 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                           _chosenChoice = null;
                         });
                       },
-                      child: const Text('Change Username'),
+                      child: Text(context.tr('Change Username', "重新选择用户名")),
                     ),
                   if (_step == _OnboardingStep.choice &&
                       _chosenChoice != null) ...[
@@ -121,7 +131,7 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       onPressed: pending
                           ? null
                           : () => _complete(_chosenChoice!),
-                      child: const Text('Retry'),
+                      child: Text(context.tr('Retry', "重试")),
                     ),
                   ],
                 ],
@@ -135,8 +145,11 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   List<Widget> _usernameStep() {
     return [
-      const Text(
-        'Use 3–30 lowercase letters, numbers or underscores. Start and end with a letter or number; do not use consecutive underscores.',
+      Text(
+        context.tr(
+          'Use 3–30 lowercase letters, numbers or underscores. Start and end with a letter or number; do not use consecutive underscores.',
+          "使用 3–30 个小写英文字母、数字或下划线。首尾须为字母或数字，不可连续使用下划线。",
+        ),
         key: Key('r6-onboarding-username-guidance'),
       ),
       const SizedBox(height: 24),
@@ -145,7 +158,7 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         child: TextFormField(
           key: const Key('r6-onboarding-username'),
           controller: _usernameController,
-          decoration: const InputDecoration(labelText: 'Username'),
+          decoration: InputDecoration(labelText: context.tr('Username', "用户名")),
           textInputAction: TextInputAction.done,
           validator: _validateUsername,
         ),
@@ -154,49 +167,64 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       FilledButton(
         key: const Key('r6-onboarding-username-continue'),
         onPressed: _continueFromUsername,
-        child: const Text('Continue'),
+        child: Text(context.tr('Continue', "继续")),
       ),
     ];
   }
 
   List<Widget> _purposeStep() {
     return [
-      const Text(
-        'This release does not perform optional AI or Recommendation processing in this setup flow. Your choice saves whether separately authorised optional features may use their approved data later. Reject keeps optional processing off. Either choice lets you continue.',
+      Text(
+        context.tr(
+          'This release does not perform optional AI or Recommendation processing in this setup flow. Your choice saves whether separately authorised optional features may use their approved data later. Reject keeps optional processing off. Either choice lets you continue.',
+          "当前版本不会在账号设置过程中执行可选的 AI 或推荐处理。此选择仅保存后续已获单独授权的可选功能能否使用其批准范围内的数据。拒绝会关闭可选处理；两种选择都可以继续。",
+        ),
         key: Key('r6-initial-choice-purpose-copy'),
       ),
       const SizedBox(height: 12),
-      const Text(
-        'Check-in Notes are not used for Recommendation ranking. Approximate location is not a Recommendation or AI input.',
+      Text(
+        context.tr(
+          'Check-in Notes are not used for Recommendation ranking. Approximate location is not a Recommendation or AI input.',
+          "签到文字不用于推荐排序。大致位置不作为推荐或 AI 的输入。",
+        ),
         key: Key('r6-initial-choice-purpose-supporting-statement'),
       ),
       const SizedBox(height: 20),
       FilledButton(
         key: const Key('r6-initial-choice-info-continue'),
         onPressed: () => setState(() => _step = _OnboardingStep.choice),
-        child: const Text('Continue'),
+        child: Text(context.tr('Continue', "继续")),
       ),
     ];
   }
 
   List<Widget> _choiceStep(bool pending) {
     return [
-      const Text(
-        'Optional data use is separate from privacy. New Check-ins start Private with either choice. You can change the default in Settings without changing past records.',
+      Text(
+        context.tr(
+          'Optional data use is separate from privacy. New Check-ins start Private with either choice. You can change the default in Settings without changing past records.',
+          "可选数据使用与隐私设置相互独立。无论如何选择，新签到最初都默认为私密。你可以在设置中修改默认值，不会改变历史记录。",
+        ),
         key: Key('r6-initial-choice-statement'),
       ),
       const SizedBox(height: 20),
       _ChoicePanel(
-        title: 'Allow optional data use',
-        body: 'Allow personalised recommendations and AI using permitted data.',
+        title: context.tr('Allow optional data use', "允许可选数据使用"),
+        body: context.tr(
+          'Allow personalised recommendations and AI using permitted data.',
+          "允许使用已获许可的数据提供个性化推荐与 AI 功能。",
+        ),
         icon: Icons.public,
         onPressed: pending ? null : () => _complete(InitialChoice.accept),
         buttonKey: const Key('r6-initial-choice-accept'),
       ),
       const SizedBox(height: 12),
       _ChoicePanel(
-        title: 'Continue without optional data use',
-        body: 'Keep using your account, activities, friends and Check-ins. AI will be limited.',
+        title: context.tr('Continue without optional data use', "不允许可选数据使用并继续"),
+        body: context.tr(
+          'Keep using your account, activities, friends and Check-ins. AI will be limited.',
+          "仍可使用账号、活动、好友与签到。AI 功能将受到限制。",
+        ),
         icon: Icons.lock_outline,
         onPressed: pending ? null : () => _complete(InitialChoice.reject),
         buttonKey: const Key('r6-initial-choice-reject'),
@@ -226,16 +254,22 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final validShape = RegExp(r'^[a-z0-9][a-z0-9_]{1,28}[a-z0-9]$')
         .hasMatch(username);
     if (!validShape || username.contains('__')) {
-      return 'Enter a valid Username using the format shown.';
+      return context.tr(
+        'Enter a valid Username using the format shown.',
+        "请按提示格式输入有效用户名。",
+      );
     }
     return null;
   }
 
   String _choiceLabel(InitialChoice? choice) {
     return switch (choice) {
-      InitialChoice.accept => 'Allow optional data use',
-      InitialChoice.reject => 'Continue without optional data use',
-      null => 'selected',
+      InitialChoice.accept => context.tr('Allow optional data use', "允许可选数据使用"),
+      InitialChoice.reject => context.tr(
+        'Continue without optional data use',
+        "不允许可选数据使用并继续",
+      ),
+      null => context.tr('selected', '所选'),
     };
   }
 }
@@ -308,25 +342,43 @@ final class _FailureText extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme.error;
     return Text(
-      _failureCopy(failure.kind),
+      _failureCopy(context, failure.kind),
       key: const Key('r6-onboarding-failure'),
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: color),
     );
   }
 
-  String _failureCopy(AppFailureKind kind) {
+  String _failureCopy(BuildContext context, AppFailureKind kind) {
     return switch (kind) {
-      AppFailureKind.usernameInvalid =>
+      AppFailureKind.usernameInvalid => context.tr(
         'Enter a valid Username using the format shown.',
-      AppFailureKind.usernameUnavailable => 'This Username is unavailable.',
-      AppFailureKind.onboardingConflict =>
+        "请按提示格式输入有效用户名。",
+      ),
+      AppFailureKind.usernameUnavailable => context.tr(
+        'This Username is unavailable.',
+        "此用户名不可用。",
+      ),
+      AppFailureKind.onboardingConflict => context.tr(
         'Account setup could not be completed with these details.',
-      AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
-      AppFailureKind.authForbidden => 'This account cannot continue.',
+        "无法使用这些信息完成账号设置。",
+      ),
+      AppFailureKind.authRequired => context.tr(
+        'Your session has expired. Sign in again.',
+        "登录已过期，请重新登录。",
+      ),
+      AppFailureKind.authForbidden => context.tr(
+        'This account cannot continue.',
+        "此账号暂时无法继续。",
+      ),
       AppFailureKind.serviceUnavailable ||
-      AppFailureKind.configurationUnavailable =>
+      AppFailureKind.configurationUnavailable => context.tr(
         'This service is temporarily unavailable. Try again.',
-      _ => 'This service is temporarily unavailable. Try again.',
+        "服务暂时不可用，请重试。",
+      ),
+      _ => context.tr(
+        'This service is temporarily unavailable. Try again.',
+        "服务暂时不可用，请重试。",
+      ),
     };
   }
 }

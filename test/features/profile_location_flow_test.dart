@@ -68,7 +68,12 @@ void main() {
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
       expect(find.text('Singapore'), findsOneWidget);
-      expect(find.text('Location permission was not granted.'), findsOneWidget);
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('profile-location-message')))
+            .data,
+        'Location permission was not granted.',
+      );
       expect(prefs.profileNames, isEmpty);
       location.result = const Success('1.3°, 103.8°');
       await tester.tap(find.byKey(const Key('profile-sync-location')));
