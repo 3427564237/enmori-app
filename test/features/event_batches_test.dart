@@ -26,11 +26,11 @@ final class Repo implements PagedActivityRepository {
   Result<ActivityRead> result = Success(
     ActivityBatch(asOf: instant, items: [item('a')], nextCursor: 'page1'),
   );
-  Completer<Result<ActivityRead>>? pending;
+  Completer<Result<ActivityRead>>? pending, pendingFirst;
   @override
   Future<Result<ActivityRead>> read(String? id) async {
     first++;
-    return result;
+    return pendingFirst?.future ?? result;
   }
 
   @override
@@ -41,6 +41,123 @@ final class Repo implements PagedActivityRepository {
 }
 
 void main() {
+  test('refresh retains readable rows, blocks old taps and pagination, and rejects cleared replies', () async {
+    final repo = Repo();
+    final c = ProviderContainer(
+      overrides: [
+        activityRepositoryProvider.overrideWithValue(repo),
+        authSessionProvider.overrideWithValue(
+          const AsyncData(AuthSessionAuthenticated(subject: 'a')),
+        ),
+      ],
+    );
+    final sub = c.listen(eventBatchesProvider, (_, _) {});
+    addTearDown(sub.close);
+    addTearDown(c.dispose);
+    final ctrl = c.read(eventBatchesProvider.notifier);
+    await ctrl.load();
+    final old = c.read(eventBatchesProvider);
+    repo.pendingFirst = Completer();
+    final refresh = ctrl.load();
+    expect(c.read(eventBatchesProvider).batch, same(old.batch));
+    expect(ctrl.isCurrentSnapshot(old), isFalse);
+    expect(ctrl.isCurrentSnapshot(c.read(eventBatchesProvider)), isFalse);
+    await ctrl.next();
+    await ctrl.load();
+    expect(repo.first, 2);
+    expect(repo.cursors, isEmpty);
+    repo.pendingFirst!.complete(
+      Success(ActivityBatch(asOf: instant, items: [item('b')])),
+    );
+    await refresh;
+    expect(c.read(eventBatchesProvider).batch!.items.single.eventId, 'b');
+    repo.pendingFirst = Completer();
+    final retired = ctrl.load();
+    ctrl.clear();
+    repo.pendingFirst!.complete(
+      Success(ActivityBatch(asOf: instant, items: [item('stale')])),
+    );
+    await retired;
+    expect(c.read(eventBatchesProvider).batch, isNull);
+    repo.pendingFirst = null;
+    await ctrl.load();
+    repo.result = const Failure(
+      AppFailure(
+        kind: AppFailureKind.serviceUnavailable,
+        message: 'Source unavailable',
+      ),
+    );
+    await ctrl.load();
+    expect(c.read(eventBatchesProvider).batch, isNull);
+    expect(c.read(eventBatchesProvider).failure, isNotNull);
+  });
+
+  testWidgets('compact filters and pull refresh work at 320dp and large text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final repo = Repo()
+      ..result = Success(
+        ActivityBatch(
+          asOf: instant,
+          items: const [
+            ActivitySummary(
+              browseId: 'a',
+              eventId: 'a',
+              title: 'Quiet music',
+              startAt: instant,
+              categoryLabel: 'Music',
+            ),
+            ActivitySummary(
+              browseId: 'b',
+              eventId: 'b',
+              title: 'Garden gathering',
+              startAt: instant,
+              categoryLabel: 'Community and culture',
+            ),
+          ],
+        ),
+      );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          activityRepositoryProvider.overrideWithValue(repo),
+          authSessionProvider.overrideWithValue(
+            const AsyncData(AuthSessionAuthenticated(subject: 'a')),
+          ),
+        ],
+        child: MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(2),
+              disableAnimations: true,
+            ),
+            child: child!,
+          ),
+          home: ParticipationEventsPage(onSelect: (_) {}),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byTooltip('Filter event category'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Music').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Quiet music'), findsOneWidget);
+    expect(find.text('Garden gathering'), findsNothing);
+    final calls = repo.first;
+    await tester.drag(find.byType(ListView), const Offset(0, 350));
+    await tester.pumpAndSettle();
+    expect(repo.first, calls + 1);
+    expect(find.text('Clear filter'), findsOneWidget);
+    await tester.tap(find.text('Clear filter'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
   testWidgets(
     'bottom Next and Retry preserve rows then show terminal hint; background clears all',
     (tester) async {
@@ -116,7 +233,9 @@ void main() {
         findsOneWidget,
       );
       expect(repo.cursors, ['page1', 'page1']);
-      final container = ProviderScope.containerOf(tester.element(find.byType(ParticipationEventsPage)));
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(ParticipationEventsPage)),
+      );
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       expect(container.read(eventBatchesProvider).batch, isNull);
       // Paused apps do not draw frames. The first resumed frame must stay clear.

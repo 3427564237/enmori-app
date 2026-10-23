@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_motion.dart';
 import '../../auth/auth_providers.dart';
 import '../participation_providers.dart';
 import '../domain/participation_repository.dart';
@@ -67,17 +68,32 @@ final class _ParticipationControlsState
           : null;
       return Semantics(
         selected: selected,
-        child: selected
-            ? FilledButton.tonalIcon(
-                onPressed: action,
-                icon: Icon(Icons.check, size: 18),
-                label: Text(label),
-              )
-            : OutlinedButton.icon(
-                onPressed: action,
-                icon: Icon(icon, size: 18),
-                label: Text(label),
-              ),
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            animationDuration: EnmoriMotion.duration(
+              context,
+              EnmoriMotion.feedback,
+            ),
+            backgroundColor: selected
+                ? Theme.of(context).colorScheme.secondaryContainer
+                : Colors.transparent,
+            foregroundColor: selected
+                ? Theme.of(context).colorScheme.onSecondaryContainer
+                : Theme.of(context).colorScheme.primary,
+            side: BorderSide(
+              color: selected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.outline,
+            ),
+          ),
+          onPressed: action,
+          icon: MotionReveal(
+            trigger: selected,
+            distance: 0,
+            child: Icon(selected ? Icons.check : icon, size: 18),
+          ),
+          label: Text(label),
+        ),
       );
     }
 
@@ -123,7 +139,7 @@ final class _ParticipationControlsState
                   ),
                 PopupMenuItem(
                   value: () => controller.load(widget.eventId),
-                  child: const Text('Refresh plans'),
+                  child: const Text('Sync participation status'),
                 ),
               ],
             ),
@@ -137,7 +153,7 @@ final class _ParticipationControlsState
         if (busy)
           Semantics(
             liveRegion: true,
-            child: const Text('Checking your plans…'),
+            child: const Text('Checking your participation…'),
           ),
         if (entry?.failure case final failure?)
           Semantics(liveRegion: true, child: Text(failure.message)),

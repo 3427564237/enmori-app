@@ -50,7 +50,7 @@ void main() {
       );
       sessions.add(AuthSessionAuthenticated(subject: 'synthetic'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Register on organiser website'));
+      await tester.tap(find.text('Register on original website'));
       await tester.pumpAndSettle();
       sessions.add(AuthSessionAuthenticated(subject: 'synthetic'));
       await tester.pumpAndSettle();
@@ -89,7 +89,7 @@ void main() {
     );
     sessions.add(AuthSessionAuthenticated(subject: 'synthetic'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Register on organiser website'));
+    await tester.tap(find.text('Register on original website'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Open website'));
     await tester.pumpAndSettle();
@@ -154,7 +154,7 @@ void main() {
     );
     sessions.add(AuthSessionAuthenticated(subject: 'synthetic'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Register on organiser website'));
+    await tester.tap(find.text('Register on original website'));
     await tester.pumpAndSettle();
     expect(find.text('Continue to third-party registration?'), findsOneWidget);
     await tester.tap(find.text('Cancel'));
@@ -193,7 +193,7 @@ void main() {
     );
     sessions.add(AuthSessionAuthenticated(subject: 'synthetic'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Register on organiser website'));
+    await tester.tap(find.text('Register on original website'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Open website'));
     await tester.pumpAndSettle();

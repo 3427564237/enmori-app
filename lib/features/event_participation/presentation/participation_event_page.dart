@@ -9,12 +9,12 @@ import '../../auth/domain/auth_repository.dart';
 import '../../event_browse/domain/activity_repository.dart';
 import '../../event_detail/domain/event_detail_repository.dart';
 import '../../event_detail/event_detail_providers.dart';
-import '../domain/participation_repository.dart';
 import '../participation_providers.dart';
 import 'event_card.dart';
 import 'external_registration_action.dart';
 import 'participation_controller.dart';
 import 'participation_controls.dart';
+import 'participant_preview.dart';
 
 /// Stable-ID detail builder. It uses the existing real Detail repository and
 /// preserves only the in-flight return coordinator while hiding stale content.
@@ -168,10 +168,18 @@ final class _ParticipationEventPageState
                 'refresh the list and reopen this event. '
                 'Your saved Interested/Going choice is unchanged.',
               ),
+            const SizedBox(height: 16),
+            Text('Your plans', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Save your interest in ENMORI. This does not book a place.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
             ParticipationControls(
               key: ValueKey('participation-${widget.eventId}'),
               eventId: widget.eventId,
             ),
+            const Divider(height: 32),
             if (_returnUrl case final url?)
               ExternalRegistrationAction(
                 key: ValueKey('registration-${widget.eventId}'),
@@ -183,28 +191,12 @@ final class _ParticipationEventPageState
                 sourceAvailable: details != null,
               ),
             const SizedBox(height: 16),
-            Text('People', style: Theme.of(context).textTheme.titleLarge),
-            for (final status in [
-              ParticipationStatus.interested,
-              ParticipationStatus.going,
-            ])
-              for (final group in ParticipantGroup.values)
-                ListTile(
-                  leading: Icon(
-                    status == ParticipationStatus.going
-                        ? Icons.event_available
-                        : Icons.star_outline,
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: _session == null
-                      ? null
-                      : () => widget.onParticipants((
-                          eventId: widget.eventId,
-                          status: status,
-                          group: group,
-                        )),
-                  title: Text('See all ${status.name} · ${group.name}'),
-                ),
+            if (details != null)
+              ParticipantPreview(
+                key: ValueKey('people-${widget.eventId}'),
+                eventId: widget.eventId,
+                onSeeAll: widget.onParticipants,
+              ),
           ],
         ),
       ),

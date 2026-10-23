@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'participation_controller.dart';
+import '../domain/participation_repository.dart';
+import '../../../core/presentation/enmori_motion.dart';
 
 final class EventParticipantsPage extends ConsumerStatefulWidget {
   const EventParticipantsPage({
@@ -21,15 +23,33 @@ final class _EventParticipantsPageState
     extends ConsumerState<EventParticipantsPage>
     with WidgetsBindingObserver {
   bool _retryNext = false;
+  late ParticipantSelection _selection = widget.selection;
+  void _select(ParticipationStatus status, ParticipantGroup group) {
+    if (_selection.status == status && _selection.group == group) return;
+    setState(() {
+      _selection = (
+        eventId: widget.selection.eventId,
+        status: status,
+        group: group,
+      );
+      _retryNext = false;
+    });
+    final selected = _selection;
+    // Observe the new auto-disposed family in build before starting its read.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _selection == selected) {
+        ref.read(participantsControllerProvider(selected).notifier).load();
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ref
-            .read(participantsControllerProvider(widget.selection).notifier)
-            .load();
+        ref.read(participantsControllerProvider(_selection).notifier).load();
       }
     });
   }
@@ -37,9 +57,7 @@ final class _EventParticipantsPageState
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed && mounted) {
-      ref
-          .read(participantsControllerProvider(widget.selection).notifier)
-          .clear();
+      ref.read(participantsControllerProvider(_selection).notifier).clear();
     }
   }
 
@@ -51,21 +69,58 @@ final class _EventParticipantsPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(participantsControllerProvider(widget.selection));
+    final selection = _selection;
+    final state = ref.watch(participantsControllerProvider(selection));
     final controller = ref.read(
-      participantsControllerProvider(widget.selection).notifier,
+      participantsControllerProvider(_selection).notifier,
     );
     final page = state.page;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '${widget.selection.status.name} · ${widget.selection.group.name}',
-        ),
-      ),
+      appBar: AppBar(title: const Text('Participants')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final status in [
+                  ParticipationStatus.going,
+                  ParticipationStatus.interested,
+                ])
+                  ChoiceChip(
+                    chipAnimationStyle: EnmoriMotion.chips(context),
+                    label: Text(
+                      status == ParticipationStatus.going
+                          ? 'Going'
+                          : 'Interested',
+                    ),
+                    selected: selection.status == status,
+                    onSelected: (_) => _select(status, selection.group),
+                  ),
+              ],
+            ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final group in ParticipantGroup.values)
+                  ChoiceChip(
+                    chipAnimationStyle: EnmoriMotion.chips(context),
+                    label: Text(
+                      group == ParticipantGroup.friends ? 'Friends' : 'Others',
+                    ),
+                    selected: selection.group == group,
+                    onSelected: (_) => _select(selection.status, group),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Only people visible to you are shown.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             if (state.busy) const Text('Loading participants…'),
             if (state.failure case final failure?) Text(failure.message),
             if (page != null && state.failure == null && !state.busy) ...[
@@ -95,7 +150,7 @@ final class _EventParticipantsPageState
                       : () {
                           // A queued tap must still belong to this exact freshly authorized page.
                           final current = ref.read(
-                            participantsControllerProvider(widget.selection),
+                            participantsControllerProvider(selection),
                           );
                           if (!current.busy &&
                               current.failure == null &&

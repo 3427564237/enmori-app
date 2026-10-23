@@ -48,7 +48,15 @@ void main() {
         });
         expect(peer.writes.length, revision);
         if (step.$2 != 'none') {
-          expect(find.widgetWithText(FilledButton, step.$1), findsOneWidget);
+          expect(
+            find.ancestor(
+              of: find.text(step.$1),
+              matching: find.byWidgetPredicate(
+                (w) => w is Semantics && w.properties.selected == true,
+              ),
+            ),
+            findsOneWidget,
+          );
         }
       }
       expect(tester.takeException(), isNull);
@@ -132,7 +140,7 @@ void main() {
       peer.pendingRead = Completer<http.Response>();
       await tester.tap(find.text('Check current plans'));
       await tester.pump();
-      expect(find.text('Checking your plans…'), findsOneWidget);
+      expect(find.text('Checking your participation…'), findsOneWidget);
       expect(find.text('Check current plans'), findsNothing);
       expect(peer.writes, hasLength(1));
       peer.pendingRead!.complete(peer.response());

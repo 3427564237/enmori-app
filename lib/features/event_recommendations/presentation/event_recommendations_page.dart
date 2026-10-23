@@ -6,6 +6,7 @@ import '../../../core/presentation/enmori_motion.dart';
 import '../../../core/presentation/status_panel.dart';
 import '../../../core/presentation/section_heading.dart';
 import '../../../core/result/result.dart';
+import '../../auth/auth_providers.dart';
 import '../domain/event_recommendation_repository.dart';
 import 'event_recommendations_controller.dart';
 
@@ -46,6 +47,7 @@ final class _EventRecommendationsSectionState
     with WidgetsBindingObserver {
   late final EventRecommendationsController _controller;
   int? _operation;
+  Set<String>? _refreshIds;
 
   @override
   void initState() {
@@ -65,19 +67,56 @@ final class _EventRecommendationsSectionState
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed && mounted) _controller.clear();
+    if (state != AppLifecycleState.resumed && mounted) {
+      _refreshIds = null;
+      _controller.clear();
+    }
   }
 
-  void _load() {
+  void _load({bool userInitiated = false}) {
+    if (!mounted) return;
+    _refreshIds = userInitiated
+        ? ref
+              .read(eventRecommendationsControllerProvider)
+              .asData
+              ?.value
+              .items
+              .map((e) => e.eventId)
+              .toSet()
+        : null;
     _operation = _controller.load(view: EventRecommendationView.home);
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authSessionProvider, (previous, next) {
+      if (!identical(previous?.asData?.value, next.asData?.value)) {
+        _refreshIds = null;
+      }
+    });
+    ref.listen(eventRecommendationsControllerProvider, (previous, next) {
+      final before = _refreshIds;
+      if (next.isLoading || before == null) return;
+      _refreshIds = null;
+      final items = next.asData?.value.items;
+      if (items != null &&
+          items.length == before.length &&
+          items.every((item) => before.contains(item.eventId))) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              items.isEmpty
+                  ? 'No recommendations available yet. Try Browse all.'
+                  : 'Latest details loaded for the same events.',
+            ),
+          ),
+        );
+      }
+    });
     final state = ref.watch(eventRecommendationsControllerProvider);
     return _RecommendationContent(
       state: state,
-      onRetry: _load,
+      onRetry: () => _load(userInitiated: true),
       onSeeAll: widget.onSeeAll,
       home: true,
       heading: widget.heading,

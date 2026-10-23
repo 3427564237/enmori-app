@@ -187,6 +187,13 @@ final class _ExternalRegistrationActionState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            'Registration takes place on the external website.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
         if (phase == RegistrationPhase.failed)
           const Text('Could not open the website. Try again or copy its link.'),
         if (phase == RegistrationPhase.saved)
@@ -202,7 +209,7 @@ final class _ExternalRegistrationActionState
         ],
         if (phase == RegistrationPhase.saving)
           const Text('Checking participation…'),
-        FilledButton.icon(
+        OutlinedButton.icon(
           onPressed:
               widget.sourceAvailable &&
                   (phase == RegistrationPhase.idle ||
@@ -211,7 +218,7 @@ final class _ExternalRegistrationActionState
               ? _open
               : null,
           icon: const Icon(Icons.open_in_new),
-          label: const Text('Register on organiser website'),
+          label: const Text('Register on original website'),
         ),
       ],
     );

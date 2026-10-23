@@ -32,6 +32,7 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
     _repository = ref.watch(activityRepositoryProvider);
     _generation++;
     _expiry?.cancel();
+    _expiry = null;
     ref.onDispose(() {
       _generation++;
       _expiry?.cancel();
@@ -42,26 +43,30 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
   void clear() {
     _generation++;
     _expiry?.cancel();
+    _expiry = null;
     state = const EventBatchesState();
   }
 
   bool isCurrentSnapshot(EventBatchesState snapshot) =>
       ref.mounted &&
       _authenticated &&
+      !state.busy &&
       identical(state, snapshot) &&
       (_expiry?.isActive ?? false);
   Future<void> load() => _load(false);
   Future<void> next() => _load(true);
   Future<void> _load(bool next) async {
     if (state.busy || !_authenticated) return;
-    final previous = next ? state.batch : null;
+    final freshDeadline = DateTime.now().add(const Duration(minutes: 5));
+    final previous = state.batch;
     final cursor = previous?.nextCursor;
     if (next && (cursor == null || _repository is! PagedActivityRepository)) {
       return;
     }
     if (!next) {
-      clear();
-      _expiry = Timer(const Duration(minutes: 5), () {
+      _generation++;
+      // Keep readable rows only within their original lifetime during refresh.
+      _expiry ??= Timer(const Duration(minutes: 5), () {
         if (ref.mounted) clear();
       });
     }
@@ -93,9 +98,15 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
         );
         return;
       }
+      if (!next) {
+        _expiry?.cancel();
+        _expiry = Timer(freshDeadline.difference(DateTime.now()), () {
+          if (ref.mounted) clear();
+        });
+      }
       final seen = <String>{};
       final items = [
-        ...?previous?.items,
+        if (next) ...?previous?.items,
         ...batch.items,
       ].where((e) => seen.add(e.eventId ?? e.browseId)).toList();
       state = EventBatchesState(
@@ -107,7 +118,8 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
       );
     } else {
       state = EventBatchesState(
-        batch: previous,
+        // A failed new source read may have retired the previous generation.
+        batch: next ? previous : null,
         failure: result is Failure<ActivityRead>
             ? result.failure
             : const AppFailure(

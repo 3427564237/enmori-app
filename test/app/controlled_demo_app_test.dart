@@ -163,9 +163,18 @@ void main() {
       await tester.ensureVisible(find.text('Synthetic integration concert'));
       await tester.tap(find.text('Synthetic integration concert'));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(FilledButton, 'Interested'), findsOneWidget);
+      expect(
+        find.ancestor(
+          of: find.text('Interested'),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Semantics && widget.properties.selected == true,
+          ),
+        ),
+        findsOneWidget,
+      );
       final router = GoRouter.of(
-        tester.element(find.widgetWithText(FilledButton, 'Interested')),
+        tester.element(find.widgetWithText(OutlinedButton, 'Interested')),
       );
       expect(
         router.state.uri.path,
@@ -177,7 +186,16 @@ void main() {
       await tester.ensureVisible(find.text('Synthetic integration concert'));
       await tester.tap(find.text('Synthetic integration concert'));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(FilledButton, 'Interested'), findsOneWidget);
+      expect(
+        find.ancestor(
+          of: find.text('Interested'),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Semantics && widget.properties.selected == true,
+          ),
+        ),
+        findsOneWidget,
+      );
       router.pop();
       await tester.pumpAndSettle();
       await tester.tap(find.text('Load more events'));
