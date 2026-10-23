@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -35,8 +37,9 @@ final class AuthorizedEventTitle extends ConsumerWidget {
     final title = ref.watch(_title(eventId));
     return Text(
       title.isLoading
-          ? 'Loading event…'
-          : title.asData?.value ?? 'Event details currently unavailable',
+          ? context.tr('Loading event…', '正在加载活动…')
+          : title.asData?.value ??
+                context.tr('Event details currently unavailable', '暂时无法获取活动详情'),
     );
   }
 }

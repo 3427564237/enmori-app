@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/presentation/enmori_motion.dart';
@@ -78,18 +80,22 @@ final class EventCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       start == null
-                          ? 'Time unavailable'
+                          ? context.tr('Time unavailable', '暂无时间信息')
                           : localTimeLabel(context, start),
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     if (end != null)
                       Text(
-                        'Until ${localTimeLabel(context, end)}',
+                        context.tr(
+                          'Until ${localTimeLabel(context, end)}',
+                          '结束于 ${localTimeLabel(context, end)}',
+                        ),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     const SizedBox(height: 4),
                     Text(
-                      location ?? 'Location not provided.',
+                      location ??
+                          context.tr('Location not provided.', '未提供地点。'),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     if (category != null) ...[
@@ -112,7 +118,12 @@ final class EventCard extends StatelessWidget {
                     ],
                     if (visibleParticipantCount case final count?
                         when count >= 0)
-                      Text('$count visible participants'),
+                      Text(
+                        context.tr(
+                          '$count visible participants',
+                          '$count 位可见参与者',
+                        ),
+                      ),
                   ],
                 ),
               ),

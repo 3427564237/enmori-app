@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -76,7 +78,7 @@ final class _EventParticipantsPageState
     );
     final page = state.page;
     return Scaffold(
-      appBar: AppBar(title: const Text('Participants')),
+      appBar: AppBar(title: Text(context.tr('Participants', '参与者'))),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -93,8 +95,8 @@ final class _EventParticipantsPageState
                     chipAnimationStyle: EnmoriMotion.chips(context),
                     label: Text(
                       status == ParticipationStatus.going
-                          ? 'Going'
-                          : 'Interested',
+                          ? context.tr('Going', '将参加')
+                          : context.tr('Interested', '感兴趣'),
                     ),
                     selected: selection.status == status,
                     onSelected: (_) => _select(status, selection.group),
@@ -109,7 +111,9 @@ final class _EventParticipantsPageState
                   ChoiceChip(
                     chipAnimationStyle: EnmoriMotion.chips(context),
                     label: Text(
-                      group == ParticipantGroup.friends ? 'Friends' : 'Others',
+                      group == ParticipantGroup.friends
+                          ? context.tr('Friends', '好友')
+                          : context.tr('Others', '其他用户'),
                     ),
                     selected: selection.group == group,
                     onSelected: (_) => _select(selection.status, group),
@@ -118,22 +122,39 @@ final class _EventParticipantsPageState
             ),
             const SizedBox(height: 12),
             Text(
-              'Only people visible to you are shown.',
+              context.tr(
+                'Only people visible to you are shown.',
+                '仅显示你有权查看的用户。',
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
-            if (state.busy) const Text('Loading participants…'),
-            if (state.failure case final failure?) Text(failure.message),
+            if (state.busy)
+              Text(context.tr('Loading participants…', '正在加载参与者…')),
+            if (state.failure case final failure?)
+              Text(localizedFailure(context, failure)),
             if (page != null && state.failure == null && !state.busy) ...[
               Text(
                 page.visibleCount == null
-                    ? 'Visible participant count unavailable.'
-                    : '${page.visibleCount} visible participants',
+                    ? context.tr(
+                        'Visible participant count unavailable.',
+                        '暂时无法获取可见参与人数。',
+                      )
+                    : context.tr(
+                        '${page.visibleCount} visible participants',
+                        '${page.visibleCount} 位可见参与者',
+                      ),
               ),
               if (page.items.isEmpty)
                 Text(
                   page.nextCursor == null
-                      ? 'No visible participants on this page.'
-                      : 'No visible participants on this page. More pages are available.',
+                      ? context.tr(
+                          'No visible participants on this page.',
+                          '本页没有可见的参与者。',
+                        )
+                      : context.tr(
+                          'No visible participants on this page. More pages are available.',
+                          '本页没有可见的参与者，还可以查看下一页。',
+                        ),
                 ),
               for (final item in page.items)
                 ListTile(
@@ -167,7 +188,7 @@ final class _EventParticipantsPageState
                           _retryNext = true;
                           controller.load(more: true);
                         },
-                  child: const Text('Next page'),
+                  child: Text(context.tr('Next page', '下一页')),
                 ),
             ],
             if (state.failure != null)
@@ -175,7 +196,7 @@ final class _EventParticipantsPageState
                 onPressed: state.busy
                     ? null
                     : () => controller.load(more: _retryNext),
-                child: const Text('Retry same page'),
+                child: Text(context.tr('Retry same page', '重试当前页')),
               ),
             TextButton(
               onPressed: state.busy
@@ -184,7 +205,7 @@ final class _EventParticipantsPageState
                       _retryNext = false;
                       controller.load();
                     },
-              child: const Text('Reload participants'),
+              child: Text(context.tr('Reload participants', '刷新参与者')),
             ),
           ],
         ),

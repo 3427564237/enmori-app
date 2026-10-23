@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'authorized_event_title.dart';
 
 import 'package:flutter/material.dart';
@@ -75,7 +77,7 @@ final class _UserParticipationSectionState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Visible Event participation',
+          context.tr('Visible Event participation', '可见的活动参与'),
           style: Theme.of(context).textTheme.titleLarge,
         ),
         switch (result) {
@@ -87,13 +89,24 @@ final class _UserParticipationSectionState
                 if (value.items.isEmpty)
                   Text(
                     value.nextCursor == null
-                        ? 'No visible participation records.'
-                        : 'No visible records on this page; more pages are available.',
+                        ? context.tr(
+                            'No visible participation records.',
+                            '没有可见的参与记录。',
+                          )
+                        : context.tr(
+                            'No visible records on this page; more pages are available.',
+                            '本页没有可见记录，还可以查看下一页。',
+                          ),
                   ),
                 for (final row in value.items)
                   ListTile(
                     title: AuthorizedEventTitle(row.eventId),
-                    subtitle: Text(row.status.name),
+                    subtitle: Text(
+                      context.tr(
+                        row.status.name,
+                        row.status == ParticipationStatus.going ? '将参加' : '感兴趣',
+                      ),
+                    ),
                     onTap: () {
                       if (identical(
                         participationSession(ref.read(authSessionProvider)),
@@ -106,22 +119,29 @@ final class _UserParticipationSectionState
                 if (value.nextCursor != null)
                   OutlinedButton(
                     onPressed: () => setState(() => _cursor = value.nextCursor),
-                    child: const Text('Next visible participation page'),
+                    child: Text(
+                      context.tr(
+                        'Next visible participation page',
+                        '下一页可见参与记录',
+                      ),
+                    ),
                   ),
               ],
             ),
           AsyncData<Result<PublicParticipationPage>>(
             value: Failure<PublicParticipationPage>(:final failure),
           ) =>
-            Text(failure.message),
-          AsyncError<Result<PublicParticipationPage>>() => const Text(
-            'Visible participation unavailable.',
+            Text(localizedFailure(context, failure)),
+          AsyncError<Result<PublicParticipationPage>>() => Text(
+            context.tr('Visible participation unavailable.', '暂时无法获取可见参与信息。'),
           ),
-          _ => const Text('Loading visible participation…'),
+          _ => Text(
+            context.tr('Loading visible participation…', '正在加载可见参与信息…'),
+          ),
         },
         TextButton(
           onPressed: () => ref.invalidate(userParticipationPageProvider(key)),
-          child: const Text('Read visible participation'),
+          child: Text(context.tr('Read visible participation', '刷新可见参与信息')),
         ),
       ],
     );

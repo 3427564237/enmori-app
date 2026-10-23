@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -43,23 +45,32 @@ final class _IgnoredPeoplePageState extends ConsumerState<IgnoredPeoplePage>
     final state = ref.watch(friendIgnoreControllerProvider);
     final renderedEpoch = controller.epoch;
     return Scaffold(
-      appBar: AppBar(title: const Text('Ignored people')),
+      appBar: AppBar(title: Text(context.tr('Ignored people', '已忽略的用户'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
-            'Restore allows a person to be recommended again when currently eligible. It does not guarantee they will appear.',
+          Text(
+            context.tr(
+              'Restore allows a person to be recommended again when currently eligible. It does not guarantee they will appear.',
+              '恢复后，符合条件的用户可以再次出现在推荐中，但不保证一定出现。',
+            ),
           ),
           if (state.busy)
             Semantics(
               liveRegion: true,
-              child: const Text('Checking preferences…'),
+              child: Text(context.tr('Checking preferences…', '正在核对偏好…')),
             ),
           if (state.failure case final failure?)
-            Semantics(liveRegion: true, child: Text(failure.message)),
+            Semantics(
+              liveRegion: true,
+              child: Text(localizedFailure(context, failure)),
+            ),
           if (state.unresolvedUsername != null) ...[
-            const Text(
-              'The last change is unconfirmed. Read the current state before changing it again.',
+            Text(
+              context.tr(
+                'The last change is unconfirmed. Read the current state before changing it again.',
+                '上次修改尚未确认，请先核对当前状态再修改。',
+              ),
             ),
             OutlinedButton(
               onPressed: state.busy
@@ -68,11 +79,16 @@ final class _IgnoredPeoplePageState extends ConsumerState<IgnoredPeoplePage>
                       await controller.checkCurrent();
                       if (mounted) await controller.loadPeople();
                     },
-              child: const Text('Read current state'),
+              child: Text(context.tr('Read current state', '核对当前状态')),
             ),
           ] else ...[
             if (state.loaded && state.people.isEmpty)
-              const Text('No currently available ignored people.'),
+              Text(
+                context.tr(
+                  'No currently available ignored people.',
+                  '当前没有可显示的已忽略用户。',
+                ),
+              ),
             for (final person in state.people)
               Card(
                 child: Padding(
@@ -92,7 +108,7 @@ final class _IgnoredPeoplePageState extends ConsumerState<IgnoredPeoplePage>
                                 );
                                 if (mounted) await controller.loadPeople();
                               },
-                        child: const Text('Restore'),
+                        child: Text(context.tr('Restore', '恢复')),
                       ),
                     ],
                   ),
@@ -100,7 +116,7 @@ final class _IgnoredPeoplePageState extends ConsumerState<IgnoredPeoplePage>
               ),
             OutlinedButton(
               onPressed: state.busy ? null : controller.loadPeople,
-              child: const Text('Reload'),
+              child: Text(context.tr('Reload', '重新加载')),
             ),
           ],
         ],

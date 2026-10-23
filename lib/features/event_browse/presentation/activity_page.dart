@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,8 +64,16 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
         .read(activityControllerProvider(widget.browseId).notifier)
         .sourceAction(open: open);
     if (mounted && notice != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(notice)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.tr(notice, switch (notice) {
+              'Link copied.' => '链接已复制。',
+              _ => '无法打开或复制来源链接，请重试。',
+            }),
+          ),
+        ),
+      );
     }
   }
 
@@ -76,7 +86,9 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.browseId.isEmpty ? 'Browse activities' : 'Activity details',
+          widget.browseId.isEmpty
+              ? context.tr('Browse activities', '浏览活动')
+              : context.tr('Activity details', '活动详情'),
         ),
       ),
       body: SafeArea(
@@ -84,23 +96,32 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
           padding: const EdgeInsets.all(16),
           children: [
             if (widget.browseId.isEmpty)
-              const Text(
-                'Explore a selection of events near and far. This is not Ticketmaster’s full catalogue.',
+              Text(
+                context.tr(
+                  'Explore a selection of events near and far. This is not Ticketmaster’s full catalogue.',
+                  '探索这里提供的活动，当前列表并非 Ticketmaster 的完整目录。',
+                ),
               ),
-            const Text('Source: Ticketmaster'),
+            Text(context.tr('Source: Ticketmaster', '来源：Ticketmaster')),
             const SizedBox(height: 16),
             switch (state) {
-              AsyncLoading<ActivityRead?>() => const StatusPanel(
-                title: 'Loading activities…',
-                body: 'Requesting current information from Ticketmaster.',
+              AsyncLoading<ActivityRead?>() => StatusPanel(
+                title: context.tr('Loading activities…', '正在加载活动…'),
+                body: context.tr(
+                  'Requesting current information from Ticketmaster.',
+                  '正在向 Ticketmaster 请求最新信息。',
+                ),
                 icon: Icons.event_outlined,
                 loading: true,
               ),
               AsyncError<ActivityRead?>(:final error) => StatusPanel(
-                title: 'Activities unavailable',
+                title: context.tr('Activities unavailable', '活动暂不可用'),
                 body: error is AppFailure
-                    ? error.message
-                    : 'Activities are unavailable. Try again.',
+                    ? localizedFailure(context, error)
+                    : context.tr(
+                        'Activities are unavailable. Try again.',
+                        '活动暂不可用，请重试。',
+                      ),
                 icon: Icons.cloud_off_outlined,
                 isError: true,
               ),
@@ -108,9 +129,12 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                 Column(
                   children: [
                     if (items.isEmpty)
-                      const StatusPanel(
-                        title: 'No activities to show',
-                        body: 'This available selection is empty. You can check again later.',
+                      StatusPanel(
+                        title: context.tr('No activities to show', '暂无活动'),
+                        body: context.tr(
+                          'This available selection is empty. You can check again later.',
+                          '当前可用范围内没有活动，可以稍后再查看。',
+                        ),
                         icon: Icons.event_busy_outlined,
                       ),
                     for (final item in items)
@@ -128,7 +152,10 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                               ? null
                               : const Icon(Icons.chevron_right),
                           subtitle: Text(
-                            '${_time(context, item.startAt)}${item.endAt == null ? '' : '\nUntil ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
+                            context.tr(
+                              '${_time(context, item.startAt)}${item.endAt == null ? '' : '\nUntil ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
+                              '${_time(context, item.startAt)}${item.endAt == null ? '' : '\n结束于 ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
+                            ),
                           ),
                           onTap: widget.onSelect == null
                               ? null
@@ -155,30 +182,54 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                       summary.title,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    Text('Starts: ${_time(context, summary.startAt)}'),
+                    Text(
+                      context.tr(
+                        'Starts: ${_time(context, summary.startAt)}',
+                        '开始：${_time(context, summary.startAt)}',
+                      ),
+                    ),
                     Text(
                       summary.endAt == null
-                          ? 'End time not provided.'
-                          : 'Ends: ${_time(context, summary.endAt!)}',
+                          ? context.tr('End time not provided.', '未提供结束时间。')
+                          : context.tr(
+                              'Ends: ${_time(context, summary.endAt!)}',
+                              '结束：${_time(context, summary.endAt!)}',
+                            ),
                     ),
-                    Text(locationLabel ?? 'Location unavailable.'),
-                    Text(categoryLabel ?? 'Category unavailable.'),
-                    const Text('Description unavailable.'),
+                    Text(
+                      locationLabel ??
+                          context.tr('Location unavailable.', '暂无地点信息。'),
+                    ),
+                    Text(
+                      categoryLabel ??
+                          context.tr('Category unavailable.', '暂无分类信息。'),
+                    ),
+                    Text(context.tr('Description unavailable.', '暂无简介。')),
                     const SizedBox(height: 16),
-                    const Text(_sourceActionDisclosure),
+                    Text(
+                      context.tr(
+                        _sourceActionDisclosure,
+                        '在 Ticketmaster 查看会通过浏览器打开来源页面。浏览器将直接连接 Ticketmaster，其隐私与 Cookie 政策适用。打开或复制链接不代表报名，也不会标记为将参加。复制的链接可能保留在设备剪贴板中。',
+                      ),
+                    ),
                     FilledButton(
                       onPressed: () => _action(true),
-                      child: const Text('View on Ticketmaster'),
+                      child: Text(
+                        context.tr('View on Ticketmaster', '在 Ticketmaster 查看'),
+                      ),
                     ),
                     TextButton(
                       onPressed: () => _action(false),
-                      child: const Text('Copy source link'),
+                      child: Text(context.tr('Copy source link', '复制来源链接')),
                     ),
                   ],
                 ),
-              _ => const StatusPanel(
-                title: 'Activity view cleared',
-                body: 'Reload activities to continue.',
+              _ => StatusPanel(
+                title: context.tr('Activity view cleared', '活动数据已清除'),
+                body: context.tr(
+                  'Reload activities to continue.',
+                  '请重新加载活动后继续。',
+                ),
                 icon: Icons.refresh,
               ),
             },
@@ -186,14 +237,28 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
             if (!state.isLoading)
               OutlinedButton(
                 onPressed: controller.load,
-                child: Text(state.hasError ? 'Retry' : 'Reload'),
+                child: Text(
+                  state.hasError
+                      ? context.tr('Retry', '重试')
+                      : context.tr('Reload', '重新加载'),
+                ),
               ),
             const SizedBox(height: 16),
             if (widget.browseId.isEmpty) ...[
-              const Text(_listDisclosure),
+              Text(
+                context.tr(
+                  _listDisclosure,
+                  '活动来源为 Ticketmaster，活动请求通过 ENMORI 发送。你的登录令牌、资料、签到、人设与 AI 消息不会发送给 Ticketmaster。Ticketmaster 会收到活动请求和服务器连接信息。',
+                ),
+              ),
               const SizedBox(height: 12),
             ],
-            const Text(_lifetimeDisclosure),
+            Text(
+              context.tr(
+                _lifetimeDisclosure,
+                '活动数据最多在 ENMORI 内存中保留五分钟，应用进入后台或退出登录时会清除。重新加载可获取最新信息。',
+              ),
+            ),
           ],
         ),
       ),
@@ -203,5 +268,7 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
 
 String _time(BuildContext context, String value) {
   final date = DateTime.tryParse(value);
-  return date == null ? 'Time unavailable' : localTimeLabel(context, date);
+  return date == null
+      ? context.tr('Time unavailable', '暂无时间信息')
+      : localTimeLabel(context, date);
 }
