@@ -1,3 +1,4 @@
+import 'package:enmori/core/presentation/enmori_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -55,7 +56,7 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
     final state = ref.watch(signInControllerProvider);
     final pending = state is CommandPending<void>;
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign in')),
+      appBar: AppBar(title: Text(context.tr('Sign in', "登录"))),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -66,11 +67,11 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
               padding: const EdgeInsets.all(16),
               children: [
                 Text(
-                  'Sign in to ENMORI',
+                  context.tr('Sign in to ENMORI', "登录 ENMORI"),
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
-                const Text('Welcome back.'),
+                Text(context.tr('Welcome back.', "欢迎回来。")),
                 const SizedBox(height: 24),
                 Form(
                   key: _formKey,
@@ -81,8 +82,8 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                         key: const Key('sign-in-email'),
                         controller: _emailController,
                         autofillHints: const [AutofillHints.email],
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
+                        decoration: InputDecoration(
+                          labelText: context.tr('Email', "邮箱"),
                           prefixIcon: Icon(Icons.mail_outline),
                         ),
                         keyboardType: TextInputType.emailAddress,
@@ -90,7 +91,7 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                         validator: (value) {
                           final email = value?.trim() ?? '';
                           return email.isEmpty || !email.contains('@')
-                              ? 'Enter a valid email.'
+                              ? context.tr('Enter a valid email.', "请输入有效邮箱。")
                               : null;
                         },
                       ),
@@ -102,8 +103,8 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                         decoration: InputDecoration(
                           suffixIcon: IconButton(
                             tooltip: _showPassword
-                                ? 'Hide password'
-                                : 'Show password',
+                                ? context.tr('Hide password', "隐藏密码")
+                                : context.tr('Show password', "显示密码"),
                             onPressed: () =>
                                 setState(() => _showPassword = !_showPassword),
                             icon: Icon(
@@ -112,13 +113,13 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                                   : Icons.visibility,
                             ),
                           ),
-                          labelText: 'Password',
+                          labelText: context.tr('Password', "密码"),
                           prefixIcon: const Icon(Icons.lock_outline),
                         ),
                         obscureText: !_showPassword,
                         textInputAction: TextInputAction.done,
                         validator: (value) => (value ?? '').isEmpty
-                            ? 'Enter your password.'
+                            ? context.tr('Enter your password.', "请输入密码。")
                             : null,
                       ),
                       if (state case CommandFailed<void>(:final failure)) ...[
@@ -144,7 +145,11 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                                 ),
                               )
                             : const Icon(Icons.login),
-                        label: Text(pending ? 'Signing in' : 'Sign in'),
+                        label: Text(
+                          pending
+                              ? context.tr('Signing in', "正在登录")
+                              : context.tr('Sign in', "登录"),
+                        ),
                       ),
                       TextButton(
                         key: const Key('forgot-password'),
@@ -156,12 +161,12 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                                       const AuthEmailPage(resetPassword: true),
                                 ),
                               ),
-                        child: const Text('Forgot password?'),
+                        child: Text(context.tr('Forgot password?', "忘记密码？")),
                       ),
                       TextButton(
                         key: const Key('sign-in-create-account'),
                         onPressed: pending ? null : widget.onCreateAccount,
-                        child: const Text('Create account'),
+                        child: Text(context.tr('Create account', "创建账号")),
                       ),
                     ],
                   ),
@@ -185,12 +190,22 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
   }
 
   String _failureCopy(AppFailureKind kind) => switch (kind) {
-    AppFailureKind.authenticationInvalid =>
+    AppFailureKind.authenticationInvalid => context.tr(
       'Enter valid account details and try again.',
-    AppFailureKind.authForbidden => 'This account cannot continue.',
+      "请输入有效账号信息后重试。",
+    ),
+    AppFailureKind.authForbidden => context.tr(
+      'This account cannot continue.',
+      "此账号暂时无法继续。",
+    ),
     AppFailureKind.serviceUnavailable ||
-    AppFailureKind.configurationUnavailable =>
+    AppFailureKind.configurationUnavailable => context.tr(
       'This service is temporarily unavailable. Try again.',
-    _ => 'This service is temporarily unavailable. Try again.',
+      "服务暂时不可用，请重试。",
+    ),
+    _ => context.tr(
+      'This service is temporarily unavailable. Try again.',
+      "服务暂时不可用，请重试。",
+    ),
   };
 }

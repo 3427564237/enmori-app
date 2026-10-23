@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:enmori/features/account/domain/profile_details.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,6 +22,246 @@ import '../support/fakes.dart';
 import '../support/fake_account_preferences.dart';
 
 void main() {
+  testWidgets(
+    'profile recovery keeps edits, adopts remote privacy, saves latest revision and rereads',
+    (tester) async {
+      final h = await start(tester);
+      await tap(tester, 'profile-edit');
+      await tester.enterText(
+        find.byKey(const Key('profile-display-name')),
+        'My edit',
+      );
+      h.prefs.saveFailure = const AppFailure(
+        kind: AppFailureKind.profileRevisionPreconditionFailed,
+        message: 'conflict',
+      );
+      await tap(tester, 'profile-save');
+      h.prefs.profile = const OwnProfile(
+        username: 'member_a',
+        displayName: 'Other edit',
+        visibility: ProfileVisibility.friendsOnly,
+        revision: 4,
+        details: ProfileDetails(region: 'Singapore'),
+      );
+      await tap(tester, 'preferences-review');
+      expect(find.text('My edit'), findsOneWidget);
+      expect(find.text('Singapore'), findsOneWidget);
+      expect(
+        find.textContaining('Also changed elsewhere: Display name'),
+        findsOneWidget,
+      );
+      expect(h.prefs.profileRevisions, [0]);
+      expect(
+        tester
+            .widget<DropdownButton<ProfileVisibility>>(
+              find.byKey(const Key('profile-visibility')),
+            )
+            .value,
+        ProfileVisibility.friendsOnly,
+      );
+      h.prefs.saveFailure = null;
+      await tap(tester, 'profile-save');
+      expect(h.prefs.profileRevisions, [0, 4]);
+      expect(find.text('Profile saved.'), findsOneWidget);
+      await tester.pageBack();
+      await frames(tester);
+      expect(find.text('My edit'), findsOneWidget);
+      expect(find.text('Friends-only profile'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'recovery read failure retains draft for another explicit check',
+    (tester) async {
+      final h = await start(tester);
+      await tap(tester, 'profile-edit');
+      await tester.enterText(
+        find.byKey(const Key('profile-display-name')),
+        'Keep me',
+      );
+      h.prefs.saveFailure = const AppFailure(
+        kind: AppFailureKind.serviceUnavailable,
+        message: 'unknown',
+      );
+      await tap(tester, 'profile-save');
+      h.prefs.profileReads.add(
+        Future.value(
+          const Failure(
+            AppFailure(
+              kind: AppFailureKind.serviceUnavailable,
+              message: 'read failed',
+            ),
+          ),
+        ),
+      );
+      await tap(tester, 'preferences-review');
+      expect(find.byKey(const Key('preferences-error')), findsOneWidget);
+      expect(h.prefs.profileRevisions, [0]);
+      await tap(tester, 'preferences-review');
+      expect(find.text('Keep me'), findsOneWidget);
+      expect(h.prefs.profileRevisions, [0]);
+      await tap(tester, 'preferences-use-latest');
+      expect(find.text('Keep me'), findsNothing);
+      await tester.pageBack();
+      await frames(tester);
+      expect(find.text('Leave without saving?'), findsNothing);
+      expect(find.byKey(const Key('route-own-profile')), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'settings recovery preserves remote changes and never retries a mutation automatically',
+    (tester) async {
+      final h = await start(tester);
+      await tap(tester, 'profile-settings');
+      await tap(tester, 'settings-home-weather');
+      h.prefs.saveFailure = const AppFailure(
+        kind: AppFailureKind.settingsRevisionPreconditionFailed,
+        message: 'conflict',
+      );
+      await tap(tester, 'settings-save');
+      h.prefs.settings = const OwnSettings(
+        checkInVisibility: CheckInVisibility.friendsOnly,
+        consent: OptionalProcessingConsent.rejected,
+        revision: 5,
+        defaultCheckInLocation: true,
+      );
+      await tap(tester, 'preferences-review');
+      expect(
+        tester
+            .widget<SwitchListTile>(
+              find.byKey(const Key('settings-home-weather')),
+            )
+            .value,
+        isTrue,
+      );
+      expect(
+        tester
+            .widget<SwitchListTile>(
+              find.byKey(const Key('settings-default-location')),
+            )
+            .value,
+        isTrue,
+      );
+      expect(
+        tester
+            .widget<SwitchListTile>(find.byKey(const Key('settings-consent')))
+            .value,
+        isFalse,
+      );
+      expect(h.prefs.settingsSaveCount, 1);
+      h.prefs.saveFailure = null;
+      await tap(tester, 'settings-save');
+      expect(h.prefs.settings.revision, 6);
+      expect(h.prefs.settings.homeWeatherAuto, isTrue);
+      expect(h.prefs.settings.defaultCheckInLocation, isTrue);
+      expect(h.prefs.settings.checkInVisibility, CheckInVisibility.friendsOnly);
+      expect(h.prefs.settingsSaveCount, 2);
+      expect(find.text('Settings saved.'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'unknown save already committed is reconciled without a second write',
+    (tester) async {
+      final h = await start(tester);
+      await tap(tester, 'profile-edit');
+      await tester.enterText(
+        find.byKey(const Key('profile-display-name')),
+        'Committed',
+      );
+      h.prefs.saveFailure = const AppFailure(
+        kind: AppFailureKind.serviceUnavailable,
+        message: 'unknown',
+      );
+      await tap(tester, 'profile-save');
+      h.prefs.profile = const OwnProfile(
+        username: 'member_a',
+        displayName: 'Committed',
+        visibility: ProfileVisibility.private,
+        revision: 1,
+      );
+      await tap(tester, 'preferences-review');
+      expect(find.text('Committed'), findsOneWidget);
+      expect(find.text('Unsaved changes'), findsNothing);
+      expect(h.prefs.profileRevisions, [0]);
+      await tester.pageBack();
+      await frames(tester);
+      expect(find.text('Leave without saving?'), findsNothing);
+      expect(find.byKey(const Key('route-own-profile')), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'fresh edits clear success feedback and remain guarded after recovery',
+    (tester) async {
+      final h = await start(tester);
+      await tap(tester, 'profile-edit');
+      await tester.enterText(
+        find.byKey(const Key('profile-display-name')),
+        'Saved',
+      );
+      await tap(tester, 'profile-save');
+      expect(find.byKey(const Key('preferences-save-success')), findsOneWidget);
+      await tester.enterText(
+        find.byKey(const Key('profile-display-name')),
+        'New draft',
+      );
+      await frames(tester);
+      expect(find.byKey(const Key('preferences-save-success')), findsNothing);
+      expect(find.text('Unsaved changes'), findsOneWidget);
+      h.prefs.saveFailure = const AppFailure(
+        kind: AppFailureKind.profileRevisionPreconditionFailed,
+        message: 'conflict',
+      );
+      await tap(tester, 'profile-save');
+      await tap(tester, 'preferences-review');
+      await tester.pageBack();
+      await frames(tester);
+      expect(find.text('Leave without saving?'), findsOneWidget);
+      await tester.tap(find.text('Stay'));
+      await frames(tester);
+      expect(find.text('New draft'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'replacement session retires pending recovery and its late result',
+    (tester) async {
+      final h = await start(tester);
+      await tap(tester, 'profile-edit');
+      await tester.enterText(
+        find.byKey(const Key('profile-display-name')),
+        'Old private draft',
+      );
+      h.prefs.saveFailure = const AppFailure(
+        kind: AppFailureKind.profileRevisionPreconditionFailed,
+        message: 'conflict',
+      );
+      await tap(tester, 'profile-save');
+      final pending = Completer<Result<OwnProfile>>();
+      h.prefs.profileReads.add(pending.future);
+      await tap(tester, 'preferences-review');
+      h.auth.emit(AuthSessionAuthenticated(subject: 'member-a'));
+      await frames(tester);
+      pending.complete(
+        const Success(
+          OwnProfile(
+            username: 'member_a',
+            displayName: 'Old remote',
+            visibility: ProfileVisibility.public,
+            revision: 8,
+          ),
+        ),
+      );
+      await frames(tester);
+      expect(find.text('Old private draft'), findsNothing);
+      expect(find.text('Old remote'), findsNothing);
+      expect(find.byKey(const Key('preferences-review-message')), findsNothing);
+      expect(h.prefs.profileRevisions, [0]);
+    },
+  );
+
   testWidgets('explicit default switches save and independently reread', (
     tester,
   ) async {
