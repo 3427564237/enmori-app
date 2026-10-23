@@ -10,6 +10,7 @@ final class HomeShellPage extends StatelessWidget {
     this.socialStyle = false,
     this.socialSection,
     this.weatherSection,
+    this.daySection,
     this.onSelectTab,
     this.onOpenSettings,
     this.onEditInterests,
@@ -29,6 +30,7 @@ final class HomeShellPage extends StatelessWidget {
   final bool socialStyle;
   final Widget? socialSection;
   final Widget? weatherSection;
+  final Widget? daySection;
   final ValueChanged<int>? onSelectTab;
   final VoidCallback? onOpenSettings;
   final VoidCallback onStartCheckIn;
@@ -72,6 +74,7 @@ final class HomeShellPage extends StatelessWidget {
               icon: const Icon(Icons.edit_note),
               label: Text(context.tr('New Check-in', "新建签到")),
             ),
+            ?daySection,
             const SizedBox(height: 12),
             OutlinedButton.icon(
               key: const Key('edit-interests-button'),
@@ -212,6 +215,7 @@ final class HomeShellPage extends StatelessWidget {
                 icon: const Icon(Icons.edit_note),
                 label: Text(context.tr('New Check-in', "新建签到")),
               ),
+              ?daySection,
               if (weatherSection != null) ...[
                 const SizedBox(height: 16),
                 weatherSection!,
