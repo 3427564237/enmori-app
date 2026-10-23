@@ -477,7 +477,14 @@ void main() {
         final action = find.text(
           language == 'zh' ? '查看活动与我的计划' : 'View event and my plan',
         );
-        await tester.ensureVisible(action);
+        // Large English copy puts this card beyond the lazy viewport cache.
+        // Scroll to build it before asserting the real touch target.
+        await tester.scrollUntilVisible(
+          action,
+          300,
+          scrollable: find.byType(Scrollable).first,
+          maxScrolls: 12,
+        );
         await tester.pumpAndSettle();
         expect(action.hitTestable(), findsOneWidget);
         expect(find.text('An evening of music a'), findsOneWidget);
