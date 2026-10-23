@@ -12,10 +12,11 @@ Module PR target: fixed `souma/product-round2-review-base-20261023` at the commo
 baseline above (replaces the initial assembly target; decision records why).
 Integration PR target:
 `souma/product-integration-20261023`. All new PRs are Draft; no main merge.
+Integration [Draft #185](https://github.com/3427564237/enmori-app/pull/185).
 
 | Module | Existing chat ID | New branch | Capability / consumer / interface | Delivery SHA / status |
 | --- | --- | --- | --- | --- |
-| Integration | `01a1689a-d9ea-7cd0-82cc-8da9d0d1770f` | `souma/product-round2-integration-20261023` | Shared routes, composition and final candidate | Composition checked; signed candidate pending |
+| Integration | `01a1689a-d9ea-7cd0-82cc-8da9d0d1770f` | `souma/product-round2-integration-20261023` | Shared routes, composition and final candidate | Product `1cc55bf234a6180eb1657135ee92b4ff65860c7d`; signed v26 verified; [Draft #185](https://github.com/3427564237/enmori-app/pull/185) |
 | App | `01a1689b-0799-7550-a624-e44ec1aa3081` | `souma/product-round2-app-20261023` | Today's own Check-in preview → detail → refreshed Home; existing own-date Repository + device date/zone | Integrated `b1492ef9efcc2a624aa6820f859e3e9b60247aed`; [Draft #181](https://github.com/3427564237/enmori-app/pull/181) |
 | Social | `01a1689b-0dd3-7560-b85b-25100b4a02eb` | `souma/product-round2-social-20261023` | Visible user's plans vs own choices → Event detail → fresh comparison; existing participation reads | Integrated `f72f965a0bcdc67c150d63ee2a6fe55d725b90f3`; [Draft #184](https://github.com/3427564237/enmori-app/pull/184) |
 | Journal | `01a1689b-1662-7f13-bc79-b5ffeeadd284` | `souma/product-round2-journal-20261023` | Own saved record → new editable text draft → explicit create; existing readOwned/create | Integrated `b9f4b644a1f2ef6b92927421e055864e09b31d39`; [Draft #182](https://github.com/3427564237/enmori-app/pull/182) |
@@ -82,3 +83,9 @@ explicit Save. This is synthetic static preview evidence only. No additional
 feature, dependency, data model, service configuration or signing change is
 introduced by assembly. Candidate version and artifact hashes are recorded only
 after the release build and signature/package checks succeed.
+
+The source is now frozen at `1cc55bf234a6180eb1657135ee92b4ff65860c7d`.
+[Signed v26 evidence](../evidence/sprint3/2026-10-24-li-group-v26.md) records the
+successful build, package/version, artifact SHA-256 and certificate match with
+v25. The local APK is in `build/group-delivery-v26/`. Installation, phone testing
+and runtime deployment remain explicitly not run; existing real data is intact.
