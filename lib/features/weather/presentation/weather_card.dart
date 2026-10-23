@@ -1,3 +1,4 @@
+import 'package:enmori/core/presentation/enmori_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/weather.dart';
@@ -27,11 +28,17 @@ final class _WeatherCardState extends State<WeatherCard> {
       final opened = await widget.openAttribution(Uri.parse(url));
       if (mounted) {
         setState(
-          () => _error = opened ? null : 'The link could not be opened.',
+          () => _error = opened
+              ? null
+              : context.tr('The link could not be opened.', "无法打开链接。"),
         );
       }
     } catch (_) {
-      if (mounted) setState(() => _error = 'The link could not be opened.');
+      if (mounted) {
+        setState(
+          () => _error = context.tr('The link could not be opened.', "无法打开链接。"),
+        );
+      }
     }
   }
 
@@ -46,7 +53,8 @@ final class _WeatherCardState extends State<WeatherCard> {
             children: [
               Expanded(
                 child: Semantics(
-                  label: widget.snapshot.label,
+                  label:
+                      '${_conditionLabel(context, widget.snapshot.condition)} · ${widget.snapshot.temperatureCelsius.toStringAsFixed(1)}°C',
                   child: ExcludeSemantics(
                     child: Wrap(
                       spacing: 12,
@@ -62,7 +70,7 @@ final class _WeatherCardState extends State<WeatherCard> {
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         Text(
-                          widget.snapshot.condition.label,
+                          _conditionLabel(context, widget.snapshot.condition),
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ],
@@ -83,7 +91,7 @@ final class _WeatherCardState extends State<WeatherCard> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  widget.snapshot.label,
+                  '${_conditionLabel(context, widget.snapshot.condition)} · ${widget.snapshot.temperatureCelsius.toStringAsFixed(1)}°C',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -93,7 +101,10 @@ final class _WeatherCardState extends State<WeatherCard> {
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              'Updated ${localTimeLabel(context, widget.snapshot.observedAt)}',
+              context.tr(
+                'Updated ${localTimeLabel(context, widget.snapshot.observedAt)}',
+                '更新于 ${localTimeLabel(context, widget.snapshot.observedAt)}',
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
@@ -106,7 +117,9 @@ final class _WeatherCardState extends State<WeatherCard> {
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 textStyle: Theme.of(context).textTheme.bodySmall,
               ),
-              child: const Text('Weather data by Open-Meteo'),
+              child: Text(
+                context.tr('Weather data by Open-Meteo', "天气数据由 Open-Meteo 提供"),
+              ),
             ),
             TextButton(
               onPressed: () =>
@@ -120,7 +133,7 @@ final class _WeatherCardState extends State<WeatherCard> {
           ],
         ),
         Text(
-          'Conditions normalized by ENMORI.',
+          context.tr('Conditions normalized by ENMORI.', "天气状况由 ENMORI 统一归类。"),
           style: Theme.of(context).textTheme.bodySmall,
         ),
         if (_error case final error?)
@@ -141,3 +154,16 @@ IconData _weatherIcon(WeatherCondition condition) => switch (condition) {
   WeatherCondition.snow => Icons.ac_unit,
   WeatherCondition.thunderstorm => Icons.thunderstorm_outlined,
 };
+
+String _conditionLabel(BuildContext context, WeatherCondition condition) =>
+    context.tr(condition.label, switch (condition) {
+      WeatherCondition.clear => '晴',
+      WeatherCondition.partlyCloudy => '多云',
+      WeatherCondition.overcast => '阴',
+      WeatherCondition.fog => '雾',
+      WeatherCondition.drizzle => '毛毛雨',
+      WeatherCondition.rain => '雨',
+      WeatherCondition.snow => '雪',
+      WeatherCondition.showers => '阵雨',
+      WeatherCondition.thunderstorm => '雷暴',
+    });

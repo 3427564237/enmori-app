@@ -1,3 +1,4 @@
+import 'package:enmori/core/presentation/enmori_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../features/event_recommendations/presentation/event_recommendations_page.dart';
@@ -53,68 +54,76 @@ final class HomeShellPage extends StatelessWidget {
           key: const Key('route-home'),
           padding: const EdgeInsets.all(24),
           children: [
-            Text('Home', style: Theme.of(context).textTheme.headlineMedium),
+            Text(
+              context.tr('Home', "首页"),
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
             const SizedBox(height: 12),
-            const Text('Your Check-in and upcoming event recommendations.'),
+            Text(
+              context.tr(
+                'Your Check-in and upcoming event recommendations.',
+                "记录当下，发现即将开始的活动。",
+              ),
+            ),
             const SizedBox(height: 24),
             FilledButton.icon(
               key: const Key('r6-new-check-in-button'),
               onPressed: onStartCheckIn,
               icon: const Icon(Icons.edit_note),
-              label: const Text('New Check-in'),
+              label: Text(context.tr('New Check-in', "新建签到")),
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               key: const Key('edit-interests-button'),
               onPressed: onEditInterests,
               icon: const Icon(Icons.interests_outlined),
-              label: const Text('Edit interests'),
+              label: Text(context.tr('Edit interests', "编辑兴趣")),
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               key: const Key('my-profile-button'),
               onPressed: onOpenProfile,
               icon: const Icon(Icons.person_outline),
-              label: const Text('My profile'),
+              label: Text(context.tr('My profile', "我的资料")),
             ),
             if (onOpenFriends != null)
               OutlinedButton.icon(
                 key: const Key('home-friends'),
                 onPressed: onOpenFriends,
                 icon: const Icon(Icons.people_outline),
-                label: const Text('Friends'),
+                label: Text(context.tr('Friends', "好友")),
               ),
             if (onManagePersonas != null)
               OutlinedButton.icon(
                 key: const Key('home-manage-personas'),
                 onPressed: onManagePersonas,
                 icon: const Icon(Icons.manage_accounts_outlined),
-                label: const Text('Manage Personas'),
+                label: Text(context.tr('Manage Personas', "管理 AI 角色")),
               ),
             if (onOpenHistory != null)
               OutlinedButton.icon(
                 key: const Key('home-check-in-history'),
                 onPressed: onOpenHistory,
                 icon: const Icon(Icons.history),
-                label: const Text('Check-in History'),
+                label: Text(context.tr('Check-in History', "签到记录")),
               ),
             if (onOpenAi != null)
               OutlinedButton.icon(
                 key: const Key('home-ai-conversation'),
                 onPressed: onOpenAi,
                 icon: const Icon(Icons.chat_outlined),
-                label: const Text('AI conversation'),
+                label: Text(context.tr('AI conversation', "AI 对话")),
               ),
             if (onBrowseActivities != null)
               OutlinedButton.icon(
                 key: const Key('home-browse-activities'),
                 onPressed: onBrowseActivities,
                 icon: const Icon(Icons.explore_outlined),
-                label: const Text('Browse activities'),
+                label: Text(context.tr('Browse activities', "浏览活动")),
               ),
             const SizedBox(height: 32),
             Text(
-              'Events for you',
+              context.tr('Events for you', "为你推荐的活动"),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
@@ -154,8 +163,11 @@ final class HomeShellPage extends StatelessWidget {
         IconButton(
           key: const Key('social-settings'),
           tooltip: onOpenSettings == null
-              ? 'Settings & privacy unavailable in this version'
-              : 'Settings & privacy',
+              ? context.tr(
+                  'Settings & privacy unavailable in this version',
+                  "此版本暂不支持设置与隐私",
+                )
+              : context.tr('Settings & privacy', "设置与隐私"),
           onPressed: onOpenSettings,
           icon: const Icon(Icons.settings_outlined),
         ),
@@ -176,7 +188,7 @@ final class HomeShellPage extends StatelessWidget {
               Semantics(
                 header: true,
                 child: Text(
-                  'Today',
+                  context.tr('Today', "今天"),
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
               ),
@@ -187,7 +199,10 @@ final class HomeShellPage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Record this moment, and how you feel.',
+                context.tr(
+                  'Record this moment, and how you feel.',
+                  "记下这一刻，也记下你的感受。",
+                ),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 12),
@@ -195,7 +210,7 @@ final class HomeShellPage extends StatelessWidget {
                 key: const Key('r6-new-check-in-button'),
                 onPressed: onStartCheckIn,
                 icon: const Icon(Icons.edit_note),
-                label: const Text('New Check-in'),
+                label: Text(context.tr('New Check-in', "新建签到")),
               ),
               if (weatherSection != null) ...[
                 const SizedBox(height: 16),
@@ -204,7 +219,7 @@ final class HomeShellPage extends StatelessWidget {
               const SizedBox(height: 24),
               if (onOpenEvent != null)
                 EventRecommendationsSection(
-                  heading: 'Events for you',
+                  heading: context.tr('Events for you', "为你推荐的活动"),
                   onBrowseAll: onBrowseActivities,
                   onSeeAll: null,
                   onOpenEvent: onOpenEvent,
@@ -216,7 +231,7 @@ final class HomeShellPage extends StatelessWidget {
                 Semantics(
                   header: true,
                   child: Text(
-                    'Your space',
+                    context.tr('Your space', "我的空间"),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
@@ -224,16 +239,22 @@ final class HomeShellPage extends StatelessWidget {
                 _HomeShortcut(
                   key: const Key('social-ai-card'),
                   icon: Icons.auto_awesome_outlined,
-                  title: 'AI conversation',
-                  description: 'Talk with your active Persona.',
+                  title: context.tr('AI conversation', "AI 对话"),
+                  description: context.tr(
+                    'Talk with your active Persona.',
+                    "与当前 AI 角色聊一聊。",
+                  ),
                   onTap: onOpenAi,
                 ),
                 const SizedBox(height: 4),
                 _HomeShortcut(
                   key: const Key('home-check-in-history'),
                   icon: Icons.history,
-                  title: 'Check-in History',
-                  description: 'Open your saved Check-ins.',
+                  title: context.tr('Check-in History', "签到记录"),
+                  description: context.tr(
+                    'Open your saved Check-ins.',
+                    "回看已保存的签到。",
+                  ),
                   onTap: onOpenHistory,
                 ),
                 if (onOpenFootprint != null) ...[
@@ -241,8 +262,11 @@ final class HomeShellPage extends StatelessWidget {
                   _HomeShortcut(
                     key: const Key('home-footprint'),
                     icon: Icons.map_outlined,
-                    title: 'Footprint',
-                    description: 'See your Check-in points on the map.',
+                    title: context.tr('Footprint', "足迹"),
+                    description: context.tr(
+                      'See your Check-in points on the map.',
+                      "在地图上查看签到地点。",
+                    ),
                     onTap: onOpenFootprint,
                   ),
                 ],
@@ -254,13 +278,13 @@ final class HomeShellPage extends StatelessWidget {
                       actionKey: const Key('home-manage-personas'),
                       onPressed: onManagePersonas,
                       icon: Icons.manage_accounts_outlined,
-                      label: 'Manage Personas',
+                      label: context.tr('Manage Personas', "管理 AI 角色"),
                     ),
                     _HomeSecondaryAction(
                       actionKey: const Key('edit-interests-button'),
                       onPressed: onEditInterests,
                       icon: Icons.interests_outlined,
-                      label: 'Edit interests',
+                      label: context.tr('Edit interests', "编辑兴趣"),
                     ),
                   ],
                 ),
@@ -294,7 +318,9 @@ final class _HomeShortcut extends StatelessWidget {
     leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
     title: Text(title),
     subtitle: Text(
-      onTap == null ? 'Unavailable in this version.' : description,
+      onTap == null
+          ? context.tr('Unavailable in this version.', "此版本暂不支持。")
+          : description,
       style: Theme.of(context).textTheme.bodyMedium
           ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
     ),
@@ -331,7 +357,10 @@ final class _HomeSecondaryAction extends StatelessWidget {
       if (onPressed == null) ...[
         const SizedBox(height: 8),
         Text(
-          '$label is unavailable in this version.',
+          context.tr(
+            '$label is unavailable in this version.',
+            '此版本暂不支持$label。',
+          ),
           style: Theme.of(context).textTheme.bodyMedium
               ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
