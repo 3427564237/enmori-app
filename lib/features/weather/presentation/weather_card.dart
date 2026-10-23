@@ -9,11 +9,13 @@ final class WeatherCard extends StatefulWidget {
     required this.snapshot,
     required this.openAttribution,
     this.showUpdated = false,
+    this.actions,
     super.key,
   });
   final WeatherSnapshot snapshot;
   final Future<bool> Function(Uri) openAttribution;
   final bool showUpdated;
+  final Widget? actions;
   @override
   State<WeatherCard> createState() => _WeatherCardState();
 }
@@ -40,29 +42,36 @@ final class _WeatherCardState extends State<WeatherCard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.showUpdated)
-          Semantics(
-            label: widget.snapshot.label,
-            child: ExcludeSemantics(
-              child: Wrap(
-                spacing: 12,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Icon(
-                    _weatherIcon(widget.snapshot.condition),
-                    size: 32,
-                    color: Theme.of(context).colorScheme.primary,
+          Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  label: widget.snapshot.label,
+                  child: ExcludeSemantics(
+                    child: Wrap(
+                      spacing: 12,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Icon(
+                          _weatherIcon(widget.snapshot.condition),
+                          size: 24,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        Text(
+                          '${widget.snapshot.temperatureCelsius.toStringAsFixed(1)}°C',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        Text(
+                          widget.snapshot.condition.label,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ],
+                    ),
                   ),
-                  Text(
-                    '${widget.snapshot.temperatureCelsius.toStringAsFixed(1)}°C',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  Text(
-                    widget.snapshot.condition.label,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
+                ),
               ),
-            ),
+              ?widget.actions,
+            ],
           )
         else
           Row(

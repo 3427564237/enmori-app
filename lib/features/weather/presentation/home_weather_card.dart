@@ -3,11 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'home_weather_controller.dart';
 import 'weather_card.dart';
-import '../../../core/presentation/section_heading.dart';
 
 final class HomeWeatherCard extends ConsumerStatefulWidget {
-  const HomeWeatherCard({required this.openAttribution, super.key});
+  const HomeWeatherCard({
+    required this.openAttribution,
+    this.onOpenSettings,
+    super.key,
+  });
   final Future<bool> Function(Uri) openAttribution;
+  final VoidCallback? onOpenSettings;
   @override
   ConsumerState<HomeWeatherCard> createState() => _HomeWeatherCardState();
 }
@@ -95,78 +99,88 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeWeatherControllerProvider);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SectionHeading(
-              title: 'Current weather',
-              actions: [
-                if (state.weather != null)
-                  IconButton(
-                    tooltip: 'Refresh weather',
-                    onPressed: state.busy ? null : _requestWeather,
-                    icon: const Icon(Icons.refresh),
-                  ),
-                PopupMenuButton<String>(
-                  tooltip: 'Weather options',
-                  onSelected: (action) =>
-                      action == 'clear' ? controller.clear() : _showInfo(),
-                  itemBuilder: (_) => [
-                    const PopupMenuItem(
-                      value: 'info',
-                      child: Text('About Home weather'),
-                    ),
-                    if (state.weather != null)
-                      const PopupMenuItem(
-                        value: 'clear',
-                        child: Text('Clear weather'),
-                      ),
-                  ],
-                ),
-              ],
+    final actions = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (state.weather != null)
+          IconButton(
+            tooltip: 'Refresh weather',
+            onPressed: state.busy ? null : _requestWeather,
+            icon: const Icon(Icons.refresh),
+          ),
+        PopupMenuButton<String>(
+          tooltip: 'Weather options',
+          onSelected: (action) {
+            if (action == 'clear') {
+              controller.clear();
+            } else if (action == 'settings') {
+              widget.onOpenSettings?.call();
+            } else {
+              _showInfo();
+            }
+          },
+          itemBuilder: (_) => [
+            const PopupMenuItem(
+              value: 'info',
+              child: Text('About Home weather'),
             ),
-            Text(
-              state.automatic
-                  ? 'Approximate location · auto on'
-                  : 'Optional · approximate location',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            if (state.weather case final weather?)
-              WeatherCard(
-                snapshot: weather,
-                showUpdated: true,
-                openAttribution: widget.openAttribution,
+            if (widget.onOpenSettings != null)
+              const PopupMenuItem(
+                value: 'settings',
+                child: Text('Weather settings'),
               ),
-            if (state.failure case final failure?)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Semantics(
-                  liveRegion: true,
-                  child: Text(failure.message),
-                ),
-              ),
-            if (state.busy)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: LinearProgressIndicator(
-                  semanticsLabel: 'Getting current weather',
-                ),
-              ),
-            if (state.weather == null)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: state.busy ? null : _requestWeather,
-                  icon: const Icon(Icons.cloud_outlined),
-                  label: const Text('Get local weather'),
-                ),
-              ),
+            if (state.weather != null)
+              const PopupMenuItem(value: 'clear', child: Text('Clear weather')),
           ],
         ),
-      ),
+      ],
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (state.weather == null)
+          Row(
+            children: [
+              Expanded(
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    alignment: Alignment.centerLeft,
+                    padding: EdgeInsets.zero,
+                  ),
+                  onPressed: state.busy ? null : _requestWeather,
+                  icon: const Icon(Icons.cloud_outlined),
+                  label: const Text('Add today’s weather'),
+                ),
+              ),
+              actions,
+            ],
+          ),
+        Text(
+          state.automatic
+              ? 'Approximate location · auto on'
+              : 'Optional · approximate location',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        if (state.weather case final weather?)
+          WeatherCard(
+            snapshot: weather,
+            showUpdated: true,
+            actions: actions,
+            openAttribution: widget.openAttribution,
+          ),
+        if (state.failure case final failure?)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Semantics(liveRegion: true, child: Text(failure.message)),
+          ),
+        if (state.busy)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: LinearProgressIndicator(
+              semanticsLabel: 'Getting current weather',
+            ),
+          ),
+      ],
     );
   }
 }

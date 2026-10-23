@@ -416,7 +416,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => HomeShellPage(
           socialSection: remoteGroup ? const GroupHomeSocial() : null,
           weatherSection: remoteGroup
-              ? HomeWeatherCard(openAttribution: openGroupAttribution)
+              ? HomeWeatherCard(
+                  openAttribution: openGroupAttribution,
+                  onOpenSettings: () =>
+                      openShared(context, AppRoutes.home, AppRoutes.settings),
+                )
               : null,
           socialStyle: socialPresentation,
           onSelectTab: socialPresentation
@@ -509,6 +513,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           AppRoutes.profile,
           4,
           OwnProfilePage(
+            onManagePersonas: personaPages != null
+                ? () => openPersona(context, AppRoutes.personas)
+                : null,
             adminCatalogueEntry: InterestAdminEntry(
               onOpen: () => context.push<void>(AppRoutes.adminInterests),
             ),

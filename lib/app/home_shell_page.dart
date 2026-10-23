@@ -180,9 +180,14 @@ final class HomeShellPage extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
               ),
-              const SizedBox(height: 4),
               Text(
-                'A moment to make your own.',
+                MaterialLocalizations.of(context)
+                    .formatFullDate(DateTime.now()),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Record this moment, and how you feel.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 12),
@@ -206,58 +211,60 @@ final class HomeShellPage extends StatelessWidget {
                   recommendationCardBuilder: recommendationCardBuilder,
                 ),
               ?socialSection,
-              const Divider(height: 32),
-              Semantics(
-                header: true,
-                child: Text(
-                  'Your space',
-                  style: Theme.of(context).textTheme.titleLarge,
+              if (onSelectTab == null || onOpenProfile == null) ...[
+                const Divider(height: 32),
+                Semantics(
+                  header: true,
+                  child: Text(
+                    'Your space',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              _HomeShortcut(
-                key: const Key('social-ai-card'),
-                icon: Icons.auto_awesome_outlined,
-                title: 'AI conversation',
-                description: 'Talk with your active Persona.',
-                onTap: onOpenAi,
-              ),
-              const SizedBox(height: 4),
-              _HomeShortcut(
-                key: const Key('home-check-in-history'),
-                icon: Icons.history,
-                title: 'Check-in History',
-                description: 'Open your saved Check-ins.',
-                onTap: onOpenHistory,
-              ),
-              if (onOpenFootprint != null) ...[
                 const SizedBox(height: 4),
                 _HomeShortcut(
-                  key: const Key('home-footprint'),
-                  icon: Icons.map_outlined,
-                  title: 'Footprint',
-                  description: 'See your Check-in points on the map.',
-                  onTap: onOpenFootprint,
+                  key: const Key('social-ai-card'),
+                  icon: Icons.auto_awesome_outlined,
+                  title: 'AI conversation',
+                  description: 'Talk with your active Persona.',
+                  onTap: onOpenAi,
                 ),
-              ],
-              const Divider(height: 24),
-              Wrap(
-                spacing: 12,
-                children: [
-                  _HomeSecondaryAction(
-                    actionKey: const Key('home-manage-personas'),
-                    onPressed: onManagePersonas,
-                    icon: Icons.manage_accounts_outlined,
-                    label: 'Manage Personas',
-                  ),
-                  _HomeSecondaryAction(
-                    actionKey: const Key('edit-interests-button'),
-                    onPressed: onEditInterests,
-                    icon: Icons.interests_outlined,
-                    label: 'Edit interests',
+                const SizedBox(height: 4),
+                _HomeShortcut(
+                  key: const Key('home-check-in-history'),
+                  icon: Icons.history,
+                  title: 'Check-in History',
+                  description: 'Open your saved Check-ins.',
+                  onTap: onOpenHistory,
+                ),
+                if (onOpenFootprint != null) ...[
+                  const SizedBox(height: 4),
+                  _HomeShortcut(
+                    key: const Key('home-footprint'),
+                    icon: Icons.map_outlined,
+                    title: 'Footprint',
+                    description: 'See your Check-in points on the map.',
+                    onTap: onOpenFootprint,
                   ),
                 ],
-              ),
+                const Divider(height: 24),
+                Wrap(
+                  spacing: 12,
+                  children: [
+                    _HomeSecondaryAction(
+                      actionKey: const Key('home-manage-personas'),
+                      onPressed: onManagePersonas,
+                      icon: Icons.manage_accounts_outlined,
+                      label: 'Manage Personas',
+                    ),
+                    _HomeSecondaryAction(
+                      actionKey: const Key('edit-interests-button'),
+                      onPressed: onEditInterests,
+                      icon: Icons.interests_outlined,
+                      label: 'Edit interests',
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

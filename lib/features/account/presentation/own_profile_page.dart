@@ -21,6 +21,7 @@ final class OwnProfilePage extends ConsumerWidget {
     this.onOpenRecords,
     this.onOpenHistory,
     this.onOpenFootprint,
+    this.onManagePersonas,
     this.adminCatalogueEntry,
     super.key,
   });
@@ -28,7 +29,7 @@ final class OwnProfilePage extends ConsumerWidget {
   final Future<void> Function()? onEditProfile, onOpenSettings;
   final Widget? participationSection;
   final Future<void> Function(String)? onOpenRecords;
-  final VoidCallback? onOpenHistory, onOpenFootprint;
+  final VoidCallback? onOpenHistory, onOpenFootprint, onManagePersonas;
   final Widget? adminCatalogueEntry;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -240,24 +241,20 @@ final class OwnProfilePage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   if (onOpenHistory != null)
-                    Card(
-                      child: ListTile(
-                        leading: const Icon(Icons.history),
-                        title: const Text('Check-in History'),
-                        subtitle: const Text('Notes, moods and saved moments'),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: onOpenHistory,
-                      ),
+                    ListTile(
+                      leading: const Icon(Icons.history),
+                      title: const Text('Check-in History'),
+                      subtitle: const Text('Notes, moods and saved moments'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: onOpenHistory,
                     ),
                   if (onOpenFootprint != null)
-                    Card(
-                      child: ListTile(
-                        leading: const Icon(Icons.map_outlined),
-                        title: const Text('Footprint'),
-                        subtitle: const Text('Your Check-in locations'),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: onOpenFootprint,
-                      ),
+                    ListTile(
+                      leading: const Icon(Icons.map_outlined),
+                      title: const Text('Footprint'),
+                      subtitle: const Text('Your Check-in locations'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: onOpenFootprint,
                     ),
                   if (onOpenHistory == null &&
                       onOpenRecords != null &&
@@ -268,6 +265,20 @@ final class OwnProfilePage extends ConsumerWidget {
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => onOpenRecords!(state.username!),
                     ),
+                  if (onManagePersonas != null) ...[
+                    const Divider(height: 32),
+                    ListTile(
+                      key: const Key('profile-manage-personas'),
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.auto_awesome_outlined),
+                      title: const Text('Your Personas'),
+                      subtitle: const Text(
+                        'Choose how your AI companion responds',
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: onManagePersonas,
+                    ),
+                  ],
                   if (participationSection != null) ...[
                     const SizedBox(height: 20),
                     participationSection!,
