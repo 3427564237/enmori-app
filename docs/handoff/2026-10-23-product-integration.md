@@ -71,5 +71,8 @@ phone fonts/keyboard/TalkBack, iOS compilation, shared-runtime switch and full
 UAT remain unverified. The AI Chinese preview still has a fixture-only missing
 heading glyph and is not counted as visual acceptance.
 
-The signed candidate and final static-check result are recorded separately in
-the v25 evidence note once the product source is frozen and the build verified.
+Product source is frozen at `fe56d5ffa7a72f07f1b389c6824f772137f81c68`.
+The signed v25 candidate, build recovery, hash/certificate and static-check result
+are recorded in [the v25 evidence](../evidence/sprint3/2026-10-23-li-group-v25.md).
+The APK is local under `build/group-delivery-v25/`; install and deployment were
+not performed. All six PRs remain Draft and the target branch remains unchanged.
