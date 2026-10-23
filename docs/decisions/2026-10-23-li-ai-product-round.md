@@ -19,3 +19,9 @@ The existing Ollama adapter requests `stream: false`; the client receives a comp
 ## Completion evidence
 
 Start from exact `7cf12cd398eb1a613eff2e5c867af5a623428cf5` in the existing managed worktree. Verify the new compose/review/send path, cancel preservation, session/consent change, message bounds, and Persona preview/edit continuity with targeted local tests. Preserve historical v24 evidence as a baseline only. Real model and phone acceptance is separately coordinated by Integration.
+
+## Confirmed language addition
+
+LI subsequently requested in App chat `01a1689b-0799-7550-a624-e44ec1aa3081`: “请在 Settings 增加语言切换，先支持中文和英文，保存用户选择，重新打开应用后仍生效。请覆盖实际界面文案，并与 Integration 协调其他模块的翻译和全局接线，避免只翻译设置页。沿用本轮交付规则。” The AI owner directly read that human message before implementation.
+
+Integration owns locale persistence/global wiring and supplied the shared `context.tr` helper plus existing SDK localization delegates. AI owns its visible chat, history, Drawer, small-plan and Persona copy, including validation, status and confirmation text. User-authored input, Persona names/expression fields, model responses, activity content and wire enum values remain unchanged. Small-plan template wording follows the language when the user explicitly builds the reviewed draft; changing language never rewrites an existing draft. This extends interface language coverage only and does not change any business/data rule.

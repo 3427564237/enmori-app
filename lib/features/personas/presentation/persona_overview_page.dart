@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
 import '../persona_providers.dart';
 import 'persona_page_parts.dart';
 
@@ -81,7 +82,7 @@ final class _PersonaOverviewState extends ConsumerState<_PersonaOverview> {
         .where((p) => p.personaId == collection.activePersonaId)
         .firstOrNull;
     return PersonaPageScaffold(
-      title: 'Personas',
+      title: context.tr('Personas', '人设'),
       onBack: _back,
       child: state.isLoading && collection == null
           ? const PersonaLoading()
@@ -100,14 +101,17 @@ final class _PersonaOverviewState extends ConsumerState<_PersonaOverview> {
                 if (collection != null && state.isCurrent) ...[
                   if (active != null) ...[
                     Text(
-                      'Active Persona',
+                      context.tr('Active Persona', '当前人设'),
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 16),
                     PersonaSummary(persona: active),
                   ] else
-                    const Text(
-                      'No Persona is active. Future AI requests use default presentation until you activate one.',
+                    Text(
+                      context.tr(
+                        'No Persona is active. Future AI requests use default presentation until you activate one.',
+                        '尚未启用人设。后续 AI 回复将使用默认表达，直到你启用一个人设。',
+                      ),
                       key: Key('persona-no-active'),
                     ),
                   const SizedBox(height: 24),
@@ -115,7 +119,7 @@ final class _PersonaOverviewState extends ConsumerState<_PersonaOverview> {
                 FilledButton(
                   key: const Key('persona-manage'),
                   onPressed: state.isBusy ? null : widget.onManage,
-                  child: const Text('Manage Personas'),
+                  child: Text(context.tr('Manage Personas', '管理人设')),
                 ),
               ],
             ),

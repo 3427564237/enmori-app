@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
 import '../domain/persona.dart';
 import '../persona_providers.dart';
 import 'persona_page_parts.dart';
@@ -89,10 +90,18 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
     final confirmed = await _confirmation.action(
       context,
       message: deleting
-          ? 'Permanently delete this Persona? This cannot be undone.${active ? '\n\nYou will have no active Persona until you activate another.' : ''}'
-          : 'Activate this Persona? It will replace your current active selection.',
-      cancelLabel: 'Cancel',
-      actionLabel: deleting ? 'Delete permanently' : 'Activate',
+          ? context.tr(
+              'Permanently delete this Persona? This cannot be undone.${active ? '\n\nYou will have no active Persona until you activate another.' : ''}',
+              '永久删除此人设？此操作无法撤销。${active ? '\n\n删除后将使用默认表达，直到你启用另一个人设。' : ''}',
+            )
+          : context.tr(
+              'Activate this Persona? It will replace your current active selection.',
+              '启用此人设？它将替换当前人设。',
+            ),
+      cancelLabel: context.tr('Cancel', '取消'),
+      actionLabel: deleting
+          ? context.tr('Delete permanently', '永久删除')
+          : context.tr('Activate', '启用'),
       actionKey: deleting
           ? 'persona-confirm-delete'
           : 'persona-confirm-activate',
@@ -159,7 +168,7 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
         .where((p) => p.personaId == _selected)
         .firstOrNull;
     return PersonaPageScaffold(
-      title: 'Manage Personas',
+      title: context.tr('Manage Personas', '管理人设'),
       onBack: _back,
       child: state.isLoading && collection == null
           ? const PersonaLoading()
@@ -183,15 +192,18 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                         children: [
                           Semantics(
                             liveRegion: true,
-                            child: const Text(
-                              'Your Personas changed. Reload them before trying again.',
+                            child: Text(
+                              context.tr(
+                                'Your Personas changed. Reload them before trying again.',
+                                '人设已发生变化，请重新加载后再试。',
+                              ),
                             ),
                           ),
                           const SizedBox(height: 12),
                           OutlinedButton(
                             key: const Key('persona-confirmation-reload'),
                             onPressed: state.isLoading ? null : _reload,
-                            child: const Text('Reload'),
+                            child: Text(context.tr('Reload', '重新加载')),
                           ),
                         ],
                       ),
@@ -200,13 +212,16 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                 if (state.isLoading) const LinearProgressIndicator(),
                 if (state.isCurrent && collection != null) ...[
                   if (collection.items.isEmpty)
-                    const Text(
-                      'You have no Personas yet.',
+                    Text(
+                      context.tr('You have no Personas yet.', '你还没有人设。'),
                       key: Key('persona-empty'),
                     ),
                   if (collection.items.length == 5)
-                    const Text(
-                      'You have 5 Personas. Delete one before creating another.',
+                    Text(
+                      context.tr(
+                        'You have 5 Personas. Delete one before creating another.',
+                        '你已有 5 个人设，请先删除一个再创建。',
+                      ),
                     ),
                   const SizedBox(height: 16),
                   FilledButton(
@@ -217,7 +232,7 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                             collection.items.length < 5
                         ? widget.onCreate
                         : null,
-                    child: const Text('Create Persona'),
+                    child: Text(context.tr('Create Persona', '创建人设')),
                   ),
                   const SizedBox(height: 16),
                   for (final persona in collection.items)
@@ -232,8 +247,10 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                               child: PopupMenuButton<String>(
                                 key: Key('persona-more-${persona.personaId}'),
                                 enabled: enabled,
-                                tooltip:
-                                    'More options for ${persona.fields.displayName}',
+                                tooltip: context.tr(
+                                  'More options for ${persona.fields.displayName}',
+                                  '${persona.fields.displayName}的更多操作',
+                                ),
                                 onSelected: (action) {
                                   if (!mounted || !enabled) return;
                                   if (action == 'edit') {
@@ -242,14 +259,18 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                                     _confirm(persona, deleting: true);
                                   }
                                 },
-                                itemBuilder: (_) => const [
+                                itemBuilder: (_) => [
                                   PopupMenuItem(
                                     value: 'edit',
-                                    child: Text('Edit Persona'),
+                                    child: Text(
+                                      context.tr('Edit Persona', '编辑人设'),
+                                    ),
                                   ),
                                   PopupMenuItem(
                                     value: 'delete',
-                                    child: Text('Delete Persona'),
+                                    child: Text(
+                                      context.tr('Delete Persona', '删除人设'),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -258,13 +279,19 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                             const SizedBox(height: 8),
                             Text(
                               collection.activePersonaId == persona.personaId
-                                  ? 'Active'
-                                  : 'Inactive',
+                                  ? context.tr('Active', '已启用')
+                                  : context.tr('Inactive', '未启用'),
                               semanticsLabel:
                                   collection.activePersonaId ==
                                       persona.personaId
-                                  ? 'Current activation status: Active'
-                                  : 'Current activation status: Inactive',
+                                  ? context.tr(
+                                      'Current activation status: Active',
+                                      '当前状态：已启用',
+                                    )
+                                  : context.tr(
+                                      'Current activation status: Inactive',
+                                      '当前状态：未启用',
+                                    ),
                             ),
                             const SizedBox(height: 8),
                             Wrap(
@@ -295,16 +322,25 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                                   child: Semantics(
                                     selected: _selected == persona.personaId,
                                     label: _selected == persona.personaId
-                                        ? 'Selected for activation: ${persona.fields.displayName}'
-                                        : 'Select for activation: ${persona.fields.displayName}',
+                                        ? context.tr(
+                                            'Selected for activation: ${persona.fields.displayName}',
+                                            '已选中待启用：${persona.fields.displayName}',
+                                          )
+                                        : context.tr(
+                                            'Select for activation: ${persona.fields.displayName}',
+                                            '选择待启用人设：${persona.fields.displayName}',
+                                          ),
                                     value:
                                         collection.activePersonaId ==
                                             persona.personaId
-                                        ? 'Currently active'
-                                        : 'Not active',
+                                        ? context.tr(
+                                            'Currently active',
+                                            '当前已启用',
+                                          )
+                                        : context.tr('Not active', '未启用'),
                                     excludeSemantics: true,
                                     child: _selected == persona.personaId
-                                        ? const Row(
+                                        ? Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               ExcludeSemantics(
@@ -314,10 +350,12 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                                                 ),
                                               ),
                                               SizedBox(width: 8),
-                                              Text('Selected'),
+                                              Text(
+                                                context.tr('Selected', '已选中'),
+                                              ),
                                             ],
                                           )
-                                        : const Text('Select'),
+                                        : Text(context.tr('Select', '选择')),
                                   ),
                                 ),
                                 OutlinedButton(
@@ -325,7 +363,7 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                                   onPressed: enabled
                                       ? () => widget.onEdit(persona.personaId)
                                       : null,
-                                  child: const Text('Edit'),
+                                  child: Text(context.tr('Edit', '编辑')),
                                 ),
                                 OutlinedButton(
                                   key: Key(
@@ -334,7 +372,7 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                                   onPressed: enabled
                                       ? () => _confirm(persona, deleting: true)
                                       : null,
-                                  child: const Text('Delete'),
+                                  child: Text(context.tr('Delete', '删除')),
                                 ),
                               ],
                             ),
@@ -344,14 +382,19 @@ final class _PersonaManagementState extends ConsumerState<_PersonaManagement> {
                     ),
                   if (selected != null) ...[
                     const SizedBox(height: 16),
-                    Text('Selected: ${selected.fields.displayName}'),
+                    Text(
+                      context.tr(
+                        'Selected: ${selected.fields.displayName}',
+                        '已选择：${selected.fields.displayName}',
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     FilledButton(
                       key: const Key('persona-activate'),
                       onPressed: enabled
                           ? () => _confirm(selected, deleting: false)
                           : null,
-                      child: const Text('Activate'),
+                      child: Text(context.tr('Activate', '启用')),
                     ),
                   ],
                 ],

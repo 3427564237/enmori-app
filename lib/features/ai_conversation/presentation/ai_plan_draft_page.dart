@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
 import '../ai_conversation_providers.dart';
 
 /// Local composition only. The ordinary chat composer owns explicit dispatch.
@@ -58,13 +59,22 @@ final class _AiPlanDraftPageState extends ConsumerState<AiPlanDraftPage> {
   void _prepareReview() {
     if (!(_form.currentState?.validate() ?? false)) return;
     _review.text = [
-      'Help me make a small, realistic plan.',
-      'What I want to work on:\n${_goal.text.trim()}',
+      context.tr('Help me make a small, realistic plan.', '请帮我制定一个简单、可行的小计划。'),
+      context.tr(
+        'What I want to work on:\n${_goal.text.trim()}',
+        '我想做的事：\n${_goal.text.trim()}',
+      ),
       if (_limits.text.trim().isNotEmpty)
-        'My limits or preferences:\n${_limits.text.trim()}',
-      'Suggest one manageable first step and a short plan. '
-          'If an essential detail is missing, ask me. '
-          'Do not assume I have completed any steps.',
+        context.tr(
+          'My limits or preferences:\n${_limits.text.trim()}',
+          '我的限制或偏好：\n${_limits.text.trim()}',
+        ),
+      context.tr(
+        'Suggest one manageable first step and a short plan. '
+            'If an essential detail is missing, ask me. '
+            'Do not assume I have completed any steps.',
+        '请给我一个容易开始的第一步和简短计划。如果缺少关键信息，请先问我。不要假定我已经完成任何步骤。',
+      ),
     ].join('\n\n');
     FocusScope.of(context).unfocus();
     _showReview(true);
@@ -85,7 +95,7 @@ final class _AiPlanDraftPageState extends ConsumerState<AiPlanDraftPage> {
         state.canSend;
     final length = _review.text.runes.length;
     return Scaffold(
-      appBar: AppBar(title: const Text('Make a small plan')),
+      appBar: AppBar(title: Text(context.tr('Make a small plan', '制定小计划'))),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -100,27 +110,36 @@ final class _AiPlanDraftPageState extends ConsumerState<AiPlanDraftPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (!available) ...[
-                    const Text('Return to chat to continue'),
+                    Text(context.tr('Return to chat to continue', '返回对话后继续')),
                     const SizedBox(height: 12),
-                    const Text(
-                      'Your account, data permission or conversation state changed. '
-                      'This helper cannot add a message now.',
+                    Text(
+                      context.tr(
+                        'Your account, data permission or conversation state changed. '
+                            'This helper cannot add a message now.',
+                        '你的账号、数据权限或对话状态已变化，暂时无法添加消息。',
+                      ),
                     ),
                   ] else if (!_reviewing) ...[
                     Text(
-                      'Start with what matters today',
+                      context.tr('Start with what matters today', '从今天想做的事开始'),
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'Use your own words. You will review the message before '
-                      'adding it to chat. Nothing is sent from this helper.',
+                    Text(
+                      context.tr(
+                        'Use your own words. You will review the message before '
+                            'adding it to chat. Nothing is sent from this helper.',
+                        '用自己的话写下来。添加到对话前，你可以先检查消息。这里不会直接发送。',
+                      ),
                     ),
                     const SizedBox(height: 24),
                     if (widget.initialText.isNotEmpty) ...[
-                      const Text(
-                        'Your chat draft is included below. Going back keeps '
-                        'the original draft unchanged.',
+                      Text(
+                        context.tr(
+                          'Your chat draft is included below. Going back keeps '
+                              'the original draft unchanged.',
+                          '下方已带入你的对话草稿。直接返回会保留原草稿。',
+                        ),
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -134,13 +153,21 @@ final class _AiPlanDraftPageState extends ConsumerState<AiPlanDraftPage> {
                             minLines: 3,
                             maxLines: 6,
                             textInputAction: TextInputAction.newline,
-                            decoration: const InputDecoration(
-                              labelText: 'What would you like to work on?',
+                            decoration: InputDecoration(
+                              labelText: context.tr(
+                                'What would you like to work on?',
+                                '你想做什么？',
+                              ),
                               alignLabelWithHint: true,
                               errorMaxLines: 4,
                             ),
                             validator: (value) =>
-                                value?.trim().isNotEmpty == true ? null : 'Describe one thing you would like help with.',
+                                value?.trim().isNotEmpty == true
+                                ? null
+                                : context.tr(
+                                    'Describe one thing you would like help with.',
+                                    '请写下一件希望获得帮助的事。',
+                                  ),
                           ),
                           const SizedBox(height: 20),
                           TextFormField(
@@ -149,9 +176,15 @@ final class _AiPlanDraftPageState extends ConsumerState<AiPlanDraftPage> {
                             minLines: 2,
                             maxLines: 4,
                             textInputAction: TextInputAction.newline,
-                            decoration: const InputDecoration(
-                              labelText: 'Limits or preferences (optional)',
-                              hintText: 'Time, energy, or something to avoid',
+                            decoration: InputDecoration(
+                              labelText: context.tr(
+                                'Limits or preferences (optional)',
+                                '限制或偏好（选填）',
+                              ),
+                              hintText: context.tr(
+                                'Time, energy, or something to avoid',
+                                '例如可用时间、精力，或想避开的事',
+                              ),
                               alignLabelWithHint: true,
                             ),
                           ),
@@ -162,22 +195,28 @@ final class _AiPlanDraftPageState extends ConsumerState<AiPlanDraftPage> {
                     FilledButton(
                       key: const Key('ai-plan-review'),
                       onPressed: _prepareReview,
-                      child: const Text('Review message'),
+                      child: Text(context.tr('Review message', '检查消息')),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Only what you type here is added. This helper does not '
-                      'read your journal, friends, activities or location.',
+                    Text(
+                      context.tr(
+                        'Only what you type here is added. This helper does not '
+                            'read your journal, friends, activities or location.',
+                        '这里只添加你输入的内容，不读取日记、好友、活动或位置。',
+                      ),
                     ),
                   ] else ...[
                     Text(
-                      'Make it sound like you',
+                      context.tr('Make it sound like you', '改成你想说的话'),
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'Edit any part below. It will be added to your current '
-                      'conversation as an unsent draft. Tap Send in chat when ready.',
+                    Text(
+                      context.tr(
+                        'Edit any part below. It will be added to your current '
+                            'conversation as an unsent draft. Tap Send in chat when ready.',
+                        '下方内容都可以修改。它将作为未发送的草稿放入当前对话，准备好后再点击发送。',
+                      ),
                     ),
                     const SizedBox(height: 20),
                     TextField(
@@ -188,12 +227,18 @@ final class _AiPlanDraftPageState extends ConsumerState<AiPlanDraftPage> {
                       textInputAction: TextInputAction.newline,
                       onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
-                        labelText: 'Message to AI',
+                        labelText: context.tr('Message to AI', '发给 AI 的消息'),
                         alignLabelWithHint: true,
-                        helperText: '$length / 2400 characters',
+                        helperText: context.tr(
+                          '$length / 2400 characters',
+                          '$length / 2400 字符',
+                        ),
                         errorMaxLines: 4,
                         errorText: length > 2400
-                            ? 'Shorten this message to 2400 characters. Nothing has been cut.'
+                            ? context.tr(
+                                'Shorten this message to 2400 characters. Nothing has been cut.',
+                                '请将消息缩短至 2400 字符以内。内容没有被截断。',
+                              )
                             : null,
                       ),
                     ),
@@ -206,25 +251,30 @@ final class _AiPlanDraftPageState extends ConsumerState<AiPlanDraftPage> {
                           : null,
                       child: Text(
                         widget.initialText.isEmpty
-                            ? 'Use this draft'
-                            : 'Replace chat draft',
+                            ? context.tr('Use this draft', '使用此草稿')
+                            : context.tr('Replace chat draft', '替换对话草稿'),
                       ),
                     ),
                     TextButton(
                       key: const Key('ai-plan-edit-details'),
                       onPressed: () => _showReview(false),
-                      child: const Text('Edit goal and limits'),
+                      child: Text(
+                        context.tr('Edit goal and limits', '修改目标和限制'),
+                      ),
                     ),
-                    const Text(
-                      'The service also uses the current conversation context '
-                      'and your current Persona. The reply will appear in chat.',
+                    Text(
+                      context.tr(
+                        'The service also uses the current conversation context '
+                            'and your current Persona. The reply will appear in chat.',
+                        '服务还会使用当前对话的上下文和当前人设，回复将显示在对话中。',
+                      ),
                     ),
                   ],
                   const SizedBox(height: 12),
                   TextButton(
                     key: const Key('ai-plan-cancel'),
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Back to chat'),
+                    child: Text(context.tr('Back to chat', '返回对话')),
                   ),
                 ],
               ),

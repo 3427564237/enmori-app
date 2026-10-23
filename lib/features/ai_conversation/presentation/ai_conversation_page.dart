@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/presentation/enmori_motion.dart';
 import '../../../core/presentation/local_time.dart';
 
 import '../ai_conversation_providers.dart';
 import 'ai_plan_draft_page.dart';
+import 'ai_status_copy.dart';
 
 Widget buildAiConversationPage(
   BuildContext context, {
@@ -218,7 +220,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       key: const Key('ai-make-plan'),
       onPressed: state.canSend ? _makePlan : null,
       icon: const Icon(Icons.checklist_outlined),
-      label: const Text('Make a small plan'),
+      label: Text(context.tr('Make a small plan', '制定小计划')),
     ),
   );
 
@@ -232,9 +234,9 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     if (_message.text.isNotEmpty) {
       _confirming = true;
       final discard = await _confirm(
-        message: 'Discard unsaved changes?',
-        keepLabel: 'Keep editing',
-        actionLabel: 'Discard',
+        message: context.tr('Discard unsaved changes?', '放弃未保存的修改？'),
+        keepLabel: context.tr('Keep editing', '继续编辑'),
+        actionLabel: context.tr('Discard', '放弃修改'),
         actionKey: 'ai-confirm-discard',
       );
       if (!_ownsCurrentSession) return;
@@ -263,7 +265,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         }
       }
     }
-    return 'Conversation';
+    return context.tr('Conversation', '对话');
   }
 
   Widget _historyPanel(AiConversationState state) => Builder(
@@ -273,7 +275,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       maintainState: true,
       expansionAnimationStyle: EnmoriMotion.surface(context),
       leading: const Icon(Icons.history),
-      title: const Text('Conversation history'),
+      title: Text(context.tr('Conversation history', '历史对话')),
       onExpansionChanged: (open) {
         if (open && !state.historyLoaded && !state.readBusy) {
           unawaited(_controller.loadConversations());
@@ -282,13 +284,16 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       children: [
         if (state.readBusy) const LinearProgressIndicator(),
         if (state.historyError case final error?)
-          Padding(padding: const EdgeInsets.all(12), child: Text(error)),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(aiStatusCopy(context, error)),
+          ),
         if (state.historyLoaded &&
             state.conversations.isEmpty &&
             state.historyCursor == null)
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(12),
-            child: Text('No saved conversations.'),
+            child: Text(context.tr('No saved conversations.', '暂无已保存的对话。')),
           ),
         for (final conversation in state.conversations)
           ListTile(
@@ -308,10 +313,13 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             },
           ),
         if (!state.canSelectConversation && state.canCheckResult)
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(12),
             child: Text(
-              'Check the current request result before switching conversations.',
+              context.tr(
+                'Check the current request result before switching conversations.',
+                '请先核对当前请求的结果，再切换对话。',
+              ),
             ),
           ),
         TextButton.icon(
@@ -320,7 +328,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           onPressed: state.readBusy
               ? null
               : () => unawaited(_controller.loadConversations()),
-          label: const Text('Reload history'),
+          label: Text(context.tr('Reload history', '重新加载历史')),
         ),
         if (state.historyCursor != null)
           TextButton(
@@ -328,7 +336,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             onPressed: state.readBusy
                 ? null
                 : () => unawaited(_controller.loadConversations(more: true)),
-            child: const Text('Load more conversations'),
+            child: Text(context.tr('Load more conversations', '加载更多对话')),
           ),
       ],
     ),
@@ -339,10 +347,12 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     if (!ref.read(aiConversationControllerProvider).canDelete) return;
     _confirming = true;
     final confirmed = await _confirm(
-      message:
-          'Delete this conversation? All messages will be permanently deleted.',
-      keepLabel: 'Keep',
-      actionLabel: 'Delete',
+      message: context.tr(
+        'Delete this conversation? All messages will be permanently deleted.',
+        '删除此对话？所有消息都将永久删除。',
+      ),
+      keepLabel: context.tr('Keep', '保留'),
+      actionLabel: context.tr('Delete', '删除'),
       actionKey: 'ai-confirm-delete',
     );
     if (!_ownsCurrentSession) return;
@@ -551,7 +561,9 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     });
     final state = ref.watch(aiConversationControllerProvider);
     final hasText = _message.text.trim().isNotEmpty;
-    final status = state.statusMessage ?? _statusCopy(state.phase);
+    final status = state.statusMessage == null
+        ? _statusCopy(context, state.phase)
+        : aiStatusCopy(context, state.statusMessage!);
     final contentHidden =
         state.phase == AiConversationPhase.deleting ||
         state.phase == AiConversationPhase.deleteUnknown ||
@@ -576,7 +588,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           appBar: AppBar(
             leading: IconButton(
               key: const Key('ai-back'),
-              tooltip: 'Back',
+              tooltip: context.tr('Back', '返回'),
               onPressed: () => unawaited(_navigate(widget.onBack)),
               icon: const Icon(Icons.arrow_back),
             ),
@@ -584,13 +596,13 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
               if (widget.onOpenPersonas case final openPersonas?)
                 IconButton(
                   key: const Key('ai-personas'),
-                  tooltip: 'Manage Personas',
+                  tooltip: context.tr('Manage Personas', '管理人设'),
                   onPressed: () => unawaited(_navigate(openPersonas)),
                   icon: const Icon(Icons.person_outline),
                 ),
               IconButton(
                 key: const Key('ai-settings'),
-                tooltip: 'Settings',
+                tooltip: context.tr('Settings', '设置'),
                 onPressed: () => unawaited(_navigate(widget.onOpenSettings)),
                 icon: const Icon(Icons.settings_outlined),
               ),
@@ -606,7 +618,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   padding: const EdgeInsets.all(24),
                   children: [
                     Text(
-                      'AI Conversation',
+                      context.tr('AI Conversation', 'AI 对话'),
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     if (state.canBrowseHistory) _historyPanel(state),
@@ -624,7 +636,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         key: const Key('ai-new-conversation'),
                         style: _buttonStyle,
                         onPressed: _newConversation,
-                        child: const Text('New conversation'),
+                        child: Text(context.tr('New conversation', '新对话')),
                       ),
                     ],
                     if (state.canCancel) ...[
@@ -633,7 +645,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         key: const Key('ai-cancel'),
                         style: _buttonStyle,
                         onPressed: _controller.cancel,
-                        child: const Text('Cancel'),
+                        child: Text(context.tr('Cancel', '取消')),
                       ),
                     ],
                     if (state.canCheckResult) ...[
@@ -644,15 +656,18 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         onPressed: state.readBusy
                             ? null
                             : () => unawaited(_controller.checkResult()),
-                        child: const Text('Check result'),
+                        child: Text(context.tr('Check result', '核对结果')),
                       ),
                     ],
                     if (state.canLeaveWithoutRetrying) ...[
                       const SizedBox(height: 12),
-                      const Text(
-                        'We may not be able to confirm whether this message was '
-                        'saved. You can leave without retrying it. Leaving does '
-                        'not delete saved messages.',
+                      Text(
+                        context.tr(
+                          'We may not be able to confirm whether this message was '
+                              'saved. You can leave without retrying it. Leaving does '
+                              'not delete saved messages.',
+                          '目前可能无法确认这条消息是否已保存。你可以先离开，无需重试。离开不会删除已保存的消息。',
+                        ),
                         key: Key('ai-recovery-explanation'),
                       ),
                       const SizedBox(height: 12),
@@ -662,7 +677,9 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         onPressed: () => unawaited(
                           _navigate(widget.onBack, explicitUnknownExit: true),
                         ),
-                        child: const Text('Leave without retrying'),
+                        child: Text(
+                          context.tr('Leave without retrying', '直接离开，不重试'),
+                        ),
                       ),
                     ],
                     if (!contentHidden) ...[
@@ -674,7 +691,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                           onPressed: state.readBusy
                               ? null
                               : () => unawaited(_controller.loadMessages()),
-                          child: const Text('Reload messages'),
+                          child: Text(context.tr('Reload messages', '重新加载消息')),
                         ),
                       ],
                       for (final message in state.messages) ...[
@@ -697,7 +714,9 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                               : () => unawaited(
                                   _controller.loadMessages(before: before),
                                 ),
-                          child: const Text('Load earlier messages'),
+                          child: Text(
+                            context.tr('Load earlier messages', '加载更早的消息'),
+                          ),
                         ),
                       ],
                       const SizedBox(height: 24),
@@ -710,8 +729,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         minLines: 2,
                         maxLines: 6,
                         onChanged: (_) => setState(() {}),
-                        decoration: const InputDecoration(
-                          labelText: 'Message',
+                        decoration: InputDecoration(
+                          labelText: context.tr('Message', '消息'),
                           alignLabelWithHint: true,
                           border: OutlineInputBorder(),
                         ),
@@ -723,7 +742,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         onPressed: state.canSend && hasText
                             ? () => _submit(retry: false)
                             : null,
-                        child: const Text('Send'),
+                        child: Text(context.tr('Send', '发送')),
                       ),
                       if (state.canRetry) ...[
                         const SizedBox(height: 8),
@@ -733,7 +752,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                           onPressed: hasText
                               ? () => _submit(retry: true)
                               : null,
-                          child: const Text('Retry'),
+                          child: Text(context.tr('Retry', '重试')),
                         ),
                       ],
                     ],
@@ -743,7 +762,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         key: const Key('ai-delete'),
                         style: _buttonStyle,
                         onPressed: () => unawaited(_delete()),
-                        child: const Text('Delete conversation'),
+                        child: Text(context.tr('Delete conversation', '删除对话')),
                       ),
                     ],
                     if (state.phase == AiConversationPhase.deleteUnknown) ...[
@@ -754,13 +773,16 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         onPressed: state.readBusy
                             ? null
                             : () => unawaited(_controller.deleteConversation()),
-                        child: const Text('Check again'),
+                        child: Text(context.tr('Check again', '再次核对')),
                       ),
                     ],
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Text(
-                        'AI Safety · AI can make mistakes. Persona preferences do not change data permissions.',
+                        context.tr(
+                          'AI Safety · AI can make mistakes. Persona preferences do not change data permissions.',
+                          'AI 使用说明 · AI 可能出错。人设偏好不会改变数据权限。',
+                        ),
                       ),
                     ),
                   ],
@@ -800,14 +822,17 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         ),
         const SizedBox(height: 24),
         Text(
-          'A little space for you',
+          context.tr('A little space for you', '留一点时间给自己'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall
               ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -.6),
         ),
         const SizedBox(height: 10),
-        const Text(
-          'Write a message whenever you feel ready.',
+        Text(
+          context.tr(
+            'Write a message whenever you feel ready.',
+            '想说的时候，随时写下来。',
+          ),
           textAlign: TextAlign.center,
           style: TextStyle(height: 1.6),
         ),
@@ -853,7 +878,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         key: const Key('ai-status'),
                         liveRegion: true,
                         child: Text(
-                          status ?? 'Waiting for a reply…',
+                          status ??
+                              context.tr('Waiting for a reply…', '正在等待回复…'),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
@@ -861,7 +887,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                     TextButton(
                       key: const Key('ai-cancel'),
                       onPressed: _controller.cancel,
-                      child: const Text('Cancel'),
+                      child: Text(context.tr('Cancel', '取消')),
                     ),
                   ],
                 ),
@@ -883,35 +909,42 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           ),
         ),
       if (state.canCancel && contentHidden)
-        _socialAction('ai-cancel', 'Cancel', _controller.cancel),
+        _socialAction(
+          'ai-cancel',
+          context.tr('Cancel', '取消'),
+          _controller.cancel,
+        ),
       if (state.canCheckResult &&
           state.phase != AiConversationPhase.idle &&
           state.phase != AiConversationPhase.success)
         _socialAction(
           'ai-check-result',
-          'Check result',
+          context.tr('Check result', '核对结果'),
           state.readBusy ? null : () => unawaited(_controller.checkResult()),
         ),
       if (state.canLeaveWithoutRetrying) ...[
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(vertical: 12),
           child: Text(
-            'We may not be able to confirm whether this message was '
-            'saved. You can leave without retrying it. Leaving does '
-            'not delete saved messages.',
+            context.tr(
+              'We may not be able to confirm whether this message was '
+                  'saved. You can leave without retrying it. Leaving does '
+                  'not delete saved messages.',
+              '目前可能无法确认这条消息是否已保存。你可以先离开，无需重试。离开不会删除已保存的消息。',
+            ),
             key: Key('ai-recovery-explanation'),
           ),
         ),
         _socialAction(
           'ai-leave-without-retrying',
-          'Leave without retrying',
+          context.tr('Leave without retrying', '直接离开，不重试'),
           () => unawaited(_navigate(widget.onBack, explicitUnknownExit: true)),
         ),
       ],
       if (state.phase == AiConversationPhase.deleteUnknown)
         _socialAction(
           'ai-check-delete',
-          'Check again',
+          context.tr('Check again', '再次核对'),
           state.readBusy
               ? null
               : () => unawaited(_controller.deleteConversation()),
@@ -936,9 +969,9 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   minLines: 1,
                   maxLines: 4,
                   onChanged: (_) => setState(() {}),
-                  decoration: const InputDecoration(
-                    labelText: 'Message',
-                    hintText: 'Write a message…',
+                  decoration: InputDecoration(
+                    labelText: context.tr('Message', '消息'),
+                    hintText: context.tr('Write a message…', '写点什么…'),
                     alignLabelWithHint: true,
                   ),
                 ),
@@ -951,7 +984,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                     ? () => _submit(retry: false)
                     : null,
                 child: Semantics(
-                  label: 'Send message',
+                  label: context.tr('Send message', '发送消息'),
                   child: const ExcludeSemantics(
                     child: Icon(Icons.arrow_upward),
                   ),
@@ -962,7 +995,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           if (state.canRetry)
             _socialAction(
               'ai-retry',
-              'Retry',
+              context.tr('Retry', '重试'),
               hasText ? () => _submit(retry: true) : null,
             ),
         ],
@@ -991,7 +1024,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(
-                    'Your conversations',
+                    context.tr('Your conversations', '你的对话'),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
@@ -999,7 +1032,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   builder: (drawerContext) => ListTile(
                     key: const Key('ai-drawer-new'),
                     leading: const Icon(Icons.add_comment_outlined),
-                    title: const Text('New conversation'),
+                    title: Text(context.tr('New conversation', '新对话')),
                     enabled: state.canStartNewConversation,
                     onTap: state.canStartNewConversation
                         ? () {
@@ -1016,8 +1049,10 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   ListTile(
                     key: const Key('ai-personas'),
                     leading: const Icon(Icons.person_outline),
-                    title: const Text('Current Persona'),
-                    subtitle: const Text('View and manage Personas'),
+                    title: Text(context.tr('Current Persona', '当前人设')),
+                    subtitle: Text(
+                      context.tr('View and manage Personas', '查看和管理人设'),
+                    ),
                     onTap: () {
                       Navigator.pop(context);
                       unawaited(_navigate(openPersonas));
@@ -1026,7 +1061,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                 ListTile(
                   key: const Key('ai-settings'),
                   leading: const Icon(Icons.tune),
-                  title: const Text('AI settings'),
+                  title: Text(context.tr('AI settings', 'AI 设置')),
                   onTap: () {
                     Navigator.pop(context);
                     unawaited(_navigate(widget.onOpenSettings));
@@ -1037,15 +1072,22 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   builder: (drawerContext) => ListTile(
                     key: const Key('ai-safety'),
                     leading: const Icon(Icons.info_outline),
-                    title: const Text('AI Safety & permissions'),
+                    title: Text(
+                      context.tr('AI Safety & permissions', 'AI 使用说明与权限'),
+                    ),
                     onTap: () {
                       Scaffold.of(drawerContext).closeDrawer();
                       showDialog<void>(
                         context: context,
                         builder: (dialogContext) => AlertDialog(
-                          title: const Text('AI Safety & permissions'),
-                          content: const Text(
-                            'AI can make mistakes. Persona preferences do not change data permissions.',
+                          title: Text(
+                            context.tr('AI Safety & permissions', 'AI 使用说明与权限'),
+                          ),
+                          content: Text(
+                            context.tr(
+                              'AI can make mistakes. Persona preferences do not change data permissions.',
+                              'AI 可能出错。人设偏好不会改变数据权限。',
+                            ),
                           ),
                           actions: [
                             TextButton(
@@ -1053,11 +1095,13 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                                 Navigator.pop(dialogContext);
                                 unawaited(_navigate(widget.onOpenSettings));
                               },
-                              child: const Text('Privacy settings'),
+                              child: Text(
+                                context.tr('Privacy settings', '隐私设置'),
+                              ),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(dialogContext),
-                              child: const Text('Close'),
+                              child: Text(context.tr('Close', '关闭')),
                             ),
                           ],
                         ),
@@ -1073,16 +1117,16 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           automaticallyImplyLeading: widget.navigationBarBuilder == null,
           leading: Builder(
             builder: (context) => IconButton(
-              tooltip: 'Open conversation menu',
+              tooltip: context.tr('Open conversation menu', '打开对话菜单'),
               icon: const Icon(Icons.menu),
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),
-          title: const Text('AI companion'),
+          title: Text(context.tr('AI companion', 'AI 伙伴')),
           actions: [
             IconButton(
               key: const Key('ai-new-conversation'),
-              tooltip: 'New conversation',
+              tooltip: context.tr('New conversation', '新对话'),
               onPressed: state.canStartNewConversation
                   ? _newConversation
                   : null,
@@ -1093,7 +1137,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                 (!contentHidden && state.conversationId != null))
               PopupMenuButton<String>(
                 key: const Key('ai-conversation-actions'),
-                tooltip: 'Conversation actions',
+                tooltip: context.tr('Conversation actions', '对话操作'),
                 onSelected: _selectSocialAction,
                 itemBuilder: (context) => [
                   if (state.canCheckResult)
@@ -1101,27 +1145,29 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                       value: 'check',
                       key: const Key('ai-check-result-menu'),
                       enabled: !state.readBusy,
-                      child: const Text('Check result'),
+                      child: Text(context.tr('Check result', '核对结果')),
                     ),
                   if (!contentHidden && state.conversationId != null)
                     PopupMenuItem(
                       value: 'reload',
                       key: const Key('ai-reload-messages'),
                       enabled: !state.readBusy,
-                      child: const Text('Reload messages'),
+                      child: Text(context.tr('Reload messages', '重新加载消息')),
                     ),
                   if (!contentHidden && state.nextCursor != null)
                     PopupMenuItem(
                       value: 'earlier',
                       key: const Key('ai-load-earlier'),
                       enabled: !state.readBusy,
-                      child: const Text('Load earlier messages'),
+                      child: Text(
+                        context.tr('Load earlier messages', '加载更早的消息'),
+                      ),
                     ),
                   if (!contentHidden && state.canDelete)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       key: Key('ai-delete'),
-                      child: Text('Delete conversation'),
+                      child: Text(context.tr('Delete conversation', '删除对话')),
                     ),
                 ],
               ),
@@ -1179,8 +1225,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                                               Icons.arrow_downward,
                                               size: 18,
                                             ),
-                                            label: const Text(
-                                              'Latest messages',
+                                            label: Text(
+                                              context.tr(
+                                                'Latest messages',
+                                                '最新消息',
+                                              ),
                                             ),
                                           )
                                         : const SizedBox.shrink(),
@@ -1260,27 +1309,51 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       );
 }
 
-String? _statusCopy(AiConversationPhase phase) => switch (phase) {
+String? _statusCopy(
+  BuildContext context,
+  AiConversationPhase phase,
+) => switch (phase) {
   AiConversationPhase.idle || AiConversationPhase.success => null,
-  AiConversationPhase.preparing => 'Sending…',
-  AiConversationPhase.waiting => 'Waiting for a reply…',
-  AiConversationPhase.limited =>
+  AiConversationPhase.preparing => context.tr('Sending…', '正在发送…'),
+  AiConversationPhase.waiting => context.tr('Waiting for a reply…', '正在等待回复…'),
+  AiConversationPhase.limited => context.tr(
     'AI chat is turned off. You can allow AI data use in Settings.',
-  AiConversationPhase.busy => 'AI is busy. Try again later.',
-  AiConversationPhase.unavailable =>
+    'AI 对话已关闭。你可以在设置中允许 AI 使用数据。',
+  ),
+  AiConversationPhase.busy => context.tr(
+    'AI is busy. Try again later.',
+    'AI 正忙，请稍后再试。',
+  ),
+  AiConversationPhase.unavailable => context.tr(
     'AI is unavailable right now. Try again later.',
-  AiConversationPhase.rejected => 'A reply could not be provided.',
-  AiConversationPhase.timedOut =>
+    'AI 暂时不可用，请稍后再试。',
+  ),
+  AiConversationPhase.rejected => context.tr(
+    'A reply could not be provided.',
+    '未能提供回复。',
+  ),
+  AiConversationPhase.timedOut => context.tr(
     'This request timed out. Check saved messages before trying again.',
-  AiConversationPhase.unknown =>
+    '请求已超时。请先核对已保存的消息，再决定是否重试。',
+  ),
+  AiConversationPhase.unknown => context.tr(
     'We couldn’t confirm the result. Check saved messages before trying again.',
-  AiConversationPhase.authorityChanged => 'This reply is no longer available.',
-  AiConversationPhase.deleted => 'Conversation deleted.',
-  AiConversationPhase.deleting => 'Deleting…',
-  AiConversationPhase.deleteUnknown =>
+    '未能确认结果。请先核对已保存的消息，再决定是否重试。',
+  ),
+  AiConversationPhase.authorityChanged => context.tr(
+    'This reply is no longer available.',
+    '此回复已不可用。',
+  ),
+  AiConversationPhase.deleted => context.tr('Conversation deleted.', '对话已删除。'),
+  AiConversationPhase.deleting => context.tr('Deleting…', '正在删除…'),
+  AiConversationPhase.deleteUnknown => context.tr(
     'Deletion has not been confirmed. Check again.',
-  AiConversationPhase.unauthenticated =>
+    '尚未确认删除结果，请再次核对。',
+  ),
+  AiConversationPhase.unauthenticated => context.tr(
     'Your session has expired. Sign in again.',
+    '登录已过期，请重新登录。',
+  ),
 };
 
 final class _MessageTile extends StatelessWidget {
@@ -1322,19 +1395,25 @@ final class _MessageTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  fromUser ? 'You' : 'AI',
+                  fromUser ? context.tr('You', '你') : 'AI',
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
                 const SizedBox(height: 6),
                 Text(
                   message.availability == AiAvailability.unavailable
-                      ? 'This reply is no longer available.'
+                      ? context.tr(
+                          'This reply is no longer available.',
+                          '此回复已不可用。',
+                        )
                       : message.text ?? '',
                   style: const TextStyle(height: 1.45),
                 ),
                 const SizedBox(height: 6),
                 Semantics(
-                  label: 'Saved at ${localTimeLabel(context, time)}',
+                  label: context.tr(
+                    'Saved at ${localTimeLabel(context, time)}',
+                    '保存于 ${localTimeLabel(context, time)}',
+                  ),
                   child: Text(
                     clock,
                     style: Theme.of(context).textTheme.labelSmall,
@@ -1355,13 +1434,13 @@ final class _MessageTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              message.role == AiRole.user ? 'You' : 'AI',
+              message.role == AiRole.user ? context.tr('You', '你') : 'AI',
               style: Theme.of(context).textTheme.labelLarge,
             ),
             const SizedBox(height: 6),
             Text(
               message.availability == AiAvailability.unavailable
-                  ? 'This reply is no longer available.'
+                  ? context.tr('This reply is no longer available.', '此回复已不可用。')
                   : message.text ?? '',
             ),
             const SizedBox(height: 6),
@@ -1393,11 +1472,17 @@ final class _LocalOutgoing extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('You', style: Theme.of(context).textTheme.labelMedium),
+              Text(
+                context.tr('You', '你'),
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
               const SizedBox(height: 6),
               Text(text, key: const Key('ai-local-outgoing')),
               const SizedBox(height: 6),
-              Text('Sending…', style: Theme.of(context).textTheme.labelSmall),
+              Text(
+                context.tr('Sending…', '正在发送…'),
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
             ],
           ),
         ),
@@ -1440,7 +1525,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
   @override
   Widget build(BuildContext context) => Semantics(
     key: const Key('ai-pending-assistant'),
-    label: 'AI is preparing a reply',
+    label: context.tr('AI is preparing a reply', 'AI 正在准备回复'),
     liveRegion: true,
     child: ExcludeSemantics(
       child: AnimatedBuilder(
