@@ -56,7 +56,12 @@ void main() {
         ];
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [socialRepositoryProvider.overrideWithValue(repository)],
+          overrides: [
+            socialRepositoryProvider.overrideWithValue(repository),
+            authSessionProvider.overrideWithValue(
+              const AsyncData(AuthSessionAuthenticated(subject: 'viewer')),
+            ),
+          ],
           child: MaterialApp(
             home: SocialProfilePage(
               username: 'member_b',
@@ -77,16 +82,21 @@ void main() {
         ),
         findsOneWidget,
       );
-      await tester.tap(find.byTooltip('Open Check-in 1'));
+      await tester.tap(find.byTooltip('Select Check-in 1'));
       await tester.pumpAndSettle();
       expect(repository.readIds, ['exact-point']);
+      expect(find.text('Point'), findsOneWidget);
+      await tester.ensureVisible(find.text('Open Check-in'));
+      await tester.tap(find.text('Open Check-in'));
+      await tester.pumpAndSettle();
+      expect(repository.readIds, ['exact-point', 'exact-point']);
       expect(find.text('Saved Check-in'), findsOneWidget);
       expect(find.text('Point'), findsOneWidget);
       repository.points = [];
       await tester.pageBack();
       await tester.pumpAndSettle();
       expect(find.byType(CheckInPointsMap), findsOneWidget);
-      expect(find.byTooltip('Open Check-in 1'), findsNothing);
+      expect(find.byTooltip('Select Check-in 1'), findsNothing);
       expect(find.text('Point'), findsNothing);
       expect(tester.takeException(), isNull);
     },

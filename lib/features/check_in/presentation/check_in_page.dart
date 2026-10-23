@@ -1,27 +1,28 @@
-import '../../account/content_access.dart';
-import 'check_in_place_controller.dart';
-import 'check_in_place_controls.dart';
-import '../../account/account_preferences_providers.dart';
-import '../../account/domain/account_preferences_repository.dart';
-import '../../auth/auth_providers.dart';
-import 'located_check_in_actions.dart';
-import 'located_check_in_controller.dart';
-import 'check_in_record_view.dart';
-import '../check_in_providers.dart';
-import '../domain/check_in_mutations.dart';
-import 'check_in_edit_page.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/presentation/local_time.dart';
-import '../../../core/presentation/enmori_motion.dart';
-
 import '../../../core/presentation/command_state.dart';
+import '../../../core/presentation/enmori_localizations.dart';
+import '../../../core/presentation/enmori_motion.dart';
+import '../../../core/presentation/local_time.dart';
 import '../../../core/result/result.dart';
-import '../domain/check_in_repository.dart';
+import '../../account/account_preferences_providers.dart';
+import '../../account/content_access.dart';
+import '../../account/domain/account_preferences_repository.dart';
 import '../../account/domain/account_repository.dart';
+import '../../auth/auth_providers.dart';
+import '../check_in_providers.dart';
+import '../domain/check_in_mutations.dart';
+import '../domain/check_in_repository.dart';
 import 'check_in_controller.dart';
+import 'check_in_copy.dart';
+import 'check_in_edit_page.dart';
+import 'check_in_label_input.dart';
+import 'check_in_place_controller.dart';
+import 'check_in_place_controls.dart';
+import 'check_in_record_view.dart';
+import 'located_check_in_actions.dart';
+import 'located_check_in_controller.dart';
 
 enum _CheckInAction { create, read }
 
@@ -201,21 +202,29 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
           context: context,
           builder: (context) => AlertDialog(
             title: Text(
-              pending ? 'Leave this Check-in?' : 'Discard this draft?',
+              pending
+                  ? context.tr('Leave this Check-in?', '离开这条签到？')
+                  : context.tr('Discard this draft?', '放弃草稿？'),
             ),
             content: Text(
               pending
-                  ? 'The save may still complete. Stay to recover the same request, or check History before making another Check-in.'
-                  : 'Your unsaved Note, Mood and location choice will be discarded.',
+                  ? context.tr(
+                      'The save may still complete. Stay to recover the same request, or check History before making another Check-in.',
+                      '保存可能仍会完成。请留在此处核对原请求，或先查看历史记录，再创建另一条签到。',
+                    )
+                  : context.tr(
+                      'Your unsaved Note, Mood and location choice will be discarded.',
+                      '未保存的笔记、心情和位置选择将被丢弃。',
+                    ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Keep editing'),
+                child: Text(context.tr('Keep editing', '继续编辑')),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Leave'),
+                child: Text(context.tr('Leave', '离开')),
               ),
             ],
           ),
@@ -227,7 +236,11 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
           leading: widget.located
               ? BackButton(onPressed: () => Navigator.of(context).maybePop())
               : null,
-          title: Text(widget.socialStyle ? 'Check-in' : 'New Check-in'),
+          title: Text(
+            widget.socialStyle
+                ? context.tr('Check-in', '签到')
+                : context.tr('New Check-in', '新建签到'),
+          ),
         ),
         body: SafeArea(
           child: Align(
@@ -258,15 +271,24 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                           alignLabelWithHint: true,
                           errorText: _noteErrorText,
                           helperText: widget.socialStyle
-                              ? 'A note of up to 500 characters.'
-                              : '$noteLength / 500 characters',
+                              ? context.tr(
+                                  'A note of up to 500 characters.',
+                                  '笔记最多 500 个字符。',
+                                )
+                              : context.tr(
+                                  '$noteLength / 500 characters',
+                                  '$noteLength / 500 个字符',
+                                ),
                           counterText: widget.socialStyle
                               ? '$noteLength / 500'
                               : null,
                           hintText: widget.socialStyle
-                              ? 'What would you like to keep from today?'
+                              ? context.tr(
+                                  'What would you like to keep from today?',
+                                  '今天有什么想留下的？',
+                                )
                               : null,
-                          labelText: 'Note',
+                          labelText: context.tr('Note', '笔记'),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -274,25 +296,24 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          _ComposerLabelChip(
+                          CheckInLabelChip(
                             selected: _mood != null,
                             avatar: const Icon(Icons.mood_outlined, size: 18),
-                            label: _mood ?? 'Mood',
+                            label: _mood ?? context.tr('Mood', '心情'),
                             onPressed: pending
                                 ? null
-                                : () => _chooseLabel('Mood', _mood, [
-                                    'Happy',
-                                    'Calm',
-                                    'Focused',
-                                    'Tired',
-                                    'Stressed',
-                                    'Not sure',
-                                  ], (v) => _mood = v),
+                                : () => _chooseLabel(
+                                    'Mood',
+                                    _mood,
+                                    checkInMoodChoices,
+                                    (v) => _mood = v,
+                                  ),
                           ),
-                          _ComposerLabelChip(
+                          CheckInLabelChip(
                             selected: _locationLabel != null,
                             avatar: const Icon(Icons.place_outlined, size: 18),
-                            label: _locationLabel ?? 'Location',
+                            label:
+                                _locationLabel ?? context.tr('Location', '地点'),
                             onPressed: pending
                                 ? null
                                 : () => _chooseLabel(
@@ -302,22 +323,21 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                                     (v) => _locationLabel = v,
                                   ),
                           ),
-                          _ComposerLabelChip(
+                          CheckInLabelChip(
                             selected: _activity != null,
                             avatar: const Icon(
                               Icons.local_activity_outlined,
                               size: 18,
                             ),
-                            label: _activity ?? 'Activity',
+                            label: _activity ?? context.tr('Activity', '活动标签'),
                             onPressed: pending
                                 ? null
-                                : () => _chooseLabel('Activity', _activity, [
-                                    'Study',
-                                    'Fitness',
-                                    'Social',
-                                    'Food',
-                                    'Travel',
-                                  ], (v) => _activity = v),
+                                : () => _chooseLabel(
+                                    'Activity',
+                                    _activity,
+                                    checkInActivityChoices,
+                                    (v) => _activity = v,
+                                  ),
                           ),
                         ],
                       ),
@@ -326,7 +346,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                         child: ListTile(
                           key: const Key('check-in-permissions'),
                           leading: const Icon(Icons.tune),
-                          title: const Text('Permissions'),
+                          title: Text(context.tr('Permissions', '权限设置')),
                           subtitle: MotionReveal(
                             trigger: (
                               _visibility,
@@ -337,10 +357,10 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                             distance: 0,
                             child: Text(
                               '$_visibilityLabel · ${placeState?.busy == true
-                                  ? 'Getting GPS…'
+                                  ? context.tr('Getting GPS…', '正在获取位置…')
                                   : placeState?.place == null
-                                  ? 'No GPS'
-                                  : 'GPS attached'} · ${placeState?.place?.includeWeather == true ? 'Weather on' : 'Weather off'}',
+                                  ? context.tr('No GPS', '未附加 GPS')
+                                  : context.tr('GPS attached', '已附加 GPS')} · ${placeState?.place?.includeWeather == true ? context.tr('Weather on', '天气已开启') : context.tr('Weather off', '天气已关闭')}',
                             ),
                           ),
                           trailing: const Icon(Icons.chevron_right),
@@ -350,12 +370,15 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                         ),
                       ),
                       if (placeState?.failure case final failure?)
-                        Text(failure.message),
+                        Text(checkInFailureText(context, failure)),
                       if (_defaults?.defaultCheckInWeather == true &&
                           placeState?.place == null &&
                           placeState?.busy != true)
-                        const Text(
-                          'Weather needs a GPS point. You can still save this Check-in.',
+                        Text(
+                          context.tr(
+                            'Weather needs a GPS point. You can still save this Check-in.',
+                            '天气需要 GPS 位置。你仍可保存这条签到。',
+                          ),
                         ),
                       const SizedBox(height: 12),
                     ],
@@ -363,9 +386,14 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                       _settingsFailed
                           ? TextButton(
                               onPressed: _loadVisibility,
-                              child: const Text('Retry privacy settings'),
+                              child: Text(
+                                context.tr(
+                                  'Retry privacy settings',
+                                  '重新加载隐私设置',
+                                ),
+                              ),
                             )
-                          : const LinearProgressIndicator()
+                          : LinearProgressIndicator()
                     else if (widget.located)
                       LocatedCheckInActions(
                         draftKey: _locationDraft,
@@ -393,7 +421,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                                 ),
                               )
                             : const Icon(Icons.check_circle_outline),
-                        label: const Text('Save Check-in'),
+                        label: Text(context.tr('Save Check-in', '保存签到')),
                       ),
                     const SizedBox(height: 20),
                     if (!widget.located) _statusBlock(state),
@@ -409,9 +437,9 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
 
   String get _visibilityLabel =>
       switch (_visibility ?? widget.visibility ?? CheckInVisibility.private) {
-        CheckInVisibility.private => 'Private',
-        CheckInVisibility.friendsOnly => 'Friends only',
-        CheckInVisibility.public => 'Public',
+        CheckInVisibility.private => context.tr('Private', '仅自己'),
+        CheckInVisibility.friendsOnly => context.tr('Friends only', '仅好友'),
+        CheckInVisibility.public => context.tr('Public', '公开'),
       };
 
   Future<void> _chooseLabel(
@@ -420,64 +448,11 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
     List<String> choices,
     void Function(String?) update,
   ) async {
-    var input = current ?? '';
-    final value = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      sheetAnimationStyle: EnmoriMotion.surface(context),
-      builder: (context) => SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          0,
-          16,
-          16 + MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-              if (title == 'Place name')
-                const Text(
-                  'A display label only. GPS and weather are managed in Permissions.',
-                ),
-              if (title == 'Activity')
-                const Text(
-                  'A personal label, separate from an official event.',
-                ),
-              if (choices.isNotEmpty)
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    for (final choice in choices)
-                      ActionChip(
-                        chipAnimationStyle: EnmoriMotion.chips(context),
-                        label: Text(choice),
-                        onPressed: () => Navigator.pop(context, choice),
-                      ),
-                  ],
-                ),
-              const SizedBox(height: 12),
-              TextFormField(
-                initialValue: input,
-                onChanged: (value) => input = value,
-                maxLength: 50,
-                decoration: InputDecoration(labelText: 'Custom $title'),
-              ),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () => Navigator.pop(context, input.trim()),
-                child: const Text('Apply'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, ''),
-                child: const Text('Clear'),
-              ),
-            ],
-          ),
-        ),
-      ),
+    final value = await chooseCheckInLabel(
+      context,
+      title: title,
+      current: current,
+      choices: choices,
     );
     if (mounted && value != null) {
       setState(() {
@@ -500,7 +475,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'This Check-in',
+                context.tr('This Check-in', '本次签到'),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
@@ -509,19 +484,21 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                     _visibility ??
                     widget.visibility ??
                     CheckInVisibility.private,
-                decoration: const InputDecoration(labelText: 'Who can see it'),
-                items: const [
+                decoration: InputDecoration(
+                  labelText: context.tr('Who can see it', '谁可以看到'),
+                ),
+                items: [
                   DropdownMenuItem(
                     value: CheckInVisibility.private,
-                    child: Text('Private'),
+                    child: Text(context.tr('Private', '仅自己')),
                   ),
                   DropdownMenuItem(
                     value: CheckInVisibility.friendsOnly,
-                    child: Text('Friends only'),
+                    child: Text(context.tr('Friends only', '仅好友')),
                   ),
                   DropdownMenuItem(
                     value: CheckInVisibility.public,
-                    child: Text('Public'),
+                    child: Text(context.tr('Public', '公开')),
                   ),
                 ],
                 onChanged: (v) {
@@ -538,7 +515,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                 ),
               FilledButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Done'),
+                child: Text(context.tr('Done', '完成')),
               ),
             ],
           ),
@@ -557,15 +534,21 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
         ),
         icon: _lastAction == _CheckInAction.read ? Icons.sync : Icons.save,
         title: _lastAction == _CheckInAction.read
-            ? 'Confirming your saved Check-in…'
-            : 'Saving Check-in',
+            ? context.tr('Confirming your saved Check-in…', '正在确认已保存的签到…')
+            : context.tr('Saving Check-in', '正在保存签到'),
         body: _lastAction == _CheckInAction.read
             ? (widget.socialStyle
-                  ? 'Checking your saved note…'
-                  : 'Reading the saved Check-in from backend-only product data.')
+                  ? context.tr('Checking your saved note…', '正在核对已保存的笔记…')
+                  : context.tr(
+                      'Reading the saved Check-in from backend-only product data.',
+                      '正在重新读取已保存的签到。',
+                    ))
             : (widget.socialStyle
-                  ? 'Saving your moment…'
-                  : 'Saving your Check-in with the approved backend operation.'),
+                  ? context.tr('Saving your moment…', '正在保存这一刻…')
+                  : context.tr(
+                      'Saving your Check-in with the approved backend operation.',
+                      '正在保存签到，请稍候。',
+                    )),
       );
     }
     if (state case CommandFailed<CheckIn>(:final failure)) {
@@ -575,7 +558,9 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
           confirming ? 'r6-check-in-unavailable' : 'r6-check-in-failure',
         ),
         icon: confirming ? Icons.sync_problem : Icons.error_outline,
-        title: confirming ? 'Confirmation unavailable' : 'Check-in not saved',
+        title: confirming
+            ? context.tr('Confirmation unavailable', '暂时无法确认')
+            : context.tr('Check-in not saved', '签到未保存'),
         body: confirming
             ? _confirmationFailureCopy(failure.kind)
             : _createFailureCopy(failure.kind),
@@ -584,7 +569,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                 key: const Key('r6-check-in-retry-confirmation'),
                 onPressed: () => _confirm(_committedCheckIn!),
                 icon: const Icon(Icons.sync),
-                label: const Text('Reload Check-in'),
+                label: Text(context.tr('Reload Check-in', '重新加载签到')),
               )
             : null,
       );
@@ -597,27 +582,38 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
     return _ResultPanel(
       key: Key(confirmed ? 'r6-check-in-confirmed' : 'r6-check-in-committed'),
       icon: confirmed ? Icons.verified : Icons.task_alt,
-      title: confirmed ? 'Saved Check-in confirmed.' : 'Check-in saved.',
-      body:
-          '${checkIn.note}${checkIn.mood == null ? '' : '\nMood: ${checkIn.mood}'}${checkIn.activity == null ? '' : '\nActivity: ${checkIn.activity}'}\nSaved at ${localTimeLabel(context, checkIn.createdAt)}'
-          '${switch (checkIn.checkInVisibility) {
-            CheckInVisibility.private => '\nVisibility: Private',
-            CheckInVisibility.friendsOnly => '\nVisibility: Friends-only',
-            CheckInVisibility.public => '\nVisibility: Public',
-            null => '',
+      title: confirmed
+          ? context.tr('Saved Check-in confirmed.', '已确认签到保存成功。')
+          : context.tr('Check-in saved.', '签到已保存。'),
+      body: [
+        checkIn.note,
+        if (checkIn.mood != null)
+          '${context.tr('Mood', '心情')}: ${checkIn.mood}',
+        if (checkIn.activity != null)
+          '${context.tr('Activity', '活动标签')}: ${checkIn.activity}',
+        context.tr(
+          'Saved at ${localTimeLabel(context, checkIn.createdAt)}',
+          '保存于 ${localTimeLabel(context, checkIn.createdAt)}',
+        ),
+        if (checkIn.checkInVisibility != null)
+          '${context.tr('Visibility', '可见范围')}: ${switch (checkIn.checkInVisibility!) {
+            CheckInVisibility.private => context.tr('Private', '仅自己'),
+            CheckInVisibility.friendsOnly => context.tr('Friends-only', '仅好友'),
+            CheckInVisibility.public => context.tr('Public', '公开'),
           }}',
+      ].where((part) => part.isNotEmpty).join('\n'),
       action: confirmed
           ? OutlinedButton.icon(
               key: const Key('r6-return-home-inline'),
               onPressed: widget.onReturnHome ?? () {},
               icon: const Icon(Icons.home_outlined),
-              label: const Text('Return Home'),
+              label: Text(context.tr('Return Home', '返回首页')),
             )
           : FilledButton.icon(
               key: const Key('r6-check-in-confirm'),
               onPressed: () => _confirm(checkIn),
               icon: const Icon(Icons.sync),
-              label: const Text('Confirm saved Check-in'),
+              label: Text(context.tr('Confirm saved Check-in', '确认已保存的签到')),
             ),
     );
   }
@@ -627,12 +623,20 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
     final noteLength = normalized.characters.length;
     if (noteLength == 0 && _mood == null) {
       setState(
-        () => _noteErrorText = 'Enter a Note or select a Mood before saving.',
+        () => _noteErrorText = context.tr(
+          'Enter a Note or select a Mood before saving.',
+          '保存前请填写笔记或选择心情。',
+        ),
       );
       return;
     }
     if (noteLength > 500) {
-      setState(() => _noteErrorText = 'Keep the Note within 500 characters.');
+      setState(
+        () => _noteErrorText = context.tr(
+          'Keep the Note within 500 characters.',
+          '笔记请勿超过 500 个字符。',
+        ),
+      );
       return;
     }
     _lastAction = _CheckInAction.create;
@@ -654,24 +658,52 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
 
   String _createFailureCopy(AppFailureKind kind) {
     return switch (kind) {
-      AppFailureKind.checkInInvalid =>
+      AppFailureKind.checkInInvalid => context.tr(
         'Enter a Note or select a Mood before saving.',
-      AppFailureKind.idempotencyConflict => 'This Check-in attempt changed after it was submitted. Start a new attempt.',
-      AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
-      AppFailureKind.authForbidden => 'This account cannot continue.',
+        '保存前请填写笔记或选择心情。',
+      ),
+      AppFailureKind.idempotencyConflict => context.tr(
+        'This Check-in attempt changed after it was submitted. Start a new attempt.',
+        '提交后签到内容发生变化，请重新开始。',
+      ),
+      AppFailureKind.authRequired => context.tr(
+        'Your session has expired. Sign in again.',
+        '登录已失效，请重新登录。',
+      ),
+      AppFailureKind.authForbidden => context.tr(
+        'This account cannot continue.',
+        '此账号无法继续。',
+      ),
       AppFailureKind.serviceUnavailable ||
-      AppFailureKind.configurationUnavailable =>
+      AppFailureKind.configurationUnavailable => context.tr(
         'This service is temporarily unavailable. Try again.',
-      _ => 'This service is temporarily unavailable. Try again.',
+        '服务暂时不可用，请重试。',
+      ),
+      _ => context.tr(
+        'This service is temporarily unavailable. Try again.',
+        '服务暂时不可用，请重试。',
+      ),
     };
   }
 
   String _confirmationFailureCopy(AppFailureKind kind) {
     return switch (kind) {
-      AppFailureKind.checkInUnavailable => 'This Check-in is unavailable.',
-      AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
-      AppFailureKind.authForbidden => 'This account cannot continue.',
-      _ => 'This service is temporarily unavailable. Try again.',
+      AppFailureKind.checkInUnavailable => context.tr(
+        'This Check-in is unavailable.',
+        '此签到不可用。',
+      ),
+      AppFailureKind.authRequired => context.tr(
+        'Your session has expired. Sign in again.',
+        '登录已失效，请重新登录。',
+      ),
+      AppFailureKind.authForbidden => context.tr(
+        'This account cannot continue.',
+        '此账号无法继续。',
+      ),
+      _ => context.tr(
+        'This service is temporarily unavailable. Try again.',
+        '服务暂时不可用，请重试。',
+      ),
     };
   }
 }
@@ -723,13 +755,13 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
     final state = ref.watch(checkInControllerProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Saved Check-in'),
+        title: Text(context.tr('Saved Check-in', '已保存的签到')),
         actions: [
           if (state case CommandSucceeded<CheckIn>(:final value))
             if (ref.watch(checkInRepositoryProvider) is CheckInMutations)
               IconButton(
                 key: const Key('saved-check-in-edit'),
-                tooltip: 'Edit Check-in',
+                tooltip: context.tr('Edit Check-in', '编辑签到'),
                 icon: const Icon(Icons.edit_outlined),
                 onPressed: () async {
                   final result = await Navigator.of(context)
@@ -741,7 +773,11 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
                   if (!context.mounted) return;
                   if (result == CheckInEditResult.deleted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Check-in deleted.')),
+                      SnackBar(
+                        content: Text(
+                          context.tr('Check-in deleted.', '签到已删除。'),
+                        ),
+                      ),
                     );
                     if (Navigator.of(context).canPop()) {
                       Navigator.of(context).pop();
@@ -750,7 +786,11 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
                     }
                   } else if (result == CheckInEditResult.saved) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Check-in updated.')),
+                      SnackBar(
+                        content: Text(
+                          context.tr('Check-in updated.', '签到已更新。'),
+                        ),
+                      ),
                     );
                     _readPersisted();
                   }
@@ -764,11 +804,11 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
           padding: const EdgeInsets.all(20),
           children: [
             if (state is CommandPending<CheckIn>)
-              const _ResultPanel(
+              _ResultPanel(
                 key: Key('r6-saved-check-in-confirming'),
                 icon: Icons.sync,
-                title: 'Loading Check-in…',
-                body: 'Getting your saved details.',
+                title: context.tr('Loading Check-in…', '正在加载签到…'),
+                body: context.tr('Getting your saved details.', '正在读取已保存的内容。'),
               )
             else if (state case CommandSucceeded<CheckIn>(:final value))
               Column(
@@ -794,13 +834,13 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
               _ResultPanel(
                 key: const Key('r6-saved-check-in-unavailable'),
                 icon: Icons.sync_problem,
-                title: 'Check-in unavailable',
+                title: context.tr('Check-in unavailable', '签到不可用'),
                 body: _confirmationFailureCopy(failure.kind),
                 action: FilledButton.icon(
                   key: const Key('r6-saved-check-in-retry-confirmation'),
                   onPressed: _readPersisted,
                   icon: const Icon(Icons.sync),
-                  label: const Text('Reload Check-in'),
+                  label: Text(context.tr('Reload Check-in', '重新加载签到')),
                 ),
               ),
             const SizedBox(height: 20),
@@ -808,7 +848,7 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
               key: const Key('r6-return-home'),
               onPressed: widget.onReturnHome,
               icon: const Icon(Icons.home_outlined),
-              label: const Text('Return Home'),
+              label: Text(context.tr('Return Home', '返回首页')),
             ),
           ],
         ),
@@ -824,10 +864,22 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
 
   String _confirmationFailureCopy(AppFailureKind kind) {
     return switch (kind) {
-      AppFailureKind.checkInUnavailable => 'This Check-in is unavailable.',
-      AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
-      AppFailureKind.authForbidden => 'This account cannot continue.',
-      _ => 'This service is temporarily unavailable. Try again.',
+      AppFailureKind.checkInUnavailable => context.tr(
+        'This Check-in is unavailable.',
+        '此签到不可用。',
+      ),
+      AppFailureKind.authRequired => context.tr(
+        'Your session has expired. Sign in again.',
+        '登录已失效，请重新登录。',
+      ),
+      AppFailureKind.authForbidden => context.tr(
+        'This account cannot continue.',
+        '此账号无法继续。',
+      ),
+      _ => context.tr(
+        'This service is temporarily unavailable. Try again.',
+        '服务暂时不可用，请重试。',
+      ),
     };
   }
 }
@@ -875,39 +927,4 @@ final class _ResultPanel extends StatelessWidget {
       ),
     );
   }
-}
-
-final class _ComposerLabelChip extends StatelessWidget {
-  const _ComposerLabelChip({
-    required this.label,
-    required this.avatar,
-    required this.selected,
-    required this.onPressed,
-  });
-  final String label;
-  final Widget avatar;
-  final bool selected;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) => MotionSize(
-    alignment: Alignment.centerLeft,
-    child: AnimatedContainer(
-      duration: EnmoriMotion.duration(context, EnmoriMotion.feedback),
-      curve: EnmoriMotion.settle,
-      decoration: ShapeDecoration(
-        shape: const StadiumBorder(),
-        color: selected
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Colors.transparent,
-      ),
-      child: ActionChip(
-        chipAnimationStyle: EnmoriMotion.chips(context),
-        backgroundColor: Colors.transparent,
-        avatar: avatar,
-        label: MotionReveal(trigger: label, distance: 0, child: Text(label)),
-        onPressed: onPressed,
-      ),
-    ),
-  );
 }

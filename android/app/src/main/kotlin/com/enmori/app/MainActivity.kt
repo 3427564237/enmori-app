@@ -15,6 +15,27 @@ import java.util.TimeZone
 class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/preferences")
+            .setMethodCallHandler { call, result ->
+                try {
+                    val preferences = getSharedPreferences("enmori_device_preferences", MODE_PRIVATE)
+                    when (call.method) {
+                        "readLanguage" -> result.success(preferences.getString("app_language", null))
+                        "writeLanguage" -> {
+                            val language = call.argument<String>("language")
+                            if (language != "en" && language != "zh") {
+                                result.error("LANGUAGE_INVALID", "Unsupported interface language.", null)
+                            } else {
+                                // Acknowledgement follows the durable write, not an optimistic UI change.
+                                result.success(preferences.edit().putString("app_language", language).commit())
+                            }
+                        }
+                        else -> result.notImplemented()
+                    }
+                } catch (_: Exception) {
+                    result.error("LANGUAGE_UNAVAILABLE", "Device language is unavailable.", null)
+                }
+            }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/external_activity")
             .setMethodCallHandler { call, result ->
                 if (call.method != "open" && call.method != "openAttribution") {

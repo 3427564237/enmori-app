@@ -46,6 +46,9 @@ class _Repository implements CheckInRepository, CheckInMutations {
     current = CheckIn(
       checkInId: checkInId,
       note: note,
+      mood: mood,
+      activity: activity,
+      locationLabel: locationLabel,
       createdAt: current!.createdAt,
       checkInVisibility: visibility,
       revision: expectedRevision + 1,
@@ -116,6 +119,43 @@ Future<void> _mount(WidgetTester tester, _Repository repository) async {
 }
 
 void main() {
+  testWidgets('custom Mood Activity and place labels survive save and reopen', (
+    tester,
+  ) async {
+    final repo = _Repository();
+    final originalDate = repo.current!.createdAt;
+    await _mount(tester, repo);
+    for (final item in [
+      ('Mood', 'Proud'),
+      ('Activity', 'Sketching'),
+      ('Location', 'Library'),
+    ]) {
+      final chip = find.widgetWithText(ActionChip, item.$1);
+      await tester.ensureVisible(chip);
+      await tester.tap(chip);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField), item.$2);
+      await tester.ensureVisible(find.text('Apply'));
+      await tester.tap(find.text('Apply'));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(ActionChip, item.$2), findsOneWidget);
+    }
+    await tester.enterText(find.byKey(const Key('check-in-edit-note')), '');
+    await tester.ensureVisible(find.byKey(const Key('check-in-edit-save')));
+    await tester.tap(find.byKey(const Key('check-in-edit-save')));
+    await tester.pumpAndSettle();
+    expect(repo.current!.note, '');
+    expect(repo.current!.mood, 'Proud');
+    expect(repo.current!.activity, 'Sketching');
+    expect(repo.current!.locationLabel, 'Library');
+    expect(repo.current!.location, isNull);
+    expect(repo.current!.createdAt, originalDate);
+    await tester.tap(find.text('Open record'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(ActionChip, 'Sketching'), findsOneWidget);
+    expect(find.widgetWithText(ActionChip, 'Proud'), findsOneWidget);
+  });
+
   testWidgets(
     'save prevents duplicate dispatch and returns to record after success',
     (tester) async {

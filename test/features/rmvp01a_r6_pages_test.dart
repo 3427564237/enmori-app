@@ -373,6 +373,10 @@ void main() {
     await _tapByKey(tester, const Key('r6-initial-choice-accept'));
     await tester.pumpAndSettle();
 
+    await _ensureBuiltAndVisible(
+      tester,
+      find.byKey(const Key('r6-onboarding-failure')),
+    );
     expect(find.text('This Username is unavailable.'), findsOneWidget);
     await _ensureBuiltAndVisible(
       tester,
@@ -611,6 +615,10 @@ Future<void> _expectOnboardingPublicError(
   await _pumpOnboardingToChoice(tester, account: account);
   await _tapByKey(tester, const Key('r6-initial-choice-accept'));
   await tester.pumpAndSettle();
+  await _ensureBuiltAndVisible(
+    tester,
+    find.byKey(const Key('r6-onboarding-failure')),
+  );
   expect(find.text(copy), findsOneWidget);
   expect(find.text('unsafe'), findsNothing);
 }

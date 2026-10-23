@@ -1,8 +1,10 @@
+import 'package:enmori/core/presentation/enmori_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'home_weather_controller.dart';
 import 'weather_card.dart';
+import 'weather_feedback.dart';
 
 final class HomeWeatherCard extends ConsumerStatefulWidget {
   const HomeWeatherCard({
@@ -59,20 +61,27 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
     final allowed = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Allow current weather?'),
-        content: const SingleChildScrollView(child: Text(_disclosure)),
+        title: Text(context.tr('Allow current weather?', "允许获取当前天气？")),
+        content: SingleChildScrollView(
+          child: Text(
+            context.tr(
+              _disclosure,
+              "ENMORI 会在前台获取一次位置，将坐标四舍五入到 0.1°，再通过后端发送大致坐标给 Open-Meteo。Open-Meteo 可能保留请求元数据，不会收到精确坐标、身份或签到内容。选择自动获取天气会保存此偏好，在首页时自动刷新间隔至少 15 分钟，可随时在设置中更改。不进行后台追踪，且独立于签到天气设置。",
+            ),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Not now'),
+            child: Text(context.tr('Not now', "暂不")),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, 'once'),
-            child: const Text('Only this time'),
+            child: Text(context.tr('Only this time', "仅这一次")),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, 'auto'),
-            child: const Text('Automatically on Home'),
+            child: Text(context.tr('Automatically on Home', "在首页自动获取")),
           ),
         ],
       ),
@@ -85,12 +94,19 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
   void _showInfo() => showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('About Home weather'),
-      content: const SingleChildScrollView(child: Text(_disclosure)),
+      title: Text(context.tr('About Home weather', "关于首页天气")),
+      content: SingleChildScrollView(
+        child: Text(
+          context.tr(
+            _disclosure,
+            "ENMORI 会在前台获取一次位置，将坐标四舍五入到 0.1°，再通过后端发送大致坐标给 Open-Meteo。Open-Meteo 可能保留请求元数据，不会收到精确坐标、身份或签到内容。选择自动获取天气会保存此偏好，在首页时自动刷新间隔至少 15 分钟，可随时在设置中更改。不进行后台追踪，且独立于签到天气设置。",
+          ),
+        ),
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Done'),
+          child: Text(context.tr('Done', "完成")),
         ),
       ],
     ),
@@ -104,12 +120,12 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
       children: [
         if (state.weather != null)
           IconButton(
-            tooltip: 'Refresh weather',
+            tooltip: context.tr('Refresh weather', "刷新天气"),
             onPressed: state.busy ? null : _requestWeather,
             icon: const Icon(Icons.refresh),
           ),
         PopupMenuButton<String>(
-          tooltip: 'Weather options',
+          tooltip: context.tr('Weather options', "天气选项"),
           onSelected: (action) {
             if (action == 'clear') {
               controller.clear();
@@ -120,17 +136,20 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
             }
           },
           itemBuilder: (_) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'info',
-              child: Text('About Home weather'),
+              child: Text(context.tr('About Home weather', "关于首页天气")),
             ),
             if (widget.onOpenSettings != null)
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'settings',
-                child: Text('Weather settings'),
+                child: Text(context.tr('Weather settings', "天气设置")),
               ),
             if (state.weather != null)
-              const PopupMenuItem(value: 'clear', child: Text('Clear weather')),
+              PopupMenuItem(
+                value: 'clear',
+                child: Text(context.tr('Clear weather', "清除天气")),
+              ),
           ],
         ),
       ],
@@ -149,7 +168,7 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
                   ),
                   onPressed: state.busy ? null : _requestWeather,
                   icon: const Icon(Icons.cloud_outlined),
-                  label: const Text('Add today’s weather'),
+                  label: Text(context.tr('Add today’s weather', "添加今日天气")),
                 ),
               ),
               actions,
@@ -157,8 +176,8 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
           ),
         Text(
           state.automatic
-              ? 'Approximate location · auto on'
-              : 'Optional · approximate location',
+              ? context.tr('Approximate location · auto on', "大致位置 · 自动获取已开启")
+              : context.tr('Optional · approximate location', "可选 · 大致位置"),
           style: Theme.of(context).textTheme.bodySmall,
         ),
         if (state.weather case final weather?)
@@ -171,13 +190,16 @@ final class _HomeWeatherCardState extends ConsumerState<HomeWeatherCard>
         if (state.failure case final failure?)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Semantics(liveRegion: true, child: Text(failure.message)),
+            child: Semantics(
+              liveRegion: true,
+              child: Text(weatherFeedback(context, failure)),
+            ),
           ),
         if (state.busy)
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
             child: LinearProgressIndicator(
-              semanticsLabel: 'Getting current weather',
+              semanticsLabel: context.tr('Getting current weather', "正在获取当前天气"),
             ),
           ),
       ],

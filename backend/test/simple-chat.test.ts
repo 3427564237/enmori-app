@@ -23,6 +23,37 @@ test('simple chat keeps numbers, questions, code and links as text; authorized h
   assert.equal((await simpleChatGates.candidate(() => input, () => parsed.value, budget())).ok, true);
   assert.deepEqual(transport.state, { pending: false, outcomeUnknown: false });
 });
+test('plan adapter forwards corrections in order without rewriting user text or model output', async () => {
+  const correction: ConversationInput = {
+    strategy: 'open_conversation_v1', checkIns: [], persona: undefined,
+    history: [{
+      user: 'Test label Cedar25. I want a quiet 15 minute break after studying, indoors with no equipment or spending.',
+      assistant: 'Cedar25：先检查设备，然后复习笔记。',
+    }],
+    currentMessage: '上面的回复偏题了。我只想休息，不要检查设备或复习。Reply in English with three steps totaling 15 minutes and my earlier marker.',
+  };
+  const requests: Array<{ messages: Array<{ role: string; content: string }>; options: unknown; think: boolean; tools?: unknown }> = [];
+  const output = { schemaVersion: 'ai_assistant_message_v1', message:
+    'Cedar25: 1. Sit comfortably for 3 minutes. 2. Rest quietly for 9 minutes. 3. Gently stretch for 3 minutes.' };
+  const transport = new LocalChatTransport('qwen3.5:9b', async (_url, init) => {
+    requests.push(JSON.parse(init!.body as string));
+    return Response.json({ done: true, model: 'qwen3.5:9b', message: { content: JSON.stringify(output) } });
+  });
+  const raw = await transport.generate(correction, budget());
+  assert.equal(requests.length, 1, 'One inference; no hidden model repair or retry');
+  const request = requests[0]!;
+  assert.equal(request.messages[0]!.role, 'system');
+  assert.deepEqual(request.messages.slice(1), [
+    { role: 'user', content: correction.history![0]!.user },
+    { role: 'assistant', content: correction.history![0]!.assistant },
+    { role: 'user', content: correction.currentMessage },
+  ]);
+  assert.deepEqual(request.options, { num_ctx: 8192, num_predict: 512 });
+  assert.equal(request.think, false);
+  assert.equal(request.tools, undefined);
+  assert.deepEqual(JSON.parse(new TextDecoder().decode(raw)), output);
+  assert.deepEqual(transport.state, { pending: false, outcomeUnknown: false });
+});
 test('simple chat retains malformed output, revoked request and unauthorized source boundaries', async () => {
   assert.equal(parseOutput(new TextEncoder().encode('{"message":"hello"}'), 'ai_assistant_message_v1', true).ok, false);
   const controller = new AbortController(); controller.abort();

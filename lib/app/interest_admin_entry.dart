@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import '../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/auth/auth_providers.dart';
@@ -51,7 +54,7 @@ final class _InterestAdminEntryState extends ConsumerState<InterestAdminEntry>
     return ListTile(
       key: const Key('profile-admin-interests'),
       leading: const Icon(Icons.playlist_add),
-      title: const Text('Manage interest catalogue'),
+      title: Text(context.tr('Manage interest catalogue', '管理兴趣目录')),
       trailing: const Icon(Icons.chevron_right),
       onTap: _opening
           ? null

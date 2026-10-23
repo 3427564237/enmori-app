@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:ui' as ui;
 
+import 'package:enmori/app/enmori_theme.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
@@ -12,10 +15,38 @@ import 'package:enmori/features/personas/presentation/persona_editor_page.dart';
 import 'package:enmori/features/personas/presentation/persona_management_page.dart';
 import 'package:enmori/features/personas/presentation/persona_overview_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets(
+    'Chinese Persona actions and current deletion warning preserve identity',
+    (tester) async {
+      final repository = _Repository()
+        ..items.add(_persona('a'))
+        ..active = 'a' * 64;
+      await _pump(
+        tester,
+        repository,
+        PersonaManagementPage(onCreate: () {}, onEdit: (_) {}, onBack: () {}),
+        locale: const Locale('zh'),
+      );
+      expect(find.text('管理人设'), findsOneWidget);
+      expect(find.text('语气: 自然'), findsOneWidget);
+      await _tapVisible(tester, 'persona-more-${'a' * 64}');
+      await tester.tap(find.text('删除人设'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('删除后将使用默认表达'), findsOneWidget);
+      await tester.tap(find.text('取消'));
+      await tester.pumpAndSettle();
+      expect(repository.deletions, 0);
+      expect(repository.active, 'a' * 64);
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets('More options edits or opens the existing delete confirmation', (
     tester,
   ) async {
@@ -45,14 +76,49 @@ void main() {
   testWidgets(
     'all approved fields save, reread and reopen with current draft preview isolated',
     (tester) async {
+      if (Platform.environment['ENMORI_AI_CAPTURE'] != null) {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final path = Platform.environment['ENMORI_AI_CAPTURE_FONT'];
+        final bytes = path == null
+            ? null
+            : await tester.runAsync(() => File(path).readAsBytes());
+        for (final (family, asset) in [
+          (
+            'Playfair Display',
+            'assets/fonts/playfair_display/PlayfairDisplay[wght].ttf',
+          ),
+          ('MaterialIcons', 'fonts/MaterialIcons-Regular.otf'),
+        ]) {
+          await tester.runAsync(() {
+            final loader = FontLoader(family)..addFont(rootBundle.load(asset));
+            if (family == 'Playfair Display' && bytes != null) {
+              loader.addFont(Future.value(ByteData.sublistView(bytes)));
+            }
+            return loader.load();
+          });
+        }
+        if (bytes != null) {
+          await tester.runAsync(
+            () => (FontLoader(
+              'Roboto',
+            )..addFont(Future.value(ByteData.sublistView(bytes)))).load(),
+          );
+        }
+      }
       final repository = _Repository();
       final preview = _ImmediatePreview();
+      var previewAllowed = true;
+      final language = ValueNotifier(const Locale('zh'));
+      addTearDown(language.dispose);
       final auth = StreamController<AuthSession>();
       final container = ProviderContainer(
         overrides: [
           authSessionProvider.overrideWith((ref) => auth.stream),
           personaRepositoryProvider.overrideWithValue(repository),
-          personaPreviewAccessProvider.overrideWithValue(true),
+          personaPreviewAccessProvider.overrideWith((ref) => previewAllowed),
           personaPreviewRepositoryProvider.overrideWithValue(preview),
         ],
       );
@@ -67,10 +133,24 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(home: PersonaEditorPage(onBack: () {})),
+          child: RepaintBoundary(
+            key: const Key('persona-capture'),
+            child: ValueListenableBuilder(
+              valueListenable: language,
+              builder: (context, locale, _) => MaterialApp(
+                debugShowCheckedModeBanner: false,
+                theme: enmoriTheme(),
+                locale: locale,
+                localizationsDelegates: GlobalMaterialLocalizations.delegates,
+                supportedLocales: const [Locale('en'), Locale('zh')],
+                home: PersonaEditorPage(onBack: () {}),
+              ),
+            ),
+          ),
         ),
       );
       await tester.pumpAndSettle();
+      expect(find.text('创建人设'), findsWidgets);
       await tester.enterText(
         find.byKey(const Key('persona-name')),
         'Full draft',
@@ -92,6 +172,7 @@ void main() {
         await tester.enterText(field, entry.value);
       }
       await _tapVisible(tester, 'persona-preview');
+      expect(find.text('试聊人设'), findsOneWidget);
       await tester.enterText(
         find.byKey(const Key('persona-preview-input')),
         'Hello preview',
@@ -103,8 +184,12 @@ void main() {
       expect(repository.creates, isEmpty);
       expect(repository.activations, 0);
       expect(repository.items, isEmpty);
-      await tester.pageBack();
+      await _capturePersona(tester, 'persona-preview-zh');
+      await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
+      language.value = const Locale('en');
+      await tester.pumpAndSettle();
+      expect(find.text('Create Persona'), findsWidgets);
       for (final entry in values.entries) {
         expect(
           tester
@@ -114,6 +199,38 @@ void main() {
           entry.value,
         );
       }
+      // Reuse the same trial message after editing; each try gets the new
+      // unsaved fields and has no implicit create/activation/history effect.
+      values['communicationStyle'] = 'One short question';
+      final style = find.byKey(const Key('persona-communicationStyle'));
+      await tester.ensureVisible(style);
+      await tester.enterText(style, values['communicationStyle']!);
+      await _tapVisible(tester, 'persona-preview-quick');
+      final previewInput = find.byKey(const Key('persona-preview-input'));
+      expect(
+        tester.widget<TextFormField>(previewInput).controller!.text,
+        'Hello preview',
+      );
+      expect(find.text('A synthetic preview'), findsNothing);
+      await _tapVisible(tester, 'persona-preview-send');
+      expect(preview.draft?.communicationStyle, 'One short question');
+      expect(preview.text, 'Hello preview');
+      expect(repository.creates, isEmpty);
+      expect(repository.activations, 0);
+      await _tapVisible(tester, 'persona-preview-edit');
+      previewAllowed = false;
+      container.invalidate(personaPreviewAccessProvider);
+      await tester.pumpAndSettle();
+      previewAllowed = true;
+      container.invalidate(personaPreviewAccessProvider);
+      await tester.pumpAndSettle();
+      await _tapVisible(tester, 'persona-preview-quick');
+      expect(
+        tester.widget<TextFormField>(previewInput).controller!.text,
+        isEmpty,
+      );
+      await tester.pageBack();
+      await tester.pumpAndSettle();
       await _tapVisible(tester, 'persona-save');
       expect(repository.creates.single.fields.expressionFields, values);
       expect(repository.items.single.fields.expressionFields, values);
@@ -920,12 +1037,32 @@ void main() {
   );
 }
 
+Future<void> _capturePersona(WidgetTester tester, String name) async {
+  final output = Platform.environment['ENMORI_AI_CAPTURE'];
+  if (output == null) return;
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pumpAndSettle();
+  final boundary = tester.renderObject<RenderRepaintBoundary>(
+    find.byKey(const Key('persona-capture')),
+  );
+  final bitmap = await tester.runAsync(() => boundary.toImage(pixelRatio: 1));
+  final bytes = await tester.runAsync(
+    () => bitmap!.toByteData(format: ui.ImageByteFormat.png),
+  );
+  await tester.runAsync(() async {
+    await Directory(output).create(recursive: true);
+    await File('$output/$name.png').writeAsBytes(bytes!.buffer.asUint8List());
+  });
+  bitmap!.dispose();
+}
+
 Future<ProviderContainer> _pump(
   WidgetTester tester,
   _Repository repository,
   Widget page, {
   double textScale = 1,
   bool dark = false,
+  Locale locale = const Locale('en'),
 }) async {
   final session = PersonaSession(
     repository,
@@ -940,6 +1077,9 @@ Future<ProviderContainer> _pump(
     UncontrolledProviderScope(
       container: container,
       child: MaterialApp(
+        locale: locale,
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        supportedLocales: const [Locale('en'), Locale('zh')],
         theme: dark ? ThemeData.dark() : ThemeData.light(),
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(
@@ -1155,6 +1295,7 @@ final class _Repository implements PersonaRepository {
 
 final class _ImmediatePreview implements PersonaPreviewRepository {
   PersonaFields? draft;
+  String? text;
   @override
   Future<Result<String>> preview({
     required PersonaFields draft,
@@ -1162,6 +1303,7 @@ final class _ImmediatePreview implements PersonaPreviewRepository {
     required bool Function() isEligible,
   }) async {
     this.draft = draft;
+    this.text = text;
     return const Success('A synthetic preview');
   }
 }

@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -107,16 +109,16 @@ final class _ParticipationControlsState
           children: [
             planButton(
               ParticipationStatus.interested,
-              'Interested',
+              context.tr('Interested', '感兴趣'),
               Icons.star_outline,
             ),
             planButton(
               ParticipationStatus.going,
-              'Going',
+              context.tr('Going', '将参加'),
               Icons.event_available_outlined,
             ),
             PopupMenuButton<VoidCallback>(
-              tooltip: 'More event options',
+              tooltip: context.tr('More event options', '更多活动选项'),
               enabled: !busy && entry?.uncertain != true && value != null,
               // Execute the closure captured when this menu was rendered, not
               // a fresh session/revision observed while the menu was open.
@@ -126,42 +128,52 @@ final class _ParticipationControlsState
                   PopupMenuItem(
                     value: () =>
                         change(ParticipationStatus.none, value.ignored),
-                    child: const Text('Cancel participation'),
+                    child: Text(context.tr('Cancel participation', '取消参与')),
                   ),
                 if (value != null)
                   PopupMenuItem(
                     value: () => change(value.status, !value.ignored),
                     child: Text(
                       value.ignored
-                          ? 'Restore recommendation'
-                          : 'Ignore recommendation',
+                          ? context.tr('Restore recommendation', '恢复推荐')
+                          : context.tr('Ignore recommendation', '忽略推荐'),
                     ),
                   ),
                 PopupMenuItem(
                   value: () => controller.load(widget.eventId),
-                  child: const Text('Sync participation status'),
+                  child: Text(
+                    context.tr('Sync participation status', '同步参与状态'),
+                  ),
                 ),
               ],
             ),
           ],
         ),
         if (value?.ignored == true)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 4),
-            child: Text('Hidden from recommendations'),
+            child: Text(context.tr('Hidden from recommendations', '已从推荐中隐藏')),
           ),
         if (busy)
           Semantics(
             liveRegion: true,
-            child: const Text('Checking your participation…'),
+            child: Text(
+              context.tr('Checking your participation…', '正在核对参与状态…'),
+            ),
           ),
         if (entry?.failure case final failure?)
-          Semantics(liveRegion: true, child: Text(failure.message)),
+          Semantics(
+            liveRegion: true,
+            child: Text(localizedFailure(context, failure)),
+          ),
         if (entry?.uncertain == true)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 4),
             child: Text(
-              'Change not confirmed. Check your plans before making another change.',
+              context.tr(
+                'Change not confirmed. Check your plans before making another change.',
+                '修改尚未确认，请先核对计划再继续修改。',
+              ),
             ),
           ),
         if (needsRead && !busy)
@@ -170,8 +182,8 @@ final class _ParticipationControlsState
             icon: const Icon(Icons.refresh, size: 18),
             label: Text(
               entry?.uncertain == true
-                  ? 'Check current plans'
-                  : 'Load your plans',
+                  ? context.tr('Check current plans', '核对当前计划')
+                  : context.tr('Load your plans', '加载你的计划'),
             ),
           ),
       ],

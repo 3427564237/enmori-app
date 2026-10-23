@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -82,22 +84,27 @@ final class _ExternalRegistrationActionState
     final allowed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Continue to third-party registration?'),
-        content: const SingleChildScrollView(
+        title: Text(
+          context.tr('Continue to third-party registration?', '前往第三方报名？'),
+        ),
+        content: SingleChildScrollView(
           child: Text(
-            'Your browser opens the organiser website. Its privacy and payment '
-            'terms apply. ENMORI does not verify registration or take payment. '
-            'Opening the page does not mark you as Going.',
+            context.tr(
+              'Your browser opens the organiser website. Its privacy and payment '
+                  'terms apply. ENMORI does not verify registration or take payment. '
+                  'Opening the page does not mark you as Going.',
+              '浏览器将打开主办方网站，其隐私和支付条款适用。ENMORI 不核实报名，也不收款。打开网页不会自动标记为将参加。',
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(context.tr('Cancel', '取消')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Open website'),
+            child: Text(context.tr('Open website', '打开网站')),
           ),
         ],
       ),
@@ -131,19 +138,22 @@ final class _ExternalRegistrationActionState
     final completed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Did you complete registration?'),
-        content: const Text(
-          'Yes records your declaration as Going in ENMORI. '
-          'It is not a booking or payment confirmation.',
+        title: Text(context.tr('Did you complete registration?', '你完成报名了吗？')),
+        content: Text(
+          context.tr(
+            'Yes records your declaration as Going in ENMORI. '
+                'It is not a booking or payment confirmation.',
+            '选择已完成会在 ENMORI 保存你将参加的声明，不代表预约或付款已获确认。',
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('No'),
+            child: Text(context.tr('No', '没有')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yes, mark Going'),
+            child: Text(context.tr('Yes, mark Going', '已完成，标记为将参加')),
           ),
         ],
       ),
@@ -174,7 +184,11 @@ final class _ExternalRegistrationActionState
       _session = observed is AuthSessionAuthenticated ? observed : null;
     }
     final session = _session;
-    if (session == null) return const Text('Sign in to record participation.');
+    if (session == null) {
+      return Text(
+        context.tr('Sign in to record participation.', '登录后可保存参与状态。'),
+      );
+    }
     _flow ??= ExternalRegistrationFlow(
       eventId: widget.eventId,
       sourceUrl: widget.sourceUrl,
@@ -190,25 +204,41 @@ final class _ExternalRegistrationActionState
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
-            'Registration takes place on the external website.',
+            context.tr(
+              'Registration takes place on the external website.',
+              '报名需要在外部网站完成。',
+            ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
         if (phase == RegistrationPhase.failed)
-          const Text('Could not open the website. Try again or copy its link.'),
+          Text(
+            context.tr(
+              'Could not open the website. Try again or copy its link.',
+              '无法打开网站，请重试或复制链接。',
+            ),
+          ),
         if (phase == RegistrationPhase.saved)
-          const Text('Going saved. This is your declaration, not a booking.'),
+          Text(
+            context.tr(
+              'Going saved. This is your declaration, not a booking.',
+              '已保存“将参加”，这只是你的声明，不代表完成预约。',
+            ),
+          ),
         if (phase == RegistrationPhase.unresolved) ...[
-          const Text(
-            'Save result is uncertain. Read participation before retrying.',
+          Text(
+            context.tr(
+              'Save result is uncertain. Read participation before retrying.',
+              '保存结果尚不确定，请先核对参与状态再重试。',
+            ),
           ),
           OutlinedButton(
             onPressed: _read,
-            child: const Text('Read participation'),
+            child: Text(context.tr('Read participation', '核对参与状态')),
           ),
         ],
         if (phase == RegistrationPhase.saving)
-          const Text('Checking participation…'),
+          Text(context.tr('Checking participation…', '正在核对参与状态…')),
         OutlinedButton.icon(
           onPressed:
               widget.sourceAvailable &&
@@ -218,7 +248,7 @@ final class _ExternalRegistrationActionState
               ? _open
               : null,
           icon: const Icon(Icons.open_in_new),
-          label: const Text('Register on original website'),
+          label: Text(context.tr('Register on original website', '前往原网站报名')),
         ),
       ],
     );

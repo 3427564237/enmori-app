@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:enmori/app/social_demo_presentation.dart';
 import 'package:enmori/features/check_in/history_device_port.dart';
 import 'package:enmori/features/friends/social_providers.dart';
 import 'package:enmori/features/friends/presentation/check_in_points_map.dart';
+import 'package:enmori/features/friends/presentation/my_friends_page.dart';
+import 'package:enmori/features/check_in/domain/check_in_repository.dart';
+import 'package:enmori/features/check_in/presentation/check_in_record_view.dart';
 
 import '../features/social_profile_flow_test.dart' show SocialFake;
 
@@ -25,7 +30,7 @@ import '../support/fakes.dart';
 
 void main() {
   testWidgets(
-    'connected Home and Profile expose separate History and Footprint with five bottom destinations',
+    'connected shell has five destinations and Profile owns History and Footprint',
     (tester) async {
       final f = await _pumpApp(
         tester,
@@ -34,25 +39,74 @@ void main() {
         remote: true,
       );
       expect(find.byType(NavigationDestination), findsNWidgets(5));
-      await _tap(tester, 'home-footprint');
-      expect(f.router.state.uri.path, AppRoutes.footprint);
-      expect(find.byType(CheckInPointsMap), findsOneWidget);
-      await tester.pageBack();
+      // 23 October refinement puts personal records under Profile in this shell.
+      expect(find.byKey(const Key('home-footprint')), findsNothing);
+      expect(find.byKey(const Key('home-check-in-history')), findsNothing);
+      await tester.tap(find.widgetWithText(NavigationDestination, 'Profile'));
       await tester.pumpAndSettle();
-      expect(f.router.state.uri.path, AppRoutes.home);
-      await _tap(tester, 'home-check-in-history');
-      expect(f.router.state.uri.path, AppRoutes.checkInHistory);
-      f.router.go(AppRoutes.profile);
-      await tester.pumpAndSettle();
-      expect(find.text('Check-in History'), findsOneWidget);
-      expect(find.text('Footprint'), findsOneWidget);
+      expect(f.router.state.uri.path, AppRoutes.profile);
+      await tester.ensureVisible(find.text('Footprint'));
       await tester.tap(find.text('Footprint'));
       await tester.pumpAndSettle();
       expect(f.router.state.uri.path, AppRoutes.footprint);
       expect(find.byType(CheckInPointsMap), findsOneWidget);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(f.router.state.uri.path, AppRoutes.profile);
+      await tester.ensureVisible(find.text('Check-in History'));
+      await tester.tap(find.text('Check-in History'));
+      await tester.pumpAndSettle();
+      expect(f.router.state.uri.path, AppRoutes.checkInHistory);
+      f.router.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('Check-in History'), findsOneWidget);
+      expect(find.text('Footprint'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final viaFriends in [false, true]) {
+    testWidgets(
+      'shared saved-record view is wired through ${viaFriends ? 'Friends' : 'top-level Profile'}',
+      (tester) async {
+        final f = await _pumpApp(tester, remote: true);
+        final social = f.container.read(socialRepositoryProvider) as SocialFake;
+        final record = testCheckIn();
+        social.pendingRecords = Completer<Result<CheckInHistoryPage>>()
+          ..complete(
+            Success(CheckInHistoryPage(checkIns: [record], nextCursor: null)),
+          );
+        social.detailResult = Success(record);
+        f.router.go(viaFriends ? '/friends' : '/people/member_b');
+        await tester.pumpAndSettle();
+        if (viaFriends) {
+          // Exercise the real Friends composition callback and nested Navigator.
+          tester
+              .widget<MyFriendsListPage>(find.byType(MyFriendsListPage))
+              .onOpenFriend!('member_b');
+          await tester.pumpAndSettle();
+        }
+        await tester.tap(find.widgetWithText(ChoiceChip, 'Check-in History'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(record.note));
+        await tester.pumpAndSettle();
+        expect(find.byType(CheckInRecordView), findsOneWidget);
+        expect(
+          tester
+              .widget<CheckInRecordView>(find.byType(CheckInRecordView))
+              .record
+              .checkInId,
+          record.checkInId,
+        );
+        expect(social.readIds, [record.checkInId]);
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+        expect(find.byType(CheckInRecordView), findsNothing);
+        expect(find.text(record.note), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   for (final supplied in [false, true]) {
     testWidgets('ordinary builds omit both new routes/entries ($supplied)', (

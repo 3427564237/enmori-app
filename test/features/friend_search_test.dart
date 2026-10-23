@@ -224,7 +224,12 @@ void main() {
       final repo = Friends();
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [friendRepositoryProvider.overrideWithValue(repo)],
+          overrides: [
+            friendRepositoryProvider.overrideWithValue(repo),
+            authSessionProvider.overrideWithValue(
+              const AsyncData(AuthSessionAuthenticated(subject: 'member-a')),
+            ),
+          ],
           child: const MaterialApp(home: MyFriendsListPage()),
         ),
       );
@@ -255,8 +260,11 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.getSize(finder).height, greaterThanOrEqualTo(48));
         final node = tester.getSemantics(finder).getSemanticsData();
-        if (key == 'my-friends-reload') {
-          expect(node.tooltip, 'Refresh friends');
+        if (key == 'my-friends-reload' || key == 'my-friends-search') {
+          expect(
+            node.tooltip,
+            key == 'my-friends-reload' ? 'Refresh friends' : 'Search friends',
+          );
         } else {
           expect(node.label, isNotEmpty, reason: key);
         }

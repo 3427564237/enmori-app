@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
+import '../../../core/presentation/local_time.dart';
+import '../../account/domain/account_repository.dart';
 import '../../check_in/domain/check_in_repository.dart';
 import '../../weather/weather_providers.dart';
 import '../domain/social_repository.dart';
-import 'social_profile_controller.dart';
+import 'check_in_map_preview.dart';
 import 'check_in_points_map.dart';
+import 'social_profile_controller.dart';
 
 typedef ParticipationBuilder = Widget Function(
   BuildContext context,
@@ -27,9 +31,11 @@ final class SocialProfilePage extends ConsumerStatefulWidget {
     this.recordId,
     this.onOpenFootprint,
     this.onOpenOwnRecord,
+    this.recordBuilder,
     super.key,
   });
   final String username, initialDate, timeZone;
+  final Widget Function(BuildContext, CheckIn)? recordBuilder;
   final SocialTab initialTab;
   final String? recordId;
   final Future<void> Function()? onOpenFootprint;
@@ -125,6 +131,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
             timeZone: widget.timeZone,
             openAttribution: widget.openAttribution,
             recordId: id,
+            recordBuilder: widget.recordBuilder,
           ),
         ),
       );
@@ -144,9 +151,9 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
       appBar: AppBar(
         title: Text(
           widget.recordId != null
-              ? 'Saved Check-in'
+              ? context.tr('Saved Check-in', '已保存的签到')
               : widget.initialTab == SocialTab.map
-              ? 'Footprint'
+              ? context.tr('Footprint', '足迹')
               : '@${widget.username}',
         ),
       ),
@@ -167,10 +174,13 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                       for (final tab in SocialTab.values)
                         ChoiceChip(
                           label: Text(switch (tab) {
-                            SocialTab.profile => 'Profile',
-                            SocialTab.records => 'Check-in History',
-                            SocialTab.calendar => 'Calendar',
-                            SocialTab.map => 'Footprint',
+                            SocialTab.profile => context.tr('Profile', '个人资料'),
+                            SocialTab.records => context.tr(
+                              'Check-in History',
+                              '签到历史',
+                            ),
+                            SocialTab.calendar => context.tr('Calendar', '日历'),
+                            SocialTab.map => context.tr('Footprint', '足迹'),
                           }),
                           selected: state.tab == tab,
                           onSelected: state.busy
@@ -217,36 +227,52 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                 if (state.busy)
                   Semantics(
                     liveRegion: true,
-                    child: const Text('Loading current access…'),
+                    child: Text(
+                      context.tr('Loading current access…', '正在加载当前可查看的内容…'),
+                    ),
                   ),
                 if (state.failure case final failure?)
-                  Semantics(liveRegion: true, child: Text(failure.message)),
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(localizedFailure(context, failure)),
+                  ),
                 if (state.removed)
                   Semantics(
                     liveRegion: true,
-                    child: const Text(
-                      'Friend removed. Shared access has been updated.',
+                    child: Text(
+                      context.tr(
+                        'Friend removed. Shared access has been updated.',
+                        '已删除好友，共享访问权限已更新。',
+                      ),
                     ),
                   ),
                 if (state.profile case final profile?)
                   ..._profile(profile, state),
                 if (state.records case final records?) ...[
                   if (records.checkIns.isEmpty)
-                    const Text('No visible records on this page.'),
+                    Text(
+                      context.tr(
+                        'No visible records on this page.',
+                        '此页没有可查看的记录。',
+                      ),
+                    ),
                   for (final record in records.checkIns)
                     if (widget.recordId != null)
-                      _record(record)
+                      widget.recordBuilder?.call(context, record) ??
+                          _record(record)
                     else
                       Card(
                         child: ListTile(
                           title: Text(
                             record.note.isEmpty
-                                ? record.mood ?? 'Check-in'
+                                ? record.mood ?? context.tr('Check-in', '签到')
                                 : record.note,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          subtitle: Text(record.createdAt.toLocal().toString()),
+                          subtitle: Text(
+                            localTimeLabel(context, record.createdAt),
+                          ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => _openRecord(record.checkInId),
                         ),
@@ -255,19 +281,29 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                       !records.checkIns.any(
                         (r) => r.checkInId == _selectedRecord,
                       ))
-                    const Text(
-                      'The selected record is not on this page. Continue or reload to check current access.',
+                    Text(
+                      context.tr(
+                        'The selected record is not on this page. Continue or reload to check current access.',
+                        '当前页没有选中的记录，请继续翻页或重新加载以核对当前权限。',
+                      ),
                     ),
                   if (records.nextCursor != null)
                     OutlinedButton(
                       onPressed: () => _load(SocialTab.records, next: true),
-                      child: const Text('Next page'),
+                      child: Text(context.tr('Next page', '下一页')),
                     ),
                 ],
                 if (state.month case final month?)
                   state.tab == SocialTab.map
                       ? CheckInPointsMap(
                           points: month.points,
+                          recordPreviewBuilder: (context, point) =>
+                              CheckInMapPreview(
+                                key: ValueKey(point.checkInId),
+                                username: widget.username,
+                                checkInId: point.checkInId,
+                                onOpen: () => _openRecord(point.checkInId),
+                              ),
                           openAttribution: widget.openAttribution,
                           tileLayerBuilder: widget.tileLayerBuilder,
                           onSelect: (point) {
@@ -301,7 +337,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                             ? controller.record(widget.recordId!)
                             : _load(state.tab),
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Reload'),
+                  label: Text(context.tr('Reload', '重新加载')),
                 ),
               ],
             ),
@@ -332,7 +368,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
           await widget.onOpenRequest!(profile.username);
           if (mounted) _loadInitial();
         },
-        child: const Text('Friend request'),
+        child: Text(context.tr('Friend request', '好友请求')),
       ),
     if (profile.details.bio case final bio?)
       Padding(
@@ -353,8 +389,10 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
     if (profile.relationship == SocialRelationship.friend) ...[
       SwitchListTile(
         contentPadding: EdgeInsets.zero,
-        title: const Text('Special Care'),
-        subtitle: const Text('Only you can see this choice.'),
+        title: Text(context.tr('Special Care', '特别关心')),
+        subtitle: Text(
+          context.tr('Only you can see this choice.', '只有你能看到这个选择。'),
+        ),
         value: profile.specialCare,
         onChanged: state.busy
             ? null
@@ -363,24 +401,27 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
       ),
       OutlinedButton.icon(
         icon: const Icon(Icons.person_remove_outlined),
-        label: const Text('Remove friend'),
+        label: Text(context.tr('Remove friend', '删除好友')),
         onPressed: () async {
           final epoch = controller.epoch;
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Remove friend?'),
-              content: const Text(
-                'This removes the friendship for both people and ends access to friends-only content.',
+              title: Text(context.tr('Remove friend?', '删除这位好友？')),
+              content: Text(
+                context.tr(
+                  'This removes the friendship for both people and ends access to friends-only content.',
+                  '这会解除双方的好友关系，并停止访问仅好友可见的内容。',
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Keep friend'),
+                  child: Text(context.tr('Keep friend', '保留好友')),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Remove friend'),
+                  child: Text(context.tr('Remove friend', '删除好友')),
                 ),
               ],
             ),
@@ -393,7 +434,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
     ],
     if (profile.participationAvailable && widget.participationBuilder != null)
       OutlinedButton(
-        child: const Text('Event participation'),
+        child: Text(context.tr('Event participation', '活动参与')),
         onPressed: () async {
           controller.clear();
           await Navigator.of(context).push<void>(
@@ -415,14 +456,23 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(record.createdAt.toLocal().toString()),
+          Text(localTimeLabel(context, record.createdAt)),
           if (record.note.isNotEmpty) Text(record.note),
           if (record.checkInVisibility case final visibility?)
             Text(
-              'Visibility: ${visibility.name == 'friendsOnly' ? 'Friends-only' : visibility.name}',
+              "${context.tr('Visibility', '可见范围')}: ${switch (visibility) {
+                CheckInVisibility.private => context.tr('Private', '仅自己'),
+                CheckInVisibility.friendsOnly => context.tr('Friends-only', '仅好友'),
+                CheckInVisibility.public => context.tr('Public', '公开'),
+              }}",
             ),
           if (record.location case final location?)
-            Text('Saved location: ${location.latitude}, ${location.longitude}'),
+            Text(
+              context.tr(
+                'Saved location: ${location.latitude}, ${location.longitude}',
+                '已保存的位置：${location.latitude}, ${location.longitude}',
+              ),
+            ),
           if (record.mood case final mood?) Text(mood),
           if (record.activity case final activity?) Text(activity),
           if (record.locationLabel case final label?)
@@ -430,7 +480,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.place_outlined),
               title: Text(label),
-              subtitle: const Text('Place name'),
+              subtitle: Text(context.tr('Place name', '地点名称')),
             ),
           if (record.weather case final weather?)
             ref.watch(weatherCardBuilderProvider)(

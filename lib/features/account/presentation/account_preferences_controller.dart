@@ -81,7 +81,12 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
       return;
     }
     final operation = ++_operation;
-    state = const PreferencesState();
+    final previousProfile = state.profile;
+    final previousSettings = state.settings;
+    state = PreferencesState(
+      profile: previousProfile,
+      settings: previousSettings,
+    );
     if (view == PreferencesView.profile) {
       final result = await _repository.readProfile();
       if (!ref.mounted || operation != _operation) return;
@@ -91,7 +96,8 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
           profile: value,
           saved: saved,
         ),
-        Failure<OwnProfile>() => const PreferencesState(
+        Failure<OwnProfile>() => PreferencesState(
+          profile: previousProfile,
           phase: PreferencesPhase.failed,
           message: 'Profile could not be loaded. Try again.',
         ),
@@ -108,7 +114,8 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
           settings: value,
           saved: saved,
         ),
-        Failure<OwnSettings>() => const PreferencesState(
+        Failure<OwnSettings>() => PreferencesState(
+          settings: previousSettings,
           phase: PreferencesPhase.failed,
           message: 'Settings could not be loaded. Try again.',
         ),
@@ -195,8 +202,8 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
                   ? 'Use a display name of 1–50 characters or leave it unset, and choose a valid Profile visibility.'
                   : 'Choose valid privacy and data-use settings.')
             : stale
-            ? 'These details changed. Reload them before saving again.'
-            : 'The save could not be confirmed. Reload before trying again.',
+            ? 'These details changed elsewhere. Read the latest version before saving again.'
+            : 'The save could not be confirmed. Check the latest version before trying again.',
       );
     }
   }

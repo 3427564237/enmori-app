@@ -1,3 +1,5 @@
+import 'package:enmori/core/presentation/enmori_localizations.dart';
+
 import '../../auth/presentation/auth_email_page.dart';
 
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import '../../../core/presentation/enmori_motion.dart';
 import '../../auth/auth_providers.dart';
 import '../account_preferences_providers.dart';
 import '../domain/account_preferences_repository.dart';
+import '../domain/profile_details.dart';
 import '../../../core/result/result.dart';
 import '../../interests/domain/interest_repository.dart';
 import 'own_profile_controller.dart';
@@ -50,20 +53,20 @@ final class OwnProfilePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My profile'),
+        title: Text(context.tr('My profile', "我的资料")),
         actions: [
           IconButton(
             key: const Key('profile-edit'),
-            tooltip: 'Edit profile',
-            onPressed: state.username == null
+            tooltip: context.tr('Edit profile', "编辑资料"),
+            onPressed: state.username == null || onEditProfile == null
                 ? null
                 : () => edit(onEditProfile),
             icon: const Icon(Icons.edit_outlined),
           ),
           IconButton(
             key: const Key('profile-settings'),
-            tooltip: 'Settings',
-            onPressed: state.username == null
+            tooltip: context.tr('Settings', "设置"),
+            onPressed: state.username == null || onOpenSettings == null
                 ? null
                 : () => edit(onOpenSettings),
             icon: const Icon(Icons.settings_outlined),
@@ -115,6 +118,43 @@ final class OwnProfilePage extends ConsumerWidget {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 16),
+                          Material(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(16),
+                            child: ListTile(
+                              key: const Key('profile-audience'),
+                              leading: const Icon(Icons.visibility_outlined),
+                              title: Text(switch (value.visibility) {
+                                ProfileVisibility.private => context.tr(
+                                  'Private profile',
+                                  "私密资料",
+                                ),
+                                ProfileVisibility.friendsOnly => context.tr(
+                                  'Friends-only profile',
+                                  "仅好友可见的资料",
+                                ),
+                                ProfileVisibility.public => context.tr(
+                                  'Public profile',
+                                  "公开资料",
+                                ),
+                              }),
+                              subtitle: Text(
+                                context.tr(
+                                  'Your records and sharing choices have separate controls.',
+                                  "记录与各项分享范围需要分别设置。",
+                                ),
+                              ),
+                              trailing: onEditProfile == null
+                                  ? null
+                                  : const Icon(Icons.chevron_right),
+                              onTap: onEditProfile == null
+                                  ? null
+                                  : () => edit(onEditProfile),
+                            ),
+                          ),
                           if (value.details.bio case final bio?)
                             Padding(
                               padding: const EdgeInsets.only(top: 16),
@@ -134,7 +174,11 @@ final class OwnProfilePage extends ConsumerWidget {
                                   if (value.details.affiliationName
                                       case final name?)
                                     _ProfileDetail(
-                                      icon: Icons.school_outlined,
+                                      icon:
+                                          value.details.affiliationType ==
+                                              AffiliationType.company
+                                          ? Icons.business_outlined
+                                          : Icons.school_outlined,
                                       label: name,
                                     ),
                                   if (value.details.region case final region?)
@@ -154,17 +198,19 @@ final class OwnProfilePage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          state.username ?? 'My profile',
+                          state.username ?? context.tr('My profile', "我的资料"),
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
-                        const Text('Profile could not be loaded.'),
+                        Text(
+                          context.tr('Profile could not be loaded.', "资料加载失败。"),
+                        ),
                         TextButton(
                           onPressed: subject == null
                               ? null
                               : () => ref.invalidate(
                                   ownProfileDetailsProvider(subject),
                                 ),
-                          child: const Text('Reload profile'),
+                          child: Text(context.tr('Reload profile', "重新加载资料")),
                         ),
                       ],
                     ),
@@ -177,7 +223,7 @@ final class OwnProfilePage extends ConsumerWidget {
                     spacing: 12,
                     children: [
                       Text(
-                        'Interests',
+                        context.tr('Interests', "兴趣"),
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       TextButton.icon(
@@ -196,7 +242,7 @@ final class OwnProfilePage extends ConsumerWidget {
                                 }
                               },
                         icon: const Icon(Icons.edit_outlined, size: 18),
-                        label: const Text('Edit interests'),
+                        label: Text(context.tr('Edit interests', "编辑兴趣")),
                       ),
                     ],
                   ),
@@ -205,16 +251,23 @@ final class OwnProfilePage extends ConsumerWidget {
                   else if (state.phase == OwnProfilePhase.failed)
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Interests could not be loaded.'),
+                      title: Text(
+                        context.tr('Interests could not be loaded.', "兴趣加载失败。"),
+                      ),
                       trailing: TextButton(
                         onPressed: () => ref
                             .read(ownProfileControllerProvider.notifier)
                             .load(),
-                        child: const Text('Retry'),
+                        child: Text(context.tr('Retry', "重试")),
                       ),
                     )
                   else if (state.interests.isEmpty)
-                    const Text('No interests selected.')
+                    Text(
+                      context.tr(
+                        'No interests selected. Add up to 10 things you enjoy.',
+                        "还没有选择兴趣。可以添加最多 10 项你喜欢的事。",
+                      ),
+                    )
                   else
                     Wrap(
                       spacing: 8,
@@ -226,8 +279,11 @@ final class OwnProfilePage extends ConsumerWidget {
                             avatar:
                                 tag.lifecycleState ==
                                     InterestLifecycleState.inactive
-                                ? const Tooltip(
-                                    message: 'No longer available — you can remove it.',
+                                ? Tooltip(
+                                    message: context.tr(
+                                      'No longer available — you can remove it.',
+                                      "已停用，可以移除。",
+                                    ),
                                     child: Icon(Icons.info_outline, size: 18),
                                   )
                                 : null,
@@ -236,23 +292,30 @@ final class OwnProfilePage extends ConsumerWidget {
                     ),
                   const SizedBox(height: 20),
                   Text(
-                    'Your records',
+                    context.tr('Your records', "我的记录"),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
                   if (onOpenHistory != null)
                     ListTile(
                       leading: const Icon(Icons.history),
-                      title: const Text('Check-in History'),
-                      subtitle: const Text('Notes, moods and saved moments'),
+                      title: Text(context.tr('Check-in History', "签到记录")),
+                      subtitle: Text(
+                        context.tr(
+                          'Notes, moods and saved moments',
+                          "文字、心情与留存的时刻",
+                        ),
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: onOpenHistory,
                     ),
                   if (onOpenFootprint != null)
                     ListTile(
                       leading: const Icon(Icons.map_outlined),
-                      title: const Text('Footprint'),
-                      subtitle: const Text('Your Check-in locations'),
+                      title: Text(context.tr('Footprint', "足迹")),
+                      subtitle: Text(
+                        context.tr('Your Check-in locations', "签到留下的地点"),
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: onOpenFootprint,
                     ),
@@ -261,7 +324,9 @@ final class OwnProfilePage extends ConsumerWidget {
                       state.username != null)
                     ListTile(
                       leading: const Icon(Icons.calendar_month),
-                      title: const Text('My records, calendar & map'),
+                      title: Text(
+                        context.tr('My records, calendar & map', "我的记录、日历与地图"),
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => onOpenRecords!(state.username!),
                     ),
@@ -271,9 +336,12 @@ final class OwnProfilePage extends ConsumerWidget {
                       key: const Key('profile-manage-personas'),
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.auto_awesome_outlined),
-                      title: const Text('Your Personas'),
-                      subtitle: const Text(
-                        'Choose how your AI companion responds',
+                      title: Text(context.tr('Your Personas', "我的 AI 角色")),
+                      subtitle: Text(
+                        context.tr(
+                          'Choose how your AI companion responds',
+                          "选择 AI 伙伴的回应方式",
+                        ),
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: onManagePersonas,

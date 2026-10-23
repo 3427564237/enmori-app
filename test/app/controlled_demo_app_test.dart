@@ -5,6 +5,8 @@ import 'package:enmori/app/controlled_demo_app.dart';
 import 'package:enmori/app/router/app_router.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
+import 'package:enmori/features/event_participation/presentation/participation_events_page.dart';
+import 'package:enmori/features/event_participation/presentation/event_plans_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -52,6 +54,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       final auth = AuthDouble();
       var status = 'none', revision = 0;
+      var planReads = 0;
       final batchCursors = <String?>[];
       final client = MockClient((request) async {
         expect(request.headers['authorization'], 'Bearer synthetic-test-token');
@@ -109,6 +112,19 @@ void main() {
               'startAt': '2026-10-25T00:00:00.000Z',
               'externalSourceUrl': 'https://ticketmaster.sg/event/a',
             },
+          };
+        } else if (path == '/v1/me/event-participations') {
+          planReads++;
+          body = {
+            'items': [
+              {
+                'eventId': 'tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                'status': status,
+                'ignored': false,
+                'revision': revision,
+                'updatedAt': '2026-10-21T00:00:00.000Z',
+              },
+            ],
           };
         } else if (path == '/v1/event-browse') {
           final cursor = request.url.queryParameters['cursor'];
@@ -183,8 +199,15 @@ void main() {
       router.go(AppRoutes.activities);
       await tester.pumpAndSettle();
       expect(find.text('Synthetic integration concert'), findsOneWidget);
+      final coveredEventsCallback = tester
+          .widget<ParticipationEventsPage>(find.byType(ParticipationEventsPage))
+          .onSelect;
       await tester.ensureVisible(find.text('Synthetic integration concert'));
       await tester.tap(find.text('Synthetic integration concert'));
+      await tester.pumpAndSettle();
+      coveredEventsCallback(
+        'tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      );
       await tester.pumpAndSettle();
       expect(
         find.ancestor(
@@ -204,6 +227,57 @@ void main() {
         null,
         'synthetic.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
       ]);
+      await tester.ensureVisible(find.text('My plans'));
+      await tester.tap(find.text('My plans'));
+      await tester.pumpAndSettle();
+      expect(router.state.uri.path, AppRoutes.eventPlans);
+      final coveredPlansCallback = tester
+          .widget<EventPlansPage>(find.byType(EventPlansPage))
+          .onOpenEvent;
+      expect(planReads, 1);
+      await tester.tap(find.text('Synthetic integration concert'));
+      await tester.pumpAndSettle();
+      coveredPlansCallback(
+        'tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Going'));
+      await tester.pumpAndSettle();
+      expect(status, 'going');
+      expect(revision, 2);
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(router.state.uri.path, AppRoutes.eventPlans);
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const ValueKey(
+              'plan-tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            ),
+          ),
+          matching: find.text('Going'),
+        ),
+        findsOneWidget,
+      );
+      expect(planReads, 1);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(router.state.uri.path, AppRoutes.activities);
+      expect(batchCursors.length, 2);
+
+      // A direct plans link still has a usable Events fallback.
+      router.go(AppRoutes.eventPlans);
+      await tester.pumpAndSettle();
+      expect(router.canPop(), isFalse);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(router.state.uri.path, AppRoutes.activities);
+      auth.sessions.add(const AuthSessionUnauthenticated());
+      await tester.pumpAndSettle();
+      coveredPlansCallback('stale-plan');
+      await tester.pumpAndSettle();
+      expect(find.byType(EventPlansPage), findsNothing);
+      expect(find.byType(ParticipationEventsPage), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       await auth.sessions.close();

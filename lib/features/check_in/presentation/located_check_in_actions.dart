@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/presentation/enmori_motion.dart';
-
 import '../../account/domain/account_repository.dart';
 import '../../auth/auth_providers.dart';
-import 'check_in_record_view.dart';
-import 'check_in_place_controller.dart';
 import '../domain/check_in_repository.dart';
+import 'check_in_copy.dart';
+import 'check_in_place_controller.dart';
 import 'check_in_place_controls.dart';
+import 'check_in_record_view.dart';
 import 'located_check_in_controller.dart';
 
 /// Insert into the existing composer in place of its save actions. The host
@@ -77,12 +78,12 @@ final class LocatedCheckInActions extends ConsumerWidget {
               child: Text(
                 key: ValueKey((state.busy, state.uncertain, place.busy)),
                 place.busy
-                    ? 'Preparing location…'
+                    ? context.tr('Preparing location…', '正在准备位置…')
                     : state.busy
-                    ? 'Saving…'
+                    ? context.tr('Saving…', '正在保存…')
                     : state.uncertain
-                    ? 'Retry same save'
-                    : 'Save Check-in',
+                    ? context.tr('Retry same save', '核对并重试原保存')
+                    : context.tr('Save Check-in', '保存签到'),
               ),
             ),
           ),
@@ -97,14 +98,19 @@ final class LocatedCheckInActions extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Wait for location, or cancel to save without it.'),
+                Text(
+                  context.tr(
+                    'Wait for location, or cancel to save without it.',
+                    '等待位置，或取消定位后保存。',
+                  ),
+                ),
                 TextButton(
                   onPressed: () {
                     if (placeController.epoch == placeEpoch) {
                       placeController.clear();
                     }
                   },
-                  child: const Text('Cancel location'),
+                  child: Text(context.tr('Cancel location', '取消定位')),
                 ),
               ],
             ),
@@ -115,30 +121,52 @@ final class LocatedCheckInActions extends ConsumerWidget {
             state.savedId == null)
           Semantics(
             liveRegion: true,
-            child: const Text(
-              'Location unavailable. Save without it, or try again in Permissions.',
+            child: Text(
+              context.tr(
+                'Location unavailable. Save without it, or try again in Permissions.',
+                '位置暂不可用。可直接保存，或在权限设置中重试。',
+              ),
             ),
           ),
         if (state.busy)
-          const LinearProgressIndicator(
-            semanticsLabel: 'Saving or reading Check-in',
+          LinearProgressIndicator(
+            semanticsLabel: context.tr(
+              'Saving or reading Check-in',
+              '正在保存或读取签到',
+            ),
           ),
         if (state.uncertain && !state.busy)
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Text(
-              'Save not confirmed. Your original draft is kept. Retry the same save safely, or check History before starting another Check-in.',
+              context.tr(
+                'Save not confirmed. Your original draft is kept. Retry the same save safely, or check History before starting another Check-in.',
+                '保存尚未确认，原始草稿已保留。请核对并重试同一保存，或先查看历史记录，再创建另一条签到。',
+              ),
             ),
           ),
         if (state.uncertain && onOpenHistory != null)
           TextButton(
             onPressed: onOpenHistory,
-            child: const Text('Check History'),
+            child: Text(context.tr('Check History', '查看历史')),
           ),
         if (state.failure case final failure?)
-          Semantics(liveRegion: true, child: Text(failure.message)),
+          Semantics(
+            liveRegion: true,
+            child: Text(checkInFailureText(context, failure)),
+          ),
         if (state.notice case final notice?)
-          Semantics(liveRegion: true, child: Text(notice)),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              notice == 'Check-in saved without weather.'
+                  ? context.tr(
+                      'Check-in saved without weather.',
+                      '签到已保存，本次未附加天气。',
+                    )
+                  : notice,
+            ),
+          ),
         if (!manageOnly && state.savedId != null) ...[
           MotionReveal(
             child: Semantics(
@@ -152,7 +180,7 @@ final class LocatedCheckInActions extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Check-in saved.',
+                      context.tr('Check-in saved.', '签到已保存。'),
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
@@ -168,7 +196,7 @@ final class LocatedCheckInActions extends ConsumerWidget {
             FilledButton.icon(
               onPressed: () => onOpenSaved!(state.savedId!),
               icon: const Icon(Icons.article_outlined),
-              label: const Text('View saved Check-in'),
+              label: Text(context.tr('View saved Check-in', '查看已保存的签到')),
             ),
           const SizedBox(height: 8),
           Wrap(
@@ -180,12 +208,12 @@ final class LocatedCheckInActions extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: onReturnHome,
                   icon: const Icon(Icons.home_outlined),
-                  label: const Text('Return Home'),
+                  label: Text(context.tr('Return Home', '返回首页')),
                 ),
               if (onOpenHistory != null)
                 TextButton(
                   onPressed: onOpenHistory,
-                  child: const Text('Check-in History'),
+                  child: Text(context.tr('Check-in History', '签到历史')),
                 ),
             ],
           ),
@@ -195,13 +223,13 @@ final class LocatedCheckInActions extends ConsumerWidget {
             expansionAnimationStyle: EnmoriMotion.surface(context),
             tilePadding: EdgeInsets.zero,
             leading: const Icon(Icons.tune),
-            title: const Text('Saved location and recovery'),
+            title: Text(context.tr('Saved location and recovery', '位置管理与保存核对')),
             children: [
               OutlinedButton(
                 onPressed: state.busy
                     ? null
                     : () => controller.read(state.savedId!),
-                child: const Text('Read saved Check-in'),
+                child: Text(context.tr('Read saved Check-in', '重新读取签到')),
               ),
               if (state.value case final value?) ...[
                 OutlinedButton(
@@ -212,19 +240,27 @@ final class LocatedCheckInActions extends ConsumerWidget {
                           final confirmed = await showDialog<bool>(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text('Replace the Check-in point?'),
-                              content: const Text(
-                                'Use your current precise location once in the foreground. This replaces the saved point and clears its weather, without a new weather lookup.',
+                              title: Text(
+                                context.tr(
+                                  'Replace the Check-in point?',
+                                  '替换签到位置？',
+                                ),
+                              ),
+                              content: Text(
+                                context.tr(
+                                  'Use your current precise location once in the foreground. This replaces the saved point and clears its weather, without a new weather lookup.',
+                                  '将在前台获取一次当前精确位置，替换已保存的位置并清除对应天气，不会重新查询天气。',
+                                ),
                               ),
                               actions: [
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.pop(context, false),
-                                  child: const Text('Keep'),
+                                  child: Text(context.tr('Keep', '保留')),
                                 ),
                                 FilledButton(
                                   onPressed: () => Navigator.pop(context, true),
-                                  child: const Text('Use once'),
+                                  child: Text(context.tr('Use once', '使用一次')),
                                 ),
                               ],
                             ),
@@ -235,7 +271,7 @@ final class LocatedCheckInActions extends ConsumerWidget {
                             );
                           }
                         },
-                  child: const Text('Replace saved location'),
+                  child: Text(context.tr('Replace saved location', '替换已保存的位置')),
                 ),
 
                 if (value.location != null || value.weather != null)
@@ -253,7 +289,9 @@ final class LocatedCheckInActions extends ConsumerWidget {
                                   true,
                                   renderedEpoch,
                                 ),
-                          child: const Text('Remove saved location'),
+                          child: Text(
+                            context.tr('Remove saved location', '移除已保存的位置'),
+                          ),
                         ),
                       if (value.weather != null)
                         OutlinedButton(
@@ -265,7 +303,9 @@ final class LocatedCheckInActions extends ConsumerWidget {
                                   false,
                                   renderedEpoch,
                                 ),
-                          child: const Text('Remove saved weather'),
+                          child: Text(
+                            context.tr('Remove saved weather', '移除已保存的天气'),
+                          ),
                         ),
                     ],
                   ),
@@ -286,21 +326,29 @@ final class LocatedCheckInActions extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          location ? 'Remove saved location?' : 'Remove saved weather?',
+          location
+              ? context.tr('Remove saved location?', '移除已保存的位置？')
+              : context.tr('Remove saved weather?', '移除已保存的天气？'),
         ),
         content: Text(
           location
-              ? 'This also removes its saved weather. Your Note and Mood stay unchanged.'
-              : 'This deletes the weather snapshot. It will not be fetched again for this Check-in.',
+              ? context.tr(
+                  'This also removes its saved weather. Your Note and Mood stay unchanged.',
+                  '同时移除对应的天气快照，笔记和心情保持不变。',
+                )
+              : context.tr(
+                  'This deletes the weather snapshot. It will not be fetched again for this Check-in.',
+                  '将删除天气快照，不会为这条历史签到重新获取天气。',
+                ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Keep'),
+            child: Text(context.tr('Keep', '保留')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Remove'),
+            child: Text(context.tr('Remove', '移除')),
           ),
         ],
       ),

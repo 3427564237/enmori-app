@@ -5,9 +5,12 @@ import '../features/event_participation/participation_providers.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/presentation/enmori_motion.dart';
+import '../core/presentation/enmori_localizations.dart';
+import '../features/language/language_providers.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -262,26 +265,35 @@ final class _ConnectedPages extends ConsumerWidget {
   final Future<Result<void>> Function() onClose;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final locale = Locale(ref.watch(appLanguageProvider).language.code);
     // Registration/new identities are not authorized by this owned fixture.
     if (!dualAccounts &&
         ref.watch(authSessionProvider).value is! AuthSessionAuthenticated) {
       return MaterialApp(
-        home: Scaffold(
-          body: SafeArea(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Waiting for the controlled account. No public registration.',
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      await onClose();
-                    },
-                    child: const Text('Close connection'),
-                  ),
-                ],
+        locale: locale,
+        supportedLocales: const [Locale('en'), Locale('zh')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: SafeArea(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.tr(
+                        'Waiting for the controlled account. No public registration.',
+                        '正在等待受控账号，此入口不提供公开注册。',
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        await onClose();
+                      },
+                      child: Text(context.tr('Close connection', '关闭连接')),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -290,6 +302,9 @@ final class _ConnectedPages extends ConsumerWidget {
     }
     return MaterialApp.router(
       title: 'ENMORI',
+      locale: locale,
+      supportedLocales: const [Locale('en'), Locale('zh')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       debugShowCheckedModeBanner: false,
       theme: socialDemoTheme(),
       builder: (context, child) =>

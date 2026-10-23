@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,8 +11,13 @@ import 'event_card.dart';
 
 /// Explicit next source batches, with display-only categories and stable dedupe.
 final class ParticipationEventsPage extends ConsumerStatefulWidget {
-  const ParticipationEventsPage({required this.onSelect, super.key});
+  const ParticipationEventsPage({
+    required this.onSelect,
+    this.onOpenPlans,
+    super.key,
+  });
   final ValueChanged<String> onSelect;
+  final VoidCallback? onOpenPlans;
   @override
   ConsumerState<ParticipationEventsPage> createState() =>
       _ParticipationEventsPageState();
@@ -54,10 +61,10 @@ final class _ParticipationEventsPageState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Events'),
+        title: Text(context.tr('Events', '活动')),
         actions: [
           IconButton(
-            tooltip: 'Refresh events',
+            tooltip: context.tr('Refresh events', '刷新活动'),
             onPressed: state.busy ? null : controller.load,
             icon: const Icon(Icons.refresh),
           ),
@@ -71,26 +78,43 @@ final class _ParticipationEventsPageState
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
             children: [
+              if (widget.onOpenPlans != null) ...[
+                OutlinedButton.icon(
+                  onPressed: widget.onOpenPlans,
+                  icon: const Icon(Icons.event_note_outlined),
+                  label: Text(context.tr('My plans', '我的活动计划')),
+                ),
+                const SizedBox(height: 12),
+              ],
               Text(
-                'Source: Ticketmaster · filters apply to loaded events',
+                context.tr(
+                  'Source: Ticketmaster · filters apply to loaded events',
+                  '来源：Ticketmaster · 仅筛选已加载的活动',
+                ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 16),
               if (state.busy)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: LinearProgressIndicator(
-                    semanticsLabel: 'Loading events',
+                    semanticsLabel: context.tr('Loading events', '正在加载活动'),
                   ),
                 ),
               if (state.failure case final failure?)
                 StatusPanel(
                   title: value == null
-                      ? 'Events unavailable'
-                      : 'More events couldn’t be loaded',
+                      ? context.tr('Events unavailable', '活动暂不可用')
+                      : context.tr(
+                          'More events couldn’t be loaded',
+                          '无法加载更多活动',
+                        ),
                   body: value == null
-                      ? failure.message
-                      : '${failure.message} Your current events are still shown.',
+                      ? localizedFailure(context, failure)
+                      : context.tr(
+                          '${failure.message} Your current events are still shown.',
+                          '${localizedFailure(context, failure)} 仍显示当前活动。',
+                        ),
                   icon: Icons.cloud_off_outlined,
                   isError: true,
                 ),
@@ -101,7 +125,7 @@ final class _ParticipationEventsPageState
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       PopupMenuButton<String>(
-                        tooltip: 'Filter event category',
+                        tooltip: context.tr('Filter event category', '筛选活动分类'),
                         initialValue: _category,
                         onSelected: (category) =>
                             setState(() => _category = category),
@@ -117,7 +141,10 @@ final class _ParticipationEventsPageState
                               const Icon(Icons.tune, size: 20),
                               const SizedBox(width: 8),
                               Flexible(
-                                child: Text(_category ?? 'All categories'),
+                                child: Text(
+                                  _category ??
+                                      context.tr('All categories', '全部分类'),
+                                ),
                               ),
                               const Icon(Icons.expand_more),
                             ],
@@ -127,21 +154,27 @@ final class _ParticipationEventsPageState
                       if (_category != null)
                         TextButton(
                           onPressed: () => setState(() => _category = null),
-                          child: const Text('Clear filter'),
+                          child: Text(context.tr('Clear filter', '清除筛选')),
                         ),
                     ],
                   ),
                 if (_category != null &&
                     !items.any((item) => item.categoryLabel == _category))
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
                     child: Text(
-                      'No matching events loaded. Clear the filter or load more events.',
+                      context.tr(
+                        'No matching events loaded. Clear the filter or load more events.',
+                        '已加载的活动中没有匹配项，请清除筛选或加载更多活动。',
+                      ),
                     ),
                   ),
                 if (items.isEmpty)
-                  const Text(
-                    'No events in this available selection. Check again later.',
+                  Text(
+                    context.tr(
+                      'No events in this available selection. Check again later.',
+                      '当前可用范围内没有活动，请稍后查看。',
+                    ),
                   ),
                 for (final item in items.where(
                   (s) => _category == null || s.categoryLabel == _category,
@@ -163,33 +196,46 @@ final class _ParticipationEventsPageState
                     onPressed: state.busy ? null : controller.next,
                     child: Text(
                       state.failure == null
-                          ? 'Load more events'
-                          : 'Try loading more again',
+                          ? context.tr('Load more events', '加载更多活动')
+                          : context.tr('Try loading more again', '重试加载更多'),
                     ),
                   )
                 else
-                  const Text('You’ve reached the end of the available events.'),
+                  Text(
+                    context.tr(
+                      'You’ve reached the end of the available events.',
+                      '已到达可用活动的末尾。',
+                    ),
+                  ),
               ] else if (!state.busy && state.failure == null)
-                const StatusPanel(
-                  title: 'Refresh your events',
-                  body: 'This view has expired or was cleared. Reload to see current events.',
+                StatusPanel(
+                  title: context.tr('Refresh your events', '刷新活动列表'),
+                  body: context.tr(
+                    'This view has expired or was cleared. Reload to see current events.',
+                    '此页面的数据已过期或被清除，请重新加载当前活动。',
+                  ),
                   icon: Icons.event_outlined,
                 ),
               if (value == null)
                 TextButton(
                   onPressed: state.busy ? null : controller.load,
                   child: Text(
-                    value == null && state.failure != null ? 'Retry' : 'Reload',
+                    value == null && state.failure != null
+                        ? context.tr('Retry', '重试')
+                        : context.tr('Reload', '重新加载'),
                   ),
                 ),
-              const ExpansionTile(
+              ExpansionTile(
                 key: PageStorageKey('events-source-disclosure'),
-                title: Text('About these events'),
+                title: Text(context.tr('About these events', '关于这些活动')),
                 children: [
                   Padding(
                     padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
                     child: Text(
-                      'Ticketmaster supplies this available selection, not its full catalogue. ENMORI sends the activity request and server connection information, not your sign-in token, profile or private content. Category labels are source labels, not new interest mappings. Views expire after five minutes. Opening the source website does not register or pay for an event.',
+                      context.tr(
+                        'Ticketmaster supplies this available selection, not its full catalogue. ENMORI sends the activity request and server connection information, not your sign-in token, profile or private content. Category labels are source labels, not new interest mappings. Views expire after five minutes. Opening the source website does not register or pay for an event.',
+                        '这里展示 Ticketmaster 提供的可用活动，并非其完整目录。ENMORI 发送活动请求和服务器连接信息，不发送你的登录令牌、资料或私人内容。分类来自活动来源，不会创建新的兴趣映射。页面数据五分钟后过期。打开来源网站不代表报名或付款。',
+                      ),
                     ),
                   ),
                 ],

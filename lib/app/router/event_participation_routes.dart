@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/presentation/enmori_localizations.dart';
 import '../../features/event_browse/domain/activity_repository.dart';
 import '../../features/event_participation/domain/participation_repository.dart';
+import '../../features/event_participation/presentation/event_plans_page.dart';
 import '../../features/event_participation/presentation/participation_event_page.dart';
 import '../../features/event_participation/presentation/participants_page.dart';
 import '../../features/event_participation/presentation/participation_events_page.dart';
@@ -13,6 +15,7 @@ List<GoRoute> eventParticipationRoutes({
   required ExternalActivityOpener opener,
   required void Function(BuildContext, String) onProfile,
   String listPath = '/participation-events',
+  String? plansPath,
   Widget Function(BuildContext, Widget)? wrapList,
   required bool Function() current,
 }) => [
@@ -22,14 +25,42 @@ List<GoRoute> eventParticipationRoutes({
     builder: (context, state) {
       final page = ParticipationEventsPage(
         onSelect: (id) {
-          if (context.mounted && current()) {
+          if (_atCurrentRoute(context, listPath, current)) {
             context.push('/events/${Uri.encodeComponent(id)}/participation');
           }
         },
+        onOpenPlans: plansPath == null
+            ? null
+            : () {
+                if (_atCurrentRoute(context, listPath, current)) {
+                  context.push<void>(plansPath);
+                }
+              },
       );
       return wrapList?.call(context, page) ?? page;
     },
   ),
+  if (plansPath != null)
+    GoRoute(
+      path: plansPath,
+      builder: (context, state) => EventPlansPage(
+        onOpenEvent: (id) {
+          if (_atCurrentRoute(context, plansPath, current)) {
+            context.push<void>(
+              '/events/${Uri.encodeComponent(id)}/participation',
+            );
+          }
+        },
+        onBack: () {
+          if (!_atCurrentRoute(context, plansPath, current)) return;
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go(listPath);
+          }
+        },
+      ),
+    ),
   GoRoute(
     path: '/events/:eventId/participation',
     builder: (context, state) => ParticipationEventPage(
@@ -37,7 +68,7 @@ List<GoRoute> eventParticipationRoutes({
       eventId: state.pathParameters['eventId'] ?? '',
       opener: opener,
       onParticipants: (s) {
-        if (context.mounted && current()) {
+        if (_atCurrentRoute(context, state.uri.path, current)) {
           context.push(
             '/events/${Uri.encodeComponent(s.eventId)}/people/${s.status.name}/${s.group.name}',
           );
@@ -59,8 +90,12 @@ List<GoRoute> eventParticipationRoutes({
           .where((v) => v.name == state.pathParameters['group'])
           .firstOrNull;
       if (status == null || group == null) {
-        return const Scaffold(
-          body: SafeArea(child: Text('Invalid participant selection.')),
+        return Scaffold(
+          body: SafeArea(
+            child: Text(
+              context.tr('Invalid participant selection.', '参与者选择无效。'),
+            ),
+          ),
         );
       }
       return EventParticipantsPage(
@@ -71,9 +106,20 @@ List<GoRoute> eventParticipationRoutes({
           group: group,
         ),
         onProfile: (username) {
-          if (context.mounted && current()) onProfile(context, username);
+          if (_atCurrentRoute(context, state.uri.path, current)) {
+            onProfile(context, username);
+          }
         },
       );
     },
   ),
 ];
+
+bool _atCurrentRoute(
+  BuildContext context,
+  String sourcePath,
+  bool Function() current,
+) =>
+    context.mounted &&
+    current() &&
+    GoRouter.of(context).state.uri.path == sourcePath;

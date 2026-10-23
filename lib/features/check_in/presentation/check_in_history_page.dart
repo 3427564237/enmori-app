@@ -1,14 +1,16 @@
 import 'dart:async';
 
-import '../check_in_providers.dart';
-import '../domain/check_in_calendar_repository.dart';
-import 'check_in_calendar_page.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
+import '../../../core/presentation/enmori_motion.dart';
 import '../../../core/result/result.dart';
 import '../../account/domain/account_repository.dart';
+import '../../auth/auth_providers.dart';
+import '../check_in_providers.dart';
+import '../domain/check_in_calendar_repository.dart';
+import 'check_in_calendar_page.dart';
 import 'check_in_history_controller.dart';
 
 Widget buildCheckInHistoryPage({
@@ -46,6 +48,7 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
     CheckInHistoryState current,
     CheckInHistoryController controller,
   ) async {
+    final openedSession = ref.read(authSessionProvider).asData?.value;
     final selection = await Navigator.of(context).push<CalendarSelection>(
       MaterialPageRoute(
         builder: (_) => CheckInCalendarPage(
@@ -55,8 +58,19 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
         ),
       ),
     );
-    if (!mounted || selection == null) return;
-    await controller.selectDate(selection.date);
+    if (!mounted ||
+        selection == null ||
+        !identical(
+          openedSession,
+          ref.read(authSessionProvider).asData?.value,
+        )) {
+      return;
+    }
+    if (current.selectedDate == selection.date) {
+      await controller.reload();
+    } else {
+      await controller.selectDate(selection.date);
+    }
     if (!mounted || selection.checkInId == null) return;
     var state = ref.read(checkInHistoryControllerProvider);
     final seen = <String>{};
@@ -75,8 +89,13 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
       (entry) => entry.checkIn.checkInId == selection.checkInId,
     )) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('This record could not be located. Reload the date.'),
+        SnackBar(
+          content: Text(
+            context.tr(
+              'This record could not be located. Reload the date.',
+              '暂时无法定位这条记录，请重新加载当天记录。',
+            ),
+          ),
         ),
       );
       return;
@@ -87,7 +106,7 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
       if (mounted && target != null) {
         Scrollable.ensureVisible(
           target,
-          duration: const Duration(milliseconds: 200),
+          duration: EnmoriMotion.duration(context, EnmoriMotion.feedback),
           alignment: .25,
         );
       }
@@ -105,16 +124,16 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          tooltip: 'Back',
+          tooltip: context.tr('Back', '返回'),
           onPressed: widget.onBack,
           icon: const Icon(Icons.arrow_back),
         ),
-        title: const Text('Check-in History'),
+        title: Text(context.tr('Check-in History', '签到历史')),
         actions: [
           if (ref.watch(checkInRepositoryProvider) is CheckInCalendarRepository)
             IconButton(
               key: const Key('history-month-calendar'),
-              tooltip: 'Month calendar',
+              tooltip: context.tr('Month calendar', '月历'),
               onPressed:
                   state.selectedDate == null ||
                       state.latestDate == null ||
@@ -125,7 +144,7 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
             ),
           IconButton(
             key: const Key('history-reload'),
-            tooltip: 'Reload',
+            tooltip: context.tr('Reload', '重新加载'),
             onPressed: state.phase == CheckInHistoryPhase.loading
                 ? null
                 : controller.reload,
@@ -155,20 +174,30 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
                     icon: const Icon(Icons.calendar_today_outlined),
                     label: Text(
                       state.selectedDate == null
-                          ? 'Choose date'
+                          ? context.tr('Choose date', '选择日期')
                           : MaterialLocalizations.of(context)
                                 .formatFullDate(state.selectedDate!),
                     ),
                   ),
                   if (state.ianaZone case final zone?)
                     Text(
-                      'Local time · $zone',
+                      context.tr('Local time · $zone', '本地时间 · $zone'),
                       key: const Key('history-device-zone'),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                 ],
               ),
             ),
+            if (state.phase != CheckInHistoryPhase.failed &&
+                state.phase != CheckInHistoryPhase.signedOut &&
+                state.selectedDate != null &&
+                state.ianaZone != null &&
+                ref.watch(checkInRepositoryProvider)
+                    is CheckInCalendarRepository)
+              _RecordedDayNavigation(
+                state: state,
+                onSelect: controller.selectDate,
+              ),
             const Divider(height: 1),
             Expanded(
               child: _HistoryBody(
@@ -187,9 +216,11 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (state.nextPageFailure != null) ...[
-                      const Text(
-                        'The next page is unavailable. Your current records '
-                        'are still shown.',
+                      Text(
+                        context.tr(
+                          'The next page is unavailable. Your current records are still shown.',
+                          '下一页暂时不可用，当前记录仍会保留。',
+                        ),
                         key: Key('history-next-page-error'),
                         textAlign: TextAlign.center,
                       ),
@@ -212,10 +243,10 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
                             ),
                       label: Text(
                         state.isLoadingNext
-                            ? 'Loading…'
+                            ? context.tr('Loading…', '正在加载…')
                             : state.nextPageFailure == null
-                            ? 'Next'
-                            : 'Retry next page',
+                            ? context.tr('Load more', '加载更多')
+                            : context.tr('Retry next page', '重试下一页'),
                       ),
                     ),
                   ],
@@ -239,7 +270,7 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
       initialDate: state.selectedDate ?? today,
       firstDate: DateTime.utc(1),
       lastDate: today,
-      helpText: 'Choose a Check-in date',
+      helpText: context.tr('Choose a Check-in date', '选择签到日期'),
     );
     if (selected != null) await controller.selectDate(selected);
   }
@@ -263,13 +294,13 @@ final class _HistoryBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (state.phase) {
-      CheckInHistoryPhase.signedOut => const _Message(
+      CheckInHistoryPhase.signedOut => _Message(
         key: Key('history-session-required'),
         icon: Icons.lock_outline,
-        title: 'Sign in to view your Check-ins',
+        title: context.tr('Sign in to view your Check-ins', '登录后查看签到'),
         action: null,
       ),
-      CheckInHistoryPhase.loading => const Center(
+      CheckInHistoryPhase.loading => Center(
         key: Key('history-loading'),
         child: CircularProgressIndicator(),
       ),
@@ -277,23 +308,27 @@ final class _HistoryBody extends StatelessWidget {
         key: const Key('history-error'),
         icon: Icons.sync_problem,
         title: switch (state.failure?.kind) {
-          AppFailureKind.authRequired =>
+          AppFailureKind.authRequired => context.tr(
             'Sign in again to view your Check-ins.',
-          AppFailureKind.authForbidden =>
+            '请重新登录以查看签到。',
+          ),
+          AppFailureKind.authForbidden => context.tr(
             'This account cannot view these Check-ins.',
-          _ => 'History is unavailable.',
+            '此账号无法查看这些签到。',
+          ),
+          _ => context.tr('History is unavailable.', '历史记录暂时不可用。'),
         },
         action: FilledButton.icon(
           key: const Key('history-retry'),
           onPressed: onRetry,
           icon: const Icon(Icons.refresh),
-          label: const Text('Retry'),
+          label: Text(context.tr('Retry', '重试')),
         ),
       ),
-      CheckInHistoryPhase.ready when state.entries.isEmpty => const _Message(
+      CheckInHistoryPhase.ready when state.entries.isEmpty => _Message(
         key: Key('history-empty'),
         icon: Icons.event_busy_outlined,
-        title: 'No Check-ins for this date.',
+        title: context.tr('No Check-ins for this date.', '当天没有签到。'),
         action: null,
       ),
       CheckInHistoryPhase.ready => SingleChildScrollView(
@@ -330,9 +365,9 @@ final class _HistoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visibility = switch (entry.checkIn.checkInVisibility) {
-      CheckInVisibility.private => 'Private',
-      CheckInVisibility.friendsOnly => 'Friends-only',
-      CheckInVisibility.public => 'Public',
+      CheckInVisibility.private => context.tr('Private', '仅自己'),
+      CheckInVisibility.friendsOnly => context.tr('Friends-only', '仅好友'),
+      CheckInVisibility.public => context.tr('Public', '公开'),
       null => null,
     };
     return ListTile(
@@ -366,13 +401,13 @@ final class _HistoryTile extends StatelessWidget {
                   Text(entry.checkIn.mood!),
                 if (entry.checkIn.activity case final activity?) Text(activity),
                 if (entry.checkIn.weather != null)
-                  const Tooltip(
-                    message: 'Weather saved',
+                  Tooltip(
+                    message: context.tr('Weather saved', '已保存天气'),
                     child: Icon(Icons.cloud_outlined, size: 16),
                   ),
                 if (entry.checkIn.location != null)
-                  const Tooltip(
-                    message: 'Location saved',
+                  Tooltip(
+                    message: context.tr('Location saved', '已保存位置'),
                     child: Icon(Icons.location_on_outlined, size: 16),
                   ),
               ],
@@ -412,4 +447,80 @@ final class _Message extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// Counts come from the complete month query, never from loaded History pages.
+final class _RecordedDayNavigation extends ConsumerWidget {
+  const _RecordedDayNavigation({required this.state, required this.onSelect});
+  final CheckInHistoryState state;
+  final ValueChanged<DateTime> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = state.selectedDate!;
+    final date =
+        '${selected.year.toString().padLeft(4, '0')}-'
+        '${selected.month.toString().padLeft(2, '0')}-'
+        '${selected.day.toString().padLeft(2, '0')}';
+    final query = (month: date.substring(0, 7), zone: state.ianaZone!);
+    final result = ref.watch(checkInMonthProvider(query));
+    if (result.isLoading) return LinearProgressIndicator();
+    if (result.value case Success<CheckInMonth>(:final value)) {
+      final days =
+          value.counts.entries
+              .where(
+                (entry) => entry.value > 0 && entry.key.startsWith(query.month),
+              )
+              .map((entry) => entry.key)
+              .toList()
+            ..sort();
+      final earlier = days.where((day) => day.compareTo(date) < 0).lastOrNull;
+      final later = days.where((day) => day.compareTo(date) > 0).firstOrNull;
+      final enabled = state.phase != CheckInHistoryPhase.loading;
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.tr(
+                'Recorded days · ${query.month}',
+                '${query.month} · 有记录的日期',
+              ),
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                TextButton.icon(
+                  key: const Key('history-previous-recorded-day'),
+                  onPressed: enabled && earlier != null
+                      ? () => onSelect(DateTime.parse(earlier))
+                      : null,
+                  icon: const Icon(Icons.chevron_left),
+                  label: Text(context.tr('Earlier day', '前一个记录日')),
+                ),
+                TextButton.icon(
+                  key: const Key('history-next-recorded-day'),
+                  onPressed: enabled && later != null
+                      ? () => onSelect(DateTime.parse(later))
+                      : null,
+                  icon: const Icon(Icons.chevron_right),
+                  label: Text(context.tr('Later day', '后一个记录日')),
+                ),
+              ],
+            ),
+            if (days.isEmpty)
+              Text(context.tr('No recorded days in this month.', '本月没有签到记录。')),
+          ],
+        ),
+      );
+    }
+    return TextButton.icon(
+      onPressed: () => ref.invalidate(checkInMonthProvider(query)),
+      icon: const Icon(Icons.refresh),
+      label: Text(context.tr('Reload recorded days', '重新加载记录日期')),
+    );
+  }
 }

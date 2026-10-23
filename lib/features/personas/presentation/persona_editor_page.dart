@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/result/result.dart';
 import '../domain/persona.dart';
 import '../persona_providers.dart';
+import '../persona_preview_providers.dart';
 import 'persona_page_parts.dart';
+import 'persona_copy.dart';
 import 'persona_preview_page.dart';
 
 final class PersonaEditorPage extends ConsumerWidget {
@@ -68,6 +71,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
   bool _confirming = false;
   bool _savedCreate = false;
   int _pageOperation = 0;
+  String _previewText = '';
 
   PersonaFields get _fields => PersonaFields(
     displayName: _name.text,
@@ -88,6 +92,9 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
   @override
   void initState() {
     super.initState();
+    ref.listenManual(personaPreviewAccessProvider, (_, allowed) {
+      if (!allowed) _previewText = '';
+    });
     ref.listenManual(personaSessionControllerProvider, (_, next) {
       final submitted = _submittedFields;
       final commandKey = _createKey;
@@ -225,9 +232,9 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
     final sessionKey = ref.read(personaSessionControllerProvider).sessionKey;
     final discard = await _confirmation.action(
       context,
-      message: 'Discard unsaved changes?',
-      cancelLabel: 'Keep editing',
-      actionLabel: 'Discard',
+      message: context.tr('Discard unsaved changes?', '放弃未保存的修改？'),
+      cancelLabel: context.tr('Keep editing', '继续编辑'),
+      actionLabel: context.tr('Discard', '放弃修改'),
       actionKey: 'persona-confirm-discard',
     );
     if (!mounted) return false;
@@ -330,8 +337,22 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
       return;
     }
     final draft = _fields.normalized;
+    final sessionKey = ref.read(personaSessionControllerProvider).sessionKey;
     await Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => PersonaPreviewPage(fields: draft)),
+      MaterialPageRoute(
+        builder: (_) => PersonaPreviewPage(
+          fields: draft,
+          initialText: _previewText,
+          onTextChanged: (text) {
+            if (mounted &&
+                sessionKey ==
+                    ref.read(personaSessionControllerProvider).sessionKey &&
+                (text.isEmpty || ref.read(personaPreviewAccessProvider))) {
+              _previewText = text;
+            }
+          },
+        ),
+      ),
     );
   }
 
@@ -349,7 +370,9 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
         state.pendingCreate == null &&
         !_savedCreate;
     return PersonaPageScaffold(
-      title: create ? 'Create Persona' : 'Edit Persona',
+      title: create
+          ? context.tr('Create Persona', '创建人设')
+          : context.tr('Edit Persona', '编辑人设'),
       onBack: _back,
       child: _loading
           ? const PersonaLoading()
@@ -359,11 +382,11 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
               padding: const EdgeInsets.all(16),
               children: [
                 if (_unavailable) ...[
-                  const Text('This Persona is unavailable.'),
+                  Text(context.tr('This Persona is unavailable.', '此人设已不可用。')),
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: _back,
-                    child: const Text('Back to Personas'),
+                    child: Text(context.tr('Back to Personas', '返回人设')),
                   ),
                 ] else ...[
                   PersonaStatusPanel(
@@ -389,11 +412,16 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                     },
                   ),
                   if (_loadFailed) ...[
-                    const Text('Personas could not be loaded. Try again.'),
+                    Text(
+                      context.tr(
+                        'Personas could not be loaded. Try again.',
+                        '未能加载人设，请重试。',
+                      ),
+                    ),
                     FilledButton(
                       key: const Key('persona-editor-retry'),
                       onPressed: _load,
-                      child: const Text('Retry'),
+                      child: Text(context.tr('Retry', '重试')),
                     ),
                   ] else if (create || _persona != null)
                     Form(
@@ -411,9 +439,12 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                                 AutovalidateMode.onUserInteraction,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
-                              labelText: 'Name',
+                              labelText: context.tr('Name', '名称'),
                               prefixIcon: const Icon(Icons.person_outline),
-                              helperText: _nameGuidance,
+                              helperText: context.tr(
+                                _nameGuidance,
+                                '必填，使用 1–50 个字符。',
+                              ),
                               // These fixed messages can wrap as far as one
                               // character per line without an arbitrary cap.
                               helperMaxLines: _nameGuidance.length,
@@ -425,7 +456,10 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                                     ) ==
                                     null
                                 ? null
-                                : _nameCorrection,
+                                : context.tr(
+                                    _nameCorrection,
+                                    '请输入 1–50 个字符的名称，不含控制字符。',
+                                  ),
                             onChanged: (_) => setState(() {}),
                           ),
                           const SizedBox(height: 16),
@@ -433,8 +467,8 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                             key: const Key('persona-tone'),
                             initialValue: _tone,
                             isExpanded: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Tone',
+                            decoration: InputDecoration(
+                              labelText: context.tr('Tone', '语气'),
                               prefixIcon: Icon(
                                 Icons.record_voice_over_outlined,
                               ),
@@ -443,7 +477,9 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                               for (final value in PersonaTone.values)
                                 DropdownMenuItem(
                                   value: value,
-                                  child: Text(value.name),
+                                  child: Text(
+                                    personaLabel(context, value.name),
+                                  ),
                                 ),
                             ],
                             onChanged: enabled
@@ -459,15 +495,17 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                             key: const Key('persona-response-length'),
                             initialValue: _responseLength,
                             isExpanded: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Response length',
+                            decoration: InputDecoration(
+                              labelText: context.tr('Response length', '回复长度'),
                               prefixIcon: Icon(Icons.subject),
                             ),
                             items: [
                               for (final value in PersonaResponseLength.values)
                                 DropdownMenuItem(
                                   value: value,
-                                  child: Text(value.name),
+                                  child: Text(
+                                    personaLabel(context, value.name),
+                                  ),
                                 ),
                             ],
                             onChanged: enabled
@@ -483,15 +521,17 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                             key: const Key('persona-format'),
                             initialValue: _formatStyle,
                             isExpanded: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Format',
+                            decoration: InputDecoration(
+                              labelText: context.tr('Format', '格式'),
                               prefixIcon: Icon(Icons.format_list_bulleted),
                             ),
                             items: [
                               for (final value in PersonaFormatStyle.values)
                                 DropdownMenuItem(
                                   value: value,
-                                  child: Text(value.name),
+                                  child: Text(
+                                    personaLabel(context, value.name),
+                                  ),
                                 ),
                             ],
                             onChanged: enabled
@@ -503,14 +543,33 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                                 : null,
                           ),
                           const SizedBox(height: 16),
+                          OutlinedButton.icon(
+                            key: const Key('persona-preview-quick'),
+                            onPressed: enabled ? _preview : null,
+                            icon: const Icon(Icons.chat_bubble_outline),
+                            label: Text(context.tr('Try this draft', '试聊此草稿')),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: 8, bottom: 16),
+                            child: Text(
+                              context.tr(
+                                'Try, return to edit, then save when it feels right. '
+                                    'Trying does not save or make this Persona current.',
+                                '先试聊，返回调整，满意后再保存。试聊不会保存或启用此人设。',
+                              ),
+                            ),
+                          ),
                           Text(
-                            'Personal expression',
+                            context.tr('Personal expression', '个性表达'),
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'These optional details shape expression only. '
-                            'They do not grant access to your data or actions.',
+                          Text(
+                            context.tr(
+                              'These optional details shape expression only. '
+                                  'They do not grant access to your data or actions.',
+                              '这些选填内容只影响表达方式，不赋予数据访问或操作权限。',
+                            ),
                           ),
                           for (final entry in _expressionLabels.entries) ...[
                             const SizedBox(height: 16),
@@ -522,9 +581,9 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                               maxLines: 4,
                               textInputAction: TextInputAction.newline,
                               decoration: InputDecoration(
-                                labelText: entry.value,
+                                labelText: personaLabel(context, entry.value),
                                 prefixIcon: Icon(_expressionIcons[entry.key]),
-                                helperText: 'Optional',
+                                helperText: context.tr('Optional', '选填'),
                               ),
                               onChanged: (_) => setState(() {}),
                             ),
@@ -534,12 +593,15 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                             key: const Key('persona-preview'),
                             onPressed: enabled ? _preview : null,
                             icon: const Icon(Icons.chat_bubble_outline),
-                            label: const Text('Try Your Persona'),
+                            label: Text(context.tr('Try Your Persona', '试聊人设')),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'Try the current draft without saving, activating '
-                            'or adding to conversation history.',
+                          Text(
+                            context.tr(
+                              'Try the current draft without saving, activating '
+                                  'or adding to conversation history.',
+                              '试聊当前草稿，不保存、不启用，也不写入正式对话历史。',
+                            ),
                           ),
                           const SizedBox(height: 16),
                           FilledButton(
@@ -550,17 +612,19 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                                 : null,
                             child: Text(
                               state.isBusy
-                                  ? 'Saving…'
+                                  ? context.tr('Saving…', '正在保存…')
                                   : create
-                                  ? 'Create Persona'
-                                  : 'Save changes',
+                                  ? context.tr('Create Persona', '创建人设')
+                                  : context.tr('Save changes', '保存修改'),
                             ),
                           ),
                           if (_savedCreate) ...[
                             const SizedBox(height: 16),
                             OutlinedButton(
                               onPressed: _back,
-                              child: const Text('Back to Personas'),
+                              child: Text(
+                                context.tr('Back to Personas', '返回人设'),
+                              ),
                             ),
                           ],
                         ],
