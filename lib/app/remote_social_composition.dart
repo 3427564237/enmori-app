@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/auth_providers.dart';
+import '../features/auth/domain/auth_repository.dart';
 import '../features/account/account_providers.dart';
 import '../features/account/domain/account_repository.dart';
 import '../core/result/result.dart';
@@ -16,6 +17,8 @@ import '../features/check_in/presentation/check_in_record_view.dart';
 import '../features/event_participation/presentation/user_participation_section.dart';
 import '../features/friends/presentation/social_profile_page.dart';
 import '../features/friends/presentation/friend_activity_panel.dart';
+import 'providers.dart';
+import 'router/app_router.dart';
 
 import 'package:flutter/services.dart';
 
@@ -39,10 +42,45 @@ Future<bool> openGroupAttribution(Uri uri) async {
 }
 
 Widget groupParticipationBuilder(BuildContext context, String username) =>
-    UserParticipationSection(
-      username: username,
-      onSelect: (id) =>
-          context.push('/events/${Uri.encodeComponent(id)}/participation'),
+    Consumer(
+      builder: (context, ref, _) {
+        final session = ref.watch(authSessionProvider).asData?.value;
+        final source = GoRouter.of(context).state.uri;
+        bool current() =>
+            context.mounted &&
+            session is AuthSessionAuthenticated &&
+            identical(ref.read(authSessionProvider).asData?.value, session) &&
+            ref.read(routerGateProvider) == RouterGateState.authenticated &&
+            GoRouter.of(context).state.uri == source &&
+            ModalRoute.of(context)?.isCurrent == true;
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(context.tr('Event participation', '活动参与')),
+          ),
+          body: SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                UserParticipationSection(
+                  username: username,
+                  onSelect: (id) {
+                    if (current()) {
+                      context.push(
+                        '/events/${Uri.encodeComponent(id)}/participation',
+                      );
+                    }
+                  },
+                  onComparePlans: () {
+                    if (current()) {
+                      context.push<void>(AppRoutes.comparePlans(username));
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
 
 Widget groupCheckInRecordBuilder(BuildContext context, CheckIn record) =>

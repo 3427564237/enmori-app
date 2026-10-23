@@ -60,7 +60,7 @@ patch presence before creating a new `souma/product-round2-<role>-20261023`
 branch; dirty work must be protected. Do not reuse the historical `7cf12cd`
 baseline or reapply already accepted first-round deliveries.
 
-Module Draft PRs target `souma/product-round2-integration-20261023`.
+Module Draft PRs initially target `souma/product-round2-integration-20261023`.
 The round-two Integration Draft PR targets `souma/product-integration-20261023`
 at the completed repair, keeping the previous delivery visible separately.
 Nothing is merged to main or deployed by this decision. The final candidate
@@ -68,3 +68,15 @@ uses the existing application ID and signer, with its actual source commit,
 version and hashes recorded. Missing signing access is reported, never replaced
 with another signer. There was no active goal at dispatch; no new goal or token
 budget is inferred from this bounded task.
+
+## Integration review-base adjustment, 24 October
+
+Integration exercised the delegated PR-base choice after the modules delivered.
+The fixed review branch `souma/product-round2-review-base-20261023` points to
+the unchanged common baseline `4d9cbf926d356320bc9b4721031e3c50dddd9fae`.
+Module Draft PRs #180–184 now target this fixed branch. This preserves their
+independent review diffs while the assembly branch receives their exact commits;
+the assembly push must not implicitly consume or close their Draft reviews.
+No module source was rebased or replayed. Integration's own PR still targets
+`souma/product-integration-20261023` at the previous round's closure. This only
+replaces the initial module PR target above, not product scope or merge authority.
