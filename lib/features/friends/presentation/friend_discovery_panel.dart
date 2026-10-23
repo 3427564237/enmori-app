@@ -41,7 +41,10 @@ final class _FriendDiscoveryPanelState
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) controller.load();
+      if (mounted &&
+          !ref.read(friendDiscoveryControllerProvider(widget.home)).loaded) {
+        controller.load();
+      }
     });
   }
 

@@ -35,6 +35,9 @@ import 'package:enmori/features/weather/domain/foreground_location.dart';
 import 'package:enmori/features/weather/weather_providers.dart';
 
 import 'friend_ignore_flow_test.dart' show IgnoreFake;
+import 'my_friends_test.dart' show Friends;
+
+import 'package:enmori/features/friends/friend_providers.dart';
 
 void main() {
   for (final page in ['friends', 'home', 'saved']) {
@@ -81,6 +84,7 @@ void main() {
                 ),
               ),
               friendDiscoveryRepositoryProvider.overrideWithValue(people),
+              friendRepositoryProvider.overrideWithValue(Friends()),
               friendIgnoreRepositoryProvider.overrideWithValue(people),
               friendActivityRepositoryProvider.overrideWithValue(_Activity()),
               eventRecommendationRepositoryProvider.overrideWithValue(events),
@@ -122,6 +126,7 @@ void main() {
               onOpenEvent: (_) {},
               onBrowseActivities: () {},
               onSelectTab: (_) {},
+              onOpenProfile: () {},
               onOpenHistory: () {},
               onOpenAi: () {},
               onOpenFootprint: () {},
@@ -172,13 +177,31 @@ void main() {
             expect(find.byType(Card), findsNothing);
             expect(find.text('Friend requests (0)'), findsNothing);
             expect(find.text('See all activity'), findsNothing);
-            await tester.scrollUntilVisible(
-              find.text('No friends activity to show.'),
-              150,
+            expect(
+              find.byKey(const Key('my-friends-search-query')),
+              findsOneWidget,
             );
+            await tester.enterText(
+              find.byKey(const Key('my-friends-search-query')),
+              'Alex',
+            );
+            await tester.tap(find.text('Activity'));
+            await tester.pumpAndSettle();
+            expect(find.text('No friends activity to show.'), findsOneWidget);
+            await tester.tap(find.text('Discover'));
+            await tester.pumpAndSettle();
+            expect(find.byTooltip('Recommendation options'), findsOneWidget);
+            await tester.tap(find.text('My Friends'));
+            await tester.pumpAndSettle();
+            expect(find.text('Alex'), findsOneWidget);
             expect(tester.takeException(), isNull);
           } else if (page == 'home') {
             await tester.ensureVisible(find.byTooltip('Refresh weather'));
+            await tester.pumpAndSettle();
+            expect(
+              find.byTooltip('Refresh weather').hitTestable(),
+              findsOneWidget,
+            );
             await tester.tap(find.byTooltip('Refresh weather'));
             await tester.pumpAndSettle();
             expect(weather.refreshes, 2);
@@ -197,7 +220,7 @@ void main() {
             await tester.pumpAndSettle();
             await tester.tap(find.text('Clear weather'));
             await tester.pumpAndSettle();
-            expect(find.text('Get local weather'), findsOneWidget);
+            expect(find.text('Add today’s weather'), findsOneWidget);
             expect(weather.refreshes, 2);
             await tester.scrollUntilVisible(
               find.byKey(const Key('event-recommendations-refresh')),

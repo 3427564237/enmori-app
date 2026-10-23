@@ -194,7 +194,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('No friends available on this page.'), findsOneWidget);
+      expect(find.text('Make room for familiar faces'), findsOneWidget);
       expect(find.text('Next page'), findsOneWidget);
       repo.response = const Success(MyFriendsPage(friends: [rowB]));
       await tester.tap(find.byKey(const Key('my-friends-next')));
@@ -209,7 +209,7 @@ void main() {
       await tester.tap(find.byKey(const Key('my-friends-reload')));
       await tester.pumpAndSettle();
       expect(find.text('Member B'), findsNothing);
-      expect(find.text('No friends available on this page.'), findsNothing);
+      expect(find.text('Make room for familiar faces'), findsNothing);
       expect(find.text('Service unavailable.'), findsOneWidget);
     },
   );
