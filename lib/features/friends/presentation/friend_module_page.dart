@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../check_in/check_in_providers.dart';
+import '../../check_in/domain/check_in_repository.dart';
 import '../../auth/auth_providers.dart';
 import '../../../core/presentation/enmori_motion.dart';
 import 'friend_page.dart';
@@ -21,11 +22,13 @@ final class FriendModulePage extends ConsumerStatefulWidget {
     required this.openAttribution,
     this.participationBuilder,
     this.onOpenEvent,
+    this.recordBuilder,
     super.key,
   });
   final Future<bool> Function(Uri) openAttribution;
   final ParticipationBuilder? participationBuilder;
   final Future<void> Function(String eventId)? onOpenEvent;
+  final Widget Function(BuildContext, CheckIn)? recordBuilder;
   @override
   ConsumerState<FriendModulePage> createState() => _FriendModulePageState();
 }
@@ -65,6 +68,7 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
               timeZone: zone,
               openAttribution: widget.openAttribution,
               participationBuilder: widget.participationBuilder,
+              recordBuilder: widget.recordBuilder,
               onOpenRequest: (name) => Navigator.of(context).push<void>(
                 MaterialPageRoute(
                   builder: (_) =>

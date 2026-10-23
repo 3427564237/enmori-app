@@ -36,3 +36,18 @@ Shared Backend/Firebase/Ollama/Tailscale, real data, signing configuration and
 device state remain unchanged during module development. Integration coordinates
 serialized Flutter validation and the final APK build. Runtime, source tests,
 fixture previews and device observations are reported separately.
+
+The human subsequently requested persistent Chinese/English selection in Settings
+in the App chat (`01a1689b-0799-7550-a624-e44ec1aa3081`), explicitly covering the
+actual application interfaces and cross-module wiring. Integration read that
+user message directly. The App decision
+`2026-10-23-li-app-preferences-recovery.md` retains the request and its scope.
+The delegated implementation uses one device-local `en`/`zh` preference, keeps
+English on devices without a prior choice, and wires both ordinary and group
+application roots. Android uses private SharedPreferences; the iOS source uses
+UserDefaults. Settings can change it while account reads fail; the locale changes
+only after storage acknowledgement and readback. The existing Flutter SDK locale
+dependency was already locked transitively and is now direct. No new third-party
+package, Backend field, cross-device sync, data purpose or content translation is
+introduced. This extends the interface scope only; earlier privacy and consent
+decisions remain unchanged. Platform source is not evidence of device acceptance.

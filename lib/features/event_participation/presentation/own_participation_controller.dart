@@ -125,6 +125,7 @@ final class OwnParticipationController extends Notifier<OwnParticipationView> {
     final failure = (result as Failure<EventParticipationPage>).failure;
     if (failure.kind == AppFailureKind.authRequired ||
         failure.kind == AppFailureKind.authForbidden ||
+        failure.kind == AppFailureKind.authenticationInvalid ||
         failure.kind == AppFailureKind.onboardingRequired) {
       _visitedCursors.clear();
       state = OwnParticipationView(failure: failure);

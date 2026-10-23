@@ -7,15 +7,16 @@ Draft integration PR: [#174](https://github.com/3427564237/enmori-app/pull/174).
 
 | Module | Work branch | Accepted delivery SHA / PR | Contract and current state |
 | --- | --- | --- | --- |
-| App | `souma/product-app-20261023` | Pending | Profile/Settings draft recovery, explicit review before retry; existing revisioned Account/Settings APIs. Developing. |
-| Social | `souma/product-social-20261023` | Pending | My plans from existing own participation reads; cumulative paging, explicit loaded-results filters, eventId navigation. Developing; shared route interface pending. |
-| Journal | `souma/product-journal-20261023` | Pending | Existing month/day/record APIs; continuous recorded-date review, retained history pages, authorized map-point preview. Developing; existing entry routes. |
-| AI | `souma/product-ai-20261023` | Pending | Small-plan composer from user-entered text, explicit send, existing conversation and Persona preview contracts. Developing; no new data access or streaming claim. |
+| App | `souma/product-app-20261023` | `deb11e4b6ccec640e87771ebc87f32eb8638919b` / [#178](https://github.com/3427564237/enmori-app/pull/178) | Accepted. Profile/Settings draft recovery and bilingual personal flows; device language control injected in general Settings. |
+| Social | `souma/product-social-20261023` | `b78c06f22411ba0d10561a2c15dae1f6a4041ea1` / [#176](https://github.com/3427564237/enmori-app/pull/176) | Accepted. Events → My plans → stable-ID detail → confirmed participation → retained plans; cumulative paging and loaded-results filters. |
+| Journal | `souma/product-journal-20261023` | `2edbed45ea0aa144d8fc59d61167dc099a1d6f0e` / [#177](https://github.com/3427564237/enmori-app/pull/177) | Accepted. Shared label editing, same-month recorded-date review, retained history pages, authorized map preview; shared saved-record view wired through both Profile and Friends. |
+| AI | `souma/product-ai-20261023` | `a2934b911949260962978ada817e2ba654fa701b` (includes `85dfc9081836698b4333482a7b1f1205ede68c51`) / [#179](https://github.com/3427564237/enmori-app/pull/179) | Accepted. Small-plan draft → editable review → explicit Send; repeatable Persona trials and bilingual UI. No new data access or streaming claim. |
 | Backend | `souma/product-backend-20261023` | `acd4dcd24d98fb1621468220002eb06c817e7750` / [#175](https://github.com/3427564237/enmori-app/pull/175) | Accepted by exact-commit merge. Prior-boot process-lock recovery; 28 Node + 1 Python isolated checks reused. Not deployed. |
 
-All five role branch heads were the base at startup. The GitHub open-PR search
-for `head:souma/product-` returned no delivery PRs at the startup snapshot.
-Pending means no SHA accepted into this branch, not an absent implementation.
+All deliveries were accepted by exact-commit local merges, with their Draft PR
+heads and common base verified. Equivalent shared prerequisite commits coalesce
+without duplicating code. The Social/Journal shared-file conflicts retained both
+owners' translations and Journal's record builder. No GitHub PR was merged.
 
 The human added English/Chinese Settings selection in the App chat; Integration
 read that actual user message. Integration provides device-local persistence,
@@ -47,9 +48,28 @@ Flutter commands use a single advisory lock at the local launch directory's
 APK/Gradle belongs to Integration only. Module delivery messages are exchanged
 directly using the verified local roster, not inferred from document writes.
 
-Current boundary: Backend source accepted; remaining modules are validating their
-product and bilingual UI packages. Device-language persistence/confirmation and
-large-text controls passed five isolated tests; production-root integration is
-pending its targeted check. No new APK/runtime/device proof yet.
-v24 intermittent AI settings reads and pending-reply cross-page continuity remain
-separate unverified findings from the historical checkpoint.
+Integration reproduced and fixed covered Events callbacks duplicating detail
+routes and authentication-invalid plan reads retaining old pages. Shared route
+callbacks now check the active source path; explicit auth loss retires the plans
+projection. Existing AI navigation and Profile-owned records follow the confirmed
+22/23 October decisions; stale integration assertions were updated accordingly.
+
+Assembly verification: the initial six-file batch passed 44/48. Its four stale
+assertions were corrected against those decisions. A bounded follow-up passed
+9/10 (two new record-builder routes and four auth-loss variants included); the
+remaining lazy-viewport assertion was corrected and both pending-navigation
+variants passed. Thus 54 distinct composition/access cases have final passing
+evidence, not one uninterrupted 54-case run. The five device-language contract
+and large-text checks passed earlier. Modules' narrower source/fixture evidence
+is retained in their delivery notes; no complete-suite rerun is claimed.
+
+Device-language tests confirm both application roots, acknowledged writes,
+fresh-container restoration, failed-read availability and draft preservation.
+AI pending navigation is confirmed only with synthetic transport. Real model
+multi-round continuity, v24 intermittent AI settings reads, native restart,
+phone fonts/keyboard/TalkBack, iOS compilation, shared-runtime switch and full
+UAT remain unverified. The AI Chinese preview still has a fixture-only missing
+heading glyph and is not counted as visual acceptance.
+
+The signed candidate and final static-check result are recorded separately in
+the v25 evidence note once the product source is frozen and the build verified.

@@ -2,6 +2,7 @@ import 'package:enmori/app/app.dart';
 import 'package:enmori/app/providers.dart';
 import 'package:enmori/app/router/app_router.dart';
 import 'package:enmori/features/ai_conversation/presentation/ai_conversation_page.dart';
+import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
 import 'package:enmori/harness/ai_conversation/ai_home_router_harness_app.dart';
 import 'package:enmori/harness/ai_conversation/synthetic_ai_transport.dart';
 import 'package:enmori/harness/ai_conversation/synthetic_auth_repository.dart';
@@ -57,7 +58,7 @@ void main() {
     final f = await _pump(tester);
     await _openAi(tester);
     await _tap(tester, 'ai-settings');
-    expect(f.router.state.uri.path, AppRoutes.settings);
+    expect(f.router.state.uri.path, AppRoutes.aiSettings);
     expect(find.byKey(const Key('route-settings')), findsOneWidget);
     expect(find.byKey(const Key('ai-home-synthetic-warning')), findsOneWidget);
     // No fake Settings success is supplied. Its existing repository is unavailable.
@@ -72,7 +73,7 @@ void main() {
 
   for (final settings in [false, true]) {
     testWidgets(
-      'pending real page owns exit before shared navigation ($settings)',
+      'same-session pending request survives ordinary navigation without resend ($settings)',
       (tester) async {
         final f = await _pump(
           tester,
@@ -82,30 +83,44 @@ void main() {
         await _send(tester);
         expect(f.transport.executeCalls, 1);
         await _exit(tester, settings);
-        expect(find.text('Leave this conversation?'), findsOneWidget);
-        await tester.tap(find.text('Stay'));
-        await _frames(tester);
-        expect(f.router.state.uri.path, AppRoutes.aiAssistant);
+        // 22 October PM decision: ordinary in-app navigation keeps the
+        // session-owned request. Explicit cancel/background/auth loss differ.
+        expect(find.byType(AlertDialog), findsNothing);
         expect(f.transport.cancelCalls, 0);
-        await _exit(tester, settings);
-        await _tap(tester, 'ai-confirm-leave');
         expect(
           f.router.state.uri.path,
-          settings ? AppRoutes.settings : AppRoutes.home,
+          settings ? AppRoutes.aiSettings : AppRoutes.home,
         );
-        expect(f.transport.cancelCalls, 1);
-        expect(find.text(_note, skipOffstage: false), findsNothing);
         if (settings) {
           f.router.pop();
           await _frames(tester);
         } else {
           await _openAi(tester);
         }
-        // Returning never resumes or resends the original pending message.
+        // Return attaches to the same pending operation; no second dispatch.
         expect(f.transport.executeCalls, 1);
-        expect(find.byKey(const Key('ai-check-result')), findsOneWidget);
+        expect(f.transport.cancelCalls, 0);
+        expect(
+          f.container.read(aiConversationControllerProvider).canCancel,
+          isTrue,
+        );
+        // Returning from Settings retains the existing reading position. The
+        // ordinary shell's Cancel action may be above its lazy viewport.
+        await tester.scrollUntilVisible(
+          find.byKey(const Key('ai-cancel')),
+          -180,
+          scrollable: find
+              .descendant(
+                of: find.byKey(const Key('route-ai-conversation')),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        expect(find.byKey(const Key('ai-cancel')), findsOneWidget);
         expect(find.byKey(const Key('ai-retry')), findsNothing);
         expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await _frames(tester);
       },
     );
   }

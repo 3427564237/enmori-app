@@ -266,6 +266,7 @@ void main() {
   for (final kind in [
     AppFailureKind.authRequired,
     AppFailureKind.authForbidden,
+    AppFailureKind.authenticationInvalid,
     AppFailureKind.onboardingRequired,
   ]) {
     test(

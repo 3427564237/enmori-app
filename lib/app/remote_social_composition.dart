@@ -11,6 +11,8 @@ import '../features/account/domain/account_repository.dart';
 import '../core/result/result.dart';
 import '../features/friends/presentation/social_profile_controller.dart';
 import '../features/check_in/check_in_providers.dart';
+import '../features/check_in/domain/check_in_repository.dart';
+import '../features/check_in/presentation/check_in_record_view.dart';
 import '../features/event_participation/presentation/user_participation_section.dart';
 import '../features/friends/presentation/social_profile_page.dart';
 import '../features/friends/presentation/friend_activity_panel.dart';
@@ -42,6 +44,9 @@ Widget groupParticipationBuilder(BuildContext context, String username) =>
       onSelect: (id) =>
           context.push('/events/${Uri.encodeComponent(id)}/participation'),
     );
+
+Widget groupCheckInRecordBuilder(BuildContext context, CheckIn record) =>
+    CheckInRecordView(record: record, openAttribution: openGroupAttribution);
 
 final class ConnectedSocialProfile extends ConsumerStatefulWidget {
   const ConnectedSocialProfile({
@@ -115,6 +120,7 @@ final class _ConnectedSocialProfileState
           initialDate: value.date,
           timeZone: value.zone,
           openAttribution: openGroupAttribution,
+          recordBuilder: groupCheckInRecordBuilder,
           participationBuilder: groupParticipationBuilder,
           onOpenRequest: (_) => context.push<void>('/friends'),
         );

@@ -30,6 +30,7 @@ import '../../features/event_recommendations/presentation/event_recommendations_
 import '../../features/event_recommendations/presentation/event_recommendations_page.dart';
 import '../../features/interests/presentation/interest_editor_page.dart';
 import '../../features/interests/presentation/admin_interest_catalogue_page.dart';
+import '../../features/language/presentation/app_language_control.dart';
 import '../interest_admin_entry.dart';
 import '../home_shell_page.dart';
 import '../../features/event_detail/presentation/event_detail_page.dart';
@@ -66,6 +67,7 @@ abstract final class AppRoutes {
   static const adminInterests = '/admin/interests';
   static const eventRecommendations = '/events';
   static const activities = '/activities';
+  static const eventPlans = '/event-plans';
   static const unavailable = '/unavailable';
   static const configurationUnavailable = '/configuration-unavailable';
   static const forbidden = '/account-unavailable';
@@ -256,6 +258,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           opener: eventOpener,
           current: canNavigateActivity,
           listPath: AppRoutes.activities,
+          plansPath: AppRoutes.eventPlans,
           wrapList: (context, child) =>
               rootTab(context, AppRoutes.activities, 2, child),
           onProfile: (context, username) =>
@@ -357,6 +360,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             remoteGroup
                 ? FriendModulePage(
                     openAttribution: openGroupAttribution,
+                    recordBuilder: groupCheckInRecordBuilder,
                     participationBuilder: groupParticipationBuilder,
                     onOpenEvent: (id) => context.push<void>(eventPath(id)),
                   )
@@ -597,6 +601,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.settings,
         builder: (context, state) => AccountPreferencesPage(
           view: PreferencesView.settings,
+          languageSection: const AppLanguageControl(),
           onEditProfile: () async {
             await context.push<void>(AppRoutes.profileEdit);
           },
