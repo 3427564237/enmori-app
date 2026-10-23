@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/result/result.dart';
 import '../domain/persona.dart';
 import '../persona_providers.dart';
+import '../persona_preview_providers.dart';
 import 'persona_page_parts.dart';
 import 'persona_preview_page.dart';
 
@@ -68,6 +69,7 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
   bool _confirming = false;
   bool _savedCreate = false;
   int _pageOperation = 0;
+  String _previewText = '';
 
   PersonaFields get _fields => PersonaFields(
     displayName: _name.text,
@@ -88,6 +90,9 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
   @override
   void initState() {
     super.initState();
+    ref.listenManual(personaPreviewAccessProvider, (_, allowed) {
+      if (!allowed) _previewText = '';
+    });
     ref.listenManual(personaSessionControllerProvider, (_, next) {
       final submitted = _submittedFields;
       final commandKey = _createKey;
@@ -330,9 +335,17 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
       return;
     }
     final draft = _fields.normalized;
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => PersonaPreviewPage(fields: draft)),
+    final sessionKey = ref.read(personaSessionControllerProvider).sessionKey;
+    final text = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) =>
+            PersonaPreviewPage(fields: draft, initialText: _previewText),
+      ),
     );
+    if (mounted &&
+        sessionKey == ref.read(personaSessionControllerProvider).sessionKey) {
+      _previewText = text ?? '';
+    }
   }
 
   @override
@@ -503,6 +516,19 @@ final class _PersonaEditorState extends ConsumerState<_PersonaEditor> {
                                 : null,
                           ),
                           const SizedBox(height: 16),
+                          OutlinedButton.icon(
+                            key: const Key('persona-preview-quick'),
+                            onPressed: enabled ? _preview : null,
+                            icon: const Icon(Icons.chat_bubble_outline),
+                            label: const Text('Try this draft'),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(top: 8, bottom: 16),
+                            child: Text(
+                              'Try, return to edit, then save when it feels right. '
+                              'Trying does not save or make this Persona current.',
+                            ),
+                          ),
                           Text(
                             'Personal expression',
                             style: Theme.of(context).textTheme.titleLarge,

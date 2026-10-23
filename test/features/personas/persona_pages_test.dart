@@ -47,12 +47,13 @@ void main() {
     (tester) async {
       final repository = _Repository();
       final preview = _ImmediatePreview();
+      var previewAllowed = true;
       final auth = StreamController<AuthSession>();
       final container = ProviderContainer(
         overrides: [
           authSessionProvider.overrideWith((ref) => auth.stream),
           personaRepositoryProvider.overrideWithValue(repository),
-          personaPreviewAccessProvider.overrideWithValue(true),
+          personaPreviewAccessProvider.overrideWith((ref) => previewAllowed),
           personaPreviewRepositoryProvider.overrideWithValue(preview),
         ],
       );
@@ -114,6 +115,38 @@ void main() {
           entry.value,
         );
       }
+      // Reuse the same trial message after editing; each try gets the new
+      // unsaved fields and has no implicit create/activation/history effect.
+      values['communicationStyle'] = 'One short question';
+      final style = find.byKey(const Key('persona-communicationStyle'));
+      await tester.ensureVisible(style);
+      await tester.enterText(style, values['communicationStyle']!);
+      await _tapVisible(tester, 'persona-preview-quick');
+      final previewInput = find.byKey(const Key('persona-preview-input'));
+      expect(
+        tester.widget<TextFormField>(previewInput).controller!.text,
+        'Hello preview',
+      );
+      expect(find.text('A synthetic preview'), findsNothing);
+      await _tapVisible(tester, 'persona-preview-send');
+      expect(preview.draft?.communicationStyle, 'One short question');
+      expect(preview.text, 'Hello preview');
+      expect(repository.creates, isEmpty);
+      expect(repository.activations, 0);
+      await _tapVisible(tester, 'persona-preview-edit');
+      previewAllowed = false;
+      container.invalidate(personaPreviewAccessProvider);
+      await tester.pumpAndSettle();
+      previewAllowed = true;
+      container.invalidate(personaPreviewAccessProvider);
+      await tester.pumpAndSettle();
+      await _tapVisible(tester, 'persona-preview-quick');
+      expect(
+        tester.widget<TextFormField>(previewInput).controller!.text,
+        isEmpty,
+      );
+      await tester.pageBack();
+      await tester.pumpAndSettle();
       await _tapVisible(tester, 'persona-save');
       expect(repository.creates.single.fields.expressionFields, values);
       expect(repository.items.single.fields.expressionFields, values);
@@ -1155,6 +1188,7 @@ final class _Repository implements PersonaRepository {
 
 final class _ImmediatePreview implements PersonaPreviewRepository {
   PersonaFields? draft;
+  String? text;
   @override
   Future<Result<String>> preview({
     required PersonaFields draft,
@@ -1162,6 +1196,7 @@ final class _ImmediatePreview implements PersonaPreviewRepository {
     required bool Function() isEligible,
   }) async {
     this.draft = draft;
+    this.text = text;
     return const Success('A synthetic preview');
   }
 }

@@ -7,6 +7,7 @@ import '../../../core/presentation/enmori_motion.dart';
 import '../../../core/presentation/local_time.dart';
 
 import '../ai_conversation_providers.dart';
+import 'ai_plan_draft_page.dart';
 
 Widget buildAiConversationPage(
   BuildContext context, {
@@ -89,6 +90,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   DialogRoute<bool>? _confirmationRoute;
   bool _confirming = false;
   bool _leaving = false;
+  bool _planning = false;
 
   @override
   void initState() {
@@ -179,6 +181,46 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     _message.value = value;
     if (focused) _messageFocus.requestFocus();
   }
+
+  Future<void> _makePlan() async {
+    if (!_ownsCurrentSession || _planning || _confirming || _leaving) return;
+    final before = ref.read(aiConversationControllerProvider);
+    if (!before.canSend) return;
+    final original = _message.value;
+    _planning = true;
+    _messageFocus.unfocus();
+    final draft = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => AiPlanDraftPage(initialText: original.text),
+      ),
+    );
+    if (!_ownsCurrentSession) return;
+    _planning = false;
+    final current = ref.read(aiConversationControllerProvider);
+    if (draft == null ||
+        !current.canSend ||
+        current.conversationId != before.conversationId ||
+        _message.value != original) {
+      return;
+    }
+    setState(() {
+      _message.value = TextEditingValue(
+        text: draft,
+        selection: TextSelection.collapsed(offset: draft.length),
+      );
+    });
+    _messageFocus.requestFocus();
+  }
+
+  Widget _planAction(AiConversationState state) => Align(
+    alignment: Alignment.centerLeft,
+    child: TextButton.icon(
+      key: const Key('ai-make-plan'),
+      onPressed: state.canSend ? _makePlan : null,
+      icon: const Icon(Icons.checklist_outlined),
+      label: const Text('Make a small plan'),
+    ),
+  );
 
   Future<void> _openConversation(String id) async {
     if (!_ownsCurrentSession ||
@@ -659,6 +701,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         ),
                       ],
                       const SizedBox(height: 24),
+                      _planAction(state),
                       TextField(
                         key: const Key('ai-message-input'),
                         controller: _message,
@@ -880,6 +923,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (state.canSend) _planAction(state),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
