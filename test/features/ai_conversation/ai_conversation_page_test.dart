@@ -9,6 +9,156 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('small plan reviews direct input and sends only from chat', (
+    tester,
+  ) async {
+    final controller = _PageController(_state(canSend: true));
+    await _pump(tester, controller, socialStyle: true);
+    await _tap(tester, 'ai-make-plan');
+    await tester.enterText(
+      find.byKey(const Key('ai-plan-goal')),
+      'Start my assignment',
+    );
+    await tester.enterText(
+      find.byKey(const Key('ai-plan-limits')),
+      'I have 20 minutes',
+    );
+    await _tap(tester, 'ai-plan-review');
+    final review = find.byKey(const Key('ai-plan-message'));
+    final text = tester.widget<TextField>(review).controller!.text;
+    expect(text, contains('Start my assignment'));
+    expect(text, contains('I have 20 minutes'));
+    expect(controller.sent, isEmpty);
+    await tester.enterText(review, '$text\nKeep the answer brief.');
+    await _tap(tester, 'ai-plan-apply');
+    final input = find.byKey(const Key('ai-message-input'));
+    expect(
+      tester.widget<TextField>(input).controller!.text,
+      '$text\nKeep the answer brief.',
+    );
+    expect(controller.sent, isEmpty);
+    expect(controller.reads, isEmpty);
+    expect(controller.checks, 0);
+    await _tap(tester, 'ai-send');
+    expect(controller.sent, ['$text\nKeep the answer brief.']);
+    expect(tester.widget<TextField>(input).controller!.text, isEmpty);
+    expect(controller.cancels, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'small plan cancel preserves existing draft; replacement is explicit',
+    (tester) async {
+      final controller = _PageController(_state(canSend: true));
+      await _pump(tester, controller, socialStyle: true);
+      final input = find.byKey(const Key('ai-message-input'));
+      await tester.enterText(input, 'My original draft');
+      final editor = tester.widget<TextField>(input).controller!;
+      editor.selection = const TextSelection(baseOffset: 3, extentOffset: 8);
+      final before = editor.value;
+      await _tap(tester, 'ai-make-plan');
+      expect(
+        tester
+            .widget<TextFormField>(find.byKey(const Key('ai-plan-goal')))
+            .controller!
+            .text,
+        before.text,
+      );
+      await tester.enterText(
+        find.byKey(const Key('ai-plan-goal')),
+        'Changed only here',
+      );
+      await _tap(tester, 'ai-plan-review');
+      expect(find.text('Replace chat draft'), findsOneWidget);
+      await _tap(tester, 'ai-plan-cancel');
+      expect(editor.value, before);
+      expect(controller.sent, isEmpty);
+    },
+  );
+
+  testWidgets(
+    'small plan capacity is visible without truncation on a narrow large-text screen',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 740);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final controller = _PageController(_state(canSend: true));
+      await _pump(tester, controller, socialStyle: true, textScale: 2.5);
+      await _tap(tester, 'ai-make-plan');
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('ai-plan-goal')),
+        150,
+        scrollable: find
+            .descendant(
+              of: find.byKey(const Key('ai-plan-page')),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.enterText(find.byKey(const Key('ai-plan-goal')), '文' * 2400);
+      await _tap(tester, 'ai-plan-review');
+      final review = find.byKey(const Key('ai-plan-message'));
+      expect(
+        tester.widget<TextField>(review).controller!.text,
+        contains('文' * 2400),
+      );
+      expect(_filledButton(tester, 'ai-plan-apply').onPressed, isNull);
+      await tester.enterText(review, 'A shorter request');
+      tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+      await tester.pumpAndSettle();
+      await _tap(tester, 'ai-plan-apply');
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('ai-message-input')))
+            .controller!
+            .text,
+        'A shorter request',
+      );
+      expect(controller.sent, isEmpty);
+      expect(tester.takeException(), isNull);
+      tester.view.resetViewInsets();
+    },
+  );
+
+  for (final cause in ['session', 'consent']) {
+    testWidgets('small plan drops private fields after $cause change', (
+      tester,
+    ) async {
+      final controller = _PageController(_state(canSend: true));
+      await _pump(tester, controller, socialStyle: true);
+      await _tap(tester, 'ai-make-plan');
+      await tester.enterText(
+        find.byKey(const Key('ai-plan-goal')),
+        'Private goal',
+      );
+      await _tap(tester, 'ai-plan-review');
+      controller.publish(
+        cause == 'session'
+            ? _state(canSend: true, sessionKey: Object())
+            : _state(phase: AiConversationPhase.limited),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-plan-message')), findsNothing);
+      expect(find.byKey(const Key('ai-plan-apply')), findsNothing);
+      if (cause == 'consent') {
+        controller.publish(_state(canSend: true));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('ai-plan-message')), findsNothing);
+      }
+      await _tap(tester, 'ai-plan-cancel');
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('ai-message-input')))
+            .controller!
+            .text,
+        isEmpty,
+      );
+      expect(controller.sent, isEmpty);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets(
     'returning chat opens latest and explicit latest preserves draft and older reading',
     (tester) async {
@@ -177,6 +327,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const Key('ai-cancel')), findsNothing);
+      expect(find.byKey(const Key('ai-make-plan')), findsNothing);
       expect(controller.sent, isEmpty);
       expect(tester.takeException(), isNull);
     },
@@ -1504,7 +1655,13 @@ Future<void> _tap(WidgetTester tester, String key) async {
       200,
       scrollable: find
           .descendant(
-            of: find.byKey(const Key('route-ai-conversation')),
+            of: find.byKey(
+              Key(
+                key.startsWith('ai-plan-')
+                    ? 'ai-plan-page'
+                    : 'route-ai-conversation',
+              ),
+            ),
             matching: find.byType(Scrollable),
           )
           .first,

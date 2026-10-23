@@ -100,6 +100,7 @@ void main() {
         'persona-tone',
         'persona-response-length',
         'persona-format',
+        'persona-preview-quick',
         'persona-relationship',
         'persona-shortIntroduction',
         'persona-description',
