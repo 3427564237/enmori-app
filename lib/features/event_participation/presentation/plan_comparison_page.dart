@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/presentation/status_panel.dart';
+import '../../../core/result/result.dart';
 import '../../auth/auth_providers.dart';
 import '../domain/participation_repository.dart';
 import 'authorized_event_title.dart';
@@ -14,10 +15,12 @@ final class EventPlanComparisonPage extends ConsumerStatefulWidget {
   const EventPlanComparisonPage({
     required this.username,
     required this.onOpenEvent,
+    this.onBack,
     super.key,
   });
   final String username;
   final Future<void> Function(String eventId) onOpenEvent;
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<EventPlanComparisonPage> createState() =>
@@ -115,7 +118,12 @@ final class _EventPlanComparisonPageState
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.tr('Compare plans', '对照活动计划'))),
+      appBar: AppBar(
+        title: Text(context.tr('Compare plans', '对照活动计划')),
+        leading: widget.onBack == null
+            ? null
+            : BackButton(onPressed: widget.onBack),
+      ),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -177,7 +185,14 @@ final class _EventPlanComparisonPageState
                 if (view.failure case final failure?)
                   StatusPanel(
                     title: context.tr('Comparison unavailable', '暂时无法对照计划'),
-                    body: localizedFailure(context, failure),
+                    body:
+                        failure.kind ==
+                            AppFailureKind.addFriendTargetUnavailable
+                        ? context.tr(
+                            'This person’s participation is unavailable under current access.',
+                            '当前访问权限下无法查看此人的参与记录。',
+                          )
+                        : localizedFailure(context, failure),
                     icon: Icons.cloud_off_outlined,
                     isError: true,
                     action: TextButton(
@@ -303,8 +318,8 @@ final class _EventPlanComparisonPageState
                   Text(
                     context.tr(
                       'This comparison covers only this visible page. '
-                          'Your choices are never copied into another plan list.',
-                      '当前仅对照本页可见记录，直接使用你已有的参与状态。',
+                          'Your saved choices can also be reviewed in My plans.',
+                      '当前仅对照本页可见记录，你保存的选择也可以在“我的活动计划”中回看。',
                     ),
                   ),
                   if (view.page!.nextCursor != null)

@@ -22,7 +22,8 @@ read/change/return loop, not a repackaging of those features.
 - `EventPlanComparisonPage` in
   `lib/features/event_participation/presentation/plan_comparison_page.dart`:
   required `String username` and
-  `Future<void> Function(String eventId) onOpenEvent`.
+  `Future<void> Function(String eventId) onOpenEvent`, optional
+  `VoidCallback? onBack` for a guarded direct-route return fallback.
 - `UserParticipationSection.onComparePlans`: optional `VoidCallback` entry.
   Integration supplies it through `groupParticipationBuilder`, covering both
   top-level and Friends-internal Profile composition.
@@ -55,8 +56,11 @@ is needed. Backend's separate synthetic verification is recorded in its
 
 ## Bounded verification
 
-Pending Integration's centrally scheduled analysis and test result. Social has
-run direct cached Dart formatting and `git diff --check` only.
+Initial central analysis/test attempt stopped at compilation: two lifecycle
+fixture calls incorrectly awaited a void result. Those awaits, an unused import
+and one missing if block were corrected; no cases executed in that attempt.
+Pending the bounded central rerun. Social has run direct cached Dart formatting
+and `git diff --check` only.
 
 Requested commands:
 
