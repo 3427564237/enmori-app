@@ -89,3 +89,11 @@ two-account revocation/isolation, actual Settings/Profile conflict recovery,
 participation writes, multi-page History, launcher recovery after host reboot,
 iOS, full regression/UAT or release approval. “Restart” evidence above means
 Android process termination and fresh application launch, not a phone reboot.
+
+## Later calendar repair verification
+
+The [24 October connected-phone follow-up](2026-10-24-li-calendar-phone-follow-up.md)
+retains this exact installed v25 and verifies the calendar repair deployed to
+the existing backend. Month counts and recorded-day navigation now pass that
+bounded phone check. This does not rewrite the original failure above or resolve
+AI small-plan relevance.

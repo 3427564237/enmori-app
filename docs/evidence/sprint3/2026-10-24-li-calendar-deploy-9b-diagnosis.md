@@ -20,6 +20,13 @@ This follows the [source repair and 58 prior probes](2026-10-23-li-calendar-plan
   Physical-phone interaction, installation and verification remain **Not Run**.
   This is not full end-to-end or release acceptance.
 
+Later the same day, LI connected the phone. The
+[connected-phone follow-up](2026-10-24-li-calendar-phone-follow-up.md) verifies
+the repaired month counts, recorded-day navigation and both language selections
+across app process restarts on installed v25. It supersedes the temporary
+Not Run status only for those named phone checks; the earlier CLI login failure
+and unresolved AI relevance finding remain recorded.
+
 ## Minimal deployed change and runtime identity
 
 The existing service was running the clean checkout

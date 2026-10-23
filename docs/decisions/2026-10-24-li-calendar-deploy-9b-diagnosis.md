@@ -26,3 +26,14 @@ deployment/model-diagnosis stop in the
 The original privacy, authorization, current-message/history/Persona projection,
 explicit Send, cancellation and unknown-outcome contracts remain unchanged.
 Read-only deployment checks and source tests are not physical-phone acceptance.
+
+## Connected-phone follow-up
+
+After the deployment report, LI stated “手机已接入”. Resume the previously
+requested bounded phone verification against the newly deployed calendar repair
+and the existing installed app, including English/Chinese selection across app
+process restarts. This replaces the temporary phone-testing pause only for these
+checks. Preserve app/account data and restore the original interface language.
+No new installation is necessary for this backend-only repair. No new account
+record, AI conversation, historical-operation retry or whole-phone reboot is
+selected by this follow-up.
