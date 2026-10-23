@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -101,22 +103,22 @@ final class _FriendDiscoveryPanelState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SectionHeading(
-          title: 'People to know',
+          title: context.tr('People to know', '认识新朋友'),
           actions: [
             if (widget.home &&
                 widget.onSeeAll != null &&
                 state.suggestions.isNotEmpty)
               TextButton(
                 onPressed: () => _open(widget.onSeeAll!),
-                child: const Text('See all'),
+                child: Text(context.tr('See all', '查看全部')),
               ),
             IconButton(
-              tooltip: 'Reload recommendations',
+              tooltip: context.tr('Reload recommendations', '刷新推荐'),
               onPressed: state.busy || locked ? null : controller.load,
               icon: const Icon(Icons.refresh),
             ),
             PopupMenuButton<String>(
-              tooltip: 'Recommendation options',
+              tooltip: context.tr('Recommendation options', '推荐选项'),
               onSelected: (action) => _open(
                 action == 'requests'
                     ? widget.onOpenRequests
@@ -127,23 +129,29 @@ final class _FriendDiscoveryPanelState
                       ),
               ),
               itemBuilder: (_) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'ignored',
-                  child: Text('Ignored people'),
+                  child: Text(context.tr('Ignored people', '已忽略的用户')),
                 ),
                 PopupMenuItem(
                   value: 'requests',
                   child: Text(
                     state.pendingCount == null
-                        ? 'Friend requests'
-                        : 'Friend requests (${state.pendingCount})',
+                        ? context.tr('Friend requests', '好友请求')
+                        : context.tr(
+                            'Friend requests (${state.pendingCount})',
+                            '好友请求（${state.pendingCount}）',
+                          ),
                   ),
                 ),
                 if (state.countFailure != null)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     enabled: false,
                     child: Text(
-                      'Request count is unavailable. Open requests to check.',
+                      context.tr(
+                        'Request count is unavailable. Open requests to check.',
+                        '暂时无法获取请求数量，请打开请求列表查看。',
+                      ),
                     ),
                   ),
               ],
@@ -151,23 +159,36 @@ final class _FriendDiscoveryPanelState
           ],
         ),
         if (state.busy)
-          const LinearProgressIndicator(semanticsLabel: 'Loading friends'),
+          LinearProgressIndicator(
+            semanticsLabel: context.tr('Loading friends', '正在加载好友'),
+          ),
         if (state.failure case final failure?)
-          Semantics(liveRegion: true, child: Text(failure.message)),
+          Semantics(
+            liveRegion: true,
+            child: Text(localizedFailure(context, failure)),
+          ),
         if (preference.busy)
           Semantics(
             liveRegion: true,
-            child: const Text('Saving or checking preferences…'),
+            child: Text(
+              context.tr('Saving or checking preferences…', '正在保存或核对偏好…'),
+            ),
           ),
         if (preference.failure case final failure?)
-          Semantics(liveRegion: true, child: Text(failure.message)),
+          Semantics(
+            liveRegion: true,
+            child: Text(localizedFailure(context, failure)),
+          ),
         if (preference.unresolvedUsername != null) ...[
-          const Text(
-            'The last preference change is unconfirmed. Read the current state before another change.',
+          Text(
+            context.tr(
+              'The last preference change is unconfirmed. Read the current state before another change.',
+              '上次偏好修改尚未确认，请先核对当前状态再修改。',
+            ),
           ),
           OutlinedButton(
             onPressed: preference.busy ? null : preferences.checkCurrent,
-            child: const Text('Read current state'),
+            child: Text(context.tr('Read current state', '核对当前状态')),
           ),
         ],
         if (state.loaded && state.suggestions.isEmpty)
@@ -185,15 +206,23 @@ final class _FriendDiscoveryPanelState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('No friend recommendations right now'),
+                      Text(
+                        context.tr(
+                          'No friend recommendations right now',
+                          '暂时没有好友推荐',
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text(
-                        'Find someone you know to get started.',
+                        context.tr(
+                          'Find someone you know to get started.',
+                          '先查找一位你认识的人。',
+                        ),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       TextButton(
                         onPressed: () => _open(widget.onOpenRequests),
-                        child: const Text('Find people'),
+                        child: Text(context.tr('Find people', '查找用户')),
                       ),
                     ],
                   ),
@@ -235,7 +264,10 @@ final class _FriendDiscoveryPanelState
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Ignore @${person.username}',
+                  tooltip: context.tr(
+                    'Ignore @${person.username}',
+                    '忽略 @${person.username}',
+                  ),
                   icon: const Icon(Icons.person_remove_outlined),
                   onPressed: locked
                       ? null
@@ -260,9 +292,14 @@ final class _FriendDiscoveryPanelState
                                   persist: MediaQuery.accessibleNavigationOf(
                                     context,
                                   ),
-                                  content: const Text('Recommendation ignored'),
+                                  content: Text(
+                                    context.tr(
+                                      'Recommendation ignored',
+                                      '已忽略此推荐',
+                                    ),
+                                  ),
                                   action: SnackBarAction(
-                                    label: 'Undo',
+                                    label: context.tr('Undo', '撤销'),
                                     onPressed: () {
                                       if (mounted) preferences.undo(undo);
                                     },

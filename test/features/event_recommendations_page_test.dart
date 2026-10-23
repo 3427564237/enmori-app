@@ -3,6 +3,7 @@ import 'package:enmori/app/providers.dart';
 import 'package:enmori/app/router/app_router.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
+import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 import 'package:enmori/features/event_recommendations/event_recommendations_providers.dart';
 import 'package:enmori/features/event_recommendations/presentation/event_recommendations_controller.dart';
@@ -210,6 +211,11 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           routerGateProvider.overrideWithValue(RouterGateState.authenticated),
+          // This authenticated route fixture must also supply its observed session;
+          // the default unavailable auth adapter otherwise retries asynchronously.
+          authSessionProvider.overrideWithValue(
+            const AsyncData(AuthSessionAuthenticated(subject: 'member-a')),
+          ),
           currentAuthSubjectProvider.overrideWithValue('member-a'),
           interestRepositoryProvider.overrideWithValue(interests),
           eventRecommendationRepositoryProvider.overrideWithValue(

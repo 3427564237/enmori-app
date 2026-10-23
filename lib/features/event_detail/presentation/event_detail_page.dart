@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -49,20 +51,23 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
   Widget build(BuildContext context) {
     final state = ref.watch(eventDetailControllerProvider(widget.eventId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Event details')),
+      appBar: AppBar(title: Text(context.tr('Event details', '活动详情'))),
       body: SafeArea(
         child: ListView(
           key: const Key('route-event-detail'),
           padding: const EdgeInsets.all(16),
           children: [
             if (widget.syntheticPreview) ...[
-              const Card(
+              Card(
                 key: Key('event-detail-synthetic-notice'),
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
-                    'Synthetic Event preview — examples only. '
-                    'No real organiser, registration or participation.',
+                    context.tr(
+                      'Synthetic Event preview — examples only. '
+                          'No real organiser, registration or participation.',
+                      '合成活动预览，仅为示例，没有真实主办方、报名或参与。',
+                    ),
                   ),
                 ),
               ),
@@ -71,15 +76,15 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
             switch (state) {
               AsyncLoading<EventDetail>() => Semantics(
                 liveRegion: true,
-                child: Text('Loading event details…'),
+                child: Text(context.tr('Loading event details…', '正在加载活动详情…')),
               ),
               AsyncError<EventDetail>(:final error) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     error is AppFailure
-                        ? error.message
-                        : 'Event details unavailable.',
+                        ? localizedFailure(context, error)
+                        : context.tr('Event details unavailable.', '活动详情暂不可用。'),
                   ),
                   FilledButton(
                     key: const Key('event-detail-retry'),
@@ -89,7 +94,7 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
                               .notifier,
                         )
                         .load(),
-                    child: const Text('Retry'),
+                    child: Text(context.tr('Retry', '重试')),
                   ),
                 ],
               ),
@@ -111,28 +116,52 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
                           const Icon(Icons.schedule),
                           const SizedBox(height: 8),
                           Text(
-                            'Starts: ${localTimeLabel(context, value.startAt)}',
+                            context.tr(
+                              'Starts: ${localTimeLabel(context, value.startAt)}',
+                              '开始：${localTimeLabel(context, value.startAt)}',
+                            ),
                           ),
                           Text(
                             value.endAt == null
-                                ? 'End time not provided.'
-                                : 'Ends: ${localTimeLabel(context, value.endAt!)}',
+                                ? context.tr(
+                                    'End time not provided.',
+                                    '未提供结束时间。',
+                                  )
+                                : context.tr(
+                                    'Ends: ${localTimeLabel(context, value.endAt!)}',
+                                    '结束：${localTimeLabel(context, value.endAt!)}',
+                                  ),
                           ),
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text('Location: ${value.locationLabel ?? 'Not provided'}'),
-                  Text('Category: ${value.categoryLabel ?? 'Not provided'}'),
+                  Text(
+                    context.tr(
+                      'Location: ${value.locationLabel ?? 'Not provided'}',
+                      '地点：${value.locationLabel ?? '未提供'}',
+                    ),
+                  ),
+                  Text(
+                    context.tr(
+                      'Category: ${value.categoryLabel ?? 'Not provided'}',
+                      '分类：${value.categoryLabel ?? '未提供'}',
+                    ),
+                  ),
                   const SizedBox(height: 16),
-                  Text(value.shortDescription ?? 'Not provided'),
+                  Text(
+                    value.shortDescription ?? context.tr('Not provided', '未提供'),
+                  ),
                   const SizedBox(height: 16),
                   SelectableText(value.externalSourceUrl),
                   const SizedBox(height: 8),
                   if (!widget.syntheticPreview) ...[
-                    const Text(
-                      'Ticketmaster source. Opens the organiser website; this does not register you for the event.',
+                    Text(
+                      context.tr(
+                        'Ticketmaster source. Opens the organiser website; this does not register you for the event.',
+                        '来源为 Ticketmaster。打开主办方网站不代表你已报名。',
+                      ),
                     ),
                     FilledButton.icon(
                       key: const Key('event-detail-open-source'),
@@ -146,12 +175,16 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
                         if (!context.mounted) return;
                         if (result case Failure<void>(:final failure)) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(failure.message)),
+                            SnackBar(
+                              content: Text(localizedFailure(context, failure)),
+                            ),
                           );
                         }
                       },
                       icon: const Icon(Icons.open_in_new),
-                      label: const Text('View on Ticketmaster'),
+                      label: Text(
+                        context.tr('View on Ticketmaster', '在 Ticketmaster 查看'),
+                      ),
                     ),
                   ],
                   OutlinedButton.icon(
@@ -172,14 +205,17 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
                         SnackBar(
                           content: Text(
                             result is Success<void>
-                                ? 'Link copied.'
-                                : (result as Failure<void>).failure.message,
+                                ? context.tr('Link copied.', '链接已复制。')
+                                : localizedFailure(
+                                    context,
+                                    (result as Failure<void>).failure,
+                                  ),
                           ),
                         ),
                       );
                     },
                     icon: const Icon(Icons.copy),
-                    label: const Text('Copy link'),
+                    label: Text(context.tr('Copy link', '复制链接')),
                   ),
                 ],
               ),

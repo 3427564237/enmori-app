@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -144,10 +146,10 @@ final class _ParticipationEventPageState
     final details = _detail;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Event details'),
+        title: Text(context.tr('Event details', '活动详情')),
         actions: [
           IconButton(
-            tooltip: 'Reload Event information',
+            tooltip: context.tr('Reload Event information', '刷新活动信息'),
             onPressed: _loading ? null : _load,
             icon: const Icon(Icons.refresh),
           ),
@@ -157,21 +159,32 @@ final class _ParticipationEventPageState
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            if (_loading) const Text('Loading Event information…'),
-            if (_failure case final failure?) Text(failure.message),
+            if (_loading)
+              Text(context.tr('Loading Event information…', '正在加载活动信息…')),
+            if (_failure case final failure?)
+              Text(localizedFailure(context, failure)),
             if (details != null)
               EventCard(event: details, onSelect: null)
             else if (!_loading)
-              const Text(
-                'Event details are unavailable right now. Tap the refresh icon '
-                'above to try again. If that does not help, return to Events, '
-                'refresh the list and reopen this event. '
-                'Your saved Interested/Going choice is unchanged.',
+              Text(
+                context.tr(
+                  'Event details are unavailable right now. Tap the refresh icon '
+                      'above to try again. If that does not help, return to Events, '
+                      'refresh the list and reopen this event. '
+                      'Your saved Interested/Going choice is unchanged.',
+                  '暂时无法获取活动详情。请点击上方刷新图标重试；如果仍不可用，请返回活动列表刷新后再打开。你保存的感兴趣或将参加状态保持不变。',
+                ),
               ),
             const SizedBox(height: 16),
-            Text('Your plans', style: Theme.of(context).textTheme.titleMedium),
             Text(
-              'Save your interest in ENMORI. This does not book a place.',
+              context.tr('Your plans', '你的计划'),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Text(
+              context.tr(
+                'Save your interest in ENMORI. This does not book a place.',
+                '在 ENMORI 保存你的意向，不代表预约名额。',
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
