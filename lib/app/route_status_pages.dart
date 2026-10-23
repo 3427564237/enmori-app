@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/presentation/status_panel.dart';
+import '../core/presentation/enmori_localizations.dart';
 
 final class StartupPage extends StatelessWidget {
   const StartupPage({super.key});
@@ -25,7 +26,7 @@ final class StartupPage extends StatelessWidget {
               const SizedBox(height: 16),
               Semantics(
                 liveRegion: true,
-                child: const Text('Opening your space…'),
+                child: Text(context.tr('Opening your space…', '正在打开你的空间…')),
               ),
             ],
           ),
@@ -44,15 +45,18 @@ final class UnavailablePage extends StatelessWidget {
   Widget build(BuildContext context) => _StatusPage(
     routeKey: const Key('route-unavailable'),
     panel: StatusPanel(
-      title: 'Service unavailable',
-      body: 'This service is temporarily unavailable. Try again.',
+      title: context.tr('Service unavailable', '服务暂时不可用'),
+      body: context.tr(
+        'This service is temporarily unavailable. Try again.',
+        '服务暂时不可用，请稍后重试。',
+      ),
       icon: Icons.cloud_off_outlined,
       isError: true,
       action: FilledButton.icon(
         key: const Key('startup-retry'),
         onPressed: onRetry,
         icon: const Icon(Icons.refresh),
-        label: const Text('Retry'),
+        label: Text(context.tr('Retry', '重试')),
       ),
     ),
   );
@@ -62,11 +66,14 @@ final class ConfigurationUnavailablePage extends StatelessWidget {
   const ConfigurationUnavailablePage({super.key});
 
   @override
-  Widget build(BuildContext context) => const _StatusPage(
-    routeKey: Key('route-configuration-unavailable'),
+  Widget build(BuildContext context) => _StatusPage(
+    routeKey: const Key('route-configuration-unavailable'),
     panel: StatusPanel(
-      title: 'Setup unavailable',
-      body: 'The required service configuration is unavailable.',
+      title: context.tr('Setup unavailable', '配置暂不可用'),
+      body: context.tr(
+        'The required service configuration is unavailable.',
+        '所需服务配置暂不可用。',
+      ),
       icon: Icons.settings_outlined,
     ),
   );
@@ -76,11 +83,11 @@ final class AccountUnavailablePage extends StatelessWidget {
   const AccountUnavailablePage({super.key});
 
   @override
-  Widget build(BuildContext context) => const _StatusPage(
-    routeKey: Key('route-account-unavailable'),
+  Widget build(BuildContext context) => _StatusPage(
+    routeKey: const Key('route-account-unavailable'),
     panel: StatusPanel(
-      title: 'Account unavailable',
-      body: 'This account cannot continue.',
+      title: context.tr('Account unavailable', '账号暂不可用'),
+      body: context.tr('This account cannot continue.', '此账号暂时无法继续使用。'),
       icon: Icons.person_off_outlined,
       isError: true,
     ),

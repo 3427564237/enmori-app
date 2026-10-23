@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -82,11 +85,13 @@ final class _ConnectedSocialProfileState
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Profile')),
+            appBar: AppBar(title: Text(context.tr('Profile', '资料'))),
             body: Center(
               child: FilledButton(
                 onPressed: () => setState(() => _date = _capture()),
-                child: const Text('Retry date and time zone'),
+                child: Text(
+                  context.tr('Retry date and time zone', '重新读取日期和时区'),
+                ),
               ),
             ),
           );
@@ -129,7 +134,7 @@ final class GroupHomeSocial extends StatelessWidget {
     Future<void> all() => Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          appBar: AppBar(title: const Text('Friends activity')),
+          appBar: AppBar(title: Text(context.tr('Friends activity', '好友动态'))),
           body: ListView(
             padding: const EdgeInsets.all(20),
             children: [
@@ -180,7 +185,7 @@ final class ConnectedOwnFootprint extends ConsumerWidget {
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('Footprint')),
+      appBar: AppBar(title: Text(context.tr('Footprint', '足迹'))),
       body: Center(
         child: account?.isLoading == true
             ? const CircularProgressIndicator()
@@ -188,7 +193,7 @@ final class ConnectedOwnFootprint extends ConsumerWidget {
                 onPressed: subject == null
                     ? null
                     : () => ref.invalidate(onboardingStatusProvider(subject)),
-                child: const Text('Reload profile'),
+                child: Text(context.tr('Reload profile', '重新读取资料')),
               ),
       ),
     );

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -124,7 +126,7 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
         key: const Key('admin-interest-page'),
         appBar: AppBar(
           leading: BackButton(onPressed: _back),
-          title: const Text('Interest catalogue'),
+          title: Text(context.tr('Interest catalogue', '兴趣目录')),
         ),
         body: SafeArea(
           child: Align(
@@ -135,12 +137,15 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                 padding: const EdgeInsets.all(24),
                 children: [
                   Text(
-                    'Add an interest',
+                    context.tr('Add an interest', '添加兴趣'),
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Create one catalogue item at a time. Existing interests keep their IDs.',
+                  Text(
+                    context.tr(
+                      'Create one catalogue item at a time. Existing interests keep their IDs.',
+                      '每次创建一个目录条目。已有兴趣的标识保持不变。',
+                    ),
                   ),
                   const SizedBox(height: 24),
                   TextField(
@@ -150,10 +155,16 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                     enabled: editable,
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
-                      labelText: 'Interest name',
-                      helperText: 'Required. Use 1–50 characters.',
+                      labelText: context.tr('Interest name', '兴趣名称'),
+                      helperText: context.tr(
+                        'Required. Use 1–50 characters.',
+                        '必填，1–50 个字符。',
+                      ),
                       helperMaxLines: 3,
-                      errorText: state.validationMessage,
+                      errorText: _adminMessage(
+                        context,
+                        state.validationMessage,
+                      ),
                       errorMaxLines: 4,
                       border: const OutlineInputBorder(),
                     ),
@@ -178,8 +189,8 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                         icon: const Icon(Icons.add),
                         label: Text(
                           state.phase == AdminInterestPhase.creating
-                              ? 'Creating…'
-                              : 'Create interest',
+                              ? context.tr('Creating…', '正在创建…')
+                              : context.tr('Create interest', '创建兴趣'),
                         ),
                       ),
                       OutlinedButton.icon(
@@ -192,7 +203,7 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                                   )
                                   .load(session: widget.session),
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Reload catalogue'),
+                        label: Text(context.tr('Reload catalogue', '重新读取目录')),
                       ),
                     ],
                   ),
@@ -201,17 +212,28 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                     const LinearProgressIndicator(),
                     const SizedBox(height: 8),
                     Text(switch (state.phase) {
-                      AdminInterestPhase.creating => 'Saving the new interest…',
-                      AdminInterestPhase.checking =>
+                      AdminInterestPhase.creating => context.tr(
+                        'Saving the new interest…',
+                        '正在保存新兴趣…',
+                      ),
+                      AdminInterestPhase.checking => context.tr(
                         'Checking the saved catalogue…',
-                      _ => 'Checking access and loading the catalogue…',
+                        '正在核对已保存的目录…',
+                      ),
+                      _ => context.tr(
+                        'Checking access and loading the catalogue…',
+                        '正在核对权限并读取目录…',
+                      ),
                     }),
                   ],
                   if (state.phase == AdminInterestPhase.denied ||
                       widget.session == null) ...[
                     const SizedBox(height: 16),
-                    const Text(
-                      'Admin access is not available for this session.',
+                    Text(
+                      context.tr(
+                        'Admin access is not available for this session.',
+                        '当前会话没有可用的管理权限。',
+                      ),
                       key: Key('admin-interest-denied'),
                     ),
                   ],
@@ -220,7 +242,7 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                     Semantics(
                       liveRegion: true,
                       child: Text(
-                        _failureCopy(failure.kind),
+                        _failureCopy(context, failure.kind),
                         key: const Key('admin-interest-failure'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.error,
@@ -233,7 +255,7 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                     Semantics(
                       liveRegion: true,
                       child: Text(
-                        notice,
+                        _adminMessage(context, notice)!,
                         key: const Key('admin-interest-notice'),
                       ),
                     ),
@@ -247,14 +269,24 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                   ],
                   const SizedBox(height: 32),
                   Text(
-                    'Available interests',
+                    context.tr('Available interests', '可选兴趣'),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
                   if (!state.hasLoaded)
-                    const Text('The catalogue has not been loaded yet.')
+                    Text(
+                      context.tr(
+                        'The catalogue has not been loaded yet.',
+                        '尚未读取兴趣目录。',
+                      ),
+                    )
                   else if (state.tags.isEmpty)
-                    const Text('No active interests are available.')
+                    Text(
+                      context.tr(
+                        'No active interests are available.',
+                        '暂无可用兴趣。',
+                      ),
+                    )
                   else
                     for (final tag in state.tags)
                       ListTile(
@@ -297,20 +329,26 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
       final dialog = DialogRoute<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('Leave interest catalogue?'),
+          title: Text(context.tr('Leave interest catalogue?', '离开兴趣目录？')),
           content: Text(
             snapshot.busy || snapshot.needsReadback
-                ? 'The create result may still need checking. Leaving will discard this draft and will not undo a request already sent.'
-                : 'Your unsaved interest name will be discarded.',
+                ? context.tr(
+                    'The create result may still need checking. Leaving will discard this draft and will not undo a request already sent.',
+                    '创建结果可能仍需核对。离开将丢弃草稿，不会撤销已经发送的请求。',
+                  )
+                : context.tr(
+                    'Your unsaved interest name will be discarded.',
+                    '未保存的兴趣名称将被丢弃。',
+                  ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Keep editing'),
+              child: Text(context.tr('Keep editing', '继续编辑')),
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Leave'),
+              child: Text(context.tr('Leave', '离开')),
             ),
           ],
         ),
@@ -339,14 +377,58 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
   }
 }
 
-String _failureCopy(AppFailureKind kind) => switch (kind) {
-  AppFailureKind.catalogueNameConflict => 'That interest name already exists, including any inactive entry. Use a different name.',
-  AppFailureKind.catalogueInvalid => 'The name is not valid. Use 1–50 characters without control or direction characters.',
-  AppFailureKind.authRequired => 'Your session has expired. Sign in again.',
-  AppFailureKind.authForbidden =>
+String _failureCopy(
+  BuildContext context,
+  AppFailureKind kind,
+) => switch (kind) {
+  AppFailureKind.catalogueNameConflict => context.tr(
+    'That interest name already exists, including any inactive entry. Use a different name.',
+    '此兴趣名称已存在，可能属于停用条目。请使用其他名称。',
+  ),
+  AppFailureKind.catalogueInvalid => context.tr(
+    'The name is not valid. Use 1–50 characters without control or direction characters.',
+    '名称无效。请使用 1–50 个字符，不包含控制或文字方向字符。',
+  ),
+  AppFailureKind.authRequired => context.tr(
+    'Your session has expired. Sign in again.',
+    '会话已失效，请重新登录。',
+  ),
+  AppFailureKind.authForbidden => context.tr(
     'Admin access was denied. Creating is disabled.',
-  AppFailureKind.configurationUnavailable => 'The service is not configured.',
-  AppFailureKind.unexpected =>
+    '管理权限被拒绝，暂时无法创建。',
+  ),
+  AppFailureKind.configurationUnavailable => context.tr(
+    'The service is not configured.',
+    '服务尚未配置。',
+  ),
+  AppFailureKind.unexpected => context.tr(
     'The service returned an invalid response. Reload the catalogue to check.',
-  _ => 'The service could not complete this request. Your draft has been kept.',
+    '服务响应无效，请重新读取目录核对。',
+  ),
+  _ => context.tr(
+    'The service could not complete this request. Your draft has been kept.',
+    '服务未能完成此请求，草稿已保留。',
+  ),
 };
+
+String? _adminMessage(BuildContext context, String? value) {
+  if (value == null || !context.usesChinese) return value;
+  return const <String, String>{
+        'Enter an interest name.': '请输入兴趣名称。',
+        'Use a name without control or direction characters.':
+            '名称不能包含控制或文字方向字符。',
+        'Use a name of 1–50 characters without control or direction characters.':
+            '请使用 1–50 个字符，不包含控制或文字方向字符。',
+        'Admin access is not available for this session.': '当前会话没有可用的管理权限。',
+        'Admin access could not be checked. Reload to try again.':
+            '暂时无法核对管理权限，请重新读取。',
+        'The create result is unknown. Reload the catalogue before trying again.':
+            '创建结果尚未确认。再次尝试前请重新读取目录。',
+        'Interest created and confirmed in the catalogue.': '兴趣已创建，并已在目录中确认。',
+        'Creation was accepted, but this catalogue does not confirm the saved item yet. Reload to check again.':
+            '创建请求已接受，但目录尚未确认保存的条目。请重新读取核对。',
+        'Catalogue reloaded. Check the list before trying again; the earlier request may have saved.':
+            '目录已重新读取。再次尝试前请核对列表，先前的请求可能已保存。',
+      }[value] ??
+      value;
+}

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'enmori_theme.dart';
@@ -29,29 +32,29 @@ final class SocialDemoNavigation extends StatelessWidget {
       if (index != selectedIndex) onSelected(index);
     },
     destinations: [
-      const NavigationDestination(
-        key: Key('social-nav-home'),
-        icon: Icon(Icons.home_outlined),
-        selectedIcon: Icon(Icons.home),
-        label: 'Home',
+      NavigationDestination(
+        key: const Key('social-nav-home'),
+        icon: const Icon(Icons.home_outlined),
+        selectedIcon: const Icon(Icons.home),
+        label: context.tr('Home', '首页'),
       ),
-      const NavigationDestination(
-        key: Key('social-nav-friends'),
-        icon: Icon(Icons.people_outline),
-        selectedIcon: Icon(Icons.people),
-        label: 'Friends',
+      NavigationDestination(
+        key: const Key('social-nav-friends'),
+        icon: const Icon(Icons.people_outline),
+        selectedIcon: const Icon(Icons.people),
+        label: context.tr('Friends', '好友'),
       ),
       if (legacyCheckInTab)
-        const NavigationDestination(
-          key: Key('social-nav-check-in'),
-          icon: Icon(Icons.add_box_outlined),
-          label: 'Check-in',
+        NavigationDestination(
+          key: const Key('social-nav-check-in'),
+          icon: const Icon(Icons.add_box_outlined),
+          label: context.tr('Check-in', '签到'),
         )
       else
-        const NavigationDestination(
-          key: Key('social-nav-events'),
-          icon: Icon(Icons.event_outlined),
-          label: 'Events',
+        NavigationDestination(
+          key: const Key('social-nav-events'),
+          icon: const Icon(Icons.event_outlined),
+          label: context.tr('Events', '活动'),
         ),
       const NavigationDestination(
         key: Key('social-nav-ai'),
@@ -63,7 +66,9 @@ final class SocialDemoNavigation extends StatelessWidget {
         key: const Key('social-nav-me'),
         icon: Icon(Icons.person_outline),
         selectedIcon: Icon(Icons.person),
-        label: legacyCheckInTab ? 'Me' : 'Profile',
+        label: legacyCheckInTab
+            ? context.tr('Me', '我')
+            : context.tr('Profile', '我的'),
       ),
     ],
   );
