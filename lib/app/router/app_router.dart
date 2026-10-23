@@ -3,6 +3,7 @@ import '../remote_social_composition.dart';
 import '../../features/friends/presentation/friend_module_page.dart';
 import '../../features/event_browse/event_browse_providers.dart';
 import '../../features/event_participation/presentation/own_participation_section.dart';
+import '../../features/event_participation/presentation/plan_comparison_page.dart';
 import '../event_recommendation_card.dart';
 import 'event_participation_routes.dart';
 
@@ -24,6 +25,7 @@ import '../../features/auth/domain/auth_repository.dart';
 import '../../features/auth/presentation/registration_page.dart';
 import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/check_in/presentation/check_in_page.dart';
+import '../../features/check_in/presentation/check_in_from_record_page.dart';
 import '../../features/check_in/presentation/check_in_history_controller.dart';
 import '../../features/event_recommendations/domain/event_recommendation_repository.dart';
 import '../../features/event_recommendations/presentation/event_recommendations_controller.dart';
@@ -33,6 +35,7 @@ import '../../features/interests/presentation/admin_interest_catalogue_page.dart
 import '../../features/language/presentation/app_language_control.dart';
 import '../interest_admin_entry.dart';
 import '../home_shell_page.dart';
+import '../home_today_section.dart';
 import '../../features/event_detail/presentation/event_detail_page.dart';
 import '../../features/friends/presentation/friend_page.dart';
 import '../../features/friends/presentation/my_friends_page.dart';
@@ -68,12 +71,17 @@ abstract final class AppRoutes {
   static const eventRecommendations = '/events';
   static const activities = '/activities';
   static const eventPlans = '/event-plans';
+  static String comparePlans(String username) =>
+      '/people/${Uri.encodeComponent(username)}/plans/compare';
   static const unavailable = '/unavailable';
   static const configurationUnavailable = '/configuration-unavailable';
   static const forbidden = '/account-unavailable';
 
   static String savedCheckIn(String checkInId) =>
       '/check-in/${Uri.encodeComponent(checkInId)}';
+
+  static String checkInFrom(String checkInId) =>
+      Uri(path: checkIn, queryParameters: {'from': checkInId}).toString();
 }
 
 /// Only a currently observed controlled session may switch a visible root tab.
@@ -275,6 +283,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   initialUsername: state.pathParameters['username'],
                 ),
         ),
+        GoRoute(
+          path: '/people/:username/plans/compare',
+          builder: (context, state) => EventPlanComparisonPage(
+            username: state.pathParameters['username'] ?? '',
+            onBack: () {
+              if (!context.mounted ||
+                  !canNavigateActivity() ||
+                  GoRouter.of(context).state.uri != state.uri ||
+                  ModalRoute.of(context)?.isCurrent != true) {
+                return;
+              }
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go(
+                  '${remoteGroup ? '/people' : '/event-people'}/${Uri.encodeComponent(state.pathParameters['username'] ?? '')}',
+                );
+              }
+            },
+            onOpenEvent: (id) async {
+              if (!context.mounted ||
+                  !canNavigateActivity() ||
+                  GoRouter.of(context).state.uri != state.uri ||
+                  ModalRoute.of(context)?.isCurrent != true) {
+                return;
+              }
+              await context.push<void>(eventPath(id));
+            },
+          ),
+        ),
       ],
       if (activitiesEnabled && !participationEnabled)
         ...activityRoutes(
@@ -418,6 +456,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.home,
         name: 'root-home',
         builder: (context, state) => HomeShellPage(
+          daySection: historyPage != null
+              ? HomeTodaySection(
+                  onOpenCheckIn: (id) async {
+                    if (!canNavigateShared(context, AppRoutes.home)) return;
+                    await context.push<void>(AppRoutes.savedCheckIn(id));
+                  },
+                  onOpenHistory: () async {
+                    if (!canNavigateShared(context, AppRoutes.home)) return;
+                    await context.push<void>(AppRoutes.checkInHistory);
+                  },
+                )
+              : null,
           socialSection: remoteGroup ? const GroupHomeSocial() : null,
           weatherSection: remoteGroup
               ? HomeWeatherCard(
@@ -634,18 +684,57 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.checkIn,
-        builder: (context, state) => CheckInComposerPage(
-          key: ValueKey(routeSession),
-          located: remoteGroup,
-          onOpenSaved: (id) =>
-              context.pushReplacement(AppRoutes.savedCheckIn(id)),
-          onOpenHistory: historyPage != null
-              ? () => context.push<void>(AppRoutes.checkInHistory)
-              : null,
-          openAttribution: openGroupAttribution,
-          socialStyle: socialPresentation,
-          onReturnHome: () => context.go(AppRoutes.home),
-        ),
+        builder: (context, state) {
+          final sourceId = state.uri.queryParameters['from'];
+          if (historyPage != null && sourceId != null) {
+            bool current() =>
+                canNavigateShared(context, AppRoutes.checkIn) &&
+                GoRouter.of(context).state.uri == state.uri &&
+                ModalRoute.of(context)?.isCurrent == true;
+            return CheckInFromRecordPage(
+              key: ValueKey((routeSession, sourceId)),
+              sourceCheckInId: sourceId,
+              located: remoteGroup,
+              socialStyle: socialPresentation,
+              openAttribution: openGroupAttribution,
+              onDiscard: () {
+                if (!current()) return;
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go(
+                    sourceId.isEmpty
+                        ? AppRoutes.checkInHistory
+                        : AppRoutes.savedCheckIn(sourceId),
+                  );
+                }
+              },
+              onReturnHome: () {
+                if (current()) context.go(AppRoutes.home);
+              },
+              onOpenSaved: (id) {
+                if (current()) {
+                  context.pushReplacement(AppRoutes.savedCheckIn(id));
+                }
+              },
+              onOpenHistory: () {
+                if (current()) context.push<void>(AppRoutes.checkInHistory);
+              },
+            );
+          }
+          return CheckInComposerPage(
+            key: ValueKey(routeSession),
+            located: remoteGroup,
+            onOpenSaved: (id) =>
+                context.pushReplacement(AppRoutes.savedCheckIn(id)),
+            onOpenHistory: historyPage != null
+                ? () => context.push<void>(AppRoutes.checkInHistory)
+                : null,
+            openAttribution: openGroupAttribution,
+            socialStyle: socialPresentation,
+            onReturnHome: () => context.go(AppRoutes.home),
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.interests,
@@ -660,6 +749,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           checkInId: state.pathParameters['checkInId'] ?? '',
           openAttribution: openGroupAttribution,
           onReturnHome: () => context.go(AppRoutes.home),
+          onStartNewDraft: historyPage != null
+              ? (id) {
+                  final expectedId = state.pathParameters['checkInId'];
+                  if (id != expectedId ||
+                      !canNavigateShared(context, state.uri.path) ||
+                      ModalRoute.of(context)?.isCurrent != true) {
+                    return;
+                  }
+                  context.push<void>(AppRoutes.checkInFrom(id));
+                }
+              : null,
         ),
       ),
       GoRoute(

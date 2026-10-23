@@ -1,18 +1,31 @@
 import 'dart:async';
 
 import 'package:enmori/app/social_demo_presentation.dart';
+import 'package:enmori/app/home_today_section.dart';
 import 'package:enmori/features/check_in/history_device_port.dart';
 import 'package:enmori/features/friends/social_providers.dart';
+import 'package:enmori/features/friends/domain/social_repository.dart';
+import 'package:enmori/features/event_browse/event_browse_providers.dart';
+import 'package:enmori/features/event_detail/event_detail_providers.dart';
+import 'package:enmori/features/event_participation/participation_providers.dart';
+import 'package:enmori/features/event_participation/presentation/plan_comparison_page.dart';
+import 'package:enmori/features/event_participation/presentation/user_participation_section.dart';
 import 'package:enmori/features/friends/presentation/check_in_points_map.dart';
 import 'package:enmori/features/friends/presentation/my_friends_page.dart';
 import 'package:enmori/features/check_in/domain/check_in_repository.dart';
 import 'package:enmori/features/check_in/presentation/check_in_record_view.dart';
+import 'package:enmori/features/check_in/presentation/check_in_page.dart';
+import 'package:enmori/features/check_in/presentation/check_in_from_record_page.dart';
 
-import '../features/social_profile_flow_test.dart' show SocialFake;
+import '../features/social_profile_flow_test.dart'
+    show SocialFake, sharedProfile;
+import '../features/plan_comparison_test.dart' show ComparisonRepo;
+import '../features/event_plans_test.dart' show Details, Opener;
 
 import 'package:enmori/app/app.dart';
 import 'package:enmori/app/providers.dart';
 import 'package:enmori/app/router/app_router.dart';
+import 'package:enmori/app/router/activity_routes.dart';
 import 'package:enmori/app/router/isolated_history_ai_pages.dart';
 import 'package:enmori/features/account/account_providers.dart';
 import 'package:enmori/features/account/domain/account_repository.dart';
@@ -29,7 +42,190 @@ import 'package:go_router/go_router.dart';
 import '../support/fakes.dart';
 
 void main() {
-  testWidgets(
+  _routerTest('Home day summary awaits History and rejects covered callbacks', (
+    tester,
+  ) async {
+    final f = await _pumpApp(
+      tester,
+      pages: _TestPages(),
+      history: true,
+      remote: true,
+    );
+    final today = tester.widget<HomeTodaySection>(
+      find.byType(HomeTodaySection),
+    );
+    final opened = today.onOpenHistory();
+    await tester.pumpAndSettle();
+    expect(f.router.state.uri.path, AppRoutes.checkInHistory);
+    await today.onOpenCheckIn('covered-home-must-not-read');
+    await tester.pumpAndSettle();
+    expect(f.router.state.uri.path, AppRoutes.checkInHistory);
+    expect(f.checkIns.readIds, isEmpty);
+    await _tap(tester, 'test-back');
+    await opened;
+    expect(f.router.state.uri.path, AppRoutes.home);
+    expect(find.byType(HomeTodaySection), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  _routerTest(
+    'profile participation opens comparison and returns from an Event once',
+    (tester) async {
+      final f = await _pumpApp(tester, remote: true, participation: true);
+      final social = f.container.read(socialRepositoryProvider) as SocialFake;
+      social.pendingProfile = Completer<Result<SocialProfile>>()
+        ..complete(
+          Success(
+            SocialProfile(
+              username: sharedProfile.username,
+              displayName: sharedProfile.displayName,
+              details: sharedProfile.details,
+              relationship: sharedProfile.relationship,
+              specialCare: sharedProfile.specialCare,
+              friendshipRevision: sharedProfile.friendshipRevision,
+              interests: sharedProfile.interests,
+              mapAvailable: sharedProfile.mapAvailable,
+              participationAvailable: true,
+            ),
+          ),
+        );
+      f.router.go('/people/member_b');
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Event participation'));
+      await tester.tap(find.text('Event participation'));
+      await tester.pumpAndSettle();
+      final compare = tester
+          .widget<UserParticipationSection>(
+            find.byType(UserParticipationSection),
+          )
+          .onComparePlans!;
+      await tester.tap(find.text('Compare with my plans'));
+      await tester.pumpAndSettle();
+      expect(f.router.state.uri.path, AppRoutes.comparePlans('member_b'));
+      final page = tester.widget<EventPlanComparisonPage>(
+        find.byType(EventPlanComparisonPage),
+      );
+      final opened = page.onOpenEvent('a');
+      await tester.pumpAndSettle();
+      expect(f.router.state.uri.path, '/events/a/participation');
+      compare();
+      page.onBack!();
+      await tester.pumpAndSettle();
+      expect(f.router.state.uri.path, '/events/a/participation');
+      f.router.pop();
+      await tester.pumpAndSettle();
+      await opened;
+      expect(f.router.state.uri.path, AppRoutes.comparePlans('member_b'));
+      page.onBack!();
+      await tester.pumpAndSettle();
+      expect(find.byType(UserParticipationSection), findsOneWidget);
+      expect(find.byType(EventPlanComparisonPage), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  _routerTest('direct comparison has an authorized Profile fallback', (
+    tester,
+  ) async {
+    final f = await _pumpApp(tester, remote: true, participation: true);
+    f.router.go(AppRoutes.comparePlans('member_b'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(f.router.state.uri.path, '/people/member_b');
+    expect(find.byType(EventPlanComparisonPage), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  _routerTest('comparison callbacks retire with a same-user session', (
+    tester,
+  ) async {
+    final f = await _pumpApp(tester, remote: true, participation: true);
+    f.router.go(AppRoutes.comparePlans('member_b'));
+    await tester.pumpAndSettle();
+    final page = tester.widget<EventPlanComparisonPage>(
+      find.byType(EventPlanComparisonPage),
+    );
+    f.auth.emit(AuthSessionAuthenticated(subject: 'member-a'));
+    await _frames(tester);
+    await page.onOpenEvent('a');
+    page.onBack!();
+    await tester.pumpAndSettle();
+    expect(f.router.state.uri.path, AppRoutes.home);
+    expect(find.byType(EventPlanComparisonPage), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  _routerTest(
+    'own saved record opens a reread draft and one discard returns to its source',
+    (tester) async {
+      final f = await _pumpApp(tester, pages: _TestPages(), history: true);
+      final id = testCheckIn().checkInId;
+      f.router.push<void>(AppRoutes.savedCheckIn(id));
+      await tester.pumpAndSettle();
+      final start = tester
+          .widget<SavedCheckInPage>(find.byType(SavedCheckInPage))
+          .onStartNewDraft!;
+      start(id);
+      await tester.pumpAndSettle();
+      expect(f.router.state.uri.path, AppRoutes.checkIn);
+      expect(f.router.state.uri.queryParameters['from'], id);
+      expect(f.checkIns.readIds, [id, id]);
+      expect(f.checkIns.createdNotes, isEmpty);
+      expect(find.byType(CheckInFromRecordPage), findsOneWidget);
+      start(id); // The covered source cannot stack another draft.
+      await tester.pumpAndSettle();
+      expect(f.checkIns.readIds, [id, id]);
+      tester
+          .widget<CheckInFromRecordPage>(find.byType(CheckInFromRecordPage))
+          .onDiscard();
+      await tester.pumpAndSettle();
+      expect(f.router.state.uri.path, AppRoutes.savedCheckIn(id));
+      expect(find.byType(CheckInFromRecordPage), findsNothing);
+      expect(f.checkIns.createdNotes, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  _routerTest('direct reuse entry discards back to the owned source', (
+    tester,
+  ) async {
+    final f = await _pumpApp(tester, pages: _TestPages(), history: true);
+    final id = testCheckIn().checkInId;
+    f.router.go(AppRoutes.checkInFrom(id));
+    await tester.pumpAndSettle();
+    tester
+        .widget<CheckInFromRecordPage>(find.byType(CheckInFromRecordPage))
+        .onDiscard();
+    await tester.pumpAndSettle();
+    expect(f.router.state.uri.path, AppRoutes.savedCheckIn(id));
+    expect(f.checkIns.createdNotes, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  _routerTest('reuse callback cannot survive same-user session replacement', (
+    tester,
+  ) async {
+    final f = await _pumpApp(tester, pages: _TestPages(), history: true);
+    final id = testCheckIn().checkInId;
+    f.router.push<void>(AppRoutes.savedCheckIn(id));
+    await tester.pumpAndSettle();
+    final start = tester
+        .widget<SavedCheckInPage>(find.byType(SavedCheckInPage))
+        .onStartNewDraft!;
+    f.auth.emit(AuthSessionAuthenticated(subject: 'member-a'));
+    await _frames(tester);
+    final reads = List<String>.of(f.checkIns.readIds);
+    start(id);
+    await _frames(tester);
+    expect(find.byType(CheckInFromRecordPage), findsNothing);
+    expect(f.checkIns.readIds, reads);
+    expect(f.checkIns.createdNotes, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  _routerTest(
     'connected shell has five destinations and Profile owns History and Footprint',
     (tester) async {
       final f = await _pumpApp(
@@ -66,7 +262,7 @@ void main() {
   );
 
   for (final viaFriends in [false, true]) {
-    testWidgets(
+    _routerTest(
       'shared saved-record view is wired through ${viaFriends ? 'Friends' : 'top-level Profile'}',
       (tester) async {
         final f = await _pumpApp(tester, remote: true);
@@ -109,7 +305,7 @@ void main() {
   }
 
   for (final supplied in [false, true]) {
-    testWidgets('ordinary builds omit both new routes/entries ($supplied)', (
+    _routerTest('ordinary builds omit both new routes/entries ($supplied)', (
       tester,
     ) async {
       final pages = _TestPages();
@@ -132,7 +328,7 @@ void main() {
     });
   }
 
-  testWidgets('isolated flag alone creates no default or mock destination', (
+  _routerTest('isolated flag alone creates no default or mock destination', (
     tester,
   ) async {
     final f = await _pumpApp(tester);
@@ -143,7 +339,7 @@ void main() {
   });
 
   for (final historyOnly in [true, false]) {
-    testWidgets(
+    _routerTest(
       'one ready feature does not wait for the other ($historyOnly)',
       (tester) async {
         final pages = _TestPages();
@@ -172,7 +368,7 @@ void main() {
     );
   }
 
-  testWidgets('History saved ID is encoded once and uses existing owner read', (
+  _routerTest('History saved ID is encoded once and uses existing owner read', (
     tester,
   ) async {
     final pages = _TestPages(savedId: 'synthetic/id %');
@@ -185,7 +381,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('AI Settings callback enters scoped AI settings and returns', (
+  _routerTest('AI Settings callback enters scoped AI settings and returns', (
     tester,
   ) async {
     final pages = _TestPages();
@@ -203,7 +399,7 @@ void main() {
   for (final gate in RouterGateState.values.where(
     (g) => g != RouterGateState.authenticated,
   )) {
-    testWidgets('new destinations cannot bypass $gate', (tester) async {
+    _routerTest('new destinations cannot bypass $gate', (tester) async {
       final pages = _TestPages();
       final f = await _pumpApp(
         tester,
@@ -222,7 +418,7 @@ void main() {
   }
 
   for (final replacement in ['member-a', 'member-b']) {
-    testWidgets(
+    _routerTest(
       'new observed session resets stack and callbacks ($replacement)',
       (tester) async {
         final pages = _TestPages();
@@ -245,7 +441,7 @@ void main() {
   }
 
   for (final history in [false, true]) {
-    testWidgets('observed logout removes owned page and callback ($history)', (
+    _routerTest('observed logout removes owned page and callback ($history)', (
       tester,
     ) async {
       final pages = _TestPages();
@@ -280,7 +476,7 @@ void main() {
     });
   }
 
-  testWidgets('auth loss before redirect frame blocks retained navigation', (
+  _routerTest('auth loss before redirect frame blocks retained navigation', (
     tester,
   ) async {
     final pages = _TestPages();
@@ -296,7 +492,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('covered or disposed feature callbacks cannot navigate', (
+  _routerTest('covered or disposed feature callbacks cannot navigate', (
     tester,
   ) async {
     final pages = _TestPages();
@@ -318,7 +514,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('direct feature entry without parent has Home Back fallback', (
+  _routerTest('direct feature entry without parent has Home Back fallback', (
     tester,
   ) async {
     final f = await _pumpApp(
@@ -336,7 +532,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
+  _routerTest(
     'removing ready builder removes entry, route and retained callback',
     (tester) async {
       final pages = _TestPages();
@@ -355,7 +551,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  _routerTest(
     'enlarged small Home keeps both controls semantic and reachable',
     (tester) async {
       tester.view.physicalSize = const Size(320, 640);
@@ -394,6 +590,26 @@ void main() {
   );
 }
 
+final _activeFixtures = <_Fixture>[];
+
+// UncontrolledProviderScope does not own its externally supplied container.
+// Dispose it inside the widget-test body, before Flutter checks pending timers.
+void _routerTest(String description, Future<void> Function(WidgetTester) body) {
+  testWidgets(description, (tester) async {
+    try {
+      await body(tester);
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+      for (final fixture in _activeFixtures) {
+        fixture.container.dispose();
+        await fixture.auth.close();
+      }
+      _activeFixtures.clear();
+      await tester.pump();
+    }
+  });
+}
+
 List<String> _featurePaths(_Fixture f) => f.router.configuration.routes
     .whereType<GoRoute>()
     .map((route) => route.path)
@@ -410,6 +626,7 @@ Future<_Fixture> _pumpApp(
   bool ai = false,
   bool isolated = true,
   bool remote = false,
+  bool participation = false,
   RouterGateState gate = RouterGateState.authenticated,
   TextScaler? textScaler,
 }) async {
@@ -428,6 +645,13 @@ Future<_Fixture> _pumpApp(
       isolatedSlicesEnabledProvider.overrideWithValue(isolated),
       remoteGroupFeaturesEnabledProvider.overrideWithValue(remote),
       socialDemoPresentationProvider.overrideWithValue(remote),
+      activityBrowseEnabledProvider.overrideWithValue(participation),
+      eventParticipationEnabledProvider.overrideWithValue(participation),
+      if (participation) ...[
+        participationRepositoryProvider.overrideWithValue(ComparisonRepo()),
+        eventDetailRepositoryProvider.overrideWithValue(Details()),
+        externalActivityOpenerProvider.overrideWithValue(Opener()),
+      ],
       if (remote) socialRepositoryProvider.overrideWithValue(SocialFake()),
       if (remote) historyDevicePortProvider.overrideWithValue(_MapDevice()),
       isolatedHistoryPageProvider.overrideWith(
@@ -439,10 +663,7 @@ Future<_Fixture> _pumpApp(
       eventRecommendationRepositoryProvider.overrideWithValue(f.events),
     ],
   );
-  addTearDown(() async {
-    f.container.dispose();
-    await f.auth.close();
-  });
+  _activeFixtures.add(f);
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: f.container,

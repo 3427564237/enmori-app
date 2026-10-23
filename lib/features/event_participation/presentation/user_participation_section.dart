@@ -40,10 +40,12 @@ final class UserParticipationSection extends ConsumerStatefulWidget {
   const UserParticipationSection({
     required this.username,
     required this.onSelect,
+    this.onComparePlans,
     super.key,
   });
   final String username;
   final ValueChanged<String> onSelect;
+  final VoidCallback? onComparePlans;
   @override
   ConsumerState<UserParticipationSection> createState() =>
       _UserParticipationSectionState();
@@ -80,6 +82,20 @@ final class _UserParticipationSectionState
           context.tr('Visible Event participation', '可见的活动参与'),
           style: Theme.of(context).textTheme.titleLarge,
         ),
+        if (widget.onComparePlans != null)
+          OutlinedButton.icon(
+            onPressed: () {
+              if (observed != null &&
+                  identical(
+                    participationSession(ref.read(authSessionProvider)),
+                    observed,
+                  )) {
+                widget.onComparePlans!();
+              }
+            },
+            icon: const Icon(Icons.compare_arrows),
+            label: Text(context.tr('Compare with my plans', '与我的计划对照')),
+          ),
         switch (result) {
           AsyncData<Result<PublicParticipationPage>>(
             value: Success<PublicParticipationPage>(:final value),

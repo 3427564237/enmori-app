@@ -16,6 +16,7 @@ import '../domain/check_in_mutations.dart';
 import '../domain/check_in_repository.dart';
 import 'check_in_controller.dart';
 import 'check_in_copy.dart';
+import 'check_in_draft_seed.dart';
 import 'check_in_edit_page.dart';
 import 'check_in_label_input.dart';
 import 'check_in_place_controller.dart';
@@ -35,6 +36,8 @@ final class CheckInComposerPage extends ConsumerStatefulWidget {
     this.located = false,
     this.openAttribution,
     this.visibility,
+    this.initialDraft,
+    this.onDiscard,
     super.key,
   });
 
@@ -45,6 +48,8 @@ final class CheckInComposerPage extends ConsumerStatefulWidget {
   final bool located;
   final Future<bool> Function(Uri)? openAttribution;
   final CheckInVisibility? visibility;
+  final CheckInDraftSeed? initialDraft;
+  final VoidCallback? onDiscard;
 
   @override
   ConsumerState<CheckInComposerPage> createState() =>
@@ -79,6 +84,11 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
         lifecycle != AppLifecycleState.hidden &&
         lifecycle != AppLifecycleState.detached;
     _controller = ref.read(checkInControllerProvider.notifier);
+    if (widget.initialDraft case final draft?) {
+      _noteController.text = draft.note;
+      _mood = draft.mood;
+      _activity = draft.activity;
+    }
     if (widget.located) Future.microtask(_loadVisibility);
   }
 
@@ -188,7 +198,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
     final noteLength = _noteController.text.trim().characters.length;
     return PopScope<void>(
       canPop:
-          !widget.located ||
+          (!widget.located && widget.initialDraft == null) ||
           saved ||
           (!pending &&
               _noteController.text.isEmpty &&
@@ -197,7 +207,7 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
               _locationLabel == null &&
               placeState?.place == null),
       onPopInvokedWithResult: (didPop, _) async {
-        if (didPop || !widget.located) return;
+        if (didPop || (!widget.located && widget.initialDraft == null)) return;
         final leave = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
@@ -229,15 +239,19 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
             ],
           ),
         );
-        if (mounted && leave == true) widget.onReturnHome?.call();
+        if (mounted && leave == true) {
+          (widget.onDiscard ?? widget.onReturnHome)?.call();
+        }
       },
       child: Scaffold(
         appBar: AppBar(
-          leading: widget.located
+          leading: widget.located || widget.initialDraft != null
               ? BackButton(onPressed: () => Navigator.of(context).maybePop())
               : null,
           title: Text(
-            widget.socialStyle
+            widget.initialDraft != null
+                ? context.tr('New draft from Check-in', '从签到开始新草稿')
+                : widget.socialStyle
                 ? context.tr('Check-in', '签到')
                 : context.tr('New Check-in', '新建签到'),
           ),
@@ -257,6 +271,24 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (!saved) ...[
+                      if (widget.initialDraft != null) ...[
+                        Text(
+                          context.tr(
+                            'Review and edit the copied Note, Mood and Activity, then save a new Check-in. The original stays unchanged.',
+                            '复核并修改复制的笔记、心情和活动标签，再保存为新签到。原记录保持不变。',
+                          ),
+                          key: const Key('check-in-draft-review'),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          context.tr(
+                            'Place, GPS, weather and sharing settings are not copied. Your current new Check-in settings apply.',
+                            '不会复制地点、GPS、天气或分享设置。本次使用当前的新签到设置。',
+                          ),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       TextField(
                         key: const Key('r6-check-in-note'),
                         controller: _noteController,
@@ -714,11 +746,13 @@ final class SavedCheckInPage extends ConsumerStatefulWidget {
     required this.onReturnHome,
     this.openAttribution,
     this.placeActions = false,
+    this.onStartNewDraft,
     super.key,
   });
 
   final String checkInId;
   final bool placeActions;
+  final ValueChanged<String>? onStartNewDraft;
   final VoidCallback onReturnHome;
   final Future<bool> Function(Uri)? openAttribution;
 
@@ -820,6 +854,17 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
                     openAttribution:
                         widget.openAttribution ?? (_) async => false,
                   ),
+                  if (widget.onStartNewDraft != null &&
+                      value.checkInId == widget.checkInId) ...[
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      key: const Key('saved-check-in-start-draft'),
+                      onPressed: () =>
+                          widget.onStartNewDraft!(widget.checkInId),
+                      icon: const Icon(Icons.post_add_outlined),
+                      label: Text(context.tr('Start a new draft', '以此开始新草稿')),
+                    ),
+                  ],
                   if (widget.placeActions)
                     SavedCheckInPlaceActions(
                       key: ValueKey('${value.checkInId}:${value.revision}'),

@@ -9,6 +9,7 @@ import '../../../core/presentation/local_time.dart';
 
 import '../ai_conversation_providers.dart';
 import 'ai_plan_draft_page.dart';
+import 'ai_message_search_page.dart';
 import 'ai_status_copy.dart';
 
 Widget buildAiConversationPage(
@@ -93,6 +94,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   bool _confirming = false;
   bool _leaving = false;
   bool _planning = false;
+  bool _finding = false;
 
   @override
   void initState() {
@@ -223,6 +225,25 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       label: Text(context.tr('Make a small plan', '制定小计划')),
     ),
   );
+
+  Future<void> _findMessages() async {
+    if (!_ownsCurrentSession ||
+        _finding ||
+        _confirming ||
+        _leaving ||
+        !canFindAiMessages(ref.read(aiConversationControllerProvider))) {
+      return;
+    }
+    _finding = true;
+    _messageFocus.unfocus();
+    try {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(builder: (_) => const AiMessageSearchPage()),
+      );
+    } finally {
+      if (mounted) _finding = false;
+    }
+  }
 
   Future<void> _openConversation(String id) async {
     if (!_ownsCurrentSession ||
@@ -593,6 +614,13 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
               icon: const Icon(Icons.arrow_back),
             ),
             actions: [
+              if (canFindAiMessages(state))
+                IconButton(
+                  key: const Key('ai-find-messages'),
+                  tooltip: context.tr('Find in conversation', '查找对话消息'),
+                  onPressed: _findMessages,
+                  icon: const Icon(Icons.search),
+                ),
               if (widget.onOpenPersonas case final openPersonas?)
                 IconButton(
                   key: const Key('ai-personas'),
@@ -1140,6 +1168,12 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                 tooltip: context.tr('Conversation actions', '对话操作'),
                 onSelected: _selectSocialAction,
                 itemBuilder: (context) => [
+                  if (canFindAiMessages(state))
+                    PopupMenuItem(
+                      value: 'find',
+                      key: const Key('ai-find-messages'),
+                      child: Text(context.tr('Find in conversation', '查找对话消息')),
+                    ),
                   if (state.canCheckResult)
                     PopupMenuItem(
                       value: 'check',
@@ -1278,6 +1312,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       AiConversationPhase.unauthenticated,
     }.contains(state.phase);
     switch (action) {
+      case 'find':
+        unawaited(_findMessages());
       case 'new':
         if (state.canStartNewConversation) _newConversation();
       case 'check':

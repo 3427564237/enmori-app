@@ -90,6 +90,40 @@ test('non-ASCII forged cursor signature is request error, not dependency error',
 test('public username projection excludes ignored/revision/timestamp even for own username',async()=>{
   const f=fixture(1);for(const uid of ['uid-0','uid-1'])assert.deepEqual(unwrap(await f.repo.list(uid,'member_1')).items,[{eventId:event,status:'going'}]);
 });
+
+test('plan comparison rereads current target privacy on every cursor page while own facts survive source loss', async () => {
+  const f = fixture(1);
+  await f.db.runTransaction(async tx => {
+    for (let index = 0; index < 24; index++) {
+      const eventId = `saved_event_${index}`;
+      tx.set(`event_participations/${participationKey('person-1', eventId)}`, {
+        accountId: 'person-1', eventId, status: index % 2 ? 'none' : 'interested',
+        ignored: false, revision: 1, updatedAt: at,
+      });
+    }
+  });
+  const first = unwrap(await f.repo.list('uid-0', 'member_1'));
+  assert(first.nextCursor);
+  assert(first.items.length < 20); // Sparse raw-record windows must not be scanned to fill the page.
+  for (const item of first.items) assert.deepEqual(Object.keys(item).sort(), ['eventId', 'status']);
+  const otherViewer = await f.repo.list('uid-1', 'member_1', first.nextCursor);
+  assert.equal(!otherViewer.ok && otherViewer.failure.code, 'REQUEST_INVALID');
+  const own = unwrap(await f.repo.save('uid-0', event, { status: 'going', ignored: false, expectedRevision: 0 }));
+  f.setAvailable(false);
+  assert.deepEqual(unwrap(await f.repo.read('uid-0', event)), own);
+  const calls = f.sourceCalls();
+  await f.db.runTransaction(async tx => {
+    const target = (await tx.get('accounts/person-1'))!;
+    tx.set('accounts/person-1', { ...target,
+      fieldPrivacy: { interests: 'private', location: 'private', participation: 'private', mapSharedWithFriends: false } });
+  });
+  for (const cursor of [undefined, first.nextCursor]) {
+    const revoked = await f.repo.list('uid-0', 'member_1', cursor);
+    assert.equal(!revoked.ok && revoked.failure.code, 'ADD_FRIEND_TARGET_UNAVAILABLE');
+  }
+  assert.deepEqual(unwrap(await f.repo.read('uid-0', event)), own);
+  assert.equal(f.sourceCalls(), calls);
+});
 test('corrupt records and dependency errors fail closed',async()=>{
   const f=fixture();await f.db.runTransaction(async tx=>tx.set(`event_participations/${participationKey('person-0',event)}`,{bad:'secret'}));
   const bad=await f.repo.read('uid-0',event);assert.equal(bad.ok,false);assert.equal(JSON.stringify(bad).includes('secret'),false);
