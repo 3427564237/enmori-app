@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/presentation/enmori_motion.dart';
-
+import 'check_in_copy.dart';
 import 'check_in_place_controller.dart';
 
 /// Feature slot for the existing Check-in editor. A fresh draftKey is allocated
@@ -62,7 +63,7 @@ final class _CheckInPlaceControlsState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Not now'),
+              child: Text(context.tr('Not now', '暂不使用')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
@@ -85,24 +86,34 @@ final class _CheckInPlaceControlsState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Location for this Check-in',
+                context.tr('Location for this Check-in', '本次签到的位置'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              const Text(
-                'Optional. One foreground location only; no background tracking. Map sharing starts off and is controlled separately in Settings.',
+              Text(
+                context.tr(
+                  'Optional. One foreground location only; no background tracking. Map sharing starts off and is controlled separately in Settings.',
+                  '可选。仅在前台获取一次位置，不在后台跟踪。地图分享默认关闭，可在设置中单独管理。',
+                ),
               ),
               if (state.place case final place?) ...[
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Text('One Check-in point is ready to save.'),
+                  child: Text(
+                    context.tr(
+                      'One Check-in point is ready to save.',
+                      '已获取本次签到位置，可以保存。',
+                    ),
+                  ),
                 ),
                 OutlinedButton(
                   onPressed: disabled ? null : controller.clear,
-                  child: const Text('Remove location'),
+                  child: Text(context.tr('Remove location', '移除位置')),
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Add weather to this Check-in'),
+                  title: Text(
+                    context.tr('Add weather to this Check-in', '为本次签到附加天气'),
+                  ),
                   value: place.includeWeather,
                   onChanged: disabled
                       ? null
@@ -111,9 +122,12 @@ final class _CheckInPlaceControlsState
                           if (enabled &&
                               !widget.defaultWeatherAuthorized &&
                               !await _confirm(
-                                'Allow weather lookup?',
-                                'ENMORI will send a coordinate rounded to 0.1° through its Backend to Open-Meteo for current conditions. Open-Meteo can retain request metadata under its terms. No precise Check-in point or Note is sent. Weather failure still allows saving.',
-                                'Allow once',
+                                context.tr('Allow weather lookup?', '允许查询天气？'),
+                                context.tr(
+                                  'ENMORI will send a coordinate rounded to 0.1° through its Backend to Open-Meteo for current conditions. Open-Meteo can retain request metadata under its terms. No precise Check-in point or Note is sent. Weather failure still allows saving.',
+                                  'ENMORI 将通过后端向 Open-Meteo 发送粗化至 0.1° 的坐标以查询当前天气。Open-Meteo 可按其条款保留请求元数据，不会收到精确签到位置或笔记。天气查询失败仍可保存签到。',
+                                ),
+                                context.tr('Allow once', '允许一次'),
                               )) {
                             return;
                           }
@@ -128,16 +142,22 @@ final class _CheckInPlaceControlsState
               ] else
                 OutlinedButton.icon(
                   icon: const Icon(Icons.my_location),
-                  label: const Text('Use location once'),
+                  label: Text(context.tr('Use location once', '使用一次位置')),
                   onPressed: disabled
                       ? null
                       : () async {
                           final epoch = controller.epoch;
                           if ((widget.defaultLocationAuthorized ||
                                   await _confirm(
-                                    'Save a precise Check-in point?',
-                                    'Use your current precise location once while this app is open. The point is saved with this Check-in. Friends can see it on your map only when Check-in visibility, location privacy and map sharing all allow it.',
-                                    'Use once',
+                                    context.tr(
+                                      'Save a precise Check-in point?',
+                                      '保存精确签到位置？',
+                                    ),
+                                    context.tr(
+                                      'Use your current precise location once while this app is open. The point is saved with this Check-in. Friends can see it on your map only when Check-in visibility, location privacy and map sharing all allow it.',
+                                      '仅在应用打开时获取一次当前位置，随这条签到保存。只有签到可见范围、位置隐私和地图分享均允许时，好友才能在地图中看到该位置。',
+                                    ),
+                                    context.tr('Use once', '使用一次'),
                                   )) &&
                               mounted) {
                             await controller.capture(expectedEpoch: epoch);
@@ -147,10 +167,13 @@ final class _CheckInPlaceControlsState
               if (state.busy)
                 Semantics(
                   liveRegion: true,
-                  child: const Text('Checking permission…'),
+                  child: Text(context.tr('Checking permission…', '正在检查权限…')),
                 ),
               if (state.failure case final failure?)
-                Semantics(liveRegion: true, child: Text(failure.message)),
+                Semantics(
+                  liveRegion: true,
+                  child: Text(checkInFailureText(context, failure)),
+                ),
             ],
           ),
         ),

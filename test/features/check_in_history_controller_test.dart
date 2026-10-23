@@ -137,7 +137,7 @@ void main() {
   });
 
   test(
-    'date change resets paging and Next and Reload replace the visible page',
+    'date change resets paging, Load more appends, Reload replaces',
     () async {
       repository.responses.single.complete(
         Success(_page([_entry('old-page')], cursor: 'next-token')),
@@ -168,10 +168,8 @@ void main() {
         container
             .read(checkInHistoryControllerProvider)
             .entries
-            .single
-            .checkIn
-            .checkInId,
-        'next-page',
+            .map((entry) => entry.checkIn.checkInId),
+        ['date-first', 'next-page'],
       );
       final reloading = container
           .read(checkInHistoryControllerProvider.notifier)
@@ -277,10 +275,54 @@ void main() {
       await retry;
 
       state = container.read(checkInHistoryControllerProvider);
-      expect(state.entries.single.checkIn.checkInId, 'second-page');
+      expect(state.entries.map((entry) => entry.checkIn.checkInId), [
+        'first-page',
+        'second-page',
+      ]);
       expect(state.nextPageFailure, isNull);
     },
   );
+
+  test('overlapping cursor pages keep one row per stable ID', () async {
+    repository.responses.single.complete(
+      Success(_page([_entry('one')], cursor: 'more')),
+    );
+    await _drain();
+    repository.queued.add(Success(_page([_entry('one'), _entry('two')])));
+    await container.read(checkInHistoryControllerProvider.notifier).loadNext();
+    expect(
+      container
+          .read(checkInHistoryControllerProvider)
+          .entries
+          .map((entry) => entry.checkIn.checkInId),
+      ['one', 'two'],
+    );
+  });
+
+  for (final kind in [
+    AppFailureKind.authRequired,
+    AppFailureKind.authForbidden,
+    AppFailureKind.authenticationInvalid,
+    AppFailureKind.onboardingRequired,
+  ]) {
+    test('$kind on next page clears previously loaded records', () async {
+      repository.responses.single.complete(
+        Success(_page([_entry('private')], cursor: 'more')),
+      );
+      await _drain();
+      repository.queued.add(
+        Failure(AppFailure(kind: kind, message: 'Access lost')),
+      );
+      await container
+          .read(checkInHistoryControllerProvider.notifier)
+          .loadNext();
+      expect(container.read(checkInHistoryControllerProvider).entries, isEmpty);
+      expect(
+        container.read(checkInHistoryControllerProvider).phase,
+        CheckInHistoryPhase.failed,
+      );
+    });
+  }
 
   test('session replacement clears state and ignores prior response', () async {
     sessions.add(AuthSessionAuthenticated(subject: 'owner-a'));
