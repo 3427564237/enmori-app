@@ -75,7 +75,7 @@ void main() {
   });
 
   testWidgets(
-    'Next replaces page, Reload restores first, chosen date is sent',
+    'Load more reconciles duplicate ID, Reload restores first, chosen date is sent',
     (tester) async {
       final f = await _pump(tester);
       await _open(tester);

@@ -29,6 +29,7 @@ class _Device implements HistoryDevicePort {
 class _CalendarRepo
     implements domain.CheckInRepository, CheckInCalendarRepository {
   final queries = <String>[];
+  final dayQueries = <({String date, String zone, String? cursor})>[];
   @override
   Future<Result<CheckInMonth>> readMonth({
     required String month,
@@ -46,7 +47,11 @@ class _CalendarRepo
             day <= DateTime.utc(date.year, date.month + 1, 0).day;
             day++
           )
-            '$month-${day.toString().padLeft(2, '0')}': day == 19 ? 2 : 0,
+            '$month-${day.toString().padLeft(2, '0')}': day == 19
+                ? 2
+                : day == 12
+                ? 1
+                : 0,
         },
       ),
     );
@@ -57,18 +62,22 @@ class _CalendarRepo
     required String date,
     required String timeZone,
     String? cursor,
-  }) async => Success(
-    domain.CheckInHistoryPage(
-      checkIns: [
-        domain.CheckIn(
-          checkInId: cursor == null ? 'first' : 'target-42',
-          note: cursor == null ? 'First record' : 'Exact selected record',
-          createdAt: DateTime.utc(2026, 10, 19),
-        ),
-      ],
-      nextCursor: cursor == null ? 'next' : null,
-    ),
-  );
+  }) async {
+    dayQueries.add((date: date, zone: timeZone, cursor: cursor));
+    return Success(
+      domain.CheckInHistoryPage(
+        checkIns: [
+          domain.CheckIn(
+            checkInId: cursor == null ? 'first' : 'target-42',
+            note: cursor == null ? 'First record' : 'Exact selected record',
+            createdAt: DateTime.utc(2026, 10, 19),
+          ),
+        ],
+        nextCursor: cursor == null ? 'next' : null,
+      ),
+    );
+  }
+
   @override
   Future<Result<domain.CheckIn>> readOwned({required String checkInId}) =>
       throw UnimplementedError();
@@ -85,7 +94,7 @@ class _CalendarRepo
 
 void main() {
   testWidgets(
-    'month counts, month navigation and second-page record return to exact Footprint item',
+    'month counts, month navigation and second-page record return to exact History item',
     (tester) async {
       final repo = _CalendarRepo();
       await tester.pumpWidget(
@@ -128,6 +137,9 @@ void main() {
             )
             .first,
       );
+      await tester.ensureVisible(find.text('Next records'));
+      await tester.pumpAndSettle();
+      expect(find.text('Next records').hitTestable(), findsOneWidget);
       await tester.tap(find.text('Next records'));
       await tester.pumpAndSettle();
       await tester.ensureVisible(
@@ -136,9 +148,21 @@ void main() {
       await tester.tap(find.byKey(const Key('calendar-record-target-42')));
       await tester.pumpAndSettle();
       expect(find.byType(CheckInCalendarPage), findsNothing);
+      expect(find.byKey(const Key('history-entry-first')), findsOneWidget);
       expect(find.byKey(const Key('history-entry-target-42')), findsOneWidget);
       expect(find.text('Exact selected record'), findsOneWidget);
       await tester.pump(const Duration(seconds: 4));
+      await tester.tap(find.byKey(const Key('history-previous-recorded-day')));
+      await tester.pumpAndSettle();
+      expect(repo.dayQueries.last, (
+        date: '2026-10-12',
+        zone: 'Asia/Singapore',
+        cursor: null,
+      ));
+      expect(find.byKey(const Key('history-entry-target-42')), findsNothing);
+      await tester.tap(find.byKey(const Key('history-next-recorded-day')));
+      await tester.pumpAndSettle();
+      expect(repo.dayQueries.last.date, '2026-10-19');
       expect(tester.takeException(), isNull);
     },
   );

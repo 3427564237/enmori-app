@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/presentation/local_time.dart';
+import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/presentation/enmori_motion.dart';
+import '../../../core/presentation/local_time.dart';
 import '../../account/domain/account_repository.dart';
 import '../../weather/weather_providers.dart';
 import '../domain/check_in_repository.dart';
@@ -22,7 +23,10 @@ final class CheckInRecordView extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          '${localTimeLabel(context, record.createdAt)} (local time)',
+          context.tr(
+            '${localTimeLabel(context, record.createdAt)} (local time)',
+            '${localTimeLabel(context, record.createdAt)}（本地时间）',
+          ),
           style: Theme.of(context).textTheme.labelLarge,
         ),
         if (record.note.isNotEmpty) ...[
@@ -47,9 +51,12 @@ final class CheckInRecordView extends ConsumerWidget {
                     ? Icons.lock_outline
                     : Icons.people_outline,
                 label: switch (visibility) {
-                  CheckInVisibility.private => 'Private',
-                  CheckInVisibility.friendsOnly => 'Friends-only',
-                  CheckInVisibility.public => 'Public',
+                  CheckInVisibility.private => context.tr('Private', '仅自己'),
+                  CheckInVisibility.friendsOnly => context.tr(
+                    'Friends-only',
+                    '仅好友',
+                  ),
+                  CheckInVisibility.public => context.tr('Public', '公开'),
                 },
               ),
           ],
@@ -64,8 +71,10 @@ final class CheckInRecordView extends ConsumerWidget {
             expansionAnimationStyle: EnmoriMotion.surface(context),
             tilePadding: EdgeInsets.zero,
             leading: const Icon(Icons.place_outlined),
-            title: Text(record.locationLabel ?? 'Saved location'),
-            subtitle: const Text('Location details'),
+            title: Text(
+              record.locationLabel ?? context.tr('Saved location', '已保存的位置'),
+            ),
+            subtitle: Text(context.tr('Location details', '位置详情')),
             childrenPadding: const EdgeInsets.only(bottom: 16),
             expandedCrossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -79,7 +88,7 @@ final class CheckInRecordView extends ConsumerWidget {
           ),
         if (record.weather case final weather?) ...[
           Text(
-            'Weather at Check-in',
+            context.tr('Weather at Check-in', '签到时的天气'),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           ref.watch(weatherCardBuilderProvider)(weather, openAttribution),

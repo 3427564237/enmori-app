@@ -1,9 +1,9 @@
-import '../../account/content_access.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/result/result.dart';
+import '../../account/content_access.dart';
 import '../../auth/auth_providers.dart';
 import '../check_in_providers.dart';
 import '../domain/check_in_calendar_repository.dart';
@@ -112,10 +112,10 @@ class _CheckInCalendarPageState extends ConsumerState<CheckInCalendarPage> {
     final numberOfDays = DateTime.utc(_month.year, _month.month + 1, 0).day;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Check-in calendar'),
+        title: Text(context.tr('Check-in calendar', '签到日历')),
         actions: [
           IconButton(
-            tooltip: 'Reload calendar',
+            tooltip: context.tr('Reload calendar', '重新加载日历'),
             onPressed: () {
               ref.invalidate(checkInMonthProvider(monthQuery));
               ref.invalidate(calendarDayProvider(dayQuery));
@@ -133,16 +133,22 @@ class _CheckInCalendarPageState extends ConsumerState<CheckInCalendarPage> {
               children: [
                 IconButton(
                   key: const Key('calendar-previous-month'),
-                  tooltip: 'Previous month',
+                  tooltip: context.tr('Previous month', '上个月'),
                   onPressed: _month.year == 1 && _month.month == 1
                       ? null
                       : () => _move(-1),
                   icon: const Icon(Icons.chevron_left),
                 ),
-                Text(monthText, style: Theme.of(context).textTheme.titleLarge),
+                Flexible(
+                  child: Text(
+                    monthText,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
                 IconButton(
                   key: const Key('calendar-next-month'),
-                  tooltip: 'Next month',
+                  tooltip: context.tr('Next month', '下个月'),
                   onPressed:
                       !_month.isBefore(
                         DateTime.utc(
@@ -156,13 +162,21 @@ class _CheckInCalendarPageState extends ConsumerState<CheckInCalendarPage> {
                 ),
               ],
             ),
-            const Text('Colour shows the number of Check-ins on each day.'),
+            Text(
+              context.tr(
+                'Choose a day to read its records. Times use ${widget.timeZone}.',
+                '选择日期阅读记录。时区：${widget.timeZone}。',
+              ),
+            ),
             if (counts.isLoading)
-              const LinearProgressIndicator()
+              LinearProgressIndicator()
             else if (counts.value case Success<CheckInMonth>(:final value)) ...[
               Row(
                 children: [
-                  for (final label in ['M', 'T', 'W', 'T', 'F', 'S', 'S'])
+                  for (final label
+                      in (context.usesChinese
+                          ? ['一', '二', '三', '四', '五', '六', '日']
+                          : ['M', 'T', 'W', 'T', 'F', 'S', 'S']))
                     Expanded(child: Center(child: Text(label))),
                 ],
               ),
@@ -170,6 +184,8 @@ class _CheckInCalendarPageState extends ConsumerState<CheckInCalendarPage> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 7,
+                mainAxisExtent:
+                    24 + 32 * MediaQuery.textScalerOf(context).scale(1),
                 children: [
                   for (var blank = 1; blank < _month.weekday; blank++)
                     const SizedBox.shrink(),
@@ -188,11 +204,15 @@ class _CheckInCalendarPageState extends ConsumerState<CheckInCalendarPage> {
                                 0;
                         final selected = _date(date) == _date(_selected);
                         return Semantics(
-                          label: '${_date(date)}, $count Check-ins',
+                          label: context.tr(
+                            '${_date(date)}, $count Check-ins',
+                            '${_date(date)}，$count 条签到',
+                          ),
                           selected: selected,
                           button: true,
+                          enabled: !date.isAfter(widget.latestDate),
                           child: Padding(
-                            padding: const EdgeInsets.all(2),
+                            padding: const EdgeInsets.all(.5),
                             child: Material(
                               color: selected
                                   ? Theme.of(context)
@@ -239,7 +259,9 @@ class _CheckInCalendarPageState extends ConsumerState<CheckInCalendarPage> {
               TextButton(
                 onPressed: () =>
                     ref.invalidate(checkInMonthProvider(monthQuery)),
-                child: const Text('Calendar unavailable. Retry'),
+                child: Text(
+                  context.tr('Calendar unavailable. Retry', '日历暂时不可用，重试'),
+                ),
               ),
             const SizedBox(height: 16),
             Text(
@@ -249,15 +271,17 @@ class _CheckInCalendarPageState extends ConsumerState<CheckInCalendarPage> {
             TextButton(
               onPressed: () =>
                   Navigator.pop(context, CalendarSelection(_selected)),
-              child: const Text('Open this date in Footprint'),
+              child: Text(
+                context.tr('Read this date in History', '在历史中阅读当天记录'),
+              ),
             ),
             if (day.isLoading)
-              const Center(child: CircularProgressIndicator())
+              Center(child: CircularProgressIndicator())
             else if (day.value case Success<CheckInHistoryPage>(
               :final value,
             )) ...[
               if (value.checkIns.isEmpty)
-                const Text('No Check-ins for this date.'),
+                Text(context.tr('No Check-ins for this date.', '当天没有签到。')),
               for (final entry in value.checkIns)
                 ListTile(
                   key: Key('calendar-record-${entry.checkInId}'),
@@ -276,12 +300,14 @@ class _CheckInCalendarPageState extends ConsumerState<CheckInCalendarPage> {
               if (value.nextCursor != null)
                 TextButton(
                   onPressed: () => setState(() => _cursor = value.nextCursor),
-                  child: const Text('Next records'),
+                  child: Text(context.tr('Next records', '下一页记录')),
                 ),
             ] else
               TextButton(
                 onPressed: () => ref.invalidate(calendarDayProvider(dayQuery)),
-                child: const Text('Records unavailable. Retry'),
+                child: Text(
+                  context.tr('Records unavailable. Retry', '记录暂时不可用，重试'),
+                ),
               ),
           ],
         ),
