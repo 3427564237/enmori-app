@@ -11,7 +11,6 @@ import '../features/check_in/check_in_providers.dart';
 import '../features/event_participation/presentation/user_participation_section.dart';
 import '../features/friends/presentation/social_profile_page.dart';
 import '../features/friends/presentation/friend_activity_panel.dart';
-import '../features/friends/presentation/friend_discovery_panel.dart';
 
 import 'package:flutter/services.dart';
 
@@ -127,28 +126,18 @@ final class GroupHomeSocial extends StatelessWidget {
         context.push<void>('/people/${Uri.encodeComponent(username)}');
     Future<void> event(String id) =>
         context.push<void>('/events/${Uri.encodeComponent(id)}/participation');
-    Future<void> all(bool activity) => Navigator.of(context).push<void>(
+    Future<void> all() => Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text(
-              activity ? 'Friends activity' : 'People You May Want To Know',
-            ),
-          ),
+          appBar: AppBar(title: const Text('Friends activity')),
           body: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              activity
-                  ? FriendActivityPanel(
-                      home: false,
-                      onOpenProfile: profile,
-                      onOpenEvent: event,
-                    )
-                  : FriendDiscoveryPanel(
-                      home: false,
-                      onOpenProfile: profile,
-                      onOpenRequests: () => context.push<void>('/friends'),
-                    ),
+              FriendActivityPanel(
+                home: false,
+                onOpenProfile: profile,
+                onOpenEvent: event,
+              ),
             ],
           ),
         ),
@@ -162,14 +151,7 @@ final class GroupHomeSocial extends StatelessWidget {
           home: true,
           onOpenProfile: profile,
           onOpenEvent: event,
-          onSeeAll: () => all(true),
-        ),
-        const SizedBox(height: 12),
-        FriendDiscoveryPanel(
-          home: true,
-          onOpenProfile: profile,
-          onOpenRequests: () => context.push<void>('/friends'),
-          onSeeAll: () => all(false),
+          onSeeAll: all,
         ),
       ],
     );

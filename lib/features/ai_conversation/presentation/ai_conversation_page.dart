@@ -206,9 +206,29 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     await _controller.selectConversation(id);
   }
 
+  String _conversationLabel(AiConversationState state, String id) {
+    // Only inspect already authorized messages in the current conversation.
+    // This is a local excerpt, not a stored title or an AI-generated summary.
+    if (state.conversationId == id) {
+      for (final message in state.messages) {
+        if (message.role == AiRole.user &&
+            message.availability == AiAvailability.available &&
+            message.text?.trim().isNotEmpty == true) {
+          final text = message.text!.trim().replaceAll(RegExp(r'\s+'), ' ');
+          return text.characters.length > 64
+              ? '${text.characters.take(64)}…'
+              : text;
+        }
+      }
+    }
+    return 'Conversation';
+  }
+
   Widget _historyPanel(AiConversationState state) => Builder(
     builder: (panelContext) => ExpansionTile(
       key: const Key('ai-history'),
+      initiallyExpanded: widget.socialStyle,
+      maintainState: true,
       expansionAnimationStyle: EnmoriMotion.surface(context),
       leading: const Icon(Icons.history),
       title: const Text('Conversation history'),
@@ -233,11 +253,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             key: ValueKey('ai-history-${conversation.conversationId}'),
             selected: state.conversationId == conversation.conversationId,
             title: Text(
-              'Conversation · ${conversation.lastMessageAt.toLocal().toIso8601String().substring(0, 16).replaceFirst('T', ' ')}',
+              _conversationLabel(state, conversation.conversationId),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            subtitle: Text(
-              'Local time · ${conversation.conversationId.substring(0, 8)}',
-            ),
+            subtitle: Text(localTimeLabel(context, conversation.lastMessageAt)),
             enabled: state.canSelectConversation,
             onTap: () {
               final scaffold = Scaffold.maybeOf(panelContext);
@@ -910,6 +930,15 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         if (!didPop) unawaited(_navigate(widget.onBack));
       },
       child: Scaffold(
+        onDrawerChanged: (open) {
+          if (!open || !_ownsCurrentSession) return;
+          final current = ref.read(aiConversationControllerProvider);
+          if (current.canBrowseHistory &&
+              !current.historyLoaded &&
+              !current.readBusy) {
+            unawaited(_controller.loadConversations());
+          }
+        },
         drawer: Drawer(
           child: SafeArea(
             child: ListView(
@@ -922,6 +951,22 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
+                Builder(
+                  builder: (drawerContext) => ListTile(
+                    key: const Key('ai-drawer-new'),
+                    leading: const Icon(Icons.add_comment_outlined),
+                    title: const Text('New conversation'),
+                    enabled: state.canStartNewConversation,
+                    onTap: state.canStartNewConversation
+                        ? () {
+                            Scaffold.of(drawerContext).closeDrawer();
+                            _newConversation();
+                          }
+                        : null,
+                  ),
+                ),
+                if (state.canBrowseHistory) _historyPanel(state),
+                const Divider(),
                 ?widget.personaContext,
                 if (widget.onOpenPersonas case final openPersonas?)
                   ListTile(
@@ -944,7 +989,6 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   },
                 ),
                 const Divider(),
-                if (state.canBrowseHistory) _historyPanel(state),
                 Builder(
                   builder: (drawerContext) => ListTile(
                     key: const Key('ai-safety'),
@@ -960,6 +1004,13 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                             'AI can make mistakes. Persona preferences do not change data permissions.',
                           ),
                           actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(dialogContext);
+                                unawaited(_navigate(widget.onOpenSettings));
+                              },
+                              child: const Text('Privacy settings'),
+                            ),
                             TextButton(
                               onPressed: () => Navigator.pop(dialogContext),
                               child: const Text('Close'),

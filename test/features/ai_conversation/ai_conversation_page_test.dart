@@ -306,7 +306,8 @@ void main() {
         'Keep this draft',
       );
       final scaffold = tester.state<ScaffoldState>(find.byType(Scaffold));
-      await _tap(tester, 'ai-history');
+      await tester.tap(find.byTooltip('Open conversation menu'));
+      await tester.pumpAndSettle();
       expect(scaffold.isDrawerOpen, isTrue);
       await _tap(tester, 'ai-history-${summary.conversationId}');
       expect(scaffold.isDrawerOpen, isFalse);
@@ -373,9 +374,6 @@ void main() {
       await tester.tap(find.byTooltip('Open conversation menu'));
       await tester.pumpAndSettle();
       expect(scaffold.isDrawerOpen, isTrue);
-      await tester.ensureVisible(find.byKey(const Key('ai-history')));
-      await tester.tap(find.byKey(const Key('ai-history')));
-      await tester.pumpAndSettle();
       await tester.tap(
         find.byKey(ValueKey('ai-history-${summary.conversationId}')),
       );
@@ -1498,11 +1496,7 @@ Future<void> _tap(WidgetTester tester, String key) async {
       find.byTooltip('Open conversation menu').evaluate().isNotEmpty) {
     await tester.tap(find.byTooltip('Open conversation menu'));
     await tester.pumpAndSettle();
-    if (key != 'ai-history' && finder.evaluate().isEmpty) {
-      await tester.ensureVisible(find.byKey(const Key('ai-history')));
-      await tester.tap(find.byKey(const Key('ai-history')));
-      await tester.pumpAndSettle();
-    }
+    if (key != 'ai-history' && finder.evaluate().isEmpty) {}
   }
   if (finder.evaluate().isEmpty) {
     await tester.scrollUntilVisible(

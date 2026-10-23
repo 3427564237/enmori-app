@@ -6,13 +6,31 @@ final class StartupPage extends StatelessWidget {
   const StartupPage({super.key});
 
   @override
-  Widget build(BuildContext context) => const _StatusPage(
-    routeKey: Key('route-startup'),
-    panel: StatusPanel(
-      title: 'Opening ENMORI',
-      body: 'Checking your session. Please wait.',
-      icon: Icons.hourglass_top,
-      loading: true,
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: Center(
+        child: SingleChildScrollView(
+          key: const Key('route-startup'),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('enmori', style: Theme.of(context).textTheme.headlineLarge),
+              const SizedBox(height: 16),
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(height: 16),
+              Semantics(
+                liveRegion: true,
+                child: const Text('Opening your space…'),
+              ),
+            ],
+          ),
+        ),
+      ),
     ),
   );
 }
