@@ -56,17 +56,51 @@ is needed. Backend's separate synthetic verification is recorded in its
 
 ## Bounded verification
 
-Initial central analysis/test attempt stopped at compilation: two lifecycle
-fixture calls incorrectly awaited a void result. Those awaits, an unused import
-and one missing if block were corrected; no cases executed in that attempt.
-Pending the bounded central rerun. Social has run direct cached Dart formatting
-and `git diff --check` only.
+Integration ran the requested checks under the round's exclusive Flutter lock.
+The verified code/test head is `6c2ec77460324b6815191825c94510d2bfd8c5b3`.
+Final result: **13 unique cases have passing results**, with clean scoped
+production analysis and clean final test-file analysis. Direct cached Dart
+formatting and `git diff --check` also passed.
 
-Requested commands:
+- Initial attempt stopped at compilation: two lifecycle fixture calls incorrectly
+  awaited a void result. Removing those awaits, an unused import and a missing
+  if block resolved this; no cases executed in that attempt.
+- The next batch passed 11 of 13 cases. The lifecycle fixture had paused Flutter
+  before expecting a new rendered frame. It now follows inactive → draw and
+  assert both cleared controller state and removed content → paused → resumed,
+  with guaranteed resume teardown. Its bounded rerun passed.
+- English 360px/2× text still put the target below the lazy viewport cache;
+  `ensureVisible` could not find an unbuilt element. The last fixture correction
+  uses bounded real scrolling to build the card, retaining hit-testability,
+  source-title and no-exception assertions. The single English rerun passed.
+  This made no product layout change and did not weaken the assertions.
+- Repeated passes are not added to the count. The aggregate is 11 + 1 lifecycle
+  + 1 English case, not a claimed final full-suite run. Three bounded correction
+  attempts ended here; no further module tests or fixes were run.
+
+Coverage: 20-row/read-concurrency bounds, sparse pages and explicit next/retry,
+cursor cycles, malformed oversized pages, authorization loss during owner reads,
+content invalidation/late response, duplicate navigation rechecks, missing public
+source, same-subject replacement session, owner failure represented as unknown,
+public permission error represented as an error, the Profile-entry/detail-save/
+return/revisit loop, background/resume reauthorization, and English/Chinese
+360px/2× layouts with reduced motion. The existing shared controller remains the
+sole mutation source. No screenshot or device acceptance is claimed.
+
+Retained central logs in the local round-two handoff directory:
+`social-analyze-retest.log`, `social-test-retest.log`, `social-two-retest.log`,
+`social-one-final.log`, `social-test-analyze-final.log` and
+`social-test-analyze-last.log`. Initial failures remain in `social-analyze.log`
+and `social-test.log`.
+
+Central commands (full file followed by bounded name filters):
 
 ```sh
 fvm flutter analyze --no-pub lib/features/event_participation/presentation/plan_comparison_controller.dart lib/features/event_participation/presentation/plan_comparison_page.dart lib/features/event_participation/presentation/user_participation_section.dart test/features/plan_comparison_test.dart
 fvm flutter test --no-pub test/features/plan_comparison_test.dart
+fvm flutter test --no-pub test/features/plan_comparison_test.dart --name 'background clears foreign content|comparison fits 360px at 2x text in en'
+fvm flutter test --no-pub test/features/plan_comparison_test.dart --name 'comparison fits 360px at 2x text in en with reduced motion'
+fvm flutter analyze --no-pub test/features/plan_comparison_test.dart
 ```
 
 Fixtures use synthetic repositories and the real existing participation
