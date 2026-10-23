@@ -1,10 +1,9 @@
-import '../../account/content_access.dart';
-
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
+import '../../account/content_access.dart';
 import '../../auth/auth_providers.dart';
 import '../../auth/domain/auth_repository.dart';
 import '../check_in_providers.dart';
@@ -246,7 +245,12 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
       );
       if (!_isCurrent(session, request, subject)) return;
       if (result case Failure<CheckInHistoryPage>()) {
-        if (existingEntries != null) {
+        if (existingEntries != null &&
+            result.failure.kind != AppFailureKind.authRequired &&
+            result.failure.kind != AppFailureKind.authForbidden &&
+            result.failure.kind != AppFailureKind.authenticationInvalid &&
+            result.failure.kind != AppFailureKind.onboardingRequired &&
+            result.failure.kind != AppFailureKind.checkInUnavailable) {
           state = CheckInHistoryState(
             phase: CheckInHistoryPhase.ready,
             selectedDate: date,
@@ -278,13 +282,17 @@ final class CheckInHistoryController extends Notifier<CheckInHistoryState> {
         selectedDate: date,
         latestDate: today,
         ianaZone: zone,
-        entries: List.unmodifiable([
-          for (var index = 0; index < page.checkIns.length; index++)
-            CheckInHistoryEntry(
-              checkIn: page.checkIns[index],
-              localTime: times[index],
-            ),
-        ]),
+        entries: List.unmodifiable(
+          {
+            for (final entry in existingEntries ?? <CheckInHistoryEntry>[])
+              entry.checkIn.checkInId: entry,
+            for (var index = 0; index < page.checkIns.length; index++)
+              page.checkIns[index].checkInId: CheckInHistoryEntry(
+                checkIn: page.checkIns[index],
+                localTime: times[index],
+              ),
+          }.values,
+        ),
         nextCursor: page.nextCursor,
       );
     } on Object {

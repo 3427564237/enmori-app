@@ -1,13 +1,14 @@
-import '../../auth/domain/auth_repository.dart';
-import '../../auth/auth_providers.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/result/result.dart';
 import '../../account/domain/account_repository.dart';
+import '../../auth/auth_providers.dart';
+import '../../auth/domain/auth_repository.dart';
 import '../domain/check_in_repository.dart';
 import 'check_in_edit_controller.dart';
+import 'check_in_label_input.dart';
 
 enum CheckInEditResult { saved, deleted }
 
@@ -51,6 +52,23 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
     super.dispose();
   }
 
+  Future<void> _chooseLabel(
+    String title,
+    String? current,
+    List<String> choices,
+    void Function(String?) update,
+  ) async {
+    final value = await chooseCheckInLabel(
+      context,
+      title: title,
+      current: current,
+      choices: choices,
+    );
+    if (mounted && value != null) {
+      setState(() => update(value.isEmpty ? null : value));
+    }
+  }
+
   Future<bool> _confirm(String title, String body, String action) async =>
       await showDialog<bool>(
         context: context,
@@ -60,7 +78,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(context.tr('Cancel', '取消')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
@@ -86,10 +104,13 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
     if (!identical(session, _openedSession)) {
       _note.clear();
       return Scaffold(
-        appBar: AppBar(title: const Text('Edit Check-in')),
-        body: const Center(
+        appBar: AppBar(title: Text(context.tr('Edit Check-in', '编辑签到'))),
+        body: Center(
           child: Text(
-            'Session changed. Return to your records and reopen this Check-in.',
+            context.tr(
+              'Session changed. Return to your records and reopen this Check-in.',
+              '登录状态已变化，请返回记录列表并重新打开这条签到。',
+            ),
           ),
         ),
       );
@@ -112,9 +133,9 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop || state.pending) return;
         if (await _confirm(
-              'Discard changes?',
-              'Your unsaved changes will be lost.',
-              'Discard',
+              context.tr('Discard changes?', '放弃修改？'),
+              context.tr('Your unsaved changes will be lost.', '未保存的修改将会丢失。'),
+              context.tr('Discard', '放弃'),
             ) &&
             context.mounted) {
           setState(() {
@@ -131,7 +152,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Edit Check-in')),
+        appBar: AppBar(title: Text(context.tr('Edit Check-in', '编辑签到'))),
         body: SafeArea(
           child: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -139,92 +160,70 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    for (final mood in [
-                      'Happy',
-                      'Calm',
-                      'Focused',
-                      'Tired',
-                      'Stressed',
-                      'Not sure',
-                      if (_mood != null &&
-                          ![
-                            'Happy',
-                            'Calm',
-                            'Focused',
-                            'Tired',
-                            'Stressed',
-                            'Not sure',
-                          ].contains(_mood))
-                        _mood!,
-                    ])
-                      ChoiceChip(
-                        label: Text(mood),
-                        selected: _mood == mood,
-                        onSelected: state.pending
-                            ? null
-                            : (selected) => setState(
-                                () => _mood = selected ? mood : null,
-                              ),
-                      ),
-                  ],
-                ),
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    for (final activity in [
-                      'Study',
-                      'Fitness',
-                      'Social',
-                      'Food',
-                      'Travel',
-                      if (_activity != null &&
-                          ![
-                            'Study',
-                            'Fitness',
-                            'Social',
-                            'Food',
-                            'Travel',
-                          ].contains(_activity))
-                        _activity!,
-                    ])
-                      FilterChip(
-                        label: Text(activity),
-                        selected: _activity == activity,
-                        onSelected: state.pending
-                            ? null
-                            : (selected) => setState(
-                                () => _activity = selected ? activity : null,
-                              ),
-                      ),
-                  ],
-                ),
                 TextField(
                   key: const Key('check-in-edit-note'),
                   controller: _note,
                   enabled: !state.pending,
-                  maxLines: 5,
+                  minLines: 3,
+                  maxLines: 8,
+                  maxLength: 500,
                   onChanged: (_) => setState(() {}),
-                  decoration: const InputDecoration(
-                    labelText: 'Note',
-                    helperText: 'Up to 500 characters',
+                  decoration: InputDecoration(
+                    labelText: context.tr('Note', '笔记'),
+                    helperText: context.tr(
+                      'Up to 500 characters',
+                      '最多 500 个字符',
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  key: ValueKey('edit-place-${_current.revision}'),
-                  initialValue: _locationLabel,
-                  enabled: !state.pending,
-                  maxLength: 50,
-                  decoration: const InputDecoration(
-                    labelText: 'Place name',
-                    helperText: 'A label only; GPS stays separate.',
-                  ),
-                  onChanged: (v) => setState(
-                    () => _locationLabel = v.trim().isEmpty ? null : v.trim(),
-                  ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    CheckInLabelChip(
+                      label: _mood ?? context.tr('Mood', '心情'),
+                      avatar: const Icon(Icons.mood_outlined, size: 18),
+                      selected: _mood != null,
+                      onPressed: state.pending
+                          ? null
+                          : () => _chooseLabel(
+                              'Mood',
+                              _mood,
+                              checkInMoodChoices,
+                              (v) => _mood = v,
+                            ),
+                    ),
+                    CheckInLabelChip(
+                      label: _locationLabel ?? context.tr('Location', '地点'),
+                      avatar: const Icon(Icons.place_outlined, size: 18),
+                      selected: _locationLabel != null,
+                      onPressed: state.pending
+                          ? null
+                          : () => _chooseLabel(
+                              'Place name',
+                              _locationLabel,
+                              [],
+                              (v) => _locationLabel = v,
+                            ),
+                    ),
+                    CheckInLabelChip(
+                      label: _activity ?? context.tr('Activity', '活动标签'),
+                      avatar: const Icon(
+                        Icons.local_activity_outlined,
+                        size: 18,
+                      ),
+                      selected: _activity != null,
+                      onPressed: state.pending
+                          ? null
+                          : () => _chooseLabel(
+                              'Activity',
+                              _activity,
+                              checkInActivityChoices,
+                              (v) => _activity = v,
+                            ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<CheckInVisibility>(
@@ -232,19 +231,21 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                     'check-in-edit-visibility-${_current.revision}',
                   ),
                   initialValue: _visibility,
-                  decoration: const InputDecoration(labelText: 'Visibility'),
-                  items: const [
+                  decoration: InputDecoration(
+                    labelText: context.tr('Visibility', '可见范围'),
+                  ),
+                  items: [
                     DropdownMenuItem(
                       value: CheckInVisibility.private,
-                      child: Text('Private'),
+                      child: Text(context.tr('Private', '仅自己')),
                     ),
                     DropdownMenuItem(
                       value: CheckInVisibility.friendsOnly,
-                      child: Text('Friends-only'),
+                      child: Text(context.tr('Friends-only', '仅好友')),
                     ),
                     DropdownMenuItem(
                       value: CheckInVisibility.public,
-                      child: Text('Public'),
+                      child: Text(context.tr('Public', '公开')),
                     ),
                   ],
                   onChanged: state.pending
@@ -252,17 +253,32 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                       : (value) => setState(() => _visibility = value!),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Editing this record keeps its original date and weather.',
+                Text(
+                  context.tr(
+                    'Editing this record keeps its original date and weather.',
+                    '编辑会保留原始日期和当时的天气。',
+                  ),
                 ),
                 if (state.failure case final failure?) ...[
                   const SizedBox(height: 16),
                   Text(switch (failure.kind) {
-                    AppFailureKind.checkInRevisionPreconditionFailed => 'This record changed. Your draft is still here. Reload before saving.',
-                    AppFailureKind.checkInInvalid => 'Add a Note or Mood; Notes can contain up to 500 characters.',
-                    AppFailureKind.checkInUnavailable =>
+                    AppFailureKind.checkInRevisionPreconditionFailed =>
+                      context.tr(
+                        'This record changed. Your draft is still here. Reload before saving.',
+                        '这条记录已发生变化。草稿仍在，请重新加载后再保存。',
+                      ),
+                    AppFailureKind.checkInInvalid => context.tr(
+                      'Add a Note or Mood; Notes can contain up to 500 characters.',
+                      '请填写笔记或心情，笔记最多 500 个字符。',
+                    ),
+                    AppFailureKind.checkInUnavailable => context.tr(
                       'This Check-in is no longer available.',
-                    _ => 'The result could not be confirmed. Reload before trying again.',
+                      '此签到已不可用。',
+                    ),
+                    _ => context.tr(
+                      'The result could not be confirmed. Reload before trying again.',
+                      '暂时无法确认结果，请重新读取后再试。',
+                    ),
                   }, key: const Key('check-in-edit-error')),
                   OutlinedButton(
                     onPressed: state.pending
@@ -270,9 +286,12 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                         : () async {
                             if (_dirty &&
                                 !await _confirm(
-                                  'Reload Check-in?',
-                                  'Replace your draft with the latest saved record?',
-                                  'Reload',
+                                  context.tr('Reload Check-in?', '重新加载签到？'),
+                                  context.tr(
+                                    'Replace your draft with the latest saved record?',
+                                    '用最新保存的记录替换当前草稿？',
+                                  ),
+                                  context.tr('Reload', '重新加载'),
                                 )) {
                               return;
                             }
@@ -292,7 +311,9 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                               });
                             }
                           },
-                    child: const Text('Reload saved record'),
+                    child: Text(
+                      context.tr('Reload saved record', '重新读取已保存的记录'),
+                    ),
                   ),
                 ],
                 const SizedBox(height: 24),
@@ -309,7 +330,11 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                           activity: _activity,
                           locationLabel: _locationLabel,
                         ),
-                  child: Text(state.pending ? 'Saving…' : 'Save changes'),
+                  child: Text(
+                    state.pending
+                        ? context.tr('Saving…', '正在保存…')
+                        : context.tr('Save changes', '保存修改'),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextButton.icon(
@@ -318,9 +343,12 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                       ? null
                       : () async {
                           if (await _confirm(
-                                'Delete Check-in?',
-                                'This removes this record from your history and shared views.',
-                                'Delete',
+                                context.tr('Delete Check-in?', '删除签到？'),
+                                context.tr(
+                                  'This removes this record from your history and shared views.',
+                                  '这条记录将从历史记录和分享视图中删除。',
+                                ),
+                                context.tr('Delete', '删除'),
                               ) &&
                               mounted) {
                             await controller.remove(
@@ -330,7 +358,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                           }
                         },
                   icon: const Icon(Icons.delete_outline),
-                  label: const Text('Delete Check-in'),
+                  label: Text(context.tr('Delete Check-in', '删除签到')),
                 ),
               ],
             ),

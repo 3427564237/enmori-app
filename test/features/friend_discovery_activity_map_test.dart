@@ -53,7 +53,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Open Check-in 2'));
+      await tester.tap(find.byTooltip('Select Check-in 2'));
       await tester.pumpAndSettle();
       expect(find.text('Check-ins near this point'), findsOneWidget);
       final rows = find.descendant(
@@ -63,6 +63,10 @@ void main() {
       expect(rows, findsNWidgets(2));
       await tester.tap(rows.first);
       await tester.pumpAndSettle();
+      expect(selected, isNull);
+      await tester.ensureVisible(find.text('Open Check-in'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Open Check-in'));
       expect(selected, 'point-0');
       expect(points[0].location.latitude, points[1].location.latitude);
       expect(tester.takeException(), isNull);
@@ -210,6 +214,9 @@ void main() {
       await tester.ensureVisible(button);
       await tester.tap(button);
       await tester.pump();
+      expect(selected, isNull);
+      await tester.ensureVisible(find.text('Open Check-in'));
+      await tester.tap(find.text('Open Check-in'));
       expect(selected, point);
       expect(tester.takeException(), isNull);
     },
