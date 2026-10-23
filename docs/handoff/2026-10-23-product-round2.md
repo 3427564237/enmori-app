@@ -89,3 +89,7 @@ The source is now frozen at `1cc55bf234a6180eb1657135ee92b4ff65860c7d`.
 successful build, package/version, artifact SHA-256 and certificate match with
 v25. The local APK is in `build/group-delivery-v26/`. Installation, phone testing
 and runtime deployment remain explicitly not run; existing real data is intact.
+
+The later [24 October calendar deployment and 9B diagnosis](../evidence/sprint3/2026-10-24-li-calendar-deploy-9b-diagnosis.md)
+records a separately authorized, minimal calendar patch to the existing backend.
+It does not deploy the round-two product assembly or change v26's phone status.
