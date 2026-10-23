@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 
 import 'dart:async';
@@ -74,12 +76,14 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
           controller: _query,
           focusNode: _queryFocus,
           decoration: InputDecoration(
-            labelText: 'Search by display name',
+            labelText: context.tr('Search by display name', '按显示名称搜索'),
             prefixIcon: const Icon(Icons.search),
-            errorText: state.queryError,
+            errorText: state.queryError == null
+                ? null
+                : context.tr(state.queryError!, '请输入好友的显示名称。'),
             suffixIcon: IconButton(
               key: const Key('my-friends-search'),
-              tooltip: 'Search friends',
+              tooltip: context.tr('Search friends', '搜索好友'),
               onPressed: state.busy
                   ? null
                   : () {
@@ -103,7 +107,7 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
           children: [
             if (state.friends.isNotEmpty || _specialCareOnly)
               FilterChip(
-                label: const Text('Special Care'),
+                label: Text(context.tr('Special Care', '特别关心')),
                 selected: _specialCareOnly,
                 onSelected: (value) => setState(() => _specialCareOnly = value),
               ),
@@ -116,42 +120,50 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
                         _queryFocus.unfocus();
                         controller.clearSearch();
                       },
-                child: const Text('Clear search'),
+                child: Text(context.tr('Clear search', '清除搜索')),
               ),
             IconButton(
               key: const Key('my-friends-reload'),
-              tooltip: 'Refresh friends',
+              tooltip: context.tr('Refresh friends', '刷新好友'),
               onPressed: state.busy ? null : () => controller.load(),
               icon: const Icon(Icons.refresh),
             ),
           ],
         ),
         if (state.busy)
-          const LinearProgressIndicator(semanticsLabel: 'Loading friends'),
+          LinearProgressIndicator(
+            semanticsLabel: context.tr('Loading friends', '正在加载好友'),
+          ),
         if (state.failure case final failure?)
           StatusPanel(
-            title: 'Friends couldn’t be loaded',
-            body: failure.message,
+            title: context.tr('Friends couldn’t be loaded', '无法加载好友'),
+            body: localizedFailure(context, failure),
             icon: Icons.cloud_off_outlined,
             isError: true,
             action: TextButton(
               onPressed: state.busy ? null : () => controller.load(),
-              child: const Text('Try again'),
+              child: Text(context.tr('Try again', '重试')),
             ),
           ),
         if (state.loaded && state.friends.isEmpty)
           StatusPanel(
             title: state.searching
-                ? 'No matching friends on this page.'
-                : 'Make room for familiar faces',
+                ? context.tr('No matching friends on this page.', '本页没有匹配的好友。')
+                : context.tr('Make room for familiar faces', '从认识的人开始'),
             body: state.searching
-                ? 'Try another display name, or clear your search.'
-                : 'Find people from Friends to start connecting.',
+                ? context.tr(
+                    'Try another display name, or clear your search.',
+                    '尝试其他显示名称，或清除搜索。',
+                  )
+                : context.tr(
+                    'Find people from Friends to start connecting.',
+                    '查找你认识的人，建立好友联系。',
+                  ),
             icon: Icons.people_outline,
             action: !state.searching && widget.onFindPeople != null
                 ? TextButton(
                     onPressed: widget.onFindPeople,
-                    child: const Text('Find people'),
+                    child: Text(context.tr('Find people', '查找用户')),
                   )
                 : null,
           ),
@@ -160,12 +172,19 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
             !state.busy &&
             state.failure == null &&
             state.queryError == null)
-          const Text('Tap Search to look for this display name.'),
+          Text(
+            context.tr(
+              'Tap Search to look for this display name.',
+              '点击搜索，查找这个显示名称。',
+            ),
+          ),
         if (state.loaded &&
             state.friends.isNotEmpty &&
             _specialCareOnly &&
             !state.friends.any((friend) => friend.specialCare))
-          const Text('No Special Care friends on this page.'),
+          Text(
+            context.tr('No Special Care friends on this page.', '本页没有特别关心的好友。'),
+          ),
         for (final friend in state.friends.where(
           (friend) => !_specialCareOnly || friend.specialCare,
         ))
@@ -176,7 +195,9 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
                   leading: CircleAvatar(
                     child: Icon(
                       friend.specialCare ? Icons.star : Icons.person_outline,
-                      semanticLabel: friend.specialCare ? 'Special Care' : null,
+                      semanticLabel: friend.specialCare
+                          ? context.tr('Special Care', '特别关心')
+                          : null,
                     ),
                   ),
                   subtitle: Text('@${friend.username}'),
@@ -209,13 +230,13 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
             key: const Key('my-friends-next'),
             style: OutlinedButton.styleFrom(minimumSize: const Size(64, 48)),
             onPressed: state.busy ? null : () => controller.load(next: true),
-            child: const Text('Next page'),
+            child: Text(context.tr('Next page', '下一页')),
           ),
       ],
     );
     if (widget.embedded) return list;
     return Scaffold(
-      appBar: AppBar(title: const Text('My Friends')),
+      appBar: AppBar(title: Text(context.tr('My Friends', '我的好友'))),
       body: SafeArea(child: list),
     );
   }

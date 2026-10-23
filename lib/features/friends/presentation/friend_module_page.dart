@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -75,8 +77,13 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
       } catch (_) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Device date/time zone is unavailable. Try again.'),
+            SnackBar(
+              content: Text(
+                context.tr(
+                  'Device date/time zone is unavailable. Try again.',
+                  '无法获取设备日期或时区，请重试。',
+                ),
+              ),
             ),
           );
         }
@@ -116,7 +123,11 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
       onSeeAll: () => Navigator.of(context).push<void>(
         MaterialPageRoute(
           builder: (_) => Scaffold(
-            appBar: AppBar(title: const Text('People You May Want To Know')),
+            appBar: AppBar(
+              title: Text(
+                context.tr('People You May Want To Know', '你可能想认识的人'),
+              ),
+            ),
             body: SafeArea(
               child: ListView(
                 padding: const EdgeInsets.all(16),
@@ -161,10 +172,10 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
     ];
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Friends'),
+        title: Text(context.tr('Friends', '好友')),
         actions: [
           IconButton(
-            tooltip: 'Find people and requests',
+            tooltip: context.tr('Find people and requests', '查找用户与好友请求'),
             onPressed: requests,
             icon: Badge(
               isLabelVisible: pending != null && pending > 0,
@@ -184,9 +195,9 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
                 runSpacing: 4,
                 children: [
                   for (final (index, title) in [
-                    'My Friends',
-                    'Activity',
-                    'Discover',
+                    context.tr('My Friends', '我的好友'),
+                    context.tr('Activity', '动态'),
+                    context.tr('Discover', '发现'),
                   ].indexed)
                     ChoiceChip(
                       chipAnimationStyle: EnmoriMotion.chips(context),

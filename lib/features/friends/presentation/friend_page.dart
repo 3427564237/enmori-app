@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -63,7 +65,7 @@ final class _FriendPageState extends ConsumerState<FriendPage>
         controller = ref.read(friendControllerProvider.notifier),
         target = state.target;
     return Scaffold(
-      appBar: AppBar(title: const Text('Friends')),
+      appBar: AppBar(title: Text(context.tr('Friends', '好友'))),
       body: SafeArea(
         child: ListView(
           key: const Key('route-friends'),
@@ -74,7 +76,7 @@ final class _FriendPageState extends ConsumerState<FriendPage>
               OutlinedButton(
                 key: const Key('open-my-friends'),
                 onPressed: widget.onOpenMyFriends,
-                child: const Text('My Friends'),
+                child: Text(context.tr('My Friends', '我的好友')),
               ),
             TextField(
               key: const Key('friend-username'),
@@ -87,10 +89,12 @@ final class _FriendPageState extends ConsumerState<FriendPage>
                 FocusScope.of(context).unfocus();
                 controller.lookup(_username.text);
               },
-              decoration: const InputDecoration(
-                labelText: 'Username',
-                helperText:
-                    'Enter their full username to find the right person.',
+              decoration: InputDecoration(
+                labelText: context.tr('Username', '用户名'),
+                helperText: context.tr(
+                  'Enter their full username to find the right person.',
+                  '输入完整用户名，准确查找对方。',
+                ),
                 helperMaxLines: 2,
                 prefixIcon: Icon(Icons.alternate_email),
               ),
@@ -104,14 +108,23 @@ final class _FriendPageState extends ConsumerState<FriendPage>
                       FocusScope.of(context).unfocus();
                       controller.lookup(_username.text);
                     },
-              child: const Text('Find person'),
+              child: Text(context.tr('Find person', '查找用户')),
             ),
             if (state.busy)
-              Semantics(liveRegion: true, child: Text('Working…')),
+              Semantics(
+                liveRegion: true,
+                child: Text(context.tr('Working…', '处理中…')),
+              ),
             if (state.failure case final failure?)
-              Semantics(liveRegion: true, child: Text(failure.message)),
+              Semantics(
+                liveRegion: true,
+                child: Text(localizedFailure(context, failure)),
+              ),
             if (state.message case final message?)
-              Semantics(liveRegion: true, child: Text(message)),
+              Semantics(
+                liveRegion: true,
+                child: Text(_requestMessage(context, message)),
+              ),
             if (target != null) ...[
               const SizedBox(height: 16),
               Text(
@@ -124,16 +137,26 @@ final class _FriendPageState extends ConsumerState<FriendPage>
                   onPressed: state.busy
                       ? null
                       : () => _openProfile(target.username),
-                  child: const Text('View Profile'),
+                  child: Text(context.tr('View Profile', '查看资料')),
                 ),
               Text(switch (target.relationship) {
-                RelationshipState.self => 'Your account',
-                RelationshipState.alreadyFriends => 'Already friends',
-                RelationshipState.outgoingRequestPending => 'Request sent',
-                RelationshipState.incomingRequestPending =>
+                RelationshipState.self => context.tr('Your account', '你的账号'),
+                RelationshipState.alreadyFriends => context.tr(
+                  'Already friends',
+                  '已是好友',
+                ),
+                RelationshipState.outgoingRequestPending => context.tr(
+                  'Request sent',
+                  '请求已发送',
+                ),
+                RelationshipState.incomingRequestPending => context.tr(
                   'Incoming request pending',
-                RelationshipState.canSendRequest =>
+                  '待处理的好友请求',
+                ),
+                RelationshipState.canSendRequest => context.tr(
                   'You can send a friend request',
+                  '可以向对方发送好友请求',
+                ),
               }),
               if (target.relationship == RelationshipState.canSendRequest)
                 FilledButton(
@@ -141,24 +164,27 @@ final class _FriendPageState extends ConsumerState<FriendPage>
                   onPressed: state.busy
                       ? null
                       : () => controller.lookup(target.username, send: true),
-                  child: const Text('Send request'),
+                  child: Text(context.tr('Send request', '发送请求')),
                 ),
             ],
             const SizedBox(height: 24),
             Text(
-              'Current requests',
+              context.tr('Current requests', '当前请求'),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             OutlinedButton(
               key: const Key('friend-reload'),
               onPressed: state.busy ? null : () => controller.loadInbox(),
-              child: const Text('Reload requests'),
+              child: Text(context.tr('Reload requests', '刷新请求')),
             ),
             if (!state.busy && state.failure == null && state.requests.isEmpty)
               Text(
                 state.nextCursor == null
-                    ? 'No current friend requests.'
-                    : 'No current requests on this page.',
+                    ? context.tr('No current friend requests.', '当前没有好友请求。')
+                    : context.tr(
+                        'No current requests on this page.',
+                        '本页没有当前请求。',
+                      ),
               ),
             ...state.requests.map(
               (request) => Card(
@@ -182,21 +208,21 @@ final class _FriendPageState extends ConsumerState<FriendPage>
                               onPressed: state.busy
                                   ? null
                                   : () => _openProfile(request.username),
-                              child: const Text('View Profile'),
+                              child: Text(context.tr('View Profile', '查看资料')),
                             ),
                           FilledButton(
                             key: Key('friend-accept-${request.requestRef}'),
                             onPressed: state.busy
                                 ? null
                                 : () => controller.act(request, accept: true),
-                            child: const Text('Accept'),
+                            child: Text(context.tr('Accept', '接受')),
                           ),
                           OutlinedButton(
                             key: Key('friend-decline-${request.requestRef}'),
                             onPressed: state.busy
                                 ? null
                                 : () => controller.act(request, accept: false),
-                            child: const Text('Decline'),
+                            child: Text(context.tr('Decline', '拒绝')),
                           ),
                         ],
                       ),
@@ -211,7 +237,7 @@ final class _FriendPageState extends ConsumerState<FriendPage>
                 onPressed: state.busy
                     ? null
                     : () => controller.loadInbox(more: true),
-                child: const Text('Load more'),
+                child: Text(context.tr('Load more', '加载更多')),
               ),
           ],
         ),
@@ -229,3 +255,18 @@ final class _FriendPageState extends ConsumerState<FriendPage>
     }
   }
 }
+
+String _requestMessage(BuildContext context, String message) =>
+    switch (message) {
+      'Friend request accepted.' => context.tr(message, '已接受好友请求。'),
+      'Friend request declined.' => context.tr(message, '已拒绝好友请求。'),
+      'Friend request accepted. Reload requests.' => context.tr(
+        message,
+        '已接受好友请求，请刷新请求列表。',
+      ),
+      'Friend request declined. Reload requests.' => context.tr(
+        message,
+        '已拒绝好友请求，请刷新请求列表。',
+      ),
+      _ => message,
+    };

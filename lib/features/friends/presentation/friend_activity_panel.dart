@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import '../../account/content_access.dart';
 
 import 'package:flutter/material.dart';
@@ -148,6 +150,61 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
     });
   }
 
+  Future<void> _openEvent(
+    FriendActivityItem item,
+    int renderedEpoch,
+    AuthSession? session,
+  ) async {
+    if (!_valid(renderedEpoch, session) || _busy) return;
+    final epoch = ++_epoch;
+    final source = FriendActivityLocator.fromItem(item);
+    final repository = ref.read(friendActivityRepositoryProvider);
+    setState(() {
+      _busy = true;
+      _result = null;
+    });
+    Result<List<FriendActivityItem>> result;
+    try {
+      // Same bounded purpose projection as the existing activity detail route.
+      // No page scanning and no navigation based on the previously shown title.
+      result = await repository.read(home: false, category: source.type);
+    } catch (_) {
+      result = const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'This activity could not be checked. Reload to try again.',
+        ),
+      );
+    }
+    if (!_valid(epoch, session)) return;
+    final matches = switch (result) {
+      Success<List<FriendActivityItem>>(:final value) =>
+        value.where(source.matches).toList(),
+      _ => const <FriendActivityItem>[],
+    };
+    if (matches.length != 1 || matches.single.eventId != item.eventId) {
+      setState(() {
+        _busy = false;
+        _result = result is Failure<List<FriendActivityItem>>
+            ? result
+            : const Failure(
+                AppFailure(
+                  kind: AppFailureKind.addFriendTargetUnavailable,
+                  message: 'This activity is no longer available under current access.',
+                ),
+              );
+      });
+      return;
+    }
+    _epoch++;
+    setState(() => _busy = false);
+    await widget.onOpenEvent!(matches.single.eventId!);
+    if (mounted &&
+        identical(session, ref.read(authSessionProvider).asData?.value)) {
+      await _load();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen(contentAccessProvider, (before, after) {
@@ -177,7 +234,7 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SectionHeading(
-          title: 'Friends Activity',
+          title: context.tr('Friends Activity', '好友动态'),
           actions: [
             if (widget.home &&
                 widget.onSeeAll != null &&
@@ -197,10 +254,10 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
                     await _load();
                   }
                 },
-                child: const Text('See all activity'),
+                child: Text(context.tr('See all activity', '查看全部动态')),
               ),
             IconButton(
-              tooltip: 'Reload activity',
+              tooltip: context.tr('Reload activity', '刷新动态'),
               onPressed: _busy ? null : _load,
               icon: const Icon(Icons.refresh),
             ),
@@ -213,7 +270,11 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
             children: [
               for (final category in [null, ...FriendActivityType.values])
                 ChoiceChip(
-                  label: Text(category?.label ?? 'All'),
+                  label: Text(
+                    category == null
+                        ? context.tr('All', '全部')
+                        : _activityLabel(context, category),
+                  ),
                   selected: _category == category,
                   onSelected: _busy
                       ? null
@@ -225,17 +286,24 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
             ],
           ),
         if (_busy)
-          const LinearProgressIndicator(
-            semanticsLabel: 'Loading Friends Activity',
+          LinearProgressIndicator(
+            semanticsLabel: context.tr('Loading Friends Activity', '正在加载好友动态'),
           ),
         if (_result case Failure<List<FriendActivityItem>>(:final failure))
-          Semantics(liveRegion: true, child: Text(failure.message)),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              failure.kind == AppFailureKind.addFriendTargetUnavailable
+                  ? context.tr(failure.message, '这条动态在当前访问权限下已不可用。')
+                  : localizedFailure(context, failure),
+            ),
+          ),
         if (_result case Success<List<FriendActivityItem>>(:final value)) ...[
           if (value.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
-                'No friends activity to show.',
+                context.tr('No friends activity to show.', '暂无可见的好友动态。'),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -261,7 +329,9 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
                       spacing: 8,
                       runSpacing: 4,
                       children: [
-                        if (widget.source == null)
+                        if (widget.source == null &&
+                            (item.eventId == null ||
+                                widget.onOpenEvent == null))
                           TextButton(
                             onPressed: () async {
                               if (!_valid(renderedEpoch, renderedSession)) {
@@ -273,7 +343,9 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
                                 MaterialPageRoute(
                                   builder: (_) => Scaffold(
                                     appBar: AppBar(
-                                      title: const Text('Friends Activity'),
+                                      title: Text(
+                                        context.tr('Friends Activity', '好友动态'),
+                                      ),
                                     ),
                                     body: SafeArea(
                                       child: ListView(
@@ -302,7 +374,7 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
                                 await _load();
                               }
                             },
-                            child: const Text('View activity'),
+                            child: Text(context.tr('View activity', '查看动态')),
                           ),
                         TextButton(
                           onPressed: () async {
@@ -318,49 +390,17 @@ final class _FriendActivityPanelState extends ConsumerState<FriendActivityPanel>
                               await _load();
                             }
                           },
-                          child: const Text('View Profile'),
+                          child: Text(context.tr('View Profile', '查看资料')),
                         ),
-                        if (widget.source != null &&
-                            item.eventId != null &&
-                            widget.onOpenEvent != null)
-                          TextButton(
-                            onPressed: () async {
-                              if (!_valid(renderedEpoch, renderedSession)) {
-                                return;
-                              }
-                              // Re-read the same purpose-bound activity before handing its stable Event ID to the host.
-                              await _load();
-                              if (!mounted ||
-                                  !identical(
-                                    renderedSession,
-                                    ref.read(authSessionProvider).asData?.value,
-                                  )) {
-                                return;
-                              }
-                              if (_result
-                                  case Success<List<FriendActivityItem>>(
-                                    :final value,
-                                  )) {
-                                if (value.length != 1 ||
-                                    value.single.eventId != item.eventId) {
-                                  return;
-                                }
-                                _epoch++;
-                                setState(() => _result = null);
-                                await widget.onOpenEvent!(item.eventId!);
-                                if (mounted &&
-                                    identical(
-                                      renderedSession,
-                                      ref
-                                          .read(authSessionProvider)
-                                          .asData
-                                          ?.value,
-                                    )) {
-                                  await _load();
-                                }
-                              }
-                            },
-                            child: const Text('Open event'),
+                        if (item.eventId != null && widget.onOpenEvent != null)
+                          OutlinedButton.icon(
+                            onPressed: () => _openEvent(
+                              item,
+                              renderedEpoch,
+                              renderedSession,
+                            ),
+                            icon: const Icon(Icons.event_outlined, size: 18),
+                            label: Text(context.tr('Open event', '打开活动')),
                           ),
                       ],
                     ),
@@ -407,7 +447,7 @@ final class FriendActivityContent extends StatelessWidget {
         style: Theme.of(context).textTheme.titleMedium,
       ),
       Text(
-        '@${item.username} · ${item.type.label}',
+        '@${item.username} · ${_activityLabel(context, item.type)}',
         style: Theme.of(context).textTheme.bodySmall,
       ),
       const SizedBox(height: 4),
@@ -424,10 +464,17 @@ final class FriendActivityContent extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
-            'Mood at this Check-in: $mood',
+            context.tr('Mood at this Check-in: $mood', '这次签到的心情：$mood'),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
     ],
   );
 }
+
+String _activityLabel(BuildContext context, FriendActivityType type) =>
+    context.tr(type.label, switch (type) {
+      FriendActivityType.checkIn => '创建了签到',
+      FriendActivityType.interested => '对活动感兴趣',
+      FriendActivityType.going => '将参加活动',
+    });

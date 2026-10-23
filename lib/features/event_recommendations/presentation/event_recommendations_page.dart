@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -106,8 +108,14 @@ final class _EventRecommendationsSectionState
           SnackBar(
             content: Text(
               items.isEmpty
-                  ? 'No recommendations available yet. Try Browse all.'
-                  : 'Latest details loaded for the same events.',
+                  ? context.tr(
+                      'No recommendations available yet. Try Browse all.',
+                      '暂时没有推荐，请尝试浏览活动。',
+                    )
+                  : context.tr(
+                      'Latest details loaded for the same events.',
+                      '已刷新这些活动的最新详情。',
+                    ),
             ),
           ),
         );
@@ -179,14 +187,14 @@ final class _EventRecommendationsPageState
   Widget build(BuildContext context) {
     final state = ref.watch(eventRecommendationsControllerProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Event recommendations')),
+      appBar: AppBar(title: Text(context.tr('Event recommendations', '活动推荐'))),
       body: SafeArea(
         child: ListView(
           key: const Key('route-event-recommendations'),
           padding: const EdgeInsets.all(24),
           children: [
             Text(
-              'Event recommendations',
+              context.tr('Event recommendations', '活动推荐'),
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 16),
@@ -290,9 +298,12 @@ final class _RecommendationContent extends StatelessWidget {
     final content = switch (state) {
       AsyncLoading<EventRecommendationResponse>() => status(
         key: const Key('event-recommendations-loading'),
-        title: 'Loading event recommendations',
+        title: context.tr('Loading event recommendations', '正在加载活动推荐'),
         loading: true,
-        body: 'Checking for upcoming events that match your interests.',
+        body: context.tr(
+          'Checking for upcoming events that match your interests.',
+          '正在查找符合你兴趣的近期活动。',
+        ),
         icon: Icons.hourglass_top,
       ),
       AsyncError<EventRecommendationResponse>(
@@ -300,42 +311,45 @@ final class _RecommendationContent extends StatelessWidget {
       ) =>
         status(
           key: const Key('event-recommendations-refresh-required'),
-          title: 'Refresh event recommendations',
-          body: 'Refresh to check for current matches for your interests.',
+          title: context.tr('Refresh event recommendations', '刷新活动推荐'),
+          body: context.tr(
+            'Refresh to check for current matches for your interests.',
+            '刷新以查看当前符合你兴趣的活动。',
+          ),
           icon: Icons.refresh,
           action: OutlinedButton.icon(
             key: const Key('event-recommendations-refresh'),
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Refresh'),
+            label: Text(context.tr('Refresh', '刷新')),
           ),
         ),
       AsyncError<EventRecommendationResponse>(:final error) => status(
         key: const Key('event-recommendations-error'),
-        title: 'Event recommendations unavailable',
+        title: context.tr('Event recommendations unavailable', '活动推荐暂不可用'),
         isError: true,
-        body: _errorCopy(error),
+        body: _errorCopy(context, error),
         icon: Icons.error_outline,
         action: FilledButton.icon(
           key: const Key('event-recommendations-retry'),
           onPressed: onRetry,
           icon: const Icon(Icons.refresh),
-          label: const Text('Retry'),
+          label: Text(context.tr('Retry', '重试')),
         ),
       ),
       AsyncData<EventRecommendationResponse>(:final value) =>
         value.items.isEmpty
             ? status(
                 key: const Key('event-recommendations-empty'),
-                title: eventEmptyTitle,
-                body: eventEmptyBody,
+                title: context.tr(eventEmptyTitle, '暂时没有活动推荐'),
+                body: context.tr(eventEmptyBody, '可以更新兴趣或稍后再查看。'),
                 icon: Icons.event_busy_outlined,
                 action: onSeeAll == null
                     ? null
                     : OutlinedButton(
                         key: const Key('event-recommendations-see-all-empty'),
                         onPressed: onSeeAll,
-                        child: const Text('See all'),
+                        child: Text(context.tr('See all', '查看全部')),
                       ),
               )
             : _RecommendationList(
@@ -356,7 +370,7 @@ final class _RecommendationContent extends StatelessWidget {
                 TextButton(
                   key: const Key('home-browse-activities'),
                   onPressed: onBrowseAll,
-                  child: const Text('Browse all'),
+                  child: Text(context.tr('Browse all', '浏览活动')),
                 ),
               IconButton(
                 key: Key(
@@ -366,21 +380,24 @@ final class _RecommendationContent extends StatelessWidget {
                       : 'event-recommendations-refresh',
                 ),
                 tooltip: state.hasError
-                    ? 'Retry event recommendations'
-                    : 'Refresh event recommendations',
+                    ? context.tr('Retry event recommendations', '重试活动推荐')
+                    : context.tr('Refresh event recommendations', '刷新活动推荐'),
                 onPressed: state.isLoading ? null : onRetry,
                 icon: const Icon(Icons.refresh),
               ),
             ],
           ),
         if (syntheticPreview) ...[
-          const Card(
+          Card(
             key: Key('event-synthetic-notice'),
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                'Synthetic Event preview — examples only. '
-                'No real registration or participation.',
+                context.tr(
+                  'Synthetic Event preview — examples only. '
+                      'No real registration or participation.',
+                  '合成活动预览，仅为示例，不代表真实报名或参与。',
+                ),
               ),
             ),
           ),
@@ -400,21 +417,27 @@ final class _RecommendationContent extends StatelessWidget {
             key: const Key('event-recommendations-refresh'),
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Refresh'),
+            label: Text(context.tr('Refresh', '刷新')),
           ),
         ],
       ],
     );
   }
 
-  String _errorCopy(Object error) {
+  String _errorCopy(BuildContext context, Object error) {
     if (error case AppFailure(kind: AppFailureKind.authRequired)) {
-      return 'Your session has expired. Sign in again.';
+      return context.tr(
+        'Your session has expired. Sign in again.',
+        '登录状态已过期，请重新登录。',
+      );
     }
     if (error case AppFailure(kind: AppFailureKind.authForbidden)) {
-      return 'This account cannot continue.';
+      return context.tr('This account cannot continue.', '此账号暂时无法继续。');
     }
-    return 'This service is temporarily unavailable. Try again.';
+    return context.tr(
+      'This service is temporarily unavailable. Try again.',
+      '服务暂不可用，请重试。',
+    );
   }
 }
 
@@ -457,9 +480,10 @@ final class _RecommendationList extends StatelessWidget {
                         : const Icon(Icons.chevron_right),
                     contentPadding: const EdgeInsets.all(16),
                     subtitle: Text(
-                      '${_formatTime(item.startAt)}\n'
-                      '${item.endAt == null ? '' : 'Ends: ${_formatTime(item.endAt!)}\n'}'
-                      'Matches: ${item.matchedInterests.map((interest) => interest.displayName).join(', ')}',
+                      context.tr(
+                        '${_formatTime(item.startAt)}\n${item.endAt == null ? '' : 'Ends: ${_formatTime(item.endAt!)}\n'}Matches: ${item.matchedInterests.map((interest) => interest.displayName).join(', ')}',
+                        '${_formatTime(item.startAt)}\n${item.endAt == null ? '' : '结束：${_formatTime(item.endAt!)}\n'}匹配兴趣：${item.matchedInterests.map((interest) => interest.displayName).join('、')}',
+                      ),
                     ),
                   ),
                 ),
@@ -469,7 +493,7 @@ final class _RecommendationList extends StatelessWidget {
           OutlinedButton(
             key: const Key('event-recommendations-see-all'),
             onPressed: onSeeAll,
-            child: const Text('See all'),
+            child: Text(context.tr('See all', '查看全部')),
           ),
       ],
     );

@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -89,12 +91,18 @@ final class _ParticipantPreviewState extends ConsumerState<ParticipantPreview>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (state.busy)
-          const LinearProgressIndicator(
-            semanticsLabel: 'Loading visible participants',
+          LinearProgressIndicator(
+            semanticsLabel: context.tr(
+              'Loading visible participants',
+              '正在加载可见参与者',
+            ),
           ),
         if (rows != null && rows.isNotEmpty) ...[
           Text(
-            '${_group == ParticipantGroup.friends ? 'Friends' : 'People'} ${_status.name}',
+            context.tr(
+              '${_group == ParticipantGroup.friends ? 'Friends' : 'People'} ${_status.name}',
+              '${_status == ParticipationStatus.going ? '将参加' : '感兴趣'}的${_group == ParticipantGroup.friends ? '好友' : '用户'}',
+            ),
             style: Theme.of(context).textTheme.titleSmall,
           ),
           for (final person in rows.take(3))
@@ -110,11 +118,17 @@ final class _ParticipantPreviewState extends ConsumerState<ParticipantPreview>
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.people_outline),
-          title: const Text('See all participants'),
+          title: Text(context.tr('See all participants', '查看全部参与者')),
           subtitle: Text(
             state.failure != null
-                ? 'Preview unavailable. Open the list to retry.'
-                : 'Explore Interested & Going · visible people only',
+                ? context.tr(
+                    'Preview unavailable. Open the list to retry.',
+                    '预览暂不可用，请打开列表重试。',
+                  )
+                : context.tr(
+                    'Explore Interested & Going · visible people only',
+                    '查看感兴趣和将参加的用户 · 仅显示获准信息',
+                  ),
           ),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => widget.onSeeAll(selection),

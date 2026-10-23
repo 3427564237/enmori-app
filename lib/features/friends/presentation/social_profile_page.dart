@@ -1,3 +1,5 @@
+import '../../../core/presentation/enmori_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -167,7 +169,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                       for (final tab in SocialTab.values)
                         ChoiceChip(
                           label: Text(switch (tab) {
-                            SocialTab.profile => 'Profile',
+                            SocialTab.profile => context.tr('Profile', '个人资料'),
                             SocialTab.records => 'Check-in History',
                             SocialTab.calendar => 'Calendar',
                             SocialTab.map => 'Footprint',
@@ -220,12 +222,18 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                     child: const Text('Loading current access…'),
                   ),
                 if (state.failure case final failure?)
-                  Semantics(liveRegion: true, child: Text(failure.message)),
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(localizedFailure(context, failure)),
+                  ),
                 if (state.removed)
                   Semantics(
                     liveRegion: true,
-                    child: const Text(
-                      'Friend removed. Shared access has been updated.',
+                    child: Text(
+                      context.tr(
+                        'Friend removed. Shared access has been updated.',
+                        '已删除好友，共享访问权限已更新。',
+                      ),
                     ),
                   ),
                 if (state.profile case final profile?)
@@ -332,7 +340,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
           await widget.onOpenRequest!(profile.username);
           if (mounted) _loadInitial();
         },
-        child: const Text('Friend request'),
+        child: Text(context.tr('Friend request', '好友请求')),
       ),
     if (profile.details.bio case final bio?)
       Padding(
@@ -353,8 +361,10 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
     if (profile.relationship == SocialRelationship.friend) ...[
       SwitchListTile(
         contentPadding: EdgeInsets.zero,
-        title: const Text('Special Care'),
-        subtitle: const Text('Only you can see this choice.'),
+        title: Text(context.tr('Special Care', '特别关心')),
+        subtitle: Text(
+          context.tr('Only you can see this choice.', '只有你能看到这个选择。'),
+        ),
         value: profile.specialCare,
         onChanged: state.busy
             ? null
@@ -363,24 +373,27 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
       ),
       OutlinedButton.icon(
         icon: const Icon(Icons.person_remove_outlined),
-        label: const Text('Remove friend'),
+        label: Text(context.tr('Remove friend', '删除好友')),
         onPressed: () async {
           final epoch = controller.epoch;
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Remove friend?'),
-              content: const Text(
-                'This removes the friendship for both people and ends access to friends-only content.',
+              title: Text(context.tr('Remove friend?', '删除这位好友？')),
+              content: Text(
+                context.tr(
+                  'This removes the friendship for both people and ends access to friends-only content.',
+                  '这会解除双方的好友关系，并停止访问仅好友可见的内容。',
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Keep friend'),
+                  child: Text(context.tr('Keep friend', '保留好友')),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Remove friend'),
+                  child: Text(context.tr('Remove friend', '删除好友')),
                 ),
               ],
             ),
@@ -393,7 +406,7 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
     ],
     if (profile.participationAvailable && widget.participationBuilder != null)
       OutlinedButton(
-        child: const Text('Event participation'),
+        child: Text(context.tr('Event participation', '活动参与')),
         onPressed: () async {
           controller.clear();
           await Navigator.of(context).push<void>(
