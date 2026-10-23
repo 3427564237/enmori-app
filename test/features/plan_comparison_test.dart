@@ -434,6 +434,20 @@ void main() {
       final repo = ComparisonRepo();
       await pumpComparison(tester, repo);
       expect(find.text('An evening of music a'), findsOneWidget);
+      addTearDown(
+        () => tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        ),
+      );
+      // Inactive still permits a frame; paused deliberately disables rendering.
+      // Verify retirement before pausing, as in the real lifecycle sequence.
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+      final scope = ProviderScope.containerOf(
+        tester.element(find.byType(EventPlanComparisonPage)),
+      );
+      expect(scope.read(comparison).page, isNull);
+      expect(find.text('An evening of music a'), findsNothing);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       await tester.pump();
       expect(find.text('An evening of music a'), findsNothing);
