@@ -415,11 +415,20 @@ void main() {
   testWidgets(
     'large text keeps review, editable labels and discard protection reachable',
     (tester) async {
+      final previousHitTestPolicy =
+          WidgetController.hitTestWarningShouldBeFatal;
+      WidgetController.hitTestWarningShouldBeFatal = true;
+      addTearDown(() {
+        WidgetController.hitTestWarningShouldBeFatal = previousHitTestPolicy;
+      });
       final h = _Harness();
       await h.mount(tester, scale: 2);
       await tester.pumpAndSettle();
-      await tapVisible(tester, find.text('Calm'));
+      await tapVisible(tester, find.widgetWithText(ActionChip, 'Calm'));
+      expect(find.widgetWithText(TextFormField, 'Calm'), findsOneWidget);
       await tapVisible(tester, find.text('Clear'));
+      expect(find.widgetWithText(ActionChip, 'Mood'), findsOneWidget);
+      expect(find.widgetWithText(ActionChip, 'Calm'), findsNothing);
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
       expect(find.text('Discard this draft?'), findsOneWidget);
