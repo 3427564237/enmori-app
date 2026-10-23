@@ -74,6 +74,7 @@ class _CalendarRepo
       throw UnimplementedError();
   @override
   Future<Result<domain.CheckIn>> create({
+    String? locationLabel,
     required String note,
     required String idempotencyKey,
     String? mood,

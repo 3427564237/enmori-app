@@ -1,0 +1,1202 @@
+{
+  "source": "c71c0c675d9a1dedd2d6972d7cbb54cc5c352bea",
+  "tree": "781b717478cdd429dd077afe40333859eb5c5beb",
+  "base": "927f77527b32d349aa08020f7de0e88402edb9c7",
+  "target": "souma/li-shi-du-integration-20261020",
+  "targetRead": "900ca6fcdefb77e9aa95d96fa80994ebf826398f",
+  "mergeCheck": {
+    "method": "git merge-tree --write-tree (no ref/worktree mutation)",
+    "tree": "65455aff1fdaff3359db281a906563e76e98b9fb",
+    "execution": "Not Run on synthetic combined tree"
+  },
+  "sourceChain": [
+    "cb23d6a660291e6f5660cd0c0c7bb33ab2ff914e",
+    "b882680c616c461cf4a7fe8dfd0a5f6cf78a9e9a",
+    "9723996c3557ad5065714848f0c6b40a3217437f",
+    "173a8590f30e71095044f8eccd55cf4a4a4fc7c3",
+    "c71c0c675d9a1dedd2d6972d7cbb54cc5c352bea"
+  ],
+  "backendTree": "e5d39de8b3e6a1cf37fd3c410372b24e020ee9ef",
+  "sdkRuntime": {
+    "runtimeFiles": 197,
+    "changed": [],
+    "manifestSha256": "793a8ee50877105e5717d4f47dc8cdfdc9516719e7107d54bc719824b8e46870",
+    "explanation": "Captured the actual SDK-tested emitted runtime before final strict compile; the two later Port edits are type-only. No SDK retest or service/process-restart claim."
+  },
+  "sdkTestBlob": "b693a943200b96014b9da16b63891db6ba62f112",
+  "oldEvidence": {
+    "source": "b882680c616c461cf4a7fe8dfd0a5f6cf78a9e9a",
+    "unchangedInputs": 78,
+    "totalOldInputs": 100,
+    "paths": [
+      "backend/emulator-test/social-weather.integration.test.ts",
+      "backend/src/check-ins/application/check-in-model.ts",
+      "backend/src/check-ins/application/create-check-in.ts",
+      "backend/src/check-ins/application/edit-check-in.ts",
+      "backend/src/check-ins/domain/check-in-location.ts",
+      "backend/src/check-ins/infrastructure/firestore-check-in-mutations.ts",
+      "backend/src/check-ins/infrastructure/firestore-check-in-repository.ts",
+      "backend/src/check-ins/ports/check-in-mutations.ts",
+      "backend/src/check-ins/ports/check-in-repository.ts",
+      "backend/src/check-ins/transport/mutation-routes.ts",
+      "backend/src/friend-activity/domain/rank-activity.ts",
+      "backend/src/friend-activity/infrastructure/firestore-friend-activity.ts",
+      "backend/src/friend-activity/transport/friend-activity-route.ts",
+      "backend/src/friends/application/social-profile.ts",
+      "backend/src/friends/infrastructure/authorized-participation.ts",
+      "backend/src/friends/infrastructure/firestore-friend-repository.ts",
+      "backend/src/friends/infrastructure/firestore-friend-summary.ts",
+      "backend/src/friends/infrastructure/firestore-social-repository.ts",
+      "backend/src/friends/infrastructure/social-authority.ts",
+      "backend/src/friends/ports/friend-repository.ts",
+      "backend/src/friends/ports/friend-summary.ts",
+      "backend/src/friends/ports/social-repository.ts",
+      "backend/src/friends/transport/friend-summary-route.ts",
+      "backend/src/friends/transport/social-routes.ts",
+      "backend/src/shared/infrastructure/firebase/firestore-gateway.ts",
+      "backend/src/shared/infrastructure/firebase/firestore-records.ts",
+      "backend/src/transport/register-isolated-slices.ts",
+      "backend/src/transport/register-routes.ts",
+      "backend/src/weather/application/home-weather.ts",
+      "backend/src/weather/domain/weather.ts",
+      "backend/src/weather/infrastructure/firestore-weather-purpose-authority.ts",
+      "backend/src/weather/infrastructure/open-meteo-weather-provider.ts",
+      "backend/src/weather/ports/weather-provider.ts",
+      "backend/src/weather/ports/weather-purpose-authority.ts",
+      "backend/src/weather/transport/home-weather-route.ts",
+      "backend/src/weather/transport/schemas.ts",
+      "backend/test/check-in-weather.test.ts",
+      "backend/test/friend-activity.test.ts",
+      "backend/test/friend-new-pair.test.ts",
+      "backend/test/home-weather.test.ts",
+      "backend/test/social-profile.test.ts",
+      "backend/test/weather.test.ts",
+      "docs/evidence/sprint3/2026-10-20-jin-module-integration.md",
+      "docs/evidence/sprint3/2026-10-20-jin-social-weather-contract.md",
+      "lib/features/check_in/domain/check_in_place_repository.dart",
+      "lib/features/check_in/domain/check_in_repository.dart",
+      "lib/features/check_in/presentation/check_in_place_controller.dart",
+      "lib/features/check_in/presentation/check_in_place_controls.dart",
+      "lib/features/check_in/presentation/located_check_in_actions.dart",
+      "lib/features/check_in/presentation/located_check_in_controller.dart",
+      "lib/features/friends/data/backend_friend_activity_repository.dart",
+      "lib/features/friends/data/backend_friend_repository.dart",
+      "lib/features/friends/data/backend_social_repository.dart",
+      "lib/features/friends/domain/friend_activity_repository.dart",
+      "lib/features/friends/domain/friend_repository.dart",
+      "lib/features/friends/domain/social_repository.dart",
+      "lib/features/friends/presentation/check_in_points_map.dart",
+      "lib/features/friends/presentation/friend_activity_panel.dart",
+      "lib/features/friends/presentation/friend_module_page.dart",
+      "lib/features/friends/presentation/friend_page.dart",
+      "lib/features/friends/presentation/my_friends_page.dart",
+      "lib/features/friends/presentation/social_profile_controller.dart",
+      "lib/features/friends/presentation/social_profile_page.dart",
+      "lib/features/friends/social_providers.dart",
+      "lib/features/weather/data/backend_home_weather_repository.dart",
+      "lib/features/weather/data/geolocator_foreground_location.dart",
+      "lib/features/weather/domain/foreground_location.dart",
+      "lib/features/weather/domain/home_weather_repository.dart",
+      "lib/features/weather/domain/weather.dart",
+      "lib/features/weather/presentation/home_weather_card.dart",
+      "lib/features/weather/presentation/home_weather_controller.dart",
+      "lib/features/weather/presentation/weather_card.dart",
+      "lib/features/weather/weather_providers.dart",
+      "pubspec.lock",
+      "pubspec.yaml",
+      "test/features/friend_discovery_activity_map_test.dart",
+      "test/features/located_check_in_flow_test.dart",
+      "test/features/social_profile_flow_test.dart"
+    ],
+    "warning": "Old 154/119/5 invocations are not reattributed to this tree; old historical pending has been superseded by LI decision."
+  },
+  "stability": [
+    {
+      "head": "173a8590f30e71095044f8eccd55cf4a4a4fc7c3",
+      "tree": "e691fea79213781a3d834c57b44beeba2d4507fd",
+      "trackedInputs": 1577,
+      "manifestFileSha256": "8f9710188d4602b44bed5555db17542ca2985bff5428cb103ce12356d8f9e480"
+    },
+    {
+      "head": "c71c0c675d9a1dedd2d6972d7cbb54cc5c352bea",
+      "tree": "781b717478cdd429dd077afe40333859eb5c5beb",
+      "trackedInputs": 1577,
+      "manifestFileSha256": "3c790d97b6a0b5af6150d9cc48e7971944db172b9dcbbaae788b64340e24e822"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "api/openapi.json",
+      "gitBlob": "c1481e6d6aa2dfc6c06feabe64343b0998ddb24f",
+      "bytes": 448234,
+      "sha256": "88549539fbdba0b7b5510b1a521a283340d0eecfac5344ca89c75a1728d385dc",
+      "normalizedSha256": "88549539fbdba0b7b5510b1a521a283340d0eecfac5344ca89c75a1728d385dc"
+    },
+    {
+      "path": "backend/emulator-test/friend-ignore.integration.test.ts",
+      "gitBlob": "b693a943200b96014b9da16b63891db6ba62f112",
+      "bytes": 9530,
+      "sha256": "23a98a39da7ea44c27411049ac0b15448911480f3687eaf01380974f39ae9593",
+      "normalizedSha256": "23a98a39da7ea44c27411049ac0b15448911480f3687eaf01380974f39ae9593"
+    },
+    {
+      "path": "backend/emulator-test/social-weather.integration.test.ts",
+      "gitBlob": "add0fad9d689681f692b190a97c37664e164d729",
+      "bytes": 9347,
+      "sha256": "75e51382cca40abc678ae6e83de8b901261040d5a89d12b04dc3aae80d2cddf3",
+      "normalizedSha256": "75e51382cca40abc678ae6e83de8b901261040d5a89d12b04dc3aae80d2cddf3"
+    },
+    {
+      "path": "backend/src/check-ins/application/check-in-model.ts",
+      "gitBlob": "9b0c4b8eae99ce020014d44acefc290f1ecff079",
+      "bytes": 436,
+      "sha256": "a34db014ab50ebf0e9d476757e5f38bcb67c38106a68d24fdac1626acdf7b9eb",
+      "normalizedSha256": "a34db014ab50ebf0e9d476757e5f38bcb67c38106a68d24fdac1626acdf7b9eb"
+    },
+    {
+      "path": "backend/src/check-ins/application/create-check-in.ts",
+      "gitBlob": "2a5d16267f6e8456eb506db6bd9178f916983793",
+      "bytes": 3980,
+      "sha256": "8ff7d7398bf6ebccf9bcefd8ed58f355bb5fa6f70b11c26e2031a09144001666",
+      "normalizedSha256": "8ff7d7398bf6ebccf9bcefd8ed58f355bb5fa6f70b11c26e2031a09144001666"
+    },
+    {
+      "path": "backend/src/check-ins/application/edit-check-in.ts",
+      "gitBlob": "38e8de594215dbbd7b85cf968ccbb52dc42029da",
+      "bytes": 2266,
+      "sha256": "49df567484e4ebd9ff791ee924421f371b1e205ff5b5bd371961682b6e2798f1",
+      "normalizedSha256": "49df567484e4ebd9ff791ee924421f371b1e205ff5b5bd371961682b6e2798f1"
+    },
+    {
+      "path": "backend/src/check-ins/domain/check-in-location.ts",
+      "gitBlob": "468b5da331a3d78cfa2de66b36d74942788c14b0",
+      "bytes": 1486,
+      "sha256": "54ee5f5df1e005eac96d971776f9c7d498a31d0495a89812b2884d917cb85b44",
+      "normalizedSha256": "54ee5f5df1e005eac96d971776f9c7d498a31d0495a89812b2884d917cb85b44"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/firestore-check-in-mutations.ts",
+      "gitBlob": "5e05ca44eaa90fa38d1c2c06901a324fba39a9d4",
+      "bytes": 4178,
+      "sha256": "328b6c924343a6a89dc823aed4d88d00acebb6301fe433f756a60e7432f059c0",
+      "normalizedSha256": "328b6c924343a6a89dc823aed4d88d00acebb6301fe433f756a60e7432f059c0"
+    },
+    {
+      "path": "backend/src/check-ins/infrastructure/firestore-check-in-repository.ts",
+      "gitBlob": "93fcb526c5bfb418759bf485f935d8fb5c5cde79",
+      "bytes": 12491,
+      "sha256": "0e7d31a907fbbd724d4056da7e36623b6dcde5edd3da50003235255efa2da22c",
+      "normalizedSha256": "0e7d31a907fbbd724d4056da7e36623b6dcde5edd3da50003235255efa2da22c"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-mutations.ts",
+      "gitBlob": "ed0d74779703fc973832bf5a0eeea5bd999e4cad",
+      "bytes": 730,
+      "sha256": "a3e3f04e6f6dfcad63434153659a213d0e4877da776c0aa12e6ca882d7745629",
+      "normalizedSha256": "a3e3f04e6f6dfcad63434153659a213d0e4877da776c0aa12e6ca882d7745629"
+    },
+    {
+      "path": "backend/src/check-ins/ports/check-in-repository.ts",
+      "gitBlob": "fc6a10b95aed36fe5ea9a8be3cca73d9b3a0c4ec",
+      "bytes": 2436,
+      "sha256": "99f41866aafe7dc946af8c7d9336ecbc277afc764d9b0f383e559ca85266ccd4",
+      "normalizedSha256": "99f41866aafe7dc946af8c7d9336ecbc277afc764d9b0f383e559ca85266ccd4"
+    },
+    {
+      "path": "backend/src/check-ins/transport/mutation-routes.ts",
+      "gitBlob": "83d2269089185f0423a132c2fb2434c9384617d3",
+      "bytes": 3225,
+      "sha256": "f865e35c391f60ba655ee0c018107b76d0d30a5a8c3be0bd9d774cfcc9989240",
+      "normalizedSha256": "f865e35c391f60ba655ee0c018107b76d0d30a5a8c3be0bd9d774cfcc9989240"
+    },
+    {
+      "path": "backend/src/friend-activity/domain/rank-activity.ts",
+      "gitBlob": "72b3808612c1fae09974f23f2626b0ee223fe2bc",
+      "bytes": 957,
+      "sha256": "23cd850452b87208336d69e2e7eb58a3bfadd7c1cf324ac11a77f00b08a2bdd8",
+      "normalizedSha256": "23cd850452b87208336d69e2e7eb58a3bfadd7c1cf324ac11a77f00b08a2bdd8"
+    },
+    {
+      "path": "backend/src/friend-activity/infrastructure/firestore-friend-activity.ts",
+      "gitBlob": "d0dbdbe486b1ca4f035107747664a963b9661f23",
+      "bytes": 5231,
+      "sha256": "b0ba5906435793204922a3f5a8eca67ad419ee80cf63eb589e4a0fae5b5ee813",
+      "normalizedSha256": "b0ba5906435793204922a3f5a8eca67ad419ee80cf63eb589e4a0fae5b5ee813"
+    },
+    {
+      "path": "backend/src/friend-activity/ports/friend-activity.ts",
+      "gitBlob": "8fa7a522067cab4659d4a6a8a3231e786ec325e3",
+      "bytes": 1240,
+      "sha256": "52ca838a71238713faa85c02b03a48060a81019d0fce06ab4753993ee75368a1",
+      "normalizedSha256": "52ca838a71238713faa85c02b03a48060a81019d0fce06ab4753993ee75368a1"
+    },
+    {
+      "path": "backend/src/friend-activity/transport/friend-activity-route.ts",
+      "gitBlob": "83df222357ce44fd5cc09871c578525cc512eef1",
+      "bytes": 2300,
+      "sha256": "760c6947c926257165ee2a119464a8b7e2166ca308a86c561c1a7deb02d03e3b",
+      "normalizedSha256": "760c6947c926257165ee2a119464a8b7e2166ca308a86c561c1a7deb02d03e3b"
+    },
+    {
+      "path": "backend/src/friend-recommendations/infrastructure/firestore-friend-ignore-repository.ts",
+      "gitBlob": "6ed69109a7f4fcf10d47565ae9704babd1966890",
+      "bytes": 7251,
+      "sha256": "01bca78c8e4281c8013d693d2cf00dc016be8be026a1ded39e2204cd05fdf6c0",
+      "normalizedSha256": "01bca78c8e4281c8013d693d2cf00dc016be8be026a1ded39e2204cd05fdf6c0"
+    },
+    {
+      "path": "backend/src/friend-recommendations/infrastructure/firestore-friend-recommendations.ts",
+      "gitBlob": "eb5034f513a0f426a4d539da62c03e36eb5c92d2",
+      "bytes": 6977,
+      "sha256": "c8f78ea505e0465354e0ce578a80ec9af056bb6c62358a9b81609d4904b2dcb9",
+      "normalizedSha256": "c8f78ea505e0465354e0ce578a80ec9af056bb6c62358a9b81609d4904b2dcb9"
+    },
+    {
+      "path": "backend/src/friend-recommendations/infrastructure/recommendation-preference.ts",
+      "gitBlob": "cbb4eb97be8ae49509a761fa03a993d9ccc5d844",
+      "bytes": 2196,
+      "sha256": "86c3ca3050587abb45ade3dd41d6dba0a16ec19bd78d5ac57604e4417d8ea7bb",
+      "normalizedSha256": "86c3ca3050587abb45ade3dd41d6dba0a16ec19bd78d5ac57604e4417d8ea7bb"
+    },
+    {
+      "path": "backend/src/friend-recommendations/ports/friend-event-projection.ts",
+      "gitBlob": "ff90de4c6ae0285328c31f243340fb4201d8d425",
+      "bytes": 916,
+      "sha256": "a0218a0652be98f98a04f8dacf4dce5b1c6bbdc850898bd3947bbc3a06b781ee",
+      "normalizedSha256": "a0218a0652be98f98a04f8dacf4dce5b1c6bbdc850898bd3947bbc3a06b781ee"
+    },
+    {
+      "path": "backend/src/friend-recommendations/ports/friend-ignore-repository.ts",
+      "gitBlob": "df0889cad93aff0cd2e8b5dbed15554b753f474d",
+      "bytes": 739,
+      "sha256": "f090787c1cbfc2be2022965fade8e467ce1a51b629210dd7b730ee474702b190",
+      "normalizedSha256": "f090787c1cbfc2be2022965fade8e467ce1a51b629210dd7b730ee474702b190"
+    },
+    {
+      "path": "backend/src/friend-recommendations/ports/friend-recommendations.ts",
+      "gitBlob": "b7272419e8bfc0f9946c728a11c256d770302632",
+      "bytes": 526,
+      "sha256": "0f71f75fec58d5534b7fafeb09ca8e6939d035d732315dd29d9203cd8111d0c5",
+      "normalizedSha256": "0f71f75fec58d5534b7fafeb09ca8e6939d035d732315dd29d9203cd8111d0c5"
+    },
+    {
+      "path": "backend/src/friend-recommendations/transport/friend-ignore-routes.ts",
+      "gitBlob": "1d0aaa82f289e411d2c3322e4cf72453e0233e7c",
+      "bytes": 3697,
+      "sha256": "bf3299c9f761548e0703283796304d313fe34dca13d13cab09a2e164082affe0",
+      "normalizedSha256": "bf3299c9f761548e0703283796304d313fe34dca13d13cab09a2e164082affe0"
+    },
+    {
+      "path": "backend/src/friend-recommendations/transport/friend-recommendation-route.ts",
+      "gitBlob": "1d92fdb9f2fdef709a5dfb56ed206f34a5b1e2cd",
+      "bytes": 2309,
+      "sha256": "c6810f23cd6fd17dcfdc2c05ee2366cd490dc0c2ca3e0e9281e95f493a0043ef",
+      "normalizedSha256": "c6810f23cd6fd17dcfdc2c05ee2366cd490dc0c2ca3e0e9281e95f493a0043ef"
+    },
+    {
+      "path": "backend/src/friends/application/social-profile.ts",
+      "gitBlob": "aa30ddf5f55eb54642f7a8e58de4bf6777aea767",
+      "bytes": 1257,
+      "sha256": "cce11c64e3050cf4b10f7826f821329006b3af59b2ee701881013902e3c324a0",
+      "normalizedSha256": "cce11c64e3050cf4b10f7826f821329006b3af59b2ee701881013902e3c324a0"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/authorized-participation.ts",
+      "gitBlob": "9cba654f02cacc05e93a5fe1d4aeb4f3c7cfc74e",
+      "bytes": 1255,
+      "sha256": "3178df0f6cc6f7993ddafc1f94edaaa6449b5a363328235d134de7da24089783",
+      "normalizedSha256": "3178df0f6cc6f7993ddafc1f94edaaa6449b5a363328235d134de7da24089783"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/firestore-friend-repository.ts",
+      "gitBlob": "1935362e036be59b3256941ff4c3a213f0f171b4",
+      "bytes": 20873,
+      "sha256": "5cb39a6e5d35011072cc024d4412662d86355a2b53b6f80a0fc484686bb69dcb",
+      "normalizedSha256": "5cb39a6e5d35011072cc024d4412662d86355a2b53b6f80a0fc484686bb69dcb"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/firestore-friend-summary.ts",
+      "gitBlob": "528d6156a686c0e4958e5d790553260c76ce8903",
+      "bytes": 2393,
+      "sha256": "1a021716b61ba1b6fd42f40eae1fd51dc8b08dd27b104244b602076308aa6810",
+      "normalizedSha256": "1a021716b61ba1b6fd42f40eae1fd51dc8b08dd27b104244b602076308aa6810"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/firestore-social-repository.ts",
+      "gitBlob": "d16641a1b4f48fdacaa30b5eb9276857d7b0773c",
+      "bytes": 11934,
+      "sha256": "a5bdfb3458dbbfefe78908a5e96a3605dc8eeeb540d10503b2014a135c8fb624",
+      "normalizedSha256": "a5bdfb3458dbbfefe78908a5e96a3605dc8eeeb540d10503b2014a135c8fb624"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/social-authority.ts",
+      "gitBlob": "aa41184fdaf127d2f1d02d4ccd451bc21b94c708",
+      "bytes": 5376,
+      "sha256": "f7703672c79154c8dd1db4d0e8fcef16389a1065f01315c6a0cae59da830f07a",
+      "normalizedSha256": "f7703672c79154c8dd1db4d0e8fcef16389a1065f01315c6a0cae59da830f07a"
+    },
+    {
+      "path": "backend/src/friends/ports/friend-repository.ts",
+      "gitBlob": "036209478d80f0132fc1c9b70cfa077733a005ce",
+      "bytes": 1496,
+      "sha256": "c6f9adedfa625a67b0f015202ac3986c445d424bb3f18ef2eadc08e549193308",
+      "normalizedSha256": "c6f9adedfa625a67b0f015202ac3986c445d424bb3f18ef2eadc08e549193308"
+    },
+    {
+      "path": "backend/src/friends/ports/friend-summary.ts",
+      "gitBlob": "82c577d1a0055bb802b689b747d7cb8b0aa2f614",
+      "bytes": 251,
+      "sha256": "d04b604b11ca58e08e6d15b682532a8c73da4405c4d55af8f85b8f94e226d9c7",
+      "normalizedSha256": "d04b604b11ca58e08e6d15b682532a8c73da4405c4d55af8f85b8f94e226d9c7"
+    },
+    {
+      "path": "backend/src/friends/ports/social-repository.ts",
+      "gitBlob": "0a6e9a05fb892e25a572881392ae1e983988a3b1",
+      "bytes": 1903,
+      "sha256": "ae1db935aa919d62ba2631d3ffab6c4a507ab585feb6dce311950afb2b9ff7bd",
+      "normalizedSha256": "ae1db935aa919d62ba2631d3ffab6c4a507ab585feb6dce311950afb2b9ff7bd"
+    },
+    {
+      "path": "backend/src/friends/transport/friend-summary-route.ts",
+      "gitBlob": "c411c02485547eb913a9a4a441ade0c1f17727b5",
+      "bytes": 1638,
+      "sha256": "adc12f8d1685dc329c7d46042de9f643d0e4aceaf595a8d49a352a15a5d419cb",
+      "normalizedSha256": "adc12f8d1685dc329c7d46042de9f643d0e4aceaf595a8d49a352a15a5d419cb"
+    },
+    {
+      "path": "backend/src/friends/transport/register-social-module.ts",
+      "gitBlob": "efaaa48a99743beec454f8eca9e5273ae01f7392",
+      "bytes": 3479,
+      "sha256": "4cc93cbf269d467bb69befe5fdb28b89e50d21f01cc0d639c711cef285132926",
+      "normalizedSha256": "4cc93cbf269d467bb69befe5fdb28b89e50d21f01cc0d639c711cef285132926"
+    },
+    {
+      "path": "backend/src/friends/transport/social-routes.ts",
+      "gitBlob": "e8b849ce3373379771c9549b9a1e6565362e6d78",
+      "bytes": 7303,
+      "sha256": "87db20a10a213109acd9d8759814632b41a77500fa1b355a05a16cb7a1bc3ea7",
+      "normalizedSha256": "87db20a10a213109acd9d8759814632b41a77500fa1b355a05a16cb7a1bc3ea7"
+    },
+    {
+      "path": "backend/src/shared/application/app-failure.ts",
+      "gitBlob": "0a08c8823ed8ffedd77af0cba2b65a6154ccfe6b",
+      "bytes": 3930,
+      "sha256": "e239b7a86a5d6e675c81a16c0339e8b7d8332e4d1dbd54ba3f52914185b4dea2",
+      "normalizedSha256": "e239b7a86a5d6e675c81a16c0339e8b7d8332e4d1dbd54ba3f52914185b4dea2"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-gateway.ts",
+      "gitBlob": "8214771339a6a90bac2dfbe4d34063b7603e69af",
+      "bytes": 8975,
+      "sha256": "b58f847d2270fa12a9ff4918b3dc0be38ff39b57dbc88033de74845266efd678",
+      "normalizedSha256": "b58f847d2270fa12a9ff4918b3dc0be38ff39b57dbc88033de74845266efd678"
+    },
+    {
+      "path": "backend/src/shared/infrastructure/firebase/firestore-records.ts",
+      "gitBlob": "a022ec9e3ab599b6b4f9c53fc6195523105ebd1c",
+      "bytes": 7202,
+      "sha256": "5b039c81054ce22436ab5585228919a18e492d26bd09921f67fb1623ef9fa52b",
+      "normalizedSha256": "5b039c81054ce22436ab5585228919a18e492d26bd09921f67fb1623ef9fa52b"
+    },
+    {
+      "path": "backend/src/transport/register-isolated-slices.ts",
+      "gitBlob": "bab6b65bd4208a17463a903604876fd7e2ae64a6",
+      "bytes": 9443,
+      "sha256": "7a5165a3ac1595f2604dce3875b510fd6bc9bb9cb28660c561f6b93a9b9ea293",
+      "normalizedSha256": "7a5165a3ac1595f2604dce3875b510fd6bc9bb9cb28660c561f6b93a9b9ea293"
+    },
+    {
+      "path": "backend/src/transport/register-routes.ts",
+      "gitBlob": "ca96040064ad0bea567245dfb3518772abbfcb34",
+      "bytes": 7884,
+      "sha256": "7d8da1497812a3ddae4063790647ae9f542a6b0722bc2a0f41def03a1f0cf440",
+      "normalizedSha256": "7d8da1497812a3ddae4063790647ae9f542a6b0722bc2a0f41def03a1f0cf440"
+    },
+    {
+      "path": "backend/src/transport/route-inventory.ts",
+      "gitBlob": "693f732f76dac20c8ecf20b325458922d0ca1ac5",
+      "bytes": 6857,
+      "sha256": "0977e89f4347e7d9b2964c8a60670d8ec2e467cae92c30ff62748f8c7dce1edf",
+      "normalizedSha256": "0977e89f4347e7d9b2964c8a60670d8ec2e467cae92c30ff62748f8c7dce1edf"
+    },
+    {
+      "path": "backend/src/transport/schemas.ts",
+      "gitBlob": "5f7f882729afe41715ac4c22893bfc4a546f170f",
+      "bytes": 8577,
+      "sha256": "227d6606900ff906673130f5664e574d5032f23ee95fad3271f34414f91c2d43",
+      "normalizedSha256": "227d6606900ff906673130f5664e574d5032f23ee95fad3271f34414f91c2d43"
+    },
+    {
+      "path": "backend/src/weather/application/home-weather.ts",
+      "gitBlob": "76a725d9b4a65652229859b2587798ab8bda8a03",
+      "bytes": 1931,
+      "sha256": "181af67e86caeca905e51038924c92470b135730a0432e6318b0c21ed6fbea1d",
+      "normalizedSha256": "181af67e86caeca905e51038924c92470b135730a0432e6318b0c21ed6fbea1d"
+    },
+    {
+      "path": "backend/src/weather/domain/weather.ts",
+      "gitBlob": "37e0bb74ef2b69446c31a2e64a06f10a54439b50",
+      "bytes": 5663,
+      "sha256": "d4c8eb5260261b0cbf6e50d0a38f7b24a3e4a5a6ae0994d66da4159f3e5dd151",
+      "normalizedSha256": "d4c8eb5260261b0cbf6e50d0a38f7b24a3e4a5a6ae0994d66da4159f3e5dd151"
+    },
+    {
+      "path": "backend/src/weather/infrastructure/firestore-weather-purpose-authority.ts",
+      "gitBlob": "8b9cf3b803031bc6ad327f4ff9c6c8d44a924f02",
+      "bytes": 1428,
+      "sha256": "59dc05765802623a97e491a6d266be65b2976ce8eb60bfc5a3b4fc3f10c9c6c7",
+      "normalizedSha256": "59dc05765802623a97e491a6d266be65b2976ce8eb60bfc5a3b4fc3f10c9c6c7"
+    },
+    {
+      "path": "backend/src/weather/infrastructure/open-meteo-weather-provider.ts",
+      "gitBlob": "02ce2927a58e0dfd6c9c78454df62fa89a81bbf9",
+      "bytes": 3861,
+      "sha256": "ac03a6fed7b11bfca7e786725665a052bc1f859ffbf31d9b81a276bb660c4594",
+      "normalizedSha256": "ac03a6fed7b11bfca7e786725665a052bc1f859ffbf31d9b81a276bb660c4594"
+    },
+    {
+      "path": "backend/src/weather/ports/weather-provider.ts",
+      "gitBlob": "1e0d5cfe59734ab2d4385a5669d781ce3fcf5b11",
+      "bytes": 289,
+      "sha256": "f29193913d86f91279a4a0db87faf1ed9fe6b2fe4aaa13e73170d3f4c8522e9d",
+      "normalizedSha256": "f29193913d86f91279a4a0db87faf1ed9fe6b2fe4aaa13e73170d3f4c8522e9d"
+    },
+    {
+      "path": "backend/src/weather/ports/weather-purpose-authority.ts",
+      "gitBlob": "e990fa8eed6d47dbaca5a9b02de983a20323ebaf",
+      "bytes": 366,
+      "sha256": "3d34065fd20b100bb892c2a8115ece4a7ef09e6b4f48656b9383b87609e2fd77",
+      "normalizedSha256": "3d34065fd20b100bb892c2a8115ece4a7ef09e6b4f48656b9383b87609e2fd77"
+    },
+    {
+      "path": "backend/src/weather/transport/home-weather-route.ts",
+      "gitBlob": "6ab0353548212869e2b8a2284e82e2ae3ccf9db9",
+      "bytes": 1780,
+      "sha256": "cbfd3e6ab011c1c8457efd580e8c0c580a26daf81475e8c74d99eac5dbb5d786",
+      "normalizedSha256": "cbfd3e6ab011c1c8457efd580e8c0c580a26daf81475e8c74d99eac5dbb5d786"
+    },
+    {
+      "path": "backend/src/weather/transport/schemas.ts",
+      "gitBlob": "f20ffec072dbc4a12c3b4c47e17583d58dd417f3",
+      "bytes": 1118,
+      "sha256": "9085d7b301da88aeccc6f039364bc56db45b4cf19214e02411b6e59f1b92e3fc",
+      "normalizedSha256": "9085d7b301da88aeccc6f039364bc56db45b4cf19214e02411b6e59f1b92e3fc"
+    },
+    {
+      "path": "backend/test/check-in-weather.test.ts",
+      "gitBlob": "6653976a3ff7f6252bae5d8fec8abf5adfb848b1",
+      "bytes": 7492,
+      "sha256": "38a77acd87f014c9120dafa052d5493d00b739972c1636a698c274b04312da85",
+      "normalizedSha256": "38a77acd87f014c9120dafa052d5493d00b739972c1636a698c274b04312da85"
+    },
+    {
+      "path": "backend/test/friend-activity.test.ts",
+      "gitBlob": "52da85b606081d92cffc19f75366a2137bea6f3c",
+      "bytes": 8165,
+      "sha256": "0fdc38ca7de0c24e6a97d64abeb22879aa108a5a9213eeda4328d54647bc11f9",
+      "normalizedSha256": "0fdc38ca7de0c24e6a97d64abeb22879aa108a5a9213eeda4328d54647bc11f9"
+    },
+    {
+      "path": "backend/test/friend-ignore-contract.test.ts",
+      "gitBlob": "b91d7951968e3aeb039565c99f13cfca1d93edf2",
+      "bytes": 1402,
+      "sha256": "8b8e1aa5a4ad9cd2add238efc309ba460de7b5d202ddc756144d7d4baed30c7e",
+      "normalizedSha256": "8b8e1aa5a4ad9cd2add238efc309ba460de7b5d202ddc756144d7d4baed30c7e"
+    },
+    {
+      "path": "backend/test/friend-ignore.test.ts",
+      "gitBlob": "ef409dbd54a4177b6cb8b479bb40401383797b9a",
+      "bytes": 11591,
+      "sha256": "5d5dfe2730846ac7848b41e60e3ce2c4a54f1735b4669d50ca22ebec5c7be4dc",
+      "normalizedSha256": "5d5dfe2730846ac7848b41e60e3ce2c4a54f1735b4669d50ca22ebec5c7be4dc"
+    },
+    {
+      "path": "backend/test/friend-new-pair.test.ts",
+      "gitBlob": "860c65326a0a276aac5220da0a2a1842f04529cb",
+      "bytes": 1488,
+      "sha256": "706c2e97b654d028c586563dd0392e87838a1e54d3f33060b76b71f17ba33770",
+      "normalizedSha256": "706c2e97b654d028c586563dd0392e87838a1e54d3f33060b76b71f17ba33770"
+    },
+    {
+      "path": "backend/test/friend-recommendation-source.test.ts",
+      "gitBlob": "57003c62825b61bc1bb82c9d833f1675901b1a30",
+      "bytes": 5748,
+      "sha256": "4d4ea5f1d495bcbc4c3c71d8914e70606f4566e57da50a9805ae34d1ffafaf5f",
+      "normalizedSha256": "4d4ea5f1d495bcbc4c3c71d8914e70606f4566e57da50a9805ae34d1ffafaf5f"
+    },
+    {
+      "path": "backend/test/home-weather.test.ts",
+      "gitBlob": "60661d3780aad5e23bcd102078d742c66993c3e9",
+      "bytes": 3316,
+      "sha256": "60f89174f359f5c442ceeaa9a96608cdc7acfdcb632b4712a54af679ca57cb7b",
+      "normalizedSha256": "60f89174f359f5c442ceeaa9a96608cdc7acfdcb632b4712a54af679ca57cb7b"
+    },
+    {
+      "path": "backend/test/social-profile.test.ts",
+      "gitBlob": "ba12894cefff224c904a90bb096409be420a51d3",
+      "bytes": 12876,
+      "sha256": "3f71cd0482abc93a326dfa24f326e9bffe9428ea31436ef6eaf44b34b4ee26b2",
+      "normalizedSha256": "3f71cd0482abc93a326dfa24f326e9bffe9428ea31436ef6eaf44b34b4ee26b2"
+    },
+    {
+      "path": "backend/test/support/in-memory-firestore-gateway.ts",
+      "gitBlob": "8d4c7b46d0f380130ddf254babfa5956962be088",
+      "bytes": 4495,
+      "sha256": "fd2e098318fcf064885ffb6b96dce1e0e70e6f658bc531ccc6c582e434e9e68d",
+      "normalizedSha256": "fd2e098318fcf064885ffb6b96dce1e0e70e6f658bc531ccc6c582e434e9e68d"
+    },
+    {
+      "path": "backend/test/weather.test.ts",
+      "gitBlob": "48567a13a922e8045fe779e30d3e91b0b805de5e",
+      "bytes": 6591,
+      "sha256": "b3a7e3fbf4e776901d2fcc60e49cceb7078690fccddf7d15d25a3599ecc4c047",
+      "normalizedSha256": "b3a7e3fbf4e776901d2fcc60e49cceb7078690fccddf7d15d25a3599ecc4c047"
+    },
+    {
+      "path": "docs/decisions/2026-10-20-li-friend-recommendation-ignore.md",
+      "gitBlob": "b00c21f6f374d108bd82701e3e6154851ff50b66",
+      "bytes": 4065,
+      "sha256": "61499d272c5420b75355da02332068db274b20d7f6c4817f170ce5f9fe171b69",
+      "normalizedSha256": "61499d272c5420b75355da02332068db274b20d7f6c4817f170ce5f9fe171b69"
+    },
+    {
+      "path": "docs/decisions/2026-10-20-li-github-handoff.md",
+      "gitBlob": "8ab1a246fb91fc45f7b72657fbd003f643102988",
+      "bytes": 1788,
+      "sha256": "f48ab91026a6be084af350acaf1acc32888103b7d21e0d5d9eef4044b3f8965e",
+      "normalizedSha256": "f48ab91026a6be084af350acaf1acc32888103b7d21e0d5d9eef4044b3f8965e"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-20-jin-ignore-contract.md",
+      "gitBlob": "41485503f2bde191b8c9fe27f33dddcea402ae50",
+      "bytes": 4735,
+      "sha256": "98544bed80bdcebc80a3eea4d1ea05e7caf3363734d70e292bf380b718f7b674",
+      "normalizedSha256": "98544bed80bdcebc80a3eea4d1ea05e7caf3363734d70e292bf380b718f7b674"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-20-jin-module-integration.md",
+      "gitBlob": "a850f5854d9083ca4df90cd5cd6780ec373d31cf",
+      "bytes": 5253,
+      "sha256": "ba28acd644b51c87c381281c6df905b4359931b9070f554433d4daea7cd8d372",
+      "normalizedSha256": "ba28acd644b51c87c381281c6df905b4359931b9070f554433d4daea7cd8d372"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-20-jin-social-weather-contract.md",
+      "gitBlob": "4fe87ba65e9c25a5d21cab4345886b7f77e67c97",
+      "bytes": 7508,
+      "sha256": "8597890cdc69b19b377a49962682386828dcd80f82dd8ae295e0ef6ba78ba2d0",
+      "normalizedSha256": "8597890cdc69b19b377a49962682386828dcd80f82dd8ae295e0ef6ba78ba2d0"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-20-jin-social-weather-receipt.json",
+      "gitBlob": "8ba21c4a67c050a0920c022df774ae95de51ca52",
+      "bytes": 48249,
+      "sha256": "e849fe3a1f9da72431fe7f676a8cb430b4e7853bb2e74b035fd395bc9d3259f2",
+      "normalizedSha256": "e849fe3a1f9da72431fe7f676a8cb430b4e7853bb2e74b035fd395bc9d3259f2"
+    },
+    {
+      "path": "docs/evidence/sprint3/2026-10-20-jin-social-weather-validation.md",
+      "gitBlob": "585cd3bd4953d393f1b36dafec03313ddf8d3f33",
+      "bytes": 7480,
+      "sha256": "1938f1bac80fc3373da5593a9f32081565dde3f6520ee9fac349534eadc47980",
+      "normalizedSha256": "1938f1bac80fc3373da5593a9f32081565dde3f6520ee9fac349534eadc47980"
+    },
+    {
+      "path": "docs/planning/local-ui-handoff-oct19/jin-complete-package-review.md",
+      "gitBlob": "51c7272b1db80fcccd0330785b3dcbd44ddeb945",
+      "bytes": 4277,
+      "sha256": "8fdcfbfd23cf7fac2586378a314aac931ce689968876af096b4b91ed48b18bac",
+      "normalizedSha256": "8fdcfbfd23cf7fac2586378a314aac931ce689968876af096b4b91ed48b18bac"
+    },
+    {
+      "path": "lib/core/network/backend_api_client.dart",
+      "gitBlob": "fa77bb8609c0e9f07e061ecdee0d02922ea7e011",
+      "bytes": 17941,
+      "sha256": "2299bcc7312db08d5ecbaaba2b3d74a6a91b740f7c9f6097eea971bf15573b29",
+      "normalizedSha256": "2299bcc7312db08d5ecbaaba2b3d74a6a91b740f7c9f6097eea971bf15573b29"
+    },
+    {
+      "path": "lib/core/result/result.dart",
+      "gitBlob": "3539094ed292a61403fd669960631cacc21d23c6",
+      "bytes": 1515,
+      "sha256": "2a3d3189377d7d463935699be408b39f890fdbd76cf0c5e481f2e3ca8cf4f3d8",
+      "normalizedSha256": "2a3d3189377d7d463935699be408b39f890fdbd76cf0c5e481f2e3ca8cf4f3d8"
+    },
+    {
+      "path": "lib/features/check_in/data/backend_check_in_place_repository.dart",
+      "gitBlob": "8ba6b87c1a563956db7beaa882481a02d80bff03",
+      "bytes": 4102,
+      "sha256": "53e2bbab9500269b944650d61185d20e414564b17eefeae70a05382b16b3aaaf",
+      "normalizedSha256": "53e2bbab9500269b944650d61185d20e414564b17eefeae70a05382b16b3aaaf"
+    },
+    {
+      "path": "lib/features/check_in/data/backend_check_in_repository.dart",
+      "gitBlob": "7bb090a5bf209d75d4cf4ee390826caa5b0c567d",
+      "bytes": 7448,
+      "sha256": "a0f338adccd597bc7043ed9a15a715cfb41d04327bebc16f3bf8a98fed6fb5ba",
+      "normalizedSha256": "a0f338adccd597bc7043ed9a15a715cfb41d04327bebc16f3bf8a98fed6fb5ba"
+    },
+    {
+      "path": "lib/features/check_in/data/check_in_projection_parser.dart",
+      "gitBlob": "a4152225103e216594592c9ec2a97eee3e8a5b88",
+      "bytes": 2295,
+      "sha256": "6ae7a2eb21d55280542d7444ed5965b194dfbb025d7fea2c37bd228280770276",
+      "normalizedSha256": "6ae7a2eb21d55280542d7444ed5965b194dfbb025d7fea2c37bd228280770276"
+    },
+    {
+      "path": "lib/features/check_in/domain/check_in_place_repository.dart",
+      "gitBlob": "2705735c63dee02401d903b1bf0a25d1ad9b4199",
+      "bytes": 1358,
+      "sha256": "e4e32dc65bc63b8c5d574e8f55a54a21653456464c6c4df486f4f36a058510be",
+      "normalizedSha256": "e4e32dc65bc63b8c5d574e8f55a54a21653456464c6c4df486f4f36a058510be"
+    },
+    {
+      "path": "lib/features/check_in/domain/check_in_repository.dart",
+      "gitBlob": "7a74195c1f5ec891ae75df6fba5b28ae639833bd",
+      "bytes": 1723,
+      "sha256": "33f5a54a0f21bc15a7ad560dd30f1684aed481168a0692a4be26e01929a9d27f",
+      "normalizedSha256": "33f5a54a0f21bc15a7ad560dd30f1684aed481168a0692a4be26e01929a9d27f"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_place_controller.dart",
+      "gitBlob": "2fba00ebbdbfd541f0b5e0c8316761a582b53533",
+      "bytes": 3259,
+      "sha256": "9b24b48aaf76fbeedba90b1a2c67c1203118afd3de9dcf2dcf3466a11f2ae1d2",
+      "normalizedSha256": "9b24b48aaf76fbeedba90b1a2c67c1203118afd3de9dcf2dcf3466a11f2ae1d2"
+    },
+    {
+      "path": "lib/features/check_in/presentation/check_in_place_controls.dart",
+      "gitBlob": "2ff7c3e10c27f1ab1466b18c1c67d16f3fbb050b",
+      "bytes": 5658,
+      "sha256": "847da696db74c5db746f85f2d44ff25abccc3604847766a0734872e59c683416",
+      "normalizedSha256": "847da696db74c5db746f85f2d44ff25abccc3604847766a0734872e59c683416"
+    },
+    {
+      "path": "lib/features/check_in/presentation/located_check_in_actions.dart",
+      "gitBlob": "fc1cbda968dad082d131ea5b3bea2c64a9b1b95a",
+      "bytes": 5852,
+      "sha256": "00bbc3a661c3b2c72c6572e83c1b81d05dafc9e0f36caf876cf79d674a2f35f2",
+      "normalizedSha256": "00bbc3a661c3b2c72c6572e83c1b81d05dafc9e0f36caf876cf79d674a2f35f2"
+    },
+    {
+      "path": "lib/features/check_in/presentation/located_check_in_controller.dart",
+      "gitBlob": "07ecd40ec9ab360e839de49456610764a34013a3",
+      "bytes": 7426,
+      "sha256": "05e0b7d05c67e037abfe8c4721a4c97b44acbd62a3b22adf3c933227785c13b8",
+      "normalizedSha256": "05e0b7d05c67e037abfe8c4721a4c97b44acbd62a3b22adf3c933227785c13b8"
+    },
+    {
+      "path": "lib/features/friends/data/backend_friend_activity_repository.dart",
+      "gitBlob": "7928df1fdd75a662316f81a2efabab7bed97f254",
+      "bytes": 2484,
+      "sha256": "d772ee1e0752da5a77f3d65b242ac3ad156e4eed6b82e5c334a077b28b2607d0",
+      "normalizedSha256": "d772ee1e0752da5a77f3d65b242ac3ad156e4eed6b82e5c334a077b28b2607d0"
+    },
+    {
+      "path": "lib/features/friends/data/backend_friend_discovery_repository.dart",
+      "gitBlob": "21a6e7586ff52d61f5e1df1e2b394aeed3f0d91e",
+      "bytes": 3334,
+      "sha256": "bb9ac9935842bbd832ebf3cf8a2984375456cef5dd185bf5770852e78cca1bed",
+      "normalizedSha256": "bb9ac9935842bbd832ebf3cf8a2984375456cef5dd185bf5770852e78cca1bed"
+    },
+    {
+      "path": "lib/features/friends/data/backend_friend_ignore_repository.dart",
+      "gitBlob": "dfa61d6d4ede767f7d255c1f6c1a97af26c9b9c7",
+      "bytes": 3863,
+      "sha256": "b9de0014219f96137bb4c48873cf721e2939bdb60978579a27109140ca779f92",
+      "normalizedSha256": "b9de0014219f96137bb4c48873cf721e2939bdb60978579a27109140ca779f92"
+    },
+    {
+      "path": "lib/features/friends/data/backend_friend_repository.dart",
+      "gitBlob": "bcbf6dad2c0ba43fe08ac531704a528fe3bbc272",
+      "bytes": 8156,
+      "sha256": "408cfec9aad56264cdfe5f6690186c7609a25a6f09523d85fa443d0ff43fab7e",
+      "normalizedSha256": "408cfec9aad56264cdfe5f6690186c7609a25a6f09523d85fa443d0ff43fab7e"
+    },
+    {
+      "path": "lib/features/friends/data/backend_social_repository.dart",
+      "gitBlob": "f16480e943f142b4d4471fdaf3dc54f23d1f4095",
+      "bytes": 8917,
+      "sha256": "1af412ee40cd2784a0cce5932da270892b00751aebfa74f8482a8317b26f87cd",
+      "normalizedSha256": "1af412ee40cd2784a0cce5932da270892b00751aebfa74f8482a8317b26f87cd"
+    },
+    {
+      "path": "lib/features/friends/discovery_providers.dart",
+      "gitBlob": "5c5ead5e5efec0f363c936bd40b67f9a2c48241a",
+      "bytes": 625,
+      "sha256": "581f31963255e609a0f9dc29b53cdf11e65d7b1edc6a99b31f1248a1055ee27a",
+      "normalizedSha256": "581f31963255e609a0f9dc29b53cdf11e65d7b1edc6a99b31f1248a1055ee27a"
+    },
+    {
+      "path": "lib/features/friends/domain/friend_activity_repository.dart",
+      "gitBlob": "62fe8ccb3a61833db9e220cacd003bbdd71f6ead",
+      "bytes": 829,
+      "sha256": "8e0cc78b181440642927d0e79be6a97aa53063a5884a4187e59a2d90734cbc3f",
+      "normalizedSha256": "8e0cc78b181440642927d0e79be6a97aa53063a5884a4187e59a2d90734cbc3f"
+    },
+    {
+      "path": "lib/features/friends/domain/friend_discovery_repository.dart",
+      "gitBlob": "b3c6ae4785663b611d5c064efa0a0b6796354ee4",
+      "bytes": 629,
+      "sha256": "30fb69160ae2aa396b23d1b6b5024871c0a63fe31143f6f39d02f81556f4e533",
+      "normalizedSha256": "30fb69160ae2aa396b23d1b6b5024871c0a63fe31143f6f39d02f81556f4e533"
+    },
+    {
+      "path": "lib/features/friends/domain/friend_ignore_repository.dart",
+      "gitBlob": "5e1c602ae5cffe479e054c709dda5362cf76b09e",
+      "bytes": 746,
+      "sha256": "623ca24a294c4fa5d3b5bbfdc1c4e3c4127acc4e80e5718fff34cbd976c78fc5",
+      "normalizedSha256": "623ca24a294c4fa5d3b5bbfdc1c4e3c4127acc4e80e5718fff34cbd976c78fc5"
+    },
+    {
+      "path": "lib/features/friends/domain/friend_repository.dart",
+      "gitBlob": "58596114dee9b7fedf0513ce2986805540e2725d",
+      "bytes": 1444,
+      "sha256": "dab6e6df8cf93a8544f76cba3772c060f52ab844d4aa45cc2efb3c27b57f88f5",
+      "normalizedSha256": "dab6e6df8cf93a8544f76cba3772c060f52ab844d4aa45cc2efb3c27b57f88f5"
+    },
+    {
+      "path": "lib/features/friends/domain/social_repository.dart",
+      "gitBlob": "5bc692289c5c6065669202605f252b48d5f1f589",
+      "bytes": 2245,
+      "sha256": "d57cb0c519c1f1ad9af208ea150bd4f68bdab8453573dd2e3f4ae56886a3701c",
+      "normalizedSha256": "d57cb0c519c1f1ad9af208ea150bd4f68bdab8453573dd2e3f4ae56886a3701c"
+    },
+    {
+      "path": "lib/features/friends/presentation/check_in_points_map.dart",
+      "gitBlob": "18cce3f9fb2f1c7de6e2360be88b05bd1f88866c",
+      "bytes": 5949,
+      "sha256": "1f32e56f504bfc89f65471096bbef22e00d6b0d503275c9c7ddd61464c09d644",
+      "normalizedSha256": "1f32e56f504bfc89f65471096bbef22e00d6b0d503275c9c7ddd61464c09d644"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_activity_panel.dart",
+      "gitBlob": "b13c601ba53737feebb6b7070368aaa9fd2581aa",
+      "bytes": 5425,
+      "sha256": "7615c81f45b1748dd495df809fb1b9f41dfc65eb1314ee77097dfb9c2a320cbb",
+      "normalizedSha256": "7615c81f45b1748dd495df809fb1b9f41dfc65eb1314ee77097dfb9c2a320cbb"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_discovery_controller.dart",
+      "gitBlob": "0402c5447adba07acd19fa65ff6aba57bcde37ac",
+      "bytes": 2861,
+      "sha256": "63989a1a3652db2b21ae27c25e4feab9d13d3b750ff44b75d3e827007d77df16",
+      "normalizedSha256": "63989a1a3652db2b21ae27c25e4feab9d13d3b750ff44b75d3e827007d77df16"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_discovery_panel.dart",
+      "gitBlob": "9dddebeee44cfa87aa67ddf7e037ca86a8e619e7",
+      "bytes": 8520,
+      "sha256": "d38aa4cefd577565f41c1a58e7777d2e208c4b64a5855fc044315c7791ccac86",
+      "normalizedSha256": "d38aa4cefd577565f41c1a58e7777d2e208c4b64a5855fc044315c7791ccac86"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_ignore_controller.dart",
+      "gitBlob": "fc07e8dbe1c35e314fce6a222204a6507ffff0c5",
+      "bytes": 5949,
+      "sha256": "0ede22c9bce8acf047f8845a35157a18f13054bc1f1dc23e60862eb78af9b536",
+      "normalizedSha256": "0ede22c9bce8acf047f8845a35157a18f13054bc1f1dc23e60862eb78af9b536"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_module_page.dart",
+      "gitBlob": "51864e10157a56ba8d946cab5a9d714661b632fa",
+      "bytes": 5304,
+      "sha256": "a854a017d5320f575d3bad2c30143380134a2299cbcc519ae6aa1e2c2e815737",
+      "normalizedSha256": "a854a017d5320f575d3bad2c30143380134a2299cbcc519ae6aa1e2c2e815737"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_page.dart",
+      "gitBlob": "895dcf815be355f7c62f418e42286704912b6941",
+      "bytes": 7890,
+      "sha256": "f33d634b99aae9d1e38fa6d8c44dd0e783cdf03c66c51e10f08e905e1c174f45",
+      "normalizedSha256": "f33d634b99aae9d1e38fa6d8c44dd0e783cdf03c66c51e10f08e905e1c174f45"
+    },
+    {
+      "path": "lib/features/friends/presentation/ignored_people_page.dart",
+      "gitBlob": "e0a726229692cf4f21cde13e33be71b0fc4e27d9",
+      "bytes": 3636,
+      "sha256": "431ed7d7c79ff39e0f3598c12bdad6f1d72ec147ecabb872376faa62cccea701",
+      "normalizedSha256": "431ed7d7c79ff39e0f3598c12bdad6f1d72ec147ecabb872376faa62cccea701"
+    },
+    {
+      "path": "lib/features/friends/presentation/my_friends_page.dart",
+      "gitBlob": "84a7d740fee73dd6cd0fff34d1fb37189aa58464",
+      "bytes": 7258,
+      "sha256": "f6e88c361bf1c5a9b97f4702677fa1b5fcfd7e1fabbcc1ce9a750010bd34b078",
+      "normalizedSha256": "f6e88c361bf1c5a9b97f4702677fa1b5fcfd7e1fabbcc1ce9a750010bd34b078"
+    },
+    {
+      "path": "lib/features/friends/presentation/social_profile_controller.dart",
+      "gitBlob": "7b777a4d80f1e784cf66887f183f2f38a6a4e671",
+      "bytes": 5547,
+      "sha256": "0aad7fbe2f3aaf7d0cd213a7eb438a597e3fb435fd909751b36a2fbc37ddf2e0",
+      "normalizedSha256": "0aad7fbe2f3aaf7d0cd213a7eb438a597e3fb435fd909751b36a2fbc37ddf2e0"
+    },
+    {
+      "path": "lib/features/friends/presentation/social_profile_page.dart",
+      "gitBlob": "12eea50a37c8ff40e91578170b063cd69c9ca4f6",
+      "bytes": 12489,
+      "sha256": "c2232dcfc6544a7a8af7921b15d40b3b835aa7263d21cf4a15d786eb076b06be",
+      "normalizedSha256": "c2232dcfc6544a7a8af7921b15d40b3b835aa7263d21cf4a15d786eb076b06be"
+    },
+    {
+      "path": "lib/features/friends/social_providers.dart",
+      "gitBlob": "bced32679d7ec7719422a4240878903bc226d397",
+      "bytes": 317,
+      "sha256": "cc72933a981a7b81af077e1f4373772d1aaed9a036866d9a90d31d37bb7ac07c",
+      "normalizedSha256": "cc72933a981a7b81af077e1f4373772d1aaed9a036866d9a90d31d37bb7ac07c"
+    },
+    {
+      "path": "lib/features/weather/data/backend_home_weather_repository.dart",
+      "gitBlob": "46e9d0ebb8841100baaa3ba7d3726c75a09e1790",
+      "bytes": 1338,
+      "sha256": "285bba6422767ea49e9e144829c21cb2d86fa703eb11314767d97ba85295bb37",
+      "normalizedSha256": "285bba6422767ea49e9e144829c21cb2d86fa703eb11314767d97ba85295bb37"
+    },
+    {
+      "path": "lib/features/weather/data/geolocator_foreground_location.dart",
+      "gitBlob": "4b7968f78659fe57b89ef42cb4278fad328c3655",
+      "bytes": 2934,
+      "sha256": "1a353c44a23ff0673f851c9b93ecd7b558c87a3412a96b6478151af22fd3cbf7",
+      "normalizedSha256": "1a353c44a23ff0673f851c9b93ecd7b558c87a3412a96b6478151af22fd3cbf7"
+    },
+    {
+      "path": "lib/features/weather/domain/foreground_location.dart",
+      "gitBlob": "ba94a3ec3f06efe1b7ad89673ad562a05ecec217",
+      "bytes": 332,
+      "sha256": "54e25dde77ce80c41daa7eb1de9b08ab7d85ba7e18fc301e780bcee8e8c5894d",
+      "normalizedSha256": "54e25dde77ce80c41daa7eb1de9b08ab7d85ba7e18fc301e780bcee8e8c5894d"
+    },
+    {
+      "path": "lib/features/weather/domain/home_weather_repository.dart",
+      "gitBlob": "6efcf563cc41cdf3f4150f103071b897aec44d5e",
+      "bytes": 223,
+      "sha256": "3f040d22fcb3309ace2481008744d753f647757468985a13c67e53c5685739d4",
+      "normalizedSha256": "3f040d22fcb3309ace2481008744d753f647757468985a13c67e53c5685739d4"
+    },
+    {
+      "path": "lib/features/weather/domain/weather.dart",
+      "gitBlob": "323d21ff5dcec1aee1196ca3e9ac7017e9c4e49c",
+      "bytes": 2569,
+      "sha256": "bf5c4afc5eeca97c477f345abd2680049fba856ff41e646a4d83cda6b7e9d1dc",
+      "normalizedSha256": "bf5c4afc5eeca97c477f345abd2680049fba856ff41e646a4d83cda6b7e9d1dc"
+    },
+    {
+      "path": "lib/features/weather/presentation/home_weather_card.dart",
+      "gitBlob": "8360ddc4e9c2aa72be4216202fbe6db31f7a045a",
+      "bytes": 4293,
+      "sha256": "5148e68025238b70806444e046f647e72931b245f0d19b679e20176fbfa57d4b",
+      "normalizedSha256": "5148e68025238b70806444e046f647e72931b245f0d19b679e20176fbfa57d4b"
+    },
+    {
+      "path": "lib/features/weather/presentation/home_weather_controller.dart",
+      "gitBlob": "81dad056e71d4dd45ab0a5352d35016399e09956",
+      "bytes": 2863,
+      "sha256": "b97222bb6a45f9dbc4bd70ad7c7f6186ccf536b7f1329055a2dc5d29e9cb3d6f",
+      "normalizedSha256": "b97222bb6a45f9dbc4bd70ad7c7f6186ccf536b7f1329055a2dc5d29e9cb3d6f"
+    },
+    {
+      "path": "lib/features/weather/presentation/weather_card.dart",
+      "gitBlob": "757328fe6419bb2bc750804a339970af1068152a",
+      "bytes": 1913,
+      "sha256": "b6c8240b79272cf6ad1800e1bc51025673f153bc45a3b923152c280199761045",
+      "normalizedSha256": "b6c8240b79272cf6ad1800e1bc51025673f153bc45a3b923152c280199761045"
+    },
+    {
+      "path": "lib/features/weather/weather_providers.dart",
+      "gitBlob": "8450dc908a4e8d6f18863f73da789b531dcaad75",
+      "bytes": 280,
+      "sha256": "f628e6a6d36606a3de7edd0b56fb62d4fc9d93bc949088a297b751ac69b18ede",
+      "normalizedSha256": "f628e6a6d36606a3de7edd0b56fb62d4fc9d93bc949088a297b751ac69b18ede"
+    },
+    {
+      "path": "pubspec.lock",
+      "gitBlob": "179307b86fed4144e534c24c3002a016bcf2fddb",
+      "bytes": 29895,
+      "sha256": "c58dfde1680a8c375f8e51ae66d4aa1130479e8567da3d379efd95d28f7301a3",
+      "normalizedSha256": "c58dfde1680a8c375f8e51ae66d4aa1130479e8567da3d379efd95d28f7301a3"
+    },
+    {
+      "path": "pubspec.yaml",
+      "gitBlob": "1731c5e7a6fad87d2b0a6bbf7baac2dca32cd250",
+      "bytes": 4493,
+      "sha256": "df0d00e4e75c7ba198e87761ab0e135838abdf58edbf7034da169da7ad299d59",
+      "normalizedSha256": "df0d00e4e75c7ba198e87761ab0e135838abdf58edbf7034da169da7ad299d59"
+    },
+    {
+      "path": "test/features/friend_discovery_activity_map_test.dart",
+      "gitBlob": "2ed7d907b14301bbf9f174010eea058e34c26649",
+      "bytes": 7109,
+      "sha256": "524e7ebc8af395e6d13fc423d4c8d63a0a4a8283845c5197d7f9a87bcb3e3e94",
+      "normalizedSha256": "524e7ebc8af395e6d13fc423d4c8d63a0a4a8283845c5197d7f9a87bcb3e3e94"
+    },
+    {
+      "path": "test/features/friend_ignore_flow_test.dart",
+      "gitBlob": "879bbaea26150119dac164601f6f463fcc40c125",
+      "bytes": 18252,
+      "sha256": "1db380dcc193b64fea5797b07122866a29a5d997bec84bd7c040a6a156632f54",
+      "normalizedSha256": "1db380dcc193b64fea5797b07122866a29a5d997bec84bd7c040a6a156632f54"
+    },
+    {
+      "path": "test/features/located_check_in_flow_test.dart",
+      "gitBlob": "dd32810da5b205870fd29ad5941ff7c7d231b20e",
+      "bytes": 16085,
+      "sha256": "cb1d46831e0471429cda48d459d2617d409a778be56816342627bdb5acf22dd4",
+      "normalizedSha256": "cb1d46831e0471429cda48d459d2617d409a778be56816342627bdb5acf22dd4"
+    },
+    {
+      "path": "test/features/social_profile_flow_test.dart",
+      "gitBlob": "a8c1015eed641564bfe0bbaacb9657197e8dab63",
+      "bytes": 10538,
+      "sha256": "241399b65c3744433372c0a68351f537e8174fe00a4f095b2b2697e524e31735",
+      "normalizedSha256": "241399b65c3744433372c0a68351f537e8174fe00a4f095b2b2697e524e31735"
+    },
+    {
+      "path": "tool/run_social_weather_emulators.mjs",
+      "gitBlob": "f1f78f1f96b488cde5d54c89c5eb2d5f73419939",
+      "bytes": 3223,
+      "sha256": "9bb54f664fd5c2788a496065524f0a59c7b6b5d2ff217dd69fdf3ec7fbf2f65a",
+      "normalizedSha256": "9bb54f664fd5c2788a496065524f0a59c7b6b5d2ff217dd69fdf3ec7fbf2f65a"
+    }
+  ],
+  "logs": [
+    {
+      "file": "build/jin-ignore/analyze-01.log",
+      "bytes": 2647,
+      "sha256": "a2625df8cfe3ea8ecbe9d84718624d1c0baaf482715572417e26a2f10e4c8ec7"
+    },
+    {
+      "file": "build/jin-ignore/backend-01.log",
+      "bytes": 2146,
+      "sha256": "fb9016c12d76d80052d1fffe5d39d215bc0a8012d50764e462f4460bf8288ae2"
+    },
+    {
+      "file": "build/jin-ignore/compatibility-checkin.log",
+      "bytes": 873,
+      "sha256": "8c662acea54674a331039b9842edaba9e363012c2f595e3841845dbddbdda79e"
+    },
+    {
+      "file": "build/jin-ignore/compatibility-place.log",
+      "bytes": 356,
+      "sha256": "570970029704e73b00db348c3c0ff26c6617786e710419f4a417ea0341a8a62d"
+    },
+    {
+      "file": "build/jin-ignore/compile-01.log",
+      "bytes": 283,
+      "sha256": "cbdb4d1da59937d7ecaaafde3cadde48bff48bcbe6cc0bda061b5cfc272d89dd"
+    },
+    {
+      "file": "build/jin-ignore/compile-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "build/jin-ignore/compile-03.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "build/jin-ignore/compile-04.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "build/jin-ignore/compile-05.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "build/jin-ignore/contract-01.log",
+      "bytes": 624,
+      "sha256": "d909e3ec2f90840c9ffcedd11a8fa4b1beb4888ff8278dd6bfff199d943aad3f"
+    },
+    {
+      "file": "build/jin-ignore/final-analyze-02.log",
+      "bytes": 498,
+      "sha256": "2122deb03d98f266b211937fa1eeed7e8ca829367f43bfb636b2478e1e264c6f"
+    },
+    {
+      "file": "build/jin-ignore/final-analyze.log",
+      "bytes": 610,
+      "sha256": "fc0f185b53a50f5e1fa4f212344cc98622f9565b85fe114b2591f6209836ffb1"
+    },
+    {
+      "file": "build/jin-ignore/final-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "build/jin-ignore/final-contract.log",
+      "bytes": 225,
+      "sha256": "1acfe24dc1c8faefc494817f57907adb891dcd44cc7033f4f9168c56186d0eda"
+    },
+    {
+      "file": "build/jin-ignore/final-flutter.log",
+      "bytes": 13331,
+      "sha256": "eacbb80b18d38f72c8a3f524f91404f1f52a0ad560f1899cf2d209f74b3928fc"
+    },
+    {
+      "file": "build/jin-ignore/final-format.log",
+      "bytes": 49,
+      "sha256": "cab22d4db70ccdf779843f6a54bb100ec09eda3bd14e8928ed789d2e26a26ef4"
+    },
+    {
+      "file": "build/jin-ignore/final-whitespace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "build/jin-ignore/flutter-01.log",
+      "bytes": 4794,
+      "sha256": "40995462ab00331263e61c1002419fb4424acbac8b5a9dbac1dd044764727346"
+    },
+    {
+      "file": "build/jin-ignore/flutter-02.log",
+      "bytes": 107980,
+      "sha256": "b2c8efc3e8512b56bdede20e7c0179db7ce9c6211e4a51d12983f86da708bbe7"
+    },
+    {
+      "file": "build/jin-ignore/flutter-03.log",
+      "bytes": 3995,
+      "sha256": "678d7c4fc962c3a617ff6d8a7ec8acbb2f3f736afb2aa09ae49dbf06b348cc83"
+    },
+    {
+      "file": "build/jin-ignore/flutter-04.log",
+      "bytes": 1546,
+      "sha256": "291bda131b3ac6ee1c435573ef013293f3d29210ff61b927da2dc286bc24f599"
+    },
+    {
+      "file": "build/jin-ignore/format-01.log",
+      "bytes": 673,
+      "sha256": "9426d92151214cfd623bf25be2e794627cd328013b3a539ea4422d62ecb3f2fd"
+    },
+    {
+      "file": "build/jin-ignore/format-02.log",
+      "bytes": 386,
+      "sha256": "f1b034dc8638ba8c3117c47b809ba2583ea9cdd887a18a524b382e1843c1bd36"
+    },
+    {
+      "file": "build/jin-ignore/format-compatibility.log",
+      "bytes": 274,
+      "sha256": "ad899b58015d537a32acef765edc5c90b85f5d59d4cd608d10518920998d3d92"
+    },
+    {
+      "file": "build/jin-ignore/prior-firestore-debug.log",
+      "bytes": 813,
+      "sha256": "c96aa92505671fa0988d368ecf0f8ddc0ed13b29d109cbe0698557c698099262"
+    },
+    {
+      "file": "build/jin-ignore/sdk-01.log",
+      "bytes": 2637,
+      "sha256": "fec439fd62b9a7bd80cfa2f71a5466a6ad8dafdafbe9d158d8a67a8b62af1673"
+    }
+  ],
+  "commandResults": [
+    {
+      "phase": "preparation",
+      "command": "node --test backend/dist/test/friend-ignore.test.js backend/dist/test/friend-recommendation-source.test.js",
+      "pass": 19,
+      "fail": 0,
+      "exit": 0,
+      "log": "backend-01.log",
+      "note": "Development invocation before final transport error enum/type-only Port cleanup; not a final-head rerun."
+    },
+    {
+      "phase": "preparation",
+      "command": "node --test backend/dist/test/contract/openapi.test.js",
+      "pass": 6,
+      "fail": 0,
+      "exit": 0,
+      "log": "contract-01.log"
+    },
+    {
+      "phase": "frozen backend same at 173a859 and c71c0c6",
+      "command": "node typescript/bin/tsc --project backend/tsconfig.json",
+      "exit": 0,
+      "log": "final-compile.log"
+    },
+    {
+      "phase": "173a859",
+      "command": "node --test backend/dist/test/friend-ignore-contract.test.js",
+      "pass": 1,
+      "fail": 0,
+      "exit": 0,
+      "log": "final-contract.log"
+    },
+    {
+      "phase": "actual isolated SDK; emitted runtime equivalence above",
+      "command": "node tool/run_social_weather_emulators.mjs --friend-ignore",
+      "pass": 6,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0,
+      "log": "sdk-01.log",
+      "cleanup": {
+        "documents": 18,
+        "authUsers": 3,
+        "profileRemoved": true,
+        "portsFree": [
+          8080,
+          9099,
+          4400,
+          4500,
+          9150
+        ]
+      },
+      "warning": "Five children plus parent. Actual Firebase/Auth and Fastify injection, no provider or physical phone. Recreated HTTP module and fresh Auth token, not OS/service process restart."
+    },
+    {
+      "phase": "173a859",
+      "command": "flutter test --no-pub test/features/friend_ignore_flow_test.dart test/features/backend_transport_failure_test.dart test/features/backend_repositories_test.dart",
+      "pass": 43,
+      "fail": 2,
+      "exit": 1,
+      "log": "final-flutter.log",
+      "note": "All 12 new ignore cases pass. Two existing single-Check-in UTC fixtures exposed unified parser regression; fixed in c71c0c6. Do not relabel this invocation 45/45."
+    },
+    {
+      "phase": "c71c0c6",
+      "command": "flutter test --no-pub test/features/backend_repositories_test.dart --plain-name BackendCheckInRepository",
+      "pass": 7,
+      "fail": 0,
+      "exit": 0,
+      "log": "compatibility-checkin.log"
+    },
+    {
+      "phase": "c71c0c6",
+      "command": "flutter test --no-pub test/features/located_check_in_flow_test.dart --plain-name \"HTTP create sends exact point\"",
+      "pass": 1,
+      "fail": 0,
+      "exit": 0,
+      "log": "compatibility-place.log"
+    },
+    {
+      "phase": "c71c0c6",
+      "command": "dart analyze --fatal-infos (15 affected Dart files)",
+      "exit": 0,
+      "log": "final-analyze-02.log"
+    },
+    {
+      "phase": "c71c0c6",
+      "command": "dart format --output=none --set-exit-if-changed (15 files)",
+      "files": 15,
+      "changed": 0,
+      "exit": 0,
+      "log": "final-format.log"
+    },
+    {
+      "phase": "c71c0c6",
+      "command": "git diff 927f775 HEAD --check",
+      "exit": 0,
+      "log": "final-whitespace.log"
+    }
+  ],
+  "notRun": [
+    "Final LI router/bootstrap/APK composition and two-account device acceptance",
+    "SHI Event participation producer wiring",
+    "Actual account permanent-deletion executor",
+    "OS/service process restart and real-account ignore persistence",
+    "Physical location/OSM cache/provider quota/weather/device/iOS",
+    "Independent SHI review of this contribution"
+  ]
+}

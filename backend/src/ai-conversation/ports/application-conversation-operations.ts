@@ -1,7 +1,7 @@
 import type { AuthPrincipal, IdentityVerificationResult } from "../../shared/ports/identity-verifier.js";
 import type { RuntimeClock } from "../../ai-runtime/ports/runtime-clock.js";
 import type { AsyncCloseObservation, AsyncConversationIdentity, AsyncEffectContext, AsyncOperation, AsyncSavedUser } from "./async-conversation.js";
-import type { ConversationCaller, ConversationReadback, ConversationResult } from "./conversation-operations.js";
+import type { ConversationCaller, ConversationReadback, ConversationResult, ConversationSummaryPage } from "./conversation-operations.js";
 import type { StoredConversationMessage } from "./real-conversation-store.js";
 import type { PresentationMetadata } from "./conversation-lifecycle.js";
 import type { AcceptedContextRead, ContextReadResult } from "./real-context-reader.js";
@@ -112,6 +112,7 @@ export interface ConversationOperationExecutor {
  * live/full-precision expiry, source rules and all same-U pending/canonical pair.
  * Missing methods fail unavailable; no absent-row/no-op deletion success. */
 export interface ConversationOperationReaders {
+  listConversations?(context: ConversationOrdinaryContext, after: string | undefined): Promise<ConversationResult<ConversationSummaryPage>>;
   verifyTarget?(context: ConversationOrdinaryContext, conversationId: string,
     userMessageId?: string): Promise<ConversationResult<void>>;
   retryUser?(context: ConversationOrdinaryContext, operation: AsyncOperation,

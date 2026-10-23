@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
+import '../../../core/presentation/local_time.dart';
 import '../../auth/auth_providers.dart';
 import '../domain/event_detail_repository.dart';
 import 'event_detail_controller.dart';
@@ -52,7 +53,7 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
       body: SafeArea(
         child: ListView(
           key: const Key('route-event-detail'),
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           children: [
             if (widget.syntheticPreview) ...[
               const Card(
@@ -109,11 +110,13 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
                         children: [
                           const Icon(Icons.schedule),
                           const SizedBox(height: 8),
-                          Text('Starts: ${value.startAt.toLocal()}'),
+                          Text(
+                            'Starts: ${localTimeLabel(context, value.startAt)}',
+                          ),
                           Text(
                             value.endAt == null
                                 ? 'End time not provided.'
-                                : 'Ends: ${value.endAt!.toLocal()}',
+                                : 'Ends: ${localTimeLabel(context, value.endAt!)}',
                           ),
                         ],
                       ),

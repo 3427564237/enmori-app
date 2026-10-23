@@ -7,6 +7,8 @@ final class HomeShellPage extends StatelessWidget {
   const HomeShellPage({
     required this.onStartCheckIn,
     this.socialStyle = false,
+    this.socialSection,
+    this.weatherSection,
     this.onSelectTab,
     this.onOpenSettings,
     this.onEditInterests,
@@ -14,14 +16,18 @@ final class HomeShellPage extends StatelessWidget {
     this.onOpenFriends,
     this.onManagePersonas,
     this.onOpenHistory,
+    this.onOpenFootprint,
     this.onOpenAi,
     this.onOpenEvent,
+    this.recommendationCardBuilder,
     this.onBrowseActivities,
     required this.onSeeAllEvents,
     super.key,
   });
 
   final bool socialStyle;
+  final Widget? socialSection;
+  final Widget? weatherSection;
   final ValueChanged<int>? onSelectTab;
   final VoidCallback? onOpenSettings;
   final VoidCallback onStartCheckIn;
@@ -30,8 +36,10 @@ final class HomeShellPage extends StatelessWidget {
   final VoidCallback? onOpenFriends;
   final VoidCallback? onManagePersonas;
   final VoidCallback? onOpenHistory;
+  final VoidCallback? onOpenFootprint;
   final VoidCallback? onOpenAi;
   final void Function(String)? onOpenEvent;
+  final RecommendationCardBuilder? recommendationCardBuilder;
   final VoidCallback onSeeAllEvents;
   final VoidCallback? onBrowseActivities;
 
@@ -88,7 +96,7 @@ final class HomeShellPage extends StatelessWidget {
                 key: const Key('home-check-in-history'),
                 onPressed: onOpenHistory,
                 icon: const Icon(Icons.history),
-                label: const Text('Footprint'),
+                label: const Text('Check-in History'),
               ),
             if (onOpenAi != null)
               OutlinedButton.icon(
@@ -113,6 +121,7 @@ final class HomeShellPage extends StatelessWidget {
             EventRecommendationsSection(
               onSeeAll: onSeeAllEvents,
               onOpenEvent: onOpenEvent,
+              recommendationCardBuilder: recommendationCardBuilder,
             ),
           ],
         ),
@@ -144,7 +153,9 @@ final class HomeShellPage extends StatelessWidget {
       actions: [
         IconButton(
           key: const Key('social-settings'),
-          tooltip: 'Settings & privacy',
+          tooltip: onOpenSettings == null
+              ? 'Settings & privacy unavailable in this version'
+              : 'Settings & privacy',
           onPressed: onOpenSettings,
           icon: const Icon(Icons.settings_outlined),
         ),
@@ -160,128 +171,171 @@ final class HomeShellPage extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 660),
           child: ListView(
             key: const Key('route-home'),
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
-              const Text(
-                'YOUR WORLD, A LITTLE CLOSER',
-                style: TextStyle(
-                  color: Color(0xff696963),
-                  fontSize: 11,
-                  letterSpacing: 1.2,
+              Semantics(
+                header: true,
+                child: Text(
+                  'Today',
+                  style: Theme.of(context).textTheme.headlineLarge,
                 ),
               ),
-              const SizedBox(height: 12),
               Text(
-                'Find your people.\nMake a little room.',
-                style: Theme.of(context).textTheme.headlineLarge,
+                MaterialLocalizations.of(context)
+                    .formatFullDate(DateTime.now()),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Record this moment, and how you feel.',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Discover activities and keep a moment for yourself.',
-                style: TextStyle(color: Color(0xff696963), height: 1.6),
-              ),
               FilledButton.icon(
                 key: const Key('r6-new-check-in-button'),
                 onPressed: onStartCheckIn,
                 icon: const Icon(Icons.edit_note),
                 label: const Text('New Check-in'),
               ),
+              if (weatherSection != null) ...[
+                const SizedBox(height: 16),
+                weatherSection!,
+              ],
               const SizedBox(height: 24),
-              Card(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(22),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.explore_outlined,
-                        size: 36,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        'Discover activities',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Browse current source-backed events, then view the original event page.',
-                        style: TextStyle(height: 1.5),
-                      ),
-                      const SizedBox(height: 16),
-                      FilledButton.icon(
-                        key: const Key('home-browse-activities'),
-                        onPressed: onBrowseActivities,
-                        icon: const Icon(Icons.arrow_forward),
-                        label: const Text('Browse activities'),
-                      ),
-                      const SizedBox(height: 8),
-                      OutlinedButton.icon(
-                        key: const Key('home-recommended-activities'),
-                        onPressed: onSeeAllEvents,
-                        icon: const Icon(Icons.event_outlined),
-                        label: const Text('Recommended activities'),
-                      ),
-                    ],
+              if (onOpenEvent != null)
+                EventRecommendationsSection(
+                  heading: 'Events for you',
+                  onBrowseAll: onBrowseActivities,
+                  onSeeAll: null,
+                  onOpenEvent: onOpenEvent,
+                  recommendationCardBuilder: recommendationCardBuilder,
+                ),
+              ?socialSection,
+              if (onSelectTab == null || onOpenProfile == null) ...[
+                const Divider(height: 32),
+                Semantics(
+                  header: true,
+                  child: Text(
+                    'Your space',
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              Card(
-                child: ListTile(
+                const SizedBox(height: 4),
+                _HomeShortcut(
                   key: const Key('social-ai-card'),
-                  contentPadding: const EdgeInsets.all(17),
-                  leading: Icon(
-                    Icons.auto_awesome_outlined,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: const Text('A moment for yourself'),
-                  subtitle: const Text(
-                    'Talk with your active Persona and saved Notes.',
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
+                  icon: Icons.auto_awesome_outlined,
+                  title: 'AI conversation',
+                  description: 'Talk with your active Persona.',
                   onTap: onOpenAi,
                 ),
-              ),
-              const SizedBox(height: 14),
-              Card(
-                child: ListTile(
+                const SizedBox(height: 4),
+                _HomeShortcut(
                   key: const Key('home-check-in-history'),
-                  contentPadding: const EdgeInsets.all(17),
-                  leading: const Icon(Icons.history),
-                  title: const Text('Your own moments'),
-                  subtitle: const Text(
-                    'Open your saved Check-ins in Footprint.',
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
+                  icon: Icons.history,
+                  title: 'Check-in History',
+                  description: 'Open your saved Check-ins.',
                   onTap: onOpenHistory,
                 ),
-              ),
-              const SizedBox(height: 14),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  OutlinedButton.icon(
-                    key: const Key('home-manage-personas'),
-                    onPressed: onManagePersonas,
-                    icon: const Icon(Icons.manage_accounts_outlined),
-                    label: const Text('Manage Personas'),
-                  ),
-                  OutlinedButton.icon(
-                    key: const Key('edit-interests-button'),
-                    onPressed: onEditInterests,
-                    icon: const Icon(Icons.interests_outlined),
-                    label: const Text('Edit interests'),
+                if (onOpenFootprint != null) ...[
+                  const SizedBox(height: 4),
+                  _HomeShortcut(
+                    key: const Key('home-footprint'),
+                    icon: Icons.map_outlined,
+                    title: 'Footprint',
+                    description: 'See your Check-in points on the map.',
+                    onTap: onOpenFootprint,
                   ),
                 ],
-              ),
+                const Divider(height: 24),
+                Wrap(
+                  spacing: 12,
+                  children: [
+                    _HomeSecondaryAction(
+                      actionKey: const Key('home-manage-personas'),
+                      onPressed: onManagePersonas,
+                      icon: Icons.manage_accounts_outlined,
+                      label: 'Manage Personas',
+                    ),
+                    _HomeSecondaryAction(
+                      actionKey: const Key('edit-interests-button'),
+                      onPressed: onEditInterests,
+                      icon: Icons.interests_outlined,
+                      label: 'Edit interests',
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
       ),
     ),
+  );
+}
+
+/// Availability follows the existing route callback, never a simulated result.
+final class _HomeShortcut extends StatelessWidget {
+  const _HomeShortcut({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.onTap,
+    super.key,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    contentPadding: const EdgeInsets.symmetric(vertical: 4),
+    leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+    title: Text(title),
+    subtitle: Text(
+      onTap == null ? 'Unavailable in this version.' : description,
+      style: Theme.of(context).textTheme.bodyMedium
+          ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+    ),
+    trailing: onTap == null ? null : const Icon(Icons.chevron_right),
+    enabled: onTap != null,
+    onTap: onTap,
+  );
+}
+
+final class _HomeSecondaryAction extends StatelessWidget {
+  const _HomeSecondaryAction({
+    required this.actionKey,
+    required this.onPressed,
+    required this.icon,
+    required this.label,
+  });
+
+  final Key actionKey;
+  final VoidCallback? onPressed;
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      TextButton.icon(
+        key: actionKey,
+        onPressed: onPressed,
+        icon: Icon(icon),
+        label: Text(label),
+      ),
+      if (onPressed == null) ...[
+        const SizedBox(height: 8),
+        Text(
+          '$label is unavailable in this version.',
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+      ],
+    ],
   );
 }

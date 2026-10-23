@@ -302,7 +302,8 @@ test("Persona six-operation HTTP chain preserves response shapes, 201/200 replay
   const first = await create(f.app); assert.equal(first.statusCode, 201, first.body);
   assert.deepEqual(Object.keys(first.json()).sort(), ["persona", "stateRevision"]);
   const persona = first.json().persona;
-  assert.deepEqual(Object.keys(persona).sort(), ["createdAt", "displayName", "formatStyle", "personaId", "responseLength", "revision", "tone", "updatedAt"]);
+  assert.deepEqual(Object.keys(persona).sort(), ["createdAt", "displayName", "formatStyle", "personaId", "responseLength", "revision", "tone", "updatedAt",
+    "relationship", "shortIntroduction", "description", "personality", "communicationStyle", "interests", "extraInstructions"].sort());
   assert.equal(persona.displayName, "Calm"); assert.equal(persona.revision, 1);
   const replay = await create(f.app); assert.equal(replay.statusCode, 200); assert.deepEqual(replay.json(), first.json());
   assertFailure(await create(f.app, { ...createBody, tone: "warm" }), 409, "PERSONA_COMMAND_CONFLICT");

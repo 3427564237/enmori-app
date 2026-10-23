@@ -13,8 +13,8 @@ const lifetime = 30 * 24 * 60 * 60 * 1000;
 export const friendPairKey = (a: string, b: string): string => sha256(JSON.stringify([a, b].sort()));
 interface Member { id: string; data: StoredDocument }
 interface Pending { requestRef: string; senderAccountId: string; recipientAccountId: string; createdAt: string; expiresAt: string }
-interface Pair { accountIds: string[]; blockedByAccountIds: string[]; friendship: boolean; pending: Pending | null; listRefs?: Record<string, string> }
-function parsePair(data: StoredDocument | undefined, a: string, b: string): Pair | undefined {
+interface Pair { accountIds: string[]; blockedByAccountIds: string[]; friendship: boolean; pending: Pending | null; listRefs?: Record<string, string>; revisions?: Record<string,number>; specialCareByAccount?:Record<string,boolean> }
+export function parsePair(data: StoredDocument | undefined, a: string, b: string): Pair | undefined {
   if (data === undefined || !Array.isArray(data.accountIds) || JSON.stringify(data.accountIds) !== JSON.stringify([a,b].sort()) ||
     !Array.isArray(data.blockedByAccountIds) || !data.blockedByAccountIds.every(id => typeof id === "string" && (data.accountIds as unknown[]).includes(id)) ||
     new Set(data.blockedByAccountIds).size !== data.blockedByAccountIds.length || typeof data.friendship !== "boolean") return undefined;
@@ -28,6 +28,19 @@ function parsePair(data: StoredDocument | undefined, a: string, b: string): Pair
     pending = p as unknown as Pending;
   }
   const pair: Pair = { accountIds: [...data.accountIds] as string[], blockedByAccountIds: [...data.blockedByAccountIds] as string[], friendship: data.friendship, pending };
+  if(data.revisions!==undefined){
+    const revisions=data.revisions;
+    if(revisions===null||typeof revisions!=="object"||Array.isArray(revisions)||
+      Object.keys(revisions).some(id=>!pair.accountIds.includes(id))||
+      Object.values(revisions).some(n=>!Number.isSafeInteger(n)||n<0||n>=Number.MAX_SAFE_INTEGER))return undefined;
+    pair.revisions={...revisions} as Record<string,number>;
+  }
+  if(data.specialCareByAccount!==undefined){
+    const flags=data.specialCareByAccount;
+    if(flags===null||typeof flags!=="object"||Array.isArray(flags)||
+      Object.keys(flags).some(id=>!pair.accountIds.includes(id))||Object.values(flags).some(v=>typeof v!=="boolean"))return undefined;
+    pair.specialCareByAccount={...flags} as Record<string,boolean>;
+  }
   if (Object.hasOwn(data, "listRefs")) {
     const refs = data.listRefs;
     if (!data.friendship || refs === null || typeof refs !== "object" || Array.isArray(refs) ||
@@ -38,6 +51,16 @@ function parsePair(data: StoredDocument | undefined, a: string, b: string): Pair
   return pair;
 }
 const inboxPath = (accountId: string, ref: string) => `friend_inboxes/${accountId}/requests/${ref}`;
+/** Read-only trusted seam for composition; reuses the existing pair parser.
+ * The caller supplies its active transaction. No new relation is synthesized. */
+export async function readFriendVisibility(tx: FirestoreTransactionGateway, a: string, b: string): Promise<{ isFriend: boolean; isBlocked: boolean }> {
+  if (a === b) return { isFriend: false, isBlocked: false };
+  const data = await tx.get(`friend_pairs/${friendPairKey(a,b)}`);
+  if (data === undefined) return { isFriend: false, isBlocked: false };
+  const pair = parsePair(data,a,b);
+  if (pair === undefined) throw new Error('Invalid relationship facts');
+  return { isFriend: pair.friendship, isBlocked: pair.blockedByAccountIds.length !== 0 };
+}
 const listPath = (accountId: string, ref: string) => `friend_lists/${accountId}/members/${ref}`;
 const initialized = (data: StoredDocument | undefined): boolean => data?.initialized === true && Object.keys(data).length === 1;
 const validPointer = (data: StoredDocument | undefined): data is StoredDocument & { pairKey: string } =>
@@ -84,7 +107,11 @@ export class FirestoreFriendRepository implements FriendRepository {
       if (presentation === undefined || presentation.username !== username) return err("target_unavailable");
       if (target.id === own.value.id) return ok({ ...presentation, relationshipState: "self" });
       const key = friendPairKey(own.value.id, target.id), path = `friend_pairs/${key}`;
-      const pair = parsePair(await tx.get(path), own.value.id, target.id);
+      const storedPair = await tx.get(path);
+      // Normal newly registered accounts do not have a quadratic pre-seeded pair
+      // table. Absence means no relationship; malformed existing authority fails.
+      const pair = storedPair === undefined ? { accountIds:[own.value.id,target.id].sort(),
+        blockedByAccountIds:[],friendship:false,pending:null } : parsePair(storedPair, own.value.id, target.id);
       if (pair === undefined || pair.blockedByAccountIds.length !== 0) return err("target_unavailable");
       const now = this.now(), pending = pair.pending;
       let relationshipState: RelationshipState = pair.friendship ? "already_friends" : pending !== null && now < new Date(pending.expiresAt).getTime()
@@ -155,7 +182,7 @@ export class FirestoreFriendRepository implements FriendRepository {
       if (!initialized(await tx.get(`friend_lists/${ownerId}`)) || tx.listPage === undefined) return err("dependency_unavailable");
       if (after !== undefined && !validPointer(await tx.get(listPath(ownerId, after)))) return err("invalid_input");
       const rows = await tx.listPage(`friend_lists/${ownerId}/members`, after, 21);
-      const friends: { username: string; displayName: string }[] = [];
+      const friends: { username: string; displayName: string; specialCare?:boolean }[] = [];
       for (const row of rows.slice(0, 20)) {
         if (!isRequestRef(row.id) || !validPointer(row.data)) return err("dependency_unavailable");
         const stored = await tx.get(`friend_pairs/${row.data.pairKey}`);
@@ -176,7 +203,8 @@ export class FirestoreFriendRepository implements FriendRepository {
         if (reservation?.accountId !== targetId) return err("dependency_unavailable");
         if (profile.profileVisibility === "private" || profile.displayName === null) continue;
         if (parsed !== undefined && !normalizeFriendDisplayName(profile.displayName).includes(parsed.q)) continue;
-        friends.push({ username: profile.username, displayName: profile.displayName });
+        friends.push({ username: profile.username, displayName: profile.displayName,
+          ...(pair.specialCareByAccount?.[ownerId]===true?{specialCare:true}:{}) });
       }
       return ok({ friends, nextCursor: rows.length > 20 ? (parsed === undefined ? Buffer.from(rows[19]!.id).toString("base64url") : encodeFriendSearchCursor(parsed.q, rows[19]!.id)) : null });
     }); } catch { return err("dependency_unavailable"); }
@@ -198,6 +226,7 @@ export class FirestoreFriendRepository implements FriendRepository {
       }
       let listRefs: Record<string, string> | undefined;
       if (action === "accept") {
+        if(pair.accountIds.some(id=>(pair.revisions?.[id]??0)>=Number.MAX_SAFE_INTEGER-1))throw new Error("friend revision exhausted");
         // Initialization is an explicit fixture completeness assertion, never repaired on read/accept.
         for (const id of pair.accountIds) if (!initialized(await tx.get(`friend_lists/${id}`))) throw new Error("uninitialized friend list");
         listRefs = Object.fromEntries(pair.accountIds.map(id => [id, randomUUID()]));
@@ -205,7 +234,9 @@ export class FirestoreFriendRepository implements FriendRepository {
         for (const id of pair.accountIds) if (await tx.get(listPath(id, listRefs[id]!)) !== undefined) throw new Error("reference collision");
         for (const id of pair.accountIds) tx.create(listPath(id, listRefs[id]!), { pairKey: pointer.pairKey });
       }
-      tx.set(path, { ...pair, pending: null, friendship: action === "accept", ...(listRefs === undefined ? {} : { listRefs }) }); tx.delete(pointerPath);
+      tx.set(path, { ...pair, pending: null, friendship: action === "accept",
+        ...(action === "accept" ? {revisions:Object.fromEntries(pair.accountIds.map(id=>[id,(pair.revisions?.[id]??0)+1]))} : {}),
+        ...(listRefs === undefined ? {} : { listRefs }) }); tx.delete(pointerPath);
       return ok({ result: action === "accept" ? "accepted" : "declined" });
     }); } catch { return err("dependency_unavailable"); }
   }

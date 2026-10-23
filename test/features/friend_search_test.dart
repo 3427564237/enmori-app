@@ -236,11 +236,10 @@ void main() {
       expect(tester.widget<TextField>(field).focusNode!.hasFocus, true);
       expect(repo.queries, [null]);
       await tester.enterText(field, 'Alice');
-      tester.testTextInput.hide();
-      await tester.pumpAndSettle();
       repo.response = Success(MyFriendsPage(friends: [], nextCursor: cursor));
-      await tester.tap(find.byKey(const Key('my-friends-search')));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
+      expect(tester.widget<TextField>(field).focusNode!.hasFocus, isFalse);
       expect(find.text('No matching friends on this page.'), findsOneWidget);
       expect(find.text('Member A'), findsNothing);
       final semantics = tester.ensureSemantics();
@@ -253,8 +252,14 @@ void main() {
       ]) {
         final finder = find.byKey(Key(key));
         await tester.ensureVisible(finder);
+        await tester.pumpAndSettle();
         expect(tester.getSize(finder).height, greaterThanOrEqualTo(48));
-        expect(tester.getSemantics(finder).label, isNotEmpty);
+        final node = tester.getSemantics(finder).getSemanticsData();
+        if (key == 'my-friends-reload') {
+          expect(node.tooltip, 'Refresh friends');
+        } else {
+          expect(node.label, isNotEmpty, reason: key);
+        }
       }
       semantics.dispose();
       repo.response = const Success(MyFriendsPage(friends: [rowB]));

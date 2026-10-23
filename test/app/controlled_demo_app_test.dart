@@ -44,7 +44,174 @@ final class AuthDouble implements AuthRepository {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   testWidgets(
-    'v2 social Home opens existing recommendations using its authenticated Backend repository',
+    'explicit Events root connects Home, paged list, detail and saved state',
+    (tester) async {
+      tester.view.physicalSize = const Size(1200, 2200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auth = AuthDouble();
+      var status = 'none', revision = 0;
+      final batchCursors = <String?>[];
+      final client = MockClient((request) async {
+        expect(request.headers['authorization'], 'Bearer synthetic-test-token');
+        final path = request.url.path;
+        Object body;
+        if (path == '/v1/me/onboarding') {
+          body = {
+            'status': 'completed',
+            'account': {
+              'username': 'controlled_primary',
+              'optionalProcessingConsent': 'accepted',
+              'checkInVisibility': 'private',
+              'onboardingCompletedAt': '2026-10-19T00:00:00.000Z',
+            },
+          };
+        } else if (path == '/v1/recommendations/events') {
+          body = {
+            'asOf': '2026-10-21T00:00:00.000Z',
+            'formulaVersion': 'event_recommendation_v1',
+            'items': [
+              {
+                'eventId': 'tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                'title': 'Synthetic integration concert',
+                'startAt': '2026-10-25T00:00:00.000Z',
+                'reasonCode': 'interest_match',
+                'matchedInterests': [
+                  {'interestTagId': 'interest_music', 'displayName': 'Music'},
+                ],
+              },
+            ],
+          };
+        } else if (path ==
+            '/v1/events/tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/participation') {
+          if (request.method == 'PUT') {
+            final change = jsonDecode(request.body) as Map<String, dynamic>;
+            expect(change['expectedRevision'], revision);
+            status = change['status'] as String;
+            revision++;
+          }
+          body = {
+            'participation': {
+              'eventId': 'tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+              'status': status,
+              'ignored': false,
+              'revision': revision,
+              if (revision > 0) 'updatedAt': '2026-10-21T00:00:00.000Z',
+            },
+          };
+        } else if (path ==
+            '/v1/events/tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') {
+          body = {
+            'event': {
+              'eventId': 'tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+              'title': 'Synthetic integration concert',
+              'startAt': '2026-10-25T00:00:00.000Z',
+              'externalSourceUrl': 'https://ticketmaster.sg/event/a',
+            },
+          };
+        } else if (path == '/v1/event-browse') {
+          final cursor = request.url.queryParameters['cursor'];
+          batchCursors.add(cursor);
+          body = {
+            'asOf': '2026-10-21T00:00:00.000Z',
+            'scope': 'ticketmaster_sg_first_batch_v1',
+            'items': cursor == null
+                ? [
+                    {
+                      'browseId': 'tm_YQ',
+                      'eventId': 'tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                      'title': 'Synthetic integration concert',
+                      'startAt': '2026-10-25T00:00:00.000Z',
+                    },
+                  ]
+                : [],
+            if (cursor == null)
+              'nextCursor':
+                  'synthetic.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+          };
+        } else {
+          throw StateError('Unexpected integration request: $path');
+        }
+        return http.Response(
+          jsonEncode(body),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+      await tester.pumpWidget(
+        ControlledDemoApp(
+          baseUri: Uri.parse('https://127.0.0.1:42001/'),
+          auth: auth,
+          client: client,
+          dualAccounts: true,
+          eventParticipationEnabled: true,
+          onClose: () async => const Success(null),
+        ),
+      );
+      await tester.pump();
+      auth.sessions.add(
+        const AuthSessionAuthenticated(subject: 'controlled_primary'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Synthetic integration concert'), findsOneWidget);
+      await tester.ensureVisible(find.text('Interested').first);
+      await tester.tap(find.text('Interested').first);
+      await tester.pumpAndSettle();
+      expect(status, 'interested');
+      expect(revision, 1);
+      await tester.ensureVisible(find.text('Synthetic integration concert'));
+      await tester.tap(find.text('Synthetic integration concert'));
+      await tester.pumpAndSettle();
+      expect(
+        find.ancestor(
+          of: find.text('Interested'),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Semantics && widget.properties.selected == true,
+          ),
+        ),
+        findsOneWidget,
+      );
+      final router = GoRouter.of(
+        tester.element(find.widgetWithText(OutlinedButton, 'Interested')),
+      );
+      expect(
+        router.state.uri.path,
+        '/events/tm_event_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/participation',
+      );
+      router.go(AppRoutes.activities);
+      await tester.pumpAndSettle();
+      expect(find.text('Synthetic integration concert'), findsOneWidget);
+      await tester.ensureVisible(find.text('Synthetic integration concert'));
+      await tester.tap(find.text('Synthetic integration concert'));
+      await tester.pumpAndSettle();
+      expect(
+        find.ancestor(
+          of: find.text('Interested'),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Semantics && widget.properties.selected == true,
+          ),
+        ),
+        findsOneWidget,
+      );
+      router.pop();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Load more events'));
+      await tester.pumpAndSettle();
+      expect(batchCursors, [
+        null,
+        'synthetic.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+      ]);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await auth.sessions.close();
+      client.close();
+    },
+  );
+  testWidgets(
+    'v2 social Home reads recommendations and opens manual Events using its authenticated Backend repository',
     (tester) async {
       final auth = AuthDouble();
       final recommendationViews = <String?>[];
@@ -62,6 +229,12 @@ void main() {
               'checkInVisibility': 'private',
               'onboardingCompletedAt': '2026-10-19T00:00:00.000Z',
             },
+          };
+        } else if (request.url.path == '/v1/event-browse') {
+          body = {
+            'asOf': '2026-10-21T00:00:00.000Z',
+            'scope': 'ticketmaster_sg_first_batch_v1',
+            'items': [],
           };
         } else {
           expect(request.url.path, '/v1/recommendations/events');
@@ -103,23 +276,20 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-home')), findsOneWidget);
-      expect(recommendationViews, isEmpty);
-      final action = find.byKey(const Key('home-recommended-activities'));
+      expect(recommendationViews, ['home']);
+      final action = find.byKey(const Key('home-browse-activities'));
       await tester.ensureVisible(action);
       await tester.pumpAndSettle();
       await tester.tap(action);
       await tester.pumpAndSettle();
       expect(
-        GoRouterState.of(
-          tester.element(find.byKey(const Key('route-event-recommendations'))),
-        ).uri.path,
-        AppRoutes.eventRecommendations,
+        GoRouterState.of(tester.element(find.text('Browse activities')))
+            .uri
+            .path,
+        AppRoutes.activities,
       );
-      expect(recommendationViews, ['all']);
-      expect(
-        find.text('Synthetic source Music recommendation'),
-        findsOneWidget,
-      );
+      expect(recommendationViews, ['home']);
+      expect(find.text('No activities to show'), findsOneWidget);
       expect(
         find.byKey(const Key('event-recommendations-error')),
         findsNothing,
@@ -127,7 +297,7 @@ void main() {
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-home')), findsOneWidget);
-      expect(recommendationViews, ['all', 'home']);
+      expect(recommendationViews, ['home']);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       await auth.sessions.close();
@@ -196,7 +366,12 @@ void main() {
       await tester.ensureVisible(find.byKey(const Key('register-sign-in')));
       await tester.tap(find.byKey(const Key('register-sign-in')));
       await tester.pumpAndSettle();
+      expect(find.text('Leave registration?'), findsOneWidget);
+      expect(find.byKey(const Key('route-register')), findsOneWidget);
+      await tester.tap(find.text('Discard details'));
+      await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-sign-in')), findsOneWidget);
+      expect(auth.registrations, 1);
       auth.sessions.add(
         const AuthSessionAuthenticated(subject: 'controlled_primary'),
       );
@@ -310,10 +485,14 @@ void main() {
           destination.$3,
         );
       }
-      await tester.scrollUntilVisible(find.byKey(const Key('r6-new-check-in-button')), 250, scrollable: find.byType(Scrollable).first);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('r6-new-check-in-button')),
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.byKey(const Key('r6-new-check-in-button')));
       await tester.pumpAndSettle();
-      expect(find.text('Keep a little moment'), findsOneWidget);
+      expect(find.byKey(const Key('r6-check-in-note')), findsOneWidget);
       router.go(AppRoutes.home);
       await tester.pumpAndSettle();
       final oldHomeTab = tester
@@ -337,13 +516,12 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('social-nav-home')));
       await tester.pumpAndSettle();
-      expect(find.text('Discard unsaved changes?'), findsOneWidget);
-      await tester.tap(find.text('Keep editing'));
+      expect(find.byKey(const Key('route-home')), findsOneWidget);
+      expect(find.byType(AlertDialog), findsNothing);
+      await tester.tap(find.byKey(const Key('social-nav-ai')));
       await tester.pumpAndSettle();
       expect(find.text('Unsaved demo draft'), findsOneWidget);
       await tester.tap(find.byKey(const Key('social-nav-home')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('ai-confirm-discard')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-home')), findsOneWidget);
       // A narrow viewport and large text keep the bottom bar and content usable.

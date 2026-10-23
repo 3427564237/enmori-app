@@ -2,6 +2,7 @@ import { normalizeNote } from "../../check-ins/domain/note.js";
 import { isPersonaId, isPersonaRevision, isStateRevision } from "../../personas/domain/persona-values.js";
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
 import type { PersonaProjection } from "../ports/conversation-lifecycle.js";
+import { copyPersonaProjection } from "./persona-expression.js";
 import type {
   AcceptedContextRead, ContextDependencies, ContextReadFailure, ContextReadResult,
   FixedStartReadView, FixedViewValue, NoteModelContext, NoteReadCursor,
@@ -48,12 +49,9 @@ function order(a: NoteReadCursor, b: NoteReadCursor): number {
     (a.sourceId < b.sourceId ? -1 : a.sourceId > b.sourceId ? 1 : 0);
 }
 function projection(value: PersonaProjection): PersonaProjection {
-  if (!object(value) || value.schemaVersion !== "persona_presentation_v1" ||
-      !["neutral", "warm", "encouraging"].includes(value.tone) ||
-      !["concise", "balanced", "detailed"].includes(value.responseLength) ||
-      !["plain", "bulleted"].includes(value.formatStyle)) throw new Error("unavailable");
-  return Object.freeze({ schemaVersion: value.schemaVersion, tone: value.tone,
-    responseLength: value.responseLength, formatStyle: value.formatStyle });
+  const copied = copyPersonaProjection(value);
+  if (!copied) throw new Error("unavailable");
+  return copied;
 }
 
 /**

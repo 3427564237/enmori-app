@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/status_panel.dart';
+import '../../../core/presentation/local_time.dart';
 import '../../../core/result/result.dart';
 import '../domain/activity_repository.dart';
 import 'activity_controller.dart';
@@ -79,37 +81,54 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           children: [
             if (widget.browseId.isEmpty)
               const Text(
-                'Showing eligible activities from the first source batch; this is not the full catalogue.',
+                'Explore a selection of events near and far. This is not Ticketmaster’s full catalogue.',
               ),
             const Text('Source: Ticketmaster'),
             const SizedBox(height: 16),
             switch (state) {
-              AsyncLoading<ActivityRead?>() => Semantics(
-                liveRegion: true,
-                child: const Text('Loading activities…'),
+              AsyncLoading<ActivityRead?>() => const StatusPanel(
+                title: 'Loading activities…',
+                body: 'Requesting current information from Ticketmaster.',
+                icon: Icons.event_outlined,
+                loading: true,
               ),
-              AsyncError<ActivityRead?>(:final error) => Text(
-                error is AppFailure
+              AsyncError<ActivityRead?>(:final error) => StatusPanel(
+                title: 'Activities unavailable',
+                body: error is AppFailure
                     ? error.message
                     : 'Activities are unavailable. Try again.',
+                icon: Icons.cloud_off_outlined,
+                isError: true,
               ),
               AsyncData<ActivityRead?>(value: ActivityBatch(:final items)) =>
                 Column(
                   children: [
                     if (items.isEmpty)
-                      const Text(
-                        'No eligible activities were found in this source batch.',
+                      const StatusPanel(
+                        title: 'No activities to show',
+                        body: 'This available selection is empty. You can check again later.',
+                        icon: Icons.event_busy_outlined,
                       ),
                     for (final item in items)
                       Card(
                         child: ListTile(
-                          title: Text(item.title),
+                          title: Text(
+                            item.title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          trailing: widget.onSelect == null
+                              ? null
+                              : const Icon(Icons.chevron_right),
                           subtitle: Text(
-                            '${item.startAt}\n${item.endAt ?? 'End time not provided.'}',
+                            '${_time(context, item.startAt)}${item.endAt == null ? '' : '\nUntil ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
                           ),
                           onTap: widget.onSelect == null
                               ? null
@@ -136,11 +155,11 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                       summary.title,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    Text('Starts: ${summary.startAt}'),
+                    Text('Starts: ${_time(context, summary.startAt)}'),
                     Text(
                       summary.endAt == null
                           ? 'End time not provided.'
-                          : 'Ends: ${summary.endAt}',
+                          : 'Ends: ${_time(context, summary.endAt!)}',
                     ),
                     Text(locationLabel ?? 'Location unavailable.'),
                     Text(categoryLabel ?? 'Category unavailable.'),
@@ -157,7 +176,11 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                     ),
                   ],
                 ),
-              _ => const Text('Reload activities to continue.'),
+              _ => const StatusPanel(
+                title: 'Activity view cleared',
+                body: 'Reload activities to continue.',
+                icon: Icons.refresh,
+              ),
             },
             const SizedBox(height: 16),
             if (!state.isLoading)
@@ -176,4 +199,9 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
       ),
     );
   }
+}
+
+String _time(BuildContext context, String value) {
+  final date = DateTime.tryParse(value);
+  return date == null ? 'Time unavailable' : localTimeLabel(context, date);
 }

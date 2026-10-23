@@ -1,3 +1,5 @@
+import '../../account/content_access.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,7 +12,16 @@ import '../domain/check_in_repository.dart';
 typedef MonthQuery = ({String month, String zone});
 final checkInMonthProvider = FutureProvider.autoDispose
     .family<Result<CheckInMonth>, MonthQuery>((ref, query) async {
-      ref.watch(currentAuthSubjectProvider);
+      ref.watch(authSessionProvider);
+      final access = ref.watch(contentAccessProvider);
+      if (!access.foreground) {
+        return const Failure(
+          AppFailure(
+            kind: AppFailureKind.serviceUnavailable,
+            message: 'Return to reload current access.',
+          ),
+        );
+      }
       final repository = ref.watch(checkInRepositoryProvider);
       if (repository is! CheckInCalendarRepository) {
         return const Failure(
@@ -28,7 +39,16 @@ final checkInMonthProvider = FutureProvider.autoDispose
 typedef DayQuery = ({String date, String zone, String? cursor});
 final calendarDayProvider = FutureProvider.autoDispose
     .family<Result<CheckInHistoryPage>, DayQuery>((ref, query) {
-      ref.watch(currentAuthSubjectProvider);
+      ref.watch(authSessionProvider);
+      final access = ref.watch(contentAccessProvider);
+      if (!access.foreground) {
+        return const Failure(
+          AppFailure(
+            kind: AppFailureKind.serviceUnavailable,
+            message: 'Return to reload current access.',
+          ),
+        );
+      }
       return ref
           .watch(checkInRepositoryProvider)
           .readOwnForDate(

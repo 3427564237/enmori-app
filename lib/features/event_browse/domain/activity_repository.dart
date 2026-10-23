@@ -10,16 +10,25 @@ final class ActivitySummary {
     required this.title,
     required this.startAt,
     this.endAt,
+    this.eventId,
+    this.locationLabel,
+    this.categoryLabel,
   });
   final String browseId, title, startAt;
   final String? endAt;
+  final String? eventId;
+  final String? locationLabel, categoryLabel;
 }
 
 final class ActivityBatch extends ActivityRead {
-  ActivityBatch({required this.asOf, required List<ActivitySummary> items})
-    : items = List.unmodifiable(items);
+  ActivityBatch({
+    required this.asOf,
+    required List<ActivitySummary> items,
+    this.nextCursor,
+  }) : items = List.unmodifiable(items);
   final String asOf;
   final List<ActivitySummary> items;
+  final String? nextCursor;
 }
 
 final class ActivityDetail extends ActivityRead {
@@ -37,6 +46,10 @@ final class ActivityDetail extends ActivityRead {
 abstract interface class ActivityRepository {
   /// Null identifies the independent first-batch read; no provider access in Flutter.
   Future<Result<ActivityRead>> read(String? browseId);
+}
+
+abstract interface class PagedActivityRepository implements ActivityRepository {
+  Future<Result<ActivityRead>> readNext(String cursor);
 }
 
 abstract interface class ActivitySourceActions {

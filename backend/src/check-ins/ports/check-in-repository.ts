@@ -2,6 +2,7 @@ import type { IdempotencyKey } from "../../shared/domain/idempotency-key.js";
 import type { DependencyUnavailable } from "../../shared/ports/dependency-failure.js";
 import type { NormalizedNote } from "../domain/note.js";
 import type { CheckInProjection } from "../application/check-in-model.js";
+import type { CheckInLocationInput } from "../domain/check-in-location.js";
 
 export type CreateCheckInRepositoryResult =
   | { readonly kind: "created"; readonly checkIn: CheckInProjection }
@@ -22,8 +23,9 @@ export interface CheckInCreationCandidate {
   readonly idempotencyExpiresAt: string;
 }
 
-export interface CreateCheckInCommand {
+export interface CreateCheckInCommand extends CheckInLocationInput {
   readonly mood?: string | null;
+  readonly locationLabel?: string | null;
   readonly activity?: string | null;
   readonly checkInVisibility?: "private" | "friends_only" | "public";
   readonly firebaseUid: string;

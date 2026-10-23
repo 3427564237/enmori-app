@@ -3,6 +3,8 @@ import '../domain/profile_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/presentation/enmori_motion.dart';
+
 import '../../../core/result/result.dart';
 import '../../auth/auth_providers.dart';
 import '../domain/account_preferences_repository.dart';
@@ -14,9 +16,13 @@ final class AccountPreferencesPage extends ConsumerWidget {
     required this.view,
     this.onEditProfile,
     this.onSignOut,
+    this.aiOnly = false,
+    this.onOpenPersonas,
     super.key,
   });
   final PreferencesView view;
+  final bool aiOnly;
+  final VoidCallback? onOpenPersonas;
   final Future<void> Function()? onEditProfile;
   final Future<Result<void>> Function()? onSignOut;
   @override
@@ -25,6 +31,8 @@ final class AccountPreferencesPage extends ConsumerWidget {
     view: view,
     onEditProfile: onEditProfile,
     onSignOut: onSignOut,
+    aiOnly: aiOnly,
+    onOpenPersonas: onOpenPersonas,
   );
 }
 
@@ -34,9 +42,13 @@ final class _AccountPreferencesForm extends ConsumerStatefulWidget {
     required this.view,
     this.onEditProfile,
     this.onSignOut,
+    this.aiOnly = false,
+    this.onOpenPersonas,
     super.key,
   });
   final PreferencesView view;
+  final bool aiOnly;
+  final VoidCallback? onOpenPersonas;
   final Future<void> Function()? onEditProfile;
   final Future<Result<void>> Function()? onSignOut;
 
@@ -57,6 +69,9 @@ final class _AccountPreferencesPageState
   ProfileVisibility _profileVisibility = ProfileVisibility.private;
   CheckInVisibility _checkInVisibility = CheckInVisibility.private;
   OptionalProcessingConsent _consent = OptionalProcessingConsent.rejected;
+  bool _defaultLocation = false,
+      _defaultWeather = false,
+      _homeWeatherAuto = false;
   bool _signingOut = false;
   bool _allowPopAfterDiscard = false;
   bool _confirmingLeave = false;
@@ -86,6 +101,9 @@ final class _AccountPreferencesPageState
       _affiliation.text = state.profile?.details.affiliationName ?? '';
       _region.text = state.profile?.details.region ?? '';
       _affiliationType = state.profile?.details.affiliationType;
+      _defaultLocation = state.settings?.defaultCheckInLocation ?? false;
+      _defaultWeather = state.settings?.defaultCheckInWeather ?? false;
+      _homeWeatherAuto = state.settings?.homeWeatherAuto ?? false;
       _privacy = state.settings?.fieldPrivacy ?? const FieldPrivacy();
       _profileVisibility =
           state.profile?.visibility ?? ProfileVisibility.private;
@@ -107,7 +125,12 @@ final class _AccountPreferencesPageState
               _region.text != (details.region ?? '') ||
               _profileVisibility !=
                   (state.profile?.visibility ?? ProfileVisibility.private)
-        : _checkInVisibility !=
+        : _homeWeatherAuto != (state.settings?.homeWeatherAuto ?? false) ||
+              _defaultLocation !=
+                  (state.settings?.defaultCheckInLocation ?? false) ||
+              _defaultWeather !=
+                  (state.settings?.defaultCheckInWeather ?? false) ||
+              _checkInVisibility !=
                   (state.settings?.checkInVisibility ??
                       CheckInVisibility.private) ||
               _consent !=
@@ -141,24 +164,43 @@ final class _AccountPreferencesPageState
                   _checkInVisibility,
                   _consent,
                   fieldPrivacy: _privacy,
+                  defaultCheckInLocation: _defaultLocation,
+                  defaultCheckInWeather: _defaultWeather,
+                  homeWeatherAuto: _homeWeatherAuto,
                 );
               }
             }
           : null,
-      child: Text(state.phase == PreferencesPhase.saving ? 'Saving…' : 'Save'),
+      child: MotionReveal(
+        trigger: state.phase,
+        distance: 0,
+        child: Text(
+          state.phase == PreferencesPhase.saving ? 'Saving…' : 'Save',
+        ),
+      ),
     );
     final page = Scaffold(
-      appBar: AppBar(title: Text(profile ? 'Edit profile' : 'Settings')),
+      appBar: AppBar(
+        title: Text(
+          profile
+              ? 'Edit profile'
+              : widget.aiOnly
+              ? 'AI settings'
+              : 'Settings',
+        ),
+      ),
       bottomNavigationBar: SafeArea(
         child: Padding(padding: const EdgeInsets.all(16), child: saveButton),
       ),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               key: Key(profile ? 'route-profile-edit' : 'route-settings'),
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -273,95 +315,169 @@ final class _AccountPreferencesPageState
                             : null,
                       ),
                     ] else ...[
-                      Text(
-                        'Profile visibility',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const Text(
-                        'Profile visibility controls who may view your profile. Check-in visibility is the default for future check-ins.',
-                      ),
-                      OutlinedButton(
-                        key: const Key('settings-profile'),
-                        onPressed: ready ? widget.onEditProfile : null,
-                        child: const Text('Edit profile visibility'),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Check-in default visibility',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      DropdownButton<CheckInVisibility>(
-                        key: const Key('settings-visibility'),
-                        isExpanded: true,
-                        value: _checkInVisibility,
-                        items: [
-                          for (final v in CheckInVisibility.values)
-                            DropdownMenuItem(
-                              value: v,
-                              child: Text(_checkInLabel(v)),
-                            ),
-                        ],
-                        onChanged: ready
-                            ? (v) {
-                                if (v != null) {
-                                  setState(() => _checkInVisibility = v);
+                      if (!widget.aiOnly) ...[
+                        Text(
+                          'Profile visibility',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const Text(
+                          'Profile visibility controls who may view your profile. Check-in visibility is the default for future check-ins.',
+                        ),
+                        OutlinedButton(
+                          key: const Key('settings-profile'),
+                          onPressed: ready ? widget.onEditProfile : null,
+                          child: const Text('Edit profile visibility'),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Check-in default visibility',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        DropdownButton<CheckInVisibility>(
+                          key: const Key('settings-visibility'),
+                          isExpanded: true,
+                          value: _checkInVisibility,
+                          items: [
+                            for (final v in CheckInVisibility.values)
+                              DropdownMenuItem(
+                                value: v,
+                                child: Text(_checkInLabel(v)),
+                              ),
+                          ],
+                          onChanged: ready
+                              ? (v) {
+                                  if (v != null) {
+                                    setState(() => _checkInVisibility = v);
+                                  }
                                 }
-                              }
-                            : null,
-                      ),
-                      const SizedBox(height: 24),
-                      _privacyChoice(
-                        'Interests',
-                        _privacy.interests,
-                        ready,
-                        (v) => FieldPrivacy(
-                          interests: v,
-                          location: _privacy.location,
-                          participation: _privacy.participation,
-                          mapSharedWithFriends: _privacy.mapSharedWithFriends,
+                              : null,
                         ),
-                      ),
-                      _privacyChoice(
-                        'Location',
-                        _privacy.location,
-                        ready,
-                        (v) => FieldPrivacy(
-                          interests: _privacy.interests,
-                          location: v,
-                          participation: _privacy.participation,
-                          mapSharedWithFriends: _privacy.mapSharedWithFriends,
+                        const SizedBox(height: 24),
+                        Text(
+                          'Home weather',
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                      ),
-                      _privacyChoice(
-                        'Activity participation',
-                        _privacy.participation,
-                        ready,
-                        (v) => FieldPrivacy(
-                          interests: _privacy.interests,
-                          location: _privacy.location,
-                          participation: v,
-                          mapSharedWithFriends: _privacy.mapSharedWithFriends,
+                        SwitchListTile(
+                          key: const Key('settings-home-weather'),
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text(
+                            'Get weather automatically on Home',
+                          ),
+                          subtitle: const Text(
+                            'Use one foreground approximate location, rounded to 0.1°, to get weather through ENMORI from Open-Meteo. Open-Meteo may retain request metadata. No precise point or identity is sent. Refreshes at most every 15 minutes automatically; no background tracking. Independent of Check-in defaults. Save to apply.',
+                          ),
+                          value: _homeWeatherAuto,
+                          onChanged: ready
+                              ? (v) => setState(() => _homeWeatherAuto = v)
+                              : null,
                         ),
-                      ),
-                      SwitchListTile(
-                        key: const Key('settings-map-sharing'),
-                        title: const Text('Share Check-in map with friends'),
-                        subtitle: const Text(
-                          'Only points allowed by each Check-in and location setting can be shown.',
+                        const SizedBox(height: 24),
+                        Text(
+                          'New Check-in defaults',
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        value: _privacy.mapSharedWithFriends,
-                        onChanged: ready
-                            ? (v) => setState(
-                                () => _privacy = FieldPrivacy(
-                                  interests: _privacy.interests,
-                                  location: _privacy.location,
-                                  participation: _privacy.participation,
-                                  mapSharedWithFriends: v,
-                                ),
-                              )
-                            : null,
-                      ),
-                      const SizedBox(height: 24),
+                        SwitchListTile(
+                          key: const Key('settings-default-location'),
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Attach location by default'),
+                          subtitle: const Text(
+                            'Allow one current precise GPS point to be saved when you open a new Check-in. No background tracking. You can turn it off for any draft.',
+                          ),
+                          value: _defaultLocation,
+                          onChanged: ready
+                              ? (v) => setState(() => _defaultLocation = v)
+                              : null,
+                        ),
+                        SwitchListTile(
+                          key: const Key('settings-default-weather'),
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Attach weather by default'),
+                          subtitle: const Text(
+                            'Allow Open-Meteo weather lookup using coordinates rounded to 0.1°. No Note or precise point is sent. Open-Meteo may retain request metadata. Requires GPS; this does not enable location. Weather failure still allows saving.',
+                          ),
+                          value: _defaultWeather,
+                          onChanged: ready
+                              ? (v) => setState(() => _defaultWeather = v)
+                              : null,
+                        ),
+                        const Text(
+                          'Save to apply these choices to future Check-ins. Turn either off here to revoke its default. Saved records stay unchanged.',
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Sharing',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        _privacyChoice(
+                          'Interests',
+                          _privacy.interests,
+                          ready,
+                          (v) => FieldPrivacy(
+                            interests: v,
+                            location: _privacy.location,
+                            participation: _privacy.participation,
+                            mapSharedWithFriends: _privacy.mapSharedWithFriends,
+                          ),
+                        ),
+                        _privacyChoice(
+                          'Location',
+                          _privacy.location,
+                          ready,
+                          (v) => FieldPrivacy(
+                            interests: _privacy.interests,
+                            location: v,
+                            participation: _privacy.participation,
+                            mapSharedWithFriends: _privacy.mapSharedWithFriends,
+                          ),
+                        ),
+                        _privacyChoice(
+                          'Activity participation',
+                          _privacy.participation,
+                          ready,
+                          (v) => FieldPrivacy(
+                            interests: _privacy.interests,
+                            location: _privacy.location,
+                            participation: v,
+                            mapSharedWithFriends: _privacy.mapSharedWithFriends,
+                          ),
+                        ),
+                        SwitchListTile(
+                          key: const Key('settings-map-sharing'),
+                          title: const Text('Share Check-in map with friends'),
+                          subtitle: const Text(
+                            'Only points allowed by each Check-in and location setting can be shown.',
+                          ),
+                          value: _privacy.mapSharedWithFriends,
+                          onChanged: ready
+                              ? (v) => setState(
+                                  () => _privacy = FieldPrivacy(
+                                    interests: _privacy.interests,
+                                    location: _privacy.location,
+                                    participation: _privacy.participation,
+                                    mapSharedWithFriends: v,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                      if (widget.aiOnly) ...[
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.person_outline),
+                          title: const Text('Persona context'),
+                          subtitle: const Text(
+                            'View your active Persona and manage its profile.',
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: widget.onOpenPersonas,
+                        ),
+                        const Divider(),
+                        const Text(
+                          'AI replies can be mistaken. Review suggestions before acting on them. Your existing data-use choice below also applies to personalised suggestions.',
+                        ),
+                        const SizedBox(height: 20),
+                      ],
                       Text(
                         'Optional data use',
                         style: Theme.of(context).textTheme.titleMedium,
@@ -386,9 +502,11 @@ final class _AccountPreferencesPageState
                     const SizedBox(height: 24),
                   ],
                   if (state.saved)
-                    Text(
-                      profile ? 'Profile saved.' : 'Settings saved.',
-                      key: const Key('preferences-save-success'),
+                    MotionReveal(
+                      child: Text(
+                        profile ? 'Profile saved.' : 'Settings saved.',
+                        key: const Key('preferences-save-success'),
+                      ),
                     ),
                   if (state.message case final message?) ...[
                     Text(message, key: const Key('preferences-error')),
@@ -403,7 +521,7 @@ final class _AccountPreferencesPageState
                         child: const Text('Reload'),
                       ),
                   ],
-                  if (!profile) ...[
+                  if (!profile && !widget.aiOnly) ...[
                     const SizedBox(height: 24),
                     OutlinedButton(
                       key: const Key('settings-sign-out'),

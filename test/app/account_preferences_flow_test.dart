@@ -20,6 +20,36 @@ import '../support/fakes.dart';
 import '../support/fake_account_preferences.dart';
 
 void main() {
+  testWidgets('explicit default switches save and independently reread', (
+    tester,
+  ) async {
+    final h = await start(tester);
+    await tap(tester, 'profile-settings');
+    await tap(tester, 'settings-default-location');
+    await tap(tester, 'settings-default-weather');
+    await tap(tester, 'settings-save');
+    expect(find.byKey(const Key('preferences-save-success')), findsOneWidget);
+    await tap(tester, 'settings-default-location');
+    await tap(tester, 'settings-save');
+    expect(
+      tester
+          .widget<SwitchListTile>(
+            find.byKey(const Key('settings-default-location')),
+          )
+          .value,
+      isFalse,
+    );
+    expect(
+      tester
+          .widget<SwitchListTile>(
+            find.byKey(const Key('settings-default-weather')),
+          )
+          .value,
+      isTrue,
+    );
+    expect(h.prefs.settingsSaveCount, 2);
+  });
+
   for (final key in ['profile-bio', 'profile-region']) {
     testWidgets('$key draft is guarded and discard never saves', (
       tester,

@@ -1,4 +1,15 @@
-export interface PersonaInput {
+/** Optional on input for legacy clients/records; normalized reads always include empty strings. */
+export interface PersonaExpressionFields {
+  readonly relationship?: string;
+  readonly shortIntroduction?: string;
+  readonly description?: string;
+  readonly personality?: string;
+  readonly communicationStyle?: string;
+  readonly interests?: string;
+  readonly extraInstructions?: string;
+}
+
+export interface PersonaInput extends PersonaExpressionFields {
   readonly displayName: string;
   readonly tone: "neutral" | "warm" | "encouraging";
   readonly responseLength: "concise" | "balanced" | "detailed";

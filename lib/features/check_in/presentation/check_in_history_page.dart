@@ -109,7 +109,7 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
           onPressed: widget.onBack,
           icon: const Icon(Icons.arrow_back),
         ),
-        title: const Text('Footprint'),
+        title: const Text('Check-in History'),
         actions: [
           if (ref.watch(checkInRepositoryProvider) is CheckInCalendarRepository)
             IconButton(
@@ -145,7 +145,7 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
                 spacing: 12,
                 runSpacing: 8,
                 children: [
-                  OutlinedButton.icon(
+                  TextButton.icon(
                     key: const Key('history-select-date'),
                     onPressed:
                         state.latestDate == null ||
@@ -153,11 +153,16 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
                         ? null
                         : () => _selectDate(context, controller, state),
                     icon: const Icon(Icons.calendar_today_outlined),
-                    label: Text(_dateLabel(state.selectedDate)),
+                    label: Text(
+                      state.selectedDate == null
+                          ? 'Choose date'
+                          : MaterialLocalizations.of(context)
+                                .formatFullDate(state.selectedDate!),
+                    ),
                   ),
                   if (state.ianaZone case final zone?)
                     Text(
-                      'Device time zone: $zone',
+                      'Local time · $zone',
                       key: const Key('history-device-zone'),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
@@ -238,13 +243,6 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
     );
     if (selected != null) await controller.selectDate(selected);
   }
-
-  String _dateLabel(DateTime? date) {
-    if (date == null) return 'Choose date';
-    return '${date.year.toString().padLeft(4, '0')}-'
-        '${date.month.toString().padLeft(2, '0')}-'
-        '${date.day.toString().padLeft(2, '0')}';
-  }
 }
 
 final class _HistoryBody extends StatelessWidget {
@@ -314,7 +312,7 @@ final class _HistoryBody extends StatelessWidget {
                   onTap: () => onOpen(entry.checkIn.checkInId),
                 ),
               ),
-              const Divider(height: 1, indent: 72),
+              const Divider(height: 1, indent: 20, endIndent: 20),
             ],
           ],
         ),
@@ -340,18 +338,47 @@ final class _HistoryTile extends StatelessWidget {
     return ListTile(
       key: Key('history-entry-${entry.checkIn.checkInId}'),
       onTap: onTap,
-      leading: const Icon(Icons.edit_note_outlined),
       title: Text(
         entry.checkIn.note.isEmpty
             ? (entry.checkIn.mood ?? '')
             : entry.checkIn.note,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.4),
         maxLines: 3,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text(
-        visibility == null
-            ? entry.localTime
-            : '${entry.localTime} · $visibility',
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              [entry.localTime, ?visibility].join(' · '),
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 10,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (entry.checkIn.note.isNotEmpty && entry.checkIn.mood != null)
+                  Text(entry.checkIn.mood!),
+                if (entry.checkIn.activity case final activity?) Text(activity),
+                if (entry.checkIn.weather != null)
+                  const Tooltip(
+                    message: 'Weather saved',
+                    child: Icon(Icons.cloud_outlined, size: 16),
+                  ),
+                if (entry.checkIn.location != null)
+                  const Tooltip(
+                    message: 'Location saved',
+                    child: Icon(Icons.location_on_outlined, size: 16),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
       trailing: const Icon(Icons.chevron_right),
     );
@@ -373,7 +400,7 @@ final class _Message extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
     child: Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

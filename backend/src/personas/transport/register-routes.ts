@@ -3,13 +3,15 @@ import type { OwnPersonas } from "../application/own-personas.js";
 import type { IdentityVerifier } from "../../shared/ports/identity-verifier.js";
 import { buildAuthenticate, requirePrincipal } from "../../transport/authenticate.js";
 import { sendFailure, sendFailureCode } from "../../transport/error-response.js";
+import type { PersonaExpressionFields } from "../application/persona-model.js";
+import { personaExpressionFields } from "../domain/persona-values.js";
 import {
   activatePersonaSchema, createPersonaSchema, deletePersonaSchema, editPersonaSchema,
   getPersonaSchema, listPersonasSchema, personaCreateKeySchema, personaIdSchema,
 } from "./schemas.js";
 
 export type PersonaOperations = Pick<OwnPersonas, "list" | "get" | "create" | "edit" | "activate" | "delete">;
-type EditableBody = { displayName: string; tone: string; responseLength: string; formatStyle: string };
+type EditableBody = PersonaExpressionFields & { displayName: string; tone: string; responseLength: string; formatStyle: string };
 type Versions = { expectedRevision: number; expectedStateRevision: number };
 type CreateBody = EditableBody & { expectedStateRevision: number };
 type Params = { personaId: string };
@@ -19,7 +21,7 @@ const editableShape = { displayName: "string", tone: "string", responseLength: "
 const versionsShape = { expectedRevision: "number", expectedStateRevision: "number" } as const;
 
 /** Reject malformed input before AJV can coerce it, without changing older routes. */
-function validateShape(fields?: Readonly<Record<string, "string" | "number">>, create = false): preValidationHookHandler {
+function validateShape(fields?: Readonly<Record<string, "string" | "number">>, create = false, expression = false): preValidationHookHandler {
   return async (request, reply) => {
     if (Object.keys(request.query as object).length !== 0) return sendFailureCode(request, reply, "REQUEST_INVALID");
     const params = request.params as Partial<Params>;
@@ -32,7 +34,9 @@ function validateShape(fields?: Readonly<Record<string, "string" | "number">>, c
     } else {
       if (typeof body !== "object" || body === null || Array.isArray(body)) return sendFailureCode(request, reply, "REQUEST_INVALID");
       const values = body as Record<string, unknown>;
-      if (Object.keys(values).length !== Object.keys(fields).length ||
+      const optional: readonly string[] = expression ? personaExpressionFields : [];
+      if (Object.keys(values).some(key => !Object.hasOwn(fields, key) && !optional.includes(key)) ||
+        optional.some(key => Object.hasOwn(values, key) && typeof values[key] !== "string") ||
         Object.entries(fields).some(([name, type]) => !Object.hasOwn(values, name) || typeof values[name] !== type)) {
         return sendFailureCode(request, reply, "REQUEST_INVALID");
       }
@@ -68,13 +72,13 @@ export async function registerPersonaRoutes(app: FastifyInstance, identity: Iden
     return result.ok ? reply.send(result.value) : sendFailure(request, reply, result.failure);
   });
   app.post<{ Body: CreateBody }>("/v1/me/personas", {
-    ...base, preValidation: validateShape({ ...editableShape, expectedStateRevision: "number" }, true), schema: structuredClone(createPersonaSchema),
+    ...base, preValidation: validateShape({ ...editableShape, expectedStateRevision: "number" }, true, true), schema: structuredClone(createPersonaSchema),
   }, async (request, reply) => {
     const result = await personas.create({ principal: requirePrincipal(request), idempotencyKey: request.headers["idempotency-key"] as string, ...request.body });
     return result.ok ? reply.code(result.value.created ? 201 : 200).send({ persona: result.value.persona, stateRevision: result.value.stateRevision }) : sendFailure(request, reply, result.failure);
   });
   app.put<{ Body: EditableBody & Versions; Params: Params }>("/v1/me/personas/:personaId", {
-    ...base, preValidation: validateShape({ ...editableShape, ...versionsShape }), schema: structuredClone(editPersonaSchema),
+    ...base, preValidation: validateShape({ ...editableShape, ...versionsShape }, false, true), schema: structuredClone(editPersonaSchema),
   }, async (request, reply) => {
     const result = await personas.edit({ principal: requirePrincipal(request), personaId: request.params.personaId, ...request.body });
     return result.ok ? reply.send(result.value) : sendFailure(request, reply, result.failure);

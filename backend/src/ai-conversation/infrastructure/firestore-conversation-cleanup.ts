@@ -1,6 +1,6 @@
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx, StoredDocument as Row } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId, parseAuthBinding, parseAccountProjection } from "../../shared/infrastructure/firebase/firestore-records.js";
-import { requireControlledEmulatorEnvironment } from "../../shared/infrastructure/firebase/controlled-emulator-environment.js";
+import { requireFeatureEnvironment } from "../../shared/infrastructure/firebase/feature-environment.js";
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
 import type { ConversationCleanup, ConversationCleanupResult, ConversationQuiescence } from "../ports/conversation-cleanup.js";
 import type { RuntimeEpoch } from "../ports/real-conversation-store.js";
@@ -20,7 +20,7 @@ export class FirestoreConversationCleanup implements ConversationCleanup {
   private lastNow=Number.NEGATIVE_INFINITY;
   constructor(private readonly gateway:FirestoreGateway, environment:Readonly<Record<string,string|undefined>>,
     private readonly quiescence:ConversationQuiescence, private readonly utcMilliseconds:()=>number=Date.now){
-    requireControlledEmulatorEnvironment(environment);
+    requireFeatureEnvironment(environment);
   }
   private async transaction<T>(work:(tx:Tx)=>Promise<T>):Promise<T>{
     return this.gateway.runTransaction(work,{maxAttempts:1});

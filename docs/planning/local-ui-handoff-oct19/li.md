@@ -1,3 +1,51 @@
+# 21Oct remote access update
+
+The PM subsequently authorized different-location group access and delegated a
+free/simple implementation choice. Follow
+`docs/decisions/2026-10-21-li-remote-group-access.md`; this replaces the same-Wi-Fi
+delivery limit below. The first real-account Funnel entry is prepared and owner
+enablement completed. Track public DNS/external acceptance, full real-identity
+feature composition and release signing/APK separately. Keep main unmerged.
+
+## 21 October PM follow-up: local fixes and wireless demonstration
+
+See [the confirmed decision](../../decisions/2026-10-21-li-wireless-demo-and-local-ownership.md).
+LI directly owns the small participation-label and shared EventCard time display
+fixes; do not wait for SHI to implement them merely to distribute work evenly.
+Retain independent review and avoid overlapping edits with an active teammate.
+The next demonstration entry must work over the same Wi-Fi/hotspot without USB
+or ADB. v14 remains the USB coretest checkpoint, not the final release. Host-local
+Ollama is retained; no public server exposure or Emulator-guard bypass is selected.
+
+---
+
+## 21 October continuation checkpoint (operational baseline update)
+
+Continue in `/home/miku/.codex/worktrees/li-zhou-integration-oct20/ENMORI`, branch
+`souma/li-zhou-runtime-20261020`, Draft PR #165. Current product source is
+`5529f7b4d5cf91489aa0b1b4ff118ec53a7fd522`: reviewed SHI #167 is merged and
+connected to the isolated core candidate; v14 is installed; selected native Events/Home flows passed (see native follow-up).
+This supersedes only the older package/workspace/startup-status instructions below;
+retain their product scope and historical evidence. The real-account v8 checkout
+is separate and was not changed by this checkpoint.
+
+Read [the Events verification record](../../evidence/sprint3/2026-10-21-li-events-integration/verification.md)
+before continuing. The retained environment has **confirmed normal export** after both service and
+native checks and is being restarted for the connected phone. Check status before
+starting; use `python3 tool/core_local.py start --events --ai` only when stopped;
+use existing private handoff, not a new credential flow. Prior SIGTERM/export
+failure and possible loss after the earlier snapshot remain recorded. Device subsequently connected; see the native verification record for passed
+Events/Home flows and the remaining nonempty profile/privacy/error scenarios.
+
+JIN #166 `124a1f86` still needs SHI's latest-head rereview. Full public profile and
+Home friend activity are not integrated. Activity producer needs a real
+Interested/Going transition timestamp and currently authorized title; `updatedAt`
+also changes for ignore/unignore and must not be treated as participation time.
+No speculative mapping/title/history may be substituted. Retain P05 scope and
+independent review, no main merge or overall Done.
+
+---
+
 请在 LI 的本机对话执行“HCI/UIUX 基线优先与本机接线工作”，本 prompt 完整推进可做部分，不要求 PM 为每个小步骤再次开工。
 
 源码功能与 UI 基线为 `51ecb5c11ff23ce3bf36fbf9280d2e00646ac857`（全局深绿、本地 Playfair、HCI 继承及 v6 已验证核心流程均已在源码内；v7 已构建但未做真机验证）。使用同一压缩包内的 Git bundle，核对 manifest.json 中的 HEAD，并确认包含该基线。不要使用旧 9e45b1e 包或从旧 main 重做。每人独立分支/worktree，保留已有文件，不与别人共写 LI 的运行工作区。

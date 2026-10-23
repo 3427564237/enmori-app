@@ -7,6 +7,11 @@ import '../../auth/auth_providers.dart';
 import '../event_recommendations_providers.dart';
 import '../domain/event_recommendation_repository.dart';
 
+/// Local read invalidation, not evidence of a failed service request.
+final class EventRecommendationsRefreshRequired {
+  const EventRecommendationsRefreshRequired();
+}
+
 final eventRecommendationsControllerProvider =
     NotifierProvider<
       EventRecommendationsController,
@@ -66,10 +71,7 @@ final class EventRecommendationsController
     _operation++;
     _expiry?.cancel();
     state = AsyncError(
-      const AppFailure(
-        kind: AppFailureKind.serviceUnavailable,
-        message: 'Recommendations expired. Reload to check the source.',
-      ),
+      const EventRecommendationsRefreshRequired(),
       StackTrace.current,
     );
   }

@@ -1,3 +1,6 @@
+import { createIsolatedEventParticipation } from "../src/bootstrap/event-participation.js";
+import { sourceEventId } from "../src/bootstrap/controlled-event-recommendations.js";
+import { ok } from "../src/shared/domain/result.js";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
@@ -190,4 +193,40 @@ test("framework-rejected Event locators preserve identity/account ordering, safe
       assert.equal(a.statusCode, b.statusCode); assert.deepEqual(a.json(), b.json());
     }
   } finally { await app.close(); await ordinary.close(); }
+});
+
+
+test("isolated root selects one paged browse registration and persists participation through HTTP", async () => {
+  const f = fixture();
+  const source = { ...f.source, async batch(_asOf: string, page: number) {
+    return { items: page === 0 ? [item] : [], ...(page === 0 ? { nextPage: 1 } : {}) };
+  } };
+  const feature = createIsolatedEventParticipation({ environment, firestore: f.gateway,
+    clock: { now: () => ok(new Date(asOf)) }, source, cursorKey: new Uint8Array(32).fill(7) });
+  const app = await buildApp({ ...f.dependencies, isolatedSlices: { environment,
+    eventBrowse: { source }, eventParticipation: feature } });
+  const id = sourceEventId(item.browseId), path = `/v1/events/${id}/participation`;
+  try {
+    assert.equal((await app.inject({ url: path })).statusCode, 401);
+    const first = await app.inject({ url: paths[0]!, headers });
+    assert.equal(first.statusCode, 200); assert.ok(first.json().nextCursor);
+    const next = await app.inject({ url: `${paths[0]}?cursor=${first.json().nextCursor}`, headers });
+    assert.equal(next.statusCode, 200); assert.deepEqual(next.json().items, []);
+    assert.equal(next.json().nextCursor, undefined);
+    const saved = await app.inject({ method: 'PUT', url: path, headers,
+      payload: { status: 'going', ignored: false, expectedRevision: 0 } });
+    assert.equal(saved.statusCode, 200); assert.equal(saved.json().participation.revision, 1);
+    assert.equal((await app.inject({ url: path, headers })).json().participation.status, 'going');
+    const own = await app.inject({ url: '/v1/me/event-participations', headers });
+    assert.equal(own.statusCode, 200); assert.equal(own.json().items[0].eventId, id);
+    assert.equal((await app.inject({ method: 'PUT', url: path, headers,
+      payload: { status: 'interested', ignored: false, expectedRevision: 0 } })).statusCode, 412);
+    f.mode('failure');
+    const cancel = await app.inject({ method: 'PUT', url: path, headers,
+      payload: { status: 'none', ignored: false, expectedRevision: 1 } });
+    assert.equal(cancel.statusCode, 200);
+    const ordinary = await buildApp(f.dependencies);
+    try { assert.equal((await ordinary.inject({ url: path, headers })).statusCode, 404); }
+    finally { await ordinary.close(); }
+  } finally { await app.close(); }
 });

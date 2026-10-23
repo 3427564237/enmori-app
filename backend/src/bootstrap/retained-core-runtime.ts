@@ -1,5 +1,10 @@
+import { socialEventSource } from './social-event-source.js';
+import { OpenMeteoWeatherProvider } from '../weather/infrastructure/open-meteo-weather-provider.js';
+import { requireRemoteGroupEnvironment } from '../shared/infrastructure/firebase/feature-environment.js';
+import { randomBytes } from "node:crypto";
+import { createIsolatedEventParticipation, createRemoteEventParticipation } from "./event-participation.js";
 import { setTimeout as wait } from "node:timers/promises";
-import { createIsolatedConversationComposition } from "./isolated-conversation-composition.js";
+import { createIsolatedConversationComposition, createRemoteConversationComposition } from "./isolated-conversation-composition.js";
 import { LocalChatTransport, simpleChatGates } from "../ai-runtime/infrastructure/local-chat-transport.js";
 import { createControlledEventBrowse } from "./controlled-event-browse.js";
 import { createControlledEventRecommendations } from "./controlled-event-recommendations.js";
@@ -12,6 +17,8 @@ import { requireControlledEmulatorEnvironment } from '../shared/infrastructure/f
 import { FriendRequests } from "../friends/application/friend-requests.js";
 import { FirestoreFriendRepository } from "../friends/infrastructure/firestore-friend-repository.js";
 import { OwnPersonas } from "../personas/application/own-personas.js";
+import { PreviewPersona } from "../personas/application/preview-persona.js";
+import { FirestorePersonaPreviewAuthority } from "../personas/infrastructure/firestore-persona-preview-authority.js";
 import { FirestorePersonaRepository } from "../personas/infrastructure/firestore-persona-repository.js";
 import { ListOwnCheckInsForDate } from '../check-ins/application/check-in-history.js';
 import { FirestoreCheckInHistoryRepository } from '../check-ins/infrastructure/firestore-check-in-history-repository.js';
@@ -20,6 +27,7 @@ import { createHistoryCursorCodec } from '../check-ins/infrastructure/aes-gcm-hi
 import { createAuthBindingDocumentId, parseAuthBinding } from '../shared/infrastructure/firebase/firestore-records.js';
 import { ok } from '../shared/domain/result.js';
 import { CreateInterestTag } from '../interests/application/create-interest-tag.js';
+import { GetInterestAdminCapability } from '../interests/application/get-interest-admin-capability.js';
 import { FirebaseInterestAdmin } from '../interests/infrastructure/firebase-interest-admin.js';
 import { FirestoreCatalogueWriter } from '../interests/infrastructure/firestore-catalogue-writer.js';
 import { OwnAccountPreferences } from "../account/application/own-account-preferences.js";
@@ -69,6 +77,7 @@ async function createControlledRuntime(
   eventInput?: { readonly source: BrowseSource; readonly musicInterestTagId: string },
   chatModel?: string,
 ): Promise<ControlledRuntime> {
+  const remote = isolatedEnvironment?.ENMORI_REMOTE_GROUP === 'true';
   const firebaseApp = initializeApp(
     { projectId: configuration.firebaseProjectId },
     "enmori-controlled-backend",
@@ -78,7 +87,8 @@ async function createControlledRuntime(
       getFirestore(firebaseApp),
     );
     const onboardingRepository = new FirestoreOnboardingRepository(gateway, isolatedEnvironment);
-    const checkInRepository = new FirestoreCheckInRepository(gateway);
+    const weather = new OpenMeteoWeatherProvider(() => running);
+    const checkInRepository = new FirestoreCheckInRepository(gateway, weather, new SystemClock());
     const interestRepository = new FirestoreInterestRepository(gateway);
     const clock = new SystemClock();
     const ids = new CryptoOpaqueIdGenerator();
@@ -97,19 +107,26 @@ async function createControlledRuntime(
       running = false; eventBrowseControl.disable();
       await Promise.allSettled([...pending]);
     };
+    // One host-owned key per process; restart invalidates positions, never facts.
+    const participation = isolatedEnvironment ? (remote ? createRemoteEventParticipation : createIsolatedEventParticipation)({
+      environment: isolatedEnvironment, firestore: gateway, clock,
+      source: eventBrowseControl.source, cursorKey: randomBytes(32),
+    }) : undefined;
     const realEvents = createControlledEventRecommendations({
       gateway: new FirebaseAdminEventReadGateway(getFirestore(firebaseApp)),
       source: eventBrowseControl.source, clock, requireRecommendationConsent: true,
+      ...(participation ? { ignoredEventIds: participation.ignoredEventIds } : {}),
       ...(eventInput ? { musicInterestTagId: eventInput.musicInterestTagId } : {}),
     });
     let chat: Awaited<ReturnType<typeof createIsolatedConversationComposition>> | undefined;
     let healthy = true;
+    let previewAccepting = true;
     let maintenanceHealthy = true;
     const chatTransport = chatModel ? new LocalChatTransport(chatModel) : undefined;
     if (chatTransport && isolatedEnvironment) {
       try {
         await chatTransport.prepareModel();
-        chat = await createIsolatedConversationComposition({
+        chat = await (remote ? createRemoteConversationComposition : createIsolatedConversationComposition)({
           firestore: getFirestore(firebaseApp), environment: isolatedEnvironment,
           transport: chatTransport, gates: simpleChatGates, simpleChat: true,
           conversationStrategy: 'open_conversation_v1',
@@ -119,6 +136,7 @@ async function createControlledRuntime(
       } catch { healthy = false; }
     }
     const stopAi = async () => {
+      previewAccepting = false;
       if (!chat) return;
       await chat.stopAdmissionAndMaintenance();
       // Let accepted work settle normally. Unknown generation outcomes retain
@@ -128,8 +146,38 @@ async function createControlledRuntime(
     };
     const aiStatus = () => ({ configured: !!chatTransport, available: !!chat && healthy,
       maintenanceHealthy, pending: chatTransport?.state.pending ?? false, outcomeUnknown: chatTransport?.state.outcomeUnknown ?? false });
+    const personaPreview = chat && healthy && chatTransport ? new PreviewPersona(
+      new FirestorePersonaPreviewAuthority(gateway), chatTransport,
+      () => performance.now(), () => chatTransport.state.pending,
+    ) : undefined;
+    const initializeOwner = async (uid: string) => {
+      await gateway.runTransaction(async tx => {
+        const bindingId = createAuthBindingDocumentId(uid);
+        if (!bindingId) throw new Error('Account unavailable');
+        const binding = await tx.get(`auth_bindings/${bindingId}`);
+        const owner = binding && parseAuthBinding(binding);
+        if (!owner) throw new Error('Account unavailable');
+        const accountPath = `accounts/${owner}`, account = await tx.get(accountPath);
+        if (!account || !['accepted', 'rejected'].includes(String(account.optionalProcessingConsent))) throw new Error('Account unavailable');
+        const records = {
+          [`friend_access/${owner}`]: { eligibilityState: 'eligible' },
+          [`friend_lists/${owner}`]: { initialized: true },
+          [`friend_inboxes/${owner}`]: { initialized: true },
+          [`account_interests/${owner}`]: { interestTagIds: [], revision: 1 },
+          [`accounts/${owner}/persona_state/current`]: { livePersonaIds: [], stateRevision: 0 },
+        };
+        const missing = [];
+        for (const [path, data] of Object.entries(records)) if (!await tx.get(path)) missing.push({path, data});
+        if (remote && account.purposeRevocationGeneration === undefined) tx.set(accountPath, {...account, purposeRevocationGeneration: 0});
+        for (const {path, data} of missing) tx.create(path, data);
+      });
+    };
+    const getOnboarding = new GetOnboarding(onboardingRepository);
+    const socialEvents = socialEventSource(eventBrowseControl.peek, eventBrowseControl.projectionReady);
     const app = await buildApp({
-      ...(isolatedEnvironment ? { isolatedSlices: {
+      ...(remote ? {socialModule: {identity: new FirebaseIdentityVerifier(getAuth(firebaseApp)), store: gateway,
+        history: new FirebaseAdminCheckInHistoryGateway(getFirestore(firebaseApp)), cursor: createHistoryCursorCodec(), clock, weather, activityEvents: socialEvents.activity, recommendationEvents: socialEvents.recommendations}} : {}),
+      ...(isolatedEnvironment ? { [remote ? 'remoteSlices' : 'isolatedSlices']: {
         environment: isolatedEnvironment,
         ...(chat && healthy ? { conversations: {
           ...chat.operations,
@@ -138,7 +186,14 @@ async function createControlledRuntime(
           execute: (...args: Parameters<typeof chat.operations.execute>) => healthy
             ? chat!.operations.execute(...args) : Promise.resolve({ kind: 'failure' as const, code: 'AI_UNAVAILABLE' as const }),
         } } : {}),
+        ...(personaPreview ? { personaPreview: {
+          execute: (...args: Parameters<PreviewPersona["execute"]>) => personaPreview.execute(
+            args[0], args[1], args[2], { ...args[3],
+              current: () => previewAccepting && healthy && args[3].current(),
+            }),
+        } } : {}),
         eventBrowse: { source: eventBrowseControl.source },
+        ...(participation ? { eventParticipation: participation } : {}),
         eventDetail: realEvents.eventDetail,
         friends: new FriendRequests(new FirestoreFriendRepository(gateway, clock), clock),
         checkInHistory: new ListOwnCheckInsForDate(new FirestoreCheckInHistoryRepository(new FirebaseAdminCheckInHistoryGateway(getFirestore(firebaseApp))), createHistoryCursorCodec(), clock),
@@ -147,32 +202,22 @@ async function createControlledRuntime(
       checkInCalendar:new OwnCheckInCalendar(new FirestoreCheckInCalendar(new FirebaseAdminCheckInHistoryGateway(getFirestore(firebaseApp)))),
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
       createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(getAuth(firebaseApp)), new FirestoreCatalogueWriter(gateway)),
+      getInterestAdminCapability: new GetInterestAdminCapability(new FirebaseInterestAdmin(getAuth(firebaseApp))),
       accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, isolatedEnvironment)),
       recommendEvents: realEvents.recommendEvents,
       identityVerifier: new FirebaseIdentityVerifier(getAuth(firebaseApp)),
       completeOnboarding: { execute: async input => {
         const result = await complete.execute(input);
         if (result.ok && isolatedEnvironment) {
-          // Idempotent scaffolding only. Never replace saved interests/relations/Personas.
-          await gateway.runTransaction(async tx => {
-            const binding = await tx.get(`auth_bindings/${createAuthBindingDocumentId(input.principal.firebaseUid)!}`);
-            const owner = binding && parseAuthBinding(binding);
-            if (!owner) throw new Error('Core account unavailable');
-            const records = {
-              [`friend_access/${owner}`]: { eligibilityState: 'eligible' },
-              [`friend_lists/${owner}`]: { initialized: true },
-              [`friend_inboxes/${owner}`]: { initialized: true },
-              [`account_interests/${owner}`]: { interestTagIds: [], revision: 1 },
-              [`accounts/${owner}/persona_state/current`]: { livePersonaIds: [], stateRevision: 0 },
-            };
-            const missing = [];
-            for (const [path, data] of Object.entries(records)) if (!await tx.get(path)) missing.push({ path, data });
-            for (const { path, data } of missing) tx.create(path, data);
-          });
+          await initializeOwner(input.principal.firebaseUid);
         }
         return result;
       } },
-      getOnboarding: new GetOnboarding(onboardingRepository),
+      getOnboarding: {execute: async principal => {
+        const result = await getOnboarding.execute(principal);
+        if (remote && result.ok && result.value.status === 'completed') await initializeOwner(principal.firebaseUid);
+        return result;
+      }},
       createCheckIn: new CreateCheckIn(checkInRepository, clock, ids),
       getCheckIn: new GetCheckIn(checkInRepository),
       getInterestTags: new GetInterestTags(interestRepository),
@@ -203,4 +248,11 @@ export async function createRetainedCoreRuntime(environment: Readonly<Record<str
     throw new Error('Core SDK environment does not match the verified endpoints');
   }
   return createControlledRuntime({ firebaseProjectId: checked.projectId, host: '127.0.0.1', port: 9380 }, environment, events, chatModel);
+}
+
+/** Public group entry uses real Firebase only; it cannot select Emulator bindings. */
+export async function createRemoteGroupRuntime(environment: Readonly<Record<string, string | undefined>>,
+  events?: { readonly source: BrowseSource; readonly musicInterestTagId: string }, chatModel?: string): Promise<ControlledRuntime> {
+  requireRemoteGroupEnvironment(environment);
+  return createControlledRuntime({firebaseProjectId: 'enmori-rmvp-controlled', host: '127.0.0.1', port: 9381}, environment, events, chatModel);
 }

@@ -1,4 +1,5 @@
-import { isPersonaId, isPersonaRevision, isStateRevision, normalizePersonaInput } from "../../personas/domain/persona-values.js";
+import { isPersonaId, isPersonaRevision, isStateRevision, normalizePersonaInput, personaExpressionFields } from "../../personas/domain/persona-values.js";
+import { personaExpressionProjection } from "../application/persona-expression.js";
 import type { StoredDocument } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { isSafeDocumentId, parseAccountProjection, parseCheckInProjection } from "../../shared/infrastructure/firebase/firestore-records.js";
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
@@ -57,15 +58,14 @@ export function parseReadPersonaState(data: StoredDocument | undefined): Omit<Re
     ...(typeof data.activePersonaId === "string" ? { activePersonaId: data.activePersonaId } : {}) });
 }
 
-export function parseReadPersona(data: StoredDocument | undefined, personaId: string): ReadPersonaSet["items"][number] | undefined {
+export function parseReadPersona(data: StoredDocument | undefined, personaId: string, includeExpression = false): ReadPersonaSet["items"][number] | undefined {
   const fields = ["displayName", "tone", "responseLength", "formatStyle", "createdAt", "updatedAt", "revision"];
   if (!data || !isPersonaId(personaId) || !fields.every(k => Object.hasOwn(data, k)) ||
-      !Object.keys(data).every(k => fields.includes(k)) || !isPersonaRevision(data.revision) ||
+      !Object.keys(data).every(k => fields.includes(k) || personaExpressionFields.includes(k as typeof personaExpressionFields[number])) || !isPersonaRevision(data.revision) ||
       !canonicalNoteInstant(data.createdAt) || !canonicalNoteInstant(data.updatedAt)) return undefined;
-  const input = normalizePersonaInput({ displayName: data.displayName, tone: data.tone,
-    responseLength: data.responseLength, formatStyle: data.formatStyle });
+  const input = normalizePersonaInput(data);
   if (!input || input.displayName !== data.displayName) return undefined;
-  return Object.freeze({ personaId, revision: data.revision, projection: Object.freeze({
+  return Object.freeze({ personaId, revision: data.revision, projection: includeExpression ? personaExpressionProjection(input) : Object.freeze({
     schemaVersion: "persona_presentation_v1", tone: input.tone, responseLength: input.responseLength,
     formatStyle: input.formatStyle }) });
 }

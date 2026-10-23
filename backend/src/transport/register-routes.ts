@@ -8,7 +8,7 @@ import type { GetOwnInterests } from "../interests/application/get-own-interests
 import type { ReplaceOwnInterests } from "../interests/application/replace-own-interests.js";
 import type { OwnInterestsProjection } from "../interests/application/interest-model.js";
 import type { AccountProjection } from "../onboarding/application/onboarding-model.js";
-import type { CheckInProjection } from "../check-ins/application/check-in-model.js";
+import { checkInResponse } from "../check-ins/transport/check-in-response.js";
 import type { IdentityVerifier } from "../shared/ports/identity-verifier.js";
 import { buildAuthenticate, requirePrincipal } from "./authenticate.js";
 import { sendFailure } from "./error-response.js";
@@ -42,12 +42,14 @@ interface CommandHeaders {
   readonly "idempotency-key": string;
 }
 
-interface CreateCheckInBody {
+interface CreateCheckInBody extends CheckInLocationInput {
   readonly mood?: string | null;
+  readonly locationLabel?: string | null;
   readonly activity?: string | null;
   readonly checkInVisibility?: "private" | "friends_only" | "public";
   readonly note: string;
 }
+type CheckInLocationInput = import("../check-ins/domain/check-in-location.js").CheckInLocationInput;
 
 interface CheckInParams {
   readonly checkInId: string;
@@ -115,7 +117,8 @@ export async function registerR4Routes(
       if (!result.ok) return sendFailure(request, reply, result.failure);
       return reply
         .code(result.value.disposition === "created" ? 201 : 200)
-        .send({ checkIn: checkInResponse(result.value.checkIn) });
+        .send({ checkIn: checkInResponse(result.value.checkIn),
+          ...(result.value.notice === undefined ? {} : {notice:result.value.notice}) });
     },
   );
 
@@ -180,17 +183,6 @@ function accountResponse(account: AccountProjection): AccountProjection {
   };
 }
 
-function checkInResponse(checkIn: CheckInProjection): CheckInProjection {
-  return {
-    checkInId: checkIn.checkInId,
-    ...(checkIn.revision === undefined ? {} : { revision: checkIn.revision }),
-    note: checkIn.note,
-    ...(checkIn.mood === undefined ? {} : {mood:checkIn.mood}),
-    ...(checkIn.activity === undefined ? {} : {activity:checkIn.activity}),
-    createdAt: checkIn.createdAt,
-    ...(checkIn.checkInVisibility === undefined ? {} : { checkInVisibility: checkIn.checkInVisibility }),
-  };
-}
 
 function interestsResponse(
   interests: OwnInterestsProjection,

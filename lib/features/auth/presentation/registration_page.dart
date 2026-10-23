@@ -73,21 +73,22 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
     final page = Scaffold(
       appBar: AppBar(title: const Text('Create account')),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: SingleChildScrollView(
               key: const Key('route-register'),
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
                     'Register for ENMORI',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
-                  const Text('Create access before completing onboarding.'),
+                  const Text('Start with your email and a password.'),
                   const SizedBox(height: 24),
                   Form(
                     key: _formKey,

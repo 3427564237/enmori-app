@@ -1,3 +1,6 @@
+import '../../auth/domain/auth_repository.dart';
+import '../../auth/auth_providers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,11 +19,14 @@ final class CheckInEditPage extends ConsumerStatefulWidget {
 }
 
 class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
+  Object? _openedSession;
+  bool _sessionBound = false;
   late CheckIn _current;
   late final TextEditingController _note;
   late CheckInVisibility _visibility;
-  String? _mood, _activity;
+  String? _mood, _activity, _locationLabel;
   bool get _dirty =>
+      _locationLabel != _current.locationLabel ||
       _mood != _current.mood ||
       _activity != _current.activity ||
       _note.text != _current.note ||
@@ -28,9 +34,13 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
   @override
   void initState() {
     super.initState();
+    final initial = ref.read(authSessionProvider).asData?.value;
+    _openedSession = initial is AuthSessionAuthenticated ? initial : null;
+    _sessionBound = initial != null;
     _current = widget.checkIn;
     _mood = _current.mood;
     _activity = _current.activity;
+    _locationLabel = _current.locationLabel;
     _note = TextEditingController(text: _current.note);
     _visibility = _current.checkInVisibility ?? CheckInVisibility.private;
   }
@@ -62,8 +72,31 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
       false;
   @override
   Widget build(BuildContext context) {
+    final session = ref.watch(
+      authSessionProvider.select(
+        (value) => value.asData?.value is AuthSessionAuthenticated
+            ? value.asData?.value
+            : null,
+      ),
+    );
+    if (!_sessionBound && ref.read(authSessionProvider).asData != null) {
+      _openedSession = session;
+      _sessionBound = true;
+    }
+    if (!identical(session, _openedSession)) {
+      _note.clear();
+      return Scaffold(
+        appBar: AppBar(title: const Text('Edit Check-in')),
+        body: const Center(
+          child: Text(
+            'Session changed. Return to your records and reopen this Check-in.',
+          ),
+        ),
+      );
+    }
     final state = ref.watch(checkInEditControllerProvider);
     final controller = ref.read(checkInEditControllerProvider.notifier);
+    final renderedEpoch = controller.epoch;
     final mustReload =
         state.failure != null &&
         state.failure!.kind != AppFailureKind.checkInInvalid;
@@ -88,6 +121,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
             _note.text = _current.note;
             _mood = _current.mood;
             _activity = _current.activity;
+            _locationLabel = _current.locationLabel;
             _visibility =
                 _current.checkInVisibility ?? CheckInVisibility.private;
           });
@@ -100,7 +134,8 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
         appBar: AppBar(title: const Text('Edit Check-in')),
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -178,6 +213,20 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                TextFormField(
+                  key: ValueKey('edit-place-${_current.revision}'),
+                  initialValue: _locationLabel,
+                  enabled: !state.pending,
+                  maxLength: 50,
+                  decoration: const InputDecoration(
+                    labelText: 'Place name',
+                    helperText: 'A label only; GPS stays separate.',
+                  ),
+                  onChanged: (v) => setState(
+                    () => _locationLabel = v.trim().isEmpty ? null : v.trim(),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 DropdownButtonFormField<CheckInVisibility>(
                   key: ValueKey(
                     'check-in-edit-visibility-${_current.revision}',
@@ -235,6 +284,7 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                                 _current = latest;
                                 _mood = latest.mood;
                                 _activity = latest.activity;
+                                _locationLabel = latest.locationLabel;
                                 _note.text = latest.note;
                                 _visibility =
                                     latest.checkInVisibility ??
@@ -254,8 +304,10 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                           _current,
                           _note.text,
                           _visibility,
+                          expectedEpoch: renderedEpoch,
                           mood: _mood,
                           activity: _activity,
+                          locationLabel: _locationLabel,
                         ),
                   child: Text(state.pending ? 'Saving…' : 'Save changes'),
                 ),
@@ -271,7 +323,10 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                                 'Delete',
                               ) &&
                               mounted) {
-                            await controller.remove(_current);
+                            await controller.remove(
+                              _current,
+                              expectedEpoch: renderedEpoch,
+                            );
                           }
                         },
                   icon: const Icon(Icons.delete_outline),

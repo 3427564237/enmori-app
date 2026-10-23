@@ -4,13 +4,22 @@ import type { FirestoreGateway, FirestoreTransactionGateway, StoredDocument } fr
 import { createAuthBindingDocumentId, isSafeDocumentId, parseAccountProjection, parseAuthBinding, parseCheckInProjection } from '../../shared/infrastructure/firebase/firestore-records.js';
 import type { CheckInProjection } from '../application/check-in-model.js';
 import type { CheckInMutations } from '../ports/check-in-mutations.js';
+import { parsePosition } from '../../weather/domain/weather.js';
 
 export class FirestoreCheckInMutations implements CheckInMutations {
   constructor(private readonly gateway: FirestoreGateway) {}
   async update(input: Parameters<CheckInMutations['update']>[0]): Promise<Result<CheckInProjection, AppFailure>> {
     return this.mutate(input, (tx, path, stored, revision) => {
-      // Keep createdAt, weather and location unchanged. They are historical facts.
-      const updated = { ...stored,
+      // Text/mood edits preserve historical weather. Moving/removing the point,
+      // or explicit withdrawal, removes its snapshot; no provider refresh.
+      if (input.location != null && !parsePosition(input.location)) return err(appFailure('CHECKIN_INVALID'));
+      const retained: Record<string, unknown> = {...stored};
+      if (input.removeWeather === true || (input.location !== undefined &&
+          JSON.stringify(input.location) !== JSON.stringify(stored.location))) delete retained.weather;
+      if (input.location === null) delete retained.location;
+      else if (input.location !== undefined) retained.location = input.location;
+      const updated = { ...retained,
+        ...(input.locationLabel === undefined ? {} : {locationLabel:input.locationLabel}),
         ...(input.mood === undefined ? {} : {mood:input.mood}), ...(input.activity === undefined ? {} : {activity:input.activity}), note: input.note, checkInVisibility: input.checkInVisibility, revision: revision + 1 };
       const projection = parseCheckInProjection(updated, input.checkInId);
       if (!projection) return err(appFailure('SERVICE_UNAVAILABLE'));

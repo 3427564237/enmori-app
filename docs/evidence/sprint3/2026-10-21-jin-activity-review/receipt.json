@@ -1,0 +1,515 @@
+{
+  "source": "77781dc374e745f491a33b17f2874d6c46740a5a",
+  "tree": "bfb55bd7ea32d80877a2290c61032792a48f2208",
+  "previousReviewHead": "0a806883d9b96dcdcb570dde7fe4055f51a8f6b7",
+  "originalDevelopmentBase": "927f77527b32d349aa08020f7de0e88402edb9c7",
+  "integrationTarget": "souma/li-shi-du-integration-20261020",
+  "targetHead": "900ca6fcdefb77e9aa95d96fa80994ebf826398f",
+  "checkedInputs": {
+    "count": 1589,
+    "beforeSha256": "3a7edb7c28a0c85db739826150c4c869d9e0d5456369c7035abeeb7be34ac974",
+    "afterSha256": "3a7edb7c28a0c85db739826150c4c869d9e0d5456369c7035abeeb7be34ac974",
+    "unchanged": true
+  },
+  "gates": {
+    "strictCompile": {
+      "exit": 0
+    },
+    "backend": {
+      "pass": 58,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0
+    },
+    "flutter": {
+      "pass": 60,
+      "fail": 0,
+      "exit": 0,
+      "noTestAssets": true
+    },
+    "analysis": {
+      "changedDartFiles": 25,
+      "fatalInfos": true,
+      "exit": 0
+    },
+    "format": {
+      "files": 25,
+      "changed": 0,
+      "exit": 0
+    },
+    "isolatedSdk": {
+      "pass": 6,
+      "fail": 0,
+      "skip": 0,
+      "outerExit": 0,
+      "includesParentTest": true,
+      "ownedDocumentsRemoved": 11,
+      "ownedAuthUsersRemoved": 2,
+      "ownedProfileRemoved": true,
+      "loopbackPortsFree": [
+        8080,
+        9099,
+        4400,
+        4500,
+        9150
+      ]
+    }
+  },
+  "attribution": {
+    "author": "JIN / chuxi12483468",
+    "backend": "handwritten gateway and Fastify injection",
+    "flutter": "synthetic Auth/HTTP/repository/widget tests; no device",
+    "sdk": "actual isolated Auth and Firestore with Fastify injection; records seeded/edited via Admin SDK; no product Check-in POST or real Event/provider test"
+  },
+  "inputs": [
+    {
+      "path": "api/friend-activity-display-contract.md",
+      "blob": "5e79bcb6b8a104589381c110c5ad017c4248d6a4",
+      "sha256": "fa1e3f22d877139c369434bdd3dbc64f01e943b2c5d0359539e1a94a0bd9e8db",
+      "normalizedSha256": "fa1e3f22d877139c369434bdd3dbc64f01e943b2c5d0359539e1a94a0bd9e8db"
+    },
+    {
+      "path": "api/openapi.json",
+      "blob": "bc4bfe488f7e82b6d4ccba77291050599cf644e5",
+      "sha256": "c8a830b26d50d27d8b41dcb5aea8da924c8ed6ed12b4bb4bc8b765ed3fd7edcd",
+      "normalizedSha256": "c8a830b26d50d27d8b41dcb5aea8da924c8ed6ed12b4bb4bc8b765ed3fd7edcd"
+    },
+    {
+      "path": "backend/emulator-test/friend-activity.integration.test.ts",
+      "blob": "1167b9e1f7ddcbcb3970409f8a4bd12cc8b10f65",
+      "sha256": "dd65de41457c479d2a9dc68201cdf556c20207d2161e676fb846f5f9d37270da",
+      "normalizedSha256": "dd65de41457c479d2a9dc68201cdf556c20207d2161e676fb846f5f9d37270da"
+    },
+    {
+      "path": "backend/emulator-test/friend-ignore.integration.test.ts",
+      "blob": "e40c269ef09f960166ade30a0538056688b54255",
+      "sha256": "f4cb84612b67698d3f30eedc5b6362290df1f985acd545bcec6d5b359c5bf420",
+      "normalizedSha256": "f4cb84612b67698d3f30eedc5b6362290df1f985acd545bcec6d5b359c5bf420"
+    },
+    {
+      "path": "backend/emulator-test/social-weather.integration.test.ts",
+      "blob": "4a10ca6dd62604bc0c169753e6a9490f12c68da9",
+      "sha256": "6daeb95e19c5562bade9a8b11e61f402bb1e745ccd677c0a6d9d5a5b1febb92b",
+      "normalizedSha256": "6daeb95e19c5562bade9a8b11e61f402bb1e745ccd677c0a6d9d5a5b1febb92b"
+    },
+    {
+      "path": "backend/src/bootstrap/register-social-module.ts",
+      "blob": "269fdd1573fd2d3bc88931e6debf8cc9516aea53",
+      "sha256": "1e1d6641dd6ebd05598dd11a80abbb21d1d5567da064a18503f197ce2fa042bf",
+      "normalizedSha256": "1e1d6641dd6ebd05598dd11a80abbb21d1d5567da064a18503f197ce2fa042bf"
+    },
+    {
+      "path": "backend/src/friend-activity/infrastructure/firestore-friend-activity.ts",
+      "blob": "dcc04d869472d80008be617313fc798fe37b938a",
+      "sha256": "549f7989b46e05db5cfc6b807c8ba4b28890f543d999de212d237046e8f3e569",
+      "normalizedSha256": "549f7989b46e05db5cfc6b807c8ba4b28890f543d999de212d237046e8f3e569"
+    },
+    {
+      "path": "backend/src/friend-activity/ports/friend-activity.ts",
+      "blob": "d6adcec70e00cca5bc1718414aa67298977c6455",
+      "sha256": "92e2385ac6568e73239a245a2f097c8f5d81bfa7a4c884d14ad49e3cdf009302",
+      "normalizedSha256": "92e2385ac6568e73239a245a2f097c8f5d81bfa7a4c884d14ad49e3cdf009302"
+    },
+    {
+      "path": "backend/src/friend-activity/transport/friend-activity-route.ts",
+      "blob": "673f71af93d1c1335b35c9290f37656ee902349b",
+      "sha256": "c82635f1b5d83993ab7e28fc56b2864bd774a99f819fcf0d3368197b5a0da65c",
+      "normalizedSha256": "c82635f1b5d83993ab7e28fc56b2864bd774a99f819fcf0d3368197b5a0da65c"
+    },
+    {
+      "path": "backend/src/friend-recommendations/infrastructure/firestore-friend-ignore-repository.ts",
+      "blob": "fe41e49f12285c270cb374b29fb32bdb4295f13b",
+      "sha256": "6de81ac67a23cd80b1cc032d7fbe9df4e2ce7838c8da781372831100affe5742",
+      "normalizedSha256": "6de81ac67a23cd80b1cc032d7fbe9df4e2ce7838c8da781372831100affe5742"
+    },
+    {
+      "path": "backend/src/friend-recommendations/infrastructure/firestore-friend-recommendations.ts",
+      "blob": "917b032ef848160d160404991adbf8150b504868",
+      "sha256": "72120a14f61dac523aa8feaa6cb8d60c9cff1827c19a0f06c9577d3245c708a4",
+      "normalizedSha256": "72120a14f61dac523aa8feaa6cb8d60c9cff1827c19a0f06c9577d3245c708a4"
+    },
+    {
+      "path": "backend/src/friend-recommendations/infrastructure/recommendation-preference.ts",
+      "blob": "46b06b146fc1c8ca37da9883a8d07e0cdfca7b68",
+      "sha256": "943adecb48cec7f09b5a53d9e91feabb706731bc6a798fad8f34e09259047de4",
+      "normalizedSha256": "943adecb48cec7f09b5a53d9e91feabb706731bc6a798fad8f34e09259047de4"
+    },
+    {
+      "path": "backend/src/friends/domain/social-failure.ts",
+      "blob": "7d0e24be759dce41932c02e8e1a96f0d92704d0d",
+      "sha256": "8fb5580a312d05c349ff8b1508f2cec280e1c2e5f089df62d9195d8574d66598",
+      "normalizedSha256": "8fb5580a312d05c349ff8b1508f2cec280e1c2e5f089df62d9195d8574d66598"
+    },
+    {
+      "path": "backend/src/friends/infrastructure/social-authority.ts",
+      "blob": "f6de4242f400ede916fd36ea6f4c85ca1302f400",
+      "sha256": "ae8cda13707e86d757b3f87525730625ddf230ed46a34f5db17425b36285bb3e",
+      "normalizedSha256": "ae8cda13707e86d757b3f87525730625ddf230ed46a34f5db17425b36285bb3e"
+    },
+    {
+      "path": "backend/src/friends/ports/social-authority.ts",
+      "blob": "ca395e74de49c8b8666fc6f0233170a705b28ddf",
+      "sha256": "acdd05eacaa826e1d591ae512abdeb850006554cac0a9f9b4e6fd70f7f9c4e63",
+      "normalizedSha256": "acdd05eacaa826e1d591ae512abdeb850006554cac0a9f9b4e6fd70f7f9c4e63"
+    },
+    {
+      "path": "backend/test/friend-activity-display.test.ts",
+      "blob": "d5290c462d6f8f088c88991ee07e5d34d6ca566e",
+      "sha256": "a130a3728d66b77ae7993df6d39931d990972c0ea660fe832f2df1513a8df31e",
+      "normalizedSha256": "a130a3728d66b77ae7993df6d39931d990972c0ea660fe832f2df1513a8df31e"
+    },
+    {
+      "path": "backend/test/friend-activity.test.ts",
+      "blob": "32b13455636ebd4ef4693cfd809f6b6a23e3261c",
+      "sha256": "d90a0b964569d0a1d32e28b03f43541a59c9744a65b2a680928203a6ff7a1c60",
+      "normalizedSha256": "d90a0b964569d0a1d32e28b03f43541a59c9744a65b2a680928203a6ff7a1c60"
+    },
+    {
+      "path": "backend/test/friend-ignore.test.ts",
+      "blob": "132ffae740126df67d4518d6220ca5482cd534f1",
+      "sha256": "039f573aaf882e31b58f0cb4d195b67df9e554146ab50e6b5e45a881a487720a",
+      "normalizedSha256": "039f573aaf882e31b58f0cb4d195b67df9e554146ab50e6b5e45a881a487720a"
+    },
+    {
+      "path": "backend/test/friend-recommendation-source.test.ts",
+      "blob": "9b0a73e1bf7fb04a67ce6bf13793953cefe5303d",
+      "sha256": "d10a3e54c2698c51592127182b77ca3f9a1781b6e5430a03f2cc1bff8b523d76",
+      "normalizedSha256": "d10a3e54c2698c51592127182b77ca3f9a1781b6e5430a03f2cc1bff8b523d76"
+    },
+    {
+      "path": "docs/decisions/2026-10-20-li-event-batches-friends-activity.md",
+      "blob": "a03564e680181930d0e913cf3bae9ed9ce599428",
+      "sha256": "0708970fdd7fecad4888df60755eac50ff9b569dc82da7c600c820e7ace89ee7",
+      "normalizedSha256": "0708970fdd7fecad4888df60755eac50ff9b569dc82da7c600c820e7ace89ee7"
+    },
+    {
+      "path": "docs/planning/local-ui-handoff-oct19/jin-activity-review-fixes-oct21.md",
+      "blob": "986ccf816d27b8cc166684d4d9a910847e6194fb",
+      "sha256": "dafa476457214cbcca51b95d7f6e6b1e1bc84f1f8a540e834a93624007e35727",
+      "normalizedSha256": "dafa476457214cbcca51b95d7f6e6b1e1bc84f1f8a540e834a93624007e35727"
+    },
+    {
+      "path": "lib/core/network/backend_api_client.dart",
+      "blob": "fa9c627c69d599d4c1025cf546e3d9aaf636ca57",
+      "sha256": "995ede3033003e5d567e9fe44a5db6c2b0ddd6e3a0b197b492930eceb3a1c43c",
+      "normalizedSha256": "995ede3033003e5d567e9fe44a5db6c2b0ddd6e3a0b197b492930eceb3a1c43c"
+    },
+    {
+      "path": "lib/features/check_in/check_in_providers.dart",
+      "blob": "0f228e95956db0c3d07c20cafdc6f0bf0c5a9dc6",
+      "sha256": "997b4e5752ff1ec3e1b6b60306b7a09fcaaf31831f516bbb020bff4adcea3376",
+      "normalizedSha256": "997b4e5752ff1ec3e1b6b60306b7a09fcaaf31831f516bbb020bff4adcea3376"
+    },
+    {
+      "path": "lib/features/check_in/data/backend_check_in_place_repository.dart",
+      "blob": "14ea059867aeb572d5cbd1bf3fa66d3497c012cd",
+      "sha256": "c3ca4befa5b275a11d2e8844d504c30833488ed56c1d2a663934d05a47f05653",
+      "normalizedSha256": "c3ca4befa5b275a11d2e8844d504c30833488ed56c1d2a663934d05a47f05653"
+    },
+    {
+      "path": "lib/features/check_in/data/check_in_projection_parser.dart",
+      "blob": "d03d763f91be99c1af8a854e98f675a0c2e3efb9",
+      "sha256": "6ecd97698d44b026767b7ecd8c274238f6d0f87a1714a3ebbf0bd728bcd58fdd",
+      "normalizedSha256": "6ecd97698d44b026767b7ecd8c274238f6d0f87a1714a3ebbf0bd728bcd58fdd"
+    },
+    {
+      "path": "lib/features/check_in/domain/check_in_place_repository.dart",
+      "blob": "82f0eb4a8e655b8c3da5945dd060969e018364ba",
+      "sha256": "76055bcdc60eb8ea045db750f68c97818e5ec766434cc7e4af978eca1a69c1cd",
+      "normalizedSha256": "76055bcdc60eb8ea045db750f68c97818e5ec766434cc7e4af978eca1a69c1cd"
+    },
+    {
+      "path": "lib/features/check_in/domain/check_in_projection_decoder.dart",
+      "blob": "cc8f5c4e99d7221b35390409ae4714971d1d8a77",
+      "sha256": "e6828464a7bf8af8ba4da87aa56726b7c1d788da6b165fcc8b4827c6ade35118",
+      "normalizedSha256": "e6828464a7bf8af8ba4da87aa56726b7c1d788da6b165fcc8b4827c6ade35118"
+    },
+    {
+      "path": "lib/features/check_in/presentation/located_check_in_actions.dart",
+      "blob": "e12feb4030377dc006befd44583562e1925b0dfb",
+      "sha256": "7b90db1204fe75b1446d5140d5f2789542bf603ca6d24223dbd52f398c068ae4",
+      "normalizedSha256": "7b90db1204fe75b1446d5140d5f2789542bf603ca6d24223dbd52f398c068ae4"
+    },
+    {
+      "path": "lib/features/check_in/presentation/located_check_in_controller.dart",
+      "blob": "22f33fc7bea7170633044bb36d2a5b5020125a4b",
+      "sha256": "ce27b8015612129f44f0f65861d7709c8814ac0f51289452db630ab98574e6f7",
+      "normalizedSha256": "ce27b8015612129f44f0f65861d7709c8814ac0f51289452db630ab98574e6f7"
+    },
+    {
+      "path": "lib/features/friends/data/backend_friend_activity_repository.dart",
+      "blob": "0879054a7ad7db4808bea9ac46987b2b3d871696",
+      "sha256": "b015cfcd1b39a8d7064f5ef571a91e55cb1a868d44fe30218959cf14a8ec4b12",
+      "normalizedSha256": "b015cfcd1b39a8d7064f5ef571a91e55cb1a868d44fe30218959cf14a8ec4b12"
+    },
+    {
+      "path": "lib/features/friends/data/backend_social_repository.dart",
+      "blob": "e6760a2ede51831066e4259523e7a9cd524a214e",
+      "sha256": "fcbed13d69d4873fa3bc39d68b677696994c4ba236db04e1aa287ab06ea96a37",
+      "normalizedSha256": "fcbed13d69d4873fa3bc39d68b677696994c4ba236db04e1aa287ab06ea96a37"
+    },
+    {
+      "path": "lib/features/friends/domain/friend_activity_repository.dart",
+      "blob": "c6dd42bed773533c2a971d6adb0ad87f7695e023",
+      "sha256": "3f3ddb8c1ad74ced4cb2042b2bd89b54c853a2a5f1b243643dde27fc6aeeb7b3",
+      "normalizedSha256": "3f3ddb8c1ad74ced4cb2042b2bd89b54c853a2a5f1b243643dde27fc6aeeb7b3"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_activity_panel.dart",
+      "blob": "8622e5e0cab08917b4e01550ce6b3fc6bd386c31",
+      "sha256": "3daab21b6a790cf6ebe56eef1b63dd8287c5576f2a75e04445fe27189500eb41",
+      "normalizedSha256": "3daab21b6a790cf6ebe56eef1b63dd8287c5576f2a75e04445fe27189500eb41"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_discovery_panel.dart",
+      "blob": "12e0f72efc0ebdc8147ebf23dd71be7b4a7db087",
+      "sha256": "1c243123daa5aeb13db383d2149ea2b80b8f39d0a5d99137a696534960b873fe",
+      "normalizedSha256": "1c243123daa5aeb13db383d2149ea2b80b8f39d0a5d99137a696534960b873fe"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_ignore_controller.dart",
+      "blob": "d4c77d6b5c4934e6df1b73846afcde5cc73bc36f",
+      "sha256": "f198873440f485e894fa7100f9192c4ee9897b19c7753e149bdc05ab3027fa58",
+      "normalizedSha256": "f198873440f485e894fa7100f9192c4ee9897b19c7753e149bdc05ab3027fa58"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_module_page.dart",
+      "blob": "2cde23f55099e1df346a4986b01f4f72976329b1",
+      "sha256": "88d66987e84d4fd4e96dfc06e8b42b0e1210220929409135f09a86cac697ca2b",
+      "normalizedSha256": "88d66987e84d4fd4e96dfc06e8b42b0e1210220929409135f09a86cac697ca2b"
+    },
+    {
+      "path": "lib/features/friends/presentation/ignored_people_page.dart",
+      "blob": "4f151a3d30103ad1fdb7d703976c24eee4281384",
+      "sha256": "e830f5f0f44803f26968d06a3c0e3f345c14deac2e35a583a5edb5a3cf385ef7",
+      "normalizedSha256": "e830f5f0f44803f26968d06a3c0e3f345c14deac2e35a583a5edb5a3cf385ef7"
+    },
+    {
+      "path": "lib/features/friends/presentation/social_profile_page.dart",
+      "blob": "5f4407ca419bb1aac84dd6e8cfcb3b09ad29bd24",
+      "sha256": "d2b3de4057a8a322fd0b77bab945a752a03a92a48f0f6a167071b437abee4354",
+      "normalizedSha256": "d2b3de4057a8a322fd0b77bab945a752a03a92a48f0f6a167071b437abee4354"
+    },
+    {
+      "path": "lib/features/friends/social_providers.dart",
+      "blob": "dd483c7208311bf06b96aeb20b11d2905876ae21",
+      "sha256": "18080ece5cd48b35d03874da8e1f6101531a9b6b8e2a3259a2c2563822e5f794",
+      "normalizedSha256": "18080ece5cd48b35d03874da8e1f6101531a9b6b8e2a3259a2c2563822e5f794"
+    },
+    {
+      "path": "lib/features/weather/weather_providers.dart",
+      "blob": "25eb45d382895120b93a9f91f94d7a33c36a1677",
+      "sha256": "8b42700a3bb4631e839d0cb525e0c2e53a9d8adf88639f01aa125d1a7e2bd945",
+      "normalizedSha256": "8b42700a3bb4631e839d0cb525e0c2e53a9d8adf88639f01aa125d1a7e2bd945"
+    },
+    {
+      "path": "test/features/friend_activity_display_test.dart",
+      "blob": "49bdd8373612d08a50e81819e622abb79c747cf1",
+      "sha256": "f14e62408ba851c549c4084295d27968e82d978e32668754520e9ea1c31cb06f",
+      "normalizedSha256": "f14e62408ba851c549c4084295d27968e82d978e32668754520e9ea1c31cb06f"
+    },
+    {
+      "path": "test/features/friend_discovery_activity_map_test.dart",
+      "blob": "c46ae1d56b6dadc170d5afb8305d019e33ab92b7",
+      "sha256": "d2db41bb1380e375862b7b56ace4cb0e8861e1310adf4b0f7f751f172e4990b0",
+      "normalizedSha256": "d2db41bb1380e375862b7b56ace4cb0e8861e1310adf4b0f7f751f172e4990b0"
+    },
+    {
+      "path": "test/features/friend_ignore_flow_test.dart",
+      "blob": "ae4eb3ede88ad56f838a2dd95d22cf38dfe42b49",
+      "sha256": "05f9055f940dabccaed4b13042dd30710090290babc0ea23cc950b41cf8a434f",
+      "normalizedSha256": "05f9055f940dabccaed4b13042dd30710090290babc0ea23cc950b41cf8a434f"
+    },
+    {
+      "path": "test/features/jin_rendered_session_regression_test.dart",
+      "blob": "9cd31dd91d97aefdc57e6a75ce669e1e1269b1f7",
+      "sha256": "4c96a4442f8eecc4b82dd0677cf827712afef2f7a32e8ea031ebe401cd316104",
+      "normalizedSha256": "4c96a4442f8eecc4b82dd0677cf827712afef2f7a32e8ea031ebe401cd316104"
+    },
+    {
+      "path": "test/features/located_check_in_flow_test.dart",
+      "blob": "03e1caaeb2adec18ef88deaf3e3ff5647d6caa18",
+      "sha256": "f832ae6e6c0abd10742953ebcfa8c9305e66d6bf64eade17a4d5677a2c467658",
+      "normalizedSha256": "f832ae6e6c0abd10742953ebcfa8c9305e66d6bf64eade17a4d5677a2c467658"
+    },
+    {
+      "path": "test/features/social_profile_flow_test.dart",
+      "blob": "6dff23ea7843b0f62dae51ab9f1ba976b8bf2938",
+      "sha256": "461935a371140aa7d66769dd1a672a7ab9128846892eea7c0501864d0fcc5ccb",
+      "normalizedSha256": "461935a371140aa7d66769dd1a672a7ab9128846892eea7c0501864d0fcc5ccb"
+    },
+    {
+      "path": "tool/run_social_weather_emulators.mjs",
+      "blob": "4675ecd0da3bf453dcb187a63df4ed9b7ca108bf",
+      "sha256": "11cef3fd77e623f006655a708a2c5eb8da15fa7df2ddf1819cbdbbfedc00aa37",
+      "normalizedSha256": "11cef3fd77e623f006655a708a2c5eb8da15fa7df2ddf1819cbdbbfedc00aa37"
+    }
+  ],
+  "deleted": [
+    "backend/src/friends/transport/register-social-module.ts"
+  ],
+  "logs": [
+    {
+      "path": "build/jin-review-activity/analysis-01.log",
+      "bytes": 338,
+      "sha256": "e5df62bd446aa98be603627b57ce042c53a3d73286a8537e159222d8397ebe97"
+    },
+    {
+      "path": "build/jin-review-activity/analysis-02.log",
+      "bytes": 1094,
+      "sha256": "555ebe58929369d2df67763bac29556273d806d97aa4f18e2128d4751d3eda9c"
+    },
+    {
+      "path": "build/jin-review-activity/analysis-03.log",
+      "bytes": 2517,
+      "sha256": "a8134781aedb8424b07a6e2211748c1aebc35851d160b4d32e2bad3e9e500dfa"
+    },
+    {
+      "path": "build/jin-review-activity/analysis-04.log",
+      "bytes": 102,
+      "sha256": "dccf2571aa5080ed52ac9ca02cc75b211100ae436676cb7f36507fe6ee6af543"
+    },
+    {
+      "path": "build/jin-review-activity/analysis-final-precommit.log",
+      "bytes": 162,
+      "sha256": "2839f9b90ddc086b0dfd8a07aaac2ca502284f15db996df937f1fe5fa753897d"
+    },
+    {
+      "path": "build/jin-review-activity/analysis-frozen.log",
+      "bytes": 816,
+      "sha256": "42a8d119749435709720cbcf0eea85d4e7fbff88ffcd909943ce2cc3252588cc"
+    },
+    {
+      "path": "build/jin-review-activity/backend-01.log",
+      "bytes": 6130,
+      "sha256": "ea82067b27e5c48b7dda414df1ccc2e4a8dbd83bf732707fc5f4062a0beea095"
+    },
+    {
+      "path": "build/jin-review-activity/backend-frozen.log",
+      "bytes": 6121,
+      "sha256": "c9d9c9fa38d09f1b0bee8b27446185bb677bfe7daeb0f1bee136c86acd979073"
+    },
+    {
+      "path": "build/jin-review-activity/before-probes.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-review-activity/compile-01.log",
+      "bytes": 1831,
+      "sha256": "45e05e60694f5abb7044b9913a867238da2c88e345e1ec0e529b259f89066619"
+    },
+    {
+      "path": "build/jin-review-activity/compile-02.log",
+      "bytes": 1073,
+      "sha256": "a69498db5ce658e53e67adeb114651ac2bec0752dc70f6675e832b8a4e5bebb5"
+    },
+    {
+      "path": "build/jin-review-activity/compile-03.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-review-activity/compile-04.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-review-activity/compile-05.log",
+      "bytes": 81,
+      "sha256": "1b58693a8ffe568f217b17ff8420cda832979655a54b6112aa0f0d3b189f8b33"
+    },
+    {
+      "path": "build/jin-review-activity/compile-06.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-review-activity/compile-07.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-review-activity/compile-frozen.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-review-activity/flutter-activity-01.log",
+      "bytes": 13849,
+      "sha256": "66dbb4132f2c0a8ddf85c0d436fe78f7033a34fd83a7b30aa209c35faa2a4092"
+    },
+    {
+      "path": "build/jin-review-activity/flutter-activity-02.log",
+      "bytes": 10118,
+      "sha256": "d6e64f85ff752310d01e508705d8a1f8d8c9af3e76326dc644540c95bcf5283a"
+    },
+    {
+      "path": "build/jin-review-activity/flutter-activity-03.log",
+      "bytes": 1086,
+      "sha256": "90eda595ff79ce8c011ee1e0bec5aa4344d14cdff3ac14604c0efa9b78e21258"
+    },
+    {
+      "path": "build/jin-review-activity/flutter-fix-01.log",
+      "bytes": 14899,
+      "sha256": "f51f0d071ea58e0f3bb7afe054dadd3911be9a626cab36bf63ed348995d84359"
+    },
+    {
+      "path": "build/jin-review-activity/flutter-fix-02.log",
+      "bytes": 6482,
+      "sha256": "d261e5edbc7dc1469655caeb2005204bdbf16e87d8ca103e9c9b47576956a28b"
+    },
+    {
+      "path": "build/jin-review-activity/flutter-frozen.log",
+      "bytes": 16962,
+      "sha256": "ad74120135e3a7d031d7a75afd2dc04305ebdaacf0cfab4a485d5ab67990b456"
+    },
+    {
+      "path": "build/jin-review-activity/format-frozen.log",
+      "bytes": 49,
+      "sha256": "0d6e35ee3a6378c11ffadf80500dedac8ba3fa10e32308a3c374f00ca4bb0a4c"
+    },
+    {
+      "path": "build/jin-review-activity/format-write-02.log",
+      "bytes": 120,
+      "sha256": "19fedb39d31bd62c7fdaa4037ea8e39ddcbf22ec3d4c6973e2ca7d3fe22af548"
+    },
+    {
+      "path": "build/jin-review-activity/format-write.log",
+      "bytes": 1499,
+      "sha256": "c08f0777959360158a8343288f8cf37d1604a0ff2ffaaf04da4023e57dfad1fd"
+    },
+    {
+      "path": "build/jin-review-activity/inputs-after.log",
+      "bytes": 201,
+      "sha256": "a042dfa16000cc2dbe2237b7e42bb5a7023ed859fd034e0795f7216b9d62606a"
+    },
+    {
+      "path": "build/jin-review-activity/inputs-before.log",
+      "bytes": 201,
+      "sha256": "a042dfa16000cc2dbe2237b7e42bb5a7023ed859fd034e0795f7216b9d62606a"
+    },
+    {
+      "path": "build/jin-review-activity/prior-firestore-debug.log",
+      "bytes": 813,
+      "sha256": "9fa1d1b47e04a90820d4e13a3543afad5e51b98fe3970b0b5cae74216e2c8967"
+    },
+    {
+      "path": "build/jin-review-activity/sdk-firestore-debug.log",
+      "bytes": 815,
+      "sha256": "2970a8cb73573b10bef29b8aeb697a5661a4e2caa7f9dd836dd7f802bf9cfe10"
+    },
+    {
+      "path": "build/jin-review-activity/sdk-frozen.log",
+      "bytes": 2519,
+      "sha256": "d54861e709fc8bbed126de917bf1f6c08d0ec335ce5538f0dd0c33a0eb1019f3"
+    }
+  ],
+  "notRun": [
+    "Concrete SHI Event activity producer and real participation occurrence time",
+    "LI Home/router combined tree and APK",
+    "Real accounts/provider/model/phone/iOS",
+    "Account permanent-deletion executor and OSM cache/quota acceptance"
+  ],
+  "documentationAfterFreeze": "FA2/handoff ownership wording reconciled to existing P05 delegation; evidence commit changes documentation only, runtime/API JSON/tests unchanged."
+}

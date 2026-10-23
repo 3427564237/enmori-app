@@ -1,9 +1,14 @@
+import { registerSocialModule } from './register-social-module.js';
+import { requireRemoteGroupEnvironment } from '../shared/infrastructure/firebase/feature-environment.js';
+import type { createIsolatedEventParticipation } from "./event-participation.js";
+import { registerParticipationRoutes } from "../event-participation/transport/register-routes.js";
 import {registerCheckInCalendar} from "../check-ins/transport/calendar-route.js";
 import type {OwnCheckInCalendar} from "../check-ins/application/check-in-calendar.js";
 import { registerCheckInMutations } from "../check-ins/transport/mutation-routes.js";
 import type { EditCheckIn } from "../check-ins/application/edit-check-in.js";
 import { registerInterestAdmin } from '../interests/transport/admin-routes.js';
 import type { CreateInterestTag } from '../interests/application/create-interest-tag.js';
+import type { GetInterestAdminCapability } from '../interests/application/get-interest-admin-capability.js';
 import { createIsolatedEventBrowse, type IsolatedEventBrowseInput } from "./isolated-event-browse.js";
 import { buildEventBrowseFrameworkErrors } from "./event-browse-framework-errors.js";
 import { registerEventBrowseRoutes } from "../event-browse/transport/register-routes.js";
@@ -11,6 +16,7 @@ import { registerIsolatedSlices } from "../transport/register-isolated-slices.js
 import { registerConversationRoutes } from "../ai-conversation/transport/register-routes.js";
 import type { ConversationOperations } from "../ai-conversation/ports/conversation-operations.js";
 import { registerPersonaRoutes, type PersonaOperations } from "../personas/transport/register-routes.js";
+import { registerPersonaPreviewRoute, type PersonaPreviewOperations } from "../personas/transport/preview-route.js";
 import { buildPersonaFrameworkErrors } from "../personas/transport/framework-errors.js";
 import { requireControlledEmulatorEnvironment } from "../shared/infrastructure/firebase/controlled-emulator-environment.js";
 import type { FriendRequests } from "../friends/application/friend-requests.js";
@@ -33,25 +39,32 @@ import {
 } from "../transport/register-routes.js";
 
 export async function buildApp(
-  dependencies: R4RouteDependencies & { readonly checkInCalendar?:OwnCheckInCalendar; readonly editCheckIn?: EditCheckIn; readonly createInterestTag?: CreateInterestTag; readonly recommendEvents?: Pick<RecommendEvents, "execute">;
+  dependencies: R4RouteDependencies & { readonly checkInCalendar?:OwnCheckInCalendar; readonly editCheckIn?: EditCheckIn; readonly createInterestTag?: CreateInterestTag; readonly getInterestAdminCapability?: GetInterestAdminCapability; readonly recommendEvents?: Pick<RecommendEvents, "execute">;
     readonly accountPreferences?: OwnAccountPreferences;
+    readonly socialModule?: Parameters<typeof registerSocialModule>[1];
     readonly controlledPhoneDiagnostics?: ControlledPhoneDiagnostics;
-    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput } },
+    readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly personaPreview?: PersonaPreviewOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput; readonly eventParticipation?: ReturnType<typeof createIsolatedEventParticipation> };
+    readonly remoteSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly personaPreview?: PersonaPreviewOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput; readonly eventParticipation?: ReturnType<typeof createIsolatedEventParticipation> } },
 ): Promise<FastifyInstance> {
   if (dependencies.isolatedSlices !== undefined) {
     requireControlledEmulatorEnvironment(dependencies.isolatedSlices.environment);
   }
+  if (dependencies.remoteSlices !== undefined) {
+    if (dependencies.isolatedSlices !== undefined) throw new Error('Mixed feature environments');
+    requireRemoteGroupEnvironment(dependencies.remoteSlices.environment);
+  }
+  const slices = dependencies.remoteSlices ?? dependencies.isolatedSlices;
   if (dependencies.controlledPhoneDiagnostics && dependencies.isolatedSlices === undefined) {
     throw new Error("CONTROLLED_PHONE_DIAGNOSTICS_REQUIRE_ISOLATED_ENVIRONMENT");
   }
   const app = Fastify({
     logger: false,
     ajv: { customOptions: { removeAdditional: false } },
-    ...(dependencies.isolatedSlices?.eventBrowse !== undefined ? {
+    ...((slices?.eventBrowse !== undefined || slices?.eventParticipation !== undefined) ? {
       routerOptions: { maxParamLength: 174 },
       frameworkErrors: buildEventBrowseFrameworkErrors(dependencies.identityVerifier,
-        dependencies.getOnboarding, dependencies.isolatedSlices.personas !== undefined),
-    } : dependencies.isolatedSlices?.personas === undefined ? {} : {
+        dependencies.getOnboarding, slices.personas !== undefined),
+    } : slices?.personas === undefined ? {} : {
       frameworkErrors: buildPersonaFrameworkErrors(dependencies.identityVerifier),
     }),
   });
@@ -66,7 +79,7 @@ export async function buildApp(
   await registerR4Routes(app, dependencies);
   if(dependencies.checkInCalendar)await registerCheckInCalendar(app,dependencies.identityVerifier,dependencies.checkInCalendar);
   if (dependencies.editCheckIn) await registerCheckInMutations(app, dependencies.identityVerifier, dependencies.editCheckIn);
-  if (dependencies.createInterestTag) await registerInterestAdmin(app, dependencies.identityVerifier, dependencies.createInterestTag);
+  if (dependencies.createInterestTag) await registerInterestAdmin(app, dependencies.identityVerifier, dependencies.createInterestTag, dependencies.getInterestAdminCapability);
   if (dependencies.accountPreferences !== undefined) {
     await registerAccountPreferencesRoutes(app, dependencies.identityVerifier, dependencies.accountPreferences);
   }
@@ -76,19 +89,26 @@ export async function buildApp(
       recommendEvents: dependencies.recommendEvents,
     });
   }
-  if (dependencies.isolatedSlices !== undefined) {
-    await registerIsolatedSlices(app, dependencies.identityVerifier, dependencies.isolatedSlices.friends, dependencies.isolatedSlices.eventDetail, dependencies.isolatedSlices.checkInHistory);
-    if (dependencies.isolatedSlices.personas !== undefined) {
-      await registerPersonaRoutes(app, dependencies.identityVerifier, dependencies.isolatedSlices.personas);
+  if (slices !== undefined) {
+    await registerIsolatedSlices(app, dependencies.identityVerifier, slices.friends, slices.eventDetail, slices.checkInHistory);
+    if (slices.personas !== undefined) {
+      await registerPersonaRoutes(app, dependencies.identityVerifier, slices.personas);
     }
-    if (dependencies.isolatedSlices.eventBrowse !== undefined) {
+    if (slices.personaPreview !== undefined) {
+      await registerPersonaPreviewRoute(app, dependencies.identityVerifier, slices.personaPreview);
+    }
+    if (slices.eventParticipation !== undefined) {
+      await registerParticipationRoutes(app, dependencies.identityVerifier, slices.eventParticipation.operations);
+      await registerEventBrowseRoutes(app, dependencies.identityVerifier, slices.eventParticipation.browse);
+    } else if (slices.eventBrowse !== undefined) {
       await registerEventBrowseRoutes(app, dependencies.identityVerifier,
-        createIsolatedEventBrowse(dependencies.getOnboarding, dependencies.isolatedSlices.eventBrowse));
+        createIsolatedEventBrowse(dependencies.getOnboarding, slices.eventBrowse));
     }
-    if (dependencies.isolatedSlices.conversations !== undefined) {
-      await registerConversationRoutes(app, dependencies.identityVerifier, dependencies.isolatedSlices.conversations);
+    if (slices.conversations !== undefined) {
+      await registerConversationRoutes(app, dependencies.identityVerifier, slices.conversations);
     }
   }
+  if (dependencies.socialModule) await registerSocialModule(app, dependencies.socialModule);
   await app.ready();
   return app;
 }

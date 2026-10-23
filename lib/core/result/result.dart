@@ -1,4 +1,8 @@
 enum AppFailureKind {
+  catalogueInvalid,
+  catalogueNameConflict,
+  eventParticipationInvalid,
+  eventParticipationRevisionPreconditionFailed,
   requestInvalid,
   aiContextNotPermitted,
   conversationUnavailable,
@@ -18,6 +22,8 @@ enum AppFailureKind {
   personaRevisionPreconditionFailed,
   addFriendTargetUnavailable,
   friendRequestUnavailable,
+  friendRevisionPreconditionFailed,
+  friendIgnorePreconditionFailed,
   eventUnavailable,
   profileInvalid,
   profileRevisionPreconditionFailed,

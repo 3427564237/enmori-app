@@ -1,0 +1,9 @@
+{
+  "source": "3a885b1bcfdb5ab7266d0482675a552e614c3344",
+  "apk": "enmori-home-v13-debug.apk",
+  "sha256": "217fa2aef580148542d10371c2971a68ad7c76dc993dd8e05996be64e0eea02a",
+  "size": 173769461,
+  "installed": false,
+  "deviceValidation": "Not Run: ADB has no connected device",
+  "packageBadging": "package: name='com.enmori.app.coretest' versionCode='13' versionName='1.0.0-home20261020' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'"
+}

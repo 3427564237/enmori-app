@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -23,6 +25,15 @@ val coreAndroidTestFlag = providers.environmentVariable("ENMORI_CORE_ANDROID_TES
 check(coreAndroidTestFlag == null || coreAndroidTestFlag == "true")
 check(listOf(personaAndroidTestFlag, hciAndroidTestFlag, sponsorDemoFlag, coreAndroidTestFlag).count { it != null } <= 1) {
     "Select only one isolated Android test package"
+}
+
+val groupRelease = providers.environmentVariable("ENMORI_GROUP_RELEASE").orNull == "true"
+val groupSigning = Properties()
+if (groupRelease) {
+    check(listOf(personaAndroidTestFlag, hciAndroidTestFlag, sponsorDemoFlag, coreAndroidTestFlag).all { it == null })
+    val path = providers.environmentVariable("ENMORI_RELEASE_KEY_PROPERTIES").orNull
+    check(path != null) { "Private release signing properties required" }
+    file(path).inputStream().use { groupSigning.load(it) }
 }
 
 android {
@@ -51,6 +62,14 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (groupRelease) create("groupRelease") {
+            storeFile = file(groupSigning.getProperty("storeFile"))
+            storePassword = groupSigning.getProperty("storePassword")
+            keyAlias = groupSigning.getProperty("keyAlias")
+            keyPassword = groupSigning.getProperty("keyPassword")
+        }
+    }
     buildTypes {
         getByName("debug") {
             if (personaAndroidTestFlag == "true") {
@@ -72,7 +91,11 @@ android {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            if (groupRelease) {
+                applicationIdSuffix = ".group"
+                manifestPlaceholders["enmoriApplicationLabel"] = "ENMORI"
+                signingConfig = signingConfigs.getByName("groupRelease")
+            } else signingConfig = signingConfigs.getByName("debug")
         }
     }
 }

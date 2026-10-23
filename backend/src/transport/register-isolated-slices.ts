@@ -1,3 +1,4 @@
+import { checkInResponse } from "../check-ins/transport/check-in-response.js";
 import type { FastifyInstance, FastifySchema } from "fastify";
 import type { IdentityVerifier } from "../shared/ports/identity-verifier.js";
 import type { FriendRequests } from "../friends/application/friend-requests.js";
@@ -16,7 +17,7 @@ export const friendInboxSchema = { type: "object", additionalProperties: false, 
   requests: { type: "array", maxItems: 20, items: { type: "object", additionalProperties: false, required: ["username","displayName","requestRef"], properties: { username: { type:"string" }, displayName: { type:"string" }, requestRef: { type:"string" } } } }, nextCursor: { anyOf: [{type:"string"},{type:"null"}] } } } as const;
 export const friendActionSchema = { type: "object", additionalProperties: false, required: ["result"], properties: { result: { type:"string", enum:["accepted","declined"] } } } as const;
 export const myFriendsSchema = { type: "object", additionalProperties: false, required: ["friends", "nextCursor"], properties: {
-  friends: { type: "array", maxItems: 20, items: { type: "object", additionalProperties: false, required: ["username", "displayName"], properties: { username: { type: "string" }, displayName: { type: "string" } } } },
+  friends: { type: "array", maxItems: 20, items: { type: "object", additionalProperties: false, required: ["username", "displayName"], properties: { username: { type: "string" }, displayName: { type: "string" }, specialCare:{type:"boolean"} } } },
   nextCursor: { anyOf: [{ type: "string" }, { type: "null" }] } } } as const;
 function responses(success: unknown) { return { 200: success, 400:errorEnvelopeSchema,401:errorEnvelopeSchema,403:errorEnvelopeSchema,404:errorEnvelopeSchema,409:errorEnvelopeSchema,503:errorEnvelopeSchema }; }
 const emptyQuery = { type:"object", additionalProperties:false, properties:{} };
@@ -86,12 +87,7 @@ export async function registerIsolatedSlices(app: FastifyInstance, identity: Ide
         });
         if (!result.ok) return sendFailure(request, reply, result.failure);
         return reply.code(200).send({
-          checkIns: result.value.checkIns.map(row => ({
-            checkInId: row.checkInId,
-            note: row.note,
-            createdAt: row.createdAt,
-            ...(row.checkInVisibility === undefined ? {} : { checkInVisibility: row.checkInVisibility }),
-          })),
+          checkIns: result.value.checkIns.map(checkInResponse),
           nextCursor: result.value.nextCursor,
         });
       },

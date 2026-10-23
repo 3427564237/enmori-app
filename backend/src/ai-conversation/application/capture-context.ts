@@ -1,4 +1,5 @@
 import type { CapturedContext, PersonaProjection, StartView } from "../ports/conversation-lifecycle.js";
+import { copyPersonaProjection } from "./persona-expression.js";
 
 const optionalCheckInFields = ["noteText", "moodLabel", "activityLabel", "weatherConditionLabel"] as const;
 function text(value: unknown): value is string { return typeof value === "string" && value.isWellFormed(); }
@@ -23,7 +24,11 @@ export function captureContext(view: StartView, asOf: string, currentMessage: st
       || !["concise", "balanced", "detailed"].includes(p.responseLength) || !["plain", "bulleted"].includes(p.formatStyle)) {
       throw new Error("unavailable");
     }
-    persona = Object.freeze({ schemaVersion: p.schemaVersion, tone: p.tone, responseLength: p.responseLength, formatStyle: p.formatStyle });
+    const copied = copyPersonaProjection({ schemaVersion: p.schemaVersion, tone: p.tone,
+      responseLength: p.responseLength, formatStyle: p.formatStyle,
+      ...(Object.hasOwn(p, "expression") ? { expression: p.expression } : {}) });
+    if (!copied) throw new Error("unavailable");
+    persona = copied;
   }
   const selected = view.checkIns.filter(({ source, projection }) => {
     if (source.sourceType !== "check_in" || !text(source.sourceId) || !source.sourceId

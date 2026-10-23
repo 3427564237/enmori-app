@@ -1,9 +1,7 @@
+import 'check_in_projection_parser.dart';
 import '../domain/check_in_calendar_repository.dart';
 
-import 'package:characters/characters.dart';
-
 import '../../../core/network/backend_api_client.dart';
-import '../../../core/network/utc_timestamp_parser.dart';
 import '../../../core/result/result.dart';
 import '../../account/domain/account_repository.dart';
 import '../domain/check_in_repository.dart';
@@ -69,6 +67,8 @@ final class BackendCheckInRepository
 
   @override
   Future<Result<CheckIn>> update({
+    bool Function()? isEligible,
+    String? locationLabel,
     required String checkInId,
     String? mood,
     String? activity,
@@ -78,10 +78,12 @@ final class BackendCheckInRepository
   }) async {
     final response = await _client.put(
       '/v1/check-ins/${Uri.encodeComponent(checkInId)}',
+      isEligible: isEligible,
       body: {
         'note': note,
         'mood': mood,
         'activity': activity,
+        'locationLabel': locationLabel,
         'checkInVisibility': switch (visibility) {
           CheckInVisibility.private => 'private',
           CheckInVisibility.friendsOnly => 'friends_only',
@@ -98,11 +100,13 @@ final class BackendCheckInRepository
 
   @override
   Future<Result<void>> remove({
+    bool Function()? isEligible,
     required String checkInId,
     required int expectedRevision,
   }) async {
     final response = await _client.deleteJson(
       '/v1/check-ins/${Uri.encodeComponent(checkInId)}',
+      isEligible: isEligible,
       body: {'expectedRevision': expectedRevision},
     );
     return switch (response) {
@@ -121,6 +125,7 @@ final class BackendCheckInRepository
 
   @override
   Future<Result<CheckIn>> create({
+    String? locationLabel,
     String? mood,
     String? activity,
     CheckInVisibility? visibility,
@@ -133,6 +138,7 @@ final class BackendCheckInRepository
         'note': note,
         'mood': ?mood,
         'activity': ?activity,
+        'locationLabel': ?locationLabel,
         if (visibility != null)
           'checkInVisibility': switch (visibility) {
             CheckInVisibility.private => 'private',
@@ -191,73 +197,14 @@ final class BackendCheckInRepository
     }
     final checkIns = <CheckIn>[];
     for (final raw in rawItems) {
-      if (raw is! Map<String, dynamic> ||
-          !_hasOnlyKeys(raw, {
-            'checkInId',
-            'note',
-            'createdAt',
-            'checkInVisibility',
-            'revision',
-            'mood',
-            'activity',
-          }) ||
-          !raw.keys.toSet().containsAll({'checkInId', 'note', 'createdAt'})) {
-        return _invalidHistory();
-      }
-      if (!_validLabels(raw)) return _invalidHistory();
-      final revision = raw['revision'] ?? 1;
-      if (revision is! int || revision < 1) return _invalidHistory();
-      final checkInId = raw['checkInId'];
-      final note = raw['note'];
-      final createdAt = raw['createdAt'];
-      final canonical =
-          createdAt is String &&
-          RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$')
-              .hasMatch(createdAt);
-      final parsedTime = canonical ? tryParseUtcTimestamp(createdAt) : null;
-      if (checkInId is! String ||
-          checkInId.isEmpty ||
-          note is! String ||
-          note.trim() != note ||
-          (note.characters.isEmpty && raw['mood'] == null) ||
-          note.characters.length > 500 ||
-          parsedTime == null ||
-          parsedTime.toIso8601String() != createdAt) {
-        return _invalidHistory();
-      }
-      final visibility = switch (raw['checkInVisibility']) {
-        'private' => CheckInVisibility.private,
-        'friends_only' => CheckInVisibility.friendsOnly,
-        'public' => CheckInVisibility.public,
-        _ => null,
-      };
-      if (raw.containsKey('checkInVisibility') && visibility == null) {
-        return _invalidHistory();
-      }
-      checkIns.add(
-        CheckIn(
-          mood: raw['mood'] as String?,
-          activity: raw['activity'] as String?,
-          revision: revision,
-          checkInId: checkInId,
-          note: note,
-          createdAt: parsedTime,
-          checkInVisibility: visibility,
-        ),
-      );
+      final checkIn = parseCheckInProjection(raw);
+      if (checkIn == null) return _invalidHistory();
+      checkIns.add(checkIn);
     }
     return Success(
       CheckInHistoryPage(checkIns: checkIns, nextCursor: nextCursor as String?),
     );
   }
-
-  bool _validLabels(Map<String, Object?> value) => ['mood', 'activity'].every((
-    key,
-  ) {
-    final v = value[key];
-    return v == null ||
-        (v is String && v.trim() == v && v.isNotEmpty && v.runes.length <= 50);
-  });
 
   bool _hasOnlyKeys(Map<String, Object?> value, Set<String> allowed) =>
       value.keys.every(allowed.contains);
@@ -270,40 +217,18 @@ final class BackendCheckInRepository
   );
 
   Result<CheckIn> _parseCheckIn(JsonObject value) {
-    final checkIn = value['checkIn'];
-    if (checkIn is! Map<String, dynamic>) return _invalidCheckIn();
-
-    if (!_validLabels(checkIn)) return _invalidCheckIn();
-    final revision = checkIn['revision'] ?? 1;
-    if (revision is! int || revision < 1) return _invalidCheckIn();
-    final checkInId = checkIn['checkInId'];
-    final note = checkIn['note'];
-    final createdAt = checkIn['createdAt'];
-    final parsedTime = tryParseUtcTimestamp(createdAt);
-    if (checkInId is! String || note is! String || parsedTime == null) {
+    if (!value.keys.every({'checkIn', 'notice'}.contains) ||
+        (value.containsKey('notice') &&
+            value['notice'] != 'Check-in saved without weather.')) {
       return _invalidCheckIn();
     }
-
-    final visibility = switch (checkIn['checkInVisibility']) {
-      'private' => CheckInVisibility.private,
-      'friends_only' => CheckInVisibility.friendsOnly,
-      'public' => CheckInVisibility.public,
-      _ => null,
-    };
-    if (checkIn.containsKey('checkInVisibility') && visibility == null) {
-      return _invalidCheckIn();
-    }
-    return Success(
-      CheckIn(
-        mood: checkIn['mood'] as String?,
-        activity: checkIn['activity'] as String?,
-        revision: revision,
-        checkInId: checkInId,
-        note: note,
-        createdAt: parsedTime,
-        checkInVisibility: visibility,
-      ),
+    // The existing single-record contract accepts UTC seconds/+00:00 too;
+    // history pagination keeps its canonical timestamp requirement.
+    final checkIn = parseCheckInProjection(
+      value['checkIn'],
+      canonicalTime: false,
     );
+    return checkIn == null ? _invalidCheckIn() : Success(checkIn);
   }
 
   Failure<CheckIn> _invalidCheckIn() => const Failure(

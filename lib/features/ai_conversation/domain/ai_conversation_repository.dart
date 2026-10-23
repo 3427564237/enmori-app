@@ -1,6 +1,15 @@
 import '../../../core/result/result.dart';
 import 'ai_conversation.dart';
 
+/// Optional owner-only discovery capability; ordinary disabled adapters expose none.
+abstract interface class AiConversationHistoryRepository {
+  Future<Result<AiConversationHistoryPage>> listConversations({
+    required String token,
+    required AiAbortSignal abort,
+    String? after,
+  });
+}
+
 /// The caller owns token/session identity and operation-specific time budgets.
 abstract interface class AiConversationRepository {
   Future<Result<AiTicket>> prepare({

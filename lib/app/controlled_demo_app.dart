@@ -1,6 +1,14 @@
+import '../features/account/content_access.dart';
+import 'ai_persona_context.dart';
+import '../features/event_participation/data/backend_participation_repository.dart';
+import '../features/event_participation/participation_providers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../core/presentation/enmori_motion.dart';
+
 import 'package:http/http.dart' as http;
 
 import '../core/network/backend_api_client.dart';
@@ -15,6 +23,8 @@ import '../features/check_in/check_in_providers.dart';
 import '../features/check_in/data/backend_check_in_repository.dart';
 import '../features/check_in/presentation/check_in_history_page.dart';
 import '../features/interests/interests_providers.dart';
+import '../features/interests/admin_interest_providers.dart';
+import '../features/interests/data/backend_admin_interest_repository.dart';
 import '../features/interests/data/backend_interest_repository.dart';
 import '../features/ai_conversation/ai_conversation_providers.dart';
 import '../features/ai_conversation/data/ai_wire_repository.dart';
@@ -23,6 +33,8 @@ import '../features/ai_conversation/presentation/ai_conversation_page.dart';
 import '../features/ai_conversation/presentation/ai_consent_gate.dart';
 import '../features/personas/persona_providers.dart';
 import '../features/personas/data/backend_persona_repository.dart';
+import '../features/personas/data/backend_persona_preview_repository.dart';
+import '../features/personas/persona_preview_providers.dart';
 import '../features/personas/presentation/persona_overview_page.dart';
 import '../features/personas/presentation/persona_management_page.dart';
 import '../features/personas/presentation/persona_editor_page.dart';
@@ -32,6 +44,7 @@ import '../features/event_recommendations/event_recommendations_providers.dart';
 import '../features/event_recommendations/data/backend_event_recommendation_repository.dart';
 import 'platform/external_activity_opener.dart';
 import 'providers.dart';
+import 'persona_preview_composition.dart';
 import 'social_demo_presentation.dart';
 import 'router/app_router.dart';
 import 'router/activity_routes.dart';
@@ -47,9 +60,13 @@ final class ControlledDemoApp extends StatefulWidget {
     required this.client,
     required this.onClose,
     this.dualAccounts = false,
+    this.eventParticipationEnabled = false,
+    this.remoteGroupEnabled = false,
     super.key,
   });
   final bool dualAccounts;
+  final bool eventParticipationEnabled;
+  final bool remoteGroupEnabled;
   final Uri baseUri;
   final AuthRepository auth;
   final http.Client client;
@@ -61,6 +78,7 @@ final class ControlledDemoApp extends StatefulWidget {
 final class _ControlledDemoAppState extends State<ControlledDemoApp> {
   late BackendApiClient _api;
   late AiWireRepository _ai;
+  late BackendPersonaPreviewRepository _personaPreview;
   @override
   void initState() {
     super.initState();
@@ -86,6 +104,11 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
     _ai = AiWireRepository(
       HttpAiWireTransport(baseUri: widget.baseUri, client: widget.client),
     );
+    _personaPreview = BackendPersonaPreviewRepository(
+      baseUri: widget.baseUri,
+      tokenProvider: widget.auth.getIdToken,
+      client: widget.client,
+    );
   }
 
   @override
@@ -95,9 +118,21 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       authRepositoryProvider.overrideWithValue(widget.auth),
       backendBaseUriProvider.overrideWithValue(widget.baseUri),
       backendApiClientProvider.overrideWithValue(_api),
-      isolatedSlicesEnabledProvider.overrideWithValue(true),
+      isolatedSlicesEnabledProvider.overrideWithValue(
+        !widget.remoteGroupEnabled,
+      ),
+      remoteGroupFeaturesEnabledProvider.overrideWithValue(
+        widget.remoteGroupEnabled,
+      ),
       socialDemoPresentationProvider.overrideWithValue(true),
       activityBrowseEnabledProvider.overrideWithValue(true),
+      eventParticipationEnabledProvider.overrideWithValue(
+        widget.eventParticipationEnabled,
+      ),
+      if (widget.eventParticipationEnabled)
+        participationRepositoryProvider.overrideWithValue(
+          BackendParticipationRepository(_api),
+        ),
       if (widget.dualAccounts)
         eventDetailSourceActionsProvider.overrideWith(
           (ref) => ref.watch(activitySourceActionsProvider),
@@ -118,11 +153,18 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       interestRepositoryProvider.overrideWithValue(
         BackendInterestRepository(_api),
       ),
+      adminInterestRepositoryProvider.overrideWithValue(
+        BackendAdminInterestRepository(_api),
+      ),
       checkInRepositoryProvider.overrideWithValue(
         BackendCheckInRepository(_api),
       ),
       personaRepositoryProvider.overrideWithValue(
         BackendPersonaRepository(_api),
+      ),
+      personaPreviewRepositoryProvider.overrideWithValue(_personaPreview),
+      personaPreviewAccessProvider.overrideWith(
+        (ref) => ref.watch(connectedPersonaPreviewAccessProvider),
       ),
       aiConversationRepositoryProvider.overrideWithValue(_ai),
       isolatedHistoryPageProvider.overrideWithValue(
@@ -160,6 +202,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
                 onSelected: selectTab,
               ),
               child: AiConversationPage(
+                personaContext: const AiPersonaContext(),
                 socialStyle: true,
                 navigationBarBuilder: (navigate) => SocialDemoNavigation(
                   selectedIndex: 3,
@@ -246,34 +289,12 @@ final class _ConnectedPages extends ConsumerWidget {
       );
     }
     return MaterialApp.router(
-      title: 'ENMORI controlled demo',
+      title: 'ENMORI',
       debugShowCheckedModeBanner: false,
       theme: socialDemoTheme(),
+      builder: (context, child) =>
+          ContentAccessBoundary(child: EnmoriMotionPreferences(child: child!)),
       routerConfig: ref.watch(appRouterProvider),
-      builder: (context, child) => Column(
-        children: [
-          Material(
-            color: const Color(0xffffedbc),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  dualAccounts
-                      ? 'Controlled demo • two test accounts; data clears when the host stops. '
-                            'Activity and recommendations use Ticketmaster when enabled by the host. '
-                            'External links open the organiser website.'
-                      : 'Test account • data clears when the host stops. '
-                            'AI uses only eligible Check-in Notes from this test account. Music and Friends are fixtures; '
-                            'Activity needs host permission. Recommendations and participation are unavailable.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-            ),
-          ),
-          Expanded(child: child!),
-        ],
-      ),
     );
   }
 }

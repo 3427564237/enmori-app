@@ -1,0 +1,21 @@
+{
+  "sourceCommit": "5529f7b4d5cf91489aa0b1b4ff118ec53a7fd522",
+  "mergedShiHead": "db1b7249c7b97d0e0f8e68e3d9024efcc4e1b9be",
+  "apk": "build/deliverables/events-oct21/enmori-events-v14-debug.apk",
+  "package": "com.enmori.app.coretest",
+  "versionCode": 14,
+  "versionName": "1.0.0-events20261021",
+  "sha256": "a16cc4dcd2d6759f96786119e6d82c624ec7cac6f3e67b7472779e9cfa1cceb4",
+  "bytes": 173847445,
+  "apkSignatureVerified": true,
+  "native": "Selected v14 flows passed; see native-verification.md",
+  "backendCasesPassed": 36,
+  "flutterDistinctCasesPassedAcrossRuns": 40,
+  "normalFinalStop": {
+    "stoppedAt": "2026-10-21T03:08:57.139Z",
+    "exportConfirmed": true
+  },
+  "priorSnapshotAuthUsersPreserved": true,
+  "runtimeLeftRunning": true,
+  "aiMaintenanceHealthyDuringRun": false
+}

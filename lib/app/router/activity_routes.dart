@@ -14,6 +14,7 @@ List<GoRoute> activityRoutes({
 }) => [
   GoRoute(
     path: '/activities',
+    name: 'root-activities',
     builder: (context, state) {
       final page = ActivityPage(
         onSelect: (id) {

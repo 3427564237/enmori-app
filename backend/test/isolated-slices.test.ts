@@ -55,7 +55,8 @@ test("exact lookup is read-only, minimized, canonicalized and strict; missing au
   const f=fixture(),before=f.gateway.entries();
   assert.deepEqual(await f.app.lookup({firebaseUid:"a"}," MEMBER_B "),ok({username:"member_b",displayName:"Member b",relationshipState:"can_send_request"}));
   assert.deepEqual(f.gateway.entries(),before);
-  for(const username of ["member","member_z","member_c"]) assert.deepEqual(await f.app.lookup({firebaseUid:"a"},username),err(appFailure("ADD_FRIEND_TARGET_UNAVAILABLE")));
+  for(const username of ["member","member_z"]) assert.deepEqual(await f.app.lookup({firebaseUid:"a"},username),err(appFailure("ADD_FRIEND_TARGET_UNAVAILABLE")));
+  assert.deepEqual(await f.app.lookup({firebaseUid:"a"},"member_c"),ok({username:"member_c",displayName:"Member c",relationshipState:"can_send_request"}));
   assert.deepEqual(await f.app.lookup({firebaseUid:"a"},"\tmember_b"),err(appFailure("USERNAME_INVALID")));
   await f.gateway.runTransaction(async tx => tx.set("accounts/b",{...base,username:"member_b",displayName:null}));
   assert.equal((await f.app.lookup({firebaseUid:"a"},"member_b")).ok,false);

@@ -5,7 +5,7 @@ import type {
 } from "../ports/onboarding-repository.js";
 import { dependencyUnavailable } from "../../shared/ports/dependency-failure.js";
 import { IDEMPOTENCY_WINDOW_MILLISECONDS } from "../../shared/application/authoritative-values.js";
-import { requireControlledEmulatorEnvironment } from "../../shared/infrastructure/firebase/controlled-emulator-environment.js";
+import { requireFeatureEnvironment } from "../../shared/infrastructure/firebase/feature-environment.js";
 import type {
   FirestoreGateway,
   FirestoreTransactionGateway,
@@ -106,7 +106,7 @@ export class FirestoreOnboardingRepository implements OnboardingRepository {
   public constructor(private readonly firestore: FirestoreGateway,
     isolatedAiEnvironment?: Readonly<Record<string, string | undefined>>) {
     this.isolatedAiPurpose = isolatedAiEnvironment !== undefined;
-    if (isolatedAiEnvironment !== undefined) requireControlledEmulatorEnvironment(isolatedAiEnvironment);
+    if (isolatedAiEnvironment !== undefined) requireFeatureEnvironment(isolatedAiEnvironment);
   }
 
   public async complete(

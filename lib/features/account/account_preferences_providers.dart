@@ -1,3 +1,4 @@
+import 'content_access.dart';
 import 'domain/profile_location_repository.dart';
 import 'data/geolocator_profile_location_repository.dart';
 
@@ -16,7 +17,16 @@ final accountPreferencesRepositoryProvider =
 
 final ownProfileDetailsProvider = FutureProvider.autoDispose
     .family<Result<OwnProfile>, String>((ref, subject) {
+      final access = ref.watch(contentAccessProvider);
       final current = ref.watch(currentAuthSubjectProvider);
+      if (!access.foreground) {
+        return const Failure(
+          AppFailure(
+            kind: AppFailureKind.serviceUnavailable,
+            message: 'Return to reload current access.',
+          ),
+        );
+      }
       if (current != subject) {
         return const Failure(
           AppFailure(
@@ -47,6 +57,9 @@ final class _UnavailablePreferences implements AccountPreferencesRepository {
   }) async => const Failure(_failure);
   @override
   Future<Result<OwnSettings>> saveSettings({
+    bool? defaultCheckInLocation,
+    bool? defaultCheckInWeather,
+    bool? homeWeatherAuto,
     FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,
@@ -57,3 +70,22 @@ final class _UnavailablePreferences implements AccountPreferencesRepository {
 final profileLocationRepositoryProvider = Provider<ProfileLocationRepository>(
   (ref) => const GeolocatorProfileLocationRepository(),
 );
+
+// Confirmed Settings observations, scoped to the observed login session. A
+// revision fence prevents late reads from undoing a newer privacy decision.
+final accountSettingsSnapshotProvider =
+    NotifierProvider<AccountSettingsSnapshot, OwnSettings?>(
+      AccountSettingsSnapshot.new,
+    );
+
+class AccountSettingsSnapshot extends Notifier<OwnSettings?> {
+  @override
+  OwnSettings? build() {
+    ref.watch(authSessionProvider);
+    return null;
+  }
+
+  void observe(OwnSettings settings) {
+    if (state == null || settings.revision >= state!.revision) state = settings;
+  }
+}

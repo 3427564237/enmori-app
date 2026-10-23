@@ -2,9 +2,11 @@ import {Temporal} from "@js-temporal/polyfill";
 import {decodeBrowseId,object,projectOccurrence} from "../domain/browse-values.js";
 import {dependencyUnavailable} from "../../shared/ports/dependency-failure.js";
 import type {BrowseSource,BrowseOccurrence} from "../ports/event-browse.js";
+import {sourceEventId} from '../domain/source-event-id.js';
 /** Explicit private key and activation supplied by controlled composition.
  * Default activation is NEVER inferred from a key; no env/credential discovery. */
 export class TicketmasterBrowseSource implements BrowseSource {
+  private readonly observed = new Map<string,{browseId:string;expires:number}>();
   constructor(private readonly access:{key():string|undefined;enabled():boolean},private readonly http:typeof fetch=fetch){}
   private async read(path:string,query:Record<string,string>,signal:AbortSignal):Promise<unknown>{
     const key=this.access.key();if(signal.aborted||!this.access.enabled()||!key||/\s/.test(key))throw dependencyUnavailable;
@@ -24,13 +26,17 @@ export class TicketmasterBrowseSource implements BrowseSource {
     finally{clearTimeout(timer);await reader?.cancel().catch(()=>{});reader?.releaseLock();}
   }
   async firstBatch(asOf:string,signal:AbortSignal):Promise<readonly BrowseOccurrence[]>{
+    return (await this.batch(asOf,0,signal)).items;
+  }
+  async batch(asOf:string,page:number,signal:AbortSignal):Promise<{items:readonly BrowseOccurrence[];nextPage?:number}>{
+    if(!Number.isSafeInteger(page)||page<0||page>49)throw dependencyUnavailable;
     // Discovery rejects fractional query seconds. Widen only its lower bound;
     // projectOccurrence below still compares each row to the original asOf.
     let startDateTime:string;
     try{startDateTime=Temporal.Instant.from(asOf).toString({smallestUnit:"second",roundingMode:"floor"});}
     catch{throw dependencyUnavailable;}
-    const raw=await this.read("events",{countryCode:"SG",size:"20",page:"0",sort:"date,asc",startDateTime,includeTBA:"no",includeTBD:"no",includeTest:"no"},signal);
-    if(!object(raw)||!object(raw.page)||raw.page.number!==0||typeof raw.page.totalElements!=="number"||!Number.isSafeInteger(raw.page.totalElements)||raw.page.totalElements<0)throw dependencyUnavailable;
+    const raw=await this.read("events",{countryCode:"SG",size:"20",page:String(page),sort:"date,asc",startDateTime,includeTBA:"no",includeTBD:"no",includeTest:"no"},signal);
+    if(!object(raw)||!object(raw.page)||raw.page.number!==page||typeof raw.page.totalElements!=="number"||!Number.isSafeInteger(raw.page.totalElements)||raw.page.totalElements<0)throw dependencyUnavailable;
     let rows:unknown[]=[];
     if(raw._embedded!==undefined){if(!object(raw._embedded)||!Array.isArray(raw._embedded.events))throw dependencyUnavailable;rows=raw._embedded.events;}
     else if(raw.page.totalElements!==0)throw dependencyUnavailable;
@@ -39,13 +45,29 @@ export class TicketmasterBrowseSource implements BrowseSource {
     if(rows.length>20||raw.page.totalElements<rows.length||(raw.page.totalElements>0&&rows.length===0))throw dependencyUnavailable;
     const items:BrowseOccurrence[]=[];const ids=new Set<string>();
     for(const row of rows){const v=projectOccurrence(row,asOf);if(v){if(ids.has(v.browseId))throw dependencyUnavailable;ids.add(v.browseId);items.push(v);}}
-    return items;
+    const now=Date.now();
+    for(const [key,value]of this.observed)if(value.expires<=now)this.observed.delete(key);
+    for(const row of items){this.observed.delete(sourceEventId(row.browseId));this.observed.set(sourceEventId(row.browseId),{browseId:row.browseId,expires:now+300000});}
+    while(this.observed.size>1000)this.observed.delete(this.observed.keys().next().value!);
+    const more=(page+1)*20<raw.page.totalElements&&page<49;
+    return {items,...(more?{nextPage:page+1}:{})};
+  }
+  async availableEvent(eventId:string,asOf:string,signal:AbortSignal):Promise<boolean>{
+    return (await this.event(eventId,asOf,signal))!==undefined;
+  }
+  async event(eventId:string,asOf:string,signal:AbortSignal):Promise<BrowseOccurrence|undefined>{
+    const known=this.observed.get(eventId);
+    if(!known||known.expires<=Date.now())return undefined;
+    return this.detail(known.browseId,asOf,signal);
   }
   async detail(id:string,asOf:string,signal:AbortSignal):Promise<BrowseOccurrence|undefined>{
     const source=decodeBrowseId(id);if(!source)return undefined;
     const raw=await this.read(`events/${encodeURIComponent(source)}`,{},signal);
     if(raw===undefined)return undefined;
     if(!object(raw))throw dependencyUnavailable;
-    if(raw.id!==source)return undefined;return projectOccurrence(raw,asOf);
+    if(raw.id!==source)return undefined;
+    const result=projectOccurrence(raw,asOf);
+    if(result){this.observed.delete(sourceEventId(result.browseId));this.observed.set(sourceEventId(result.browseId),{browseId:result.browseId,expires:Date.now()+300000});while(this.observed.size>1000)this.observed.delete(this.observed.keys().next().value!);}
+    return result;
   }
 }

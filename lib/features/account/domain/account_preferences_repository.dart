@@ -21,11 +21,15 @@ final class OwnProfile {
 
 final class OwnSettings {
   const OwnSettings({
+    this.defaultCheckInLocation = false,
+    this.defaultCheckInWeather = false,
+    this.homeWeatherAuto = false,
     this.fieldPrivacy = const FieldPrivacy(),
     required this.checkInVisibility,
     required this.consent,
     required this.revision,
   });
+  final bool defaultCheckInLocation, defaultCheckInWeather, homeWeatherAuto;
   final FieldPrivacy fieldPrivacy;
   final CheckInVisibility checkInVisibility;
   final OptionalProcessingConsent consent;
@@ -42,6 +46,9 @@ abstract interface class AccountPreferencesRepository {
     required int expectedRevision,
   });
   Future<Result<OwnSettings>> saveSettings({
+    bool? defaultCheckInLocation,
+    bool? defaultCheckInWeather,
+    bool? homeWeatherAuto,
     FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,

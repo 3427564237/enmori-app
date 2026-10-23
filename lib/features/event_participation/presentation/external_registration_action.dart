@@ -6,6 +6,7 @@ import '../../auth/auth_providers.dart';
 import '../../auth/domain/auth_repository.dart';
 import '../../event_browse/domain/activity_repository.dart';
 import '../domain/external_registration_flow.dart';
+import '../participation_providers.dart';
 
 /// Explicit opt-in builder: LI wires the real writer after contract approval.
 /// Not installed into the existing browse path by default.
@@ -16,6 +17,7 @@ final class ExternalRegistrationAction extends ConsumerStatefulWidget {
     required this.opener,
     required this.confirmGoing,
     required this.readGoing,
+    this.sourceAvailable = true,
     super.key,
   });
   final String eventId;
@@ -23,6 +25,7 @@ final class ExternalRegistrationAction extends ConsumerStatefulWidget {
   final ExternalActivityOpener opener;
   final Future<Result<void>> Function(String eventId) confirmGoing;
   final Future<Result<bool>> Function(String eventId) readGoing;
+  final bool sourceAvailable;
 
   @override
   ConsumerState<ExternalRegistrationAction> createState() =>
@@ -45,16 +48,14 @@ final class _ExternalRegistrationActionState
   }
 
   bool _current(AuthSessionAuthenticated session) =>
-      mounted && identical(ref.read(authSessionProvider).value, session);
+      mounted &&
+      identical(participationSession(ref.read(authSessionProvider)), session);
 
   @override
   void didUpdateWidget(ExternalRegistrationAction oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.eventId != widget.eventId ||
-        oldWidget.sourceUrl != widget.sourceUrl ||
-        oldWidget.opener != widget.opener ||
-        oldWidget.confirmGoing != widget.confirmGoing ||
-        oldWidget.readGoing != widget.readGoing) {
+        oldWidget.sourceUrl != widget.sourceUrl) {
       _flow?.dispose();
       _flow = null;
     }
@@ -73,7 +74,7 @@ final class _ExternalRegistrationActionState
   }
 
   Future<void> _open() async {
-    if (_dialog) return;
+    if (_dialog || !widget.sourceAvailable) return;
     final session = _session;
     final flow = _flow;
     if (session == null || flow == null || !_current(session)) return;
@@ -102,7 +103,10 @@ final class _ExternalRegistrationActionState
       ),
     );
     _dialog = false;
-    if (allowed != true || !_current(session) || !identical(flow, _flow)) {
+    if (allowed != true ||
+        !widget.sourceAvailable ||
+        !_current(session) ||
+        !identical(flow, _flow)) {
       return;
     }
     final opening = flow.open();
@@ -163,7 +167,7 @@ final class _ExternalRegistrationActionState
 
   @override
   Widget build(BuildContext context) {
-    final observed = ref.watch(authSessionProvider).value;
+    final observed = participationSession(ref.watch(authSessionProvider));
     if (!identical(observed, _session)) {
       _flow?.dispose();
       _flow = null;
@@ -174,15 +178,22 @@ final class _ExternalRegistrationActionState
     _flow ??= ExternalRegistrationFlow(
       eventId: widget.eventId,
       sourceUrl: widget.sourceUrl,
-      opener: widget.opener,
+      opener: _CurrentRegistrationOpener(() => widget.opener),
       current: () => _current(session),
-      confirmGoing: widget.confirmGoing,
-      readGoing: widget.readGoing,
+      confirmGoing: (id) => widget.confirmGoing(id),
+      readGoing: (id) => widget.readGoing(id),
     );
     final phase = _flow!.phase;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            'Registration takes place on the external website.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
         if (phase == RegistrationPhase.failed)
           const Text('Could not open the website. Try again or copy its link.'),
         if (phase == RegistrationPhase.saved)
@@ -198,15 +209,16 @@ final class _ExternalRegistrationActionState
         ],
         if (phase == RegistrationPhase.saving)
           const Text('Checking participation…'),
-        FilledButton.icon(
+        OutlinedButton.icon(
           onPressed:
-              phase == RegistrationPhase.idle ||
-                  phase == RegistrationPhase.failed ||
-                  phase == RegistrationPhase.saved
+              widget.sourceAvailable &&
+                  (phase == RegistrationPhase.idle ||
+                      phase == RegistrationPhase.failed ||
+                      phase == RegistrationPhase.saved)
               ? _open
               : null,
           icon: const Icon(Icons.open_in_new),
-          label: const Text('Register on organiser website'),
+          label: const Text('Register on original website'),
         ),
       ],
     );
@@ -218,4 +230,14 @@ final class _ExternalRegistrationActionState
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+}
+
+/// Parent rebuilds may create fresh equivalent capability objects. Resolve the
+/// current injected capability only at explicit dispatch, not via identity reset.
+final class _CurrentRegistrationOpener implements ExternalActivityOpener {
+  const _CurrentRegistrationOpener(this.resolve);
+  final ExternalActivityOpener Function() resolve;
+  @override
+  Future<bool> open(Uri sourceUrl, {required bool Function() current}) =>
+      resolve().open(sourceUrl, current: current);
 }

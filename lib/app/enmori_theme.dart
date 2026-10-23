@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/presentation/enmori_motion.dart';
+
 /// Shared by the app and controlled preview. Feature pages inherit these tokens.
 ThemeData enmoriTheme() {
   const green = Color(0xff244b3f);
@@ -39,6 +41,16 @@ ThemeData enmoriTheme() {
   );
   return base.copyWith(
     scaffoldBackgroundColor: paper,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: EnmoriPageTransitions(),
+        TargetPlatform.iOS: EnmoriPageTransitions(cupertino: true),
+        TargetPlatform.macOS: EnmoriPageTransitions(cupertino: true),
+        TargetPlatform.linux: EnmoriPageTransitions(),
+        TargetPlatform.windows: EnmoriPageTransitions(),
+        TargetPlatform.fuchsia: EnmoriPageTransitions(),
+      },
+    ),
     textTheme: text,
     appBarTheme: AppBarTheme(
       backgroundColor: paper,
@@ -65,11 +77,27 @@ ThemeData enmoriTheme() {
       focusedBorder: inputBorder.copyWith(
         borderSide: const BorderSide(color: green, width: 2),
       ),
+      errorBorder: inputBorder.copyWith(
+        borderSide: BorderSide(color: scheme.error),
+      ),
+      focusedErrorBorder: inputBorder.copyWith(
+        borderSide: BorderSide(color: scheme.error, width: 2),
+      ),
       prefixIconColor: scheme.onSurfaceVariant,
+      helperMaxLines: 3,
       errorMaxLines: 3,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        animationDuration: EnmoriMotion.feedback,
+        minimumSize: const Size(48, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: buttonShape,
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
+        animationDuration: EnmoriMotion.feedback,
         minimumSize: const Size(48, 48),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         shape: buttonShape,
@@ -77,13 +105,28 @@ ThemeData enmoriTheme() {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
+        animationDuration: EnmoriMotion.feedback,
         minimumSize: const Size(48, 48),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         shape: buttonShape,
       ),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+      style: TextButton.styleFrom(
+        animationDuration: EnmoriMotion.feedback,
+        minimumSize: const Size(48, 48),
+        shape: buttonShape,
+      ),
+    ),
+    chipTheme: base.chipTheme.copyWith(
+      shape: const StadiumBorder(),
+      side: BorderSide(color: scheme.outlineVariant),
+      selectedColor: scheme.primaryContainer,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+    ),
+    listTileTheme: ListTileThemeData(
+      iconColor: scheme.primary,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: Colors.white,

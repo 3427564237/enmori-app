@@ -179,6 +179,23 @@ export async function registerConversationRoutes(app: FastifyInstance, identity:
         return { messages: v.messages.map(message), ...(v.nextBefore === undefined ? {} : { nextCursor: Buffer.from(JSON.stringify({ v: 1, before: v.nextBefore })).toString("base64url") }) };
       });
     });
+  app.get<{ Querystring: { after?: unknown } }>("/v1/me/conversations", { ...options, exposeHeadRoute:false }, async (request,reply) => {
+    const after = request.query.after;
+    if (!clean(request,["after"]) || !noBody(request) || request.headers["ai-operation-key"] !== undefined ||
+        (after !== undefined && !uuid(after))) return failure(request,reply,"REQUEST_INVALID");
+    if (!operations.listConversations) return failure(request,reply,"AI_UNAVAILABLE");
+    return deliver(request,reply,await operations.listConversations(caller(request),after),200,page => {
+      if (!Array.isArray(page.conversations) || page.conversations.length > 20 ||
+          page.conversations.some((row,i) => !uuid(row.conversationId) ||
+            (after !== undefined && row.conversationId <= after) ||
+            (i > 0 && row.conversationId <= page.conversations[i - 1]!.conversationId) ||
+            typeof row.lastMessageAt !== "string" || new Date(row.lastMessageAt).toISOString() !== row.lastMessageAt) ||
+          (page.nextCursor !== undefined && (!uuid(page.nextCursor) || (after !== undefined && page.nextCursor <= after) ||
+            page.conversations.some(row => row.conversationId > page.nextCursor!)))) throw new Error("Invalid inner conversation history");
+      return { conversations:page.conversations.map(row => ({ conversationId:row.conversationId,lastMessageAt:row.lastMessageAt })),
+        ...(page.nextCursor === undefined ? {} : { nextCursor:page.nextCursor }) };
+    });
+  });
   app.delete<{ Params: { conversationId: string } }>("/v1/me/conversations/:conversationId", options, async (request, reply) => {
     if (!clean(request) || !noBody(request) || request.headers["ai-operation-key"] !== undefined || !uuid(request.params.conversationId)) return failure(request, reply, "REQUEST_INVALID");
     return deliver(request, reply, await operations.deleteConversation(caller(request), request.params.conversationId), 204, () => undefined);

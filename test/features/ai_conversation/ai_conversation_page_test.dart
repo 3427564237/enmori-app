@@ -9,6 +9,431 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets(
+    'returning chat opens latest and explicit latest preserves draft and older reading',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final messages = [
+        for (var i = 0; i < 30; i++)
+          _message('saved-$i', i + 1, AiRole.user, 'Saved message $i'),
+      ];
+      final controller = _PageController(
+        _state(canSend: true, messages: messages),
+      );
+      await _pump(tester, controller, socialStyle: true, textScale: 2);
+      final scroll = tester
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byKey(const Key('route-ai-conversation')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
+          .position;
+      expect(scroll.extentAfter, lessThanOrEqualTo(1));
+      final input = find.byKey(const Key('ai-message-input'));
+      await tester.enterText(input, 'Keep this draft');
+      scroll.jumpTo(0);
+      await tester.pumpAndSettle();
+      final olderOffset = scroll.pixels;
+      messages.add(
+        _message('reply', 31, AiRole.assistant, 'Here is the latest reply.'),
+      );
+      controller.publish(_state(canSend: true, messages: messages));
+      await tester.pumpAndSettle();
+      expect(scroll.pixels, olderOffset);
+      await tester.tap(find.byKey(const Key('ai-latest-messages')));
+      await tester.pumpAndSettle();
+      expect(scroll.extentAfter, lessThanOrEqualTo(1));
+      expect(find.byKey(const Key('ai-latest-messages')), findsNothing);
+      expect(
+        tester.widget<TextField>(input).controller!.text,
+        'Keep this draft',
+      );
+      expect(controller.sent, isEmpty);
+      expect(controller.reads, isEmpty);
+      expect(controller.cancels, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'typing dots animate only while waiting and reduced motion stays static',
+    (tester) async {
+      for (final reduced in [false, true]) {
+        final controller = _PageController(_state(canSend: true));
+        await _pump(
+          tester,
+          controller,
+          socialStyle: true,
+          reduceMotion: reduced,
+        );
+        controller.publish(
+          _state(
+            phase: AiConversationPhase.waiting,
+            canCancel: true,
+            localOutgoingKey: 'attempt',
+            localOutgoingText: 'Waiting input',
+          ),
+        );
+        await tester.pump();
+        final first = tester
+            .widget<Opacity>(find.byKey(const Key('ai-typing-dot-0')))
+            .opacity;
+        await tester.pump(const Duration(milliseconds: 300));
+        final next = tester
+            .widget<Opacity>(find.byKey(const Key('ai-typing-dot-0')))
+            .opacity;
+        expect(next, reduced ? first : isNot(first));
+        controller.publish(
+          _state(phase: AiConversationPhase.success, canSend: true),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('ai-pending-assistant')), findsNothing);
+        await tester.pumpWidget(const SizedBox.shrink());
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
+
+  testWidgets(
+    'chat keeps safety reachable without repeating it below messages',
+    (tester) async {
+      final controller = _PageController(
+        _state(
+          phase: AiConversationPhase.success,
+          canSend: true,
+          messages: [
+            _message('u', 1, AiRole.user, 'A quiet walk after class.'),
+            _message(
+              'a',
+              2,
+              AiRole.assistant,
+              'What did you notice on your walk?',
+            ),
+          ],
+        ),
+      );
+      await _pump(tester, controller, socialStyle: true);
+      final input = find.byKey(const Key('ai-message-input'));
+      await tester.enterText(input, 'Keep this draft');
+      expect(find.textContaining('AI can make mistakes'), findsNothing);
+      expect(find.byKey(const Key('ai-status')), findsNothing);
+      await tester.tap(find.byTooltip('Open conversation menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('ai-safety')));
+      await tester.pumpAndSettle();
+      expect(
+        tester.state<ScaffoldState>(find.byType(Scaffold)).isDrawerOpen,
+        isFalse,
+      );
+      expect(
+        find.text(
+          'AI can make mistakes. Persona preferences do not change data permissions.',
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TextField>(input).controller!.text,
+        'Keep this draft',
+      );
+      expect(find.text('What did you notice on your walk?'), findsOneWidget);
+      expect(controller.sent, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'chat waiting feedback is single and unknown recovery stays visible',
+    (tester) async {
+      final controller = _PageController(
+        _state(
+          phase: AiConversationPhase.waiting,
+          canCancel: true,
+          localOutgoingKey: 'pending',
+          localOutgoingText: 'My message',
+        ),
+      );
+      await _pump(tester, controller, socialStyle: true);
+      expect(find.text('Waiting for a reply…'), findsOneWidget);
+      expect(find.byKey(const Key('ai-cancel')), findsOneWidget);
+      expect(find.byKey(const Key('ai-status')), findsOneWidget);
+      controller.publish(
+        _state(
+          phase: AiConversationPhase.unknown,
+          canCheckResult: true,
+          canLeaveWithoutRetrying: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-check-result')), findsOneWidget);
+      expect(find.byKey(const Key('ai-recovery-explanation')), findsOneWidget);
+      expect(
+        find.byKey(const Key('ai-leave-without-retrying')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('ai-cancel')), findsNothing);
+      expect(controller.sent, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'pending bubbles follow the bottom and preserve deliberate older reading',
+    (tester) async {
+      final messages = [
+        for (var i = 0; i < 20; i++)
+          _message('old-$i', i + 1, AiRole.user, 'Old message $i'),
+      ];
+      final controller = _PageController(
+        _state(canSend: true, messages: messages),
+      );
+      await _pump(tester, controller, socialStyle: true);
+      final scroll = tester
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byKey(const Key('route-ai-conversation')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
+          .position;
+      for (var i = 0; i < 4; i++) {
+        scroll.jumpTo(scroll.maxScrollExtent);
+        await tester.pumpAndSettle();
+      }
+      controller.publish(
+        _state(
+          phase: AiConversationPhase.preparing,
+          canCancel: true,
+          messages: messages,
+          localOutgoingText: 'New local input',
+          localOutgoingKey: 'attempt',
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-local-outgoing')), findsOneWidget);
+      expect(find.byKey(const Key('ai-pending-assistant')), findsOneWidget);
+      expect(scroll.extentAfter, lessThanOrEqualTo(1));
+      expect(
+        tester.getTopLeft(find.byKey(const Key('ai-status'))).dy,
+        greaterThan(
+          tester.getTopLeft(find.byKey(const Key('ai-local-outgoing'))).dy,
+        ),
+      );
+      scroll.jumpTo(0);
+      await tester.pumpAndSettle();
+      controller.publish(
+        _state(
+          phase: AiConversationPhase.waiting,
+          canCancel: true,
+          messages: messages,
+          localOutgoingText: 'New local input',
+          localOutgoingKey: 'attempt',
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(scroll.pixels, 0);
+      controller.publish(
+        _state(
+          phase: AiConversationPhase.success,
+          canSend: true,
+          messages: [
+            ...messages,
+            _message('committed', 21, AiRole.user, 'New local input'),
+            _message('reply', 22, AiRole.assistant, 'Saved reply'),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-local-outgoing')), findsNothing);
+      expect(find.byKey(const Key('ai-pending-assistant')), findsNothing);
+      expect(scroll.pixels, 0);
+    },
+  );
+
+  for (final social in [false, true]) {
+    for (final phase in [
+      AiConversationPhase.limited,
+      AiConversationPhase.authorityChanged,
+    ]) {
+      testWidgets(
+        'withdrawn AI authority clears the editor social=$social phase=$phase',
+        (tester) async {
+          final controller = _PageController(_state(canSend: true));
+          await _pump(tester, controller, socialStyle: social);
+          final input = find.byKey(const Key('ai-message-input'));
+          await tester.enterText(input, 'Private unsent input');
+          final editor = tester.widget<TextField>(input).controller!;
+          controller.publish(_state(phase: phase));
+          await tester.pumpAndSettle();
+          expect(input, findsNothing);
+          expect(editor.text, isEmpty);
+          expect(controller.sent, isEmpty);
+        },
+      );
+    }
+  }
+  testWidgets(
+    'history selection protects draft and empty scanned page exposes continuation at large text',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final summary = AiConversationSummary(
+        conversationId: '11111111-1111-4111-8111-111111111111',
+        lastMessageAt: DateTime.utc(2026, 10, 20),
+      );
+      final controller = _PageController(
+        _state(
+          canSend: true,
+          conversationId: 'old-conversation',
+          messages: [_message('old', 1, AiRole.user, 'Saved original message')],
+          canBrowseHistory: true,
+          canSelectConversation: true,
+          historyLoaded: true,
+          conversations: [summary],
+        ),
+      );
+      await _pump(tester, controller, socialStyle: true, textScale: 2);
+      await tester.enterText(
+        find.byKey(const Key('ai-message-input')),
+        'Keep this draft',
+      );
+      final scaffold = tester.state<ScaffoldState>(find.byType(Scaffold));
+      await tester.tap(find.byTooltip('Open conversation menu'));
+      await tester.pumpAndSettle();
+      expect(scaffold.isDrawerOpen, isTrue);
+      await _tap(tester, 'ai-history-${summary.conversationId}');
+      expect(scaffold.isDrawerOpen, isFalse);
+      await tester.tap(find.text('Keep editing'));
+      await tester.pumpAndSettle();
+      expect(controller.selected, isEmpty);
+      expect(controller.view.conversationId, 'old-conversation');
+      expect(controller.view.messages.single.text, 'Saved original message');
+      expect(find.text('Saved original message'), findsOneWidget);
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('ai-message-input')))
+            .controller!
+            .text,
+        'Keep this draft',
+      );
+      await _tap(tester, 'ai-history-${summary.conversationId}');
+      expect(scaffold.isDrawerOpen, isFalse);
+      await tester.tap(find.byKey(const Key('ai-confirm-discard')));
+      await tester.pumpAndSettle();
+      expect(controller.selected, [summary.conversationId]);
+      expect(controller.sent, isEmpty);
+      expect(controller.view.messages.single.text, 'Saved original message');
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('ai-message-input')))
+            .controller!
+            .text,
+        isEmpty,
+      );
+      controller.publish(
+        _state(
+          canSend: true,
+          canBrowseHistory: true,
+          historyLoaded: true,
+          historyCursor: summary.conversationId,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('No saved conversations.'), findsNothing);
+      await _tap(tester, 'ai-history-more');
+      expect(controller.historyLoads, [true]);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'social history selection without a draft closes its own drawer',
+    (tester) async {
+      final summary = AiConversationSummary(
+        conversationId: '11111111-1111-4111-8111-111111111111',
+        lastMessageAt: DateTime.utc(2026, 10, 20),
+      );
+      final controller = _PageController(
+        _state(
+          canSend: true,
+          canBrowseHistory: true,
+          canSelectConversation: true,
+          historyLoaded: true,
+          conversations: [summary],
+        ),
+      );
+      await _pump(tester, controller, socialStyle: true, reduceMotion: false);
+      final scaffold = tester.state<ScaffoldState>(find.byType(Scaffold));
+      await tester.tap(find.byTooltip('Open conversation menu'));
+      await tester.pumpAndSettle();
+      expect(scaffold.isDrawerOpen, isTrue);
+      await tester.tap(
+        find.byKey(ValueKey('ai-history-${summary.conversationId}')),
+      );
+      await tester.pumpAndSettle();
+      expect(scaffold.isDrawerOpen, isFalse);
+      expect(controller.selected, [summary.conversationId]);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(controller.sent, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  for (final social in [false, true]) {
+    testWidgets('new replies follow only near the bottom social=$social', (
+      tester,
+    ) async {
+      final messages = [
+        for (var i = 0; i < 24; i++)
+          _message('saved-$i', i + 1, AiRole.user, 'Saved message $i'),
+      ];
+      final controller = _PageController(
+        _state(canSend: true, messages: messages),
+      );
+      await _pump(tester, controller, socialStyle: social);
+      final scroll = tester
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byKey(const Key('route-ai-conversation')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
+          .position;
+      // Settle lazy layout at the actual end before the next reply arrives.
+      for (var i = 0; i < 4; i++) {
+        scroll.jumpTo(scroll.maxScrollExtent);
+        await tester.pumpAndSettle();
+      }
+      messages.add(
+        _message('reply-1', 25, AiRole.assistant, 'A new reply. ' * 20),
+      );
+      controller.publish(_state(canSend: true, messages: messages));
+      await tester.pumpAndSettle();
+      expect(scroll.extentAfter, lessThanOrEqualTo(1));
+
+      scroll.jumpTo(0);
+      await tester.pumpAndSettle();
+      final readingOffset = scroll.pixels;
+      messages.add(
+        _message('reply-2', 26, AiRole.assistant, 'Another reply. ' * 20),
+      );
+      controller.publish(_state(canSend: true, messages: messages));
+      await tester.pumpAndSettle();
+      expect(scroll.pixels, readingOffset);
+      expect(scroll.extentAfter, greaterThan(100));
+      expect(controller.sent, isEmpty);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   for (final social in [false, true]) {
     testWidgets(
       'New conversation preserves draft, selection and focus social=$social',
@@ -22,19 +447,11 @@ void main() {
         final field = tester.widget<TextField>(input);
         const selection = TextSelection(baseOffset: 3, extentOffset: 9);
         field.controller!.selection = selection;
-        if (social) {
-          await _tap(tester, 'ai-conversation-actions');
-        }
-        // Invoke the exact action without moving platform focus to a pointer.
+        // Invoke the visible new-conversation action without moving focus.
         if (social) {
           tester
-              .widget<PopupMenuButton<String>>(
-                find.byKey(const Key('ai-conversation-actions')),
-              )
-              .onSelected!('new');
-          Navigator.of(
-            tester.element(find.byKey(const Key('ai-new-conversation'))),
-          ).pop();
+              .widget<IconButton>(find.byKey(const Key('ai-new-conversation')))
+              .onPressed!();
         } else {
           tester
               .widget<OutlinedButton>(
@@ -54,7 +471,7 @@ void main() {
     );
   }
 
-  for (final action in ['discard', 'leave', 'delete']) {
+  for (final action in ['delete']) {
     for (final authRejected in [false, true]) {
       testWidgets(
         'session dialog AI $action closes on ${authRejected ? 'auth rejection' : 'session replacement'} and permits fresh use',
@@ -122,15 +539,15 @@ void main() {
   testWidgets('session dialog cleanup preserves a newer route above it', (
     tester,
   ) async {
-    final controller = _PageController(_state(canSend: true));
+    final controller = _PageController(_state(canSend: true, canDelete: true));
     await _pump(tester, controller);
     await tester.enterText(
       find.byKey(const Key('ai-message-input')),
       'Old session draft',
     );
-    await _tap(tester, 'ai-back');
+    await _tap(tester, 'ai-delete');
     final staleAction = tester
-        .widget<TextButton>(find.byKey(const Key('ai-confirm-discard')))
+        .widget<TextButton>(find.byKey(const Key('ai-confirm-delete')))
         .onPressed!;
     final navigator = Navigator.of(
       tester.element(find.byType(AiConversationPage)),
@@ -151,7 +568,7 @@ void main() {
     expect(find.text('New session destination'), findsOneWidget);
     navigator.pop();
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('ai-confirm-discard')), findsNothing);
+    expect(find.byKey(const Key('ai-confirm-delete')), findsNothing);
     expect(controller.events, isEmpty);
     expect(controller.sent, isEmpty);
     expect(tester.takeException(), isNull);
@@ -170,12 +587,15 @@ void main() {
       ),
     );
     await _pump(tester, controller, socialStyle: true);
-    final settingsContext = tester.element(find.byIcon(Icons.tune));
+    final settingsContext = tester.element(find.byIcon(Icons.menu));
     final settingsFocus = Focus.of(settingsContext);
     settingsFocus.requestFocus();
     await tester.pumpAndSettle();
     expect(settingsFocus.hasFocus, isTrue);
     final primary = PrimaryScrollController.of(settingsContext);
+    // Chat now opens at the latest message; move up before testing PageDown.
+    primary.jumpTo(0);
+    await tester.pumpAndSettle();
     final initialOffset = primary.positions.first.pixels;
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
@@ -223,10 +643,13 @@ void main() {
           final input = find.byKey(const Key('ai-message-input'));
           if (longHistory) {
             expect(
-              find.byKey(const ValueKey('ai-message-history-39')),
+              find.byKey(const ValueKey('ai-message-history-0')),
               findsNothing,
-              reason:
-                  'The history should keep building its distant rows lazily.',
+              reason: 'Opening at latest should leave distant older rows lazy.',
+            );
+            expect(
+              find.byKey(const ValueKey('ai-message-history-39')),
+              findsOneWidget,
             );
           }
           await tester.enterText(input, 'An unfinished draft');
@@ -297,7 +720,7 @@ void main() {
 
   for (final destination in [0, 1, 2, 4]) {
     testWidgets(
-      'social AI tab $destination passes through cancel/leave before navigation',
+      'social AI tab $destination navigates without cancel or confirmation',
       (tester) async {
         final controller = _PageController(
           _state(phase: AiConversationPhase.waiting, canCancel: true),
@@ -317,13 +740,9 @@ void main() {
         expect(find.text('Stay'), findsNothing);
         final key = ['home', 'friends', 'check-in', 'ai', 'me'][destination];
         await _tap(tester, 'social-nav-$key');
-        expect(find.text('Request cancel and leave'), findsOneWidget);
-        await tester.tap(find.text('Stay'));
-        await tester.pumpAndSettle();
-        expect(controller.events, isEmpty);
-        await _tap(tester, 'social-nav-$key');
-        await _tap(tester, 'ai-confirm-leave');
-        expect(controller.events, ['leave', 'tab-$destination']);
+        expect(find.text('Request cancel and leave'), findsNothing);
+        expect(controller.events, ['tab-$destination']);
+        expect(controller.cancels, 0);
         expect(controller.sent, isEmpty);
       },
     );
@@ -433,32 +852,7 @@ void main() {
   });
 
   for (final destination in ['back', 'settings', 'personas']) {
-    testWidgets('$destination confirms and leaves before navigation', (
-      tester,
-    ) async {
-      final controller = _PageController(
-        _state(phase: AiConversationPhase.waiting, canCancel: true),
-      );
-      await _pump(
-        tester,
-        controller,
-        onBack: () => controller.events.add('back'),
-        onSettings: () => controller.events.add('settings'),
-        onPersonas: () => controller.events.add('personas'),
-      );
-      await _tap(tester, 'ai-$destination');
-      expect(find.text('Request cancel and leave'), findsOneWidget);
-      await tester.tap(find.text('Stay'));
-      await tester.pumpAndSettle();
-      expect(controller.events, isEmpty);
-      await _tap(tester, 'ai-$destination');
-      await _tap(tester, 'ai-confirm-leave');
-      expect(controller.events, ['leave', destination]);
-    });
-  }
-
-  for (final destination in ['back', 'settings', 'personas']) {
-    testWidgets('$destination preserves a draft until discard is confirmed', (
+    testWidgets('$destination freely navigates and keeps the session draft', (
       tester,
     ) async {
       final controller = _PageController(_state(canSend: true));
@@ -474,28 +868,11 @@ void main() {
         'private draft',
       );
       await _tap(tester, 'ai-$destination');
-      expect(find.text('Discard unsaved changes?'), findsOneWidget);
-      await tester.tap(find.text('Keep editing'));
-      await tester.pumpAndSettle();
-      expect(controller.events, isEmpty);
-      expect(
-        tester
-            .widget<TextField>(find.byKey(const Key('ai-message-input')))
-            .controller!
-            .text,
-        'private draft',
-      );
-      await _tap(tester, 'ai-$destination');
-      await _tap(tester, 'ai-confirm-discard');
-      expect(controller.events, ['leave', destination]);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(controller.events, [destination]);
+      expect(controller.draft.text, 'private draft');
+      expect(controller.cancels, 0);
       expect(controller.sent, isEmpty);
-      expect(
-        tester
-            .widget<TextField>(find.byKey(const Key('ai-message-input')))
-            .controller!
-            .text,
-        isEmpty,
-      );
     });
   }
 
@@ -506,44 +883,11 @@ void main() {
     expect(find.byKey(const Key('ai-personas')), findsNothing);
   });
 
-  testWidgets('same-UID session replacement invalidates a pending discard', (
-    tester,
-  ) async {
-    final controller = _PageController(_state(canSend: true));
-    await _pump(
-      tester,
-      controller,
-      onPersonas: () => controller.events.add('personas'),
-    );
-    await tester.enterText(
-      find.byKey(const Key('ai-message-input')),
-      'private draft',
-    );
-    await _tap(tester, 'ai-personas');
-    final staleAction = tester
-        .widget<TextButton>(find.byKey(const Key('ai-confirm-discard')))
-        .onPressed!;
-    controller.publish(_state(sessionKey: 'replacement', canSend: true));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('ai-confirm-discard')), findsNothing);
-    staleAction();
-    await tester.pumpAndSettle();
-    expect(controller.events, isEmpty);
-    expect(controller.sent, isEmpty);
-    expect(
-      tester
-          .widget<TextField>(find.byKey(const Key('ai-message-input')))
-          .controller!
-          .text,
-      isEmpty,
-    );
-  });
-
   for (final phase in [
     AiConversationPhase.success,
     AiConversationPhase.deleting,
   ]) {
-    testWidgets('Persona navigation confirms pending ${phase.name} work', (
+    testWidgets('Persona navigation retains pending ${phase.name} work', (
       tester,
     ) async {
       final controller = _PageController(
@@ -555,17 +899,13 @@ void main() {
         onPersonas: () => controller.events.add('personas'),
       );
       await _tap(tester, 'ai-personas');
-      expect(
-        find.text('The request may still complete. Leave this screen?'),
-        findsOneWidget,
-      );
-      expect(controller.events, isEmpty);
-      await _tap(tester, 'ai-confirm-leave');
-      expect(controller.events, ['leave', 'personas']);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(controller.events, ['personas']);
+      expect(controller.cancels, 0);
     });
   }
 
-  testWidgets('Persona return keeps private input empty and never resends', (
+  testWidgets('Persona return keeps the private draft and never resends', (
     tester,
   ) async {
     final controller = _PageController(_state(canSend: true));
@@ -589,11 +929,10 @@ void main() {
       'private draft',
     );
     await _tap(tester, 'ai-personas');
-    await _tap(tester, 'ai-confirm-discard');
     expect(find.text('Persona destination fixture'), findsOneWidget);
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
-    expect(controller.events, ['leave']);
+    expect(controller.events, isEmpty);
     expect(controller.sent, isEmpty);
     expect(controller.retried, isEmpty);
     expect(controller.detaches, 0);
@@ -602,62 +941,61 @@ void main() {
           .widget<TextField>(find.byKey(const Key('ai-message-input')))
           .controller!
           .text,
-      isEmpty,
+      'private draft',
     );
   });
 
-  testWidgets('returning from Settings permits only a new explicit action', (
-    tester,
-  ) async {
-    final controller = _PageController(
-      _state(phase: AiConversationPhase.waiting, canCancel: true),
-    );
-    await _pump(
-      tester,
-      controller,
-      onSettings: () {
-        Navigator.of(
-          tester.element(find.byType(AiConversationPage)),
-        ).push<void>(
-          MaterialPageRoute(
-            builder: (_) =>
-                Scaffold(appBar: AppBar(title: const Text('Settings fixture'))),
-          ),
-        );
-      },
-    );
-    await _tap(tester, 'ai-settings');
-    await _tap(tester, 'ai-confirm-leave');
-    expect(find.text('Settings fixture'), findsOneWidget);
-    expect(controller.events, ['leave']);
-    expect(controller.detaches, 0);
-    expect(controller.sent, isEmpty);
-    await tester.tap(find.byType(BackButton));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('ai-message-input')), findsOneWidget);
-    expect(controller.sent, isEmpty);
-    expect(controller.retried, isEmpty);
-    await tester.enterText(
-      find.byKey(const Key('ai-message-input')),
-      'new explicit input',
-    );
-    await _tap(tester, 'ai-send');
-    expect(controller.sent, ['new explicit input']);
-  });
+  testWidgets(
+    'returning from Settings keeps the running request without resending',
+    (tester) async {
+      final controller = _PageController(
+        _state(phase: AiConversationPhase.waiting, canCancel: true),
+      );
+      await _pump(
+        tester,
+        controller,
+        onSettings: () {
+          Navigator.of(tester.element(find.byType(AiConversationPage)))
+              .push<void>(
+                MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: const Text('Settings fixture')),
+                  ),
+                ),
+              );
+        },
+      );
+      await _tap(tester, 'ai-settings');
+      expect(find.text('Settings fixture'), findsOneWidget);
+      expect(controller.events, isEmpty);
+      expect(controller.detaches, 0);
+      expect(controller.sent, isEmpty);
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-message-input')), findsOneWidget);
+      expect(controller.sent, isEmpty);
+      expect(controller.retried, isEmpty);
+      expect(controller.view.canCancel, isTrue);
+      expect(controller.cancels, 0);
+    },
+  );
 
-  testWidgets('system Back uses the same in-progress confirmation', (
+  testWidgets('system Back leaves a running request without confirmation', (
     tester,
   ) async {
     final controller = _PageController(
       _state(phase: AiConversationPhase.preparing, canCancel: true),
     );
-    await _pump(tester, controller);
+    await _pump(
+      tester,
+      controller,
+      onBack: () => controller.events.add('back'),
+    );
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
-    expect(find.text('Stay'), findsOneWidget);
-    expect(controller.events, isEmpty);
-    await tester.tap(find.text('Stay'));
-    await tester.pumpAndSettle();
+    expect(find.text('Stay'), findsNothing);
+    expect(controller.events, ['back']);
+    expect(controller.cancels, 0);
   });
 
   testWidgets(
@@ -679,7 +1017,7 @@ void main() {
     },
   );
 
-  testWidgets('disposal synchronously detaches without a provider write', (
+  testWidgets('route disposal does not detach the session controller', (
     tester,
   ) async {
     final controller = _PageController(
@@ -687,7 +1025,7 @@ void main() {
     );
     await _pump(tester, controller);
     await tester.pumpWidget(const SizedBox());
-    expect(controller.detaches, 1);
+    expect(controller.detaches, 0);
     expect(tester.takeException(), isNull);
   });
 
@@ -704,7 +1042,7 @@ void main() {
       find.byKey(const Key('ai-message-input')),
     );
     expect(input.controller!.text, isEmpty);
-    expect(controller.detaches, 1);
+    expect(controller.detaches, 0);
     expect(controller.sent, isEmpty);
   });
 
@@ -740,7 +1078,7 @@ void main() {
 
   const outcomes = {
     AiConversationPhase.limited:
-        'Check-in context is not available under your current permissions.',
+        'AI chat is turned off. You can allow AI data use in Settings.',
     AiConversationPhase.busy: 'AI is busy. Try again later.',
     AiConversationPhase.unavailable:
         'AI is unavailable right now. Try again later.',
@@ -780,6 +1118,17 @@ void main() {
         ),
       );
       await _pump(tester, controller);
+      final savedTime = tester
+          .widgetList<Text>(
+            find.descendant(
+              of: find.byKey(const Key('ai-message-user')),
+              matching: find.byType(Text),
+            ),
+          )
+          .last
+          .data!;
+      expect(savedTime, contains(' · '));
+      expect(savedTime, isNot(user.persistedAt.toUtc().toIso8601String()));
       await tester.ensureVisible(find.byKey(const Key('ai-retry')));
       expect(
         tester
@@ -796,10 +1145,7 @@ void main() {
       expect(controller.retried, ['original text']);
       expect(controller.sent, isEmpty);
       expect(find.byKey(const Key('ai-message-user')), findsOneWidget);
-      expect(
-        find.text(user.persistedAt.toUtc().toIso8601String()),
-        findsOneWidget,
-      );
+      expect(find.text(savedTime), findsOneWidget);
     },
   );
 
@@ -1016,7 +1362,13 @@ void main() {
         final controller = _PageController(
           _state(phase: AiConversationPhase.waiting, canCancel: true),
         );
-        await _pump(tester, controller, textScale: 2);
+        var navigated = false;
+        await _pump(
+          tester,
+          controller,
+          textScale: 2,
+          onBack: () => navigated = true,
+        );
         expect(find.bySemanticsLabel('Waiting for a reply…'), findsOneWidget);
         expect(find.bySemanticsLabel('Cancel'), findsOneWidget);
         final size = tester.getSize(find.byKey(const Key('ai-cancel')));
@@ -1024,11 +1376,10 @@ void main() {
         expect(size.width, greaterThanOrEqualTo(48));
         expect(tester.takeException(), isNull);
         await _tap(tester, 'ai-back');
-        expect(find.text('Stay'), findsOneWidget);
-        expect(find.text('Request cancel and leave'), findsOneWidget);
+        expect(navigated, isTrue);
+        expect(find.byType(AlertDialog), findsNothing);
+        expect(controller.cancels, 0);
         expect(tester.takeException(), isNull);
-        await tester.tap(find.text('Stay'));
-        await tester.pumpAndSettle();
       } finally {
         semantics.dispose();
       }
@@ -1041,6 +1392,8 @@ AiConversationState _state({
   AiConversationPhase phase = AiConversationPhase.idle,
   Iterable<AiMessage> messages = const [],
   String? conversationId,
+  String? localOutgoingText,
+  Object? localOutgoingKey,
   String? nextCursor,
   bool canSend = false,
   bool canRetry = false,
@@ -1050,11 +1403,18 @@ AiConversationState _state({
   bool canDelete = false,
   bool canStartNewConversation = false,
   bool readBusy = false,
+  bool canBrowseHistory = false,
+  bool canSelectConversation = false,
+  bool historyLoaded = false,
+  String? historyCursor,
+  Iterable<AiConversationSummary> conversations = const [],
 }) => AiConversationState(
   sessionKey: sessionKey,
   phase: phase,
   messages: messages,
   conversationId: conversationId,
+  localOutgoingText: localOutgoingText,
+  localOutgoingKey: localOutgoingKey,
   nextCursor: nextCursor,
   canSend: canSend,
   canRetry: canRetry,
@@ -1064,6 +1424,11 @@ AiConversationState _state({
   canDelete: canDelete,
   canStartNewConversation: canStartNewConversation,
   readBusy: readBusy,
+  canBrowseHistory: canBrowseHistory,
+  canSelectConversation: canSelectConversation,
+  historyLoaded: historyLoaded,
+  historyCursor: historyCursor,
+  conversations: conversations,
 );
 
 AiMessage _message(
@@ -1090,6 +1455,7 @@ Future<void> _pump(
   VoidCallback? onSettings,
   VoidCallback? onPersonas,
   double textScale = 1,
+  bool reduceMotion = true,
   bool socialStyle = false,
   Widget Function(ValueChanged<VoidCallback>)? navigationBarBuilder,
 }) async {
@@ -1100,8 +1466,10 @@ Future<void> _pump(
       ],
       child: MaterialApp(
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context)
-              .copyWith(textScaler: TextScaler.linear(textScale)),
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScale),
+            disableAnimations: reduceMotion,
+          ),
           child: child!,
         ),
         home: AiConversationPage(
@@ -1123,6 +1491,13 @@ FilledButton _filledButton(WidgetTester tester, String key) =>
 Future<void> _tap(WidgetTester tester, String key) async {
   await tester.pump();
   final finder = find.byKey(Key(key));
+  if (key.startsWith('ai-history') &&
+      finder.evaluate().isEmpty &&
+      find.byTooltip('Open conversation menu').evaluate().isNotEmpty) {
+    await tester.tap(find.byTooltip('Open conversation menu'));
+    await tester.pumpAndSettle();
+    if (key != 'ai-history' && finder.evaluate().isEmpty) {}
+  }
   if (finder.evaluate().isEmpty) {
     await tester.scrollUntilVisible(
       finder,
@@ -1136,6 +1511,7 @@ Future<void> _tap(WidgetTester tester, String key) async {
     );
   }
   await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
@@ -1149,6 +1525,8 @@ class _PageController extends AiConversationController {
   final retried = <String>[];
   final reads = <String?>[];
   final events = <String>[];
+  final selected = <String>[];
+  final historyLoads = <bool>[];
   int cancels = 0;
   int detaches = 0;
   int checks = 0;
@@ -1207,6 +1585,13 @@ class _PageController extends AiConversationController {
 
   @override
   Future<void> loadMessages({String? before}) async => reads.add(before);
+
+  @override
+  Future<void> loadConversations({bool more = false}) async =>
+      historyLoads.add(more);
+
+  @override
+  Future<void> selectConversation(String id) async => selected.add(id);
 
   @override
   void startNewConversation() {

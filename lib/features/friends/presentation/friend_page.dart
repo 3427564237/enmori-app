@@ -3,28 +3,58 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/friend_repository.dart';
 import 'friend_controller.dart';
+import '../../auth/auth_providers.dart';
 
 final class FriendPage extends ConsumerStatefulWidget {
-  const FriendPage({super.key, this.onOpenMyFriends});
+  const FriendPage({
+    super.key,
+    this.onOpenMyFriends,
+    this.onOpenProfile,
+    this.initialUsername,
+  });
   final VoidCallback? onOpenMyFriends;
+  final Future<void> Function(String)? onOpenProfile;
+  final String? initialUsername;
   @override
   ConsumerState<FriendPage> createState() => _FriendPageState();
 }
 
-final class _FriendPageState extends ConsumerState<FriendPage> {
+final class _FriendPageState extends ConsumerState<FriendPage>
+    with WidgetsBindingObserver {
   final _username = TextEditingController();
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(friendControllerProvider.notifier).loadInbox();
+    WidgetsBinding.instance.addObserver(this);
+    _username.text = widget.initialUsername ?? '';
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final session = ref.read(authSessionProvider).asData?.value;
+      final controller = ref.read(friendControllerProvider.notifier);
+      if (widget.initialUsername != null) {
+        await controller.lookup(widget.initialUsername!);
+      }
+      if (mounted &&
+          identical(session, ref.read(authSessionProvider).asData?.value)) {
+        await controller.loadInbox();
+      }
     });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _username.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted) return;
+    ref.invalidate(friendControllerProvider);
+    if (state == AppLifecycleState.resumed) {
+      ref.read(friendControllerProvider.notifier).loadInbox();
+    }
   }
 
   @override
@@ -37,7 +67,8 @@ final class _FriendPageState extends ConsumerState<FriendPage> {
       body: SafeArea(
         child: ListView(
           key: const Key('route-friends'),
-          padding: const EdgeInsets.all(24),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: const EdgeInsets.all(16),
           children: [
             if (widget.onOpenMyFriends != null)
               OutlinedButton(
@@ -49,14 +80,30 @@ final class _FriendPageState extends ConsumerState<FriendPage> {
               key: const Key('friend-username'),
               controller: _username,
               enabled: !state.busy,
-              decoration: const InputDecoration(labelText: 'Exact Username'),
+              autocorrect: false,
+              enableSuggestions: false,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) {
+                FocusScope.of(context).unfocus();
+                controller.lookup(_username.text);
+              },
+              decoration: const InputDecoration(
+                labelText: 'Username',
+                helperText:
+                    'Enter their full username to find the right person.',
+                helperMaxLines: 2,
+                prefixIcon: Icon(Icons.alternate_email),
+              ),
             ),
             const SizedBox(height: 12),
             FilledButton(
               key: const Key('friend-lookup'),
               onPressed: state.busy
                   ? null
-                  : () => controller.lookup(_username.text),
+                  : () {
+                      FocusScope.of(context).unfocus();
+                      controller.lookup(_username.text);
+                    },
               child: const Text('Find person'),
             ),
             if (state.busy)
@@ -67,8 +114,18 @@ final class _FriendPageState extends ConsumerState<FriendPage> {
               Semantics(liveRegion: true, child: Text(message)),
             if (target != null) ...[
               const SizedBox(height: 16),
-              Text(target.displayName),
-              Text('Username: ${target.username}'),
+              Text(
+                target.displayName,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Text('@${target.username}'),
+              if (widget.onOpenProfile != null)
+                TextButton(
+                  onPressed: state.busy
+                      ? null
+                      : () => _openProfile(target.username),
+                  child: const Text('View Profile'),
+                ),
               Text(switch (target.relationship) {
                 RelationshipState.self => 'Your account',
                 RelationshipState.alreadyFriends => 'Already friends',
@@ -110,13 +167,23 @@ final class _FriendPageState extends ConsumerState<FriendPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(request.displayName),
-                      Text('Username: ${request.username}'),
+                      Text(
+                        request.displayName,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Text('@${request.username}'),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         children: [
+                          if (widget.onOpenProfile != null)
+                            TextButton(
+                              onPressed: state.busy
+                                  ? null
+                                  : () => _openProfile(request.username),
+                              child: const Text('View Profile'),
+                            ),
                           FilledButton(
                             key: Key('friend-accept-${request.requestRef}'),
                             onPressed: state.busy
@@ -150,5 +217,15 @@ final class _FriendPageState extends ConsumerState<FriendPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _openProfile(String username) async {
+    final session = ref.read(authSessionProvider).asData?.value;
+    ref.invalidate(friendControllerProvider);
+    await widget.onOpenProfile?.call(username);
+    if (mounted &&
+        identical(session, ref.read(authSessionProvider).asData?.value)) {
+      await ref.read(friendControllerProvider.notifier).loadInbox();
+    }
   }
 }

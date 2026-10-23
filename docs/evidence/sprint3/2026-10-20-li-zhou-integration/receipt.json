@@ -1,0 +1,184 @@
+{
+  "date": "2026-10-20",
+  "reviewedPr": 164,
+  "reviewedHead": "5cf060cd8ee722a3ade85dac967d15d48e0d5382",
+  "integrationBase": "900ca6fcdefb77e9aa95d96fa80994ebf826398f",
+  "testedSource": "52f494bbfd02f85dadbdf0e9f38189772be16edf",
+  "apk": {
+    "file": "enmori-zhou-v9-debug.apk",
+    "package": "com.enmori.app.coretest",
+    "versionCode": 9,
+    "sha256": "7ae21f7c8c54508dbcb15154e28407dc79ea002507ec0d0cd6bc9413f7ff84e9",
+    "installedHashMatched": true
+  },
+  "checks": {
+    "backendInitial": {
+      "passed": 505,
+      "failed": 1
+    },
+    "backendCorrectionSubset": {
+      "passed": 78,
+      "failed": 0,
+      "overlapsInitial": true
+    },
+    "flutterInitial": {
+      "passed": 340,
+      "failed": 1
+    },
+    "flutterCorrectionSubset": {
+      "passed": 7,
+      "failed": 0,
+      "overlapsInitial": true
+    },
+    "analyze": "pass",
+    "builds": 1
+  },
+  "logs": [
+    {
+      "path": "build/li-zhou-review/backend-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/li-zhou-review/backend-tests.log",
+      "sha256": "3de8a8691e608a7a178f5b28efc100836b5a7c69184cf35c94931800977487a8"
+    },
+    {
+      "path": "build/li-zhou-review/backend-build-correction.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/li-zhou-review/backend-lifecycle-correction.log",
+      "sha256": "ff42204bd7edfef6bde7e5971d687da0426670f2c57ce0758872fb70f8aabdfe"
+    },
+    {
+      "path": "build/li-zhou-review/flutter-tests.log",
+      "sha256": "aed19c0f08f7d76f19414df44ad452a70fa03f92ad594c2cf753c839353af914"
+    },
+    {
+      "path": "build/li-zhou-review/flutter-router-correction.log",
+      "sha256": "0783a0b5087cda8b21cb2699776e4856d92b7b15662cb2b09bc8fa2cd27faa4c"
+    },
+    {
+      "path": "build/li-zhou-review/flutter-analyze.log",
+      "sha256": "419fff2f2cc9438e213fcee66cbb2ce6fd65fcc4c5dd2f325090ed3ae2a34888"
+    },
+    {
+      "path": "build/li-zhou-review/apk-build.log",
+      "sha256": "decf9bd56d2485b1edad26c151ab7e823e19e62cb665647237fc01034b325f68"
+    },
+    {
+      "path": "build/li-zhou-review/host-model-probe.log",
+      "sha256": "f0bfbee31f5d56a2985d1c413638a7875623d64d3b9d19aebaa4c95351ef75bd"
+    },
+    {
+      "path": "build/li-zhou-review/host-restart-read-final.log",
+      "sha256": "a258b646642badb8f830dcf52a9da92da19bf435975627fd41d7fd214bae09f9"
+    },
+    {
+      "path": "build/li-zhou-review/native-handoff.json",
+      "sha256": "ca46a5af1f350da1a11edecefd02bae950aba40141965143098548d579fb4cf9"
+    }
+  ],
+  "hostAndNativeReadback": [
+    {
+      "check": "new-synthetic-account",
+      "onboarding": true,
+      "existingAccountsUnchanged": true
+    },
+    {
+      "check": "real-draft-preview",
+      "pass_": true,
+      "draftStyleObserved": true
+    },
+    {
+      "check": "preview-no-save-or-history",
+      "personasUnchanged": true,
+      "historyUnchanged": true
+    },
+    {
+      "check": "persona-save-reread",
+      "allFieldsMatch": true
+    },
+    {
+      "check": "persona-select",
+      "currentMatches": true
+    },
+    {
+      "check": "real-chat-round-1",
+      "seconds": 4.32,
+      "nonempty": true,
+      "nameRemembered": true,
+      "durationRemembered": true,
+      "indoorStretchRemembered": false,
+      "draftStyleObserved": true
+    },
+    {
+      "check": "real-chat-round-2",
+      "seconds": 3.91,
+      "nonempty": true,
+      "nameRemembered": true,
+      "durationRemembered": true,
+      "indoorStretchRemembered": true,
+      "draftStyleObserved": true
+    },
+    {
+      "check": "real-chat-round-3",
+      "seconds": 5.06,
+      "nonempty": true,
+      "nameRemembered": true,
+      "durationRemembered": true,
+      "indoorStretchRemembered": true,
+      "draftStyleObserved": false
+    },
+    {
+      "check": "history-reread",
+      "messageCount": 6,
+      "listed": true
+    },
+    {
+      "check": "delete-current-persona",
+      "defaultRestored": true,
+      "deletedAbsent": true
+    },
+    {
+      "check": "existing-data-retained",
+      "profileUnchanged": true,
+      "originalPersonaItemsUnchanged": true,
+      "originalSelectionRestored": true
+    },
+    {
+      "check": "after-normal-restart",
+      "messagesUnchanged": true,
+      "personasUnchanged": true,
+      "profileUnchanged": true
+    },
+    {
+      "check": "native-continuation",
+      "messageCount": 8,
+      "lastRole": "assistant",
+      "durationRemembered": true
+    },
+    {
+      "check": "native-draft-preview-isolation",
+      "personaCount": 0,
+      "noActivePersona": true,
+      "conversationMessageCount": 8
+    }
+  ],
+  "nativeObserved": [
+    "history selection",
+    "continued the same conversation after restart",
+    "unsaved draft preview returned a greeting",
+    "Android Back discard prompt",
+    "discard returned to management"
+  ],
+  "commands": [
+    "Node 24.19.0: node node_modules/typescript/bin/tsc --project backend/tsconfig.json",
+    "Node 24.19.0: node --test backend/dist/test/personas/*.test.js backend/dist/test/ai-conversation/*.test.js backend/dist/test/simple-chat.test.js backend/dist/test/contract/openapi.test.js",
+    "After correction only: node --test backend/dist/test/ai-conversation/lifecycle.test.js",
+    "Flutter 3.47.2: flutter test --no-pub --reporter expanded test/features/personas test/features/ai_conversation test/app/persona_preview_composition_test.dart test/app/persona_home_router_test.dart test/app/ai_conversation_shared_router_test.dart",
+    "After fixture correction only: flutter test --no-pub --reporter expanded test/app/ai_conversation_shared_router_test.dart",
+    "Flutter 3.47.2: flutter analyze --no-pub",
+    "ENMORI_CORE_ANDROID_TEST=true flutter build apk --debug --target lib/controlled_demo.dart --no-pub --build-number 9 --build-name 1.0.0-zhou20261020"
+  ]
+}

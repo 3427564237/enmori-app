@@ -4,6 +4,7 @@ import {FirestoreCheckInCalendar} from "../check-ins/infrastructure/firestore-ch
 import { EditCheckIn } from "../check-ins/application/edit-check-in.js";
 import { FirestoreCheckInMutations } from "../check-ins/infrastructure/firestore-check-in-mutations.js";
 import { CreateInterestTag } from '../interests/application/create-interest-tag.js';
+import { GetInterestAdminCapability } from '../interests/application/get-interest-admin-capability.js';
 import { FirebaseInterestAdmin } from '../interests/infrastructure/firebase-interest-admin.js';
 import { FirestoreCatalogueWriter } from '../interests/infrastructure/firestore-catalogue-writer.js';
 import { CreateCheckIn } from "../check-ins/application/create-check-in.js";
@@ -367,6 +368,7 @@ export async function createControlledPhoneService(options: {
       ...(options.demoFeatures ? {checkInCalendar:new OwnCheckInCalendar(new FirestoreCheckInCalendar(historyGateway))}:{}),
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
       createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(auth), new FirestoreCatalogueWriter(gateway)),
+      getInterestAdminCapability: new GetInterestAdminCapability(new FirebaseInterestAdmin(auth)),
       ...(options.diagnostics ? { controlledPhoneDiagnostics: options.diagnostics } : {}),
       ...(realEvents ? { recommendEvents: realEvents.recommendEvents } : {}),
       identityVerifier: { verifyIdToken: async token => {

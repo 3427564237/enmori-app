@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-20",
+  "reviewedPr": 163,
+  "reviewedHead": "413fee3dfe8c60cb86e4b736b140e243d534c384",
+  "integrationParent": "7124dbb4be3f98bb1225de32b9d10c5a57db82a1",
+  "integrationBase": "900ca6fcdefb77e9aa95d96fa80994ebf826398f",
+  "testedSource": "dd2fbebc4bc554c538824794d6788cca822861de",
+  "originalMain": "d59cb128bfe0b5889baae0b08c973e140505590f",
+  "review": "LI integration inspection; distinct-author DU review pending",
+  "incomingBlobsIdentical": 19,
+  "productionDartFiles": 6,
+  "backendApiLockAndAiCompositionUnchangedFrom": "52f494bbfd02f85dadbdf0e9f38189772be16edf",
+  "flutterPassed": 97,
+  "flutterFailed": 0,
+  "checks": [
+    {
+      "step": "flutter-tests",
+      "exitCode": 0,
+      "seconds": 18.72,
+      "command": [
+        "/home/miku/fvm/versions/3.47.2/bin/flutter",
+        "test",
+        "--no-pub",
+        "--reporter",
+        "expanded",
+        "test/app/shared_uiux_test.dart",
+        "test/features/event_recommendations_page_test.dart",
+        "test/app/home_event_navigation_test.dart",
+        "test/app/activity_shared_router_test.dart",
+        "test/app/account_preferences_flow_test.dart",
+        "test/features/rmvp01a_r6_pages_test.dart",
+        "test/app/persona_home_router_test.dart",
+        "test/app/ai_conversation_shared_router_test.dart",
+        "test/app/check_in_history_shared_router_test.dart"
+      ]
+    },
+    {
+      "step": "flutter-analyze",
+      "exitCode": 0,
+      "seconds": 7.84,
+      "command": [
+        "/home/miku/fvm/versions/3.47.2/bin/flutter",
+        "analyze",
+        "--no-pub"
+      ]
+    },
+    {
+      "step": "format",
+      "exitCode": 0,
+      "seconds": 0.28,
+      "command": [
+        "/home/miku/fvm/versions/3.47.2/bin/dart",
+        "format",
+        "--output=none",
+        "--set-exit-if-changed",
+        "lib/app/enmori_theme.dart",
+        "lib/app/home_shell_page.dart",
+        "lib/app/route_status_pages.dart",
+        "lib/core/presentation/status_panel.dart",
+        "lib/features/event_browse/presentation/activity_page.dart",
+        "lib/features/event_recommendations/presentation/event_recommendations_page.dart",
+        "test/app/shared_uiux_test.dart",
+        "test/features/event_recommendations_page_test.dart"
+      ]
+    },
+    {
+      "step": "whitespace",
+      "exitCode": 0,
+      "seconds": 0.01,
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "HEAD^1",
+        "HEAD"
+      ]
+    }
+  ],
+  "apk": {
+    "file": "enmori-uiux-v10-debug.apk",
+    "package": "com.enmori.app.coretest",
+    "versionCode": 10,
+    "versionName": "1.0.0-uiux20261020",
+    "sha256": "9320ec59cdd395753b02acf59b45845f6e61ede6efd9264e3dea291a9d336081",
+    "bytes": 173768437,
+    "build": {
+      "exitCode": 0,
+      "command": "ENMORI_CORE_ANDROID_TEST=true /home/miku/fvm/versions/3.47.2/bin/flutter build apk --debug --target lib/controlled_demo.dart --no-pub --build-number 10 --build-name 1.0.0-uiux20261020"
+    },
+    "installed": false
+  },
+  "logs": [
+    {
+      "path": "build/li-uiux-review/apk-build.log",
+      "sha256": "cc1ef326606017ce1d2760a16cd91f62319938d98f1b9d817bb63f4d79bd2ea2"
+    },
+    {
+      "path": "build/li-uiux-review/flutter-analyze.log",
+      "sha256": "dbe5767a5dbadf5f87da2128eb170d46c1ba7a90d7fa2599f24210fb4a0b1a4b"
+    },
+    {
+      "path": "build/li-uiux-review/flutter-tests.log",
+      "sha256": "5977bd6f07d7728cf0db7842f5ff22fc4e861321433b774bbf101686301ecd49"
+    },
+    {
+      "path": "build/li-uiux-review/format.log",
+      "sha256": "f8f6824aff8501eaf6bfb03cf8942be8be1a302418230ada30706ebfcc43f092"
+    },
+    {
+      "path": "build/li-uiux-review/whitespace.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "native": "Not Run: adb devices returned no connected device",
+  "runtime": "Read-only status ready=true; aiMaintenanceHealthy=false retained; no restart, writes or model calls"
+}

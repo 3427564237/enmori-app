@@ -24,6 +24,9 @@ final class AiConversationState {
     this.phase = AiConversationPhase.idle,
     Iterable<AiMessage> messages = const [],
     this.conversationId,
+    this.localOutgoingText,
+    this.localOutgoingKey,
+    this.outgoingMessageId,
     this.nextCursor,
     this.statusMessage,
     this.canSend = false,
@@ -34,11 +37,23 @@ final class AiConversationState {
     this.canDelete = false,
     this.canStartNewConversation = false,
     this.readBusy = false,
-  }) : messages = List.unmodifiable(messages);
+    Iterable<AiConversationSummary> conversations = const [],
+    this.historyLoaded = false,
+    this.historyCursor,
+    this.historyError,
+    this.canBrowseHistory = false,
+    this.canSelectConversation = false,
+  }) : messages = List.unmodifiable(messages),
+       conversations = List.unmodifiable(conversations);
 
   final Object sessionKey;
   final AiConversationPhase phase;
   final List<AiMessage> messages;
+
+  /// Presentation-only input, never a persisted message or resend queue.
+  final String? localOutgoingText;
+  final Object? localOutgoingKey;
+  final String? outgoingMessageId;
   final String? conversationId;
   final String? nextCursor;
   final String? statusMessage;
@@ -52,6 +67,12 @@ final class AiConversationState {
   final bool canDelete;
   final bool canStartNewConversation;
   final bool readBusy;
+  final List<AiConversationSummary> conversations;
+  final bool historyLoaded;
+  final String? historyCursor;
+  final String? historyError;
+  final bool canBrowseHistory;
+  final bool canSelectConversation;
   bool get isBusy =>
       canCancel || readBusy || phase == AiConversationPhase.deleting;
 }

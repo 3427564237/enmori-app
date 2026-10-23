@@ -1,0 +1,16 @@
+[Unit]
+Description=ENMORI group real-account backend
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/ABSOLUTE/PATH/TO/ENMORI
+ExecStart=/ABSOLUTE/PATH/TO/NODE24 tool/run_real_account_local.mjs /ABSOLUTE/PRIVATE/local-backend.json
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=infinity
+UMask=0077
+
+[Install]
+WantedBy=default.target

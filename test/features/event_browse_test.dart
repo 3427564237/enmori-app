@@ -320,7 +320,7 @@ void main() {
         );
       await pump(tester, repo);
       expect(
-        find.text('No eligible activities were found in this source batch.'),
+        find.text('This available selection is empty. You can check again later.'),
         findsOneWidget,
       );
       repo.result = const Failure(

@@ -41,8 +41,13 @@ abstract interface class FriendRepository {
 }
 
 final class MyFriend {
-  const MyFriend({required this.username, required this.displayName});
+  const MyFriend({
+    required this.username,
+    required this.displayName,
+    this.specialCare = false,
+  });
   final String username, displayName;
+  final bool specialCare;
 }
 
 final class MyFriendsPage {

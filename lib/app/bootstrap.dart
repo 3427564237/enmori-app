@@ -1,3 +1,5 @@
+import 'controlled_demo_app.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
@@ -20,6 +22,8 @@ import '../features/event_recommendations/data/backend_event_recommendation_repo
 import '../features/event_recommendations/event_recommendations_providers.dart';
 import '../features/interests/data/backend_interest_repository.dart';
 import '../features/interests/interests_providers.dart';
+import '../features/interests/admin_interest_providers.dart';
+import '../features/interests/data/backend_admin_interest_repository.dart';
 import '../features/event_browse/event_browse_providers.dart';
 import 'platform/external_activity_opener.dart';
 import 'app.dart';
@@ -31,12 +35,14 @@ Future<void> bootstrap() async {
   const controlledAccount = bool.fromEnvironment(
     'ENMORI_CONTROLLED_REAL_ACCOUNT',
   );
+  const remoteAccount = bool.fromEnvironment('ENMORI_REMOTE_GROUP');
   const backendUrl = String.fromEnvironment('ENMORI_API_BASE_URL');
   const certificate = String.fromEnvironment('ENMORI_API_CERTIFICATE_BASE64');
   final baseUri = parseApprovedBackendBaseUri(backendUrl);
   final configurationValid = validAccountRuntimeConfiguration(
     configuration,
     controlledAccount: controlledAccount,
+    remoteAccount: remoteAccount,
     certificateBase64: certificate,
     baseUri: baseUri,
   );
@@ -68,10 +74,26 @@ Future<void> bootstrap() async {
     }
   }
 
+  if (remoteAccount && firebaseReady && baseUri != null) {
+    final auth = FirebaseAuthRepository(FirebaseAuth.instance);
+    runApp(
+      ControlledDemoApp(
+        baseUri: baseUri,
+        auth: auth,
+        client: http.Client(),
+        onClose: auth.signOut,
+        dualAccounts: true,
+        eventParticipationEnabled: true,
+        remoteGroupEnabled: true,
+      ),
+    );
+    return;
+  }
+
   runApp(
     ProviderScope(
       overrides: [
-        if (controlledAccount)
+        if (controlledAccount || remoteAccount)
           backendBaseUriProvider.overrideWithValue(
             firebaseReady ? baseUri : null,
           ),
@@ -109,6 +131,11 @@ Future<void> bootstrap() async {
         interestRepositoryProvider.overrideWith(
           (ref) =>
               BackendInterestRepository(ref.watch(backendApiClientProvider)),
+        ),
+        adminInterestRepositoryProvider.overrideWith(
+          (ref) => BackendAdminInterestRepository(
+            ref.watch(backendApiClientProvider),
+          ),
         ),
         eventRecommendationRepositoryProvider.overrideWith(
           (ref) => BackendEventRecommendationRepository(
@@ -182,9 +209,23 @@ final class FirebaseRuntimeConfiguration {
 bool validAccountRuntimeConfiguration(
   FirebaseRuntimeConfiguration configuration, {
   required bool controlledAccount,
+  bool remoteAccount = false,
   required String certificateBase64,
   required Uri? baseUri,
 }) {
+  if (remoteAccount) {
+    return !controlledAccount &&
+        configuration.options?.projectId == 'enmori-rmvp-controlled' &&
+        !configuration.useAuthEmulator &&
+        certificateBase64.isEmpty &&
+        baseUri?.scheme == 'https' &&
+        baseUri?.host == 'enmori-rmvp-demo.tail29ae43.ts.net' &&
+        baseUri?.port == 8443 &&
+        baseUri!.userInfo.isEmpty &&
+        !baseUri.hasQuery &&
+        !baseUri.hasFragment &&
+        (baseUri.path.isEmpty || baseUri.path == '/');
+  }
   if (!controlledAccount) return certificateBase64.isEmpty;
   return configuration.options?.projectId == 'enmori-rmvp-controlled' &&
       !configuration.useAuthEmulator &&

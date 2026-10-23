@@ -48,7 +48,8 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
         ],
       ),
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: _body(state),
@@ -79,8 +80,24 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
     final conflict = state.phase == InterestEditorPhase.conflict;
     return ListView(
       key: const Key('route-interests'),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       children: [
+        if (widget.onSkip != null) ...[
+          Text(
+            'A little space for your everyday',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Check-in to save a moment. Explore Events, connect with Friends, or talk things through with AI.',
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Start wherever you like. Optional permissions stay yours to choose.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const Divider(height: 32),
+        ],
         Text(
           'Choose up to 10',
           style: Theme.of(context).textTheme.headlineMedium,

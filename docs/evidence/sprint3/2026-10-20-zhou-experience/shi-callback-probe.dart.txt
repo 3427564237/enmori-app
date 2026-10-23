@@ -1,0 +1,126 @@
+import 'dart:async';
+
+import 'package:enmori/core/result/result.dart';
+import 'package:enmori/features/auth/auth_providers.dart';
+import 'package:enmori/features/auth/domain/auth_repository.dart';
+import 'package:enmori/features/event_browse/domain/activity_repository.dart';
+import 'package:enmori/features/event_participation/presentation/external_registration_action.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+final class _Opener implements ExternalActivityOpener {
+  @override
+  Future<bool> open(Uri sourceUrl, {required bool Function() current}) async =>
+      current();
+}
+
+void main() {
+  for (final stable in [true, false]) {
+    for (final unknown in [false, true]) {
+      testWidgets(
+        '${stable ? 'stable' : 'rebuilt'} callbacks retain '
+        '${unknown ? 'unknown-result read fence' : 'browser return confirmation'}',
+        (tester) async {
+          final sessions = StreamController<AuthSession>();
+          addTearDown(sessions.close);
+          final opener = _Opener();
+          var revision = 0, writes = 0, reads = 0;
+          late VoidCallback rebuildParent;
+          Future<Result<void>> writer(String id) async {
+            writes++;
+            return const Failure(
+              AppFailure(
+                kind: AppFailureKind.serviceUnavailable,
+                message: 'Synthetic unknown result',
+              ),
+            );
+          }
+
+          Future<Result<bool>> reader(String id) async {
+            reads++;
+            return const Success(false);
+          }
+
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                authSessionProvider.overrideWith((ref) => sessions.stream),
+              ],
+              child: MaterialApp(
+                theme: ThemeData(splashFactory: NoSplash.splashFactory),
+                home: Scaffold(
+                  body: StatefulBuilder(
+                    builder: (context, update) {
+                      final capturedRevision = revision;
+                      rebuildParent = () => update(() => revision++);
+                      return ExternalRegistrationAction(
+                        eventId: 'stable-event-a',
+                        sourceUrl: Uri.https('www.ticketmaster.sg', '/event/a'),
+                        opener: opener,
+                        confirmGoing: stable
+                            ? writer
+                            : (id) async {
+                                // Captured build identity, same actual writer.
+                                if (capturedRevision < 0) throw StateError('x');
+                                return writer(id);
+                              },
+                        readGoing: stable
+                            ? reader
+                            : (id) async {
+                                if (capturedRevision < 0) throw StateError('x');
+                                return reader(id);
+                              },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          );
+          sessions.add(AuthSessionAuthenticated(subject: 'same-account'));
+          tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Register on organiser website'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Open website'));
+          await tester.pumpAndSettle();
+          tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+          if (!unknown) {
+            rebuildParent();
+            await tester.pump();
+          }
+          tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+          await tester.pumpAndSettle();
+          expect(
+            find.text('Did you complete registration?'),
+            findsOneWidget,
+            reason: 'A same-event/account parent rebuild is not a new flow.',
+          );
+          if (!unknown) {
+            await tester.tap(find.text('Yes, mark Going'));
+            await tester.pumpAndSettle();
+            expect(
+              writes,
+              1,
+              reason: 'The displayed return confirmation must remain live.',
+            );
+            return;
+          }
+          await tester.tap(find.text('Yes, mark Going'));
+          await tester.pumpAndSettle();
+          expect(writes, 1);
+          expect(reads, 0);
+          expect(find.text('Read participation'), findsOneWidget);
+          rebuildParent();
+          await tester.pump();
+          expect(
+            find.text('Read participation'),
+            findsOneWidget,
+            reason: 'An unresolved write must remain read-only after rebuild.',
+          );
+        },
+      );
+    }
+  }
+}

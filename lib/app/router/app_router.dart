@@ -1,3 +1,11 @@
+import '../../features/weather/presentation/home_weather_card.dart';
+import '../remote_social_composition.dart';
+import '../../features/friends/presentation/friend_module_page.dart';
+import '../../features/event_browse/event_browse_providers.dart';
+import '../../features/event_participation/presentation/own_participation_section.dart';
+import '../event_recommendation_card.dart';
+import 'event_participation_routes.dart';
+
 import 'package:flutter/widgets.dart';
 
 import '../social_demo_presentation.dart';
@@ -21,6 +29,8 @@ import '../../features/event_recommendations/domain/event_recommendation_reposit
 import '../../features/event_recommendations/presentation/event_recommendations_controller.dart';
 import '../../features/event_recommendations/presentation/event_recommendations_page.dart';
 import '../../features/interests/presentation/interest_editor_page.dart';
+import '../../features/interests/presentation/admin_interest_catalogue_page.dart';
+import '../interest_admin_entry.dart';
 import '../home_shell_page.dart';
 import '../../features/event_detail/presentation/event_detail_page.dart';
 import '../../features/friends/presentation/friend_page.dart';
@@ -47,10 +57,13 @@ abstract final class AppRoutes {
       '/personas/${Uri.encodeComponent(personaId)}/edit';
   static const profileEdit = '/profile/edit';
   static const settings = '/settings';
+  static const aiSettings = '/ai/settings';
   static const checkIn = '/check-in';
   static const checkInHistory = '/check-ins/history';
+  static const footprint = '/check-ins/footprint';
   static const aiAssistant = '/ai-assistant';
   static const interests = '/interests';
+  static const adminInterests = '/admin/interests';
   static const eventRecommendations = '/events';
   static const activities = '/activities';
   static const unavailable = '/unavailable';
@@ -88,12 +101,26 @@ void selectConnectedSocialTab(
   context.go(paths[index]);
 }
 
+/// Explicit isolated composition only; ordinary/real-account root stays disabled.
+final eventParticipationEnabledProvider = Provider<bool>((ref) => false);
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   // An account-owned route stack must not survive an identity replacement.
   final routeSubject = ref.watch(currentAuthSubjectProvider);
-  final isolatedSlices = ref.watch(isolatedSlicesEnabledProvider);
+  final remoteGroup = ref.watch(remoteGroupFeaturesEnabledProvider);
+  final isolatedSlices =
+      ref.watch(isolatedSlicesEnabledProvider) || remoteGroup;
   final socialPresentation = ref.watch(socialDemoPresentationProvider);
   final activitiesEnabled = ref.watch(activityBrowseEnabledProvider);
+  final participationEnabled =
+      isolatedSlices &&
+      activitiesEnabled &&
+      ref.watch(eventParticipationEnabledProvider);
+  final eventOpener = participationEnabled
+      ? ref.watch(externalActivityOpenerProvider)
+      : null;
+  String eventPath(String id) =>
+      '/events/${Uri.encodeComponent(id)}${participationEnabled ? "/participation" : ""}';
   final personaPages = isolatedSlices
       ? ref.watch(isolatedPersonaPagesProvider)
       : null;
@@ -137,7 +164,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       identical(ref.read(authSessionProvider).asData?.value, routeSession) &&
       ref.read(currentAuthSubjectProvider) == routeSubject &&
       ref.read(routerGateProvider) == RouterGateState.authenticated &&
-      ref.read(isolatedSlicesEnabledProvider) &&
+      (ref.read(isolatedSlicesEnabledProvider) ||
+          ref.read(remoteGroupFeaturesEnabledProvider)) &&
       GoRouter.of(context).state.uri.path == sourcePath;
 
   void openShared(BuildContext context, String sourcePath, String destination) {
@@ -202,7 +230,50 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       signedOutEntry: ref.read(signOutEntryProvider),
     ),
     routes: [
-      if (activitiesEnabled)
+      if (remoteGroup) ...[
+        GoRoute(
+          path: AppRoutes.footprint,
+          builder: (_, _) => const ConnectedOwnFootprint(),
+        ),
+        GoRoute(
+          path: '/people/:username/footprint',
+          builder: (_, state) => ConnectedSocialProfile(
+            username: state.pathParameters['username']!,
+            footprint: true,
+          ),
+        ),
+      ],
+      if (remoteGroup)
+        GoRoute(
+          path: '/people/:username',
+          builder: (context, state) => ConnectedSocialProfile(
+            username: state.pathParameters['username']!,
+          ),
+        ),
+
+      if (participationEnabled && eventOpener != null) ...[
+        ...eventParticipationRoutes(
+          opener: eventOpener,
+          current: canNavigateActivity,
+          listPath: AppRoutes.activities,
+          wrapList: (context, child) =>
+              rootTab(context, AppRoutes.activities, 2, child),
+          onProfile: (context, username) =>
+              context.push('/event-people/${Uri.encodeComponent(username)}'),
+        ),
+        GoRoute(
+          path: '/event-people/:username',
+          builder: (context, state) => remoteGroup
+              ? ConnectedSocialProfile(
+                  username: state.pathParameters['username']!,
+                )
+              : FriendPage(
+                  key: ValueKey(state.pathParameters['username']),
+                  initialUsername: state.pathParameters['username'],
+                ),
+        ),
+      ],
+      if (activitiesEnabled && !participationEnabled)
         ...activityRoutes(
           current: canNavigateActivity,
           wrapList: (context, child) =>
@@ -230,11 +301,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (aiPage != null)
         GoRoute(
           path: AppRoutes.aiAssistant,
+          name: 'root-ai',
           builder: (context, state) => aiPage.build(
             context,
             onBack: () => backFromShared(context, AppRoutes.aiAssistant),
-            onOpenSettings: () =>
-                openShared(context, AppRoutes.aiAssistant, AppRoutes.settings),
+            onOpenSettings: () => openShared(
+              context,
+              AppRoutes.aiAssistant,
+              AppRoutes.aiSettings,
+            ),
           ),
         ),
       if (personaPages != null) ...[
@@ -274,13 +349,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isolatedSlices)
         GoRoute(
           path: '/friends',
+          name: 'root-friends',
           builder: (context, state) => rootTab(
             context,
             '/friends',
             1,
-            FriendPage(
-              onOpenMyFriends: () => context.push<void>('/friends/list'),
-            ),
+            remoteGroup
+                ? FriendModulePage(
+                    openAttribution: openGroupAttribution,
+                    participationBuilder: groupParticipationBuilder,
+                    onOpenEvent: (id) => context.push<void>(eventPath(id)),
+                  )
+                : FriendPage(
+                    onOpenMyFriends: () => context.push<void>('/friends/list'),
+                  ),
           ),
         ),
       if (isolatedSlices)
@@ -330,7 +412,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.home,
+        name: 'root-home',
         builder: (context, state) => HomeShellPage(
+          socialSection: remoteGroup ? const GroupHomeSocial() : null,
+          weatherSection: remoteGroup
+              ? HomeWeatherCard(
+                  openAttribution: openGroupAttribution,
+                  onOpenSettings: () =>
+                      openShared(context, AppRoutes.home, AppRoutes.settings),
+                )
+              : null,
           socialStyle: socialPresentation,
           onSelectTab: socialPresentation
               ? (index) => selectConnectedSocialTab(
@@ -343,13 +434,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           onOpenSettings: socialPresentation
               ? () => openShared(context, AppRoutes.home, AppRoutes.settings)
               : null,
-          onStartCheckIn: () => context.go(AppRoutes.checkIn),
+          onStartCheckIn: () => context.push<void>(AppRoutes.checkIn),
           onBrowseActivities: activitiesEnabled
               ? () {
                   if (context.mounted && canNavigateActivity()) {
                     context.push<void>(AppRoutes.activities);
                   }
                 }
+              : null,
+          onOpenFootprint: remoteGroup
+              ? () => openShared(context, AppRoutes.home, AppRoutes.footprint)
               : null,
           onOpenHistory: historyPage != null
               ? () => openShared(
@@ -367,8 +461,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           onOpenFriends: isolatedSlices
               ? () => context.push<void>('/friends')
               : null,
+          recommendationCardBuilder: participationEnabled
+              ? (context, event, onOpen) =>
+                    ConnectedRecommendationCard(event: event, onOpen: onOpen)
+              : null,
           onOpenEvent: isolatedSlices
-              ? (id) => context.push<void>('/events/${Uri.encodeComponent(id)}')
+              ? (id) {
+                  if (context.mounted &&
+                      (!participationEnabled || canNavigateActivity())) {
+                    context.push<void>(eventPath(id));
+                  }
+                }
               : null,
           onOpenProfile: () async {
             final subject = ref.read(currentAuthSubjectProvider);
@@ -404,11 +507,38 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.profile,
+        name: 'root-profile',
         builder: (context, state) => rootTab(
           context,
           AppRoutes.profile,
           4,
           OwnProfilePage(
+            onManagePersonas: personaPages != null
+                ? () => openPersona(context, AppRoutes.personas)
+                : null,
+            adminCatalogueEntry: InterestAdminEntry(
+              onOpen: () => context.push<void>(AppRoutes.adminInterests),
+            ),
+            onOpenHistory: historyPage != null
+                ? () => context.push<void>(AppRoutes.checkInHistory)
+                : null,
+            onOpenFootprint: remoteGroup
+                ? () => context.push<void>(AppRoutes.footprint)
+                : null,
+            onOpenRecords: remoteGroup
+                ? (username) => context.push<void>(
+                    '/people/${Uri.encodeComponent(username)}',
+                  )
+                : null,
+            participationSection: participationEnabled
+                ? OwnParticipationSection(
+                    onSelect: (id) {
+                      if (context.mounted && canNavigateActivity()) {
+                        context.push<void>(eventPath(id));
+                      }
+                    },
+                  )
+                : null,
             onEditProfile: () async {
               await context.push<void>(AppRoutes.profileEdit);
             },
@@ -422,9 +552,46 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        path: AppRoutes.adminInterests,
+        builder: (context, state) => Consumer(
+          builder: (context, widgetRef, _) {
+            final session = widgetRef.watch(authSessionProvider).asData?.value;
+            return AdminInterestCataloguePage(
+              onBack: () {
+                if (!context.mounted ||
+                    session is! AuthSessionAuthenticated ||
+                    !identical(
+                      widgetRef.read(authSessionProvider).asData?.value,
+                      session,
+                    ) ||
+                    widgetRef.read(routerGateProvider) !=
+                        RouterGateState.authenticated ||
+                    GoRouter.of(context).state.uri.path !=
+                        AppRoutes.adminInterests) {
+                  return;
+                }
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go(AppRoutes.profile);
+                }
+              },
+            );
+          },
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.profileEdit,
         builder: (context, state) =>
             const AccountPreferencesPage(view: PreferencesView.profile),
+      ),
+      GoRoute(
+        path: AppRoutes.aiSettings,
+        builder: (context, state) => AccountPreferencesPage(
+          view: PreferencesView.settings,
+          aiOnly: true,
+          onOpenPersonas: () => context.push<void>(AppRoutes.personas),
+        ),
       ),
       GoRoute(
         path: AppRoutes.settings,
@@ -446,14 +613,31 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.eventRecommendations,
         builder: (context, state) => EventRecommendationsPage(
+          recommendationCardBuilder: participationEnabled
+              ? (context, event, onOpen) =>
+                    ConnectedRecommendationCard(event: event, onOpen: onOpen)
+              : null,
           onOpenEvent: isolatedSlices
-              ? (id) => context.push<void>('/events/${Uri.encodeComponent(id)}')
+              ? (id) {
+                  if (context.mounted &&
+                      (!participationEnabled || canNavigateActivity())) {
+                    context.push<void>(eventPath(id));
+                  }
+                }
               : null,
         ),
       ),
       GoRoute(
         path: AppRoutes.checkIn,
         builder: (context, state) => CheckInComposerPage(
+          key: ValueKey(routeSession),
+          located: remoteGroup,
+          onOpenSaved: (id) =>
+              context.pushReplacement(AppRoutes.savedCheckIn(id)),
+          onOpenHistory: historyPage != null
+              ? () => context.push<void>(AppRoutes.checkInHistory)
+              : null,
+          openAttribution: openGroupAttribution,
           socialStyle: socialPresentation,
           onReturnHome: () => context.go(AppRoutes.home),
         ),
@@ -466,7 +650,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/check-in/:checkInId',
         builder: (context, state) => SavedCheckInPage(
+          key: ValueKey(routeSession),
+          placeActions: remoteGroup,
           checkInId: state.pathParameters['checkInId'] ?? '',
+          openAttribution: openGroupAttribution,
           onReturnHome: () => context.go(AppRoutes.home),
         ),
       ),

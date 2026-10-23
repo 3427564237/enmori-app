@@ -63,6 +63,9 @@ final class FakeAccountPreferences implements AccountPreferencesRepository {
 
   @override
   Future<Result<OwnSettings>> saveSettings({
+    bool? defaultCheckInLocation,
+    bool? defaultCheckInWeather,
+    bool? homeWeatherAuto,
     FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,
@@ -71,6 +74,11 @@ final class FakeAccountPreferences implements AccountPreferencesRepository {
     settingsSaveCount++;
     if (saveFailure case final failure?) return Failure(failure);
     settings = OwnSettings(
+      defaultCheckInLocation:
+          defaultCheckInLocation ?? settings.defaultCheckInLocation,
+      defaultCheckInWeather:
+          defaultCheckInWeather ?? settings.defaultCheckInWeather,
+      homeWeatherAuto: homeWeatherAuto ?? settings.homeWeatherAuto,
       fieldPrivacy: fieldPrivacy ?? settings.fieldPrivacy,
       checkInVisibility: visibility,
       consent: consent,

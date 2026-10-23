@@ -46,6 +46,99 @@ void main() {
 
   group('Persona DTO and wire operations', () {
     test(
+      'full expression fields round trip through create, read and edit',
+      () async {
+        const fields = PersonaFields(
+          displayName: 'Warm guide',
+          tone: PersonaTone.warm,
+          responseLength: PersonaResponseLength.balanced,
+          formatStyle: PersonaFormatStyle.plain,
+          relationship: 'Companion',
+          shortIntroduction: 'Hello',
+          description: 'A study guide',
+          personality: 'Calm',
+          communicationStyle: 'Ask a follow-up',
+          interests: 'My custom interest',
+          extraInstructions: 'Use examples\nKeep my pace.',
+        );
+        final requests = <http.Request>[];
+        final repository = _repo((request) async {
+          requests.add(request);
+          return _response({
+            'persona': {..._persona(), ...fields.expressionFields},
+            'stateRevision': 1,
+          }, request.method == 'POST' ? 201 : 200);
+        });
+        final attempt = repository.create(
+          _command(fields: fields),
+          isEligible: () => true,
+        );
+        expect(
+          (await attempt.foreground as Success<PersonaMutation>)
+              .value
+              .persona
+              .fields,
+          fields,
+        );
+        expect(
+          (await repository.readOne(
+            _id,
+          ) as Success<PersonaMutation>).value.persona.fields,
+          fields,
+        );
+        expect(
+          (await repository.edit(
+            _id,
+            fields: fields,
+            expectedRevision: 1,
+            expectedStateRevision: 1,
+          ) as Success<PersonaMutation>).value.persona.fields,
+          fields,
+        );
+        for (final request in [requests.first, requests.last]) {
+          expect(
+            jsonDecode(request.body),
+            containsPair('interests', 'My custom interest'),
+          );
+          expect(
+            jsonDecode(request.body),
+            containsPair('extraInstructions', 'Use examples\nKeep my pace.'),
+          );
+        }
+        expect(fields.normalized, fields);
+        expect(fields.hashCode, fields.normalized.hashCode);
+        expect(fields, isNot(_fields));
+      },
+    );
+
+    test('legacy missing free fields safely default empty; malformed values fail closed', () async {
+      final legacy = await _repo((_) async => _response(_mutation()))
+          .readOne(_id);
+      final fields = (legacy as Success<PersonaMutation>).value.persona.fields;
+      expect(fields.expressionFields.values, everyElement(''));
+      for (final key in fields.expressionFields.keys) {
+        for (final invalid in <Object?>[
+          null,
+          42,
+          ['unapproved'],
+          '\ud800',
+        ]) {
+          final repository = _repo(
+            (_) async => _response({
+              'persona': {..._persona(), key: invalid},
+              'stateRevision': 1,
+            }),
+          );
+          expect(
+            await repository.readOne(_id),
+            isA<Failure<PersonaMutation>>(),
+            reason: key,
+          );
+        }
+      }
+    });
+
+    test(
       'all six exact operations, revisions, normalized fields and JSON DELETE',
       () async {
         final requests = <http.Request>[];
@@ -107,6 +200,7 @@ void main() {
           'tone': 'warm',
           'responseLength': 'balanced',
           'formatStyle': 'plain',
+          ..._fields.expressionFields,
           'expectedStateRevision': 0,
         });
         expect(jsonDecode(requests.last.body), {

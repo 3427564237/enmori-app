@@ -15,6 +15,77 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fakes.dart';
 
 void main() {
+  testWidgets('background clearing is refresh-needed, not a service failure', (
+    tester,
+  ) async {
+    final repository = FakeEventRecommendationRepository();
+    await _pump(tester, const EventRecommendationsPage(), repository);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(find.text('Refresh event recommendations'), findsOneWidget);
+    expect(find.text('Event recommendations unavailable'), findsNothing);
+    expect(find.text('Third-ranked event'), findsNothing);
+    expect(repository.views, [EventRecommendationView.all]);
+    await tester.tap(find.byKey(const Key('event-recommendations-refresh')));
+    await tester.pumpAndSettle();
+    expect(find.text('Third-ranked event'), findsOneWidget);
+    expect(repository.views, [
+      EventRecommendationView.all,
+      EventRecommendationView.all,
+    ]);
+  });
+
+  testWidgets('expired results clear and empty results can be refreshed', (
+    tester,
+  ) async {
+    final repository = FakeEventRecommendationRepository();
+    await _pump(tester, const EventRecommendationsPage(), repository);
+    await tester.pump(const Duration(minutes: 5));
+    await tester.pumpAndSettle();
+    expect(find.text('Refresh event recommendations'), findsOneWidget);
+    expect(find.text('Third-ranked event'), findsNothing);
+    repository.allResult = Success(
+      EventRecommendationResponse(
+        asOf: DateTime.utc(2026, 10, 20),
+        formulaVersion: 'event_recommendation_v1',
+        items: const [],
+      ),
+    );
+    await tester.tap(find.byKey(const Key('event-recommendations-refresh')));
+    await tester.pumpAndSettle();
+    expect(find.text(eventEmptyTitle), findsOneWidget);
+    repository.allResult = Success(testEventRecommendations());
+    await tester.tap(find.byKey(const Key('event-recommendations-refresh')));
+    await tester.pumpAndSettle();
+    expect(find.text('Third-ranked event'), findsOneWidget);
+    expect(repository.views.length, 3);
+  });
+
+  testWidgets('connected social Home shows real repository Top 2 inline', (
+    tester,
+  ) async {
+    final repository = FakeEventRecommendationRepository();
+    await _pump(
+      tester,
+      HomeShellPage(
+        socialStyle: true,
+        onStartCheckIn: () {},
+        onSeeAllEvents: () {},
+        onOpenEvent: (_) {},
+      ),
+      repository,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Third-ranked event'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('First-ranked event'), findsOneWidget);
+    expect(find.text('Second-ranked event'), findsNothing);
+    expect(repository.views, [EventRecommendationView.home]);
+  });
+
   test('a departed Event view cannot cancel its successor request', () async {
     final repository = FakeEventRecommendationRepository();
     final container = ProviderContainer(
@@ -119,7 +190,11 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('private backend detail'), findsNothing);
-    await tester.tap(find.byKey(const Key('event-recommendations-retry')));
+    final retry = find.byKey(const Key('event-recommendations-retry'));
+    await tester.ensureVisible(retry);
+    await tester.pumpAndSettle();
+    expect(retry.hitTestable(), findsOneWidget);
+    await tester.tap(retry);
     await tester.pumpAndSettle();
     expect(repository.views, [
       EventRecommendationView.home,

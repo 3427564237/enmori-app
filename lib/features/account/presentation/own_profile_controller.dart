@@ -1,3 +1,5 @@
+import '../content_access.dart';
+
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,6 +37,7 @@ final class OwnProfileController extends Notifier<OwnProfileState> {
   @override
   OwnProfileState build() {
     _repository = ref.watch(interestRepositoryProvider);
+    ref.watch(contentAccessProvider);
     final subject = ref.watch(currentAuthSubjectProvider);
     final account = subject == null
         ? null
@@ -50,7 +53,7 @@ final class OwnProfileController extends Notifier<OwnProfileState> {
     };
     final operation = ++_operation;
     ref.onDispose(() => _operation++);
-    if (username != null) {
+    if (username != null && ref.read(contentAccessProvider).foreground) {
       scheduleMicrotask(() {
         if (ref.mounted && operation == _operation) unawaited(load());
       });
@@ -59,7 +62,11 @@ final class OwnProfileController extends Notifier<OwnProfileState> {
   }
 
   Future<void> load() async {
-    if (!ref.mounted || state.username == null) return;
+    if (!ref.mounted ||
+        state.username == null ||
+        !ref.read(contentAccessProvider).foreground) {
+      return;
+    }
     final operation = ++_operation;
     final username = state.username;
     state = OwnProfileState(username: username);

@@ -245,6 +245,9 @@ final class OfflinePreferencesRepository
 
   @override
   Future<Result<OwnSettings>> saveSettings({
+    bool? defaultCheckInLocation,
+    bool? defaultCheckInWeather,
+    bool? homeWeatherAuto,
     FieldPrivacy? fieldPrivacy,
     required CheckInVisibility visibility,
     required OptionalProcessingConsent consent,
@@ -257,6 +260,11 @@ final class OfflinePreferencesRepository
       );
     }
     store.settings = OwnSettings(
+      defaultCheckInLocation:
+          defaultCheckInLocation ?? store.settings.defaultCheckInLocation,
+      defaultCheckInWeather:
+          defaultCheckInWeather ?? store.settings.defaultCheckInWeather,
+      homeWeatherAuto: homeWeatherAuto ?? store.settings.homeWeatherAuto,
       checkInVisibility: visibility,
       consent: consent,
       revision: expectedRevision + 1,
@@ -319,6 +327,7 @@ final class OfflineCheckInRepository implements CheckInRepository {
   final OfflineSocialStore store;
   @override
   Future<Result<CheckIn>> create({
+    String? locationLabel,
     String? mood,
     String? activity,
     CheckInVisibility? visibility,
@@ -333,6 +342,7 @@ final class OfflineCheckInRepository implements CheckInRepository {
       return existing.note == normalized &&
               existing.mood == mood &&
               existing.activity == activity &&
+              existing.locationLabel == locationLabel &&
               (visibility == null || existing.checkInVisibility == visibility)
           ? Success(existing)
           : _failure(
@@ -343,6 +353,7 @@ final class OfflineCheckInRepository implements CheckInRepository {
     final created = CheckIn(
       mood: mood,
       activity: activity,
+      locationLabel: locationLabel,
       checkInId: 'offline_note_${store.notes.length + 1}',
       note: normalized,
       createdAt: DateTime.now().toUtc(),

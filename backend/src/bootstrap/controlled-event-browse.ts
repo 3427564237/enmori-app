@@ -38,10 +38,15 @@ export function createControlledEventBrowse(options: {
     } finally { pending.delete(controller); }
   }
   const source: BrowseSource = {
+    ...(options.source?.event?{event:(id:string,asOf:string,signal:AbortSignal)=>read(signal,(value,current)=>value.event!(id,asOf,current))}:{}),
+    ...(options.source?.batch?{batch:(asOf:string,page:number,signal:AbortSignal)=>read(signal,(value,current)=>value.batch!(asOf,page,current))}:{}),
+    ...(options.source?.availableEvent?{availableEvent:(id:string,asOf:string,signal:AbortSignal)=>read(signal,(value,current)=>value.availableEvent!(id,asOf,current))}:{}),
     firstBatch: (asOf, signal) => read(signal, (value, current) => value.firstBatch(asOf, current)),
     detail: (id, asOf, signal) => read(signal, (value, current) => value.detail(id, asOf, current)),
   };
   return { source, enable, disable,
+    projectionReady: (asOf: string) => enabled && options.running() && projection?.ready(asOf) === true,
+    peek: (id: string, asOf: string) => enabled && options.running() ? projection?.peek(id, asOf) : undefined,
     observation: () => ({ configured: options.source !== undefined, enabled: enabled && options.running(), pending: pending.size }),
   };
 }
