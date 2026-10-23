@@ -76,3 +76,22 @@ The signed v25 candidate, build recovery, hash/certificate and static-check resu
 are recorded in [the v25 evidence](../evidence/sprint3/2026-10-23-li-group-v25.md).
 The APK is local under `build/group-delivery-v25/`; install and deployment were
 not performed. All six PRs remain Draft and the target branch remains unchanged.
+
+Subsequent LI-authorized phone work is recorded in the
+[v25 device follow-up](../evidence/sprint3/2026-10-23-li-group-v25-device.md).
+The frozen APK was installed in place; original scoped documents were preserved.
+Native bilingual process-restart persistence, bounded new-feature paths, real
+two-round chat/navigation continuity and unsaved Persona preview iteration were
+observed. Calendar month counts and recorded-day navigation failed because the
+aggregate query does not match an available index; the read-only descending-order
+control succeeded. This follow-up updates only the observed device gates above;
+it does not change product source, deploy Backend, or grant UAT/Release/Done.
+
+The subsequent [calendar repair and AI diagnosis](../evidence/sprint3/2026-10-23-li-calendar-plan-repair.md)
+contains a source-only calendar patch that matches the existing descending
+history index. TypeScript compilation and 19 targeted local tests passed.
+The installed v25 and shared runtime were not updated in this repair round;
+phone verification was explicitly skipped and no account records were read or
+written. AI relevance remains unresolved after the authorized existing-9B
+comparisons; failed prompt candidates were withdrawn and no model/configuration
+change was adopted. Original v25 device observations remain as recorded.

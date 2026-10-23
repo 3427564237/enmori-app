@@ -6,7 +6,12 @@ class FirebaseAdminCheckInHistoryTransaction implements CheckInHistoryTransactio
   public constructor(private readonly firestore: Firestore, private readonly transaction: Transaction) {}
 
   public async countCheckIns(input:{ownerAccountId:string;startUtc:string;endUtc:string|null}):Promise<number>{
-    let query=this.firestore.collection("check_ins").where("ownerAccountId","==",input.ownerAccountId).where("createdAt",">=",input.startUtc);
+    // Match the existing history index; the implicit ascending range order
+    // requires a different index even though an aggregate does not return rows.
+    let query=this.firestore.collection("check_ins")
+      .where("ownerAccountId","==",input.ownerAccountId)
+      .where("createdAt",">=",input.startUtc)
+      .orderBy("createdAt","desc");
     if(input.endUtc!==null)query=query.where("createdAt","<",input.endUtc);
     return (await this.transaction.get(query.count())).data().count;
   }
