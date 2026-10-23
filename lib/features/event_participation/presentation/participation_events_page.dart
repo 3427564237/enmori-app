@@ -183,6 +183,7 @@ final class _ParticipationEventsPageState
                   ),
                 ),
               const ExpansionTile(
+                key: PageStorageKey('events-source-disclosure'),
                 title: Text('About these events'),
                 children: [
                   Padding(

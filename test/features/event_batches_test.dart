@@ -41,6 +41,46 @@ final class Repo implements PagedActivityRepository {
 }
 
 void main() {
+  testWidgets('scroll then expire keeps Event disclosure storage separate', (
+    tester,
+  ) async {
+    final repo = Repo()
+      ..result = Success(
+        ActivityBatch(
+          asOf: instant,
+          items: List.generate(12, (i) => item('Event $i')),
+        ),
+      );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          activityRepositoryProvider.overrideWithValue(repo),
+          authSessionProvider.overrideWithValue(
+            const AsyncData(AuthSessionAuthenticated(subject: 'a')),
+          ),
+        ],
+        child: MaterialApp(home: ParticipationEventsPage(onSelect: (_) {})),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ParticipationEventsPage)),
+    );
+    container.read(eventBatchesProvider.notifier).clear();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.ensureVisible(find.text('About these events'));
+    await tester.tap(find.text('About these events'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Ticketmaster supplies this available selection'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   test('refresh retains readable rows, blocks old taps and pagination, and rejects cleared replies', () async {
     final repo = Repo();
     final c = ProviderContainer(
