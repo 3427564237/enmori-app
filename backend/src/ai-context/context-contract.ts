@@ -85,7 +85,9 @@ export interface HistoryPairContextRecord extends OwnerRecord {
   readonly occurredAt: string;
   readonly userQuote: string;
   readonly assistantSuggestion: string;
-  /** All sources required by the historical assistant, supplied by its reader. */
+  /** Complete flattened source dependencies required by the historical
+   * assistant, including sources inherited through previous pairs. The trusted
+   * reader must prove this generation-time inventory; not just direct links. */
   readonly requiredSources: readonly SourceDependency[];
   /** Generation-time data-use categories, freshly authorized by the reader.
    * Missing/unknown legacy metadata must be "unknown", never inferred empty.

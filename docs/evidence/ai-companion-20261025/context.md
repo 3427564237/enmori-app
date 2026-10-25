@@ -77,7 +77,11 @@ message, selected relevant/attached records and per-request exclusions. The
 trusted read carries a fresh matching authority snapshot and permitted record
 projections. It is not accepted from a public request body. Source selections
 cannot mint grants, fetch arbitrary paths, or cross that scope. Exclusion wins
-over attachment; excluded content and dependencies are absent.
+over attachment and covers all projections of the underlying source. If a
+selected historical pair inherits that excluded source, preparation returns
+`invalid_selection` with no model payload; the owner must prepare a compatible
+selection. It never drops provenance while retaining the assistant's text.
+Exclusion is temporary and does not mutate or permanently delete a record.
 
 Check-ins retain five newest eligible projections in the inclusive preceding
 seven days; two settled history pairs remain bounded. The prototype's three
@@ -226,7 +230,7 @@ Exact test entry points:
 <pinned-node> --test backend/dist/test/ai-context/context.test.js
 ```
 
-Strict compilation passes; the latest candidate batch passes **42/42** Node
+Strict compilation passes; the latest candidate batch passes **44/44** Node
 tests/subtests, using only synthetic records. Raw commands/results:
 `/home/miku/.local/state/enmori-ai-companion-20261025/context-validation.txt`.
 The first strict build failed with TS2339 because exclusion of grouped
@@ -240,6 +244,17 @@ historical assistant text. The candidate now has paired positive/negative cases
 for these, explicit known-change version semantics, sequence/turn preservation,
 and mandatory historical category proof. This is a response to independent
 review, not a claim that final exact-SHA review has already passed.
+
+At exact first-package SHA `3a32f11c2a9f72bc70c44b4fe4e5b254a95d1f21`, QA
+independently reproduced CTX-15: an explicitly excluded Check-in could re-enter
+through a selected pair's assistant text/dependencies. A new targeted test first
+failed locally (expected `invalid_selection`, actual `prepared`), preserving
+that failure in the raw log. The correction maps record selectors to underlying
+source kinds, applies exclusions to inherited dependencies and returns no model
+payload on conflict. Regression covers Note, location, Event, repeated
+attachment/exclusion and a changed source version; removal remains temporary.
+Required source inventories are explicitly complete and flattened across
+inherited pairs; an unproved partial inventory is not a valid reader receipt.
 
 Other covered counterexamples include owner/session/topic/purpose/target swaps,
 unauthorized attachments, denied local-to-cloud reuse, source edit/delete/intent

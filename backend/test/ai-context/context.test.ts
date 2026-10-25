@@ -246,6 +246,32 @@ test("unknown historical data-use metadata is unavailable; a present source ID c
   }
 });
 
+test("an excluded source cannot re-enter through a selected historical assistant's dependencies", () => {
+  const cases = [
+    { excluded: { kind: "check_in", id: "excluded-note" } as const, source: { kind: "check_in", id: "excluded-note", version: "r1", observedAt: asOf } as const, category: "check_ins" as const },
+    { excluded: { kind: "location_snapshot", id: "excluded-note" } as const, source: { kind: "check_in", id: "excluded-note", version: "r1", observedAt: asOf } as const, category: "location" as const },
+    { excluded: { kind: "event_intent", id: "event-source" } as const, source: { kind: "event", id: "event-source", version: "e1", observedAt: asOf, validUntil: until } as const, category: "event_intents" as const },
+  ];
+  for (const { excluded, source, category } of cases) {
+    const pair = history({ requiredSources: [source], requiredCategories: [category], assistantSuggestion: "Synthetic excluded-source text" });
+    const result = projectContext(request([pair], { excluded: [excluded] }), read([pair]));
+    assert.deepEqual(result, { kind: "invalid_selection" });
+  }
+});
+
+test("exclusion remains temporary and wins over repeated attachment and inherited use at any source version", () => {
+  const row = checkIn("excluded-note"), pair = history({ requiredSources: [{ ...row.source, version: "r2", observedAt: asOf }], requiredCategories: ["check_ins"] });
+  const excluded = selector(row), both = [selector(row), selector(pair)];
+  assert.deepEqual(projectContext(request([row, pair], { attached: both, excluded: [excluded, excluded] }), read([row, pair])), { kind: "invalid_selection" });
+  // The projection never mutates the reader's records or permanently deletes
+  // anything. A new request can explicitly choose that same source again.
+  assert.equal(projectContext(request([row]), read([row])).kind, "prepared");
+  const locationExcluded = { kind: "location_snapshot", id: row.source.id } as const;
+  const result = projectContext(request([row], { excluded: [locationExcluded] }), read([row]));
+  assert.equal(result.kind, "prepared");
+  if (result.kind === "prepared") assert.deepEqual(result.value.dependencies, []);
+});
+
 test("projection is detached from later caller mutation; metadata/arbitrary extra fields are not forwarded", () => {
   const row = checkIn(), rows = [row], result = prepare(rows);
   Object.assign(row, { noteText: "mutated after projection", revision: "malicious", location: { latitude: 1, longitude: 2 } });

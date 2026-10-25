@@ -2,7 +2,7 @@ import { copyPersonaProjection } from "../ai-conversation/application/persona-ex
 import { validEventId } from "../event-participation/domain/participation-values.js";
 import type { ContextAuthority, ContextCategory, ContextModelProjection, ContextPreparation, ContextRead,
   ContextRecord, ContextRequest, ContextScope, PreparedContext, SourceDependency, SourceRef,
-  SourceNavigation, TrustedSourceCard } from "./context-contract.js";
+  SourceKind, SourceNavigation, TrustedSourceCard } from "./context-contract.js";
 
 const week = 7 * 86_400_000;
 /** Prototype resource bounds, not adopted product defaults. Check-in/history
@@ -59,6 +59,13 @@ export function projectContext(request: ContextRequest, read: ContextRead): Cont
   if (now === undefined || !text(request.currentMessage) || !currentContextAuthority(read.authority, request.scope, request.asOf))
     return { kind: "denied" };
   const excluded = new Set(request.excluded.map(key));
+  // Selection kinds are not source kinds. Excluding a record excludes every
+  // projection of its underlying source, including inherited assistant use.
+  const excludedSources = new Set(request.excluded.flatMap(selector => {
+    const kinds: readonly SourceKind[] = selector.kind === "event_intent" ? ["event", "participation"] :
+      selector.kind === "check_in" || selector.kind === "location_snapshot" ? ["check_in"] : [selector.kind];
+    return kinds.map(kind => key({ kind, id: selector.id }));
+  }));
   const attached = new Set(request.attached.map(key));
   const selected = new Map([...request.relevant, ...request.attached].map(s => [key(s), s]));
   const available = new Map<string, ContextRecord>();
@@ -72,6 +79,7 @@ export function projectContext(request: ContextRequest, read: ContextRead): Cont
     if (excluded.has(id)) { omitted.push({ selector: { ...selector }, reason: "excluded" }); continue; }
     const record = available.get(id);
     if (!record) return { kind: "unavailable" };
+    if (excludedSources.has(key(record.source))) { omitted.push({ selector: { ...selector }, reason: "excluded" }); continue; }
     if (record.ownerId !== request.scope.ownerId || !read.authority.allowedCategories.includes(category(record))) return { kind: "denied" };
     if (!validContextSourceRef(record.source) || record.observedAt !== request.asOf) return { kind: "unavailable" };
     const at = timeOf(record);
@@ -162,6 +170,9 @@ export function projectContext(request: ContextRequest, read: ContextRead): Cont
         usedCategories.add(required);
       }
       for (const ref of record.requiredSources) {
+        // Keep both text and provenance out together. An explicit conflict is
+        // visible to the owner; never strip only the dependency and send text.
+        if (excludedSources.has(key(ref))) return { kind: "invalid_selection" };
         const compatible: readonly ContextCategory[] = ref.kind === "check_in" ? ["check_ins", "location"] :
           ref.kind === "event" || ref.kind === "participation" ? ["event_intents"] : ref.kind === "persona" ? ["persona"] : ["conversation_history"];
         if (!compatible.some(c => record.requiredCategories.includes(c))) return { kind: "unavailable" };
