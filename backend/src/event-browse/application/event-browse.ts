@@ -16,8 +16,8 @@ export class EventBrowse {
       if(cursor!==undefined&&(id!==undefined||!decoded))return err(appFailure('REQUEST_INVALID'));
       const asOf=decoded?.asOf??now.toISOString();
       if(id!==undefined){const detail=await this.source.detail(id,asOf,signal);if(signal.aborted)return err(appFailure("SERVICE_UNAVAILABLE"));if(!detail)return err(appFailure("EVENT_UNAVAILABLE"));
-        const {browseId,title,startAt,externalSourceUrl,endAt,locationLabel,categoryLabel}=detail;
-        return ok({browseId,...(this.includeStableEventId?{eventId:sourceEventId(browseId)}:{}),title,startAt,externalSourceUrl,...(endAt===undefined?{}:{endAt}),...(locationLabel===undefined?{}:{locationLabel}),...(categoryLabel===undefined?{}:{categoryLabel})});}
+        const {browseId,title,startAt,externalSourceUrl,endAt,locationLabel,categoryLabel,shortDescription,coverImageUrl}=detail;
+        return ok({browseId,...(this.includeStableEventId?{eventId:sourceEventId(browseId)}:{}),title,startAt,externalSourceUrl,...(endAt===undefined?{}:{endAt}),...(locationLabel===undefined?{}:{locationLabel}),...(categoryLabel===undefined?{}:{categoryLabel}),...(shortDescription===undefined?{}:{shortDescription}),...(coverImageUrl===undefined?{}:{coverImageUrl})});}
       if(cursor!==undefined&&!this.source.batch)return err(appFailure('SERVICE_UNAVAILABLE'));
       const batch=this.position&&this.source.batch?await this.source.batch(asOf,decoded?.page??0,signal):{items:await this.source.firstBatch(asOf,signal)};
       if(signal.aborted)return err(appFailure("SERVICE_UNAVAILABLE"));

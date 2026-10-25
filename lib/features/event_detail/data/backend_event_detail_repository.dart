@@ -4,6 +4,7 @@ import '../../../core/network/backend_api_client.dart';
 import '../../../core/network/utc_timestamp_parser.dart';
 import '../../../core/result/result.dart';
 import '../domain/event_detail_repository.dart';
+import '../domain/event_cover.dart';
 
 final class BackendEventDetailRepository implements EventDetailRepository {
   BackendEventDetailRepository(this.client);
@@ -26,6 +27,7 @@ final class BackendEventDetailRepository implements EventDetailRepository {
       'locationLabel',
       'categoryLabel',
       'shortDescription',
+      'coverImageUrl',
     ];
     bool text(Object? v, int max) =>
         v is String &&
@@ -73,6 +75,9 @@ final class BackendEventDetailRepository implements EventDetailRepository {
         locationLabel: value['locationLabel'] as String?,
         categoryLabel: value['categoryLabel'] as String?,
         shortDescription: value['shortDescription'] as String?,
+        coverImageUrl: validEventCoverUrl(value['coverImageUrl'])
+            ? value['coverImageUrl'] as String
+            : null,
       ),
     );
   }
