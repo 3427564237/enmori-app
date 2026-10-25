@@ -86,3 +86,33 @@ exited 0. No author's wider test total is counted as independent QA execution.
 | `362d8cb/prepared-selection.log` (3) | `22278529f9f69a0dd004fb17caa8f8c33107a0b01c084a614235fcf2f80f183c` |
 | `26dd48c/selected-reply.log` (21) | `77265fd3b7f47f48eb729f44aee819af8e7cc16c3f5c29e978a5cdb1948336b8` |
 | `26dd48c/prepared-selection.log` (5) | `6b5c4534096777a13ac785b26a7fb4f7789bed692ba2db082b6702eceaa8eeb2` |
+
+## Later HTTP correction for retained late retries
+
+Integration `d1dece9c407923594ffb053884895032d05ec47a` corrects the prepared
+history DTO validation for an existing Store behavior. A failed U1 can remain
+retryable while U2/A3 completes; retrying U1 can then create A4. The canonical
+history window sorts its last two complete pairs by assistant sequence, yielding
+`[(U2,A3),(U1,A4)]`. Requiring each later user's sequence to exceed the earlier
+assistant's sequence incorrectly rejected that valid metadata with 503.
+
+QA inspected `readRetryUser`, `claimRetry`, assistant append and `historyWindow`
+and confirmed this is consistent with the retained Store behavior. The small
+HTTP change preserves each pair's positive integer `U < A`, unique history keys,
+unique message IDs, unique sequences across all messages and ascending assistant
+sequences. It removes only the invalid cross-pair user ordering assumption.
+Store history selection, saved messages and model projection are unchanged.
+
+QA froze this exact head, compiled privately and independently passed **4/4
+selected HTTP tests** with global fetch forbidden. The added test exercises
+the valid late-retry shape returning 201 and reused sequence returning 503;
+the other three are existing locator/allowlist/source-shape/transcript cases.
+The unchanged ID checks and assistant ordering were source-reviewed. No Emulator,
+model, Flutter or phone was run. Private evidence: `qa-review/root-d1dece9/` under
+the round state directory. `selected-http.log` SHA-256:
+`913c5cf73d21333dd0e8fa1fdab328175a6a1ace74ea81eeb8aa757ff303d926`.
+
+These four tests overlap the earlier three-test HTTP checkpoint and are not
+four additional distinct cases. The actual single F1 model attempt remains
+bound to `6bab960` and used a new topic with empty history; it is not relabeled
+as a run at this later source head.
