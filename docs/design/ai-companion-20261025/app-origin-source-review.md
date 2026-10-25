@@ -56,6 +56,51 @@ This is a source counterexample, not an independently executed widget result.
 The author's chat-only disappearance assertion does not exercise either search
 projection. Closure requires a fix checkpoint and focused review/validation.
 
+### Focused repair — bd10a8e
+
+Product independently inspected all five files in
+`bd10a8e1598e71f040e38fd3330f7e5baaf64859`, whose parent is the original
+`629a22d7b00580e2a39360efd1270a7bd7ac7e94` review checkpoint. **The reported source
+finding is addressed. QA subsequently closed its focused widget gate below.**
+The original P1 and its counterexample above remain part of the record.
+
+The shared `canDisplayAiMessage` predicate now gates the chat body, search
+matching and excerpts, selected content, neighbouring context and previous/next
+actions. Search watches current source state, so an already open selected/context
+view reacts to later denial or foreground invalidation. `_select` re-reads the
+current conversation/source state before using a captured message ID; a callback
+captured before denial cannot select the newly hidden body. Session/topic mismatch
+withholds source-bearing content. Unrelated available messages remain searchable.
+
+The patch does not rewrite canonical messages, add tombstones or initiate a model
+request. Existing exact-page recheck determines when temporary source hiding may
+end. Product read the three new cases: direct search after denial, denial arriving
+while an adjacent message is selected plus its captured Next callback, and a
+selected source remaining hidden across background/resume until fresh exact read.
+
+App reports 27/27 focused checks and clean analysis of four Dart files. Product
+verified the local author log's 27-pass line, analysis result and SHA-256
+`8995ed9031bc7c284895dd0702414a727a527ec062f6776b3b36cf2c8b6e1a11`
+(`app-search-display-gate.log`); Product did not execute Flutter. QA initially
+acknowledged the fix diff while awaiting its coordinated execution window.
+
+### Independent QA closure — exact bd10a8e
+
+QA reported independent source inspection and **3/3** new counterexamples at
+exact `bd10a8e1598e71f040e38fd3330f7e5baaf64859`: the hidden direct match is absent
+while an unrelated user message remains searchable; denial masks an already open
+neighbour context and the captured Next cannot restore it; the selected source
+stays hidden across background/resume until fresh exact read. QA's reported log
+SHA-256 is `254f52c289188ea1abd0bbe772c8990dd2985720f851c39d63de72471a1dfa88`.
+QA returned the Flutter window to Integration. Its separate evidence is
+`9c65bb6ffc1fbdae7cf3d29b5caa02bca902127c`,
+`docs/evidence/ai-companion-20261025/qa-app-source-search.md`; Product read that
+record. QA did not execute an old-head red run, and none is inferred here.
+
+**P1 closed within the independently reviewed source/widget scope.** The original
+629a22d failure remains above. QA's three cases are not added to App's 27 or 104,
+and this focused closure is not a full source UI, runtime, device or F1/D1 result.
+
 ## Other inspected boundaries
 
 | Boundary | Source observation | Evidence limit |
@@ -70,8 +115,9 @@ projection. Closure requires a fix checkpoint and focused review/validation.
 | Stacked AI pages | Current-route editor lease gates edits/Send. Returning pages copy the current controller TextEditingValue, including selection, and retire an obsolete initial locator. Source editor routes remain retained. | Author cases cover a retained Check-in editor and the original unknown operation; this is not a new router framework or device result. |
 | Default composition | Reference capability defaults off; optional `pushControls` is a host slot. | D1 implementation, SDK initialization and actual notification actions are outside this slice. |
 
-No other blocking source finding was identified in the reviewed scope at this
-checkpoint. That observation does not close P1 or establish complete F0/F1/D1.
+No other blocking source finding was identified in the reviewed scope at the
+original checkpoint. The focused repair above addresses the P1 source finding;
+the attributed QA closure covers its three counterexamples, not complete F0/F1/D1.
 
 ## Validation attribution
 
