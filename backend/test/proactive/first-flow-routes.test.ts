@@ -6,10 +6,10 @@ import { firstFlowIntentView, registerFirstFlowRoutes } from "../../src/proactiv
 import { fixture, ids } from "./first-flow-fakes.js";
 
 const headers = { authorization: "Bearer synthetic-caller" };
-async function server() {
+async function server(accepting: () => boolean = () => true, onVerify?: (count: number) => void) {
   const f = fixture(); let identityCalls = 0;
-  const identity: IdentityVerifier = { verifyIdToken: async () => { identityCalls++; return { kind: "verified", principal: { firebaseUid: "owner" } }; } };
-  const app = Fastify({ logger: false }); await registerFirstFlowRoutes(app, identity, f.app); await app.ready();
+  const identity: IdentityVerifier = { verifyIdToken: async () => { identityCalls++; onVerify?.(identityCalls); return { kind: "verified", principal: { firebaseUid: "owner" } }; } };
+  const app = Fastify({ logger: false }); await registerFirstFlowRoutes(app, identity, f.app, accepting); await app.ready();
   return { ...f, http: app, identityCalls: () => identityCalls };
 }
 const settings = (f: ReturnType<typeof fixture>) => ({ expectedRevision: f.store.settingsValue.revision, ...f.settings });
@@ -199,5 +199,39 @@ test("an actor invalidated at the final emit boundary closes the sink instead of
       return { kind: "ok", value };
     };
     await assert.rejects(f.http.inject({ method: "GET", url: "/v1/me/proactive-settings", headers }), /destroy|closed|reset/i);
+  } finally { await f.http.close(); }
+});
+
+test("shutdown admission stops reads and writes before authentication or Store access", async () => {
+  for (const gate of [() => false, () => { throw Error("private shutdown failure"); }]) {
+    const f = await server(gate);
+    try {
+      for (const method of ["GET", "PUT"] as const) {
+        const result = await f.http.inject({ method, url: "/v1/me/proactive-settings", headers,
+          ...(method === "PUT" ? { payload: settings(f) } : {}) });
+        assert.equal(result.statusCode, 503); assert.equal(result.json().error.code, "AI_UNAVAILABLE");
+        assert(!result.body.includes("private"));
+      }
+      assert.equal(f.identityCalls(), 0); assert.equal(f.store.settingsValue.revision, 0);
+    } finally { await f.http.close(); }
+  }
+});
+
+test("shutdown while initial authentication is awaiting refuses admission before creating an actor", async () => {
+  let accepting = true;
+  const f = await server(() => accepting, () => { accepting = false; });
+  try {
+    const response = await f.http.inject({ method: "PUT", url: "/v1/me/proactive-settings", headers, payload: settings(f) });
+    assert.equal(response.statusCode, 503); assert.equal(f.store.settingsValue.revision, 0);
+    assert.equal(f.identityCalls(), 1);
+  } finally { await f.http.close(); }
+});
+
+test("shutdown after actor creation invalidates its fresh-auth barrier and prevents the pending mutation", async () => {
+  let accepting = true;
+  const f = await server(() => accepting, count => { if (count === 2) accepting = false; });
+  try {
+    await assert.rejects(f.http.inject({ method: "PUT", url: "/v1/me/proactive-settings", headers, payload: settings(f) }), /destroy|closed|reset/i);
+    assert.equal(f.store.settingsValue.revision, 0); assert.equal(f.identityCalls(), 2);
   } finally { await f.http.close(); }
 });

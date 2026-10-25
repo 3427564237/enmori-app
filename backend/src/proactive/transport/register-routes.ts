@@ -96,23 +96,27 @@ function rawHeaderCount(request: FastifyRequest, name: string): number {
   return count;
 }
 
-export async function registerFirstFlowRoutes(app: FastifyInstance, identity: IdentityVerifier, service: FirstFlowApplication): Promise<void> {
+export async function registerFirstFlowRoutes(app: FastifyInstance, identity: IdentityVerifier,
+  service: FirstFlowApplication, accepting: () => boolean = () => true): Promise<void> {
+  const admitted = (): boolean => { try { return accepting() === true; } catch { return false; } };
   await app.register(async scope => {
     const actors = new WeakMap<FastifyRequest, ProactiveActor>();
     scope.addHook("onRequest", async (request, reply) => {
       reply.header("Cache-Control", "no-store");
+      if (!admitted()) return failure(request, reply, "unavailable");
       const match = /^Bearer ([^\s,]+)$/.exec(request.headers.authorization ?? "");
       if (!match?.[1]) return reply.code(401).send({ error: { code: "AUTH_REQUIRED", message: "Your session has expired. Sign in again." }, requestId: request.id });
       const token = match[1];
       let verified;
       try { verified = await identity.verifyIdToken(token); } catch { return failure(request, reply, "unavailable"); }
+      if (!admitted()) return failure(request, reply, "unavailable");
       if (verified.kind === "dependency_unavailable") return failure(request, reply, "unavailable");
       if (verified.kind !== "verified") return reply.code(verified.kind === "forbidden" ? 403 : 401)
         .send({ error: { code: verified.kind === "forbidden" ? "AUTH_FORBIDDEN" : "AUTH_REQUIRED", message: "This session cannot continue." }, requestId: request.id });
       let live = true;
       request.raw.once("aborted", () => { live = false; });
       reply.raw.once("close", () => { live = false; });
-      actors.set(request, { principal: verified.principal, current: () => live && !request.raw.aborted && !reply.raw.destroyed,
+      actors.set(request, { principal: verified.principal, current: () => admitted() && live && !request.raw.aborted && !reply.raw.destroyed,
         verifyCurrentAuth: () => identity.verifyIdToken(token) });
     });
     scope.setErrorHandler((error, request, reply) => {
