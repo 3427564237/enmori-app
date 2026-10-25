@@ -15,6 +15,11 @@ and [shared local lane / old serializer compatibility](qa-runtime-first-flow.md)
 These add browser and fake-transport evidence only; integrated F0/F1a, real
 Firestore, notification and device acceptance remain separate gates.
 
+The subsequent [Context F0 source/isolated Emulator review](qa-context-first-flow-emulator.md)
+adds 10 independent actual Admin/Auth Emulator groups and four separate timestamp
+fake tests. It does not establish production Firestore, complete worker/HTTP
+composition, notification delivery or device acceptance.
+
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with
 [proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is
