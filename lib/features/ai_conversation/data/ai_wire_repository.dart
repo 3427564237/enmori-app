@@ -5,6 +5,7 @@ import '../../../core/result/result.dart';
 import '../domain/ai_conversation.dart';
 import '../domain/ai_conversation_repository.dart';
 import '../domain/ai_owned_sources.dart';
+import '../domain/ai_selected_reply.dart';
 import 'ai_wire_transport.dart';
 
 final class AiWireRepository
@@ -12,7 +13,8 @@ final class AiWireRepository
         AiConversationRepository,
         AiConversationHistoryRepository,
         AiOwnedSourcesRepository,
-        AiCompanionReplyRepository {
+        AiCompanionReplyRepository,
+        AiSelectedReplyRepository {
   AiWireRepository(this._transport);
 
   final AiWireTransport _transport;
@@ -250,6 +252,118 @@ final class AiWireRepository
   }
 
   @override
+  Future<Result<AiSelectedReplyTicket>> prepareSelected({
+    required String token,
+    required AiAbortSignal abort,
+    String? conversationId,
+    String? userMessageId,
+    required List<String> sourceIds,
+  }) {
+    if ((conversationId != null && !_uuid(conversationId)) ||
+        (userMessageId != null &&
+            (conversationId == null || !_uuid(userMessageId))) ||
+        sourceIds.length > 5 ||
+        sourceIds.toSet().length != sourceIds.length ||
+        !sourceIds.every(_safeDocumentId)) {
+      return _invalid();
+    }
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'POST',
+      path: '/v1/me/ai/operations',
+      body: {
+        'kind': userMessageId == null ? 'send' : 'retry',
+        'purpose': 'checkin_conversation',
+        'conversationId': ?conversationId,
+        'userMessageId': ?userMessageId,
+        'contextSelection': {
+          'processing': 'local',
+          'sources': [
+            for (final id in sourceIds) {'kind': 'check_in', 'checkInId': id},
+          ],
+        },
+      },
+      status: 201,
+      parse: (value) {
+        final dto = _object(value, {
+          'operationId',
+          'operationKey',
+          'conversationId',
+          'preparationExpiresAt',
+          'contextSelection',
+        });
+        final operation = AiTicket(
+          operationId: _id(dto['operationId']),
+          operationKey: _key(dto['operationKey']),
+          conversationId: _id(dto['conversationId']),
+          preparationExpiresAt: _utc(dto['preparationExpiresAt']),
+        );
+        final selection = _preparedSelection(dto['contextSelection']);
+        _require(
+          (conversationId == null ||
+                  operation.conversationId == conversationId) &&
+              selection.expiresAt == operation.preparationExpiresAt &&
+              selection.sourceCards.length == sourceIds.length,
+        );
+        return AiSelectedReplyTicket(
+          operation: operation,
+          selection: selection,
+        );
+      },
+    );
+  }
+
+  @override
+  Future<Result<AiReply>> executeSelected({
+    required String token,
+    required AiAbortSignal abort,
+    required AiSelectedReplyTicket ticket,
+    required String text,
+    required List<String> includedKeys,
+    required List<String> excludedKeys,
+    required List<String> excludedHistoryKeys,
+    String? replyToMessageId,
+  }) {
+    final selection = ticket.selection;
+    final sources = selection.sourceCards.map((v) => v.selectionKey).toSet();
+    final history = selection.historyPairs.map((v) => v.historyKey).toSet();
+    bool validChoices(List<String> choices, Set<String> available) =>
+        choices.toSet().length == choices.length &&
+        choices.every(available.contains);
+    if (!_uuid(selection.selectionRevision) ||
+        !selection.expiresAt.isUtc ||
+        selection.expiresAt != ticket.operation.preparationExpiresAt ||
+        sources.length > 5 ||
+        history.length > 2 ||
+        sources.length != selection.sourceCards.length ||
+        history.length != selection.historyPairs.length ||
+        !{...sources, ...history}.every(_uuid) ||
+        sources.intersection(history).isNotEmpty ||
+        !validChoices(includedKeys, sources) ||
+        !validChoices(excludedKeys, sources) ||
+        !validChoices(excludedHistoryKeys, history) ||
+        !sources.every(
+          (v) => includedKeys.contains(v) || excludedKeys.contains(v),
+        )) {
+      return _invalid();
+    }
+    return _execute(
+      token: token,
+      abort: abort,
+      ticket: ticket.operation,
+      text: text,
+      replyToMessageId: replyToMessageId,
+      contextSelection: {
+        'selectionRevision': selection.selectionRevision,
+        'includedKeys': includedKeys,
+        'excludedKeys': excludedKeys,
+        'excludedHistoryKeys': excludedHistoryKeys,
+      },
+    );
+  }
+
+  @override
   Future<Result<AiReply>> execute({
     required String token,
     required AiAbortSignal abort,
@@ -278,6 +392,7 @@ final class AiWireRepository
     required AiTicket ticket,
     required String text,
     String? replyToMessageId,
+    Map<String, Object>? contextSelection,
   }) {
     if (!_ticket(ticket) ||
         (replyToMessageId != null && !_uuid(replyToMessageId))) {
@@ -289,6 +404,7 @@ final class AiWireRepository
     final body = <String, Object>{
       'text': text,
       'replyToMessageId': ?replyToMessageId,
+      'contextSelection': ?contextSelection,
     };
     if (utf8.encode(jsonEncode(body)).length > 16 * 1024) {
       return Future.value(const Failure(_tooLarge));
@@ -776,6 +892,86 @@ AiSourceCard _sourceCard(Object? raw) {
     version: d['version'] as String,
     sourceOccurredAt: _sourceInstant(d['sourceOccurredAt']),
     observedAt: _sourceInstant(d['observedAt']),
+  );
+}
+
+AiPreparedReplySelection _preparedSelection(Object? raw) {
+  final d = _object(raw, {
+    'selectionRevision',
+    'expiresAt',
+    'sourceCards',
+    'historyPairs',
+  });
+  final sourceRows = d['sourceCards'];
+  final historyRows = d['historyPairs'];
+  _require(sourceRows is List && sourceRows.length <= 5);
+  _require(historyRows is List && historyRows.length <= 2);
+  final cards = <AiSelectedSourceCard>[];
+  final keys = <String>{};
+  final cardRefs = <String>{};
+  for (final row in sourceRows as List) {
+    final item = _object(row, {
+      'selectionKey',
+      'cardRef',
+      'kind',
+      'version',
+      'sourceOccurredAt',
+      'observedAt',
+      'state',
+      'canNavigate',
+    });
+    final key = _id(item['selectionKey']);
+    final card = _sourceCard({...item}..remove('selectionKey'));
+    _require(
+      card.kind == AiSourceKind.checkIn &&
+          keys.add(key) &&
+          cardRefs.add(card.cardRef),
+    );
+    cards.add(AiSelectedSourceCard(selectionKey: key, card: card));
+  }
+  final history = <AiPreparedHistoryPair>[];
+  final messageIds = <String>{};
+  final sequences = <int>{};
+  for (final row in historyRows as List) {
+    final item = _object(row, {
+      'historyKey',
+      'userMessageId',
+      'assistantMessageId',
+      'userSequence',
+      'assistantSequence',
+    });
+    final key = _id(item['historyKey']);
+    final userId = _id(item['userMessageId']);
+    final assistantId = _id(item['assistantMessageId']);
+    final user = item['userSequence'];
+    final assistant = item['assistantSequence'];
+    _require(
+      _nonnegative(user) &&
+          (user as int) > 0 &&
+          _nonnegative(assistant) &&
+          (assistant as int) > user &&
+          keys.add(key) &&
+          messageIds.add(userId) &&
+          messageIds.add(assistantId) &&
+          sequences.add(user) &&
+          sequences.add(assistant) &&
+          (history.isEmpty || history.last.assistantSequence < assistant),
+    );
+    history.add(
+      AiPreparedHistoryPair(
+        historyKey: key,
+        userMessageId: userId,
+        assistantMessageId: assistantId,
+        userSequence: user as int,
+        assistantSequence: assistant as int,
+      ),
+    );
+  }
+  return AiPreparedReplySelection(
+    selectionRevision: _id(d['selectionRevision']),
+    expiresAt: _utc(d['expiresAt']),
+    sourceCards: cards,
+    historyPairs: history,
   );
 }
 
