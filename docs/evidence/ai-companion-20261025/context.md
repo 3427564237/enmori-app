@@ -809,3 +809,69 @@ the adapter fixture simulates transforms and does NOT prove actual Firestore
 commit metadata. Emulator proof, real services/accounts, model calls, device
 registration, provider sends, deployment and device acceptance are not supplied
 by this slice. F1a selection/executor wiring follows separately.
+
+## Approved F1a selection / reply slice — 25 October implementation
+
+Adds the explicit typed request contracts in `e3e0080` and their implementation
+through `ApplicationConversationOperations`, `SelectedReplyReader`,
+`FirestoreSelectedReplyReader`, the actual asynchronous executor and canonical
+conversation store. This branch does not enable the old immutable-Note reader.
+Preparation reads exactly the requested own Check-in IDs, at most five within
+the inclusive seven-day window, ordered by original occurrence descending and
+ID ascending. A mutable source's create/update metadata and actual business
+revision identify the prepared content state. No fake legacy revision or hash.
+The model receives only the dated Note quotation and normalized Mood/Activity;
+location, Weather, source IDs/versions, selection keys and account IDs are absent.
+
+`selectionRevision`, selection keys and prepared card refs are canonical UUID-v4
+values. The operation's existing token/key scope and 15-second prepared lifetime
+own them. Execute must cover all prepared keys through the included/excluded
+union; each array is unique, unknown/cross-operation keys conflict, and exclusion
+wins over overlap. A missing selection on a selected prepare fails visibly
+without consuming the ticket. A source attachment cannot be inserted into an
+old unselected prepare. Terminal/expiry clears all transient selection holders.
+
+A separate current mutable-source read runs at runtime acceptance and at every
+checkpoint. It uses the actual per-source observation time and a five-second
+complete-read bound; it does not label a latest transaction as historical
+`readTime=asOf`. The executor registers the exact accepted read context before
+its first fresh verification. The original current-read guard is checked around
+each await. Persona edits/active switches keep the started projection; permanent
+deletion or a purpose revoke/regrant terminates it.
+
+The same effect transaction independently verifies selected content versions,
+exact selected/excluded IDs, source ownership/current age, source completeness,
+used Persona and original request authority before any operation/content write.
+The saved assistant uses `source_use_v2` with the complete flattened source set
+and actual categories, without source contents or Persona identity. History
+cannot import Check-in B when this request selected A, or import any Check-in
+without a new current selection. Exclusion checks the inherited receipt before
+forwarding the assistant text. Legacy nonempty receipts cannot be backfilled
+with a current mutable content version to invent earlier proof. Source-free
+history and Persona behavior remain available.
+
+A real Send to an existing topic may explicitly associate with a genuine
+same-topic proactive assistant. It is a labelled, dated AI-suggestion quotation,
+not a user fact or a complete fabricated pair. The canonical user stores only
+the association; the resulting assistant flattens the current real-user source
+refs into its v2 receipt. Retry preserves the authoritative original association.
+The normal real user/reply still advances retention; P does not.
+
+Changed source resolution returns the inner `conflict` for the approved
+`AI_AUTHORITY_CHANGED` 409; confirmed missing/denied sources return unavailable
+404; unknown proof remains 503. Original card refs are never silently refreshed.
+Accepted response cards and the user association survive the executor's explicit
+minimal projection; private receipts/selection grants never do.
+
+Validation: pinned Node 24.19.0 / TypeScript 7.0.2 strict build and **481/481**
+`ai-conversation` plus F0 store Node tests. New actual-executor/real-store fake
+verticals cover successful canonical v2 publication, no old Note reader call,
+model-in-flight edits refusing save/delivery while preserving U, history B/A
+conflicts before model/user writes, resolver changed/missing/unknown distinction,
+proactive reply association, Persona edit/switch versus deletion, purpose epoch,
+prepared-key/omission rejection without consumption and excluded-source closure.
+These are local fake-gateway/model tests. The separately reported QA real F0
+Emulator cases apply to `14f7390`, not automatically to this F1a slice. HTTP /
+Bootstrap / local-model adapter composition is Integration/Delivery work and
+requires its own exact-head verification; no real user account, model, provider,
+registration, device or deployment evidence is claimed here.

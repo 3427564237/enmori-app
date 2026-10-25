@@ -10,6 +10,7 @@ import type { ConversationGates } from "../ports/conversation-lifecycle.js";
 import type { StoredConversationMessage } from "../ports/real-conversation-store.js";
 import type { AcceptedContextRead, ContextReadResult, RealContextReadPort } from "../ports/real-context-reader.js";
 import { AsyncConversationApplication } from "./async-conversation-application.js";
+import type { SelectedReplyGrant, SelectedReplyFailure } from "../ports/selected-reply.js";
 
 type AcknowledgedConversationPair = Extract<Awaited<ReturnType<AsyncAcknowledgedConversationPair["read"]>>, { kind: "success" }>["value"];
 export interface AsyncConversationExecutionPorts {
@@ -32,6 +33,8 @@ export interface AsyncConversationExecutionProviders {
 type ExecuteInput = Parameters<ConversationOperationExecutor["create"]>[0];
 type Command = ReturnType<AsyncConversationApplication["create"]>;
 interface PrivateState {
+  selectedReply:SelectedReplyGrant|undefined;
+  replyToMessageId:string|undefined;
   text: ExecuteInput["text"] | undefined;
   verify: ExecuteInput["verifyCurrentAuth"] | undefined;
   current: ConversationExecutionDelivery["current"] | undefined;
@@ -50,9 +53,13 @@ function copyMessage(value: StoredConversationMessage, role: StoredConversationM
   if (!value || !uuid(value.messageId) || !Number.isSafeInteger(value.sequence) || value.sequence < 1 ||
       value.role !== role || !instant(value.persistedAt) || value.availability !== "available" ||
       typeof value.text !== "string" || !value.text.isWellFormed() || !/\S/u.test(value.text) || [...value.text].length > 2400) return undefined;
+  if(value.replyToMessageId!==undefined&&!uuid(value.replyToMessageId))return undefined;
+  const sources=value.sources?.map(s=>Object.freeze({cardRef:s.cardRef,kind:s.kind,version:s.version,sourceOccurredAt:s.sourceOccurredAt,observedAt:s.observedAt,state:s.state,canNavigate:s.canNavigate}));
+  if(sources&&(sources.length>15||sources.some(s=>typeof s.cardRef!=="string"||!s.cardRef||!s.version||s.state!=="available"||s.canNavigate!==true||
+    !["conversation_message","check_in"].includes(s.kind)||!Number.isFinite(Date.parse(s.sourceOccurredAt))||!Number.isFinite(Date.parse(s.observedAt)))))return undefined;
   return Object.freeze({ messageId: value.messageId, sequence: value.sequence, role,
     persistedAt: Object.freeze({ seconds: value.persistedAt.seconds, nanoseconds: value.persistedAt.nanoseconds }),
-    availability: "available", text: value.text });
+    availability: "available", text: value.text,...(sources?{sources:Object.freeze(sources)}:{}),...(value.replyToMessageId?{replyToMessageId:value.replyToMessageId}:{}) });
 }
 function failure(value: RuntimeFailure | "overload" | "invalid_input"): ConversationFailureCode {
   switch (value) {
@@ -73,6 +80,7 @@ export class AsyncConversationOperationExecutor implements ConversationOperation
   }
 }
 class Execution implements ConversationExecution {
+  private selectedCode:ConversationFailureCode|undefined;
   private readonly identity: AsyncConversationIdentity;
   private readonly operation: AsyncOperation;
   private readonly retry: AsyncSavedUser | undefined;
@@ -91,6 +99,7 @@ class Execution implements ConversationExecution {
     this.operation = Object.freeze({ ...input.operation });
     this.retry = input.retryUser && Object.freeze({ ...input.retryUser, persistedAt: Object.freeze({ ...input.retryUser.persistedAt }) });
     this.private = { text: input.text, verify: input.verifyCurrentAuth, current: delivery.current,
+      selectedReply:input.selectedReply,replyToMessageId:input.replyToMessageId,
       accept: delivery.acceptCompleteBody, signal: delivery.signal, pair: undefined, response: undefined, terminal: delivery.onTerminal,
       read: undefined };
     delivery.signal.addEventListener("abort", this.aborted, { once: true });
@@ -111,6 +120,7 @@ class Execution implements ConversationExecution {
     this.private.signal?.removeEventListener("abort", this.aborted);
     this.budgetSignal?.removeEventListener("abort", this.runtimeTerminal); this.budgetSignal = undefined;
     this.private.text = undefined; this.private.verify = undefined; this.private.current = undefined;
+    this.private.selectedReply=undefined;this.private.replyToMessageId=undefined;
     this.private.accept = undefined; this.private.signal = undefined; this.private.pair = undefined; this.private.response = undefined;
     this.private.read = undefined;
     this.ports = undefined;
@@ -140,6 +150,7 @@ class Execution implements ConversationExecution {
       const admission = await this.app!.dispatch(this.command!);
       if (!admission.accepted) return this.current() ? { kind: "failure", code: failure(admission.failure) } : { kind: "terminated" };
       const outcome = await admission.request.outcome;
+      if(!outcome.ok&&this.selectedCode)return {kind:"failure",code:this.selectedCode};
       if (!outcome.ok) return outcome.failure === "cancelled" || outcome.failure === "abandoned" ||
         outcome.failure === "timed_out" || outcome.failure === "stale_authority"
         ? { kind: "terminated" } : { kind: "failure", code: failure(outcome.failure) };
@@ -154,6 +165,7 @@ class Execution implements ConversationExecution {
       current: identity => this.sameOriginal(identity) && this.current(),
       verify: identity => this.verify(identity),
       verifyRead: context => this.verifyRead(context),
+      currentRead:context=>this.readCurrent(context),
     };
     const ports = this.providers.ports(original);
     if (!ports.acknowledgedPair) return "unavailable";
@@ -161,6 +173,11 @@ class Execution implements ConversationExecution {
     const text = this.private.text?.();
     if (text === undefined) return "terminated";
     const readPort = ports.reads;
+    const registerRead=(context:AcceptedContextRead):boolean=>{
+      if(!this.current()||!this.readIdentity(context))return false;
+      if(this.private.read!==undefined)return this.private.read===context&&this.readCurrent(context);
+      this.private.read=context;this.budgetSignal=context.signal;context.signal.addEventListener("abort",this.runtimeTerminal,{once:true});return this.readCurrent(context);
+    };
     const reads: RealContextReadPort = {
       openStart: context => {
         if (!this.current()) return Promise.resolve({ kind: "terminated" });
@@ -186,11 +203,20 @@ class Execution implements ConversationExecution {
             return value;
           } catch { this.revoke(); throw new Error("unavailable"); }
         },
-      }, this.providers.strategy);
+      }, this.providers.strategy,ports.selectedReads?{
+        prepare:(context,selection)=>ports.selectedReads!.prepare(context,selection),
+        read:(context,grant)=>registerRead(context)?ports.selectedReads!.read(context,grant):Promise.resolve({kind:"terminated"}),
+      }:undefined,kind=>this.selectionFailure(kind));
     this.command = this.app.create({ identity: this.identity, operation: this.operation, text,
+      ...(this.private.selectedReply?{selectedReply:this.private.selectedReply}:{}),...(this.private.replyToMessageId?{replyToMessageId:this.private.replyToMessageId}:{}),
       ...(this.retry ? { retryUser: this.retry } : {}) });
     this.private.text = undefined;
     return "ready";
+  }
+  private selectionFailure(kind:SelectedReplyFailure):void{
+    if(kind==="terminated")return;
+    this.selectedCode=kind==="changed"||kind==="denied"?"AI_AUTHORITY_CHANGED":kind==="source_unavailable"?"AI_SOURCE_UNAVAILABLE":
+      kind==="selection_conflict"?"AI_CONTEXT_SELECTION_CONFLICT":"AI_UNAVAILABLE";
   }
   private async verify(identity: AsyncConversationIdentity): Promise<IdentityVerificationResult> {
     if (!this.sameOriginal(identity) || !this.current()) return { kind: "invalid" };

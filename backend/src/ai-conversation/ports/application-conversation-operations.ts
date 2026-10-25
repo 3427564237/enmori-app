@@ -12,6 +12,7 @@ export interface RequestOriginalConversationIdentity {
   /** Only the exact approved Application start context, under its original
    * token instance and runtime budget. No reusable identity or write permit. */
   verifyRead(context: AcceptedContextRead): Promise<ContextReadResult<AuthPrincipal>>;
+  currentRead?(context:AcceptedContextRead):boolean;
 }
 /** JIN's guarded projection of the actual settled canonical pair, including its
  * selected presentation. Fresh owner/source/full-precision expiry/all-pending

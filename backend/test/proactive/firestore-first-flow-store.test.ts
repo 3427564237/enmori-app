@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { MetadataFirestoreGateway } from "../support/metadata-firestore-gateway.js";
 import test from "node:test";
 import { FirestoreFirstFlowStore } from "../../src/proactive/infrastructure/firestore-first-flow-store.js";
 import { FirestoreConversationStore } from "../../src/ai-conversation/infrastructure/firestore-conversation-store.js";
@@ -13,22 +14,9 @@ const environment={ENMORI_ENVIRONMENT:"test",ENMORI_CONTROLLED_PROFILE_DIRECTORY
   GCLOUD_PROJECT:"demo-enmori-rmvp01a-r10",FIRESTORE_EMULATOR_HOST:"127.0.0.1:8080",FIREBASE_AUTH_EMULATOR_HOST:"127.0.0.1:9099"};
 const settings:FirstFlowSettingsInput={mode:"on",categories:["explicit_follow_up"],timeZone:"UTC",quiet:{kind:"window",startMinute:1320,endMinute:480},maximumInRolling24h:1,cooldownMinutes:480,pushEnabled:true,preview:"generic"};
 function value<T>(r:FirstFlowResult<T>):T{assert.equal(r.kind,"ok");if(r.kind!=="ok")throw Error("Expected ok");return r.value;}
-class Gateway implements FirestoreGateway {
-  rows=new Map<string,Snapshot>();now=start;calls=0;writes=0;loseAck=false;failAtWrite:number|undefined;beforeCommit:(()=>void)|undefined;onRead:((path:string)=>void)|undefined;
-  put(path:string,data:Row,created=this.now){const previous=this.rows.get(path);this.rows.set(path,{id:path.split("/").at(-1)!,data:structuredClone(data),createTime:previous?.createTime??{seconds:Math.floor(created/1000),nanoseconds:created%1000*1e6},updateTime:{seconds:Math.floor(this.now/1000),nanoseconds:this.now%1000*1e6}});}
-  async runTransaction<T>(work:(tx:Tx)=>Promise<T>,options?:{readonly maxAttempts:1}):Promise<T>{
-    assert.deepEqual(options,{maxAttempts:1});this.calls++;const rows=new Map([...this.rows].map(([k,v])=>[k,structuredClone(v)]));let wrote=false,count=0;
-    const read=async<T>(path:string,v:T)=>{assert.equal(wrote,false,"no read after staged write");this.onRead?.(path);await Promise.resolve();return structuredClone(v);};
-    const entries=(path:string)=>[...rows.entries()].filter(([k])=>k.startsWith(`${path}/`)&&!k.slice(path.length+1).includes("/")).map(([,v])=>v);
-    const stage=(path:string,data:Row)=>{wrote=true;count++;if(this.failAtWrite===count)throw Error("private staged write failure");const prev=rows.get(path);rows.set(path,{id:path.split("/").at(-1)!,data:structuredClone(data),createTime:prev?.createTime??{seconds:Math.floor(this.now/1000),nanoseconds:this.now%1000*1e6},updateTime:{seconds:Math.floor(this.now/1000),nanoseconds:this.now%1000*1e6}});};
-    const tx:Tx={get:p=>read(p,rows.get(p)?.data),getSnapshot:p=>read(p,rows.get(p)),list:p=>read(p,entries(p).map(v=>({id:v.id,data:v.data}))),listSnapshots:p=>read(p,entries(p)),
-      listMessagePage:(p,before)=>read(p,entries(p).filter(r=>before===undefined||(r.data.sequence as number)<before).sort((a,b)=>(b.data.sequence as number)-(a.data.sequence as number)).slice(0,20)),
-      create:(p,d)=>{assert.equal(rows.has(p),false);stage(p,d);},set:stage,delete:p=>{wrote=true;count++;rows.delete(p);}};
-    const result=await work(tx);this.beforeCommit?.();this.rows=rows;this.writes+=count;if(this.loseAck){this.loseAck=false;throw Error("private lost ACK");}return result;
-  }
-}
+
 function fixture(configured=true){
-  const g=new Gateway();let live=true,checks=0;
+  const g=new MetadataFirestoreGateway(start);let live=true,checks=0;
   g.put(`auth_bindings/${createAuthBindingDocumentId(principal.firebaseUid)!}`,{accountId:owner});
   g.put(base,{username:"first_flow_owner",optionalProcessingConsent:"accepted",checkInVisibility:"private",onboardingCompletedAt:new Date(start).toISOString(),purposeRevocationGeneration:0});
   g.put(`${base}/persona_state/current`,{stateRevision:0,livePersonaIds:[]});

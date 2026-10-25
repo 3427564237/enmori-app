@@ -60,7 +60,7 @@ export function checkInSourceVersion(row: StoredDocumentSnapshot): string | unde
 
 export async function inspectSourceUseV2(tx: Tx, ownerId: string, conversationId: string, receipt: SourceUseV2,
   utcMilliseconds: () => number, check: () => void): Promise<{ readonly kind: "valid"; readonly cards: readonly OwnedSourceCard[] }
-    | { readonly kind: "invalid" | "unavailable" }> {
+    | { readonly kind: "invalid";readonly reason:"changed"|"missing"|"denied" }|{readonly kind:"unavailable"}> {
   if (!tx.getSnapshot) return { kind: "unavailable" };
   const started=utcMilliseconds();let last=started;
   const fresh=()=>{const now=utcMilliseconds();if(!Number.isSafeInteger(now)||now<last||now-started>5000)return false;last=now;return true;};
@@ -71,7 +71,7 @@ export async function inspectSourceUseV2(tx: Tx, ownerId: string, conversationId
     check(); account = await tx.get(`accounts/${ownerId}`); check();if(!fresh())return {kind:"unavailable"};
     const authority=parseReadAuthority(account,ownerId);
     if (!authority) return { kind: "unavailable" };
-    if (authority.purposeRevocationGeneration > receipt.purposeRevocationGeneration) return { kind: "invalid" };
+    if (authority.purposeRevocationGeneration > receipt.purposeRevocationGeneration) return { kind: "invalid",reason:"denied" };
     if (authority.purposeRevocationGeneration < receipt.purposeRevocationGeneration || authority.consent !== "accepted") return { kind: "unavailable" };
   }
   for (const source of receipt.sources) {
@@ -79,19 +79,19 @@ export async function inspectSourceUseV2(tx: Tx, ownerId: string, conversationId
     const row = await tx.getSnapshot(source.kind === "check_in" ? `check_ins/${source.id}` :
       `accounts/${ownerId}/conversations/${conversationId}/messages/${source.id}`);
     check();if(!fresh())return {kind:"unavailable"};
-    if (!row) return { kind: "invalid" };
+    if (!row) return { kind: "invalid",reason:"missing" };
     let occurredAt: string;
     if (source.kind === "check_in") {
-      if (row.data.ownerAccountId !== ownerId) return { kind: "invalid" };
+      if (row.data.ownerAccountId !== ownerId) return { kind: "invalid",reason:"denied" };
       const projection = parseCheckInProjection(row.data, row.id), version = checkInSourceVersion(row);
       if (!projection || !version) return { kind: "unavailable" };
-      if (version !== source.version) return { kind: "invalid" };
+      if (version !== source.version) return { kind: "invalid",reason:"changed" };
       occurredAt = projection.createdAt;
     } else {
-      if (row.data.role !== "user") return { kind: "invalid" };
+      if (row.data.role !== "user") return { kind: "invalid",reason:"denied" };
       const version = messageSourceVersion(row), instant = parseReadInstant(row.createTime);
       if (!version || !instant) return { kind: "unavailable" };
-      if (version !== source.version) return { kind: "invalid" };
+      if (version !== source.version) return { kind: "invalid",reason:"changed" };
       occurredAt = new Date(instant.seconds * 1000 + Math.floor(instant.nanoseconds / 1e6)).toISOString();
     }
     cards.push({ cardRef: source.cardRef, kind: source.kind, version: source.version, sourceOccurredAt: occurredAt,
