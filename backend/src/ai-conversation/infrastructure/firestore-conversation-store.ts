@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx, StoredDocument as RecordData,
   StoredDocumentSnapshot as Snapshot } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId, parseAuthBinding, parseAccountProjection } from "../../shared/infrastructure/firebase/firestore-records.js";
@@ -11,7 +12,12 @@ import type { ConversationHistory, HistoryPairIdentity } from "../ports/real-con
 import { parseReadNote } from "./real-context-records.js";
 import type { PresentationMetadata } from "../ports/conversation-lifecycle.js";
 import { normalizePersonaInput } from "../../personas/domain/persona-values.js";
+import type { FirstFlowConversationTransaction } from "../../proactive/ports/conversation-transaction.js";
+import type { FirstFlowResult, FirstFlowSource, FirstFlowReservation } from "../../proactive/ports/first-flow.js";
+import { inspectSourceUseV2, messageSourceVersion, parseSourceUseV2 } from "./source-use-v2.js";
+import { parseReadAuthority, parseReadPersona, parseReadPersonaState } from "./real-context-records.js";
 import type { ConversationReadback, ConversationSummary, ConversationSummaryPage } from "../ports/conversation-operations.js";
+import type { OwnedMessageAnchor, OwnedSourceTarget } from "../ports/owned-sources.js";
 
 import { inspectNoteSources, inspectProvenance, parseProvenance, validDependencies, type TransactionalNotePrerequisites } from "./transactional-note-sources.js";
 
@@ -58,6 +64,117 @@ export class FirestoreConversationStore implements RealConversationStore {
     private readonly utcMilliseconds: () => number = Date.now,
     private readonly notePrerequisites?: TransactionalNotePrerequisites) {
     requireFeatureEnvironment(environment);
+  }
+
+  /** Infrastructure composition binds this to the proactive store's SAME Tx.
+   * No nested transaction or cached source authority is introduced. */
+  firstFlowTransaction(tx: Tx, principal: AuthPrincipal, owner: string, isCurrent: () => boolean): FirstFlowConversationTransaction {
+    const check = () => this.readCurrent(isCurrent);
+    const wrap = async <T>(work: () => Promise<T>): Promise<FirstFlowResult<T>> => {
+      try { check(); const value = await work(); check(); return {kind:"ok",value}; }
+      catch (e) {
+        if (!(e instanceof Refusal)) return {kind:"unavailable"};
+        return {kind:e.kind === "conversation_unavailable" ? "not_found" : e.kind};
+      }
+    };
+    const capture = async (conversationId: string, sourceMessageId: string, original?: FirstFlowSource) => {
+      check(); const started = this.utcMilliseconds(), location = this.location(owner,conversationId);
+      if (!UUID.test(sourceMessageId)) refuse("unavailable");
+      const account = parseReadAuthority(await this.owner(tx,principal,owner,check),owner);
+      if (!account) refuse("unavailable");
+      if (account.consent !== "accepted") refuse("denied");
+      const inv = await this.inventory(tx,location,false,check); if (!inv) refuse("conversation_unavailable");
+      const user = this.requireUser(inv,sourceMessageId), message = this.message(user), version = messageSourceVersion(user);
+      if (!version || user.data.pendingOperationId !== undefined || !message.text) refuse("unavailable");
+      const state = parseReadPersonaState(await readWhileCurrent(check,()=>tx.get(`accounts/${owner}/persona_state/current`)));
+      if (!state) refuse("unavailable");
+      const usedId = original?.usedPersonaId ?? (original ? undefined : state.activePersonaId);
+      let persona: FirstFlowSource["persona"];
+      if (usedId !== undefined) {
+        if (!state.livePersonaIds.includes(usedId)) refuse("denied");
+        const item = parseReadPersona(await readWhileCurrent(check,()=>tx.get(`accounts/${owner}/personas/${usedId}`)),usedId,true);
+        if (!item) refuse("denied");
+        persona = original?.persona ?? item.projection;
+      }
+      const ended = this.utcMilliseconds();
+      if (![started,ended].every(Number.isSafeInteger) || ended < started || ended-started > 5000) refuse("unavailable");
+      const source: FirstFlowSource = {conversationId,sourceMessageId,sourceSequence:message.sequence,sourceVersion:version,
+        sourcePersistedAt:user.createTime,topicLifecycleVersion:inv.parent.lifecycleVersion as number,topicCutoff:inv.cutoff,
+        occurredAt:new Date(user.createTime.seconds*1000+Math.floor(user.createTime.nanoseconds/1e6)).toISOString(),text:message.text,
+        purposeRevocationGeneration:account.purposeRevocationGeneration,...(persona ? {persona,usedPersonaId:usedId!} : {})};
+      if (original && (source.sourceVersion !== original.sourceVersion || source.topicLifecycleVersion !== original.topicLifecycleVersion ||
+          source.purposeRevocationGeneration !== original.purposeRevocationGeneration)) refuse("denied");
+      check(); return {source,inv,location};
+    };
+    const validate = async (reservation: FirstFlowReservation) => {
+      const {intent,source} = reservation;
+      if (intent.conversationId !== source.conversationId || intent.sourceMessageId !== source.sourceMessageId ||
+          intent.topicLifecycleVersion !== source.topicLifecycleVersion || intent.requiredSources.length !== 1 ||
+          intent.requiredSources[0]?.kind !== "conversation_message" || intent.requiredSources[0].id !== source.sourceMessageId ||
+          intent.requiredSources[0].version !== source.sourceVersion) refuse("denied");
+      return capture(source.conversationId,source.sourceMessageId,source);
+    };
+    return {
+      source:(id,messageId)=>wrap(async()=> (await capture(id,messageId)).source),
+      validate:reservation=>wrap(async()=>{await validate(reservation);}),
+      append:input=>wrap(async()=>{
+        const {inv,location} = await validate(input.reservation);
+        if (!UUID.test(input.messageId) || !validText(input.text) || !UUID.test(input.reservation.intent.intentId) ||
+            !((input.presentation.presentationMode === "default" && input.reservation.source.persona === undefined) ||
+              (input.presentation.presentationMode === "persona" && input.presentation.presentationProjectionVersion === "persona_presentation_v1" &&
+               input.reservation.source.persona !== undefined))) refuse("unavailable");
+        const path = `${parentPath(location)}/messages/${input.messageId}`;
+        if (await readWhileCurrent(check,()=>tx.get(path))) refuse("conflict");
+        const sequence = this.nextSequence(inv), source = input.reservation.source;
+        check();
+        tx.create(path,{role:"assistant",origin:"proactive",sequence,availability:"available",text:input.text,
+          occurrenceId:input.reservation.intent.intentId,category:"explicit_follow_up",presentationMode:input.presentation.presentationMode,
+          ...(input.presentation.presentationMode === "persona" ? {presentationProjectionVersion:input.presentation.presentationProjectionVersion} : {}),appendBefore:inv.cutoff});
+        tx.create(`${parentPath(location)}/message_sources/${input.messageId}`,{schemaVersion:"source_use_v2",purpose:"explicit_follow_up",
+          processing:"local",sources:[{kind:"conversation_message",id:source.sourceMessageId,version:source.sourceVersion,cardRef:randomUUID()}],
+          requiredCategories:["conversation_history"],purposeRevocationGeneration:source.purposeRevocationGeneration});
+        tx.set(parentPath(location),{...inv.parent,nextSequence:sequence+1,latestMessageId:input.messageId});
+        return {sequence};
+      }),
+      readableSequence:(id,sequence)=>wrap(async()=>{
+        const location=this.location(owner,id);await this.owner(tx,principal,owner,check);
+        const inv=await this.inventory(tx,location,false,check);if(!inv)refuse("conversation_unavailable");
+        if(sequence===0)return;
+        const row=inv.rows.find(r=>r.data.sequence===sequence);if(!row)refuse("conversation_unavailable");
+        if(row.data.role === "user")return;
+        const value=row.data.origin === "proactive"
+          ? await this.sourcedV2(tx,location,row,await readWhileCurrent(check,()=>tx.get(`${parentPath(location)}/message_sources/${row.id}`)),check)
+          : await this.pair(tx,location,inv,this.requireUser(inv,row.data.replyToUserMessageId as string),check);
+        if(!value || value.messageId!==row.id || value.availability!=="available")refuse("conversation_unavailable");
+      }),
+    };
+  }
+
+  async readOwnedMessageAnchor(principal:AuthPrincipal,owner:string,id:string,messageId:string,current:()=>boolean):Promise<StoreResult<OwnedMessageAnchor>> {
+    return this.run(async tx=>{
+      const check=()=>this.readCurrent(current),location=this.location(owner,id);check();await this.owner(tx,principal,owner,check);
+      const inv=await this.inventory(tx,location,false,check);if(!inv)refuse("conversation_unavailable");
+      const row=inv.rows.find(r=>r.id===messageId);if(!row)refuse("conversation_unavailable");
+      const readable=await this.firstFlowTransaction(tx,principal,owner,current).readableSequence(id,row.data.sequence as number);
+      if(readable.kind!=="ok")refuse(readable.kind === "terminated" ? "terminated" : "conversation_unavailable");
+      check();return {conversationId:id,messageId,sequence:row.data.sequence as number,pageBefore:(row.data.sequence as number)+1};
+    });
+  }
+
+  async resolveOwnedSource(principal:AuthPrincipal,owner:string,id:string,assistantMessageId:string,cardRef:string,current:()=>boolean):Promise<StoreResult<OwnedSourceTarget>> {
+    return this.run(async tx=>{
+      const check=()=>this.readCurrent(current),location=this.location(owner,id);check();await this.owner(tx,principal,owner,check);
+      const inv=await this.inventory(tx,location,false,check);if(!inv)refuse("conversation_unavailable");
+      const row=inv.rows.find(r=>r.id===assistantMessageId);if(!row||row.data.role!=="assistant"||row.data.availability!=="available")refuse("conversation_unavailable");
+      const receipt=parseSourceUseV2(await readWhileCurrent(check,()=>tx.get(`${parentPath(location)}/message_sources/${row.id}`)));
+      if(!receipt)refuse("conversation_unavailable");
+      const state=await inspectSourceUseV2(tx,owner,id,receipt,this.utcMilliseconds,check);
+      if(state.kind!=="valid")refuse(state.kind==="invalid"?"conversation_unavailable":"unavailable");
+      const source=receipt.sources.find(s=>s.cardRef===cardRef);if(!source)refuse("conversation_unavailable");
+      check();if(source.kind==="check_in")return {kind:"check_in",checkInId:source.id};
+      const user=this.requireUser(inv,source.id),sequence=user.data.sequence as number;
+      return {kind:"conversation_message",anchor:{conversationId:id,messageId:user.id,sequence,pageBefore:sequence+1}};
+    });
   }
 
   private async run<T>(work: (tx: Tx) => Promise<T>): Promise<StoreResult<T>> {
@@ -169,6 +286,7 @@ export class FirestoreConversationStore implements RealConversationStore {
       inventory: { parent: { ...parent, ownerAccountId: target.ownerAccountId, conversationId: target.conversationId },
         messages: rows.map(row => ({ ownerAccountId: target.ownerAccountId, conversationId: target.conversationId,
           messageId: row.id, role: row.data.role, sequence: row.data.sequence, createTime: row.createTime,
+          ...(row.data.origin === undefined ? {} : { origin: row.data.origin }),
           ...(row.data.appendBefore === undefined ? {} : { appendBefore: row.data.appendBefore }) })) },
       now: { precision: "millisecond", instant: this.now() } });
     if (resolution.state === "unavailable") refuse("unavailable");
@@ -183,6 +301,17 @@ export class FirestoreConversationStore implements RealConversationStore {
           typeof d.text !== "string" || !validText(d.text) ||
           [d.pendingOperationId, d.acceptedAssistantMessageId].some(v => v !== undefined && (typeof v !== "string" || !UUID.test(v)))) refuse("unavailable");
       return { messageId: row.id, sequence: d.sequence, role: "user", persistedAt: row.createTime, availability: "available", text: d.text };
+    }
+    if (d.origin === "proactive") {
+      if (d.role !== "assistant" || !exact(d,["role","origin","sequence","availability","occurrenceId","category","presentationMode","appendBefore"],
+        ["text","presentationProjectionVersion"]) || typeof d.occurrenceId !== "string" || !UUID.test(d.occurrenceId) ||
+        d.category !== "explicit_follow_up" || !((d.presentationMode === "default" && d.presentationProjectionVersion === undefined) ||
+        (d.presentationMode === "persona" && d.presentationProjectionVersion === "persona_presentation_v1")) ||
+        !((d.availability === "available" && typeof d.text === "string" && validText(d.text)) ||
+          (d.availability === "unavailable" && !Object.hasOwn(d,"text")))) refuse("unavailable");
+      return {messageId:row.id,sequence:d.sequence,role:"assistant",origin:"proactive",occurrenceId:d.occurrenceId,
+        category:"explicit_follow_up",persistedAt:row.createTime,availability:d.availability,
+        ...(typeof d.text === "string" ? {text:d.text} : {})};
     }
     if (d.role !== "assistant" || !exact(d, ["role", "sequence", "availability", "replyToUserMessageId", "presentationMode", "appendBefore"],
       ["text", "presentationProjectionVersion"]) || typeof d.replyToUserMessageId !== "string" || !UUID.test(d.replyToUserMessageId) ||
@@ -327,6 +456,7 @@ export class FirestoreConversationStore implements RealConversationStore {
       if (sources !== undefined) refuse("unavailable");
       return this.message(assistant);
     }
+    if (sources?.schemaVersion === "source_use_v2") return this.sourcedV2(tx,t,assistant,sources,check);
     const parsed = parseProvenance(sources); if (!parsed) refuse("unavailable");
     const state = await readWhileCurrent(check, () => inspectProvenance(tx, this.gateway, this.notePrerequisites, t.ownerAccountId, parsed, check));
     if (state === "unavailable") refuse("unavailable");
@@ -337,6 +467,23 @@ export class FirestoreConversationStore implements RealConversationStore {
       return this.message({ ...assistant, data: { ...metadata, availability: "unavailable" } });
     }
     return this.message(assistant);
+  }
+  private async sourcedV2(tx:Tx,t:Location,row:Snapshot,source:RecordData|undefined,check?:()=>void):Promise<StoredConversationMessage>{
+    if(row.data.availability === "unavailable") {
+      if(source !== undefined)refuse("unavailable");
+      return this.message(row);
+    }
+    const receipt = parseSourceUseV2(source); if(!receipt)refuse("unavailable");
+    this.now();
+    const result = await inspectSourceUseV2(tx,t.ownerAccountId,t.conversationId,receipt,this.utcMilliseconds,()=>check?.());
+    check?.();
+    if(result.kind === "unavailable")refuse("unavailable");
+    if(result.kind === "invalid") {
+      const {text:_text,...metadata}=row.data;
+      return this.message({...row,data:{...metadata,availability:"unavailable"}});
+    }
+    if(result.kind!=="valid")refuse("unavailable");
+    return {...this.message(row),sources:result.cards};
   }
   /** Select the latest TWO canonical complete pairs before exclusions. Never backfill.
    * An explicit expected set rechecks precisely the borrowed pairs at every effect. */
@@ -559,7 +706,10 @@ export class FirestoreConversationStore implements RealConversationStore {
       const page=await readWhileCurrent(check,()=>tx.listMessagePage!(`${parentPath(location)}/messages`,before)),messages:StoredConversationMessage[]=[];
       for(const row of [...page].reverse()){
         if(!inv.rows.some(m=>m.id===row.id&&m.data.sequence===row.data.sequence))refuse("unavailable");
-        if(row.data.role==="user")messages.push(this.message(row));else{
+        if(row.data.role==="user")messages.push(this.message(row));else if(row.data.origin === "proactive"){
+          const source = await readWhileCurrent(check,()=>tx.get(`${parentPath(location)}/message_sources/${row.id}`));
+          messages.push(await this.sourcedV2(tx,location,row,source,check));
+        }else{
           const user=this.requireUser(inv,row.data.replyToUserMessageId as string),a=await this.pair(tx,location,inv,user,check);
           if(!a||a.messageId!==row.id)refuse("unavailable");messages.push(a);
         }
