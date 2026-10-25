@@ -2,6 +2,7 @@ package com.enmori.app
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import java.net.URI
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -57,6 +58,23 @@ class MainActivity : FlutterActivity() {
                         result.error("ZONE_INVALID", "The captured device time zone is invalid.", null)
                     } else {
                         result.success(format("yyyy-MM-dd", zone, Date()))
+                    }
+                } else if (call.method == "resolveCivil") {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                        result.error("TIME_UNAVAILABLE", "Civil time resolution is unavailable.", null)
+                    } else {
+                        try {
+                            result.success(FollowUpCivilTimeResolver.resolve(
+                                requireNotNull(call.argument<String>("timeZone")),
+                                requireNotNull(call.argument<Int>("year")),
+                                requireNotNull(call.argument<Int>("month")),
+                                requireNotNull(call.argument<Int>("day")),
+                                requireNotNull(call.argument<Int>("hour")),
+                                requireNotNull(call.argument<Int>("minute")),
+                            ))
+                        } catch (_: Exception) {
+                            result.error("TIME_INVALID", "Civil time or IANA zone is invalid.", null)
+                        }
                     }
                 } else if (call.method == "formatInstants") {
                     val zone = call.argument<String>("timeZone")
