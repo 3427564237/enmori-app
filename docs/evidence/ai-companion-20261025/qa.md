@@ -79,6 +79,13 @@ draft-only confirmation, unresolved-dispatch, source-change and exact-session
 checks for the next frozen App head. The component's supplied booleans and
 callbacks do not themselves establish those controller/page behaviors.
 
+The subsequent [final F1 App/shared-entry review](qa-f1-app-integration.md) at
+`a20927c` independently passes 18 focused checks but reproduces one open
+P2: pending selected execution across content-access invalidation can leave
+fresh review blocked after authoritative no-effect. It retains the initial
+16-pass/3-fail batch and the two corrected QA fixture checks separately. The
+Flutter window is returned; final F1 closure awaits the bounded recovery repair.
+
 The [D1 source review](qa-d1-source-review.md) reports a new P2 at `cb8d982`:
 controller rebuild clears unknown registration/settings mutation guards, so a
 same-UID session replacement can let an unchanged GET reopen mutation controls.
