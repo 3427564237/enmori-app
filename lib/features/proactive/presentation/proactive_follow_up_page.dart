@@ -202,12 +202,8 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
     }
     final now = ref.read(proactiveNowProvider)();
     if (values.length > 2 ||
-        values.any(
-          (v) =>
-              v.timeZone != _zone.text ||
-              !v.dueAt.isUtc ||
-              !v.dueAt.isAfter(now),
-        )) {
+        values.any((v) => v.timeZone != _zone.text || !v.dueAt.isUtc) ||
+        values.every((v) => !v.dueAt.isAfter(now))) {
       setState(
         () => _timeError = context.tr(
           'Choose and verify a future time.',
@@ -261,6 +257,16 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
           !_owns ||
           !identical(selected, _chosen) ||
           !_confirmed) {
+        return;
+      }
+      if (!selected.dueAt.isAfter(ref.read(proactiveNowProvider)())) {
+        setState(() {
+          _confirmed = false;
+          _timeError = context.tr(
+            'Choose and verify a future time.',
+            '请选择并核对一个未来时间。',
+          );
+        });
         return;
       }
       final controller = ref.read(proactiveControllerProvider.notifier);
@@ -481,12 +487,16 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
                               'proactive-time-${candidate.dueAt.toIso8601String()}',
                             ),
                             value: candidate,
-                            enabled: !blocked,
+                            enabled:
+                                !blocked &&
+                                candidate.dueAt.isAfter(
+                                  ref.read(proactiveNowProvider)(),
+                                ),
                             title: Text(
                               '${candidate.displayTime} · ${candidate.timeZone}',
                             ),
                             subtitle: Text(
-                              '${candidate.offsetLabel}\n${candidate.dueAt.toIso8601String()}',
+                              '${candidate.offsetLabel}\n${candidate.dueAt.toIso8601String()}${candidate.dueAt.isAfter(ref.read(proactiveNowProvider)()) ? '' : context.tr('\nThis time has passed.', '\n这个时刻已过去。')}',
                             ),
                           ),
                       ],

@@ -375,3 +375,27 @@ with no issues and the complete proactive suite passed **51/51**. Raw output:
 No shared route, ordinary AI behavior, dependency, native or real-service
 operation changed. The existing 155-case record remains the checkpoint's
 record; it is not added to this rerun's count.
+
+### Independent Product finding — one future fold candidate
+
+Product's second frozen-source P2 identified an overly strict time check:
+with two valid native fold candidates, `any(past)` rejected both even when the
+later instant was still in the future. The trusted resolver deliberately
+returns all offsets, while the approved requirement concerns the selected
+future instant.
+
+The form now retains both fold rows and the ambiguity explanation, explicitly
+labels/disables each passed instant, and leaves the group unselected. The user
+must select the future row and confirm it. It does not filter the group into
+an automatically selected single choice. Both-past and single-past results
+remain rejected; submission also rechecks the selected instant after the
+device-zone await. Two widget counterexamples cover earlier-past/later-future
+and both-past, including the actual submitted later instant and zero implicit
+selection.
+
+The source/anchor WIP was again isolated before this correction. On the merged
+shared baseline `70ca23d0dda44dbe3fc2fa380ca06dcfb8b5f485` (retaining the first
+P2 correction), targeted analyzer passed without issues and the complete
+proactive suite passed **53/53**. Raw output:
+`/home/miku/.local/state/enmori-ai-companion-20261025/app-f0-fold-future.log`.
+This remains fake/widget time evidence, not Android time-channel/device proof.
