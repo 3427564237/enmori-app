@@ -87,6 +87,14 @@ ticker caused the settle timeout. With only that test boundary supplied, the
 original readiness/settle assertions pass **2/2**. The earlier failures and
 diagnostic attempts are retained; no production Settings change was needed.
 
+The [App search display repair](qa-app-source-search.md) preserves Product's
+source-only P1 at `629a22d`: search could redisplay a body hidden after source
+denial. Independent source review and **3/3** focused widget cases at `bd10a8e`
+close direct matches, open adjacent context/captured navigation and selected
+message background/resume paths. Temporary hiding remains recoverable through
+the appropriate transcript read; canonical content is not tombstoned. This is
+separate from the author's 27/104 batches and final F1/integrated/device gates.
+
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with
 [proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is
