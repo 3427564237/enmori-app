@@ -176,3 +176,35 @@ The actual picker/controller/page checkpoint, F1 end-to-end behavior, independen
 widget execution, real source/runtime and device evidence are not established by
 this component review. Product will inspect the composed frozen head separately;
 no F1-wide acceptance is recorded here.
+
+## Actual F1 picker/controller/page and shared detail entry — ee44827 / a20927c
+
+Product independently read App's nine-file
+`ee448278bce86766238f2b049b0822e21c5540ad` checkpoint and the four implementation
+files plus two route cases in Root's `a20927c063b9ef20e38fa8fdac7b252f54c60bda`.
+[The detailed F1 review](../../design/ai-companion-20261025/app-f1-source-review.md)
+records the exact scope, source anchors and remaining recovery defect.
+
+App's post-freeze self-review found a P2: a pending selected execute crossing a
+content-access epoch can retain `_sending`, so original GET no-effect or
+user-saved recovery still cannot open a fresh review. Product independently
+confirmed the source cause and sent the bounded recovery counterexample to
+Integration and QA. It remains Open on these heads pending App's separate fix;
+Product has not claimed an independently executed old-head failure.
+
+No additional blocking source finding was identified for zero defaults, at most
+five inclusive-seven-day choices, minimal record fields, before/after exact
+source reads, original token and 15-second/absolute expiry, fresh complete-pair
+exclusion keys with renewed confirmation, separate explicit Send, original GET
+and saved-U Retry, draft ownership, or exact-session Check-in detail attachment.
+Unknown operations retain their barrier; after safe readback the requested
+attachment still requires a new explicit tap. This conclusion is source scope
+only and does not close the known P2.
+
+Product verified App's log SHA-256
+`002babf00e62b0f9222f5b34fc67b1d21dda8e2c284ac32d9de5211a0648e816`, its 389-pass
+line and clean analysis result. These remain App's author checks, including 25
+F1 cases and the six earlier panel cases; they are not Product execution or the
+full integrated suite. Product ran no Flutter/model/service/device operation.
+Root's integrated validation and QA's independent frozen-head work remain
+separate, as do model semantics, D1, physical device and release acceptance.
