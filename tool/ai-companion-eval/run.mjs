@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { lstatSync, realpathSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve, relative } from 'node:path';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createPrivateOutput } from './private-output.mjs';
 import { loadCases, prepareCase, buildEvaluationRequest, observeSyntheticEvaluation, evaluationProfiles,
   protocolAssessment, costObservation, priceSnapshot, mockHttpFor, blankReview, sha256 } from './evaluation.mjs';
 
@@ -18,18 +19,13 @@ assert(['mock', 'local'].includes(mode), 'Cloud execution is not enabled. First 
 assert(options['--out'], 'Usage: node tool/ai-companion-eval/run.mjs --provider mock --out /private/parent/new-run');
 if (mode === 'local') assert(options['--authorization'], 'Integration must first assign a bounded local evaluation slot');
 const root = fileURLToPath(new URL('../../', import.meta.url)), out = resolve(options['--out']);
-assert(relative(root, out).startsWith('..'), 'Raw reports must be outside the repository');
-const parent = dirname(out), stat = lstatSync(parent);
-assert(stat.isDirectory() && !stat.isSymbolicLink() && stat.uid === process.getuid() &&
-  (stat.mode & 0o077) === 0 && realpathSync(parent) === parent, 'Use an owner-only real parent directory');
-mkdirSync(out, { mode: 0o700 }); // Exclusive; never resume/retry/overwrite an earlier run.
-const save = (name, value) => writeFileSync(resolve(out, name), JSON.stringify(value, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
+const { save } = createPrivateOutput(root, out); // Exclusive; never resume/overwrite an earlier run.
 const corpus = loadCases(), cases = mode === 'local' ? corpus.cases.filter(c => c.track === 'current-prompt') : corpus.cases;
 const provider = mode === 'local' ? 'ollama-baseline' : 'gemini-candidate';
 const sourceFiles = ['backend/src/ai-runtime/infrastructure/local-chat-transport.ts',
   'backend/src/ai-runtime/infrastructure/synthetic-evaluation-adapters.ts',
   'backend/src/ai-runtime/ports/synthetic-evaluation.ts', 'tool/ai-companion-eval/evaluation.mjs',
-  'tool/ai-companion-eval/run.mjs', 'tool/ai-companion-eval/fixtures/companion-cases.json',
+  'tool/ai-companion-eval/run.mjs', 'tool/ai-companion-eval/private-output.mjs', 'tool/ai-companion-eval/fixtures/companion-cases.json',
   'tool/ai-companion-eval/fixtures/preserved-small-plan-cases.json'];
 const compiledFiles = ['backend/dist/src/ai-runtime/infrastructure/local-chat-transport.js',
   'backend/dist/src/ai-runtime/infrastructure/synthetic-evaluation-adapters.js',
@@ -76,3 +72,5 @@ writeFileSync(resolve(out, 'report.json'), reportBytes, { flag: 'wx', mode: 0o60
 save('review-template.json', blankReview(sha256(reportBytes), rows));
 console.log(JSON.stringify({ output: out, casesRecorded: rows.length, realProviderCalls: report.realProviderCalls,
   semanticPasses: 0, review: 'required', stopReason: report.stopReason }));
+// Mock deliberately exercises failures; its exit only checks the harness.
+if (mode === 'local' && (rows.length !== cases.length || rows.some(r => !r.protocol.eligible))) process.exitCode = 2;

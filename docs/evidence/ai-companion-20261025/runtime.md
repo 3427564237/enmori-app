@@ -75,6 +75,7 @@ make it a reasonable candidate; ENMORI answer quality remains unmeasured.
 | [Standard pricing](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.8-flash) | Until 31 December 2026: USD $0.75 per million input tokens, $3.75 per million output including thinking. From 1 January 2027: $1.50/$7.50. Standard paid is the candidate; Contributor's data-sharing discount is excluded. |
 | [Thinking documentation](https://ai.google.dev/gemini-api/docs/generate-content/thinking) | Use `thinkingLevel:low`; output cap includes thinking and visible output. Truncation/empty final answer at `MAX_TOKENS` is a failure, not a retry trigger. Count `thoughtsTokenCount` separately and include it in cost. |
 | [REST structured output](https://ai.google.dev/gemini-api/docs/generate-content/structured-output) | `responseMimeType:application/json` and `responseJsonSchema` can express the existing two-field response. Schema validity alone cannot establish the requested semantics. Native `generateContent` avoids SDK continuation/retry behavior and new packages. |
+| [Count tokens](https://ai.google.dev/api/tokens) and [generation API](https://ai.google.dev/api/generate-content#ServiceTier) | Count the whole `generateContentRequest`; explicit `serviceTier:standard` fixes the request tier. `store:false` controls optional request logging, not the terms' safety/legal retention. |
 | [API key guidance](https://ai.google.dev/gemini-api/docs/api-key) | Production keys belong on the server, never in Flutter/Git. This delivery neither reads a key nor creates an account, billing setup or production client. |
 | [Available regions](https://ai.google.dev/gemini-api/docs/available-regions) | Singapore is listed. The actual operator and intended end-user regions must still be confirmed; a Singapore timezone does not prove eligible location. |
 
@@ -146,7 +147,7 @@ usable. No credential is sought from local files.
 - `tool/ai-companion-eval/` supplies the fixed 32-case corpus, exact current-prompt
   capture, offline mock runner, prepared local runner, raw artifact manifest,
   strict structural checks, usage cost calculation and independent review entry.
-  No cloud execution mode is enabled. The mock intentionally includes HTTP
+  The ordinary runner has no cloud execution mode. The mock intentionally includes HTTP
   rejection, provider block, token exhaustion, invalid JSON and lost connection.
 - `backend/test/ai-runtime/synthetic-evaluation.test.ts` and the tool tests
   verify these boundaries with fakes. Existing production files are unchanged.
@@ -193,3 +194,57 @@ review before scheduling the proposed local 24-case baseline; **no real model
 generation, shared-service restart, real cloud request, APK or phone work ran**.
 Old small-plan status remains **Fail/unresolved**, and all production/provider,
 data-use, audience and cost decisions above remain pending within their scope.
+
+## Follow-up: reviewed execution guards
+
+Integration explicitly requested the isolated cloud runner before presenting
+the specific spending decision. `cloud-run.mjs` now defaults to **dry**, with a
+zero-network mock route and an explicitly disabled-until-authorized cloud route.
+`cloud-budget.mjs` and `cloud-runner.mjs` enforce fixed service/model/corpus,
+same-day price confirmation, expiry, approved source bundle, at most two passes,
+64 native token counts/generations, 8192/2048 token limits and a USD $1 ceiling.
+The proposed authorization template has status `proposed`, unconfirmed project/
+eligibility and no expiry; it cannot enable a call. No real key was read.
+
+Reservations and request intent are fsynced before dispatch. Unknown outcomes
+never refund a reservation, retry, continue or switch provider. Each decision
+reference has a single-use host ledger to prevent a second run resetting its
+spend. Provider host and `serviceTier:standard` are fixed; redirects are errors,
+`store:false` is explicit, and keys stay in the server environment/header.
+Credential echoes are redacted before artifacts are saved. Paid status, eligible
+operator/region and key-to-project association still require actual operator
+evidence; the authorization record cannot prove them itself.
+
+QA found the initial outside-repository check accepted a child named `..raw`.
+It now tests path segments and canonical parents, with internal-prefix/root/
+descendant/sibling/ancestor-symlink and exclusive-file regressions. This was an
+isolated tooling defect; no private source data entered Git. Separately, author
+review reproduced a malformed HTTP-200 envelope releasing the evaluation loop;
+the preserved red log demonstrates that failure. Such envelopes and absent
+terminal markers now remain unconfirmed and stop the run. No production file
+changed for either fix.
+
+The follow-up build passed and the expanded focused set passed **31/31**:
+10 adapter, 4 evaluator, 2 path, 10 cloud guard and 5 existing simple-chat cases.
+This replaces the initial 18-case count, not an additional 31 product proofs.
+The cloud tests cover all 64 serial mock attempts, reservation-before-dispatch,
+lost responses, token/count/usage failures, cancellation, disk-write failure,
+one-use grants, wrong host, credential redaction and default/denied CLI modes.
+Logs: `build-cloud-candidate.log`, `tests-cloud-candidate.log` and the original
+`malformed-envelope-red.log` under the private runtime directory.
+After the final credential-file guard, the same 10 cloud and 2 path checks were
+rerun: **12/12**, recorded in `tests-cloud-final.log` (not 12 new scenarios).
+Final ordinary mock records 32 cases, report SHA-256
+`664a641f6754f49b62d02edb7d1cc599689c05b1632e5d7202b90c7f66627c40`;
+the two-pass cloud mock records 64 cases, 64 simulated count/generation pairs,
+$0.884736 simulated reservation and **0 actual cloud calls**, report SHA-256
+`168b786564967b1aeff9d3f4868600378325f0b6d6039daa70e9bd63f46ea3b2`.
+Their directories are `runtime/mock-final/` and `runtime/cloud-mock-final/`
+under the same owner-only state root. All semantic judgments remain unreviewed.
+The dry-run approved-source candidate bundle hash is
+`c2de685480c70eda878cc1247a0da88c81f86568d1d6e66009fd071e282e808f`;
+corpus hash is `1f216f2d8a4facafaac55eb9567c2136864999cc68c6759e831a81693ff0912a`.
+These runs record their pre-commit dirty state honestly and include exact
+source/compiled hashes; they are not presented as runs from a later commit.
+Real cloud/local generation remains **Not Run** pending QA and Integration's
+specific execution decision; source/mock success does not alter semantic status.

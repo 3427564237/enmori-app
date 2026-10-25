@@ -28,7 +28,7 @@ export function buildEvaluationRequest(provider: EvaluationProvider, input: Synt
   }
   if (provider !== 'gemini-candidate') throw Error('EVALUATION_PROVIDER_INVALID');
   return { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent',
-    body: JSON.stringify({ systemInstruction: { parts: [{ text: input.system }] },
+    body: JSON.stringify({ serviceTier: 'standard', store: false, systemInstruction: { parts: [{ text: input.system }] },
       contents: input.turns.map(t => ({ role: t.role === 'assistant' ? 'model' : 'user', parts: [{ text: t.text }] })),
       generationConfig: { candidateCount: 1, maxOutputTokens: 2048,
         thinkingConfig: { thinkingLevel: 'low', includeThoughts: false },
@@ -73,8 +73,8 @@ export async function observeSyntheticEvaluation(provider: EvaluationProvider, p
     const observed = { ...base(), outcome: 'response-observed' as const, httpStatus, rawBody };
     if (!response.ok) return { ...observed, failure: 'http' };
     let value: unknown;
-    try { value = JSON.parse(rawBody); } catch { return { ...observed, failure: 'malformed' }; }
-    if (!record(value)) return { ...observed, failure: 'malformed' };
+    try { value = JSON.parse(rawBody); } catch { return { ...observed, outcome: 'unconfirmed', failure: 'malformed' }; }
+    if (!record(value)) return { ...observed, outcome: 'unconfirmed', failure: 'malformed' };
     if (provider === 'ollama-baseline') {
       if (value.done !== true || value.model !== evaluationProfiles[provider].model)
         return { ...observed, outcome: 'unconfirmed', failure: 'incomplete' };
@@ -95,9 +95,11 @@ export async function observeSyntheticEvaluation(provider: EvaluationProvider, p
     if (record(value.promptFeedback) && value.promptFeedback.blockReason)
       return { ...metadata, failure: 'blocked' };
     if (!Array.isArray(value.candidates) || value.candidates.length !== 1 || !record(value.candidates[0]))
-      return { ...metadata, failure: 'malformed' };
+      return { ...metadata, outcome: 'unconfirmed', failure: 'malformed' };
     const candidate = value.candidates[0], parts = record(candidate.content) ? candidate.content.parts : undefined;
     const finishReason = typeof candidate.finishReason === 'string' ? candidate.finishReason : undefined;
+    if (!finishReason || finishReason === 'FINISH_REASON_UNSPECIFIED')
+      return { ...metadata, outcome: 'unconfirmed', failure: 'incomplete' };
     // Do not treat a tool call or thought summary as the assistant's final text.
     const plainParts = Array.isArray(parts) && parts.length > 0 && parts.every(p => record(p) &&
       p.thought !== true && typeof p.text === 'string' && p.functionCall === undefined);

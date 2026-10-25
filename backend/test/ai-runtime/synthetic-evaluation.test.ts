@@ -109,3 +109,16 @@ test('bounded body receive records unknown instead of silently accepting oversiz
     async () => new Response('x'.repeat(1024 * 1024 + 1)));
   assert.equal(result.outcome, 'unconfirmed'); assert.equal(result.failure, 'network-or-receive');
 });
+
+test('malformed success envelope cannot release the serial evaluation lane', async () => {
+  for (const provider of ['ollama-baseline', 'gemini-candidate'] as const) {
+    for (const raw of ['not-json', 'null']) {
+      const result = await observeSyntheticEvaluation(provider, prompt, async () => new Response(raw));
+      assert.equal(result.outcome, 'unconfirmed');
+      assert.equal(result.rawBody, raw);
+    }
+  }
+  const noFinish = await observeSyntheticEvaluation('gemini-candidate', prompt,
+    async () => gemini({ candidates: [{ content: { role: 'model', parts: [{ text: jsonText }] } }] }));
+  assert.equal(noFinish.outcome, 'unconfirmed');
+});
