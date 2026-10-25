@@ -10,11 +10,12 @@ const conversationId=randomUUID(),operationId=randomUUID(),key=randomBytes(32).t
 const source={cardRef:selectionKey,kind:"check_in" as const,version:"server-version",sourceOccurredAt:"2026-10-25T01:00:00.000Z",observedAt:"2026-10-25T01:01:00.000Z",state:"available" as const,canNavigate:true as const};
 const user:StoredConversationMessage={messageId:randomUUID(),role:"user",sequence:1,persistedAt:{seconds:1792886400,nanoseconds:0},availability:"available",text:"Synthetic request"};
 const assistant:StoredConversationMessage={...user,messageId:randomUUID(),sequence:2,role:"assistant",text:"Synthetic answer",sources:[{...source,...{privateSourceId:"do-not-project"}}]};
+const historyPair={historyKey:randomUUID(),userMessageId:user.messageId,assistantMessageId:assistant.messageId,userSequence:1,assistantSequence:2};
 async function fixture(){
  const calls:unknown[]=[];
  const app=Fastify({logger:false});app.decorateRequest("authPrincipal",null);
  const operations:ConversationOperations={
-  prepare:async(_caller,input)=>{calls.push(input);return{kind:"success",value:{operationId,operationKey:key,conversationId,preparationExpiresAt:"2026-10-25T01:02:00.000Z",contextSelection:{selectionRevision,expiresAt:"2026-10-25T01:02:00.000Z",sourceCards:[{...source,selectionKey,...{privateOwner:"do-not-project"}}]}}};},
+  prepare:async(_caller,input)=>{calls.push(input);return{kind:"success",value:{operationId,operationKey:key,conversationId,preparationExpiresAt:"2026-10-25T01:02:00.000Z",contextSelection:{selectionRevision,expiresAt:"2026-10-25T01:02:00.000Z",sourceCards:[{...source,selectionKey,...{privateOwner:"do-not-project"}}],historyPairs:[{...historyPair,...{privateReceipt:"do-not-project"}}]}}};},
   execute:async(_caller,input)=>{calls.push(input);return{kind:"success",value:{operationId,conversationId,userMessage:user,assistantMessage:assistant}};},
   listMessages:async()=>({kind:"success",value:{messages:[user,{...assistant,origin:"proactive",occurrenceId:randomUUID(),category:"explicit_follow_up"}]}}),
   cancel:async()=>({kind:"success",value:{operationId,state:"terminal"}}),
@@ -31,7 +32,8 @@ test("selected transport keeps exact locator input, allowlists cards and forward
  const response=await f.app.inject({method:"POST",url:"/v1/me/ai/operations",headers,payload:{kind:"send",purpose:"checkin_conversation",contextSelection}});
  assert.equal(response.statusCode,201);assert.deepEqual(f.calls[0],{kind:"send",purpose:"checkin_conversation",contextSelection});
  assert.deepEqual(response.json().contextSelection.sourceCards,[{...source,selectionKey}]);assert(!response.body.includes("do-not-project"));
- const choice={selectionRevision,includedKeys:[selectionKey],excludedKeys:[selectionKey]};const replyToMessageId=randomUUID();
+ assert.deepEqual(response.json().contextSelection.historyPairs,[historyPair]);
+ const choice={selectionRevision,includedKeys:[selectionKey],excludedKeys:[selectionKey],excludedHistoryKeys:[historyPair.historyKey]};const replyToMessageId=randomUUID();
  const result=await f.app.inject({method:"POST",url:`/v1/me/ai/operations/${operationId}/execute`,headers:{...headers,"ai-operation-key":key},payload:{text:"Synthetic",contextSelection:choice,replyToMessageId}});
  assert.equal(result.statusCode,200);assert.deepEqual(f.calls[1],{operationId,operationKey:key,text:"Synthetic",contextSelection:choice,replyToMessageId});
  assert.deepEqual(result.json().assistantMessage.sources,[source]);assert(!result.body.includes("do-not-project"));
@@ -45,7 +47,11 @@ test("selected transport rejects excessive, duplicate, content-bearing or foreig
   {processing:"local",sources:Array.from({length:6},(_,i)=>({kind:"check_in",checkInId:`id-${i}`}))},
   {processing:"local",sources:[{kind:"check_in",checkInId:"x"},{kind:"check_in",checkInId:"x"}]},
  ])assert.equal((await f.app.inject({method:"POST",url:"/v1/me/ai/operations",headers,payload:{kind:"send",purpose:"checkin_conversation",contextSelection:selection}})).statusCode,400);
- for(const contextSelection of [{selectionRevision:"forged",includedKeys:[],excludedKeys:[]},{selectionRevision,includedKeys:[selectionKey,selectionKey],excludedKeys:[]},{selectionRevision,includedKeys:[],excludedKeys:[],owner:"forged"}])
+ for(const contextSelection of [{selectionRevision:"forged",includedKeys:[],excludedKeys:[]},{selectionRevision,includedKeys:[selectionKey,selectionKey],excludedKeys:[]},{selectionRevision,includedKeys:[],excludedKeys:[],owner:"forged"},
+  {selectionRevision,includedKeys:[],excludedKeys:[],excludedHistoryKeys:[historyPair.historyKey,historyPair.historyKey]},
+  {selectionRevision,includedKeys:[],excludedKeys:[],excludedHistoryKeys:[randomUUID(),randomUUID(),randomUUID()]},
+  {selectionRevision,includedKeys:[],excludedKeys:[],excludedHistoryKeys:["forged"]},
+ ])
   assert.equal((await f.app.inject({method:"POST",url:`/v1/me/ai/operations/${operationId}/execute`,headers:{...headers,"ai-operation-key":key},payload:{text:"Synthetic",contextSelection}})).statusCode,400);
  assert.deepEqual(f.calls,[]);
 });

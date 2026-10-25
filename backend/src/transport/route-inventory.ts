@@ -116,5 +116,6 @@ export const ROUTE_INVENTORY = [
     requiresIdempotencyKey: false,
   },
   { method: "POST", path: "/v1/me/ai/source-references/resolve", successStatuses: [200], requiresIdempotencyKey: false },
+  { method: "POST", path: "/v1/me/ai/delivery-references/resolve", successStatuses: [200], requiresIdempotencyKey: false },
   { method: "GET", path: "/v1/me/conversations/{conversationId}/messages/{messageId}/anchor", successStatuses: [200], requiresIdempotencyKey: false },
 ] as const;

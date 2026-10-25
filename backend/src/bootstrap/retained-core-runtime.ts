@@ -8,6 +8,7 @@ import { createIsolatedConversationComposition, createRemoteConversationComposit
 import { LocalChatTransport, simpleChatGates } from "../ai-runtime/infrastructure/local-chat-transport.js";
 import { LocalModelLane } from "../ai-runtime/infrastructure/local-model-lane.js";
 import { createFirstFlowComposition, type FirstFlowConfiguration } from "./first-flow-composition.js";
+import { withDeliveryResolution } from "./owned-source-composition.js";
 import { createControlledEventBrowse } from "./controlled-event-browse.js";
 import { createControlledEventRecommendations } from "./controlled-event-recommendations.js";
 import type { BrowseSource } from "../event-browse/ports/event-browse.js";
@@ -190,7 +191,8 @@ async function createControlledRuntime(
     const socialEvents = socialEventSource(eventBrowseControl.peek, eventBrowseControl.projectionReady);
     const app = await buildApp({
       ...(firstFlow ? { firstFlow } : {}),
-      ...(chat?.ownedSources ? { ownedSources: chat.ownedSources } : {}),
+      ...(chat?.ownedSources ? { ownedSources: firstFlow
+        ? withDeliveryResolution(chat.ownedSources, firstFlow.application, firstFlow.accepting) : chat.ownedSources } : {}),
       ...(remote ? {socialModule: {identity: new FirebaseIdentityVerifier(getAuth(firebaseApp)), store: gateway,
         history: new FirebaseAdminCheckInHistoryGateway(getFirestore(firebaseApp)), cursor: createHistoryCursorCodec(), clock, weather, activityEvents: socialEvents.activity, recommendationEvents: socialEvents.recommendations}} : {}),
       ...(isolatedEnvironment ? { [remote ? 'remoteSlices' : 'isolatedSlices']: {

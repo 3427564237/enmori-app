@@ -791,7 +791,8 @@
         "required": [
           "selectionRevision",
           "expiresAt",
-          "sourceCards"
+          "sourceCards",
+          "historyPairs"
         ],
         "properties": {
           "selectionRevision": {
@@ -809,6 +810,13 @@
             },
             "minItems": 0,
             "maxItems": 5
+          },
+          "historyPairs": {
+            "type": "array",
+            "maxItems": 2,
+            "items": {
+              "$ref": "#/components/schemas/PreparedHistoryPair"
+            }
           }
         }
       },
@@ -844,6 +852,16 @@
             "minItems": 0,
             "maxItems": 5,
             "uniqueItems": true
+          },
+          "excludedHistoryKeys": {
+            "type": "array",
+            "maxItems": 2,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "description": "Optional, defaults to no exclusions. Only keys from this prepared selection. Explicitly omit complete pairs for this reply, without deleting saved history or backfilling older pairs. Changed history requires a fresh review."
           }
         },
         "description": "Each key must belong to this unconsumed preparation and both arrays together must cover it. Overlap is allowed: exclusion wins. Inherited dependencies are checked separately; conflict preserves the draft and requires review."
@@ -940,6 +958,55 @@
             }
           }
         ]
+      },
+      "PreparedHistoryPair": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "historyKey",
+          "userMessageId",
+          "assistantMessageId",
+          "userSequence",
+          "assistantSequence"
+        ],
+        "properties": {
+          "historyKey": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "userMessageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "assistantMessageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "userSequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "assistantSequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "description": "One current complete user/assistant exchange, from the fixed latest-two window before exclusions. User sequence precedes assistant sequence; IDs and keys are distinct. No source IDs, source text or private provenance."
+      },
+      "ResolveDelivery": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "deliveryRef"
+        ],
+        "properties": {
+          "deliveryRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
       }
     }
   }

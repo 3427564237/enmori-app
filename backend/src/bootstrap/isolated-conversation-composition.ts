@@ -76,9 +76,11 @@ async function createConversationComposition(options: ConversationCompositionOpt
   const cleanup = new FirestoreConversationCleanup(gateway,options.environment,quiescence,utcMilliseconds);
   const readers = new FirestoreConversationOperationReaders(store,cleanup,epoch);
   const authority = new FirebaseAdminConversationOperationAuthority(options.firestore,options.environment,()=>clock.now());
-  const prepareReader = options.selectedReplies ? new FirestoreSelectedReplyReader(gateway, options.environment, undefined, utcMilliseconds) : undefined;
+  const historySnapshot: NonNullable<ConstructorParameters<typeof FirestoreSelectedReplyReader>[4]> =
+    (tx, principal, ownerId, conversationId, current) => store.prepareHistorySnapshot(tx, principal, ownerId, conversationId, current);
+  const prepareReader = options.selectedReplies ? new FirestoreSelectedReplyReader(gateway, options.environment, undefined, utcMilliseconds, historySnapshot) : undefined;
   const operationReaders = prepareReader ? Object.assign(readers, {
-    prepareSelection: (context: Parameters<FirestoreSelectedReplyReader["prepare"]>[0], input: Parameters<FirestoreSelectedReplyReader["prepare"]>[1]) => prepareReader.prepare(context, input),
+    prepareSelection: (context: Parameters<FirestoreSelectedReplyReader["prepare"]>[0], input: Parameters<FirestoreSelectedReplyReader["prepare"]>[1], conversationId?: string) => prepareReader.prepare(context, input, conversationId),
   }) : readers;
   consumer = new ApplicationConversationOperations(
     authority,
@@ -99,7 +101,7 @@ async function createConversationComposition(options: ConversationCompositionOpt
         const selectedGateway:FirestoreGateway={runTransaction:(work,transactionOptions)=>
           io.run(ownerId,conversationId,operationId,()=>gateway.runTransaction(work,transactionOptions))};
         return {authority,reads,store:bridge,acknowledgedPair:bridge,
-          ...(options.selectedReplies ? { selectedReads: new FirestoreSelectedReplyReader(selectedGateway, options.environment, original, utcMilliseconds) } : {})};
+          ...(options.selectedReplies ? { selectedReads: new FirestoreSelectedReplyReader(selectedGateway, options.environment, original, utcMilliseconds, historySnapshot) } : {})};
       }}).create(input,delivery)},operationReaders);
   const maintenance=new FirestoreConversationMaintenance(gateway,options.environment,cleanup,quiescence,utcMilliseconds,notePrerequisites);
   // Construct consumer BEFORE startup sweeps, expose operations only AFTER them.

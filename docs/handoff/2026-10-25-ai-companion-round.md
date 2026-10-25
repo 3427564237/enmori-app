@@ -6,7 +6,32 @@ Authority: [LI's bounded round request](../decisions/2026-10-25-li-ai-companion-
 The local launch roster and exact prompts are under
 `/home/miku/.local/state/enmori-ai-companion-20261025/`.
 
-## Current checkpoint — C artifact ready; approved first flow in implementation
+## Current checkpoint — first-flow source assembled; final App slice in progress
+
+The root composition now contains F0, current-owner source navigation, F1a
+selected replies with explicit whole-history-pair exclusions, and exact
+delivery-reference resolution. The fixed source inputs are Context `26dd48c`,
+Delivery `23ce434`, Runtime `5c0e27d` / `7820211`, and App F0 `16e1923`.
+Integration's strict build and 43 targeted HTTP/API/composition checks passed;
+[the integration record](../evidence/ai-companion-20261025/integration-first-flow.md)
+separates them from earlier tests. Context's real emulator verification is
+scheduled separately. App source-card/review/read-state/Messaging work and the
+next binary candidate are still pending. v27 below remains C-only.
+
+Independent F0 semantics remain below the quality gate: first run 1/7, one
+bounded correction 5/3. Both original ledgers are retained; tuning has stopped.
+QA independently closed the two F0 UI recovery/DST findings in widget/source
+checks; native device behavior is not established.
+
+Only zero-cost Gemini research remains authorized. The existing Default Gemini
+Project `gen-lang-client-0930184174` is the selected free research project;
+the operator explicitly confirmed no Data Contributor enrollment at `eb50e40`.
+The eight-case single-pass run is pending fresh project/key evidence and guarded
+execution. No API subscription credit, paid fallback or larger batch is assumed.
+The deployed backend and all phone/account data remain outside these local
+implementation and synthetic-test operations.
+
+## Earlier checkpoint — C artifact ready; approved first flow in implementation
 
 LI explicitly approved the recommended F0 / F1a / D1 implementation and the
 separate USD 1 synthetic Gemini evaluation in [the first-flow decision](../decisions/2026-10-25-li-ai-companion-first-flow.md)

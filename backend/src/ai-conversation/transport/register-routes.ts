@@ -49,7 +49,9 @@ function selectContext(value: unknown): value is SelectReplyContext {
     new Set(value.sources.map(source => source.checkInId)).size === value.sources.length;
 }
 function executeSelection(value: unknown): value is ExecuteReplySelection {
-  if (!record(value) || !keys(value, ["selectionRevision", "includedKeys", "excludedKeys"]) || !uuid(value.selectionRevision)) return false;
+  if (!record(value) || !keys(value, ["selectionRevision", "includedKeys", "excludedKeys"], ["excludedHistoryKeys"]) || !uuid(value.selectionRevision)) return false;
+  if (value.excludedHistoryKeys !== undefined && (!Array.isArray(value.excludedHistoryKeys) || value.excludedHistoryKeys.length > 2 ||
+      !value.excludedHistoryKeys.every(uuid) || new Set(value.excludedHistoryKeys).size !== value.excludedHistoryKeys.length)) return false;
   return [value.includedKeys, value.excludedKeys].every(list => Array.isArray(list) && list.length <= 5 &&
     list.every(uuid) && new Set(list).size === list.length);
 }
@@ -66,7 +68,16 @@ function preparedSelection(value: PreparedReplySelection): PreparedReplySelectio
       new Date(value.expiresAt).toISOString() !== value.expiresAt || !Array.isArray(value.sourceCards) || value.sourceCards.length > 5 ||
       new Set(value.sourceCards.map(v => v.selectionKey)).size !== value.sourceCards.length ||
       new Set(value.sourceCards.map(v => v.cardRef)).size !== value.sourceCards.length) throw Error("Invalid inner selection");
-  return { selectionRevision: value.selectionRevision, expiresAt: value.expiresAt, sourceCards: value.sourceCards.map(v => {
+  if (!Array.isArray(value.historyPairs) || value.historyPairs.length > 2 ||
+      new Set(value.historyPairs.map(v => v.historyKey)).size !== value.historyPairs.length ||
+      new Set(value.historyPairs.flatMap(v => [v.userMessageId, v.assistantMessageId])).size !== value.historyPairs.length * 2 ||
+      value.historyPairs.some((v, i) => !uuid(v.historyKey) || !uuid(v.userMessageId) || !uuid(v.assistantMessageId) ||
+        !Number.isSafeInteger(v.userSequence) || !Number.isSafeInteger(v.assistantSequence) || v.userSequence < 1 || v.assistantSequence <= v.userSequence ||
+        i > 0 && v.userSequence <= value.historyPairs[i - 1]!.assistantSequence)) throw Error("Invalid inner history review");
+  return { selectionRevision: value.selectionRevision, expiresAt: value.expiresAt, historyPairs: value.historyPairs.map(v => ({
+    historyKey: v.historyKey, userMessageId: v.userMessageId, assistantMessageId: v.assistantMessageId,
+    userSequence: v.userSequence, assistantSequence: v.assistantSequence,
+  })), sourceCards: value.sourceCards.map(v => {
     if (!uuid(v.selectionKey) || v.kind !== "check_in") throw Error("Invalid inner selection key");
     return { ...card(v), selectionKey: v.selectionKey };
   }) };

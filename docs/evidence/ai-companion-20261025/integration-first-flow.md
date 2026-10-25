@@ -111,3 +111,46 @@ The first actual local F0 semantic evaluation is **1 Pass / 7 Fail**, despite al
 eight protocol-valid outputs; see [the independent review](qa-f0-semantic-review.md).
 That quality gate is open. No deployment, real-account write, FCM send, device
 installation, UAT or release acceptance follows from this integration checkpoint.
+
+## Selected-history recovery and exact delivery target checkpoint
+
+Context `26dd48cae40a20a571d73731ea696fde1854259f` is now composed with
+the canonical conversation store's `prepareHistorySnapshot` in the selector's
+same Firestore transaction. Both readers receive the callback; ordinary prepare
+forwards the requested topic, and execution SDK transactions retain the root I/O
+tracker. Prepared metadata exposes at most two current complete pair identities
+with request-local history keys. Explicit `excludedHistoryKeys` omit those
+complete pairs for this reply only. The fixed latest-two window is selected
+before exclusion; it never backfills earlier history. Changed history requires a
+fresh review. Saved records and the user's draft are not deleted by exclusion.
+The prior unresolved recovery gap is retained in the earlier checkpoint and
+[independent F1 review](qa-f1-selected-context.md).
+
+Delivery `23ce434504c56906623b7e6c2bb198048c7bfbdc` adds the optional
+delivery-reference resolver. Root composes it with the existing first-flow
+application and owned-message anchor: an opaque reference must belong to a
+currently authorized, published intent, then match the canonical topic,
+message and sequence. Absent/unpublished/inaccessible targets fail without a
+latest-message fallback. Unknown verification remains unavailable. This read
+does not generate, dispatch or mark a message read. Normative OpenAPI and the
+route inventory include the same exact-body, candidate-only operation.
+
+Pinned TypeScript compilation passed, followed by **43/43** targeted HTTP,
+normative API and delivery-composition checks. These cover genuine proactive
+projection, request-local source/history choices, private-field removal,
+strict malformed inputs, retirement and target mismatch. Raw logs are
+`integration-history-delivery-build.log` and
+`integration-history-delivery-targeted.log` under the private round directory.
+They are source/fake evidence, not an emulator or real-provider result.
+
+The same assembly includes App `16e1923` and its independent two-case widget
+review: a DST overlap keeps both candidates, disables a past candidate and
+requires explicit selection/confirmation of a future one. Initial settings
+and active-list GET recovery at `be0a7b1` has its separate review. The next
+source-card, selected-reply and native-Messaging UI slice remains in progress.
+
+Runtime's one permitted F0 prompt correction `5c0e27d` has completed its
+eight-case actual local comparison. Independent QA found **5 Pass / 3 Fail**,
+separately from the original **1 Pass / 7 Fail**. No further F0 tuning is being
+run. [The comparison](qa-f0-semantic-comparison.md) retains the remaining
+presumed completion, dated mood and decision-versus-attendance failures.

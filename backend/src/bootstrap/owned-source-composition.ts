@@ -3,6 +3,7 @@ import type { ConversationCaller, ConversationResult } from "../ai-conversation/
 import type { FirestoreConversationStore } from "../ai-conversation/infrastructure/firestore-conversation-store.js";
 import type { StoreResult } from "../ai-conversation/ports/real-conversation-store.js";
 import type { OwnedSourceOperations } from "../ai-conversation/transport/register-owned-source-routes.js";
+import type { FirstFlowApplication } from "../proactive/application/first-flow-application.js";
 
 /** Authenticated read-only projections. Store transactions recheck binding,
  * purpose, source version, message availability and the original live guard. */
@@ -44,4 +45,23 @@ export function createOwnedSourceOperations(authority: ConversationOperationAuth
     anchor: (caller, conversationId, messageId, current) => read(caller, current, (owner, live) =>
       store.readOwnedMessageAnchor(caller.principal, owner, conversationId, messageId, live)),
   };
+}
+
+/** A notification contains only an opaque occurrence reference. Resolving it
+ * does not mark it read, rerun an occurrence or trust a stale push payload. */
+export function withDeliveryResolution(operations: OwnedSourceOperations,
+  application: Pick<FirstFlowApplication, "intent">, accepting: () => boolean): OwnedSourceOperations {
+  return { ...operations, deliveryAnchor: async (caller, deliveryRef, current) => {
+    const live = () => { try { return accepting() && current(); } catch { return false; } };
+    if (!live()) return { kind: "terminated" };
+    const intent = await application.intent({ principal: caller.principal, verifyCurrentAuth: () => caller.verifyCurrentAuth(), current: live }, deliveryRef);
+    if (!live() || intent.kind === "terminated") return { kind: "terminated" };
+    if (intent.kind !== "ok") return { kind: "failure", code: ["unknown", "unavailable"].includes(intent.kind) ? "AI_UNAVAILABLE" : "AI_SOURCE_UNAVAILABLE" };
+    if (intent.value.state !== "published" || !intent.value.messageId || !Number.isSafeInteger(intent.value.messageSequence)) return { kind: "failure", code: "AI_SOURCE_UNAVAILABLE" };
+    const target = await operations.anchor(caller, intent.value.conversationId, intent.value.messageId, live);
+    if (!live()) return { kind: "terminated" };
+    if (target.kind === "success" && (target.value.conversationId !== intent.value.conversationId || target.value.messageId !== intent.value.messageId ||
+        target.value.sequence !== intent.value.messageSequence)) return { kind: "failure", code: "AI_UNAVAILABLE" };
+    return target;
+  } };
 }

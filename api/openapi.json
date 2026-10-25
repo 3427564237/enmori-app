@@ -13079,6 +13079,109 @@
           }
         ]
       }
+    },
+    "/v1/me/ai/delivery-references/resolve": {
+      "post": {
+        "tags": [
+          "AI Companion"
+        ],
+        "operationId": "resolveOwnedDeliveryReference",
+        "summary": "Resolve a notification reference to its exact canonical message",
+        "description": "Explicit first-flow candidate only. Authenticate and recheck the fixed owner, current source and canonical topic/message before returning its anchor. No read receipt, model call, dispatch or implicit retry. Unpublished, absent or inaccessible targets return 404; unknown verification returns 503. A push packet is not permission. No query, Idempotency-Key, AI-Operation-Key or conditional-write headers.",
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "responses": {
+          "200": {
+            "description": "Current authorized target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/MessageAnchor"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authentication or purpose forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Source unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Source authority changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Verification unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "ai-companion.json#/components/schemas/ResolveDelivery"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
