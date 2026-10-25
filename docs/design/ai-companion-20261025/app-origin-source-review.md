@@ -56,6 +56,34 @@ This is a source counterexample, not an independently executed widget result.
 The author's chat-only disappearance assertion does not exercise either search
 projection. Closure requires a fix checkpoint and focused review/validation.
 
+### Focused repair — bd10a8e
+
+Product independently inspected all five files in
+`bd10a8e1598e71f040e38fd3330f7e5baaf64859`, whose parent is the original
+`629a22d7b00580e2a39360efd1270a7bd7ac7e94` review checkpoint. **The reported source
+finding is addressed; QA's independent execution remains a separate open gate.**
+The original P1 and its counterexample above remain part of the record.
+
+The shared `canDisplayAiMessage` predicate now gates the chat body, search
+matching and excerpts, selected content, neighbouring context and previous/next
+actions. Search watches current source state, so an already open selected/context
+view reacts to later denial or foreground invalidation. `_select` re-reads the
+current conversation/source state before using a captured message ID; a callback
+captured before denial cannot select the newly hidden body. Session/topic mismatch
+withholds source-bearing content. Unrelated available messages remain searchable.
+
+The patch does not rewrite canonical messages, add tombstones or initiate a model
+request. Existing exact-page recheck determines when temporary source hiding may
+end. Product read the three new cases: direct search after denial, denial arriving
+while an adjacent message is selected plus its captured Next callback, and a
+selected source remaining hidden across background/resume until fresh exact read.
+
+App reports 27/27 focused checks and clean analysis of four Dart files. Product
+verified the local author log's 27-pass line, analysis result and SHA-256
+`8995ed9031bc7c284895dd0702414a727a527ec062f6776b3b36cf2c8b6e1a11`
+(`app-search-display-gate.log`); Product did not execute Flutter. QA acknowledged
+the fix diff and is awaiting its coordinated window for independent execution.
+
 ## Other inspected boundaries
 
 | Boundary | Source observation | Evidence limit |
@@ -70,8 +98,9 @@ projection. Closure requires a fix checkpoint and focused review/validation.
 | Stacked AI pages | Current-route editor lease gates edits/Send. Returning pages copy the current controller TextEditingValue, including selection, and retire an obsolete initial locator. Source editor routes remain retained. | Author cases cover a retained Check-in editor and the original unknown operation; this is not a new router framework or device result. |
 | Default composition | Reference capability defaults off; optional `pushControls` is a host slot. | D1 implementation, SDK initialization and actual notification actions are outside this slice. |
 
-No other blocking source finding was identified in the reviewed scope at this
-checkpoint. That observation does not close P1 or establish complete F0/F1/D1.
+No other blocking source finding was identified in the reviewed scope at the
+original checkpoint. The focused repair above addresses the P1 source finding;
+it does not establish independent widget acceptance or complete F0/F1/D1.
 
 ## Validation attribution
 
