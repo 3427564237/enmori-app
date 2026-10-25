@@ -261,3 +261,91 @@ invocation takes the same nonblocking global lock; no APK/Gradle work is run.
 This is source/widget evidence. No real backend/model call, automatic cloud
 fallback, notification, APK, device write or data migration was performed.
 QA's dirty-source pre-review is not the final exact-commit independent review.
+
+## Third increment — F0 settings and explicit scheduling checkpoint
+
+### Authority and shared baseline
+
+This is the first runnable App slice of the
+[approved F0/F1a/D1 decision](../../decisions/2026-10-25-li-ai-companion-first-flow.md),
+not the completion of all three flows. It follows the bounded
+[Product F0 handoff](../../design/ai-companion-20261025/first-flow-handoff.md).
+The App branch fast-forwarded through the approved contracts and shared
+dependencies to `1a1f96b11606d6ecd7bb1124b823a9dfbad6e7d5`. Integration owns
+shared routes, composition, core errors, dependencies and Android code.
+The public HTTP projection was checked against Delivery's independent transport
+candidate `f1fce8adb0753860d03d644e3d95d0169d1bf3e9`, including its correction
+from internal state to the minimal public intent view. Native civil-time
+resolution uses Integration's existing `com.enmori.app/time_zone` channel and
+the `1a1f96b` contract; no offset or local-zone fallback is used.
+
+### Implemented App boundary
+
+- Optional chat callbacks `onFollowUpRequested(SavedFollowUpSource)` and
+  `onOpenFollowUps` keep the existing composition unchanged until explicitly
+  injected. Only a current available saved user message exposes the source
+  action. A captured action rechecks the session, topic and current source;
+  local outgoing, assistant and unavailable rows cannot initiate scheduling.
+  Entering either flow keeps the exact single chat draft and does not Send.
+- `ProactiveFollowUpPage({required source, required onBack})` reviews the raw
+  saved source and occurrence time. It resolves explicit civil fields and IANA
+  zone through `FollowUpTimePort`. A DST gap is distinct from an unavailable
+  resolver; a fold requires an explicit offset/instant choice. Date/time/zone
+  changes remove confirmation. Device-zone changes hold submission for an
+  explicit keep/change choice. A quiet-time suggestion changes fields only
+  after the user's choice, resolves again, and still needs confirmation.
+- An initial settings read can prove revision-zero/off with no selected zone;
+  it never invents UTC or treats a failed read as default off. The first
+  confirmation performs only the settings PUT. Its ACK and new revision enable
+  a separate explicit create action. Scheduling never initializes push or runs
+  the model. Limits remain category `explicit_follow_up`, local processing,
+  one per rolling 24 hours, 480-minute cooldown and at most three active intents.
+- `ProactiveSettingsPage({required onBack})` displays known settings and the
+  complete bounded active list, with explicit on/off/indefinite pause/cancel.
+  Unknown reads remain unknown. Cancellation uses the current intent revision;
+  an uncertain cancellation retains the visible row and original intent ID.
+  Provider acceptance copy does not claim device delivery or reading.
+- The feature-owned HTTP adapter makes one bounded attempt, uses caller-owned
+  HTTP resources and per-request abort, rejects redirects/malformed successful
+  receipts, and maps the exact N01 top-level `requestId` error envelope. Create
+  sends only IDs, dueAt, zone, processing and revision with one UUIDv4 key;
+  source text and owner identity never enter that request. Public responses do
+  not accept internal dispatch/source/grant fields. An unknown create retains
+  the original command/key and offers only its GET readback, never another POST.
+- Form recovery is session RAM only: source IDs plus the reviewed time, without
+  copied source text or a disk store. Session replacement, content invalidation,
+  backgrounding and consent loss retire the source view, clear captures, abort
+  in-flight work and ignore late results. An admitted uncertain key stays fenced
+  until the same-session authoritative read; a new session drops private state.
+
+### Verification and limits
+
+All invocations used the coordinated nonblocking Flutter lock. Offline pub get
+with `--enforce-lockfile` completed without changing the manifest or lockfile.
+The initial analyzer-only runs found informational style issues; those were
+fixed before tests. The first new-suite run passed 44/45; the sole failure was
+the synthetic Chinese test container lacking Material localization delegates.
+The next related run passed 114/115; its sole failure attempted to edit a
+not-yet-built generic-page field. The test now uses bounded actual scrolling
+and hit-test checks. Neither failure was turned into a weaker assertion.
+
+The final command analyzed only the owned feature/page and test boundaries,
+then ran `test/features/proactive` plus the five existing AI UI test files
+listed in the C increment. It exited 0: **155/155 distinct scenarios passed**
+(49 new F0 scenarios, four new chat-entry scenarios and 102 existing UI cases).
+Analyzer: `No issues found! (ran in 11.6s)`. No overflow, hit-test warning or
+exception remained. Raw final output:
+`/home/miku/.local/state/enmori-ai-companion-20261025/app-f0-focused-final.log`.
+Earlier logs are retained alongside it as `app-f0-suite-initial.log` and
+`app-f0-suite-second.log`. `git diff --check` is clean.
+
+This checkpoint supplies feature ports, HTTP/time adapters, controller, pages
+and synthetic tests for Integration's first composition. Genuine proactive
+origin/source cards, authorized resolver/anchor navigation, same-topic reply,
+visible read watermark, F1a selection and the explicit D1 SDK adapter remain
+the next App slice. The current callback/constructor surface is ready for
+Integration; this commit alone does not install a shared route or bootstrap.
+No real service/model, Firebase data, push registration/send, APK/Gradle,
+phone write or deployment was exercised. Source/widget evidence is not runtime,
+physical-device, UAT, Release or Done acceptance. The exact source commit is
+handed off separately for independent QA; these local results do not replace it.
