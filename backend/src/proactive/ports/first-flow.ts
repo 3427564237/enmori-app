@@ -1,4 +1,4 @@
-import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
+import type { AuthPrincipal, IdentityVerificationResult } from "../../shared/ports/identity-verifier.js";
 import type { FullPrecisionInstant } from "../../ai-conversation/domain/real-effect-expiry.js";
 import type { PersonaProjection, PresentationMetadata } from "../../ai-conversation/ports/conversation-lifecycle.js";
 import type { GenerationTransport } from "../../ai-runtime/ports/generation-transport.js";
@@ -7,12 +7,16 @@ import type { GenerationTransport } from "../../ai-runtime/ports/generation-tran
  * Firebase/vendor objects. All timestamps below are canonical server UTC. */
 export interface ProactiveActor {
   readonly principal: AuthPrincipal;
+  /** HTTP: reverify the original current caller. Worker: verify the fixed owner
+   * through current durable-purpose/account eligibility, NOT an old HTTP token.
+   * Never persist this callback, token or its result as a reusable permit. */
+  verifyCurrentAuth(): Promise<IdentityVerificationResult>;
   /** Current original request/worker-run/abort authority; checked after awaits.
    * A scheduler separately verifies the fixed owner's current eligibility. */
   current(): boolean;
 }
 export type FirstFlowFailure = "invalid" | "denied" | "unavailable" | "not_found" |
-  "conflict" | "selection_conflict" | "not_due" | "quiet" | "frequency" |
+  "conflict" | "revision_conflict" | "selection_conflict" | "not_due" | "quiet" | "frequency" |
   "expired" | "unknown" | "terminated";
 export type FirstFlowResult<T> = { readonly kind: "ok"; readonly value: T }
   | { readonly kind: FirstFlowFailure };
@@ -97,6 +101,19 @@ export interface FirstFlowRegistration {
 export interface FirstFlowReadState {
   readonly revision: number;
   readonly readThroughSequence: number;
+}
+/** Application read models for explicit Transport allowlists. Never serialize
+ * FirstFlowSettings/FirstFlowIntent directly; they carry private authority. */
+export type FirstFlowSettingsView = FirstFlowSettingsInput & { readonly revision: number };
+export interface FirstFlowIntentView {
+  readonly intentId: string;
+  readonly revision: number;
+  readonly state: FirstFlowState | "dispatching" | "accepted" | "unknown";
+  readonly dueAt: string;
+  readonly expiresAt: string;
+  readonly category: "explicit_follow_up";
+  readonly conversationId: string;
+  readonly recallPossible?: false;
 }
 /** Transient source bytes and Persona deletion guard, not an intent/outbox. */
 export interface FirstFlowSource {
