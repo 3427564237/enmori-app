@@ -14,6 +14,86 @@ import 'package:flutter_test/flutter_test.dart';
 import 'proactive_test_support.dart';
 
 void main() {
+  for (final allPast in [false, true]) {
+    testWidgets(
+      'fold preserves explicit choice when earlier passed; both passed is rejected allPast=$allPast',
+      (tester) async {
+        final r = await ProactiveRig.create(
+          tester,
+          now: DateTime.utc(2026, 10, 25, allPast ? 2 : 0, 45),
+        );
+        r.repo.settings = fixtureSettings(
+          mode: ProactiveMode.on,
+          revision: 1,
+          timeZone: 'Europe/Berlin',
+          quiet: const ProactiveQuietDisabled(),
+        );
+        r.time.deviceZone = 'Europe/Berlin';
+        final earlier = FollowUpTime(
+          dueAt: DateTime.utc(2026, 10, 25, 0, 30),
+          timeZone: 'Europe/Berlin',
+          displayTime: '2026-10-25 02:30',
+          offsetLabel: 'UTC+02:00',
+        );
+        final later = FollowUpTime(
+          dueAt: DateTime.utc(2026, 10, 25, 1, 30),
+          timeZone: 'Europe/Berlin',
+          displayTime: '2026-10-25 02:30',
+          offsetLabel: 'UTC+01:00',
+        );
+        r.time.resolution = Success([earlier, later]);
+        await _pump(
+          tester,
+          r,
+          ProactiveFollowUpPage(source: fixtureSource, onBack: () {}),
+        );
+        await _verify(tester, date: '2026-10-25', time: '02:30');
+        if (allPast) {
+          expect(find.byType(RadioListTile<FollowUpTime>), findsNothing);
+          expect(find.byKey(const Key('proactive-time-error')), findsOneWidget);
+          expect(_schedule(tester).onPressed, isNull);
+        } else {
+          await _visible(
+            tester,
+            'proactive-time-${earlier.dueAt.toIso8601String()}',
+          );
+          expect(
+            tester
+                .widget<RadioListTile<FollowUpTime>>(
+                  find.byKey(
+                    Key('proactive-time-${earlier.dueAt.toIso8601String()}'),
+                  ),
+                )
+                .enabled,
+            isFalse,
+          );
+          expect(find.textContaining('This time has passed.'), findsOneWidget);
+          expect(
+            tester
+                .widget<RadioGroup<FollowUpTime>>(
+                  find.byType(RadioGroup<FollowUpTime>),
+                )
+                .groupValue,
+            isNull,
+          );
+          await _visible(tester, 'proactive-confirm-time');
+          expect(
+            tester
+                .widget<CheckboxListTile>(
+                  find.byKey(const Key('proactive-confirm-time')),
+                )
+                .onChanged,
+            isNull,
+          );
+          await _tap(tester, 'proactive-time-${later.dueAt.toIso8601String()}');
+          await _tap(tester, 'proactive-confirm-time');
+          await _tap(tester, 'proactive-schedule');
+          expect(r.repo.creates.single.time.dueAt, later.dueAt);
+        }
+        await _dispose(tester, r);
+      },
+    );
+  }
   for (final failed in ['settings', 'active']) {
     testWidgets(
       'follow-up form recovers a failed first $failed GET without losing choices or creating',

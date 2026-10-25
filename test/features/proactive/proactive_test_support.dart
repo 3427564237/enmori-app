@@ -82,7 +82,10 @@ final class ProactiveRig {
   late final ProviderContainer container;
   late final ProviderSubscription<ProactiveState> subscription;
 
-  static Future<ProactiveRig> create(WidgetTester tester) async {
+  static Future<ProactiveRig> create(
+    WidgetTester tester, {
+    DateTime? now,
+  }) async {
     final rig = ProactiveRig._();
     rig.container = ProviderContainer(
       overrides: [
@@ -90,7 +93,7 @@ final class ProactiveRig {
         proactiveRepositoryProvider.overrideWithValue(rig.repo),
         followUpTimePortProvider.overrideWithValue(rig.time),
         proactiveIntentIdsProvider.overrideWithValue(rig.ids),
-        proactiveNowProvider.overrideWithValue(() => fixtureNow),
+        proactiveNowProvider.overrideWithValue(() => now ?? fixtureNow),
       ],
     );
     rig.subscription = rig.container.listen(
