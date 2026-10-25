@@ -26,8 +26,16 @@ checks; native device behavior is not established.
 Only zero-cost Gemini research remains authorized. The existing Default Gemini
 Project `gen-lang-client-0930184174` is the selected free research project;
 the operator explicitly confirmed no Data Contributor enrollment at `eb50e40`.
-The eight-case single-pass run is pending fresh project/key evidence and guarded
-execution. No API subscription credit, paid fallback or larger batch is assumed.
+The guarded eight-case single-pass run was interrupted at the first generation:
+one token-count request returned HTTP 200 / 189 tokens; the first generation's
+attempt reservation was durably consumed, but its actual dispatch is 0..1 and
+its result is unknown. No model response was saved and seven cases never began.
+The command ended with exit 143 after 85.469 seconds, before the runner's
+120-second receive limit; the signal source is unknown. Root did not terminate
+it. No retry, replacement grant or paid fallback occurred. Runtime's
+`165c009` [evidence record](../evidence/ai-companion-20261025/runtime.md)
+retains the original five artifacts and interruption audit. This is not a
+completed eight-case evaluation or a Gemini semantic failure.
 The deployed backend and all phone/account data remain outside these local
 implementation and synthetic-test operations.
 
@@ -72,6 +80,16 @@ Integration retains normative API, shared errors, bootstrap/router, dependencies
 and Android platform files. Product and QA retain their independent surfaces.
 Flutter/Gradle, the shared model and physical operations stay serialized by
 Integration. All six chats continue on their verified assigned model / max.
+
+For the remaining approved D1 implementation, App confirmed it had not started
+any SDK or registration file. Integration reassigned only the new
+`proactive_messaging.dart`, `firebase_proactive_messaging.dart`,
+`http_proactive_registration_repository.dart`,
+`proactive_notification_controller.dart`, `proactive_push_controls.dart` and
+their new tests to the existing Delivery chat. Existing proactive/AI files stay
+App-owned. App exposes an optional settings UI slot; Root supplies the fixed
+configuration, resolver bridge and session-bound navigation. This allocation
+changes authorship only, not product scope, dependencies or real-push permission.
 
 The previous checkpoint follows as historical evidence. Its pending approvals
 and pending C statements are superseded only within the scopes stated above.
