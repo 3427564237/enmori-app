@@ -1,6 +1,7 @@
 # Runtime / Models — 25 October 2026
 
-Status: bounded local evidence recorded below; actual cloud comparison **Not Run**.
+Status: bounded local evidence recorded below; free cloud research **Interrupted**
+after one confirmed count and one reserved generation attempt with no response.
 Owner: Runtime chat `01a171a5-707c-77a2-8ddc-fbda24e4c089`.
 Integration remains the decision and shared-composition owner. No push, PR,
 main merge, production provider/configuration or data mutation is included.
@@ -878,3 +879,80 @@ call counts remain **0**. The bounded first count may establish whether the old
 restricted standard key works only after all required facts are established;
 there is no separate availability probe, paid fallback or permission to infer
 the missing Contributor value.
+
+## Authorized free run: operator assertion resolved, execution interrupted
+
+Root decision `eb50e4098e4193eede7e078283aa95287c6f1702` records LI's exact
+project-specific assertion, “没有接受或加入该计划”. Together with the previously
+recorded adult / Singapore statements, this satisfies the operator assertion
+conditions. It is not UI proof of Contributor status. Runtime freshly reloaded
+the selected project's Free tier, no linked Cloud Billing account, single Gemini
+API restriction on the existing February 8 key, and 5 RPM / 250K TPM / 20 RPD
+limits. The existing key was read only into an owner-only 0600 file outside Git;
+its value was not printed, placed in a command argument or clipboard, or committed.
+No new key, service account, IAM/API/billing change or payment was performed.
+
+Root had independently reviewed the runner and its 19 guard/mock checks, then
+authorized exactly one fixed-eight free pass. The actual invocation used clean
+`0c436bddc147bf7a0a761b37af3f533ac34b595d`, bundle
+`8f3e405cb0fbed69c15eeb3cfe74483ad87c7f6334387b2dcf40d6b30fbb957f`,
+selection `7c01a0def120672264174b25de162ad8b4b142b6b2caa067d6d34d59aefa9d4c`,
+and the unchanged 32-case source corpus. Grant SHA256:
+`f88af0f67bc455a8e355c307c0f665453ccc0147a89f02c42091e6d4b79d1841`.
+Bound preflight evidence SHA256:
+`7e311cff2934b77d3f5e63271e70314cade6c2c6f340b263340eafb408afae13`.
+The grant permits at most eight counts and eight generations, one pass, 15.1-second
+spacing across both request types, and zero USD. Its single-use claim remains consumed.
+
+Observed execution: the first case's count returned HTTP 200, **189 input tokens**,
+in **203.991 ms**. Exactly one generation intent/reservation was then persisted.
+No generation response, runner `report.json`, or runner `stop.json` was written.
+The command execution ended with exit **143**, consistent with SIGTERM, and no
+matching runner remained at the bounded readback. Count success establishes that
+the existing key worked for that count; it does not establish generation success.
+
+The precise ledger is **one confirmed count + one consumed generation-attempt
+reservation / unknown outcome**, zero observed generated responses, and seven
+cases never reached. This runner does not durably distinguish intent from the
+actual HTTP dispatch boundary; the first generation's network dispatch therefore
+has evidence bounds 0–1, not a confirmed response or quality failure. Generation
+latency, token usage and semantic quality are unknown. No retry, replacement key,
+new grant, model swap, paid fallback or continued evaluation was performed.
+
+The private `runtime/gemini-free8-0c436bd` directory contains the five original
+write-ahead/source/count artifacts plus an explicitly labelled operator interruption
+record and an artifact hash manifest (seven files). The operator record does not
+pretend to be a runner final report. Interruption record SHA256:
+`91b4d9bb91627db8cb5aa42dc5d83f65a33ee736641d876867938676449c0bbd`.
+Artifact-manifest SHA256:
+`651b2df04805f58e6f9b89cdf0b83ab058e783af30f6d0fc8a2b09de14aa1a29`.
+QA was asked to audit these bindings and the uncertainty classification; there
+is no model text available for a cloud semantic assessment.
+
+## Bounded interruption diagnosis
+
+Only this chat's execution lifecycle, the named runner source and existing private
+artifacts were inspected; no further provider call or unrelated process diagnosis
+was performed. The own-chat lifecycle record identifies
+`exec-8c604b34-8231-4a65-8e18-129d7209aede`, tool session `28275`, source
+`unified_exec_startup`: start **2026-10-25 16:23:08.307 +08:00**, completion
+**16:24:33.776 +08:00**, duration **85.469 s**, status failed, exit 143.
+The later `write_stdin` read returned that already completed status.
+
+The submitted launch chain was exec shell → Python `subprocess.run` → pinned Node
+`cloud-run.mjs`, with no submitted shell timeout or kill command. The runner's
+45-second delivery limit only affects eligibility; its 120-second receive abort
+cannot have expired before an 85.469-second command lifetime. Its signal handlers
+only revoke delivery through an AbortController, no inspected source sends a
+process signal, and handled failures use exit 2. Thus this is not evidence of a
+runner-generated receive watchdog termination. The tool exposes the command-level
+exit but no bound individual shell/Python/Node OS PIDs or signal-sender record;
+the originating layer and reason remain unknown. Root stated it performed no
+termination, restart or service operation, and no concurrent model request.
+
+The separate private diagnostic `runtime/gemini-free8-interruption-audit/command-lifecycle.json`
+has SHA256 `4c422946abb97a094525976d9edc04816e09de7a33a58115b09021ca173a58f2`.
+The original evaluation artifacts and claim are preserved. The zero-USD grant,
+zero monetary reservation and observed billing-disabled Free state are distinct
+from an invoice or numeric balance measurement; no charge, generation-token total,
+eight-case completion, model semantic failure or cloud adoption is claimed.
