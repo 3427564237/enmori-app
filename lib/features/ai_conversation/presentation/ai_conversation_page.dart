@@ -8,6 +8,7 @@ import '../../../core/presentation/enmori_motion.dart';
 import '../../../core/presentation/local_time.dart';
 
 import '../ai_conversation_providers.dart';
+import '../../proactive/domain/proactive.dart';
 import 'ai_plan_draft_page.dart';
 import 'ai_message_search_page.dart';
 import 'ai_status_copy.dart';
@@ -17,10 +18,14 @@ Widget buildAiConversationPage(
   required VoidCallback onBack,
   required VoidCallback onOpenSettings,
   VoidCallback? onOpenPersonas,
+  ValueChanged<SavedFollowUpSource>? onFollowUpRequested,
+  VoidCallback? onOpenFollowUps,
 }) => AiConversationPage(
   onBack: onBack,
   onOpenSettings: onOpenSettings,
   onOpenPersonas: onOpenPersonas,
+  onFollowUpRequested: onFollowUpRequested,
+  onOpenFollowUps: onOpenFollowUps,
 );
 
 /// LI supplies navigation; the feature retains request and session ownership.
@@ -32,6 +37,8 @@ final class AiConversationPage extends ConsumerWidget {
     this.navigationBarBuilder,
     this.onOpenPersonas,
     this.personaContext,
+    this.onFollowUpRequested,
+    this.onOpenFollowUps,
     super.key,
   });
 
@@ -42,6 +49,8 @@ final class AiConversationPage extends ConsumerWidget {
   navigationBarBuilder;
   final VoidCallback? onOpenPersonas;
   final Widget? personaContext;
+  final ValueChanged<SavedFollowUpSource>? onFollowUpRequested;
+  final VoidCallback? onOpenFollowUps;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => _ConversationPage(
@@ -54,6 +63,8 @@ final class AiConversationPage extends ConsumerWidget {
     navigationBarBuilder: navigationBarBuilder,
     onOpenPersonas: onOpenPersonas,
     personaContext: personaContext,
+    onFollowUpRequested: onFollowUpRequested,
+    onOpenFollowUps: onOpenFollowUps,
   );
 }
 
@@ -65,6 +76,8 @@ final class _ConversationPage extends ConsumerStatefulWidget {
     this.navigationBarBuilder,
     this.onOpenPersonas,
     this.personaContext,
+    this.onFollowUpRequested,
+    this.onOpenFollowUps,
     super.key,
   });
 
@@ -75,6 +88,8 @@ final class _ConversationPage extends ConsumerStatefulWidget {
   navigationBarBuilder;
   final VoidCallback? onOpenPersonas;
   final Widget? personaContext;
+  final ValueChanged<SavedFollowUpSource>? onFollowUpRequested;
+  final VoidCallback? onOpenFollowUps;
 
   @override
   ConsumerState<_ConversationPage> createState() => _ConversationPageState();
@@ -260,6 +275,39 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     if (!_ownsCurrentSession || _confirming || _leaving) return;
     if (!ref.read(aiConversationControllerProvider).canBrowseHistory) return;
     _scaffoldKey.currentState?.openDrawer();
+  }
+
+  VoidCallback? _followUpAction(AiConversationState state, AiMessage message) {
+    if (widget.onFollowUpRequested == null ||
+        !state.canSelectConversation ||
+        state.conversationId == null ||
+        SavedFollowUpSource.fromMessage(
+              conversationId: state.conversationId!,
+              message: message,
+            ) ==
+            null) {
+      return null;
+    }
+    final conversation = state.conversationId;
+    return () {
+      if (!_ownsCurrentSession || _confirming || _leaving) return;
+      final current = ref.read(aiConversationControllerProvider);
+      if (!current.canSelectConversation ||
+          current.conversationId != conversation) {
+        return;
+      }
+      final matches = current.messages.where(
+        (m) => m.messageId == message.messageId,
+      );
+      if (matches.length != 1) return;
+      final source = SavedFollowUpSource.fromMessage(
+        conversationId: conversation!,
+        message: matches.single,
+      );
+      final open = widget.onFollowUpRequested;
+      if (source == null || open == null) return;
+      unawaited(_navigate(() => open(source)));
+    };
   }
 
   Future<void> _openConversation(String id) async {
@@ -744,7 +792,10 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                       ],
                       for (final message in state.messages) ...[
                         const SizedBox(height: 16),
-                        _MessageTile(message: message),
+                        _MessageTile(
+                          message: message,
+                          onFollowUp: _followUpAction(state, message),
+                        ),
                       ],
                       if (state.localOutgoingText case final text?)
                         _LocalOutgoing(
@@ -927,7 +978,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             distance: 8,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 7),
-              child: _MessageTile(message: message, bubble: true),
+              child: _MessageTile(
+                message: message,
+                bubble: true,
+                onFollowUp: _followUpAction(state, message),
+              ),
             ),
           ),
         if (state.localOutgoingText case final text?)
@@ -1138,6 +1193,16 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                 if (state.canBrowseHistory) _historyPanel(state),
                 const Divider(),
                 ?widget.personaContext,
+                if (widget.onOpenFollowUps case final openFollowUps?)
+                  ListTile(
+                    key: const Key('ai-follow-up-settings'),
+                    leading: const Icon(Icons.notifications_outlined),
+                    title: Text(context.tr('Requested follow-ups', '明确跟进')),
+                    onTap: () {
+                      _scaffoldKey.currentState?.closeDrawer();
+                      unawaited(_navigate(openFollowUps));
+                    },
+                  ),
                 if (widget.onOpenPersonas case final openPersonas?)
                   ListTile(
                     key: const Key('ai-personas'),
@@ -1468,10 +1533,22 @@ String? _statusCopy(
 };
 
 final class _MessageTile extends StatelessWidget {
-  const _MessageTile({required this.message, this.bubble = false});
+  const _MessageTile({
+    required this.message,
+    this.bubble = false,
+    this.onFollowUp,
+  });
 
   final AiMessage message;
   final bool bubble;
+  final VoidCallback? onFollowUp;
+
+  Widget _followUpButton(BuildContext context) => TextButton.icon(
+    key: ValueKey('ai-follow-up-${message.messageId}'),
+    onPressed: onFollowUp,
+    icon: const Icon(Icons.schedule),
+    label: Text(context.tr('Follow up later', '稍后跟进')),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -1531,6 +1608,7 @@ final class _MessageTile extends StatelessWidget {
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ),
+                if (onFollowUp != null) _followUpButton(context),
               ],
             ),
           ),
@@ -1562,6 +1640,7 @@ final class _MessageTile extends StatelessWidget {
               localTimeLabel(context, message.persistedAt),
               style: Theme.of(context).textTheme.bodySmall,
             ),
+            if (onFollowUp != null) _followUpButton(context),
           ],
         ),
       ),
