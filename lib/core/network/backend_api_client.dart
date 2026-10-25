@@ -580,6 +580,12 @@ final class BackendApiClient {
 
     final kind = switch (code) {
       'REQUEST_INVALID' => AppFailureKind.requestInvalid,
+      'PROACTIVE_REVISION_PRECONDITION_FAILED' =>
+        AppFailureKind.proactiveRevisionPreconditionFailed,
+      'PROACTIVE_INPUT_INVALID' => AppFailureKind.proactiveInputInvalid,
+      'AI_SOURCE_UNAVAILABLE' => AppFailureKind.aiSourceUnavailable,
+      'AI_CONTEXT_SELECTION_CONFLICT' =>
+        AppFailureKind.aiContextSelectionConflict,
       'PERSONA_INVALID' => AppFailureKind.personaInvalid,
       'PERSONA_UNAVAILABLE' => AppFailureKind.personaUnavailable,
       'PERSONA_LIMIT_REACHED' => AppFailureKind.personaLimitReached,

@@ -62,6 +62,12 @@ String localizedFailure(BuildContext context, AppFailure failure) {
     AppFailureKind.aiUnavailable => 'AI 服务暂时不可用。',
     AppFailureKind.aiReplyRejected => '这次回复未通过检查，未显示该回复。',
     AppFailureKind.aiOutcomeUnresolved => '这次请求的结果尚未确认，请先核对结果，不要重复发送。',
+    AppFailureKind.proactiveRevisionPreconditionFailed =>
+      '跟进状态已发生变化，请读取最新状态后复核。',
+    AppFailureKind.proactiveInputInvalid => '跟进设置无效，请核对时间和选项。',
+    AppFailureKind.aiSourceUnavailable => '这条参考来源已不可用，请保留草稿并重新选择。',
+    AppFailureKind.aiContextSelectionConflict =>
+      '本次参考与已有上下文冲突，请复核来源后继续。',
     AppFailureKind.configurationUnavailable => '服务尚未配置完成，暂时无法使用。',
     AppFailureKind.serviceUnavailable => '服务暂时不可用，请检查连接后重试。',
     AppFailureKind.unexpected => '暂时无法完成操作，请先核对当前状态。',
