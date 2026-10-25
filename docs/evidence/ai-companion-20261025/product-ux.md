@@ -18,6 +18,14 @@ The prototype is proposed, synthetic and session-memory only. Local URL during r
 
 C is the recommended candidate, **not LI-selected**. It first preserves existing Conversation containers, current-conversation search, history, whole-conversation deletion and the current retention contract. UI reference projection, proactive identity/delivery, cloud processing, position data and retention-anchor changes remain separately pending.
 
+## Later decision — C entry approved
+
+The preceding delivery paragraph records the pre-selection state. LI subsequently selected **C：连续主入口＋历史／新话题（推荐）** in Integration's human reply `01a171b5-67bd-7ff0-9cfc-023225279b93`, answering the question explicitly limited to entry form. Product independently read that original human reply and the formal decision at Integration commit `2bb638b47e682217007cf02cd505550d88d627cf`, canonical path `docs/decisions/2026-10-25-li-ai-entry-c.md`.
+
+Only P1 is resolved: continuous daily access with existing conversation containers, History/current-conversation search/New topic, whole-conversation deletion, retention, single-draft handling and current session/unknown-result guards. New source UI/data purposes, proactive identity/storage/delivery/retention changes, cloud/provider/budget, location processing and new persistence remain unapproved where no specific contract exists. Prototype controls do not authorize them. App may implement the confirmed entry increment through existing boundaries under Integration coordination.
+
+The initial comparison/prototype is retained, not rewritten as if C had been selected at creation. This documentation-only follow-up stays on the original worker branch/baseline; the Integration-owned decision is read by exact commit, not copied into this worker's ownership. No browser, Flutter, model or device checks were rerun for this status annotation.
+
 ## Source findings and cross-role review
 
 - Q19 allows whole-conversation deletion, not individual-message deletion, and keeps existing source provenance Backend-only. P2 therefore needs a new minimal UI display/navigation contract.
