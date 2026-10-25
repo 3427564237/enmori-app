@@ -29,6 +29,12 @@ implementation and the conditioned synthetic cloud research are now authorized
 within that record; historical Proposed labels are retained. Real deployment,
 data writes, registrations, sends and phone operations remain separately gated.
 
+First implementation checkpoints: [F0 interface and acceptance cases](qa-f0-first-flow.md)
+after the normal `ce6782c` merge, and [v27 artifact readback](qa-v27-artifact.md).
+The actual v27 hash/signature/metadata match its manifest; no device operation was
+performed. F0 shared identity/model-lane and sender cases remain at source review
+with integrated execution Not Run.
+
 ## Authority and baseline readback
 
 Read the original LI request directly at
