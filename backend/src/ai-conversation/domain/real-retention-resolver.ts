@@ -41,6 +41,7 @@ export interface RealRetentionMessageMetadata {
   readonly conversationId: string;
   readonly messageId: string;
   readonly role: "user" | "assistant";
+  readonly origin?: "proactive";
   readonly sequence: number;
   readonly createTime: unknown;
   readonly appendBefore?: unknown;
@@ -170,6 +171,7 @@ function resolve(input: RealRetentionResolverInput): RealRetentionResolution {
         fields["conversationId"] !== input.conversationId ||
         !identity(fields["messageId"]) || ids.has(fields["messageId"]) ||
         (fields["role"] !== "user" && fields["role"] !== "assistant") ||
+        (fields["origin"] !== undefined && (fields["origin"] !== "proactive" || fields["role"] !== "assistant")) ||
         !positiveSafeInteger(fields["sequence"])) return unavailable();
     ids.add(fields["messageId"]);
     ordered.push({ fields, sequence: fields["sequence"] });
@@ -197,7 +199,7 @@ function resolve(input: RealRetentionResolverInput): RealRetentionResolution {
       if (compare(creation, appendBefore) >= 0) lateCopy = true;
       // Once a late physical copy exists, only the old cutoff remains valid.
       // A forged/self-progressed later cutoff fails the equality check above.
-      if (!lateCopy) cutoff = plusSeconds(creation, RETENTION_SECONDS);
+      if (!lateCopy && row.fields["origin"] !== "proactive") cutoff = plusSeconds(creation, RETENTION_SECONDS);
     }
     if (cutoff === undefined) return unavailable();
     previousCreation = creation;

@@ -753,3 +753,59 @@ For LI's single decision packet, these can be accepted separately: **F0 only**,
 technical gate. The notification test choice is separately **in-app only**,
 **T1 one E2E + two transport diagnostics**, or **T2 separate normal windows**.
 No response to C's entry choice is interpreted as any of these approvals.
+
+## Approved F0 persistence slice — 25 October implementation
+
+Implements LI's [first-flow decision](../../decisions/2026-10-25-li-ai-companion-first-flow.md)
+from common baseline `ce6782c`, with the shared Ports `42b0b2a` / `ff00e7c`.
+This slice supplies `FirestoreFirstFlowStore` and the same-transaction
+`FirestoreConversationStore.firstFlowTransaction` bridge. Integration injects
+one shared `withRetainedMessageTimes` gateway, a fixed owner, and (only after a
+named window is approved) the fixed installation and absolute registration
+lease end. Missing installation/window denies registration and dispatch.
+
+Canonical publication atomically appends a genuine standalone assistant,
+`source_use_v2`, parent sequence, occurrence/outbox and one frequency charge.
+It creates no fake user or accepted-pair pointer. The original source is a
+settled real user message; current Auth, binding, account purpose epoch,
+settings grant, live topic, source version and current Persona existence are
+checked again at each stage. Revoke/regrant cannot revive an old occurrence.
+Persona edits and active switches retain the started snapshot; deletion denies.
+The HTTP read models omit authorization scopes, raw source refs and registration
+values. Source-card versions contain metadata only, without raw source IDs.
+
+R-ANCHOR applies to transcript reads, cleanup and maintenance inventory.
+Standalone proactive rows (including tombstones) preserve the prior cutoff;
+a later real user/reply may advance it under the unchanged ordinary rule.
+Owner source resolution and message anchors reread current authority and use
+the existing message-page bound. Read-watermark CAS never appends a message.
+
+Production timestamp conversion uses Firestore `serverTimestamp` for both
+`publishedAt` and the approved scalar `lastAttemptedAt` in the SAME transaction.
+Firestore cannot place that transform inside an array: raw state stores an
+empty `rollingAttemptTimes` plus the scalar; the infrastructure wrapper projects
+that scalar to the bounded inner array. Its nanosecond value is rounded UP for
+the frequency lower bound, so the next 24-hour window cannot start early from
+millisecond truncation. Public occurrence time remains a millisecond projection.
+Later settings/outcome writes preserve both original commit timestamps.
+`publish` performs a new authenticated readback after a definite commit ACK;
+missing/unresolved timestamp evidence returns unknown, never an admission-time
+receipt. Old records receive no fabricated timestamp or provenance backfill.
+
+A lost transaction ACK is read back; no generation or send happens inside a
+transaction or as automatic recovery. Interrupted unpublished work fails;
+`dispatching` becomes unknown and cannot reclaim a sender capability. Published
+`not_started` work still needs the fresh post-credential claim. Off cancels
+unstarted work; preview-only settings changes preserve its eligibility grant.
+Ordinary accepted history does not depend on proactive mode remaining on.
+
+Validation: pinned Node 24.19.0 / TypeScript 7.0.2 strict build, and **461/461**
+local Node tests (all `ai-conversation` cases plus the F0 store cases). The new
+cases include Auth-await zero transactions, exact source and purpose changes,
+staged-write rollback, commit-with-lost-ACK readback, one-use unknown dispatch,
+read CAS, lease expiry, five-second sequential-read freshness, U1/A2/P3/U4/A5,
+and server-timestamp adapter contracts. These are fake-gateway/source tests;
+the adapter fixture simulates transforms and does NOT prove actual Firestore
+commit metadata. Emulator proof, real services/accounts, model calls, device
+registration, provider sends, deployment and device acceptance are not supplied
+by this slice. F1a selection/executor wiring follows separately.
