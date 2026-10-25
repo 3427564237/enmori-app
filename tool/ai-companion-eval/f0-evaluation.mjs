@@ -3,7 +3,7 @@ import { LocalModelLane } from '../../backend/dist/src/ai-runtime/infrastructure
 import { LocalFirstFlowTransport } from '../../backend/dist/src/ai-runtime/infrastructure/local-first-flow-transport.js';
 
 /** Separate F0 corpus: does not change the approved 32-case cloud experiment.
- * No real-run CLI here. QA reviews cases before a separate physical model slot. */
+ * f0-run.mjs requires a separately assigned physical model slot. */
 export function loadF0Cases() {
   const fixture = JSON.parse(readFileSync(new URL('./fixtures/f0-cases.json', import.meta.url)));
   if (fixture.schemaVersion !== 'f0_synthetic_cases_v1' || fixture.cases.length !== 8 ||
