@@ -740,3 +740,41 @@ Cloud regression/free tests: 19/19 passed. The private `mock-free` CLI completed
 eight fake counts/eight fake generations, zero real calls, zero reserved USD.
 Actual free execution is still **Not Run**: no key value has been read, no live
 grant issued and Root's runner review/execution conditions remain outstanding.
+
+## F0 independent semantic result and F1a serializer closure
+
+QA independently reviewed every frozen F0 request/raw response and validated the
+report and source hashes: **1 Pass / 7 Fail**, with only `f0-start-not-complete`
+passing. The failures are old scheduling-request acknowledgement instead of an
+actual follow-up, copied writing instructions, wrong first-person attribution,
+an unsupported current-time claim, and a claimed saved reminder. Protocol 8/8
+does not supersede these failures. QA's private review SHA256 is
+`71016a62c02add8d8555606c892e8c7b237cc88e97577c3032a432a18ac074e1`;
+`review.mjs` validation passed. Original raw/report/template files remain intact.
+
+Following Root's explicit priority, Runtime merged Context `362d8cb` without
+conflicts and adapted `LocalChatTransport` / `simpleChatGates` to its exact F1a
+Port. Only `contextMode=selected_checkins_v1` admits supplied Check-ins; the
+unselected legacy path still rejects them. The projection copies only source
+`occurredAt`, canonical `noteText`, normalized `moodLabel`/`activityLabel`, plus
+the separately allowed dated `replyToAssistant` AI quotation. Empty selected
+sources and reply-only association work without fabricating a user/assistant
+history pair. Current real user text and already authorized history retain order.
+Canonical content validation reuses Check-in domain rules (including Mood-only
+empty Note); it does not rewrite malformed data or authorize a source read.
+
+Source IDs, versions, selection/account/topic keys, Weather and location fields
+are rejected rather than silently accepted. Newly copied JSON cannot invoke an
+inherited source `toJSON` hook to introduce private fields. Context/history/
+permission/expiry checks remain Application/Store responsibilities. Prompt text
+labels historical data and AI quotation, current language/correction priority,
+unknown current state and absent action authority; that wording is not proof of
+model compliance. No model output repair, new remote provider or source lookup.
+
+Pinned strict TypeScript build and 49 focused checks passed: six new F1a adapter
+cases, legacy Chat, shared-lane F0, Persona preview and evaluation harness. All
+24 old production HTTP request bodies remain byte-identical to the frozen golden;
+the original 32-case corpus and preserved 16-case source are unchanged. Evaluation
+bundle manifests now also bind the imported canonical Check-in and shared helper
+compiled files. These are fake HTTP/source tests only. No actual F1a model, store,
+notification or device acceptance is claimed; Root owns final composition checks.
