@@ -9,6 +9,7 @@ import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
 import type { ConversationMaintenance, MaintenanceResult } from "../ports/conversation-maintenance.js";
 
 import { inspectProvenance, parseProvenance, type TransactionalNotePrerequisites } from "./transactional-note-sources.js";
+import { inspectSourceUseV2, parseSourceUseV2 } from "./source-use-v2.js";
 
 const RUNTIME="ai_runtime_fence/current", PROGRESS="ai_cleanup_progress/source_sweep";
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -99,12 +100,33 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
       const retention=resolveRealRetention({ownerAccountId:at.ownerAccountId,conversationId:at.conversationId,
         inventory:{parent:{...parent,ownerAccountId:at.ownerAccountId,conversationId:at.conversationId},messages:rows.map(m=>({
           ownerAccountId:at.ownerAccountId,conversationId:at.conversationId,messageId:m.id,role:m.data.role,sequence:m.data.sequence,
+          ...(m.data.origin === undefined ? {} : {origin:m.data.origin}),
           createTime:m.createTime,...(m.data.appendBefore===undefined?{}:{appendBefore:m.data.appendBefore})}))},now:{precision:"millisecond",instant:this.now()}});
       if(retention.state==="unavailable")unavailable();if(retention.state!=="live")return "whole";
       const sourcePath=`${parentPath}/message_sources/${at.messageId}`,messagePath=`${parentPath}/messages/${at.messageId}`;
       const source=await tx.get(sourcePath),a=rows.find(m=>m.id===at.messageId);
       if(!a)return source?"orphan":"kept";
       if(a.data.role==="user"){if(phase==="message_sources"&&source)unavailable();return "kept";}
+      if(a.data.origin === "proactive") {
+        if(a.data.role !== "assistant" || !exact(a.data,["role","origin","sequence","availability","occurrenceId","category","presentationMode","appendBefore"],["text","presentationProjectionVersion"]) ||
+          !uint(a.data.sequence) || a.data.sequence < 1 || typeof a.data.occurrenceId !== "string" || !UUID.test(a.data.occurrenceId) ||
+          a.data.category !== "explicit_follow_up" || !((a.data.presentationMode === "default" && a.data.presentationProjectionVersion === undefined) ||
+          (a.data.presentationMode === "persona" && a.data.presentationProjectionVersion === "persona_presentation_v1"))) unavailable();
+        if(a.data.availability === "unavailable") {
+          const {text:_text,...metadata}=a.data;
+          if(Object.hasOwn(a.data,"text"))tx.set(messagePath,metadata);
+          if(source)tx.delete(sourcePath);
+          return source || Object.hasOwn(a.data,"text") ? "changed" : "kept";
+        }
+        if(a.data.availability !== "available" || typeof a.data.text !== "string" || !a.data.text.isWellFormed() || !a.data.text.trim()) unavailable();
+        const receipt = parseSourceUseV2(source); if(!receipt)unavailable();
+        const checked = await inspectSourceUseV2(tx,at.ownerAccountId,at.conversationId,receipt,
+          this.utcMilliseconds,()=>{});
+        if(checked.kind === "unavailable")unavailable();
+        if(checked.kind === "valid")return "kept";
+        const {text:_text,...metadata}=a.data;
+        tx.set(messagePath,{...metadata,availability:"unavailable"});tx.delete(sourcePath);return "changed";
+      }
       if(a.data.role!=="assistant"||!exact(a.data,["role","sequence","availability","replyToUserMessageId","presentationMode","appendBefore"],["text","presentationProjectionVersion"])||
         !["available","unavailable"].includes(String(a.data.availability))||typeof a.data.replyToUserMessageId!=="string"||!UUID.test(a.data.replyToUserMessageId)||
         !((a.data.presentationMode==="default"&&a.data.presentationProjectionVersion===undefined)||
@@ -118,6 +140,13 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
         return source||Object.hasOwn(a.data,"text")?"changed":"kept";
       }
       if(typeof a.data.text!=="string"||!a.data.text.isWellFormed()||!a.data.text.trim())unavailable();
+      if(source?.schemaVersion==="source_use_v2"){
+        const receipt=parseSourceUseV2(source);if(!receipt)unavailable();
+        const checked=await inspectSourceUseV2(tx,at.ownerAccountId,at.conversationId,receipt,this.utcMilliseconds,()=>{});
+        if(checked.kind==="unavailable")unavailable();if(checked.kind==="valid")return "kept";
+        const {text:_discarded,...metadata}=a.data;
+        tx.set(messagePath,{...metadata,availability:"unavailable"});tx.delete(sourcePath);return "changed";
+      }
       const parsed=parseProvenance(source);if(!parsed)unavailable();
       const state=await inspectProvenance(tx,this.gateway,this.notePrerequisites,at.ownerAccountId,parsed);
       if(state==="unavailable")unavailable();if(state==="valid")return "kept";

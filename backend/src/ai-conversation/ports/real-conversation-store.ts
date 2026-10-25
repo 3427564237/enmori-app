@@ -40,6 +40,10 @@ export interface StoredConversationMessage {
   readonly messageId: string;
   readonly sequence: number;
   readonly role: "user" | "assistant";
+  readonly origin?: "proactive";
+  readonly occurrenceId?: string;
+  readonly category?: "explicit_follow_up";
+  readonly sources?: readonly import("./owned-sources.js").OwnedSourceCard[];
   /** Actual immutable service metadata; convert only at the HTTP projection. */
   readonly persistedAt: FullPrecisionInstant;
   readonly availability: "available" | "unavailable";
