@@ -36,6 +36,11 @@ check. Earlier 25 route/loopback sender cases are separately recorded. The
 checks at `92c6342`, including the two prerequisite-read recovery cases. These
 are not notification or device acceptance.
 
+The [selected-context review](qa-f1-selected-context.md) preserves the original
+`362d8cb` history-exclusion recovery gap and its `26dd48c` source/fake closure.
+At the latter head, 21 selected-reply and five prepared-selection checks passed
+independently. HTTP/UI/Emulator composition remains a separate gate.
+
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with
 [proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is

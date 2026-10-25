@@ -42,3 +42,26 @@ The preserved `pubspec.lock` SHA-256 is
 `523dfbacd19c0d6e3c33fe9e6e46606ec62f8939bc78f7013810a01d5feb8a96`.
 QA returned the slot immediately after completion. The author's wider test
 counts remain author evidence and are not added to these eight checks.
+
+## Separate daylight-saving fold repair
+
+Product found a second P2 at the earlier App head: rejecting the entire time
+resolution when any candidate was past also rejected a still-future candidate
+during a repeated civil-time hour. QA reviewed repair
+`16e1923bc3041d6384e59d702da5cd8623f4b6f3` and, in a new exclusive slot,
+independently passed only its **2/2** targeted widget counterexamples.
+
+With synthetic Berlin 02:30 candidates at UTC 00:30 and 01:30, and a controlled
+clock at UTC 00:45, both choices remain visible, the elapsed choice is disabled
+and labelled, and neither is selected by default. The future candidate requires
+explicit selection and confirmation before the fixture records its exact UTC
+instant. When the clock is after both candidates, the page rejects them. Source
+inspection also confirms the selected instant is checked again on submission.
+
+This used the same pinned lockfile and `fvm --no-pub`/global flock workflow, with
+no rerun of the previous eight cases. Private evidence is in
+`/home/miku/.local/state/enmori-ai-companion-20261025/qa-review/app-16e1923/`;
+the command exited 0 and the log SHA-256 is
+`d5aaa1e96a75bbdfc7f8198a8af4ec5ebd6f95efa536332c05e02834da88ac49`.
+The slot was returned. These are widget results using a fake time port, not
+independent execution of Android's timezone database or a physical device.
