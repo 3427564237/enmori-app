@@ -21,6 +21,8 @@ export const CONVERSATION_ERRORS: Record<ConversationFailureCode, readonly [numb
   AI_UNAVAILABLE: [503, "AI is temporarily unavailable."],
   AI_REPLY_REJECTED: [502, "The reply could not be accepted."],
   AI_AUTHORITY_CHANGED: [409, "Your permission to continue has changed."],
+  AI_SOURCE_UNAVAILABLE: [404, "This reference is unavailable. Keep your draft and review the sources."],
+  AI_CONTEXT_SELECTION_CONFLICT: [409, "The selected sources conflict with this context. Review them before continuing."],
   AI_OUTCOME_UNRESOLVED: [503, "We couldn’t confirm the result. Check saved messages before trying again."],
 };
 function failure(request: FastifyRequest, reply: FastifyReply, code: ConversationFailureCode): FastifyReply {
