@@ -121,3 +121,51 @@ Green log: `app-send-gate-focused.log`, SHA-256
 Both are under `/home/miku/.local/state/enmori-core-feedback-20261025/`.
 This is source/widget evidence for the identified gating path; no device action,
 real service/model request, build or deployment is claimed.
+
+
+## Automatic today and readable later-contact increment
+
+Authority is the committed LI repair decision above and Integration's exact
+`72fc616ca81d6d7703fc139600ce959d7a84dc9e`
+`api/ai-today-context-contract.md`; Product's bounded packet is
+`e344ab1f3a4993216c195cd0cc82acbb2366686d`. No other data scope is added.
+
+Root composition explicitly enables `aiTodayReferencesEnabledProvider` (default
+false) and overrides `aiTodayTimeZoneProvider`, a
+`Provider<Future<Result<String>> Function()>`, with the existing device IANA
+port's `currentIanaZone` tear-off. When enabled, a missing capability or zone is
+visible failure, never a silent manual/ordinary/UTC fallback. Manual-only legacy
+fakes retain their original semantics unless this explicit switch is enabled.
+
+Automatic Send obtains the trusted device zone, then uses the server's current
+day, five-source receipt and fresh opaque selection keys before one execute.
+It performs no redundant client-owned-record read for normal Send. Optional
+preview reads at most the server-returned five owned IDs for Note/Mood/Activity
+and original time. Preview does not send. The last-checked day/zone, latest-five
+sentinel, explicit off, per-topic source exclusions, and unknown-vs-zero states
+are visible. Exclusions are applied to the server's top five without backfill;
+off sends explicit `sources:[]`. Both persist after success in the topic and
+clear on a new topic/session. Explicit single-record legacy references still
+apply to that reply; the next reply returns to the topic preference.
+
+Every automatic explicit Send freshly prepares even after preview confirmation.
+A changed dependency/history set retains the draft and requires review. Old
+history keys are never reused; only unchanged whole-pair identities can map to
+fresh keys. Once execute dispatches, a generic selection conflict still goes
+through the original operation GET: it is not proof of no saved user message.
+No original-operation recovery code was replaced with a replay shortcut.
+
+The drawer now offers “Ask me later / 稍后联系我”, selecting one available saved
+real-user message from the current topic before the existing typed scheduling
+flow. Assistant/unavailable/local-pending messages cannot become sources; live
+session, topic, content-display and current-route checks protect callbacks.
+Management is a separate entry. Labels and unavailable-service copy were
+simplified without adding an intent, provider/model call, push or new API.
+
+Added five automatic-mode widget/provider cases, two strict automatic wire
+cases, and two later-contact page cases. Existing manual cases remain in place.
+These new cases have NOT been executed here: Root requested all remaining
+Flutter/Dart/Gradle validation centrally. Formatting/analyzer and relevant
+AI/proactive tests are pending that central window. Only `git diff --check`
+was run locally and passed. Prior Send-fix test results above apply only to
+that earlier increment; no new APK, runtime, phone, UAT or Release claim follows.

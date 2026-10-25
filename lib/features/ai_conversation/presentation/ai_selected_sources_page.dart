@@ -44,6 +44,9 @@ final class _AiSelectedSourcesPageState
       }
       if (mounted &&
           ref.read(aiConversationControllerProvider).sessionKey == _session) {
+        final mode=ref.read(aiSelectedSourcesControllerProvider).mode;
+        if(mode==AiReferenceMode.today) {await controller.previewToday();return;}
+        if(mode==AiReferenceMode.off) return;
         await controller.loadRecent();
       }
     });
@@ -62,6 +65,9 @@ final class _AiSelectedSourcesPageState
         (ai.canSend || ai.canRetry);
     final review = state.review;
     final knownIds = state.records.map((record) => record.id).toSet();
+    if(available && state.mode!=AiReferenceMode.manual) {
+      return _automatic(context,state,controller,canReview);
+    }
     return PopScope<void>(
       onPopInvokedWithResult: (didPop, _) {
         final current = ref.read(aiSelectedSourcesControllerProvider);
@@ -308,6 +314,90 @@ final class _AiSelectedSourcesPageState
       mounted &&
       ModalRoute.of(context)?.isCurrent == true &&
       ref.read(aiConversationControllerProvider).sessionKey == _session;
+
+  Widget _automatic(BuildContext context,AiSelectedSourcesState state,
+      AiSelectedSourcesController controller,bool canReview) {
+    final enabled=state.mode==AiReferenceMode.today;
+    final current=state.review;
+    return PopScope<void>(onPopInvokedWithResult:(didPop,_) {
+      if(didPop && ref.read(aiSelectedSourcesControllerProvider).sessionKey==_session) {
+        controller.editSelection();
+      }
+    },child:Scaffold(
+      appBar:AppBar(title:Text(context.tr("Today's Check-ins · local references",'今天的签到 · 本地参考'))),
+      body:SafeArea(child:ListView(padding:const EdgeInsets.all(20),children:[
+        SwitchListTile(key:const Key('ai-today-enabled'),value:enabled,
+          onChanged:state.busy||state.sending?null:controller.setTodayEnabled,
+          title:Text(context.tr("Use today's Check-ins in this topic",'此话题使用今天的签到'))),
+        Text(context.tr('Uses up to the latest 5 from today when you send. Excluded records are not replaced.',
+          '发送时最多参考今天最近 5 条；排除后不会补入更早记录。')),
+        if(!enabled) Padding(padding:const EdgeInsets.symmetric(vertical:16),
+          child:Text(context.tr('Check-in references are off for this topic. You can still chat.',
+            '本话题不新增参考签到，仍可正常聊天。'))),
+        if(state.busy) const LinearProgressIndicator(),
+        if(enabled) ...[
+          const SizedBox(height:12),
+          if(state.today case final today?) ...[
+            Text(context.tr('Last checked: ${today.date} · ${today.timeZone}',
+              '上次核对：${today.date} · ${today.timeZone}')),
+            if(today.hasMore) Text(context.tr('Only the latest 5 are used. There are earlier records in this day.',
+              '仅参考最近 5 条，当天还有更早的记录。'),key:const Key('ai-today-has-more')),
+            if(state.automaticIds.isEmpty) Text(context.tr('No Check-ins were found for this day. You can still chat.',
+              '当天没有签到，仍可正常聊天。'),key:const Key('ai-today-empty')),
+          ] else Text(context.tr('Today’s records are checked when you send. You can preview them here.',
+            '发送时会自动核对当天记录，也可在这里预览。')),
+          if({AiSelectionNotice.unknown,AiSelectionNotice.unavailable}.contains(state.notice))
+            Text(context.tr("Could not load today's Check-ins. Retry or turn them off for this topic.",
+              '签到暂未加载，可重试或关闭本话题签到参考。'),key:const Key('ai-today-unknown')),
+          if(state.excludedCheckInIds.isNotEmpty) Text(context.tr(
+            '${state.excludedCheckInIds.length} excluded in this topic',
+            '本话题已排除 ${state.excludedCheckInIds.length} 条签到')),
+          OutlinedButton(key:const Key('ai-today-preview'),
+            onPressed:canReview?()=>unawaited(controller.previewToday()):null,
+            child:Text(context.tr("Preview today's Check-ins",'预览当天签到'))),
+          for(final id in state.automaticIds) Builder(builder:(context) {
+            final matches=state.records.where((record)=>record.id==id);
+            final record=matches.isEmpty?null:matches.first;
+            final toggle=state.busy||state.sending?null:()=>controller.toggleTodaySource(id);
+            if(record!=null) return _record(context,record,
+              selected:!state.excludedCheckInIds.contains(id),onChanged:toggle);
+            return CheckboxListTile(key:Key('ai-today-source-$id'),
+              value:!state.excludedCheckInIds.contains(id),onChanged:toggle==null?null:(_)=>toggle(),
+              title:Text(context.tr('Check-in preview is not loaded','签到正文尚未加载')),
+              subtitle:Text(context.tr('Uncheck to exclude this record from this topic.',
+                '取消勾选后，本话题不会参考这条记录。')));
+          }),
+        ],
+        if(state.reviewRequired)
+          Padding(padding:const EdgeInsets.symmetric(vertical:16),
+            child:Text(aiSelectionNoticeCopy(context,state.notice==AiSelectionNotice.pastPairsChanged?
+              state.notice:AiSelectionNotice.conflict))),
+        if(state.reviewRequired && current==null)
+          OutlinedButton(key:const Key('ai-reference-recheck'),onPressed:canReview?()=>unawaited(controller.review()):null,
+            child:Text(context.tr('Review the current references','核对当前参考'))),
+        if(!enabled)
+          OutlinedButton(onPressed:canReview?()=>unawaited(controller.review()):null,
+            child:Text(context.tr('Preview reply references','预览本次回复参考'))),
+        if(current!=null)
+          AiSelectedReplyReview(selection:current,excludedHistoryKeys:state.excludedHistoryKeys,
+            confirmed:state.confirmed,expired:!ref.read(aiConversationControllerProvider.notifier)
+              .hasSelectedPreparation(current.selectionRevision),busy:!canReview,
+            onExcludeHistory:() {if(_currentRoute) unawaited(controller.review(
+              excludeDisplayedHistory:true,expectedRevision:current.selectionRevision));},
+            onRefresh:() {if(_currentRoute) unawaited(controller.review(expectedRevision:current.selectionRevision));},
+            onConfirm:() {
+              if(!_currentRoute) return;
+              controller.confirm(current.selectionRevision);
+              final latest=ref.read(aiSelectedSourcesControllerProvider);
+              if(latest.confirmed && latest.review?.selectionRevision==current.selectionRevision && Navigator.of(context).canPop())
+                Navigator.of(context).pop();
+            },onCancel:controller.editSelection),
+        const SizedBox(height:12),
+        Text(context.tr('Previewing or changing references does not send a message.',
+          '预览或更改参考不会发送消息。')),
+      ])),
+    ));
+  }
 
   Widget _record(
     BuildContext context,

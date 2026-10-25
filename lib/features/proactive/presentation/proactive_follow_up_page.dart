@@ -334,7 +334,7 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
           onPressed: widget.onBack,
           icon: const Icon(Icons.arrow_back),
         ),
-        title: Text(context.tr('Follow up later', '稍后跟进')),
+        title: Text(context.tr('Ask me later', '稍后联系我')),
       ),
       body: SafeArea(
         child: Align(

@@ -4,10 +4,19 @@ import 'ai_owned_sources.dart';
 
 /// Opaque keys are valid only for the preparation that issued them. A card is
 /// not a client-side mapping back to a Check-in ID or permission for another send.
+/// Only automatic-day receipts explicitly supply the owned ID for exclusions.
 final class AiSelectedSourceCard {
-  const AiSelectedSourceCard({required this.selectionKey, required this.card});
+  const AiSelectedSourceCard({required this.selectionKey, required this.card,this.checkInId});
   final String selectionKey;
   final AiSourceCard card;
+  final String? checkInId;
+}
+
+final class AiTodayContext {
+  const AiTodayContext({required this.date,required this.timeZone,required this.hasMore});
+  final String date,timeZone;
+  final bool hasMore;
+  int get limit=>5;
 }
 
 final class AiPreparedHistoryPair {
@@ -28,12 +37,23 @@ final class AiPreparedReplySelection {
     required this.expiresAt,
     required Iterable<AiSelectedSourceCard> sourceCards,
     required Iterable<AiPreparedHistoryPair> historyPairs,
+    this.today,
   }) : sourceCards = List.unmodifiable(sourceCards),
        historyPairs = List.unmodifiable(historyPairs);
   final String selectionRevision;
   final DateTime expiresAt;
   final List<AiSelectedSourceCard> sourceCards;
   final List<AiPreparedHistoryPair> historyPairs;
+  final AiTodayContext? today;
+}
+
+/// The server derives the current civil day and reads a bounded owner-only set.
+/// The client cannot choose a date, clock, owner or an enlarged source limit.
+abstract interface class AiTodayReplyRepository {
+  Future<Result<AiSelectedReplyTicket>> prepareToday({
+    required String token,required AiAbortSignal abort,required String timeZone,
+    String? conversationId,String? userMessageId,
+  });
 }
 
 final class AiSelectedReplyTicket {

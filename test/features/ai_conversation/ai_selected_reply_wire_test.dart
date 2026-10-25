@@ -72,6 +72,48 @@ Map<String, dynamic> reply() => {
 };
 
 void main() {
+  test('today prepare sends only IANA zone and parses explicit owner IDs and server day', () async {
+    final dto=preparation();
+    dto['contextSelection']['today']={'date':'2026-10-25','timeZone':'Asia/Singapore','limit':5,'hasMore':false};
+    dto['contextSelection']['sourceCards'][0]['checkInId']='own-check-in';
+    final transport=_Transport(dto,201);
+    final result=await AiWireRepository(transport).prepareToday(token:'t',abort:AiAbortSignal(),timeZone:'Asia/Singapore');
+    final selection=(result as Success<AiSelectedReplyTicket>).value.selection;
+    expect(jsonDecode(transport.requests.single.body!),{
+      'kind':'send','purpose':'checkin_conversation',
+      'contextSelection':{'processing':'local','today':{'timeZone':'Asia/Singapore'}},
+    });
+    expect(selection.today!.date,'2026-10-25');
+    expect(selection.today!.limit,5);
+    expect(selection.sourceCards.single.checkInId,'own-check-in');
+    expect(selection.sourceCards.single.card.version,'opaque-version');
+  });
+
+  test('today zero is valid but missing or invalid day/owner metadata is unknown', () async {
+    Map<String,dynamic> automatic() {
+      final dto=preparation();
+      dto['contextSelection']['today']={'date':'2026-10-25','timeZone':'Asia/Singapore','limit':5,'hasMore':false};
+      dto['contextSelection']['sourceCards'][0]['checkInId']='own-check-in';
+      return dto;
+    }
+    final changes=<void Function(Map<String,dynamic>)>[
+      (d)=>d['contextSelection'].remove('today'),
+      (d)=>d['contextSelection']['today']['date']='2026-02-30',
+      (d)=>d['contextSelection']['today']['timeZone']='UTC',
+      (d)=>d['contextSelection']['today']['limit']=6,
+      (d)=>d['contextSelection']['sourceCards'][0].remove('checkInId'),
+    ];
+    for(final change in changes) {
+      final dto=automatic();change(dto);
+      expect(await AiWireRepository(_Transport(dto,201)).prepareToday(
+        token:'t',abort:AiAbortSignal(),timeZone:'Asia/Singapore'),isA<Failure<AiSelectedReplyTicket>>());
+    }
+    final empty=automatic();empty['contextSelection']['sourceCards']=[];
+    final result=await AiWireRepository(_Transport(empty,201)).prepareToday(
+      token:'t',abort:AiAbortSignal(),timeZone:'Asia/Singapore');
+    expect((result as Success<AiSelectedReplyTicket>).value.selection.sourceCards,isEmpty);
+  });
+
   test('prepare sends only explicit local IDs and accepts minimized late-Retry metadata', () async {
     final transport = _Transport(preparation(), 201);
     final result = await AiWireRepository(transport).prepareSelected(

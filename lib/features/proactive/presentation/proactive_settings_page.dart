@@ -80,7 +80,7 @@ final class _ProactiveSettingsPageState
           onPressed: widget.onBack,
           icon: const Icon(Icons.arrow_back),
         ),
-        title: Text(context.tr('Requested follow-ups', '明确跟进')),
+        title: Text(context.tr('Manage later contacts', '管理预约')),
       ),
       body: SafeArea(
         child: Align(
@@ -101,13 +101,16 @@ final class _ProactiveSettingsPageState
                 else ...[
                   Text(
                     context.tr(
-                      'Only follow-ups you explicitly request',
-                      '只联系你明确要求跟进的事项',
+                      'A later contact about a message you sent',
+                      '围绕已发送的消息，约定稍后联系一次',
                     ),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   ?widget.pushControls,
                   const SizedBox(height: 12),
+                  if(settings==null && !state.settingsBusy && state.failure!=null)
+                    Text(context.tr('Scheduling is temporarily unavailable. You can retry loading; your chat and draft are kept.',
+                      '预约暂时不可用，可重试加载；对话和草稿仍保留。'),key:const Key('proactive-service-unavailable')),
                   Text(
                     context.tr(
                       'Local model · at most once per rolling 24 hours · 8-hour cooldown · at most 3 active requests.',
@@ -129,12 +132,12 @@ final class _ProactiveSettingsPageState
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Text(switch (settings.mode) {
                         ProactiveMode.off => context.tr(
-                          'Requested follow-ups are off',
-                          '明确跟进已关闭',
+                          'Later contacts are off',
+                          '稍后联系已关闭',
                         ),
                         ProactiveMode.on => context.tr(
-                          'Requested follow-ups are on',
-                          '明确跟进已开启',
+                          'Later contacts are on',
+                          '稍后联系已开启',
                         ),
                         ProactiveMode.paused =>
                           settings.pausedUntil == null
