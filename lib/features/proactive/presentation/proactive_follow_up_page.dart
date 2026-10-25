@@ -548,7 +548,9 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
                         '联系设置尚未确认。',
                       ),
                     ),
-                  if (state.settingsUnconfirmed || state.settingsStale) ...[
+                  if (state.settings == null ||
+                      state.settingsUnconfirmed ||
+                      state.settingsStale) ...[
                     Text(
                       context.tr(
                         'Settings are not confirmed. Check them before scheduling.',
@@ -564,6 +566,25 @@ final class _FollowUpPageState extends ConsumerState<ProactiveFollowUpPage> {
                                 .readSettings(),
                       child: Text(
                         context.tr('Check contact settings', '核对联系设置'),
+                      ),
+                    ),
+                  ],
+                  if (state.intents == null) ...[
+                    Text(
+                      context.tr(
+                        'Active requests have not been confirmed. Check them before scheduling.',
+                        '有效预约尚未核对，请先核对再预约。',
+                      ),
+                    ),
+                    OutlinedButton(
+                      key: const Key('proactive-check-active-intents'),
+                      onPressed: state.intentsBusy
+                          ? null
+                          : () => ref
+                                .read(proactiveControllerProvider.notifier)
+                                .readActive(),
+                      child: Text(
+                        context.tr('Check active follow-ups', '核对有效预约'),
                       ),
                     ),
                   ],

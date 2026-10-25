@@ -14,6 +14,68 @@ import 'package:flutter_test/flutter_test.dart';
 import 'proactive_test_support.dart';
 
 void main() {
+  for (final failed in ['settings', 'active']) {
+    testWidgets(
+      'follow-up form recovers a failed first $failed GET without losing choices or creating',
+      (tester) async {
+        final r = await ProactiveRig.create(tester);
+        r.repo.settings = fixtureSettings(mode: ProactiveMode.on, revision: 1);
+        if (failed == 'settings') {
+          r.repo.nextReadSettings = Future.value(
+            const Failure(unavailableResult),
+          );
+        } else {
+          r.repo.nextActive = Future.value(const Failure(unavailableResult));
+        }
+        await _pump(
+          tester,
+          r,
+          ProactiveFollowUpPage(source: fixtureSource, onBack: () {}),
+        );
+        await _verify(tester);
+        await _tap(tester, 'proactive-confirm-time');
+        expect(_schedule(tester).onPressed, isNull);
+        r.repo.nextReadSettings = null;
+        r.repo.nextActive = null;
+        await _tap(
+          tester,
+          failed == 'settings'
+              ? 'proactive-check-settings'
+              : 'proactive-check-active-intents',
+        );
+        expect(r.repo.saved, isEmpty);
+        expect(r.repo.creates, isEmpty);
+        await _visible(tester, 'proactive-date');
+        expect(
+          tester
+              .widget<TextField>(find.byKey(const Key('proactive-date')))
+              .controller!
+              .text,
+          '2026-10-26',
+        );
+        await _visible(tester, 'proactive-time');
+        expect(
+          tester
+              .widget<TextField>(find.byKey(const Key('proactive-time')))
+              .controller!
+              .text,
+          '16:30',
+        );
+        await _visible(tester, 'proactive-confirm-time');
+        expect(
+          tester
+              .widget<CheckboxListTile>(
+                find.byKey(const Key('proactive-confirm-time')),
+              )
+              .value,
+          isTrue,
+        );
+        await _visible(tester, 'proactive-schedule');
+        expect(_schedule(tester).onPressed, isNotNull);
+        await _dispose(tester, r);
+      },
+    );
+  }
   testWidgets(
     'time review then settings ACK then separate explicit one-shot create',
     (tester) async {
