@@ -31,6 +31,8 @@ this review.
   Startup does not extend it after model preload; expired configuration fails
   on restart instead of silently receiving another window. Worker start/ticks
   check the unchanged deadline, and its deadline timer aborts scheduling.
+  This is a controlled verification window, not evidence that long-term
+  background companionship or future scheduled delivery has been fulfilled.
 - **Current authority.** The unchanged actor verifies the fixed Firebase user.
   Each store transaction rereads its binding, requires that owner to equal the
   configured account, and checks accepted purpose and current source state.
