@@ -68,6 +68,9 @@ The [selected-context ledger](qa-f1-selected-context.md) also records the later
 `d1dece9` HTTP history correction: legal late retries can produce interleaved
 user sequences while assistant sequences stay ascending. Exact-head strict
 compilation and four focused HTTP tests passed independently with fetch blocked.
+The same ledger records an independent **source-only** review of client Domain
+`090e996` and selected wire `a7a288f`: no actionable finding, with compilation,
+the eight new wire tests and final F1 UI execution not claimed by QA.
 
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with

@@ -116,3 +116,41 @@ These four tests overlap the earlier three-test HTTP checkpoint and are not
 four additional distinct cases. The actual single F1 model attempt remains
 bound to `6bab960` and used a new topic with empty history; it is not relabeled
 as a run at this later source head.
+
+## Client Domain and wire: source review only
+
+Reviewed Domain `090e99636063c606d0a1b815918177fff93fc05b` and the final Domain/wire
+at `a7a288ff63d695078a16359b05ee669b9ee2b49a`. QA inspected the eight new test
+cases as source but did not run Flutter, copy/repeat those tests, take a service
+slot or invoke a model. No actionable defect was found in this bounded source
+review. It does not establish compilation, test success or completed App UI.
+
+The wire request uses only explicit safe Check-in IDs, at most five unique
+values, with local processing. Retry requires a valid saved-user ID and a
+conversation ID. A zero-source selection remains an explicit selected request.
+Prepare validates the returned conversation, exact allowed fields, matching
+operation/selection expiry and card count. Source cards contain the minimized
+metadata only; source timestamps retain their supplied nanosecond text. Domain
+source/history lists are unmodifiable and their opaque keys are request-scoped.
+
+The history decoder accepts the retained late-retry ordering described above,
+while checking each pair's positive `U < A`, ascending assistant sequences,
+unique message IDs/sequences and disjoint unique selection/history keys. The
+source/card shapes and time representations match the backend transport's
+current projections. This is a comparison of contracts, not an executed Dart
+decode of the earlier redacted HTTP capture.
+
+Execute validates choices against the current prepared keys, requires every
+source to be included or excluded, and rejects foreign/duplicate history keys.
+An inclusion/exclusion overlap is intentionally permitted because exclusion
+wins on the server. The shared execute path retains the original operation
+ticket/key, limits text/body size and validates returned operation/conversation,
+ordinary U/A ordering and exact submitted user text. There is no ordinary-send
+fallback or automatic replay for a selection conflict.
+
+The existing wire call keeps abort/transport failures unresolved and dispatches
+once. Source inspection of the existing controller confirms that every failure
+after dispatch sets its unresolved memory, including an invalid response mapped
+to `unexpected`; that path does not release the input for direct retry. The
+new F1 controller/picker/review integration and final shared composition were
+not frozen at this review and require their own checks.
