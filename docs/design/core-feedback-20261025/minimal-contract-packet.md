@@ -107,6 +107,12 @@ App 已报告独立 widget/IME 对照：0 选择普通输入两种 UI 可发送�
 宣称新行为已通过。修复应把准备动作移入显式 Send，同时保留已有排除意图，不能直接
 绕过 selected path 调用普通 Send。
 
+后续 App 已冻结最小 Send 修复 `6d0e3f6395dc36cfbe4991163d6319aac89d171b`。
+Product 读取该提交的 `docs/evidence/core-feedback-20261025/app.md`：作者报告新增与
+受影响页面 16/16、既有 selector 恢复 6/6 通过，原 2 Pass / 1 Fail 日志保留。
+该修复将 `canSubmit` 与准备编排接在显式 Send，自动当天引用仍是下一独立增量。
+这些数字属于 App 的源码/widget 证据；Product 未复跑，独立 QA 与真机结果仍另记。
+
 ## 4. 跟进：先把已有流程变得可发现、可恢复
 
 当前 AI drawer 的“明确跟进”实际进入设置/已有预约；新建功能位于已保存本人消息的

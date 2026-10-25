@@ -23,22 +23,26 @@ final class FriendModulePage extends ConsumerStatefulWidget {
     this.participationBuilder,
     this.onOpenEvent,
     this.recordBuilder,
+    this.initialDiscovery = false,
     super.key,
   });
   final Future<bool> Function(Uri) openAttribution;
   final ParticipationBuilder? participationBuilder;
   final Future<void> Function(String eventId)? onOpenEvent;
   final Widget Function(BuildContext, CheckIn)? recordBuilder;
+  final bool initialDiscovery;
   @override
   ConsumerState<FriendModulePage> createState() => _FriendModulePageState();
 }
 
 final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
-  int _view = 0;
-  final _visited = <int>{0};
+  late int _view;
+  late final Set<int> _visited;
   @override
   void initState() {
     super.initState();
+    _view = widget.initialDiscovery ? 2 : 0;
+    _visited = {_view};
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(friendDiscoveryControllerProvider(false).notifier).load();
@@ -129,7 +133,7 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
           builder: (_) => Scaffold(
             appBar: AppBar(
               title: Text(
-                context.tr('People You May Want To Know', '你可能想认识的人'),
+                context.tr('People you may know', '可能认识的人'),
               ),
             ),
             body: SafeArea(
@@ -201,7 +205,7 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
                   for (final (index, title) in [
                     context.tr('My Friends', '我的好友'),
                     context.tr('Activity', '动态'),
-                    context.tr('Discover', '发现'),
+                    context.tr('People you may know', '可能认识的人'),
                   ].indexed)
                     ChoiceChip(
                       chipAnimationStyle: EnmoriMotion.chips(context),
