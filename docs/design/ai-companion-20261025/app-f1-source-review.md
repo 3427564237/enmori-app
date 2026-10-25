@@ -15,6 +15,11 @@ Authority remains [LI's first-flow decision](../../decisions/2026-10-25-li-ai-co
 [history-exclusion handoff](history-exclusion-handoff.md). The repository
 Flutter/Dart review checklist supplies a workflow, not new requirements.
 
+Current disposition: the P2 below is **Closed within source, repository-double
+and widget scope** following the independent fixed-head checks recorded at the
+end of this review. Its original failure and intermediate pending dispositions
+remain historical evidence; this is not full integrated or device acceptance.
+
 ## P2 — invalidated pending Send can leave selection permanently busy
 
 **Open at `ee44827` and its `a20927c` integration.** App reported this during its
@@ -160,3 +165,52 @@ original failing no-effect counterexample and the distinct saved-U Retry termina
 path for focused independent verification. Product ran no Flutter. App's separate
 legacy-fixture maintenance is outside this three-file repair and this review;
 neither it nor Root's full-suite status is certified by the focused source fix.
+
+### Independent P2 closure — exact 6b4ec58
+
+QA froze the closure in `dc1704117ea00b77a031d046d8850d7e46583bbf`, parent
+`982df029`. Product read its three QA-document changes, including the complete
+repair disposition in `qa-f1-app-integration.md`, before recording this closure.
+
+QA independently reran the original no-effect counterexample and added the
+saved-user recovery branch on Root
+`6b4ec589c49fc7edf43a4654421c757d2435c9e5`. Product verified that the four relevant
+F1 production files match App `9bc571c`, and the later Root
+`8d5a7240e7a69fbc3d0ae6249e525f37973d33df` has no `lib/` difference from that QA
+head. Product also checked all 412 original files against QA's frozen manifest:
+zero mismatches. The additional QA tests are private overlays, not production
+changes. Product did not run Flutter.
+
+The first fixed-head run ended **0 Pass / 2 Fail** because the private fixtures
+disposed their provider containers after the widget binding checked pending
+timers. Product read both before/after diffs: only `addTearDown(r.dispose)` was
+replaced by `try/finally` with explicit dispose and pump; business assertions
+were unchanged. QA retained that failed log. Product verified the corrected
+original counterexample file is byte-identical on old and repaired snapshots.
+It fails again on original `a20927c` at the same second-prepare assertion and
+passes on `6b4ec58`; the fixed-head pair is **2/2 Pass**.
+
+- Original no-effect path: unresolved original GET still blocks new work;
+  authoritative no-effect retains draft and choices, then admits a new review
+  with confirmation false, no automatic execute and no ordinary fallback.
+- Saved-U path: unresolved readback remains fenced; authoritative user-saved
+  enables only Retry, and the fresh selected preparation names that same U.
+  A late old execute response cannot replace the new review or draft. Ordinary
+  send/retry calls cannot bypass held selected preparation. Explicit confirmation
+  and selected Send leave exactly the original user message, no ordinary
+  preparation/execution, and clear the accepted matching draft and selection.
+
+Verified logs under `/home/miku/.local/state/enmori-ai-companion-20261025/qa-review/`:
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `root-6b4ec58/qa-f1-recovery.log` — retained fixture failure | `9ae0a389ac32c433fd8e302b2e3b51f16805bd084534ee6de449719325485c19` |
+| `root-a20927c/qa-f1-recovery-red-v2.log` — same corrected old-head counterexample | `38e7f7ff6ce55b9d977394e7d84afd0af0a8753c41ccafd256ee5489d24d6530` |
+| `root-6b4ec58/qa-f1-recovery-green-v2.log` — both repaired-head paths | `172e1f74a985d0daec90064806ac136bd94b00562f89f5111fe28218f5c53f61` |
+
+**P2 Closed within source/repository-double/widget scope.** QA returned the
+exclusive Flutter window immediately. The earlier 18 passing checks remain at
+their original head; they were not repeated or renamed as 20 newly executed
+checks on the repair. App's 389 batch, its two repair cases, separate harness and
+historical fixture work, Root's complete suite, model/service and physical-device
+acceptance retain their own evidence and unresolved gates.

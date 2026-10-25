@@ -244,3 +244,29 @@ execution of the original red and saved-U recovery branch is still pending,
 so this annotation does not close the widget or integrated F1 gate. Root and QA
 received the source disposition; original failures and separate fixture work
 remain recorded without being folded into this repair.
+
+## Independent F1 recovery P2 closure — 6b4ec58
+
+Product read QA's three-file closure commit
+`dc1704117ea00b77a031d046d8850d7e46583bbf` over `982df029`.
+QA's original no-effect counterexample and added saved-U recovery branch passed
+**2/2** at Root `6b4ec589c49fc7edf43a4654421c757d2435c9e5`. Product independently
+verified relevant F1 production matches App `9bc571c`, later Root `8d5a724` has
+no `lib/` difference, and all 412 frozen original files match QA's manifest.
+Product read both QA cases and verified the three retained log hashes in the
+detailed review; Product did not execute Flutter.
+
+The first fixed-head 0/2 was a private-fixture cleanup issue. Only explicit
+dispose/pump in `try/finally` changed; the business assertions stayed. With the
+identical corrected original counterexample, old `a20927c` still fails the
+second-prepare assertion and repaired `6b4ec58` passes. Original-operation
+unknown remains fenced; no-effect permits a fresh unconfirmed review, and
+user-saved preparation/Retry stays bound to the same U. Late old execute cannot
+replace fresh review; separate confirmation/Send is required and ordinary
+fallback remains unused.
+
+The P2 is **Closed within source, repository-double and widget scope**. Its
+original red, fixture failure and final green remain recorded. QA returned the
+Flutter window. Earlier 18 passes were not repeated; author 389, separate
+harness/historical fixtures, the full integrated suite, model semantics and
+device acceptance are not closed or recounted by these two checks.
