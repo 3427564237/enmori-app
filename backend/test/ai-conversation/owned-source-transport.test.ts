@@ -12,6 +12,7 @@ const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")
 const conversationId = id(1), messageId = id(2), cardRef = id(3), sourceConversation = id(4), sourceMessage = id(5);
 const headers = { authorization: "Bearer synthetic-source-caller" };
 const resolveUrl = "/v1/me/ai/source-references/resolve";
+const deliveryUrl = "/v1/me/ai/delivery-references/resolve";
 const anchorUrl = `/v1/me/conversations/${conversationId}/messages/${messageId}/anchor`;
 const input = { conversationId, messageId, cardRef };
 const anchor = (c = conversationId, m = messageId): OwnedMessageAnchor => ({ conversationId: c, messageId: m, sequence: 7, pageBefore: 8 });
@@ -200,4 +201,66 @@ test("terminal result and final projection invalidation close the sink instead o
   await assert.rejects(f.app.inject({ method: "POST", url: resolveUrl, headers, payload: input }), /destroy|closed|reset/i);
   f.operations.anchor = async () => ok({ ...anchor(), get sequence() { f.stop(); return 7; } });
   await assert.rejects(f.app.inject({ method: "GET", url: anchorUrl, headers }), /destroy|closed|reset/i);
+});
+
+test("delivery reference resolver is registered only with the optional authorized capability", async t => {
+  const absent = await fixture(); t.after(() => absent.app.close());
+  assert.equal((await absent.app.inject({ method: "POST", url: deliveryUrl, headers, payload: { deliveryRef: cardRef } })).statusCode, 404);
+  assert.equal(absent.verified.length, 0); assert.equal(absent.calls.length, 0);
+  let seen: { principal: string; ref: string; live: boolean } | undefined;
+  const present = await fixture({ change: { deliveryAnchor: async (caller, ref, current) => {
+    const identity = await caller.verifyCurrentAuth(); assert.equal(identity.kind, "verified");
+    seen = { principal: caller.principal.firebaseUid, ref, live: current() };
+    return ok(Object.assign(anchor(sourceConversation, sourceMessage), { intent: "private-intent", messageText: "private-body", registrationValue: "private-token" }));
+  } } }); t.after(() => present.app.close());
+  const response = await present.app.inject({ method: "POST", url: deliveryUrl, headers, payload: { deliveryRef: cardRef } });
+  assert.equal(response.statusCode, 200); assert.equal(response.headers["cache-control"], "no-store");
+  assert.deepEqual(response.json(), { conversationId: sourceConversation, messageId: sourceMessage, sequence: 7,
+    pageBefore: Buffer.from(JSON.stringify({ v: 1, before: 8 })).toString("base64url") });
+  assert.deepEqual(seen, { principal: "synthetic-source-owner", ref: cardRef, live: true });
+  assert(!response.body.includes("private")); assert.equal(parseConversationCursor(response.json().pageBefore), 8);
+  assert.deepEqual(present.verified, ["synthetic-source-caller", "synthetic-source-caller"]);
+});
+
+test("delivery resolver accepts exactly one UUID ref and rejects extra authority, query and control headers", async t => {
+  let calls = 0;
+  const f = await fixture({ change: { deliveryAnchor: async () => { calls++; return ok(anchor()); } } }); t.after(() => f.app.close());
+  for (const body of [{ deliveryRef: "bad" }, { deliveryRef: cardRef, ownerAccountId: id(8) },
+    { deliveryRef: cardRef, messageId }, { deliveryRef: [cardRef, cardRef] }, {}, []])
+    assert.equal((await f.app.inject({ method: "POST", url: deliveryUrl, headers, payload: body })).statusCode, 400);
+  for (const header of ["idempotency-key", "ai-operation-key", "if-match", "if-none-match", "if-unmodified-since"])
+    assert.equal((await f.app.inject({ method: "POST", url: deliveryUrl, headers: { ...headers, [header]: "bad" }, payload: { deliveryRef: cardRef } })).statusCode, 400);
+  assert.equal((await f.app.inject({ method: "POST", url: deliveryUrl + "?ref=other", headers, payload: { deliveryRef: cardRef } })).statusCode, 400);
+  assert.equal((await f.app.inject({ method: "POST", url: deliveryUrl, headers: { "content-type": "application/json" }, payload: "{" })).statusCode, 401);
+  assert.equal((await f.app.inject({ method: "POST", url: deliveryUrl, headers: { ...headers, "content-type": "application/json" }, payload: "{" })).statusCode, 400);
+  assert.equal((await f.app.inject({ method: "POST", url: deliveryUrl, headers, payload: { deliveryRef: cardRef, extra: "x".repeat(8192) } })).statusCode, 413);
+  assert.equal(calls, 0);
+});
+
+test("delivery reference failures never return a fallback or a partially trusted anchor", async () => {
+  for (const [code, status] of [["AI_SOURCE_UNAVAILABLE", 404], ["AI_AUTHORITY_CHANGED", 409], ["AI_UNAVAILABLE", 503]] as const) {
+    const f = await fixture({ change: { deliveryAnchor: async () => ({ kind: "failure", code }) } });
+    try {
+      const response = await f.app.inject({ method: "POST", url: deliveryUrl, headers, payload: { deliveryRef: cardRef } });
+      assert.equal(response.statusCode, status); assert.equal(response.json().error.code, code);
+      assert.equal(response.json().conversationId, undefined); assert.equal(response.json().pageBefore, undefined);
+    } finally { await f.app.close(); }
+  }
+  const bad = await fixture({ change: { deliveryAnchor: async () => ok({ ...anchor(), pageBefore: 7 }) } });
+  try { assert.equal((await bad.app.inject({ method: "POST", url: deliveryUrl, headers, payload: { deliveryRef: cardRef } })).statusCode, 503); }
+  finally { await bad.app.close(); }
+});
+
+test("delivery resolver stops admission and closes cancelled or invalidated responses", async () => {
+  let calls = 0;
+  const stopped = await fixture({ accepting: () => false, change: { deliveryAnchor: async () => { calls++; return ok(anchor()); } } });
+  try { assert.equal((await stopped.app.inject({ method: "POST", url: deliveryUrl, headers, payload: { deliveryRef: cardRef } })).statusCode, 503); assert.equal(calls, 0); }
+  finally { await stopped.app.close(); }
+  const terminated = await fixture({ change: { deliveryAnchor: async () => ({ kind: "terminated" }) } });
+  try { await assert.rejects(terminated.app.inject({ method: "POST", url: deliveryUrl, headers, payload: { deliveryRef: cardRef } }), /destroy|closed|reset/i); }
+  finally { await terminated.app.close(); }
+  let late!: Awaited<ReturnType<typeof fixture>>;
+  late = await fixture({ change: { deliveryAnchor: async () => { await Promise.resolve(); late.stop(); return ok(anchor()); } } });
+  try { await assert.rejects(late.app.inject({ method: "POST", url: deliveryUrl, headers, payload: { deliveryRef: cardRef } }), /destroy|closed|reset/i); }
+  finally { await late.app.close(); }
 });

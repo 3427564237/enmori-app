@@ -13,6 +13,10 @@ export interface OwnedSourceOperations {
     current: () => boolean): Promise<ConversationResult<OwnedSourceTarget>>;
   anchor(caller: ConversationCaller, conversationId: string, messageId: string,
     current: () => boolean): Promise<ConversationResult<OwnedMessageAnchor>>;
+  /** Optional explicit first-flow composition. An opaque delivery reference
+   * grants no access until the wrapper resolves and revalidates its message. */
+  deliveryAnchor?(caller: ConversationCaller, deliveryRef: string,
+    current: () => boolean): Promise<ConversationResult<OwnedMessageAnchor>>;
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -93,6 +97,14 @@ export async function registerOwnedSourceRoutes(app: FastifyInstance, identity: 
         !uuid(body.conversationId) || !uuid(body.messageId) || !uuid(body.cardRef)) return failure(request, reply, "REQUEST_INVALID");
       const input = { conversationId: body.conversationId, messageId: body.messageId, cardRef: body.cardRef };
       return read(request, reply, (caller, current) => operations.resolve(caller, input, current), sourceView);
+    });
+    const deliveryAnchor = operations.deliveryAnchor?.bind(operations);
+    if (deliveryAnchor) scope.post("/v1/me/ai/delivery-references/resolve", { bodyLimit: 8192 }, async (request, reply) => {
+      const body = request.body;
+      if (!clean(request, true) || !record(body) || !exact(body, ["deliveryRef"]) || !uuid(body.deliveryRef))
+        return failure(request, reply, "REQUEST_INVALID");
+      const deliveryRef = body.deliveryRef;
+      return read(request, reply, (caller, current) => deliveryAnchor(caller, deliveryRef, current), anchorView);
     });
     scope.get<{ Params: { conversationId: string; messageId: string } }>(
       "/v1/me/conversations/:conversationId/messages/:messageId/anchor", { bodyLimit: 8192, exposeHeadRoute: false }, async (request, reply) => {

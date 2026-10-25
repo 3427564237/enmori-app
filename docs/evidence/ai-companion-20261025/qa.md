@@ -24,6 +24,18 @@ The [first actual F0 semantic review](qa-f0-semantic-review.md) is **1 Pass /
 7 Fail / 0 unreviewed**, despite eight protocol-eligible outputs. Its semantic
 gate remains Fail. It is separate from the unchanged local24 12/12 result.
 
+The [single F0 prompt comparison](qa-f0-semantic-comparison.md) is **5 Pass /
+3 Fail / 0 unreviewed** on the same eight cases and unchanged criteria. The
+original 1/7 is preserved separately; F0 semantic acceptance remains Fail.
+
+The [Delivery recovery review](qa-delivery-recovery.md) closes the independently
+reproduced reservation leak at `ca50765` using the original actual-class fake
+counterexample, 24 targeted regressions and a separate unknown-physical-outcome
+check. Earlier 25 route/loopback sender cases are separately recorded. The
+[composed App review](qa-app-first-flow.md) adds eight independent widget/route
+checks at `92c6342`, including the two prerequisite-read recovery cases. These
+are not notification or device acceptance.
+
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with
 [proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is
