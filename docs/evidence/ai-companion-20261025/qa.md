@@ -23,6 +23,12 @@ gates remain separate. The later Admin sender-retry finding and its corrected
 Delivery `b8b8532` / Context `98447a9` proposal are preserved in the contract
 ledger; actual transport behavior remains unverified.
 
+Subsequent authority checkpoint: QA directly verified LI's new replies and the
+durable [first-flow scope record](qa-approved-scope.md) at `26af8c9`. F0/F1a/D1
+implementation and the conditioned synthetic cloud research are now authorized
+within that record; historical Proposed labels are retained. Real deployment,
+data writes, registrations, sends and phone operations remain separately gated.
+
 ## Authority and baseline readback
 
 Read the original LI request directly at

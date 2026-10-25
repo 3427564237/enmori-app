@@ -1,5 +1,9 @@
 # QA review of proposed F0/F1 physical contracts
 
+This file preserves the chronological pre-decision reviews. The later
+[LI authority checkpoint](qa-approved-scope.md) records the specific granted
+implementation/research scope without turning these reviews into runtime proof.
+
 25 October 2026. Independently read Context's complete appended contract at
 `3ed4b3ed6a97f501069c692e1b98a47da7db4305` and the corresponding Delivery
 revision at `38c81660b5c3cf33566fddacf5d79ff03ec1ef44`. These commits change

@@ -11,6 +11,12 @@ Review baseline: `b81d93ffd219011dbc0918daca5c82fd83e7ba4a`. QA branch:
 source, model, artifact and observation time. A later test does not erase an
 earlier failure.
 
+Later scope selection is traced in [the QA authority checkpoint](qa-approved-scope.md):
+LI approved F0/F1a/D1 implementation and conditional bounded synthetic cloud
+research at decision `26af8c9`. This selects the named behavior; it does not
+change any Not Run result into Pass or authorize real deployment/data/device
+operations. F1b/location/automatic triggers remain outside that selected slice.
+
 ## Verdict and evidence rules
 
 - **Pass** means the row's success condition was observed at the listed layer,
