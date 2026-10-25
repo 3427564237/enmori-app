@@ -721,3 +721,36 @@ foreground rendering, background/closed-device delivery, real restart atomicity,
 APK, native click/unread, TalkBack, iOS, cross-network, UAT, Release or Done.
 QA must independently review the exact commit and the gaps above. Existing v26
 history/search/language/calendar evidence remains a separate historical layer.
+
+## Authorized implementation checkpoint — S1 sender
+
+LI's [first-flow implementation decision](../../decisions/2026-10-25-li-ai-companion-first-flow.md)
+now approves bounded F0/F1a/D1 source work. This branch fast-forwarded cleanly to
+`ce6782c2337267cd991b008560b5df91a8cb208b` before implementation. Earlier proposal
+text and failed evidence above remain historical. Real registration, Firestore
+writes, deployment, model runs and FCM calls are still outside this checkpoint.
+
+`backend/src/proactive/infrastructure/single-post-fcm-sender.ts` implements S1
+with injected public Credential and fetch, fixed production FCM endpoint,
+generic/hidden content, REST `NORMAL`/`0s`, no redirects and no retry/fallback.
+It snapshots the packet, checks before/after credential acquisition and after
+the asynchronous claim, returns only safe accepted/rejected/unknown/not-attempted
+outcomes and never returns/logs vendor bodies or credentials. The application
+will supply the actual current-authority/store claim through its shared Port;
+this sender alone is not the transaction boundary.
+
+The strict pinned TypeScript build passes. Targeted tests pass **41/41**: the
+29 existing policy cases and 12 sender cases. The sender tests use real Node
+native fetch against an ephemeral **127.0.0.1-only** HTTP server, after checking
+the adapter's fixed FCM target at the injected boundary. Accepted response, 401,
+503, redirect denial, reset after receipt, abort and a real native HTTP deadline
+each have one received POST; redirect target receives none. Delayed credential
+and claim followed by invalid authority, credential failure, losing/unknown claim,
+initial abort and malformed inputs emit zero requests. Hidden preview and malformed
+success ACK handling also have explicit cases. Raw output is owner-local
+`proactive/sender-policy.tap` and `sender-build.log`. No FCM/OAuth request occurred.
+
+These are isolated adapter/HTTP observations, not Firebase TLS/IAM/provider or
+device acceptance. F0 store/source Ports, complete application/worker/transport,
+atomic publication, restart persistence and real model composition remain the
+next implementation slice, coordinated with Context and Integration.
