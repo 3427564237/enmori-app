@@ -69,3 +69,40 @@ fresh today/off selection, excluded-ID matching, changed/deleted source,
 expired/midnight preparation, and same-topic draft preservation. HTTP tests must
 exercise the real route/serializer and should use fake context/model boundaries;
 these source findings do not require a new model call.
+
+## App source follow-up
+
+QA read all eight production changes and four test-file changes in App candidate
+`abf75c507cb26d04b863fbafe51fdbd7cf7e4957`, based on the earlier Send repair
+`6d0e3f6`. No new blocking defect was found in this source review.
+
+- Today and off modes prepare fresh on every explicit Send. Today carries only
+  the device IANA zone; the server supplies the day and bounded owned IDs. Missing
+  zone/capability remains an explicit failure, with no manual/history/UTC fallback.
+- Optional preview reads at most the returned five owned records. Exclusions
+  retain owned IDs and map onto fresh selection keys; no sixth record is fetched
+  to replace an excluded one. Topic off uses explicit zero sources. Successful
+  sends preserve topic off/exclusions; a new topic clears them.
+- Unknown/dispatched conflict still blocks another logical send and requires the
+  original operation readback. Existing expiry, session/consent/background fences
+  and saved-User retry remain in the same controller.
+- The later-contact chooser filters current-topic visible saved User messages,
+  rechecks session/topic/source after selection, and uses the existing typed
+  follow-up action. Previewing/selecting a message does not dispatch chat; the
+  composer remains owned by its existing controller.
+
+QA also read the then-current Integration wiring at HEAD `15ad082`: the working
+file enables today references under `ControlledDemoApp.companionFirstFlowEnabled`
+and reuses `followUpTimePortProvider.currentIanaZone`. This is evidence for that
+composition/flag path, not a claim that every app root enables the feature.
+The format-adjusted avatar provider/editor still retain the session-bound pending
+attempt documented in `qa-avatar-source-review.md`.
+
+No new tests were executed at this checkpoint. The next independent run is
+limited to the original three Send counterexamples and avatar route reentry,
+after Root freezes its integrated head and releases the shared Flutter slot.
+
+Root's analyzer subsequently caught the local `review` variable shadowing the
+`review()` method in `previewToday`. QA read App correction `7fef973`: it only
+renames that local and its uses to `preparedReview`. The earlier source review
+was not a compile check; the correction adds no behavior or execution evidence.
