@@ -960,3 +960,45 @@ approved read-state path is now explicitly tagged first-flow candidate. This
 specific assertion mismatch was reported to Integration, which owns its shared
 contract/test update. It does not change the 24-case cleanup result. Raw output:
 `timeout-combined.tap`. Independent QA rerun of the cleanup fix remains pending.
+
+Integration's original `edaad75411481436c751f30032c340167636b224` now includes
+the cleanup fix, actual bootstrap/source wrappers, Context's F1a closure and the
+explicit candidate-environment assertion. This worker fast-forwarded to that
+exact original commit and reran the strict build and 15 affected test files:
+**258/258 pass**. The earlier single normative assertion failure is closed in
+this tree. Raw output: `integrated-build.log` / `integrated-source-cleanup.tap`.
+This is author-run verification of the integrated source tree, with no actual
+model, external notification or Firebase service invocation by this worker.
+
+QA subsequently reported its independent original-counterexample replay of
+`ca50765` closed the reservation-leak finding. Its separate 24-case fake
+Application/composition run passed, including current-auth revocation and unknown
+cleanup ACK. It confirmed the old intent never published or called the sender,
+while the next intent could generate and canonically publish. That replay's
+original sender stub did not claim a dispatch; its total next-intent unavailable
+result is not an FCM observation. QA retained an initial fixture failure from
+reusing a consumed Response and corrected the fixture to create one per call.
+The formal QA documentation checkpoint will supply the independent record.
+
+## Optional delivery-reference navigation capability
+
+Integration assigned the remaining approved notification locator seam: an opaque
+deliveryRef must resolve to its exact authorized message without expanding the
+public intent DTO. `OwnedSourceOperations` now has optional
+`deliveryAnchor(caller, deliveryRef, current)`. Only a composition supplying that
+capability registers `POST /v1/me/ai/delivery-references/resolve`; otherwise it is
+absent. The exact request is `{deliveryRef}` with a canonical UUID. Its direct
+response is the existing minimized message anchor with the same checked cursor.
+
+The transport reads no Store and derives no authority from the opaque reference.
+Integration owns reference-to-canonical-message lookup, fresh source/owner/
+retention verification, API inventory and bootstrap registration. The route
+reuses current-auth, admission, strict input/header/query, bounded-body and final
+emit protections. No notification registration or provider call is introduced.
+
+Strict build and **16/16 source-navigation HTTP fake tests** pass, including four
+new delivery-reference cases: capability absence, precise allowlisted response,
+malformed input/control headers, safe distinct failures, invalid cursor, terminal
+request and stopped admission. Owner-local raw output is
+`delivery-anchor-build.log` / `delivery-anchor-http.tap`. This is transport evidence
+only; it is not real notification, device or resolver-authority acceptance.
