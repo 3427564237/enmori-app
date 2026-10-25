@@ -375,6 +375,7 @@ final class _AiMessageSearchPageState
             message.availability == AiAvailability.available
                 ? message.text ?? ''
                 : context.tr('Message unavailable', '消息不可用'),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5),
           ),
         ],
       ),

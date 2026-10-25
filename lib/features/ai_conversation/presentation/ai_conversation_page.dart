@@ -84,6 +84,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     with WidgetsBindingObserver {
   final _message = TextEditingController();
   final _messageFocus = FocusNode();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _historyScroll = ScrollController();
   final _latestVisible = ValueNotifier(false);
   bool _latestUpdatePending = false;
@@ -156,6 +157,16 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   bool get _ownsCurrentSession =>
       mounted &&
       ref.read(aiConversationControllerProvider).sessionKey == _sessionKey;
+
+  void _backFromChat() {
+    if (!_ownsCurrentSession) return;
+    final scaffold = _scaffoldKey.currentState;
+    if (scaffold?.isDrawerOpen == true) {
+      scaffold!.closeDrawer();
+      return;
+    }
+    unawaited(_navigate(widget.onBack));
+  }
 
   Future<void> _navigate(
     VoidCallback navigate, {
@@ -730,6 +741,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         _LocalOutgoing(
                           text: text,
                           identity: state.localOutgoingKey!,
+                          active: state.canCancel,
                         ),
                       if (state.canCancel) const _TypingIndicator(),
                       if (state.nextCursor case final before?) ...[
@@ -886,6 +898,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             child: _LocalOutgoing(
               text: text,
               identity: state.localOutgoingKey!,
+              active: state.canCancel,
             ),
           ),
         if (state.canCancel)
@@ -1032,9 +1045,10 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     return PopScope<void>(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) unawaited(_navigate(widget.onBack));
+        if (!didPop) _backFromChat();
       },
       child: Scaffold(
+        key: _scaffoldKey,
         onDrawerChanged: (open) {
           if (!open || !_ownsCurrentSession) return;
           final current = ref.read(aiConversationControllerProvider);
@@ -1442,7 +1456,8 @@ final class _MessageTile extends StatelessWidget {
                           '此回复已不可用。',
                         )
                       : message.text ?? '',
-                  style: const TextStyle(height: 1.45),
+                  style: Theme.of(context).textTheme.bodyLarge
+                      ?.copyWith(height: 1.5),
                 ),
                 const SizedBox(height: 6),
                 Semantics(
@@ -1478,6 +1493,8 @@ final class _MessageTile extends StatelessWidget {
               message.availability == AiAvailability.unavailable
                   ? context.tr('This reply is no longer available.', '此回复已不可用。')
                   : message.text ?? '',
+              style: Theme.of(context).textTheme.bodyLarge
+                  ?.copyWith(height: 1.5),
             ),
             const SizedBox(height: 6),
             Text(
@@ -1492,9 +1509,14 @@ final class _MessageTile extends StatelessWidget {
 }
 
 final class _LocalOutgoing extends StatelessWidget {
-  const _LocalOutgoing({required this.text, required this.identity});
+  const _LocalOutgoing({
+    required this.text,
+    required this.identity,
+    required this.active,
+  });
   final String text;
   final Object identity;
+  final bool active;
   @override
   Widget build(BuildContext context) => Align(
     key: ObjectKey(identity),
@@ -1513,10 +1535,17 @@ final class _LocalOutgoing extends StatelessWidget {
                 style: Theme.of(context).textTheme.labelMedium,
               ),
               const SizedBox(height: 6),
-              Text(text, key: const Key('ai-local-outgoing')),
+              Text(
+                text,
+                key: const Key('ai-local-outgoing'),
+                style: Theme.of(context).textTheme.bodyLarge
+                    ?.copyWith(height: 1.5),
+              ),
               const SizedBox(height: 6),
               Text(
-                context.tr('Sending…', '正在发送…'),
+                active
+                    ? context.tr('Sending…', '正在发送…')
+                    : context.tr('Not confirmed as saved', '尚未确认保存'),
                 style: Theme.of(context).textTheme.labelSmall,
               ),
             ],
