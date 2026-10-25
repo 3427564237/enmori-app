@@ -61,7 +61,7 @@ projection. Closure requires a fix checkpoint and focused review/validation.
 Product independently inspected all five files in
 `bd10a8e1598e71f040e38fd3330f7e5baaf64859`, whose parent is the original
 `629a22d7b00580e2a39360efd1270a7bd7ac7e94` review checkpoint. **The reported source
-finding is addressed; QA's independent execution remains a separate open gate.**
+finding is addressed. QA subsequently closed its focused widget gate below.**
 The original P1 and its counterexample above remain part of the record.
 
 The shared `canDisplayAiMessage` predicate now gates the chat body, search
@@ -81,8 +81,25 @@ selected source remaining hidden across background/resume until fresh exact read
 App reports 27/27 focused checks and clean analysis of four Dart files. Product
 verified the local author log's 27-pass line, analysis result and SHA-256
 `8995ed9031bc7c284895dd0702414a727a527ec062f6776b3b36cf2c8b6e1a11`
-(`app-search-display-gate.log`); Product did not execute Flutter. QA acknowledged
-the fix diff and is awaiting its coordinated window for independent execution.
+(`app-search-display-gate.log`); Product did not execute Flutter. QA initially
+acknowledged the fix diff while awaiting its coordinated execution window.
+
+### Independent QA closure — exact bd10a8e
+
+QA reported independent source inspection and **3/3** new counterexamples at
+exact `bd10a8e1598e71f040e38fd3330f7e5baaf64859`: the hidden direct match is absent
+while an unrelated user message remains searchable; denial masks an already open
+neighbour context and the captured Next cannot restore it; the selected source
+stays hidden across background/resume until fresh exact read. QA's reported log
+SHA-256 is `254f52c289188ea1abd0bbe772c8990dd2985720f851c39d63de72471a1dfa88`.
+QA returned the Flutter window to Integration. Its separate evidence is
+`9c65bb6ffc1fbdae7cf3d29b5caa02bca902127c`,
+`docs/evidence/ai-companion-20261025/qa-app-source-search.md`; Product read that
+record. QA did not execute an old-head red run, and none is inferred here.
+
+**P1 closed within the independently reviewed source/widget scope.** The original
+629a22d failure remains above. QA's three cases are not added to App's 27 or 104,
+and this focused closure is not a full source UI, runtime, device or F1/D1 result.
 
 ## Other inspected boundaries
 
@@ -100,7 +117,7 @@ the fix diff and is awaiting its coordinated window for independent execution.
 
 No other blocking source finding was identified in the reviewed scope at the
 original checkpoint. The focused repair above addresses the P1 source finding;
-it does not establish independent widget acceptance or complete F0/F1/D1.
+the attributed QA closure covers its three counterexamples, not complete F0/F1/D1.
 
 ## Validation attribution
 
