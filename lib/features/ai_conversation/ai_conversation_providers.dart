@@ -5,15 +5,18 @@ import 'package:flutter/widgets.dart';
 
 import '../account/account_preferences_providers.dart';
 import '../account/domain/account_repository.dart';
+import '../account/content_access.dart';
 
 import '../../core/result/result.dart';
 import '../auth/auth_providers.dart';
 import '../auth/domain/auth_repository.dart';
 import 'domain/ai_conversation.dart';
 import 'domain/ai_conversation_repository.dart';
+import 'domain/ai_owned_sources.dart';
 import 'presentation/ai_conversation_state.dart';
 
 export 'domain/ai_conversation.dart';
+export 'domain/ai_owned_sources.dart';
 export 'presentation/ai_conversation_state.dart';
 
 // No ordinary/demo transport is composed. The explicit synthetic harness injects
@@ -21,6 +24,8 @@ export 'presentation/ai_conversation_state.dart';
 final aiConversationRepositoryProvider = Provider<AiConversationRepository?>(
   (ref) => null,
 );
+
+final aiCompanionReferencesEnabledProvider = Provider<bool>((ref) => false);
 
 final aiConversationNowProvider = Provider<Duration Function()>((ref) {
   final clock = Stopwatch()..start();
@@ -63,6 +68,11 @@ class AiConversationController extends Notifier<AiConversationState> {
   int _assistantRevision = 0;
   int _requestNumber = 0;
   int _commandVersion = 0;
+  int _messageReadRevision = 0;
+  List<String> _lastReadMessageIds = const [];
+  final _unverifiedReplyTargets = <String>{};
+  AiMessageLocation? _location;
+  String? _replyToMessageId;
   AiMessage? _retryUser;
   String? _localOutgoingText, _outgoingMessageId;
   Object? _localOutgoingKey;
@@ -73,11 +83,29 @@ class AiConversationController extends Notifier<AiConversationState> {
 
   TextEditingValue _draft = TextEditingValue.empty;
   Object? _draftSessionKey;
+  Object? _draftEditor;
   TextEditingValue get draft => _draft;
   TextEditingValue draftFor(Object sessionKey) =>
       identical(_draftSessionKey, sessionKey) ? _draft : TextEditingValue.empty;
-  void updateDraft(TextEditingValue value, {required Object sessionKey}) {
+  void claimDraftEditor(Object editor, {required Object sessionKey}) {
+    if (ref.mounted && state.sessionKey == sessionKey) _draftEditor = editor;
+  }
+
+  bool ownsDraftEditor(Object editor, {required Object sessionKey}) =>
+      ref.mounted &&
+      state.sessionKey == sessionKey &&
+      identical(_draftEditor, editor);
+  void releaseDraftEditor(Object editor) {
+    if (identical(_draftEditor, editor)) _draftEditor = null;
+  }
+
+  void updateDraft(
+    TextEditingValue value, {
+    required Object sessionKey,
+    Object? editor,
+  }) {
     if (!ref.mounted || state.sessionKey != sessionKey) return;
+    if (editor != null && !identical(_draftEditor, editor)) return;
     _draftSessionKey = sessionKey;
     if ({
       AiConversationPhase.limited,
@@ -95,6 +123,7 @@ class AiConversationController extends Notifier<AiConversationState> {
     _shutdown();
     _draft = TextEditingValue.empty;
     _draftSessionKey = null;
+    _draftEditor = null;
     _localOutgoingText = null;
     _localOutgoingKey = null;
     _outgoingMessageId = null;
@@ -119,10 +148,30 @@ class AiConversationController extends Notifier<AiConversationState> {
     _historyCursor = null;
     _historyError = null;
     _historyLoaded = false;
+    _messageReadRevision = 0;
+    _lastReadMessageIds = const [];
+    _unverifiedReplyTargets.clear();
+    _location = null;
+    _replyToMessageId = null;
     ref.onDispose(_shutdown);
-    final lifecycle = _AiLifecycleObserver(cancel);
+    final lifecycle = _AiLifecycleObserver(_suspend);
     WidgetsBinding.instance.addObserver(lifecycle);
     ref.onDispose(() => WidgetsBinding.instance.removeObserver(lifecycle));
+    ref.listen(contentAccessProvider, (_, _) {
+      _unverifiedReplyTargets.addAll(
+        state.messages.where((m) => m.isProactive).map((m) => m.messageId),
+      );
+      if (_location != null) {
+        _invalidateReads();
+        _location = AiMessageLocation(
+          locator: _location!.locator,
+          phase: AiMessageLocationPhase.failed,
+        );
+        _show(state.phase, clear: true);
+      } else if (_replyToMessageId != null) {
+        _show(state.phase);
+      }
+    });
     ref.listen(accountSettingsSnapshotProvider, (previous, next) {
       if (next?.consent == OptionalProcessingConsent.rejected) {
         cancel();
@@ -180,6 +229,17 @@ class AiConversationController extends Notifier<AiConversationState> {
         _reads.isEmpty &&
         !_memory.deleting &&
         !_memory.deleted;
+    final located =
+        _location == null || _location!.phase == AiMessageLocationPhase.ready;
+    final replyAvailable =
+        _replyToMessageId == null ||
+        (!_unverifiedReplyTargets.contains(_replyToMessageId) &&
+            messages.any(
+              (m) =>
+                  m.messageId == _replyToMessageId &&
+                  m.isProactive &&
+                  m.availability == AiAvailability.available,
+            ));
     return AiConversationState(
       sessionKey: _memory.key,
       phase: phase,
@@ -195,16 +255,27 @@ class AiConversationController extends Notifier<AiConversationState> {
       nextCursor: nextCursor,
       statusMessage: statusMessage,
       canSend:
-          ready && !terminalView && !_memory.unresolved && _retryUser == null,
+          ready &&
+          located &&
+          replyAvailable &&
+          !terminalView &&
+          !_memory.unresolved &&
+          _retryUser == null,
       canRetry:
-          ready && !terminalView && !_memory.unresolved && _retryUser != null,
-      canCheckResult: ready && hasTarget && _memory.operationId != null,
+          ready &&
+          located &&
+          !terminalView &&
+          !_memory.unresolved &&
+          _retryUser != null,
+      canCheckResult:
+          ready && located && hasTarget && _memory.operationId != null,
       canCancel: available && generating,
       // R-A can stop an ordinary read too; readBusy must not trap the user in
       // recovery. Only an already dispatched target has this unknown-result exit.
       canLeaveWithoutRetrying:
           available &&
           hasTarget &&
+          located &&
           _memory.operationId != null &&
           _memory.unresolved &&
           !generating &&
@@ -213,6 +284,7 @@ class AiConversationController extends Notifier<AiConversationState> {
       canDelete:
           available &&
           hasTarget &&
+          located &&
           _reads.isEmpty &&
           phase != AiConversationPhase.deleting &&
           phase != AiConversationPhase.unauthenticated,
@@ -221,9 +293,13 @@ class AiConversationController extends Notifier<AiConversationState> {
           !generating &&
           _reads.isEmpty &&
           !_memory.deleting &&
-          _memory.conversationId != null &&
+          (_memory.conversationId != null || _location != null) &&
           (!_memory.unresolved || _memory.deleted),
       readBusy: _reads.isNotEmpty,
+      messageReadRevision: _messageReadRevision,
+      lastReadMessageIds: _lastReadMessageIds,
+      messageLocation: _location,
+      replyToMessageId: _replyToMessageId,
       conversations: _conversations,
       historyLoaded: _historyLoaded,
       historyCursor: _historyCursor,
@@ -292,6 +368,7 @@ class AiConversationController extends Notifier<AiConversationState> {
       userMessageId: retryUser?.messageId,
       userSequence: retryUser?.sequence,
       userPersistedAt: retryUser?.persistedAt,
+      replyToMessageId: retryUser == null ? _replyToMessageId : null,
     );
     _localOutgoingText = text;
     _localOutgoingKey = attempt;
@@ -360,6 +437,7 @@ class AiConversationController extends Notifier<AiConversationState> {
       _memory.operationAssistantId = null;
       _memory.unresolved = true;
       attempt.dispatched = true;
+      _replyToMessageId = null;
       attempt.executeStarted = _now();
       attempt.executeTimer = Timer(const Duration(seconds: 75), () {
         _close(attempt, AiConversationPhase.timedOut);
@@ -369,12 +447,23 @@ class AiConversationController extends Notifier<AiConversationState> {
       if (!_current(attempt)) return;
       final input = attempt.text!;
       attempt.text = null;
-      final reply = await attempt.repository.execute(
-        token: attempt.token!,
-        abort: attempt.abort,
-        ticket: attempt.ticket!,
-        text: input,
-      );
+      final companion = attempt.repository;
+      final reply =
+          attempt.replyToMessageId != null &&
+              companion is AiCompanionReplyRepository
+          ? await (companion as AiCompanionReplyRepository).executeReply(
+              token: attempt.token!,
+              abort: attempt.abort,
+              ticket: attempt.ticket!,
+              text: input,
+              replyToMessageId: attempt.replyToMessageId!,
+            )
+          : await attempt.repository.execute(
+              token: attempt.token!,
+              abort: attempt.abort,
+              ticket: attempt.ticket!,
+              text: input,
+            );
       if (!_current(attempt)) return;
       if (_now() - attempt.started >= const Duration(seconds: 90) ||
           _now() - attempt.executeStarted! >= const Duration(seconds: 75)) {
@@ -442,6 +531,7 @@ class AiConversationController extends Notifier<AiConversationState> {
         phase == AiConversationPhase.limited ||
         phase == AiConversationPhase.authorityChanged ||
         failure.kind == AppFailureKind.conversationUnavailable) {
+      _replyToMessageId = null;
       _draft = TextEditingValue.empty;
       _invalidateReads();
       _retryUser = null;
@@ -709,7 +799,17 @@ class AiConversationController extends Notifier<AiConversationState> {
         !_conversations.any((c) => c.conversationId == conversationId)) {
       return;
     }
+    _resetConversationIdentity(conversationId);
+    _show(AiConversationPhase.idle, clear: true);
+    await loadMessages();
+  }
+
+  void _resetConversationIdentity(String conversationId) {
     _invalidateReads();
+    _location = null;
+    _replyToMessageId = null;
+    _lastReadMessageIds = const [];
+    _unverifiedReplyTargets.clear();
     _retryUser = null;
     _messageVersions.clear();
     _assistantUsers.clear();
@@ -724,8 +824,175 @@ class AiConversationController extends Notifier<AiConversationState> {
     _memory.operationHasAssistant = false;
     _memory.established = true;
     _memory.deleted = false;
-    _show(AiConversationPhase.idle, clear: true);
-    await loadMessages();
+  }
+
+  void replyToFollowUp(String messageId) {
+    if (!state.canSend ||
+        !ref.read(aiCompanionReferencesEnabledProvider) ||
+        _repository is! AiCompanionReplyRepository ||
+        _unverifiedReplyTargets.contains(messageId) ||
+        !state.messages.any(
+          (m) =>
+              m.messageId == messageId &&
+              m.isProactive &&
+              m.availability == AiAvailability.available,
+        )) {
+      return;
+    }
+    _replyToMessageId = messageId;
+    _show(state.phase);
+  }
+
+  void clearReplyTarget() {
+    _replyToMessageId = null;
+    _show(state.phase);
+  }
+
+  void referenceAuthFailed(AppFailure failure) {
+    if ({
+      AppFailureKind.authRequired,
+      AppFailureKind.authForbidden,
+      AppFailureKind.aiContextNotPermitted,
+    }.contains(failure.kind)) {
+      _failure(failure, preserveOutcome: true);
+    }
+  }
+
+  void invalidateSourceReads({
+    required Object sessionKey,
+    required String conversationId,
+    required String messageId,
+  }) {
+    if (!ref.mounted ||
+        state.sessionKey != sessionKey ||
+        state.conversationId != conversationId) {
+      return;
+    }
+    _unverifiedReplyTargets.add(messageId);
+    _invalidateReads();
+    _show(state.phase);
+  }
+
+  void _suspend() {
+    cancel();
+    if (_location?.phase == AiMessageLocationPhase.checking) {
+      _invalidateReads();
+      _location = AiMessageLocation(
+        locator: _location!.locator,
+        phase: AiMessageLocationPhase.failed,
+      );
+      _show(state.phase, clear: true);
+    }
+  }
+
+  Future<void> openMessage(AiMessageLocator locator) async {
+    final repository = _repository;
+    if (!state.canSelectConversation ||
+        !ref.read(aiCompanionReferencesEnabledProvider) ||
+        repository is! AiOwnedSourcesRepository ||
+        !ref.read(contentAccessProvider).foreground) {
+      return;
+    }
+    _invalidateReads();
+    _location = AiMessageLocation(
+      locator: locator,
+      phase: AiMessageLocationPhase.checking,
+    );
+    _show(state.phase, clear: true);
+    final epoch = _epoch;
+    final command = _commandVersion;
+    final sources = repository as AiOwnedSourcesRepository;
+    final anchorResult = await _ordinary(
+      (token, abort) => sources.readMessageAnchor(
+        token: token,
+        abort: abort,
+        locator: locator,
+      ),
+    );
+    if (!_validReadResult(epoch, command)) return;
+    if (anchorResult case Failure<AiMessageAnchor>(:final failure)) {
+      _locationFailed(locator, failure);
+      return;
+    }
+    final anchor = (anchorResult as Success<AiMessageAnchor>).value;
+    if (anchor.locator.conversationId != locator.conversationId ||
+        anchor.locator.messageId != locator.messageId) {
+      _locationFailed(locator, _unknown);
+      return;
+    }
+    final pageResult = await _ordinary(
+      (token, abort) => repository!.readMessages(
+        token: token,
+        abort: abort,
+        conversationId: locator.conversationId,
+        before: anchor.pageBefore,
+      ),
+    );
+    if (!_validReadResult(epoch, command)) return;
+    if (pageResult case Failure<AiMessagePage>(:final failure)) {
+      _locationFailed(locator, failure);
+      return;
+    }
+    final page = (pageResult as Success<AiMessagePage>).value;
+    final targets = page.messages.where(
+      (m) =>
+          m.messageId == locator.messageId &&
+          m.sequence == anchor.sequence &&
+          m.availability == AiAvailability.available,
+    );
+    if (targets.length != 1) {
+      _locationFailed(locator, _unknown);
+      return;
+    }
+    final sameTopic = locator.conversationId == _memory.conversationId;
+    final phase = sameTopic ? state.phase : AiConversationPhase.idle;
+    if (!sameTopic) {
+      _resetConversationIdentity(locator.conversationId);
+    }
+    _location = AiMessageLocation(
+      locator: locator,
+      phase: AiMessageLocationPhase.ready,
+      sequence: anchor.sequence,
+    );
+    _show(phase, clear: true);
+    if (!_merge(page.messages, ++_requestNumber, fromHistory: true)) {
+      _locationFailed(locator, _unknown);
+      return;
+    }
+    _messageReadRevision++;
+    _lastReadMessageIds = List.unmodifiable(
+      page.messages.map((m) => m.messageId),
+    );
+    _unverifiedReplyTargets.removeAll(_lastReadMessageIds);
+    state = _snapshot(
+      state.phase,
+      messages: state.messages,
+      nextCursor: page.nextCursor,
+    );
+  }
+
+  void _locationFailed(AiMessageLocator locator, AppFailure failure) {
+    _location = AiMessageLocation(
+      locator: locator,
+      phase: AiMessageLocationPhase.failed,
+    );
+    if ({
+      AppFailureKind.authRequired,
+      AppFailureKind.authForbidden,
+      AppFailureKind.aiContextNotPermitted,
+    }.contains(failure.kind)) {
+      _failure(failure, preserveOutcome: true);
+    } else {
+      _show(state.phase, clear: true);
+    }
+  }
+
+  void dismissMessageLocation() {
+    if (_location == null) return;
+    _invalidateReads();
+    _location = null;
+    _show(state.phase);
+    unawaited(loadMessages());
   }
 
   Future<void> loadMessages({String? before}) async {
@@ -737,6 +1004,9 @@ class AiConversationController extends Notifier<AiConversationState> {
         _memory.deleted ||
         _memory.deleting ||
         _attempt != null) {
+      return;
+    }
+    if (_location != null && _location!.phase != AiMessageLocationPhase.ready) {
       return;
     }
     final epoch = _epoch;
@@ -775,6 +1045,11 @@ class AiConversationController extends Notifier<AiConversationState> {
       case Success<AiMessagePage>(:final value):
         _memory.established = true;
         if (_merge(value.messages, number, fromHistory: true)) {
+          _messageReadRevision++;
+          _lastReadMessageIds = List.unmodifiable(
+            value.messages.map((m) => m.messageId),
+          );
+          _unverifiedReplyTargets.removeAll(_lastReadMessageIds);
           state = _snapshot(
             state.phase,
             messages: state.messages,
@@ -793,6 +1068,7 @@ class AiConversationController extends Notifier<AiConversationState> {
 
   bool _relevantAssistant(AiMessage assistant, AiMessage user) =>
       assistant.role == AiRole.assistant &&
+      !assistant.isProactive &&
       assistant.sequence > user.sequence &&
       (_assistantUsers[assistant.messageId] == null ||
           _assistantUsers[assistant.messageId] == user.messageId);
@@ -813,6 +1089,7 @@ class AiConversationController extends Notifier<AiConversationState> {
   }
 
   bool _consistentPair(AiMessage user, AiMessage assistant) =>
+      !assistant.isProactive &&
       (_assistantUsers[assistant.messageId] == null ||
           _assistantUsers[assistant.messageId] == user.messageId) &&
       !_assistantUsers.entries.any(
@@ -854,6 +1131,8 @@ class AiConversationController extends Notifier<AiConversationState> {
               role: incomingMessage.role,
               persistedAt: incomingMessage.persistedAt,
               availability: AiAvailability.unavailable,
+              origin: incomingMessage.origin,
+              occurrenceId: incomingMessage.occurrenceId,
             )
           : incomingMessage;
       if (message.messageId == _memory.operationUserId &&
@@ -863,6 +1142,8 @@ class AiConversationController extends Notifier<AiConversationState> {
       final previous = messages[message.messageId];
       if (previous != null &&
           (previous.role != message.role ||
+              previous.origin != message.origin ||
+              previous.occurrenceId != message.occurrenceId ||
               previous.sequence != message.sequence ||
               previous.persistedAt != message.persistedAt ||
               (message.role == AiRole.user && previous.text != message.text))) {
@@ -873,6 +1154,7 @@ class AiConversationController extends Notifier<AiConversationState> {
         continue;
       }
       if (message.role == AiRole.assistant &&
+          !message.isProactive &&
           (previous == null ||
               (previous.availability == AiAvailability.available &&
                   message.availability == AiAvailability.unavailable))) {
@@ -917,6 +1199,8 @@ class AiConversationController extends Notifier<AiConversationState> {
     if (!state.canStartNewConversation) return;
     final previousWasDeleted = _memory.deleted;
     _invalidateReads();
+    _location = null;
+    _replyToMessageId = null;
     _retryUser = null;
     _messageVersions.clear();
     _assistantUsers.clear();
@@ -992,6 +1276,8 @@ class AiConversationController extends Notifier<AiConversationState> {
   void leave() {
     cancel();
     _invalidateReads();
+    _location = null;
+    _replyToMessageId = null;
     if (_retryUser != null) _memory.unresolved = true;
     _retryUser = null;
     final phase = _memory.deleted
@@ -1081,6 +1367,7 @@ final class _Attempt {
     this.userMessageId,
     this.userSequence,
     this.userPersistedAt,
+    this.replyToMessageId,
   });
   final Object epoch;
   final AiConversationRepository repository;
@@ -1090,6 +1377,7 @@ final class _Attempt {
   final String? userMessageId;
   final int? userSequence;
   final DateTime? userPersistedAt;
+  final String? replyToMessageId;
   bool matchesUser(AiMessage user) =>
       userMessageId == null ||
       (user.messageId == userMessageId &&
