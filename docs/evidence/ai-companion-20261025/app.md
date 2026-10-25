@@ -2,6 +2,10 @@
 
 Date: 25 October 2026, Asia/Singapore.
 
+The first delivery below records the pre-choice audit at `f514a325`. LI later
+selected C; the separate C increment and its exact baseline are recorded at the
+end of this file. Earlier pending-choice statements are retained as history.
+
 ## Authority, baseline and ownership
 
 The original LI request attachment was read directly, together with
@@ -147,3 +151,113 @@ All fixtures are synthetic and use the existing controller/provider boundary.
 No real model, Firebase/service data, cloud request, notification, APK, device
 write or deployment was exercised. Historical small-plan semantic failures,
 v26's scoped phone evidence and remaining UAT/Release gates are unchanged.
+
+## Second increment — approved C main entry
+
+### Confirmed source and exact baseline
+
+LI's direct answer to the A/B/C question was read in the Integration chat,
+user message `01a171b5-67bd-7ff0-9cfc-023225279b93`:
+`C：连续主入口＋历史／新话题（推荐）`.
+The durable authority is
+[25 October C selection](../../decisions/2026-10-25-li-ai-entry-c.md),
+commit `2bb638b47e682217007cf02cd505550d88d627cf`. The clean App branch was
+fast-forwarded only after checking that the reviewed `f514a325` delivery was its
+ancestor. This commit is the exact baseline of the second increment.
+
+Product confirmed that the bounded layout/interaction changes conform to C.
+The authorization concerns the entry form and existing conversation boundaries;
+it does not approve source projections, additional context, cloud processing,
+proactive delivery or new persistence. This increment changes no controller,
+Repository, route, theme, API, storage, dependency or retention contract.
+
+### Source gaps and resulting behavior
+
+| Earlier source behavior | C increment |
+| --- | --- |
+| The main page already opens the session's current conversation directly, but History is mainly inside the generic menu. | A named 48dp History icon action is directly visible in the main app bar. The existing menu remains available for Persona, settings and permissions. Opening History reads only through existing controller capabilities and never selects a history row or sends automatically. |
+| Current-message lookup is inside the overflow menu. | History also has a top-level “Find in conversation” action. It opens the same existing page, limited to loaded, available messages. The overflow search and whole-conversation deletion remain available. |
+| The entry calls the new boundary “New conversation”. | Visible controls and typed status copy say “New topic”. The existing controller command remains the same: one unsent draft stays for explicit editing, old saved conversations stay in History, and the next explicit Send uses the existing new-conversation path. No separate topic entity or title is introduced. |
+| Choosing the already selected History row still enters the discard/selection flow. | Same authorized current ID is a no-op after the drawer closes: retain the exact draft/selection, do not reread, switch, clear operation state or send. Selecting a different conversation still requires explicit draft discard. |
+| An empty-looking transcript can display the welcome illustration during reads or uncertain recovery. | The welcome state requires idle/success, `canSend`, no read, no messages and no local outgoing. It distinguishes a new topic from an authorized current empty conversation. A saved-conversation read has a static live status; uncertainty remains in its existing recovery state. No unbounded loading animation was added. |
+
+The existing session controller already retains the current conversation,
+messages and a single `TextEditingValue` draft in RAM across route removal.
+The new tests exercise that actual page/controller draft boundary. Account or
+consent replacement still clears private editing state; a captured old History
+callback rechecks the current page/session and capability before opening.
+
+The existing automatic authorized message refresh is unchanged, including on
+uncertain reentry when it is otherwise admitted. It refreshes saved content and
+tombstones; it does not release the unresolved operation fence, call result
+readback or resend. The UI retains recovery controls. No initial-read contract
+is replaced by this presentation increment.
+
+### Explicit local gap
+
+There is no newly approved disk/cross-device current-conversation pointer,
+reading anchor or draft store. This increment does not guess the newest History
+row after a cold start. A user can open History and explicitly resume an
+authorized conversation. Existing mounted-route reading state remains; a fresh
+page keeps the existing Latest behavior. Broader restart/read-position recovery
+remains P6, rather than an implied delivery claim for C.
+
+### Focused verification
+
+Integration granted the App C slice the sole bounded Flutter slot. Every
+invocation takes the same nonblocking global lock; no APK/Gradle work is run.
+
+- Initial reproduction against the unchanged selection handler:
+  `ai_continuous_entry_test.dart --plain-name 'opening the current conversation'`
+  failed because `ai-confirm-discard` was present. Raw output:
+  `~/.local/state/enmori-ai-companion-20261025/app-c-initial.log`.
+- The isolated same-ID guard then passed that one case, including unchanged
+  editor value and no extra read or selection. Raw output:
+  `app-c-current-topic-fix.log` in the same local directory.
+- First complete new-file run: 10/12 passed. The loading fixture timed out on an
+  unnecessary indeterminate progress animation; the final UI uses the static
+  live text. The landscape Drawer target was not yet built; its test now uses a
+  bounded real Drawer scroll and requires a hit-testable target before tapping.
+  The failure output is retained in `app-c-new-tests.log`.
+- That candidate's new-file rerun passed 12/12 without overflow/hit-test
+  warnings: `app-c-new-tests-final.log`. It still contained an initial-read
+  experiment that was subsequently removed as described next; it is not the
+  final source's acceptance record.
+- The first related batch passed 89/90. The sole failure expected the original
+  automatic ordinary message read on unknown entry, which that experiment had
+  suppressed. A trial changed expectation passed 90/90. Source review with QA
+  established that the original read safely refreshes authorized content and
+  never releases the operation fence. The suppression and modified old test
+  were both removed; the existing page test is unchanged from the C baseline.
+  Both `app-c-related-ui-regression.log` and
+  `app-c-related-ui-regression-final.log` remain as experiment history, separate
+  from the final validation below.
+- Coverage includes empty entry without automatic history selection, exact
+  same-session draft return, current-row continuation, explicit other-row
+  discard, unknown/no-resend protection with admitted ordinary reads, loading versus empty, revoked/stale
+  History actions, New topic without dispatch, retained search/delete and
+  320dp English/Chinese plus 740×375 landscape at 2× text.
+- Final source command:
+  `fvm flutter test --no-pub
+  test/features/ai_conversation/ai_continuous_entry_test.dart
+  test/features/ai_conversation/ai_conversation_page_test.dart
+  test/features/ai_conversation/ai_message_search_test.dart
+  test/features/ai_conversation/ai_localization_test.dart
+  test/features/ai_conversation/ai_chat_usability_test.dart` exited 0,
+  **102/102 distinct scenarios passed** in that single final batch, with no
+  hit-test/overflow warning. It includes 12 new C scenarios and 90 related
+  existing scenarios; experiment reruns are not added to that count. Raw final
+  output: `app-c-authorized-refresh-final.log`.
+- Final `fvm flutter analyze --no-pub
+  lib/features/ai_conversation/presentation/
+  test/features/ai_conversation/ai_continuous_entry_test.dart` exited 0:
+  `No issues found! (ran in 6.7s)`. Output: `app-c-analyze.log`.
+- All log basenames above are under
+  `/home/miku/.local/state/enmori-ai-companion-20261025/`. The manifest and
+  lockfile remain unchanged. `git diff --check` is clean. No full-project test
+  expansion, APK or Gradle build was run. All Flutter processes are complete;
+  the slot is released with the exact commit for QA's independent review.
+
+This is source/widget evidence. No real backend/model call, automatic cloud
+fallback, notification, APK, device write or data migration was performed.
+QA's dirty-source pre-review is not the final exact-commit independent review.
