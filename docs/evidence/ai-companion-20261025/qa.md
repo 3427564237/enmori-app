@@ -10,6 +10,11 @@ baseline checkpoint is preserved below. Subsequent exact-head source reviews,
 executed checks and unresolved findings are in [qa-review.md](qa-review.md).
 No production implementation was authored by QA.
 
+Latest independent first-flow checks: [approved prototype and visibility repair](qa-approved-prototype.md)
+and [shared local lane / old serializer compatibility](qa-runtime-first-flow.md).
+These add browser and fake-transport evidence only; integrated F0/F1a, real
+Firestore, notification and device acceptance remain separate gates.
+
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with
 [proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is
