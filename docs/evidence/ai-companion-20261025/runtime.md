@@ -778,3 +778,35 @@ the original 32-case corpus and preserved 16-case source are unchanged. Evaluati
 bundle manifests now also bind the imported canonical Check-in and shared helper
 compiled files. These are fake HTTP/source tests only. No actual F1a model, store,
 notification or device acceptance is claimed; Root owns final composition checks.
+
+## One F0 message-act prompt candidate, no new actual run
+
+After the 1 Pass / 7 Fail result, Root authorized at most one reviewable prompt
+comparison candidate. Runtime read all eight raw outputs and QA rationales.
+The common demonstrated failure was treating the historical request as something
+to acknowledge/rebook, with related speaker, time and writing-instruction errors.
+
+Only F0's system prompt changes. It now asks for the follow-up question itself,
+explicitly maps historical `I/my/我` to the receiving user, applies rather than
+repeats writing instructions, denies present-time inference/day-part greetings
+from historical metadata, and forbids claimed/future reminder actions. One small
+generic fern-watering example illustrates the message-act transformation; it
+does not use any frozen fixture's topic or hardcode eight answers. This is a
+bounded hypothesis, not demonstrated model improvement or a new output filter.
+
+Offline comparison against all eight actual 4746eff request artifacts confirmed
+that only `messages[0].content` changes: URL, full remaining HTTP body, minimized
+user JSON projection, model, context/output budget, think and decoding settings
+are identical. Old prompt SHA256:
+`87f6b051a8b9bf61410cf1ba96f8035fc0ee3612c3cb10f653bbda1719dd89f6`.
+Candidate prompt SHA256:
+`fae3f317a5bac02a13f47994083991982b0fd040178517ee7de4dca6849f934e`.
+Private eight-case comparison SHA256:
+`4dec4afc4e053617fb8ea54d2fad655e6467fdfe2957b00dbdf5627401288366`.
+
+Pinned strict build and 49 focused source/fake checks passed, including the F0
+lane and exact-eight harness, six F1a projections and all 24 frozen legacy chat
+request bodies. Original F0 eight-case and cloud 32/16 fixtures remain unchanged.
+Candidate actual model calls: **0**. Root must review the diff and separately
+decide a single fixed-eight comparison slot. The failed baseline remains failed;
+there is no permission for repeated prompt rotation or indefinite tuning.
