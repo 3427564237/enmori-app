@@ -218,5 +218,5 @@ test('CLI defaults to zero-call dry mode and rejects cloud before any key/networ
   const dry = JSON.parse(output); assert.equal(dry.mode, 'dry'); assert.equal(dry.realCalls, 0);
   assert.equal(output.includes('SYNTHETIC_KEY_NOT_REAL'), false);
   const denied = spawnSync(process.execPath, ['tool/ai-companion-eval/cloud-run.mjs', '--mode', 'cloud', '--out', '/should-not-create'], { encoding: 'utf8' });
-  assert.equal(denied.status, 2); assert.match(denied.stderr, /EXPLICIT_CLOUD_AUTHORIZATION_REQUIRED/);
+  assert.equal(denied.status, 2); assert.match(denied.stderr, /PAID_EXECUTION_SUPERSEDED/);
 });

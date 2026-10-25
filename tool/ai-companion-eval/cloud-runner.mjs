@@ -1,9 +1,12 @@
 import { readFileSync, lstatSync, realpathSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
 import { loadCases, prepareCase, buildEvaluationRequest, observeSyntheticEvaluation, protocolAssessment,
   costObservation, sha256, priceSnapshot } from './evaluation.mjs';
 import { CloudBudget, validateCloudAuthorization } from './cloud-budget.mjs';
 import { writeExclusiveJson } from './private-output.mjs';
+import { freeService, freeSelection, freeSelectionSha256, freeMinimumSpacingMs,
+  validateFreeAuthorization, FreeBudget } from './free-cloud-scope.mjs';
 
 const generateUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent';
 const countUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:countTokens';
@@ -12,12 +15,16 @@ export const safeErrorCode = error => typeof error?.message === 'string' && /^[A
   ? error.message : 'EVALUATION_STOPPED';
 
 export function sourceBundle(root) {
-  const files = ['tool/ai-companion-eval/cloud-budget.mjs', 'tool/ai-companion-eval/cloud-runner.mjs',
+  const files = ['tool/ai-companion-eval/free-cloud-scope.mjs', 'tool/ai-companion-eval/cloud-budget.mjs', 'tool/ai-companion-eval/cloud-runner.mjs',
     'tool/ai-companion-eval/cloud-run.mjs', 'tool/ai-companion-eval/evaluation.mjs', 'tool/ai-companion-eval/private-output.mjs',
     'tool/ai-companion-eval/fixtures/companion-cases.json', 'tool/ai-companion-eval/fixtures/preserved-small-plan-cases.json',
     'backend/src/ai-runtime/infrastructure/synthetic-evaluation-adapters.ts',
     'backend/dist/src/ai-runtime/infrastructure/synthetic-evaluation-adapters.js',
     'backend/dist/src/ai-runtime/infrastructure/local-chat-transport.js',
+    'backend/dist/src/ai-runtime/infrastructure/local-model-lane.js',
+    'backend/dist/src/ai-runtime/infrastructure/ollama-response.js',
+    'backend/dist/src/ai-conversation/application/persona-expression.js',
+    'backend/dist/src/personas/domain/persona-values.js',
     'backend/dist/src/ai-runtime/domain/parse-output.js',
     'backend/dist/src/ai-conversation/application/open-conversation-semantic-policy.js', 'pnpm-lock.yaml'];
   const hashes = Object.fromEntries(files.map(p => [p, sha256(readFileSync(resolve(root, p)))]));
@@ -89,11 +96,28 @@ async function countInput(request, http, signal) {
 /** Fixed checked-in corpus only. save must create exclusive private files and
  * succeed before each dispatch. Caller owns actual permission and key supply. */
 export async function runSyntheticCloud({ mode, authorization, passes, maxUsd, sourceBundleSha256, http, save,
-  secret, signal, now = () => new Date().toISOString() }) {
-  requireValue(['mock', 'cloud'].includes(mode), 'EXECUTION_MODE_INVALID');
-  const corpus = loadCases(), verify = () => validateCloudAuthorization(authorization, { corpusSha256: corpus.corpusSha256,
-    sourceBundleSha256, passes, maxUsd, now: now(), mock: mode === 'mock' });
-  const grant = verify(), budget = new CloudBudget(grant), rows = [];
+  secret, signal, now = () => new Date().toISOString(), verifyExternal = () => {},
+  monotonicNow = () => performance.now(), wait = ms => delay(ms, undefined, { signal }) }) {
+  requireValue(mode !== 'cloud', 'PAID_EXECUTION_SUPERSEDED');
+  requireValue(['mock', 'free'].includes(mode), 'EXECUTION_MODE_INVALID');
+  const free = authorization?.service === freeService;
+  requireValue(mode !== 'free' || free, 'FREE_AUTHORIZATION_REQUIRED');
+  const corpus = loadCases(), verify = () => {
+    verifyExternal();
+    return (free ? validateFreeAuthorization : validateCloudAuthorization)(authorization, {
+      corpusSha256: corpus.corpusSha256, sourceBundleSha256, passes, maxUsd, now: now(), mock: mode === 'mock' });
+  };
+  const grant = verify(), budget = free ? new FreeBudget() : new CloudBudget(grant), rows = [];
+  const cases = free ? freeSelection.map(item => corpus.cases.find(fixture => fixture.id === item.id)) : corpus.cases;
+  requireValue(cases.every(Boolean), 'FREE_SUBSET_MISSING');
+  let nextDispatchAt = -Infinity;
+  const pace = async () => {
+    if (!free) return;
+    while (monotonicNow() < nextDispatchAt) {
+      try { await wait(nextDispatchAt - monotonicNow()); } catch { throw Error(signal?.aborted ? 'CANCELLED' : 'FREE_PACING_UNCONFIRMED'); }
+    }
+    verify(); requireValue(!signal?.aborted, 'CANCELLED');
+  };
   let generationCalls = 0, countCalls = 0, dispatchBlockReason;
   const measuredHttp = async (request, abortSignal) => {
     // Intent persistence can cross expiry or observe cancellation. Recheck
@@ -102,6 +126,7 @@ export async function runSyntheticCloud({ mode, authorization, passes, maxUsd, s
       verify();
       requireValue(!signal?.aborted, 'CANCELLED');
       requireValue(!abortSignal.aborted, 'RECEIVE_DEADLINE_EXPIRED');
+      requireValue(!free || monotonicNow() >= nextDispatchAt, 'FREE_RATE_GUARD');
     } catch (error) {
       dispatchBlockReason = safeErrorCode(error);
       throw error;
@@ -109,6 +134,7 @@ export async function runSyntheticCloud({ mode, authorization, passes, maxUsd, s
     if (request.url === generateUrl) generationCalls++;
     else if (request.url === countUrl) countCalls++;
     else throw Error('PROVIDER_URL_FORBIDDEN');
+    if (free) nextDispatchAt = monotonicNow() + freeMinimumSpacingMs;
     return http(request, abortSignal);
   };
   const safe = value => redactCredential(value, secret);
@@ -119,12 +145,16 @@ export async function runSyntheticCloud({ mode, authorization, passes, maxUsd, s
   };
   const persist = (name, value) => save(name, safe(value));
   const report = { schemaVersion: 'synthetic_evaluation_run_v1', mode, provider: 'gemini-candidate', syntheticOnly: true,
-    startedAt: now(), intendedCases: corpus.cases.length * passes, sourceBundleSha256,
-    corpusSha256: corpus.corpusSha256, authorization: grant, priceSnapshot, rows };
+    startedAt: now(), intendedCases: cases.length * passes, sourceBundleSha256,
+    corpusSha256: corpus.corpusSha256, authorization: grant,
+    ...(free ? { selection: freeSelection, selectionSha256: freeSelectionSha256,
+      minimumRequestSpacingMs: freeMinimumSpacingMs, spendAuthorizationUsd: 0,
+      priceSnapshot: { service: freeService, source: 'https://ai.google.dev/gemini-api/docs/pricing',
+        verifiedAt: grant.verifiedAt, inputPerMillion: 0, outputIncludingThinkingPerMillion: 0 } } : { priceSnapshot }), rows };
   persist('cloud-manifest.json', { ...report, budget: budget.snapshot() });
   let stopReason = 'case-budget-exhausted';
   for (let pass = 1; pass <= passes; pass++) {
-    for (const fixture of corpus.cases) {
+    for (const fixture of cases) {
       const id = `pass-${pass}--${fixture.id}`;
       let row;
       try {
@@ -135,6 +165,7 @@ export async function runSyntheticCloud({ mode, authorization, passes, maxUsd, s
         const reservedCount = budget.reserveCount();
         // Durable reservation/intent first; a crash never means safe to resend.
         persist(`${id}.count-intent.json`, { id, fixture, prompt, request: countRequest, budget: reservedCount, at: now() });
+        await pace();
         const count = safe(observedDispatch(await countInput(countRequest, measuredHttp, signal)));
         persist(`${id}.count-response.json`, count);
         row = { id, caseId: fixture.id, pass, track: fixture.track, tags: fixture.tags, criteria: fixture.criteria, count,
@@ -146,9 +177,12 @@ export async function runSyntheticCloud({ mode, authorization, passes, maxUsd, s
         const reservation = budget.reserveGeneration(count.totalTokens);
         persist(`${id}.generation-intent.json`, { id, request, requestSha256: sha256(JSON.stringify(request)),
           budget: reservation, at: now() });
+        await pace();
         const observation = safe(observedDispatch(await observeSyntheticEvaluation('gemini-candidate', prompt, measuredHttp, { signal })));
         row = { ...row, requestSha256: sha256(JSON.stringify(request)), observation,
-          protocol: protocolAssessment(observation), cost: costObservation(observation, mode === 'mock') };
+          protocol: protocolAssessment(observation), cost: free && mode === 'free'
+            ? { kind: 'verified-free-tier', authorizedMaxUsd: 0, estimateUsd: 0, billedUsd: null }
+            : costObservation(observation, mode === 'mock') };
         // Persist each response before interpreting failures or considering the next case.
         persist(`${id}.response.json`, row);
         rows.push(row);
@@ -167,12 +201,12 @@ export async function runSyntheticCloud({ mode, authorization, passes, maxUsd, s
         // No budget release, retry, continuation, model swap or alternate provider.
         persist('stop.json', { id, stopReason, budget: budget.snapshot(), at: now() });
         return safe({ ...report, finishedAt: now(), budget: budget.snapshot(), stopReason,
-          realGenerationCalls: mode === 'cloud' ? generationCalls : 0,
-          realCountCalls: mode === 'cloud' ? countCalls : 0 });
+          realGenerationCalls: mode === 'free' ? generationCalls : 0,
+          realCountCalls: mode === 'free' ? countCalls : 0 });
       }
     }
   }
   return safe({ ...report, finishedAt: now(), budget: budget.snapshot(), stopReason,
-    realGenerationCalls: mode === 'cloud' ? generationCalls : 0,
-    realCountCalls: mode === 'cloud' ? countCalls : 0 });
+    realGenerationCalls: mode === 'free' ? generationCalls : 0,
+    realCountCalls: mode === 'free' ? countCalls : 0 });
 }

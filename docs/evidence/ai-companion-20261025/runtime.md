@@ -1,6 +1,6 @@
 # Runtime / Models — 25 October 2026
 
-Status: isolated source/mock candidate; real model comparison **Not Run**.
+Status: bounded local evidence recorded below; actual cloud comparison **Not Run**.
 Owner: Runtime chat `01a171a5-707c-77a2-8ddc-fbda24e4c089`.
 Integration remains the decision and shared-composition owner. No push, PR,
 main merge, production provider/configuration or data mutation is included.
@@ -659,3 +659,84 @@ Independent QA separately confirmed the e2f092e adapter's 18/18 focused cases,
 old production serializer byte identity for all 24 legacy requests, and the eight
 F0 input projections. Root then assigned the sole local slot, conditional on this
 CLI's completed self-check. Actual run evidence follows separately when available.
+
+## F0 actual single pass at 4746eff
+
+Root assigned the sole Ollama slot after independent e2f092e QA and CLI self-check.
+Execution used clean `4746efffc2ae6e85f681a694af6a129175e2298b`, bundle
+`98d9eefc71d54ff3fb2cc8d90f36471635d7f645007621ab6f379ed6d8d0b4aa`,
+and the unchanged F0 corpus `b9ada505ef4cb732c829c0f9eab959a33b8034c949d35e2ce06d37146ec45d70`.
+Host readback confirmed Ollama 0.40.4 and qwen3.5:9b digest
+`56671c2ab9385f9cfcb404638e32cd62d88e3501d44822208363c010179a3c90`.
+
+There was exactly one empty preload (27.481 s), followed by eight sequential
+generations, one per frozen case, with no retry or output repair. All nine
+physical responses matched the model and `done:true`; all eight generation
+outputs were protocol eligible within 45 seconds. Generation median was 3.468 s,
+p95/max 4.442 s. The shared lane finished `pending=false/outcomeUnknown=false`.
+These are protocol/timing observations; independent semantic QA was requested
+and is not inferred from them. No product storage or notification delivery ran.
+
+The private directory `~/.local/state/enmori-ai-companion-20261025/runtime/f0-local-4746eff`
+has 22 exclusive files, including raw vendor bytes/text, request bodies, timing,
+source manifest, report, artifact hashes and a blank bound review template.
+Report SHA256: `593958fb878c0dc7ffe03fcd21a429a422199b1ad8d2b15f318f58a65c2382e4`.
+Artifact-manifest SHA256: `180c619cd6e2bf4e7988e9a6762253e15933fda9ddc801640a8bbc2d23dfe908`.
+The earlier 24-case local result and its independent 12 Pass / 12 Fail remain
+separate; this F0 run does not replace that evidence.
+
+## Free-only cloud supersession and bounded preparation
+
+LI's direct “先用免费档……不要付费” instruction supersedes the earlier USD 1 paid
+permission. Root preserved the history and recorded the selected existing Default
+Gemini Project and eight-case scope in decision commit `15c9f32`,
+`docs/decisions/2026-10-25-li-gemini-free-only.md`. No upgrade, recharge, paid
+fallback, new project, API enabling, IAM grant or new credential was performed.
+
+Read-only account evidence: Default Gemini Project `gen-lang-client-0930184174`
+is labelled Free in AI Studio; Cloud Billing explicitly says no billing account
+is linked; the Gemini API is enabled. Gemini 3.8 Flash displays 5 RPM / 250K TPM /
+20 RPD. This is not proof of unused daily quota. The existing February 8 key is
+restricted to the single Gemini API, with no application restriction and no
+listed bound account. Its value was not displayed/copied and call eligibility
+is unverified. Cloud Console's auth-key notice and the documented compatibility
+of API-restricted standard keys require retaining that uncertainty; no new
+service account or permission is inferred. ENMORI now displays Tier 1 / No
+credits; the actor behind that change is unknown and its billing stays untouched.
+
+Private allowlisted observation SHA256:
+`eb81ece03e0601f50da44c81dce57a7f08365b2e3bba77d249ccdbe8d6989b8e`.
+Credential-metadata SHA256 (no credential bytes):
+`016068d48e813b6d5f32d0c6e7cbf490c5f44c5ebee07d725bbd0a848348810f`.
+[Google's AI plan documentation](https://ai.google.dev/gemini-api/docs/google-ai-plans)
+separates Pro's AI Studio web benefits from direct API billing and Google One
+credits. [Pricing](https://ai.google.dev/gemini-api/docs/pricing) lists a free
+Standard Gemini 3.8 Flash tier; [API-key guidance](https://ai.google.dev/gemini-api/docs/api-key)
+describes restricted standard-key compatibility. Free requests remain synthetic-only.
+
+The existing cloud runner now has a distinct free authorization schema, fixed
+project/key API restriction, recent evidence hashes, protected server key-file
+hash, source/corpus/subset hashes, exactly one pass and zero USD. Real paid mode
+is rejected before any credential read or HTTP. Historical paid fake tests remain
+as regression evidence, not permission. The default CLI is dry/zero-call. Real
+free mode additionally requires `--mode free --allow-cloud true --passes 1
+--max-usd 0 --authorization <private-file> --authorization-sha256 <hash>
+--key-file <private-file> --out <new-private-directory>`, clean source and a
+single-use authorization. Source, grant and key-file bindings are checked again
+at each dispatch. The credential itself only enters the fixed API request header.
+
+`free-cloud-scope.mjs` names eight unchanged cases from the original 32: the
+reported-English/rest case, actual-study-goal, normal-chat, switch-to-english,
+correct-personal-claim, past-mood-time, intent-not-attendance, and
+quoted-instruction-not-authority. They cover five current-prompt and three
+candidate-context cases, not the full 32-by-two evaluation or production F1a.
+The runner permits at most eight counts plus eight generations. Both request
+types share a minimum 15.1-second start interval (at most four per rolling minute);
+waiting happens before provider timing and is followed by a new expiry/cancel/
+source check. A 429, 402, authorization failure or unknown outcome stops without
+retry, model substitution or paid fallback. Zero spend authorization is not an invoice.
+
+Cloud regression/free tests: 19/19 passed. The private `mock-free` CLI completed
+eight fake counts/eight fake generations, zero real calls, zero reserved USD.
+Actual free execution is still **Not Run**: no key value has been read, no live
+grant issued and Root's runner review/execution conditions remain outstanding.
