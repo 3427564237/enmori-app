@@ -279,7 +279,7 @@ This does not close the real reader/adapter or product-use gates.
 
 **Status: Proposed, not adopted or wired.** Context/source portions below and
 Delivery's [first-flow proposal](proactive.md) at
-`38c81660b5c3cf33566fddacf5d79ff03ec1ef44` form one review packet. This section
+`4a388d9fdb96596482fb7aa30760d0f1dbe203df` form one review packet. This section
 also records the concrete review corrections sent to Delivery: a single
 `not_started → dispatching` sender claim, registration/read-state GET readbacks,
 and honest installation/idempotency limits. Integration owns final reconciliation
@@ -355,8 +355,8 @@ Missing optional scalar values are omitted, not ambiguous `null`.
 | `GET /v1/me/proactive-intents/{intentId}` | Current owner-only status `{intentId,revision,state,dueAt,expiresAt,category,conversationId}` while authorized. Deleted-source details are omitted. This is the readback after an unknown create/cancel result. |
 | `GET /v1/me/proactive-intents` | Complete bounded active set from the owner's at-most-3 references; no global scan, source text or invented pagination. |
 | `DELETE /v1/me/proactive-intents/{intentId}` | Exact JSON body `{expectedRevision}`; **no competing revision header/query**. Cancel queued/reserved/prepared work atomically with active membership. A matching terminal no-op is idempotent. For a dispatch possibly already begun, report current unknown/accepted state and `recallPossible:false`; never claim recall or delete the conversation. |
-| `GET /v1/me/proactive-registration` | Metadata-only readback `{installationRef?,revision,enabled,expiresAt?,availability}`. Never echo a token/FID or expose a token lookup. |
-| `PUT /v1/me/proactive-registration` | Exact body `{expectedRevision,installationRef,registrationKind,registrationValue,enabled:true}`; registrationValue is opaque, well-formed UTF-8, max 4096 bytes. Only the one kind actually selected by the reviewed SDK pairing (`fcm_token` **or** `firebase_installation_id`) is accepted, never guessed or converted. No FCM topic subscription. One active permitted installation in F0. Return metadata only. |
+| `GET /v1/me/proactive-registration` | Metadata-only readback `{installationRef?,revision,enabled,expiresAt?,availability}`. Never echo a registration value or expose a token lookup. |
+| `PUT /v1/me/proactive-registration` | Exact body `{expectedRevision,installationRef,registrationKind:fcm_token,registrationValue,enabled:true}`; registrationValue is the SDK's opaque FCM registration token, well-formed UTF-8, max 4096 bytes. F0 accepts only literal `fcm_token`; reject an FID/APNs value or another registration kind rather than guessing/converting it. No FCM topic subscription. One active permitted installation in F0. Return metadata only. |
 | `DELETE /v1/me/proactive-registration` | Exact JSON body `{expectedRevision,installationRef}`; owner/binding/CAS check, disable and erase the Backend value, advance revision. Unknown result requires GET readback. Never erase Firebase Auth/Core installation state as a shortcut. |
 | `GET /v1/me/conversations/{conversationId}/read-state` | Current authorized topic's `{revision,readThroughSequence}`; absent state is revision/sequence 0. No private body or source receipt. |
 | `PUT /v1/me/conversations/{conversationId}/read-state` | Exact body `{expectedRevision,readThroughSequence}`. Require current owner/live topic and an existing currently available committed message at that sequence; monotonically advance, never past current authority. UI submits only once the target is actually visible. No change to retention anchor. Stale/unknown write requires GET readback. |
@@ -377,6 +377,45 @@ the old identical command's due time/topic is expired and remains invalid;
 this is **not** evidence of a permanent globally remembered nonce registry.
 Any new confirmation uses a fresh key. Unknown original outcomes are never
 replayed or reinterpreted as a confirmed no-effect.
+
+### D1's exact SDK/identifier candidate — read-only clarification
+
+The bounded SDK audit at Delivery commit
+`4a388d9fdb96596482fb7aa30760d0f1dbe203df` resolves only the earlier
+token-versus-FID **proposal ambiguity**. The prior `3ed4b3e` / `38c8166` texts
+remain historical; neither they nor this clarification approve a dependency,
+registration, native change, environment access or send.
+
+The exact proposed addition is `firebase_messaging: 16.7.0`, keeping current
+Flutter `3.47.2`, Dart `^3.13.2`, locked Core `4.14.0`, Auth `6.6.1` and Admin
+`14.3.0`. Context independently read the local baseline and the
+[16.7.0 versioned pubspec](https://raw.githubusercontent.com/firebase/flutterfire/firebase_messaging-v16.7.0/packages/firebase_messaging/firebase_messaging/pubspec.yaml):
+its Core `^4.14.0`, Dart `^3.6.0` and Flutter `>=3.27.0` constraints fit those
+versions. The [16.7.1 metadata](https://pub.dev/api/packages/firebase_messaging/versions/16.7.1)
+requires Core `^4.15.1`, and [17.0.1 metadata](https://pub.dev/api/packages/firebase_messaging/versions/17.0.1)
+requires `^5.1.0`; neither is an unchanged-Core addition. Public JSON was read
+directly when the web reader could not retrieve it. No solver or package archive
+was run/installed, so this is constraint evidence, not a resolved lock or build.
+
+The [pinned 16.7.0 client source](https://raw.githubusercontent.com/firebase/flutterfire/firebase_messaging-v16.7.0/packages/firebase_messaging/firebase_messaging/lib/src/messaging.dart)
+provides `getToken`, `onTokenRefresh` and `deleteToken`. It does not provide FID
+`register/onRegistered`. Thus F0's wire/storage kind is solely `fcm_token`; no
+FID is put into an Admin `token` field. The existing installed Admin `14.3.0`
+declarations contain `TokenMessage {token}` and `Messaging.send`, but explicitly
+deprecate token messages in favor of FID. The future Backend-only adapter would
+use `getMessaging(existingFirebaseApp).send({token,...})`, generic notification
+content, an opaque reference and TTL 0 after the final sender claim. Presence
+of that [pinned Admin interface](https://github.com/firebase/firebase-admin-node/blob/v14.3.0/src/messaging/messaging-api.ts)
+does not prove current provider/project/device acceptance or a migration window.
+FID adoption is a separately reviewed client/Core/Auth change, not a fallback.
+
+No token getter, auto-initialization/registration, refresh binding, dry-run or
+sender call was performed. Before any future SDK initialization, the approved
+implementation must keep messaging/analytics auto-init off until the user's
+explicit push/cloud-routing choice; a refresh must recheck the current fixed
+owner/installation/revision. All dependency/native/configuration changes and
+the single-device external test still require their specific approval and
+independent validation. No existing manifest/lock/source file changes here.
 
 ### Minimal source card, selection and message-anchor resolver
 
@@ -445,7 +484,7 @@ Firestore access. `owner` is the server-resolved existing account ID.
 | --- | --- |
 | `accounts/{owner}/proactive_state/current` | `revision,grantGeneration` plus settings above, `activeIntentIds` (max3), optional `inFlightOccurrenceId,lastAttemptedAt`, bounded `rollingAttemptTimes`. No source body. Advance grant generation for eligible-scope changes; compare/prune the old budget atomically. |
 | `accounts/{owner}/proactive_occurrences/{intentId}` | One intent/effect/outbox record: `revision,state,conversationId,sourceMessageId,category,dueAt,expiresAt,timeZone,processing,settingsRevision,grantGeneration,authorizationScope,topicLifecycleVersion,requiredSources,requiredCategories,createdAt`, optional `messageId,messageSequence,publishedAt,attemptedAt,providerAcceptedAt,registrationRevision`; `dispatchState=not_started/dispatching/accepted/unknown/skipped`. `authorizationScope` is the trusted non-token intent-purpose epoch described above, never credentials. On `state:published`, `messageId,messageSequence,publishedAt` are all required; `publishedAt` is server commit time. Source/version/category proof is server-owned. No raw prompt/output, title, body, token or cached notification payload. Terminal records minimize to non-content effect identity/state/times after required invalidation, expire with the containing topic, and cleanup within 24h. No permanent nonce guarantee is implied. |
-| `accounts/{owner}/proactive_registration/current` | `revision,installationRef,registrationKind,registrationValue,enabled,registeredAt,expiresAt`; no old registration values. F0 expires no later than the named 30-minute test end +15min and erases/disables on acknowledged completion/withdrawal/sign-out. No promise about immediate removal from Google backup. |
+| `accounts/{owner}/proactive_registration/current` | `revision,installationRef,registrationKind:fcm_token,registrationValue,enabled,registeredAt,expiresAt`; no old registration values or FID union. F0 expires no later than the named 30-minute test end +15min and erases/disables on acknowledged completion/withdrawal/sign-out. No promise about immediate removal from Google backup. |
 | `accounts/{owner}/conversations/{topic}/read_state/current` | `revision,readThroughSequence,updatedAt`; delete/expire with topic. No message text; reads/marks never advance Q14's anchor. Unread means currently authorized available proactive messages after the watermark. Use a dot rather than fabricate a count from a partial page. |
 | Existing `messages/{messageId}` | Genuine `role:assistant,origin:proactive`, server sequence/time, canonical accepted text, occurrence/category identity, existing presentation usage metadata and immutable `appendBefore` equal to the **old** topic cutoff. Explicit server-owned retention effect is non-advancing under R-ANCHOR. No `replyToUserMessageId`, fake user or orphan pair receipt. |
 | Existing `message_sources/{messageId}` | A versioned `source_use_v2` receipt for new messages only: scope purpose/processing target, complete flattened `{kind,id,version}` dependencies, `requiredCategories` and server-issued per-card opaque references. F0 message version is backed by immutable source ID/sequence/full-precision persisted time. No source body, title, coordinates, source-content hash or reconstructed Persona. Old receipts are not backfilled or silently interpreted as this schema. |
