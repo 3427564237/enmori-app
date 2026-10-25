@@ -4,13 +4,155 @@ import 'dart:convert';
 import '../../../core/result/result.dart';
 import '../domain/ai_conversation.dart';
 import '../domain/ai_conversation_repository.dart';
+import '../domain/ai_owned_sources.dart';
 import 'ai_wire_transport.dart';
 
 final class AiWireRepository
-    implements AiConversationRepository, AiConversationHistoryRepository {
+    implements
+        AiConversationRepository,
+        AiConversationHistoryRepository,
+        AiOwnedSourcesRepository,
+        AiCompanionReplyRepository {
   AiWireRepository(this._transport);
 
   final AiWireTransport _transport;
+
+  @override
+  Future<Result<AiMessageAnchor>> resolveDelivery({
+    required String token,
+    required AiAbortSignal abort,
+    required String deliveryRef,
+  }) {
+    if (!_uuid(deliveryRef)) return _invalid();
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'POST',
+      path: '/v1/me/ai/delivery-references/resolve',
+      status: 200,
+      body: {'deliveryRef': deliveryRef},
+      parse: _anchor,
+    );
+  }
+
+  @override
+  Future<Result<AiMessageAnchor>> readMessageAnchor({
+    required String token,
+    required AiAbortSignal abort,
+    required AiMessageLocator locator,
+  }) {
+    if (!_uuid(locator.conversationId) || !_uuid(locator.messageId)) {
+      return _invalid();
+    }
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'GET',
+      path:
+          '/v1/me/conversations/${locator.conversationId}/messages/${locator.messageId}/anchor',
+      status: 200,
+      parse: (raw) {
+        final anchor = _anchor(raw);
+        _require(
+          anchor.locator.conversationId == locator.conversationId &&
+              anchor.locator.messageId == locator.messageId,
+        );
+        return anchor;
+      },
+    );
+  }
+
+  @override
+  Future<Result<AiSourceTarget>> resolveSource({
+    required String token,
+    required AiAbortSignal abort,
+    required AiMessageLocator message,
+    required AiSourceCard card,
+  }) {
+    if (!_uuid(message.conversationId) ||
+        !_uuid(message.messageId) ||
+        !_uuid(card.cardRef)) {
+      return _invalid();
+    }
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'POST',
+      path: '/v1/me/ai/source-references/resolve',
+      status: 200,
+      body: {
+        'conversationId': message.conversationId,
+        'messageId': message.messageId,
+        'cardRef': card.cardRef,
+      },
+      parse: (raw) {
+        final dto = _object(raw, {'kind'}, {'anchor', 'checkInId'});
+        if (dto['kind'] == 'conversation_message' &&
+            card.kind == AiSourceKind.conversationMessage) {
+          _require(dto.length == 2 && dto.containsKey('anchor'));
+          return AiConversationMessageTarget(_anchor(dto['anchor']));
+        }
+        _require(
+          dto['kind'] == 'check_in' &&
+              card.kind == AiSourceKind.checkIn &&
+              dto.length == 2 &&
+              _safeDocumentId(dto['checkInId']),
+        );
+        return AiCheckInTarget(dto['checkInId'] as String);
+      },
+    );
+  }
+
+  @override
+  Future<Result<AiTopicReadState>> readTopicReadState({
+    required String token,
+    required AiAbortSignal abort,
+    required String conversationId,
+  }) {
+    if (!_uuid(conversationId)) return _invalid();
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'GET',
+      path: '/v1/me/conversations/$conversationId/read-state',
+      status: 200,
+      parse: _readState,
+    );
+  }
+
+  @override
+  Future<Result<AiTopicReadState>> markTopicRead({
+    required String token,
+    required AiAbortSignal abort,
+    required String conversationId,
+    required int expectedRevision,
+    required int readThroughSequence,
+  }) {
+    if (!_uuid(conversationId) ||
+        !_nonnegative(expectedRevision) ||
+        !_nonnegative(readThroughSequence)) {
+      return _invalid();
+    }
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'PUT',
+      path: '/v1/me/conversations/$conversationId/read-state',
+      status: 200,
+      body: {
+        'expectedRevision': expectedRevision,
+        'readThroughSequence': readThroughSequence,
+      },
+      parse: (raw) {
+        final value = _readState(raw);
+        _require(
+          value.revision >= expectedRevision &&
+              value.readThroughSequence >= readThroughSequence,
+        );
+        return value;
+      },
+    );
+  }
 
   @override
   Future<Result<AiConversationHistoryPage>> listConversations({
@@ -113,12 +255,41 @@ final class AiWireRepository
     required AiAbortSignal abort,
     required AiTicket ticket,
     required String text,
+  }) => _execute(token: token, abort: abort, ticket: ticket, text: text);
+
+  @override
+  Future<Result<AiReply>> executeReply({
+    required String token,
+    required AiAbortSignal abort,
+    required AiTicket ticket,
+    required String text,
+    required String replyToMessageId,
+  }) => _execute(
+    token: token,
+    abort: abort,
+    ticket: ticket,
+    text: text,
+    replyToMessageId: replyToMessageId,
+  );
+
+  Future<Result<AiReply>> _execute({
+    required String token,
+    required AiAbortSignal abort,
+    required AiTicket ticket,
+    required String text,
+    String? replyToMessageId,
   }) {
-    if (!_ticket(ticket)) return _invalid();
+    if (!_ticket(ticket) ||
+        (replyToMessageId != null && !_uuid(replyToMessageId))) {
+      return _invalid();
+    }
     if (!_validText(text)) {
       return Future.value(const Failure(_invalidInput));
     }
-    final body = {'text': text};
+    final body = <String, Object>{
+      'text': text,
+      'replyToMessageId': ?replyToMessageId,
+    };
     if (utf8.encode(jsonEncode(body)).length > 16 * 1024) {
       return Future.value(const Failure(_tooLarge));
     }
@@ -440,7 +611,7 @@ AiMessage _message(Object? value) {
   final dto = _object(
     value,
     {'messageId', 'sequence', 'role', 'persistedAt', 'availability'},
-    {'text'},
+    {'text', 'origin', 'occurrenceId', 'category', 'sources'},
   );
   final sequence = dto['sequence'];
   _require(sequence is int && sequence > 0 && sequence <= _maxSafeInteger);
@@ -455,6 +626,32 @@ AiMessage _message(Object? value) {
     _ => throw const FormatException(),
   };
   String? text;
+  var origin = AiMessageOrigin.ordinary;
+  String? occurrenceId;
+  if (dto.containsKey('origin') ||
+      dto.containsKey('occurrenceId') ||
+      dto.containsKey('category')) {
+    _require(
+      role == AiRole.assistant &&
+          dto['origin'] == 'proactive' &&
+          dto['category'] == 'explicit_follow_up',
+    );
+    occurrenceId = _id(dto['occurrenceId']);
+    origin = AiMessageOrigin.proactive;
+  }
+  List<AiSourceCard> sources = const [];
+  if (dto.containsKey('sources')) {
+    final rows = dto['sources'];
+    _require(
+      role == AiRole.assistant &&
+          availability == AiAvailability.available &&
+          rows is List &&
+          rows.isNotEmpty &&
+          rows.length <= 15,
+    );
+    sources = List.unmodifiable((rows as List).map(_sourceCard));
+    _require(sources.map((v) => v.cardRef).toSet().length == sources.length);
+  }
   if (availability == AiAvailability.unavailable) {
     _require(role == AiRole.assistant && !dto.containsKey('text'));
   } else {
@@ -469,13 +666,116 @@ AiMessage _message(Object? value) {
     persistedAt: _utc(dto['persistedAt']),
     availability: availability,
     text: text,
+    origin: origin,
+    occurrenceId: occurrenceId,
+    sources: sources,
   );
 }
 
 void _pair(AiMessage user, AiMessage assistant) {
-  _require(user.role == AiRole.user && assistant.role == AiRole.assistant);
+  _require(
+    user.role == AiRole.user &&
+        assistant.role == AiRole.assistant &&
+        !assistant.isProactive,
+  );
   _require(
     user.messageId != assistant.messageId && user.sequence < assistant.sequence,
+  );
+}
+
+bool _nonnegative(Object? value) =>
+    value is int && value >= 0 && value <= _maxSafeInteger;
+bool _safeDocumentId(Object? value) =>
+    value is String &&
+    value.isNotEmpty &&
+    _wellFormed(value) &&
+    utf8.encode(value).length <= 1500 &&
+    value != '.' &&
+    value != '..' &&
+    !value.contains('/') &&
+    !RegExp(r'^__.*__$').hasMatch(value);
+
+AiTopicReadState _readState(Object? raw) {
+  final d = _object(raw, {'revision', 'readThroughSequence'});
+  _require(
+    _nonnegative(d['revision']) && _nonnegative(d['readThroughSequence']),
+  );
+  return AiTopicReadState(
+    revision: d['revision'] as int,
+    readThroughSequence: d['readThroughSequence'] as int,
+  );
+}
+
+AiMessageAnchor _anchor(Object? raw) {
+  final d = _object(raw, {
+    'conversationId',
+    'messageId',
+    'sequence',
+    'pageBefore',
+  });
+  final sequence = d['sequence'];
+  _require(
+    sequence is int &&
+        sequence > 0 &&
+        sequence < _maxSafeInteger &&
+        d['pageBefore'] is String,
+  );
+  final cursor = d['pageBefore'] as String;
+  _require(_cursor(cursor) == (sequence as int) + 1);
+  return AiMessageAnchor(
+    locator: AiMessageLocator(
+      conversationId: _id(d['conversationId']),
+      messageId: _id(d['messageId']),
+    ),
+    sequence: sequence,
+    pageBefore: cursor,
+  );
+}
+
+String _sourceInstant(Object? raw) {
+  _require(
+    raw is String &&
+        RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$')
+            .hasMatch(raw),
+  );
+  final value = raw as String;
+  final parsed = DateTime.tryParse(value);
+  _require(
+    parsed != null &&
+        parsed.isUtc &&
+        parsed.toIso8601String().substring(0, 19) == value.substring(0, 19),
+  );
+  return value;
+}
+
+AiSourceCard _sourceCard(Object? raw) {
+  final d = _object(raw, {
+    'cardRef',
+    'kind',
+    'version',
+    'sourceOccurredAt',
+    'observedAt',
+    'state',
+    'canNavigate',
+  });
+  _require(
+    d['state'] == 'available' &&
+        d['canNavigate'] == true &&
+        d['version'] is String &&
+        (d['version'] as String).isNotEmpty &&
+        (d['version'] as String).length <= 512 &&
+        _wellFormed(d['version'] as String),
+  );
+  return AiSourceCard(
+    cardRef: _id(d['cardRef']),
+    kind: switch (d['kind']) {
+      'conversation_message' => AiSourceKind.conversationMessage,
+      'check_in' => AiSourceKind.checkIn,
+      _ => throw const FormatException(),
+    },
+    version: d['version'] as String,
+    sourceOccurredAt: _sourceInstant(d['sourceOccurredAt']),
+    observedAt: _sourceInstant(d['observedAt']),
   );
 }
 
@@ -600,6 +900,26 @@ const _errors = <String, (int, AppFailureKind, String)>{
     409,
     AppFailureKind.aiAuthorityChanged,
     'This reply is no longer available.',
+  ),
+  'AI_SOURCE_UNAVAILABLE': (
+    404,
+    AppFailureKind.aiSourceUnavailable,
+    'This source is unavailable. Keep your draft and review the sources.',
+  ),
+  'AI_CONTEXT_SELECTION_CONFLICT': (
+    409,
+    AppFailureKind.aiContextSelectionConflict,
+    'Review the selected sources before sending.',
+  ),
+  'PROACTIVE_REVISION_PRECONDITION_FAILED': (
+    412,
+    AppFailureKind.proactiveRevisionPreconditionFailed,
+    'Read the current state before changing it.',
+  ),
+  'PROACTIVE_INPUT_INVALID': (
+    422,
+    AppFailureKind.proactiveInputInvalid,
+    'Review this request.',
   ),
   'AI_OUTCOME_UNRESOLVED': (
     503,
