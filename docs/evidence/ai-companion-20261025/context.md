@@ -279,7 +279,7 @@ This does not close the real reader/adapter or product-use gates.
 
 **Status: Proposed, not adopted or wired.** Context/source portions below and
 Delivery's [first-flow proposal](proactive.md) at
-`4a388d9fdb96596482fb7aa30760d0f1dbe203df` form one review packet. This section
+`b8b853208b88dee4d1dc46dc9497a6e67a87305c` form one review packet. This section
 also records the concrete review corrections sent to Delivery: a single
 `not_started → dispatching` sender claim, registration/read-state GET readbacks,
 and honest installation/idempotency limits. Integration owns final reconciliation
@@ -402,12 +402,48 @@ provides `getToken`, `onTokenRefresh` and `deleteToken`. It does not provide FID
 `register/onRegistered`. Thus F0's wire/storage kind is solely `fcm_token`; no
 FID is put into an Admin `token` field. The existing installed Admin `14.3.0`
 declarations contain `TokenMessage {token}` and `Messaging.send`, but explicitly
-deprecate token messages in favor of FID. The future Backend-only adapter would
-use `getMessaging(existingFirebaseApp).send({token,...})`, generic notification
-content, an opaque reference and TTL 0 after the final sender claim. Presence
-of that [pinned Admin interface](https://github.com/firebase/firebase-admin-node/blob/v14.3.0/src/messaging/messaging-api.ts)
+deprecate token messages in favor of FID. Presence of that
+[pinned Admin interface](https://github.com/firebase/firebase-admin-node/blob/v14.3.0/src/messaging/messaging-api.ts)
 does not prove current provider/project/device acceptance or a migration window.
 FID adoption is a separately reviewed client/Core/Auth change, not a fallback.
+
+**Narrow sender correction S1:** Delivery commit
+`b8b853208b88dee4d1dc46dc9497a6e67a87305c` supersedes only this paragraph's
+earlier `getMessaging(...).send(...)` sender choice at `ce0a5ed`; retain that
+commit as history. Integration, Delivery and QA inspected the pinned internal
+[HTTP client](https://github.com/firebase/firebase-admin-node/blob/v14.3.0/src/utils/api-request.ts):
+the default can retry four times after the initial request for selected
+503/network failures, and the inspected public `send` / AppOptions surface
+provides no supported retry-disable control. One SDK call is not one HTTP attempt.
+
+The replacement **unimplemented Port contract** borrows an access token only
+through the existing initialized app's public `Credential.getAccessToken()`,
+then uses pinned Node 24 native `fetch` once for a POST to exactly
+`https://fcm.googleapis.com/v1/projects/{approvedProjectId}/messages:send`.
+Project/recipient come from approved trusted server configuration, never a
+caller/model URL. After the token await, freshly revalidate source/topic/grants,
+registration lease, quiet/zone, expiry/runtime/abort, then CAS the one-use sender
+claim; after that claim's await, recheck current runtime/abort/expiry immediately
+before sending. A valid OAuth token is not business authorization.
+
+Use `redirect:'error'`, bounded abort, transient Bearer header and generic
+notification/opaque data only. REST Android fields are
+`priority:'NORMAL',ttl:'0s'`, not Admin's millisecond `ttl:0`. No SDK sender,
+retrying auth-request wrapper, RetryAgent/interceptor, loop or redirect/SDK
+fallback surrounds this message POST. Do not refresh a token after 401 and
+re-POST; 503/reset/timeout/abort or an ambiguous body/ACK is never automatically
+replayed. Preserve rejected/unknown outcomes; validated provider acceptance is
+still not display/read. The credential's own OAuth traffic is not a second
+FCM message attempt and is never logged, persisted or returned as product data.
+See Delivery's S1 and the [FCM HTTP v1 contract](https://firebase.google.com/docs/cloud-messaging/send/v1-api).
+
+This is a transport requirement, **not proven wire behavior** of an adapter
+that does not exist. Future isolated checks must count actual received message
+POSTs under 503/reset/delay/redirect and the pinned native dispatcher, rather
+than wrapper calls. Credential failure, or revoked/expired/aborted authority
+after token/claim waits, must produce zero message POSTs. If that cannot be
+established, hold D1. No credential acquisition, sender implementation, transport
+test or real call was performed for this documentation correction.
 
 No token getter, auto-initialization/registration, refresh binding, dry-run or
 sender call was performed. Before any future SDK initialization, the approved
@@ -554,9 +590,15 @@ target from an old notice.
 
 The precise prospective authorization is one LI-designated existing test account,
 one LI/SHI-operated device, synthetic content, one named 30-minute window and at
-most one notification per observed app state (foreground, background via Home,
+most one FCM message POST attempt per observed app state (foreground, background via Home,
 ordinary close). No credentials, real-source cloud payload, force-stop bypass,
 new participant or 20-person pilot is included.
+
+`attemptLimit:1` / the at-most-three total limit counts actual FCM message POST
+attempts, not SDK calls, OAuth exchanges or device displays. A consumed
+`attemptedAt` claim can precede a crash with zero actual requests; unknown still
+must not replay. Canonical contact budget is charged once at `publishedAt`, not
+again for the message POST. No provider request promises exactly-once display.
 
 With the proposed 1-per-24h cap, Delivery's T1 is **one normal complete E2E** plus
 at most two separately approved transport-only diagnostics referencing that
