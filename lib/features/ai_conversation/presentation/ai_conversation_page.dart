@@ -256,6 +256,12 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     }
   }
 
+  void _openHistoryMenu() {
+    if (!_ownsCurrentSession || _confirming || _leaving) return;
+    if (!ref.read(aiConversationControllerProvider).canBrowseHistory) return;
+    _scaffoldKey.currentState?.openDrawer();
+  }
+
   Future<void> _openConversation(String id) async {
     if (!_ownsCurrentSession ||
         _confirming ||
@@ -263,6 +269,9 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         !ref.read(aiConversationControllerProvider).canSelectConversation) {
       return;
     }
+    // The current topic is already open. Do not discard its draft, reread it
+    // or reset its request state merely because its History row was selected.
+    if (ref.read(aiConversationControllerProvider).conversationId == id) return;
     if (_message.text.isNotEmpty) {
       _confirming = true;
       final discard = await _confirm(
@@ -675,7 +684,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         key: const Key('ai-new-conversation'),
                         style: _buttonStyle,
                         onPressed: _newConversation,
-                        child: Text(context.tr('New conversation', '新对话')),
+                        child: Text(context.tr('New topic', '新话题')),
                       ),
                     ],
                     if (state.canCancel) ...[
@@ -842,9 +851,26 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     bool hasText,
   ) {
     final content = <Widget>[
+      if (!contentHidden && state.readBusy && state.conversationId != null)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Semantics(
+            key: const Key('ai-conversation-read-status'),
+            liveRegion: true,
+            child: Text(
+              context.tr('Checking saved conversation…', '正在核对已保存的对话…'),
+            ),
+          ),
+        ),
       if (state.messages.isEmpty &&
           state.localOutgoingText == null &&
-          !contentHidden) ...[
+          !contentHidden &&
+          !state.readBusy &&
+          state.canSend &&
+          {
+            AiConversationPhase.idle,
+            AiConversationPhase.success,
+          }.contains(state.phase)) ...[
         const SizedBox(height: 28),
         Center(
           child: Container(
@@ -862,17 +888,30 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         ),
         const SizedBox(height: 24),
         Text(
-          context.tr('A little space for you', '留一点时间给自己'),
+          state.conversationId == null
+              ? context.tr('Start a new topic', '开始一个新话题')
+              : context.tr('Continue this topic', '继续这个话题'),
+          key: const Key('ai-entry-empty'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall
               ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -.6),
         ),
         const SizedBox(height: 10),
         Text(
-          context.tr(
-            'Write a message whenever you feel ready.',
-            '想说的时候，随时写下来。',
-          ),
+          state.conversationId != null
+              ? context.tr(
+                  'Your next message stays in this conversation.',
+                  '下一条消息仍会留在这段对话中。',
+                )
+              : state.canBrowseHistory
+              ? context.tr(
+                  'Write here to begin, or open History to continue a saved conversation.',
+                  '在这里开始，或打开历史继续一段已保存的对话。',
+                )
+              : context.tr(
+                  'Write a message whenever you feel ready.',
+                  '想说的时候，随时写下来。',
+                ),
           textAlign: TextAlign.center,
           style: TextStyle(height: 1.6),
         ),
@@ -1074,7 +1113,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   builder: (drawerContext) => ListTile(
                     key: const Key('ai-drawer-new'),
                     leading: const Icon(Icons.add_comment_outlined),
-                    title: Text(context.tr('New conversation', '新对话')),
+                    title: Text(context.tr('New topic', '新话题')),
                     enabled: state.canStartNewConversation,
                     onTap: state.canStartNewConversation
                         ? () {
@@ -1083,6 +1122,18 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                           }
                         : null,
                   ),
+                ),
+                ListTile(
+                  key: const Key('ai-drawer-find'),
+                  leading: const Icon(Icons.search),
+                  title: Text(context.tr('Find in conversation', '查找对话消息')),
+                  enabled: canFindAiMessages(state),
+                  onTap: canFindAiMessages(state)
+                      ? () {
+                          _scaffoldKey.currentState?.closeDrawer();
+                          unawaited(_findMessages());
+                        }
+                      : null,
                 ),
                 if (state.canBrowseHistory) _historyPanel(state),
                 const Divider(),
@@ -1164,11 +1215,21 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),
-          title: Text(context.tr('AI companion', 'AI 伙伴')),
+          title: Text(
+            context.tr('AI companion', 'AI 伙伴'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           actions: [
             IconButton(
+              key: const Key('ai-open-history'),
+              tooltip: context.tr('History', '历史'),
+              onPressed: state.canBrowseHistory ? _openHistoryMenu : null,
+              icon: const Icon(Icons.history),
+            ),
+            IconButton(
               key: const Key('ai-new-conversation'),
-              tooltip: context.tr('New conversation', '新对话'),
+              tooltip: context.tr('New topic', '新话题'),
               onPressed: state.canStartNewConversation
                   ? _newConversation
                   : null,
