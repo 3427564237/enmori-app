@@ -11454,6 +11454,1415 @@
           }
         }
       }
+    },
+    "/v1/me/proactive-settings": {
+      "get": {
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "description": "Approved F0 implementation candidate. Fresh identity, owner, purpose, source and retention authority are checked at each effect. No undeclared query/body fields. No default background or external sending enablement. Mutations use one expectedRevision in JSON, except UUID-keyed create. Registration requires a separately configured named installation and fixed approved lease. Reject AI-Operation-Key, If-Match, If-None-Match and If-Unmodified-Since. Idempotency-Key is allowed only on intent creation. JSON bodies are limited to 8192 bytes; malformed JSON or unsupported content type returns 400, excessive bytes 413, and semantic input failures 422. No request body, transfer encoding or positive Content-Length; no automatic HEAD route.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Confirmed current owner result; Cache-Control: no-store. Receipt is not proof of notification delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Settings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "description": "Approved F0 implementation candidate. Fresh identity, owner, purpose, source and retention authority are checked at each effect. No undeclared query/body fields. No default background or external sending enablement. Mutations use one expectedRevision in JSON, except UUID-keyed create. Registration requires a separately configured named installation and fixed approved lease. Reject AI-Operation-Key, If-Match, If-None-Match and If-Unmodified-Since. Idempotency-Key is allowed only on intent creation. JSON bodies are limited to 8192 bytes; malformed JSON or unsupported content type returns 400, excessive bytes 413, and semantic input failures 422.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Confirmed current owner result; Cache-Control: no-store. Receipt is not proof of notification delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Settings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "ai-companion.json#/components/schemas/ReplaceSettings"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/proactive-intents": {
+      "post": {
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "description": "Approved F0 implementation candidate. Fresh identity, owner, purpose, source and retention authority are checked at each effect. No undeclared query/body fields. No default background or external sending enablement. Mutations use one expectedRevision in JSON, except UUID-keyed create. Registration requires a separately configured named installation and fixed approved lease. Reject AI-Operation-Key, If-Match, If-None-Match and If-Unmodified-Since. Idempotency-Key is allowed only on intent creation. JSON bodies are limited to 8192 bytes; malformed JSON or unsupported content type returns 400, excessive bytes 413, and semantic input failures 422.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CompanionIdempotencyKey"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Confirmed current owner result; Cache-Control: no-store. Receipt is not proof of notification delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Intent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "ai-companion.json#/components/schemas/CreateIntent"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "description": "Approved F0 implementation candidate. Fresh identity, owner, purpose, source and retention authority are checked at each effect. No undeclared query/body fields. No default background or external sending enablement. Mutations use one expectedRevision in JSON, except UUID-keyed create. Registration requires a separately configured named installation and fixed approved lease. Reject AI-Operation-Key, If-Match, If-None-Match and If-Unmodified-Since. Idempotency-Key is allowed only on intent creation. JSON bodies are limited to 8192 bytes; malformed JSON or unsupported content type returns 400, excessive bytes 413, and semantic input failures 422. No request body, transfer encoding or positive Content-Length; no automatic HEAD route.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Confirmed current owner result; Cache-Control: no-store. Receipt is not proof of notification delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Intents"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/proactive-intents/{intentId}": {
+      "get": {
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "description": "Approved F0 implementation candidate. Fresh identity, owner, purpose, source and retention authority are checked at each effect. No undeclared query/body fields. No default background or external sending enablement. Mutations use one expectedRevision in JSON, except UUID-keyed create. Registration requires a separately configured named installation and fixed approved lease. Reject AI-Operation-Key, If-Match, If-None-Match and If-Unmodified-Since. Idempotency-Key is allowed only on intent creation. JSON bodies are limited to 8192 bytes; malformed JSON or unsupported content type returns 400, excessive bytes 413, and semantic input failures 422. No request body, transfer encoding or positive Content-Length; no automatic HEAD route.",
+        "parameters": [
+          {
+            "name": "intentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "minLength": 36,
+              "maxLength": 36
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmed current owner result; Cache-Control: no-store. Receipt is not proof of notification delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Intent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "description": "Approved F0 implementation candidate. Fresh identity, owner, purpose, source and retention authority are checked at each effect. No undeclared query/body fields. No default background or external sending enablement. Mutations use one expectedRevision in JSON, except UUID-keyed create. Registration requires a separately configured named installation and fixed approved lease. Reject AI-Operation-Key, If-Match, If-None-Match and If-Unmodified-Since. Idempotency-Key is allowed only on intent creation. JSON bodies are limited to 8192 bytes; malformed JSON or unsupported content type returns 400, excessive bytes 413, and semantic input failures 422.",
+        "parameters": [
+          {
+            "name": "intentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "minLength": 36,
+              "maxLength": 36
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmed current owner result; Cache-Control: no-store. Receipt is not proof of notification delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Intent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "ai-companion.json#/components/schemas/CancelIntent"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/proactive-registration": {
+      "get": {
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "description": "Approved F0 implementation candidate. Fresh identity, owner, purpose, source and retention authority are checked at each effect. No undeclared query/body fields. No default background or external sending enablement. Mutations use one expectedRevision in JSON, except UUID-keyed create. Registration requires a separately configured named installation and fixed approved lease. Reject AI-Operation-Key, If-Match, If-None-Match and If-Unmodified-Since. Idempotency-Key is allowed only on intent creation. JSON bodies are limited to 8192 bytes; malformed JSON or unsupported content type returns 400, excessive bytes 413, and semantic input failures 422. No request body, transfer encoding or positive Content-Length; no automatic HEAD route.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Confirmed current owner result; Cache-Control: no-store. Receipt is not proof of notification delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Registration"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "description": "Approved F0 implementation candidate. Fresh identity, owner, purpose, source and retention authority are checked at each effect. No undeclared query/body fields. No default background or external sending enablement. Mutations use one expectedRevision in JSON, except UUID-keyed create. Registration requires a separately configured named installation and fixed approved lease. Reject AI-Operation-Key, If-Match, If-None-Match and If-Unmodified-Since. Idempotency-Key is allowed only on intent creation. JSON bodies are limited to 8192 bytes; malformed JSON or unsupported content type returns 400, excessive bytes 413, and semantic input failures 422.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Confirmed current owner result; Cache-Control: no-store. Receipt is not proof of notification delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Registration"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "ai-companion.json#/components/schemas/ReplaceRegistration"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "description": "Approved F0 implementation candidate. Fresh identity, owner, purpose, source and retention authority are checked at each effect. No undeclared query/body fields. No default background or external sending enablement. Mutations use one expectedRevision in JSON, except UUID-keyed create. Registration requires a separately configured named installation and fixed approved lease. Reject AI-Operation-Key, If-Match, If-None-Match and If-Unmodified-Since. Idempotency-Key is allowed only on intent creation. JSON bodies are limited to 8192 bytes; malformed JSON or unsupported content type returns 400, excessive bytes 413, and semantic input failures 422.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Confirmed current owner result; Cache-Control: no-store. Receipt is not proof of notification delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Registration"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "ai-companion.json#/components/schemas/DeleteRegistration"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/conversations/{conversationId}/read-state": {
+      "get": {
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "description": "Approved F0 implementation candidate. Fresh identity, owner, purpose, source and retention authority are checked at each effect. No undeclared query/body fields. No default background or external sending enablement. Mutations use one expectedRevision in JSON, except UUID-keyed create. Registration requires a separately configured named installation and fixed approved lease. Reject AI-Operation-Key, If-Match, If-None-Match and If-Unmodified-Since. Idempotency-Key is allowed only on intent creation. JSON bodies are limited to 8192 bytes; malformed JSON or unsupported content type returns 400, excessive bytes 413, and semantic input failures 422. No request body, transfer encoding or positive Content-Length; no automatic HEAD route.",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "minLength": 36,
+              "maxLength": 36
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmed current owner result; Cache-Control: no-store. Receipt is not proof of notification delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/ReadState"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "description": "Approved F0 implementation candidate. Fresh identity, owner, purpose, source and retention authority are checked at each effect. No undeclared query/body fields. No default background or external sending enablement. Mutations use one expectedRevision in JSON, except UUID-keyed create. Registration requires a separately configured named installation and fixed approved lease. Reject AI-Operation-Key, If-Match, If-None-Match and If-Unmodified-Since. Idempotency-Key is allowed only on intent creation. JSON bodies are limited to 8192 bytes; malformed JSON or unsupported content type returns 400, excessive bytes 413, and semantic input failures 422.",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+              "minLength": 36,
+              "maxLength": 36
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmed current owner result; Cache-Control: no-store. Receipt is not proof of notification delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/ReadState"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe AI envelope. Unknown outcome requires readback; never proves no effects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "ai-companion.json#/components/schemas/MarkRead"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11485,6 +12894,18 @@
         "schema": {
           "type": "string",
           "pattern": "^[A-Za-z0-9_-]{22,64}$"
+        }
+      },
+      "CompanionIdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "description": "Exactly one canonical lowercase UUID v4 for explicit-follow-up create; also its owner-scoped readback locator. Missing, malformed or duplicate key yields IDEMPOTENCY_KEY_INVALID. No automatic resubmit after an unknown outcome.",
+        "schema": {
+          "type": "string",
+          "minLength": 36,
+          "maxLength": 36,
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
         }
       }
     },
@@ -13224,7 +14645,9 @@
                   "AI_UNAVAILABLE",
                   "AI_REPLY_REJECTED",
                   "AI_AUTHORITY_CHANGED",
-                  "AI_OUTCOME_UNRESOLVED"
+                  "AI_OUTCOME_UNRESOLVED",
+                  "AI_SOURCE_UNAVAILABLE",
+                  "AI_CONTEXT_SELECTION_CONFLICT"
                 ]
               },
               "message": {
