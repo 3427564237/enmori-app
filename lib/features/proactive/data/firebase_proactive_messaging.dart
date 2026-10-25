@@ -13,9 +13,17 @@ final class FirebaseProactiveMessagingPort implements ProactiveMessagingPort {
     FirebaseMessaging Function()? messagingFactory,
     MethodChannel? channel,
     Stream<RemoteMessage>? openedMessages,
-  }) : this._(messagingFactory ?? (() => FirebaseMessaging.instance),
-       channel ?? const MethodChannel('com.enmori.app/proactive_notifications'), openedMessages);
-  FirebaseProactiveMessagingPort._(this._factory, this._channel, this._openedMessages);
+  }) : this._(
+         messagingFactory ?? (() => FirebaseMessaging.instance),
+         channel ??
+             const MethodChannel('com.enmori.app/proactive_notifications'),
+         openedMessages,
+       );
+  FirebaseProactiveMessagingPort._(
+    this._factory,
+    this._channel,
+    this._openedMessages,
+  );
   final FirebaseMessaging Function() _factory;
   final MethodChannel _channel;
   final Stream<RemoteMessage>? _openedMessages;

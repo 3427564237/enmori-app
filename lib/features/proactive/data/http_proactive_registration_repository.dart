@@ -231,7 +231,8 @@ ProactiveRegistration _registration(Object? raw) {
   DateTime? expiry;
   if (instant != null) {
     if (instant is! String ||
-        !RegExp(r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$').hasMatch(instant)) {
+        !RegExp(r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$')
+            .hasMatch(instant)) {
       throw const FormatException();
     }
     expiry = DateTime.tryParse(instant);
