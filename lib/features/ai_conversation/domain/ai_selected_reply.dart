@@ -37,7 +37,10 @@ final class AiPreparedReplySelection {
 }
 
 final class AiSelectedReplyTicket {
-  const AiSelectedReplyTicket({required this.operation, required this.selection});
+  const AiSelectedReplyTicket({
+    required this.operation,
+    required this.selection,
+  });
   final AiTicket operation;
   final AiPreparedReplySelection selection;
 }
@@ -49,6 +52,7 @@ abstract interface class AiSelectedReplyRepository {
     required String token,
     required AiAbortSignal abort,
     String? conversationId,
+    String? userMessageId,
     required List<String> sourceIds,
   });
 
