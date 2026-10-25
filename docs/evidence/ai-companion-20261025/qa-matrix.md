@@ -17,6 +17,11 @@ research at decision `26af8c9`. This selects the named behavior; it does not
 change any Not Run result into Pass or authorize real deployment/data/device
 operations. F1b/location/automatic triggers remain outside that selected slice.
 
+The first implementation's focused identity, shared-model-lane, transaction,
+retention/read and single-POST counterexamples are maintained in
+[qa-f0-first-flow.md](qa-f0-first-flow.md). Its integrated rows remain Not Run;
+the separate [v27 artifact verification](qa-v27-artifact.md) covers C/usability.
+
 ## Verdict and evidence rules
 
 - **Pass** means the row's success condition was observed at the listed layer,
