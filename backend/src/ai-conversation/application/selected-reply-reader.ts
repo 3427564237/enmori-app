@@ -47,6 +47,8 @@ export class SelectedReplyReader {
       this.deps=Object.freeze({ownerId:context.ownerId,purpose:"checkin_conversation",purposeRevocationGeneration:grant.purposeRevocationGeneration,usedPersonaId:active,
         sources:Object.freeze(v.sources.map(s=>Object.freeze({sourceType:"check_in" as const,sourceId:s.checkInId,observedVersion:s.observedVersion}))),
         selectedReply:Object.freeze({processing:"local",asOf:context.asOf,permittedCheckInIds:Object.freeze(expected.map(s=>s.checkInId)),
+          historySnapshot:Object.freeze(grant.historyPairs.map(({historyKey:_,...identity})=>Object.freeze(identity))),
+          excludedHistoryPairs:Object.freeze(grant.historyPairs.filter(p=>grant.excludedHistoryKeys?.includes(p.historyKey)).map(({historyKey:_,...identity})=>Object.freeze(identity))),
           excludedCheckInIds:Object.freeze(grant.sources.filter(s=>grant.excludedKeys.includes(s.selectionKey)).map(s=>s.checkInId)),
           sources:Object.freeze(v.sources.map(s=>Object.freeze({kind:"check_in" as const,id:s.checkInId,version:s.version})))})});
       this.phase="ready";return "ready";

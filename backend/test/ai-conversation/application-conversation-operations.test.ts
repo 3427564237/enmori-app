@@ -377,7 +377,7 @@ test("concurrent/invalid acquisition has no lease and idempotent old release can
 });
 
 test("F1a prepared choices are operation-bound and omission/foreign/incomplete keys preserve the prepared ticket",async()=>{
-  const f=fixture();f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:3,sources:[{kind:"check_in",checkInId:"private-source-id",version:"metadata-v1",sourceOccurredAt:"2026-10-14T09:00:00.000Z",observedAt:"2026-10-14T10:00:00.000Z"}]});
+  const f=fixture();f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:3,historyPairs:[],sources:[{kind:"check_in",checkInId:"private-source-id",version:"metadata-v1",sourceOccurredAt:"2026-10-14T09:00:00.000Z",observedAt:"2026-10-14T10:00:00.000Z"}]});
   const ticket=value(await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",contextSelection:{processing:"local",sources:[{kind:"check_in",checkInId:"private-source-id"}]}}));
   const c=ticket.contextSelection!;assert.equal(c.sourceCards.length,1);assert(!JSON.stringify(c).includes("private-source-id"));
   const body={operationId:ticket.operationId,operationKey:ticket.operationKey,text:"keep this draft"};
@@ -396,4 +396,22 @@ test("F1a selection cannot be inserted into an old unselected prepare, or adopte
 test("reply association is allowed only for an existing topic and does not consume a rejected new-topic ticket",async()=>{
   const f=fixture(),ticket=await f.prepare();
   assert.deepEqual(await f.app.execute(f.original,{operationId:ticket.operationId,operationKey:ticket.operationKey,text:"draft",replyToMessageId:id(800)},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});assert.equal(f.counts().creates,0);assert.equal((await f.execute(ticket)).kind,"success");
+});
+
+test("history exclusions use only fresh prepared keys and preserve draft plus source choice through explicit Send",async()=>{
+  const f=fixture();f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:3,sources:[],historyPairs:[{userMessageId:id(800),assistantMessageId:id(801),userSequence:1,assistantSequence:2}]});
+  const ticket=value(await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",conversationId:existing,contextSelection:{processing:"local",sources:[]}})),s=ticket.contextSelection!,key=s.historyPairs[0]!.historyKey;
+  const body={operationId:ticket.operationId,operationKey:ticket.operationKey,text:"draft stays exactly"},selection={selectionRevision:s.selectionRevision,includedKeys:[],excludedKeys:[]};
+  for(const keys of [[id(999)],[key,key]])assert.deepEqual(await f.app.execute(f.original,{...body,contextSelection:{...selection,excludedHistoryKeys:keys}},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});
+  assert.equal(f.counts().creates,0);assert.equal((await f.app.execute(f.original,{...body,contextSelection:{...selection,excludedHistoryKeys:[key]}},f.delivery())).kind,"success");assert.deepEqual(f.inputs[0]?.selectedReply?.excludedHistoryKeys,[key]);assert.equal(f.accepted[0]?.userMessage.text,"draft stays exactly");
+});
+
+test("reprepare issues new history keys; old exclusions cannot transfer even with the same owner/topic",async()=>{
+  const f=fixture();f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:3,sources:[],historyPairs:[{userMessageId:id(820),assistantMessageId:id(821),userSequence:1,assistantSequence:2}]});
+  const prepare=async()=>value(await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",conversationId:existing,contextSelection:{processing:"local",sources:[]}}));
+  const old=await prepare(),oldKey=old.contextSelection!.historyPairs[0]!.historyKey;value(await f.app.cancel(f.original,{operationId:old.operationId,operationKey:old.operationKey}));
+  const fresh=await prepare(),s=fresh.contextSelection!,newKey=s.historyPairs[0]!.historyKey;assert.notEqual(s.selectionRevision,old.contextSelection!.selectionRevision);assert.notEqual(newKey,oldKey);
+  const body={operationId:fresh.operationId,operationKey:fresh.operationKey,text:"unchanged draft"},choice={selectionRevision:s.selectionRevision,includedKeys:[],excludedKeys:[]};
+  assert.deepEqual(await f.app.execute(f.original,{...body,contextSelection:{...choice,excludedHistoryKeys:[oldKey]}},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});
+  assert.equal((await f.app.execute(f.original,{...body,contextSelection:{...choice,excludedHistoryKeys:[newKey]}},f.delivery())).kind,"success");assert.equal(f.accepted[0]?.userMessage.text,"unchanged draft");
 });

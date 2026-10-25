@@ -7,6 +7,9 @@ import type { ConversationOrdinaryContext, RequestOriginalConversationIdentity }
 import type { AcceptedContextRead, ReadPersonaSet } from "../ports/real-context-reader.js";
 import type { SelectReplyContext, SelectedReplySnapshot, SelectedReplyGrant, SelectedReplyObservation, SelectedReplyReadPort, SelectedReplyReadResult, SelectedReplyFailure } from "../ports/selected-reply.js";
 import type { ConversationResult } from "../ports/conversation-operations.js";
+import type { StoreResult } from "../ports/real-conversation-store.js";
+import type { HistoryPairIdentity } from "../ports/real-context-reader.js";
+export type SelectedHistorySnapshot=(tx:Tx,principal:AcceptedContextRead["principal"],ownerId:string,conversationId:string,current:()=>boolean)=>Promise<StoreResult<readonly HistoryPairIdentity[]>>;
 class Failure extends Error {constructor(readonly kind:SelectedReplyFailure){super(kind);}}
 function fail(kind:SelectedReplyFailure):never{throw new Failure(kind);}
 const uint=(x:unknown):x is number=>typeof x==="number"&&Number.isSafeInteger(x)&&x>=0;
@@ -15,7 +18,7 @@ const uint=(x:unknown):x is number=>typeof x==="number"&&Number.isSafeInteger(x)
 export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
   constructor(private readonly gateway:FirestoreGateway,environment:Readonly<Record<string,string|undefined>>,
     private readonly original:Pick<RequestOriginalConversationIdentity,"verifyRead"|"currentRead">|undefined,
-    private readonly utcMilliseconds:()=>number=Date.now){requireFeatureEnvironment(environment);}
+    private readonly utcMilliseconds:()=>number=Date.now,private readonly historySnapshot?:SelectedHistorySnapshot){requireFeatureEnvironment(environment);}
   private check(current:()=>boolean){try{if(current())return;}catch{}fail("terminated");}
   private async guardedRead<T>(current:()=>boolean,operation:()=>Promise<T>):Promise<T>{this.check(current);const result=await operation();this.check(current);return result;}
   private valid(input:SelectReplyContext):void{
@@ -39,14 +42,19 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
     return {kind:"check_in" as const,checkInId:id,version,sourceOccurredAt:p.createdAt,observedAt:new Date(observed).toISOString(),
       noteText:p.note,...(p.mood?{moodLabel:p.mood}:{}),...(p.activity?{activityLabel:p.activity}:{}),observedVersion:updated};
   }
-  async prepare(context:ConversationOrdinaryContext,input:SelectReplyContext):Promise<ConversationResult<SelectedReplySnapshot>>{
+  async prepare(context:ConversationOrdinaryContext,input:SelectReplyContext,conversationId?:string):Promise<ConversationResult<SelectedReplySnapshot>>{
     try{this.valid(input);const started=this.utcMilliseconds();if(!uint(started))fail("unavailable");
       const value=await this.gateway.runTransaction(async tx=>{
         const authority=await this.authority(tx,context.principal,context.ownerId,context.current),sources=[];
         for(const ref of input.sources){const {noteText:_,moodLabel:__,activityLabel:___,observedVersion:____,...identity}=await this.source(tx,context.ownerId,ref.checkInId,started,context.current);sources.push(identity);}
+        let historyPairs:readonly HistoryPairIdentity[]=[];
+        if(conversationId!==undefined){
+          if(!this.historySnapshot)fail("unavailable");const read=await this.guardedRead(context.current,()=>this.historySnapshot!(tx,context.principal,context.ownerId,conversationId,context.current));
+          if(read.kind!=="confirmed")fail(read.kind==="denied"?"denied":read.kind==="terminated"?"terminated":"unavailable");historyPairs=read.value;
+        }
         const ended=this.utcMilliseconds();if(ended<started||ended-started>5000)fail("unavailable");this.check(context.current);
         sources.sort((a,b)=>b.sourceOccurredAt.localeCompare(a.sourceOccurredAt)||a.checkInId.localeCompare(b.checkInId));
-        return {purposeRevocationGeneration:authority.purposeRevocationGeneration,sources};
+        return {purposeRevocationGeneration:authority.purposeRevocationGeneration,sources,historyPairs};
       },{maxAttempts:1});this.check(context.current);return {kind:"success",value};
     }catch(e){return {kind:"failure",code:e instanceof Failure?e.kind==="selection_conflict"?"AI_CONTEXT_SELECTION_CONFLICT":e.kind==="source_unavailable"?"AI_SOURCE_UNAVAILABLE":e.kind==="denied"?"AI_CONTEXT_NOT_PERMITTED":"AI_UNAVAILABLE":"AI_UNAVAILABLE"};}
   }
@@ -59,6 +67,8 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
       const ids=new Set(grant.sources.map(s=>s.selectionKey));if(ids.size!==grant.sources.length||grant.includedKeys.some(k=>!ids.has(k))||grant.excludedKeys.some(k=>!ids.has(k)))fail("selection_conflict");
       if(new Set(grant.includedKeys).size!==grant.includedKeys.length||new Set(grant.excludedKeys).size!==grant.excludedKeys.length||
         [...ids].some(key=>!grant.includedKeys.includes(key)&&!grant.excludedKeys.includes(key)))fail("selection_conflict");
+      if(!Array.isArray(grant.historyPairs)||grant.historyPairs.length>2||new Set(grant.historyPairs.map(p=>p.historyKey)).size!==grant.historyPairs.length||
+        (grant.excludedHistoryKeys??[]).some(key=>!grant.historyPairs.some(p=>p.historyKey===key))||new Set(grant.excludedHistoryKeys??[]).size!==(grant.excludedHistoryKeys??[]).length)fail("selection_conflict");
       this.valid({processing:"local",sources:grant.sources.map(s=>({kind:"check_in",checkInId:s.checkInId}))});
       const started=this.utcMilliseconds(),asOf=context.asOf.seconds*1000+Math.floor(context.asOf.nanoseconds/1e6);
       if(!uint(started)||started<asOf)fail("unavailable");

@@ -1,6 +1,6 @@
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
 import type { OwnedSourceCard } from "./owned-sources.js";
-import type { AcceptedContextRead, ReadAuthority, ReadPersonaSet } from "./real-context-reader.js";
+import type { AcceptedContextRead, ReadAuthority, ReadPersonaSet, HistoryPairIdentity } from "./real-context-reader.js";
 import type { ConversationOrdinaryContext } from "./application-conversation-operations.js";
 import type { ConversationResult } from "./conversation-operations.js";
 
@@ -14,6 +14,7 @@ export interface ExecuteReplySelection {
   readonly selectionRevision:string;
   readonly includedKeys:readonly string[];
   readonly excludedKeys:readonly string[];
+  readonly excludedHistoryKeys?:readonly string[];
 }
 export interface SelectedSourceIdentity {
   readonly kind:"check_in";
@@ -25,15 +26,18 @@ export interface SelectedSourceIdentity {
 export interface SelectedReplySnapshot {
   readonly purposeRevocationGeneration:number;
   readonly sources:readonly SelectedSourceIdentity[];
+  readonly historyPairs:readonly HistoryPairIdentity[];
 }
 export interface PreparedReplySelection {
   readonly selectionRevision:string;
   readonly expiresAt:string;
   readonly sourceCards:readonly (OwnedSourceCard & {readonly selectionKey:string})[];
+  readonly historyPairs:readonly (HistoryPairIdentity & {readonly historyKey:string})[];
 }
 export interface SelectedReplyGrant extends ExecuteReplySelection {
   readonly purposeRevocationGeneration:number;
   readonly sources:readonly (SelectedSourceIdentity & {readonly selectionKey:string})[];
+  readonly historyPairs:readonly (HistoryPairIdentity & {readonly historyKey:string})[];
 }
 export type SelectedReplyFailure="changed"|"source_unavailable"|"selection_conflict"|"denied"|"unavailable"|"terminated";
 export interface SelectedReplyObservation {
@@ -44,12 +48,14 @@ export interface SelectedReplyObservation {
 export type SelectedReplyReadResult={readonly kind:"read";readonly value:SelectedReplyObservation}|{readonly kind:SelectedReplyFailure};
 export interface SelectedReplyReadPort {
   /** The ordinary Application authenticates before/after this transaction. */
-  prepare(context:ConversationOrdinaryContext,input:SelectReplyContext):Promise<ConversationResult<SelectedReplySnapshot>>;
+  prepare(context:ConversationOrdinaryContext,input:SelectReplyContext,conversationId?:string):Promise<ConversationResult<SelectedReplySnapshot>>;
   /** Current mutable reads with actual per-source observation times. Does not
    * claim a fixed readTime=acceptance snapshot. Each effect rereads separately. */
   read(context:AcceptedContextRead,grant:SelectedReplyGrant):Promise<SelectedReplyReadResult>;
 }
 export interface SelectedReplyDependencies {
+  readonly historySnapshot?:readonly HistoryPairIdentity[];
+  readonly excludedHistoryPairs?:readonly HistoryPairIdentity[];
   readonly processing:"local";
   readonly asOf:FullPrecisionInstant;
   readonly permittedCheckInIds:readonly string[];

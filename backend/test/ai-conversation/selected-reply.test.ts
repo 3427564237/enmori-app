@@ -30,10 +30,10 @@ function fixture(){
   for(const [index,key]of [a,b].entries())g.put(`check_ins/${key}`,{ownerAccountId:owner,note:`quoted-${key}`,mood:"calm",activity:"walking",createdAt:new Date(now-60000-index*60000).toISOString(),
     locationLabel:"location-canary",revision:1},now-60000-index*60000);
   const controller=new AbortController(),context:AcceptedContextRead={principal,ownerId:owner,session:{},originalRequest:{},acceptedAt:0,deadline:60000,asOf:{seconds:now/1000,nanoseconds:0},signal:controller.signal};
-  const adapter=new FirestoreSelectedReplyReader(g,environment,{verifyRead:async c=>c===context&&live?{kind:"read",value:principal}:{kind:"denied"},currentRead:c=>c===context&&live},()=>g.now);
+  const adapter=new FirestoreSelectedReplyReader(g,environment,{verifyRead:async c=>c===context&&live?{kind:"read",value:principal}:{kind:"denied"},currentRead:c=>c===context&&live},()=>g.now,(tx,p,o,c,current)=>store.prepareHistorySnapshot(tx,p,o,c,current));
   const ordinary={principal,ownerId:owner,signal:controller.signal,deadline:15000,current:()=>live};
-  const prepare=async(ids=[a])=>value(await adapter.prepare(ordinary,{processing:"local",sources:ids.map(checkInId=>({kind:"check_in",checkInId}))}));
-  const grant=(snapshot:SelectedReplySnapshot,include=snapshot.sources.map((_,i)=>id(100+i)),exclude:string[]=[]):SelectedReplyGrant=>({purposeRevocationGeneration:snapshot.purposeRevocationGeneration,selectionRevision:id(90),sources:snapshot.sources.map((s,i)=>({...s,selectionKey:id(100+i)})),includedKeys:include,excludedKeys:exclude});
+  const prepare=async(ids=[a])=>value(await adapter.prepare(ordinary,{processing:"local",sources:ids.map(checkInId=>({kind:"check_in",checkInId}))},g.rows.has(root)?topic:undefined));
+  const grant=(snapshot:SelectedReplySnapshot,include=snapshot.sources.map((_,i)=>id(100+i)),exclude:string[]=[]):SelectedReplyGrant=>({purposeRevocationGeneration:snapshot.purposeRevocationGeneration,selectionRevision:id(90),historyPairs:snapshot.historyPairs.map((p,i)=>({...p,historyKey:id(200+i)})),excludedHistoryKeys:[],sources:snapshot.sources.map((s,i)=>({...s,selectionKey:id(100+i)})),includedKeys:include,excludedKeys:exclude});
   const failures:string[]=[];const reader=(selection:SelectedReplyGrant)=>new SelectedReplyReader(context,selection,adapter,()=>monotonic,()=>live,k=>failures.push(k));
   const store=new FirestoreConversationStore(g,environment,()=>g.now);
   const target:OperationTarget={ownerAccountId:owner,conversationId:topic,userMessageId:id(30),operationId:id(31),kind:"send",targetKind:"existing"};
@@ -100,17 +100,17 @@ test("effect transaction independently rejects a changed selected source before 
   assert.equal((await f.store.initializeOperation(f.target,epoch.value,auth)).kind,"source_changed");assert.equal(f.g.writes,before);assert(!f.g.rows.has(`ai_operation_fences/${f.target.operationId}`));
 });
 
-async function executionFixture(selected:string[]|null=[a],existing=false,replyToMessageId?:string){
-  const f=fixture(),runtime=runtimeFixture(),snapshot=selected===null?undefined:await f.prepare(selected),grant=snapshot?f.grant(snapshot):undefined,epoch=await f.store.startEpoch(id(50));assert.equal(epoch.kind,"confirmed");if(epoch.kind!=="confirmed")throw Error("epoch");
+async function executionFixture(selected:string[]|null=[a],existing=false,replyToMessageId?:string,initialPairSource?:string){
+  const f=fixture(),runtime=runtimeFixture();if(initialPairSource)seedPair(f,initialPairSource);const snapshot=selected===null?undefined:await f.prepare(selected),grant=snapshot?f.grant(snapshot):undefined,epoch=await f.store.startEpoch(id(50));assert.equal(epoch.kind,"confirmed");if(epoch.kind!=="confirmed")throw Error("epoch");
   const accepted:ExecutedConversation[]=[];runtime.reads.authority={...runtime.reads.authority,purposeRevocationGeneration:0};
   const executor=new AsyncConversationOperationExecutor({runtime:runtime.runtime,strategy:"open_conversation_v1",clock:{monotonicNow:()=>runtime.clock.now(),utcNow:()=>({seconds:f.g.now/1000,nanoseconds:0})},gates:runtime.gates,
     ports:original=>{
       const authority:AsyncConversationAuthority={current:i=>original.current(i),freshAuth:async i=>{const r=await original.verify(i);return r.kind==="verified"?"authorized":r.kind==="dependency_unavailable"?"unavailable":"denied";},preaccept:async i=>{const r=await original.verify(i);return r.kind==="verified"?"authorized":"denied";}};
       const store=new AsyncFirestoreConversationStore(f.store,epoch.value,authority);
-      return {authority,reads:runtime.reads,selectedReads:new FirestoreSelectedReplyReader(f.g,environment,original,()=>f.g.now),store,acknowledgedPair:store};
+      return {authority,reads:runtime.reads,selectedReads:new FirestoreSelectedReplyReader(f.g,environment,original,()=>f.g.now,(tx,p,o,c,current)=>f.store.prepareHistorySnapshot(tx,p,o,c,current)),store,acknowledgedPair:store};
     }});
   const identity={principal,ownerId:owner,session:{},tokenInstance:{},originalRequest:{}},operation={operationId:id(80),conversationId:topic,userMessageId:id(81),kind:"send" as const,targetKind:existing?"existing" as const:"reserved_new" as const};
-  const create=()=>executor.create({identity,operation,text:()=>"Synthetic exact draft",verifyCurrentAuth:async()=>({kind:"verified",principal}),...(grant?{selectedReply:grant}:{}),...(replyToMessageId?{replyToMessageId}: {})},
+  const create=(chosen=grant)=>executor.create({identity,operation,text:()=>"Synthetic exact draft",verifyCurrentAuth:async()=>({kind:"verified",principal}),...(chosen?{selectedReply:chosen}:{}),...(replyToMessageId?{replyToMessageId}: {})},
     {signal:f.context.signal,current:()=>!f.context.signal.aborted,acceptCompleteBody:p=>{accepted.push(p);return true;}});
   return {...f,runtime,accepted,create,selectedGrant:grant,operation};
 }
@@ -131,7 +131,7 @@ test("changed selected Note after model dispatch rejects publication and deliver
   const messages=[...f.g.rows].filter(([path])=>path.startsWith(`${root}/messages/`));assert.equal(messages.length,1);assert.equal(messages[0]![1].data.role,"user");
 });
 test("cross-record history conflict reaches executor before model or user writes",async()=>{
-  const f=await executionFixture([a],true);seedPair(f,b);const before=f.g.writes,pending=f.create().dispatch();assert.deepEqual(await pending,{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});assert.equal(f.runtime.calls.length,0);assert.equal(f.g.writes,before);assert.equal(f.accepted.length,0);
+  const f=await executionFixture([a],true,undefined,b);const before=f.g.writes,pending=f.create().dispatch();assert.deepEqual(await pending,{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});assert.equal(f.runtime.calls.length,0);assert.equal(f.g.writes,before);assert.equal(f.accepted.length,0);
 });
 
 test("source resolver preserves changed409 vs missing404 vs unknown, without replacing the original card",async()=>{
@@ -180,4 +180,37 @@ test("malformed category proof and incomplete internal selection closure fail cl
   const f=fixture(),snapshot=await f.prepare([a,b]),incomplete={...f.grant(snapshot),includedKeys:[id(100)],excludedKeys:[]};assert.equal(await f.reader(incomplete).prepare(),"selection_conflict");
   seedPair(f);const path=`${root}/message_sources/${assistant}`,proof=f.g.rows.get(path)!.data;f.g.put(path,{...proof,requiredCategories:["check_ins","conversation_history"]});
   assert.equal((await f.store.resolveOwnedSource(principal,owner,topic,assistant,id(70),()=>true)).kind,"conversation_unavailable");assert.equal(f.g.writes,0);
+});
+
+test("explicit excluded history key restores same-topic reply for an unselected B or a source older than seven days",async()=>{
+  for(const older of [false,true]){
+    const f=await executionFixture(older?[]:[a],true,undefined,b);
+    if(older)f.g.put(`check_ins/${b}`,{...f.g.rows.get(`check_ins/${b}`)!.data,createdAt:new Date(now-8*86400000).toISOString()});
+    const grant={...f.selectedGrant!,excludedHistoryKeys:f.selectedGrant!.historyPairs.map(p=>p.historyKey)},oldUser=f.g.rows.get(`${root}/messages/${user}`),oldAssistant=f.g.rows.get(`${root}/messages/${assistant}`);
+    const pending=f.create(grant).dispatch();await waitModel(f,pending);const input=f.runtime.calls[0]!.input;assert.deepEqual(input.history,[]);assert.equal(input.currentMessage,"Synthetic exact draft");assert(!JSON.stringify(input).includes("old suggestion"));assert(!JSON.stringify(input).includes("quoted-selected-b"));
+    f.runtime.calls[0]!.completion.resolve(valid("Fresh reply without those past exchanges"));const result=await pending;assert.equal(result.kind,"success");
+    assert.deepEqual(f.g.rows.get(`${root}/messages/${user}`),oldUser);assert.deepEqual(f.g.rows.get(`${root}/messages/${assistant}`),oldAssistant);
+  }
+});
+test("a new complete pair after preparation invalidates exclusions, never maps an old key to a new window",async()=>{
+  const f=await executionFixture([a],true,undefined,b),grant={...f.selectedGrant!,excludedHistoryKeys:f.selectedGrant!.historyPairs.map(p=>p.historyKey)};
+  const cutoff={seconds:now/1000-10+90*86400,nanoseconds:0},nextUser=id(120),nextAssistant=id(121);
+  f.g.put(`${root}/messages/${nextUser}`,{role:"user",sequence:3,text:"new unrelated user",acceptedAssistantMessageId:nextAssistant,appendBefore:cutoff},now-5000);
+  f.g.put(`${root}/messages/${nextAssistant}`,{role:"assistant",sequence:4,text:"new unrelated response",replyToUserMessageId:nextUser,availability:"available",presentationMode:"default",appendBefore:{seconds:now/1000-5+90*86400,nanoseconds:0}},now-4000);
+  f.g.put(`${root}/message_sources/${nextAssistant}`,{sources:[]});f.g.put(root,{state:"live",lifecycleVersion:1,nextSequence:5,latestMessageId:nextAssistant});
+  const before=f.g.writes;assert.deepEqual(await f.create(grant).dispatch(),{kind:"failure",code:"AI_AUTHORITY_CHANGED"});assert.equal(f.runtime.calls.length,0);assert.equal(f.g.writes,before);assert.equal(f.accepted.length,0);
+});
+test("excluding the prepared top two exchanges never backfills an older source-free exchange",async()=>{
+  const f=fixture();let cutoff:{seconds:number;nanoseconds:number}|undefined;
+  for(let i=0;i<3;i++){
+    const u=id(130+i*2),ai=id(131+i*2),created=now-60000+i*10000;
+    f.g.put(`${root}/messages/${u}`,{role:"user",sequence:1+i*2,text:i?"later user":"oldest-private-canary",acceptedAssistantMessageId:ai,...(cutoff?{appendBefore:cutoff}:{})},created);
+    cutoff={seconds:created/1000+90*86400,nanoseconds:0};f.g.put(`${root}/messages/${ai}`,{role:"assistant",sequence:2+i*2,text:"old assistant",replyToUserMessageId:u,availability:"available",presentationMode:"default",appendBefore:cutoff},created+1000);
+    cutoff={seconds:(created+1000)/1000+90*86400,nanoseconds:0};f.g.put(`${root}/message_sources/${ai}`,{sources:[]});
+    f.g.put(root,{state:"live",lifecycleVersion:1,nextSequence:3+i*2,latestMessageId:ai});
+  }
+  const s=await f.prepare([]),grant=f.grant(s);assert.deepEqual(s.historyPairs.map(p=>p.userSequence),[3,5]);
+  const r=f.reader({...grant,excludedHistoryKeys:grant.historyPairs.map(p=>p.historyKey)});assert.equal(await r.prepare(),"ready");
+  const auth:OriginalWriteAuthority={principal,current:()=>true,verifyCurrentAuth:async()=>({kind:"verified",principal}),dependencies:r.dependencies()!},result=await f.store.readHistory(f.target,auth);
+  assert.deepEqual(result,{kind:"confirmed",value:{pairs:[],sources:[]}});assert.equal(f.g.writes,0);assert.equal([...f.g.rows.keys()].filter(p=>p.startsWith(`${root}/messages/`)).length,6);
 });

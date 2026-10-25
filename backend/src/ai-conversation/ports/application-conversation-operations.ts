@@ -114,7 +114,7 @@ export interface ConversationOperationExecutor {
  * live/full-precision expiry, source rules and all same-U pending/canonical pair.
  * Missing methods fail unavailable; no absent-row/no-op deletion success. */
 export interface ConversationOperationReaders {
-  prepareSelection?(context:ConversationOrdinaryContext,input:import("./selected-reply.js").SelectReplyContext):Promise<ConversationResult<import("./selected-reply.js").SelectedReplySnapshot>>;
+  prepareSelection?(context:ConversationOrdinaryContext,input:import("./selected-reply.js").SelectReplyContext,conversationId?:string):Promise<ConversationResult<import("./selected-reply.js").SelectedReplySnapshot>>;
   listConversations?(context: ConversationOrdinaryContext, after: string | undefined): Promise<ConversationResult<ConversationSummaryPage>>;
   verifyTarget?(context: ConversationOrdinaryContext, conversationId: string,
     userMessageId?: string): Promise<ConversationResult<void>>;
