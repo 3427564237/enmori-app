@@ -30,3 +30,29 @@ At this decision, the sole completed cloud configuration change was importing
 the existing `enmori-rmvp-controlled` project into AI Studio's project list.
 Google Cloud paid upgrade, prepayment, API key creation and evaluation calls
 had not been performed. The paid-upgrade confirmation is to be left unaccepted.
+
+## Implementation selection within the free-only authorization
+
+Use the already existing Default Gemini Project `gen-lang-client-0930184174`
+only for this synthetic research. AI Studio currently labels that project Free;
+the imported ENMORI project now displays Tier 1 / no credit. The cause of that
+display change is not established. Do not use ENMORI for a zero-cost probe, alter
+its billing state, or connect the research project to the application.
+
+Before execution, establish that billing is disabled on the selected project
+and that its server credential belongs to it and is restricted to the Gemini
+API. Keep credential bytes outside the repository and tool output. An unverified
+condition blocks only the cloud run, not implementation work.
+
+Keep the already selected Gemini 3.8 Flash model. Prepare an explicitly named
+eight-case subset of the approved 32 synthetic cases, one pass only, with ceilings
+of eight generation and eight count requests and zero new spending. Respect the
+project's observed 5 RPM limit; the displayed 20 RPD is a limit, not proof of
+remaining quota. Stop on quota, billing, authorization or ambiguous outcomes;
+do not retry, switch models, or activate a paid fallback. This smaller run cannot
+be reported as the earlier 32-by-two evaluation.
+
+[Google's plan documentation](https://ai.google.dev/gemini-api/docs/google-ai-plans)
+states that Pro benefits in AI Studio apply to its web interface; direct API
+usage and Google One AI credits are managed separately. No subscription credit
+is assumed to cover these API requests.
