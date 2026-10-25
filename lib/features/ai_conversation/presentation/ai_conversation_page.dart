@@ -9,9 +9,11 @@ import '../../../core/presentation/local_time.dart';
 
 import '../ai_conversation_providers.dart';
 import '../ai_owned_sources_providers.dart';
+import '../ai_selected_sources_providers.dart';
 import '../../proactive/domain/proactive.dart';
 import 'ai_plan_draft_page.dart';
 import 'ai_message_search_page.dart';
+import 'ai_selected_sources_page.dart';
 import 'ai_status_copy.dart';
 import 'ai_visible_message.dart';
 
@@ -23,6 +25,8 @@ Widget buildAiConversationPage(
   ValueChanged<SavedFollowUpSource>? onFollowUpRequested,
   VoidCallback? onOpenFollowUps,
   AiMessageLocator? initialMessage,
+  String? initialCheckInId,
+  Object? initialCheckInSessionKey,
   ValueChanged<AiSourceTarget>? onOpenSourceTarget,
 }) => AiConversationPage(
   onBack: onBack,
@@ -31,6 +35,8 @@ Widget buildAiConversationPage(
   onFollowUpRequested: onFollowUpRequested,
   onOpenFollowUps: onOpenFollowUps,
   initialMessage: initialMessage,
+  initialCheckInId: initialCheckInId,
+  initialCheckInSessionKey: initialCheckInSessionKey,
   onOpenSourceTarget: onOpenSourceTarget,
 );
 
@@ -46,6 +52,8 @@ final class AiConversationPage extends ConsumerWidget {
     this.onFollowUpRequested,
     this.onOpenFollowUps,
     this.initialMessage,
+    this.initialCheckInId,
+    this.initialCheckInSessionKey,
     this.onOpenSourceTarget,
     super.key,
   });
@@ -60,6 +68,8 @@ final class AiConversationPage extends ConsumerWidget {
   final ValueChanged<SavedFollowUpSource>? onFollowUpRequested;
   final VoidCallback? onOpenFollowUps;
   final AiMessageLocator? initialMessage;
+  final String? initialCheckInId;
+  final Object? initialCheckInSessionKey;
   final ValueChanged<AiSourceTarget>? onOpenSourceTarget;
 
   @override
@@ -76,6 +86,8 @@ final class AiConversationPage extends ConsumerWidget {
     onFollowUpRequested: onFollowUpRequested,
     onOpenFollowUps: onOpenFollowUps,
     initialMessage: initialMessage,
+    initialCheckInId: initialCheckInId,
+    initialCheckInSessionKey: initialCheckInSessionKey,
     onOpenSourceTarget: onOpenSourceTarget,
   );
 }
@@ -91,6 +103,8 @@ final class _ConversationPage extends ConsumerStatefulWidget {
     this.onFollowUpRequested,
     this.onOpenFollowUps,
     this.initialMessage,
+    this.initialCheckInId,
+    this.initialCheckInSessionKey,
     this.onOpenSourceTarget,
     super.key,
   });
@@ -105,6 +119,8 @@ final class _ConversationPage extends ConsumerStatefulWidget {
   final ValueChanged<SavedFollowUpSource>? onFollowUpRequested;
   final VoidCallback? onOpenFollowUps;
   final AiMessageLocator? initialMessage;
+  final String? initialCheckInId;
+  final Object? initialCheckInSessionKey;
   final ValueChanged<AiSourceTarget>? onOpenSourceTarget;
 
   @override
@@ -127,6 +143,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   bool _leaving = false;
   bool _planning = false;
   bool _finding = false;
+  bool _choosingReferences = false;
+  bool _initialCheckInHandled = false;
   bool _initialLocationDismissed = false;
   final _messageKeys = <String, GlobalKey>{};
   final Object _editorToken = Object();
@@ -150,7 +168,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     });
     WidgetsBinding.instance.addObserver(this);
     _historyScroll.addListener(_updateLatestVisibility);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!_ownsCurrentSession) return;
       final state = ref.read(aiConversationControllerProvider);
       if (widget.initialMessage case final target?) {
@@ -167,12 +185,16 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           state.phase != AiConversationPhase.deleted &&
           state.phase != AiConversationPhase.deleteUnknown &&
           state.phase != AiConversationPhase.unauthenticated) {
-        unawaited(_controller.loadMessages());
+        await _controller.loadMessages();
+        if (!_ownsCurrentSession) return;
       }
       if (ref.read(aiCompanionReferencesEnabledProvider)) {
         unawaited(
           ref.read(aiOwnedSourcesControllerProvider.notifier).checkReadState(),
         );
+      }
+      if (_isCurrentEditor && widget.initialCheckInId != null) {
+        await _openReferences(initialCheckInId: widget.initialCheckInId);
       }
     });
   }
@@ -319,6 +341,114 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       label: Text(context.tr('Make a small plan', '制定小计划')),
     ),
   );
+
+  bool get _selectionReady {
+    if (!ref.read(aiCompanionReferencesEnabledProvider)) return true;
+    final selection = ref.read(aiSelectedSourcesControllerProvider);
+    return !selection.active ||
+        ref.read(aiSelectedSourcesControllerProvider.notifier).canSend;
+  }
+
+  Future<void> _openReferences({String? initialCheckInId}) async {
+    if (!_isCurrentEditor ||
+        _choosingReferences ||
+        _confirming ||
+        _leaving ||
+        !ref.read(aiCompanionReferencesEnabledProvider)) {
+      return;
+    }
+    final state = ref.read(aiConversationControllerProvider);
+    if (state.canCancel) return;
+    if (initialCheckInId != null) {
+      if (_initialCheckInHandled ||
+          widget.initialCheckInSessionKey != _sessionKey ||
+          (!state.canSend && !state.canRetry) ||
+          state.readBusy) {
+        return;
+      }
+      _initialCheckInHandled = true;
+    }
+    _choosingReferences = true;
+    _messageFocus.unfocus();
+    try {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) =>
+              AiSelectedSourcesPage(initialCheckInId: initialCheckInId),
+        ),
+      );
+    } finally {
+      if (mounted) _choosingReferences = false;
+    }
+  }
+
+  Widget _referencesAction(AiConversationState state) {
+    if (!ref.read(aiCompanionReferencesEnabledProvider)) {
+      return const SizedBox.shrink();
+    }
+    final selected = ref.read(aiSelectedSourcesControllerProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.initialCheckInId != null && !_initialCheckInHandled) ...[
+          Text(
+            context.tr(
+              'The requested Check-in has not been added. Check the current conversation or original operation before attaching it.',
+              '请求的签到尚未附加。请先核对当前对话或原操作，再明确附加。',
+            ),
+            key: const Key('ai-requested-check-in-pending'),
+          ),
+          TextButton(
+            key: const Key('ai-attach-requested-check-in'),
+            onPressed:
+                widget.initialCheckInSessionKey == _sessionKey &&
+                    (state.canSend || state.canRetry) &&
+                    !state.readBusy
+                ? () => unawaited(
+                    _openReferences(initialCheckInId: widget.initialCheckInId),
+                  )
+                : null,
+            child: Text(context.tr('Attach the requested Check-in', '附加请求的签到')),
+          ),
+        ],
+        TextButton.icon(
+          key: const Key('ai-references'),
+          onPressed:
+              !state.canCancel &&
+                  (state.canSend || state.canRetry || selected.active)
+              ? () => unawaited(_openReferences())
+              : null,
+          icon: const Icon(Icons.fact_check_outlined),
+          label: Text(
+            selected.active
+                ? context.tr(
+                    'References: ${selected.selectedIds.length} selected',
+                    '本次参考：已选 ${selected.selectedIds.length} 条',
+                  )
+                : context.tr('References for this reply', '本次参考'),
+          ),
+        ),
+        if (selected.active)
+          Padding(
+            padding: const EdgeInsets.only(left: 12, bottom: 8),
+            child: Text(
+              selected.confirmed && _selectionReady
+                  ? context.tr(
+                      'Reviewed for this local reply. Send when ready.',
+                      '已审阅，仅用于本次本地回复。准备好后明确发送。',
+                    )
+                  : aiSelectionNoticeCopy(
+                      context,
+                      selected.notice == AiSelectionNotice.none
+                          ? AiSelectionNotice.recheck
+                          : selected.notice,
+                    ),
+              key: const Key('ai-reference-status'),
+            ),
+          ),
+      ],
+    );
+  }
 
   Future<void> _findMessages() async {
     if (!_ownsCurrentSession ||
@@ -902,6 +1032,15 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     final state = ref.read(aiConversationControllerProvider);
     if (retry ? !state.canRetry : !state.canSend) return;
     final text = _message.text;
+    if (ref.read(aiCompanionReferencesEnabledProvider) &&
+        ref.read(aiSelectedSourcesControllerProvider).active) {
+      if (!_selectionReady) return;
+      _messageFocus.unfocus();
+      unawaited(
+        ref.read(aiSelectedSourcesControllerProvider.notifier).send(text),
+      );
+      return;
+    }
     final sending = retry ? _controller.retry(text) : _controller.send(text);
     // Local validation and exact Retry matching happen synchronously before
     // preparation. Preserve editing when they reject without a new attempt.
@@ -1010,6 +1149,12 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       next,
     ) {
       _followMessages(previous, next);
+      if (_isCurrentEditor &&
+          previous?.draftSyncRevision != next.draftSyncRevision) {
+        _syncingEditor = true;
+        _message.value = _controller.draftFor(_sessionKey);
+        _syncingEditor = false;
+      }
       if (previous?.conversationId != next.conversationId) _messageKeys.clear();
       if (ref.read(aiCompanionReferencesEnabledProvider) &&
           previous?.conversationId != next.conversationId &&
@@ -1038,6 +1183,9 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       }
     });
     final state = ref.watch(aiConversationControllerProvider);
+    if (ref.watch(aiCompanionReferencesEnabledProvider)) {
+      ref.watch(aiSelectedSourcesControllerProvider);
+    }
     final hasText = _message.text.trim().isNotEmpty;
     final status = state.statusMessage == null
         ? _statusCopy(context, state.phase)
@@ -1224,6 +1372,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                       const SizedBox(height: 24),
                       _replyStatus(state),
                       _planAction(state),
+                      _referencesAction(state),
                       TextField(
                         key: const Key('ai-message-input'),
                         controller: _message,
@@ -1242,7 +1391,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                       FilledButton(
                         key: const Key('ai-send'),
                         style: _buttonStyle,
-                        onPressed: state.canSend && hasText
+                        onPressed: state.canSend && hasText && _selectionReady
                             ? () => _submit(retry: false)
                             : null,
                         child: Text(context.tr('Send', '发送')),
@@ -1252,7 +1401,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         OutlinedButton(
                           key: const Key('ai-retry'),
                           style: _buttonStyle,
-                          onPressed: hasText
+                          onPressed: hasText && _selectionReady
                               ? () => _submit(retry: true)
                               : null,
                           child: Text(context.tr('Retry', '重试')),
@@ -1493,6 +1642,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         children: [
           _replyStatus(state),
           if (state.canSend) _planAction(state),
+          _referencesAction(state),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -1516,7 +1666,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
               FilledButton(
                 key: const Key('ai-send'),
                 style: _buttonStyle,
-                onPressed: state.canSend && hasText
+                onPressed: state.canSend && hasText && _selectionReady
                     ? () => _submit(retry: false)
                     : null,
                 child: Semantics(
@@ -1532,7 +1682,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             _socialAction(
               'ai-retry',
               context.tr('Retry', '重试'),
-              hasText ? () => _submit(retry: true) : null,
+              hasText && _selectionReady ? () => _submit(retry: true) : null,
             ),
         ],
       ),

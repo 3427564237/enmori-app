@@ -1,5 +1,6 @@
 import '../domain/ai_conversation.dart';
 import '../domain/ai_owned_sources.dart';
+import '../../../core/result/result.dart';
 
 enum AiConversationPhase {
   idle,
@@ -25,6 +26,7 @@ final class AiConversationState {
     this.phase = AiConversationPhase.idle,
     Iterable<AiMessage> messages = const [],
     this.conversationId,
+    this.contextScopeKey,
     this.localOutgoingText,
     this.localOutgoingKey,
     this.outgoingMessageId,
@@ -42,6 +44,10 @@ final class AiConversationState {
     Iterable<String> lastReadMessageIds = const [],
     this.messageLocation,
     this.replyToMessageId,
+    this.selectedPreparationRevision,
+    this.selectedPreparationBusy = false,
+    this.failureKind,
+    this.draftSyncRevision = 0,
     Iterable<AiConversationSummary> conversations = const [],
     this.historyLoaded = false,
     this.historyCursor,
@@ -61,6 +67,9 @@ final class AiConversationState {
   final Object? localOutgoingKey;
   final String? outgoingMessageId;
   final String? conversationId;
+
+  /// Changes on an explicit topic switch, not on a reserved operation's ID.
+  final Object? contextScopeKey;
   final String? nextCursor;
   final String? statusMessage;
   final bool canSend;
@@ -81,6 +90,10 @@ final class AiConversationState {
   final List<String> lastReadMessageIds;
   final AiMessageLocation? messageLocation;
   final String? replyToMessageId;
+  final String? selectedPreparationRevision;
+  final bool selectedPreparationBusy;
+  final AppFailureKind? failureKind;
+  final int draftSyncRevision;
   final List<AiConversationSummary> conversations;
   final bool historyLoaded;
   final String? historyCursor;

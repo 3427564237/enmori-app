@@ -13,6 +13,7 @@ import '../auth/domain/auth_repository.dart';
 import 'domain/ai_conversation.dart';
 import 'domain/ai_conversation_repository.dart';
 import 'domain/ai_owned_sources.dart';
+import 'domain/ai_selected_reply.dart';
 import 'presentation/ai_conversation_state.dart';
 
 export 'domain/ai_conversation.dart';
@@ -57,6 +58,7 @@ class AiConversationController extends Notifier<AiConversationState> {
   late Duration Function() _now;
   late DateTime Function() _utcNow;
   Object _epoch = Object();
+  Object _contextScopeKey = Object();
   bool _alive = false;
   _Attempt? _attempt;
   final Set<_ReadTask> _reads = {};
@@ -73,6 +75,10 @@ class AiConversationController extends Notifier<AiConversationState> {
   final _unverifiedReplyTargets = <String>{};
   AiMessageLocation? _location;
   String? _replyToMessageId;
+  _SelectedPreparation? _selectedPreparation;
+  AppFailureKind? _lastFailureKind;
+  String? _selectedSubmittedText;
+  int _draftSyncRevision = 0;
   AiMessage? _retryUser;
   String? _localOutgoingText, _outgoingMessageId;
   Object? _localOutgoingKey;
@@ -133,6 +139,7 @@ class AiConversationController extends Notifier<AiConversationState> {
     _now = ref.watch(aiConversationNowProvider);
     _utcNow = ref.watch(aiConversationUtcNowProvider);
     _epoch = Object();
+    _contextScopeKey = Object();
     _alive = true;
     _messageVersions.clear();
     _assistantUsers.clear();
@@ -153,11 +160,16 @@ class AiConversationController extends Notifier<AiConversationState> {
     _unverifiedReplyTargets.clear();
     _location = null;
     _replyToMessageId = null;
+    _selectedPreparation = null;
+    _lastFailureKind = null;
+    _selectedSubmittedText = null;
+    _draftSyncRevision = 0;
     ref.onDispose(_shutdown);
     final lifecycle = _AiLifecycleObserver(_suspend);
     WidgetsBinding.instance.addObserver(lifecycle);
     ref.onDispose(() => WidgetsBinding.instance.removeObserver(lifecycle));
     ref.listen(contentAccessProvider, (_, _) {
+      discardSelectedPreparation();
       _unverifiedReplyTargets.addAll(
         state.messages.where((m) => m.isProactive).map((m) => m.messageId),
       );
@@ -173,6 +185,9 @@ class AiConversationController extends Notifier<AiConversationState> {
       }
     });
     ref.listen(accountSettingsSnapshotProvider, (previous, next) {
+      if (next?.consent != OptionalProcessingConsent.accepted) {
+        discardSelectedPreparation();
+      }
       if (next?.consent == OptionalProcessingConsent.rejected) {
         cancel();
         _failure(
@@ -252,6 +267,7 @@ class AiConversationController extends Notifier<AiConversationState> {
       localOutgoingKey: _localOutgoingKey,
       outgoingMessageId: _outgoingMessageId,
       conversationId: _memory.conversationId,
+      contextScopeKey: _contextScopeKey,
       nextCursor: nextCursor,
       statusMessage: statusMessage,
       canSend:
@@ -300,6 +316,12 @@ class AiConversationController extends Notifier<AiConversationState> {
       lastReadMessageIds: _lastReadMessageIds,
       messageLocation: _location,
       replyToMessageId: _replyToMessageId,
+      selectedPreparationRevision:
+          _selectedPreparation?.ticket?.selection.selectionRevision,
+      selectedPreparationBusy:
+          _selectedPreparation != null && _selectedPreparation!.ticket == null,
+      failureKind: _lastFailureKind,
+      draftSyncRevision: _draftSyncRevision,
       conversations: _conversations,
       historyLoaded: _historyLoaded,
       historyCursor: _historyCursor,
@@ -337,12 +359,14 @@ class AiConversationController extends Notifier<AiConversationState> {
 
   Future<void> send(String text) async {
     if (!state.canSend) return;
+    if (_selectedPreparation != null) return;
     await _start(text);
   }
 
   Future<void> retry(String text) async {
     final user = _retryUser;
     if (!state.canRetry || user == null) return;
+    if (_selectedPreparation != null) return;
     if (text != user.text) {
       _show(state.phase, message: 'Enter the same saved message to retry.');
       return;
@@ -350,7 +374,192 @@ class AiConversationController extends Notifier<AiConversationState> {
     await _start(text, retryUser: user);
   }
 
-  Future<void> _start(String text, {AiMessage? retryUser}) {
+  bool hasSelectedPreparation(String revision) {
+    final p = _selectedPreparation;
+    return p != null &&
+        p.ticket?.selection.selectionRevision == revision &&
+        _selectedCurrent(p) &&
+        _selectedRemaining(p) > Duration.zero;
+  }
+
+  bool _selectedCurrent(_SelectedPreparation p) =>
+      _alive &&
+      ref.mounted &&
+      identical(_epoch, p.epoch) &&
+      identical(_selectedPreparation, p) &&
+      ref.read(aiCompanionReferencesEnabledProvider) &&
+      !_memory.deleting &&
+      !_memory.deleted &&
+      _memory.conversationId == p.scopeConversationId &&
+      ref.read(contentAccessProvider).foreground &&
+      ref.read(accountSettingsSnapshotProvider)?.consent ==
+          OptionalProcessingConsent.accepted;
+
+  Future<Result<AiPreparedReplySelection>> prepareSelectedSources(
+    List<String> sourceIds,
+  ) async {
+    final repository = _repository;
+    if ((!state.canSend && !state.canRetry) ||
+        sourceIds.length > 5 ||
+        sourceIds.toSet().length != sourceIds.length ||
+        sourceIds.any((id) => id.isEmpty) ||
+        !ref.read(aiCompanionReferencesEnabledProvider) ||
+        repository is! AiSelectedReplyRepository ||
+        !ref.read(contentAccessProvider).foreground ||
+        ref.read(accountSettingsSnapshotProvider)?.consent !=
+            OptionalProcessingConsent.accepted) {
+      return const Failure(_unknown);
+    }
+    final epoch = _epoch, command = _commandVersion;
+    await _discardSelected();
+    if (!_validReadResult(epoch, command) ||
+        (!state.canSend && !state.canRetry)) {
+      return const Failure(_unknown);
+    }
+    final p = _SelectedPreparation(
+      epoch: epoch,
+      repository: repository!,
+      started: _now(),
+      scopeConversationId: _memory.conversationId,
+      conversationId: _memory.established ? _memory.conversationId : null,
+      retryUser: _retryUser,
+      sourceIds: sourceIds,
+    );
+    _selectedPreparation = p;
+    _lastFailureKind = null;
+    final selectedRepo = repository as AiSelectedReplyRepository;
+    final result = await _ordinary((token, abort) {
+      p.token = token;
+      p.requestAbort = abort;
+      return selectedRepo.prepareSelected(
+        token: token,
+        abort: abort,
+        conversationId: p.conversationId,
+        userMessageId: p.retryUser?.messageId,
+        sourceIds: p.sourceIds,
+      );
+    });
+    if (!_selectedCurrent(p)) {
+      p.release();
+      _show(state.phase);
+      return const Failure(_unknown);
+    }
+    if (result case Failure<AiSelectedReplyTicket>(:final failure)) {
+      await _discardSelected();
+      _lastFailureKind = failure.kind;
+      referenceAuthFailed(failure);
+      _show(state.phase);
+      return Failure(failure);
+    }
+    p.ticket = (result as Success<AiSelectedReplyTicket>).value;
+    final remaining = _selectedRemaining(p);
+    if (remaining <= Duration.zero) {
+      await _discardSelected();
+      return const Failure(_unknown);
+    }
+    p.expiry = Timer(remaining, discardSelectedPreparation);
+    _show(state.phase);
+    return Success(p.ticket!.selection);
+  }
+
+  Duration _selectedRemaining(_SelectedPreparation p) {
+    var budget = const Duration(seconds: 15) - (_now() - p.started);
+    final ticket = p.ticket;
+    if (ticket != null) {
+      for (final expiresAt in [
+        ticket.operation.preparationExpiresAt,
+        ticket.selection.expiresAt,
+      ]) {
+        final absolute = expiresAt.difference(_utcNow());
+        if (absolute < budget) budget = absolute;
+      }
+    }
+    return budget;
+  }
+
+  void discardSelectedPreparation() {
+    unawaited(_discardSelected());
+  }
+
+  Future<void> _discardSelected({bool notify = true}) async {
+    final p = _selectedPreparation;
+    if (p == null) return;
+    _selectedPreparation = null;
+    p.expiry?.cancel();
+    p.requestAbort?.abort();
+    final token = p.token, ticket = p.ticket?.operation;
+    final budget = _selectedRemaining(p);
+    p.release();
+    if (notify && ref.mounted && _alive) _show(state.phase);
+    if (token == null || ticket == null || budget <= Duration.zero) return;
+    final abort = AiAbortSignal();
+    final timer = Timer(budget, abort.abort);
+    try {
+      await Future.any<Object?>([
+        p.repository.cancel(token: token, abort: abort, ticket: ticket),
+        abort.whenAborted,
+      ]);
+    } catch (_) {
+      // Prepared-only cleanup cannot authorize or dispatch a reply.
+    } finally {
+      timer.cancel();
+      abort.abort();
+    }
+  }
+
+  Future<void> sendSelected(
+    String text, {
+    required String selectionRevision,
+    required List<String> sourceIds,
+    required List<String> excludedHistoryKeys,
+  }) async {
+    final p = _selectedPreparation;
+    if (p == null ||
+        (!state.canSend && !state.canRetry) ||
+        !hasSelectedPreparation(selectionRevision) ||
+        sourceIds.length != p.sourceIds.length ||
+        sourceIds.toSet().length != sourceIds.length ||
+        !sourceIds.every(p.sourceIds.contains)) {
+      return;
+    }
+    final retry = state.canRetry ? p.retryUser : null;
+    if (retry != null && text != retry.text) {
+      _show(state.phase, message: 'Enter the same saved message to retry.');
+      return;
+    }
+    if (!_validInput(text)) {
+      _show(state.phase, message: 'Enter 1–2400 characters of valid text.');
+      return;
+    }
+    final history = p.ticket!.selection.historyPairs
+        .map((v) => v.historyKey)
+        .toSet();
+    if (excludedHistoryKeys.toSet().length != excludedHistoryKeys.length ||
+        !excludedHistoryKeys.every(history.contains)) {
+      return;
+    }
+    _selectedPreparation = null;
+    p.expiry?.cancel();
+    final ticket = p.ticket!, token = p.token!;
+    p.release();
+    await _start(
+      text,
+      retryUser: retry,
+      selected: ticket,
+      selectedToken: token,
+      selectionStarted: p.started,
+      excludedHistoryKeys: excludedHistoryKeys,
+    );
+  }
+
+  Future<void> _start(
+    String text, {
+    AiMessage? retryUser,
+    AiSelectedReplyTicket? selected,
+    String? selectedToken,
+    Duration? selectionStarted,
+    List<String> excludedHistoryKeys = const [],
+  }) {
     if (!_validInput(text)) {
       _show(state.phase, message: 'Enter 1–2400 characters of valid text.');
       return Future.value();
@@ -358,11 +567,13 @@ class AiConversationController extends Notifier<AiConversationState> {
     _invalidateReads();
     if (retryUser != null) _memory.unresolved = true;
     _retryUser = null;
+    _lastFailureKind = null;
+    _selectedSubmittedText = selected == null ? null : text;
     final attempt = _Attempt(
       epoch: _epoch,
       repository: _repository!,
       auth: _auth,
-      started: _now(),
+      started: selectionStarted ?? _now(),
       text: text,
       conversationId: _memory.established ? _memory.conversationId : null,
       userMessageId: retryUser?.messageId,
@@ -370,16 +581,26 @@ class AiConversationController extends Notifier<AiConversationState> {
       userPersistedAt: retryUser?.persistedAt,
       replyToMessageId: retryUser == null ? _replyToMessageId : null,
     );
+    attempt.selectedTicket = selected;
+    attempt.selectedHistoryKeys = List.unmodifiable(excludedHistoryKeys);
+    attempt.token = selectedToken;
+    attempt.ticket = selected?.operation;
     _localOutgoingText = text;
     _localOutgoingKey = attempt;
     _outgoingMessageId = retryUser?.messageId;
     _attempt = attempt;
-    attempt.prepareTimer = Timer(const Duration(seconds: 15), () {
-      _close(attempt, AiConversationPhase.timedOut);
-    });
-    attempt.totalTimer = Timer(const Duration(seconds: 90), () {
-      _close(attempt, AiConversationPhase.timedOut);
-    });
+    attempt.prepareTimer = Timer(
+      const Duration(seconds: 15) - (_now() - attempt.started),
+      () {
+        _close(attempt, AiConversationPhase.timedOut);
+      },
+    );
+    attempt.totalTimer = Timer(
+      const Duration(seconds: 90) - (_now() - attempt.started),
+      () {
+        _close(attempt, AiConversationPhase.timedOut);
+      },
+    );
     _show(AiConversationPhase.preparing);
     unawaited(_run(attempt));
     return attempt.ended.future;
@@ -394,34 +615,37 @@ class AiConversationController extends Notifier<AiConversationState> {
 
   Future<void> _run(_Attempt attempt) async {
     try {
-      final token = await attempt.auth.getIdToken();
+      if (attempt.selectedTicket == null) {
+        final token = await attempt.auth.getIdToken();
+        if (!_current(attempt)) return;
+        if (_now() - attempt.started >= const Duration(seconds: 15)) {
+          _close(attempt, AiConversationPhase.timedOut);
+          return;
+        }
+        if (token case Failure<String>(:final failure)) {
+          _failed(attempt, failure);
+          return;
+        }
+        attempt.token = (token as Success<String>).value;
+        final prepared = await attempt.repository.prepare(
+          token: attempt.token!,
+          abort: attempt.abort,
+          conversationId: attempt.conversationId,
+          userMessageId: attempt.userMessageId,
+        );
+        if (prepared case Success<AiTicket>(:final value)) {
+          attempt.ticket = value;
+        }
+        if (!_current(attempt)) {
+          _cleanup(attempt);
+          return;
+        }
+        if (prepared case Failure<AiTicket>(:final failure)) {
+          _failed(attempt, failure);
+          return;
+        }
+      }
       if (!_current(attempt)) return;
-      if (_now() - attempt.started >= const Duration(seconds: 15)) {
-        _close(attempt, AiConversationPhase.timedOut);
-        return;
-      }
-      if (token case Failure<String>(:final failure)) {
-        _failed(attempt, failure);
-        return;
-      }
-      attempt.token = (token as Success<String>).value;
-      final prepared = await attempt.repository.prepare(
-        token: attempt.token!,
-        abort: attempt.abort,
-        conversationId: attempt.conversationId,
-        userMessageId: attempt.userMessageId,
-      );
-      if (prepared case Success<AiTicket>(:final value)) {
-        attempt.ticket = value;
-      }
-      if (!_current(attempt)) {
-        _cleanup(attempt);
-        return;
-      }
-      if (prepared case Failure<AiTicket>(:final failure)) {
-        _failed(attempt, failure);
-        return;
-      }
       if (_now() - attempt.started >= const Duration(seconds: 15) ||
           !attempt.ticket!.preparationExpiresAt.isAfter(_utcNow())) {
         _close(attempt, AiConversationPhase.timedOut);
@@ -448,9 +672,22 @@ class AiConversationController extends Notifier<AiConversationState> {
       final input = attempt.text!;
       attempt.text = null;
       final companion = attempt.repository;
-      final reply =
-          attempt.replyToMessageId != null &&
-              companion is AiCompanionReplyRepository
+      final selected = attempt.selectedTicket;
+      final reply = selected != null && companion is AiSelectedReplyRepository
+          ? await (companion as AiSelectedReplyRepository).executeSelected(
+              token: attempt.token!,
+              abort: attempt.abort,
+              ticket: selected,
+              text: input,
+              includedKeys: selected.selection.sourceCards
+                  .map((v) => v.selectionKey)
+                  .toList(),
+              excludedKeys: const [],
+              excludedHistoryKeys: attempt.selectedHistoryKeys ?? const [],
+              replyToMessageId: attempt.replyToMessageId,
+            )
+          : attempt.replyToMessageId != null &&
+                companion is AiCompanionReplyRepository
           ? await (companion as AiCompanionReplyRepository).executeReply(
               token: attempt.token!,
               abort: attempt.abort,
@@ -479,6 +716,7 @@ class AiConversationController extends Notifier<AiConversationState> {
             _failed(attempt, _unknown);
             return;
           }
+          _completeSelectedDraft();
           _finish(attempt);
           _memory.established = true;
           _memory.unresolved = false;
@@ -504,6 +742,7 @@ class AiConversationController extends Notifier<AiConversationState> {
 
   void _failed(_Attempt attempt, AppFailure failure) {
     final wasDispatched = attempt.dispatched;
+    final wasSelected = attempt.selectedTicket != null;
     attempt.dispatchAllowed = false;
     attempt.abort.abort();
     _cleanup(attempt);
@@ -511,10 +750,21 @@ class AiConversationController extends Notifier<AiConversationState> {
     // Even a rejected reply can follow a saved user message. Only an explicit
     // authoritative readback releases a dispatched logical input for retry.
     if (wasDispatched) _memory.unresolved = true;
+    if (wasSelected &&
+        {
+          AppFailureKind.aiAuthorityChanged,
+          AppFailureKind.aiSourceUnavailable,
+          AppFailureKind.aiContextSelectionConflict,
+        }.contains(failure.kind)) {
+      _lastFailureKind = failure.kind;
+      _show(AiConversationPhase.unavailable);
+      return;
+    }
     _failure(failure);
   }
 
   void _failure(AppFailure failure, {bool preserveOutcome = false}) {
+    _lastFailureKind = failure.kind;
     final phase = switch (failure.kind) {
       AppFailureKind.authRequired ||
       AppFailureKind.authForbidden => AiConversationPhase.unauthenticated,
@@ -531,7 +781,9 @@ class AiConversationController extends Notifier<AiConversationState> {
         phase == AiConversationPhase.limited ||
         phase == AiConversationPhase.authorityChanged ||
         failure.kind == AppFailureKind.conversationUnavailable) {
+      discardSelectedPreparation();
       _replyToMessageId = null;
+      _selectedSubmittedText = null;
       _draft = TextEditingValue.empty;
       _invalidateReads();
       _retryUser = null;
@@ -543,6 +795,15 @@ class AiConversationController extends Notifier<AiConversationState> {
       _show(phase, clear: true);
     } else {
       _show(phase);
+    }
+  }
+
+  void _completeSelectedDraft() {
+    final submitted = _selectedSubmittedText;
+    _selectedSubmittedText = null;
+    if (submitted != null && _draft.text == submitted) {
+      _draft = TextEditingValue.empty;
+      _draftSyncRevision++;
     }
   }
 
@@ -690,6 +951,7 @@ class AiConversationController extends Notifier<AiConversationState> {
     final operation = _memory.operationId!;
     final epoch = _epoch;
     final command = _commandVersion;
+    _lastFailureKind = null;
     final number = ++_requestNumber;
     final assistantRevision = _assistantRevision;
     final repository = _repository!;
@@ -757,6 +1019,7 @@ class AiConversationController extends Notifier<AiConversationState> {
             if (_merge([value.userMessage!, value.assistantMessage!], number)) {
               _recordPair(value.userMessage!, value.assistantMessage!);
               _memory.unresolved = false;
+              _completeSelectedDraft();
               _show(AiConversationPhase.success);
             }
         }
@@ -805,6 +1068,9 @@ class AiConversationController extends Notifier<AiConversationState> {
   }
 
   void _resetConversationIdentity(String conversationId) {
+    _contextScopeKey = Object();
+    _selectedSubmittedText = null;
+    discardSelectedPreparation();
     _invalidateReads();
     _location = null;
     _replyToMessageId = null;
@@ -839,11 +1105,13 @@ class AiConversationController extends Notifier<AiConversationState> {
         )) {
       return;
     }
+    discardSelectedPreparation();
     _replyToMessageId = messageId;
     _show(state.phase);
   }
 
   void clearReplyTarget() {
+    discardSelectedPreparation();
     _replyToMessageId = null;
     _show(state.phase);
   }
@@ -868,12 +1136,14 @@ class AiConversationController extends Notifier<AiConversationState> {
         state.conversationId != conversationId) {
       return;
     }
+    discardSelectedPreparation();
     _unverifiedReplyTargets.add(messageId);
     _invalidateReads();
     _show(state.phase);
   }
 
   void _suspend() {
+    discardSelectedPreparation();
     cancel();
     if (_location?.phase == AiMessageLocationPhase.checking) {
       _invalidateReads();
@@ -893,6 +1163,7 @@ class AiConversationController extends Notifier<AiConversationState> {
         !ref.read(contentAccessProvider).foreground) {
       return;
     }
+    discardSelectedPreparation();
     _invalidateReads();
     _location = AiMessageLocation(
       locator: locator,
@@ -1197,6 +1468,9 @@ class AiConversationController extends Notifier<AiConversationState> {
   /// No DELETE, automatic resend, unknown-result escape or message replacement.
   void startNewConversation() {
     if (!state.canStartNewConversation) return;
+    _contextScopeKey = Object();
+    discardSelectedPreparation();
+    _selectedSubmittedText = null;
     final previousWasDeleted = _memory.deleted;
     _invalidateReads();
     _location = null;
@@ -1227,6 +1501,7 @@ class AiConversationController extends Notifier<AiConversationState> {
 
   Future<void> deleteConversation() async {
     if (!state.canDelete) return;
+    discardSelectedPreparation();
     final conversation = _memory.conversationId!;
     cancel();
     _invalidateReads();
@@ -1274,6 +1549,7 @@ class AiConversationController extends Notifier<AiConversationState> {
   }
 
   void leave() {
+    discardSelectedPreparation();
     cancel();
     _invalidateReads();
     _location = null;
@@ -1307,6 +1583,7 @@ class AiConversationController extends Notifier<AiConversationState> {
 
   void _shutdown() {
     if (!_alive) return;
+    unawaited(_discardSelected(notify: false));
     final attempt = _attempt;
     if (attempt != null) {
       _close(attempt, AiConversationPhase.unknown, notify: false);
@@ -1356,6 +1633,34 @@ final class _Memory {
           user.availability == AiAvailability.available);
 }
 
+final class _SelectedPreparation {
+  _SelectedPreparation({
+    required this.epoch,
+    required this.repository,
+    required this.started,
+    required this.scopeConversationId,
+    required this.conversationId,
+    required this.retryUser,
+    required Iterable<String> sourceIds,
+  }) : sourceIds = List.unmodifiable(sourceIds);
+  final Object epoch;
+  final AiConversationRepository repository;
+  final Duration started;
+  final String? scopeConversationId, conversationId;
+  final AiMessage? retryUser;
+  final List<String> sourceIds;
+  String? token;
+  AiSelectedReplyTicket? ticket;
+  AiAbortSignal? requestAbort;
+  Timer? expiry;
+  void release() {
+    token = null;
+    ticket = null;
+    requestAbort = null;
+    expiry?.cancel();
+  }
+}
+
 final class _Attempt {
   _Attempt({
     required this.epoch,
@@ -1390,6 +1695,8 @@ final class _Attempt {
   String? text;
   String? token;
   AiTicket? ticket;
+  AiSelectedReplyTicket? selectedTicket;
+  List<String>? selectedHistoryKeys;
   bool dispatched = false;
   bool dispatchAllowed = true;
   bool cancelSent = false;
@@ -1405,6 +1712,8 @@ final class _Attempt {
     text = null;
     token = null;
     ticket = null;
+    selectedTicket = null;
+    selectedHistoryKeys = null;
     cleanupTimer?.cancel();
   }
 }

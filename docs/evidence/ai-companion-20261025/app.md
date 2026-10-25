@@ -550,3 +550,99 @@ is clean. Raw log: `app-search-display-gate.log`, SHA-256
 `8995ed9031bc7c284895dd0702414a727a527ec062f6776b3b36cf2c8b6e1a11`,
 under the local evidence directory above. This is an App source/widget repair;
 Product/QA independently close their P1 review against this new commit.
+
+## F1a App candidate: choose, review, then explicitly Send (2026-10-25)
+
+This consumes the LI first-flow decision, Root's selected-reply domain/wire
+contract (`5d579e5` / `49e1c60` here), and Product/Integration's bounded
+history-exclusion handoff. Root's pure review component `cad5fb4` is retained as
+local cherry-pick `af2a79c`; App's next commit contains the controller, picker,
+composer and corresponding evidence/tests, with no edits to Root's wire/domain.
+
+### Selection and review boundary
+
+- References opens an explicit own-Check-in picker with zero defaults, a maximum
+  of five choices and the inclusive rolling seven-day limit. Eight UTC date
+  first pages bound retrieval; next pages require an explicit action with the
+  returned cursor. Unknown/failed dates remain a partial list, and a failed or
+  repeating cursor neither empties the earlier rows nor drains pages in a loop.
+- Check-ins immediately become a small RAM projection: ID, current Note,
+  recorded Mood/Activity, original time and revision. Location labels,
+  coordinates and weather are not fields of this state. Display uses the
+  original time and labels Mood/Activity as recorded, not current facts.
+- Exact owned IDs are re-read before and after prepare. A source changing during
+  that interval invalidates review; an unavailable/unknown read removes the old
+  displayed quotation while retaining the choice for explicit recheck/removal.
+  Prepare sends IDs only. No saved cardRef/version is decoded or mapped to a
+  record ID; execution includes the current prepare's complete source-key set.
+- Excluding displayed past exchanges cancels the old preparation and prepares
+  afresh. Only exact matching user/assistant IDs and sequences map the explicit
+  intent onto fresh history keys. A changed set resets the exclusion and
+  confirmation. Whole pairs are excluded, no earlier pair is backfilled, and
+  saved exchanges are not deleted. Generic conflict copy does not guess which
+  source/pair caused it. Captured Confirm/Exclude/Refresh callbacks must still
+  match their displayed revision and current route/session; confirming only
+  returns to the unchanged draft, with no execute.
+
+### Original operation, scope and private preparation
+
+The original prepare token/ticket stays private in the existing AI controller.
+Public state receives only sanitized selection metadata. Both original absolute
+expiries and the original monotonic 15-second budget apply; confirm/Send does not
+acquire another token or renew a ticket. Expiry, changed choices/source access,
+background, auth/consent loss and an explicit topic switch retire held keys.
+Pending reads can be left without waiting for a late prepare to replace newer
+choices. Attempt cleanup clears the selected ticket and history keys as well as
+the existing token/key, including the attempt object used as outgoing identity.
+
+Selected Send transfers its original preparation into the existing execution,
+cancel, timing and unknown-operation machinery. The draft remains in the editor
+while pending/unknown. A dispatched 409/source failure is still fenced: only
+the original operation GET can prove no-effect, the exact saved U for Retry, or
+an accepted assistant pair. No-effect retains choices for a newly reviewed Send;
+user-saved Retry names that original U, never saves another U. Accepted success
+clears this reply's selection and only the still-matching submitted draft.
+An explicit topic-scope key distinguishes user topic changes from a reserved
+operation ID becoming canonical or returning no-effect; new topics keep the
+draft while clearing the old source selection.
+
+`AiConversationPage` and its builder add optional `initialCheckInId` and
+`initialCheckInSessionKey`. Root supplies the current AI session-key object for
+its explicit owned-detail route. The current editor reads its existing topic,
+then consumes that request once by opening the picker; existing choices and
+draft stay intact. An unknown operation waits in chat with a pending-attachment
+notice. After safe readback, another explicit tap is required. A same-UID auth
+replacement cannot reuse the old stamp, issue the target GET or select it.
+Root separately owns the actual Check-in action and shared route/extra binding.
+
+### Exact verification and retained corrections
+
+The first 15-case run passed 11 and found four failures. Two were actual state
+bugs: PopScope read its old pre-confirm snapshot, and new-topic no-effect was
+mistaken for an explicit topic switch. These now read current confirmation and
+the explicit topic scope respectively. A narrow-screen fixture also searched
+down for a lazy Review button above the viewport; bounded top-to-target scrolling
+fixed that navigation without weakening hit-test assertions. The next 15 cases
+passed; analyzer flow-control/style findings were repaired. Later 19-case and
+385-case runs are retained as separate pre-final checkpoints, not summed.
+
+The final candidate passed **389/389** across this checkout's entire
+`test/features/ai_conversation` and `test/features/proactive` directories,
+including **25** F1 controller/page cases and Root's six review-panel cases.
+It covers 0/5/6 choices, rolling time boundaries and cursor errors, original
+token/expiry, fresh pair identity/exclusion, same-UID replacement and late reads,
+source edits/authorization loss, execute conflict/unknown/user-saved Retry,
+no-effect/assistant-saved recovery, two AI pages around an intact other editor,
+captured review callbacks, explicit detail entry and its unknown/session guards,
+and 320px English/Chinese at 2x text. No overflow, tap warning or exception
+remained. Two final missing flow-control braces were then fixed without changing
+behavior; all four AI/proactive source/test directories analyzed cleanly
+(`11.8s`). `git diff --check` is clean.
+
+Raw final log: `/home/miku/.local/state/enmori-ai-companion-20261025/app-f1-final.log`,
+SHA-256 `002babf00e62b0f9222f5b34fc67b1d21dda8e2c284ac32d9de5211a0648e816`.
+All Flutter/Dart work used the coordinated global lock. This is App source,
+fake repository, widget and localhost-wire evidence, not final shared routing,
+Delivery D1, deployed Backend/model, Firebase/FCM, APK/phone, UAT, Release or Done
+acceptance. No real model/Backend request, data write, registration or push was
+performed. Product/QA review this exact new commit independently.
