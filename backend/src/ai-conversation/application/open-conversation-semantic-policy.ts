@@ -3,6 +3,7 @@ import type { OutputCandidate } from "../../ai-runtime/domain/parse-output.js";
 import type { RequestBudget } from "../../ai-runtime/ports/generation-transport.js";
 import { err, ok } from "../../shared/domain/result.js";
 import { copyPersonaProjection } from "./persona-expression.js";
+import { normalizeCheckInLabel } from "../../check-ins/domain/content.js";
 
 /** S-PM-1019-LI-SPONSOR-DEMO-LOCAL-TAKEOVER. Internal only; public JSON stays v1. */
 export const openConversationSemanticPolicyVersion = "open_conversation_v1";
@@ -15,14 +16,22 @@ function live(b: RequestBudget): boolean {
   try { return !b.signal.aborted && Number.isFinite(b.deadline) && b.remainingMs() > 0; } catch { return false; }
 }
 export function validOpenConversationInput(v: ConversationInput): boolean {
-  if (!record(v) || !fields(v,["strategy","currentMessage","checkIns","persona","history"],["strategy","currentMessage","checkIns","history"]) ||
+  if (!record(v) || !fields(v,["strategy","currentMessage","checkIns","persona","history","contextMode","replyToAssistant"],["strategy","currentMessage","checkIns","history"]) ||
       v.strategy !== openConversationSemanticPolicyVersion || !text(v.currentMessage) || [...v.currentMessage].length > 2400 ||
-      !Array.isArray(v.checkIns) || v.checkIns.length > 5 || !Array.isArray(v.history) || v.history.length > 2) return false;
+      !Array.isArray(v.checkIns) || v.checkIns.length > 5 || !Array.isArray(v.history) || v.history.length > 2||
+      (v.contextMode!==undefined&&v.contextMode!=="selected_checkins_v1")) return false;
   for (const list of [v.checkIns,v.history]) {
     const keys = ["length",...list.map((_,i) => String(i))];
     if (!fields(list,keys,keys)) return false;
   }
-  for (const n of v.checkIns) if (!record(n) || !fields(n,["occurredAt","noteText"],["occurredAt","noteText"]) || !text(n.occurredAt) || !text(n.noteText)) return false;
+  for (const n of v.checkIns){
+    const selected=v.contextMode==="selected_checkins_v1";
+    if (!record(n) || !fields(n,selected?["occurredAt","noteText","moodLabel","activityLabel"]:["occurredAt","noteText"],["occurredAt","noteText"]) || !text(n.occurredAt)||
+      (selected?typeof n.noteText!=="string"||!n.noteText.isWellFormed()||
+        [n.moodLabel,n.activityLabel].some(label=>label!==undefined&&normalizeCheckInLabel(label)!==label):!text(n.noteText)))return false;
+  }
+  if(v.replyToAssistant!==undefined&&(!record(v.replyToAssistant)||!fields(v.replyToAssistant,["occurredAt","text"],["occurredAt","text"])||
+    !text(v.replyToAssistant.occurredAt)||!text(v.replyToAssistant.text)||[...v.replyToAssistant.text].length>2400))return false;
   for (const p of v.history) if (!record(p) || !fields(p,["user","assistant"],["user","assistant"]) ||
       !text(p.user) || !text(p.assistant) || [...p.user].length > 2400 || [...p.assistant].length > 2400) return false;
   const p = v.persona;

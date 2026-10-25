@@ -150,7 +150,7 @@ class FixedFirebaseStartView implements FixedStartReadView {
         if (this.#closed || !this.#context || !this.#options || !live(this.#context, this.#options.monotonicNow)) {
           this.stop("terminated"); return { kind: this.#failure ?? "terminated" };
         }
-        if (value.kind !== "read") { this.stop(value.kind); return value; }
+        if (value.kind !== "read") {const failure=value.kind==="denied"||value.kind==="terminated"?value.kind:"unavailable"; this.stop(failure); return {kind:failure}; }
         return { kind: "read", value: Object.freeze({ view: this.identity, asOf: this.asOf, value: value.value }) };
       } catch {
         if (!this.#context || !this.#options || !live(this.#context, this.#options.monotonicNow)) {

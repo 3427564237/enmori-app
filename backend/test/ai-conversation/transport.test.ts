@@ -179,7 +179,7 @@ test("normative AI envelope/codes and isolation are separate from unchanged lega
   assert.deepEqual([...contract.components.schemas.ConversationError.properties.error.properties.code.enum].sort(),Object.keys(CONVERSATION_ERRORS).sort());
   assert.deepEqual(contract.components.schemas.ErrorEnvelope.properties.error.required,["code","message","requestId"]);
   for(const [path,methods] of Object.entries(contract.paths) as [string,Record<string,any>][]) if(path.includes("/ai/")||path.includes("/conversations/")) {
-    for(const operation of Object.values(methods)) assert.equal(operation["x-enmori-environment"],"isolated-emulator");
+    for(const operation of Object.values(methods)) assert.equal(operation["x-enmori-environment"],path.endsWith("/read-state")?"explicit-first-flow-candidate":"isolated-emulator");
   }
 });
 

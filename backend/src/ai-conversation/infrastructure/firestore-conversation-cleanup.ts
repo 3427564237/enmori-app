@@ -58,6 +58,7 @@ export class FirestoreConversationCleanup implements ConversationCleanup {
         const retention=resolveRealRetention({ownerAccountId:owner,conversationId:id,
           inventory:{parent:{...row,ownerAccountId:owner,conversationId:id},messages:rows.map(m=>({
             ownerAccountId:owner,conversationId:id,messageId:m.id,role:m.data.role,sequence:m.data.sequence,
+            ...(m.data.origin === undefined ? {} : {origin:m.data.origin}),
             createTime:m.createTime,...(m.data.appendBefore===undefined?{}:{appendBefore:m.data.appendBefore})}))},
           now:{precision:"millisecond",instant:{seconds,nanoseconds:(ms-seconds*1000)*1_000_000}}});
         if(retention.state==="unavailable")stop("unavailable");

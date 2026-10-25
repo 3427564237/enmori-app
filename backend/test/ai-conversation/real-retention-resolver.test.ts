@@ -378,3 +378,24 @@ test("N02 unknown precision and malformed inventories are unavailable, not empty
   } as unknown as RealRetentionResolverInput), unknownResult);
   assert.deepEqual(resolveRealRetention(null as unknown as RealRetentionResolverInput), unknownResult);
 });
+
+test("R-ANCHOR standalone proactive assistant and its tombstone never advance the original cutoff",()=>{
+  const user=first(),reply={...message(2,at(200),firstCutoff),role:"assistant" as const},replyCutoff=at(200+RETENTION);
+  for(const availability of ["available","unavailable"]){
+    const proactive={...message(3,at(1000),replyCutoff),role:"assistant" as const,origin:"proactive" as const,availability};
+    const result=resolve(inventory([user,reply,proactive]),at(1001));
+    assert.equal(result.state,"live");
+    assert.deepEqual(result.expiresAt,replyCutoff);assert.equal(resolve(inventory([user,reply,proactive]),replyCutoff).state,"expired");
+  }
+});
+test("R-ANCHOR U1 A2 P3 U4 A5 advances again only for the later real user/reply",()=>{
+  const cutoff2=at(200+RETENTION),cutoff4=at(2000+RETENTION),cutoff5=at(2100+RETENTION);
+  const rows=[first(),{...message(2,at(200),firstCutoff),role:"assistant" as const},
+    {...message(3,at(1000),cutoff2),role:"assistant" as const,origin:"proactive" as const},message(4,at(2000),cutoff2),
+    {...message(5,at(2100),cutoff4),role:"assistant" as const}];
+  const result=resolve(inventory(rows),at(2101));assert.equal(result.state,"live");assert.deepEqual(result.expiresAt,cutoff5);
+});
+test("R-ANCHOR cannot label a user proactive or use an unknown origin to skip retention validation",()=>{
+  assert.deepEqual(resolve(inventory([{...first(),origin:"proactive"}])),unknownResult);
+  assert.deepEqual(resolve({parent:inventory([]).parent,messages:[first(),{...message(2,at(200),firstCutoff),role:"assistant",origin:"unknown"}]}),unknownResult);
+});

@@ -375,3 +375,25 @@ test("concurrent/invalid acquisition has no lease and idempotent old release can
   assert.deepEqual(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing }), bad("AI_OPERATION_CONFLICT"));
   fresh.lease.release(); fresh.lease.release(); assert.equal(fresh.lease.current(), false);
 });
+
+test("F1a prepared choices are operation-bound and omission/foreign/incomplete keys preserve the prepared ticket",async()=>{
+  const f=fixture();f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:3,sources:[{kind:"check_in",checkInId:"private-source-id",version:"metadata-v1",sourceOccurredAt:"2026-10-14T09:00:00.000Z",observedAt:"2026-10-14T10:00:00.000Z"}]});
+  const ticket=value(await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",contextSelection:{processing:"local",sources:[{kind:"check_in",checkInId:"private-source-id"}]}}));
+  const c=ticket.contextSelection!;assert.equal(c.sourceCards.length,1);assert(!JSON.stringify(c).includes("private-source-id"));
+  const body={operationId:ticket.operationId,operationKey:ticket.operationKey,text:"keep this draft"};
+  for(const choice of [undefined,{selectionRevision:c.selectionRevision,includedKeys:["wrong"],excludedKeys:[]},{selectionRevision:c.selectionRevision,includedKeys:[],excludedKeys:[]}]){
+    assert.deepEqual(await f.app.execute(f.original,{...body,...(choice?{contextSelection:choice}:{})},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});assert.equal(f.counts().creates,0);
+  }
+  const key=c.sourceCards[0]!.selectionKey;
+  assert.equal((await f.app.execute(f.original,{...body,contextSelection:{selectionRevision:c.selectionRevision,includedKeys:[key],excludedKeys:[key]}},f.delivery())).kind,"success");
+  assert.deepEqual(f.inputs[0]?.selectedReply?.includedKeys,[key]);assert.deepEqual(f.inputs[0]?.selectedReply?.excludedKeys,[key]);
+});
+test("F1a selection cannot be inserted into an old unselected prepare, or adopted from another operation",async()=>{
+  const f=fixture(),ticket=await f.prepare();
+  assert.deepEqual(await f.app.execute(f.original,{operationId:ticket.operationId,operationKey:ticket.operationKey,text:"draft",contextSelection:{selectionRevision:id(800),includedKeys:[],excludedKeys:[]}},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});
+  assert.equal(f.counts().creates,0);assert.equal((await f.execute(ticket)).kind,"success");
+});
+test("reply association is allowed only for an existing topic and does not consume a rejected new-topic ticket",async()=>{
+  const f=fixture(),ticket=await f.prepare();
+  assert.deepEqual(await f.app.execute(f.original,{operationId:ticket.operationId,operationKey:ticket.operationKey,text:"draft",replyToMessageId:id(800)},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});assert.equal(f.counts().creates,0);assert.equal((await f.execute(ticket)).kind,"success");
+});
