@@ -45,7 +45,10 @@ void main() {
       expect(find.text('Third-ranked event'), findsOneWidget);
       expect(find.text('First-ranked event'), findsOneWidget);
       expect(find.text('Second-ranked event'), findsNothing);
-      expect(find.byKey(const Key('event-recommendations-refresh')), findsNothing);
+      expect(
+        find.byKey(const Key('event-recommendations-refresh')),
+        findsNothing,
+      );
     });
   }
 
@@ -53,7 +56,9 @@ void main() {
     tester,
   ) async {
     final repository = FakeEventRecommendationRepository()
-      ..allResult = Success(_orderedEvents(['c', 'a', 'b', 'g', 'f', 'e', 'd']));
+      ..allResult = Success(
+        _orderedEvents(['c', 'a', 'b', 'g', 'f', 'e', 'd']),
+      );
     await _pump(
       tester,
       EventRecommendationsPage(
@@ -85,43 +90,54 @@ void main() {
     expect(find.byKey(const Key('card-c')).hitTestable(), findsOneWidget);
   });
 
-  testWidgets('retry restores the same event ID in a changed ordered snapshot', (
-    tester,
-  ) async {
-    final repository = FakeEventRecommendationRepository()
-      ..allResult = Success(_orderedEvents(['a', 'b', 'c', 'd', 'e']));
-    await _pump(
-      tester,
-      EventRecommendationsPage(
-        initialEventIndex: 2,
-        recommendationCardBuilder: _tallCard,
-      ),
-      repository,
-    );
-    repository.allResult = const Failure(
-      AppFailure(kind: AppFailureKind.serviceUnavailable, message: 'fixture'),
-    );
-    final refresh = find.byKey(const Key('event-recommendations-refresh'));
-    await tester.ensureVisible(refresh);
-    await tester.pumpAndSettle();
-    await tester.tap(refresh);
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('card-c')), findsNothing);
-    expect(find.text('You have reached the end of this list.'), findsNothing);
-    expect(find.byKey(const Key('event-recommendations-next-group')), findsNothing);
-    repository.allResult = Success(_orderedEvents(['x', 'a', 'b', 'c', 'd', 'e']));
-    final retry = find.byKey(const Key('event-recommendations-retry'));
-    await tester.ensureVisible(retry);
-    await tester.pumpAndSettle();
-    await tester.tap(retry);
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('card-c')).hitTestable(), findsOneWidget);
-    await tester.tap(find.byKey(const Key('event-recommendations-next-group')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('card-e')).hitTestable(), findsOneWidget);
-    expect(find.text('You have reached the end of this list.'), findsOneWidget);
-    expect(repository.views.length, 3);
-  });
+  testWidgets(
+    'retry restores the same event ID in a changed ordered snapshot',
+    (tester) async {
+      final repository = FakeEventRecommendationRepository()
+        ..allResult = Success(_orderedEvents(['a', 'b', 'c', 'd', 'e']));
+      await _pump(
+        tester,
+        EventRecommendationsPage(
+          initialEventIndex: 2,
+          recommendationCardBuilder: _tallCard,
+        ),
+        repository,
+      );
+      repository.allResult = const Failure(
+        AppFailure(kind: AppFailureKind.serviceUnavailable, message: 'fixture'),
+      );
+      final refresh = find.byKey(const Key('event-recommendations-refresh'));
+      await tester.ensureVisible(refresh);
+      await tester.pumpAndSettle();
+      await tester.tap(refresh);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('card-c')), findsNothing);
+      expect(find.text('You have reached the end of this list.'), findsNothing);
+      expect(
+        find.byKey(const Key('event-recommendations-next-group')),
+        findsNothing,
+      );
+      repository.allResult = Success(
+        _orderedEvents(['x', 'a', 'b', 'c', 'd', 'e']),
+      );
+      final retry = find.byKey(const Key('event-recommendations-retry'));
+      await tester.ensureVisible(retry);
+      await tester.pumpAndSettle();
+      await tester.tap(retry);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('card-c')).hitTestable(), findsOneWidget);
+      await tester.tap(
+        find.byKey(const Key('event-recommendations-next-group')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('card-e')).hitTestable(), findsOneWidget);
+      expect(
+        find.text('You have reached the end of this list.'),
+        findsOneWidget,
+      );
+      expect(repository.views.length, 3);
+    },
+  );
 
   testWidgets('continuing past only two results reports the actual end', (
     tester,

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/presentation/enmori_localizations.dart';
 import '../../features/event_browse/domain/activity_repository.dart';
+import '../../features/event_detail/presentation/event_information.dart';
 import '../../features/event_participation/domain/participation_repository.dart';
 import '../../features/event_participation/presentation/event_plans_page.dart';
 import '../../features/event_participation/presentation/participation_event_page.dart';
@@ -66,6 +67,7 @@ List<GoRoute> eventParticipationRoutes({
     builder: (context, state) => ParticipationEventPage(
       key: ValueKey(state.pathParameters['eventId']),
       eventId: state.pathParameters['eventId'] ?? '',
+      detailBuilder: (context, event) => EventInformation(event: event),
       opener: opener,
       onParticipants: (s) {
         if (_atCurrentRoute(context, state.uri.path, current)) {

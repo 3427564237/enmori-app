@@ -47,8 +47,9 @@ void main() {
 
 final class _Discovery implements FriendDiscoveryRepository {
   @override
-  Future<Result<List<FriendSuggestion>>> suggestions({required bool home}) async =>
-      const Success([]);
+  Future<Result<List<FriendSuggestion>>> suggestions({
+    required bool home,
+  }) async => const Success([]);
 
   @override
   Future<Result<int>> pendingCount() async => const Success(0);

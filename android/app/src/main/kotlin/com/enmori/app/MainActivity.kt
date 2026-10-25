@@ -17,8 +17,23 @@ import java.util.Locale
 import java.util.TimeZone
 
 class MainActivity : FlutterActivity() {
+    private var avatarPhotoPicker: AvatarPhotoPicker? = null
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (avatarPhotoPicker?.onActivityResult(requestCode, resultCode, data) != true) {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    override fun onDestroy() {
+        avatarPhotoPicker?.dispose()
+        avatarPhotoPicker = null
+        super.onDestroy()
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        avatarPhotoPicker = AvatarPhotoPicker(this, flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/preferences")
             .setMethodCallHandler { call, result ->
                 try {

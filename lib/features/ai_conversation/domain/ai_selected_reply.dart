@@ -6,17 +6,25 @@ import 'ai_owned_sources.dart';
 /// not a client-side mapping back to a Check-in ID or permission for another send.
 /// Only automatic-day receipts explicitly supply the owned ID for exclusions.
 final class AiSelectedSourceCard {
-  const AiSelectedSourceCard({required this.selectionKey, required this.card,this.checkInId});
+  const AiSelectedSourceCard({
+    required this.selectionKey,
+    required this.card,
+    this.checkInId,
+  });
   final String selectionKey;
   final AiSourceCard card;
   final String? checkInId;
 }
 
 final class AiTodayContext {
-  const AiTodayContext({required this.date,required this.timeZone,required this.hasMore});
-  final String date,timeZone;
+  const AiTodayContext({
+    required this.date,
+    required this.timeZone,
+    required this.hasMore,
+  });
+  final String date, timeZone;
   final bool hasMore;
-  int get limit=>5;
+  int get limit => 5;
 }
 
 final class AiPreparedHistoryPair {
@@ -51,8 +59,11 @@ final class AiPreparedReplySelection {
 /// The client cannot choose a date, clock, owner or an enlarged source limit.
 abstract interface class AiTodayReplyRepository {
   Future<Result<AiSelectedReplyTicket>> prepareToday({
-    required String token,required AiAbortSignal abort,required String timeZone,
-    String? conversationId,String? userMessageId,
+    required String token,
+    required AiAbortSignal abort,
+    required String timeZone,
+    String? conversationId,
+    String? userMessageId,
   });
 }
 

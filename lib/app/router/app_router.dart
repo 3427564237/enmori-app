@@ -485,6 +485,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             1,
             remoteGroup
                 ? FriendModulePage(
+                    initialDiscovery:
+                        state.uri.queryParameters['view'] == 'discover',
                     openAttribution: openGroupAttribution,
                     recordBuilder: groupCheckInRecordBuilder,
                     participationBuilder: groupParticipationBuilder,
@@ -544,6 +546,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.home,
         name: 'root-home',
         builder: (context, state) => HomeShellPage(
+          profileHeader: remoteGroup
+              ? ConnectedOwnHeader(
+                  onEdit: () async {
+                    if (canNavigateShared(context, AppRoutes.home)) {
+                      await context.push<void>(AppRoutes.profileEdit);
+                    }
+                  },
+                )
+              : null,
+          onContinueDiscovery: () async {
+            if (!canNavigateShared(context, AppRoutes.home)) return;
+            await context.push<void>(
+              '${AppRoutes.eventRecommendations}?from=2',
+            );
+            if (context.mounted && canNavigateShared(context, AppRoutes.home)) {
+              ref
+                  .read(eventRecommendationsControllerProvider.notifier)
+                  .load(view: EventRecommendationView.home);
+            }
+          },
           daySection: historyPage != null
               ? HomeTodaySection(
                   onOpenCheckIn: (id) async {
@@ -799,6 +821,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.eventRecommendations,
         builder: (context, state) => EventRecommendationsPage(
+          initialEventIndex: state.uri.queryParameters['from'] == '2' ? 2 : 0,
           recommendationCardBuilder: participationEnabled
               ? (context, event, onOpen) =>
                     ConnectedRecommendationCard(event: event, onOpen: onOpen)

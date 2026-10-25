@@ -1,3 +1,5 @@
+import '../features/account/own_avatar_providers.dart';
+import '../features/account/data/backend_own_avatar_repository.dart';
 import 'controlled_demo_app.dart';
 import 'proactive_messaging_composition.dart';
 import '../features/proactive/data/firebase_proactive_messaging.dart';
@@ -129,6 +131,10 @@ Future<void> bootstrap() async {
           }),
         externalActivityOpenerProvider.overrideWithValue(
           const PlatformExternalActivityOpener(),
+        ),
+        ownAvatarRepositoryProvider.overrideWith(
+          (ref) =>
+              BackendOwnAvatarRepository(ref.watch(backendApiClientProvider)),
         ),
         accountPreferencesRepositoryProvider.overrideWith(
           (ref) => BackendAccountPreferencesRepository(

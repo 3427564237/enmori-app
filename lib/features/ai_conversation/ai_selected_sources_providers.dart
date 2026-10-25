@@ -49,11 +49,17 @@ enum AiReferenceMode { manual, today, off }
 
 /// Root composition enables the approved automatic-day contract explicitly.
 /// A missing repository capability then fails closed instead of using history.
-final aiTodayReferencesEnabledProvider=Provider<bool>((ref)=>false);
+final aiTodayReferencesEnabledProvider = Provider<bool>((ref) => false);
 
-final aiTodayTimeZoneProvider=Provider<Future<Result<String>> Function()>((ref)=>
-  () async=>const Failure(AppFailure(kind:AppFailureKind.configurationUnavailable,
-    message:'The current IANA time zone could not be verified.')));
+final aiTodayTimeZoneProvider = Provider<Future<Result<String>> Function()>(
+  (ref) =>
+      () async => const Failure(
+        AppFailure(
+          kind: AppFailureKind.configurationUnavailable,
+          message: 'The current IANA time zone could not be verified.',
+        ),
+      ),
+);
 
 enum AiSelectionNotice {
   none,
@@ -84,16 +90,19 @@ final class AiSelectedSourcesState {
     this.review,
     Iterable<String> excludedHistoryKeys = const [],
     this.notice = AiSelectionNotice.none,
-    this.mode=AiReferenceMode.manual,this.automaticAvailable=false,this.today,this.reviewRequired=false,
-    Iterable<String> excludedCheckInIds=const [],
-    Iterable<String> automaticIds=const [],
+    this.mode = AiReferenceMode.manual,
+    this.automaticAvailable = false,
+    this.today,
+    this.reviewRequired = false,
+    Iterable<String> excludedCheckInIds = const [],
+    Iterable<String> automaticIds = const [],
   }) : records = List.unmodifiable(records),
        selectedIds = Set.unmodifiable(selectedIds),
        cursors = Map.unmodifiable(cursors),
        failedDates = Set.unmodifiable(failedDates),
        excludedHistoryKeys = Set.unmodifiable(excludedHistoryKeys),
-       excludedCheckInIds=Set.unmodifiable(excludedCheckInIds),
-       automaticIds=Set.unmodifiable(automaticIds);
+       excludedCheckInIds = Set.unmodifiable(excludedCheckInIds),
+       automaticIds = Set.unmodifiable(automaticIds);
   final Object sessionKey;
   final String? conversationId;
   final bool permitted, loaded, busy, active, confirmed, sending;
@@ -104,9 +113,9 @@ final class AiSelectedSourcesState {
   final AiPreparedReplySelection? review;
   final AiSelectionNotice notice;
   final AiReferenceMode mode;
-  final bool automaticAvailable,reviewRequired;
+  final bool automaticAvailable, reviewRequired;
   final AiTodayContext? today;
-  final Set<String> excludedCheckInIds,automaticIds;
+  final Set<String> excludedCheckInIds, automaticIds;
 }
 
 final aiSelectedSourcesControllerProvider =
@@ -119,10 +128,12 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
   late AiConversationController _conversation;
   late DateTime Function() _now;
   late Future<Result<String>> Function() _readTimeZone;
-  bool _automaticAvailable=false,_topicUsesToday=true,_reviewRequired=false;
-  AiReferenceMode _mode=AiReferenceMode.manual;
+  bool _automaticAvailable = false,
+      _topicUsesToday = true,
+      _reviewRequired = false;
+  AiReferenceMode _mode = AiReferenceMode.manual;
   AiTodayContext? _today;
-  final _automaticIds=<String>{},_excludedCheckIns=<String>{};
+  final _automaticIds = <String>{}, _excludedCheckIns = <String>{};
   late Object _session;
   Object? _scope;
   String? _topic;
@@ -149,9 +160,10 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
     _command++;
     _repository = ref.watch(checkInRepositoryProvider);
     _now = ref.watch(aiConversationUtcNowProvider);
-    _readTimeZone=ref.watch(aiTodayTimeZoneProvider);
-    _automaticAvailable=ref.watch(aiTodayReferencesEnabledProvider) &&
-      ref.watch(aiCompanionReferencesEnabledProvider);
+    _readTimeZone = ref.watch(aiTodayTimeZoneProvider);
+    _automaticAvailable =
+        ref.watch(aiTodayReferencesEnabledProvider) &&
+        ref.watch(aiCompanionReferencesEnabledProvider);
     _conversation = ref.read(aiConversationControllerProvider.notifier);
     final ai = ref.read(aiConversationControllerProvider);
     _session = ai.sessionKey;
@@ -209,7 +221,8 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
       _epoch = Object();
       _command++;
       _records.clear();
-      _today=null;_automaticIds.clear();
+      _today = null;
+      _automaticIds.clear();
       _cursors.clear();
       _usedCursors.clear();
       _failedDates.clear();
@@ -260,7 +273,11 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
     final records = _records.values.toList()
       ..sort((a, b) {
         final time = b.occurredAt.compareTo(a.occurredAt);
-        return time == 0 ? (_mode==AiReferenceMode.today?b.id.compareTo(a.id):a.id.compareTo(b.id)) : time;
+        return time == 0
+            ? (_mode == AiReferenceMode.today
+                  ? b.id.compareTo(a.id)
+                  : a.id.compareTo(b.id))
+            : time;
       });
     return AiSelectedSourcesState(
       sessionKey: _session,
@@ -277,8 +294,13 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
       sending: _sending,
       review: _review,
       excludedHistoryKeys: _excludedHistory,
-      notice: _notice,mode:_mode,automaticAvailable:_automaticAvailable,today:_today,
-      excludedCheckInIds:_excludedCheckIns,automaticIds:_automaticIds,reviewRequired:_reviewRequired,
+      notice: _notice,
+      mode: _mode,
+      automaticAvailable: _automaticAvailable,
+      today: _today,
+      excludedCheckInIds: _excludedCheckIns,
+      automaticIds: _automaticIds,
+      reviewRequired: _reviewRequired,
     );
   }
 
@@ -294,14 +316,21 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
     _failedDates.clear();
     _loaded = false;
     _busy = false;
-    _topicUsesToday=true;_mode=_automaticAvailable?AiReferenceMode.today:AiReferenceMode.manual;
-    _active = _automaticAvailable;_today=null;_automaticIds.clear();_excludedCheckIns.clear();
+    _topicUsesToday = true;
+    _mode = _automaticAvailable
+        ? AiReferenceMode.today
+        : AiReferenceMode.manual;
+    _active = _automaticAvailable;
+    _today = null;
+    _automaticIds.clear();
+    _excludedCheckIns.clear();
     _confirmed = false;
     _sending = false;
     _recoveringSelected = false;
     _review = null;
     _excludedHistory = {};
-    _excludedHistoryIntent = const [];_reviewRequired=false;
+    _excludedHistoryIntent = const [];
+    _reviewRequired = false;
     _notice = AiSelectionNotice.none;
   }
 
@@ -315,13 +344,17 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
   void _clearAccepted() {
     _selected.clear();
     _active = _automaticAvailable;
-    _mode=_automaticAvailable?(_topicUsesToday?AiReferenceMode.today:AiReferenceMode.off):AiReferenceMode.manual;
-    _today=null;_automaticIds.clear();
-    if(_automaticAvailable) _records.clear();
+    _mode = _automaticAvailable
+        ? (_topicUsesToday ? AiReferenceMode.today : AiReferenceMode.off)
+        : AiReferenceMode.manual;
+    _today = null;
+    _automaticIds.clear();
+    if (_automaticAvailable) _records.clear();
     _confirmed = false;
     _review = null;
     _excludedHistory = {};
-    _excludedHistoryIntent = const [];_reviewRequired=false;
+    _excludedHistoryIntent = const [];
+    _reviewRequired = false;
     _sending = false;
     _recoveringSelected = false;
     _notice = AiSelectionNotice.none;
@@ -482,7 +515,8 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
       }
       _selected.add(id);
     }
-    _active = true;_mode=AiReferenceMode.manual;
+    _active = true;
+    _mode = AiReferenceMode.manual;
     _retireReview();
     _notice = AiSelectionNotice.recheck;
     _emit();
@@ -511,7 +545,8 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
         when _eligible(value, _now().toUtc())) {
       _records[id] = value;
       _selected.add(id);
-      _active = true;_mode=AiReferenceMode.manual;
+      _active = true;
+      _mode = AiReferenceMode.manual;
       _notice = AiSelectionNotice.recheck;
     } else {
       _records.remove(id);
@@ -527,8 +562,9 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
   Future<Map<String, AiSelectedCheckIn>?> _readSelected(
     Object epoch,
     int command,
-    List<String> ids,{bool enforceWindow=true}
-  ) async {
+    List<String> ids, {
+    bool enforceWindow = true,
+  }) async {
     final results = await Future.wait([for (final id in ids) _readOne(id)]);
     if (!_current(epoch, command)) return null;
     for (final result in results) {
@@ -588,26 +624,52 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
     _active = true;
     _retireReview();
     _emit();
-    final epoch=_epoch,command=++_command;
-    final ids=_mode==AiReferenceMode.manual?_selected.toList():<String>[];
-    final before=_mode==AiReferenceMode.manual?await _readSelected(epoch,command,ids):<String,AiSelectedCheckIn>{};
-    if(!_current(epoch,command)) return;
-    if(before==null) {_busy=false;_emit();return;}
+    final epoch = _epoch, command = ++_command;
+    final ids = _mode == AiReferenceMode.manual
+        ? _selected.toList()
+        : <String>[];
+    final before = _mode == AiReferenceMode.manual
+        ? await _readSelected(epoch, command, ids)
+        : <String, AiSelectedCheckIn>{};
+    if (!_current(epoch, command)) return;
+    if (before == null) {
+      _busy = false;
+      _emit();
+      return;
+    }
     Result<AiPreparedReplySelection> result;
-    if(_mode==AiReferenceMode.today) {
-      _today=null;_automaticIds.clear();_records.clear();
+    if (_mode == AiReferenceMode.today) {
+      _today = null;
+      _automaticIds.clear();
+      _records.clear();
       Result<String> zone;
-      try {zone=await _readTimeZone().timeout(const Duration(seconds:15),
-        onTimeout:()=>const Failure(_readUnknown));}
-      catch(_) {zone=const Failure(_readUnknown);}
-      if(!_current(epoch,command)) return;
-      if(zone case Failure<String>()) {_busy=false;_notice=AiSelectionNotice.unknown;_emit();return;}
-      result=await _conversation.prepareTodaySources((zone as Success<String>).value);
-    } else {result=await _conversation.prepareSelectedSources(ids);}
+      try {
+        zone = await _readTimeZone().timeout(
+          const Duration(seconds: 15),
+          onTimeout: () => const Failure(_readUnknown),
+        );
+      } catch (_) {
+        zone = const Failure(_readUnknown);
+      }
+      if (!_current(epoch, command)) return;
+      if (zone case Failure<String>()) {
+        _busy = false;
+        _notice = AiSelectionNotice.unknown;
+        _emit();
+        return;
+      }
+      result = await _conversation.prepareTodaySources(
+        (zone as Success<String>).value,
+      );
+    } else {
+      result = await _conversation.prepareSelectedSources(ids);
+    }
     if (!_current(epoch, command)) return;
     if (result case Failure<AiPreparedReplySelection>(:final failure)) {
       _busy = false;
-      if(failure.kind==AppFailureKind.aiContextSelectionConflict) _reviewRequired=true;
+      if (failure.kind == AppFailureKind.aiContextSelectionConflict) {
+        _reviewRequired = true;
+      }
       _notice = failure.kind == AppFailureKind.aiContextSelectionConflict
           ? AiSelectionNotice.conflict
           : AiSelectionNotice.unknown;
@@ -615,7 +677,9 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
       return;
     }
     final prepared = (result as Success<AiPreparedReplySelection>).value;
-    final after=_mode==AiReferenceMode.manual?await _readSelected(epoch,command,ids):<String,AiSelectedCheckIn>{};
+    final after = _mode == AiReferenceMode.manual
+        ? await _readSelected(epoch, command, ids)
+        : <String, AiSelectedCheckIn>{};
     if (!_current(epoch, command)) return;
     _busy = false;
     if (after == null ||
@@ -627,14 +691,17 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
     }
     if (ids.any((id) => !before[id]!.sameVersion(after[id]!))) {
       _retireReview();
-      _notice = AiSelectionNotice.changed;_reviewRequired=true;
+      _notice = AiSelectionNotice.changed;
+      _reviewRequired = true;
       _emit();
       return;
     }
     _review = prepared;
-    _today=prepared.today;
-    if(prepared.today!=null) {
-      _automaticIds..clear()..addAll(prepared.sourceCards.map((card)=>card.checkInId!));
+    _today = prepared.today;
+    if (prepared.today != null) {
+      _automaticIds
+        ..clear()
+        ..addAll(prepared.sourceCards.map((card) => card.checkInId!));
     }
     _confirmed = false;
     if (oldPairs != null &&
@@ -649,7 +716,7 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
       _notice = oldPairs == null || oldPairs.isEmpty
           ? AiSelectionNotice.none
           : AiSelectionNotice.pastPairsChanged;
-      if(_notice==AiSelectionNotice.pastPairsChanged) _reviewRequired=true;
+      if (_notice == AiSelectionNotice.pastPairsChanged) _reviewRequired = true;
     }
     _emit();
   }
@@ -664,8 +731,11 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
         !_conversation.hasSelectedPreparation(review.selectionRevision)) {
       return;
     }
-    if(_notice==AiSelectionNotice.pastPairsChanged) _excludedHistoryIntent=const [];
-    _confirmed = true;_reviewRequired=false;
+    if (_notice == AiSelectionNotice.pastPairsChanged) {
+      _excludedHistoryIntent = const [];
+    }
+    _confirmed = true;
+    _reviewRequired = false;
     _notice = AiSelectionNotice.none;
     _emit();
   }
@@ -681,29 +751,52 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
   }
 
   void setTodayEnabled(bool enabled) {
-    if(!_automaticAvailable || !_permitted || _busy || _sending) return;
-    _topicUsesToday=enabled;_mode=enabled?AiReferenceMode.today:AiReferenceMode.off;
-    _selected.clear();_active=true;_today=null;_automaticIds.clear();_records.clear();
-    _retireReview();_notice=AiSelectionNotice.none;_emit();
+    if (!_automaticAvailable || !_permitted || _busy || _sending) return;
+    _topicUsesToday = enabled;
+    _mode = enabled ? AiReferenceMode.today : AiReferenceMode.off;
+    _selected.clear();
+    _active = true;
+    _today = null;
+    _automaticIds.clear();
+    _records.clear();
+    _retireReview();
+    _notice = AiSelectionNotice.none;
+    _emit();
   }
 
   void toggleTodaySource(String id) {
-    if(!_permitted || _busy || _sending || _mode!=AiReferenceMode.today ||
-        (!_automaticIds.contains(id) && !_excludedCheckIns.contains(id))) return;
-    if(!_excludedCheckIns.remove(id)) _excludedCheckIns.add(id);
-    _retireReview();_notice=AiSelectionNotice.none;_emit();
+    if (!_permitted ||
+        _busy ||
+        _sending ||
+        _mode != AiReferenceMode.today ||
+        (!_automaticIds.contains(id) && !_excludedCheckIns.contains(id))) {
+      return;
+    }
+    if (!_excludedCheckIns.remove(id)) _excludedCheckIns.add(id);
+    _retireReview();
+    _notice = AiSelectionNotice.none;
+    _emit();
   }
 
   Future<void> previewToday() async {
-    if(_mode!=AiReferenceMode.today || !canSubmit) return;
+    if (_mode != AiReferenceMode.today || !canSubmit) return;
     await review();
-    final review=_review;
-    if(!ref.mounted || review?.today==null || _busy || _sending || !_permitted) return;
-    _busy=true;_emit();final epoch=_epoch,command=++_command;
-    final ids=review!.sourceCards.map((card)=>card.checkInId!).toList();
-    await _readSelected(epoch,command,ids,enforceWindow:false);
-    if(!_current(epoch,command)) return;
-    _busy=false;_emit();
+    final prepared = _review;
+    if (!ref.mounted ||
+        prepared?.today == null ||
+        _busy ||
+        _sending ||
+        !_permitted) {
+      return;
+    }
+    _busy = true;
+    _emit();
+    final epoch = _epoch, command = ++_command;
+    final ids = prepared!.sourceCards.map((card) => card.checkInId!).toList();
+    await _readSelected(epoch, command, ids, enforceWindow: false);
+    if (!_current(epoch, command)) return;
+    _busy = false;
+    _emit();
   }
 
   bool get canSend {
@@ -726,13 +819,14 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
 
   Future<void> submit(String text) async {
     if (!canSubmit || !_conversation.validateSelectedInput(text)) return;
-    if (_mode!=AiReferenceMode.manual || !canSend) {
+    if (_mode != AiReferenceMode.manual || !canSend) {
       final epoch = _epoch;
       await review();
       if (!ref.mounted ||
           !identical(epoch, _epoch) ||
           !canSubmit ||
-          _review == null || _reviewRequired ||
+          _review == null ||
+          _reviewRequired ||
           _notice == AiSelectionNotice.pastPairsChanged) {
         return;
       }
@@ -745,8 +839,9 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
     final ai = ref.read(aiConversationControllerProvider);
     if (!canSend || (!ai.canSend && !ai.canRetry)) return;
     final review = _review!,
-        ids = _review!.today!=null?_review!.sourceCards.map((card)=>card.checkInId!).toList():
-          (_mode==AiReferenceMode.off?<String>[]:_selected.toList()),
+        ids = _review!.today != null
+            ? _review!.sourceCards.map((card) => card.checkInId!).toList()
+            : (_mode == AiReferenceMode.off ? <String>[] : _selected.toList()),
         excluded = _excludedHistory.toList();
     _sending = true;
     _recoveringSelected = true;
@@ -757,7 +852,9 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
       selectionRevision: review.selectionRevision,
       sourceIds: ids,
       excludedHistoryKeys: excluded,
-      excludedSourceIds:review.today==null?const []:ids.where(_excludedCheckIns.contains).toList(),
+      excludedSourceIds: review.today == null
+          ? const []
+          : ids.where(_excludedCheckIns.contains).toList(),
     );
     final admitted = ref.read(aiConversationControllerProvider).canCancel;
     _review = null;
@@ -783,7 +880,7 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
         AppFailureKind.aiAuthorityChanged,
         AppFailureKind.aiContextSelectionConflict,
       }.contains(after.failureKind)) {
-        _reviewRequired=true;
+        _reviewRequired = true;
         _records.clear();
         _loaded = false;
       }

@@ -132,9 +132,7 @@ final class _FriendModulePageState extends ConsumerState<FriendModulePage> {
         MaterialPageRoute(
           builder: (_) => Scaffold(
             appBar: AppBar(
-              title: Text(
-                context.tr('People you may know', '可能认识的人'),
-              ),
+              title: Text(context.tr('People you may know', '可能认识的人')),
             ),
             body: SafeArea(
               child: ListView(

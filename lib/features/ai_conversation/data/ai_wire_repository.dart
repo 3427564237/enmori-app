@@ -254,53 +254,114 @@ final class AiWireRepository
 
   @override
   Future<Result<AiSelectedReplyTicket>> prepareSelected({
-    required String token, required AiAbortSignal abort,
-    String? conversationId, String? userMessageId,
+    required String token,
+    required AiAbortSignal abort,
+    String? conversationId,
+    String? userMessageId,
     required List<String> sourceIds,
   }) {
-    if (sourceIds.length>5 || sourceIds.toSet().length!=sourceIds.length ||
-        !sourceIds.every(_safeDocumentId)) return _invalid();
-    return _prepareContext(token:token,abort:abort,conversationId:conversationId,
-      userMessageId:userMessageId,sourceIds:sourceIds);
+    if (sourceIds.length > 5 ||
+        sourceIds.toSet().length != sourceIds.length ||
+        !sourceIds.every(_safeDocumentId)) {
+      return _invalid();
+    }
+    return _prepareContext(
+      token: token,
+      abort: abort,
+      conversationId: conversationId,
+      userMessageId: userMessageId,
+      sourceIds: sourceIds,
+    );
   }
 
   @override
   Future<Result<AiSelectedReplyTicket>> prepareToday({
-    required String token, required AiAbortSignal abort,required String timeZone,
-    String? conversationId,String? userMessageId,
+    required String token,
+    required AiAbortSignal abort,
+    required String timeZone,
+    String? conversationId,
+    String? userMessageId,
   }) {
-    if(timeZone.isEmpty || timeZone.length>128 || timeZone.trim()!=timeZone ||
-        !RegExp(r'^[A-Za-z0-9_+./-]+$').hasMatch(timeZone)) return _invalid();
-    return _prepareContext(token:token,abort:abort,conversationId:conversationId,
-      userMessageId:userMessageId,todayZone:timeZone);
+    if (timeZone.isEmpty ||
+        timeZone.length > 128 ||
+        timeZone.trim() != timeZone ||
+        !RegExp(r'^[A-Za-z0-9_+./-]+$').hasMatch(timeZone)) {
+      return _invalid();
+    }
+    return _prepareContext(
+      token: token,
+      abort: abort,
+      conversationId: conversationId,
+      userMessageId: userMessageId,
+      todayZone: timeZone,
+    );
   }
 
   Future<Result<AiSelectedReplyTicket>> _prepareContext({
-    required String token,required AiAbortSignal abort,
-    String? conversationId,String? userMessageId,List<String>? sourceIds,String? todayZone,
+    required String token,
+    required AiAbortSignal abort,
+    String? conversationId,
+    String? userMessageId,
+    List<String>? sourceIds,
+    String? todayZone,
   }) {
-    if((conversationId!=null && !_uuid(conversationId)) ||
-       (userMessageId!=null && (conversationId==null || !_uuid(userMessageId)))) return _invalid();
+    if ((conversationId != null && !_uuid(conversationId)) ||
+        (userMessageId != null &&
+            (conversationId == null || !_uuid(userMessageId)))) {
+      return _invalid();
+    }
     return _call(
-      token:token,abort:abort,method:'POST',path:'/v1/me/ai/operations',status:201,
-      body:{
-        'kind':userMessageId==null?'send':'retry','purpose':'checkin_conversation',
-        'conversationId':?conversationId,'userMessageId':?userMessageId,
-        'contextSelection':{'processing':'local',
-          if(todayZone!=null) 'today':{'timeZone':todayZone}
-          else 'sources':[for(final id in sourceIds!) {'kind':'check_in','checkInId':id}],
+      token: token,
+      abort: abort,
+      method: 'POST',
+      path: '/v1/me/ai/operations',
+      status: 201,
+      body: {
+        'kind': userMessageId == null ? 'send' : 'retry',
+        'purpose': 'checkin_conversation',
+        'conversationId': ?conversationId,
+        'userMessageId': ?userMessageId,
+        'contextSelection': {
+          'processing': 'local',
+          if (todayZone != null)
+            'today': {'timeZone': todayZone}
+          else
+            'sources': [
+              for (final id in sourceIds!)
+                {'kind': 'check_in', 'checkInId': id},
+            ],
         },
       },
-      parse:(value) {
-        final dto=_object(value,{'operationId','operationKey','conversationId','preparationExpiresAt','contextSelection'});
-        final operation=AiTicket(operationId:_id(dto['operationId']),operationKey:_key(dto['operationKey']),
-          conversationId:_id(dto['conversationId']),preparationExpiresAt:_utc(dto['preparationExpiresAt']));
-        final selection=_preparedSelection(dto['contextSelection'],automatic:todayZone!=null);
-        _require((conversationId==null || operation.conversationId==conversationId) &&
-          selection.expiresAt==operation.preparationExpiresAt &&
-          (todayZone==null?selection.sourceCards.length==sourceIds!.length:
-            selection.today?.timeZone==todayZone));
-        return AiSelectedReplyTicket(operation:operation,selection:selection);
+      parse: (value) {
+        final dto = _object(value, {
+          'operationId',
+          'operationKey',
+          'conversationId',
+          'preparationExpiresAt',
+          'contextSelection',
+        });
+        final operation = AiTicket(
+          operationId: _id(dto['operationId']),
+          operationKey: _key(dto['operationKey']),
+          conversationId: _id(dto['conversationId']),
+          preparationExpiresAt: _utc(dto['preparationExpiresAt']),
+        );
+        final selection = _preparedSelection(
+          dto['contextSelection'],
+          automatic: todayZone != null,
+        );
+        _require(
+          (conversationId == null ||
+                  operation.conversationId == conversationId) &&
+              selection.expiresAt == operation.preparationExpiresAt &&
+              (todayZone == null
+                  ? selection.sourceCards.length == sourceIds!.length
+                  : selection.today?.timeZone == todayZone),
+        );
+        return AiSelectedReplyTicket(
+          operation: operation,
+          selection: selection,
+        );
       },
     );
   }
@@ -886,13 +947,16 @@ AiSourceCard _sourceCard(Object? raw) {
   );
 }
 
-AiPreparedReplySelection _preparedSelection(Object? raw,{bool automatic=false}) {
+AiPreparedReplySelection _preparedSelection(
+  Object? raw, {
+  bool automatic = false,
+}) {
   final d = _object(raw, {
     'selectionRevision',
     'expiresAt',
     'sourceCards',
     'historyPairs',
-    if(automatic) 'today',
+    if (automatic) 'today',
   });
   final sourceRows = d['sourceCards'];
   final historyRows = d['historyPairs'];
@@ -901,7 +965,7 @@ AiPreparedReplySelection _preparedSelection(Object? raw,{bool automatic=false}) 
   final cards = <AiSelectedSourceCard>[];
   final keys = <String>{};
   final cardRefs = <String>{};
-  final ownedIds=<String>{};
+  final ownedIds = <String>{};
   for (final row in sourceRows as List) {
     final item = _object(row, {
       'selectionKey',
@@ -912,18 +976,31 @@ AiPreparedReplySelection _preparedSelection(Object? raw,{bool automatic=false}) 
       'observedAt',
       'state',
       'canNavigate',
-      if(automatic) 'checkInId',
+      if (automatic) 'checkInId',
     });
     final key = _id(item['selectionKey']);
-    final ownedId=automatic?item['checkInId']:null;
-    _require(!automatic || (_safeDocumentId(ownedId) && ownedIds.add(ownedId as String)));
-    final card = _sourceCard({...item}..remove('selectionKey')..remove('checkInId'));
+    final ownedId = automatic ? item['checkInId'] : null;
+    _require(
+      !automatic ||
+          (_safeDocumentId(ownedId) && ownedIds.add(ownedId as String)),
+    );
+    final card = _sourceCard(
+      {...item}
+        ..remove('selectionKey')
+        ..remove('checkInId'),
+    );
     _require(
       card.kind == AiSourceKind.checkIn &&
           keys.add(key) &&
           cardRefs.add(card.cardRef),
     );
-    cards.add(AiSelectedSourceCard(selectionKey: key, card: card,checkInId:ownedId as String?));
+    cards.add(
+      AiSelectedSourceCard(
+        selectionKey: key,
+        card: card,
+        checkInId: ownedId as String?,
+      ),
+    );
   }
   final history = <AiPreparedHistoryPair>[];
   final messageIds = <String>{};
@@ -964,26 +1041,47 @@ AiPreparedReplySelection _preparedSelection(Object? raw,{bool automatic=false}) 
     );
   }
   AiTodayContext? today;
-  if(automatic) {
-    final receipt=_object(d['today'],{'date','timeZone','limit','hasMore'});
-    final date=receipt['date'],zone=receipt['timeZone'];
-    _require(date is String && _civilDate(date) && zone is String && zone.isNotEmpty &&
-      zone.length<=128 && receipt['limit'] is int && receipt['limit']==5 && receipt['hasMore'] is bool);
-    today=AiTodayContext(date:date as String,timeZone:zone as String,hasMore:receipt['hasMore'] as bool);
+  if (automatic) {
+    final receipt = _object(d['today'], {
+      'date',
+      'timeZone',
+      'limit',
+      'hasMore',
+    });
+    final date = receipt['date'], zone = receipt['timeZone'];
+    _require(
+      date is String &&
+          _civilDate(date) &&
+          zone is String &&
+          zone.isNotEmpty &&
+          zone.length <= 128 &&
+          receipt['limit'] is int &&
+          receipt['limit'] == 5 &&
+          receipt['hasMore'] is bool,
+    );
+    today = AiTodayContext(
+      date: date as String,
+      timeZone: zone as String,
+      hasMore: receipt['hasMore'] as bool,
+    );
   }
   return AiPreparedReplySelection(
     selectionRevision: _id(d['selectionRevision']),
     expiresAt: _utc(d['expiresAt']),
     sourceCards: cards,
     historyPairs: history,
-    today:today,
+    today: today,
   );
 }
 
 bool _civilDate(String value) {
-  if(!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value)) return false;
-  final parsed=DateTime.tryParse('${value}T00:00:00.000Z');
-  return parsed!=null && parsed.toIso8601String().startsWith('$value' 'T');
+  if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value)) return false;
+  final parsed = DateTime.tryParse('${value}T00:00:00.000Z');
+  return parsed != null &&
+      parsed.toIso8601String().startsWith(
+        '$value'
+        'T',
+      );
 }
 
 int _cursor(String value) {

@@ -17,6 +17,10 @@ import '../features/check_in/presentation/check_in_record_view.dart';
 import '../features/event_participation/presentation/user_participation_section.dart';
 import '../features/friends/presentation/social_profile_page.dart';
 import '../features/friends/presentation/friend_activity_panel.dart';
+import '../features/friends/presentation/friend_discovery_panel.dart';
+import '../features/account/account_preferences_providers.dart';
+import '../features/account/domain/account_preferences_repository.dart';
+import '../features/account/presentation/own_profile_header.dart';
 import 'providers.dart';
 import 'router/app_router.dart';
 
@@ -167,14 +171,31 @@ final class _ConnectedSocialProfileState
   }
 }
 
-final class GroupHomeSocial extends StatelessWidget {
+final class GroupHomeSocial extends ConsumerWidget {
   const GroupHomeSocial({super.key});
   @override
-  Widget build(BuildContext context) {
-    Future<void> profile(String username) =>
-        context.push<void>('/people/${Uri.encodeComponent(username)}');
-    Future<void> event(String id) =>
-        context.push<void>('/events/${Uri.encodeComponent(id)}/participation');
+  Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(authSessionProvider).asData?.value;
+    bool current(BuildContext route) =>
+        route.mounted &&
+        session is AuthSessionAuthenticated &&
+        identical(session, ref.read(authSessionProvider).asData?.value) &&
+        ref.read(routerGateProvider) == RouterGateState.authenticated &&
+        ModalRoute.of(route)?.isCurrent == true;
+    Future<void> profile(String username) async {
+      if (current(context)) {
+        await context.push<void>('/people/${Uri.encodeComponent(username)}');
+      }
+    }
+
+    Future<void> event(String id) async {
+      if (current(context)) {
+        await context.push<void>(
+          '/events/${Uri.encodeComponent(id)}/participation',
+        );
+      }
+    }
+
     Future<void> all() => Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (context) => Scaffold(
@@ -184,8 +205,20 @@ final class GroupHomeSocial extends StatelessWidget {
             children: [
               FriendActivityPanel(
                 home: false,
-                onOpenProfile: profile,
-                onOpenEvent: event,
+                onOpenProfile: (name) async {
+                  if (current(context)) {
+                    await context.push<void>(
+                      '/people/${Uri.encodeComponent(name)}',
+                    );
+                  }
+                },
+                onOpenEvent: (id) async {
+                  if (current(context)) {
+                    await context.push<void>(
+                      '/events/${Uri.encodeComponent(id)}/participation',
+                    );
+                  }
+                },
               ),
             ],
           ),
@@ -196,6 +229,19 @@ final class GroupHomeSocial extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Divider(height: 32),
+        FriendDiscoveryPanel(
+          home: true,
+          onOpenProfile: profile,
+          onOpenRequests: () async {
+            if (current(context)) await context.push<void>('/friends');
+          },
+          onSeeAll: () async {
+            if (current(context)) {
+              await context.push<void>('/friends?view=discover');
+            }
+          },
+        ),
+        const Divider(height: 32),
         FriendActivityPanel(
           home: true,
           onOpenProfile: profile,
@@ -204,6 +250,36 @@ final class GroupHomeSocial extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+final class ConnectedOwnHeader extends ConsumerWidget {
+  const ConnectedOwnHeader({required this.onEdit, super.key});
+  final Future<void> Function() onEdit;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final subject = ref.watch(currentAuthSubjectProvider);
+    final profile = subject == null
+        ? null
+        : ref.watch(ownProfileDetailsProvider(subject));
+    if (profile case AsyncData<Result<OwnProfile>>(
+      value: Success<OwnProfile>(:final value),
+    )) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: OwnProfileHeader(
+          profile: value,
+          onEdit: () async {
+            await onEdit();
+            if (context.mounted &&
+                subject == ref.read(currentAuthSubjectProvider)) {
+              ref.invalidate(ownProfileDetailsProvider(subject!));
+            }
+          },
+        ),
+      );
+    }
+    return const SizedBox.shrink();
   }
 }
 

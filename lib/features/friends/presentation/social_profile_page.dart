@@ -466,11 +466,11 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
                 CheckInVisibility.public => context.tr('Public', '公开'),
               }}",
             ),
-          if (record.location case final location?)
+          if (record.location != null && record.locationLabel == null)
             Text(
               context.tr(
-                'Saved location: ${location.latitude}, ${location.longitude}',
-                '已保存的位置：${location.latitude}, ${location.longitude}',
+                'Location saved; view it on the map.',
+                '地点已保存，可在地图中查看。',
               ),
             ),
           if (record.mood case final mood?) Text(mood),

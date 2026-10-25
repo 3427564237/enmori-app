@@ -27,7 +27,7 @@ const selectedConflict = AppFailure(
 
 final class SelectedRig {
   SelectedRig._({SelectedAiRepository? repository}) {
-    repo=repository??SelectedAiRepository(() => utc);
+    repo = repository ?? SelectedAiRepository(() => utc);
   }
   final auth = SelectedAuth();
   final checkIns = SelectedCheckIns();
@@ -41,10 +41,10 @@ final class SelectedRig {
     WidgetTester tester, {
     bool existingTopic = false,
     SelectedAiRepository? repository,
-    bool today=false,
+    bool today = false,
     Future<Result<String>> Function()? timeZone,
   }) async {
-    final r = SelectedRig._(repository:repository);
+    final r = SelectedRig._(repository: repository);
     r.container = ProviderContainer(
       overrides: [
         authRepositoryProvider.overrideWithValue(r.auth),
@@ -52,7 +52,8 @@ final class SelectedRig {
         checkInRepositoryProvider.overrideWithValue(r.checkIns),
         aiCompanionReferencesEnabledProvider.overrideWithValue(true),
         aiTodayReferencesEnabledProvider.overrideWithValue(today),
-        if(timeZone!=null) aiTodayTimeZoneProvider.overrideWithValue(timeZone),
+        if (timeZone != null)
+          aiTodayTimeZoneProvider.overrideWithValue(timeZone),
         aiConversationUtcNowProvider.overrideWithValue(() => r.utc),
         aiConversationNowProvider.overrideWithValue(() => r.elapsed),
       ],

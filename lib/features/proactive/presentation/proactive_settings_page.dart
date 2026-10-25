@@ -108,9 +108,16 @@ final class _ProactiveSettingsPageState
                   ),
                   ?widget.pushControls,
                   const SizedBox(height: 12),
-                  if(settings==null && !state.settingsBusy && state.failure!=null)
-                    Text(context.tr('Scheduling is temporarily unavailable. You can retry loading; your chat and draft are kept.',
-                      '预约暂时不可用，可重试加载；对话和草稿仍保留。'),key:const Key('proactive-service-unavailable')),
+                  if (settings == null &&
+                      !state.settingsBusy &&
+                      state.failure != null)
+                    Text(
+                      context.tr(
+                        'Scheduling is temporarily unavailable. You can retry loading; your chat and draft are kept.',
+                        '预约暂时不可用，可重试加载；对话和草稿仍保留。',
+                      ),
+                      key: const Key('proactive-service-unavailable'),
+                    ),
                   Text(
                     context.tr(
                       'Local model · at most once per rolling 24 hours · 8-hour cooldown · at most 3 active requests.',

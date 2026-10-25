@@ -66,7 +66,7 @@ void main() {
       await tester.pageBack();
       await frames(tester);
       expect(find.text('My edit'), findsOneWidget);
-      expect(find.text('Friends-only profile'), findsOneWidget);
+      expect(find.byTooltip('Friends-only profile'), findsOneWidget);
     },
   );
 

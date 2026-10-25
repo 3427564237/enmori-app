@@ -409,24 +409,30 @@ class AiConversationController extends Notifier<AiConversationState> {
       ref.read(accountSettingsSnapshotProvider)?.consent ==
           OptionalProcessingConsent.accepted;
 
-  Future<Result<AiPreparedReplySelection>> prepareSelectedSources(List<String> sourceIds) =>
-    _prepareReferenceSources(sourceIds:sourceIds);
+  Future<Result<AiPreparedReplySelection>> prepareSelectedSources(
+    List<String> sourceIds,
+  ) => _prepareReferenceSources(sourceIds: sourceIds);
 
-  Future<Result<AiPreparedReplySelection>> prepareTodaySources(String timeZone) =>
-    _prepareReferenceSources(todayZone:timeZone);
+  Future<Result<AiPreparedReplySelection>> prepareTodaySources(
+    String timeZone,
+  ) => _prepareReferenceSources(todayZone: timeZone);
 
   Future<Result<AiPreparedReplySelection>> _prepareReferenceSources({
-    List<String> sourceIds=const [],String? todayZone,
+    List<String> sourceIds = const [],
+    String? todayZone,
   }) async {
-    final repository=_repository;
-    if((!state.canSend && !state.canRetry) ||
-      sourceIds.length>5 || sourceIds.toSet().length!=sourceIds.length ||
-      sourceIds.any((id)=>id.isEmpty) ||
-      !ref.read(aiCompanionReferencesEnabledProvider) ||
-      repository is! AiSelectedReplyRepository ||
-      (todayZone!=null && (todayZone.isEmpty || repository is! AiTodayReplyRepository)) ||
-      !ref.read(contentAccessProvider).foreground ||
-      ref.read(accountSettingsSnapshotProvider)?.consent!=OptionalProcessingConsent.accepted) {
+    final repository = _repository;
+    if ((!state.canSend && !state.canRetry) ||
+        sourceIds.length > 5 ||
+        sourceIds.toSet().length != sourceIds.length ||
+        sourceIds.any((id) => id.isEmpty) ||
+        !ref.read(aiCompanionReferencesEnabledProvider) ||
+        repository is! AiSelectedReplyRepository ||
+        (todayZone != null &&
+            (todayZone.isEmpty || repository is! AiTodayReplyRepository)) ||
+        !ref.read(contentAccessProvider).foreground ||
+        ref.read(accountSettingsSnapshotProvider)?.consent !=
+            OptionalProcessingConsent.accepted) {
       return const Failure(_unknown);
     }
     final epoch = _epoch, command = _commandVersion;
@@ -443,7 +449,7 @@ class AiConversationController extends Notifier<AiConversationState> {
       conversationId: _memory.established ? _memory.conversationId : null,
       retryUser: _retryUser,
       sourceIds: sourceIds,
-      todayZone:todayZone,
+      todayZone: todayZone,
     );
     _selectedPreparation = p;
     _lastFailureKind = null;
@@ -451,9 +457,14 @@ class AiConversationController extends Notifier<AiConversationState> {
     final result = await _ordinary((token, abort) {
       p.token = token;
       p.requestAbort = abort;
-      if(todayZone!=null) {
-        return (repository as AiTodayReplyRepository).prepareToday(token:token,abort:abort,
-          timeZone:todayZone,conversationId:p.conversationId,userMessageId:p.retryUser?.messageId);
+      if (todayZone != null) {
+        return (repository as AiTodayReplyRepository).prepareToday(
+          token: token,
+          abort: abort,
+          timeZone: todayZone,
+          conversationId: p.conversationId,
+          userMessageId: p.retryUser?.messageId,
+        );
       }
       return selectedRepo.prepareSelected(
         token: token,
@@ -476,12 +487,15 @@ class AiConversationController extends Notifier<AiConversationState> {
       return Failure(failure);
     }
     p.ticket = (result as Success<AiSelectedReplyTicket>).value;
-    if(todayZone!=null) {
-      final selection=p.ticket!.selection;
-      final ids=selection.sourceCards.map((card)=>card.checkInId).toList();
-      if(selection.today?.timeZone!=todayZone || ids.any((id)=>id==null || id.isEmpty) ||
-          ids.length>5 || ids.toSet().length!=ids.length) {
-        await _discardSelected();return const Failure(_unknown);
+    if (todayZone != null) {
+      final selection = p.ticket!.selection;
+      final ids = selection.sourceCards.map((card) => card.checkInId).toList();
+      if (selection.today?.timeZone != todayZone ||
+          ids.any((id) => id == null || id.isEmpty) ||
+          ids.length > 5 ||
+          ids.toSet().length != ids.length) {
+        await _discardSelected();
+        return const Failure(_unknown);
       }
     }
     final remaining = _selectedRemaining(p);
@@ -544,7 +558,7 @@ class AiConversationController extends Notifier<AiConversationState> {
     required String selectionRevision,
     required List<String> sourceIds,
     required List<String> excludedHistoryKeys,
-    List<String> excludedSourceIds=const [],
+    List<String> excludedSourceIds = const [],
   }) async {
     final p = _selectedPreparation;
     if (p == null ||
@@ -553,9 +567,9 @@ class AiConversationController extends Notifier<AiConversationState> {
         sourceIds.length != p.authorizedIds.length ||
         sourceIds.toSet().length != sourceIds.length ||
         !sourceIds.every(p.authorizedIds.contains) ||
-        excludedSourceIds.toSet().length!=excludedSourceIds.length ||
+        excludedSourceIds.toSet().length != excludedSourceIds.length ||
         !excludedSourceIds.every(p.authorizedIds.contains) ||
-        (p.todayZone==null && excludedSourceIds.isNotEmpty)) {
+        (p.todayZone == null && excludedSourceIds.isNotEmpty)) {
       return;
     }
     final retry = state.canRetry ? p.retryUser : null;
@@ -574,8 +588,10 @@ class AiConversationController extends Notifier<AiConversationState> {
         !excludedHistoryKeys.every(history.contains)) {
       return;
     }
-    final excludedKeys=[for(final card in p.ticket!.selection.sourceCards)
-      if(excludedSourceIds.contains(card.checkInId)) card.selectionKey];
+    final excludedKeys = [
+      for (final card in p.ticket!.selection.sourceCards)
+        if (excludedSourceIds.contains(card.checkInId)) card.selectionKey,
+    ];
     _selectedPreparation = null;
     p.expiry?.cancel();
     final ticket = p.ticket!, token = p.token!;
@@ -587,7 +603,7 @@ class AiConversationController extends Notifier<AiConversationState> {
       selectedToken: token,
       selectionStarted: p.started,
       excludedHistoryKeys: excludedHistoryKeys,
-      excludedSourceKeys:excludedKeys,
+      excludedSourceKeys: excludedKeys,
     );
   }
 
@@ -623,7 +639,7 @@ class AiConversationController extends Notifier<AiConversationState> {
     );
     attempt.selectedTicket = selected;
     attempt.selectedHistoryKeys = List.unmodifiable(excludedHistoryKeys);
-    attempt.selectedExcludedSourceKeys=List.unmodifiable(excludedSourceKeys);
+    attempt.selectedExcludedSourceKeys = List.unmodifiable(excludedSourceKeys);
     attempt.token = selectedToken;
     attempt.ticket = selected?.operation;
     _localOutgoingText = text;
@@ -722,9 +738,13 @@ class AiConversationController extends Notifier<AiConversationState> {
               text: input,
               includedKeys: selected.selection.sourceCards
                   .map((v) => v.selectionKey)
-                  .where((key)=>!(attempt.selectedExcludedSourceKeys?.contains(key)??false))
+                  .where(
+                    (key) =>
+                        !(attempt.selectedExcludedSourceKeys?.contains(key) ??
+                            false),
+                  )
                   .toList(),
-              excludedKeys: attempt.selectedExcludedSourceKeys??const [],
+              excludedKeys: attempt.selectedExcludedSourceKeys ?? const [],
               excludedHistoryKeys: attempt.selectedHistoryKeys ?? const [],
               replyToMessageId: attempt.replyToMessageId,
             )
@@ -1693,8 +1713,13 @@ final class _SelectedPreparation {
   final AiMessage? retryUser;
   final List<String> sourceIds;
   final String? todayZone;
-  List<String> get authorizedIds => todayZone==null?sourceIds:
-    [for(final card in ticket?.selection.sourceCards??<AiSelectedSourceCard>[]) card.checkInId!];
+  List<String> get authorizedIds => todayZone == null
+      ? sourceIds
+      : [
+          for (final card
+              in ticket?.selection.sourceCards ?? <AiSelectedSourceCard>[])
+            card.checkInId!,
+        ];
   String? token;
   AiSelectedReplyTicket? ticket;
   AiAbortSignal? requestAbort;
@@ -1761,7 +1786,7 @@ final class _Attempt {
     ticket = null;
     selectedTicket = null;
     selectedHistoryKeys = null;
-    selectedExcludedSourceKeys=null;
+    selectedExcludedSourceKeys = null;
     cleanupTimer?.cancel();
   }
 }

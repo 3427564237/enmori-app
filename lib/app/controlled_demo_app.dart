@@ -1,4 +1,7 @@
+import '../features/account/own_avatar_providers.dart';
+import '../features/account/data/backend_own_avatar_repository.dart';
 import '../features/account/content_access.dart';
+import '../features/ai_conversation/ai_selected_sources_providers.dart';
 import 'ai_persona_context.dart';
 import '../features/event_participation/data/backend_participation_repository.dart';
 import '../features/event_participation/participation_providers.dart';
@@ -264,6 +267,9 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       accountRepositoryProvider.overrideWithValue(
         BackendAccountRepository(_api),
       ),
+      ownAvatarRepositoryProvider.overrideWithValue(
+        BackendOwnAvatarRepository(_api),
+      ),
       accountPreferencesRepositoryProvider.overrideWithValue(
         BackendAccountPreferencesRepository(_api),
       ),
@@ -290,6 +296,12 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       aiConversationRepositoryProvider.overrideWithValue(_ai),
       aiCompanionReferencesEnabledProvider.overrideWithValue(
         widget.companionFirstFlowEnabled,
+      ),
+      aiTodayReferencesEnabledProvider.overrideWithValue(
+        widget.companionFirstFlowEnabled,
+      ),
+      aiTodayTimeZoneProvider.overrideWith(
+        (ref) => ref.watch(followUpTimePortProvider).currentIanaZone,
       ),
       if (widget.companionFirstFlowEnabled)
         companionCheckInPageProvider.overrideWithValue(

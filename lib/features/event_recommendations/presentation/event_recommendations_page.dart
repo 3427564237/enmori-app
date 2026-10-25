@@ -574,9 +574,7 @@ final class _RecommendationContent extends StatelessWidget {
                   : 'event-recommendations-refresh',
             ),
             onPressed: continueDiscovery ? onContinueDiscovery : onRetry,
-            icon: Icon(
-              continueDiscovery ? Icons.arrow_forward : Icons.refresh,
-            ),
+            icon: Icon(continueDiscovery ? Icons.arrow_forward : Icons.refresh),
             label: Text(
               continueDiscovery
                   ? context.tr('Next group', '下一组')

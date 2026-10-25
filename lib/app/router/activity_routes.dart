@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/event_browse/data/backend_activity_repository.dart';
 import '../../features/event_browse/presentation/activity_page.dart';
+import '../../features/event_detail/presentation/event_information.dart';
 
 /// Explicit controlled composition only; key presence never enables browsing.
 final activityBrowseEnabledProvider = Provider<bool>((ref) => false);
@@ -34,6 +35,8 @@ List<GoRoute> activityRoutes({
     builder: (context, state) => ActivityPage(
       key: ValueKey(state.pathParameters['browseId']),
       browseId: state.pathParameters['browseId'] ?? '',
+      detailBuilder: (context, activity) =>
+          EventInformation.activity(activity: activity),
     ),
   ),
 ];

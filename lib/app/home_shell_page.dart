@@ -11,6 +11,8 @@ final class HomeShellPage extends StatelessWidget {
     this.socialSection,
     this.weatherSection,
     this.daySection,
+    this.profileHeader,
+    this.onContinueDiscovery,
     this.onSelectTab,
     this.onOpenSettings,
     this.onEditInterests,
@@ -31,6 +33,8 @@ final class HomeShellPage extends StatelessWidget {
   final Widget? socialSection;
   final Widget? weatherSection;
   final Widget? daySection;
+  final Widget? profileHeader;
+  final VoidCallback? onContinueDiscovery;
   final ValueChanged<int>? onSelectTab;
   final VoidCallback? onOpenSettings;
   final VoidCallback onStartCheckIn;
@@ -56,6 +60,7 @@ final class HomeShellPage extends StatelessWidget {
           key: const Key('route-home'),
           padding: const EdgeInsets.all(24),
           children: [
+            if (profileHeader != null) _HomeSection(child: profileHeader!),
             Text(
               context.tr('Home', "首页"),
               style: Theme.of(context).textTheme.headlineMedium,
@@ -133,6 +138,7 @@ final class HomeShellPage extends StatelessWidget {
             _HomeSection(
               child: EventRecommendationsSection(
                 onSeeAll: onSeeAllEvents,
+                onContinueDiscovery: onContinueDiscovery,
                 onOpenEvent: onOpenEvent,
                 recommendationCardBuilder: recommendationCardBuilder,
               ),
@@ -190,6 +196,7 @@ final class HomeShellPage extends StatelessWidget {
             key: const Key('route-home'),
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
+              if (profileHeader != null) _HomeSection(child: profileHeader!),
               Semantics(
                 header: true,
                 child: Text(
@@ -228,7 +235,8 @@ final class HomeShellPage extends StatelessWidget {
                   child: EventRecommendationsSection(
                     heading: context.tr('Events for you', "为你推荐的活动"),
                     onBrowseAll: onBrowseActivities,
-                    onSeeAll: null,
+                    onSeeAll: onSeeAllEvents,
+                    onContinueDiscovery: onContinueDiscovery,
                     onOpenEvent: onOpenEvent,
                     recommendationCardBuilder: recommendationCardBuilder,
                   ),
