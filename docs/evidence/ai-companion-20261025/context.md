@@ -875,3 +875,12 @@ Emulator cases apply to `14f7390`, not automatically to this F1a slice. HTTP /
 Bootstrap / local-model adapter composition is Integration/Delivery work and
 requires its own exact-head verification; no real user account, model, provider,
 registration, device or deployment evidence is claimed here.
+
+Focused source-proof hardening after `362d8cb`: required categories must exactly
+match the stored source kinds, and the internal selected-reader boundary repeats
+the complete/unique included-excluded key-union check. Strict build and 18/18
+focused selected-reply tests pass. This does not add an HTTP field or a history
+exclusion action. QA separately identified that explicit same-topic exclusion of
+an associated history pair still has no wire entry; the fail-closed source test
+is valid, but the Product recovery flow is not yet complete. This gap was sent
+to Integration for a concrete approved interface and is not called Done.

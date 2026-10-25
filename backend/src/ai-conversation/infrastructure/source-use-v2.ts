@@ -38,6 +38,8 @@ export function parseSourceUseV2(row: StoredDocument | undefined): SourceUseV2 |
     keys.add(key); cards.add(source.cardRef);
     if (!row.requiredCategories.includes(source.kind === "check_in" ? "check_ins" : "conversation_history")) return undefined;
   }
+  const categories=new Set(row.sources.map(s=>s.kind==="check_in"?"check_ins":"conversation_history"));
+  if(categories.size!==row.requiredCategories.length||row.requiredCategories.some(c=>!categories.has(c as "check_ins"|"conversation_history")))return undefined;
   if(row.purpose==="explicit_follow_up"&&(row.sources.length!==1||row.sources[0]?.kind!=="conversation_message"||
     row.requiredCategories.length!==1||row.requiredCategories[0]!=="conversation_history"))return undefined;
   return row as unknown as SourceUseV2;
