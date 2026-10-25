@@ -1009,3 +1009,38 @@ malformed input/control headers, safe distinct failures, invalid cursor, termina
 request and stopped admission. Owner-local raw output is
 `delivery-anchor-build.log` / `delivery-anchor-http.tap`. This is transport evidence
 only; it is not real notification, device or resolver-authority acceptance.
+
+## D1 Flutter isolated implementation checkpoint (in progress)
+
+Integration explicitly reassigned five new isolated files to Delivery: Domain
+messaging/registration contracts, a lazy pinned-16.7.0 SDK adapter, the independent
+HTTP registration Repository, notification controller/providers and optional
+Settings controls. Existing App providers/settings/AI files and shared package,
+native/router/composition files were not edited. Base: original `6bab960`.
+
+The default installation reference and dependencies are null/disabled. This
+configuration obtains no SDK instance, initial message, stream, permission or
+token. Explicit enable performs current consent/settings checks, permission,
+the existing `prepareChannel`, token acquisition, settings CAS confirmation and
+registration CAS confirmation. Unknown mutations retain readback fences; a GET
+at the old revision is not proof an unresolved PUT cannot still commit. SDK
+mutations use same-instance physical-Future serialization. The sign-out seam is
+bounded and cannot use a replacement session to release the previous owner.
+Only opaque click references and minimized session-bound targets enter routing;
+no message body, mark-read or message-generation operation is implemented here.
+
+Offline preparation used `fvm flutter pub get --offline --enforce-lockfile`;
+manifest/lockfile remained unchanged. Every Flutter/Dart command used the existing
+global nonblocking validation lock. The first test run exposed two test-only
+compile errors (a missing 16.7.0 serviceWorkerScriptPath parameter and a Result
+cast) and an unmounted ProviderContainer scheduling fixture; diagnostics remain
+in owner-local `d1-analyze-first.log` / `d1-tests-first.log`. Tests now mount their
+provider scope and retain the exact SDK fake signature.
+
+The second bounded batch is **32/34 pass**, not an accepted candidate. The two
+remaining cold-login cases have not observed the expected consent read after
+the login event; scheduling versus production behavior still needs diagnosis.
+Raw output: `d1-tests-second.log`. Delivery returned the Flutter slot so App and
+Integration can run their already queued short batches. Independent QA and all
+actual SDK/registration/device/service acceptance are still pending. No real
+notification permission, token, Backend registration or FCM request was made.
