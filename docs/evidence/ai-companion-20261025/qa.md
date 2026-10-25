@@ -10,11 +10,14 @@ baseline checkpoint is preserved below. Subsequent exact-head source reviews,
 executed checks and unresolved findings are in [qa-review.md](qa-review.md).
 No production implementation was authored by QA.
 
-Latest checkpoint: [repair closure and independent prototype review](qa-review-followup.md).
-The earlier Context/Runtime candidate findings now have independently checked
-fixes. LI subsequently chose entry C; that scoped decision does not approve the
-prototype's new context/cloud/proactive capabilities. New local-model semantics
-and the subsequent native C increment remain pending their exact evidence.
+Latest checkpoints: [local24 semantic review](qa-model-review.md) and
+[proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is
+**12 Pass / 12 Fail / 0 unreviewed**; the small-plan gate remains Fail despite
+23 protocol-eligible responses. The earlier Context/Runtime candidate findings
+have independently checked fixes in the
+[repair and prototype ledger](qa-review-followup.md). LI chose entry C; that
+scope does not approve new context/cloud/proactive capabilities. The subsequent
+native C increment remains pending its exact evidence.
 
 ## Authority and baseline readback
 
