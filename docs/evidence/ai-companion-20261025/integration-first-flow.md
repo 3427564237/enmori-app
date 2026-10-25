@@ -43,3 +43,22 @@ Apia's skipped date, UTC and invalid inputs. It passed. Raw result:
 `native-time-check/result.log` in the owner-local state directory. This verifies
 resolver logic with host zone data; Android compilation and physical UI remain
 separate checks.
+
+## Android background candidate wiring
+
+The explicit `ENMORI_AI_COMPANION_FIRST_FLOW=true` build selection reads the same
+four Firebase client options supplied to Dart and generates native resource names
+needed by Firebase's provider before Dart starts. It requires the existing group
+project and matching App ID / sender ID. Missing, duplicate or inconsistent
+configuration fails the build without printing its values. No new configuration
+file, Google Services Gradle plugin or service-account credential is introduced.
+Ordinary builds do not receive these additional resources. This follows the
+documented [direct-resource alternative](https://firebase.google.com/docs/projects/multiprojects#support_multiple_environments_in_your_android_application).
+
+The `proactive_notifications.prepareChannel` handler creates only the fixed
+`enmori_requested_followups` channel when explicitly called by the opt-in flow.
+Its default importance respects OS settings; its default lock-screen visibility
+is private and it creates no unread badge count. Handler registration does not
+create the channel, request permission or obtain a token. Messaging auto-init
+remains false. Candidate native compilation, token lifecycle, background startup,
+notification click, cancellation and device behavior remain unverified.

@@ -1,5 +1,8 @@
 package com.enmori.app
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -91,6 +94,33 @@ class MainActivity : FlutterActivity() {
                     }
                 } else {
                     result.notImplemented()
+                }
+            }
+        // The feature calls this only after explicit push opt-in. Registering
+        // the handler itself creates no channel and obtains no token.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/proactive_notifications")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "prepareChannel") {
+                    result.notImplemented()
+                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    result.success(false)
+                } else {
+                    try {
+                        val manager = getSystemService(NotificationManager::class.java)
+                        val channel = NotificationChannel(
+                            "enmori_requested_followups",
+                            getString(R.string.enmori_requested_followups_name),
+                            NotificationManager.IMPORTANCE_DEFAULT,
+                        ).apply {
+                            description = getString(R.string.enmori_requested_followups_description)
+                            lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+                            setShowBadge(false)
+                        }
+                        manager.createNotificationChannel(channel)
+                        result.success(manager.getNotificationChannel(channel.id).importance != NotificationManager.IMPORTANCE_NONE)
+                    } catch (_: Exception) {
+                        result.success(false)
+                    }
                 }
             }
     }
