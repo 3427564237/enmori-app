@@ -259,3 +259,77 @@ comparison of all **24/24** historical production requests. No new test merely
 asserting the edited wording was added. Logs are `quotation-build.log` and
 `quotation-fakes.log` in the private Runtime evidence directory above. All model
 HTTP calls in this batch were intercepted by fakes; there was no real generation.
+
+## Owner-only avatar Backend handoff
+
+Root expanded Runtime ownership to the account Backend and its tests. The
+complete controlling `api/own-avatar-contract.md` was read at Root commit
+`d8b88105b7cc7b176f08fa25eb5c6f90c7d5e141`, including the explicit rejection of
+IEND trailing bytes, palette, unknown critical, animation and tRNS chunks.
+Root retains native/Flutter, OpenAPI and all shared bootstrap injection work.
+
+Separate authenticated `GET/PUT /v1/me/profile/avatar` operations return only
+`{avatar:{pngBase64,sourceSha256,revision}}`. The existing Profile/Settings wire
+schemas stay unchanged. The optional composition is:
+
+```typescript
+new OwnAccountPreferences(
+  existingPreferencesRepository,
+  new OwnAvatar(new FirestoreOwnAvatarRepository(gateway)),
+)
+```
+
+Without that second argument, avatar operations fail unavailable. The new
+transport schemas are exported as `avatarSchema`, `saveAvatarBody`,
+`getAvatarSchema` and `putAvatarSchema` for Root's OpenAPI integration.
+Strict pre-validation rejects scalar coercion, including null/string revisions,
+before Fastify's existing AJV setup can change their types. Avatar responses
+use `Cache-Control: no-store`; body, query and size failures use existing codes.
+
+PNG validation bounds the canonical base64 and source to 128 KiB, square
+dimensions to 1–256, pixels to 8-bit RGB/RGBA without interlacing, every CRC and
+chunk boundary, and inflated scanlines to their exact expected size. It checks
+all row filters and requires complete consumption of one zlib stream. Only
+well-framed `tEXt` ancillary metadata is accepted and discarded; every other
+ancillary type is rejected, including orientation/aspect-ratio/color metadata.
+Canonical output contains only IHDR/IDAT/IEND. The source digest covers the
+validated submitted PNG, before metadata removal. No image/digest is logged.
+The format checks follow the [PNG specification](https://www.w3.org/TR/png-3/);
+bounded inflate/re-encoding uses built-in
+[Node zlib](https://nodejs.org/docs/latest-v24.x/api/zlib.html).
+
+The existing completed-account binding derives the owner. A one-attempt
+transaction reads the independent avatar revision and writes exactly the three
+approved avatar fields, preserving other account fields. Complete absence is
+null/null/revision zero; partial/malformed state and overflow fail unavailable.
+Explicit removal advances the avatar revision and stores null bytes/hash.
+A lost acknowledgement returns unavailable without an automatic retry or
+compensating write. Subsequent GET exposes current authority; an unchanged GET
+is not proof that an unacknowledged operation had no effect.
+
+Pinned Node 24.19.0 / TypeScript 7.0.2 strict compilation passed. The initial
+test compile found only a test-helper Buffer generic inference mismatch; its
+explicit Buffer annotation fixed it before executing tests. The concentrated
+fake/inject batch passed **47/47**: 16 new avatar cases plus 31 existing account,
+transport, social privacy and isolated consent-producer cases. Final source
+review narrowed ancillary acceptance to text only, to avoid stripping
+orientation/aspect-ratio semantics; strict compilation and the affected 16
+avatar cases then passed **16/16**. These are 47 unique tests, not 63.
+
+```text
+<pinned-node> <pinned-tsc> --project backend/tsconfig.json
+<pinned-node> --test backend/dist/test/account/avatar-png.test.js backend/dist/test/account/own-avatar.test.js backend/dist/test/account/avatar-transport.test.js backend/dist/test/account-preferences.test.js backend/dist/test/account-preferences-transport.test.js backend/dist/test/social-profile.test.js backend/dist/test/isolated-ai-account-producer.test.js
+<pinned-node> --test backend/dist/test/account/avatar-png.test.js backend/dist/test/account/own-avatar.test.js backend/dist/test/account/avatar-transport.test.js
+```
+
+Private logs in the Runtime evidence directory above: `avatar-build.log`
+(initial helper compile failure), `avatar-build-fixed.log`, `avatar-fakes.log`,
+`avatar-final-build.log` and `avatar-final-fakes.log`. The batch log SHA-256 is
+`5ff00e4602b2717e01e8e452d24eb2b149c43af717a449c4b51681192d4546c4`;
+the final affected-case log SHA-256 is
+`e56eecab3a57045f68c7a4572d65a72a72b92f7da92df4e87e293b9400569582`.
+The lockfile remains unchanged. No new dependencies, collection, index or
+migration were introduced. No real image upload, account/Firestore call,
+service/model operation, Emulator, Flutter, Gradle, APK or phone operation ran.
+Bootstrap/OpenAPI/native integration and runtime/device acceptance remain
+Root's subsequent integrated work; this handoff is author source evidence.
