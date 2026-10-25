@@ -6,7 +6,19 @@ Authority: [LI's bounded round request](../decisions/2026-10-25-li-ai-companion-
 The local launch roster and exact prompts are under
 `/home/miku/.local/state/enmori-ai-companion-20261025/`.
 
-## Current checkpoint — first-flow source assembled; final App slice in progress
+## Current checkpoint — v28 candidate built and independently inspected
+
+The approved C / F0 / F1a / D1 source is assembled at
+`fd1649724e38298418b22681fcce6b6a9fcf933c`, and the actual v28 release APK has
+been built. The [focused v28 handoff](2026-10-25-ai-companion-v28.md) is the
+current delivery record. It separates final source checks, independent F1
+recovery closure, actual model results, preserved historical Flutter failures,
+APK review and unperformed deployment/device/push work. Subsequent text below
+is retained history and is superseded only for the scopes explicitly recorded
+in that handoff. No production deployment, phone installation or real push has
+been performed; free-only cloud research ended with its original unknown result.
+
+## Earlier checkpoint — first-flow source assembled; final App slice in progress
 
 The root composition now contains F0, current-owner source navigation, F1a
 selected replies with explicit whole-history-pair exclusions, and exact

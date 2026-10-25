@@ -64,3 +64,42 @@ See [the independent F1 ledger](qa-f1-app-integration.md). Its initial result
 is eighteen distinct passing boundaries and this one open failure. The repair
 requires the original failed counterexample to pass while the original unknown
 operation and no-replay guards remain in force.
+
+## Final targeted corrections and independent recovery closure
+
+The earlier pending statements remain observations at their stated heads.
+App's `785571fe00ffe58d2a9e7908217264f1b8e7bfff`, integrated unchanged as
+`8d5a7240e7a69fbc3d0ae6249e525f37973d33df`, completes the two social overlong
+text/Unicode fixtures. Diagnostic layout showed a 240-pixel history viewport
+and a 64-pixel scroll extent. The original upward-scroll hypothesis failed;
+the final three-line fixture change uses the existing `_ensure(ai-status)`
+downward scroll after the original exact draft, selection and focus assertions.
+No text shortening, keyboard hiding, production change or business assertion
+removal was used. The unrelated 58 old failures were left untouched.
+
+At clean `8d5a724`, Integration ran full `flutter analyze --no-pub` with no
+issues, six selected F1/composition/router files **55/55**, and exactly those
+two social cases **2/2**. The six-file batch includes the corrected shared
+detail/picker cases. All commands exited 0. Log
+`integration-v28-source-final.log` SHA-256:
+`6e266d25b4086c6b7e019e0a09822d412bbe146d84ee52383c1926cf043911bf`.
+The matching JSON retains the complete commands and frozen head. This closes
+the four candidate-only fixture failures through targeted execution; it is
+not a second complete-suite result and does not turn the original 58 green.
+
+App separately repaired the genuine F1 P2 at `9bc571c`, integrated unchanged
+as `6b4ec589c49fc7edf43a4654421c757d2435c9e5`. QA's `dc170411` preserves the
+original red counterexample, an initial private fixture-cleanup failure, the
+same corrected-cleanup test failing again on original `a20927c`, and the
+repaired no-effect plus different saved-user recovery branches **2/2 passed**.
+The retired local sending flag now clears while the original unknown-operation
+fence remains. Product independently agrees at `346ac94`. See the full
+[QA ledger](qa-f1-app-integration.md) for exact hashes and scope; no real native
+background or service acceptance is implied.
+
+The actual APK source `fd1649724e38298418b22681fcce6b6a9fcf933c` has no Dart,
+Backend, API, pubspec/lockfile or Android-manifest difference from the final
+`8d5a724` check. Its only later build-code change enables already approved
+Android resource generation for the selected companion variant. The
+[v28 handoff](../../handoff/2026-10-25-ai-companion-v28.md) records the actual
+binary, build history and remaining gates. No full-suite rerun is claimed.

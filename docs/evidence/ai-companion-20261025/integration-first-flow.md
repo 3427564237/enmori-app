@@ -293,3 +293,52 @@ statuses already present in the contract, transport and independently reviewed
 shared catalogue. `fdc9ff4` adds those four expected entries only; it changes no
 production behavior. The original failing log remains preserved, SHA-256
 `ab3afba484cbaf8278c79cfd5bb05ed7d03d1279014cdf17a5b7888cd179cd0a`.
+
+## Final F1 composition and v28 source/artifact checkpoint
+
+The selected-source picker/controller/page from App `ee44827` is integrated
+as `721a253`; its access-recovery repair `9bc571c` is integrated as `6b4ec58`.
+Root added the exact-session saved-Check-in detail entry at `a20927c` and
+corrected only its covered-page test finder at `9d50ac4`. The explicit detail
+action opens the selected own record in the picker without preparing or
+sending automatically. Current route, original exact session and content
+access guards apply to retained callbacks. The unknown original-operation
+readback remains authoritative before any new preparation or saved-user Retry.
+
+QA reproduced the real recovery defect at the original head and independently
+closed it with two repaired-head cases in `dc170411`; Product reviewed that
+closure in `346ac94`. App's final two long-input harness corrections `785571f`
+were integrated as `8d5a724`. All three App cherry-pick pairs have identical
+stable patch IDs. Earlier pending F1 statements above are superseded only by
+these source/widget results, not by a device or deployment claim.
+
+At clean `8d5a724`, full Flutter analysis passed. Six F1/route/Messaging files
+passed **55/55**, and the two exact social long-input cases passed **2/2**.
+Final log SHA-256:
+`6e266d25b4086c6b7e019e0a09822d412bbe146d84ee52383c1926cf043911bf`.
+The complete historical suite remains **1,348 Pass / 62 Fail** at its earlier
+head; 58 failures reproduce on the original baseline, and four new finder
+cases were subsequently fixed and checked. No second full-suite run occurred.
+[Regression comparison and closures](integration-regression-audit.md).
+
+The first v28 build failed at Gradle configuration because resource-value
+generation was disabled. Root's four-line `4d030645` enables it only when the
+already approved native companion variant is selected; dependency versions
+are unchanged. QA independently reviewed that patch. The subsequent build at
+clean `fd1649724e38298418b22681fcce6b6a9fcf933c` completed successfully.
+The actual v28 APK is 66,447,274 bytes, SHA-256
+`22dc680046950c61fb53bdfc824f0852c84da649094aa58b45c0ab4e9225f377`.
+Its metadata binds the exact source and successful build log; the earlier failed
+build log remains preserved. The [focused handoff](../../handoff/2026-10-25-ai-companion-v28.md)
+contains package/version/signature, independent artifact review and remaining
+runtime/phone gates. Installation reference remains absent. This build does
+not deploy the new Backend, enable actual push or resolve model quality failures.
+
+QA's final `4b8a99fac7662c7bd877af5fdfb876c5a751a14b` independently verifies
+the actual APK hash, identity, signature against retained v26, merged manifest
+and all four packaged Firebase resource values against this build's existing
+configuration. Every static check passed; installation reference remains absent.
+The [artifact record](qa-v28-artifact.md) distinguishes independent binary
+inspection from the retained Integration build's source provenance. Both later
+Product and QA merges and this handoff change documentation only; they do not
+silently relabel the frozen APK source or add device/runtime evidence.
