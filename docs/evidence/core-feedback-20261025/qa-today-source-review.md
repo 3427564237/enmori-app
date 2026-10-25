@@ -106,3 +106,10 @@ Root's analyzer subsequently caught the local `review` variable shadowing the
 `review()` method in `previewToday`. QA read App correction `7fef973`: it only
 renames that local and its uses to `preparedReview`. The earlier source review
 was not a compile check; the correction adds no behavior or execution evidence.
+
+Final follow-up: QA read the narrowed-Future timeout correction `54db6f8` and
+confirmed that the five today assertions were unchanged. Root's equivalent
+repair is in frozen `0e60cb9`. QA independently checked App's 5/5 and Root's
+42/42 repair logs, then executed only the authorized original three Send
+counterexamples plus avatar reentry (4/4). These are distinct scopes; see
+`qa-final-verification.md` for the complete evidence split and source hashes.

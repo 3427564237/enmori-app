@@ -76,3 +76,9 @@ same ProviderScope, keeps writes at one after unchanged GET, and checks that
 Save/Choose remain disabled. QA has not executed it. Both findings are
 source-addressed; integrated widget, native runtime and physical-device results
 remain separate evidence layers.
+
+Final follow-up: at frozen `0e60cb9`, QA independently ran the single route-reentry
+case with the three original Send counterexamples. All four passed. Final
+provider/editor guards were reread; native picker bytes still match the source
+checkpoint above. See `qa-final-verification.md` for exact execution and hashes.
+Native picker runtime and actual upload remain unverified by QA.
