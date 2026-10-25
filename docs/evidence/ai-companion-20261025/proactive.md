@@ -199,10 +199,11 @@ Android 13+ requires `POST_NOTIFICATIONS` for these non-exempt notifications;
 Android 8+ uses channels controlled by the user. [Android permission](https://developer.android.com/develop/ui/compose/notifications/notification-permission),
 [channels](https://developer.android.com/develop/ui/compose/notifications/channels).
 FCM setup also needs a compatible Google Play services environment. The current
-Android documentation describes installation-ID registration, while Flutter
-documentation still exposes token-oriented methods; do not invent a compatible
-new API on our absent dependency. Exact Flutter/native/Admin compatibility must
-be checked before choosing the dependency/configuration change.
+Android/current Flutter documentation now recommends installation-ID registration
+and marks the old token path deprecated. The bounded baseline-compatible choice
+for this proposal is **firebase_messaging 16.7.0 + fcm_token**, as audited below;
+this older stable client does not expose the newer FID registration API. Do not
+apply current-major examples to an older plugin or put an FID in a token field.
 [Android FCM setup](https://firebase.google.com/docs/cloud-messaging/android/get-started).
 
 | Mechanism decision | Recommended pilot candidate | Limitation / alternative |
@@ -297,7 +298,7 @@ source IDs, request keys, delivery references and bodies never enter logs.
 | `GET /v1/me/proactive-intents/{intentId}` | Ordinary current-owner status read for known UUID; returns `intentId`, `revision`, state, due/expiry, category and topic only while permitted. Used after unknown create/cancel ACK; not an automatic retry. |
 | `GET /v1/me/proactive-intents` | First slice returns the complete bounded active set, at most three intent summaries from the owner-state references. No cross-owner/global scan or copied source text. A larger/general list contract is deferred. |
 | `DELETE /v1/me/proactive-intents/{intentId}` | JSON body `{expectedRevision}`; no competing header/query precondition. Compare revision first; cancel queued/reserved/prepared, advance once and remove active membership. Repeated matching terminal cancellation has no new effect. If dispatch may already have begun, return current `unknown/accepted` state with `recallPossible:false`, never claim notification recall. Does not delete the conversation/message. |
-| `PUT /v1/me/proactive-registration` | `expectedRevision`, `installationRef` (the fixed server/operator-approved opaque reference for this named device), `registrationKind:fcm_token/firebase_installation_id`, opaque `registrationValue` (UTF-8 <=4096 bytes), and explicit `enabled:true`. Backend accepts only the selected SDK kind and the trusted one-owner/installation allowlist, rejecting every other owner/binding. Exactly one registration in this first test. Return only installationRef/revision/expiry/availability. No value echo, no public token lookup, no FCM topics or general cross-account transfer API. |
+| `PUT /v1/me/proactive-registration` | `expectedRevision`, `installationRef` (the fixed server/operator-approved opaque reference for this named device), literal `registrationKind:fcm_token`, opaque `registrationValue` (UTF-8 <=4096 bytes), and explicit `enabled:true`. F0 rejects FID/other kinds; no conversion. Backend accepts only the trusted one-owner/installation allowlist, rejecting every other owner/binding. Exactly one registration in this first test. Return only installationRef/revision/expiry/availability. No value echo, no public token lookup, no FCM topics or general cross-account transfer API. |
 | `GET /v1/me/proactive-registration` | Current-owner metadata-only readback: revision, installationRef/expiry when present and availability. An absent row is explicitly unregistered/revision 0; an unknown read is 503, not unregistered success. Never return registrationValue or another owner's binding. |
 | `DELETE /v1/me/proactive-registration` | JSON body `{expectedRevision,installationRef}`; no competing header/query precondition. Verify current owner and binding. Once the command commits, disable/erase backend registrationValue, advance revision and stop pending push. Sign-out/account replacement ends this fixed-account test; no new owner binding is accepted. An unknown/offline release may not yet be visible to the server, so it cannot guarantee immediate cessation. No new push attempt is permitted by the test driver until the release is resolved; accepted generic notices retain the recall limitation. |
 | `PUT /v1/me/conversations/{conversationId}/read-state` | `expectedRevision`, `readThroughSequence`. Server verifies owner, live topic, existing committed currently authorized sequence; monotonically advance to max(current, requested), never past the highest currently authorized sequence. Return revision/readThroughSequence. Push accepted/received/clicked alone is not read. A stale/unknown write needs readback before another explicit command. |
@@ -320,7 +321,7 @@ or new distributed scheduler is needed.
 | --- | --- |
 | `accounts/{owner}/proactive_state/current` | `revision`, `grantGeneration`, F0 settings above, `activeIntentIds` (max 3), `inFlightOccurrenceId?`, `lastAttemptedAt?`, and complete `rollingAttemptTimes` for the whole current window. F0's ordinary contact cap is exactly one; do not reset or truncate unexpired budget on pause/on/zone changes. Optional separately permitted transport diagnostics do not pretend to be ordinary contacts. No source bodies. Current authority for reservation/budget; prune expired timestamps only after evaluating the old budget in the transaction. |
 | `accounts/{owner}/proactive_occurrences/{intentId}` | **One record combines intent, effect and outbox**: `revision`, `state`, `conversationId`, `sourceMessageId`, `category`, `dueAt`, `expiresAt`, `timeZone`, `processing`, `settingsRevision`, `grantGeneration`, `authorizationScope` (trusted non-token session/purpose epoch), `topicLifecycleVersion`, complete flattened `requiredSources` (`{kind,id,version}`) and actual `requiredCategories`, `createdAt`, optional `messageId,messageSequence,publishedAt,attemptedAt,providerAcceptedAt,registrationRevision`; `dispatchState:not_started/dispatching/accepted/unknown/skipped`. Successful publication atomically sets `state:published`, `messageId`, `messageSequence` and `publishedAt`; provider acceptance is a separate dispatch status. No raw prompt, generated result, registration value or cached push payload. Invalid/deleted-source metadata is removed after dependent content is made unavailable. Terminal minimize to non-content effect identity/state/times until the containing topic expires, then inaccessible and cleanup within 24h; this retention needs LI approval. |
-| `accounts/{owner}/proactive_registration/current` | `revision`, `installationRef`, selected `registrationKind`, `registrationValue`, `enabled`, `registeredAt`, `expiresAt`. For the first test, expire no later than the named 30-minute test window + 15min, and disable/erase on completion/withdrawal/sign-out. Do not retain previous registration values. Backend erasure does not promise immediate Google backup deletion. Do not delete shared Firebase Auth/Core installation state as a cleanup shortcut. |
+| `accounts/{owner}/proactive_registration/current` | `revision`, `installationRef`, literal `registrationKind:fcm_token`, `registrationValue`, `enabled`, `registeredAt`, `expiresAt`. For the first test, expire no later than the named 30-minute test window + 15min, and disable/erase on completion/withdrawal/sign-out. Do not retain previous registration values. Backend erasure does not promise immediate Google backup deletion. Do not delete shared Firebase Auth/Core installation state as a cleanup shortcut. |
 | `accounts/{owner}/conversations/{topic}/read_state/current` | `revision`, monotonic `readThroughSequence`, `updatedAt`; never advances `lastPersistedMessageAt`. No independent private history. Delete with the topic. Unread derives only from currently authorized available proactive messages after this sequence; use an unread dot if a complete count is unavailable. |
 | Existing canonical message and source provenance | Server-assigned sequence/messageId, role assistant, explicit proactive origin, accepted text, occurrenceId/category and approved minimized provenance. An internal `appendProactive` operation checks original topic cutoff and versions, appends once, and **does not advance the old anchor under R-ANCHOR**. It cannot call the existing user/assistant-pair saver with an invented user. Existing serializers/resolvers/retention logic must be explicitly adapted and independently reviewed. |
 | Optional test-only `accounts/{owner}/proactive_transport_diagnostics/{permitId}` | Only if T1's extra two sends are expressly approved: `revision`, `installationRef`, `canonicalMessageId`, `permittedDeviceState:background/ordinary_closed`, `expiresAt` at the named window end, `attemptLimit:1`, `state:not_started/dispatching/accepted/unknown/skipped`, `attemptedAt?`, `providerAcceptedAt?`. Operator-created, no public create/send endpoint, at most two records. Claim dispatching atomically before one sender invocation; unknown never replays. Reauthorize the referenced canonical message and all normal non-frequency permissions before send. No model call, new assistant message, raw packet or registration value. Minimize/delete this diagnostic metadata within 24h of test end; no general diagnostic retention is authorized. |
@@ -345,6 +346,20 @@ queued candidate only through a fresh authorized preparation/version update.
 Once generation has begun, a source/grant change discards old text and ends that
 occurrence; the first slice has at most one model call per occurrence, not a
 regeneration loop. No code in this candidate implements a queued update API.
+
+Scheduled F0 authority is a durable explicitly confirmed intent plus **current**
+owner/account eligibility, grant generation, source/topic and registration lease,
+not the original HTTP bearer token or old in-memory session object. Its stored
+`authorizationScope` is a server-issued non-token intent-purpose epoch; current
+trusted reads, not a caller echo, validate it. The pure candidate's internal
+session-key field needs that explicit scheduled-purpose mapping in a future
+adapter. Persona identity/deletion guards remain transient at generation under
+Q19; persisted `requiredSources`/`source_use_v2` use the approved business-source
+whitelist, not a copy of every in-flight dependency. Retained Persona usage is
+only the existing presentation mode/projection version, without Persona ID,
+revision or style reconstruction. Off stops future contact/push; it does not
+delete accepted history. Actual source deletion or withdrawal of its retained
+use invokes the reconciled Q19 unavailable behavior.
 
 Transactions and recovery proposed for this schema:
 
@@ -392,6 +407,98 @@ click checks. Source revocation must also invalidate the canonical message, not
 merely cancel its notification. D1's process must cancel timers on shutdown and
 stop the one-owner scan at its test-window end. No new always-on deployment is
 implied by a 30-minute test harness.
+
+### Bounded D1 SDK compatibility audit — 25 October, read only
+
+Integration requested one baseline-compatible choice. It accepted the following
+candidate for the review packet; this is not LI's dependency/platform/deployment
+approval. Only public metadata/versioned source and existing installed source
+were read. No dependency install, solver, upgrade, native build, credential/config
+read, identifier registration or sender call (including dry-run) occurred.
+
+| Exact choice / alternative | Verified constraints and conclusion |
+| --- | --- |
+| **Propose `firebase_messaging: 16.7.0` exactly** | Stable public release 14 September 2026. Its declared Dart `^3.6.0`/Flutter `>=3.27.0`, Core `^4.14.0` and Core platform interface `^8.1.1` fit the repo's Dart `^3.13.2`, FVM Flutter `3.47.2`, locked Core `4.14.0`/interface `8.1.1`. Compatible new transitive candidates are messaging platform interface `4.10.0` and messaging web `4.2.5`; their shared internals `1.3.77`, Core web `3.11.0`, meta/plugin-interface/web constraints fit existing locked versions. This is constraint/source compatibility, not a solved lockfile or build result. |
+| Newer stable `16.7.1` | Public metadata requires Core `^4.15.1`; it would change this frozen Core lock. It is not the minimal unchanged-Core choice. |
+| Latest stable `17.0.1` | Public metadata requires Core `^5.1.0`; the current Auth `6.6.1` requires Core `^4.14.0`. It cannot simply be added to this lock without a broader Core/Auth/native migration. FID registration APIs are a 17.x feature. That migration is outside this first choice. |
+
+Primary evidence: [16.7.0 package](https://pub.dev/packages/firebase_messaging/versions/16.7.0),
+[16.7.0 versioned pubspec](https://raw.githubusercontent.com/firebase/flutterfire/firebase_messaging-v16.7.0/packages/firebase_messaging/firebase_messaging/pubspec.yaml),
+[16.7.1 public metadata](https://pub.dev/api/packages/firebase_messaging/versions/16.7.1),
+[17.0.1 versioned metadata](https://pub.dev/api/packages/firebase_messaging/versions/17.0.1).
+Metadata was read directly from pub.dev's public JSON endpoint when the web
+reader could not open it. No package archive was installed or used as a runtime.
+
+Minimal **suggested**, unperformed dependency diff:
+
+```diff
+ dependencies:
+   firebase_core: ^4.14.0
++  firebase_messaging: 16.7.0
+```
+
+Keep Auth/Core/Admin and Gradle/Flutter versions unchanged. After approval,
+Integration must resolve/review the actual lock diff; do not hand-author hashes,
+add dependency overrides or silently upgrade existing packages. No new Backend
+dependency is needed: `firebase-admin` is already pinned to `14.3.0`.
+
+The pinned [16.7.0 client source](https://raw.githubusercontent.com/firebase/flutterfire/firebase_messaging-v16.7.0/packages/firebase_messaging/firebase_messaging/lib/src/messaging.dart)
+provides `getToken`, `onTokenRefresh`, `deleteToken` and `setAutoInitEnabled`.
+Its Android implementation calls native `FirebaseMessaging.getInstance().getToken()`.
+It has no FID `register/onRegistered` API. Therefore F0 stores only the opaque
+FCM registration token under `registrationKind:fcm_token`; an FID or APNs token
+is not interchangeable. Do not parse identifier shape for authorization.
+
+The existing Admin `14.3.0` installed declarations contain `TokenMessage{token}`
+and `Messaging.send(message,dryRun?)`; use a future Backend-only Port adapter
+with `getMessaging(existingFirebaseApp).send({token, notification:<generic>,
+data:<opaque-reference>, android:{priority:'normal',ttl:0}})` after the final
+claim. SDK `ttl` is milliseconds; zero is deliberate. No multicast/topic API or
+new auth library is needed. [Pinned Admin message types](https://github.com/firebase/firebase-admin-node/blob/v14.3.0/src/messaging/messaging-api.ts),
+[Admin sender guide](https://firebase.google.com/docs/cloud-messaging/send/admin-sdk).
+
+**Support limitation:** Admin's token interface is explicitly deprecated and
+current official guidance recommends FID. Existing types and a public example
+prove that the API is present, not that this project's provider endpoint, IAM,
+registration or actual device will accept it. There is no live acceptance proof
+or promised migration deadline here. FID adoption requires the separately
+reviewed newer client/Core/Auth combination; it is not an implicit fallback.
+
+Android/native readback and minimum future platform work:
+
+- Current app delegates SDK levels to Flutter. The installed Flutter `3.47.2`
+  extension supplies compile/target 36 and min 24; Java is 17. Root AGP `9.1.0`,
+  Gradle `9.3.1` and Kotlin `2.4.0` stay unchanged. Existing Core `4.14.0` supplies
+  Firebase Android BoM `34.18.0`. The Messaging plugin takes the Core BoM and
+  declares compile 34/min 23/Java 17; these minimums fit this app. This static
+  comparison does not demonstrate AGP compilation or a merged manifest.
+- The [16.7.0 plugin manifest](https://raw.githubusercontent.com/firebase/flutterfire/firebase_messaging-v16.7.0/packages/firebase_messaging/firebase_messaging/android/src/main/AndroidManifest.xml)
+  supplies messaging services/receiver and `POST_NOTIFICATIONS` through manifest
+  merge. Verify the actual merged artifact after an approved build. Add explicit
+  default **false** metadata for `firebase_messaging_auto_init_enabled` and
+  `firebase_analytics_collection_enabled`; do not enable BigQuery delivery export.
+  No `getToken` or automatic registration call occurs until explicit app push /
+  cloud-routing opt-in and the contextual Android permission choice. A later
+  `setAutoInitEnabled(true)` is deliberate and persists, not a harmless read.
+- App already initializes the default Firebase app through explicit build-time
+  `FirebaseOptions` in `lib/app/bootstrap.dart`. Messaging 16.7.0 supports the
+  default app. Auth working in a running app does **not** prove default-app/native
+  configuration on a cold FCM process. No Google Services Gradle plugin is in
+  current settings; verify approved native configuration/resources and the group
+  application-ID suffix against the Firebase Android app before integration.
+  Do not run broad `flutterfire configure` or add a Gradle plugin blindly.
+- Add one explicit Android notification channel and contextual permission flow,
+  top-level release-safe background entry point, foreground hint handler, both
+  click paths and the existing authenticated resolver boundary. Foreground can
+  show the in-app canonical message; it needs no local-notification dependency.
+  No foreground timer, background model call or local-only notification is a
+  server-push proof. Existing force-stop/offline/late/revocation limits still apply.
+
+Permission, compatible Google Play services, exact project/app/sender matching,
+FCM API enablement, server send authorization and actual database-region charges
+remain **post-approval environment checks**. No key or service-account material
+was inspected. No IAM grant, billing upgrade, registration or real notification
+is inferred from package compatibility.
 
 ### Small-scope operation and cost estimate — Proposed
 
