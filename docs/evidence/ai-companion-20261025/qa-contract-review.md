@@ -82,3 +82,36 @@ device, inspect credentials, or call a sender, including dry-run. Actual native
 configuration, merged manifest, project/IAM, token acceptance, revocation and
 delivery remain unverified. Pure policy test counts do not grow from this D-layer
 review.
+
+## Later sender retry finding — original SDK choice is insufficient
+
+After the compatibility checkpoint above, Integration identified a material
+implementation assumption in D1. QA independently traced the installed Admin
+14.3.0 source: `Messaging.send` calls `FirebaseMessagingRequestHandler`, which
+constructs `AuthorizedHttpClient(app)` without a retry override. Its base
+`HttpClient.sendWithRetry` uses `defaultRetryConfig`: up to four retries on 503,
+`ECONNRESET` and `ETIMEDOUT`. The public `Messaging.send(message,dryRun?)`,
+Messaging exports and `AppOptions` inspected here expose no supported retry
+disable parameter. `httpAgent` and the legacy transport switch do not establish
+such a guarantee.
+
+Thus **one SDK sender invocation is not one HTTP message attempt**. The original
+4a388d9/ce0a5ed5 `getMessaging(...).send(...)` suggestion cannot establish the
+proposal's no-replay rule. This finding changes the sender choice, not the
+previous package-constraint/token-API evidence. No actual notification was sent
+or duplicated in this review; a future adapter has not been implemented.
+
+A replacement under author review uses the existing public
+`Credential.getAccessToken()` interface for authorization and a separately
+controlled direct HTTP v1 message POST with no application retry or redirect.
+QA independently checked the
+[FCM send method](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages/send)
+and [HTTP v1 authorization guide](https://firebase.google.com/docs/cloud-messaging/send/v1-api).
+Token acquisition is not message submission; neither interface presence nor
+documentation proves the actual project's permission or device acceptance.
+After asynchronous token acquisition and durable claiming, the final dispatch
+must still check source/grant/expiry/cancellation. A 401, 503, timeout, malformed
+response or crash cannot trigger token-refresh-and-message-replay. Future
+injected-boundary tests must count HTTP attempts rather than SDK invocations.
+No token getter, auth endpoint, sender, dry-run, policy test or model was called
+to establish this source finding.
