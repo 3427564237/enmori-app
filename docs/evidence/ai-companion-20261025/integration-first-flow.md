@@ -278,3 +278,18 @@ with the earlier twelve. Raw log `integration-f1-review-final.log` SHA-256:
 `9023d8a06dfcd6f737cca669183c2cd55dbb9f51c6fcd09416673366828a5517`.
 App still owns the picker/controller/page composition and its final F1 tests;
 independent F1 review and the v28 artifact remain open at this checkpoint.
+
+## Complete Backend regression
+
+Pinned Node 24.19.0 / TypeScript 7.0.2 strict compilation and the complete
+tracked Backend unit/contract suite at `fdc9ff4` passed **1,481/1,481** tests
+across 121 test files. This run used no Emulator, actual model, FCM or production
+account. Its log `integration-backend-final-repaired.log` has SHA-256
+`907a69d21641488bd19b2c2b26473e983e581a37b51a45fdfc55c1fd1226ed28`.
+
+The initial complete run at `838e65c` passed 1,480 and failed one exact error
+catalogue assertion: the existing expected map omitted the four approved F0/F1
+statuses already present in the contract, transport and independently reviewed
+shared catalogue. `fdc9ff4` adds those four expected entries only; it changes no
+production behavior. The original failing log remains preserved, SHA-256
+`ab3afba484cbaf8278c79cfd5bb05ed7d03d1279014cdf17a5b7888cd179cd0a`.
