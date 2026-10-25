@@ -20,6 +20,10 @@ adds 10 independent actual Admin/Auth Emulator groups and four separate timestam
 fake tests. It does not establish production Firestore, complete worker/HTTP
 composition, notification delivery or device acceptance.
 
+The [first actual F0 semantic review](qa-f0-semantic-review.md) is **1 Pass /
+7 Fail / 0 unreviewed**, despite eight protocol-eligible outputs. Its semantic
+gate remains Fail. It is separate from the unchanged local24 12/12 result.
+
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with
 [proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is
