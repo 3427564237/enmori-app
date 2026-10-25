@@ -61,7 +61,10 @@ media 接口或原生代码，合同设计符合不等于实现已验证。
 
 App 报告两种 UI 的 0 选择/IME 输入可普通发送；选择记录后 Back 的本地门控反例为红。
 Product 读到了 `_selectionReady` 的实际门控，但本轮没有自行执行这些测试，也不称其
-为 LI 手机唯一根因。Context 给出的现有 IANA/day/parser/query 接缝已与源码交叉核对。
+为 LI 手机唯一根因。后续已读取 App `6d0e3f6395dc36cfbe4991163d6319aac89d171b`
+的精确证据文档：最小 Send 修复作者报告 16/16＋6/6，通过分析；原红日志保留，
+自动当天引用尚为独立后续增量。Product 未复跑或把作者结果称为独立 QA。
+Context 给出的现有 IANA/day/parser/query 接缝已与源码交叉核对。
 Delivery 静态确认 F0 不因 D1 未配置而直接禁用；App 已区分创建与管理入口。QA 已独立
 指出推荐、照片、活动封面 DTO 缺口，本包供其按最终 Root 规范安排用例。
 
