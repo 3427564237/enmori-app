@@ -15,6 +15,76 @@ import 'package:flutter_test/flutter_test.dart';
 import 'ai_selected_test_support.dart';
 
 void main() {
+  for (final background in [false, true]) {
+    testWidgets(
+      'pending selected execution recovers after access retirement (background=$background)',
+      (tester) async {
+        final r = await SelectedRig.create(tester);
+        r.add('record');
+        await r.sources.chooseOwned('record');
+        const text = 'Keep this original operation';
+        r.ai.updateDraft(
+          const TextEditingValue(text: text),
+          sessionKey: r.aiState.sessionKey,
+        );
+        await r.sources.review();
+        r.sources.confirm(r.sourceState.review!.selectionRevision);
+        final response = Completer<Result<AiReply>>();
+        r.repo.nextExecute = response.future;
+        final pending = r.sources.send(text);
+        await tester.pump();
+        expect(r.sourceState.sending, isTrue);
+        expect(r.repo.selectedExecutes, hasLength(1));
+        if (background) {
+          r.container.read(contentAccessProvider.notifier).setForeground(false);
+        } else {
+          r.container.read(contentAccessProvider.notifier).changed();
+        }
+        // Native lifecycle / explicit Cancel uses the same original-attempt fence.
+        r.ai.cancel();
+        await tester.pump();
+        await pending;
+        expect(r.sourceState.sending, isFalse);
+        expect(r.sourceState.selectedIds, {'record'});
+        expect(r.aiState.canCheckResult, isTrue);
+        expect(r.aiState.canSend, isFalse);
+        expect(r.ai.draft.text, text);
+        expect(r.sourceState.review, isNull);
+        if (background) {
+          r.container.read(contentAccessProvider.notifier).setForeground(true);
+          await tester.pump();
+        }
+        await r.sources.review();
+        expect(r.repo.selectedPrepares, hasLength(1));
+        r.repo.nextReadback = Future.value(
+          const Success(
+            AiReadback(
+              operationId: 'operation-1',
+              state: AiOutcomeState.noEffect,
+            ),
+          ),
+        );
+        await r.ai.checkResult();
+        await r.sources.review();
+        expect(r.repo.selectedPrepares, hasLength(2));
+        expect(r.sources.canSend, isFalse);
+        final revision = r.sourceState.review!.selectionRevision;
+        response.complete(const Failure(selectedUnknown));
+        await tester.pump();
+        expect(r.sourceState.review!.selectionRevision, revision);
+        expect(r.sourceState.selectedIds, {'record'});
+        expect(r.ai.draft.text, text);
+        expect(r.repo.selectedExecutes, hasLength(1));
+        r.sources.confirm(revision);
+        r.repo.nextExecute = null;
+        await r.sources.send(text);
+        expect(r.repo.selectedExecutes, hasLength(2));
+        expect(r.sourceState.selectedIds, isEmpty);
+        r.dispose();
+        await tester.pump();
+      },
+    );
+  }
   testWidgets(
     'returning to edit while prepare is pending abandons its old keys without losing choices',
     (tester) async {

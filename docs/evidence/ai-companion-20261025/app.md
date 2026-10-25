@@ -646,3 +646,28 @@ fake repository, widget and localhost-wire evidence, not final shared routing,
 Delivery D1, deployed Backend/model, Firebase/FCM, APK/phone, UAT, Release or Done
 acceptance. No real model/Backend request, data write, registration or push was
 performed. Product/QA review this exact new commit independently.
+
+## F1a P2: pending execution after source-access retirement
+
+App self-review after `ee44827` found that content-access retirement changes the
+selector epoch. A pending selected-send await then correctly refuses to update
+that retired epoch, but its local `sending` flag was never released. After Cancel
+and an authoritative original-operation no-effect GET, AI could send while the
+selector still refused a new review. Product source review `4ad63af` and QA's
+independent original-head red evidence `982df02` preserve that failure; the
+389-case checkpoint above did not cover this pending-execution transition.
+
+The content-access listener now releases only its local `sending` flag when
+retiring the epoch. `_recoveringSelected`, the original operation identity,
+unknown guard, draft and choices are unchanged. It cannot prepare/execute while
+the original AI operation remains unresolved. Two new source/fake cases cover
+foreground access mutation and background/resume, explicit original Cancel,
+unknown blocking a new prepare, original GET no-effect permitting a fresh
+review, a late old execute response unable to overwrite it, and a new explicit
+confirm/Send. Both passed (**2/2**); these two Dart files analyzed cleanly
+(`3.8s`). No full-suite count is added to this focused run.
+
+Raw log: `app-f1-access-recovery.log`, SHA-256
+`da1f2e8c92d9c926e8d91a92afe80a73fb51230f72c28851641b06fee4eff55e`,
+in the local evidence directory. This is a source/widget recovery correction,
+with no native background, service, model, notification or physical-device claim.

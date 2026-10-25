@@ -186,6 +186,9 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
       _failedDates.clear();
       _loaded = false;
       _busy = false;
+      // The retiring await cannot update this epoch. Original-operation
+      // recovery remains owned by the AI controller and _recoveringSelected.
+      _sending = false;
       _retireReview();
       _notice = AiSelectionNotice.recheck;
       _emit();
