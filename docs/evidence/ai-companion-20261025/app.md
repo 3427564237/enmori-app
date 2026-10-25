@@ -671,3 +671,30 @@ Raw log: `app-f1-access-recovery.log`, SHA-256
 `da1f2e8c92d9c926e8d91a92afe80a73fb51230f72c28851641b06fee4eff55e`,
 in the local evidence directory. This is a source/widget recovery correction,
 with no native background, service, model, notification or physical-device claim.
+
+## Minimal C harness visibility correction
+
+Integration compared its complete candidate run against exact `b81d93f` using
+the same SDK and unchanged original 19 test files: 58 of 62 failures reproduced
+on that baseline. Its comparison is retained in
+`integration-flutter-baseline-comparison.json`; those historical failures are
+not rewritten as a green full-project result. The two new App harness failures
+were the social overlong-text/Unicode-scalar rejection display checks. The
+existing draft, selection, focus, no-request, correction and exact request-count
+assertions remain unchanged.
+
+Diagnostics confirmed the controller had the correct input error, the original
+2401-scalar draft and focus were kept, and the status existed offscreen. The
+history viewport was **240px**, not zero; at offset zero its scroll range was
+64px. The error follows the empty-topic introduction, so it needed a downward
+scroll. An initial upward-scroll/top-jump hypothesis failed and is retained in
+`app-c-status-fixture.log`, `app-c-status-fixture-second.log` and the diagnostic
+logs. No keyboard hiding, shorter text, provider mutation or production change
+was used. The final fixture adds only a bounded call to its existing visibility
+helper before the text assertion.
+
+The exact two social rejection cases then passed **2/2**; the changed test file
+analyzed cleanly (`4.4s`). Final log: `app-c-status-fixture-final.log` in the local
+evidence directory. All broader baseline-only fixture drafts were removed from
+the worktree and retained only as an uncommitted local patch for traceability;
+their old business assertions and cases were not changed or waived.
