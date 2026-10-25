@@ -15,6 +15,12 @@ recorded at `61478e0`. Billing project, paid plan and server credential still
 need actual verification; no evaluation charge or deployment follows from the
 implementation approval alone.
 
+LI subsequently selected [free-only Gemini research](../decisions/2026-10-25-li-gemini-free-only.md):
+no payment, recharge, paid upgrade or paid fallback. This supersedes the USD 1
+paid execution permission. Google Pro credits are not assumed to cover API use;
+actual free-project/model quota is being verified. Only the existing project's
+AI Studio list import has occurred; no key or model call was created by setup.
+
 C App source `442a340` passed author checks, independent QA's selected 16 cases
 and Integration's router 40/40. The v27 release candidate freezes `61478e0`,
 contains C/usability only, and was independently inspected by QA. Its APK is

@@ -87,6 +87,10 @@ Retain the old source, new source and these limits:
 
 ## Approved cloud research, with execution conditions
 
+**Supersession:** the later [free-only decision](2026-10-25-li-gemini-free-only.md)
+withdraws paid execution and new spending permission. The approval below is
+retained as history and must not be used for a paid run or account upgrade.
+
 LI approves one Gemini Developer API **Standard paid** `gemini-3.8-flash`
 synthetic-only experiment, fixed 32 cases twice, at most 64 generation attempts
 and 64 token-count attempts, maximum 8192 input and 2048 combined output/thinking
