@@ -35,6 +35,11 @@ The actual v27 hash/signature/metadata match its manifest; no device operation w
 performed. F0 shared identity/model-lane and sender cases remain at source review
 with integrated execution Not Run.
 
+The [shared dependency/failure and native civil-time review](qa-shared-native-review.md)
+is bound to `c5357a7` / `1a1f96b`. All 131 existing lock entries are unchanged;
+new native time conversion explicitly returns unavailable below API 26. This
+checkpoint is source review, with no independent native execution by QA.
+
 ## Authority and baseline readback
 
 Read the original LI request directly at

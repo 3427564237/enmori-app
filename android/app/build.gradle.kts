@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.util.Base64
 
 plugins {
     id("com.android.application")
@@ -28,6 +29,47 @@ check(listOf(personaAndroidTestFlag, hciAndroidTestFlag, sponsorDemoFlag, coreAn
 }
 
 val groupRelease = providers.environmentVariable("ENMORI_GROUP_RELEASE").orNull == "true"
+
+// Use the same explicitly supplied client configuration as Dart. Firebase's
+// native provider needs these resources before Dart starts for a cold FCM tap.
+// No google-services plugin, service-account material or ambient lookup.
+val companionDefineKeys = setOf(
+    "ENMORI_AI_COMPANION_FIRST_FLOW", "ENMORI_REMOTE_GROUP",
+    "ENMORI_FIREBASE_API_KEY", "ENMORI_FIREBASE_APP_ID",
+    "ENMORI_FIREBASE_MESSAGING_SENDER_ID", "ENMORI_FIREBASE_PROJECT_ID",
+)
+val companionDefines = mutableMapOf<String, String>()
+(project.findProperty("dart-defines")?.toString() ?: "").split(',')
+    .filter { it.isNotEmpty() }.forEach { encoded ->
+        val decoded = try { String(Base64.getDecoder().decode(encoded), Charsets.UTF_8) }
+            catch (_: IllegalArgumentException) { error("Invalid Dart define encoding") }
+        val separator = decoded.indexOf('=')
+        if (separator > 0) {
+            val key = decoded.substring(0, separator)
+            if (key in companionDefineKeys) {
+                check(!companionDefines.containsKey(key)) { "Duplicate companion build define" }
+                companionDefines[key] = decoded.substring(separator + 1)
+            }
+        }
+    }
+val companionNative = companionDefines["ENMORI_AI_COMPANION_FIRST_FLOW"] == "true"
+check(companionDefines["ENMORI_AI_COMPANION_FIRST_FLOW"] in setOf(null, "true", "false")) {
+    "Invalid companion build selection"
+}
+val companionResources = if (companionNative) {
+    check(companionDefines["ENMORI_REMOTE_GROUP"] == "true") { "Native companion requires the selected group configuration" }
+    val apiKey = companionDefines["ENMORI_FIREBASE_API_KEY"] ?: error("Missing Firebase client configuration")
+    val appId = companionDefines["ENMORI_FIREBASE_APP_ID"] ?: error("Missing Firebase client configuration")
+    val senderId = companionDefines["ENMORI_FIREBASE_MESSAGING_SENDER_ID"] ?: error("Missing Firebase client configuration")
+    val projectId = companionDefines["ENMORI_FIREBASE_PROJECT_ID"] ?: error("Missing Firebase client configuration")
+    check(Regex("[A-Za-z0-9_-]{20,256}").matches(apiKey) &&
+        Regex("1:[0-9]+:android:[a-fA-F0-9]+").matches(appId) &&
+        Regex("[0-9]+").matches(senderId) && appId.split(':')[1] == senderId &&
+        projectId == "enmori-rmvp-controlled") { "Invalid Firebase client configuration" }
+    mapOf("google_api_key" to apiKey, "google_app_id" to appId,
+        "gcm_defaultSenderId" to senderId, "project_id" to projectId)
+} else emptyMap()
+
 val groupSigning = Properties()
 if (groupRelease) {
     check(listOf(personaAndroidTestFlag, hciAndroidTestFlag, sponsorDemoFlag, coreAndroidTestFlag).all { it == null })
@@ -50,6 +92,7 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.enmori.app"
         manifestPlaceholders["enmoriApplicationLabel"] = "enmori"
+        companionResources.forEach { (name, value) -> resValue("string", name, value) }
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

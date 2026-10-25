@@ -25,6 +25,8 @@ export interface AsyncOperation {
   readonly targetKind: "reserved_new" | "existing";
 }
 export type AsyncConversationCommandInput = {
+  readonly selectedReply?:import("./selected-reply.js").SelectedReplyGrant;
+  readonly replyToMessageId?:string;
   readonly identity: AsyncConversationIdentity;
   readonly operation: AsyncOperation;
   readonly text: string;
