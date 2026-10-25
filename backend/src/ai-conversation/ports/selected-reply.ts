@@ -4,11 +4,21 @@ import type { AcceptedContextRead, ReadAuthority, ReadPersonaSet, HistoryPairIde
 import type { ConversationOrdinaryContext } from "./application-conversation-operations.js";
 import type { ConversationResult } from "./conversation-operations.js";
 
-/** The explicitly selected mutable F1a branch; never the old immutable Note
+/** The mutable local reply branch; never the old immutable Note
  * reader or a category-wide permission. No contents or IDs enter model keys. */
-export interface SelectReplyContext {
+export type SelectReplyContext = {
   readonly processing:"local";
   readonly sources:readonly {readonly kind:"check_in";readonly checkInId:string}[];
+} | {
+  readonly processing:"local";
+  readonly today:{readonly timeZone:string};
+};
+/** Request-only UI metadata. Never model input or a persisted category grant. */
+export interface TodayReplySelection {
+  readonly date:string;
+  readonly timeZone:string;
+  readonly limit:5;
+  readonly hasMore:boolean;
 }
 export interface ExecuteReplySelection {
   readonly selectionRevision:string;
@@ -27,17 +37,20 @@ export interface SelectedReplySnapshot {
   readonly purposeRevocationGeneration:number;
   readonly sources:readonly SelectedSourceIdentity[];
   readonly historyPairs:readonly HistoryPairIdentity[];
+  readonly today?:TodayReplySelection;
 }
 export interface PreparedReplySelection {
   readonly selectionRevision:string;
   readonly expiresAt:string;
-  readonly sourceCards:readonly (OwnedSourceCard & {readonly selectionKey:string})[];
+  readonly sourceCards:readonly (OwnedSourceCard & {readonly selectionKey:string;readonly checkInId?:string})[];
   readonly historyPairs:readonly (HistoryPairIdentity & {readonly historyKey:string})[];
+  readonly today?:TodayReplySelection;
 }
 export interface SelectedReplyGrant extends ExecuteReplySelection {
   readonly purposeRevocationGeneration:number;
   readonly sources:readonly (SelectedSourceIdentity & {readonly selectionKey:string})[];
   readonly historyPairs:readonly (HistoryPairIdentity & {readonly historyKey:string})[];
+  readonly today?:TodayReplySelection;
 }
 export type SelectedReplyFailure="changed"|"source_unavailable"|"selection_conflict"|"denied"|"unavailable"|"terminated";
 export interface SelectedReplyObservation {

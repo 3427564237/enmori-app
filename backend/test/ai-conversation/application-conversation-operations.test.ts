@@ -7,6 +7,7 @@ import type { ConversationExecutionDelivery, ConversationOperationClock, Convers
 import type { AsyncCloseObservation } from "../../src/ai-conversation/ports/async-conversation.js";
 import type { StoredConversationMessage } from "../../src/ai-conversation/ports/real-conversation-store.js";
 import type { IdentityVerificationResult } from "../../src/shared/ports/identity-verifier.js";
+import type { SelectedReplySnapshot } from "../../src/ai-conversation/ports/selected-reply.js";
 
 const id = (n: number): string => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const owner = id(1), existing = id(2), originalUser = id(3);
@@ -414,4 +415,46 @@ test("reprepare issues new history keys; old exclusions cannot transfer even wit
   const body={operationId:fresh.operationId,operationKey:fresh.operationKey,text:"unchanged draft"},choice={selectionRevision:s.selectionRevision,includedKeys:[],excludedKeys:[]};
   assert.deepEqual(await f.app.execute(f.original,{...body,contextSelection:{...choice,excludedHistoryKeys:[oldKey]}},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});
   assert.equal((await f.app.execute(f.original,{...body,contextSelection:{...choice,excludedHistoryKeys:[newKey]}},f.delivery())).kind,"success");assert.equal(f.accepted[0]?.userMessage.text,"unchanged draft");
+});
+
+test("automatic today prepares owned ID metadata and passes the same bounded day grant on one Send",async()=>{
+  const f=fixture(),today={date:"2026-10-14",timeZone:"Asia/Singapore",limit:5 as const,hasMore:false};
+  f.readers.prepareSelection=async(_context,input)=>{
+    assert.deepEqual(input,{processing:"local",today:{timeZone:"Asia/Singapore"}});
+    return good({purposeRevocationGeneration:3,today,historyPairs:[],sources:[{kind:"check_in",checkInId:"owned-today-id",version:"metadata-v1",sourceOccurredAt:"2026-10-14T09:00:00.000Z",observedAt:"2026-10-14T10:00:00.000Z"}]});
+  };
+  const ticket=value(await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",contextSelection:{processing:"local",today:{timeZone:"Asia/Singapore"}}}));
+  const selected=ticket.contextSelection!;assert.deepEqual(selected.today,today);assert.equal(selected.sourceCards[0]?.checkInId,"owned-today-id");
+  const key=selected.sourceCards[0]!.selectionKey;
+  const result=await f.app.execute(f.original,{operationId:ticket.operationId,operationKey:ticket.operationKey,text:"exact draft",contextSelection:{selectionRevision:selected.selectionRevision,includedKeys:[key],excludedKeys:[key]}},f.delivery());
+  assert.equal(result.kind,"success");assert.deepEqual(f.inputs[0]?.selectedReply?.today,today);assert.deepEqual(f.inputs[0]?.selectedReply?.excludedKeys,[key]);assert.equal(f.counts().creates,1);
+});
+
+test("automatic empty day admits ordinary chat while metadata errors cannot become an empty grant",async()=>{
+  for(const malformed of [false,true]){
+    const f=fixture();f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:0,sources:[],historyPairs:[],today:{date:"2026-10-14",timeZone:"Asia/Singapore",limit:5,hasMore:malformed}});
+    const result=await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",contextSelection:{processing:"local",today:{timeZone:"Asia/Singapore"}}});
+    if(malformed){assert.deepEqual(result,{kind:"failure",code:"AI_UNAVAILABLE"});assert.equal(f.counts().creates,0);continue;}
+    const ticket=value(result),selection=ticket.contextSelection!;
+    assert.equal((await f.app.execute(f.original,{operationId:ticket.operationId,operationKey:ticket.operationKey,text:"normal chat",contextSelection:{selectionRevision:selection.selectionRevision,includedKeys:[],excludedKeys:[]}},f.delivery())).kind,"success");
+  }
+});
+
+test("automatic day rollover before execute preserves text and rejects before executor effects",async()=>{
+  const f=fixture();f.clock.instant=6*3600000-1000;
+  f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:0,sources:[],historyPairs:[],today:{date:"2026-10-14",timeZone:"Asia/Singapore",limit:5,hasMore:false}});
+  const ticket=value(await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",contextSelection:{processing:"local",today:{timeZone:"Asia/Singapore"}}})),selection=ticket.contextSelection!;
+  f.clock.advance(1000);
+  assert.deepEqual(await f.app.execute(f.original,{operationId:ticket.operationId,operationKey:ticket.operationKey,text:"draft still here",contextSelection:{selectionRevision:selection.selectionRevision,includedKeys:[],excludedKeys:[]}},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});
+  assert.equal(f.counts().creates,0);assert.equal(f.accepted.length,0);
+});
+
+test("a manual source prepare cannot receive automatic metadata or a fabricated automatic day",async()=>{
+  const samples:SelectedReplySnapshot[]=[{purposeRevocationGeneration:0,sources:[],historyPairs:[],today:{date:"2026-10-14",timeZone:"Asia/Singapore",limit:5,hasMore:false}},
+    {purposeRevocationGeneration:0,sources:[],historyPairs:[]}];
+  for(const [i,snapshot]of samples.entries()){
+    const f=fixture();f.readers.prepareSelection=async()=>good(snapshot);
+    const result=await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",contextSelection:i===0?{processing:"local",sources:[]}:{processing:"local",today:{timeZone:"Asia/Singapore"}}});
+    assert.deepEqual(result,{kind:"failure",code:"AI_UNAVAILABLE"});
+  }
 });

@@ -9,11 +9,13 @@ import type { SelectReplyContext, SelectedReplySnapshot, SelectedReplyGrant, Sel
 import type { ConversationResult } from "../ports/conversation-operations.js";
 import type { StoreResult } from "../ports/real-conversation-store.js";
 import type { HistoryPairIdentity } from "../ports/real-context-reader.js";
+import { currentReplyDay, validTodayReplySelection } from "../application/today-reply-selection.js";
 export type SelectedHistorySnapshot=(tx:Tx,principal:AcceptedContextRead["principal"],ownerId:string,conversationId:string,current:()=>boolean)=>Promise<StoreResult<readonly HistoryPairIdentity[]>>;
 class Failure extends Error {constructor(readonly kind:SelectedReplyFailure){super(kind);}}
 function fail(kind:SelectedReplyFailure):never{throw new Failure(kind);}
 const uint=(x:unknown):x is number=>typeof x==="number"&&Number.isSafeInteger(x)&&x>=0;
-/** Exact explicit mutable-source adapter; no collection scan, old immutable Note
+/** Exact mutable-source adapter; only explicit IDs or a bounded own-day query,
+ * never a collection scan or the old immutable Note
  * prerequisites, body cache, URL, weather or location model projection. */
 export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
   constructor(private readonly gateway:FirestoreGateway,environment:Readonly<Record<string,string|undefined>>,
@@ -22,7 +24,13 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
   private check(current:()=>boolean){try{if(current())return;}catch{}fail("terminated");}
   private async guardedRead<T>(current:()=>boolean,operation:()=>Promise<T>):Promise<T>{this.check(current);const result=await operation();this.check(current);return result;}
   private valid(input:SelectReplyContext):void{
-    if(!input||Object.keys(input).some(k=>k!=="processing"&&k!=="sources")||input.processing!=="local"||!Array.isArray(input.sources)||input.sources.length>5||
+    if(!input||input.processing!=="local")fail("selection_conflict");
+    if("today" in input){
+      if(Object.keys(input).some(k=>k!=="processing"&&k!=="today")||!input.today||
+        Object.keys(input.today).length!==1||!Object.hasOwn(input.today,"timeZone")||typeof input.today.timeZone!=="string")fail("selection_conflict");
+      return;
+    }
+    if(Object.keys(input).some(k=>k!=="processing"&&k!=="sources")||!Array.isArray(input.sources)||input.sources.length>5||
       input.sources.some(s=>!s||Object.keys(s).length!==2||s.kind!=="check_in"||typeof s.checkInId!=="string"||!isSafeDocumentId(s.checkInId))||
       new Set(input.sources.map(s=>s.checkInId)).size!==input.sources.length)fail("selection_conflict");
   }
@@ -46,15 +54,36 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
     try{this.valid(input);const started=this.utcMilliseconds();if(!uint(started))fail("unavailable");
       const value=await this.gateway.runTransaction(async tx=>{
         const authority=await this.authority(tx,context.principal,context.ownerId,context.current),sources=[];
-        for(const ref of input.sources){const {noteText:_,moodLabel:__,activityLabel:___,observedVersion:____,...identity}=await this.source(tx,context.ownerId,ref.checkInId,started,context.current);sources.push(identity);}
+        let today:SelectedReplySnapshot["today"],refs:readonly {checkInId:string;createdAt?:string}[];
+        if("today" in input){
+          const day=currentReplyDay(input.today.timeZone,started);
+          if(!day||day.empty)fail("selection_conflict");
+          if(!tx.listOwnCheckInDayPage)fail("unavailable");
+          const asOf=new Date(started).toISOString(),rows=await this.guardedRead(context.current,()=>tx.listOwnCheckInDayPage!({
+            ownerAccountId:context.ownerId,startUtc:day.startUtc,endUtc:day.endUtc,asOf,limit:6}));
+          if(!Array.isArray(rows)||rows.length>6||new Set(rows.map(r=>r.id)).size!==rows.length)fail("unavailable");
+          for(const [i,row] of rows.entries()){
+            const createdAt=canonicalNoteInstant(row.data.createdAt);
+            if(!isSafeDocumentId(row.id)||Object.keys(row.data).some(k=>k!=="ownerAccountId"&&k!=="createdAt")||row.data.ownerAccountId!==context.ownerId||
+              !createdAt||createdAt<day.startUtc||createdAt>asOf||
+              (day.endUtc!==null&&createdAt>=day.endUtc))fail("unavailable");
+            const prior=rows[i-1];
+            if(prior&&(String(prior.data.createdAt)<createdAt||prior.data.createdAt===createdAt&&prior.id<=row.id))fail("unavailable");
+          }
+          refs=rows.slice(0,5).map(r=>({checkInId:r.id,createdAt:r.data.createdAt as string}));
+          today={date:day.date,timeZone:day.timeZone,limit:5,hasMore:rows.length>5};
+        }else refs=input.sources;
+        for(const ref of refs){const {noteText:_,moodLabel:__,activityLabel:___,observedVersion:____,...identity}=await this.source(tx,context.ownerId,ref.checkInId,started,context.current);
+          if(ref.createdAt!==undefined&&ref.createdAt!==identity.sourceOccurredAt)fail("unavailable");sources.push(identity);}
         let historyPairs:readonly HistoryPairIdentity[]=[];
         if(conversationId!==undefined){
           if(!this.historySnapshot)fail("unavailable");const read=await this.guardedRead(context.current,()=>this.historySnapshot!(tx,context.principal,context.ownerId,conversationId,context.current));
           if(read.kind!=="confirmed")fail(read.kind==="denied"?"denied":read.kind==="terminated"?"terminated":"unavailable");historyPairs=read.value;
         }
         const ended=this.utcMilliseconds();if(ended<started||ended-started>5000)fail("unavailable");this.check(context.current);
-        sources.sort((a,b)=>b.sourceOccurredAt.localeCompare(a.sourceOccurredAt)||a.checkInId.localeCompare(b.checkInId));
-        return {purposeRevocationGeneration:authority.purposeRevocationGeneration,sources,historyPairs};
+        if(today&&!validTodayReplySelection(today,ended))fail("selection_conflict");
+        if(!today)sources.sort((a,b)=>b.sourceOccurredAt.localeCompare(a.sourceOccurredAt)||a.checkInId.localeCompare(b.checkInId));
+        return {purposeRevocationGeneration:authority.purposeRevocationGeneration,sources,historyPairs,...(today?{today}:{})};
       },{maxAttempts:1});this.check(context.current);return {kind:"success",value};
     }catch(e){return {kind:"failure",code:e instanceof Failure?e.kind==="selection_conflict"?"AI_CONTEXT_SELECTION_CONFLICT":e.kind==="source_unavailable"?"AI_SOURCE_UNAVAILABLE":e.kind==="denied"?"AI_CONTEXT_NOT_PERMITTED":"AI_UNAVAILABLE":"AI_UNAVAILABLE"};}
   }
@@ -72,6 +101,9 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
       this.valid({processing:"local",sources:grant.sources.map(s=>({kind:"check_in",checkInId:s.checkInId}))});
       const started=this.utcMilliseconds(),asOf=context.asOf.seconds*1000+Math.floor(context.asOf.nanoseconds/1e6);
       if(!uint(started)||started<asOf)fail("unavailable");
+      if(grant.today!==undefined&&!validTodayReplySelection(grant.today,asOf))fail("selection_conflict");
+      const day=grant.today&&currentReplyDay(grant.today.timeZone,asOf);
+      if(grant.today?.hasMore&&grant.sources.length!==5)fail("selection_conflict");
       const value=await this.gateway.runTransaction(async tx=>{
         const authority=await this.authority(tx,context.principal,context.ownerId,current);
         if(authority.purposeRevocationGeneration!==grant.purposeRevocationGeneration)fail(authority.purposeRevocationGeneration>grant.purposeRevocationGeneration?"changed":"unavailable");
@@ -82,6 +114,7 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
         for(const ref of grant.sources){
           if(!grant.includedKeys.includes(ref.selectionKey)||grant.excludedKeys.includes(ref.selectionKey))continue;
           const source=await this.source(tx,context.ownerId,ref.checkInId,asOf,current);if(source.version!==ref.version)fail("changed");sources.push(source);
+          if(day&&(source.sourceOccurredAt<day.startUtc||(day.endUtc!==null&&source.sourceOccurredAt>=day.endUtc)))fail("selection_conflict");
         }
         const ended=this.utcMilliseconds();if(ended<started||ended-started>5000)fail("unavailable");
         return {authority,personas:{...state,items},sources};

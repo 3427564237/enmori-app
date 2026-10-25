@@ -47,6 +47,7 @@ export function withRetainedMessageTimes(base: FirestoreGateway): FirestoreGatew
         return { ...row, data, ...(time ? { createTime: { seconds: time.seconds, nanoseconds: time.nanoseconds } } : {}) };
       };
       const wrap: FirestoreTransactionGateway = {
+        ...(tx.listOwnCheckInDayPage ? {listOwnCheckInDayPage: input => tx.listOwnCheckInDayPage!(input)} : {}),
         get: async path => { const row = await tx.get(path); return row && unpack(path, row); },
         getSnapshot: async path => { const row = await tx.getSnapshot!(path); return row && snapshot(path, row); },
         list: async path => (await tx.list(path)).map(row => ({ ...row, data: unpack(`${path}/${row.id}`, row.data) })),
