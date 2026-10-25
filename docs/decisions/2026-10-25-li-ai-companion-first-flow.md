@@ -104,6 +104,16 @@ missing details separately after the approval. No key belongs in chat or Git.
 This grants no recharge, new billing account, production model adoption, audience
 change, age collection or real-data cloud processing.
 
+### Operator setup follow-up
+
+LI subsequently directly confirmed `已满18` and `新加坡`, and asked
+`其他还未配置，帮我配置`. Adult-operator and Singapore-location assertions are
+therefore supplied by the operator. Project/billing/key setup assistance is
+requested; those actual configurations are not thereby established. First
+inspect available signed-in project metadata and prepare the minimal concrete
+configuration. No credential copying, automatic account switch, unspecified
+prepayment or expanded product-data scope follows from this request.
+
 ## Still outside this approval
 
 Actual deployment, real Firestore test writes, SDK registration upload, FCM

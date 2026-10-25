@@ -1,4 +1,8 @@
 export const APP_FAILURE_CATALOGUE = {
+  PROACTIVE_REVISION_PRECONDITION_FAILED: { statusCode: 412, message: "Follow-up state changed. Read the current state before continuing." },
+  PROACTIVE_INPUT_INVALID: { statusCode: 422, message: "Check the follow-up time and options." },
+  AI_SOURCE_UNAVAILABLE: { statusCode: 404, message: "This reference is unavailable. Keep your draft and review the sources." },
+  AI_CONTEXT_SELECTION_CONFLICT: { statusCode: 409, message: "The selected sources conflict with this context. Review them before continuing." },
   EVENT_PARTICIPATION_INVALID: { statusCode: 422, message: "Choose a valid Event participation state and revision." },
   EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED: { statusCode: 412, message: "Your participation changed. Read it before saving again." },
   FRIEND_IGNORE_PRECONDITION_FAILED: { statusCode: 412, message: "Your recommendation preference changed. Read its current state before trying again." },
