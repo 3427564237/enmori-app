@@ -19,8 +19,15 @@ have independently checked fixes in the
 [repair and prototype ledger](qa-review-followup.md). LI chose entry C; that
 scope does not approve new context/cloud/proactive capabilities. C's exact App
 head `442a340` has **16/16 independent widget checks passed**; runtime/device
-gates remain separate. The later Admin sender-retry finding is recorded in the
-contract ledger and requires a corrected sender proposal.
+gates remain separate. The later Admin sender-retry finding and its corrected
+Delivery `b8b8532` / Context `98447a9` proposal are preserved in the contract
+ledger; actual transport behavior remains unverified.
+
+Subsequent authority checkpoint: QA directly verified LI's new replies and the
+durable [first-flow scope record](qa-approved-scope.md) at `26af8c9`. F0/F1a/D1
+implementation and the conditioned synthetic cloud research are now authorized
+within that record; historical Proposed labels are retained. Real deployment,
+data writes, registrations, sends and phone operations remain separately gated.
 
 ## Authority and baseline readback
 
