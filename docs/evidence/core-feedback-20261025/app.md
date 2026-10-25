@@ -169,3 +169,34 @@ Flutter/Dart/Gradle validation centrally. Formatting/analyzer and relevant
 AI/proactive tests are pending that central window. Only `git diff --check`
 was run locally and passed. Prior Send-fix test results above apply only to
 that earlier increment; no new APK, runtime, phone, UAT or Release claim follows.
+
+
+### Assigned narrow diagnostic window and automatic-day correction
+
+After Integration's centralized analyzer found the local `review` shadowing the
+method invocation in `previewToday`, App renamed that local `preparedReview`
+(`7fef973`). Integration applied the equivalent fix and reported analyzer clean.
+The centralized 19-file batch then reported 243 pass / 6 fail; three failures
+were these new automatic-day tests, while Integration owns the other three.
+That total is not an App-wide or full-suite pass.
+
+Integration explicitly granted App the sole Flutter slot for only the today
+failure file or a minimal diagnostic. Under the shared nonblocking lock, the
+five-case file reproduced 2 pass / 3 fail with `zoneReads=1, tokenReads=0`.
+A temporary synthetic-only probe confirmed the exact Dart error: a narrowed
+`Future<Success<String>>` rejects an `onTimeout` callback returning
+`Failure<String>`. The broad exception boundary had converted that type error
+into a visible unknown state before preparation; no model/service was involved.
+The probe was removed after use, not retained as an implementation-mirroring
+test. Existing automatic tests retain all behavioral assertions and now include
+boundary diagnostics on failure.
+
+The minimal production correction removes the timeout callback and lets the
+existing catch convert the normal timeout exception into unknown. The same
+five-case file then passed **5/5** unchanged in behavior assertions. This window
+ran no other suite, analyzer, build, provider or phone operation, and the slot
+was returned immediately. Remaining central checks stay with Integration.
+
+Logs under `/home/miku/.local/state/enmori-core-feedback-20261025/`:
+- `app-today-diagnostic.log` SHA-256 `f99eab34a361f86cea6b35df7444e30ef40f0788be3528a21ffef4ae5f3aab48`.
+- `app-today-green.log` SHA-256 `a00f0372b4f7a0acf509ffb10d1774802c1af87b77134cf2f99ecad25c2c6d85`.

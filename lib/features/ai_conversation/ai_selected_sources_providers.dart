@@ -644,10 +644,7 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
       _records.clear();
       Result<String> zone;
       try {
-        zone = await _readTimeZone().timeout(
-          const Duration(seconds: 15),
-          onTimeout: () => const Failure(_readUnknown),
-        );
+        zone = await _readTimeZone().timeout(const Duration(seconds: 15));
       } catch (_) {
         zone = const Failure(_readUnknown);
       }
