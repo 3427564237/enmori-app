@@ -926,3 +926,37 @@ reported to Integration. Integration reported addressing them in its shared API
 commit; that report is not an independent recheck of the resulting commit.
 Owner-local `api-review-cases.log` and `api-review-snapshot.json` preserve the
 read-only observations. No shared API/bootstrap file was authored here.
+
+## Independent timeout finding and bounded reservation cleanup
+
+QA independently reproduced a reservation leak in the original `f1fce8a`
+Application with Context's real Store and Runtime's shared lane, replacing only
+transactions and model HTTP. After the delivery deadline, the matching physical
+completion released the model lane, but `failGeneration` used the expired
+operation actor. Its current check stopped cleanup before the Store call, so the
+intent remained reserved and inFlightOccurrenceId blocked a later queued intent
+with frequency. The worker's one-time startup recovery did not handle it.
+
+Four new composition regressions were red before the fix; owner-local
+`timeout-before.tap` preserves the failures. Terminal cleanup now uses the
+freshly verified original owner actor through the existing Application and Store
+barriers. The cleanup sites occur before model submission or after the physical
+promise has settled. Only the exact revision/scope-bound reservation can become
+failed. Publication and dispatch still use the original delivery deadline/signal;
+they cannot borrow the cleanup actor. An unknown physical outcome continues to
+hold its promise/lane and never reaches cleanup. A lost cleanup ACK stays unknown.
+
+Strict build and **24/24** Application/composition tests pass after the fix,
+including timeout and external abort, retained reservation/lane before physical
+completion, zero late message/provider call, clearing inFlight afterward and a
+later independent intent succeeding. A revoked original identity prevents cleanup
+instead of bypassing owner authorization; later authorized recovery is then still
+required. Raw output: `timeout-after.tap` / `timeout-after-build.log`.
+
+Integration's original normative commit `2a3b4f3` was merged unchanged. The broader
+13-file regression run is **251/252**: the remaining older conversation transport
+test assumes every conversation subroute is tagged isolated-emulator, while the
+approved read-state path is now explicitly tagged first-flow candidate. This
+specific assertion mismatch was reported to Integration, which owns its shared
+contract/test update. It does not change the 24-case cleanup result. Raw output:
+`timeout-combined.tap`. Independent QA rerun of the cleanup fix remains pending.
