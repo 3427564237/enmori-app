@@ -240,3 +240,41 @@ This checkpoint does not close Product's `629a22d` source-body/Search finding or
 QA's `cb8d982` same-owner unknown-registration finding. Their module owners are
 fixing both before final candidate acceptance. F1 picker/review UI, independent
 composed UI review and the final v28 artifact remain subsequent evidence layers.
+
+## Subsequent independent closures and F1 review component
+
+The preceding checkpoint is retained as its original observation. App's
+`bd10a8e` applies the source display fence to search results, the selected
+message, surrounding messages and captured navigation callbacks. Product
+reviewed the repair at `683fac9`; QA independently exercised three counterexamples
+at `9c65bb6`. The source/Search P1 is closed within that source/widget scope.
+See [QA's separate evidence](qa-app-source-search.md).
+
+Delivery's `df3351f` retains an unresolved registration revision across an
+exact-owner session replacement and clears it only after an authoritative
+advanced revision. It keeps credentials and different-owner UI separate.
+QA's `8bccd50` independently closes the same-owner unknown-fence finding with
+two cases. The author's 38-case suite remains a separate result. Neither
+result proves SDK, FCM or physical-device behavior.
+
+QA also identified the earlier Settings settle timeout as a test-platform
+fixture issue: the language channel lacked its read-only `readLanguage` mock.
+The actual settings state was ready. Root's revised fixture supplies that
+mock, restores `pumpAndSettle` and explicitly checks `PreferencesPhase.ready`
+for the configured and null-installation cases. No production workaround was
+introduced for this diagnostic.
+
+Root's `cad5fb4` adds the pure selected-reply review presentation. It displays
+only minimized source/time metadata and history pair sequence references.
+Confirmation returns to the draft; sending remains a separate action owned by
+the controller. Expired or inconsistent review state cannot be confirmed,
+busy work can be cancelled, and the layout supports scrolling and enlarged
+English/Chinese text. It contains no repository or model calls.
+
+Targeted analysis was clean and **18/18** cases passed: six new review-widget
+cases and the twelve updated shared composition/router cases. This is a
+replacement run of those shared cases, not eighteen additional cases to sum
+with the earlier twelve. Raw log `integration-f1-review-final.log` SHA-256:
+`9023d8a06dfcd6f737cca669183c2cd55dbb9f51c6fcd09416673366828a5517`.
+App still owns the picker/controller/page composition and its final F1 tests;
+independent F1 review and the v28 artifact remain open at this checkpoint.

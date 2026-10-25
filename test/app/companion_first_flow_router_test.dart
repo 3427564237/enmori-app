@@ -342,8 +342,9 @@ _pump(
   final client = MockClient((request) async {
     requests.add(request);
     if (registrationRead != null &&
-        request.url.path == '/v1/me/proactive-registration')
+        request.url.path == '/v1/me/proactive-registration') {
       return registrationRead.future;
+    }
     if (request.url.path == '/v1/me/onboarding') {
       return http.Response(
         jsonEncode({
