@@ -75,8 +75,17 @@ the eight new wire tests and final F1 UI execution not claimed by QA.
 The [D1 source review](qa-d1-source-review.md) reports a new P2 at `cb8d982`:
 controller rebuild clears unknown registration/settings mutation guards, so a
 same-UID session replacement can let an unchanged GET reopen mutation controls.
-This is a source finding awaiting focused validation/repair, separate from the
-author's two known cold-login failures. QA ran no D1 tests or SDK/service calls.
+The original source finding is preserved; the subsequent `df3351f` repair is now
+closed by independent source review and **2/2** focused fake tests. This remains
+a process-lifetime fence result, separate from the author's broader test batch
+and actual SDK/service/device acceptance.
+
+The [shared Settings diagnosis](qa-shared-settings-diagnostic.md) at `60f1105`
+separately identifies a missing native-language-channel mock in the shared
+fixture. Both null/configured D1 cases were already ready; the language progress
+ticker caused the settle timeout. With only that test boundary supplied, the
+original readiness/settle assertions pass **2/2**. The earlier failures and
+diagnostic attempts are retained; no production Settings change was needed.
 
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with

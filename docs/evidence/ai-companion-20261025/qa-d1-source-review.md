@@ -1,4 +1,4 @@
-# QA — D1 source review and pending finding
+# QA — D1 source review and unknown-fence repair
 
 25 October 2026. Reviewed Delivery candidate
 `cb8d98243cca029577b08a054577b42ae75bde07` and a private per-file snapshot of
@@ -81,3 +81,53 @@ Private snapshot and hashes:
 `review-source-manifest.json` records all five Delivery source hashes and five
 shared WIP hashes. The old snapshot remains available for reviewing any repair;
 QA changed no production or author test files.
+
+## Subsequent independent repair closure
+
+QA reviewed frozen Delivery `df3351f4ea310736d06e1be608a96679f01a9acb`
+(the functional repair is `043cce7`; the final commit formats the owned files).
+The original finding above remains the record for `cb8d982`. Its P2 is now
+closed at the later head within the source/fake scope below.
+
+The controller retains only unresolved expected registration/settings revisions
+in owner-keyed RAM. A rebuild restores the current subject's fence while clearing
+registration metadata and other session-bound UI. A different owner cannot see
+that metadata or provide credentials for the previous owner's cleanup. Returning
+to the original owner restores its outstanding fence. The controller records
+uncertainty only when the actual repository mutation is admitted; a token wait
+before dispatch is not falsely classified as an unknown write. Current-epoch
+guards prevent a late old callback from clearing the replacement session's
+fence. ACK, a definite no-effect response or a strictly advanced authoritative
+revision can settle the relevant fence; an unchanged GET cannot.
+
+In Integration's explicitly assigned exclusive Flutter window, QA independently
+ran exactly **2/2 targeted tests**, using the unmodified author test file at
+`df3351f`:
+
+- Unknown registration PUT, same-owner replacement, unchanged GET and another
+  explicit enable retain one PUT. Switching to a different owner hides metadata
+  and does not delete a token/registration; returning to the original owner
+  restores the fence. A newer authoritative revision clears it without starting
+  refresh subscriptions or another PUT.
+- Unknown settings PUT, same-owner replacement and unchanged GET remain
+  unconfirmed, with one settings mutation and no registration PUT.
+
+The second test observes retained uncertainty and mutation counts; the early
+enable guard was also inspected in source. QA did not add another mutation
+attempt to that test. Delivery's broader 38/38 and original red-counterexample
+run remain author evidence and are not included in QA's two-test count.
+
+The private `git archive` is
+`/home/miku/.local/state/enmori-ai-companion-20261025/qa-review/delivery-df3351f/`.
+`command.json`, `result.json` and `source-readback.json` bind the exact head,
+test selection and unchanged 393 archived files. The pinned existing package
+configuration/graph and unchanged lockfile were reused with `fvm flutter test
+--no-pub` under the global validation lock. The command exited 0; `flutter.log`
+SHA-256 is
+`68fd3fab5f0b6ca305e50fb8ba2d0ceda27d551eb616b8bd2ccde6ebaa21db20`.
+QA returned the slot after the separate Settings diagnosis.
+
+This closes the process-lifetime rebuild defect. It does not establish crash
+persistence, real SDK permission/token behavior, live registration, FCM delivery,
+device behavior or complete D1 acceptance. No production source was changed by
+QA and no real SDK, service, model or device call was made.
