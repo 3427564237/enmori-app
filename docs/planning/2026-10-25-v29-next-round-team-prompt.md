@@ -17,6 +17,7 @@ LI 已明确批准推送。成员先 fetch 并核对该远端分支实际完整 
 先读 AGENTS.md、docs/tooling/skill-routing.md、ARCHITECTURE.md，以及：
 - docs/decisions/2026-10-25-li-core-experience-repair.md
 - docs/decisions/2026-10-25-li-next-round-ownership.md
+- docs/decisions/2026-10-25-li-recommendation-completion.md（推荐范围的最新直接指令）
 - docs/handoff/2026-10-25-core-feedback-v29.md
 - docs/evidence/core-feedback-20261025/qa-final-verification.md
 - docs/evidence/core-feedback-20261025/deployment-verification.md
@@ -53,10 +54,14 @@ v29 已实现直接发送、自动当天本人最近五条参考、活动详情�
 负责来源授权、数据读回、跨页面失效和预约持久化/去重的后端缺口。重点处理当天
 边界、记录更新/删除、撤回同意、退出登录、未知写入及重启后的状态一致性，
 保护每天最多一次及已过期窗口不能自动恢复的边界；不自行开放永久 worker。
-核查活动/好友推荐的真实来源、排序、刷新与权限，修复现有合同内的缓存或空结果
-缺陷。朋友 Interested/Going、位置、兴趣、年龄、学校/组织的新权重只形成一份
-最小方案：现有数据是否可用、权限边界、示例结果、需要决策的具体差异；不得
-自行定权重、加字段或覆盖 Home Top 2 规则。其余后端工作不等待这项决策。
+直接完成活动/好友推荐改进，不只交方案：使用现有获准读取的兴趣、朋友可见
+Interested/Going、地区/位置、学校/组织及已有可用年龄，选择并实现合理初始
+权重、稳定同分顺序和真实推荐原因。缺失字段中性降级，不推断年龄或编造数据，
+不因缺一项阻塞其余实现。修复缓存/权限造成的重复或空结果；存在其他合格候选时
+“换一组”必须展示新候选，穷尽时明确提示。必要最小接口、UI 接点、fixture、
+文档和回归同包交付，说明实际采用的因素与权重。LI 已明确不再以旧排序/固定
+Home Top 2 作为本轮实现阻塞，也不再要求先等权重方案批准。优先复用已有资料
+和服务，保留访问权限、撤权、失败及未知状态；真实数据/模型验证仍交 LI。
 
 ## SHI：活动体验收口
 
