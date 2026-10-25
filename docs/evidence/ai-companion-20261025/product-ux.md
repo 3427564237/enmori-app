@@ -143,3 +143,36 @@ Product independently read the complete five-file `bd10a8e1598e71f040e38fd3330f7
 The original P1 remains recorded in [the review](../../design/ai-companion-20261025/app-origin-source-review.md), followed by this bounded repair disposition. Product read the new direct-hit, open-neighbour/stale-Next and selected-background/resume counterexamples, and verified App's local log hash `8995ed9031bc7c284895dd0702414a727a527ec062f6776b3b36cf2c8b6e1a11`, its 27-pass line and clean four-file analyzer result. These remain App's author checks. Product ran no Flutter. At this source-review checkpoint QA was awaiting its coordinated execution window; independent closure was not inferred from the author log.
 
 QA subsequently reported independent source plus **3/3** focused counterexamples at exact `bd10a8e1598e71f040e38fd3330f7e5baaf64859`, with log SHA-256 `254f52c289188ea1abd0bbe772c8990dd2985720f851c39d63de72471a1dfa88`. It confirmed direct-hit exclusion with unrelated user search intact, already-open neighbour masking and stale-Next rejection, and selected-source hiding across background/resume until exact fresh read. The P1 is therefore Closed within source/widget scope, preserving its original 629a22d failure. Product read QA's separate evidence at `9c65bb6ffc1fbdae7cf3d29b5caa02bca902127c` (`qa-app-source-search.md`), which explicitly does not claim an old-head red execution. These three cases are not added to App's 27/104 or promoted to full UI/runtime/device acceptance. QA reported the Flutter window returned to Integration.
+
+## Pure F1 review component — cad5fb4 source inspection
+
+At Integration's request, Product independently read both complete files in
+`cad5fb430091f01492a586143d2dcaf7bb4c9414` (parent `b8e3567ea9f71043cbbc6b4d33b842dd353043b7`):
+`ai_selected_reply_review.dart` and its six widget cases. No blocking source
+finding was identified for this presentation-only component under the approved
+F1/history-exclusion handoff.
+
+It displays only source kind and original UTC recorded/read timestamps, plus
+the server-prepared user/assistant sequence pairs. Keys, record IDs, versions,
+source bodies and private provenance are not rendered. The current wire parser
+restricts prepared cards to at most five Check-ins and history to at most two
+complete pairs. The view labels local, one-reply scope and keeps exclude,
+refresh, confirm and return actions distinct. Busy, expired or foreign-history-key
+state prevents confirmation; whole-pair exclusion status is visible. Confirm
+invokes only its supplied callback, with copy explicitly returning to the draft;
+the component contains no repository or Send call.
+
+Integration's 6/6 panel result (including 320px, 2x English/Chinese, expired,
+busy and all-excluded states) remains author evidence. Product ran no Flutter.
+The actual parent must enforce the original ticket/expiry across waiting,
+backgrounding and stale callbacks; fresh preparation must not inherit old keys
+or confirmation; explicit exclusion still requires fresh review and a separate
+Send; late prepare must not replace changed choices after return/cancel; unknown
+execute retains original-operation recovery. Preserved choices and usable
+expiry recovery in the composed narrow/large-text flow remain to be checked.
+These parent obligations are not new component findings or product scope.
+
+The actual picker/controller/page checkpoint, F1 end-to-end behavior, independent
+widget execution, real source/runtime and device evidence are not established by
+this component review. Product will inspect the composed frozen head separately;
+no F1-wide acceptance is recorded here.
