@@ -1,24 +1,11 @@
+import type { FirstFlowClaim, FirstFlowDispatch, FirstFlowSender } from "../ports/first-flow.js";
+
 /** S1 adapter. This module never constructs credentials, changes SDK internals,
  * follows redirects or retries an FCM message. Credential traffic is separate.
  * Firebase Admin's public Credential is structurally compatible with this input.
  */
 export interface FcmCredential {
   getAccessToken(): Promise<{ readonly access_token: string; readonly expires_in: number }>;
-}
-
-export interface SinglePostInput {
-  readonly registrationValue: string;
-  readonly deliveryRef: string;
-  readonly preview: "generic" | "hidden";
-  readonly signal: AbortSignal;
-}
-
-/** Implemented by the application over the current source/store Ports. claim()
- * MUST re-read authority after credential acquisition and atomically claim the
- * not_started outbox. current() also runs after the asynchronous claim. */
-export interface DispatchAuthorization {
-  claimAfterCredential(): Promise<boolean>;
-  current(): boolean;
 }
 
 export type SinglePostResult =
@@ -37,7 +24,7 @@ export interface SinglePostFcmOptions {
 const notAttempted = (reason: Extract<SinglePostResult, { kind: "not_attempted" }>["reason"]): SinglePostResult =>
   ({ kind: "not_attempted", reason });
 
-export class SinglePostFcmSender {
+export class SinglePostFcmSender implements FirstFlowSender {
   private readonly fetch: typeof globalThis.fetch;
   private readonly endpoint: string | undefined;
   private readonly timeoutMs: number;
@@ -49,36 +36,37 @@ export class SinglePostFcmSender {
     this.timeoutMs = options.timeoutMs ?? 15000;
   }
 
-  async sendOnce(input: SinglePostInput, authority: DispatchAuthorization): Promise<SinglePostResult> {
-    input = Object.freeze({ registrationValue: input.registrationValue, deliveryRef: input.deliveryRef,
-      preview: input.preview, signal: input.signal });
-    const permitted = (): boolean => {
-      try { return !input.signal.aborted && authority.current(); } catch { return false; }
+  async sendOnce(input: Parameters<FirstFlowSender["sendOnce"]>[0]): Promise<SinglePostResult> {
+    const permitted = (claim: FirstFlowClaim): boolean => {
+      try { return !input.signal.aborted && input.current(claim); } catch { return false; }
     };
-    if (!this.endpoint || !Number.isSafeInteger(this.timeoutMs) || this.timeoutMs < 1 || this.timeoutMs > 15000 ||
-      !/^[A-Za-z0-9_-]{1,128}$/.test(input.deliveryRef) || !input.registrationValue.trim() ||
-      Buffer.byteLength(input.registrationValue, "utf8") > 4096 || /[\u0000-\u001f\u007f]/.test(input.registrationValue) ||
-      (input.preview !== "generic" && input.preview !== "hidden")) return notAttempted("invalid_input");
-    if (!permitted()) return notAttempted("not_authorized");
+    if (!this.endpoint || !Number.isSafeInteger(this.timeoutMs) || this.timeoutMs < 1 || this.timeoutMs > 15000) return notAttempted("invalid_input");
+    if (input.signal.aborted) return notAttempted("not_authorized");
 
     let accessToken: string;
     try {
       const token = await this.options.credential.getAccessToken();
-      if (!token.access_token.trim() || /[\u0000-\u0020\u007f]/.test(token.access_token) || token.access_token.length > 8192 ||
+      if (!token.access_token.isWellFormed() || !token.access_token.trim() || /[\u0000-\u0020\u007f]/.test(token.access_token) || token.access_token.length > 8192 ||
         !Number.isFinite(token.expires_in) || token.expires_in <= 0) return notAttempted("credential_unavailable");
       accessToken = token.access_token;
     } catch { return notAttempted("credential_unavailable"); }
     // Never let a delayed OAuth result grant stale business authority.
-    if (!permitted()) return notAttempted("not_authorized");
+    if (input.signal.aborted) return notAttempted("not_authorized");
+    let dispatch: FirstFlowDispatch;
     try {
-      if (!await authority.claimAfterCredential()) return notAttempted("not_authorized");
+      const claim = await input.claimAfterCredential();
+      if (claim.kind !== "ok") return notAttempted("not_authorized");
+      dispatch = Object.freeze({ ...claim.value, claim: Object.freeze({ ...claim.value.claim }) });
     } catch { return notAttempted("not_authorized"); }
     // A lost/late claim ACK is not permission to dispatch or recycle the claim.
-    if (!permitted()) return notAttempted("not_authorized");
+    if (!permitted(dispatch.claim)) return notAttempted("not_authorized");
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(dispatch.deliveryRef) || !dispatch.registrationValue.isWellFormed() || !dispatch.registrationValue.trim() ||
+      Buffer.byteLength(dispatch.registrationValue, "utf8") > 4096 || /[\u0000-\u001f\u007f]/.test(dispatch.registrationValue) ||
+      (dispatch.preview !== "generic" && dispatch.preview !== "hidden")) return notAttempted("invalid_input");
 
-    const notification = input.preview === "hidden" ? { title: "ENMORI" } :
+    const notification = dispatch.preview === "hidden" ? { title: "ENMORI" } :
       { title: "ENMORI", body: "Open ENMORI to view an update." };
-    const data = { deliveryRef: input.deliveryRef };
+    const data = { deliveryRef: dispatch.deliveryRef };
     if (Buffer.byteLength(JSON.stringify({ notification, data }), "utf8") > 512) return notAttempted("invalid_input");
     const signal = AbortSignal.any([input.signal, AbortSignal.timeout(this.timeoutMs)]);
     // There is exactly one fetch invocation, with no SDK sender/wrapper/fallback.
@@ -87,8 +75,8 @@ export class SinglePostFcmSender {
       const response = await this.fetch(this.endpoint, {
         method: "POST", redirect: "error", signal,
         headers: { "content-type": "application/json", authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ message: { token: input.registrationValue, notification, data,
-          android: { priority: "NORMAL", ttl: "0s" } } }),
+        body: JSON.stringify({ message: { token: dispatch.registrationValue, notification, data,
+          android: { priority: "NORMAL", ttl: "0s", notification: { channel_id: "enmori_requested_followups" } } } }),
       });
       accessToken = "";
       if (response.status !== 200) {

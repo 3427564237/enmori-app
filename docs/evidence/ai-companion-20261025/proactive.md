@@ -754,3 +754,77 @@ These are isolated adapter/HTTP observations, not Firebase TLS/IAM/provider or
 device acceptance. F0 store/source Ports, complete application/worker/transport,
 atomic publication, restart persistence and real model composition remain the
 next implementation slice, coordinated with Context and Integration.
+
+## F0 application, bounded worker and HTTP checkpoint
+
+Merged Context's exact shared Port commits `42b0b2a` / `ff00e7c` and Integration's
+`47839d` without changing those owners' files. The sender now implements
+`FirstFlowSender`: the post-credential callback returns a freshly confirmed claim
+**and** the current registration/ref/preview. Routing data is no longer a
+pre-claim argument. It rejects malformed Unicode tokens, and the Android payload
+selects Root's explicit `enmori_requested_followups` channel. No SDK registration,
+actual permission request or platform write occurs in these tests.
+
+`FirstFlowApplication` supplies management/readback operations and the bounded
+reserve → model → parse → atomic-publish-Port → post-credential claim → one-POST
+workflow. Generation input contains only the dated quoted request, due/zone and
+permitted Persona, never owner/source IDs or fabricated user rows. It reuses
+`parseOutput(..., 'ai_assistant_message_v1', true)` because the local transport
+already returns content bytes; ordinary lists/URLs remain allowed. Unexpected
+write throws remain unknown, with ordinary readback rather than replay.
+
+`FirstFlowDueWorker` is explicitly constructed/started for one injected owner,
+scans at most three active references in a maximum 30-minute window, serializes
+ticks, recovers metadata once and never regenerates interrupted work. It aborts
+on stop/window expiry but waits for the physical model promise before releasing
+its in-process execution. This is an application guard, **not a replacement for
+the shared chat/Persona/F0 host lane**. Integration must inject Runtime's same
+lane into the actual model composition. No model/provider call is in a Store
+transaction callback.
+
+`transport/register-routes.ts` exports `registerFirstFlowRoutes`. Root owns its
+bootstrap registration, route inventory and normative API/schema integration.
+The 11 owner-only handlers have these exact success responses:
+
+| Route family | Status and explicit projection |
+| --- | --- |
+| GET/PUT settings | 200, direct `FirstFlowSettingsView`; no grant generation. An unconfirmed off/default zone remains empty rather than inventing a current zone. |
+| POST intent | 201, direct `FirstFlowIntentView`; mandatory single canonical UUIDv4 Idempotency-Key. |
+| GET intent / DELETE intent | 200, same minimal view. Cancellation has priority over any prior provider acceptance; irreversible dispatch adds `recallPossible:false`. |
+| GET active intents | 200, `{intents:[view]}`, complete bounded set ≤3; an excessive set is an error, not truncated success. |
+| GET/PUT/DELETE registration | 200, metadata only: revision/enabled/availability and optional installationRef/expiry. Never token echo. |
+| GET/PUT topic read-state | 200, revision/readThroughSequence; no retention-anchor mutation. |
+
+Public intent view contains only intentId/revision/state/dueAt/expiresAt/category/
+conversationId/optional recallPossible. It excludes raw source IDs, grants,
+authorizationScope, requiredSources and routing values. The internal dispatch
+accepted/unknown/dispatching observation folds into public state unless the
+intent is already cancelled/expired/failed. Accepted means provider acceptance,
+not device delivery. Errors use N01 `{error:{code,message},requestId}`.
+
+Root's six transport-review corrections are implemented and injected: canonical
+`.SSSZ` timestamps; malformed/missing/repeated key → 400
+`IDEMPOTENCY_KEY_INVALID`; malformed JSON/unsupported media → 400
+`REQUEST_INVALID`; oversized body → 413 `REQUEST_TOO_LARGE`; no non-create keys,
+AI-operation-key, competing revision headers, GET body/query/transfer-encoding
+or automatic HEAD route; final emit checks current actor and closes an invalid
+sink instead of returning a misleading failure response. Current Firebase caller
+verification is checked again before management effects; Store remains
+responsible for every actual source/account/transaction fence.
+
+Pinned strict build passes; **68/68** targeted cases pass (29 policy, 12 native
+loopback sender, 14 application/worker fakes and 13 Fastify injection cases).
+The first HTTP run had two expected-200 fixtures rejected with 400 because the
+test setup accidentally spread internal revision/grant fields into a settings
+command. Exact projection fixed the fixture; the production extra-field guard
+was preserved. Owner-local `f0-routes-before.tap` retains that original failure,
+and `f0-all.tap` / `f0-build.log` hold the final run.
+
+Application tests prove control flow against a handwritten Store, including
+unknown reserve/publish, source loss, settings changes, identity replacement,
+no anchor change, no fabricated user message, readback and physical quarantine.
+They do **not** prove Firestore atomicity, canonical source receipts/resolvers,
+production route registration, actual host-lane composition, real model quality,
+FCM/IAM or native behavior. Context's real Store/bridge and Root composition still
+need their corresponding integrated tests; no deployment/data/device acceptance
+is inferred from this checkpoint.
