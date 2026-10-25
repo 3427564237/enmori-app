@@ -38,7 +38,7 @@ their separate scope and cannot fill this missing evidence.
 
 Private directory:
 `/home/miku/.local/state/enmori-ai-companion-20261025/context-f1-production-6bab960-once/`.
-The committed runner matches the frozen copy in this directory. It is preserved
+The runner committed at `f58c3c3` matches the frozen copy in this directory. It is preserved
 as the exact failed evidence source, not a ready reusable command. Running it
 again is blocked by the retained job-wide reservation. A later execution needs
 Integration's separate bounded authorization; neither that reservation nor the
@@ -65,3 +65,9 @@ occurred before the manifest/reservation existed and made zero network calls.
 The private evidence capture was explicitly authorized for this all-synthetic
 request. No Auth token, password or operation key was written to evidence or
 application logs. Semantic review remains independent of protocol success.
+
+A later, separately authorized continuation repaired only the getter assignment
+and consumed the remaining one-generation allowance. Its cumulative result and
+independent-review boundary are recorded in
+[the continuation evidence](context-f1-production-continuation.md). This original
+failure, manifest and reservation remain preserved unchanged.
