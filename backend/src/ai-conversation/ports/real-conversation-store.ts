@@ -4,7 +4,7 @@ import type { ContextDependencies, ConversationHistory, HistoryPairIdentity } fr
 import type { PresentationMetadata } from "./conversation-lifecycle.js";
 
 /** N02/F01 asynchronous boundary. The synchronous fake effect(commit) Port is unchanged. */
-export type StoreFailure = "unavailable" | "denied" | "terminated" | "conflict" | "conversation_unavailable";
+export type StoreFailure = "unavailable" | "denied" | "terminated" | "conflict" | "conversation_unavailable"|"selection_conflict"|"source_unavailable"|"source_changed";
 export type StoreResult<T> = { readonly kind: "confirmed"; readonly value: T }
   | { readonly kind: StoreFailure }
   // A thrown/lost transaction acknowledgment is never proof of no effect.
@@ -43,6 +43,7 @@ export interface StoredConversationMessage {
   readonly origin?: "proactive";
   readonly occurrenceId?: string;
   readonly category?: "explicit_follow_up";
+  readonly replyToMessageId?:string;
   readonly sources?: readonly import("./owned-sources.js").OwnedSourceCard[];
   /** Actual immutable service metadata; convert only at the HTTP projection. */
   readonly persistedAt: FullPrecisionInstant;

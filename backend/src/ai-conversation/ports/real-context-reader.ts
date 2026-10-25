@@ -14,7 +14,7 @@ export interface AcceptedContextRead {
   readonly signal: AbortSignal;
 }
 
-export type ContextReadFailure = "denied" | "unavailable" | "terminated";
+export type ContextReadFailure = "denied" | "unavailable" | "terminated"|"selection_conflict"|"changed"|"source_unavailable";
 export type ContextReadResult<T> = { readonly kind: "read"; readonly value: T }
   | { readonly kind: ContextReadFailure };
 
@@ -80,6 +80,8 @@ export interface HistoryPairIdentity {
   readonly userSequence: number; readonly assistantSequence: number;
 }
 export interface ConversationHistory {
+  readonly replyToAssistant?:{readonly occurredAt:string;readonly text:string};
+  readonly messageSources?:readonly {readonly kind:"conversation_message";readonly id:string;readonly version:string}[];
   readonly pairs: readonly { readonly identity: HistoryPairIdentity; readonly user: string; readonly assistant: string }[];
   readonly sources: ContextDependencies["sources"];
 }
