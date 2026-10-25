@@ -205,7 +205,8 @@ final class BackendActivityRepository implements PagedActivityRepository {
           categoryLabel: raw['categoryLabel'] as String?,
           shortDescription: raw['shortDescription'] as String?,
           coverImageUrl: validEventCoverUrl(raw['coverImageUrl'])
-              ? raw['coverImageUrl'] as String : null,
+              ? raw['coverImageUrl'] as String
+              : null,
         ),
       );
     } catch (_) {

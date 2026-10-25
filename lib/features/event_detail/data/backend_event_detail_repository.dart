@@ -76,7 +76,8 @@ final class BackendEventDetailRepository implements EventDetailRepository {
         categoryLabel: value['categoryLabel'] as String?,
         shortDescription: value['shortDescription'] as String?,
         coverImageUrl: validEventCoverUrl(value['coverImageUrl'])
-            ? value['coverImageUrl'] as String : null,
+            ? value['coverImageUrl'] as String
+            : null,
       ),
     );
   }

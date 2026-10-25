@@ -70,7 +70,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(actions.opened, isEmpty);
       expect(find.text('End time not provided.'), findsOneWidget);
-      await tester.ensureVisible(find.byKey(const Key('event-detail-open-source')));
+      await tester.ensureVisible(
+        find.byKey(const Key('event-detail-open-source')),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('event-detail-open-source')));
       await tester.pump();

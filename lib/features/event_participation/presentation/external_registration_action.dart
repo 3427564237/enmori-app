@@ -85,7 +85,10 @@ final class _ExternalRegistrationActionState
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          context.tr('Continue to Ticketmaster tickets?', '前往 Ticketmaster 购票？'),
+          context.tr(
+            'Continue to Ticketmaster tickets?',
+            '前往 Ticketmaster 购票？',
+          ),
         ),
         content: SingleChildScrollView(
           child: Text(
@@ -248,7 +251,12 @@ final class _ExternalRegistrationActionState
               ? _open
               : null,
           icon: const Icon(Icons.open_in_new),
-          label: Text(context.tr('Tickets / booking on Ticketmaster', '在 Ticketmaster 购票／预订')),
+          label: Text(
+            context.tr(
+              'Tickets / booking on Ticketmaster',
+              '在 Ticketmaster 购票／预订',
+            ),
+          ),
         ),
       ],
     );

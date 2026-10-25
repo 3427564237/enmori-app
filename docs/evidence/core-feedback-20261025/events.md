@@ -62,7 +62,11 @@ using Flutter's global image cache. A generation fence discards late results;
 the page owns cancellation and decoded-image disposal. Missing/failed media
 keeps text and actions usable. The original parent detail expiry remains the
 expiry; image work does not refresh it. Background/sign-out/disposal remove the
-owned image without clearing unrelated media.
+owned image without clearing unrelated media. A route becoming non-current
+also cancels/clears its cover even when the original detail remains mounted in
+the Navigator stack. Returning does not automatically reload that snapshot.
+The same conservative clearing applies when a modal dialog covers the detail;
+Integration explicitly accepted this built-in `ModalRoute.isCurrent` boundary.
 
 `EventInformation` displays time, readable place and introduction after source
 and direct image-CDN disclosure. It contains no ticket action. App composition
@@ -81,10 +85,35 @@ cases plus existing browse/pagination cases). They cover unsafe/missing optional
 content, Unicode bound, venue/address, exact detail serialization, list
 minimization, identity/access, source cancellation and no-store behavior.
 
-Flutter analysis/format and the focused tests are pending the Integration-owned
-validation slot. New tests cover both HTTP readers, download bounds/redirects,
-no credentials, late cancellation, original expiry, narrow large-text layout
-and global-cache isolation. This paragraph will be updated with actual results.
+Within Integration's exclusive shared-flock slot, Flutter 3.47.2 formatting and
+`fvm dart analyze --fatal-infos` on all **17 changed Dart files passed**.
+The following six files passed **43/43** cases using
+`fvm flutter test --no-pub --reporter expanded`:
+
+- `test/features/event_information_test.dart`
+- `test/features/event_cover_loader_test.dart`
+- `test/features/event_browse_test.dart`
+- `test/features/event_source_projection_test.dart`
+- `test/features/event_participation_components_test.dart`
+- `test/features/event_detail_unicode_test.dart`
+
+These cover both HTTP readers, byte/MIME/redirect bounds, no credentials,
+background/owner/late cancellation, original expiry, narrow large-text layout,
+global-cache isolation and explicit external return/unknown-write protection.
+Two real `Navigator.push` cases retain the underlying detail and verify pending
+work cancellation and decoded-image disposal, with no late refill or auto reload.
+The source-only independent QA observation that prompted those route cases was
+accepted and fixed; this is not a final independent runtime acceptance claim.
+
+The initial focused run found two new test-harness defects (missing scroll and
+an unconfigured Auth stream causing a Riverpod retry timer), now fixed. It also
+found a stale list-copy assertion and omitted missing-end list text; the
+assertion now matches the existing copy and the list explicitly says the source
+did not provide an end time, preserving the approved missing-field behavior.
+Description fallback now says "Event description unavailable", covering both
+absence and rejected unsafe source text. No broader historical-test cleanup was
+performed. After the successful rerun, no additional tests or provider calls
+were started; Integration owns the final combined verification.
 
 Root owns normative OpenAPI, the generic EventDetail HTTP serializer,
 `controlled-event-recommendations.ts` projection and app route injection. Their

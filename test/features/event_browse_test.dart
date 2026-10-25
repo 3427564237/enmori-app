@@ -177,7 +177,10 @@ void main() {
       String? selected;
       await pump(tester, repo, select: (id) => selected = id);
       expect(find.text(summary.title), findsOneWidget);
-      expect(find.textContaining('not the full catalogue'), findsOneWidget);
+      expect(
+        find.textContaining('not Ticketmaster’s full catalogue'),
+        findsOneWidget,
+      );
       expect(find.textContaining('End time not provided.'), findsOneWidget);
       await tester.tap(find.byType(ListTile));
       expect(selected, id);
@@ -320,7 +323,9 @@ void main() {
         );
       await pump(tester, repo);
       expect(
-        find.text('This available selection is empty. You can check again later.'),
+        find.text(
+          'This available selection is empty. You can check again later.',
+        ),
         findsOneWidget,
       );
       repo.result = const Failure(
@@ -359,7 +364,7 @@ void main() {
       );
       await pump(tester, repo, key: id, opener: opener);
       expect(opener.calls, 0);
-      expect(find.text('Ticketmaster has not provided a description for this event.'), findsOneWidget);
+      expect(find.text('Event description unavailable.'), findsOneWidget);
       await reveal(tester, find.text('Tickets / booking on Ticketmaster'));
       await tester.tap(find.text('Tickets / booking on Ticketmaster'));
       await tester.pumpAndSettle();
@@ -504,7 +509,9 @@ void main() {
       await reveal(tester, find.text('Tickets / booking on Ticketmaster'));
       expect(
         tester.getTopLeft(explanation).dy,
-        lessThan(tester.getTopLeft(find.text('Tickets / booking on Ticketmaster')).dy),
+        lessThan(
+          tester.getTopLeft(find.text('Tickets / booking on Ticketmaster')).dy,
+        ),
       );
       await tester.tap(find.text('Tickets / booking on Ticketmaster'));
       await tester.pumpAndSettle();

@@ -10,8 +10,7 @@ final class TicketmasterEventCoverLoader implements EventCoverLoader {
   final HttpClient Function() createClient;
   static HttpClient _client() => HttpClient()..autoUncompress = false;
   @override
-  EventCoverLoad start(String sourceUrl) =>
-      _CoverLoad(sourceUrl, createClient);
+  EventCoverLoad start(String sourceUrl) => _CoverLoad(sourceUrl, createClient);
 }
 
 final class _CoverLoad implements EventCoverLoad {
@@ -24,7 +23,10 @@ final class _CoverLoad implements EventCoverLoad {
   @override
   late final Future<Uint8List?> bytes;
 
-  Future<Uint8List?> _read(String url, HttpClient Function() createClient) async {
+  Future<Uint8List?> _read(
+    String url,
+    HttpClient Function() createClient,
+  ) async {
     if (!validEventCoverUrl(url)) return null;
     final timer = Timer(const Duration(seconds: 10), cancel);
     try {
@@ -35,11 +37,17 @@ final class _CoverLoad implements EventCoverLoad {
       request.headers.set(HttpHeaders.cacheControlHeader, 'no-store');
       request.headers.set(HttpHeaders.acceptEncodingHeader, 'identity');
       final response = await request.close();
-      if (_cancelled || response.statusCode != HttpStatus.ok ||
+      if (_cancelled ||
+          response.statusCode != HttpStatus.ok ||
           response.contentLength > maxBytes ||
-          !const ['image/jpeg', 'image/png', 'image/webp']
-              .contains(response.headers.contentType?.mimeType) ||
-          (response.headers.value(HttpHeaders.contentEncodingHeader) ?? 'identity') != 'identity') {
+          !const [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+          ].contains(response.headers.contentType?.mimeType) ||
+          (response.headers.value(HttpHeaders.contentEncodingHeader) ??
+                  'identity') !=
+              'identity') {
         return null;
       }
       final bytes = BytesBuilder(copy: false);

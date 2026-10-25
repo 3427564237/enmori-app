@@ -27,7 +27,12 @@ const _lifetimeDisclosure =
 
 /// LI supplies route/session guards and list navigation. Never remaps /events.
 final class ActivityPage extends ConsumerStatefulWidget {
-  const ActivityPage({this.browseId = '', this.onSelect, this.detailBuilder, super.key});
+  const ActivityPage({
+    this.browseId = '',
+    this.onSelect,
+    this.detailBuilder,
+    super.key,
+  });
   final String browseId;
   final ValueChanged<String>? onSelect;
   final Widget Function(BuildContext, ActivityDetail)? detailBuilder;
@@ -155,8 +160,8 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                               : const Icon(Icons.chevron_right),
                           subtitle: Text(
                             context.tr(
-                              '${_time(context, item.startAt)}${item.endAt == null ? '' : '\nUntil ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
-                              '${_time(context, item.startAt)}${item.endAt == null ? '' : '\n结束于 ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
+                              '${_time(context, item.startAt)}${item.endAt == null ? '\nEnd time not provided.' : '\nUntil ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
+                              '${_time(context, item.startAt)}${item.endAt == null ? '\n未提供结束时间。' : '\n结束于 ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
                             ),
                           ),
                           onTap: widget.onSelect == null
@@ -177,33 +182,39 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                     if (widget.detailBuilder != null)
                       widget.detailBuilder!(context, detail)
                     else ...[
-                    Text(
-                      detail.summary.title,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    Text(
-                      context.tr(
-                        'Starts: ${_time(context, detail.summary.startAt)}',
-                        '开始：${_time(context, detail.summary.startAt)}',
+                      Text(
+                        detail.summary.title,
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
-                    ),
-                    Text(
-                      detail.summary.endAt == null
-                          ? context.tr('End time not provided.', '未提供结束时间。')
-                          : context.tr(
-                              'Ends: ${_time(context, detail.summary.endAt!)}',
-                              '结束：${_time(context, detail.summary.endAt!)}',
+                      Text(
+                        context.tr(
+                          'Starts: ${_time(context, detail.summary.startAt)}',
+                          '开始：${_time(context, detail.summary.startAt)}',
+                        ),
+                      ),
+                      Text(
+                        detail.summary.endAt == null
+                            ? context.tr('End time not provided.', '未提供结束时间。')
+                            : context.tr(
+                                'Ends: ${_time(context, detail.summary.endAt!)}',
+                                '结束：${_time(context, detail.summary.endAt!)}',
+                              ),
+                      ),
+                      Text(
+                        detail.locationLabel ??
+                            context.tr('Location unavailable.', '暂无地点信息。'),
+                      ),
+                      Text(
+                        detail.categoryLabel ??
+                            context.tr('Category unavailable.', '暂无分类信息。'),
+                      ),
+                      Text(
+                        detail.shortDescription ??
+                            context.tr(
+                              'Event description unavailable.',
+                              '暂无可用活动简介。',
                             ),
-                    ),
-                    Text(
-                      detail.locationLabel ??
-                          context.tr('Location unavailable.', '暂无地点信息。'),
-                    ),
-                    Text(
-                      detail.categoryLabel ??
-                          context.tr('Category unavailable.', '暂无分类信息。'),
-                    ),
-                    Text(detail.shortDescription ?? context.tr('Ticketmaster has not provided a description for this event.', 'Ticketmaster 未提供此活动的简介。')),
+                      ),
                     ],
                     const SizedBox(height: 16),
                     Text(
@@ -215,7 +226,10 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                     FilledButton(
                       onPressed: () => _action(true),
                       child: Text(
-                        context.tr('Tickets / booking on Ticketmaster', '在 Ticketmaster 购票／预订'),
+                        context.tr(
+                          'Tickets / booking on Ticketmaster',
+                          '在 Ticketmaster 购票／预订',
+                        ),
                       ),
                     ),
                     TextButton(

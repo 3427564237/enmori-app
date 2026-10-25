@@ -101,7 +101,10 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
               AsyncData<EventDetail>(:final value) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  EventInformation(event: value, syntheticPreview: widget.syntheticPreview),
+                  EventInformation(
+                    event: value,
+                    syntheticPreview: widget.syntheticPreview,
+                  ),
                   const SizedBox(height: 8),
                   if (!widget.syntheticPreview) ...[
                     Text(
@@ -130,7 +133,10 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
                       },
                       icon: const Icon(Icons.open_in_new),
                       label: Text(
-                        context.tr('Tickets / booking on Ticketmaster', '在 Ticketmaster 购票／预订'),
+                        context.tr(
+                          'Tickets / booking on Ticketmaster',
+                          '在 Ticketmaster 购票／预订',
+                        ),
                       ),
                     ),
                   ],
