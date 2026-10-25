@@ -501,7 +501,10 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     final sources = enabled
         ? ref.watch(aiOwnedSourcesControllerProvider)
         : null;
-    final hidden = sources?.hides(message) == true;
+    final hidden =
+        message.availability == AiAvailability.available &&
+        message.text != null &&
+        !canDisplayAiMessage(conversation, message, sources: sources);
     final located = conversation.messageLocation;
     final focused =
         located?.phase == AiMessageLocationPhase.ready &&

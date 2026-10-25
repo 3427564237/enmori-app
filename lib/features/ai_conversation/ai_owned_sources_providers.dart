@@ -49,6 +49,25 @@ final aiOwnedSourcesControllerProvider =
       AiOwnedSourcesController.new,
     );
 
+/// Every transcript-derived surface uses this same current display boundary.
+/// Hiding a source view is temporary and never rewrites its canonical message.
+bool canDisplayAiMessage(
+  AiConversationState conversation,
+  AiMessage message, {
+  AiOwnedSourcesState? sources,
+}) {
+  if (message.availability != AiAvailability.available ||
+      message.text == null) {
+    return false;
+  }
+  if (sources == null) return true;
+  if (sources.sessionKey != conversation.sessionKey ||
+      sources.conversationId != conversation.conversationId) {
+    return !message.isProactive && message.sources.isEmpty;
+  }
+  return !sources.hides(message);
+}
+
 /// Source navigation and read metadata have a separate request lifetime. They
 /// cannot dispatch/retry chat, acknowledge delivery or extend topic retention.
 class AiOwnedSourcesController extends Notifier<AiOwnedSourcesState> {
