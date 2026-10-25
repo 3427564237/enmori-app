@@ -287,12 +287,12 @@ source IDs, request keys, delivery references and bodies never enter logs.
 | --- | --- |
 | `GET /v1/me/proactive-settings` | Owner-only settings plus `revision`; no private-source content or device registration value. |
 | `PUT /v1/me/proactive-settings` | Full replacement with `expectedRevision`, `mode:on/off/paused`, optional `pausedUntil`, `categories`, `timeZone`, `quiet:{startMinute,endMinute}` or explicit disabled, `maximumInRolling24h:1/2`, `cooldownMinutes:480`, `pushEnabled`, `preview:generic/hidden`. Compare revision before no-op. An effective purpose/category/off/pause change advances grant generation; off cancels unstarted intents. Push opt-in does not grant cloud model processing. Return current representation/revision. |
-| `POST /v1/me/proactive-intents` | `Idempotency-Key`: canonical UUID, also the proposed owner-scoped `intentId` so a lost ACK can be queried. Body: `conversationId`, `sourceMessageId`, `category:explicit_follow_up`, `dueAt`, `timeZone`, `processing:local`, `expectedSettingsRevision`. Cloud is rejected in this first slice unless separately selected in the reconciled LI decision. Server rereads source, topic, grants, zone and future due instant, then captures exact source/topic versions and min(source/topic cutoff, due+2h) expiry. No model call during creation. Store no new copy of the request text. Same key + identical normalized command returns the same current intent; same key + changed command conflicts, and cancelled/expired intent never becomes queued again. |
+| `POST /v1/me/proactive-intents` | `Idempotency-Key`: canonical UUID, also the proposed owner-scoped `intentId` so a lost ACK can be queried. Body: `conversationId`, `sourceMessageId`, `category:explicit_follow_up`, `dueAt`, `timeZone`, `processing:local`, `expectedSettingsRevision`. Cloud is rejected in this first slice unless separately selected in the reconciled LI decision. Server rereads source, topic, grants, zone and future due instant, then captures exact source/topic versions and min(source/topic cutoff, due+2h) expiry. No model call during creation. Store no new copy of the request text. While its command receipt remains live, same key + identical normalized command returns the same current intent; changed command conflicts. A terminal receipt returns terminal status without recreating work. No permanent key registry is claimed. |
 | `GET /v1/me/proactive-intents/{intentId}` | Ordinary current-owner status read for known UUID; returns `intentId`, `revision`, state, due/expiry, category and topic only while permitted. Used after unknown create/cancel ACK; not an automatic retry. |
 | `GET /v1/me/proactive-intents` | First slice returns the complete bounded active set, at most three intent summaries from the owner-state references. No cross-owner/global scan or copied source text. A larger/general list contract is deferred. |
 | `DELETE /v1/me/proactive-intents/{intentId}` | JSON body `{expectedRevision}`; no competing header/query precondition. Compare revision first; cancel queued/reserved/prepared, advance once and remove active membership. Repeated matching terminal cancellation has no new effect. If dispatch may already have begun, return current `unknown/accepted` state with `recallPossible:false`, never claim notification recall. Does not delete the conversation/message. |
-| `PUT /v1/me/proactive-registration` | `expectedRevision`, `installationRef` (new owner-selected canonical UUID on initial registration), `registrationKind:fcm_token/firebase_installation_id`, opaque `registrationValue` (UTF-8 <=4096 bytes), and explicit `enabled:true`. Backend accepts only the kind supported by the reviewed SDK pairing; this enum does not approve either dependency. Exactly one active registration per owner in this first slice. Return only installationRef/revision/expiry/availability. No value echo, no public token lookup, no FCM topics. |
-| `DELETE /v1/me/proactive-registration` | JSON body `{expectedRevision,installationRef}`; no competing header/query precondition. Verify current owner and binding. Immediately disable/erase backend registrationValue, advance revision and stop pending push. A new account cannot inherit an old binding: sign-out/account replacement must release the old binding first; unknown release holds push until resolved. Already accepted generic platform notifications remain subject to the documented recall limitation. |
+| `PUT /v1/me/proactive-registration` | `expectedRevision`, `installationRef` (the fixed server/operator-approved opaque reference for this named device), `registrationKind:fcm_token/firebase_installation_id`, opaque `registrationValue` (UTF-8 <=4096 bytes), and explicit `enabled:true`. Backend accepts only the selected SDK kind and the trusted one-owner/installation allowlist, rejecting every other owner/binding. Exactly one registration in this first test. Return only installationRef/revision/expiry/availability. No value echo, no public token lookup, no FCM topics or general cross-account transfer API. |
+| `DELETE /v1/me/proactive-registration` | JSON body `{expectedRevision,installationRef}`; no competing header/query precondition. Verify current owner and binding. Once the command commits, disable/erase backend registrationValue, advance revision and stop pending push. Sign-out/account replacement ends this fixed-account test; no new owner binding is accepted. An unknown/offline release may not yet be visible to the server, so it cannot guarantee immediate cessation. No new push attempt is permitted by the test driver until the release is resolved; accepted generic notices retain the recall limitation. |
 | `PUT /v1/me/conversations/{conversationId}/read-state` | `expectedRevision`, `readThroughSequence`. Server verifies owner, live topic, existing committed currently authorized sequence; monotonically advance to max(current, requested), never past the highest currently authorized sequence. Return revision/readThroughSequence. Push accepted/received/clicked alone is not read. A stale/unknown write needs readback before another explicit command. |
 | Existing transcript / context read | Extend the approved owner message projection with a genuine assistant `origin:proactive`, trusted occurrence/category/cause card and source resolver refs under Context's allowlist. No `replyToUser`, fake user row, or inclusion as a complete historical pair. Replies resolve the trusted owner/topic/target first and enter the normal real-user flow. Existing search/deletion remain. |
 
@@ -317,6 +317,21 @@ or new distributed scheduler is needed.
 | Existing canonical message and source provenance | Server-assigned sequence/messageId, role assistant, explicit proactive origin, accepted text, occurrenceId/category and approved minimized provenance. An internal `appendProactive` operation checks original topic cutoff and versions, appends once, and **does not advance the old anchor under R-ANCHOR**. It cannot call the existing user/assistant-pair saver with an invented user. Existing serializers/resolvers/retention logic must be explicitly adapted and independently reviewed. |
 | Optional test-only `accounts/{owner}/proactive_transport_diagnostics/{permitId}` | Only if T1's extra two sends are expressly approved: `revision`, `installationRef`, `canonicalMessageId`, `permittedDeviceState:background/ordinary_closed`, `expiresAt` at the named window end, `attemptLimit:1`, `state:not_started/dispatching/accepted/unknown/skipped`, `attemptedAt?`, `providerAcceptedAt?`. Operator-created, no public create/send endpoint, at most two records. Claim dispatching atomically before one sender invocation; unknown never replays. Reauthorize the referenced canonical message and all normal non-frequency permissions before send. No model call, new assistant message, raw packet or registration value. Minimize/delete this diagnostic metadata within 24h of test end; no general diagnostic retention is authorized. |
 
+The owner-local registration singleton is **not proof of global installation
+uniqueness**. This first contract relies on the trusted fixed owner/device gate
+and refuses transfers. A general app rollout needs a separately specified global
+installation-binding uniqueness/index and online/offline replacement lifecycle;
+changing a client UUID must not grant transfer authority. The short registration
+lease, generic text/TTL0 and current-owner click checks reduce consequences but
+do not make an offline sign-out visible to the server instantly.
+
+Idempotency is guaranteed only within the live command/effect receipt lifecycle
+and this gated 30-minute test. Once a terminal receipt is removed it is not a
+global forever-used nonce registry. Old same-command requests are independently
+rejected once their due/source/topic is expired; unknown writes require readback,
+and a new explicitly confirmed intent requires a fresh key. No old key is reused
+for another request, diagnostic or automatic retry.
+
 The intent is one-shot: before reservation, an edited source can replace the
 queued candidate only through a fresh authorized preparation/version update.
 Once generation has begun, a source/grant change discards old text and ends that
@@ -333,22 +348,32 @@ Transactions and recovery proposed for this schema:
    concurrent worker must lose the compare and reread. The claim is not granted
    by this module's pure `allow` return.
 3. After generation, repeat Context checks. Atomically append the true proactive
-   message/provenance and change the same occurrence to `dispatching` (or `skipped`
-   for in-app-only), charge one frequency slot and record installation revision.
+   message/provenance, set occurrence `state:published` and `publishedAt`, create
+   `dispatchState:not_started` (or `skipped` for in-app-only), charge one contact
+   frequency slot and record installation revision. The final wire adapter must
+   distinguish the accepted canonical message from its provider dispatch state;
+   `published` is a Proposed production state, not a claim that the current pure
+   reducer already implements this persistence protocol. Admission ledger
+   projections must use the canonical contact-commit time without charging again
+   on provider submission.
    Recheck the existing topic's original expiry; do not recreate an expired topic.
    Source/grant/topic invalidation and this commit need compatible version fences.
-4. Only the original one-use in-memory dispatch capability from the successful
-   commit may proceed. Before the external sender invocation, re-read the occurrence and current
+4. Before the external sender invocation, re-read the occurrence and current
    installation, permission/purpose, quiet/zone and source authority again. If
-   invalid, skip the unsent push and apply current content invalidation. A unique
-   dispatch compare/capability prevents a second worker invocation. This is a
-   fresh source/channel guard, not a second call to pure preflight on an already
-   `dispatching` record (that correctly returns unknown/hold). Send only the generic
+   invalid, skip the unsent push and apply current content invalidation. Only a
+   successful atomic CAS `dispatchState:not_started -> dispatching` with
+   `attemptedAt` grants the one-use sender capability; one winner invokes the
+   provider. No second worker may claim an already-dispatching record. This is a
+   fresh source/channel guard over the published receipt, not replaying generation
+   or invoking pure preflight on an already-dispatching ledger. Send only the generic
    envelope. Commit provider acceptance as a status; a timeout/crash means unknown.
    No provider acceptance is interpreted as device receipt or an unread mutation.
 5. Restart: scan only trusted active references; queued work reevaluates if still
-   valid; interrupted reserved/prepared output fails without regenerating;
-   dispatching becomes unknown without send replay. Current reads enforce
+   valid; interrupted unpublished reserved/prepared output fails without
+   regenerating. A published canonical message with outbox `not_started` is
+   provably not submitted by this protocol and may be chosen for dispatch only
+   after all fresh guards; it needs no saved raw generation output. Outbox
+   `dispatching` becomes unknown without send replay. Current reads enforce
    deletion/expiry before cleanup. Automatic transaction retries may only reread
    fences, never repeat the model or provider call. Limit retry attempts in the
    eventual adapter so the operation estimate stays bounded.
