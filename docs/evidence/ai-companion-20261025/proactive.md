@@ -1044,3 +1044,44 @@ Raw output: `d1-tests-second.log`. Delivery returned the Flutter slot so App and
 Integration can run their already queued short batches. Independent QA and all
 actual SDK/registration/device/service acceptance are still pending. No real
 notification permission, token, Backend registration or FCM request was made.
+
+### D1 author validation and same-owner unknown-fence repair
+
+The two cold-login observations were fixture timing: the Auth stream update
+invalidates a Riverpod provider for the next frame. The tests now observe that
+frame and still require a fresh account-settings read, accepted current consent,
+the exact authenticated instance and a fresh opaque resolver. Production guards
+were not loosened to pass those tests.
+
+Independent QA found a separate P2 in `cb8d982`: rebuilding for a same-UID new
+session erased the unknown PUT fence. A new single counterexample was run against
+the exact original controller source and failed (`unconfirmed` became false).
+The original file was then restored to the current candidate and the same case
+passed. Diagnostics are owner-local `d1-owner-fence-before.log` and
+`d1-final-tests.log`; no peer source or SDK implementation was substituted.
+
+The fix retains only expected registration/settings revisions in owner-keyed
+RAM. The active owner restores its own fence across session/provider rebuilds;
+other owners receive no previous metadata, pending UI or credentials. Returning
+to the first owner still requires authoritative readback. An unchanged revision
+does not clear an unknown PUT. The fence is recorded at actual Repository-command
+admission, not while waiting for a token before any command. ACK, a definite
+no-effect failure or an advanced authoritative revision settles the relevant
+fence. This is process-lifetime evidence, not crash-persistent client storage.
+
+The final isolated D1 batch passes **38/38**, and targeted analysis of all ten
+new source/test files reports **No issues found**. In addition to the original
+34 cases it covers same-owner replacement, different-owner UI isolation and
+return, coalesced quick sign-out, consent-withdrawal cleanup and refusing local
+token deletion after failed owner verification. A cancellable sign-out deadline
+leaves no timer after fast cleanup, while SDK physical mutation serialization
+remains held after a bounded caller timeout. A throwing navigation supplier does
+not consume the opaque pending reference before handing it off.
+
+Commands were `fvm flutter analyze --no-pub <ten owned files>` and
+`fvm flutter test --no-pub --reporter expanded <four new test files>`, each under
+the shared nonblocking validation lock. Raw output: `d1-final-analyze.log` and
+`d1-final-tests.log`. Only handwritten SDK/HTTP/Auth/Repository fakes and a mocked
+native MethodChannel were used. No real permission request, token, registration,
+provider send, device install or APK build occurred. Independent QA acceptance
+of this final D1 delta and Root's real composition remain separate checkpoints.
