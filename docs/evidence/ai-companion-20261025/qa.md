@@ -11,13 +11,16 @@ executed checks and unresolved findings are in [qa-review.md](qa-review.md).
 No production implementation was authored by QA.
 
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
+[approved C source/widget review](qa-c-entry-review.md), with
 [proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is
 **12 Pass / 12 Fail / 0 unreviewed**; the small-plan gate remains Fail despite
 23 protocol-eligible responses. The earlier Context/Runtime candidate findings
 have independently checked fixes in the
 [repair and prototype ledger](qa-review-followup.md). LI chose entry C; that
-scope does not approve new context/cloud/proactive capabilities. The subsequent
-native C increment remains pending its exact evidence.
+scope does not approve new context/cloud/proactive capabilities. C's exact App
+head `442a340` has **16/16 independent widget checks passed**; runtime/device
+gates remain separate. The later Admin sender-retry finding is recorded in the
+contract ledger and requires a corrected sender proposal.
 
 ## Authority and baseline readback
 

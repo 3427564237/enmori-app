@@ -47,3 +47,71 @@ native notification integration and independent device proofs are not supplied
 by these documents. C's already-confirmed entry decision does not select F0/F1,
 their retention exceptions or any external verification. No unrelated source
 tests were repeated for these documentation-only changes.
+
+## Subsequent D1 dependency/source compatibility check
+
+Delivery's documentation-only `4a388d9fdb96596482fb7aa30760d0f1dbe203df`
+narrows the proposed first registration kind to literal `fcm_token` with exact
+`firebase_messaging: 16.7.0`. Context's corresponding documentation-only delta
+`ce0a5ed5ba5ded1365faa816025f747a6729863e` matches that wire/storage kind and
+explicitly distinguishes opaque-value acceptance from provider validation.
+QA read both complete deltas; no new substantive contract contradiction was
+identified. QA also independently read
+pub.dev's primary metadata for
+[16.7.0](https://pub.dev/api/packages/firebase_messaging/versions/16.7.0),
+[16.7.1](https://pub.dev/api/packages/firebase_messaging/versions/16.7.1) and
+[17.0.1](https://pub.dev/api/packages/firebase_messaging/versions/17.0.1).
+Their Core constraints are respectively `^4.14.0`, `^4.15.1` and `^5.1.0`.
+The actual repository locks Core 4.14.0/interface 8.1.1/Auth 6.6.1, with FVM
+Flutter 3.47.2 and Dart constraint ^3.13.2. The 16.7.0 declared constraints fit
+that baseline; this is not evidence of successful dependency resolution/build.
+
+QA independently read the
+[pinned 16.7.0 messaging source](https://raw.githubusercontent.com/firebase/flutterfire/firebase_messaging-v16.7.0/packages/firebase_messaging/firebase_messaging/lib/src/messaging.dart):
+it provides `getToken`, `onTokenRefresh`, `deleteToken`, `setAutoInitEnabled`, and
+does not provide the newer `register`/`onRegistered` interface. Existing installed
+Admin 14.3.0 declarations still provide `TokenMessage` and `send(message,dryRun?)`,
+but explicitly deprecate `TokenMessage` in favor of `FidMessage`. No FID-to-token
+conversion or implicit Core/Auth upgrade is justified by this evidence.
+
+Primary metadata readback is in
+`/home/miku/.local/state/enmori-ai-companion-20261025/qa-review/delivery-4a388d9/package-metadata.json`,
+SHA-256 `1246174e0bfb659f2ce4ad59bdb828e9a389b79718c928adf45d91bb49e5ce3f`.
+QA did not install/resolve dependencies, build native code, initialize/register a
+device, inspect credentials, or call a sender, including dry-run. Actual native
+configuration, merged manifest, project/IAM, token acceptance, revocation and
+delivery remain unverified. Pure policy test counts do not grow from this D-layer
+review.
+
+## Later sender retry finding — original SDK choice is insufficient
+
+After the compatibility checkpoint above, Integration identified a material
+implementation assumption in D1. QA independently traced the installed Admin
+14.3.0 source: `Messaging.send` calls `FirebaseMessagingRequestHandler`, which
+constructs `AuthorizedHttpClient(app)` without a retry override. Its base
+`HttpClient.sendWithRetry` uses `defaultRetryConfig`: up to four retries on 503,
+`ECONNRESET` and `ETIMEDOUT`. The public `Messaging.send(message,dryRun?)`,
+Messaging exports and `AppOptions` inspected here expose no supported retry
+disable parameter. `httpAgent` and the legacy transport switch do not establish
+such a guarantee.
+
+Thus **one SDK sender invocation is not one HTTP message attempt**. The original
+4a388d9/ce0a5ed5 `getMessaging(...).send(...)` suggestion cannot establish the
+proposal's no-replay rule. This finding changes the sender choice, not the
+previous package-constraint/token-API evidence. No actual notification was sent
+or duplicated in this review; a future adapter has not been implemented.
+
+A replacement under author review uses the existing public
+`Credential.getAccessToken()` interface for authorization and a separately
+controlled direct HTTP v1 message POST with no application retry or redirect.
+QA independently checked the
+[FCM send method](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages/send)
+and [HTTP v1 authorization guide](https://firebase.google.com/docs/cloud-messaging/send/v1-api).
+Token acquisition is not message submission; neither interface presence nor
+documentation proves the actual project's permission or device acceptance.
+After asynchronous token acquisition and durable claiming, the final dispatch
+must still check source/grant/expiry/cancellation. A 401, 503, timeout, malformed
+response or crash cannot trigger token-refresh-and-message-replay. Future
+injected-boundary tests must count HTTP attempts rather than SDK invocations.
+No token getter, auth endpoint, sender, dry-run, policy test or model was called
+to establish this source finding.

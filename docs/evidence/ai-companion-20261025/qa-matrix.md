@@ -52,6 +52,14 @@ or latency result implies semantic success. Eight candidate-context real-model
 cases remain Not Run. [F0/F1 contract review](qa-contract-review.md) is D only,
 with new contracts still Proposed.
 
+Current C-entry S/widget checkpoint: [exact App 442a340 review](qa-c-entry-review.md),
+**16/16 independently passed**. This covers the named draft, current/other
+conversation, recovery, stale-session, retained search/delete and 2x-text
+scenarios in DEC-01, REC-01–03, REG-01 and UX-01–02. It does not mark those entire
+multi-layer rows or cold-start/physical behaviors passed. The Admin 14.3 sender's
+internal retries are a later D1 contract finding; a pure policy allow decision or
+single SDK invocation cannot prove PRO-05/08's no-replay boundary.
+
 ## Context, permission and provenance
 
 | ID | Counterexample / fixture | Required layers | Pass condition; observed violation means Fail | Owner |
