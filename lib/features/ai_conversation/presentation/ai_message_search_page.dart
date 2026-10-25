@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 import '../../../core/presentation/local_time.dart';
 import '../ai_conversation_providers.dart';
+import '../ai_owned_sources_providers.dart';
 
 bool _hidden(AiConversationState state) =>
     state.canCancel ||
@@ -110,6 +111,18 @@ final class _AiMessageSearchPageState
   void _select(String? id) {
     final current = ref.read(aiConversationControllerProvider);
     if (!_available(current)) return;
+    if (id != null) {
+      final sources = ref.read(aiCompanionReferencesEnabledProvider)
+          ? ref.read(aiOwnedSourcesControllerProvider)
+          : null;
+      if (!current.messages.any(
+        (m) =>
+            m.messageId == id &&
+            canDisplayAiMessage(current, m, sources: sources),
+      )) {
+        return;
+      }
+    }
     FocusScope.of(context).unfocus();
     setState(() => _selectedId = id);
     if (_scroll.hasClients) _scroll.jumpTo(0);
@@ -118,14 +131,18 @@ final class _AiMessageSearchPageState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(aiConversationControllerProvider);
+    final sources = ref.watch(aiCompanionReferencesEnabledProvider)
+        ? ref.watch(aiOwnedSourcesControllerProvider)
+        : null;
+    bool displayable(AiMessage message) =>
+        canDisplayAiMessage(state, message, sources: sources);
     final available = _available(state);
     final query = _query.text.trim().toLowerCase();
     final matches = available && query.isNotEmpty
         ? state.messages
               .where(
                 (message) =>
-                    message.availability == AiAvailability.available &&
-                    message.text != null &&
+                    displayable(message) &&
                     message.text!.toLowerCase().contains(query),
               )
               .toList()
@@ -133,11 +150,16 @@ final class _AiMessageSearchPageState
     final selectedIndex = _selectedId == null
         ? -1
         : state.messages.indexWhere(
-            (m) =>
-                m.messageId == _selectedId &&
-                m.availability == AiAvailability.available &&
-                m.text != null,
+            (m) => m.messageId == _selectedId && displayable(m),
           );
+    final selectedSourceHidden =
+        _selectedId != null &&
+        state.messages.any(
+          (m) =>
+              m.messageId == _selectedId &&
+              m.availability == AiAvailability.available &&
+              !displayable(m),
+        );
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('Find in conversation', '查找对话消息'))),
       body: SafeArea(
@@ -184,10 +206,15 @@ final class _AiMessageSearchPageState
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Text(
-                        context.tr(
-                          'This message is no longer available.',
-                          '此消息已不可用。',
-                        ),
+                        selectedSourceHidden
+                            ? context.tr(
+                                'Check this message’s sources in the conversation before displaying it.',
+                                '请先在对话中核对这条消息的来源，再查看正文。',
+                              )
+                            : context.tr(
+                                'This message is no longer available.',
+                                '此消息已不可用。',
+                              ),
                       ),
                     )
                   else ...[
@@ -199,6 +226,7 @@ final class _AiMessageSearchPageState
                       _contextMessage(
                         state.messages[i],
                         selected: i == selectedIndex,
+                        displayable: displayable(state.messages[i]),
                       ),
                     Wrap(
                       spacing: 12,
@@ -208,10 +236,7 @@ final class _AiMessageSearchPageState
                           OutlinedButton(
                             key: const Key('ai-search-previous'),
                             onPressed:
-                                state
-                                        .messages[selectedIndex - 1]
-                                        .availability ==
-                                    AiAvailability.available
+                                displayable(state.messages[selectedIndex - 1])
                                 ? () => _select(
                                     state.messages[selectedIndex - 1].messageId,
                                   )
@@ -224,10 +249,7 @@ final class _AiMessageSearchPageState
                           OutlinedButton(
                             key: const Key('ai-search-next'),
                             onPressed:
-                                state
-                                        .messages[selectedIndex + 1]
-                                        .availability ==
-                                    AiAvailability.available
+                                displayable(state.messages[selectedIndex + 1])
                                 ? () => _select(
                                     state.messages[selectedIndex + 1].messageId,
                                   )
@@ -264,6 +286,18 @@ final class _AiMessageSearchPageState
                       '仅查找此对话已加载的消息。可加载更早消息，继续向前查找。',
                     ),
                   ),
+                  if (state.messages.any(
+                    (m) =>
+                        m.availability == AiAvailability.available &&
+                        !displayable(m),
+                  ))
+                    Text(
+                      context.tr(
+                        'Some message sources need checking in the conversation. Those messages are hidden from search.',
+                        '部分消息来源需要在对话中重新核对，这些消息暂不显示在查找中。',
+                      ),
+                      key: const Key('ai-search-source-check-needed'),
+                    ),
                   const SizedBox(height: 16),
                   if (query.isEmpty)
                     Text(
@@ -356,7 +390,11 @@ final class _AiMessageSearchPageState
       ? context.tr('You', '你')
       : context.tr('AI', 'AI');
 
-  Widget _contextMessage(AiMessage message, {required bool selected}) => Card(
+  Widget _contextMessage(
+    AiMessage message, {
+    required bool selected,
+    required bool displayable,
+  }) => Card(
     key: ValueKey('ai-search-context-${message.messageId}'),
     color: selected ? Theme.of(context).colorScheme.secondaryContainer : null,
     margin: const EdgeInsets.symmetric(vertical: 8),
@@ -372,8 +410,13 @@ final class _AiMessageSearchPageState
           if (selected) Text(context.tr('Selected message', '已选消息')),
           const SizedBox(height: 8),
           SelectableText(
-            message.availability == AiAvailability.available
+            displayable
                 ? message.text ?? ''
+                : message.availability == AiAvailability.available
+                ? context.tr(
+                    'Message sources need checking in the conversation.',
+                    '需要在对话中重新核对这条消息的来源。',
+                  )
                 : context.tr('Message unavailable', '消息不可用'),
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5),
           ),

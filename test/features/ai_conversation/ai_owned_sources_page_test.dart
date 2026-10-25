@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
 import 'package:enmori/features/ai_conversation/presentation/ai_conversation_page.dart';
+import 'package:enmori/features/ai_conversation/presentation/ai_message_search_page.dart';
+import 'package:enmori/features/account/content_access.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +13,165 @@ import 'package:flutter_test/flutter_test.dart';
 import 'ai_reference_test_support.dart';
 
 void main() {
+  testWidgets(
+    'search excludes a denied source body while unrelated current messages remain searchable',
+    (tester) async {
+      final r = await AiReferenceRig.create(tester);
+      r.repo.nextResolve = Future.value(
+        const Failure(
+          AppFailure(
+            kind: AppFailureKind.aiSourceUnavailable,
+            message: 'source denied',
+          ),
+        ),
+      );
+      await _pump(tester, r);
+      await _tap(tester, 'ai-source-$referenceMessage-$referenceCard');
+      expect(find.text(referenceProactive.text!), findsNothing);
+      await _openSearch(tester);
+      await tester.enterText(
+        find.byKey(const Key('ai-search-query')),
+        'Synthetic',
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('ai-search-match-$referenceMessage')),
+        findsNothing,
+      );
+      expect(find.text(referenceProactive.text!), findsNothing);
+      expect(
+        find.byKey(const Key('ai-search-source-check-needed')),
+        findsOneWidget,
+      );
+      await tester.enterText(
+        find.byKey(const Key('ai-search-query')),
+        'Saved source',
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(Key('ai-search-match-${referenceUser.messageId}')),
+        findsOneWidget,
+      );
+      expect(r.repo.prepares, 0);
+      expect(r.repo.executes, 0);
+      await _dispose(tester, r);
+    },
+  );
+  testWidgets(
+    'open search masks a later denied neighbor and blocks its captured next callback',
+    (tester) async {
+      final r = await AiReferenceRig.create(tester);
+      final response = Completer<Result<AiSourceTarget>>();
+      r.repo.nextResolve = response.future;
+      await _pump(tester, r);
+      await _tap(tester, 'ai-source-$referenceMessage-$referenceCard');
+      await _openSearch(tester);
+      await tester.enterText(
+        find.byKey(const Key('ai-search-query')),
+        'Saved source',
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(Key('ai-search-match-${referenceUser.messageId}')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widgetList<SelectableText>(find.byType(SelectableText))
+            .any((w) => w.data == referenceProactive.text),
+        isTrue,
+      );
+      final staleNext = tester
+          .widget<OutlinedButton>(find.byKey(const Key('ai-search-next')))
+          .onPressed!;
+      response.complete(
+        const Failure(
+          AppFailure(
+            kind: AppFailureKind.aiSourceUnavailable,
+            message: 'source denied',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widgetList<SelectableText>(find.byType(SelectableText))
+            .any((w) => w.data == referenceProactive.text),
+        isFalse,
+      );
+      expect(
+        tester
+            .widget<OutlinedButton>(find.byKey(const Key('ai-search-next')))
+            .onPressed,
+        isNull,
+      );
+      staleNext();
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widgetList<SelectableText>(find.byType(SelectableText))
+            .any((w) => w.data == referenceProactive.text),
+        isFalse,
+      );
+      expect(
+        find.byKey(Key('ai-search-context-${referenceUser.messageId}')),
+        findsOneWidget,
+      );
+      expect(r.repo.prepares, 0);
+      expect(r.repo.executes, 0);
+      await _dispose(tester, r);
+    },
+  );
+  testWidgets(
+    'selected search source is hidden on background and stays hidden until a fresh exact read',
+    (tester) async {
+      final r = await AiReferenceRig.create(tester);
+      await _pump(tester, r);
+      await _openSearch(tester);
+      await tester.enterText(
+        find.byKey(const Key('ai-search-query')),
+        'Synthetic',
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('ai-search-match-$referenceMessage')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widgetList<SelectableText>(find.byType(SelectableText))
+            .any((w) => w.data == referenceProactive.text),
+        isTrue,
+      );
+      r.container.read(contentAccessProvider.notifier).setForeground(false);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widgetList<SelectableText>(find.byType(SelectableText))
+            .any((w) => w.data == referenceProactive.text),
+        isFalse,
+      );
+      r.container.read(contentAccessProvider.notifier).setForeground(true);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widgetList<SelectableText>(find.byType(SelectableText))
+            .any((w) => w.data == referenceProactive.text),
+        isFalse,
+      );
+      await r.conversation.loadMessages();
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widgetList<SelectableText>(find.byType(SelectableText))
+            .any((w) => w.data == referenceProactive.text),
+        isTrue,
+      );
+      expect(r.repo.prepares, 0);
+      expect(r.repo.executes, 0);
+      await _dispose(tester, r);
+    },
+  );
   testWidgets(
     'stacked target page preserves original unknown operation and returns an empty unsent editor',
     (tester) async {
@@ -447,4 +608,12 @@ Future<void> _dispose(WidgetTester tester, AiReferenceRig r) async {
   await tester.pumpWidget(const SizedBox());
   r.dispose();
   await tester.pump();
+}
+
+Future<void> _openSearch(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Open conversation menu'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(const Key('ai-drawer-find')));
+  await tester.pumpAndSettle();
+  expect(find.byType(AiMessageSearchPage), findsOneWidget);
 }

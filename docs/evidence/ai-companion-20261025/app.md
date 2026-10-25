@@ -525,3 +525,28 @@ was invoked. Existing model semantic failures remain unchanged. Shared target
 routes/flag composition and the independently owned D1 candidate need Root's
 separate integration/QA; F1 picker/review/selected-send UI remains the next App
 increment. This is not UAT, Release or Done acceptance.
+
+## Product P1: search-derived source display (2026-10-25)
+
+Product's exact `629a22d` review found that chat correctly hid a source-denied
+body while Find still derived matches and neighboring context from the canonical
+message. The body was still canonically available, so availability alone was
+insufficient evidence for display. The shared current display predicate now
+gates chat, Find results, selected content, context and previous/next controls.
+Captured selection callbacks recheck the current source state before acting.
+Session/topic mismatch hides source-bearing content; unrelated available messages
+remain searchable. Temporary source uncertainty does not rewrite stored messages
+as tombstones, and only a fresh exact accepted read restores the affected view.
+
+The focused search/source-page run passed **27/27**. New counterexamples cover
+direct-hit denial, a denial arriving with search already open on a neighbor,
+captured Next after denial, and an already-selected source becoming hidden on
+background/resume until a fresh exact transcript read. Existing search draft,
+history, tombstone, unknown-operation and narrow 2x text cases also passed. There
+were no model prepares/executes in the new privacy cases. Analyzer initially
+reported two missing flow-control braces; after that formatting-only correction
+the same four changed Dart files analyzed cleanly (`3.7s`). `git diff --check`
+is clean. Raw log: `app-search-display-gate.log`, SHA-256
+`8995ed9031bc7c284895dd0702414a727a527ec062f6776b3b36cf2c8b6e1a11`,
+under the local evidence directory above. This is an App source/widget repair;
+Product/QA independently close their P1 review against this new commit.
