@@ -83,6 +83,7 @@ HTML 演示只模拟 App 内页面，不证明这些能力。未读/已读、静
 | P5 | 本地/云端处理位置、服务商/数据种类、预算与撤回；不可自动回退到云端 | 19 October local-only 仍描述当前 runtime；本轮只放宽候选研究 | Runtime / Context / LI |
 | P6 | 连续入口恢复点、跨会话搜索或话题标题的新增持久化范围 | 既有摘要仅 ID/时间，查询只在页内；新记录不可凭 UI 需要自动批准 | App / Context / Integration |
 | P7 | 主动写入与 90 天保留锚点、删除会话后跟进关联处理 | Q14/Q19 保持；不得因定期主动写入无意延长全部旧内容可读期 | Proactive / Context / Integration |
+| P8 | 是否需要任何用户位置进入 AI；若需要，明确字段、时间、用途和新许可 | [Q17](../../decisions/2026-09-01-recommendation-ai-field-allowlists.md) 当前连 Approx Location 也不准进入 Qwen；旧签到已有 GPS / 一般同意均不批准此用途 | Context / LI / Integration |
 
 请将这些事项并入总控的一次具体选择，不让其他模块重复向 LI 询问。
 未选前继续做合成原型、既有行为的可读性修复、mock/adapter 和反例审计。
