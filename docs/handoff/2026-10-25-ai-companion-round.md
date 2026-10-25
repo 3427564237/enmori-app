@@ -6,7 +6,46 @@ Authority: [LI's bounded round request](../decisions/2026-10-25-li-ai-companion-
 The local launch roster and exact prompts are under
 `/home/miku/.local/state/enmori-ai-companion-20261025/`.
 
-## Current checkpoint — C selected; reviewed candidates assembled
+## Current checkpoint — C artifact ready; approved first flow in implementation
+
+LI explicitly approved the recommended F0 / F1a / D1 implementation and the
+separate USD 1 synthetic Gemini evaluation in [the first-flow decision](../decisions/2026-10-25-li-ai-companion-first-flow.md)
+at `26af8c9`. Adult operator / Singapore and requested setup assistance are
+recorded at `61478e0`. Billing project, paid plan and server credential still
+need actual verification; no evaluation charge or deployment follows from the
+implementation approval alone.
+
+C App source `442a340` passed author checks, independent QA's selected 16 cases
+and Integration's router 40/40. The v27 release candidate freezes `61478e0`,
+contains C/usability only, and was independently inspected by QA. Its APK is
+64,907,459 bytes, SHA-256
+`b6399da5f5e352a400c19459627d900b00a63e12acb013901cb4b31bb9e502d9`,
+package `com.enmori.app.group`, version code 27. Its signing certificate matches
+the preserved v26. No installation or phone acceptance occurred.
+[Artifact review](../evidence/ai-companion-20261025/qa-v27-artifact.md).
+
+First-flow shared base `47839d7` integrates Context's `ff00e7c` Ports with mandatory
+fresh actor verification and public read models, Product's `750dd8a` handoff,
+QA's `387400b` focused matrix, and Integration's `c5357a7` exact Messaging 16.7.0
+dependency / safe defaults / four shared errors. Native civil-time parsing is
+at `1a1f96b`; [integration checks](../evidence/ai-companion-20261025/integration-first-flow.md)
+remain source/JVM evidence, not device evidence. API, Firestore effects,
+shared local model lane, feature UI and root wiring are still being assembled.
+
+Current write allocation extends the launch table below: Context owns
+`ai-context`, `ai-conversation` including its executor except the root-owned
+HTTP registrar, and proactive Ports/Firestore/source authority. Delivery owns
+the remaining proactive application/HTTP/sender files. Runtime owns the
+shared model lane and local F0 adapter; App owns AI/proactive feature code.
+Integration retains normative API, shared errors, bootstrap/router, dependencies
+and Android platform files. Product and QA retain their independent surfaces.
+Flutter/Gradle, the shared model and physical operations stay serialized by
+Integration. All six chats continue on their verified assigned model / max.
+
+The previous checkpoint follows as historical evidence. Its pending approvals
+and pending C statements are superseded only within the scopes stated above.
+
+## Earlier checkpoint — C selected; reviewed candidates assembled
 
 LI selected **C**, recorded at `2bb638b47e682217007cf02cd505550d88d627cf` in
 [the scoped decision](../decisions/2026-10-25-li-ai-entry-c.md). The original
