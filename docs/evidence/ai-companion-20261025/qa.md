@@ -19,8 +19,9 @@ have independently checked fixes in the
 [repair and prototype ledger](qa-review-followup.md). LI chose entry C; that
 scope does not approve new context/cloud/proactive capabilities. C's exact App
 head `442a340` has **16/16 independent widget checks passed**; runtime/device
-gates remain separate. The later Admin sender-retry finding is recorded in the
-contract ledger and requires a corrected sender proposal.
+gates remain separate. The later Admin sender-retry finding and its corrected
+Delivery `b8b8532` / Context `98447a9` proposal are preserved in the contract
+ledger; actual transport behavior remains unverified.
 
 ## Authority and baseline readback
 

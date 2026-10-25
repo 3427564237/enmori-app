@@ -115,3 +115,22 @@ response or crash cannot trigger token-refresh-and-message-replay. Future
 injected-boundary tests must count HTTP attempts rather than SDK invocations.
 No token getter, auth endpoint, sender, dry-run, policy test or model was called
 to establish this source finding.
+
+Delivery corrected this proposal at
+`b8b853208b88dee4d1dc46dc9497a6e67a87305c` (S1, documentation only).
+Context synchronized it at `98447a90e3e35abc3a5c404d847e99f1f5dcb0c9`.
+QA read both complete deltas from 4a388d9 and ce0a5ed respectively; their
+sender/attempt semantics match. The correction explicitly supersedes the SDK
+sender choice, preserves its historical cause, separates OAuth traffic from
+message POSTs, uses a fixed native HTTP endpoint without retry wrappers or
+redirects, and requires fresh authorization after token/claim awaits. It also
+correctly maps REST priority/TTL to `NORMAL` / `'0s'`, independently checked
+against the [REST Android configuration](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages#AndroidConfig).
+T1 limits now count actual message POST attempts. A single provider request is
+not promised to guarantee exactly one physical delivery.
+
+**The sender-choice finding is corrected at D layer in that Delivery delta.**
+No direct-HTTP adapter/network property is passed by this text. Future tests must
+observe actual received POSTs for 503/reset/redirect/delay, including zero POSTs
+after credential failure or authority loss while awaiting token/claim. The
+original 29 pure-policy tests were not rerun or relabeled as transport proof.
