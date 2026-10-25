@@ -70,6 +70,11 @@ final class _Grant {
   final int consentRevision, settingsRevision, registrationRevision;
 }
 
+final class _UnknownFence {
+  const _UnknownFence(this.registrationRevision, this.settingsRevision);
+  final int? registrationRevision, settingsRevision;
+}
+
 /// Explicit registration and read-only opaque click restoration. No private
 /// message body, token, unread acknowledgement or generated message is cached.
 class ProactiveNotificationController
@@ -86,6 +91,8 @@ class ProactiveNotificationController
   bool _enabled = false, _dead = false;
   Object _epoch = Object(), _configuration = Object();
   final _requests = <ProactiveAbortSignal>{}, _actions = <Object>{};
+  Future<void>? _releasing;
+  bool _autoReleaseAttempted = false;
   StreamSubscription<String>? _clicks, _refreshes;
   Object? _initialConfiguration;
   Completer<void>? _foregroundWaiter;
@@ -95,6 +102,9 @@ class ProactiveNotificationController
   ProactiveNotificationPermission? _permission;
   AppFailure? _failure;
   int? _unknownRegistrationRevision, _unknownSettingsRevision;
+  // Non-content RAM fences survive same-owner session/provider replacement.
+  // Different owners receive no old registration, credential or pending UI.
+  final _unknownOwners = <String, _UnknownFence>{};
   bool _checkRequired = false, _resolving = false, _attemptedDelivery = false;
   String? _pendingDelivery, _lastDelivery;
   AuthSessionAuthenticated? _pendingOwner, _lastDeliveryOwner;
@@ -126,8 +136,11 @@ class ProactiveNotificationController
     _failure = null;
     _resolving = false;
     _checkRequired = false;
-    _unknownRegistrationRevision = null;
-    _unknownSettingsRevision = null;
+    final fence = _actor is AuthSessionAuthenticated
+        ? _unknownOwners[(_actor as AuthSessionAuthenticated).subject]
+        : null;
+    _unknownRegistrationRevision = fence?.registrationRevision;
+    _unknownSettingsRevision = fence?.settingsRevision;
     if (!identical(sdk, _sdk) ||
         installation != _installation ||
         enabled != _enabled) {
@@ -163,6 +176,10 @@ class ProactiveNotificationController
       } else {
         _wakeForeground();
         if (before?.foreground == true) _invalidate();
+        if (ref.read(accountSettingsSnapshotProvider)?.consent ==
+            OptionalProcessingConsent.rejected) {
+          _scheduleRelease();
+        }
         _maybeOpen();
       }
       _show();
@@ -175,7 +192,7 @@ class ProactiveNotificationController
             identical(_boundSession, _actor) &&
             after?.consent == OptionalProcessingConsent.rejected;
         _invalidate();
-        if (release) Future.microtask(() => _release(updateSettings: false));
+        if (release) _scheduleRelease();
       }
       _show();
     });
@@ -212,6 +229,9 @@ class ProactiveNotificationController
       _actor is AuthSessionAuthenticated &&
       identical(_actor, ref.read(authSessionProvider).asData?.value);
   bool _current(Object epoch) => _identity(epoch) && _foreground;
+  bool get _consentAllowed =>
+      ref.read(accountSettingsSnapshotProvider)?.consent ==
+      OptionalProcessingConsent.accepted;
   ProactiveNotificationState _snapshot() => ProactiveNotificationState(
     configured: _configured,
     authenticated: _actor is AuthSessionAuthenticated,
@@ -264,6 +284,20 @@ class ProactiveNotificationController
     _attemptedDelivery = false;
   }
 
+  void _rememberUnknown() {
+    final actor = _actor;
+    if (actor is! AuthSessionAuthenticated) return;
+    if (_unknownRegistrationRevision == null &&
+        _unknownSettingsRevision == null) {
+      _unknownOwners.remove(actor.subject);
+    } else {
+      _unknownOwners[actor.subject] = _UnknownFence(
+        _unknownRegistrationRevision,
+        _unknownSettingsRevision,
+      );
+    }
+  }
+
   Future<void> _waitForForeground(Object epoch) async {
     if (_foreground || !_identity(epoch)) return;
     final waiter = Completer<void>();
@@ -278,9 +312,11 @@ class ProactiveNotificationController
 
   Future<Result<T>> _call<T>(
     Object epoch,
-    Future<Result<T>> Function(String, ProactiveAbortSignal) run,
-  ) async {
-    if (!_current(epoch)) return const Failure(_notVerified);
+    Future<Result<T>> Function(String, ProactiveAbortSignal) run, {
+    bool needsConsent = false,
+  }) async {
+    bool current() => _current(epoch) && (!needsConsent || _consentAllowed);
+    if (!current()) return const Failure(_notVerified);
     final abort = ProactiveAbortSignal();
     _requests.add(abort);
     final timer = Timer(const Duration(seconds: 15), abort.abort);
@@ -289,7 +325,7 @@ class ProactiveNotificationController
         _auth.getIdToken(),
         abort.whenAborted.then((_) => null),
       ]);
-      if (!_current(epoch) || abort.isAborted || token == null) {
+      if (!current() || abort.isAborted || token == null) {
         return const Failure(_notVerified);
       }
       if (token case Failure<String>(:final failure)) return Failure(failure);
@@ -297,7 +333,7 @@ class ProactiveNotificationController
         run((token as Success<String>).value, abort),
         abort.whenAborted.then((_) => const Failure(_notVerified)),
       ]);
-      return _current(epoch) && !abort.isAborted
+      return current() && !abort.isAborted
           ? result
           : const Failure(_notVerified);
     } catch (_) {
@@ -366,6 +402,7 @@ class ProactiveNotificationController
     if (_unknownSettingsRevision != null &&
         value.revision > _unknownSettingsRevision!) {
       _unknownSettingsRevision = null;
+      _rememberUnknown();
     }
     return value;
   }
@@ -390,12 +427,18 @@ class ProactiveNotificationController
     if (_unknownRegistrationRevision != null &&
         value.revision > _unknownRegistrationRevision!) {
       _unknownRegistrationRevision = null;
+      _rememberUnknown();
     }
     return value;
   }
 
   void _guard(Object epoch) {
     if (!_current(epoch)) throw const _Stopped(_notVerified);
+  }
+
+  void _guardConsent(Object epoch) {
+    _guard(epoch);
+    if (!_consentAllowed) throw const _Stopped(_notVerified);
   }
 
   T _value<T>(Result<T> result) => switch (result) {
@@ -447,6 +490,7 @@ class ProactiveNotificationController
       _guard(epoch);
       if (consent == null || original == null) return;
       if (!original.allowsExplicitFollowUp) throw const _Stopped(_followUpsOff);
+      _guardConsent(epoch);
       _permission = _value(await _sdk!.requestPermission());
       await _waitForForeground(epoch);
       _guard(epoch);
@@ -461,10 +505,10 @@ class ProactiveNotificationController
         throw const _Stopped(_notVerified);
       }
       final channel = _value(await _sdk!.prepareChannel());
-      _guard(epoch);
+      _guardConsent(epoch);
       if (!channel) throw const _Stopped(_permissionDenied);
       final token = _value(await _sdk!.getToken());
-      _guard(epoch);
+      _guardConsent(epoch);
       if (await _consent(epoch, expected: consent.revision) == null) return;
       final before = await _settings(epoch);
       _guard(epoch);
@@ -496,6 +540,7 @@ class ProactiveNotificationController
       await ref.read(proactiveControllerProvider.notifier).readSettings();
       _guard(epoch);
       _registration = updated;
+      _autoReleaseAttempted = false;
       _grant = _Grant(
         _boundSession!,
         consent.revision,
@@ -539,20 +584,23 @@ class ProactiveNotificationController
       preview: before.preview,
       pausedUntil: before.pausedUntil,
     );
-    _unknownSettingsRevision = before.revision;
-    _checkRequired = true;
-    final result = await _call(
-      epoch,
-      (token, abort) => _settingsRepo!.saveSettings(
+    final result = await _call(epoch, (token, abort) {
+      _unknownSettingsRevision = before.revision;
+      _checkRequired = true;
+      _rememberUnknown();
+      return _settingsRepo!.saveSettings(
         token: token,
         abort: abort,
         settings: requested,
         expectedRevision: before.revision,
-      ),
-    );
+      );
+    }, needsConsent: enabled);
     _guard(epoch);
     if (result case Failure<ProactiveSettings>(:final failure)) {
-      if (_definite(failure)) _unknownSettingsRevision = null;
+      if (_definite(failure)) {
+        _unknownSettingsRevision = null;
+        _rememberUnknown();
+      }
       throw _Stopped(failure);
     }
     final value = (result as Success<ProactiveSettings>).value;
@@ -561,6 +609,7 @@ class ProactiveNotificationController
       throw const _Stopped(_unconfirmed);
     }
     _unknownSettingsRevision = null;
+    _rememberUnknown();
     return value;
   }
 
@@ -569,21 +618,24 @@ class ProactiveNotificationController
     int expected,
     String value,
   ) async {
-    _unknownRegistrationRevision = expected;
-    _checkRequired = true;
-    final result = await _call(
-      epoch,
-      (token, abort) => _registrations!.replace(
+    final result = await _call(epoch, (token, abort) {
+      _unknownRegistrationRevision = expected;
+      _checkRequired = true;
+      _rememberUnknown();
+      return _registrations!.replace(
         token: token,
         abort: abort,
         expectedRevision: expected,
         installationRef: _installation!,
         registrationValue: value,
-      ),
-    );
+      );
+    }, needsConsent: true);
     _guard(epoch);
     if (result case Failure<ProactiveRegistration>(:final failure)) {
-      if (_definite(failure)) _unknownRegistrationRevision = null;
+      if (_definite(failure)) {
+        _unknownRegistrationRevision = null;
+        _rememberUnknown();
+      }
       throw _Stopped(failure);
     }
     final current = (result as Success<ProactiveRegistration>).value;
@@ -592,6 +644,7 @@ class ProactiveNotificationController
       throw const _Stopped(_unconfirmed);
     }
     _unknownRegistrationRevision = null;
+    _rememberUnknown();
     return current;
   }
 
@@ -606,14 +659,43 @@ class ProactiveNotificationController
   /// continues sign-out. A timeout is not proof of server or SDK revocation.
   Future<void> beforeSignOut() async {
     if (!_current(_epoch)) return;
-    _invalidate();
-    await Future.any<void>([
-      _release(updateSettings: false),
-      Future<void>.delayed(const Duration(seconds: 15)),
-    ]);
+    final existing = _releasing;
+    if (existing == null) _invalidate();
+    final expired = Completer<void>();
+    final timer = Timer(const Duration(seconds: 15), expired.complete);
+    try {
+      await Future.any<void>([
+        existing ?? _release(updateSettings: false),
+        expired.future,
+      ]);
+    } finally {
+      timer.cancel();
+    }
   }
 
-  Future<void> _release({required bool updateSettings}) async {
+  void _scheduleRelease() {
+    if (!_current(_epoch) ||
+        _autoReleaseAttempted ||
+        _boundSession == null ||
+        !identical(_boundSession, _actor)) {
+      return;
+    }
+    _autoReleaseAttempted = true;
+    Future.microtask(() => _release(updateSettings: false));
+  }
+
+  Future<void> _release({required bool updateSettings}) {
+    final existing = _releasing;
+    if (existing != null) return existing;
+    late Future<void> running;
+    running = _releaseWork(updateSettings: updateSettings).whenComplete(() {
+      if (identical(_releasing, running)) _releasing = null;
+    });
+    _releasing = running;
+    return running;
+  }
+
+  Future<void> _releaseWork({required bool updateSettings}) async {
     if (!_current(_epoch)) return;
     final epoch = _epoch, action = Object();
     _actions.add(action);
@@ -630,20 +712,23 @@ class ProactiveNotificationController
         // An unchanged GET cannot prove an earlier unknown PUT will not commit.
         _failure = _unconfirmed;
       } else if (metadata.enabled) {
-        _unknownRegistrationRevision = metadata.revision;
-        _checkRequired = true;
-        final result = await _call(
-          epoch,
-          (token, abort) => _registrations!.delete(
+        final result = await _call(epoch, (token, abort) {
+          _unknownRegistrationRevision = metadata.revision;
+          _checkRequired = true;
+          _rememberUnknown();
+          return _registrations!.delete(
             token: token,
             abort: abort,
             expectedRevision: metadata.revision,
             installationRef: _installation!,
-          ),
-        );
+          );
+        });
         _guard(epoch);
         if (result case Failure<ProactiveRegistration>(:final failure)) {
-          if (_definite(failure)) _unknownRegistrationRevision = null;
+          if (_definite(failure)) {
+            _unknownRegistrationRevision = null;
+            _rememberUnknown();
+          }
           _failure = failure;
         } else {
           final released = (result as Success<ProactiveRegistration>).value;
@@ -652,6 +737,7 @@ class ProactiveNotificationController
           }
           _registration = released;
           _unknownRegistrationRevision = null;
+          _rememberUnknown();
           _boundSession = null;
         }
       } else {
@@ -722,7 +808,9 @@ class ProactiveNotificationController
     unawaited(_refreshes?.cancel());
     _refreshes = _sdk!.tokenRefreshes.listen(
       (value) {
-        if (!_current(epoch) || !identical(configuration, _configuration)) {
+        if (!_current(epoch) ||
+            !identical(configuration, _configuration) ||
+            _grant == null) {
           return;
         }
         if (_actions.isNotEmpty) {
@@ -922,18 +1010,19 @@ class ProactiveNotificationController
         epoch,
         (token, abort) =>
             _resolver!(token: token, deliveryRef: reference, abort: abort),
+        needsConsent: true,
       );
-      _guard(epoch);
+      _guardConsent(epoch);
       if (_pendingDelivery != reference) return;
       final target = _value(result);
       if (!isProactiveUuid(target.conversationId) ||
           !isProactiveUuid(target.messageId)) {
         throw const _Stopped(_notVerified);
       }
+      _handler!(actor, target); // Root separately rechecks this exact session.
       _lastDelivery = reference;
       _lastDeliveryOwner = actor;
       _clearPending();
-      _handler!(actor, target); // Root separately rechecks this exact session.
     } on _Stopped catch (error) {
       if (_current(epoch)) _failure = error.failure;
     } catch (_) {

@@ -222,7 +222,12 @@ class MessagingRig {
         ),
       ],
     );
-    await tester.pumpWidget(UncontrolledProviderScope(container: r.container, child: const SizedBox()));
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: r.container,
+        child: const SizedBox(),
+      ),
+    );
     r.subscription = r.container.listen(
       proactiveNotificationControllerProvider,
       (_, _) {},

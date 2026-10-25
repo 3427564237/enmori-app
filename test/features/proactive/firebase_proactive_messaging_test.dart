@@ -38,7 +38,10 @@ class Messaging extends Fake implements FirebaseMessaging {
   }
 
   @override
-  Future<String?> getToken({String? vapidKey, String? serviceWorkerScriptPath}) async {
+  Future<String?> getToken({
+    String? vapidKey,
+    String? serviceWorkerScriptPath,
+  }) async {
     calls.add('getToken');
     return token;
   }

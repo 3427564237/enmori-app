@@ -14,6 +14,102 @@ import 'proactive_test_support.dart';
 
 void main() {
   testWidgets(
+    'unknown registration fence survives same-owner session replacement and unchanged GET',
+    (tester) async {
+      final r = await MessagingRig.create(tester);
+      addTearDown(r.dispose);
+      r.registrations.nextReplace = Future.value(const Failure(unknownResult));
+      await r.controller.enablePush();
+      expect(r.state.unconfirmed, isTrue);
+      final reads = r.registrations.reads;
+      r.auth.sessions.add(AuthSessionAuthenticated(subject: r.actor.subject));
+      await tester.pump();
+      await tester.pump();
+      expect(r.state.unconfirmed, isTrue);
+      expect(r.state.registration, isNull);
+      await r.controller.readRegistration();
+      expect(r.state.unconfirmed, isTrue);
+      await r.controller.enablePush();
+      expect(r.registrations.puts, 1);
+      r.auth.sessions.add(
+        const AuthSessionAuthenticated(subject: 'different-owner'),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(r.state.registration, isNull);
+      expect(r.state.unconfirmed, isFalse);
+      expect(r.registrations.deletes, 0);
+      expect(r.sdk.calls.where((v) => v == 'delete'), isEmpty);
+      expect(r.registrations.reads, reads + 1);
+      r.auth.sessions.add(AuthSessionAuthenticated(subject: r.actor.subject));
+      await tester.pump();
+      await tester.pump();
+      expect(r.state.unconfirmed, isTrue);
+      r.registrations.metadata = registered();
+      await r.controller.readRegistration();
+      expect(r.state.unconfirmed, isFalse);
+      expect(r.registrations.puts, 1);
+      expect(r.sdk.refreshSubscriptions, 0);
+    },
+  );
+  testWidgets(
+    'quick sign-out cleanup cancels its deadline and releases exactly once',
+    (tester) async {
+      final r = await MessagingRig.create(tester);
+      addTearDown(r.dispose);
+      await r.controller.enablePush();
+      await Future.wait([
+        r.controller.beforeSignOut(),
+        r.controller.beforeSignOut(),
+      ]);
+      expect(r.registrations.deletes, 1);
+      expect(r.sdk.calls.where((v) => v == 'delete'), hasLength(1));
+      expect(r.state.registration?.enabled, isFalse);
+    },
+  );
+  testWidgets(
+    'consent withdrawal cleans a confirmed binding without an automatic re-registration',
+    (tester) async {
+      final r = await MessagingRig.create(tester);
+      addTearDown(r.dispose);
+      await r.controller.enablePush();
+      r.preferences.value = ownConsent(
+        consent: OptionalProcessingConsent.rejected,
+        revision: 2,
+      );
+      r.container
+          .read(accountSettingsSnapshotProvider.notifier)
+          .observe(r.preferences.value);
+      await tester.pump();
+      await tester.pump();
+      expect(r.registrations.deletes, 1);
+      expect(r.registrations.puts, 1);
+      expect(r.sdk.calls.where((v) => v == 'delete'), hasLength(1));
+      r.sdk.refreshed.add('withdrawn-token');
+      await tester.pump();
+      expect(r.registrations.puts, 1);
+    },
+  );
+  testWidgets(
+    'failed owner verification during cleanup never deletes a different installation token',
+    (tester) async {
+      final r = await MessagingRig.create(tester);
+      addTearDown(r.dispose);
+      await r.controller.enablePush();
+      r.registrations.nextRead = Future.value(
+        const Failure(
+          AppFailure(
+            kind: AppFailureKind.authForbidden,
+            message: 'Unavailable.',
+          ),
+        ),
+      );
+      await r.controller.beforeSignOut();
+      expect(r.registrations.deletes, 0);
+      expect(r.sdk.calls.where((v) => v == 'delete'), isEmpty);
+    },
+  );
+  testWidgets(
     'null installation performs no SDK work, network registration or consent read',
     (tester) async {
       final r = await MessagingRig.create(
@@ -177,6 +273,10 @@ void main() {
       await r.controller.enablePush();
       expect(r.state.unconfirmed, isTrue);
       expect(r.registrations.puts, 0);
+      r.auth.sessions.add(AuthSessionAuthenticated(subject: r.actor.subject));
+      await tester.pump();
+      await tester.pump();
+      expect(r.state.unconfirmed, isTrue);
       await r.controller.readRegistration();
       expect(r.state.unconfirmed, isTrue);
       expect(r.settings.saved, hasLength(1));
@@ -256,6 +356,7 @@ void main() {
       expect(r.resolutions, isEmpty);
       r.auth.sessions.add(r.actor);
       await tester.pump();
+      await tester.pump();
       expect(r.preferences.reads, 1);
       expect(r.resolutions, [deliveryReference]);
       expect(r.targets.single.session, same(r.actor));
@@ -281,6 +382,7 @@ void main() {
         consent: OptionalProcessingConsent.rejected,
       );
       r.auth.sessions.add(r.actor);
+      await tester.pump();
       await tester.pump();
       expect(r.resolutions, isEmpty);
       expect(r.targets, isEmpty);
