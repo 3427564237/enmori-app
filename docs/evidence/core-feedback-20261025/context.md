@@ -72,6 +72,17 @@ new persisted memory/category permission. Exact source edits, deletion, purpose
 changes, history dependencies and original operation identities remain on the
 existing selected-reply path.
 
+The pre-effects midnight gate is a source-level fact, not a client-visible effect
+stage. This packet adds no public effect-stage field. A generic
+`AI_CONTEXT_SELECTION_CONFLICT` can also occur after the original user message
+was saved. After any HTTP execute dispatch, the client must keep the original
+operation and read it back to establish `noEffect`, or retain `userSaved` and
+Retry the original user message. It cannot infer safe resend from a 409 or a
+midnight explanation. Only a failed preparation with no execute dispatch can
+directly start fresh preparation. This corrects the author's earlier incomplete
+peer instruction about canceling a prepared midnight ticket before another Send;
+App's conservative original-operation recovery remains controlling.
+
 The actual simple-chat `withRetainedMessageTimes` wrapper explicitly forwards
 the new optional gateway capability. This is necessary because that wrapper
 lists its methods rather than automatically forwarding new ones. The existing
