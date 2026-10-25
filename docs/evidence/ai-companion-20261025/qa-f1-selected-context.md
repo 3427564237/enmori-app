@@ -154,3 +154,67 @@ after dispatch sets its unresolved memory, including an invalid response mapped
 to `unexpected`; that path does not release the input for direct retry. The
 new F1 controller/picker/review integration and final shared composition were
 not frozen at this review and require their own checks.
+
+## Pure review component: source checkpoint and final-flow test selection
+
+QA independently read `cad5fb430091f01492a586143d2dcaf7bb4c9414`, which adds
+`AiSelectedReplyReview` and its test file. No Flutter, service or model was run
+for this checkpoint. Integration's reported six component cases plus twelve
+shared router cases remain author evidence, not independent QA execution.
+
+The authority used is the approved LI first-flow decision, its explicitly
+referenced Context `ce0a5ed` F1 scope, and the current Integration-owned
+`api/ai-companion.json` selection/history schemas. The Product
+`history-exclusion-handoff.md` explains those approved recovery interactions;
+it does not create new requirements or replace the normative schema. The
+earlier proposed `historyMode` alternative remains superseded by the current
+operation-bound `historyPairs` / `excludedHistoryKeys` contract.
+
+No blocking defect was found in this pure component's bounded source review.
+It displays minimized source type/time metadata and complete history-pair
+sequence labels, without rendering opaque keys, versions, IDs or source bodies.
+UTC text retains its supplied fractional precision. Confirmation, exclusion,
+refresh and return are distinct callbacks. Busy/expired/confirmed state and
+foreign history exclusions disable confirmation; exclusion is unavailable when
+busy, expired or every shown pair is already excluded. Returning remains
+available while busy. Its six test sources cover these display/callback states
+and action reachability at 320 px / 2x text in both languages; QA has read but
+not run them.
+
+The component does not own an auth token, operation ticket, clock, repository,
+draft or navigation. In particular, its `expired` boolean is supplied by the
+caller; the 15-second label does not enforce a deadline. Its callback interface
+cannot by itself prove that an older captured Confirm/Exclude callback is still
+bound to the displayed revision. These are final caller obligations, not defects
+in a component whose stated responsibility is presentation only.
+
+Once App freezes the complete picker/controller/page head and Integration
+assigns the next exclusive window, QA will select the smallest existing tests
+that establish the following six boundaries, adding a focused counterexample
+only where the final source/tests leave a meaningful gap:
+
+| Boundary | Minimum distinguishing observation |
+| --- | --- |
+| Original preparation token and expiry | A valid reviewed Send uses the original prepare token/ticket and request-local keys even if the auth port can now return another token. At the original absolute expiry, confirmation/Send cannot execute, silently obtain another preparation, or restart a 15-second period. Draft and manual choices remain. |
+| Changed source selection and history review | Editing the selected set retires its old confirmation. Owner/time/count boundaries remain at most five own Check-ins in the inclusive seven-day window. Explicit whole-pair exclusion gets a fresh preparation; a changed pair identity/window cannot inherit old confirmation or old opaque keys. Captured old Confirm/Exclude callbacks cannot approve a new unseen revision. |
+| Confirmation and return keep the draft | Review Confirm/Cancel return to the existing draft without execute or ordinary-send fallback. An eventual explicit Send dispatches once with the currently reviewed selection. Temporary exclusion does not delete stored messages or Check-ins. |
+| Unknown dispatched outcome | After execute is dispatched and becomes unknown, prepare/send/review actions cannot create another attempt or operation. Recovery reads the original operation; only an authoritative result permits the existing applicable recovery path. A selection-conflict review path cannot bypass unresolved dispatch. |
+| Source change or loss | Local invalidation or a current-source verification failure retires the old review/body. A source-change/selection failure preserves appropriate draft/choices and requires explicit fresh review, without silently dropping a source or falling back to ordinary Send. If a user message may already be saved, preserve the original-operation recovery fence. |
+| Exact session and retired callbacks | Same-UID replacement during preparation/review/dispatch invalidates the original actor's callbacks and late results. Old choices, tokens or confirmation cannot populate or send for the replacement session. Returning/cancelling a review cannot let its late response reopen a retired review or mutate another page's draft. |
+
+The unknown row deliberately concerns dispatched execute. It does not invent a
+new rule that every failed pre-dispatch preparation is a saved user message.
+Final test names/counts will follow the frozen implementation and observed
+results, rather than being claimed in advance. Existing independent Backend,
+wire-source and one-case model results remain at their original heads; this
+plan does not rerun or broaden them. Shared composition, responsive presentation,
+real service/model and physical-device acceptance remain separate gates.
+
+The component, its test source and the exact authority/schema snapshots are
+preserved under
+`/home/miku/.local/state/enmori-ai-companion-20261025/qa-review/root-cad5fb4-source/`.
+The eight-entry `review-source-manifest.json` SHA-256 is
+`6a7cd3cd561e1efdca3d5562c04e3959bd1719e35f2fd8aee0b37a7ce9e6faa8`;
+component SHA-256 is
+`e3534740ff9bd68c94f2c00915b561845ad52dba2f6bafa8c6a0fad21364b52f`.
+QA holds no Flutter/Emulator/model slot at this checkpoint.
