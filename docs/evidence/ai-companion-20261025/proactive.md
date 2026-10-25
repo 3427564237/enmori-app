@@ -1085,3 +1085,27 @@ the shared nonblocking validation lock. Raw output: `d1-final-analyze.log` and
 native MethodChannel were used. No real permission request, token, registration,
 provider send, device install or APK build occurred. Independent QA acceptance
 of this final D1 delta and Root's real composition remain separate checkpoints.
+
+### Formal independent D1 fence closure
+
+QA checkpoint `8bccd50f80f3832a586777c51a4579f5c438affe` persists the original
+finding and the subsequent frozen-`df3351f` closure in
+[qa-d1-source-review.md](qa-d1-source-review.md#subsequent-independent-repair-closure).
+The reviewer independently ran exactly **2/2** targeted registration/settings
+unknown-fence tests from a private unchanged `git archive`, under Integration's
+exclusive validation window. The log SHA-256 is
+`68fd3fab5f0b6ca305e50fb8ba2d0ceda27d551eb616b8bd2ccde6ebaa21db20`.
+
+The independent result confirms same-owner session replacement preserves the
+fence, unchanged GET does not unlock it, a different owner receives no old
+metadata or cleanup, and returning to the original owner restores the unresolved
+revision. The settings case independently observes retained uncertainty and
+mutation counts; its early enable guard was additionally reviewed in source.
+It did not add a further enable attempt to that settings test.
+
+The P2 is closed within the stated **process-lifetime source/fake** boundary.
+Author **38/38** and independent QA **2/2** remain separate counts and are not
+added together. This does not establish crash persistence, real permission/token
+behavior, live registration, FCM delivery, device handling or complete D1
+acceptance. This evidence update changes no production/test source and invokes
+no SDK, service, device or validation run.
