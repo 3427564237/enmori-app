@@ -884,3 +884,48 @@ exclusion action. QA separately identified that explicit same-topic exclusion of
 an associated history pair still has no wire entry; the fail-closed source test
 is valid, but the Product recovery flow is not yet complete. This gap was sent
 to Integration for a concrete approved interface and is not called Done.
+
+## History exclusion recovery — approved behavior implementation alignment
+
+The earlier F1 DTO was insufficient for Product's explicit exclusion/review
+flow. QA correctly identified that an unselected or over-seven-day source could
+otherwise keep its topic in a permanent conflict. Integration and Product
+confirmed the bounded server-issued history-pair key implementation for the
+existing approved temporary-exclusion behavior. The interim `historyMode`
+proposal was not selected and is not implemented.
+
+An F1 prepare now returns `contextSelection.historyPairs`, at most the two
+complete settled real user/assistant pairs its current history window would
+consider, with a fresh UUID `historyKey` and the already owner-visible canonical
+message IDs/sequences. No historical body, expired Check-in ID or private receipt
+is returned by this review projection. The snapshot is read in the SAME selector
+transaction. Source cards remain the explicitly requested Check-ins, at most five.
+Execution may add `excludedHistoryKeys` (unique, at most two, default empty),
+which must belong to that exact preparation/revision/session/operation.
+
+The UI must preserve the draft and exact Check-in choices, explicitly show the
+actual groups being excluded, obtain a fresh prepare/review and then require
+another explicit Send. Exclusions never transfer automatically to new keys or
+newly arrived pairs. Backend carries the complete prepared history identities
+and exclusions in the disposable grant, verifies the current top-two window at
+every effect, and borrows neither text nor provenance from excluded pairs.
+It never deletes/hides canonical history, silently drops an unapproved pair, or
+backfills an older exchange. All remaining history still needs complete exact
+source authorization. Unknown execute outcomes use the original readback path;
+this recovery does not confer a resend permit.
+
+Composition delta: `prepareSelection(context,input,conversationId?)` forwards the
+existing topic ID as its third internal argument. The mutable reader constructor
+accepts a fifth `historySnapshot` callback, bound to
+`store.prepareHistorySnapshot(tx,principal,owner,conversation,current)` using
+the SAME gateway transaction. An existing-topic selector without that supplier
+fails unavailable. Execution selected reads still need the actual tracked gateway
+and exact `original.currentRead` guard; a timeout or abort does not settle SDK I/O.
+
+Pinned strict build plus **487/487** ai-conversation / F0 store fake tests pass.
+The new cases cover same-topic recovery for unselected B and an eight-day-old
+source, no old body in the model input, byte-identical retained old messages,
+window change refusing the old exclusion before model/writes, no backfill after
+excluding both top pairs, draft-preserving explicit Send and cross-prepare key
+rejection. These are fake-gateway/model proofs. Author and independent QA real
+Emulator/composition evidence remains separate.

@@ -266,10 +266,10 @@ export class FirestoreConversationStore implements RealConversationStore {
           !nonnegative(state.stateRevision)) refuse("unavailable");
       // Edit/switch are NOT revocations; only the originally used record must remain live.
     }
-    if (deps.history !== undefined) {
+    if (deps.history !== undefined||deps.selectedReply?.historySnapshot!==undefined) {
       const inv = await this.inventory(tx, target, false, check);
-      if (!inv && deps.history.length) refuse("denied");
-      if (inv) await this.history(tx, target, inv, deps.history, check,deps);
+      if (!inv && (deps.history?.length||deps.selectedReply?.historySnapshot?.length)) refuse("denied");
+      if (inv) await this.history(tx, target, inv, deps.history??[], check,deps);
     }
     if(deps.replyToMessageId!==undefined){
       if(!UUID.test(deps.replyToMessageId)||target.targetKind!=="existing")refuse("selection_conflict");
@@ -509,6 +509,26 @@ export class FirestoreConversationStore implements RealConversationStore {
     }
     return this.message(assistant);
   }
+  private historyIdentity(inv:Inventory,user:Snapshot):HistoryPairIdentity{
+    const assistant=inv.rows.find(r=>r.id===user.data.acceptedAssistantMessageId);
+    if(!assistant||assistant.data.role!=="assistant"||assistant.data.origin!==undefined||assistant.data.replyToUserMessageId!==user.id||
+      (assistant.data.sequence as number)<=(user.data.sequence as number))refuse("unavailable");
+    return {userMessageId:user.id,assistantMessageId:assistant.id,userSequence:user.data.sequence as number,assistantSequence:assistant.data.sequence as number};
+  }
+  private historyWindow(inv:Inventory,excludeUser?:string):readonly Snapshot[]{
+    return inv.rows.filter(row=>row.data.role==="user"&&row.id!==excludeUser&&row.data.acceptedAssistantMessageId!==undefined&&row.data.pendingOperationId===undefined)
+      .sort((a,b)=>this.historyIdentity(inv,b).assistantSequence-this.historyIdentity(inv,a).assistantSequence).slice(0,2).reverse();
+  }
+  /** Content-free candidate identities inside the selector's SAME transaction.
+   * Does not grant permission to borrow any pair's text or underlying sources. */
+  async prepareHistorySnapshot(tx:Tx,principal:AuthPrincipal,owner:string,id:string,current:()=>boolean):Promise<StoreResult<readonly HistoryPairIdentity[]>>{
+    try{
+      const check=()=>this.readCurrent(current),location=this.location(owner,id);check();
+      const authority=parseReadAuthority(await this.owner(tx,principal,owner,check),owner);if(!authority)refuse("unavailable");if(authority.consent!=="accepted")refuse("denied");
+      const inv=await this.inventory(tx,location,false,check);if(!inv)refuse("conversation_unavailable");
+      const pairs=this.historyWindow(inv).map(row=>this.historyIdentity(inv,row));check();return {kind:"confirmed",value:pairs};
+    }catch(e){return {kind:e instanceof Refusal?e.kind:"unresolved"};}
+  }
   private async sourcedV2(tx:Tx,t:Location,row:Snapshot,source:RecordData|undefined,check?:()=>void):Promise<StoredConversationMessage>{
     if(row.data.availability === "unavailable") {
       if(source !== undefined)refuse("unavailable");
@@ -531,18 +551,17 @@ export class FirestoreConversationStore implements RealConversationStore {
   private async history(tx: Tx, t: OperationTarget, inv: Inventory,
     expected: readonly HistoryPairIdentity[] | undefined, check: () => void,deps?:OriginalWriteAuthority["dependencies"]): Promise<ConversationHistory> {
     if (expected && (!Array.isArray(expected) || expected.length > 2 || new Set(expected.map(p => p.userMessageId)).size !== expected.length)) refuse("unavailable");
-    const selected = expected ? expected.map(p => {
+    const window=this.historyWindow(inv,t.userMessageId),snapshot=deps?.selectedReply?.historySnapshot,excluded=deps?.selectedReply?.excludedHistoryPairs??[];
+    const same=(a:HistoryPairIdentity,b:HistoryPairIdentity)=>a.userMessageId===b.userMessageId&&a.assistantMessageId===b.assistantMessageId&&a.userSequence===b.userSequence&&a.assistantSequence===b.assistantSequence;
+    if(snapshot!==undefined&&(!Array.isArray(snapshot)||snapshot.length>2||snapshot.length!==window.length||window.some((row,i)=>!same(this.historyIdentity(inv,row),snapshot[i]!))))refuse("source_changed");
+    if(excluded.length>2||new Set(excluded.map(p=>p.userMessageId)).size!==excluded.length||excluded.some(p=>!snapshot?.some(s=>same(s,p))))refuse("selection_conflict");
+    if(expected?.some(p=>excluded.some(e=>same(e,p))))refuse("selection_conflict");
+    const selected = (expected ? expected.map(p => {
       if (!UUID.test(p.userMessageId) || !UUID.test(p.assistantMessageId) || !positive(p.userSequence) || !positive(p.assistantSequence)) refuse("unavailable");
       const row = this.requireUser(inv, p.userMessageId);
       if (row.data.sequence !== p.userSequence || row.data.acceptedAssistantMessageId !== p.assistantMessageId) refuse("denied");
       return row;
-    }) : inv.rows.filter(row => row.data.role === "user" && row.id !== t.userMessageId &&
-      row.data.acceptedAssistantMessageId !== undefined && row.data.pendingOperationId === undefined)
-      .sort((a,b) => {
-        const aa=inv.rows.find(row=>row.id===a.data.acceptedAssistantMessageId),bb=inv.rows.find(row=>row.id===b.data.acceptedAssistantMessageId);
-        if (!aa || !bb) refuse("unavailable");
-        return Number(bb.data.sequence)-Number(aa.data.sequence);
-      }).slice(0,2).reverse();
+    }) : window).filter(row=>!excluded.some(p=>same(p,this.historyIdentity(inv,row))));
     const pairs: ConversationHistory["pairs"][number][] = [], sources = new Map<string, ConversationHistory["sources"][number]>(),
       messageSources=new Map<string,NonNullable<ConversationHistory["messageSources"]>[number]>();
     for (const row of selected) {

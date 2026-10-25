@@ -221,7 +221,8 @@ export class AsyncConversationApplication {
     if(flattened.length>15)return undefined;
     return Object.freeze({...dependencies,sources:Object.freeze([...sources.values()]),history:Object.freeze(s.history?.pairs.map(p => p.identity) ?? []),
       ...(selected||messages.length?{selectedReply:{processing:"local" as const,asOf:s.context!.read.asOf,permittedCheckInIds:selected?.permittedCheckInIds??[],
-        excludedCheckInIds:selected?.excludedCheckInIds??[],sources:Object.freeze(flattened)}}:{})});
+        excludedCheckInIds:selected?.excludedCheckInIds??[],sources:Object.freeze(flattened),
+        ...(selected?.historySnapshot?{historySnapshot:selected.historySnapshot}:{}),...(selected?.excludedHistoryPairs?{excludedHistoryPairs:selected.excludedHistoryPairs}:{})}}:{})});
   }
   private model(s: State): ConversationInput | undefined {
     if (!this.live(s) || !s.processing) return undefined;
