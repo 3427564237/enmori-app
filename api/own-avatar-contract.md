@@ -22,8 +22,11 @@ avatar. No URL, arbitrary MIME, account ID or external file path is accepted.
 
 The Backend validates canonical base64, PNG byte/pixel/chunk/decompression bounds,
 8-bit RGB/RGBA non-interlaced pixels, chunk checksums and complete file shape.
-Reject malformed or animated payloads. Canonical re-encoding with built-in zlib
-keeps only required PNG chunks, stripping ancillary metadata and trailing data.
+Reject malformed or animated payloads, any bytes after IEND, palette/unknown
+critical chunks and RGB transparency via tRNS. The native preview uses RGB or
+RGBA directly. Canonical re-encoding with built-in zlib keeps only required PNG
+chunks, stripping accepted non-rendering ancillary metadata. Do not silently
+drop a chunk that changes pixel transparency or accept a trailing payload.
 Store the bounded canonical bytes plus SHA-256 of the validated submitted PNG;
 this digest permits readback comparison after an unacknowledged write without
 retaining the original metadata. No raw image or digest belongs in logs.
