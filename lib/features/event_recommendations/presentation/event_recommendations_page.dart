@@ -26,6 +26,7 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
     required this.onSeeAll,
     this.heading,
     this.onBrowseAll,
+    this.onContinueDiscovery,
     this.onOpenEvent,
     this.recommendationCardBuilder,
     this.syntheticPreview = false,
@@ -35,6 +36,7 @@ final class EventRecommendationsSection extends ConsumerStatefulWidget {
   final VoidCallback? onSeeAll;
   final String? heading;
   final VoidCallback? onBrowseAll;
+  final VoidCallback? onContinueDiscovery;
   final void Function(String)? onOpenEvent;
   final RecommendationCardBuilder? recommendationCardBuilder;
   final bool syntheticPreview;
@@ -129,6 +131,7 @@ final class _EventRecommendationsSectionState
       home: true,
       heading: widget.heading,
       onBrowseAll: widget.onBrowseAll,
+      onContinueDiscovery: widget.onContinueDiscovery,
       onOpenEvent: widget.onOpenEvent,
       recommendationCardBuilder: widget.recommendationCardBuilder,
       syntheticPreview: widget.syntheticPreview,
@@ -141,11 +144,13 @@ final class EventRecommendationsPage extends ConsumerStatefulWidget {
     this.onOpenEvent,
     this.recommendationCardBuilder,
     this.syntheticPreview = false,
+    this.initialEventIndex = 0,
     super.key,
-  });
+  }) : assert(initialEventIndex >= 0);
   final void Function(String)? onOpenEvent;
   final RecommendationCardBuilder? recommendationCardBuilder;
   final bool syntheticPreview;
+  final int initialEventIndex;
 
   @override
   ConsumerState<EventRecommendationsPage> createState() =>
@@ -157,6 +162,12 @@ final class _EventRecommendationsPageState
     with WidgetsBindingObserver {
   late final EventRecommendationsController _controller;
   int? _operation;
+  final _eventKeys = <String, GlobalKey>{};
+  EventRecommendationResponse? _snapshot;
+  String? _currentEventId;
+  bool _positioned = false;
+  bool _moving = false;
+  int _positionGeneration = 0;
 
   @override
   void initState() {
@@ -176,16 +187,117 @@ final class _EventRecommendationsPageState
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed && mounted) _controller.clear();
+    if (state != AppLifecycleState.resumed && mounted) {
+      _resetPosition();
+      _controller.clear();
+    }
+  }
+
+  void _resetPosition() {
+    _positionGeneration++;
+    _snapshot = null;
+    _currentEventId = null;
+    _positioned = false;
+    _moving = false;
+    _eventKeys.clear();
+  }
+
+  void _preparePosition(EventRecommendationResponse? response) {
+    if (identical(_snapshot, response)) return;
+    _positionGeneration++;
+    _snapshot = response;
+    _moving = false;
+    final ids =
+        response?.items.map((event) => event.eventId).toSet() ?? <String>{};
+    _eventKeys.removeWhere((id, _) => !ids.contains(id));
+    for (final id in ids) {
+      _eventKeys.putIfAbsent(id, GlobalKey.new);
+    }
+    if (response == null || response.items.isEmpty) return;
+    final previous = response.items.indexWhere(
+      (event) => event.eventId == _currentEventId,
+    );
+    var index = previous >= 0 ? previous : 0;
+    if (previous < 0 && !_positioned) {
+      index = widget.initialEventIndex < response.items.length
+          ? widget.initialEventIndex
+          : response.items.length - 1;
+    }
+    final generation = _positionGeneration;
+    _moving = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && generation == _positionGeneration) {
+        _reveal(response, response.items[index].eventId, generation);
+      }
+    });
+  }
+
+  Future<void> _reveal(
+    EventRecommendationResponse response,
+    String id,
+    int generation,
+  ) async {
+    final target = _eventKeys[id]?.currentContext;
+    if (target == null ||
+        ModalRoute.of(context)?.isCurrent == false ||
+        !identical(
+          ref.read(eventRecommendationsControllerProvider).asData?.value,
+          response,
+        )) {
+      if (mounted && generation == _positionGeneration) {
+        setState(() => _moving = false);
+      }
+      return;
+    }
+    // All cards stay in Backend order; moving the viewport never fetches a batch.
+    await Scrollable.ensureVisible(target, duration: Duration.zero);
+    if (!mounted || generation != _positionGeneration) return;
+    setState(() {
+      _moving = false;
+      if (identical(
+        ref.read(eventRecommendationsControllerProvider).asData?.value,
+        response,
+      )) {
+        _currentEventId = id;
+        _positioned = true;
+      }
+    });
+  }
+
+  void _nextGroup(EventRecommendationResponse response) {
+    if (_moving || !identical(_snapshot, response)) return;
+    final current = response.items.indexWhere(
+      (event) => event.eventId == _currentEventId,
+    );
+    final next = (current < 0 ? 0 : current) + 2;
+    if (next >= response.items.length) return;
+    setState(() => _moving = true);
+    _reveal(response, response.items[next].eventId, _positionGeneration);
   }
 
   void _load() {
+    if (!mounted) return;
     _operation = _controller.load(view: EventRecommendationView.all);
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authSessionProvider, (previous, next) {
+      if (!identical(previous?.asData?.value, next.asData?.value)) {
+        setState(_resetPosition);
+      }
+    });
     final state = ref.watch(eventRecommendationsControllerProvider);
+    final response = state.asData?.value;
+    _preparePosition(response);
+    final currentIndex =
+        response?.items.indexWhere(
+          (event) => event.eventId == _currentEventId,
+        ) ??
+        -1;
+    final hasNext =
+        response != null &&
+        (currentIndex < 0 ? 0 : currentIndex) + 2 < response.items.length;
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('Event recommendations', '活动推荐'))),
       body: SafeArea(
@@ -204,10 +316,34 @@ final class _EventRecommendationsPageState
               onOpenEvent: widget.onOpenEvent,
               recommendationCardBuilder: widget.recommendationCardBuilder,
               syntheticPreview: widget.syntheticPreview,
+              eventKeys: _eventKeys,
             ),
           ],
         ),
       ),
+      bottomNavigationBar: response == null || response.items.isEmpty
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: _moving || hasNext
+                    ? OutlinedButton.icon(
+                        key: const Key('event-recommendations-next-group'),
+                        onPressed: _moving ? null : () => _nextGroup(response),
+                        icon: const Icon(Icons.arrow_downward),
+                        label: Text(context.tr('Next group', '下一组')),
+                      )
+                    : Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          context.tr(
+                            'You have reached the end of this list.',
+                            '已浏览到本次推荐列表的末尾。',
+                          ),
+                        ),
+                      ),
+              ),
+            ),
     );
   }
 }
@@ -220,9 +356,11 @@ final class _RecommendationContent extends StatelessWidget {
     this.home = false,
     this.heading,
     this.onBrowseAll,
+    this.onContinueDiscovery,
     this.onOpenEvent,
     this.recommendationCardBuilder,
     this.syntheticPreview = false,
+    this.eventKeys = const {},
   });
 
   final AsyncValue<EventRecommendationResponse> state;
@@ -231,6 +369,8 @@ final class _RecommendationContent extends StatelessWidget {
   final bool home;
   final String? heading;
   final VoidCallback? onBrowseAll;
+  final VoidCallback? onContinueDiscovery;
+  final Map<String, GlobalKey> eventKeys;
   final bool syntheticPreview;
   final void Function(String)? onOpenEvent;
   final RecommendationCardBuilder? recommendationCardBuilder;
@@ -238,6 +378,11 @@ final class _RecommendationContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inlineHeader = home && heading != null;
+    final continueDiscovery =
+        home &&
+        onContinueDiscovery != null &&
+        state is AsyncData<EventRecommendationResponse> &&
+        state.requireValue.items.isNotEmpty;
     Widget status({
       required Key key,
       required String title,
@@ -357,6 +502,7 @@ final class _RecommendationContent extends StatelessWidget {
                 onSeeAll: onSeeAll,
                 onOpenEvent: onOpenEvent,
                 recommendationCardBuilder: recommendationCardBuilder,
+                eventKeys: eventKeys,
               ),
     };
     return Column(
@@ -372,19 +518,27 @@ final class _RecommendationContent extends StatelessWidget {
                   onPressed: onBrowseAll,
                   child: Text(context.tr('Browse all', '浏览活动')),
                 ),
-              IconButton(
-                key: Key(
-                  state.hasError &&
-                          state.error is! EventRecommendationsRefreshRequired
-                      ? 'event-recommendations-retry'
-                      : 'event-recommendations-refresh',
+              if (continueDiscovery)
+                TextButton.icon(
+                  key: const Key('event-recommendations-continue'),
+                  onPressed: onContinueDiscovery,
+                  icon: const Icon(Icons.arrow_forward),
+                  label: Text(context.tr('Next group', '下一组')),
+                )
+              else
+                IconButton(
+                  key: Key(
+                    state.hasError &&
+                            state.error is! EventRecommendationsRefreshRequired
+                        ? 'event-recommendations-retry'
+                        : 'event-recommendations-refresh',
+                  ),
+                  tooltip: state.hasError
+                      ? context.tr('Retry event recommendations', '重试活动推荐')
+                      : context.tr('Refresh event recommendations', '刷新活动推荐'),
+                  onPressed: state.isLoading ? null : onRetry,
+                  icon: const Icon(Icons.refresh),
                 ),
-                tooltip: state.hasError
-                    ? context.tr('Retry event recommendations', '重试活动推荐')
-                    : context.tr('Refresh event recommendations', '刷新活动推荐'),
-                onPressed: state.isLoading ? null : onRetry,
-                icon: const Icon(Icons.refresh),
-              ),
             ],
           ),
         if (syntheticPreview) ...[
@@ -414,10 +568,20 @@ final class _RecommendationContent extends StatelessWidget {
             !inlineHeader) ...[
           const SizedBox(height: 12),
           TextButton.icon(
-            key: const Key('event-recommendations-refresh'),
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh),
-            label: Text(context.tr('Refresh', '刷新')),
+            key: Key(
+              continueDiscovery
+                  ? 'event-recommendations-continue'
+                  : 'event-recommendations-refresh',
+            ),
+            onPressed: continueDiscovery ? onContinueDiscovery : onRetry,
+            icon: Icon(
+              continueDiscovery ? Icons.arrow_forward : Icons.refresh,
+            ),
+            label: Text(
+              continueDiscovery
+                  ? context.tr('Next group', '下一组')
+                  : context.tr('Refresh', '刷新'),
+            ),
           ),
         ],
       ],
@@ -447,12 +611,14 @@ final class _RecommendationList extends StatelessWidget {
     this.onSeeAll,
     this.onOpenEvent,
     this.recommendationCardBuilder,
+    this.eventKeys = const {},
   });
 
   final List<EventRecommendation> items;
   final void Function(String)? onOpenEvent;
   final RecommendationCardBuilder? recommendationCardBuilder;
   final VoidCallback? onSeeAll;
+  final Map<String, GlobalKey> eventKeys;
 
   @override
   Widget build(BuildContext context) {
@@ -461,6 +627,7 @@ final class _RecommendationList extends StatelessWidget {
       children: [
         ...items.map(
           (item) => Padding(
+            key: eventKeys[item.eventId],
             padding: const EdgeInsets.only(bottom: 12),
             child:
                 recommendationCardBuilder?.call(context, item, onOpenEvent) ??
