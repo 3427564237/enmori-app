@@ -210,7 +210,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester
-            .widget<AiConversationPage>(find.byType(AiConversationPage))
+            .widget<AiConversationPage>(
+              find.byType(AiConversationPage, skipOffstage: false),
+            )
             .initialCheckInId,
         'synthetic-reference',
       );
@@ -250,7 +252,9 @@ void main() {
       expect(router.state.uri.path, AppRoutes.aiCheckIn);
       expect(
         tester
-            .widget<AiConversationPage>(find.byType(AiConversationPage))
+            .widget<AiConversationPage>(
+              find.byType(AiConversationPage, skipOffstage: false),
+            )
             .initialCheckInId,
         'synthetic-reference',
       );
