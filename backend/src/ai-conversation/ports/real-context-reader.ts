@@ -84,6 +84,8 @@ export interface ConversationHistory {
   readonly sources: ContextDependencies["sources"];
 }
 export interface ContextDependencies {
+  readonly selectedReply?:import("./selected-reply.js").SelectedReplyDependencies;
+  readonly replyToMessageId?:string;
   readonly history?: readonly HistoryPairIdentity[];
   readonly ownerId: string;
   readonly purpose: "checkin_conversation";
@@ -105,7 +107,7 @@ export interface CurrentContextAuthority {
 }
 export interface NoteModelContext {
   readonly persona: PersonaProjection | undefined;
-  readonly checkIns: readonly { readonly occurredAt: string; readonly noteText: string }[];
+  readonly checkIns: readonly { readonly occurredAt: string; readonly noteText: string;readonly moodLabel?:string;readonly activityLabel?:string }[];
 }
 
 /**
