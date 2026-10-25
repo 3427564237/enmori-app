@@ -257,6 +257,8 @@ The final App `ee448278bce86766238f2b049b0822e21c5540ad` and shared Integration
 `a20927c063b9ef20e38fa8fdac7b252f54c60bda` were subsequently reviewed and tested
 within the six boundaries above. The complete result, exact overlays and
 failure history are in [the final App/shared-entry ledger](qa-f1-app-integration.md).
-Eighteen distinct checks pass; one independently reproduced pending-execute
-recovery defect remains open. This supersedes the earlier Not Run status only
-for those named source/widget checks, not for other evidence layers.
+Eighteen distinct checks initially passed with one independently reproduced
+pending-execute recovery defect. The later exact `6b4ec58` repair closes that
+P2 with two focused independent recovery passes and a retained old-head red.
+This supersedes the earlier Not Run status only for those named source/widget
+checks, not for other evidence layers; the earlier checks were not rerun.
