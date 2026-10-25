@@ -56,3 +56,11 @@ Raw browser output/snapshots remain owner-local under `~/.local/state/enmori-ai-
 ## Unverified layers
 
 Independent QA of the exact prototype delivery remains a separate record. This is not production Flutter, backend/source-contract acceptance, actual model quality or latency/cost evidence, real notification delivery, APK/physical-device acceptance, upgrade/migration verification, UAT, Release or Done. Small-plan semantic failure remains unresolved. Nothing was pushed, deployed, merged to main or written to a real account.
+
+## Approved first-flow follow-up — early F0 handoff
+
+On Integration's renewed assignment, this clean worker fast-forwarded from `c7adc9837850972018ddd91b3c5491256f09a230` to common baseline `26af8c95da4fa00b76f841952d742d9da8c07e5c`. Product independently read LI's original answer `01a171cc-8f2f-78d2-a909-d1472f097376` ("按推荐范围实现（推荐）"), the durable `docs/decisions/2026-10-25-li-ai-companion-first-flow.md`, and the approved portions of Context/Proactive plus QA's contract reconciliation.
+
+The later decision supersedes only the specified earlier pending boundaries: F0 explicit saved-user-message follow-up with R-ANCHOR, F1a exact hand-selected own Check-ins for one local reply, minimal source cards/resolver/receipts/read-state, and the pinned D1 Android push implementation candidate. Earlier proposal paragraphs above remain historical. F1b, location, automatic Check-in/Going triggers, wider cloud personal processing and actual deploy/register/send/device actions are not added.
+
+[Minimal F0 handoff](../../design/ai-companion-20261025/first-flow-handoff.md) is delivered first so App can implement without waiting for all prototype screens. It covers separate settings/create outcomes, original-intent readback on unknown outcomes, explicit time/IANA confirmation, default-off and bounded controls, typed source/anchor navigation, actual visibility before read acknowledgement, and bilingual copy. This documentation increment changes no production code and makes no new browser/native/runtime claim. The same visual prototype will be updated next within the approved F0/F1a scope.
