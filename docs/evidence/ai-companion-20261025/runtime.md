@@ -365,3 +365,96 @@ private-data purposes and integrated/native/phone acceptance remain untested or
 pending their separate contracts. The isolated source/mock candidate is available
 for Integration's review; the current local model is not presented as meeting
 the full companion quality criteria.
+
+## Gemini configuration preparation — read-only, 25 October
+
+The [first-flow decision](../../decisions/2026-10-25-li-ai-companion-first-flow.md)
+at `26af8c95da4fa00b76f841952d742d9da8c07e5c` approves the previously specified
+USD 1 synthetic experiment, subject to execution conditions. It supersedes the
+earlier unapproved-budget status only within that scope. Runtime read back LI's
+direct Integration reply `01a171ce-c02b-7830-9971-728d347f7dcd`: the operator
+self-reports age 18+ and Singapore and asks for configuration help. This is an
+operator statement, not an adult-only product audience or age-verification
+feature. Integration should retain it in the execution decision record.
+
+Integration assigned only configuration inspection at this stage: no login or
+account switching, billing linkage, API enablement, project/key creation, key
+read, secret-file search or model request. Runtime fast-forwarded its clean
+branch from `15a7665` to `26af8c9` as directed; the reviewed evaluation sources
+and adapters are unchanged. No SDK installation or build was required.
+
+| Read-only observation | Result and limit |
+| --- | --- |
+| Installed CLIs | `/usr/bin/gcloud` 590.0.0; `/home/miku/.local/bin/firebase` 15.29.0 |
+| gcloud authenticated accounts | `gcloud auth list` returned `[]`; selected account/project projection returned `null` |
+| Firebase login inventory | One existing operator account; email retained only in the private metadata record |
+| Firebase-visible project | `enmori-rmvp-controlled`, number `11254388146`, display name `ENMORI RMVP Controlled`, `ACTIVE` |
+| Other Google Cloud projects | Unconfirmed: Firebase lists only accessible Firebase projects |
+| Billing accounts, project billing link, Gemini paid readiness/credits | Unconfirmed; no gcloud login was initiated and no token was transferred from Firebase |
+| Contributor enrollment, Generative Language API state, key/project binding | Unconfirmed; no key surface was opened |
+
+The Firebase `login:list` and `projects:list` calls succeeded, with output
+restricted to account/project metadata. The allowed CLI purposes are documented
+in the [Firebase CLI reference](https://firebase.google.com/docs/cli). The private
+allowlisted observation record is
+`/home/miku/.local/state/enmori-ai-companion-20261025/runtime/cloud-setup/metadata-observation.json`.
+Its SHA-256 is
+`0e577242086ded03ab867a4a9d6c16ff84904f0270047df9393e304ecd1f042c`.
+No inference of missing billing is made from missing gcloud authentication.
+
+### Smallest proposed next configuration steps
+
+1. Integration arranges user-mediated Google authorization for the confirmed
+   existing operator account, retaining the account choice explicitly. The
+   optional `gcloud auth login <confirmed-account> --no-activate` path avoids
+   changing the active account; it is prepared, not executed. Do not update ADC
+   or extract Firebase tokens. See [gcloud auth login](https://docs.cloud.google.com/sdk/gcloud/reference/auth/login).
+2. With that authorized session, read all accessible Cloud projects and billing
+   accounts, then the selected project's billing metadata and enabled services.
+   The known controlled Firebase project is an **inspection candidate**, not an
+   automatically selected Gemini project. Prefer an existing suitable research
+   project if one is actually discovered. A new project or a change to the
+   controlled project's billing needs its specific project/account decision.
+3. Confirm the selected project's paid plan/usable balance and no Contributor
+   enrollment. Google's current [billing guide](https://ai.google.dev/gemini-api/docs/billing)
+   allows Postpay or may require a minimum USD 5 prepayment. That payment is
+   separate from the approved USD 1 model-token allowance; no recharge or new
+   billing account is currently authorized. Existing billing linkage alone does
+   not establish usable Prepay credit. AI Studio spend caps can lag by about ten
+   minutes, so the local reservation guard remains necessary.
+4. After the concrete setup scope is confirmed, enable only the required service
+   and prepare a server-side credential tied to that project. Current
+   [key documentation](https://ai.google.dev/gemini-api/docs/api-key) says new AI
+   Studio keys default to authorization keys bound to a service account; creation
+   can also require API enablement and IAM binding. These are real configuration
+   actions. New-user Terms acceptance can create a default project/key, so the
+   read-only stage has not entered that onboarding flow. Never reuse a Firebase
+   client key or place a Gemini secret in chat, Git, Flutter or command arguments.
+5. Read back the chosen configuration, reconfirm the reviewed source/corpus and
+   same-day prices, and prepare the private one-use authorization record with
+   actual project/eligibility evidence and expiry. Only then can Integration
+   assign execution of the already approved fixed experiment. No smoke-generation
+   call or hidden extra run is part of setup.
+
+The post-login metadata commands are prepared below, **not executed**. Replace
+the account placeholder only with the human-confirmed account; do not change
+global default project/account settings. Permission errors remain unknown and
+must not trigger automatic API enablement or broader roles.
+
+```sh
+gcloud projects list --account='<confirmed-account>' --format='json(projectId,name,projectNumber,lifecycleState)'
+gcloud billing accounts list --account='<confirmed-account>' --format='json(name,displayName,open)'
+gcloud billing projects describe enmori-rmvp-controlled --account='<confirmed-account>' --format='json(projectId,billingEnabled,billingAccountName)'
+gcloud services list --enabled --project=enmori-rmvp-controlled --account='<confirmed-account>' --filter='config.name=generativelanguage.googleapis.com' --format='json(config.name,state)'
+```
+
+The billing reads are defined by Google's
+[account listing](https://docs.cloud.google.com/sdk/gcloud/reference/billing/accounts/list)
+and [project billing description](https://docs.cloud.google.com/sdk/gcloud/reference/billing/projects/describe)
+references; project and service inventory use
+[projects list](https://docs.cloud.google.com/sdk/gcloud/reference/projects/list)
+and [services list](https://docs.cloud.google.com/sdk/gcloud/reference/services/list).
+This completes the assigned read-only preparation. Setup, usable
+paid credentials and real cloud evaluation remain incomplete; the next user
+interaction is account authorization, followed by a project/payment choice only
+if the resulting metadata requires one.
