@@ -163,3 +163,12 @@ original receiver. Strict compilation and all four delivery-wrapper cases
 passed, including a private-state class supplier. Raw result:
 `integration-delivery-receiver-fix.log`. This small correction does not change
 HTTP scope or storage/dispatch behavior.
+
+A later wire review found an overly strict cross-pair ordering assumption in
+Root's prepared-history projection. The existing Retry contract permits an
+older unanswered U1 to receive A4 after U2/A3 completes. The Store therefore
+legitimately returns `(U2,A3),(U1,A4)` ordered by assistant sequence. The HTTP
+projection now checks each pair's U-before-A order, unique IDs/sequences and
+ascending assistant sequence, without requiring non-overlapping pairs. A
+targeted late-retry and duplicate-sequence regression was added. Existing
+history selection, Retry permissions and model serialization are unchanged.

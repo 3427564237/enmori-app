@@ -5,17 +5,18 @@ import Fastify from "fastify";
 import { registerConversationRoutes } from "../../src/ai-conversation/transport/register-routes.js";
 import type { ConversationOperations } from "../../src/ai-conversation/ports/conversation-operations.js";
 import type { StoredConversationMessage } from "../../src/ai-conversation/ports/real-conversation-store.js";
+import type { PreparedReplySelection } from "../../src/ai-conversation/ports/selected-reply.js";
 
 const conversationId=randomUUID(),operationId=randomUUID(),key=randomBytes(32).toString("base64url"),selectionRevision=randomUUID(),selectionKey=randomUUID();
 const source={cardRef:selectionKey,kind:"check_in" as const,version:"server-version",sourceOccurredAt:"2026-10-25T01:00:00.000Z",observedAt:"2026-10-25T01:01:00.000Z",state:"available" as const,canNavigate:true as const};
 const user:StoredConversationMessage={messageId:randomUUID(),role:"user",sequence:1,persistedAt:{seconds:1792886400,nanoseconds:0},availability:"available",text:"Synthetic request"};
 const assistant:StoredConversationMessage={...user,messageId:randomUUID(),sequence:2,role:"assistant",text:"Synthetic answer",sources:[{...source,...{privateSourceId:"do-not-project"}}]};
 const historyPair={historyKey:randomUUID(),userMessageId:user.messageId,assistantMessageId:assistant.messageId,userSequence:1,assistantSequence:2};
-async function fixture(){
+async function fixture(historyPairs:PreparedReplySelection["historyPairs"]=[historyPair]){
  const calls:unknown[]=[];
  const app=Fastify({logger:false});app.decorateRequest("authPrincipal",null);
  const operations:ConversationOperations={
-  prepare:async(_caller,input)=>{calls.push(input);return{kind:"success",value:{operationId,operationKey:key,conversationId,preparationExpiresAt:"2026-10-25T01:02:00.000Z",contextSelection:{selectionRevision,expiresAt:"2026-10-25T01:02:00.000Z",sourceCards:[{...source,selectionKey,...{privateOwner:"do-not-project"}}],historyPairs:[{...historyPair,...{privateReceipt:"do-not-project"}}]}}};},
+  prepare:async(_caller,input)=>{calls.push(input);return{kind:"success",value:{operationId,operationKey:key,conversationId,preparationExpiresAt:"2026-10-25T01:02:00.000Z",contextSelection:{selectionRevision,expiresAt:"2026-10-25T01:02:00.000Z",sourceCards:[{...source,selectionKey,...{privateOwner:"do-not-project"}}],historyPairs:historyPairs.map(p=>({...p,...{privateReceipt:"do-not-project"}}))}}};},
   execute:async(_caller,input)=>{calls.push(input);return{kind:"success",value:{operationId,conversationId,userMessage:user,assistantMessage:assistant}};},
   listMessages:async()=>({kind:"success",value:{messages:[user,{...assistant,origin:"proactive",occurrenceId:randomUUID(),category:"explicit_follow_up"}]}}),
   cancel:async()=>({kind:"success",value:{operationId,state:"terminal"}}),
@@ -61,4 +62,15 @@ test("source-aware transcript projects genuine proactive identity and does not f
  assert.equal(response.statusCode,200);const messages=response.json().messages;
  assert.equal(messages.length,2);assert.equal(messages[1].role,"assistant");assert.equal(messages[1].origin,"proactive");assert.equal(messages[1].category,"explicit_follow_up");
  assert.deepEqual(messages[1].sources,[source]);assert(!response.body.includes("do-not-project"));
+});
+test("history review permits a late accepted retry while rejecting reused message sequences",async t=>{
+ // U1 fails, U2/A3 completes, then Retry U1 produces A4. The retained Store
+ // selects the last two completed pairs by assistant sequence, not user order.
+ const pairs=[{historyKey:randomUUID(),userMessageId:randomUUID(),assistantMessageId:randomUUID(),userSequence:2,assistantSequence:3},
+  {historyKey:randomUUID(),userMessageId:randomUUID(),assistantMessageId:randomUUID(),userSequence:1,assistantSequence:4}];
+ const good=await fixture(pairs);t.after(()=>good.app.close());
+ const request={method:"POST" as const,url:"/v1/me/ai/operations",headers,payload:{kind:"send",purpose:"checkin_conversation",conversationId,contextSelection:{processing:"local",sources:[]}}};
+ const response=await good.app.inject(request);assert.equal(response.statusCode,201);assert.deepEqual(response.json().contextSelection.historyPairs,pairs);
+ const bad=await fixture([pairs[0]!,{...pairs[1]!,userSequence:2}]);t.after(()=>bad.app.close());
+ assert.equal((await bad.app.inject(request)).statusCode,503);
 });

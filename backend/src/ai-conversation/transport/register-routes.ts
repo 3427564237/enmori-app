@@ -71,9 +71,10 @@ function preparedSelection(value: PreparedReplySelection): PreparedReplySelectio
   if (!Array.isArray(value.historyPairs) || value.historyPairs.length > 2 ||
       new Set(value.historyPairs.map(v => v.historyKey)).size !== value.historyPairs.length ||
       new Set(value.historyPairs.flatMap(v => [v.userMessageId, v.assistantMessageId])).size !== value.historyPairs.length * 2 ||
+      new Set(value.historyPairs.flatMap(v => [v.userSequence, v.assistantSequence])).size !== value.historyPairs.length * 2 ||
       value.historyPairs.some((v, i) => !uuid(v.historyKey) || !uuid(v.userMessageId) || !uuid(v.assistantMessageId) ||
         !Number.isSafeInteger(v.userSequence) || !Number.isSafeInteger(v.assistantSequence) || v.userSequence < 1 || v.assistantSequence <= v.userSequence ||
-        i > 0 && v.userSequence <= value.historyPairs[i - 1]!.assistantSequence)) throw Error("Invalid inner history review");
+        i > 0 && v.assistantSequence <= value.historyPairs[i - 1]!.assistantSequence)) throw Error("Invalid inner history review");
   return { selectionRevision: value.selectionRevision, expiresAt: value.expiresAt, historyPairs: value.historyPairs.map(v => ({
     historyKey: v.historyKey, userMessageId: v.userMessageId, assistantMessageId: v.assistantMessageId,
     userSequence: v.userSequence, assistantSequence: v.assistantSequence,
