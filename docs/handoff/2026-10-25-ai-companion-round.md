@@ -72,3 +72,44 @@ phone evidence separate. Unknown operation outcomes are not retried blindly.
 Preserve original failures and existing business/privacy semantics. First build
 the decision packet while independent approved work continues; this launch is
 not a completed product or acceptance claim.
+
+## First local integration checkpoint
+
+All seven actual development models/efforts match LI's configuration, verified
+from recorded current turns and independently checked by QA. See
+[configuration evidence](../evidence/ai-companion-20261025/agent-configuration.md).
+The new six-chat roster is live; no historical work chat was assigned new work.
+
+| Delivery | Exact author commit | Current disposition |
+| --- | --- | --- |
+| QA acceptance matrix and hash comparator | `fa56f0e1cab0bf9599b3920eddfca6e3ba814f74` | Integrated after Integration source review; comparator's 12 tests are tool-only evidence |
+| Product A/B/C decision text | `22e8bea4bf71fc2404d357b64a695985202a9633` | Integrated as a reviewed proposal; C remains unselected; phone prototype in progress |
+| App chat usability | `f514a325878d351ecfd5de314a516954db2161ad` | Integrated after QA's independent exact-head source review and 16 selected widget cases |
+| Runtime evaluator/adapter | `f9a97652ee532cfe374120962b2c5dd66643dd62` | Not integrated yet; unknown-provider termination and raw-output path findings under repair; cloud guard/runner being completed |
+| Proactive pure policy | `48ac991b8978d1d7ad47ee21e9a5b7d52c3f5221` | Independent review in progress; isolated policy only |
+| Context pure projection | No final author SHA received at this checkpoint | Independent counterexamples under reconciliation; no production wiring |
+
+App's source change stops showing active Sending after dispatch closes while
+retaining the original unknown-result text; system Back first closes the social
+chat drawer; chat/search bodies use existing bodyLarge and 1.5 line height.
+Existing send/retry/authority behavior and raw content are unchanged.
+
+Integration's tested assembly is
+`9f14fb0318a9633d05b689d3a5a14324b6d1d012`. Under the shared Flutter lock, offline
+frozen dependency preparation completed without tracked manifest/lock changes,
+then `ai_conversation_shared_router_test.dart` and
+`history_ai_home_router_test.dart` passed **40/40**. The original output is in
+`/home/miku/.local/state/enmori-ai-companion-20261025/integration-ui-regression.log`.
+These are source/widget composition checks, separate from App's 8 new/82 existing
+cases and QA's 16 selected cases; overlapping counts are not added together.
+The Flutter slot was released. No APK, runtime deployment, real generation,
+notification, personal-data capture or phone write occurred.
+
+Product/Context identified Q19 Backend-only provenance, Q17 location restrictions
+and Q14's 90-day message anchor as concrete contracts requiring scoped decisions.
+The recommended first proactive path is explicitly confirmed later follow-up;
+the first proposed external check is limited to LI's one chosen account/device
+and synthetic foreground/background/ordinary-close notifications. A broader
+multi-account pilot is not the default request. Product form, private-context
+use, source UI, proactive storage/retention/delivery and cloud budget/provider
+conditions remain unresolved; independent candidate work continues.
