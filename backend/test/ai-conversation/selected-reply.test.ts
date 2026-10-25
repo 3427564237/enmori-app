@@ -175,3 +175,9 @@ test("new input shape permits only reviewed selected labels/quote and rejects we
   for(const extra of [{weatherConditionLabel:"sunny"},{locationLabel:"private place"},{sourceId:"private-id"}])assert.equal(validOpenConversationInput({...input,checkIns:[{...input.checkIns[0]!,...extra}]}),false);
   assert.equal(validOpenConversationInput({...input,contextMode:undefined} as unknown as typeof input),false);
 });
+
+test("malformed category proof and incomplete internal selection closure fail closed rather than acquire a source grant",async()=>{
+  const f=fixture(),snapshot=await f.prepare([a,b]),incomplete={...f.grant(snapshot),includedKeys:[id(100)],excludedKeys:[]};assert.equal(await f.reader(incomplete).prepare(),"selection_conflict");
+  seedPair(f);const path=`${root}/message_sources/${assistant}`,proof=f.g.rows.get(path)!.data;f.g.put(path,{...proof,requiredCategories:["check_ins","conversation_history"]});
+  assert.equal((await f.store.resolveOwnedSource(principal,owner,topic,assistant,id(70),()=>true)).kind,"conversation_unavailable");assert.equal(f.g.writes,0);
+});

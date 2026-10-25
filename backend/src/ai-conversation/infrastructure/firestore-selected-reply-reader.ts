@@ -57,6 +57,8 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
       if(verified.kind!=="read")fail(verified.kind);if(verified.value.firebaseUid!==context.principal.firebaseUid)fail("denied");
       if(!grant||!uint(grant.purposeRevocationGeneration)||!Array.isArray(grant.sources)||grant.sources.length>5)fail("selection_conflict");
       const ids=new Set(grant.sources.map(s=>s.selectionKey));if(ids.size!==grant.sources.length||grant.includedKeys.some(k=>!ids.has(k))||grant.excludedKeys.some(k=>!ids.has(k)))fail("selection_conflict");
+      if(new Set(grant.includedKeys).size!==grant.includedKeys.length||new Set(grant.excludedKeys).size!==grant.excludedKeys.length||
+        [...ids].some(key=>!grant.includedKeys.includes(key)&&!grant.excludedKeys.includes(key)))fail("selection_conflict");
       this.valid({processing:"local",sources:grant.sources.map(s=>({kind:"check_in",checkInId:s.checkInId}))});
       const started=this.utcMilliseconds(),asOf=context.asOf.seconds*1000+Math.floor(context.asOf.nanoseconds/1e6);
       if(!uint(started)||started<asOf)fail("unavailable");
