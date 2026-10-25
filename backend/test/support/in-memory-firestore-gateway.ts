@@ -43,6 +43,11 @@ export class InMemoryFirestoreGateway implements FirestoreGateway {
           }));
       },
       delete: path => { candidate.delete(path); },
+      listOwnCheckInDayPage:async input=>[...candidate.entries()]
+        .filter(([path,data])=>path.startsWith("check_ins/")&&!path.slice(10).includes("/")&&data.ownerAccountId===input.ownerAccountId&&
+          typeof data.createdAt==="string"&&data.createdAt>=input.startUtc&&data.createdAt<=input.asOf&&(input.endUtc===null||data.createdAt<input.endUtc))
+        .map(([path,data])=>({id:path.slice(10),data:{ownerAccountId:data.ownerAccountId,createdAt:data.createdAt}}))
+        .sort((a,b)=>String(b.data.createdAt).localeCompare(String(a.data.createdAt))||(a.id>b.id?-1:a.id<b.id?1:0)).slice(0,input.limit),
       listWherePage: async (collection, equal, afterId, limit) => [...candidate.entries()]
         .filter(([path, data]) => path.startsWith(`${collection}/`) && !path.slice(collection.length + 1).includes("/") &&
           Object.entries(equal).every(([key, value]) => data[key] === value))

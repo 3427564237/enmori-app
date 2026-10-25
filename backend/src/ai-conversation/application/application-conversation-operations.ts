@@ -7,6 +7,7 @@ import type { ConversationExecution, ConversationExecutionDelivery, Conversation
   ConversationTargetLeaseResult, ExecutedConversation } from "../ports/application-conversation-operations.js";
 import type { StoredConversationMessage } from "../ports/real-conversation-store.js";
 import type { ExecuteReplySelection, SelectedReplyGrant, SelectedReplySnapshot } from "../ports/selected-reply.js";
+import { currentReplyDay, validTodayReplySelection } from "./today-reply-selection.js";
 
 const uuid = (v: unknown): v is string => typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(v);
 const key = (v: unknown): v is string => typeof v === "string" && /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/u.test(v);
@@ -102,9 +103,18 @@ export class ApplicationConversationOperations implements ConversationOperations
           const selected=await this.readers.prepareSelection(context,input.contextSelection,input.conversationId);
           if(!context.current())return failure("AI_UNAVAILABLE");if(selected.kind!=="success")return selected;snapshot=selected.value;
           if(!snapshot||!Number.isSafeInteger(snapshot.purposeRevocationGeneration)||snapshot.purposeRevocationGeneration<0||!Array.isArray(snapshot.sources)||
-            snapshot.sources.length!==input.contextSelection.sources.length||snapshot.sources.some(s=>s.kind!=="check_in"||!input.contextSelection!.sources.some(r=>r.checkInId===s.checkInId)||typeof s.version!=="string"||!s.version)||
+            snapshot.sources.length>5||new Set(snapshot.sources.map(s=>s.checkInId)).size!==snapshot.sources.length||
+            snapshot.sources.some(s=>s.kind!=="check_in"||typeof s.checkInId!=="string"||!s.checkInId||typeof s.version!=="string"||!s.version)||
             !Array.isArray(snapshot.historyPairs)||snapshot.historyPairs.length>2||snapshot.historyPairs.some(p=>!uuid(p.userMessageId)||!uuid(p.assistantMessageId)||
               !Number.isSafeInteger(p.userSequence)||p.userSequence<1||!Number.isSafeInteger(p.assistantSequence)||p.assistantSequence<=p.userSequence))return failure("AI_UNAVAILABLE");
+          const selection=input.contextSelection;
+          if("today" in selection){
+            const now=this.clock.utcMilliseconds(),day=currentReplyDay(selection.today.timeZone,now);
+            if(!snapshot.today||snapshot.today.timeZone!==selection.today.timeZone||!validTodayReplySelection(snapshot.today,now)||!day||
+              snapshot.today.hasMore&&snapshot.sources.length!==5||snapshot.sources.some(s=>s.sourceOccurredAt<day.startUtc||
+                (day.endUtc!==null&&s.sourceOccurredAt>=day.endUtc)||!Number.isFinite(Date.parse(s.sourceOccurredAt))||Date.parse(s.sourceOccurredAt)>now))return failure("AI_UNAVAILABLE");
+          }else if(snapshot.today!==undefined||snapshot.sources.length!==selection.sources.length||
+            snapshot.sources.some(s=>!selection.sources.some(r=>r.checkInId===s.checkInId)))return failure("AI_UNAVAILABLE");
         }
         const operationId = this.identifiers.uuid(), conversationId = input.conversationId ?? this.identifiers.uuid(),
           userMessageId = input.kind === "retry" ? input.userMessageId : this.identifiers.uuid(), operationKey = this.identifiers.operationKey();
@@ -115,7 +125,7 @@ export class ApplicationConversationOperations implements ConversationOperations
             !key(operationKey) || this.tickets.has(operationId) || !Number.isFinite(now) || !Number.isSafeInteger(utc) ||
             typeof caller.tokenInstance !== "string" || caller.tokenInstance.length === 0) return failure("AI_UNAVAILABLE");
         const ticket: Ticket = { ownerId: context.ownerId, uid: context.principal.firebaseUid,
-          selection:snapshot?{...snapshot,selectionRevision:this.identifiers.uuid(),keys:snapshot.sources.map(()=>this.identifiers.uuid()),historyKeys:snapshot.historyPairs.map(()=>this.identifiers.uuid())}:undefined,selectedGrant:undefined,replyToMessageId:undefined,
+          selection:snapshot?{...snapshot,...(snapshot.today?{today:Object.freeze({...snapshot.today})}:{}),selectionRevision:this.identifiers.uuid(),keys:snapshot.sources.map(()=>this.identifiers.uuid()),historyKeys:snapshot.historyPairs.map(()=>this.identifiers.uuid())}:undefined,selectedGrant:undefined,replyToMessageId:undefined,
           operation: Object.freeze({ operationId, conversationId, userMessageId, kind: input.kind,
             targetKind: input.kind === "send" && input.conversationId === undefined ? "reserved_new" : "existing" }),
           session: Object.freeze({}), tokenIdentity: Object.freeze({}), digest: caller.tokenInstance, key: operationKey,
@@ -127,8 +137,10 @@ export class ApplicationConversationOperations implements ConversationOperations
         ticket.stopExpiry = this.clock.at(ticket.expiresAt, () => { if (ticket.phase === "prepared") this.forget(ticket); });
         return success(Object.freeze({ operationId, conversationId, operationKey, preparationExpiresAt,
           ...(ticket.selection?{contextSelection:{selectionRevision:ticket.selection.selectionRevision,expiresAt:preparationExpiresAt,
+            ...(ticket.selection.today?{today:ticket.selection.today}:{}),
             historyPairs:ticket.selection.historyPairs.map((p,i)=>({...p,historyKey:ticket.selection!.historyKeys[i]!})),
             sourceCards:ticket.selection.sources.map((s,i)=>({cardRef:ticket.selection!.keys[i]!,kind:s.kind,version:s.version,sourceOccurredAt:s.sourceOccurredAt,
+              ...(ticket.selection!.today?{checkInId:s.checkInId}:{}),
               observedAt:s.observedAt,state:"available" as const,canNavigate:true as const,selectionKey:ticket.selection!.keys[i]!}))}}:{}) }));
       } catch { return failure("AI_UNAVAILABLE"); }
       finally { context.signal.removeEventListener("abort", release); release(); }
@@ -148,6 +160,7 @@ export class ApplicationConversationOperations implements ConversationOperations
     if (!this.preparedCurrent(ticket)) { this.forget(ticket); return Promise.resolve(failure("AI_OPERATION_UNAVAILABLE")); }
     const choice=input.contextSelection,selection=ticket.selection;
     if((selection!==undefined)!==(choice!==undefined))return Promise.resolve(failure("AI_CONTEXT_SELECTION_CONFLICT"));
+    if(selection?.today&&!validTodayReplySelection(selection.today,this.clock.utcMilliseconds()))return Promise.resolve(failure("AI_CONTEXT_SELECTION_CONFLICT"));
     if(selection&&choice){
       if(choice.selectionRevision!==selection.selectionRevision||!Array.isArray(choice.includedKeys)||!Array.isArray(choice.excludedKeys)||
         new Set(choice.includedKeys).size!==choice.includedKeys.length||new Set(choice.excludedKeys).size!==choice.excludedKeys.length||
@@ -160,6 +173,7 @@ export class ApplicationConversationOperations implements ConversationOperations
     if (!delivery || typeof delivery.acceptCompleteBody !== "function") return Promise.resolve(failure("AI_UNAVAILABLE"));
     if (!this.deliveryCurrent(delivery)) return Promise.resolve({ kind: "terminated" });
     ticket.selectedGrant=selection&&choice?Object.freeze({purposeRevocationGeneration:selection.purposeRevocationGeneration,selectionRevision:selection.selectionRevision,
+      ...(selection.today?{today:Object.freeze({...selection.today})}:{}),
       sources:Object.freeze(selection.sources.map((s,i)=>Object.freeze({...s,selectionKey:selection.keys[i]!}))),includedKeys:Object.freeze([...choice.includedKeys]),excludedKeys:Object.freeze([...choice.excludedKeys]),
       historyPairs:Object.freeze(selection.historyPairs.map((p,i)=>Object.freeze({...p,historyKey:selection.historyKeys[i]!}))),excludedHistoryKeys:Object.freeze([...(choice.excludedHistoryKeys??[])])}):undefined;
     ticket.replyToMessageId=input.replyToMessageId;
