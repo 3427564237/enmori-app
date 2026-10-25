@@ -10,16 +10,17 @@ repository AGENTS and Skill routing. The manual-only AI entry direction is
 superseded within that decision's stated scope. Existing permission, deletion,
 revision, unknown-operation, retention, and draft protections remain applicable.
 
-This packet records independent source inspection and unexecuted QA reproductions.
-No Flutter, Gradle, APK, emulator, model, provider, real service, ADB, or phone
-operation was run by QA in this round. LI's reported v28 installation and disabled
-Send are user evidence; the prior v28 static audit is not phone acceptance.
+This packet records independent source inspection and a subsequently authorised
+three-case Flutter reproduction (1 Pass / 2 Fail), detailed below. No Gradle, APK,
+emulator, model, provider, real service, ADB, or phone operation was run by QA in
+this round. LI's reported v28 installation and disabled Send are user evidence;
+the prior v28 static audit is not phone acceptance.
 
 ## Findings and limits
 
 | ID | Independent baseline evidence | Classification / next check |
 | --- | --- | --- |
-| QA-AI-01 | Both UI modes rebuild on text changes. Send also requires `_selectionReady`; selecting and then removing the last Check-in leaves `active=true`. Returning without confirmation retires the review but leaves this active state. AI can therefore be ready while the UI button remains disabled. | Concrete source path; not yet QA widget reproduction or the proven sequence on LI's phone. Do not bypass unknown-operation recovery to enable it. |
+| QA-AI-01 | Both UI modes rebuild on text changes. Send also requires `_selectionReady`; selecting and then removing the last Check-in leaves `active=true`. Returning without confirmation retires the review but leaves this active state. AI can therefore be ready while the UI button remains disabled. | Independently reproduced in the social UI for cancel-last and cancel-empty-review; not the proven sequence on LI's phone. Do not bypass unknown-operation recovery to enable it. |
 | QA-AI-02 | The selection controller offers an explicit owned-record entry and a manual recent-record picker. The picker enumerates eight UTC calendar dates for its rolling seven-day eligibility window. There is no automatic current-day read on ordinary chat entry. | Confirmed baseline capability gap against the new direction. The old picker implementation does not define the new meaning of “today”. |
 | QA-HOME-01 | Home is a lazy ListView. Its event section starts a read on mount and abandons its operation on dispose; scrolling it out and back can replace a populated section with a short loading/error state. | Source hypothesis for the height/scroll jump. Root reports a separate red regression; QA has not run it or verified a repaired head. |
 | QA-EVENT-01 | Refresh sends the same `view=home` request. Backend computes the deterministic order and always takes `slice(0, 2)` for Home. UI explicitly supports “Latest details loaded for the same events.” | Confirmed source explanation for repeatedly showing the same eligible pair. Batch rotation is absent; source success with no alternatives must remain distinct from source failure. |
@@ -96,9 +97,9 @@ not approval to invent them or a request to reopen the approved product directio
 
 | Check | Required observation | Current QA status |
 | --- | --- | --- |
-| Ordinary input control | Type a nonempty draft, visit references without selecting, return; Send available, draft exact, zero send side effects. | Written, unexecuted. |
-| Cancel final selection | Select and remove the only record, return; available Send, exact draft, no automatic execute. | Written, unexecuted. |
-| Cancel empty review | Review zero sources, cancel review, return; available Send without forcing another preview. Explicit empty selection must not silently reacquire excluded sources. | UI availability case written, unexecuted; auto-today exclusion check waits for contract/head. |
+| Ordinary input control | Type a nonempty draft, visit references without selecting, return; Send available, draft exact, zero send side effects. | Independent Pass on 087281e. |
+| Cancel final selection | Select and remove the only record, return; available Send, exact draft, no automatic execute. | Independent Fail: Send callback null; all preceding readiness/draft/no-send assertions passed. |
+| Cancel empty review | Review zero sources, cancel review, return; available Send without forcing another preview. Explicit empty selection must not silently reacquire excluded sources. | Independent Fail: Send callback null; all preceding readiness/draft/no-send assertions passed. Auto-today exclusion still awaits repair-head verification. |
 | Send-time freshness | One explicit Send checks the exact selected/automatic IDs and current versions; changed/deleted/expired preparation cannot dispatch stale content; draft survives. | Await exact App/Context repair head. |
 | Unknown / saved User | While original outcome is unknown, no new ordinary/selected execution; read the original operation. Saved-User retry preserves identity and selection rules. | Await exact repair head; prior F1 evidence is not a new-round pass. |
 | Home scroll | Actual Home with populated sections: scroll down and back; section does not trigger a redundant read or collapse the anchor. Expiry/background/permission retirement still applies. | Root reports its own red; no QA execution. |
@@ -112,8 +113,38 @@ It reuses existing fake repositories and asserts behavior rather than a particul
 providers in `try/finally` before widget-test timer checks. It is outside production
 test ownership by the explicit QA directory assignment.
 
-Integration instructed QA to continue source inspection while it coordinates the
-Flutter slot. The fixture has not been formatted, analysed, or executed with
-Flutter/Dart. `git diff --check` is only whitespace validation, not a test result.
-App's reported IME controls and selected-record red, and Root's Home red, are
-author evidence only; no pass/fail count is added to QA's independent results.
+## Authorised baseline execution
+
+Integration subsequently granted one exclusive short Flutter window for these
+three cases. Command, run from this QA checkout with unchanged baseline production
+files and QA commit `bb93759b029725397608bdbbed490f0c330f4c23`:
+
+```text
+flock -n /home/miku/.local/state/enmori-product-round-20261023/flutter-validation.lock /home/miku/.local/bin/fvm flutter test --no-pub --reporter expanded tool/core-feedback-qa/ai_cancelled_selection_test.dart
+```
+
+- Started 2026-10-25T11:47:27.905715Z; ended 11:47:44.715466Z; 16.809 seconds.
+- Flutter command exit 1; 1 Pass / 2 Fail, precisely at the two expected button
+  availability assertions. No fixture, compile, pending-timer, or cleanup failure.
+- Raw log: `/home/miku/.local/state/enmori-core-feedback-20261025/qa-ai-gating-087281e/baseline-red.log`.
+  SHA-256 `7995ca8135bb7bb8be033435bf8a566e7a93433e648fd7b703c1763fd7dbcaad`.
+- Same private directory retains `run.json`, the exact fixture, and
+  `source-before.json` / `source-after.json`: all 872 inspected source, existing
+  test, contract, dependency-lock and platform files unchanged.
+- `.fvmrc` pins Flutter 3.47.2. Reused the already-resolved Integration package
+  config/graph after exact hash checks; no pub get or dependency changes.
+  `pubspec.lock`: `523dfbacd19c0d6e3c33fe9e6e46606ec62f8939bc78f7013810a01d5feb8a96`;
+  package config: `9a1b335331cad80214d50523873fc1dfe9f58b7d165f91e4e61eebef04d0a1cd`;
+  package graph: `475e4eba271931418a8c39e5ce58fac59064d3437a4a6e4d2be6afc89646803e`.
+- Lock released when the command ended; slot explicitly returned to Integration.
+  No second run, formatter, analyser, broader suite, or model call was performed.
+
+App's reported IME controls and selected-record red, and Root's Home red/green,
+remain author evidence only; no author count is added to the three QA cases.
+No repaired head has yet passed these independent cases.
+
+Integration has also supplied `api/ai-today-context-contract.md` in its working
+tree. QA read its server-derived civil day, latest-five bound, explicit off/empty
+selection, current-topic identity exclusions and fresh Send-time preparation.
+The baseline above predates that addition; implementation and an exact integrated
+revision still require independent review before claiming the new behavior.
