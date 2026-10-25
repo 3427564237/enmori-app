@@ -489,3 +489,135 @@ billing metadata without initiating setup/payment. A screenshot is retained at
 It contains operator account information and stays outside Git. The full tab/URL
 and observed gate were delivered to Integration; no repeated UI attempts or
 credential inspection followed.
+
+### Follow-up: Terms cleared, existing project imported, paid-upgrade gate
+
+After LI's direct `ok` and Integration's bounded readback assignment, the Terms
+dialog was no longer present. The same project's linked-account URL resolved
+to a specific Cloud Billing account (private metadata retains the complete ID;
+suffix `25F80B`). Its overview said **free trial**, SGD383.45 remaining credit,
+90 days, expiring 2027-01-24. These are Cloud Billing facts, not evidence of a
+usable Gemini paid plan. The earlier unknown link state is superseded only by
+this observed link and trial status.
+
+The same existing account could open AI Studio without a new Terms screen.
+Initially only the already-imported Default Gemini Project appeared, on free
+tier. An existing key was masked; its value was not opened or copied. The
+Gemini Billing page for the linked account showed **SGD0 eligible GCP credits**,
+unknown tier, and **prepayment required**. An initial read-only setup dialog
+offered only the Default project or import/create, and was cancelled.
+
+Integration then explicitly authorized importing only the existing
+`enmori-rmvp-controlled` project under LI's request to complete remaining setup.
+The import dialog identified exactly that project, and the resulting project
+row confirmed **free trial / prepayment required**, SGD0.00 monthly spend and a
+Create API key action. This project-list import is the only submitted change.
+
+Opening that row's billing activation entry reached a concrete review page:
+continuing agrees to upgrade the existing free-trial Cloud Billing account to
+paid. It also states that remaining USD300 welcome credits exclude Gemini API.
+**Continue was not clicked.** The actual minimum prepayment is still behind
+this upgrade step and remains unknown. No paid upgrade, payment, new project,
+key creation, API enablement or billing-link change was performed. No model call
+was made. Integration received the exact gate for LI's decision; the approved
+USD1 model-token budget cannot be substituted for this account-level change.
+
+Private evidence is under the existing `runtime/cloud-setup/` directory:
+`console-linked-trial.png`, `studio-prepay-required.png`,
+`studio-enmori-imported.png`, `studio-paid-upgrade-gate.png` and
+`after-terms-observation.json`. The record contains the allowlisted metadata and
+screenshot hashes, never key material. Browser 3/tab 356358123 stays on the
+unsubmitted upgrade confirmation for handoff. This is a configuration checkpoint,
+not permission to run the cloud evaluation.
+
+## F0 local adapter and shared physical model lane — source candidate
+
+Authority: LI's first-flow decision, shared `FirstFlowModelInput` /
+`GenerationTransport` Port at `42b0b2a4e1151b43e9608f953c9a986c2c078394`, and
+its fresh-actor/read-model correction `ff00e7c`. Both were merged without
+overwriting Runtime's cloud setup evidence. Integration explicitly assigned F0
+first, shared physical ownership with existing Chat/Persona preview, and eight
+synthetic cases for independent QA before a separately assigned model slot.
+
+`LocalFirstFlowTransport` accepts only the Port's dated `quotedRequest`,
+`inputKind:proactive_followup`, absolute due instant, IANA zone and optional
+current Persona projection. It copies the allowed fields, preserves quote text,
+and rejects malformed or additional identity/authority/context fields before
+dispatch. The quote uses the existing 2400 Unicode-code-point user-message
+ceiling. Application/Store still own fresh actor, source, due/quiet, consent,
+expiry and Persona permission checks; shape validation supplies no authority.
+
+The model sees an explicitly labelled historical quote and follow-up instruction,
+not a newly persisted user message. The adapter owns no store, source reader,
+tool or sender. It returns the provider's raw message bytes without output
+repair, second generation or semantic acceptance. Current Persona is expression
+data only. F0 uses exactly local `qwen3.5:9b`, 8192 context, 512 output,
+`think:false`, existing schema format and 30-minute keep-alive; no cloud fallback.
+
+One injected `LocalModelLane` owns physical pending/unknown state across Chat,
+Persona preview, F0 and empty preload. The existing controlled envelope receiver
+was extracted as a shared helper with its 1 MiB, strict UTF-8, depth and duplicate
+key checks unchanged. Delivery abort/deadline does not stop receiving the
+original local response. Only a matching model and complete `done:true` envelope
+release physical ownership. Late completion is withheld from delivery.
+HTTP errors, socket/reader loss, partial/invalid/duplicate envelopes and wrong
+model remain pending/quarantined; there is no reset, retry or fallback API.
+
+This corrects a demonstrated old `LocalChatTransport` mismatch: HTTP503 had set
+`done=true` and freed the lane, although the shared Port requires physical
+stoppage evidence. Integration explicitly confirmed the correction. The old
+test now expects quarantine, with additional cross-consumer fakes. A matching
+terminal envelope with unusable content still releases the stopped model and
+rejects delivery, rather than confusing output rejection with unknown execution.
+
+### Composition handoff
+
+Integration owns bootstrap, routes and application composition. The required
+construction is:
+
+```ts
+const lane = new LocalModelLane('qwen3.5:9b');
+const chatTransport = new LocalChatTransport(lane);
+const firstFlowModel = new LocalFirstFlowTransport(lane);
+// PreviewPersona receives chatTransport and () => lane.state.pending.
+```
+
+Both adapters expose the same `{pending,outcomeUnknown}` state. The worker uses
+the existing `RequestBudget` and must withdraw delivery within its approved
+deadline even when physical generation remains unresolved. Status/shutdown must
+observe this shared lane. The old `LocalChatTransport(model,http?)` overload
+remains for existing isolated callers/fakes; composition must explicitly pass
+the single shared instance, never create one per feature. This commit does not
+wire bootstrap or claim that the deployed application already uses F0.
+
+### Source validation and unrun evaluation cases
+
+Pinned Node 24.19.0 / TypeScript 7.0.2 build passed. The focused run passed
+**56/56** tests across `local-first-flow-transport`, `controlled-ollama-transport`,
+`simple-chat`, Persona preview, original evaluation and F0 fixture tests. Tests
+cover shared admission, preload, invalid projection, cancellation/clock expiry,
+late physical completion, known invalid output, eleven unknown-result cases,
+and preview cancellation while F0 waits. All HTTP functions were injected fakes.
+
+Before refactoring, the 24 current-prompt requests were captured through the
+unchanged production serializer; its source bytes matched `24f913d`. The golden
+records include complete URL/method/redirect/cache/headers and serialized body.
+All 24 compare byte-for-byte after this change, including history, Persona,
+prompt, schema and settings. Golden fixture SHA-256:
+`b6a8673446a1a36cc5921e097ecacbf06aa752450227e9eddbab6ad7049027ee`.
+The approved original 32-case corpus hash is unchanged.
+
+Eight separate F0 cases are prepared in
+`tool/ai-companion-eval/fixtures/f0-cases.json`, with a fake-only serializer helper.
+They cover rest-versus-study relevance, starting-versus-completing, dated mood,
+explicit language, unknown attendance, local-midnight dates, quoted instruction
+injection and Persona authority boundaries. Fixture SHA-256:
+`b9ada505ef4cb732c829c0f9eab959a33b8034c949d35e2ce06d37146ec45d70`.
+QA pre-read the eight cases and found no case error blocking a freeze. Its
+requested common criterion now distinguishes due time from actual dispatch time;
+refusal alone cannot pass the notebook/Persona relevance checks. Final independent
+review will bind the committed source. There are **no actual F0 outputs or
+semantic verdicts**. No new preload, local model run, cloud call,
+real account write or notification send occurred. F1a remains for the next
+exact Context input contract. The previous local 12 Pass / 12 Fail semantic
+result remains unchanged.

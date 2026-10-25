@@ -64,7 +64,7 @@ test('simple chat retains malformed output, revoked request and unauthorized sou
   await assert.rejects(transport.generate({ ...input, checkIns: [{ occurredAt: '2026-10-19', noteText: 'not allowed in this composition' }] }, budget()));
   assert.equal(calls, 0);
 });
-test('late provider completion releases lane without delivering cancelled text; HTTP failure is settled', async () => {
+test('late provider completion releases lane without delivering cancelled text; HTTP failure quarantines', async () => {
   let complete!: (response: Response) => void;
   const controller = new AbortController();
   const transport = new LocalChatTransport('qwen3.5:9b', async (_url, init) => {
@@ -78,8 +78,12 @@ test('late provider completion releases lane without delivering cancelled text; 
   await assert.rejects(operation);
   assert.deepEqual(transport.state, { pending: false, outcomeUnknown: false });
   const failed = new LocalChatTransport('qwen3.5:9b', async () => new Response('unavailable', { status: 503 }));
+  let settled = false;
+  void failed.generate(input, budget()).then(() => { settled = true; }, () => { settled = true; });
+  await new Promise<void>(resolve => setImmediate(resolve));
+  assert.equal(settled, false, 'HTTP error alone is not evidence that model generation stopped');
+  assert.deepEqual(failed.state, { pending: true, outcomeUnknown: true });
   await assert.rejects(failed.generate(input, budget()));
-  assert.deepEqual(failed.state, { pending: false, outcomeUnknown: false });
 });
 test('retained messages preserve original server timestamp across imported metadata and replacement writes', async () => {
   const { Timestamp } = await import('firebase-admin/firestore');
