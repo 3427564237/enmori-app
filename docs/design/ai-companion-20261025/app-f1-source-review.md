@@ -129,3 +129,34 @@ corrected `qa-f1-shared-entry-v2.log`
 These cases are not added to App's 389, Root's six panel cases, or integrated
 historical-suite results. QA returned the exclusive Flutter window to Root;
 the repaired head still needs the original failing counterexample rerun.
+
+### Focused source repair — 9bc571c
+
+Product independently inspected all three files of
+`9bc571c38eeb9472b8f37128244b64862186f319`, parent `ee44827`.
+**The reported local-state cause is addressed in source; independent repaired-head
+widget closure is pending.** The original executed failure and counts above
+remain unchanged.
+
+The only production behavior change is `_sending = false` in the content-access
+retirement listener. Its two comments explain why the old await cannot clear a
+new epoch's view state. `_recoveringSelected`, original operation identity,
+unknown-result guard, draft and selected IDs are unchanged. `review()` still
+requires the conversation's `canSend` or `canRetry`; an unresolved original
+operation cannot acquire a new preparation merely because the local display flag
+was released. The existing epoch check still rejects the old Send continuation.
+
+Product read both added cases: foreground source mutation and background/resume,
+each with a pending selected execute, explicit original Cancel, blocked review
+while unknown, authoritative no-effect, a fresh unconfirmed review, an inert late
+old response and another explicit confirm/Send. Product verified the author log
+`app-f1-access-recovery.log`, SHA-256
+`da1f2e8c92d9c926e8d91a92afe80a73fb51230f72c28851641b06fee4eff55e`, containing
+**2/2** passes and clean two-file analysis in 3.8 seconds. App did not rerun its
+389-case batch for this increment; these two cases are not added to that count.
+
+Product sent the source disposition to Integration and QA, including the
+original failing no-effect counterexample and the distinct saved-U Retry terminal
+path for focused independent verification. Product ran no Flutter. App's separate
+legacy-fixture maintenance is outside this three-file repair and this review;
+neither it nor Root's full-suite status is certified by the focused source fix.

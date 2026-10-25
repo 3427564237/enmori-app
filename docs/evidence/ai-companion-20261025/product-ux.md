@@ -225,3 +225,22 @@ cases separately. Existing no-write/session/covered-callback assertions stayed.
 The distinct outcome is **18 Pass / 1 Fail**, not 21 cases or a green F1 gate.
 The detailed Product review records the exact hashes and attribution. These
 counts remain separate from App's 389 and Root's full integrated validation.
+
+## F1 recovery P2 source repair — 9bc571c
+
+Product independently inspected all three files in
+`9bc571c38eeb9472b8f37128244b64862186f319` over the original `ee44827`. The sole
+production change clears the retiring selector's `_sending` flag. Recovery
+identity, original unknown-operation protection, choices and draft stay intact;
+fresh review still requires conversation `canSend` or `canRetry`, and late old
+continuations still fail the epoch check. The recorded source cause is addressed.
+
+Product read App's two added foreground/background counterexamples and verified
+the focused log hash `da1f2e8c92d9c926e8d91a92afe80a73fb51230f72c28851641b06fee4eff55e`,
+its 2/2 pass line and clean two-file analysis in 3.8 seconds. These are author
+checks; no 389-case rerun or Product Flutter execution occurred. QA's original
+18 Pass / 1 Fail result remains attached to `a20927c`. Independent repaired-head
+execution of the original red and saved-U recovery branch is still pending,
+so this annotation does not close the widget or integrated F1 gate. Root and QA
+received the source disposition; original failures and separate fixture work
+remain recorded without being folded into this repair.
