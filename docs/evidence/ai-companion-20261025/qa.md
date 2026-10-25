@@ -80,11 +80,15 @@ checks for the next frozen App head. The component's supplied booleans and
 callbacks do not themselves establish those controller/page behaviors.
 
 The subsequent [final F1 App/shared-entry review](qa-f1-app-integration.md) at
-`a20927c` independently passes 18 focused checks but reproduces one open
-P2: pending selected execution across content-access invalidation can leave
-fresh review blocked after authoritative no-effect. It retains the initial
-16-pass/3-fail batch and the two corrected QA fixture checks separately. The
-Flutter window is returned; final F1 closure awaits the bounded recovery repair.
+`a20927c` independently passed 18 focused checks and reproduced a P2: pending
+selected execution across content-access invalidation could leave fresh review
+blocked after authoritative no-effect. The exact `6b4ec58` repair now passes
+**2/2 independent recovery checks**, including the original red counterexample
+and a saved-user Retry branch; this closes the source/controller-test P2.
+Initial route-fixture and later timer-cleanup failures are retained alongside
+the old-head red and repaired-head green. The earlier 18 checks and other
+author/integration/device layers are not counted as new executions. The
+Flutter window is returned.
 
 The [D1 source review](qa-d1-source-review.md) reports a new P2 at `cb8d982`:
 controller rebuild clears unknown registration/settings mutation guards, so a
