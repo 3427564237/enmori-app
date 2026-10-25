@@ -75,6 +75,31 @@ interface ControlledRuntime {
   readonly aiStatus: () => { configured: boolean; available: boolean; maintenanceHealthy: boolean; pending: boolean; outcomeUnknown: boolean };
 }
 
+/** Private real-entry selection only. Absence keeps F0/F1 off; this never
+ * grants user consent, enables intents, discovers an owner or configures push. */
+export function parseLocalFirstFlowConfiguration(value: unknown, nowMs = Date.now()): FirstFlowConfiguration | undefined {
+  if (value === undefined) return undefined;
+  const record = (v: unknown): v is Record<string, unknown> =>
+    typeof v === "object" && v !== null && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype;
+  const invalid = () => { throw Error("Invalid local first-flow configuration"); };
+  if (!record(value) || !Object.hasOwn(value, "ownerAccountId") || !Object.hasOwn(value, "firebaseUid") ||
+      Object.keys(value).some(key => !["ownerAccountId", "firebaseUid", "worker"].includes(key))) return invalid();
+  const { ownerAccountId, firebaseUid, worker } = value;
+  if (typeof ownerAccountId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(ownerAccountId) ||
+      typeof firebaseUid !== "string" || !firebaseUid || firebaseUid.length > 128 || !firebaseUid.isWellFormed() ||
+      /[\u0000-\u001f\u007f]/u.test(firebaseUid)) return invalid();
+  if (worker === undefined && !Object.hasOwn(value, "worker")) return Object.freeze({ ownerAccountId, firebaseUid });
+  if (!record(worker) || Object.keys(worker).some(key => !["endsAtMs", "intervalMs"].includes(key))) return invalid();
+  const { endsAtMs, intervalMs } = worker;
+  if (typeof endsAtMs !== "number" || !Number.isSafeInteger(endsAtMs) || !Number.isSafeInteger(nowMs) ||
+      endsAtMs <= nowMs || endsAtMs - nowMs > 30 * 60000 ||
+      (Object.hasOwn(worker, "intervalMs") && (typeof intervalMs !== "number" || !Number.isSafeInteger(intervalMs) ||
+        intervalMs < 1000 || intervalMs > 2_147_483_647))) return invalid();
+  // Copy the fixed selection; do not retain a mutable JSON/configuration object.
+  return Object.freeze({ ownerAccountId, firebaseUid, worker: Object.freeze({ endsAtMs,
+    ...(typeof intervalMs === "number" ? { intervalMs } : {}) }) });
+}
+
 async function createControlledRuntime(
   configuration: ControlledRuntimeConfiguration,
   isolatedEnvironment?: Readonly<Record<string, string | undefined>>,

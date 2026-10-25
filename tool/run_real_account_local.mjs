@@ -1,5 +1,5 @@
 import { retainedCoreEvents } from './retained_core_events.mjs';
-import { createRemoteGroupRuntime, closeControlledRuntime as closeRemoteRuntime } from '../backend/dist/src/bootstrap/retained-core-runtime.js';
+import { createRemoteGroupRuntime, closeControlledRuntime as closeRemoteRuntime, parseLocalFirstFlowConfiguration } from '../backend/dist/src/bootstrap/retained-core-runtime.js';
 /** Existing real Firebase composition behind the established localhost TLS edge. */
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, lstatSync, realpathSync } from 'node:fs';
@@ -35,6 +35,9 @@ try {
   assert(config.remotePort === undefined || config.remotePort === 9382);
   assert.equal(typeof config.verificationEmail, 'string');
   for (const name of ['FIREBASE_AUTH_EMULATOR_HOST', 'FIRESTORE_EMULATOR_HOST']) assert.equal(process.env[name], undefined);
+  fullFeatures = config.fullFeatures === true;
+  const firstFlow = parseLocalFirstFlowConfiguration(config.firstFlow);
+  assert(firstFlow === undefined || fullFeatures, 'Local first-flow requires full features');
   privateOwned(config.keyPath);
   const certificate = readFileSync(config.certificatePath);
   const parsed = new X509Certificate(certificate);
@@ -42,14 +45,13 @@ try {
   assert(Date.parse(parsed.validFrom) <= Date.now() && Date.parse(parsed.validTo) > Date.now());
   ownership = acquireRealAccountLock(directory);
   publish({ phase: 'starting', ready: false });
-  fullFeatures = config.fullFeatures === true;
   const events = retainedCoreEvents(config.eventDirectory ?? directory, fullFeatures,
     () => runtime?.eventBrowseControl?.observation().enabled === true);
   if (fullFeatures && events.configuration !== 'configured') throw new Error('Event configuration unavailable');
   const environment = { ...process.env,
     ENMORI_ENVIRONMENT: 'controlled-demo', ENMORI_FIREBASE_PROJECT_ID: config.projectId,
     ENMORI_BACKEND_HOST: config.host, ENMORI_BACKEND_PORT: String(config.port) };
-  runtime = fullFeatures ? await createRemoteGroupRuntime({...environment, ENMORI_REMOTE_GROUP:'true'}, events.input, 'qwen3.5:9b')
+  runtime = fullFeatures ? await createRemoteGroupRuntime({...environment, ENMORI_REMOTE_GROUP:'true'}, events.input, 'qwen3.5:9b', firstFlow)
     : await createControlledRuntime(environment);
   if (fullFeatures) {
     const music = await getFirestore(runtime.firebaseApp).doc(`interest_tags/${events.input.musicInterestTagId}`).get();
@@ -97,6 +99,7 @@ try {
   }
   publish({ phase: 'listening', ready: true, authAdminRead: true, firestoreRead: true,
     remoteLoopbackEnabled: Boolean(remoteServer?.listening), fullFeatures,
+    firstFlow: { configured: firstFlow !== undefined, workerConfigured: firstFlow?.worker !== undefined, pushConfigured: false },
     ...(fullFeatures ? {ai: runtime.aiStatus(), events: runtime.eventBrowseControl.observation()} : {}),
     emailVerified: user.emailVerified, bindingExists: binding.exists });
   console.log('Real account HTTPS ready; Firebase identity verification remains required.');
