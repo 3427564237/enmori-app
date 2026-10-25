@@ -72,6 +72,7 @@ abstract final class AppRoutes {
   static const footprint = '/check-ins/footprint';
   static const aiAssistant = '/ai-assistant';
   static const aiMessage = '/ai/message';
+  static const aiCheckIn = '/ai/reference';
   static const aiFollowUps = '/ai/follow-ups';
   static const newAiFollowUp = '/ai/follow-ups/new';
   static const interests = '/interests';
@@ -152,6 +153,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       aiPage != null && ref.watch(companionFirstFlowEnabledProvider);
   final companionMessagePage = companionEnabled
       ? ref.watch(companionMessagePageProvider)
+      : null;
+  final companionCheckInPage = companionEnabled
+      ? ref.watch(companionCheckInPageProvider)
       : null;
 
   // Observe same-UID replacement only for an available shared feature. Existing
@@ -367,6 +371,29 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ),
       if (companionEnabled) ...[
+        if (companionCheckInPage != null)
+          GoRoute(
+            path: AppRoutes.aiCheckIn,
+            builder: (context, state) {
+              final extra = state.extra;
+              if (extra is! AiCheckInNavigation ||
+                  extra.checkInId.trim().isEmpty ||
+                  routeSession == null ||
+                  !identical(extra.session, routeSession)) {
+                return const ConfigurationUnavailablePage();
+              }
+              return companionCheckInPage.build(
+                context,
+                checkInId: extra.checkInId,
+                onBack: () => backFromShared(context, AppRoutes.aiCheckIn),
+                onOpenSettings: () => openShared(
+                  context,
+                  AppRoutes.aiCheckIn,
+                  AppRoutes.aiSettings,
+                ),
+              );
+            },
+          ),
         if (companionMessagePage != null)
           GoRoute(
             path: AppRoutes.aiMessage,
@@ -853,6 +880,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           checkInId: state.pathParameters['checkInId'] ?? '',
           openAttribution: openGroupAttribution,
           onReturnHome: () => context.go(AppRoutes.home),
+          onReferenceInAi: companionCheckInPage != null
+              ? (id) {
+                  if (id != state.pathParameters['checkInId'] ||
+                      !canNavigateShared(context, state.uri.path) ||
+                      ModalRoute.of(context)?.isCurrent != true) {
+                    return;
+                  }
+                  context.push<void>(
+                    AppRoutes.aiCheckIn,
+                    extra: AiCheckInNavigation(
+                      session: routeSession!,
+                      checkInId: id,
+                    ),
+                  );
+                }
+              : null,
           onStartNewDraft: historyPage != null
               ? (id) {
                   final expectedId = state.pathParameters['checkInId'];

@@ -13,6 +13,7 @@ import 'package:enmori/features/account/presentation/account_preferences_control
 import 'package:enmori/features/language/data/platform_app_language_repository.dart';
 import 'package:enmori/features/ai_conversation/domain/ai_owned_sources.dart';
 import 'package:enmori/features/ai_conversation/presentation/ai_conversation_page.dart';
+import 'package:enmori/features/check_in/presentation/check_in_page.dart';
 import 'package:enmori/features/proactive/presentation/proactive_follow_up_page.dart';
 import 'package:enmori/features/proactive/presentation/proactive_settings_page.dart';
 import 'package:enmori/features/proactive/domain/proactive_messaging.dart';
@@ -139,6 +140,7 @@ void main() {
       expect(paths, isNot(contains(AppRoutes.aiFollowUps)));
       expect(paths, isNot(contains(AppRoutes.newAiFollowUp)));
       expect(paths, isNot(contains(AppRoutes.aiMessage)));
+      expect(paths, isNot(contains(AppRoutes.aiCheckIn)));
       expect(
         rig.requests.where((r) => r.url.path.contains('proactive')),
         isEmpty,
@@ -186,6 +188,77 @@ void main() {
       rig.container.read(appRouterProvider).go(AppRoutes.aiFollowUps);
       await tester.pumpAndSettle();
       expect(find.byType(ProactiveSettingsPage), findsOneWidget);
+      expect(rig.requests.where((r) => r.method != 'GET'), isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'Check-in attachment navigation requires its original exact session',
+    (tester) async {
+      final rig = await _pump(tester, enabled: true, settingsReady: true);
+      rig.container.read(appRouterProvider).go(AppRoutes.aiCheckIn);
+      await tester.pumpAndSettle();
+      expect(find.byType(ConfigurationUnavailablePage), findsOneWidget);
+      final extra = AiCheckInNavigation(
+        session: rig.session,
+        checkInId: 'synthetic-reference',
+      );
+      rig.container
+          .read(appRouterProvider)
+          .go(AppRoutes.aiCheckIn, extra: extra);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<AiConversationPage>(find.byType(AiConversationPage))
+            .initialCheckInId,
+        'synthetic-reference',
+      );
+      expect(rig.requests.where((r) => r.method != 'GET'), isEmpty);
+      rig.auth.sessions.add(
+        const AuthSessionAuthenticated(subject: 'synthetic-owner'),
+      );
+      await tester.pumpAndSettle();
+      rig.container
+          .read(appRouterProvider)
+          .go(AppRoutes.aiCheckIn, extra: extra);
+      await tester.pumpAndSettle();
+      expect(find.byType(ConfigurationUnavailablePage), findsOneWidget);
+      expect(find.byType(AiConversationPage), findsNothing);
+      expect(rig.requests.where((r) => r.method != 'GET'), isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'saved detail explicitly opens its own reference and covered callbacks cannot navigate',
+    (tester) async {
+      final rig = await _pump(tester, enabled: true, settingsReady: true);
+      final router = rig.container.read(appRouterProvider);
+      router.go(AppRoutes.savedCheckIn('synthetic-reference'));
+      await tester.pumpAndSettle();
+      final detail = tester.widget<SavedCheckInPage>(
+        find.byType(SavedCheckInPage),
+      );
+      final captured = detail.onReferenceInAi!;
+      final button = find.byKey(const Key('saved-check-in-reference-ai'));
+      await tester.ensureVisible(button);
+      expect(button.hitTestable(), findsOneWidget);
+      expect(tester.getSize(button).height, greaterThanOrEqualTo(48));
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(router.state.uri.path, AppRoutes.aiCheckIn);
+      expect(
+        tester
+            .widget<AiConversationPage>(find.byType(AiConversationPage))
+            .initialCheckInId,
+        'synthetic-reference',
+      );
+      final reads = rig.requests.length;
+      captured('synthetic-reference');
+      await tester.pumpAndSettle();
+      expect(router.state.uri.path, AppRoutes.aiCheckIn);
+      expect(rig.requests.length, reads);
       expect(rig.requests.where((r) => r.method != 'GET'), isEmpty);
       expect(tester.takeException(), isNull);
     },
@@ -367,6 +440,25 @@ _pump(
             'checkInVisibility': 'private',
             'optionalProcessingConsent': 'accepted',
             'revision': 0,
+          },
+        }),
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+    }
+    if (request.url.path == '/v1/check-ins/synthetic-reference') {
+      return http.Response(
+        jsonEncode({
+          'checkIn': {
+            'checkInId': 'synthetic-reference',
+            'note': 'An explicitly chosen synthetic note',
+            'mood': 'Calm',
+            'createdAt': DateTime.now()
+                .toUtc()
+                .subtract(const Duration(hours: 1))
+                .toIso8601String(),
+            'checkInVisibility': 'private',
+            'revision': 1,
           },
         }),
         200,

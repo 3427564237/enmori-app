@@ -38,3 +38,26 @@ final class CompanionMessagePage {
 final companionMessagePageProvider = Provider<CompanionMessagePage?>(
   (ref) => null,
 );
+
+/// The owner explicitly chose this record in its detail page. This is only an
+/// ephemeral selection hint; the destination rereads it before preparation.
+final class AiCheckInNavigation {
+  const AiCheckInNavigation({required this.session, required this.checkInId});
+  final AuthSessionAuthenticated session;
+  final String checkInId;
+}
+
+final class CompanionCheckInPage {
+  const CompanionCheckInPage({required this.build});
+  final Widget Function(
+    BuildContext context, {
+    required String checkInId,
+    required VoidCallback onBack,
+    required VoidCallback onOpenSettings,
+  })
+  build;
+}
+
+final companionCheckInPageProvider = Provider<CompanionCheckInPage?>(
+  (ref) => null,
+);

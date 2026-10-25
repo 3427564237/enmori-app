@@ -133,6 +133,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
     required VoidCallback onBack,
     required VoidCallback onOpenSettings,
     AiMessageLocator? initialMessage,
+    String? initialCheckInId,
   }) {
     final session = ProviderScope.containerOf(
       context,
@@ -173,6 +174,13 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       ),
       child: AiConversationPage(
         initialMessage: initialMessage,
+        initialCheckInId: initialCheckInId,
+        initialCheckInSessionKey: initialCheckInId == null
+            ? null
+            : ProviderScope.containerOf(
+                context,
+                listen: false,
+              ).read(aiConversationControllerProvider).sessionKey,
         onOpenSourceTarget: widget.companionFirstFlowEnabled
             ? (target) {
                 if (!canOpenCompanion()) return;
@@ -283,6 +291,24 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       aiCompanionReferencesEnabledProvider.overrideWithValue(
         widget.companionFirstFlowEnabled,
       ),
+      if (widget.companionFirstFlowEnabled)
+        companionCheckInPageProvider.overrideWithValue(
+          CompanionCheckInPage(
+            build:
+                (
+                  context, {
+                  required checkInId,
+                  required onBack,
+                  required onOpenSettings,
+                }) => _buildAiPage(
+                  context,
+                  sourcePath: AppRoutes.aiCheckIn,
+                  onBack: onBack,
+                  onOpenSettings: onOpenSettings,
+                  initialCheckInId: checkInId,
+                ),
+          ),
+        ),
       if (widget.companionFirstFlowEnabled)
         companionMessagePageProvider.overrideWithValue(
           CompanionMessagePage(
