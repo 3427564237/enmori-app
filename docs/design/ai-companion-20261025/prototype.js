@@ -46,18 +46,28 @@ function followValidation(){
   return null;
 }
 function selectionBlocked(){return state.selectionConflict||!state.selectionReviewed||state.sourceState!=='current'&&activeRefs().length>0;}
-let readObserver;
+let readObserver,readSizeObserver;
 function observeRead(){
-  readObserver?.disconnect();
+  readObserver?.disconnect();readSizeObserver?.disconnect();
   const target=document.querySelector('[data-read-target]');if(!target)return;
-  readObserver=new IntersectionObserver(entries=>{
-    for(const e of entries)if(e.isIntersecting&&e.intersectionRect.height>=Math.min(40,e.boundingClientRect.height)&&state.view==='proactive'&&state.proactiveState==='valid'){
+  const observer=new IntersectionObserver(entries=>{
+    // The implicit root clips through #screen and #phone to the browser viewport.
+    // A phone preview entirely below the window has no readable intersection.
+    for(const e of entries)if(document.visibilityState==='visible'&&e.target.isConnected&&e.target===document.querySelector('[data-read-target]')&&e.isIntersecting&&e.boundingClientRect.height>0&&e.intersectionRect.width>0&&e.intersectionRect.height>=Math.min(40,e.boundingClientRect.height)&&state.view==='proactive'&&state.proactiveState==='valid'){
       state.readObserved=true;if(state.readState==='unread')state.readState='pending';
       const status=$('read-status');if(status)status.textContent=readCopy();
       const ack=document.querySelector('[data-action="ack-read"]');if(ack)ack.disabled=false;
     }
-  },{root:$('screen'),threshold:[0,.1,.5,1]});readObserver.observe(target);
+  },{root:null,threshold:[0,.1,.5,1]});readObserver=observer;observer.observe(target);
+  // A zero-area and a fully visible positive-area entry can both have ratio 1.
+  // Reobserve a resized message even when no intersection threshold changes.
+  readSizeObserver=new ResizeObserver(()=>{
+    if(readObserver!==observer||!target.isConnected)return;
+    observer.unobserve(target);observer.observe(target);
+  });readSizeObserver.observe(target);
 }
+// Returning to a visible document must recheck unchanged geometry too.
+document.addEventListener('visibilitychange',observeRead);
 function readCopy(){return state.readState==='synced'?t('已读 · 已同步（模拟）','Read · Synced (demo)'):state.readObserved?t('已打开，阅读状态尚未同步。','Opened. Read status has not synced yet.'):t('未读 · 等待消息实际显示','Unread · Waiting for the message to become visible');}
 
 function go(view, changes={}) {
@@ -138,7 +148,7 @@ function whyView() {
 function activeRefs(){return state.refs.filter((id)=>!state.excluded.includes(id));}
 function referencesView() {
   const bad=state.sourceState!=='current';
-  return `<p class="lead">${t('只用于这一次本地回复。手选本人近 7 天内最多 5 条签到；查看历史来源不会自动选择它。','For this local reply only. Hand-select up to 5 of your own Check-ins from the last 7 days. Viewing a past source does not select it.')}</p>${pill(t('本次选择 · '+state.refs.length+' / 5','Selected · '+state.refs.length+' / 5'))}${bad?notice(t('来源未通过当前核对。查看变化或明确排除，保留草稿。','A source did not pass the current check. Review or explicitly exclude it; your draft is kept.'),'warn'):''}${state.refs.length?state.refs.map(id=>sourceCard(id,bad)).join(''):notice(t('未选择签到。不会自动读取其他签到。','No Check-ins selected. Other Check-ins will not be read automatically.'))}${button('attach',`${icon('plus')} ${t('手选自己的签到','Choose your Check-ins')}`,'full')}${state.selectionConflict?`<div class="card warm"><h3>${t('先审阅关联历史','Review dependent history first')}</h3><p>${t('已选历史中的一组旧问答依赖被排除的签到，当前选择冲突。草稿和原历史保留。','A selected past question-and-answer pair depends on the excluded Check-in. The selection conflicts. Your draft and original history are kept.')}</p>${button('exclude-history',t('本次也排除这组关联问答','Also exclude this dependent pair for this reply'),'full')}</div>`:''}<div class="divider"></div>${notice(t('排除包含同一来源的所有投影与依赖历史；不能从旧回复绕回。仅本次不用，不删除记录或旧消息，也不改你主动输入的文字。','Exclusion covers all projections and dependent history of that source. It cannot return through an old reply. This affects this request only; records, old messages and your typed text remain.'))}${state.historyExcluded?pill(t('关联问答已明确排除 · 仍需重新核对','Dependent pair excluded · Recheck still needed')):''}${button('review-selection',state.selectionReviewed?t('本次范围已核对（模拟）','Scope checked (demo)'):t('核对本次选择（模拟）','Check this selection (demo)'),'full',state.selectionReviewed?'disabled':'')}${button('refs-done',t('完成选择，返回草稿','Done, return to draft'),'primary full',selectionBlocked()?'disabled':'')}`;
+  return `<p class="lead">${t('只用于这一次本地回复。手选本人近 7 天内最多 5 条签到；查看历史来源不会自动选择它。','For this local reply only. Hand-select up to 5 of your own Check-ins from the last 7 days. Viewing a past source does not select it.')}</p>${pill(t('本次选择 · '+state.refs.length+' / 5','Selected · '+state.refs.length+' / 5'))}${bad?notice(t('来源未通过当前核对。查看变化或明确排除，保留草稿。','A source did not pass the current check. Review or explicitly exclude it; your draft is kept.'),'warn'):''}${state.refs.length?state.refs.map(id=>sourceCard(id,bad)).join(''):notice(t('未选择签到。不会自动读取其他签到。','No Check-ins selected. Other Check-ins will not be read automatically.'))}${button('attach',`${icon('plus')} ${t('手选自己的签到','Choose your Check-ins')}`,'full')}${state.selectionConflict?`<div class="card warm"><h3>${t('先审阅关联历史','Review dependent history first')}</h3><p>${t('已选历史中的一组旧问答依赖被排除的签到，当前选择冲突。草稿和原历史保留。','A selected past question-and-answer pair depends on the excluded Check-in. The selection conflicts. Your draft and original history are kept.')}</p>${button('exclude-history',t('本次也排除这组关联问答','Also exclude this dependent pair for this reply'),'full')}</div>`:''}<div class="divider"></div>${notice(t('排除包含同一来源的所有投影与依赖历史；不能从旧回复绕回。仅本次不用，不删除记录或旧消息，也不改你主动输入的文字。','Exclusion covers all projections and dependent history of that source. It cannot return through an old reply. This affects this request only; records, old messages and your typed text remain.'))}${state.historyExcluded?pill(state.selectionReviewed?t('关联问答已明确排除 · 本次已核对','Dependent pair excluded · Scope checked'):t('关联问答已明确排除 · 仍需重新核对','Dependent pair excluded · Recheck still needed')):''}${button('review-selection',state.selectionReviewed?t('本次范围已核对（模拟）','Scope checked (demo)'):t('核对本次选择（模拟）','Check this selection (demo)'),'full',state.selectionReviewed?'disabled':'')}${button('refs-done',t('完成选择，返回草稿','Done, return to draft'),'primary full',selectionBlocked()?'disabled':'')}`;
 }
 
 function savedReferencesView(){
