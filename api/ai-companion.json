@@ -1,0 +1,661 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ENMORI approved first-flow candidate schemas",
+    "version": "2026-10-25"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Settings": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "revision",
+          "mode",
+          "categories",
+          "timeZone",
+          "quiet",
+          "maximumInRolling24h",
+          "cooldownMinutes",
+          "pushEnabled",
+          "preview"
+        ],
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "on",
+              "off",
+              "paused"
+            ]
+          },
+          "pausedUntil": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "categories": {
+            "type": "array",
+            "maxItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "explicit_follow_up"
+              ]
+            }
+          },
+          "timeZone": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Confirmed IANA zone for saved settings; empty only for the initial revision-zero/off response."
+          },
+          "quiet": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "disabled"
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "startMinute",
+                  "endMinute"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "window"
+                    ]
+                  },
+                  "startMinute": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1439
+                  },
+                  "endMinute": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1439
+                  }
+                }
+              }
+            ],
+            "description": "A window must have distinct startMinute and endMinute; semantic equality is rejected with 422."
+          },
+          "maximumInRolling24h": {
+            "type": "integer",
+            "const": 1
+          },
+          "cooldownMinutes": {
+            "type": "integer",
+            "const": 480
+          },
+          "pushEnabled": {
+            "type": "boolean"
+          },
+          "preview": {
+            "type": "string",
+            "enum": [
+              "generic",
+              "hidden"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "revision": {
+                  "const": 0
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "off"
+                },
+                "timeZone": {
+                  "const": ""
+                },
+                "pushEnabled": {
+                  "const": false
+                },
+                "categories": {
+                  "maxItems": 0
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "timeZone": {
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "pausedUntil"
+              ]
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "paused"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ReplaceSettings": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedRevision",
+          "mode",
+          "categories",
+          "timeZone",
+          "quiet",
+          "maximumInRolling24h",
+          "cooldownMinutes",
+          "pushEnabled",
+          "preview"
+        ],
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "on",
+              "off",
+              "paused"
+            ]
+          },
+          "pausedUntil": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "categories": {
+            "type": "array",
+            "maxItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "explicit_follow_up"
+              ]
+            }
+          },
+          "timeZone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Explicit confirmed IANA time zone, validated against zone rules; no implicit device offset."
+          },
+          "quiet": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "disabled"
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "startMinute",
+                  "endMinute"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "window"
+                    ]
+                  },
+                  "startMinute": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1439
+                  },
+                  "endMinute": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1439
+                  }
+                }
+              }
+            ],
+            "description": "A window must have distinct startMinute and endMinute; semantic equality is rejected with 422."
+          },
+          "maximumInRolling24h": {
+            "type": "integer",
+            "const": 1
+          },
+          "cooldownMinutes": {
+            "type": "integer",
+            "const": 480
+          },
+          "pushEnabled": {
+            "type": "boolean"
+          },
+          "preview": {
+            "type": "string",
+            "enum": [
+              "generic",
+              "hidden"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "required": [
+                "pausedUntil"
+              ]
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "paused"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CreateIntent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "conversationId",
+          "sourceMessageId",
+          "category",
+          "dueAt",
+          "timeZone",
+          "processing",
+          "expectedSettingsRevision"
+        ],
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "sourceMessageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "explicit_follow_up"
+            ]
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "timeZone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Explicit confirmed IANA time zone, validated against zone rules; no implicit device offset."
+          },
+          "processing": {
+            "type": "string",
+            "enum": [
+              "local"
+            ]
+          },
+          "expectedSettingsRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "Intent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "intentId",
+          "revision",
+          "state",
+          "dueAt",
+          "expiresAt",
+          "category",
+          "conversationId"
+        ],
+        "properties": {
+          "intentId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "reserved",
+              "prepared",
+              "published",
+              "cancelled",
+              "failed",
+              "expired",
+              "dispatching",
+              "accepted",
+              "unknown"
+            ]
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "explicit_follow_up"
+            ]
+          },
+          "conversationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "recallPossible": {
+            "type": "boolean",
+            "const": false
+          }
+        },
+        "description": "Owner-authorized status only. Accepted means provider accepted, not delivered or read. No source body, sourceMessageId, grant, routing value or authority proof is exposed."
+      },
+      "Intents": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "intents"
+        ],
+        "properties": {
+          "intents": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "$ref": "#/components/schemas/Intent"
+            }
+          }
+        }
+      },
+      "CancelIntent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedRevision"
+        ],
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "Registration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "revision",
+          "enabled",
+          "availability"
+        ],
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "installationRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "registered",
+              "unregistered",
+              "expired"
+            ]
+          }
+        }
+      },
+      "ReplaceRegistration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedRevision",
+          "installationRef",
+          "registrationKind",
+          "registrationValue",
+          "enabled"
+        ],
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "installationRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "registrationKind": {
+            "type": "string",
+            "enum": [
+              "fcm_token"
+            ]
+          },
+          "registrationValue": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "writeOnly": true,
+            "description": "Secret routing value; non-whitespace well-formed Unicode without control characters. Never returned by metadata GET or logged."
+          },
+          "enabled": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      },
+      "DeleteRegistration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedRevision",
+          "installationRef"
+        ],
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "installationRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          }
+        }
+      },
+      "ReadState": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "revision",
+          "readThroughSequence"
+        ],
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "readThroughSequence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "MarkRead": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedRevision",
+          "readThroughSequence"
+        ],
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "readThroughSequence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "error",
+          "requestId"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "AI_AUTHORITY_CHANGED",
+                  "AI_BUSY",
+                  "AI_CONTEXT_NOT_PERMITTED",
+                  "AI_CONTEXT_SELECTION_CONFLICT",
+                  "AI_INPUT_INVALID",
+                  "AI_OPERATION_CONFLICT",
+                  "AI_OPERATION_UNAVAILABLE",
+                  "AI_OUTCOME_UNRESOLVED",
+                  "AI_REPLY_REJECTED",
+                  "AI_SOURCE_UNAVAILABLE",
+                  "AI_UNAVAILABLE",
+                  "AUTH_FORBIDDEN",
+                  "AUTH_REQUIRED",
+                  "CONVERSATION_UNAVAILABLE",
+                  "IDEMPOTENCY_CONFLICT",
+                  "IDEMPOTENCY_KEY_INVALID",
+                  "ONBOARDING_REQUIRED",
+                  "PROACTIVE_INPUT_INVALID",
+                  "PROACTIVE_REVISION_PRECONDITION_FAILED",
+                  "REQUEST_INVALID",
+                  "REQUEST_TOO_LARGE"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
+          "requestId": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
