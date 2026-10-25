@@ -6,6 +6,55 @@ Authority: [LI's bounded round request](../decisions/2026-10-25-li-ai-companion-
 The local launch roster and exact prompts are under
 `/home/miku/.local/state/enmori-ai-companion-20261025/`.
 
+## Current checkpoint — C selected; reviewed candidates assembled
+
+LI selected **C**, recorded at `2bb638b47e682217007cf02cd505550d88d627cf` in
+[the scoped decision](../decisions/2026-10-25-li-ai-entry-c.md). The original
+launch/first-checkpoint statements below remain historical. The new native C
+increment is undergoing its own source/widget validation. The
+[next decision packet](../planning/2026-10-25-ai-companion-next-decisions.md)
+separately proposes F0 explicit local follow-up, F1a hand-selected own Check-ins,
+D1 Android delivery and the USD 1 synthetic Gemini experiment; none is granted
+by the entry choice.
+
+| Module | Exact delivered head / source | Review and present boundary |
+| --- | --- | --- |
+| Product / UX | `c7adc9837850972018ddd91b3c5491256f09a230` | A/B/C comparison, phone prototype and C handoff integrated; independent browser/layout review, synthetic design only |
+| App initial usability | `f514a325878d351ecfd5de314a516954db2161ad` | Independently reviewed and integrated; C follow-up has a separate final head pending |
+| Context / Backend | `3ed4b3ed6a97f501069c692e1b98a47da7db4305`; source `8ce74a82b635e6a7b0ada6b2d17255ecb09714c0` | 44 source tests and original exclusion counterexample independently passed; full F0/F1 contract remains proposed, no production reader |
+| Proactive / Delivery | `4a388d9fdb96596482fb7aa30760d0f1dbe203df`; source `6d3b590a75bdafb6130b7adb920cf90ace32b4cc` | 29 pure policy cases independently reviewed; exact proposed SDK compatibility audited read-only; no database transaction, scheduler, registration or send |
+| AI Runtime / Models | `15a76655f6bcda67eeaba8767ca31cd9a60ecf5f`; source `24f913dd26afa9af82f7c31ac9eefcf543b64140` | Source/mock guard findings independently closed; one actual local batch completed; cloud remains disabled |
+| QA / Evaluation | `925ba38732772d1a71c24f19d2b8c750d538fab5` | Independent source counterexamples, prototype, exact physical-contract consistency and all 24 raw model judgments integrated |
+
+Integration preserved all author lineages through local merge commits. The
+integrated Backend at `e377fa2f3fdaf77dd6ffc37e94c20d665c41afb3` passed the
+strict TypeScript build with Node 24.19.0, exit 0. Later merges through the above
+checkpoint change only documentation; Backend source remains identical.
+The earlier 40/40 router run below applies to the initial App change, not the
+new C slice. No overlapping author/QA/Integration test totals are added together.
+
+The real local Qwen run used frozen source `24f913d`, the current production
+serializer and synthetic input: one empty preload plus exactly 24 generations,
+no retries or parameter/model changes. All responses physically settled;
+23/24 were structurally eligible, one output truncated. Independent QA found
+**12 Pass / 12 Fail / 0 unreviewed**. Preserved 16 cases are 6/10, new 8 are 6/2.
+Median latency was 4.1215 s, p95 12.4966 s, maximum 27.6998 s; local host cost
+was not measured. [Full per-case review](../evidence/ai-companion-20261025/qa-model-review.md)
+retains task misreading, correction failures and an instruction-violating
+clear-data suggestion as model-output failures, not actual storage operations.
+Small-plan semantics remain **Fail**. The eight proposed context cases and
+Gemini calls remain **Not Run** against real providers.
+
+All seven development-agent configurations remain the explicitly requested
+model / max values, independently verified from actual turn records; no model
+was silently downgraded. These settings are separate from ENMORI's model choice.
+Service/deployment, current real-data preservation, native APK/device and push
+acceptance remain separate gates. No new source use, cloud charge, external
+send, shared-service restart or phone write occurred at this checkpoint.
+The service was read back active/running again at the original clean `7a3c4fa`
+working directory; all six original reference files still match their preserved
+startup hashes. This is source/service readback, not a fresh account-data inventory.
+
 ## Verified startup state
 
 - Product/evidence parent: `40ec21d69cec396bad49b834750fc4b1894c8a3c`, containing
