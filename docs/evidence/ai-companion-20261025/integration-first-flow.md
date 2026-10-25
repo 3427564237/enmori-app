@@ -172,3 +172,5 @@ projection now checks each pair's U-before-A order, unique IDs/sequences and
 ascending assistant sequence, without requiring non-overlapping pairs. A
 targeted late-retry and duplicate-sequence regression was added. Existing
 history selection, Retry permissions and model serialization are unchanged.
+Pinned compilation and **4/4** selected HTTP tests passed for this correction;
+the raw result is `integration-late-retry-history.log`.

@@ -993,7 +993,7 @@
             "maximum": 9007199254740991
           }
         },
-        "description": "One current complete user/assistant exchange, from the fixed latest-two window before exclusions. User sequence precedes assistant sequence; IDs and keys are distinct. No source IDs, source text or private provenance."
+        "description": "One current complete user/assistant exchange, from the fixed latest-two window before exclusions. User sequence precedes its assistant sequence; all message IDs and sequences and all history keys are distinct. Pairs are ordered by assistant sequence, so an older user's later accepted Retry can overlap a more recent pair. No source IDs, source text or private provenance."
       },
       "ResolveDelivery": {
         "type": "object",
