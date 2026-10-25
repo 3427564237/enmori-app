@@ -54,6 +54,13 @@ the remaining files at `0c436bd`: one confirmed count response, one consumed
 generation reservation, actual generation dispatch 0..1 unknown, no generated
 output and seven cases unreached. It cannot be scored and was not retried.
 
+The [bounded F1 real-model attempt ledger](qa-f1-production-attempts.md) preserves
+the first `6bab960` harness failure: one completed empty preload, zero generation,
+prepare or execute. QA verified the recorded artifacts and independently
+reproduced the getter error without network/listener/model activity. F1 real-model
+semantics remain Not Run; Integration's separate bounded continuation is pending
+review and cannot erase the first failure or its consumed preload.
+
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with
 [proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is
