@@ -458,3 +458,34 @@ This completes the assigned read-only preparation. Setup, usable
 paid credentials and real cloud evaluation remain incomplete; the next user
 interaction is account authorization, followed by a project/payment choice only
 if the resulting metadata requires one.
+
+### Follow-up: existing browser session and concrete Console blocker
+
+Integration persisted the operator statement at `61478e0507e439fb0d0998c2fca26fbaa3ddbe15`
+and explicitly assigned Runtime the sole browser operator for a read-only visit
+to the existing project's Cloud Console billing page. This extends the earlier
+CLI-only inspection; it does not authorize accepting terms or changing resources.
+
+The existing Chrome profile was available. A direct visit to
+`https://console.cloud.google.com/billing/linkedaccount?project=enmori-rmvp-controlled`
+resolved to the same URL with `&pli=1`, browser `3`, tab `356358120`. The current
+Google session already identified the same operator as the Firebase session,
+and the visible region was Singapore. No login, account choice or account switch
+was performed.
+
+Cloud Console displayed its first-use welcome/Terms dialog. The service-terms
+checkbox and marketing-email checkbox were both unchecked; **Agree and continue**
+was disabled. Billing binding was not visible behind this gate and remains
+**Unknown**, not unlinked. The separate Gemini Cloud Assist setup affordance
+was not used. No Terms/API key/AI Studio onboarding, billing or resource mutation
+was submitted.
+
+The tab is marked for user handoff. The immediate browser path needs the human
+to read and decide whether to complete that Google Cloud Terms confirmation;
+gcloud login is now an optional later CLI route, not the first observed blocker.
+After user confirmation, the authorized operator can read the same project's
+billing metadata without initiating setup/payment. A screenshot is retained at
+`/home/miku/.local/state/enmori-ai-companion-20261025/runtime/cloud-setup/console-terms-blocker.png`.
+It contains operator account information and stays outside Git. The full tab/URL
+and observed gate were delivered to Integration; no repeated UI attempts or
+credential inspection followed.
