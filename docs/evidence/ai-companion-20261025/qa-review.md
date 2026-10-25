@@ -146,3 +146,7 @@ authorized bounded model run. New Context/Proactive production integration,
 durable cancellation/restart, real source navigation, notifications, provider
 spending, current data snapshots, APK and LI/SHI phone tests remain **Not Run**.
 The comparator's 12 unit tests do not establish any actual preservation result.
+
+Later exact-head repair and prototype results are recorded in
+[qa-review-followup.md](qa-review-followup.md). This earlier checkpoint remains
+intact so its failures and pending states are not rewritten as original passes.

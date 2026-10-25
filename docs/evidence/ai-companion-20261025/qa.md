@@ -10,6 +10,12 @@ baseline checkpoint is preserved below. Subsequent exact-head source reviews,
 executed checks and unresolved findings are in [qa-review.md](qa-review.md).
 No production implementation was authored by QA.
 
+Latest checkpoint: [repair closure and independent prototype review](qa-review-followup.md).
+The earlier Context/Runtime candidate findings now have independently checked
+fixes. LI subsequently chose entry C; that scoped decision does not approve the
+prototype's new context/cloud/proactive capabilities. New local-model semantics
+and the subsequent native C increment remain pending their exact evidence.
+
 ## Authority and baseline readback
 
 Read the original LI request directly at
@@ -105,9 +111,10 @@ successful. New candidate evaluation requires its own full raw evidence.
 
 Priority counterexamples were sent directly to all five authorized peers and
 Integration. App and Proactive now have bounded independent source results.
-Context's exclusion-through-history counterexample and Runtime's evidence-path
-and unknown-envelope findings remain open at the heads listed in the review
-ledger until their revised exact commits are independently checked.
+Context's exclusion-through-history counterexample and Runtime's evidence-path,
+unknown-envelope and later cloud dispatch findings remain preserved as failures
+at their original heads. Their revised-head closure is recorded separately in
+[the follow-up ledger](qa-review-followup.md).
 
 Product decision text at `22e8bea4bf71fc2404d357b64a695985202a9633` was read.
 Its C recommendation is explicitly unselected; it retains conversation storage

@@ -114,7 +114,7 @@ by QA. A comma lists distinct required observations, not interchangeable proof.
 | REG-06 | Upgrade uses wrong signer/package, clears data, or rollback silently discards newly written data. | D, P | Same-package signed update and scoped preservation are verified; rollback limitations reviewed before action. No uninstall/reset/data deletion as a shortcut. | Integration / LI or SHI |
 | UX-01 | Small phone, large text, long Chinese/English response, long lists and keyboard covering composer. | D, S, P | Readable wrapping, reachable controls/safe area, preserved scrolling/draft and usable targets; no overflow or obscured necessary control. | Product / App |
 | UX-02 | Screen reader, keyboard focus, reduced-motion preference and Back during waiting/search. | D, S, P | Meaningful labels/state, predictable focus/return and reduced-motion behavior; animation never blocks recovery. Device accessibility remains separately Not Run. | App |
-| DEC-01 | Candidate C prototype hides history/delete or appears already selected. | D, S | A/B/C compare retained capabilities, compatibility and tradeoffs; C is labelled recommendation until LI chooses. No destructive migration or unapproved entry removal. | Product / Integration |
+| DEC-01 | C hides history/delete or its selection is treated as approval for every synthetic feature. | D, S | Keep the original A/B/C comparison and explicit LI selection trail. C is recommendation-only before LI's choice; subsequent decision `2bb638b` selects the entry alone. No destructive migration, unapproved entry removal, or inferred authorization for pending source/cloud/proactive contracts. | Product / Integration |
 
 ## Mapping back to the eleven mandatory outcomes
 
