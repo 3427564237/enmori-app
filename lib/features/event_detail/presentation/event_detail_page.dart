@@ -23,13 +23,25 @@ final class EventDetailPage extends ConsumerStatefulWidget {
 
 final class _EventDetailPageState extends ConsumerState<EventDetailPage>
     with WidgetsBindingObserver {
+  int _scheduledLoad = 0;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scheduleLoad();
+  }
+
+  @override
+  void didUpdateWidget(EventDetailPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.eventId != widget.eventId) _scheduleLoad();
+  }
+
+  void _scheduleLoad() {
+    final scheduled = ++_scheduledLoad, eventId = widget.eventId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        ref.read(eventDetailControllerProvider(widget.eventId).notifier).load();
+      if (mounted && scheduled == _scheduledLoad && widget.eventId == eventId) {
+        ref.read(eventDetailControllerProvider(eventId).notifier).load();
       }
     });
   }
