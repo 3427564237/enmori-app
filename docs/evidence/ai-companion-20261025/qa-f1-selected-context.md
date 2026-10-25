@@ -218,3 +218,35 @@ The eight-entry `review-source-manifest.json` SHA-256 is
 component SHA-256 is
 `e3534740ff9bd68c94f2c00915b561845ad52dba2f6bafa8c6a0fad21364b52f`.
 QA holds no Flutter/Emulator/model slot at this checkpoint.
+
+### Added shared entry: explicitly reference a saved own Check-in
+
+Integration subsequently connected the already specified detail-page entry in
+`interaction-spec.md` item 1: explicitly reference that Check-in in AI. QA read
+a five-file uncommitted snapshot based on
+`c8ddcc6074d02561a8163e784ad13e0c6805a6ee`; this is not a frozen shared head,
+compilation result or executed routing acceptance.
+
+The snapshot shows the action only for a successful record matching the detail
+ID. Its click handler checks current route, foreground and current successful
+record again. Shared routing additionally checks the original exact session,
+authenticated gate, detail path and matching ID. `AiCheckInNavigation` carries
+only that session and ID to `/ai/reference`; a missing/wrong-session extra is
+unavailable. The destination passes `initialCheckInId` through the existing
+consent gate. This selection hint does not supply source text or model-use
+authority. No blocking issue was found in this bounded shared-source snapshot.
+
+Final review must bind the shared commit together with App's completed target:
+the target rereads current owner/time/count/use eligibility and cannot overwrite
+an existing draft, replace the chosen set, exceed five choices or reset an
+unknown operation to admit a new preparation/send. These are additional entry
+branches of the selection/draft/session checks above, not a wider Backend,
+model or real-service test request. The two new shared test sources were read,
+not executed. Integration's separate 1481-case Backend report remains author
+evidence and is not counted here.
+
+Private snapshot: `qa-review/root-c8ddcc6-checkin-reference-wip/` under the round
+state directory. `review-source-manifest.json` SHA-256:
+`df034385cec9f2619606c55bbfa59fc1381904da79cdbb647c141d5821c9831f`.
+The final shared SHA must be compared with this snapshot before claiming its
+source observations against a frozen candidate.
