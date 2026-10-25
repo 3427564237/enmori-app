@@ -220,7 +220,7 @@ from consent to use private context or send it to a cloud model.
 | Option | Services and resource scope | Costs / boundaries |
 | --- | --- | --- |
 | D0: in-app only | Existing Backend host; approved durable minimal intent/effect storage, bounded due scan and existing authorized app reads. | No FCM registration or system push. Cannot satisfy background/terminated notification acceptance. Still needs new product-data/schema/retention approval. |
-| D1: recommend existing-host worker + FCM | Extend the existing supervised Backend only after review. A bounded server due scan (candidate 60s), persisted occurrence/budget/outbox and current-source rereads; existing Admin messaging capability behind a Port; one selected `firebase_messaging` dependency/platform change; Firebase project/package configuration and FCM send permission. | FCM is listed as no-cost, but storage/reads/egress and host availability are not thereby free or guaranteed. No new VM, cloud scheduler, function or vector service is required by this option. Exact project capability/IAM and current account billing are unverified. |
+| D1: recommend existing-host worker + FCM | Extend the existing supervised Backend only after review. For the first test, a bounded 30-minute, one-owner due scan (candidate 60s), persisted occurrence/budget/outbox and current-source rereads; existing Admin messaging capability behind a Port; one reviewed `firebase_messaging` dependency/platform change; Firebase project/package configuration and FCM send permission. | FCM is listed as no-cost, but storage/reads/egress and host availability are not thereby free or guaranteed. No new VM, cloud scheduler, function or vector service is required by this option. Exact project capability/IAM and current account billing are unverified. |
 | D2: managed scheduler/worker | One Cloud Scheduler job invoking an authenticated managed worker plus approved datastore/outbox and FCM. Backend/private-model connectivity must be resolved without exposing Ollama publicly. | Cloud Scheduler lists 3 free jobs per billing account and USD 0.10/job/31 days otherwise; worker/database/egress are separate. This is a bigger topology/credential/billing change and is not the first recommendation. |
 
 Pricing facts: [Firebase pricing](https://firebase.google.com/pricing),
@@ -228,16 +228,177 @@ Pricing facts: [Firebase pricing](https://firebase.google.com/pricing),
 These are provider list terms, not a current-account invoice or a claim of
 zero total cost. No billing account, credential, token or registration was read.
 
-For D1, propose a **7-day, at most 20 explicitly invited accounts, one chosen
-device each, at most 1 occurrence/account/24h and 140 occurrences total** pilot.
-At most one model generation per occurrence, with no automatic cloud fallback or
-unknown-send replay. Proposed incremental non-model cloud spend limit: **USD 5
-for this pilot**, with a service kill switch/counters; no purchase, plan upgrade
-or auto top-up. Model/provider spending remains Runtime/Integration's separate
-explicit selection. Billing alerts alone must not be described as a hard cap.
-Before use, Integration must produce an operation/read estimate for the exact
-approved schema and scan/index design; the USD 5 is a proposed authorization
-ceiling, not an unmeasured cost estimate.
+Integration narrowed the first external proposal after the first draft: **one
+LI-specified existing test account, one LI/SHI device, synthetic content and at
+most one notification in each of foreground/background/ordinary-close states**.
+No invitation of other people or broad pilot is proposed for this decision.
+
+To respect the recommended 1/24h and 8h cooldown, choose either:
+
+- **T1, recommend bounded evidence:** one normal-policy E2E contact. If separately
+  approved, up to two transport-only diagnostics for the remaining device states,
+  using fixed generic synthetic text, an expiring one-use operator permit and a
+  maximum of one sender invocation per permit. They may reference the one
+  canonical synthetic message but do not create more proactive messages or alter
+  normal settings/budgets. No public diagnostic-send endpoint is proposed. Label
+  evidence `trigger-policy E2E` versus `transport-only`; do not report three normal
+  policy passes. Do not implement this bypass or send until the exact permit is
+  explicitly authorized.
+- **T2:** three normal-policy contacts on separate permitted days/times, preserving
+  real clock, quiet interval and persistent budget. This avoids a diagnostic path
+  but takes at least two rolling 24-hour intervals to demonstrate all three states.
+
+Force-stop is documented as an unsupported state until manual reopen, not a
+fourth positive send. No fake time, foreground timer or local-only notice is a
+substitute. Each actual send still needs the named device/state authorization.
+
+An earlier 20-account/7-day/140-occurrence, USD 5 pilot draft is retained here only
+as a **future optional expansion**, superseded for the first decision by the
+one-account package above. It is not the default ask and has no spending or
+invitation authorization. Model/provider spending remains Runtime/Integration's
+separate explicit selection, with no automatic cloud fallback.
+
+### Proposed first-flow wire/storage contract
+
+This subsection is the exact engineering proposal for Context/Integration to
+reconcile. It is **not an amendment** to `api/`, the Firestore contract or Q14.
+All authenticated owner identity comes from verified Firebase identity and the
+existing binding; no request contains owner UID/accountId. Unknown fields are
+rejected. UTC timestamps below use timezone-aware ISO 8601, revisions are
+nonnegative safe integers, and identifiers are opaque. Raw registration values,
+source IDs, request keys, delivery references and bodies never enter logs.
+
+| Proposed operation | Exact minimal input / result and concurrency rule |
+| --- | --- |
+| `GET /v1/me/proactive-settings` | Owner-only settings plus `revision`; no private-source content or device registration value. |
+| `PUT /v1/me/proactive-settings` | Full replacement with `expectedRevision`, `mode:on/off/paused`, optional `pausedUntil`, `categories`, `timeZone`, `quiet:{startMinute,endMinute}` or explicit disabled, `maximumInRolling24h:1/2`, `cooldownMinutes:480`, `pushEnabled`, `preview:generic/hidden`. Compare revision before no-op. An effective purpose/category/off/pause change advances grant generation; off cancels unstarted intents. Push opt-in does not grant cloud model processing. Return current representation/revision. |
+| `POST /v1/me/proactive-intents` | `Idempotency-Key`: canonical UUID, also the proposed owner-scoped `intentId` so a lost ACK can be queried. Body: `conversationId`, `sourceMessageId`, `category:explicit_follow_up`, `dueAt`, `timeZone`, `processing:local`, `expectedSettingsRevision`. Cloud is rejected in this first slice unless separately selected in the reconciled LI decision. Server rereads source, topic, grants, zone and future due instant, then captures exact source/topic versions and min(source/topic cutoff, due+2h) expiry. No model call during creation. Store no new copy of the request text. Same key + identical normalized command returns the same current intent; same key + changed command conflicts, and cancelled/expired intent never becomes queued again. |
+| `GET /v1/me/proactive-intents/{intentId}` | Ordinary current-owner status read for known UUID; returns `intentId`, `revision`, state, due/expiry, category and topic only while permitted. Used after unknown create/cancel ACK; not an automatic retry. |
+| `GET /v1/me/proactive-intents` | First slice returns the complete bounded active set, at most three intent summaries from the owner-state references. No cross-owner/global scan or copied source text. A larger/general list contract is deferred. |
+| `DELETE /v1/me/proactive-intents/{intentId}` | JSON body `{expectedRevision}`; no competing header/query precondition. Compare revision first; cancel queued/reserved/prepared, advance once and remove active membership. Repeated matching terminal cancellation has no new effect. If dispatch may already have begun, return current `unknown/accepted` state with `recallPossible:false`, never claim notification recall. Does not delete the conversation/message. |
+| `PUT /v1/me/proactive-registration` | `expectedRevision`, `installationRef` (new owner-selected canonical UUID on initial registration), `registrationKind:fcm_token/firebase_installation_id`, opaque `registrationValue` (UTF-8 <=4096 bytes), and explicit `enabled:true`. Backend accepts only the kind supported by the reviewed SDK pairing; this enum does not approve either dependency. Exactly one active registration per owner in this first slice. Return only installationRef/revision/expiry/availability. No value echo, no public token lookup, no FCM topics. |
+| `DELETE /v1/me/proactive-registration` | JSON body `{expectedRevision,installationRef}`; no competing header/query precondition. Verify current owner and binding. Immediately disable/erase backend registrationValue, advance revision and stop pending push. A new account cannot inherit an old binding: sign-out/account replacement must release the old binding first; unknown release holds push until resolved. Already accepted generic platform notifications remain subject to the documented recall limitation. |
+| `PUT /v1/me/conversations/{conversationId}/read-state` | `expectedRevision`, `readThroughSequence`. Server verifies owner, live topic, existing committed currently authorized sequence; monotonically advance to max(current, requested), never past the highest currently authorized sequence. Return revision/readThroughSequence. Push accepted/received/clicked alone is not read. A stale/unknown write needs readback before another explicit command. |
+| Existing transcript / context read | Extend the approved owner message projection with a genuine assistant `origin:proactive`, trusted occurrence/category/cause card and source resolver refs under Context's allowlist. No `replyToUser`, fake user row, or inclusion as a complete historical pair. Replies resolve the trusted owner/topic/target first and enter the normal real-user flow. Existing search/deletion remain. |
+
+All mutation preconditions above have one explicit body field. Proposed error
+semantics follow the existing safe boundary: unauthenticated 401, unavailable
+own target 404 without ownership disclosure, changed expected revision 412,
+changed command under the same key 409, and unknown dependency/outcome 503 with
+ordinary status readback. No raw vendor error or automatic resend is returned.
+
+Proposed Firestore paths/fields below are new schema **candidates**, not created
+collections. Keep them behind Backend Ports; Flutter gets no direct Firestore
+access. For this one-owner validation, the server has a trusted allowlisted owner
+and at most three known references, so no global due index/collection-group scan
+or new distributed scheduler is needed.
+
+| Proposed record | Minimal fields and lifetime |
+| --- | --- |
+| `accounts/{owner}/proactive_state/current` | `revision`, `grantGeneration`, settings fields above, `activeIntentIds` (max 3), `inFlightOccurrenceId?`, `lastAttemptedAt?`, and complete `rollingAttemptTimes` for the whole current window (the supported maximum cap is 2). Never truncate unexpired attempts when switching between cap 1/2 or changing zones. No source bodies. Current authority for reservation/budget; prune expired timestamps only after evaluating the old budget in the transaction. |
+| `accounts/{owner}/proactive_occurrences/{intentId}` | **One record combines intent, effect and outbox**: `revision`, `state`, `conversationId`, `sourceMessageId`, `category`, `dueAt`, `expiresAt`, `timeZone`, `processing`, `settingsRevision`, `grantGeneration`, `authorizationScope` (trusted non-token session/purpose epoch), `topicLifecycleVersion`, required `{kind,id,version,useCategory}` dependencies, `createdAt`, optional `messageId/messageSequence`, `attemptedAt`, `providerAcceptedAt`, `registrationRevision`, `dispatchState:not_started/dispatching/accepted/unknown/skipped`. No raw prompt, generated result, registration value or cached push payload. Invalid/deleted-source metadata is removed after dependent content is made unavailable. Terminal minimize to non-content effect identity/state/times until the containing topic expires, then inaccessible and cleanup within 24h; this retention needs LI approval. |
+| `accounts/{owner}/proactive_registration/current` | `revision`, `installationRef`, selected `registrationKind`, `registrationValue`, `enabled`, `registeredAt`, `expiresAt`. For the first test, expire no later than the named 30-minute test window + 15min, and disable/erase on completion/withdrawal/sign-out. Do not retain previous registration values. Backend erasure does not promise immediate Google backup deletion. Do not delete shared Firebase Auth/Core installation state as a cleanup shortcut. |
+| `accounts/{owner}/conversations/{topic}/read_state/current` | `revision`, monotonic `readThroughSequence`, `updatedAt`; never advances `lastPersistedMessageAt`. No independent private history. Delete with the topic. Unread derives only from currently authorized available proactive messages after this sequence; use an unread dot if a complete count is unavailable. |
+| Existing canonical message and source provenance | Server-assigned sequence/messageId, role assistant, explicit proactive origin, accepted text, occurrenceId/category and approved minimized provenance. An internal `appendProactive` operation checks original topic cutoff and versions, appends once, and **does not advance the old anchor under R-ANCHOR**. It cannot call the existing user/assistant-pair saver with an invented user. Existing serializers/resolvers/retention logic must be explicitly adapted and independently reviewed. |
+
+The intent is one-shot: before reservation, an edited source can replace the
+queued candidate only through a fresh authorized preparation/version update.
+Once generation has begun, a source/grant change discards old text and ends that
+occurrence; the first slice has at most one model call per occurrence, not a
+regeneration loop. No code in this candidate implements a queued update API.
+
+Transactions and recovery proposed for this schema:
+
+1. Create/cancel/settings/registration commands reauthorize current owner and
+   compare expected revisions. Create and bounded active membership change in
+   one transaction. No model/network calls occur inside transaction callbacks.
+2. Before generation, fresh-read Context/grants; atomically compare their versions,
+   queued occurrence, owner settings and owner budget, then claim reserved. A
+   concurrent worker must lose the compare and reread. The claim is not granted
+   by this module's pure `allow` return.
+3. After generation, repeat Context checks. Atomically append the true proactive
+   message/provenance and change the same occurrence to `dispatching` (or `skipped`
+   for in-app-only), charge one frequency slot and record installation revision.
+   Recheck the existing topic's original expiry; do not recreate an expired topic.
+   Source/grant/topic invalidation and this commit need compatible version fences.
+4. Only the original one-use in-memory dispatch capability from the successful
+   commit may proceed. Before the external sender invocation, re-read the occurrence and current
+   installation, permission/purpose, quiet/zone and source authority again. If
+   invalid, skip the unsent push and apply current content invalidation. A unique
+   dispatch compare/capability prevents a second worker invocation. This is a
+   fresh source/channel guard, not a second call to pure preflight on an already
+   `dispatching` record (that correctly returns unknown/hold). Send only the generic
+   envelope. Commit provider acceptance as a status; a timeout/crash means unknown.
+   No provider acceptance is interpreted as device receipt or an unread mutation.
+5. Restart: scan only trusted active references; queued work reevaluates if still
+   valid; interrupted reserved/prepared output fails without regenerating;
+   dispatching becomes unknown without send replay. Current reads enforce
+   deletion/expiry before cleanup. Automatic transaction retries may only reread
+   fences, never repeat the model or provider call. Limit retry attempts in the
+   eventual adapter so the operation estimate stays bounded.
+
+The post-commit/pre-send guard still cannot make a later external display atomic
+with a source deletion/quiet boundary; use generic text/TTL0 and authenticated
+click checks. Source revocation must also invalidate the canonical message, not
+merely cancel its notification. D1's process must cancel timers on shutdown and
+stop the one-owner scan at its test-window end. No new always-on deployment is
+implied by a 30-minute test harness.
+
+### Small-scope operation and cost estimate — Proposed
+
+Source evidence in `tool/run_real_account_local.mjs` and
+`backend/src/bootstrap/retained-core-runtime.ts` shows the real-account/group
+launcher rejects Emulator endpoints and composes remote Firebase. Therefore use
+a **cloud Firestore** estimate for that path, even when Qwen runs locally.
+Integration still must match the running launcher and database region; this
+worker did not read runtime credentials/configuration or the billing account.
+
+T1's proposed 30-minute one-owner test envelope has at most one canonical model
+generation/message, three provider sender invocations total (one normal, two
+separately permitted diagnostics), one registration and three explicit click
+checks. No automatic provider retry. Estimated operations for the exact bounded
+record/read approach above are:
+
+| Work | Estimated document reads / writes / deletes |
+| --- | --- |
+| Readback + settings/registration setup | <=8 / 3 / 0 |
+| One normal create, generation gate, publish, ACK and first click/read | <=30 / 10 / 0 |
+| Two transport-only permit checks and result records | <=12 / 4 / 0 |
+| Two extra authenticated click/read-state checks | <=16 / 2 / 0 |
+| 30 due ticks, at most owner state + three known occurrence documents each | <=120 / 0 / 0 |
+| Final readback, disable/restore settings and operational cleanup | <=10 / 3 / 4 |
+| Base total | <=196 / 22 / 4 |
+
+Reserve a conservative **512 reads, 64 writes, 16 deletes**, <=64 KiB of new
+logical records/message data (plus measured index/record overhead), <=1 MiB
+incremental database traffic and at most three <512-byte application notification
+packets. This is a test resource ceiling proposal, **not an observed meter result**.
+The estimates include repeated authority reads and a small allowance for
+transaction conflicts; stop the run if the counters approach the bounds rather
+than silently polling/retrying. Detailed adapter review may tighten/correct
+the counts before execution. No broad background scan, listener, TTL/PITR/backup,
+new database or index is included. Do not individually delete accepted messages
+as “cleanup”; Q19's complete-topic deletion still requires its normal owner action.
+
+Firestore bills document operations, some index reads, stored overhead and
+egress; empty queries can still cost a read, and TTL deletes are not included in
+free quota. [Firestore billing](https://firebase.google.com/docs/firestore/pricing).
+For a transparent example only, the currently displayed Iowa list rates are
+USD 0.03/100k reads, 0.09/100k writes and 0.01/100k deletes. The reserved document
+operations would be `512*0.03/100000 + 64*0.09/100000 + 16*0.01/100000 = USD 0.0002128`
+before storage/network. **This is not the current project's region or invoice.**
+[Firestore regional pricing](https://cloud.google.com/firestore/pricing).
+
+Recommend a conditional **USD 0.01 incremental non-model test allowance**, after
+Integration substitutes the actual database-region/storage/egress rates and
+confirms the operation bound fits. Do not request a plan upgrade/top-up, create
+new cloud resources or treat account-wide free quota as available without
+verification. If that conditional estimate cannot be established, continue
+mock/in-app candidate work and hold this external test. Model cost remains a
+separate Runtime-approved bound. FCM itself is listed no-cost. Alerts-only
+budgets are monitoring, not a hard stop; this proposal relies on the explicit
+attempt/window/operation bounds and a manual kill switch, not an assumed billing
+cap. [Cloud Billing budgets](https://docs.cloud.google.com/billing/docs/how-to/budgets).
 
 The concrete decision request is:
 
@@ -250,13 +411,16 @@ The concrete decision request is:
    metadata. For D1, authorize the specific Firebase project/package and reviewed
    dependency/platform changes, minimal send permissions, installation-owner
    binding and deletion lifecycle. No credentials in chat or Git.
-4. Approve a precise minimal intent/effect/outbox/registration/unread persistence
-   and API contract with concurrency, expiry, deletion and cleanup semantics.
-   This note selects no collection names, DTOs, indexes or migration.
-5. Approve the 7-day pilot resource ceiling and a named test account/device,
-   synthetic content and at most one send per requested device state. LI/SHI
-   perform the physical-device checks through Integration. No notification or
-   device write is currently authorized by this proposal.
+4. Approve the reconciled exact intent/effect-outbox/registration/read-state
+   contract proposed above and in Context's appendProactive/source resolver
+   appendix, including the new candidate paths, concurrency, expiry and cleanup.
+   No normative API/schema, index or migration has been changed here.
+5. Select T1 or T2 and name the one existing test account/device, synthetic source,
+   allowed device state(s), window and <=3 sender invocations. For T1 explicitly
+   distinguish the one normal E2E contact from <=2 one-use transport-only permits.
+   Approve the measured-region conditional resource/cost bound; no broad pilot.
+   LI/SHI perform physical-device checks through Integration. No notification,
+   registration upload or device write is currently authorized by this proposal.
 
 All five are input to Integration's one consolidated LI decision, not separate
 worker questions or a reason to stop isolated policy work.
