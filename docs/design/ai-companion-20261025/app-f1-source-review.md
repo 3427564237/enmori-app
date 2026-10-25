@@ -95,3 +95,37 @@ independent frozen-head counterexamples. Shared routing, backend/model quality,
 D1 notification delivery, APK/device, UAT, Release and Done remain separate
 evidence layers. This review changes no model-quality result and grants no
 deployment, cloud-data or physical-device acceptance.
+
+### Independent QA execution — original a20927c
+
+Product subsequently read QA's frozen evidence commit
+`982df029cab78514ce4c099e665ed2edcb9a96f1`, file
+`docs/evidence/ai-companion-20261025/qa-f1-app-integration.md`, and verified both
+reported log hashes under QA's `qa-review/root-a20927c/` local directory.
+Production stayed at `a20927c`; the record declares its test-only overlays.
+
+QA independently executed the pending-execute/background/cancel/resume counterexample
+above. Unresolved original readback kept the barrier; a subsequent authoritative
+no-effect made conversation `canSend` true, but explicit review still left the
+selected prepare count at one instead of two. **The P2 remains Open.** This is
+now independently reproduced widget evidence, attributed to QA, not Product
+execution. No duplicate execute or unauthorized source use was observed in that
+counterexample.
+
+The initial batch was **16 Pass / 3 Fail**: 13 selected feature cases plus three
+independent deadline cases passed; the genuine P2 and two QA-added route-body
+assertions failed. The route fixture intentionally returned 503 for all eight
+date-list GETs, so those added body assertions did not match its expected unknown
+state. QA retained that first overlay/log and changed only those assertions to
+require the visible picker, selected exact ID, hidden unverified body, eight
+failed partitions and unknown notice. Existing no-write, exact-session and
+covered-callback checks remained. The two focused route reruns passed **2/2**.
+The distinct result is **18 Pass / 1 Fail**, not 21 cases or a green F1 gate.
+
+Verified SHA-256 values: original `qa-f1-targeted-baseline.log`
+`9fe331a441e7d9bad34bd2f4598ce3601f6780cb41efce4196466734e854c7f9`;
+corrected `qa-f1-shared-entry-v2.log`
+`5293eac0b4733acdbdc88d86067cff332f37859ec5bbac9d146c1cf54eba88fe`.
+These cases are not added to App's 389, Root's six panel cases, or integrated
+historical-suite results. QA returned the exclusive Flutter window to Root;
+the repaired head still needs the original failing counterexample rerun.

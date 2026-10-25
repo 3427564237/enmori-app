@@ -208,3 +208,20 @@ F1 cases and the six earlier panel cases; they are not Product execution or the
 full integrated suite. Product ran no Flutter/model/service/device operation.
 Root's integrated validation and QA's independent frozen-head work remain
 separate, as do model semantics, D1, physical device and release acceptance.
+
+QA subsequently committed its independent original-head evidence as
+`982df029cab78514ce4c099e665ed2edcb9a96f1`
+(`qa-f1-app-integration.md`). Product read that record and verified its two
+log hashes. QA executed the real pending-Send recovery failure on `a20927c`:
+after unresolved then no-effect original GET, explicit review still could not
+create the second preparation. This strengthens the existing P2 to independently
+reproduced widget evidence; it remains Open and is not Product execution.
+
+QA's first batch was 16 Pass / 3 Fail. Two failures came from QA-added body
+assertions against a shared fixture returning history-list 503; QA preserved
+that overlay/log, corrected the assertions to require hidden unverified body,
+preserved selected ID and explicit unknown state, and passed those two route
+cases separately. Existing no-write/session/covered-callback assertions stayed.
+The distinct outcome is **18 Pass / 1 Fail**, not 21 cases or a green F1 gate.
+The detailed Product review records the exact hashes and attribution. These
+counts remain separate from App's 389 and Root's full integrated validation.
