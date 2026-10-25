@@ -53,6 +53,9 @@ import 'router/app_router.dart';
 import 'router/activity_routes.dart';
 import 'router/isolated_history_ai_pages.dart';
 import 'router/isolated_persona_pages.dart';
+import 'router/companion_navigation.dart';
+import '../features/proactive/data/http_proactive_repository.dart';
+import '../features/proactive/proactive_providers.dart';
 
 /// One caller-owned HTTPS/Auth connection. No credentials, local product store,
 /// fake Repository or ordinary bootstrap enablement is supplied by this root.
@@ -65,11 +68,13 @@ final class ControlledDemoApp extends StatefulWidget {
     this.dualAccounts = false,
     this.eventParticipationEnabled = false,
     this.remoteGroupEnabled = false,
+    this.companionFirstFlowEnabled = false,
     super.key,
   });
   final bool dualAccounts;
   final bool eventParticipationEnabled;
   final bool remoteGroupEnabled;
+  final bool companionFirstFlowEnabled;
   final Uri baseUri;
   final AuthRepository auth;
   final http.Client client;
@@ -170,6 +175,16 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
         (ref) => ref.watch(connectedPersonaPreviewAccessProvider),
       ),
       aiConversationRepositoryProvider.overrideWithValue(_ai),
+      companionFirstFlowEnabledProvider.overrideWithValue(
+        widget.companionFirstFlowEnabled,
+      ),
+      if (widget.companionFirstFlowEnabled)
+        proactiveRepositoryProvider.overrideWithValue(
+          HttpProactiveRepository(
+            baseUri: widget.baseUri,
+            client: widget.client,
+          ),
+        ),
       isolatedHistoryPageProvider.overrideWithValue(
         IsolatedHistoryPage(
           build: (context, {required onBack, required onOpenSavedCheckIn}) =>
@@ -187,6 +202,22 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
               context,
               listen: false,
             ).read(authSessionProvider).value;
+            bool canOpenCompanion() {
+              if (!context.mounted ||
+                  !widget.companionFirstFlowEnabled ||
+                  session is! AuthSessionAuthenticated) {
+                return false;
+              }
+              final scope = ProviderScope.containerOf(context, listen: false);
+              return identical(
+                    scope.read(authSessionProvider).asData?.value,
+                    session,
+                  ) &&
+                  scope.read(routerGateProvider) ==
+                      RouterGateState.authenticated &&
+                  GoRouter.of(context).state.uri.path == AppRoutes.aiAssistant;
+            }
+
             void selectTab(int index) {
               if (context.mounted) {
                 selectConnectedSocialTab(
@@ -222,6 +253,28 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
                 ),
                 onBack: onBack,
                 onOpenSettings: onOpenSettings,
+                onFollowUpRequested: widget.companionFirstFlowEnabled
+                    ? (source) {
+                        if (!canOpenCompanion() ||
+                            session is! AuthSessionAuthenticated) {
+                          return;
+                        }
+                        context.push<void>(
+                          AppRoutes.newAiFollowUp,
+                          extra: FollowUpNavigation(
+                            session: session,
+                            source: source,
+                          ),
+                        );
+                      }
+                    : null,
+                onOpenFollowUps: widget.companionFirstFlowEnabled
+                    ? () {
+                        if (canOpenCompanion()) {
+                          context.push<void>(AppRoutes.aiFollowUps);
+                        }
+                      }
+                    : null,
                 onOpenPersonas: () {
                   if (context.mounted) context.push<void>(AppRoutes.personas);
                 },

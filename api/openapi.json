@@ -12863,6 +12863,222 @@
           }
         }
       }
+    },
+    "/v1/me/ai/source-references/resolve": {
+      "post": {
+        "tags": [
+          "AI Companion"
+        ],
+        "operationId": "resolveOwnedAiSource",
+        "summary": "Resolve a currently authorized owned source",
+        "description": "Explicit first-flow candidate only. Fresh owner, purpose, source/version and retention checks. No arbitrary URL or path. Unknown verification returns 503; absent, denied or expired source returns 404; changed source returns 409. No query parameters, Idempotency-Key, AI-Operation-Key or conditional-write headers. Preserve drafts on failure. GET has no body and no automatic HEAD route.",
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "responses": {
+          "200": {
+            "description": "Current authorized target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/SourceTarget"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authentication or purpose forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Source unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Source authority changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Verification unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "ai-companion.json#/components/schemas/ResolveSource"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/conversations/{conversationId}/messages/{messageId}/anchor": {
+      "get": {
+        "tags": [
+          "AI Companion"
+        ],
+        "operationId": "getOwnedMessageAnchor",
+        "summary": "Locate an exact currently available message",
+        "description": "Explicit first-flow candidate only. Fresh owner, purpose, source/version and retention checks. No arbitrary URL or path. Unknown verification returns 503; absent, denied or expired source returns 404; changed source returns 409. No query parameters, Idempotency-Key, AI-Operation-Key or conditional-write headers. Preserve drafts on failure. GET has no body and no automatic HEAD route.",
+        "x-enmori-environment": "explicit-first-flow-candidate",
+        "responses": {
+          "200": {
+            "description": "Current authorized target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "ai-companion.json#/components/schemas/MessageAnchor"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authentication or purpose forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Source unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Source authority changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Verification unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -14680,6 +14896,9 @@
               "conversationId": {
                 "type": "string",
                 "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "contextSelection": {
+                "$ref": "ai-companion.json#/components/schemas/SelectReplyContext"
               }
             }
           },
@@ -14706,6 +14925,9 @@
               "userMessageId": {
                 "type": "string",
                 "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "contextSelection": {
+                "$ref": "ai-companion.json#/components/schemas/SelectReplyContext"
               }
             }
           }
@@ -14739,6 +14961,9 @@
           "preparationExpiresAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "contextSelection": {
+            "$ref": "ai-companion.json#/components/schemas/PreparedReplySelection"
           }
         }
       },
@@ -14817,7 +15042,39 @@
             "minLength": 1,
             "maxLength": 2400,
             "description": "Well-formed Unicode, 1-2400 scalars, not whitespace-only. Preserve supplied text; no truncation."
+          },
+          "origin": {
+            "const": "proactive"
+          },
+          "occurrenceId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "category": {
+            "const": "explicit_follow_up"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "ai-companion.json#/components/schemas/SourceCard"
+            },
+            "minItems": 1,
+            "maxItems": 15
           }
+        },
+        "dependentRequired": {
+          "origin": [
+            "occurrenceId",
+            "category"
+          ],
+          "occurrenceId": [
+            "origin",
+            "category"
+          ],
+          "category": [
+            "origin",
+            "occurrenceId"
+          ]
         }
       },
       "ConversationAssistant": {
@@ -14854,7 +15111,31 @@
               },
               "availability": {
                 "const": "unavailable"
+              },
+              "origin": {
+                "const": "proactive"
+              },
+              "occurrenceId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "category": {
+                "const": "explicit_follow_up"
               }
+            },
+            "dependentRequired": {
+              "origin": [
+                "occurrenceId",
+                "category"
+              ],
+              "occurrenceId": [
+                "origin",
+                "category"
+              ],
+              "category": [
+                "origin",
+                "occurrenceId"
+              ]
             }
           }
         ]
@@ -14881,6 +15162,13 @@
             "minLength": 1,
             "maxLength": 2400,
             "description": "Well-formed Unicode, 1-2400 scalars, not whitespace-only. Preserve supplied text; no truncation."
+          },
+          "contextSelection": {
+            "$ref": "ai-companion.json#/components/schemas/ExecuteReplySelection"
+          },
+          "replyToMessageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
           }
         }
       },

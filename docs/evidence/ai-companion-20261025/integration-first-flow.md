@@ -62,3 +62,52 @@ is private and it creates no unread badge count. Handler registration does not
 create the channel, request permission or obtain a token. Messaging auto-init
 remains false. Candidate native compilation, token lifecycle, background startup,
 notification click, cancellation and device behavior remain unverified.
+
+## Integrated first-flow and source boundaries
+
+The explicit candidate now composes the same physical model lane for ordinary
+chat, Persona preview and requested follow-up generation. The F0 store uses the
+chat store's retained-message gateway and same-transaction bridge. A fixed owner
+and optional worker window are supplied as typed operator configuration; ordinary
+startup has neither. A worker window is at most 30 minutes. Registration and the
+single-post FCM sender additionally require explicit remote installation/lease
+configuration. No actual runtime or worker was started by these edits.
+
+The fixed worker verifies the current Auth account and then current binding and
+purpose in Store operations, rather than storing or reusing an HTTP token. Root
+shutdown closes first-flow admission and stops its worker before draining the
+shared lane. The selected mutable reader is also registered with the existing
+conversation I/O tracker using only owner/topic/operation identifiers; cancellation
+does not substitute for physical SDK settlement.
+
+Normative API now contains the 11 approved F0 routes, typed source resolution and
+message anchors, selected-source preparation/execution, and minimal assistant
+origin/source projections. Old request fields and legacy error envelopes remain
+compatible. The initial settings response alone permits revision 0 / off / empty
+zone. Saved settings require a confirmed IANA zone. Explicit source exclusions
+are per request; the inherited-history conflict recovery remains under focused
+integration review and is not claimed complete by this checkpoint.
+
+The App candidate flag `ENMORI_AI_COMPANION_FIRST_FLOW` connects the owner HTTP
+repository and `/ai/follow-ups` pages. A new follow-up receives an ephemeral
+saved-message object bound to the exact authenticated session; URL-only entry or
+same-UID session replacement cannot replay it. No ordinary build enables these
+routes. Native Messaging opt-in, source navigation/read state and F1 picker work
+continue in their respective slices.
+
+Validation at this integration checkpoint: pinned TypeScript build and **55/55**
+targeted API/HTTP/composition checks passed; targeted Dart analysis has no issues,
+and **19/19** router/composition widget tests passed, including three new candidate
+route cases. These are source/fake-transport checks. Initial failures were a test
+fixture missing the required isolated profile fields, an old route-environment
+expectation, and three Dart brace lints; production guards were retained. Logs:
+`integration-first-flow-targeted.log`, `integration-first-flow-targeted-final.log`,
+`integration-app-first-flow-check.log`, `integration-app-first-flow-final.log` in
+the private round state directory. Their totals overlap module reports and are
+not summed into a larger independent count.
+
+QA's separate actual emulator evidence is [10/10 F0 checks](qa-context-first-flow-emulator.md).
+The first actual local F0 semantic evaluation is **1 Pass / 7 Fail**, despite all
+eight protocol-valid outputs; see [the independent review](qa-f0-semantic-review.md).
+That quality gate is open. No deployment, real-account write, FCM send, device
+installation, UAT or release acceptance follows from this integration checkpoint.

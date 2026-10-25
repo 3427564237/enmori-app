@@ -655,6 +655,291 @@
             "minLength": 1
           }
         }
+      },
+      "SourceCard": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cardRef",
+          "kind",
+          "version",
+          "sourceOccurredAt",
+          "observedAt",
+          "state",
+          "canNavigate"
+        ],
+        "properties": {
+          "cardRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "kind": {
+            "enum": [
+              "conversation_message",
+              "check_in"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "sourceOccurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "const": "available"
+          },
+          "canNavigate": {
+            "const": true
+          }
+        }
+      },
+      "SelectionCard": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cardRef",
+          "kind",
+          "version",
+          "sourceOccurredAt",
+          "observedAt",
+          "state",
+          "canNavigate",
+          "selectionKey"
+        ],
+        "properties": {
+          "cardRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "kind": {
+            "const": "check_in"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "sourceOccurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "const": "available"
+          },
+          "canNavigate": {
+            "const": true
+          },
+          "selectionKey": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      },
+      "SelectReplyContext": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "processing",
+          "sources"
+        ],
+        "properties": {
+          "processing": {
+            "const": "local"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "checkInId"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "check_in"
+                },
+                "checkInId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1500,
+                  "description": "Current-owner Check-in document identifier; shared isSafeDocumentId validation, at most 1500 UTF-8 bytes, no slash, . or .. or reserved __name__. No client contents or paths."
+                }
+              }
+            },
+            "minItems": 0,
+            "maxItems": 5,
+            "uniqueItems": true
+          }
+        },
+        "description": "One request only. At most five unique own Check-ins in the inclusive last seven days. Zero selections is allowed for explicit exclusion review; no automatic category permission."
+      },
+      "PreparedReplySelection": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "selectionRevision",
+          "expiresAt",
+          "sourceCards"
+        ],
+        "properties": {
+          "selectionRevision": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceCards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SelectionCard"
+            },
+            "minItems": 0,
+            "maxItems": 5
+          }
+        }
+      },
+      "ExecuteReplySelection": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "selectionRevision",
+          "includedKeys",
+          "excludedKeys"
+        ],
+        "properties": {
+          "selectionRevision": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "includedKeys": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "minItems": 0,
+            "maxItems": 5,
+            "uniqueItems": true
+          },
+          "excludedKeys": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "minItems": 0,
+            "maxItems": 5,
+            "uniqueItems": true
+          }
+        },
+        "description": "Each key must belong to this unconsumed preparation and both arrays together must cover it. Overlap is allowed: exclusion wins. Inherited dependencies are checked separately; conflict preserves the draft and requires review."
+      },
+      "MessageAnchor": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "conversationId",
+          "messageId",
+          "sequence",
+          "pageBefore"
+        ],
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "messageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740990
+          },
+          "pageBefore": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "description": "Canonical unpadded base64url(JSON.stringify({v:1,before:sequence+1})); pass as existing transcript before query, then locate this exact ID and sequence."
+          }
+        }
+      },
+      "ResolveSource": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "conversationId",
+          "messageId",
+          "cardRef"
+        ],
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "messageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "cardRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      },
+      "SourceTarget": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "anchor"
+            ],
+            "properties": {
+              "kind": {
+                "const": "conversation_message"
+              },
+              "anchor": {
+                "$ref": "#/components/schemas/MessageAnchor"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "checkInId"
+            ],
+            "properties": {
+              "kind": {
+                "const": "check_in"
+              },
+              "checkInId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500,
+                "description": "Current-owner Check-in document identifier; shared isSafeDocumentId validation, at most 1500 UTF-8 bytes, no slash, . or .. or reserved __name__. No client contents or paths."
+              }
+            }
+          }
+        ]
       }
     }
   }
