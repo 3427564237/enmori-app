@@ -49,6 +49,10 @@ Product 原型仅固定 Asia/Singapore 合成时间验证，不是该 TimePort �
    任何选中来源无法核实时阻止 Send，直到重新核对或用户明确排除并解决依赖。
 9. 成功接受后清空本次选择；失败/未知保留并受原操作恢复保护。下一次回复不因旧消息可读而自动重用其签到。
 
+Integration 后续收口的有限历史排除接口及准确文案见
+[历史依赖冲突交接](history-exclusion-handoff.md)。该补全保留上述批准行为与旧接口缺口，
+使用最多两组 server pair keys 和已有 selection revision；不是新的 PM 决定或实现通过记录。
+
 ## 查看旧来源与选择新来源分开
 
 已保存消息的“查看这条消息的来源 / View sources for this message”是只读 sidecar。
