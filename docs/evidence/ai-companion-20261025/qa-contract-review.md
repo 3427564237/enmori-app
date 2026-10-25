@@ -47,3 +47,38 @@ native notification integration and independent device proofs are not supplied
 by these documents. C's already-confirmed entry decision does not select F0/F1,
 their retention exceptions or any external verification. No unrelated source
 tests were repeated for these documentation-only changes.
+
+## Subsequent D1 dependency/source compatibility check
+
+Delivery's documentation-only `4a388d9fdb96596482fb7aa30760d0f1dbe203df`
+narrows the proposed first registration kind to literal `fcm_token` with exact
+`firebase_messaging: 16.7.0`. Context's corresponding documentation-only delta
+`ce0a5ed5ba5ded1365faa816025f747a6729863e` matches that wire/storage kind and
+explicitly distinguishes opaque-value acceptance from provider validation.
+QA read both complete deltas; no new substantive contract contradiction was
+identified. QA also independently read
+pub.dev's primary metadata for
+[16.7.0](https://pub.dev/api/packages/firebase_messaging/versions/16.7.0),
+[16.7.1](https://pub.dev/api/packages/firebase_messaging/versions/16.7.1) and
+[17.0.1](https://pub.dev/api/packages/firebase_messaging/versions/17.0.1).
+Their Core constraints are respectively `^4.14.0`, `^4.15.1` and `^5.1.0`.
+The actual repository locks Core 4.14.0/interface 8.1.1/Auth 6.6.1, with FVM
+Flutter 3.47.2 and Dart constraint ^3.13.2. The 16.7.0 declared constraints fit
+that baseline; this is not evidence of successful dependency resolution/build.
+
+QA independently read the
+[pinned 16.7.0 messaging source](https://raw.githubusercontent.com/firebase/flutterfire/firebase_messaging-v16.7.0/packages/firebase_messaging/firebase_messaging/lib/src/messaging.dart):
+it provides `getToken`, `onTokenRefresh`, `deleteToken`, `setAutoInitEnabled`, and
+does not provide the newer `register`/`onRegistered` interface. Existing installed
+Admin 14.3.0 declarations still provide `TokenMessage` and `send(message,dryRun?)`,
+but explicitly deprecate `TokenMessage` in favor of `FidMessage`. No FID-to-token
+conversion or implicit Core/Auth upgrade is justified by this evidence.
+
+Primary metadata readback is in
+`/home/miku/.local/state/enmori-ai-companion-20261025/qa-review/delivery-4a388d9/package-metadata.json`,
+SHA-256 `1246174e0bfb659f2ce4ad59bdb828e9a389b79718c928adf45d91bb49e5ce3f`.
+QA did not install/resolve dependencies, build native code, initialize/register a
+device, inspect credentials, or call a sender, including dry-run. Actual native
+configuration, merged manifest, project/IAM, token acceptance, revocation and
+delivery remain unverified. Pure policy test counts do not grow from this D-layer
+review.
