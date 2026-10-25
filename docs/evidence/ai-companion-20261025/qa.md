@@ -72,6 +72,12 @@ The same ledger records an independent **source-only** review of client Domain
 `090e996` and selected wire `a7a288f`: no actionable finding, with compilation,
 the eight new wire tests and final F1 UI execution not claimed by QA.
 
+The [D1 source review](qa-d1-source-review.md) reports a new P2 at `cb8d982`:
+controller rebuild clears unknown registration/settings mutation guards, so a
+same-UID session replacement can let an unchanged GET reopen mutation controls.
+This is a source finding awaiting focused validation/repair, separate from the
+author's two known cold-login failures. QA ran no D1 tests or SDK/service calls.
+
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with
 [proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is
