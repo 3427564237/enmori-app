@@ -56,3 +56,19 @@ be reported as the earlier 32-by-two evaluation.
 states that Pro benefits in AI Studio apply to its web interface; direct API
 usage and Google One AI credits are managed separately. No subscription credit
 is assumed to cover these API requests.
+
+## Operator confirmation for the existing free project
+
+In the same Integration chat, LI replied to the specific question about whether
+`gen-lang-client-0930184174` had accepted an invitation to and actively joined
+the Gemini API Data Contributor Program:
+
+> 没有接受或加入该计划
+
+This records the operator's assertion of no enrollment. It is not inferred from
+disabled logging, a missing banner or subscription status. Together with the
+previous adult / Singapore operator assertions, it supplies that execution
+condition only. Runtime must still refresh and bind actual free-tier, disabled
+billing, project/key restriction and quota evidence before the single bounded
+eight-case synthetic run. No billing change, paid fallback, new IAM/service
+account, application adoption or real personal-data transmission is authorized.
