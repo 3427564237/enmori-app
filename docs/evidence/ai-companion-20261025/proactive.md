@@ -62,9 +62,20 @@ rechecks again, and atomically publishes the genuine AI proactive message and
 its delivery intent. Replies attach to its trusted topic, not a topic invented by
 the model. No fabricated user message or automated “user Send” is inserted.
 
-Conversation layout A/B/C remains LI's separate choice. The first flow can use
+At this draft's initial checkpoint, conversation layout A/B/C remained LI's
+separate choice. The first flow can use
 the existing conversation container semantics with a new explicit origin; it
 does not remove history/search/delete or merge old content.
+
+Subsequent scoped authority: Integration commit
+`2bb638b47e682217007cf02cd505550d88d627cf`,
+`docs/decisions/2026-10-25-li-ai-entry-c.md`, records LI's direct choice of C.
+This worker read that decision in Integration's tree. C now resolves the entry
+form only: continuous entry with existing containers/history/current-topic
+search/new topic/whole-topic deletion retained. It does not approve this note's
+proactive purpose, persistence, retention exception, source cards, FCM or cost.
+The original unselected comparison remains historical; no baseline rebase or
+production source change was needed for this subsequent decision.
 
 ## Controls and limits to choose — all Proposed
 
@@ -135,8 +146,9 @@ A stable sender outcome record is needed before calling FCM. A crash between
 provider acceptance and saving its result is unresolved, not proof of failure.
 FCM collapse keys/notification tags are display hints, not durable idempotency.
 
-The candidate has no persistence adapter, collection names, field/ID scheme,
-indexes or scheduling process. Atomicity, a durable restart, multi-worker races,
+The source candidate has no persistence adapter, registered collection/index,
+API route or scheduling process. The later document appendix proposes these
+contracts without implementing them. Atomicity, a durable restart, multi-worker races,
 retention cleanup and provider reconciliation remain unverified. The test that
 serializes/rehydrates a record proves only reducer/preflight behavior.
 
@@ -251,6 +263,9 @@ To respect the recommended 1/24h and 8h cooldown, choose either:
 Force-stop is documented as an unsupported state until manual reopen, not a
 fourth positive send. No fake time, foreground timer or local-only notice is a
 substitute. Each actual send still needs the named device/state authorization.
+Transport-only permits waive only the normal trigger/frequency requirement for
+their two explicitly authorized checks; they never waive master/category off,
+consent, source validity, quiet/zone, installation binding or OS permission.
 
 An earlier 20-account/7-day/140-occurrence, USD 5 pilot draft is retained here only
 as a **future optional expansion**, superseded for the first decision by the
@@ -300,6 +315,7 @@ or new distributed scheduler is needed.
 | `accounts/{owner}/proactive_registration/current` | `revision`, `installationRef`, selected `registrationKind`, `registrationValue`, `enabled`, `registeredAt`, `expiresAt`. For the first test, expire no later than the named 30-minute test window + 15min, and disable/erase on completion/withdrawal/sign-out. Do not retain previous registration values. Backend erasure does not promise immediate Google backup deletion. Do not delete shared Firebase Auth/Core installation state as a cleanup shortcut. |
 | `accounts/{owner}/conversations/{topic}/read_state/current` | `revision`, monotonic `readThroughSequence`, `updatedAt`; never advances `lastPersistedMessageAt`. No independent private history. Delete with the topic. Unread derives only from currently authorized available proactive messages after this sequence; use an unread dot if a complete count is unavailable. |
 | Existing canonical message and source provenance | Server-assigned sequence/messageId, role assistant, explicit proactive origin, accepted text, occurrenceId/category and approved minimized provenance. An internal `appendProactive` operation checks original topic cutoff and versions, appends once, and **does not advance the old anchor under R-ANCHOR**. It cannot call the existing user/assistant-pair saver with an invented user. Existing serializers/resolvers/retention logic must be explicitly adapted and independently reviewed. |
+| Optional test-only `accounts/{owner}/proactive_transport_diagnostics/{permitId}` | Only if T1's extra two sends are expressly approved: `revision`, `installationRef`, `canonicalMessageId`, `permittedDeviceState:background/ordinary_closed`, `expiresAt` at the named window end, `attemptLimit:1`, `state:not_started/dispatching/accepted/unknown/skipped`, `attemptedAt?`, `providerAcceptedAt?`. Operator-created, no public create/send endpoint, at most two records. Claim dispatching atomically before one sender invocation; unknown never replays. Reauthorize the referenced canonical message and all normal non-frequency permissions before send. No model call, new assistant message, raw packet or registration value. Minimize/delete this diagnostic metadata within 24h of test end; no general diagnostic retention is authorized. |
 
 The intent is one-shot: before reservation, an edited source can replace the
 queued candidate only through a fresh authorized preparation/version update.
