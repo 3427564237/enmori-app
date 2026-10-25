@@ -65,3 +65,22 @@ Root's generic EventDetail serializer, controlled source-to-detail projection
 and route injection are not included in this candidate. Final verification must
 check those shared paths at the integrated head, including optional cover and
 description surviving through the actual authenticated response and active page.
+
+## Source follow-up at 7d7c90b
+
+QA inspected Delivery's final `7d7c90b1d03d9cd48e50618fead8965f74489bee`
+without executing tests. Both findings are addressed in source:
+
+- P2: `didChangeDependencies` observes the route, starts only its first current
+  snapshot and clears the request/image when covered. Async completion also
+  checks current-route status. `_clear` retires the snapshot so returning cannot
+  restart it automatically. The two added Navigator tests retain the original
+  Element, check pending cancellation/late-byte rejection and decoded-image
+  disposal, then pop and assert no extra load.
+- P3: both information views now use the neutral unavailable-description copy.
+
+Delivery reports 43/43 focused Flutter tests, 17-file clean analysis and 22/22
+Node tests. These remain author evidence, not independent QA passes. Per the
+latest consolidation instruction, QA did not rerun them or claim integrated
+closure; Root's final snapshot and one combined verification window remain the
+next execution point. Provider/CDN and physical-device behavior are unverified.
