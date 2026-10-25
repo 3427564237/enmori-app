@@ -332,3 +332,36 @@ after service metadata, all file hashes and the immutable run snapshot;
 preload. The unique slot was explicitly released to Integration after all
 original responses were received. Independent QA receives every case and writes
 its own review artifact without replacing these raw inputs or outputs.
+
+## Independent semantic result — 12 Pass, 12 Fail
+
+QA completed all 24 judgments at its commit
+`925ba38732772d1a71c24f19d2b8c750d538fab5`, documented in
+`docs/evidence/ai-companion-20261025/qa-model-review.md` on the QA branch. The
+full result is **12 Pass / 12 Fail / 0 unreviewed**: preserved small-plan cases
+**6 Pass / 10 Fail**, additional current-prompt cases **6 Pass / 2 Fail**.
+This resolves the earlier handoff's unreviewed state; it does not supersede the
+original failed examples or change the model's semantic gate from **Fail**.
+
+The material failures include rest goals misread as testing/studying, persisting
+an error after an explicit correction, a fabricated user turn before truncation,
+an omitted requested code example, and suggesting clearing data despite the
+explicit preservation instruction. No suggested action was actually executed.
+The QA report also distinguishes narrower timing, recall, conversational and
+factual defects rather than treating every failure as equally severe.
+
+QA independently verified all 51 original artifact hashes, all source/compiled
+bindings, and each complete request against the unchanged production serializer.
+The private review is
+`/home/miku/.local/state/enmori-ai-companion-20261025/qa-review/local-24f913d/semantic-review.json`,
+SHA-256 `9557171a8256cafbb0a3c14b29f228e867c21cb75e960762dd892d4bf32d057e`.
+Runtime read back that hash and the independent QA commit, then ran the unchanged
+review validator: **12/12/0, incomplete:false, exit 0**. This verifies binding
+and completeness; the semantic judgments remain QA's, not author's self-grading.
+
+No further model requests, prompt tuning or parameter changes follow from this
+review. Candidate-context model cases, real cloud performance/cost, additional
+private-data purposes and integrated/native/phone acceptance remain untested or
+pending their separate contracts. The isolated source/mock candidate is available
+for Integration's review; the current local model is not presented as meeting
+the full companion quality criteria.
