@@ -1,13 +1,14 @@
-# QA / Evaluation — independent first checkpoint
+# QA / Evaluation — independent evidence index
 
 Date: 25 October 2026, Asia/Singapore. QA workspace:
 `/home/miku/.codex/worktrees/30e0/ENMORI`; branch
 `souma/ai-companion-qa-20261025`; inspected product baseline
 `b81d93ffd219011dbc0918daca5c82fd83e7ba4a`.
 
-This is an independent audit and preparation checkpoint, not integrated-product
-acceptance. No production implementation was authored by QA. The executable
-tool below tests only a local hash comparison, not application behavior.
+This is an independent audit, not integrated-product acceptance. The initial
+baseline checkpoint is preserved below. Subsequent exact-head source reviews,
+executed checks and unresolved findings are in [qa-review.md](qa-review.md).
+No production implementation was authored by QA.
 
 ## Authority and baseline readback
 
@@ -95,16 +96,18 @@ successful. New candidate evaluation requires its own full raw evidence.
 - Command `python3 -m unittest discover -s tool/ai-companion-qa -p 'test_*.py' -v`
   completed with **12/12 tests passed**, exit 0. This verifies the QA comparator
   against preservation/unknown-evidence counterexamples only.
-- `git diff --check` completed exit 0. No Flutter, Gradle, APK, model, emulator,
-  cloud, notification or physical-device execution was performed.
+- At this initial checkpoint, `git diff --check` completed exit 0. No Flutter,
+  Gradle, APK, model, emulator, cloud, notification or physical-device execution
+  had been performed. Later source/widget execution is separately recorded in
+  [the review ledger](qa-review.md).
 
 ## Coordination and next review boundaries
 
 Priority counterexamples were sent directly to all five authorized peers and
-Integration. Runtime is preparing independent-review-bound synthetic results;
-Context/Proactive are preparing isolated proposals and deterministic tests; App
-reported the existing unknown-outgoing label defect and owns its repair.
-QA will review their exact commits and choose bounded tests independently.
+Integration. App and Proactive now have bounded independent source results.
+Context's exclusion-through-history counterexample and Runtime's evidence-path
+and unknown-envelope findings remain open at the heads listed in the review
+ledger until their revised exact commits are independently checked.
 
 Product decision text at `22e8bea4bf71fc2404d357b64a695985202a9633` was read.
 Its C recommendation is explicitly unselected; it retains conversation storage
