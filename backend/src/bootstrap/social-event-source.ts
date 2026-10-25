@@ -9,7 +9,7 @@ import { readFriendVisibility } from '../friends/infrastructure/firestore-friend
 import type { FirestoreTransactionGateway } from '../shared/infrastructure/firebase/firestore-gateway.js';
 
 /** Current transaction permission plus process-only provider projection. No network IO or archived title. */
-export function socialEventSource(peek: (id: string, asOf: string) => BrowseOccurrence | undefined, ready: (asOf: string) => boolean) {
+export function socialEventSource(peek: (id: string, asOf: string) => BrowseOccurrence | undefined, ready: (asOf: string) => boolean, prepare?: (asOf: string) => Promise<void>) {
   async function permitted(tx: SocialSourceReader, viewer: string, owner: string) {
     const account = await tx.get(`accounts/${owner}`), access = await tx.get(`friend_access/${owner}`);
     if (!account || account.optionalProcessingConsent !== 'accepted' || access?.eligibilityState !== 'eligible') return false;
@@ -64,11 +64,12 @@ export function socialEventSource(peek: (id: string, asOf: string) => BrowseOccu
     },
   };
   const recommendations: FriendEventProjection = {
-    async read(tx, viewer, owner) {
-      if (!ready(new Date().toISOString())) throw new Error('Current event source unavailable');
+    ...(prepare ? { prepare } : {}),
+    async read(tx, viewer, owner, _purpose, asOf) {
+      if (!ready(asOf)) throw new Error('Current event source unavailable');
       const result = {interestedEventIds: [] as string[], goingEventIds: [] as string[]};
       for (const row of await rows(tx, viewer, owner)) {
-        if (!peek(String(row.data.eventId), new Date().toISOString())) continue;
+        if (!peek(String(row.data.eventId), asOf)) continue;
         if (row.data.status === 'interested') result.interestedEventIds.push(String(row.data.eventId));
         if (row.data.status === 'going') result.goingEventIds.push(String(row.data.eventId));
       }

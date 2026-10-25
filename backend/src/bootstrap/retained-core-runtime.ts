@@ -1,3 +1,5 @@
+import { OwnAvatar } from "../account/application/own-avatar.js";
+import { FirestoreOwnAvatarRepository } from "../account/infrastructure/firestore-own-avatar-repository.js";
 import { socialEventSource } from './social-event-source.js';
 import { OpenMeteoWeatherProvider } from '../weather/infrastructure/open-meteo-weather-provider.js';
 import { requireRemoteGroupEnvironment } from '../shared/infrastructure/firebase/feature-environment.js';
@@ -213,7 +215,7 @@ async function createControlledRuntime(
       });
     };
     const getOnboarding = new GetOnboarding(onboardingRepository);
-    const socialEvents = socialEventSource(eventBrowseControl.peek, eventBrowseControl.projectionReady);
+    const socialEvents = socialEventSource(eventBrowseControl.peek, eventBrowseControl.projectionReady, async (asOf) => { await eventBrowseControl.source.firstBatch(asOf, new AbortController().signal); });
     const app = await buildApp({
       ...(firstFlow ? { firstFlow } : {}),
       ...(chat?.ownedSources ? { ownedSources: firstFlow
@@ -246,7 +248,7 @@ async function createControlledRuntime(
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
       createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(getAuth(firebaseApp)), new FirestoreCatalogueWriter(gateway)),
       getInterestAdminCapability: new GetInterestAdminCapability(new FirebaseInterestAdmin(getAuth(firebaseApp))),
-      accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, isolatedEnvironment)),
+      accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, isolatedEnvironment), new OwnAvatar(new FirestoreOwnAvatarRepository(gateway))),
       recommendEvents: realEvents.recommendEvents,
       identityVerifier: new FirebaseIdentityVerifier(getAuth(firebaseApp)),
       completeOnboarding: { execute: async input => {

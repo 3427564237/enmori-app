@@ -1,3 +1,5 @@
+import { OwnAvatar } from "../account/application/own-avatar.js";
+import { FirestoreOwnAvatarRepository } from "../account/infrastructure/firestore-own-avatar-repository.js";
 import { EditCheckIn } from "../check-ins/application/edit-check-in.js";
 import { FirestoreCheckInMutations } from "../check-ins/infrastructure/firestore-check-in-mutations.js";
 import { CreateInterestTag } from '../interests/application/create-interest-tag.js';
@@ -70,7 +72,7 @@ export async function createControlledRuntime(
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
       createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(getAuth(firebaseApp)), new FirestoreCatalogueWriter(gateway)),
       getInterestAdminCapability: new GetInterestAdminCapability(new FirebaseInterestAdmin(getAuth(firebaseApp))),
-      accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway)),
+      accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway), new OwnAvatar(new FirestoreOwnAvatarRepository(gateway))),
       recommendEvents: new RecommendEvents(new FirestoreEventRecommendationRepository(
         new FirebaseAdminEventReadGateway(getFirestore(firebaseApp)),
       ), clock),

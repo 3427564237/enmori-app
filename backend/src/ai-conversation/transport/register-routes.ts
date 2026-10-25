@@ -6,6 +6,7 @@ import type { StoredConversationMessage } from "../ports/real-conversation-store
 import { isSafeDocumentId } from "../../shared/infrastructure/firebase/firestore-records.js";
 import type { OwnedSourceCard } from "../ports/owned-sources.js";
 import type { SelectReplyContext, ExecuteReplySelection, PreparedReplySelection } from "../ports/selected-reply.js";
+import { parseCivilDay } from "../../check-ins/application/check-in-history.js";
 
 const ID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const KEY = /^[A-Za-z0-9_-]{43}$/;
@@ -42,7 +43,13 @@ function operationKey(v: unknown): v is string {
   return typeof v === "string" && KEY.test(v) && Buffer.from(v, "base64url").length === 32 && Buffer.from(v, "base64url").toString("base64url") === v;
 }
 function selectContext(value: unknown): value is SelectReplyContext {
-  return record(value) && keys(value, ["processing", "sources"]) && value.processing === "local" &&
+  if (!record(value) || value.processing !== "local") return false;
+  if (Object.hasOwn(value, "today")) {
+    return keys(value, ["processing", "today"]) && record(value.today) &&
+      keys(value.today, ["timeZone"]) && typeof value.today.timeZone === "string" &&
+      value.today.timeZone.length <= 100 && parseCivilDay("2000-01-01", value.today.timeZone) !== undefined;
+  }
+  return keys(value, ["processing", "sources"]) &&
     Array.isArray(value.sources) && value.sources.length <= 5 &&
     value.sources.every(source => record(source) && keys(source, ["kind", "checkInId"]) && source.kind === "check_in" &&
       typeof source.checkInId === "string" && isSafeDocumentId(source.checkInId)) &&
@@ -75,12 +82,21 @@ function preparedSelection(value: PreparedReplySelection): PreparedReplySelectio
       value.historyPairs.some((v, i) => !uuid(v.historyKey) || !uuid(v.userMessageId) || !uuid(v.assistantMessageId) ||
         !Number.isSafeInteger(v.userSequence) || !Number.isSafeInteger(v.assistantSequence) || v.userSequence < 1 || v.assistantSequence <= v.userSequence ||
         i > 0 && v.assistantSequence <= value.historyPairs[i - 1]!.assistantSequence)) throw Error("Invalid inner history review");
-  return { selectionRevision: value.selectionRevision, expiresAt: value.expiresAt, historyPairs: value.historyPairs.map(v => ({
+  const today = value.today;
+  if (today !== undefined && (!record(today) || !keys(today, ["date", "timeZone", "limit", "hasMore"]) ||
+      typeof today.date !== "string" || typeof today.timeZone !== "string" || today.timeZone.length > 100 ||
+      today.limit !== 5 || typeof today.hasMore !== "boolean" || !parseCivilDay(today.date, today.timeZone) ||
+      new Set(value.sourceCards.map(v => v.checkInId)).size !== value.sourceCards.length)) throw Error("Invalid inner today selection");
+  return { selectionRevision: value.selectionRevision, expiresAt: value.expiresAt,
+    ...(today === undefined ? {} : { today: { date: today.date, timeZone: today.timeZone, limit: 5 as const, hasMore: today.hasMore } }),
+    historyPairs: value.historyPairs.map(v => ({
     historyKey: v.historyKey, userMessageId: v.userMessageId, assistantMessageId: v.assistantMessageId,
     userSequence: v.userSequence, assistantSequence: v.assistantSequence,
   })), sourceCards: value.sourceCards.map(v => {
     if (!uuid(v.selectionKey) || v.kind !== "check_in") throw Error("Invalid inner selection key");
-    return { ...card(v), selectionKey: v.selectionKey };
+    if (today !== undefined && (typeof v.checkInId !== "string" || !isSafeDocumentId(v.checkInId))) throw Error("Invalid inner today source");
+    return { ...card(v), selectionKey: v.selectionKey,
+      ...(today === undefined ? {} : { checkInId: v.checkInId! }) };
   }) };
 }
 export function parseConversationCursor(v: unknown): number | undefined {

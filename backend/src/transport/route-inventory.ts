@@ -1,4 +1,6 @@
 export const ROUTE_INVENTORY = [
+  { method: "GET", path: "/v1/me/profile/avatar", successStatuses: [200], requiresIdempotencyKey: false },
+  { method: "PUT", path: "/v1/me/profile/avatar", successStatuses: [200], requiresIdempotencyKey: false },
   {"method":"GET","path":"/v1/me/proactive-settings","successStatuses":[200],"requiresIdempotencyKey":false,"environment":"explicit-first-flow-candidate"},
   {"method":"PUT","path":"/v1/me/proactive-settings","successStatuses":[200],"requiresIdempotencyKey":false,"environment":"explicit-first-flow-candidate"},
   {"method":"POST","path":"/v1/me/proactive-intents","successStatuses":[201],"requiresIdempotencyKey":true,"environment":"explicit-first-flow-candidate"},

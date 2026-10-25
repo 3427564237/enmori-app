@@ -12,11 +12,11 @@ const source={cardRef:selectionKey,kind:"check_in" as const,version:"server-vers
 const user:StoredConversationMessage={messageId:randomUUID(),role:"user",sequence:1,persistedAt:{seconds:1792886400,nanoseconds:0},availability:"available",text:"Synthetic request"};
 const assistant:StoredConversationMessage={...user,messageId:randomUUID(),sequence:2,role:"assistant",text:"Synthetic answer",sources:[{...source,...{privateSourceId:"do-not-project"}}]};
 const historyPair={historyKey:randomUUID(),userMessageId:user.messageId,assistantMessageId:assistant.messageId,userSequence:1,assistantSequence:2};
-async function fixture(historyPairs:PreparedReplySelection["historyPairs"]=[historyPair]){
+async function fixture(historyPairs:PreparedReplySelection["historyPairs"]=[historyPair], today?:PreparedReplySelection["today"]){
  const calls:unknown[]=[];
  const app=Fastify({logger:false});app.decorateRequest("authPrincipal",null);
  const operations:ConversationOperations={
-  prepare:async(_caller,input)=>{calls.push(input);return{kind:"success",value:{operationId,operationKey:key,conversationId,preparationExpiresAt:"2026-10-25T01:02:00.000Z",contextSelection:{selectionRevision,expiresAt:"2026-10-25T01:02:00.000Z",sourceCards:[{...source,selectionKey,...{privateOwner:"do-not-project"}}],historyPairs:historyPairs.map(p=>({...p,...{privateReceipt:"do-not-project"}}))}}};},
+  prepare:async(_caller,input)=>{calls.push(input);return{kind:"success",value:{operationId,operationKey:key,conversationId,preparationExpiresAt:"2026-10-25T01:02:00.000Z",contextSelection:{selectionRevision,expiresAt:"2026-10-25T01:02:00.000Z",...(today?{today}:{}),sourceCards:[{...source,selectionKey,...(today?{checkInId:"own-today-record"}:{}),...{privateOwner:"do-not-project"}}],historyPairs:historyPairs.map(p=>({...p,...{privateReceipt:"do-not-project"}}))}}};},
   execute:async(_caller,input)=>{calls.push(input);return{kind:"success",value:{operationId,conversationId,userMessage:user,assistantMessage:assistant}};},
   listMessages:async()=>({kind:"success",value:{messages:[user,{...assistant,origin:"proactive",occurrenceId:randomUUID(),category:"explicit_follow_up"}]}}),
   cancel:async()=>({kind:"success",value:{operationId,state:"terminal"}}),
@@ -27,6 +27,24 @@ async function fixture(historyPairs:PreparedReplySelection["historyPairs"]=[hist
  await app.ready();return{app,calls};
 }
 const headers={authorization:"Bearer synthetic"};
+test("today transport projects the server day and owner source locator without expanding the source card",async t=>{
+ const today={date:"2026-10-25",timeZone:"Asia/Singapore",limit:5 as const,hasMore:true};
+ const f=await fixture([],today);t.after(()=>f.app.close());
+ const contextSelection={processing:"local",today:{timeZone:"Asia/Singapore"}};
+ const r=await f.app.inject({method:"POST",url:"/v1/me/ai/operations",headers,payload:{kind:"send",purpose:"checkin_conversation",contextSelection}});
+ assert.equal(r.statusCode,201);assert.deepEqual(f.calls[0],{kind:"send",purpose:"checkin_conversation",contextSelection});
+ assert.deepEqual(r.json().contextSelection.today,today);
+ assert.deepEqual(r.json().contextSelection.sourceCards,[{...source,selectionKey,checkInId:"own-today-record"}]);
+ assert(!r.body.includes("do-not-project"));
+});
+test("today transport rejects client dates, owner selectors, invalid zones and mixed manual modes before operations",async t=>{
+ const f=await fixture();t.after(()=>f.app.close());
+ for(const today of [{timeZone:"GMT"},{timeZone:"+08:00"},{timeZone:"Unknown/Zone"},{timeZone:"Asia/Singapore",date:"2026-10-25"},{timeZone:"Asia/Singapore",owner:"other"},{}]) {
+  const r=await f.app.inject({method:"POST",url:"/v1/me/ai/operations",headers,payload:{kind:"send",purpose:"checkin_conversation",contextSelection:{processing:"local",today}}});assert.equal(r.statusCode,400);
+ }
+ const r=await f.app.inject({method:"POST",url:"/v1/me/ai/operations",headers,payload:{kind:"send",purpose:"checkin_conversation",contextSelection:{processing:"local",today:{timeZone:"Asia/Singapore"},sources:[]}}});
+ assert.equal(r.statusCode,400);assert.deepEqual(f.calls,[]);
+});
 test("selected transport keeps exact locator input, allowlists cards and forwards request-local choices",async t=>{
  const f=await fixture();t.after(()=>f.app.close());
  const contextSelection={processing:"local",sources:[{kind:"check_in",checkInId:"legacy-record-id"}]};

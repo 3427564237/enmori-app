@@ -3932,6 +3932,17 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 2048
+                    },
+                    "shortDescription": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    },
+                    "coverImageUrl": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2048,
+                      "pattern": "^https://s1\\.ticketm\\.net/[^?#]+$"
                     }
                   }
                 }
@@ -13182,6 +13193,132 @@
           }
         }
       }
+    },
+    "/v1/me/profile/avatar": {
+      "get": {
+        "operationId": "getOwnAvatar",
+        "responses": {
+          "200": {
+            "description": "Canonical private owner avatar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "avatar"
+                  ],
+                  "properties": {
+                    "avatar": {
+                      "$ref": "#/components/schemas/OwnAvatar"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "REQUEST_INVALID: no query fields or owner selectors are accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthForbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/OnboardingRequired"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "description": "Owner-only bounded PNG avatar, separate revision; no-store. No automatic retry after an unknown save. See own-avatar-contract.md."
+      },
+      "put": {
+        "operationId": "saveOwnAvatar",
+        "description": "Owner-only bounded PNG avatar, separate revision; no-store. No automatic retry after an unknown save. See own-avatar-contract.md.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveOwnAvatarRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Canonical private owner avatar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "avatar"
+                  ],
+                  "properties": {
+                    "avatar": {
+                      "$ref": "#/components/schemas/OwnAvatar"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or undeclared DTO fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthForbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/OnboardingRequired"
+          },
+          "412": {
+            "description": "PROFILE_REVISION_PRECONDITION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "PROFILE_INVALID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -14785,6 +14922,11 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 1000
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
           }
         }
       },
@@ -15610,6 +15752,58 @@
           },
           "requestId": {
             "type": "string"
+          }
+        }
+      },
+      "OwnAvatar": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pngBase64",
+          "sourceSha256",
+          "revision"
+        ],
+        "properties": {
+          "pngBase64": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 174764
+          },
+          "sourceSha256": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "SaveOwnAvatarRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pngBase64",
+          "expectedRevision"
+        ],
+        "properties": {
+          "pngBase64": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 174764
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
           }
         }
       }

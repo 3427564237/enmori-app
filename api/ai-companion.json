@@ -743,47 +743,86 @@
           "selectionKey": {
             "type": "string",
             "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "checkInId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500,
+            "description": "Present only in automatic-today preparation, current-owner UI exclusion mapping; never a model input."
           }
         }
       },
       "SelectReplyContext": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "processing",
-          "sources"
-        ],
-        "properties": {
-          "processing": {
-            "const": "local"
-          },
-          "sources": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "kind",
-                "checkInId"
-              ],
-              "properties": {
-                "kind": {
-                  "const": "check_in"
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "processing",
+              "sources"
+            ],
+            "properties": {
+              "processing": {
+                "const": "local"
+              },
+              "sources": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "kind",
+                    "checkInId"
+                  ],
+                  "properties": {
+                    "kind": {
+                      "const": "check_in"
+                    },
+                    "checkInId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1500,
+                      "description": "Current-owner Check-in document identifier; shared isSafeDocumentId validation, at most 1500 UTF-8 bytes, no slash, . or .. or reserved __name__. No client contents or paths."
+                    }
+                  }
                 },
-                "checkInId": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 1500,
-                  "description": "Current-owner Check-in document identifier; shared isSafeDocumentId validation, at most 1500 UTF-8 bytes, no slash, . or .. or reserved __name__. No client contents or paths."
-                }
+                "minItems": 0,
+                "maxItems": 5,
+                "uniqueItems": true
               }
             },
-            "minItems": 0,
-            "maxItems": 5,
-            "uniqueItems": true
+            "description": "One request only. At most five unique own Check-ins in the inclusive last seven days. Zero selections is allowed for explicit exclusion review; no automatic category permission."
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "processing",
+              "today"
+            ],
+            "properties": {
+              "processing": {
+                "const": "local"
+              },
+              "today": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "timeZone"
+                ],
+                "properties": {
+                  "timeZone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Canonical IANA time zone; date and current owner are resolved by the server."
+                  }
+                }
+              }
+            }
           }
-        },
-        "description": "One request only. At most five unique own Check-ins in the inclusive last seven days. Zero selections is allowed for explicit exclusion review; no automatic category permission."
+        ],
+        "description": "Explicit local source IDs or automatic current-owner today selection, never both. See ai-today-context-contract.md."
       },
       "PreparedReplySelection": {
         "type": "object",
@@ -816,6 +855,33 @@
             "maxItems": 2,
             "items": {
               "$ref": "#/components/schemas/PreparedHistoryPair"
+            }
+          },
+          "today": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "date",
+              "timeZone",
+              "limit",
+              "hasMore"
+            ],
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "timeZone": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "limit": {
+                "const": 5
+              },
+              "hasMore": {
+                "type": "boolean"
+              }
             }
           }
         }
