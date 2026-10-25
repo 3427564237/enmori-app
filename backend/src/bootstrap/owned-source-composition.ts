@@ -51,7 +51,10 @@ export function createOwnedSourceOperations(authority: ConversationOperationAuth
  * does not mark it read, rerun an occurrence or trust a stale push payload. */
 export function withDeliveryResolution(operations: OwnedSourceOperations,
   application: Pick<FirstFlowApplication, "intent">, accepting: () => boolean): OwnedSourceOperations {
-  return { ...operations, deliveryAnchor: async (caller, deliveryRef, current) => {
+  return {
+    resolve: (...args) => operations.resolve(...args),
+    anchor: (...args) => operations.anchor(...args),
+    deliveryAnchor: async (caller, deliveryRef, current) => {
     const live = () => { try { return accepting() && current(); } catch { return false; } };
     if (!live()) return { kind: "terminated" };
     const intent = await application.intent({ principal: caller.principal, verifyCurrentAuth: () => caller.verifyCurrentAuth(), current: live }, deliveryRef);

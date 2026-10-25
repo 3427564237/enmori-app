@@ -36,3 +36,17 @@ test("account or host retirement after lookup cannot reveal an anchor and incons
   assert.deepEqual(await resolve(caller,deliveryRef,()=>true),{kind:"failure",code:"AI_UNAVAILABLE"});
  }
 });
+test("delivery decorator preserves prototype suppliers and their private receiver state",async()=>{
+ class Supplier implements OwnedSourceOperations {
+  #reads=0;
+  get reads(){return this.#reads;}
+  async resolve(..._args:Parameters<OwnedSourceOperations["resolve"]>){this.#reads++;return{kind:"failure" as const,code:"AI_SOURCE_UNAVAILABLE" as const};}
+  async anchor(..._args:Parameters<OwnedSourceOperations["anchor"]>){this.#reads++;return{kind:"success" as const,value:target};}
+ }
+ const supplier=new Supplier();
+ const wrapped=withDeliveryResolution(supplier,{intent:async()=>({kind:"ok",value:published})},()=>true);
+ assert.deepEqual(await wrapped.resolve(caller,{conversationId,messageId,cardRef:randomUUID()},()=>true),{kind:"failure",code:"AI_SOURCE_UNAVAILABLE"});
+ assert.deepEqual(await wrapped.anchor(caller,conversationId,messageId,()=>true),{kind:"success",value:target});
+ assert.deepEqual(await wrapped.deliveryAnchor!(caller,deliveryRef,()=>true),{kind:"success",value:target});
+ assert.equal(supplier.reads,3);
+});

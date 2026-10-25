@@ -154,3 +154,12 @@ eight-case actual local comparison. Independent QA found **5 Pass / 3 Fail**,
 separately from the original **1 Pass / 7 Fail**. No further F0 tuning is being
 run. [The comparison](qa-f0-semantic-comparison.md) retains the remaining
 presumed completion, dated mood and decision-versus-attendance failures.
+
+Delivery's separate root-wrapper review found that object spreading would drop
+prototype methods of a valid class-based source supplier. The concrete current
+factory uses own arrow methods, but the interface does not require that shape.
+Root replaced the spread with explicit member-call forwarding, preserving the
+original receiver. Strict compilation and all four delivery-wrapper cases
+passed, including a private-state class supplier. Raw result:
+`integration-delivery-receiver-fix.log`. This small correction does not change
+HTTP scope or storage/dispatch behavior.
