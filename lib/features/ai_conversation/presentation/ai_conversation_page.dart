@@ -421,7 +421,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           icon: const Icon(Icons.fact_check_outlined),
           label: Text(
             selected.active
-                ? context.tr(
+                ? selected.mode==AiReferenceMode.today
+                  ?context.tr("Today's Check-ins · local references",'今天的签到 · 本地参考')
+                  :selected.mode==AiReferenceMode.off
+                  ?context.tr('Check-in references off for this topic','本话题签到参考已关闭')
+                  : context.tr(
                     'References: ${selected.selectedIds.length} selected',
                     '本次参考：已选 ${selected.selectedIds.length} 条',
                   )
@@ -432,7 +436,15 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           Padding(
             padding: const EdgeInsets.only(left: 12, bottom: 8),
             child: Text(
-              selected.confirmed &&
+              selected.reviewRequired
+                  ?aiSelectionNoticeCopy(context,AiSelectionNotice.conflict)
+                  :{AiSelectionNotice.unknown,AiSelectionNotice.unavailable}.contains(selected.notice)
+                  ?aiSelectionNoticeCopy(context,selected.notice)
+                  :selected.mode==AiReferenceMode.today
+                  ?context.tr('Uses up to the latest 5 from today when you send.','发送时最多参考今天最近 5 条。')
+                  :selected.mode==AiReferenceMode.off
+                  ?context.tr('You can still chat.','仍可正常聊天。')
+                  :selected.confirmed &&
                       ref
                           .read(aiSelectedSourcesControllerProvider.notifier)
                           .canSend
@@ -518,6 +530,55 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       if (source == null || open == null) return;
       unawaited(_navigate(() => open(source)));
     };
+  }
+
+  Future<void> _chooseLaterContact() async {
+    if(!_isCurrentEditor || _confirming || _leaving) return;
+    final initial=ref.read(aiConversationControllerProvider);
+    final topic=initial.conversationId,session=initial.sessionKey;
+    _messageFocus.unfocus();
+    final id=await showModalBottomSheet<String>(context:context,isScrollControlled:true,
+      builder:(sheet)=>Consumer(builder:(context,viewRef,_) {
+        final current=viewRef.watch(aiConversationControllerProvider);
+        final sources=viewRef.watch(aiCompanionReferencesEnabledProvider)?
+          viewRef.watch(aiOwnedSourcesControllerProvider):null;
+        final allowed=current.sessionKey==session && current.conversationId==topic &&
+          current.canSelectConversation;
+        final choices=allowed?current.messages.where((message)=>
+          canDisplayAiMessage(current,message,sources:sources) && topic!=null &&
+          SavedFollowUpSource.fromMessage(conversationId:topic,message:message)!=null).toList():<AiMessage>[];
+        return SafeArea(child:SizedBox(height:MediaQuery.sizeOf(context).height*.7,
+          child:ListView(padding:const EdgeInsets.all(20),children:[
+            Text(context.tr('Ask me later','稍后联系我'),style:Theme.of(context).textTheme.titleLarge),
+            Text(context.tr('Choose a sent message in this topic and set when to contact you.',
+              '选择本话题一条已发送的消息，设置稍后联系的时间。')),
+            if(!allowed) Text(context.tr('Check the last send or return to the current topic before choosing a message.',
+              '请先核对上次发送，或返回当前话题后再选择消息。'))
+            else if(choices.isEmpty) Text(context.tr('Send a message in this topic first, then choose it here.',
+              '先在本话题发送一条消息，再在这里选择它。')),
+            for(final message in choices) ListTile(key:Key('ai-later-source-${message.messageId}'),
+              title:Text(message.text!,maxLines:3,overflow:TextOverflow.ellipsis),
+              subtitle:Text(localTimeLabel(context,message.persistedAt)),
+              onTap:() {
+                if(!context.mounted || ModalRoute.of(context)?.isCurrent!=true) return;
+                final live=viewRef.read(aiConversationControllerProvider);
+                if(live.sessionKey!=session || live.conversationId!=topic || !live.canSelectConversation) return;
+                final liveSources=viewRef.read(aiCompanionReferencesEnabledProvider)?
+                  viewRef.read(aiOwnedSourcesControllerProvider):null;
+                final found=live.messages.where((item)=>item.messageId==message.messageId);
+                if(found.length!=1 || !canDisplayAiMessage(live,found.single,sources:liveSources)) return;
+                Navigator.of(sheet).pop(message.messageId);
+              }),
+            TextButton(onPressed:()=>Navigator.of(sheet).pop(),child:Text(context.tr('Back to chat','返回对话'))),
+          ])));
+      }));
+    if(!_isCurrentEditor || id==null) return;
+    final current=ref.read(aiConversationControllerProvider);
+    if(current.sessionKey!=session || current.conversationId!=topic) return;
+    final messages=current.messages.where((message)=>message.messageId==id);
+    final currentSources=ref.read(aiCompanionReferencesEnabledProvider)?ref.read(aiOwnedSourcesControllerProvider):null;
+    if(messages.length==1 && canDisplayAiMessage(current,messages.single,sources:currentSources))
+      _followUpAction(current,messages.single)?.call();
   }
 
   Future<void> _openConversation(String id) async {
@@ -1763,12 +1824,18 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   ListTile(
                     key: const Key('ai-follow-up-settings'),
                     leading: const Icon(Icons.notifications_outlined),
-                    title: Text(context.tr('Requested follow-ups', '明确跟进')),
+                    title: Text(context.tr('Ask me later', '稍后联系我')),
+                    subtitle:Text(context.tr('Choose a sent message and set a time.','选择已发送的消息并设置时间。')),
                     onTap: () {
                       _scaffoldKey.currentState?.closeDrawer();
-                      unawaited(_navigate(openFollowUps));
+                      if(widget.onFollowUpRequested!=null) {unawaited(_chooseLaterContact());}
+                      else {unawaited(_navigate(openFollowUps));}
                     },
                   ),
+                if(widget.onOpenFollowUps case final manage?)
+                  ListTile(key:const Key('ai-manage-follow-ups'),leading:const Icon(Icons.manage_history),
+                    title:Text(context.tr('Manage later contacts','管理预约')),
+                    onTap:() {_scaffoldKey.currentState?.closeDrawer();unawaited(_navigate(manage));}),
                 if (widget.onOpenPersonas case final openPersonas?)
                   ListTile(
                     key: const Key('ai-personas'),
@@ -2186,7 +2253,7 @@ final class _MessageTile extends StatelessWidget {
     key: ValueKey('ai-follow-up-${message.messageId}'),
     onPressed: onFollowUp,
     icon: const Icon(Icons.schedule),
-    label: Text(context.tr('Follow up later', '稍后跟进')),
+    label: Text(context.tr('Ask me later about this', '就这件事稍后联系我')),
   );
 
   @override

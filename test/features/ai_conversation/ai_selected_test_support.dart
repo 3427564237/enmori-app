@@ -26,10 +26,12 @@ const selectedConflict = AppFailure(
 );
 
 final class SelectedRig {
-  SelectedRig._();
+  SelectedRig._({SelectedAiRepository? repository}) {
+    repo=repository??SelectedAiRepository(() => utc);
+  }
   final auth = SelectedAuth();
   final checkIns = SelectedCheckIns();
-  late final repo = SelectedAiRepository(() => utc);
+  late final SelectedAiRepository repo;
   DateTime utc = selectedNow;
   Duration elapsed = Duration.zero;
   late final ProviderContainer container;
@@ -38,14 +40,19 @@ final class SelectedRig {
   static Future<SelectedRig> create(
     WidgetTester tester, {
     bool existingTopic = false,
+    SelectedAiRepository? repository,
+    bool today=false,
+    Future<Result<String>> Function()? timeZone,
   }) async {
-    final r = SelectedRig._();
+    final r = SelectedRig._(repository:repository);
     r.container = ProviderContainer(
       overrides: [
         authRepositoryProvider.overrideWithValue(r.auth),
         aiConversationRepositoryProvider.overrideWithValue(r.repo),
         checkInRepositoryProvider.overrideWithValue(r.checkIns),
         aiCompanionReferencesEnabledProvider.overrideWithValue(true),
+        aiTodayReferencesEnabledProvider.overrideWithValue(today),
+        if(timeZone!=null) aiTodayTimeZoneProvider.overrideWithValue(timeZone),
         aiConversationUtcNowProvider.overrideWithValue(() => r.utc),
         aiConversationNowProvider.overrideWithValue(() => r.elapsed),
       ],
@@ -205,7 +212,7 @@ final class SelectedCheckIns implements CheckInRepository {
   }
 }
 
-final class SelectedAiRepository
+class SelectedAiRepository
     implements
         AiConversationRepository,
         AiSelectedReplyRepository,
