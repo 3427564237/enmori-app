@@ -399,3 +399,40 @@ P2 correction), targeted analyzer passed without issues and the complete
 proactive suite passed **53/53**. Raw output:
 `/home/miku/.local/state/enmori-ai-companion-20261025/app-f0-fold-future.log`.
 This remains fake/widget time evidence, not Android time-channel/device proof.
+
+## Fourth increment, protocol checkpoint — genuine messages and owned sources
+
+This first source checkpoint freezes only Domain/HTTP wire work so Integration
+can implement F1's separate selected-reply capability without editing App's
+active UI/controller work. It is based on `16e1923bc3041d6384e59d702da5cd8623f4b6f3`.
+The controlling authority remains the approved first-flow decision. Exact
+source/anchor/read-state DTOs were checked against the shared source contracts
+and Integration's transport through `ba1797e6be7c75f7303c254f47d45e32af56d171`.
+The separate delivery resolver returns an authorized anchor from only
+`deliveryRef`; its existence does not authorize registration or notification sends.
+
+`AiMessage` adds explicit proactive origin, occurrence and minimized source cards
+with legacy defaults. The decoder validates the literal approved category and
+rejects partial origin, fake user origin, rich/unavailable cards, normalized
+invalid times and source bodies on tombstones. Source timestamps retain their
+full projection precision as display strings; versions remain opaque authority.
+An ordinary execute/readback pair cannot use a standalone proactive assistant.
+
+Optional `AiOwnedSourcesRepository` and `AiCompanionReplyRepository` capabilities
+leave old adapters and request shapes intact. The real wire mapper implements
+exact source/delivery resolution, bound message anchor, versioned topic-read
+GET/PUT and explicit same-topic reply execution. Anchor `pageBefore` must decode
+to exactly sequence + 1 in the existing canonical cursor format. A source resolver
+returns only the expected typed target, never an arbitrary path or model URL.
+The four new typed failures use N01's top-level requestId and safe local copy.
+
+Eleven new synthetic wire cases passed as part of the latest complete
+AI/proactive **344/344** candidate regression, with analyzer clean; the UI and
+controller in that broader run are still separate WIP at this checkpoint.
+Only the protocol files and their independent wire test are frozen here. Their
+standalone final output is `app-source-protocol-final.log` under
+`/home/miku/.local/state/enmori-ai-companion-20261025/`.
+UI composition, actual visible read marking, exact page reveal, draft-editor
+ownership and F1/D1 remain subsequent checkpoints, not claims of this commit.
+No real Backend, model, Firebase, SDK/token, notification, device, APK/Gradle or
+deployment operation was performed for this protocol validation.
