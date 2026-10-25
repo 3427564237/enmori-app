@@ -99,7 +99,12 @@ node tool/ai-companion-eval/review.mjs /absolute/run/report.json /absolute/qa/re
 
 Report numerator, intended denominator, unreviewed/missing cases and per-track
 results. A clean protocol or good isolated reply never erases the old small-plan
-failures. No real-model result has been produced by this initial delivery.
+failures. The initial delivery contained mock evidence only.
+
+The later, separately authorized one-pass local baseline is recorded in
+[`runtime.md`](../../docs/evidence/ai-companion-20261025/runtime.md), with the
+exact source snapshot and complete private artifact hashes. Its structural and
+timing observations do not establish semantic acceptance or cloud performance.
 
 ## Guarded cloud candidate (disabled by default)
 
@@ -174,5 +179,5 @@ Raw responses are preserved up to the 1 MiB receive bound; any exact credential
 echo is redacted and labelled before any artifact is written. No headers or key
 are recorded. Truncated/unknown bodies remain failures, with their available
 prefix preserved. Complete reports and independent review templates retain all
-attempted cases; real latency/cost remains Not Run until a separately authorized
+attempted cases; real cloud latency/cost remains Not Run until a separately authorized
 evaluation actually occurs.

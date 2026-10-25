@@ -280,3 +280,55 @@ and frozen source/compiled hashes. Cloud execution/budget remains unapproved;
 local results will be recorded separately after the batch and independently
 reviewed. LI's separate entry-C decision at Integration commit `2bb638b` changes
 only presentation/navigation and supplies no cloud or additional data authority.
+
+## Authorized local baseline — one fixed pass, 25 October
+
+QA independently confirmed the local inputs unchanged at clean commit
+`24f913dd26afa9af82f7c31ac9eefcf543b64140`; it also closed the cloud-only P2 using
+13/13 cloud tests and its original three dispatch counterexamples. Those are
+source/mock results, not cloud execution authorization.
+
+Integration then assigned this chat the unique local slot. Read-only preflight
+confirmed Ollama `0.40.4`, `qwen3.5:9b` digest
+`56671c2ab9385f9cfcb404638e32cd62d88e3501d44822208363c010179a3c90`, no resident
+model and no observed known evaluator process. The metadata read does not prove
+the absence of arbitrary outside requests. One explicitly authorized empty
+preload completed in **28.993 seconds**, with its original empty terminal
+response preserved. No service restart/configuration change was made.
+
+Exactly **24 current-prompt requests** ran serially from 06:22:56.578 to
+06:25:19.622 UTC on the unchanged 8192/512/`think:false` baseline. Source and
+compiled hashes were frozen and verified equal after all responses arrived.
+There was no retry, parameter change, second pass, candidate-context request,
+product conversation write or cloud request. The code/compiled bundle hash was
+`4fd938cfd8fce925bd9db602a7c599b58f6e8f9fe1d4ce9c68e7c30471455283`.
+
+| Observed layer | Result |
+| --- | --- |
+| Provider terminal response | 24/24 received with `done:true`; 0 unknown |
+| Structural protocol and delivery eligibility | 23/24; all responses arrived within 45 seconds |
+| Ineligible case | `actual-study-goal`: `done_reason:length`, incomplete JSON at the fixed output cap |
+| Runner exit | 2, retaining the failure and all 24 raw rows |
+| Request latency | median 4.121 s; nearest-rank p95 12.497 s; max 27.700 s |
+| Independent semantics at handoff | All 24 unreviewed; full corpus handed to QA |
+| Provider invoice/host cost | No cloud call; local host/electricity cost not measured |
+
+Latency is the experiment's request/receive observation after preload, not an
+application end-to-end, cold-start or physical-device measure. A known length
+terminal response is distinct from an unknown transport outcome; the former
+was retained as ineligible while the fixed batch continued. Historical small-plan
+failures remain unresolved pending independent full-case review.
+
+All requests, fixtures, raw responses, manifest, report and blank review template
+are preserved under the owner-only private directory
+`/home/miku/.local/state/enmori-ai-companion-20261025/runtime/local-baseline-24f913d/`.
+Report SHA-256:
+`5b46f17e1785edc9f5f562ad3e6e0f36e1998ca0597a75df888df2a97024a0e9`.
+Manifest SHA-256:
+`35324835e79ac3099fcd7bb819d1241c3b312037216741505344ea191c55cb8b`.
+The parent's `local-baseline-{preflight,postflight,hashes}.json` records before/
+after service metadata, all file hashes and the immutable run snapshot;
+`local-preload-{intent,response,settlement}.json` separately records the one
+preload. The unique slot was explicitly released to Integration after all
+original responses were received. Independent QA receives every case and writes
+its own review artifact without replacing these raw inputs or outputs.
