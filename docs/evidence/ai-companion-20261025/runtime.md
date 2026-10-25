@@ -810,3 +810,27 @@ request bodies. Original F0 eight-case and cloud 32/16 fixtures remain unchanged
 Candidate actual model calls: **0**. Root must review the diff and separately
 decide a single fixed-eight comparison slot. The failed baseline remains failed;
 there is no permission for repeated prompt rotation or indefinite tuning.
+
+## Authorized second F0 comparison at 5c0e27d
+
+After reading the actual candidate diff, Root assigned one final fixed-eight
+comparison slot. The invocation used clean `5c0e27de4770f1a71ad0ec272fcfd63d8b448ee7`,
+bundle `fa8a5e8484c6e752172a6f0d0dd112332bfc3289b3ce82ed4f89687769563e8f`,
+the same corpus and criteria, and a new private authorization/single-use claim.
+Read-only host verification found the same Ollama 0.40.4 / qwen3.5:9b digest and
+an already resident 8192-context model; therefore **zero preload** was used.
+
+Exactly eight generation attempts completed, once each, without retry or output
+repair. All eight had matching `done:true` and eligible protocol responses.
+Generation median was 2.029 s, p95/max 3.830 s. The shared lane finished
+`pending=false/outcomeUnknown=false`. This is protocol/timing evidence only;
+independent QA was asked to compare the two ledgers under the unchanged criteria.
+No third prompt round is authorized, regardless of this candidate's result.
+
+The new private `runtime/f0-local-5c0e27d` directory has 20 exclusive files.
+Report SHA256: `7f39c97573b3fc7bf8babb6b9d3104971ad88546b602209476a8228f0cfcab37`.
+Artifact-manifest SHA256: `d1d988fd08d5b036e471e3564ea8409767d9e5088441ad931047eaa69c47dd73`.
+The separate two-run metadata comparison SHA256 is
+`37442a216318a75c7d46969ea355235814eb3535325d7d4c61df3943174d0c2c`.
+All 21 baseline artifact hashes were rechecked unchanged; baseline semantic
+**1 Pass / 7 Fail** remains recorded. No product store, push or device action ran.
