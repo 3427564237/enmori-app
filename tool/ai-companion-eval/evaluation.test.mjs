@@ -1,7 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { LocalChatTransport } from '../../backend/dist/src/ai-runtime/infrastructure/local-chat-transport.js';
 import { loadCases, prepareCase, buildEvaluationRequest, protocolAssessment, costObservation, blankReview,
   rubricDimensions, validateReview, sha256 } from './evaluation.mjs';
+
+test('all 24 current-prompt HTTP requests remain byte-identical to the pre-shared-lane production capture', async () => {
+  const golden = JSON.parse(readFileSync(new URL('./fixtures/current-prompt-requests.json', import.meta.url)));
+  const fixtures = loadCases().cases.filter(c => c.track === 'current-prompt');
+  assert.equal(golden.sourceCommit, '24f913dd26afa9af82f7c31ac9eefcf543b64140');
+  assert.deepEqual(golden.cases.map(c => c.id), fixtures.map(c => c.id));
+  for (const [index, fixture] of fixtures.entries()) {
+    let captured;
+    const transport = new LocalChatTransport('qwen3.5:9b', async (url, init) => {
+      captured = { id: fixture.id, url, method: init.method, redirect: init.redirect, cache: init.cache,
+        headers: init.headers, body: init.body };
+      return Response.json({ model: 'qwen3.5:9b', done: true, message: { content: '{}' } });
+    });
+    await transport.generate(fixture.input, { signal: new AbortController().signal, deadline: 60000, remainingMs: () => 60000 });
+    assert.deepEqual(captured, golden.cases[index], fixture.id);
+  }
+});
 
 test('preserved inputs remain byte-identical and all 32 fixtures compile; baseline requests match production', async () => {
   const { cases, preservedSha256 } = loadCases();

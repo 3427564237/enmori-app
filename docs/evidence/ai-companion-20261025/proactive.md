@@ -721,3 +721,242 @@ foreground rendering, background/closed-device delivery, real restart atomicity,
 APK, native click/unread, TalkBack, iOS, cross-network, UAT, Release or Done.
 QA must independently review the exact commit and the gaps above. Existing v26
 history/search/language/calendar evidence remains a separate historical layer.
+
+## Authorized implementation checkpoint — S1 sender
+
+LI's [first-flow implementation decision](../../decisions/2026-10-25-li-ai-companion-first-flow.md)
+now approves bounded F0/F1a/D1 source work. This branch fast-forwarded cleanly to
+`ce6782c2337267cd991b008560b5df91a8cb208b` before implementation. Earlier proposal
+text and failed evidence above remain historical. Real registration, Firestore
+writes, deployment, model runs and FCM calls are still outside this checkpoint.
+
+`backend/src/proactive/infrastructure/single-post-fcm-sender.ts` implements S1
+with injected public Credential and fetch, fixed production FCM endpoint,
+generic/hidden content, REST `NORMAL`/`0s`, no redirects and no retry/fallback.
+It snapshots the packet, checks before/after credential acquisition and after
+the asynchronous claim, returns only safe accepted/rejected/unknown/not-attempted
+outcomes and never returns/logs vendor bodies or credentials. The application
+will supply the actual current-authority/store claim through its shared Port;
+this sender alone is not the transaction boundary.
+
+The strict pinned TypeScript build passes. Targeted tests pass **41/41**: the
+29 existing policy cases and 12 sender cases. The sender tests use real Node
+native fetch against an ephemeral **127.0.0.1-only** HTTP server, after checking
+the adapter's fixed FCM target at the injected boundary. Accepted response, 401,
+503, redirect denial, reset after receipt, abort and a real native HTTP deadline
+each have one received POST; redirect target receives none. Delayed credential
+and claim followed by invalid authority, credential failure, losing/unknown claim,
+initial abort and malformed inputs emit zero requests. Hidden preview and malformed
+success ACK handling also have explicit cases. Raw output is owner-local
+`proactive/sender-policy.tap` and `sender-build.log`. No FCM/OAuth request occurred.
+
+These are isolated adapter/HTTP observations, not Firebase TLS/IAM/provider or
+device acceptance. F0 store/source Ports, complete application/worker/transport,
+atomic publication, restart persistence and real model composition remain the
+next implementation slice, coordinated with Context and Integration.
+
+## F0 application, bounded worker and HTTP checkpoint
+
+Merged Context's exact shared Port commits `42b0b2a` / `ff00e7c` and Integration's
+`47839d` without changing those owners' files. The sender now implements
+`FirstFlowSender`: the post-credential callback returns a freshly confirmed claim
+**and** the current registration/ref/preview. Routing data is no longer a
+pre-claim argument. It rejects malformed Unicode tokens, and the Android payload
+selects Root's explicit `enmori_requested_followups` channel. No SDK registration,
+actual permission request or platform write occurs in these tests.
+
+`FirstFlowApplication` supplies management/readback operations and the bounded
+reserve → model → parse → atomic-publish-Port → post-credential claim → one-POST
+workflow. Generation input contains only the dated quoted request, due/zone and
+permitted Persona, never owner/source IDs or fabricated user rows. It reuses
+`parseOutput(..., 'ai_assistant_message_v1', true)` because the local transport
+already returns content bytes; ordinary lists/URLs remain allowed. Unexpected
+write throws remain unknown, with ordinary readback rather than replay.
+
+`FirstFlowDueWorker` is explicitly constructed/started for one injected owner,
+scans at most three active references in a maximum 30-minute window, serializes
+ticks, recovers metadata once and never regenerates interrupted work. It aborts
+on stop/window expiry but waits for the physical model promise before releasing
+its in-process execution. This is an application guard, **not a replacement for
+the shared chat/Persona/F0 host lane**. Integration must inject Runtime's same
+lane into the actual model composition. No model/provider call is in a Store
+transaction callback.
+
+`transport/register-routes.ts` exports `registerFirstFlowRoutes`. Root owns its
+bootstrap registration, route inventory and normative API/schema integration.
+The 11 owner-only handlers have these exact success responses:
+
+| Route family | Status and explicit projection |
+| --- | --- |
+| GET/PUT settings | 200, direct `FirstFlowSettingsView`; no grant generation. An unconfirmed off/default zone remains empty rather than inventing a current zone. |
+| POST intent | 201, direct `FirstFlowIntentView`; mandatory single canonical UUIDv4 Idempotency-Key. |
+| GET intent / DELETE intent | 200, same minimal view. Cancellation has priority over any prior provider acceptance; irreversible dispatch adds `recallPossible:false`. |
+| GET active intents | 200, `{intents:[view]}`, complete bounded set ≤3; an excessive set is an error, not truncated success. |
+| GET/PUT/DELETE registration | 200, metadata only: revision/enabled/availability and optional installationRef/expiry. Never token echo. |
+| GET/PUT topic read-state | 200, revision/readThroughSequence; no retention-anchor mutation. |
+
+Public intent view contains only intentId/revision/state/dueAt/expiresAt/category/
+conversationId/optional recallPossible. It excludes raw source IDs, grants,
+authorizationScope, requiredSources and routing values. The internal dispatch
+accepted/unknown/dispatching observation folds into public state unless the
+intent is already cancelled/expired/failed. Accepted means provider acceptance,
+not device delivery. Errors use N01 `{error:{code,message},requestId}`.
+
+Root's six transport-review corrections are implemented and injected: canonical
+`.SSSZ` timestamps; malformed/missing/repeated key → 400
+`IDEMPOTENCY_KEY_INVALID`; malformed JSON/unsupported media → 400
+`REQUEST_INVALID`; oversized body → 413 `REQUEST_TOO_LARGE`; no non-create keys,
+AI-operation-key, competing revision headers, GET body/query/transfer-encoding
+or automatic HEAD route; final emit checks current actor and closes an invalid
+sink instead of returning a misleading failure response. Current Firebase caller
+verification is checked again before management effects; Store remains
+responsible for every actual source/account/transaction fence.
+
+Pinned strict build passes; **68/68** targeted cases pass (29 policy, 12 native
+loopback sender, 14 application/worker fakes and 13 Fastify injection cases).
+The first HTTP run had two expected-200 fixtures rejected with 400 because the
+test setup accidentally spread internal revision/grant fields into a settings
+command. Exact projection fixed the fixture; the production extra-field guard
+was preserved. Owner-local `f0-routes-before.tap` retains that original failure,
+and `f0-all.tap` / `f0-build.log` hold the final run.
+
+Application tests prove control flow against a handwritten Store, including
+unknown reserve/publish, source loss, settings changes, identity replacement,
+no anchor change, no fabricated user message, readback and physical quarantine.
+They do **not** prove Firestore atomicity, canonical source receipts/resolvers,
+production route registration, actual host-lane composition, real model quality,
+FCM/IAM or native behavior. Context's real Store/bridge and Root composition still
+need their corresponding integrated tests; no deployment/data/device acceptance
+is inferred from this checkpoint.
+
+## Real component composition with replaced I/O
+
+Composition baseline `b7adead` preserves Context's original `14f7390` Store and
+conversation bridge and Runtime's original `e2f092e` shared lane. The new
+`first-flow-composition.test.ts` injects those actual components into
+`FirstFlowApplication` and `SinglePostFcmSender`. Only Firestore transactions,
+OAuth, model HTTP and FCM HTTP are replaced; all accounts, messages and routing
+values are synthetic. No emulator, model, OAuth, Firebase or FCM service runs.
+
+The strict pinned build and **6/6 composition tests** pass. They cover:
+
+- One dated authorized quote reaches Runtime; one standalone canonical
+  assistant/proactive message and its source receipt are readable through the
+  actual conversation reader/resolver. A read watermark does not extend the
+  original conversation's 90-day lifetime.
+- A lost publish ACK leaves one message and one budget charge. Ordinary
+  readback/recovery dispatches that same message without another generation.
+- A lost claim ACK consumes the persisted claim, emits zero provider requests
+  and recovers to unknown without reclaiming permission to send.
+- Source deletion, purpose revoke/regrant and installation lease expiry after
+  OAuth each prevent provider dispatch. The lease case expires within the
+  application's operation deadline, so it exercises the Store lease fence.
+- Off during generation prevents late publication and dispatch. The same lane
+  blocks chat until the original matching physical completion is observed.
+- An ambiguous 503 becomes persisted unknown and is never sent again.
+
+The first composition run passed five cases; its cancellation assertion expected
+the application's direct `terminated` branch while the real Runtime rejects
+cancelled delivery through the application's failure branch. The test now checks
+the required failed delivery, no publication, no provider call and retained lane
+until physical completion. Production code was unchanged. A subsequent strict
+compile caught an explicit undefined optional property in the new lease fixture;
+the fixture now omits the property. Owner-local `f0-composition-first.tap` and
+`f0-composition-build-before.log` retain those diagnostics; final output is
+`f0-composition.tap` / `f0-composition-build.log`.
+
+This adds evidence for the actual component seams, including canonical reads and
+the shared host lane. The transaction gateway is still an in-memory substitute:
+it checks read-before-write, all-or-nothing fake commits and immutable timestamps,
+but it does not establish Firestore/emulator behavior, cross-process persistence,
+provider acceptance, actual model relevance, native delivery or user acceptance.
+Independent QA and Integration's actual bootstrap remain separate gates.
+
+The final merged targeted regression run passes **212/212** across all six
+Proactive test files plus Runtime's shared-lane transport, parser, application
+and bounded-runtime suites. This includes peer-owned Store/Runtime tests as
+well as this worker's cases; it is an author-run combined regression count,
+not independent QA approval. Raw output: owner-local `f0-composed-all.tap`.
+
+## Assigned navigation transport and shutdown admission
+
+Integration explicitly assigned the approved source resolver and message anchor
+HTTP sidecars to this worker after coordinating ownership with Context. The new
+`register-owned-source-routes.ts` exports `registerOwnedSourceRoutes` and the
+minimal `OwnedSourceOperations` interface; Integration owns the real wrapper,
+bootstrap and normative API registration. It imports the shared conversation
+error catalogue and `parseConversationCursor`, without editing those files.
+
+`POST /v1/me/ai/source-references/resolve` accepts exactly conversationId,
+messageId and server-issued UUID cardRef. Its response is only a typed
+conversation-message anchor or Check-in target. Check-in IDs use the existing
+`isSafeDocumentId` contract, including legacy non-UUID IDs. The companion GET
+message anchor has no body/query and returns exactly the requested message.
+Both projections omit private provenance and raw paths/content. Anchor sequence
+and pageBefore must be safe integers, with pageBefore exactly sequence + 1;
+the emitted canonical unpadded base64url cursor is round-tripped through the
+existing parser before sending. No Event target extension is implemented.
+
+Authentication precedes body parsing. Request-only caller verification and a
+current guard are supplied to the injected operations; fresh source version,
+owner/purpose/retention authority remains their responsibility. Missing, changed
+and unknown results retain their distinct 404/409/503 errors. Strict body,
+query/header rules, 8192-byte limit, no automatic HEAD, final projection guard
+and safe error normalization have explicit HTTP fake cases.
+
+Both route registrars accept an optional fourth `accepting: () => boolean`
+callback, defaulting to true for existing compositions. They check admission
+before/after initial authentication and include it in every request current
+guard. Stopped admission rejects a new request with 503, prevents a mutation
+after an awaited authentication and closes an invalidated pending response.
+Integration must stop admission before worker shutdown/drain; this change does
+not stop a physical model by itself and does not change Application/model code.
+
+Pinned strict build and **28/28 HTTP fake tests** pass: 12 new source-navigation
+cases and 16 F0 transport cases, including three new shutdown cases. Raw output
+is owner-local `owned-source-first.tap` / `owned-source-first-build.log`.
+These tests do not establish actual source authority or Firebase behavior.
+
+The separately requested read-only normative F0 review checked all 11 route
+methods/paths, success schemas and statuses, public allowlists, error envelopes
+and header rules against Integration's working API files. Reproducible schema
+versus handler differences for non-paused pausedUntil and equal quiet endpoints,
+plus missing strict-header/body-limit detail and the unused 502 listing, were
+reported to Integration. Integration reported addressing them in its shared API
+commit; that report is not an independent recheck of the resulting commit.
+Owner-local `api-review-cases.log` and `api-review-snapshot.json` preserve the
+read-only observations. No shared API/bootstrap file was authored here.
+
+## Independent timeout finding and bounded reservation cleanup
+
+QA independently reproduced a reservation leak in the original `f1fce8a`
+Application with Context's real Store and Runtime's shared lane, replacing only
+transactions and model HTTP. After the delivery deadline, the matching physical
+completion released the model lane, but `failGeneration` used the expired
+operation actor. Its current check stopped cleanup before the Store call, so the
+intent remained reserved and inFlightOccurrenceId blocked a later queued intent
+with frequency. The worker's one-time startup recovery did not handle it.
+
+Four new composition regressions were red before the fix; owner-local
+`timeout-before.tap` preserves the failures. Terminal cleanup now uses the
+freshly verified original owner actor through the existing Application and Store
+barriers. The cleanup sites occur before model submission or after the physical
+promise has settled. Only the exact revision/scope-bound reservation can become
+failed. Publication and dispatch still use the original delivery deadline/signal;
+they cannot borrow the cleanup actor. An unknown physical outcome continues to
+hold its promise/lane and never reaches cleanup. A lost cleanup ACK stays unknown.
+
+Strict build and **24/24** Application/composition tests pass after the fix,
+including timeout and external abort, retained reservation/lane before physical
+completion, zero late message/provider call, clearing inFlight afterward and a
+later independent intent succeeding. A revoked original identity prevents cleanup
+instead of bypassing owner authorization; later authorized recovery is then still
+required. Raw output: `timeout-after.tap` / `timeout-after-build.log`.
+
+Integration's original normative commit `2a3b4f3` was merged unchanged. The broader
+13-file regression run is **251/252**: the remaining older conversation transport
+test assumes every conversation subroute is tagged isolated-emulator, while the
+approved read-state path is now explicitly tagged first-flow candidate. This
+specific assertion mismatch was reported to Integration, which owns its shared
+contract/test update. It does not change the 24-case cleanup result. Raw output:
+`timeout-combined.tap`. Independent QA rerun of the cleanup fix remains pending.

@@ -23,7 +23,7 @@
    已确认 dueAt 为绝对时刻，改时区不暗中移动它；修改到期时间需要再次确认。
 3. **明确开启 → 创建一次预约。** 初始总开关 off、无类别及推送登记。
    显示“开启明确跟进并预约”的两个顺序步骤：先确认设置，再以返回的新 revision 创建预约。
-   设置失败不创建；设置成功而预约未知必须分别显示。已有 on 设置可直接进入预约确认。
+   设置失败不创建；设置成功而预约未知必须分别显示。预约未知阻止重复创建同一预约，不把它误作聊天发送结果未知而冻结普通聊天。已有 on 设置可直接进入预约确认。
    首流仅 `explicit_follow_up`、本地模型；滚动 24h 最多 1 次、冷却 8h、最多 3 个有效预约；默认安静时段 22:00–08:00。
    开启本流不等于同意系统推送。模型不会在创建预约时立即生成内容。
 4. **确认已预约 → 可查、暂停或取消。** 仅在明确 receipt 后显示时间及状态。超过话题/来源有效期不能预约；单次有效期不超过 dueAt + 2h。
@@ -63,6 +63,15 @@ FCM accepted 只能表示服务商接受，不表示送达或阅读；App 页面
 源消息/话题不可用时，上述一般提示不能带回其旧正文、标题或已删除 ID。
 
 ## App 需要的最小接口连接
+
+时间字段与动作补充（App 已指出现有 timezone channel 没有任意 IANA civil→UTC 解析）：
+
+- 编辑字段是 civil 日期/时间和明确 IANA 时区；可信 TimePort 返回 UTC offset 与 absolute instant，二者靠近最终确认展示。
+- 无 resolver/未知结果：保留输入，阻止 create；“暂时无法确认这个当地时间 / This local time could not be confirmed”。
+- 不存在的当地时间：不自动跳过 DST 缺口；“这个当地时间不存在，请另选时间 / This local time does not exist. Choose another time”。
+- 重复的当地时间：只展示 resolver 返回的候选 offset/instant，要求用户选一个；“这个时间出现两次，请选择对应时刻 / This local time occurs twice. Choose the intended instant”。不能由客户端自行造候选。
+- 日期或时区修改清除旧解析及最终确认。设备 zone 变化先 hold；明确保留已确认 zone，或采用当前 zone 再解析，不用 `DateTime.local` 转换另一 IANA。
+- 首个可跑候选可只开放已解析的设备 zone，其余显示未核对；平台桥接由 Integration 接入，本设计不增加公开 Backend API。原型只模拟固定 Asia/Singapore。
 
 - Context / Integration：当前已保存 user 消息身份；设置与 intent 的真实 revision/status；最小可信来源卡；typed resolver 与 message anchor；兼容旧请求的 `replyToMessageId`。
 - Proactive / Integration：off/paused/quiet/zone/cap/expiry 的明确 eligibility；创建/取消未知 readback；推送登记可用性与平台权限分别显示。

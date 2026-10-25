@@ -10,6 +10,20 @@ baseline checkpoint is preserved below. Subsequent exact-head source reviews,
 executed checks and unresolved findings are in [qa-review.md](qa-review.md).
 No production implementation was authored by QA.
 
+Latest independent first-flow checks: [approved prototype and visibility repair](qa-approved-prototype.md)
+and [shared local lane / old serializer compatibility](qa-runtime-first-flow.md).
+These add browser and fake-transport evidence only; integrated F0/F1a, real
+Firestore, notification and device acceptance remain separate gates.
+
+The subsequent [Context F0 source/isolated Emulator review](qa-context-first-flow-emulator.md)
+adds 10 independent actual Admin/Auth Emulator groups and four separate timestamp
+fake tests. It does not establish production Firestore, complete worker/HTTP
+composition, notification delivery or device acceptance.
+
+The [first actual F0 semantic review](qa-f0-semantic-review.md) is **1 Pass /
+7 Fail / 0 unreviewed**, despite eight protocol-eligible outputs. Its semantic
+gate remains Fail. It is separate from the unchanged local24 12/12 result.
+
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with
 [proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is
@@ -34,6 +48,11 @@ after the normal `ce6782c` merge, and [v27 artifact readback](qa-v27-artifact.md
 The actual v27 hash/signature/metadata match its manifest; no device operation was
 performed. F0 shared identity/model-lane and sender cases remain at source review
 with integrated execution Not Run.
+
+The [shared dependency/failure and native civil-time review](qa-shared-native-review.md)
+is bound to `c5357a7` / `1a1f96b`. All 131 existing lock entries are unchanged;
+new native time conversion explicitly returns unavailable below API 26. This
+checkpoint is source review, with no independent native execution by QA.
 
 ## Authority and baseline readback
 

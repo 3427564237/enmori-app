@@ -36,6 +36,9 @@ Future<void> bootstrap() async {
     'ENMORI_CONTROLLED_REAL_ACCOUNT',
   );
   const remoteAccount = bool.fromEnvironment('ENMORI_REMOTE_GROUP');
+  const companionFirstFlow = bool.fromEnvironment(
+    'ENMORI_AI_COMPANION_FIRST_FLOW',
+  );
   const backendUrl = String.fromEnvironment('ENMORI_API_BASE_URL');
   const certificate = String.fromEnvironment('ENMORI_API_CERTIFICATE_BASE64');
   final baseUri = parseApprovedBackendBaseUri(backendUrl);
@@ -85,6 +88,7 @@ Future<void> bootstrap() async {
         dualAccounts: true,
         eventParticipationEnabled: true,
         remoteGroupEnabled: true,
+        companionFirstFlowEnabled: companionFirstFlow,
       ),
     );
     return;

@@ -1,0 +1,4 @@
+<resources>
+    <string name="enmori_requested_followups_name">约好的跟进</string>
+    <string name="enmori_requested_followups_description">你明确预约的跟进，仅显示通用提示。</string>
+</resources>

@@ -44,6 +44,9 @@ import '../route_status_pages.dart';
 import 'isolated_persona_pages.dart';
 import 'isolated_history_ai_pages.dart';
 import 'activity_routes.dart';
+import 'companion_navigation.dart';
+import '../../features/proactive/presentation/proactive_follow_up_page.dart';
+import '../../features/proactive/presentation/proactive_settings_page.dart';
 
 abstract final class AppRoutes {
   static const startup = '/startup';
@@ -66,6 +69,8 @@ abstract final class AppRoutes {
   static const checkInHistory = '/check-ins/history';
   static const footprint = '/check-ins/footprint';
   static const aiAssistant = '/ai-assistant';
+  static const aiFollowUps = '/ai/follow-ups';
+  static const newAiFollowUp = '/ai/follow-ups/new';
   static const interests = '/interests';
   static const adminInterests = '/admin/interests';
   static const eventRecommendations = '/events';
@@ -140,6 +145,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final aiPage = isolatedSlices
       ? ref.watch(isolatedAiConversationPageProvider)
       : null;
+  final companionEnabled =
+      aiPage != null && ref.watch(companionFirstFlowEnabledProvider);
 
   // Observe same-UID replacement only for an available shared feature. Existing
   // compositions retain their auth dependency path when no page is supplied.
@@ -353,6 +360,31 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
         ),
+      if (companionEnabled) ...[
+        GoRoute(
+          path: AppRoutes.aiFollowUps,
+          builder: (context, state) => ProactiveSettingsPage(
+            key: ValueKey((routeSession, AppRoutes.aiFollowUps)),
+            onBack: () => backFromShared(context, AppRoutes.aiFollowUps),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.newAiFollowUp,
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! FollowUpNavigation ||
+                routeSession == null ||
+                !identical(extra.session, routeSession)) {
+              return const ConfigurationUnavailablePage();
+            }
+            return ProactiveFollowUpPage(
+              key: ValueKey((routeSession, extra.source)),
+              source: extra.source,
+              onBack: () => backFromShared(context, AppRoutes.newAiFollowUp),
+            );
+          },
+        ),
+      ],
       if (personaPages != null) ...[
         GoRoute(
           path: AppRoutes.personas,

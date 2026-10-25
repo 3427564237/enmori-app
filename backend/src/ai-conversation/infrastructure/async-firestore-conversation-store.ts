@@ -25,8 +25,10 @@ export class AsyncFirestoreConversationStore implements AsyncConversationStore {
         return result==="authorized"?{kind:"verified",principal:context.identity.principal}:{kind:result};
       }};
   }
-  private failed(result:Exclude<StoreResult<unknown>,{kind:"confirmed"}>):{kind:"unknown"}|{kind:"rejected";failure:"stale_authority"|"dependency_unavailable"}{
-    return result.kind==="unresolved"?{kind:"unknown"}:{kind:"rejected",failure:result.kind==="unavailable"?"dependency_unavailable":"stale_authority"};
+  private failed(result:Exclude<StoreResult<unknown>,{kind:"confirmed"}>):{kind:"unknown"}|{kind:"rejected";failure:"stale_authority"|"dependency_unavailable";selectionFailure?:import("../ports/selected-reply.js").SelectedReplyFailure}{
+    return result.kind==="unresolved"?{kind:"unknown"}:{kind:"rejected",failure:result.kind==="unavailable"?"dependency_unavailable":"stale_authority",
+      ...(result.kind==="selection_conflict"?{selectionFailure:"selection_conflict" as const}:result.kind==="source_changed"?{selectionFailure:"changed" as const}:
+        result.kind==="source_unavailable"?{selectionFailure:"source_unavailable" as const}:{})};
   }
   /** #107 supplier seam: freshly guarded canonical pair/presentation, not a
    * reflection of the private OpenOperation or a cached/guessed response body. */
@@ -50,7 +52,7 @@ export class AsyncFirestoreConversationStore implements AsyncConversationStore {
       const result = await this.store.readHistory(this.target(context.identity,context.operation),authority,expected);
       if (!context.originalCurrent()) return {kind:"terminated"};
       return result.kind === "confirmed" ? {kind:"read",value:result.value} :
-        {kind: result.kind === "denied" || result.kind === "conversation_unavailable" ? "denied" : result.kind === "terminated" ? "terminated" : "unavailable"};
+        {kind: result.kind==="selection_conflict"?"selection_conflict":result.kind==="source_changed"?"changed":result.kind==="source_unavailable"?"source_unavailable":result.kind === "denied" || result.kind === "conversation_unavailable" ? "denied" : result.kind === "terminated" ? "terminated" : "unavailable"};
     } catch { return {kind:"unavailable"}; }
   }
   async open(context:AsyncEffectContext):Promise<AsyncFenceObservation>{

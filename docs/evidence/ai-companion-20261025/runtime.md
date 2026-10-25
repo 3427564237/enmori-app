@@ -1,6 +1,6 @@
 # Runtime / Models — 25 October 2026
 
-Status: isolated source/mock candidate; real model comparison **Not Run**.
+Status: bounded local evidence recorded below; actual cloud comparison **Not Run**.
 Owner: Runtime chat `01a171a5-707c-77a2-8ddc-fbda24e4c089`.
 Integration remains the decision and shared-composition owner. No push, PR,
 main merge, production provider/configuration or data mutation is included.
@@ -365,3 +365,378 @@ private-data purposes and integrated/native/phone acceptance remain untested or
 pending their separate contracts. The isolated source/mock candidate is available
 for Integration's review; the current local model is not presented as meeting
 the full companion quality criteria.
+
+## Gemini configuration preparation — read-only, 25 October
+
+The [first-flow decision](../../decisions/2026-10-25-li-ai-companion-first-flow.md)
+at `26af8c95da4fa00b76f841952d742d9da8c07e5c` approves the previously specified
+USD 1 synthetic experiment, subject to execution conditions. It supersedes the
+earlier unapproved-budget status only within that scope. Runtime read back LI's
+direct Integration reply `01a171ce-c02b-7830-9971-728d347f7dcd`: the operator
+self-reports age 18+ and Singapore and asks for configuration help. This is an
+operator statement, not an adult-only product audience or age-verification
+feature. Integration should retain it in the execution decision record.
+
+Integration assigned only configuration inspection at this stage: no login or
+account switching, billing linkage, API enablement, project/key creation, key
+read, secret-file search or model request. Runtime fast-forwarded its clean
+branch from `15a7665` to `26af8c9` as directed; the reviewed evaluation sources
+and adapters are unchanged. No SDK installation or build was required.
+
+| Read-only observation | Result and limit |
+| --- | --- |
+| Installed CLIs | `/usr/bin/gcloud` 590.0.0; `/home/miku/.local/bin/firebase` 15.29.0 |
+| gcloud authenticated accounts | `gcloud auth list` returned `[]`; selected account/project projection returned `null` |
+| Firebase login inventory | One existing operator account; email retained only in the private metadata record |
+| Firebase-visible project | `enmori-rmvp-controlled`, number `11254388146`, display name `ENMORI RMVP Controlled`, `ACTIVE` |
+| Other Google Cloud projects | Unconfirmed: Firebase lists only accessible Firebase projects |
+| Billing accounts, project billing link, Gemini paid readiness/credits | Unconfirmed; no gcloud login was initiated and no token was transferred from Firebase |
+| Contributor enrollment, Generative Language API state, key/project binding | Unconfirmed; no key surface was opened |
+
+The Firebase `login:list` and `projects:list` calls succeeded, with output
+restricted to account/project metadata. The allowed CLI purposes are documented
+in the [Firebase CLI reference](https://firebase.google.com/docs/cli). The private
+allowlisted observation record is
+`/home/miku/.local/state/enmori-ai-companion-20261025/runtime/cloud-setup/metadata-observation.json`.
+Its SHA-256 is
+`0e577242086ded03ab867a4a9d6c16ff84904f0270047df9393e304ecd1f042c`.
+No inference of missing billing is made from missing gcloud authentication.
+
+### Smallest proposed next configuration steps
+
+1. Integration arranges user-mediated Google authorization for the confirmed
+   existing operator account, retaining the account choice explicitly. The
+   optional `gcloud auth login <confirmed-account> --no-activate` path avoids
+   changing the active account; it is prepared, not executed. Do not update ADC
+   or extract Firebase tokens. See [gcloud auth login](https://docs.cloud.google.com/sdk/gcloud/reference/auth/login).
+2. With that authorized session, read all accessible Cloud projects and billing
+   accounts, then the selected project's billing metadata and enabled services.
+   The known controlled Firebase project is an **inspection candidate**, not an
+   automatically selected Gemini project. Prefer an existing suitable research
+   project if one is actually discovered. A new project or a change to the
+   controlled project's billing needs its specific project/account decision.
+3. Confirm the selected project's paid plan/usable balance and no Contributor
+   enrollment. Google's current [billing guide](https://ai.google.dev/gemini-api/docs/billing)
+   allows Postpay or may require a minimum USD 5 prepayment. That payment is
+   separate from the approved USD 1 model-token allowance; no recharge or new
+   billing account is currently authorized. Existing billing linkage alone does
+   not establish usable Prepay credit. AI Studio spend caps can lag by about ten
+   minutes, so the local reservation guard remains necessary.
+4. After the concrete setup scope is confirmed, enable only the required service
+   and prepare a server-side credential tied to that project. Current
+   [key documentation](https://ai.google.dev/gemini-api/docs/api-key) says new AI
+   Studio keys default to authorization keys bound to a service account; creation
+   can also require API enablement and IAM binding. These are real configuration
+   actions. New-user Terms acceptance can create a default project/key, so the
+   read-only stage has not entered that onboarding flow. Never reuse a Firebase
+   client key or place a Gemini secret in chat, Git, Flutter or command arguments.
+5. Read back the chosen configuration, reconfirm the reviewed source/corpus and
+   same-day prices, and prepare the private one-use authorization record with
+   actual project/eligibility evidence and expiry. Only then can Integration
+   assign execution of the already approved fixed experiment. No smoke-generation
+   call or hidden extra run is part of setup.
+
+The post-login metadata commands are prepared below, **not executed**. Replace
+the account placeholder only with the human-confirmed account; do not change
+global default project/account settings. Permission errors remain unknown and
+must not trigger automatic API enablement or broader roles.
+
+```sh
+gcloud projects list --account='<confirmed-account>' --format='json(projectId,name,projectNumber,lifecycleState)'
+gcloud billing accounts list --account='<confirmed-account>' --format='json(name,displayName,open)'
+gcloud billing projects describe enmori-rmvp-controlled --account='<confirmed-account>' --format='json(projectId,billingEnabled,billingAccountName)'
+gcloud services list --enabled --project=enmori-rmvp-controlled --account='<confirmed-account>' --filter='config.name=generativelanguage.googleapis.com' --format='json(config.name,state)'
+```
+
+The billing reads are defined by Google's
+[account listing](https://docs.cloud.google.com/sdk/gcloud/reference/billing/accounts/list)
+and [project billing description](https://docs.cloud.google.com/sdk/gcloud/reference/billing/projects/describe)
+references; project and service inventory use
+[projects list](https://docs.cloud.google.com/sdk/gcloud/reference/projects/list)
+and [services list](https://docs.cloud.google.com/sdk/gcloud/reference/services/list).
+This completes the assigned read-only preparation. Setup, usable
+paid credentials and real cloud evaluation remain incomplete; the next user
+interaction is account authorization, followed by a project/payment choice only
+if the resulting metadata requires one.
+
+### Follow-up: existing browser session and concrete Console blocker
+
+Integration persisted the operator statement at `61478e0507e439fb0d0998c2fca26fbaa3ddbe15`
+and explicitly assigned Runtime the sole browser operator for a read-only visit
+to the existing project's Cloud Console billing page. This extends the earlier
+CLI-only inspection; it does not authorize accepting terms or changing resources.
+
+The existing Chrome profile was available. A direct visit to
+`https://console.cloud.google.com/billing/linkedaccount?project=enmori-rmvp-controlled`
+resolved to the same URL with `&pli=1`, browser `3`, tab `356358120`. The current
+Google session already identified the same operator as the Firebase session,
+and the visible region was Singapore. No login, account choice or account switch
+was performed.
+
+Cloud Console displayed its first-use welcome/Terms dialog. The service-terms
+checkbox and marketing-email checkbox were both unchecked; **Agree and continue**
+was disabled. Billing binding was not visible behind this gate and remains
+**Unknown**, not unlinked. The separate Gemini Cloud Assist setup affordance
+was not used. No Terms/API key/AI Studio onboarding, billing or resource mutation
+was submitted.
+
+The tab is marked for user handoff. The immediate browser path needs the human
+to read and decide whether to complete that Google Cloud Terms confirmation;
+gcloud login is now an optional later CLI route, not the first observed blocker.
+After user confirmation, the authorized operator can read the same project's
+billing metadata without initiating setup/payment. A screenshot is retained at
+`/home/miku/.local/state/enmori-ai-companion-20261025/runtime/cloud-setup/console-terms-blocker.png`.
+It contains operator account information and stays outside Git. The full tab/URL
+and observed gate were delivered to Integration; no repeated UI attempts or
+credential inspection followed.
+
+### Follow-up: Terms cleared, existing project imported, paid-upgrade gate
+
+After LI's direct `ok` and Integration's bounded readback assignment, the Terms
+dialog was no longer present. The same project's linked-account URL resolved
+to a specific Cloud Billing account (private metadata retains the complete ID;
+suffix `25F80B`). Its overview said **free trial**, SGD383.45 remaining credit,
+90 days, expiring 2027-01-24. These are Cloud Billing facts, not evidence of a
+usable Gemini paid plan. The earlier unknown link state is superseded only by
+this observed link and trial status.
+
+The same existing account could open AI Studio without a new Terms screen.
+Initially only the already-imported Default Gemini Project appeared, on free
+tier. An existing key was masked; its value was not opened or copied. The
+Gemini Billing page for the linked account showed **SGD0 eligible GCP credits**,
+unknown tier, and **prepayment required**. An initial read-only setup dialog
+offered only the Default project or import/create, and was cancelled.
+
+Integration then explicitly authorized importing only the existing
+`enmori-rmvp-controlled` project under LI's request to complete remaining setup.
+The import dialog identified exactly that project, and the resulting project
+row confirmed **free trial / prepayment required**, SGD0.00 monthly spend and a
+Create API key action. This project-list import is the only submitted change.
+
+Opening that row's billing activation entry reached a concrete review page:
+continuing agrees to upgrade the existing free-trial Cloud Billing account to
+paid. It also states that remaining USD300 welcome credits exclude Gemini API.
+**Continue was not clicked.** The actual minimum prepayment is still behind
+this upgrade step and remains unknown. No paid upgrade, payment, new project,
+key creation, API enablement or billing-link change was performed. No model call
+was made. Integration received the exact gate for LI's decision; the approved
+USD1 model-token budget cannot be substituted for this account-level change.
+
+Private evidence is under the existing `runtime/cloud-setup/` directory:
+`console-linked-trial.png`, `studio-prepay-required.png`,
+`studio-enmori-imported.png`, `studio-paid-upgrade-gate.png` and
+`after-terms-observation.json`. The record contains the allowlisted metadata and
+screenshot hashes, never key material. Browser 3/tab 356358123 stays on the
+unsubmitted upgrade confirmation for handoff. This is a configuration checkpoint,
+not permission to run the cloud evaluation.
+
+## F0 local adapter and shared physical model lane — source candidate
+
+Authority: LI's first-flow decision, shared `FirstFlowModelInput` /
+`GenerationTransport` Port at `42b0b2a4e1151b43e9608f953c9a986c2c078394`, and
+its fresh-actor/read-model correction `ff00e7c`. Both were merged without
+overwriting Runtime's cloud setup evidence. Integration explicitly assigned F0
+first, shared physical ownership with existing Chat/Persona preview, and eight
+synthetic cases for independent QA before a separately assigned model slot.
+
+`LocalFirstFlowTransport` accepts only the Port's dated `quotedRequest`,
+`inputKind:proactive_followup`, absolute due instant, IANA zone and optional
+current Persona projection. It copies the allowed fields, preserves quote text,
+and rejects malformed or additional identity/authority/context fields before
+dispatch. The quote uses the existing 2400 Unicode-code-point user-message
+ceiling. Application/Store still own fresh actor, source, due/quiet, consent,
+expiry and Persona permission checks; shape validation supplies no authority.
+
+The model sees an explicitly labelled historical quote and follow-up instruction,
+not a newly persisted user message. The adapter owns no store, source reader,
+tool or sender. It returns the provider's raw message bytes without output
+repair, second generation or semantic acceptance. Current Persona is expression
+data only. F0 uses exactly local `qwen3.5:9b`, 8192 context, 512 output,
+`think:false`, existing schema format and 30-minute keep-alive; no cloud fallback.
+
+One injected `LocalModelLane` owns physical pending/unknown state across Chat,
+Persona preview, F0 and empty preload. The existing controlled envelope receiver
+was extracted as a shared helper with its 1 MiB, strict UTF-8, depth and duplicate
+key checks unchanged. Delivery abort/deadline does not stop receiving the
+original local response. Only a matching model and complete `done:true` envelope
+release physical ownership. Late completion is withheld from delivery.
+HTTP errors, socket/reader loss, partial/invalid/duplicate envelopes and wrong
+model remain pending/quarantined; there is no reset, retry or fallback API.
+
+This corrects a demonstrated old `LocalChatTransport` mismatch: HTTP503 had set
+`done=true` and freed the lane, although the shared Port requires physical
+stoppage evidence. Integration explicitly confirmed the correction. The old
+test now expects quarantine, with additional cross-consumer fakes. A matching
+terminal envelope with unusable content still releases the stopped model and
+rejects delivery, rather than confusing output rejection with unknown execution.
+
+### Composition handoff
+
+Integration owns bootstrap, routes and application composition. The required
+construction is:
+
+```ts
+const lane = new LocalModelLane('qwen3.5:9b');
+const chatTransport = new LocalChatTransport(lane);
+const firstFlowModel = new LocalFirstFlowTransport(lane);
+// PreviewPersona receives chatTransport and () => lane.state.pending.
+```
+
+Both adapters expose the same `{pending,outcomeUnknown}` state. The worker uses
+the existing `RequestBudget` and must withdraw delivery within its approved
+deadline even when physical generation remains unresolved. Status/shutdown must
+observe this shared lane. The old `LocalChatTransport(model,http?)` overload
+remains for existing isolated callers/fakes; composition must explicitly pass
+the single shared instance, never create one per feature. This commit does not
+wire bootstrap or claim that the deployed application already uses F0.
+
+### Source validation and unrun evaluation cases
+
+Pinned Node 24.19.0 / TypeScript 7.0.2 build passed. The focused run passed
+**56/56** tests across `local-first-flow-transport`, `controlled-ollama-transport`,
+`simple-chat`, Persona preview, original evaluation and F0 fixture tests. Tests
+cover shared admission, preload, invalid projection, cancellation/clock expiry,
+late physical completion, known invalid output, eleven unknown-result cases,
+and preview cancellation while F0 waits. All HTTP functions were injected fakes.
+
+Before refactoring, the 24 current-prompt requests were captured through the
+unchanged production serializer; its source bytes matched `24f913d`. The golden
+records include complete URL/method/redirect/cache/headers and serialized body.
+All 24 compare byte-for-byte after this change, including history, Persona,
+prompt, schema and settings. Golden fixture SHA-256:
+`b6a8673446a1a36cc5921e097ecacbf06aa752450227e9eddbab6ad7049027ee`.
+The approved original 32-case corpus hash is unchanged.
+
+Eight separate F0 cases are prepared in
+`tool/ai-companion-eval/fixtures/f0-cases.json`, with a fake-only serializer helper.
+They cover rest-versus-study relevance, starting-versus-completing, dated mood,
+explicit language, unknown attendance, local-midnight dates, quoted instruction
+injection and Persona authority boundaries. Fixture SHA-256:
+`b9ada505ef4cb732c829c0f9eab959a33b8034c949d35e2ce06d37146ec45d70`.
+QA pre-read the eight cases and found no case error blocking a freeze. Its
+requested common criterion now distinguishes due time from actual dispatch time;
+refusal alone cannot pass the notebook/Persona relevance checks. Final independent
+review will bind the committed source. There are **no actual F0 outputs or
+semantic verdicts**. No new preload, local model run, cloud call,
+real account write or notification send occurred. F1a remains for the next
+exact Context input contract. The previous local 12 Pass / 12 Fail semantic
+result remains unchanged.
+## F0 executable exact-eight entry point
+
+`tool/ai-companion-eval/f0-run.mjs` defaults to `dry`: it hashes the executable
+bundle, compiled adapters and unchanged eight-case corpus without network calls.
+`--mode mock --out <new-private-path> --preload 1` exercises the same production
+`LocalModelLane` and `LocalFirstFlowTransport` using injected fake HTTP.
+
+Real execution requires `--mode local --allow-local true --out <new-private-path>
+--authorization <private-json> --authorization-sha256 <exact-file-sha256>
+--preload 0|1`, clean HEAD, pinned Node 24.19.0, an unexpired Integration slot
+grant bound to HEAD/bundle/corpus, and an exclusive single-use slot claim. The
+grant contains `schemaVersion=f0_local_authorization_v1`, `status=approved`,
+`approvedBy=Integration`, `scope=enmori-f0-exact8-20261025`, `slotReference`,
+`hostReadbackReference`, `sourceHead`, `sourceBundleSha256`, `corpusSha256`,
+`model=qwen3.5:9b`, `maxGenerationRequests=8`, `maxEmptyPreloads=0|1`, `expiresAt`.
+Authorization and executable hashes are rechecked after durable intent capture
+at each actual HTTP boundary. A consumed grant cannot resume or retry.
+
+The run uses one production lane: at most one empty preload, counted separately,
+then each frozen F0 case once sequentially (8192 context / 512 output / think=false).
+Delivery expires at 45 seconds; receipt continues up to 120 seconds. The harness
+captures bounded raw response bytes and their hash before passing identical bytes
+through the production receiver. Unknown physical outcomes stop the entire batch
+without releasing/resetting the lane. Known complete but malformed, length-ended
+or late output stays raw and ineligible; it is not repaired or repeated.
+
+Private request/response artifacts, manifest, report and a hash-bound blank review
+template are saved exclusively outside Git. The CLI prints only outcome/count/
+timing metadata. Final harness/corpus/private-output checks passed 22/22, including
+eight sequential cases, preload count, unknown/duplicate/invalid UTF-8/lost/large/
+stalled responses, expiry/cancellation during capture, late completion, and grant
+binding and response-artifact failure. The mock CLI completed one fake preload
+plus eight fake generations with zero provider calls. These are harness/source
+checks, not actual model or semantic evidence.
+Independent QA separately confirmed the e2f092e adapter's 18/18 focused cases,
+old production serializer byte identity for all 24 legacy requests, and the eight
+F0 input projections. Root then assigned the sole local slot, conditional on this
+CLI's completed self-check. Actual run evidence follows separately when available.
+
+## F0 actual single pass at 4746eff
+
+Root assigned the sole Ollama slot after independent e2f092e QA and CLI self-check.
+Execution used clean `4746efffc2ae6e85f681a694af6a129175e2298b`, bundle
+`98d9eefc71d54ff3fb2cc8d90f36471635d7f645007621ab6f379ed6d8d0b4aa`,
+and the unchanged F0 corpus `b9ada505ef4cb732c829c0f9eab959a33b8034c949d35e2ce06d37146ec45d70`.
+Host readback confirmed Ollama 0.40.4 and qwen3.5:9b digest
+`56671c2ab9385f9cfcb404638e32cd62d88e3501d44822208363c010179a3c90`.
+
+There was exactly one empty preload (27.481 s), followed by eight sequential
+generations, one per frozen case, with no retry or output repair. All nine
+physical responses matched the model and `done:true`; all eight generation
+outputs were protocol eligible within 45 seconds. Generation median was 3.468 s,
+p95/max 4.442 s. The shared lane finished `pending=false/outcomeUnknown=false`.
+These are protocol/timing observations; independent semantic QA was requested
+and is not inferred from them. No product storage or notification delivery ran.
+
+The private directory `~/.local/state/enmori-ai-companion-20261025/runtime/f0-local-4746eff`
+has 22 exclusive files, including raw vendor bytes/text, request bodies, timing,
+source manifest, report, artifact hashes and a blank bound review template.
+Report SHA256: `593958fb878c0dc7ffe03fcd21a429a422199b1ad8d2b15f318f58a65c2382e4`.
+Artifact-manifest SHA256: `180c619cd6e2bf4e7988e9a6762253e15933fda9ddc801640a8bbc2d23dfe908`.
+The earlier 24-case local result and its independent 12 Pass / 12 Fail remain
+separate; this F0 run does not replace that evidence.
+
+## Free-only cloud supersession and bounded preparation
+
+LI's direct “先用免费档……不要付费” instruction supersedes the earlier USD 1 paid
+permission. Root preserved the history and recorded the selected existing Default
+Gemini Project and eight-case scope in decision commit `15c9f32`,
+`docs/decisions/2026-10-25-li-gemini-free-only.md`. No upgrade, recharge, paid
+fallback, new project, API enabling, IAM grant or new credential was performed.
+
+Read-only account evidence: Default Gemini Project `gen-lang-client-0930184174`
+is labelled Free in AI Studio; Cloud Billing explicitly says no billing account
+is linked; the Gemini API is enabled. Gemini 3.8 Flash displays 5 RPM / 250K TPM /
+20 RPD. This is not proof of unused daily quota. The existing February 8 key is
+restricted to the single Gemini API, with no application restriction and no
+listed bound account. Its value was not displayed/copied and call eligibility
+is unverified. Cloud Console's auth-key notice and the documented compatibility
+of API-restricted standard keys require retaining that uncertainty; no new
+service account or permission is inferred. ENMORI now displays Tier 1 / No
+credits; the actor behind that change is unknown and its billing stays untouched.
+
+Private allowlisted observation SHA256:
+`eb81ece03e0601f50da44c81dce57a7f08365b2e3bba77d249ccdbe8d6989b8e`.
+Credential-metadata SHA256 (no credential bytes):
+`016068d48e813b6d5f32d0c6e7cbf490c5f44c5ebee07d725bbd0a848348810f`.
+[Google's AI plan documentation](https://ai.google.dev/gemini-api/docs/google-ai-plans)
+separates Pro's AI Studio web benefits from direct API billing and Google One
+credits. [Pricing](https://ai.google.dev/gemini-api/docs/pricing) lists a free
+Standard Gemini 3.8 Flash tier; [API-key guidance](https://ai.google.dev/gemini-api/docs/api-key)
+describes restricted standard-key compatibility. Free requests remain synthetic-only.
+
+The existing cloud runner now has a distinct free authorization schema, fixed
+project/key API restriction, recent evidence hashes, protected server key-file
+hash, source/corpus/subset hashes, exactly one pass and zero USD. Real paid mode
+is rejected before any credential read or HTTP. Historical paid fake tests remain
+as regression evidence, not permission. The default CLI is dry/zero-call. Real
+free mode additionally requires `--mode free --allow-cloud true --passes 1
+--max-usd 0 --authorization <private-file> --authorization-sha256 <hash>
+--key-file <private-file> --out <new-private-directory>`, clean source and a
+single-use authorization. Source, grant and key-file bindings are checked again
+at each dispatch. The credential itself only enters the fixed API request header.
+
+`free-cloud-scope.mjs` names eight unchanged cases from the original 32: the
+reported-English/rest case, actual-study-goal, normal-chat, switch-to-english,
+correct-personal-claim, past-mood-time, intent-not-attendance, and
+quoted-instruction-not-authority. They cover five current-prompt and three
+candidate-context cases, not the full 32-by-two evaluation or production F1a.
+The runner permits at most eight counts plus eight generations. Both request
+types share a minimum 15.1-second start interval (at most four per rolling minute);
+waiting happens before provider timing and is followed by a new expiry/cancel/
+source check. A 429, 402, authorization failure or unknown outcome stops without
+retry, model substitution or paid fallback. Zero spend authorization is not an invoice.
+
+Cloud regression/free tests: 19/19 passed. The private `mock-free` CLI completed
+eight fake counts/eight fake generations, zero real calls, zero reserved USD.
+Actual free execution is still **Not Run**: no key value has been read, no live
+grant issued and Root's runner review/execution conditions remain outstanding.

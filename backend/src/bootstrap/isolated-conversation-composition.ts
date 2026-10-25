@@ -21,12 +21,14 @@ import { FirestoreConversationCleanup } from "../ai-conversation/infrastructure/
 import { FirestoreConversationMaintenance } from "../ai-conversation/infrastructure/firestore-conversation-maintenance.js";
 import { retirePreviousConversationEpoch } from "../ai-conversation/infrastructure/firestore-conversation-restart.js";
 import { requireFeatureContextFirestore } from "../ai-conversation/infrastructure/isolated-context-firestore.js";
-import { FirebaseAdminFirestoreGateway } from "../shared/infrastructure/firebase/firestore-gateway.js";
+import { FirebaseAdminFirestoreGateway, type FirestoreGateway } from "../shared/infrastructure/firebase/firestore-gateway.js";
 import { requireControlledEmulatorEnvironment } from "../shared/infrastructure/firebase/controlled-emulator-environment.js";
 import type { ConversationInput, ConversationGates } from "../ai-conversation/ports/conversation-lifecycle.js";
 import type { ConversationOperations } from "../ai-conversation/ports/conversation-operations.js";
 import type { MaintenanceResult } from "../ai-conversation/ports/conversation-maintenance.js";
 import { startConversationMaintenance, type MaintenanceSchedule } from "./conversation-maintenance-runner.js";
+import { FirestoreSelectedReplyReader } from "../ai-conversation/infrastructure/firestore-selected-reply-reader.js";
+import { createOwnedSourceOperations } from "./owned-source-composition.js";
 
 /** Explicit isolated composition; ordinary buildApp/main never invokes it.
  * Caller validates and owns the actual Emulator Firestore instance. No fake
@@ -39,6 +41,7 @@ interface ConversationCompositionOptions {
   readonly conversationStrategy?: "open_conversation_v1";
   readonly notePrerequisites?: SourceBoundNotePrerequisites;
   readonly simpleChat?: true;
+  readonly selectedReplies?: true;
   readonly report: (phase: "expiry" | "source", result: MaintenanceResult) => void;
   readonly reportRetirement: (confirmed: boolean) => void;
   readonly schedule?: MaintenanceSchedule;
@@ -72,8 +75,13 @@ async function createConversationComposition(options: ConversationCompositionOpt
   const quiescence = new ConversationIoQuiescence({ acquireTargetLease: (...args) => consumer.acquireTargetLease(...args) },io);
   const cleanup = new FirestoreConversationCleanup(gateway,options.environment,quiescence,utcMilliseconds);
   const readers = new FirestoreConversationOperationReaders(store,cleanup,epoch);
+  const authority = new FirebaseAdminConversationOperationAuthority(options.firestore,options.environment,()=>clock.now());
+  const prepareReader = options.selectedReplies ? new FirestoreSelectedReplyReader(gateway, options.environment, undefined, utcMilliseconds) : undefined;
+  const operationReaders = prepareReader ? Object.assign(readers, {
+    prepareSelection: (context: Parameters<FirestoreSelectedReplyReader["prepare"]>[0], input: Parameters<FirestoreSelectedReplyReader["prepare"]>[1]) => prepareReader.prepare(context, input),
+  }) : readers;
   consumer = new ApplicationConversationOperations(
-    new FirebaseAdminConversationOperationAuthority(options.firestore,options.environment,()=>clock.now()),
+    authority,
     {uuid:randomUUID,operationKey:()=>randomBytes(32).toString("base64url")},
     {now:()=>clock.now(),at:(at,wake)=>clock.at(at,wake),utcMilliseconds},
     {create:(input,delivery)=>new AsyncConversationOperationExecutor({runtime,gates:options.gates,
@@ -87,8 +95,12 @@ async function createConversationComposition(options: ConversationCompositionOpt
           ...(options.simpleChat ? {includeCheckIns:false as const,includePersonaExpression:true as const} : {}),
           ...(options.notePrerequisites ? {notePrerequisites:{...options.notePrerequisites,firestore:db}} : {})});
         const bridge=new TrackedAsyncConversationStore(new AsyncFirestoreConversationStore(store,epoch,authority),io,store,epoch,options.reportRetirement);
-        return {authority,reads,store:bridge,acknowledgedPair:bridge};
-      }}).create(input,delivery)},readers);
+        const ownerId=input.identity.ownerId,conversationId=input.operation.conversationId,operationId=input.operation.operationId;
+        const selectedGateway:FirestoreGateway={runTransaction:(work,transactionOptions)=>
+          io.run(ownerId,conversationId,operationId,()=>gateway.runTransaction(work,transactionOptions))};
+        return {authority,reads,store:bridge,acknowledgedPair:bridge,
+          ...(options.selectedReplies ? { selectedReads: new FirestoreSelectedReplyReader(selectedGateway, options.environment, original, utcMilliseconds) } : {})};
+      }}).create(input,delivery)},operationReaders);
   const maintenance=new FirestoreConversationMaintenance(gateway,options.environment,cleanup,quiescence,utcMilliseconds,notePrerequisites);
   // Construct consumer BEFORE startup sweeps, expose operations only AFTER them.
   const runner=startConversationMaintenance(maintenance,epoch,options.report,options.schedule);
@@ -102,7 +114,8 @@ async function createConversationComposition(options: ConversationCompositionOpt
     listMessages:(...args)=>consumer.listMessages(...args),deleteConversation:(...args)=>consumer.deleteConversation(...args),
     listConversations:(caller,after)=>consumer.listConversations(caller,after),
   };
-  return {operations,runtime,epoch,io,maintenance,quiescence,restart,
+  const ownedSources = options.selectedReplies ? createOwnedSourceOperations(authority, store, () => accepting) : undefined;
+  return {operations,runtime,epoch,io,maintenance,quiescence,restart,store,gateway,ownedSources,
     /** Call before closing the owned HTTP listener; existing terminal closure is
      * still permitted. This stops periodic work, not an assertion of model stop. */
     stopAdmissionAndMaintenance:async()=>{accepting=false;await runner.stop();},

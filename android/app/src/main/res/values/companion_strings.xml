@@ -1,0 +1,4 @@
+<resources>
+    <string name="enmori_requested_followups_name">Requested follow-ups</string>
+    <string name="enmori_requested_followups_description">Generic updates for follow-ups you requested.</string>
+</resources>

@@ -1,0 +1,58 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { randomBytes, randomUUID } from "node:crypto";
+import Fastify from "fastify";
+import { registerConversationRoutes } from "../../src/ai-conversation/transport/register-routes.js";
+import type { ConversationOperations } from "../../src/ai-conversation/ports/conversation-operations.js";
+import type { StoredConversationMessage } from "../../src/ai-conversation/ports/real-conversation-store.js";
+
+const conversationId=randomUUID(),operationId=randomUUID(),key=randomBytes(32).toString("base64url"),selectionRevision=randomUUID(),selectionKey=randomUUID();
+const source={cardRef:selectionKey,kind:"check_in" as const,version:"server-version",sourceOccurredAt:"2026-10-25T01:00:00.000Z",observedAt:"2026-10-25T01:01:00.000Z",state:"available" as const,canNavigate:true as const};
+const user:StoredConversationMessage={messageId:randomUUID(),role:"user",sequence:1,persistedAt:{seconds:1792886400,nanoseconds:0},availability:"available",text:"Synthetic request"};
+const assistant:StoredConversationMessage={...user,messageId:randomUUID(),sequence:2,role:"assistant",text:"Synthetic answer",sources:[{...source,...{privateSourceId:"do-not-project"}}]};
+async function fixture(){
+ const calls:unknown[]=[];
+ const app=Fastify({logger:false});app.decorateRequest("authPrincipal",null);
+ const operations:ConversationOperations={
+  prepare:async(_caller,input)=>{calls.push(input);return{kind:"success",value:{operationId,operationKey:key,conversationId,preparationExpiresAt:"2026-10-25T01:02:00.000Z",contextSelection:{selectionRevision,expiresAt:"2026-10-25T01:02:00.000Z",sourceCards:[{...source,selectionKey,...{privateOwner:"do-not-project"}}]}}};},
+  execute:async(_caller,input)=>{calls.push(input);return{kind:"success",value:{operationId,conversationId,userMessage:user,assistantMessage:assistant}};},
+  listMessages:async()=>({kind:"success",value:{messages:[user,{...assistant,origin:"proactive",occurrenceId:randomUUID(),category:"explicit_follow_up"}]}}),
+  cancel:async()=>({kind:"success",value:{operationId,state:"terminal"}}),
+  readOutcome:async()=>({kind:"failure",code:"AI_OPERATION_UNAVAILABLE"}),
+  deleteConversation:async()=>({kind:"success",value:undefined}),
+ };
+ await registerConversationRoutes(app,{verifyIdToken:async()=>({kind:"verified",principal:{firebaseUid:"synthetic"}})},operations);
+ await app.ready();return{app,calls};
+}
+const headers={authorization:"Bearer synthetic"};
+test("selected transport keeps exact locator input, allowlists cards and forwards request-local choices",async t=>{
+ const f=await fixture();t.after(()=>f.app.close());
+ const contextSelection={processing:"local",sources:[{kind:"check_in",checkInId:"legacy-record-id"}]};
+ const response=await f.app.inject({method:"POST",url:"/v1/me/ai/operations",headers,payload:{kind:"send",purpose:"checkin_conversation",contextSelection}});
+ assert.equal(response.statusCode,201);assert.deepEqual(f.calls[0],{kind:"send",purpose:"checkin_conversation",contextSelection});
+ assert.deepEqual(response.json().contextSelection.sourceCards,[{...source,selectionKey}]);assert(!response.body.includes("do-not-project"));
+ const choice={selectionRevision,includedKeys:[selectionKey],excludedKeys:[selectionKey]};const replyToMessageId=randomUUID();
+ const result=await f.app.inject({method:"POST",url:`/v1/me/ai/operations/${operationId}/execute`,headers:{...headers,"ai-operation-key":key},payload:{text:"Synthetic",contextSelection:choice,replyToMessageId}});
+ assert.equal(result.statusCode,200);assert.deepEqual(f.calls[1],{operationId,operationKey:key,text:"Synthetic",contextSelection:choice,replyToMessageId});
+ assert.deepEqual(result.json().assistantMessage.sources,[source]);assert(!result.body.includes("do-not-project"));
+});
+test("selected transport rejects excessive, duplicate, content-bearing or foreign source shapes before operations",async t=>{
+ const f=await fixture();t.after(()=>f.app.close());
+ for(const selection of [
+  {processing:"cloud",sources:[]}, {processing:"local",sources:[{kind:"event",checkInId:"x"}]},
+  {processing:"local",sources:[{kind:"check_in",checkInId:"x",text:"private"}]},
+  {processing:"local",sources:[{kind:"check_in",checkInId:"../x"}]},
+  {processing:"local",sources:Array.from({length:6},(_,i)=>({kind:"check_in",checkInId:`id-${i}`}))},
+  {processing:"local",sources:[{kind:"check_in",checkInId:"x"},{kind:"check_in",checkInId:"x"}]},
+ ])assert.equal((await f.app.inject({method:"POST",url:"/v1/me/ai/operations",headers,payload:{kind:"send",purpose:"checkin_conversation",contextSelection:selection}})).statusCode,400);
+ for(const contextSelection of [{selectionRevision:"forged",includedKeys:[],excludedKeys:[]},{selectionRevision,includedKeys:[selectionKey,selectionKey],excludedKeys:[]},{selectionRevision,includedKeys:[],excludedKeys:[],owner:"forged"}])
+  assert.equal((await f.app.inject({method:"POST",url:`/v1/me/ai/operations/${operationId}/execute`,headers:{...headers,"ai-operation-key":key},payload:{text:"Synthetic",contextSelection}})).statusCode,400);
+ assert.deepEqual(f.calls,[]);
+});
+test("source-aware transcript projects genuine proactive identity and does not fabricate a user pair",async t=>{
+ const f=await fixture();t.after(()=>f.app.close());
+ const response=await f.app.inject({method:"GET",url:`/v1/me/conversations/${conversationId}/messages`,headers});
+ assert.equal(response.statusCode,200);const messages=response.json().messages;
+ assert.equal(messages.length,2);assert.equal(messages[1].role,"assistant");assert.equal(messages[1].origin,"proactive");assert.equal(messages[1].category,"explicit_follow_up");
+ assert.deepEqual(messages[1].sources,[source]);assert(!response.body.includes("do-not-project"));
+});
