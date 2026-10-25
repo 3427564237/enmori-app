@@ -90,6 +90,15 @@ the old-head red and repaired-head green. The earlier 18 checks and other
 author/integration/device layers are not counted as new executions. The
 Flutter window is returned.
 
+The [v28 actual APK readback](qa-v28-artifact.md) independently passes artifact
+identity/signature/manifest/configuration consistency at build source `fd16497`.
+The package/code28 match the candidate record, and the signer matches retained
+v26; FCM auto-init and Analytics collection are false, the notification permission is
+packaged, and all four Firebase resources match the existing build configuration.
+The installation reference is absent, so native D1 remains unconfigured. The
+first native resource build failure and conditional repair remain in the record.
+This involved no build, installation, ADB, token, service, model or push operation.
+
 The [D1 source review](qa-d1-source-review.md) reports a new P2 at `cb8d982`:
 controller rebuild clears unknown registration/settings mutation guards, so a
 same-UID session replacement can let an unchanged GET reopen mutation controls.
