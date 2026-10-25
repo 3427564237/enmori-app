@@ -834,3 +834,47 @@ The separate two-run metadata comparison SHA256 is
 `37442a216318a75c7d46969ea355235814eb3535325d7d4c61df3943174d0c2c`.
 All 21 baseline artifact hashes were rechecked unchanged; baseline semantic
 **1 Pass / 7 Fail** remains recorded. No product store, push or device action ran.
+
+## Final F0 semantic ledger and free-cloud prerequisite still missing
+
+Independent QA completed the second ledger: **5 Pass / 3 Fail / 0 unreviewed**,
+validated against all 19 new and 21 baseline artifacts, 23 bundle files, original
+criteria and identical non-system request content. Runtime also verified the
+review hash and ran `review.mjs`: exit 0, `incomplete=false`. New review SHA256:
+`d595f414c853b806530d8ed844533aa5f66777491be345f4bd3851c1f281ca05`.
+
+The remaining failures are precise: rest presupposes the ten-minute rest already
+happened; mood carries the previous night's quotation into “tonight” instead of
+asking the requested next-morning current feeling; attendance asks about actual
+visiting instead of the requested decision to go. The last response does not
+assert attendance: its failure is relevance to the decision, not an invented
+attendance fact. Cases 2/4/6/7/8 pass. These results do not merge into the earlier
+1/7 ledger or establish a general quality pass. Root accepted the source as an
+improved candidate, kept the quality gate open and ended local prompt/model
+experimentation for this round. No more local generation is authorized.
+
+Root independently reviewed the free CLI/runner/grant/ledger/fixed URLs/pacing,
+passed its 19 guard/mock tests, and conditionally authorized the single free run
+using only the existing restricted Default project key. Runtime refreshed the UI:
+Default remains Free, Cloud Billing explicitly has no linked account, and the
+existing key remains restricted to one Gemini API in that project. The refreshed
+Gemini 3.8 Flash display remains 5 RPM / 250K TPM / 20 RPD. A 28-day peak-usage
+display is not proof of remaining daily quota.
+
+One required fact remains **unconfirmed**: Contributor enrollment. Project
+details and User Settings did not expose enrollment status. Default's Logs
+settings explicitly show both GenerateContent and Interactions request storage
+disabled, with billing setup required for logging, but storage settings are not
+Contributor enrollment. [Google's policy](https://ai.google.dev/gemini-api/docs/logs-policy)
+describes Contributor as an invited, per-project opt-in; absence of a visible
+invitation is not evidence of non-enrollment. Root was asked for an existing
+operator statement or direct confirmation of that specific fact.
+
+The private missing-prerequisite record SHA256 is
+`2a0c4f914c3881cab1611010e254935a1ca62cf98df72b70246c82ecdbbd555e`.
+No actual free grant was issued, credential value read/copied, new credential/SA/
+IAM/API enablement performed, or cloud count/generation dispatched. Both cloud
+call counts remain **0**. The bounded first count may establish whether the old
+restricted standard key works only after all required facts are established;
+there is no separate availability probe, paid fallback or permission to infer
+the missing Contributor value.
