@@ -877,3 +877,52 @@ Proactive test files plus Runtime's shared-lane transport, parser, application
 and bounded-runtime suites. This includes peer-owned Store/Runtime tests as
 well as this worker's cases; it is an author-run combined regression count,
 not independent QA approval. Raw output: owner-local `f0-composed-all.tap`.
+
+## Assigned navigation transport and shutdown admission
+
+Integration explicitly assigned the approved source resolver and message anchor
+HTTP sidecars to this worker after coordinating ownership with Context. The new
+`register-owned-source-routes.ts` exports `registerOwnedSourceRoutes` and the
+minimal `OwnedSourceOperations` interface; Integration owns the real wrapper,
+bootstrap and normative API registration. It imports the shared conversation
+error catalogue and `parseConversationCursor`, without editing those files.
+
+`POST /v1/me/ai/source-references/resolve` accepts exactly conversationId,
+messageId and server-issued UUID cardRef. Its response is only a typed
+conversation-message anchor or Check-in target. Check-in IDs use the existing
+`isSafeDocumentId` contract, including legacy non-UUID IDs. The companion GET
+message anchor has no body/query and returns exactly the requested message.
+Both projections omit private provenance and raw paths/content. Anchor sequence
+and pageBefore must be safe integers, with pageBefore exactly sequence + 1;
+the emitted canonical unpadded base64url cursor is round-tripped through the
+existing parser before sending. No Event target extension is implemented.
+
+Authentication precedes body parsing. Request-only caller verification and a
+current guard are supplied to the injected operations; fresh source version,
+owner/purpose/retention authority remains their responsibility. Missing, changed
+and unknown results retain their distinct 404/409/503 errors. Strict body,
+query/header rules, 8192-byte limit, no automatic HEAD, final projection guard
+and safe error normalization have explicit HTTP fake cases.
+
+Both route registrars accept an optional fourth `accepting: () => boolean`
+callback, defaulting to true for existing compositions. They check admission
+before/after initial authentication and include it in every request current
+guard. Stopped admission rejects a new request with 503, prevents a mutation
+after an awaited authentication and closes an invalidated pending response.
+Integration must stop admission before worker shutdown/drain; this change does
+not stop a physical model by itself and does not change Application/model code.
+
+Pinned strict build and **28/28 HTTP fake tests** pass: 12 new source-navigation
+cases and 16 F0 transport cases, including three new shutdown cases. Raw output
+is owner-local `owned-source-first.tap` / `owned-source-first-build.log`.
+These tests do not establish actual source authority or Firebase behavior.
+
+The separately requested read-only normative F0 review checked all 11 route
+methods/paths, success schemas and statuses, public allowlists, error envelopes
+and header rules against Integration's working API files. Reproducible schema
+versus handler differences for non-paused pausedUntil and equal quiet endpoints,
+plus missing strict-header/body-limit detail and the unused 502 listing, were
+reported to Integration. Integration reported addressing them in its shared API
+commit; that report is not an independent recheck of the resulting commit.
+Owner-local `api-review-cases.log` and `api-review-snapshot.json` preserve the
+read-only observations. No shared API/bootstrap file was authored here.
