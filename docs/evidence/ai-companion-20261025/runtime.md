@@ -621,3 +621,41 @@ semantic verdicts**. No new preload, local model run, cloud call,
 real account write or notification send occurred. F1a remains for the next
 exact Context input contract. The previous local 12 Pass / 12 Fail semantic
 result remains unchanged.
+## F0 executable exact-eight entry point
+
+`tool/ai-companion-eval/f0-run.mjs` defaults to `dry`: it hashes the executable
+bundle, compiled adapters and unchanged eight-case corpus without network calls.
+`--mode mock --out <new-private-path> --preload 1` exercises the same production
+`LocalModelLane` and `LocalFirstFlowTransport` using injected fake HTTP.
+
+Real execution requires `--mode local --allow-local true --out <new-private-path>
+--authorization <private-json> --authorization-sha256 <exact-file-sha256>
+--preload 0|1`, clean HEAD, pinned Node 24.19.0, an unexpired Integration slot
+grant bound to HEAD/bundle/corpus, and an exclusive single-use slot claim. The
+grant contains `schemaVersion=f0_local_authorization_v1`, `status=approved`,
+`approvedBy=Integration`, `scope=enmori-f0-exact8-20261025`, `slotReference`,
+`hostReadbackReference`, `sourceHead`, `sourceBundleSha256`, `corpusSha256`,
+`model=qwen3.5:9b`, `maxGenerationRequests=8`, `maxEmptyPreloads=0|1`, `expiresAt`.
+Authorization and executable hashes are rechecked after durable intent capture
+at each actual HTTP boundary. A consumed grant cannot resume or retry.
+
+The run uses one production lane: at most one empty preload, counted separately,
+then each frozen F0 case once sequentially (8192 context / 512 output / think=false).
+Delivery expires at 45 seconds; receipt continues up to 120 seconds. The harness
+captures bounded raw response bytes and their hash before passing identical bytes
+through the production receiver. Unknown physical outcomes stop the entire batch
+without releasing/resetting the lane. Known complete but malformed, length-ended
+or late output stays raw and ineligible; it is not repaired or repeated.
+
+Private request/response artifacts, manifest, report and a hash-bound blank review
+template are saved exclusively outside Git. The CLI prints only outcome/count/
+timing metadata. Final harness/corpus/private-output checks passed 22/22, including
+eight sequential cases, preload count, unknown/duplicate/invalid UTF-8/lost/large/
+stalled responses, expiry/cancellation during capture, late completion, and grant
+binding and response-artifact failure. The mock CLI completed one fake preload
+plus eight fake generations with zero provider calls. These are harness/source
+checks, not actual model or semantic evidence.
+Independent QA separately confirmed the e2f092e adapter's 18/18 focused cases,
+old production serializer byte identity for all 24 legacy requests, and the eight
+F0 input projections. Root then assigned the sole local slot, conditional on this
+CLI's completed self-check. Actual run evidence follows separately when available.
