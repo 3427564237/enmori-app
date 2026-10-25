@@ -1,5 +1,6 @@
 import type { AuthPrincipal, IdentityVerificationResult } from "../../shared/ports/identity-verifier.js";
 import type { StoredConversationMessage } from "./real-conversation-store.js";
+import type { SelectReplyContext, ExecuteReplySelection, PreparedReplySelection } from "./selected-reply.js";
 
 /** Selected N01 operations. Implemented by ZHOU's asynchronous Application. */
 export interface ConversationCaller {
@@ -11,15 +12,16 @@ export interface ConversationCaller {
 export type ConversationFailureCode = "REQUEST_INVALID" | "AUTH_REQUIRED" | "AUTH_FORBIDDEN" | "ONBOARDING_REQUIRED"
   | "AI_CONTEXT_NOT_PERMITTED" | "CONVERSATION_UNAVAILABLE" | "AI_OPERATION_UNAVAILABLE" | "AI_OPERATION_CONFLICT"
   | "REQUEST_TOO_LARGE" | "AI_INPUT_INVALID" | "AI_BUSY" | "AI_UNAVAILABLE" | "AI_REPLY_REJECTED"
-  | "AI_AUTHORITY_CHANGED" | "AI_OUTCOME_UNRESOLVED";
+  | "AI_AUTHORITY_CHANGED" | "AI_OUTCOME_UNRESOLVED" | "AI_SOURCE_UNAVAILABLE" | "AI_CONTEXT_SELECTION_CONFLICT";
 export type ConversationResult<T> = { readonly kind: "success"; readonly value: T }
   | { readonly kind: "failure"; readonly code: ConversationFailureCode }
   | { readonly kind: "terminated" };
-export type PrepareConversation =
+export type PrepareConversation = (
   | { readonly kind: "send"; readonly purpose: "checkin_conversation"; readonly conversationId?: string }
-  | { readonly kind: "retry"; readonly purpose: "checkin_conversation"; readonly conversationId: string; readonly userMessageId: string };
+  | { readonly kind: "retry"; readonly purpose: "checkin_conversation"; readonly conversationId: string; readonly userMessageId: string }) & {readonly contextSelection?:SelectReplyContext};
 export interface PreparedConversationOperation {
   readonly operationId: string; readonly operationKey: string; readonly conversationId: string; readonly preparationExpiresAt: string;
+  readonly contextSelection?:PreparedReplySelection;
 }
 export type ConversationReadback =
   | { readonly operationId: string; readonly state: "active" | "no_effect" | "unresolved" }
@@ -43,7 +45,8 @@ export interface ConversationOperations {
   /** Optional for older isolated suppliers: absence fails unavailable. */
   listConversations?(caller: ConversationCaller, after: string | undefined): Promise<ConversationResult<ConversationSummaryPage>>;
   prepare(caller: ConversationCaller, input: PrepareConversation): Promise<ConversationResult<PreparedConversationOperation>>;
-  execute(caller: ConversationCaller, input: { readonly operationId: string; readonly operationKey: string; readonly text: string },
+  execute(caller: ConversationCaller, input: { readonly operationId: string; readonly operationKey: string; readonly text: string;
+    readonly contextSelection?:ExecuteReplySelection;readonly replyToMessageId?:string },
     delivery: { readonly signal: AbortSignal; current(): boolean;
       /** Complete body acceptance at the original guarded synchronous sink event. */
       readonly acceptCompleteBody?:(pair:ExecutedConversationPair)=>boolean;

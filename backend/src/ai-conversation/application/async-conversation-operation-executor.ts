@@ -13,6 +13,7 @@ import { AsyncConversationApplication } from "./async-conversation-application.j
 
 type AcknowledgedConversationPair = Extract<Awaited<ReturnType<AsyncAcknowledgedConversationPair["read"]>>, { kind: "success" }>["value"];
 export interface AsyncConversationExecutionPorts {
+  readonly selectedReads?:import("../ports/selected-reply.js").SelectedReplyReadPort;
   readonly authority: AsyncConversationAuthority;
   readonly reads: RealContextReadPort;
   readonly store: AsyncConversationStore;
