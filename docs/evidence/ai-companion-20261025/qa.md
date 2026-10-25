@@ -58,8 +58,16 @@ The [bounded F1 real-model attempt ledger](qa-f1-production-attempts.md) preserv
 the first `6bab960` harness failure: one completed empty preload, zero generation,
 prepare or execute. QA verified the recorded artifacts and independently
 reproduced the getter error without network/listener/model activity. F1 real-model
-semantics remain Not Run; Integration's separate bounded continuation is pending
-review and cannot erase the first failure or its consumed preload.
+semantics were Not Run for that first attempt. The separate authorized continuation
+now has one actual HTTP/canonical/model output independently graded **1 Pass** on
+the original five criteria for one historical Check-in restatement. Cumulative
+preload/generation/execute are each one; the original failure and all other
+semantic ledgers remain unchanged. This is not broad F1 or device acceptance.
+
+The [selected-context ledger](qa-f1-selected-context.md) also records the later
+`d1dece9` HTTP history correction: legal late retries can produce interleaved
+user sequences while assistant sequences stay ascending. Exact-head strict
+compilation and four focused HTTP tests passed independently with fetch blocked.
 
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with
