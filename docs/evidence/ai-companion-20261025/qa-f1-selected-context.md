@@ -68,6 +68,11 @@ the actual UI review-and-Send flow and Emulator behavior require their own
 composition evidence. Unknown execute outcomes still require an original-
 operation read; exclusion recovery is not permission to resend them.
 
+Subsequent [actual Root composition QA](qa-composed-first-flow.md) at `d992ea9`
+adds independent bootstrap/HTTP/Auth/Firestore evidence for selected publication,
+same-topic explicit recovery and source-edit rejection. Its model HTTP is fake;
+real-model semantics and App interaction remain separate gates.
+
 ## Evidence
 
 Private directories:

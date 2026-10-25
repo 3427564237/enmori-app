@@ -41,6 +41,19 @@ The [selected-context review](qa-f1-selected-context.md) preserves the original
 At the latter head, 21 selected-reply and five prepared-selection checks passed
 independently. HTTP/UI/Emulator composition remains a separate gate.
 
+The subsequent [actual composed first-flow audit](qa-composed-first-flow.md)
+passed five independent groups at `d992ea9` using real bootstrap factories,
+HTTP handlers and isolated Auth/Firestore Emulator, with four fake model calls
+and no real model or FCM call. It also records nine focused source/fake tests,
+24 unchanged old request captures and the four-test `8b2e746` delegation repair.
+Synthetic data was cleaned and the Emulator slot returned. UI, real-model,
+notification and physical-device gates remain distinct.
+
+The [free-eight cloud interruption audit](qa-cloud-interruption.md) verifies
+the remaining files at `0c436bd`: one confirmed count response, one consumed
+generation reservation, actual generation dispatch 0..1 unknown, no generated
+output and seven cases unreached. It cannot be scored and was not retried.
+
 Latest checkpoints: [local24 semantic review](qa-model-review.md) and
 [approved C source/widget review](qa-c-entry-review.md), with
 [proposed F0/F1 contract consistency](qa-contract-review.md). Local24 is
