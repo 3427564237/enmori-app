@@ -174,3 +174,69 @@ targeted late-retry and duplicate-sequence regression was added. Existing
 history selection, Retry permissions and model serialization are unchanged.
 Pinned compilation and **4/4** selected HTTP tests passed for this correction;
 the raw result is `integration-late-retry-history.log`.
+
+## Selected-reply client and validation cleanup
+
+Client Domain `090e996` and wire `a7a288f` add the optional selected-reply
+capability without changing ordinary preparation. A selected Retry explicitly
+binds the existing conversation and saved user message. Preparation sends only
+manual Check-in IDs with local processing; the returned minimized cards and
+history keys belong to that one ticket. Execute sends the original operation
+key, closed source choices and explicit history exclusions once. Selection
+conflicts and cancelled/unknown requests do not trigger an ordinary-send
+fallback. The controller owns ticket expiry and retention of the preparation
+token; its final UI checks remain a separate evidence layer.
+
+All **8/8** focused wire tests passed. They cover actual transport shapes,
+invalid or content-rich metadata, legitimate late-Retry history, request-local
+choices, conflict propagation and late cancellation. Raw log
+`integration-f1-wire-first.log` SHA-256:
+`495601491705a354e523782f553beb42f9a454ebe7fc7dd6703b92fb6d5eeb32`.
+QA independently reviewed the wire against Backend at `e483b7c`; that source
+review did not claim to run these tests or accept the unfinished UI.
+
+After the one real F1 continuation and independent artifact review completed,
+Integration stopped its own synthetic Auth/Firestore Emulator process normally
+(exit 0). All five assigned ports were checked closed. No further model or
+Emulator calls are planned in this scope. The original six input files still
+match the startup preservation manifest. The existing `enmori-group.service`
+remains active in `li-zhou-integration-oct20/ENMORI`, whose source HEAD remains
+`7a3c4fa31b5bb609349a961a2e4e08aeb80c9036`; this check is not a deployment.
+Owner-local preservation readback SHA-256:
+`ad2c62c902ccfea6ceef3a8e800871c62939e5b41cb44aa89c86316266726657`.
+
+## Shared client composition checkpoint
+
+The explicitly selected first-flow composition now injects source references,
+an exact-session `/ai/message` locator page and the optional notification ports.
+An opaque notification is resolved by the existing owner endpoint, then the
+message page reads the canonical target anchor again. Missing or stale locators
+do not fall back to Latest. A verified Check-in source opens the existing owner
+record route only while the originating route and exact session are current.
+
+`ENMORI_AI_COMPANION_INSTALLATION_REF` is optional. An absent value supplies no
+SDK port; the notification boundary creates no controller/listener/token flow.
+An explicit valid installation uses the pinned lazy SDK adapter and the existing
+registration contract. The planned v28 build omits that value. Its Settings
+controls explain that system notifications are unavailable for this installation.
+Sign-out calls bounded cleanup while the original session is valid, then checks
+session identity again before logging out. Cleanup failure/timeout cannot block
+logout or cause a replacement account to be logged out.
+
+Targeted shared-file analysis was clean after removing one redundant import.
+The **12/12** composed router/bridge tests passed, including default-null/invalid
+configuration with no SDK access, opaque target/abort handling, fresh anchor
+reads, stale callbacks and bounded logout with a real notification controller
+and a synthetic delayed registration GET. Raw final log SHA-256:
+`204f316450a4ac7967aab784ea1ddbc5abed01fce307f75cdf138d08d7fcb620`.
+The first two logout tests used an unsuitable nested provider override and did
+not reach the mounted settings router; that fixture was replaced. Their first
+real-composition version also waited for all Settings animations to settle.
+The final tests pump a bounded route transition and invoke the route callback;
+they establish logout coordination, not full Settings visual readiness. Those
+diagnostic logs remain beside the final log for independent review.
+
+This checkpoint does not close Product's `629a22d` source-body/Search finding or
+QA's `cb8d982` same-owner unknown-registration finding. Their module owners are
+fixing both before final candidate acceptance. F1 picker/review UI, independent
+composed UI review and the final v28 artifact remain subsequent evidence layers.

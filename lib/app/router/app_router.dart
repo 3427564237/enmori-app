@@ -47,6 +47,8 @@ import 'activity_routes.dart';
 import 'companion_navigation.dart';
 import '../../features/proactive/presentation/proactive_follow_up_page.dart';
 import '../../features/proactive/presentation/proactive_settings_page.dart';
+import '../../features/proactive/presentation/proactive_push_controls.dart';
+import '../../features/proactive/proactive_notification_controller.dart';
 
 abstract final class AppRoutes {
   static const startup = '/startup';
@@ -69,6 +71,7 @@ abstract final class AppRoutes {
   static const checkInHistory = '/check-ins/history';
   static const footprint = '/check-ins/footprint';
   static const aiAssistant = '/ai-assistant';
+  static const aiMessage = '/ai/message';
   static const aiFollowUps = '/ai/follow-ups';
   static const newAiFollowUp = '/ai/follow-ups/new';
   static const interests = '/interests';
@@ -147,6 +150,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       : null;
   final companionEnabled =
       aiPage != null && ref.watch(companionFirstFlowEnabledProvider);
+  final companionMessagePage = companionEnabled
+      ? ref.watch(companionMessagePageProvider)
+      : null;
 
   // Observe same-UID replacement only for an available shared feature. Existing
   // compositions retain their auth dependency path when no page is supplied.
@@ -361,11 +367,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ),
       if (companionEnabled) ...[
+        if (companionMessagePage != null)
+          GoRoute(
+            path: AppRoutes.aiMessage,
+            builder: (context, state) {
+              final extra = state.extra;
+              if (extra is! AiMessageNavigation ||
+                  routeSession == null ||
+                  !identical(extra.session, routeSession)) {
+                return const ConfigurationUnavailablePage();
+              }
+              return companionMessagePage.build(
+                context,
+                locator: extra.locator,
+                onBack: () => backFromShared(context, AppRoutes.aiMessage),
+                onOpenSettings: () => openShared(
+                  context,
+                  AppRoutes.aiMessage,
+                  AppRoutes.aiSettings,
+                ),
+              );
+            },
+          ),
         GoRoute(
           path: AppRoutes.aiFollowUps,
           builder: (context, state) => ProactiveSettingsPage(
             key: ValueKey((routeSession, AppRoutes.aiFollowUps)),
             onBack: () => backFromShared(context, AppRoutes.aiFollowUps),
+            pushControls: const ProactivePushControls(),
           ),
         ),
         GoRoute(
@@ -688,8 +717,51 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             await context.push<void>(AppRoutes.profileEdit);
           },
           onSignOut: () async {
+            if (!ref.mounted) {
+              return const Failure<void>(
+                AppFailure(
+                  kind: AppFailureKind.authRequired,
+                  message: 'The signed-in session has changed.',
+                ),
+              );
+            }
             final entry = ref.read(signOutEntryProvider.notifier);
             final auth = ref.read(authRepositoryProvider);
+            final session = ref.read(authSessionProvider).asData?.value;
+            if (companionEnabled &&
+                (session is! AuthSessionAuthenticated ||
+                    !identical(session, routeSession))) {
+              return const Failure<void>(
+                AppFailure(
+                  kind: AppFailureKind.authRequired,
+                  message: 'The signed-in session has changed.',
+                ),
+              );
+            }
+            if (companionEnabled &&
+                ref.exists(proactiveNotificationControllerProvider)) {
+              try {
+                await ref
+                    .read(proactiveNotificationControllerProvider.notifier)
+                    .beforeSignOut()
+                    .timeout(const Duration(seconds: 15));
+              } catch (_) {
+                // Logout remains available if device/server cleanup is unknown.
+                // The controller retains its original session/physical guards.
+              }
+            }
+            if (!ref.mounted ||
+                !identical(
+                  ref.read(authSessionProvider).asData?.value,
+                  session,
+                )) {
+              return const Failure<void>(
+                AppFailure(
+                  kind: AppFailureKind.authRequired,
+                  message: 'The signed-in session has changed.',
+                ),
+              );
+            }
             entry.requested(true);
             final result = await auth.signOut();
             if (result is Failure<void>) entry.requested(false);

@@ -56,6 +56,10 @@ import 'router/isolated_persona_pages.dart';
 import 'router/companion_navigation.dart';
 import '../features/proactive/data/http_proactive_repository.dart';
 import '../features/proactive/proactive_providers.dart';
+import '../features/proactive/domain/proactive_messaging.dart';
+import '../features/proactive/data/http_proactive_registration_repository.dart';
+import '../features/proactive/proactive_notification_controller.dart';
+import 'proactive_messaging_composition.dart';
 
 /// One caller-owned HTTPS/Auth connection. No credentials, local product store,
 /// fake Repository or ordinary bootstrap enablement is supplied by this root.
@@ -69,12 +73,16 @@ final class ControlledDemoApp extends StatefulWidget {
     this.eventParticipationEnabled = false,
     this.remoteGroupEnabled = false,
     this.companionFirstFlowEnabled = false,
+    this.companionInstallationRef,
+    this.companionMessagingPort,
     super.key,
   });
   final bool dualAccounts;
   final bool eventParticipationEnabled;
   final bool remoteGroupEnabled;
   final bool companionFirstFlowEnabled;
+  final String? companionInstallationRef;
+  final ProactiveMessagingPort? companionMessagingPort;
   final Uri baseUri;
   final AuthRepository auth;
   final http.Client client;
@@ -116,6 +124,103 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       baseUri: widget.baseUri,
       tokenProvider: widget.auth.getIdToken,
       client: widget.client,
+    );
+  }
+
+  Widget _buildAiPage(
+    BuildContext context, {
+    required String sourcePath,
+    required VoidCallback onBack,
+    required VoidCallback onOpenSettings,
+    AiMessageLocator? initialMessage,
+  }) {
+    final session = ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(authSessionProvider).value;
+    bool canOpenCompanion() {
+      if (!context.mounted ||
+          !widget.companionFirstFlowEnabled ||
+          session is! AuthSessionAuthenticated) {
+        return false;
+      }
+      final scope = ProviderScope.containerOf(context, listen: false);
+      return identical(
+            scope.read(authSessionProvider).asData?.value,
+            session,
+          ) &&
+          scope.read(routerGateProvider) == RouterGateState.authenticated &&
+          GoRouter.of(context).state.uri.path == sourcePath &&
+          ModalRoute.of(context)?.isCurrent == true;
+    }
+
+    void selectTab(int index) {
+      if (context.mounted) {
+        selectConnectedSocialTab(
+          context,
+          index,
+          session: session,
+          sourcePath: sourcePath,
+        );
+      }
+    }
+
+    return AiConsentGate(
+      onOpenSettings: onOpenSettings,
+      navigationBar: SocialDemoNavigation(
+        selectedIndex: 3,
+        onSelected: selectTab,
+      ),
+      child: AiConversationPage(
+        initialMessage: initialMessage,
+        onOpenSourceTarget: widget.companionFirstFlowEnabled
+            ? (target) {
+                if (!canOpenCompanion()) return;
+                if (target case AiCheckInTarget(:final checkInId)) {
+                  context.push<void>(AppRoutes.savedCheckIn(checkInId));
+                }
+              }
+            : null,
+        personaContext: const AiPersonaContext(),
+        socialStyle: true,
+        navigationBarBuilder: (navigate) => SocialDemoNavigation(
+          selectedIndex: 3,
+          onSelected: (index) => navigate(() {
+            if (context.mounted) {
+              selectConnectedSocialTab(
+                context,
+                index,
+                session: session,
+                sourcePath: sourcePath,
+              );
+            }
+          }),
+        ),
+        onBack: onBack,
+        onOpenSettings: onOpenSettings,
+        onFollowUpRequested: widget.companionFirstFlowEnabled
+            ? (source) {
+                if (!canOpenCompanion() ||
+                    session is! AuthSessionAuthenticated) {
+                  return;
+                }
+                context.push<void>(
+                  AppRoutes.newAiFollowUp,
+                  extra: FollowUpNavigation(session: session, source: source),
+                );
+              }
+            : null,
+        onOpenFollowUps: widget.companionFirstFlowEnabled
+            ? () {
+                if (canOpenCompanion()) {
+                  context.push<void>(AppRoutes.aiFollowUps);
+                }
+              }
+            : null,
+        onOpenPersonas: () {
+          if (context.mounted) context.push<void>(AppRoutes.personas);
+        },
+      ),
     );
   }
 
@@ -175,6 +280,27 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
         (ref) => ref.watch(connectedPersonaPreviewAccessProvider),
       ),
       aiConversationRepositoryProvider.overrideWithValue(_ai),
+      aiCompanionReferencesEnabledProvider.overrideWithValue(
+        widget.companionFirstFlowEnabled,
+      ),
+      if (widget.companionFirstFlowEnabled)
+        companionMessagePageProvider.overrideWithValue(
+          CompanionMessagePage(
+            build:
+                (
+                  context, {
+                  required locator,
+                  required onBack,
+                  required onOpenSettings,
+                }) => _buildAiPage(
+                  context,
+                  sourcePath: AppRoutes.aiMessage,
+                  onBack: onBack,
+                  onOpenSettings: onOpenSettings,
+                  initialMessage: locator,
+                ),
+          ),
+        ),
       companionFirstFlowEnabledProvider.overrideWithValue(
         widget.companionFirstFlowEnabled,
       ),
@@ -185,6 +311,30 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
             client: widget.client,
           ),
         ),
+      proactiveMessagingEnabledProvider.overrideWithValue(
+        widget.companionFirstFlowEnabled,
+      ),
+      if (widget.companionFirstFlowEnabled) ...[
+        proactiveMessagingInstallationRefProvider.overrideWithValue(
+          widget.companionInstallationRef,
+        ),
+        proactiveMessagingPortProvider.overrideWithValue(
+          widget.companionMessagingPort,
+        ),
+        proactiveRegistrationRepositoryProvider.overrideWithValue(
+          HttpProactiveRegistrationRepository(
+            baseUri: widget.baseUri,
+            client: widget.client,
+          ),
+        ),
+        proactiveDeliveryResolverProvider.overrideWithValue(
+          companionDeliveryResolver(_ai),
+        ),
+        proactiveMessageTargetHandlerProvider.overrideWith(
+          (ref) =>
+              (session, target) => openCompanionMessage(ref, session, target),
+        ),
+      ],
       isolatedHistoryPageProvider.overrideWithValue(
         IsolatedHistoryPage(
           build: (context, {required onBack, required onOpenSavedCheckIn}) =>
@@ -197,90 +347,13 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       ),
       isolatedAiConversationPageProvider.overrideWithValue(
         IsolatedAiConversationPage(
-          build: (context, {required onBack, required onOpenSettings}) {
-            final session = ProviderScope.containerOf(
-              context,
-              listen: false,
-            ).read(authSessionProvider).value;
-            bool canOpenCompanion() {
-              if (!context.mounted ||
-                  !widget.companionFirstFlowEnabled ||
-                  session is! AuthSessionAuthenticated) {
-                return false;
-              }
-              final scope = ProviderScope.containerOf(context, listen: false);
-              return identical(
-                    scope.read(authSessionProvider).asData?.value,
-                    session,
-                  ) &&
-                  scope.read(routerGateProvider) ==
-                      RouterGateState.authenticated &&
-                  GoRouter.of(context).state.uri.path == AppRoutes.aiAssistant;
-            }
-
-            void selectTab(int index) {
-              if (context.mounted) {
-                selectConnectedSocialTab(
-                  context,
-                  index,
-                  session: session,
-                  sourcePath: AppRoutes.aiAssistant,
-                );
-              }
-            }
-
-            return AiConsentGate(
-              onOpenSettings: onOpenSettings,
-              navigationBar: SocialDemoNavigation(
-                selectedIndex: 3,
-                onSelected: selectTab,
-              ),
-              child: AiConversationPage(
-                personaContext: const AiPersonaContext(),
-                socialStyle: true,
-                navigationBarBuilder: (navigate) => SocialDemoNavigation(
-                  selectedIndex: 3,
-                  onSelected: (index) => navigate(() {
-                    if (context.mounted) {
-                      selectConnectedSocialTab(
-                        context,
-                        index,
-                        session: session,
-                        sourcePath: AppRoutes.aiAssistant,
-                      );
-                    }
-                  }),
-                ),
+          build: (context, {required onBack, required onOpenSettings}) =>
+              _buildAiPage(
+                context,
+                sourcePath: AppRoutes.aiAssistant,
                 onBack: onBack,
                 onOpenSettings: onOpenSettings,
-                onFollowUpRequested: widget.companionFirstFlowEnabled
-                    ? (source) {
-                        if (!canOpenCompanion() ||
-                            session is! AuthSessionAuthenticated) {
-                          return;
-                        }
-                        context.push<void>(
-                          AppRoutes.newAiFollowUp,
-                          extra: FollowUpNavigation(
-                            session: session,
-                            source: source,
-                          ),
-                        );
-                      }
-                    : null,
-                onOpenFollowUps: widget.companionFirstFlowEnabled
-                    ? () {
-                        if (canOpenCompanion()) {
-                          context.push<void>(AppRoutes.aiFollowUps);
-                        }
-                      }
-                    : null,
-                onOpenPersonas: () {
-                  if (context.mounted) context.push<void>(AppRoutes.personas);
-                },
               ),
-            );
-          },
         ),
       ),
       isolatedPersonaPagesProvider.overrideWithValue(
@@ -360,8 +433,11 @@ final class _ConnectedPages extends ConsumerWidget {
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       debugShowCheckedModeBanner: false,
       theme: socialDemoTheme(),
-      builder: (context, child) =>
-          ContentAccessBoundary(child: EnmoriMotionPreferences(child: child!)),
+      builder: (context, child) => ContentAccessBoundary(
+        child: CompanionNotificationBoundary(
+          child: EnmoriMotionPreferences(child: child!),
+        ),
+      ),
       routerConfig: ref.watch(appRouterProvider),
     );
   }

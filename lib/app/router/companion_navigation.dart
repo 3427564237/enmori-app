@@ -1,5 +1,7 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/ai_conversation/domain/ai_owned_sources.dart';
 import '../../features/auth/domain/auth_repository.dart';
 import '../../features/proactive/domain/proactive.dart';
 
@@ -13,3 +15,26 @@ final class FollowUpNavigation {
   final AuthSessionAuthenticated session;
   final SavedFollowUpSource source;
 }
+
+/// Only an authenticated resolver supplies this ephemeral locator. The target
+/// page still reads its current canonical anchor and never trusts cached text.
+final class AiMessageNavigation {
+  const AiMessageNavigation({required this.session, required this.locator});
+  final AuthSessionAuthenticated session;
+  final AiMessageLocator locator;
+}
+
+final class CompanionMessagePage {
+  const CompanionMessagePage({required this.build});
+  final Widget Function(
+    BuildContext context, {
+    required AiMessageLocator locator,
+    required VoidCallback onBack,
+    required VoidCallback onOpenSettings,
+  })
+  build;
+}
+
+final companionMessagePageProvider = Provider<CompanionMessagePage?>(
+  (ref) => null,
+);
