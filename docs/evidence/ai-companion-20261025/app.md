@@ -436,3 +436,92 @@ UI composition, actual visible read marking, exact page reveal, draft-editor
 ownership and F1/D1 remain subsequent checkpoints, not claims of this commit.
 No real Backend, model, Firebase, SDK/token, notification, device, APK/Gradle or
 deployment operation was performed for this protocol validation.
+
+## Fourth increment, App checkpoint — exact source view, visible reading and one draft
+
+This UI/controller increment follows protocol `807613d`. Root's pure selected
+contract/wire commits `090e996` and `a7a288f` were consumed as `5d579e5` and
+`49e1c60`; they do not add an F1 picker or selected-send UI in this checkpoint.
+The first-flow authority and source/anchor/read contracts remain unchanged.
+
+- Genuine proactive rows carry the application-owned “You requested this
+  follow-up” label, safe source actions and an unread dot only after a known
+  watermark. The controller excludes standalone proactive assistants from
+  ordinary pair/retry evidence. Text stays plain and source versions stay opaque.
+- Optional `initialMessage: AiMessageLocator?` and
+  `onOpenSourceTarget: ValueChanged<AiSourceTarget>?` extend the existing page.
+  A source tap resolves the exact current receipt before navigation. Message
+  targets stay in the feature; Root routes typed Check-in targets. A locator
+  reads its authorized anchor, then the existing transcript with the returned
+  `before`, and requires the exact available ID/sequence. Failure has explicit
+  read-only recovery and never opens a global Latest page in its place.
+- A same-topic locator preserves the current reply/user-saved retry binding and
+  draft. A different topic retains the existing explicit discard confirmation.
+  Proactive reply selection adds only a local association; explicit real-user
+  Send carries the approved replyTo field through the existing operation fence.
+- Source navigation/read metadata use a separate session/topic/foreground/consent
+  lifetime. A later denial aborts earlier transcript reads so a delayed older
+  response cannot restore its body. Only IDs in a newly accepted page recover
+  their own hidden source views; reading an unrelated page cannot authorize the
+  rest of the cached history. A retired reply stays blocked until exact recheck
+  or explicit removal of its association, keeping the user's own draft.
+- `AiVisibleMessage` observes the actual text render box after layout, its scroll
+  viewport, painted opacity and current route. Offscreen, covered, offstage and
+  incomplete-fade bodies do not mark reading. The metadata controller rechecks
+  the committed available proactive ID and current revision. Unknown PUT remains
+  unconfirmed and fenced until GET; row construction, notification receipt and
+  clicks alone are not read acknowledgements or delivery proof.
+- A session-RAM draft editor lease permits only the current AI page to edit or
+  Send. When two AI pages coexist around a pushed record editor, the returning
+  page restores the current controller TextEditingValue/selection and consumes
+  the current locator. It cannot resurrect discarded text, replay a captured old
+  Send callback or reapply an obsolete initial locator. Unknown operation guards
+  survive both page stacks. Other record-editor drafts are retained.
+- References default disabled through `aiCompanionReferencesEnabledProvider`.
+  Root enables the approved composition explicitly. The settings page also adds
+  optional `Widget? pushControls`, default null, for Delivery's separate D1 UI.
+  This checkpoint neither initializes Messaging nor implements that D1 controller.
+
+### Exact validation and retained failure history
+
+All Flutter work used the coordinated nonblocking global lock. The first new
+wire/controller run passed 15/19: the fixture had allowed a lazily rebuilt source
+observer to see an earlier cached read before initializing the new session epoch.
+The fixture now starts that observer before the fresh transcript; production
+still refuses cached proof. The corrected 19/19 run is retained as
+`app-origin-source-epoch-tests.log`. A new stacked-page case initially sampled a
+button before its text-edit rebuild; adding the real frame resolved that fixture.
+
+The complete AI/proactive candidate then passed **344/344**, with analyzer clean,
+in `app-origin-regression-final.log`. Its sole earlier failure was an old R-A test
+that started at Latest, searched down for an unbuilt recovery control above it,
+and required a new notifier instance. An isolated archive of exact `d893d2d`
+reproduced the same instance failure after fixing navigation; see
+`app-origin-ra-d893-baseline.log` and the baseline path receipt in this directory.
+The test now uses bounded top-to-target scrolling/hit testing and asserts the
+session/target/unknown/no-resend behavior, retaining every business guard rather
+than requiring a notifier disposal mechanism. Runtime lifetime was not changed
+to satisfy that stale assumption.
+
+After the complete run, final local-page recovery and reply privacy cases were
+added. The exact final scoped batch passed **104/104**, including owned source
+controller/page/visibility cases, ordinary AI controller/R-A recovery regression
+and Root's eight selected-wire cases. Analyzer: `No issues found! (ran in 13.1s)`.
+Raw output: `app-source-ui-final.log`. No overflow, hit-test warning or exception
+remained. Counts above describe separate runs and are not added together. Every
+log named in this section is under
+`/home/miku/.local/state/enmori-ai-companion-20261025/`.
+
+The latest privacy cases prove that a partial page cannot restore another cached
+source, a same-topic exact read preserves its retry/reply binding, and cancelling
+a retired reply association is explicit. UI coverage includes two coexisting AI
+pages around a retained record editor, original unknown-operation recovery,
+covered/offscreen text, exact navigation failure, typed source routing and a
+320px Chinese screen at 2× text. `git diff --check` is clean.
+
+These are synthetic/source/widget and localhost-wire checks. No real Backend,
+model, Firebase, SDK token/registration, notification, phone, APK/Gradle or deploy
+was invoked. Existing model semantic failures remain unchanged. Shared target
+routes/flag composition and the independently owned D1 candidate need Root's
+separate integration/QA; F1 picker/review/selected-send UI remains the next App
+increment. This is not UAT, Release or Done acceptance.

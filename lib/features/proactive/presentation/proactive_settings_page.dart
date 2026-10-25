@@ -9,8 +9,13 @@ import '../proactive_providers.dart';
 import 'proactive_status.dart';
 
 final class ProactiveSettingsPage extends ConsumerStatefulWidget {
-  const ProactiveSettingsPage({required this.onBack, super.key});
+  const ProactiveSettingsPage({
+    required this.onBack,
+    this.pushControls,
+    super.key,
+  });
   final VoidCallback onBack;
+  final Widget? pushControls;
   @override
   ConsumerState<ProactiveSettingsPage> createState() =>
       _ProactiveSettingsPageState();
@@ -101,6 +106,7 @@ final class _ProactiveSettingsPageState
                     ),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
+                  ?widget.pushControls,
                   const SizedBox(height: 12),
                   Text(
                     context.tr(

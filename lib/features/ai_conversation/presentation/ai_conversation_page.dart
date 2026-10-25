@@ -8,10 +8,12 @@ import '../../../core/presentation/enmori_motion.dart';
 import '../../../core/presentation/local_time.dart';
 
 import '../ai_conversation_providers.dart';
+import '../ai_owned_sources_providers.dart';
 import '../../proactive/domain/proactive.dart';
 import 'ai_plan_draft_page.dart';
 import 'ai_message_search_page.dart';
 import 'ai_status_copy.dart';
+import 'ai_visible_message.dart';
 
 Widget buildAiConversationPage(
   BuildContext context, {
@@ -20,12 +22,16 @@ Widget buildAiConversationPage(
   VoidCallback? onOpenPersonas,
   ValueChanged<SavedFollowUpSource>? onFollowUpRequested,
   VoidCallback? onOpenFollowUps,
+  AiMessageLocator? initialMessage,
+  ValueChanged<AiSourceTarget>? onOpenSourceTarget,
 }) => AiConversationPage(
   onBack: onBack,
   onOpenSettings: onOpenSettings,
   onOpenPersonas: onOpenPersonas,
   onFollowUpRequested: onFollowUpRequested,
   onOpenFollowUps: onOpenFollowUps,
+  initialMessage: initialMessage,
+  onOpenSourceTarget: onOpenSourceTarget,
 );
 
 /// LI supplies navigation; the feature retains request and session ownership.
@@ -39,6 +45,8 @@ final class AiConversationPage extends ConsumerWidget {
     this.personaContext,
     this.onFollowUpRequested,
     this.onOpenFollowUps,
+    this.initialMessage,
+    this.onOpenSourceTarget,
     super.key,
   });
 
@@ -51,6 +59,8 @@ final class AiConversationPage extends ConsumerWidget {
   final Widget? personaContext;
   final ValueChanged<SavedFollowUpSource>? onFollowUpRequested;
   final VoidCallback? onOpenFollowUps;
+  final AiMessageLocator? initialMessage;
+  final ValueChanged<AiSourceTarget>? onOpenSourceTarget;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => _ConversationPage(
@@ -65,6 +75,8 @@ final class AiConversationPage extends ConsumerWidget {
     personaContext: personaContext,
     onFollowUpRequested: onFollowUpRequested,
     onOpenFollowUps: onOpenFollowUps,
+    initialMessage: initialMessage,
+    onOpenSourceTarget: onOpenSourceTarget,
   );
 }
 
@@ -78,6 +90,8 @@ final class _ConversationPage extends ConsumerStatefulWidget {
     this.personaContext,
     this.onFollowUpRequested,
     this.onOpenFollowUps,
+    this.initialMessage,
+    this.onOpenSourceTarget,
     super.key,
   });
 
@@ -90,6 +104,8 @@ final class _ConversationPage extends ConsumerStatefulWidget {
   final Widget? personaContext;
   final ValueChanged<SavedFollowUpSource>? onFollowUpRequested;
   final VoidCallback? onOpenFollowUps;
+  final AiMessageLocator? initialMessage;
+  final ValueChanged<AiSourceTarget>? onOpenSourceTarget;
 
   @override
   ConsumerState<_ConversationPage> createState() => _ConversationPageState();
@@ -111,6 +127,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   bool _leaving = false;
   bool _planning = false;
   bool _finding = false;
+  bool _initialLocationDismissed = false;
+  final _messageKeys = <String, GlobalKey>{};
+  final Object _editorToken = Object();
+  bool? _routeCurrent;
+  bool _syncingEditor = false;
 
   @override
   void initState() {
@@ -119,13 +140,24 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     _sessionKey = ref.read(aiConversationControllerProvider).sessionKey;
     _message.value = _controller.draftFor(_sessionKey);
     _message.addListener(() {
-      _controller.updateDraft(_message.value, sessionKey: _sessionKey);
+      if (!_syncingEditor && _isCurrentEditor) {
+        _controller.updateDraft(
+          _message.value,
+          sessionKey: _sessionKey,
+          editor: _editorToken,
+        );
+      }
     });
     WidgetsBinding.instance.addObserver(this);
     _historyScroll.addListener(_updateLatestVisibility);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_ownsCurrentSession) return;
       final state = ref.read(aiConversationControllerProvider);
+      if (widget.initialMessage case final target?) {
+        unawaited(_openMessage(target));
+        return;
+      }
+      if (state.messageLocation != null) _controller.dismissMessageLocation();
       if (widget.socialStyle &&
           (state.messages.isNotEmpty || state.localOutgoingText != null)) {
         _jumpToLatest();
@@ -137,13 +169,44 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           state.phase != AiConversationPhase.unauthenticated) {
         unawaited(_controller.loadMessages());
       }
+      if (ref.read(aiCompanionReferencesEnabledProvider)) {
+        unawaited(
+          ref.read(aiOwnedSourcesControllerProvider.notifier).checkReadState(),
+        );
+      }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final current = ModalRoute.of(context)?.isCurrent == true;
+    final returning = _routeCurrent == false && current;
+    _routeCurrent = current;
+    if (!current || !_ownsCurrentSession) return;
+    _controller.claimDraftEditor(_editorToken, sessionKey: _sessionKey);
+    if (returning) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_isCurrentEditor) return;
+        _syncingEditor = true;
+        _message.value = _controller.draftFor(_sessionKey);
+        _syncingEditor = false;
+        setState(() => _initialLocationDismissed = true);
+        final location = ref
+            .read(aiConversationControllerProvider)
+            .messageLocation;
+        if (location?.phase == AiMessageLocationPhase.ready) {
+          _revealLocatedMessage(location!.locator.messageId);
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _dismissConfirmation();
+    _controller.releaseDraftEditor(_editorToken);
     // The session owns the request and draft; route removal only releases UI.
     _message.dispose();
     _messageFocus.dispose();
@@ -172,6 +235,10 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   bool get _ownsCurrentSession =>
       mounted &&
       ref.read(aiConversationControllerProvider).sessionKey == _sessionKey;
+  bool get _isCurrentEditor =>
+      _ownsCurrentSession &&
+      ModalRoute.of(context)?.isCurrent == true &&
+      _controller.ownsDraftEditor(_editorToken, sessionKey: _sessionKey);
 
   void _backFromChat() {
     if (!_ownsCurrentSession) return;
@@ -187,7 +254,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     VoidCallback navigate, {
     bool explicitUnknownExit = false,
   }) async {
-    if (!_ownsCurrentSession || _confirming || _leaving) return;
+    if (!_isCurrentEditor || _confirming || _leaving) return;
     _leaving = true;
     _messageFocus.unfocus();
     if (explicitUnknownExit) {
@@ -202,7 +269,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   }
 
   void _newConversation() {
-    if (!_ownsCurrentSession || _confirming || _leaving) return;
+    if (!_isCurrentEditor || _confirming || _leaving) return;
+    _initialLocationDismissed = true;
     final value = _message.value;
     final focused = _messageFocus.hasFocus;
     _controller.startNewConversation();
@@ -213,7 +281,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   }
 
   Future<void> _makePlan() async {
-    if (!_ownsCurrentSession || _planning || _confirming || _leaving) return;
+    if (!_isCurrentEditor || _planning || _confirming || _leaving) return;
     final before = ref.read(aiConversationControllerProvider);
     if (!before.canSend) return;
     final original = _message.value;
@@ -311,7 +379,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   }
 
   Future<void> _openConversation(String id) async {
-    if (!_ownsCurrentSession ||
+    if (!_isCurrentEditor ||
         _confirming ||
         _leaving ||
         !ref.read(aiConversationControllerProvider).canSelectConversation) {
@@ -333,11 +401,315 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       if (!discard) return;
     }
     _message.clear();
+    _initialLocationDismissed = true;
     _messageFocus.unfocus();
     _scrollGeneration++;
     if (_historyScroll.hasClients) _historyScroll.jumpTo(0);
     await _controller.selectConversation(id);
   }
+
+  Future<void> _openMessage(AiMessageLocator target) async {
+    if (!_isCurrentEditor || _confirming || _leaving) return;
+    final before = ref.read(aiConversationControllerProvider);
+    if (!before.canSelectConversation) return;
+    if (before.conversationId != target.conversationId &&
+        _message.text.isNotEmpty) {
+      _confirming = true;
+      final discard = await _confirm(
+        message: context.tr('Discard unsaved changes?', '放弃未保存的修改？'),
+        keepLabel: context.tr('Keep editing', '继续编辑'),
+        actionLabel: context.tr('Discard', '放弃修改'),
+        actionKey: 'ai-confirm-discard',
+      );
+      if (!_ownsCurrentSession) return;
+      _confirming = false;
+      if (!discard) {
+        setState(() => _initialLocationDismissed = true);
+        return;
+      }
+      _message.clear();
+    }
+    _messageFocus.unfocus();
+    _scrollGeneration++;
+    await _controller.openMessage(target);
+    if (!_ownsCurrentSession) return;
+    final current = ref.read(aiConversationControllerProvider);
+    if (current.messageLocation != null) {
+      setState(() => _initialLocationDismissed = true);
+    }
+    if (current.messageLocation?.phase == AiMessageLocationPhase.ready) {
+      _revealLocatedMessage(target.messageId);
+      unawaited(
+        ref.read(aiOwnedSourcesControllerProvider.notifier).checkReadState(),
+      );
+    }
+  }
+
+  void _revealLocatedMessage(String messageId) {
+    final generation = ++_scrollGeneration;
+    void reveal(int remaining) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_ownsCurrentSession ||
+            generation != _scrollGeneration ||
+            !_historyScroll.hasClients) {
+          return;
+        }
+        final target = _messageKeys[messageId]?.currentContext;
+        if (target != null) {
+          unawaited(Scrollable.ensureVisible(target, alignment: .4));
+          return;
+        }
+        if (remaining <= 0) return;
+        // The verified anchor page ends at this exact sequence. This bounded
+        // layout reveal does not fetch or navigate to a global Latest page.
+        _historyScroll.jumpTo(_historyScroll.position.maxScrollExtent);
+        reveal(remaining - 1);
+      });
+      WidgetsBinding.instance.scheduleFrame();
+    }
+
+    reveal(6);
+  }
+
+  Future<void> _openSource(AiMessage message, AiSourceCard card) async {
+    if (!_ownsCurrentSession || ModalRoute.of(context)?.isCurrent != true) {
+      return;
+    }
+    final target = await ref
+        .read(aiOwnedSourcesControllerProvider.notifier)
+        .resolve(message.messageId, card);
+    if (!mounted ||
+        !_ownsCurrentSession ||
+        ModalRoute.of(context)?.isCurrent != true ||
+        target == null) {
+      return;
+    }
+    if (target case AiConversationMessageTarget(:final anchor)) {
+      await _openMessage(anchor.locator);
+    } else {
+      final open = widget.onOpenSourceTarget;
+      if (open != null) await _navigate(() => open(target));
+    }
+  }
+
+  Widget _messageTile(
+    AiConversationState conversation,
+    AiMessage message, {
+    bool bubble = false,
+  }) {
+    final enabled = ref.read(aiCompanionReferencesEnabledProvider);
+    final sources = enabled
+        ? ref.watch(aiOwnedSourcesControllerProvider)
+        : null;
+    final hidden = sources?.hides(message) == true;
+    final located = conversation.messageLocation;
+    final focused =
+        located?.phase == AiMessageLocationPhase.ready &&
+        located?.locator.messageId == message.messageId &&
+        located?.sequence == message.sequence;
+    final tile = _MessageTile(
+      message: message,
+      bubble: bubble,
+      onFollowUp: _followUpAction(conversation, message),
+      sourcePending: hidden,
+      onCheckSource: hidden && conversation.canSelectConversation
+          ? () => unawaited(
+              _openMessage(
+                AiMessageLocator(
+                  conversationId: conversation.conversationId!,
+                  messageId: message.messageId,
+                ),
+              ),
+            )
+          : null,
+      unread: sources?.isUnread(message) == true,
+      onSource: enabled && !hidden && sources?.resolvingCardRef == null
+          ? (card) => unawaited(_openSource(message, card))
+          : null,
+      onReply:
+          enabled &&
+              !hidden &&
+              message.isProactive &&
+              message.availability == AiAvailability.available &&
+              conversation.canSend
+          ? () {
+              if (!_isCurrentEditor) return;
+              _controller.replyToFollowUp(message.messageId);
+              _messageFocus.requestFocus();
+            }
+          : null,
+      onVisible:
+          enabled &&
+              !hidden &&
+              message.isProactive &&
+              message.availability == AiAvailability.available
+          ? () {
+              if (_ownsCurrentSession &&
+                  !_confirming &&
+                  _scaffoldKey.currentState?.isDrawerOpen != true) {
+                unawaited(
+                  ref
+                      .read(aiOwnedSourcesControllerProvider.notifier)
+                      .markActuallyVisible(message.messageId),
+                );
+              }
+            }
+          : null,
+    );
+    return Container(
+      key: _messageKeys.putIfAbsent(message.messageId, GlobalKey.new),
+      decoration: focused
+          ? BoxDecoration(
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            )
+          : null,
+      child: Semantics(
+        label: focused ? context.tr('Located message', '已定位消息') : null,
+        child: tile,
+      ),
+    );
+  }
+
+  Widget _referenceStatus(AiConversationState conversation) {
+    if (!ref.read(aiCompanionReferencesEnabledProvider)) {
+      return const SizedBox.shrink();
+    }
+    final sources = ref.watch(aiOwnedSourcesControllerProvider);
+    final location = conversation.messageLocation;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (location == null &&
+            widget.initialMessage != null &&
+            !_initialLocationDismissed) ...[
+          Text(
+            context.tr(
+              'Check the current request before opening this message.',
+              '请先核对当前请求，再打开这条消息。',
+            ),
+          ),
+          OutlinedButton(
+            key: const Key('ai-open-requested-message'),
+            onPressed: conversation.canSelectConversation
+                ? () => unawaited(_openMessage(widget.initialMessage!))
+                : null,
+            child: Text(context.tr('Open this exact message', '打开这条消息')),
+          ),
+        ],
+        if (location != null &&
+            location.phase != AiMessageLocationPhase.ready) ...[
+          Text(
+            location.phase == AiMessageLocationPhase.checking
+                ? context.tr('Checking this exact message…', '正在核对这条消息…')
+                : context.tr(
+                    'This message could not be located. No other message was opened.',
+                    '暂时无法定位这条消息，未转到其他消息。',
+                  ),
+            key: const Key('ai-message-location-status'),
+          ),
+          if (location.phase == AiMessageLocationPhase.failed)
+            OutlinedButton(
+              key: const Key('ai-retry-message-location'),
+              onPressed: conversation.canSelectConversation
+                  ? () => unawaited(_openMessage(location.locator))
+                  : null,
+              child: Text(context.tr('Check this message again', '重新核对这条消息')),
+            ),
+          TextButton(
+            key: const Key('ai-return-current-topic'),
+            onPressed: () {
+              if (!_isCurrentEditor) return;
+              setState(() => _initialLocationDismissed = true);
+              _controller.dismissMessageLocation();
+            },
+            child: Text(context.tr('Return to the current topic', '返回当前话题')),
+          ),
+        ],
+        if (conversation.conversationId != null &&
+            (sources.sourcesNeedRead || sources.hiddenMessageIds.isNotEmpty))
+          OutlinedButton(
+            key: const Key('ai-reload-references'),
+            onPressed: conversation.readBusy
+                ? null
+                : () => unawaited(_controller.loadMessages()),
+            child: Text(
+              context.tr('Check saved messages and sources', '核对已保存的消息与来源'),
+            ),
+          ),
+        if (sources.failure != null)
+          Text(
+            context.tr(
+              'The source or reading status could not be verified. Your draft is kept.',
+              '暂时无法核对来源或阅读状态，草稿仍保留。',
+            ),
+            key: const Key('ai-reference-failure'),
+          ),
+        if (sources.readUnconfirmed)
+          Text(
+            context.tr(
+              'Opened. Read status has not synced yet.',
+              '已打开，阅读状态尚未同步。',
+            ),
+            key: const Key('ai-read-unconfirmed'),
+          ),
+        if (conversation.conversationId != null &&
+            (sources.readState == null || sources.readUnconfirmed))
+          OutlinedButton(
+            key: const Key('ai-check-read-state'),
+            onPressed: sources.readBusy
+                ? null
+                : () => unawaited(
+                    ref
+                        .read(aiOwnedSourcesControllerProvider.notifier)
+                        .checkReadState(),
+                  ),
+            child: Text(context.tr('Check reading status', '核对阅读状态')),
+          ),
+      ],
+    );
+  }
+
+  Widget _replyStatus(AiConversationState state) =>
+      state.replyToMessageId == null
+      ? const SizedBox.shrink()
+      : Row(
+          children: [
+            Expanded(
+              child: TextButton(
+                key: const Key('ai-view-reply-follow-up'),
+                onPressed: state.canSelectConversation
+                    ? () => unawaited(
+                        _openMessage(
+                          AiMessageLocator(
+                            conversationId: state.conversationId!,
+                            messageId: state.replyToMessageId!,
+                          ),
+                        ),
+                      )
+                    : null,
+                child: Text(
+                  context.tr(
+                    'Reply to this follow-up in the same topic',
+                    '在原话题回复这次跟进',
+                  ),
+                  key: const Key('ai-reply-context'),
+                ),
+              ),
+            ),
+            IconButton(
+              key: const Key('ai-clear-reply-context'),
+              tooltip: context.tr('Remove reply association', '取消回复关联'),
+              onPressed: () {
+                if (_isCurrentEditor) _controller.clearReplyTarget();
+              },
+              icon: const Icon(Icons.close),
+            ),
+          ],
+        );
 
   String _conversationLabel(AiConversationState state, String id) {
     // Only inspect already authorized messages in the current conversation.
@@ -518,7 +890,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   }
 
   void _submit({required bool retry}) {
-    if (!_ownsCurrentSession ||
+    if (!_isCurrentEditor ||
         _leaving ||
         _confirming ||
         _message.text.trim().isEmpty) {
@@ -635,6 +1007,20 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       next,
     ) {
       _followMessages(previous, next);
+      if (previous?.conversationId != next.conversationId) _messageKeys.clear();
+      if (ref.read(aiCompanionReferencesEnabledProvider) &&
+          previous?.conversationId != next.conversationId &&
+          next.conversationId != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_ownsCurrentSession) {
+            unawaited(
+              ref
+                  .read(aiOwnedSourcesControllerProvider.notifier)
+                  .checkReadState(),
+            );
+          }
+        });
+      }
       if (_ownsCurrentSession &&
           {
             AiConversationPhase.unauthenticated,
@@ -660,10 +1046,25 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         state.phase == AiConversationPhase.limited ||
         state.phase == AiConversationPhase.authorityChanged ||
         state.phase == AiConversationPhase.unauthenticated;
+    final location = state.messageLocation;
+    final locationHidden =
+        (location != null && location.phase != AiMessageLocationPhase.ready) ||
+        (!_initialLocationDismissed &&
+            widget.initialMessage != null &&
+            (location?.phase != AiMessageLocationPhase.ready ||
+                location?.locator.messageId !=
+                    widget.initialMessage!.messageId ||
+                location?.locator.conversationId !=
+                    widget.initialMessage!.conversationId));
 
     if (widget.socialStyle) {
       return _withHistoryScroll(
-        _socialScaffold(state, status, contentHidden, hasText),
+        _socialScaffold(
+          state,
+          status,
+          contentHidden || locationHidden,
+          hasText,
+        ),
       );
     }
 
@@ -718,6 +1119,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     if (state.canBrowseHistory) _historyPanel(state),
+                    _referenceStatus(state),
                     if (status != null) ...[
                       const SizedBox(height: 16),
                       Semantics(
@@ -778,7 +1180,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         ),
                       ),
                     ],
-                    if (!contentHidden) ...[
+                    if (!contentHidden && !locationHidden) ...[
                       if (state.conversationId != null) ...[
                         const SizedBox(height: 12),
                         OutlinedButton(
@@ -792,10 +1194,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                       ],
                       for (final message in state.messages) ...[
                         const SizedBox(height: 16),
-                        _MessageTile(
-                          message: message,
-                          onFollowUp: _followUpAction(state, message),
-                        ),
+                        _messageTile(state, message),
                       ],
                       if (state.localOutgoingText case final text?)
                         _LocalOutgoing(
@@ -820,6 +1219,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         ),
                       ],
                       const SizedBox(height: 24),
+                      _replyStatus(state),
                       _planAction(state),
                       TextField(
                         key: const Key('ai-message-input'),
@@ -902,6 +1302,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     bool hasText,
   ) {
     final content = <Widget>[
+      _referenceStatus(state),
       if (!contentHidden && state.readBusy && state.conversationId != null)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -978,11 +1379,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             distance: 8,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 7),
-              child: _MessageTile(
-                message: message,
-                bubble: true,
-                onFollowUp: _followUpAction(state, message),
-              ),
+              child: _messageTile(state, message, bubble: true),
             ),
           ),
         if (state.localOutgoingText case final text?)
@@ -1091,6 +1488,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          _replyStatus(state),
           if (state.canSend) _planAction(state),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -1537,11 +1935,84 @@ final class _MessageTile extends StatelessWidget {
     required this.message,
     this.bubble = false,
     this.onFollowUp,
+    this.sourcePending = false,
+    this.unread = false,
+    this.onSource,
+    this.onReply,
+    this.onVisible,
+    this.onCheckSource,
   });
 
   final AiMessage message;
   final bool bubble;
   final VoidCallback? onFollowUp;
+  final bool sourcePending, unread;
+  final ValueChanged<AiSourceCard>? onSource;
+  final VoidCallback? onReply, onVisible, onCheckSource;
+
+  Widget _body(BuildContext context) {
+    final text = Text(
+      sourcePending
+          ? context.tr(
+              'Check this message and its sources before continuing.',
+              '请先核对这条消息与来源。',
+            )
+          : message.availability == AiAvailability.unavailable
+          ? context.tr('This reply is no longer available.', '此回复已不可用。')
+          : message.text ?? '',
+      style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5),
+    );
+    return onVisible == null
+        ? text
+        : AiVisibleMessage(onVisible: onVisible, child: text);
+  }
+
+  List<Widget> _sourceDetails(BuildContext context) =>
+      sourcePending || message.availability != AiAvailability.available
+      ? const []
+      : [
+          if (message.isProactive)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (unread)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8),
+                      child: Icon(
+                        Icons.circle,
+                        size: 8,
+                        color: Theme.of(context).colorScheme.primary,
+                        semanticLabel: context.tr('Unread follow-up', '未读跟进'),
+                      ),
+                    ),
+                  Flexible(
+                    child: Text(
+                      context.tr('You requested this follow-up', '你约好的跟进'),
+                      key: ValueKey('ai-proactive-origin-${message.messageId}'),
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          for (final card in message.sources)
+            OutlinedButton(
+              key: ValueKey('ai-source-${message.messageId}-${card.cardRef}'),
+              onPressed: onSource == null ? null : () => onSource!(card),
+              child: Text(
+                '${card.kind == AiSourceKind.conversationMessage ? context.tr('Original saved message', '原始已保存消息') : context.tr('Check-in', '签到')} · ${localTimeLabel(context, DateTime.parse(card.sourceOccurredAt))}',
+              ),
+            ),
+          if (onReply != null)
+            TextButton.icon(
+              key: ValueKey('ai-reply-follow-up-${message.messageId}'),
+              onPressed: onReply,
+              icon: const Icon(Icons.reply),
+              label: Text(context.tr('Reply to this follow-up', '回复这次跟进')),
+            ),
+        ];
 
   Widget _followUpButton(BuildContext context) => TextButton.icon(
     key: ValueKey('ai-follow-up-${message.messageId}'),
@@ -1587,16 +2058,17 @@ final class _MessageTile extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  message.availability == AiAvailability.unavailable
-                      ? context.tr(
-                          'This reply is no longer available.',
-                          '此回复已不可用。',
-                        )
-                      : message.text ?? '',
-                  style: Theme.of(context).textTheme.bodyLarge
-                      ?.copyWith(height: 1.5),
-                ),
+                _body(context),
+                if (sourcePending)
+                  OutlinedButton(
+                    key: ValueKey(
+                      'ai-check-message-source-${message.messageId}',
+                    ),
+                    onPressed: onCheckSource,
+                    child: Text(
+                      context.tr('Check this exact message', '核对这条消息'),
+                    ),
+                  ),
                 const SizedBox(height: 6),
                 Semantics(
                   label: context.tr(
@@ -1608,6 +2080,7 @@ final class _MessageTile extends StatelessWidget {
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ),
+                ..._sourceDetails(context),
                 if (onFollowUp != null) _followUpButton(context),
               ],
             ),
@@ -1628,18 +2101,19 @@ final class _MessageTile extends StatelessWidget {
               style: Theme.of(context).textTheme.labelLarge,
             ),
             const SizedBox(height: 6),
-            Text(
-              message.availability == AiAvailability.unavailable
-                  ? context.tr('This reply is no longer available.', '此回复已不可用。')
-                  : message.text ?? '',
-              style: Theme.of(context).textTheme.bodyLarge
-                  ?.copyWith(height: 1.5),
-            ),
+            _body(context),
+            if (sourcePending)
+              OutlinedButton(
+                key: ValueKey('ai-check-message-source-${message.messageId}'),
+                onPressed: onCheckSource,
+                child: Text(context.tr('Check this exact message', '核对这条消息')),
+              ),
             const SizedBox(height: 6),
             Text(
               localTimeLabel(context, message.persistedAt),
               style: Theme.of(context).textTheme.bodySmall,
             ),
+            ..._sourceDetails(context),
             if (onFollowUp != null) _followUpButton(context),
           ],
         ),

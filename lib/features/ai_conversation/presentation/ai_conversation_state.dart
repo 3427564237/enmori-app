@@ -1,4 +1,5 @@
 import '../domain/ai_conversation.dart';
+import '../domain/ai_owned_sources.dart';
 
 enum AiConversationPhase {
   idle,
@@ -37,6 +38,10 @@ final class AiConversationState {
     this.canDelete = false,
     this.canStartNewConversation = false,
     this.readBusy = false,
+    this.messageReadRevision = 0,
+    Iterable<String> lastReadMessageIds = const [],
+    this.messageLocation,
+    this.replyToMessageId,
     Iterable<AiConversationSummary> conversations = const [],
     this.historyLoaded = false,
     this.historyCursor,
@@ -44,7 +49,8 @@ final class AiConversationState {
     this.canBrowseHistory = false,
     this.canSelectConversation = false,
   }) : messages = List.unmodifiable(messages),
-       conversations = List.unmodifiable(conversations);
+       conversations = List.unmodifiable(conversations),
+       lastReadMessageIds = List.unmodifiable(lastReadMessageIds);
 
   final Object sessionKey;
   final AiConversationPhase phase;
@@ -67,6 +73,14 @@ final class AiConversationState {
   final bool canDelete;
   final bool canStartNewConversation;
   final bool readBusy;
+
+  /// Advances only after an authoritative transcript page was accepted.
+  final int messageReadRevision;
+
+  /// Only the exact accepted page was rechecked, never all cached history.
+  final List<String> lastReadMessageIds;
+  final AiMessageLocation? messageLocation;
+  final String? replyToMessageId;
   final List<AiConversationSummary> conversations;
   final bool historyLoaded;
   final String? historyCursor;
