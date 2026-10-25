@@ -9,6 +9,8 @@ import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/account/presentation/account_preferences_page.dart';
+import 'package:enmori/features/account/presentation/account_preferences_controller.dart';
+import 'package:enmori/features/language/data/platform_app_language_repository.dart';
 import 'package:enmori/features/ai_conversation/domain/ai_owned_sources.dart';
 import 'package:enmori/features/ai_conversation/presentation/ai_conversation_page.dart';
 import 'package:enmori/features/proactive/presentation/proactive_follow_up_page.dart';
@@ -40,8 +42,13 @@ void main() {
     );
     rig.container.read(proactiveNotificationControllerProvider);
     rig.container.read(appRouterProvider).go(AppRoutes.settings);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    expect(
+      rig.container
+          .read(accountPreferencesControllerProvider(PreferencesView.settings))
+          .phase,
+      PreferencesPhase.ready,
+    );
     expect(
       rig.container.read(appRouterProvider).state.uri.path,
       AppRoutes.settings,
@@ -70,7 +77,6 @@ void main() {
       rig.requests.where((r) => r.url.path == '/v1/me/proactive-registration'),
       hasLength(1),
     );
-    await tester.pump(const Duration(seconds: 15));
     expect(tester.takeException(), isNull);
   });
 
@@ -86,8 +92,15 @@ void main() {
       );
       rig.container.read(proactiveNotificationControllerProvider);
       rig.container.read(appRouterProvider).go(AppRoutes.settings);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+      expect(
+        rig.container
+            .read(
+              accountPreferencesControllerProvider(PreferencesView.settings),
+            )
+            .phase,
+        PreferencesPhase.ready,
+      );
       final signOut = tester
           .widget<AccountPreferencesPage>(find.byType(AccountPreferencesPage))
           .onSignOut!;
@@ -306,6 +319,20 @@ _pump(
   bool settingsReady = false,
   Completer<http.Response>? registrationRead,
 }) async {
+  final messenger =
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+  messenger.setMockMethodCallHandler(PlatformAppLanguageRepository.channel, (
+    call,
+  ) async {
+    expect(call.method, 'readLanguage');
+    return 'en';
+  });
+  addTearDown(
+    () => messenger.setMockMethodCallHandler(
+      PlatformAppLanguageRepository.channel,
+      null,
+    ),
+  );
   tester.view.physicalSize = const Size(430, 932);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
