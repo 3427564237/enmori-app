@@ -72,6 +72,13 @@ The same ledger records an independent **source-only** review of client Domain
 `090e996` and selected wire `a7a288f`: no actionable finding, with compilation,
 the eight new wire tests and final F1 UI execution not claimed by QA.
 
+The same ledger now adds the pure review component `cad5fb4`: no blocking
+source finding, with its six test cases read but not independently executed.
+It identifies the final caller's token/expiry, fresh-selection/history review,
+draft-only confirmation, unresolved-dispatch, source-change and exact-session
+checks for the next frozen App head. The component's supplied booleans and
+callbacks do not themselves establish those controller/page behaviors.
+
 The [D1 source review](qa-d1-source-review.md) reports a new P2 at `cb8d982`:
 controller rebuild clears unknown registration/settings mutation guards, so a
 same-UID session replacement can let an unchanged GET reopen mutation controls.
