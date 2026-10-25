@@ -5,9 +5,19 @@ import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
 import { isRevision, isVisibility, normalizeDisplayName } from "../domain/profile-values.js";
 import type { AccountPreferencesRepository, AccountRead, AccountSave } from "../ports/account-preferences-repository.js";
 import type { OwnProfile, OwnSettings } from "./account-model.js";
+import type { OwnAvatar } from "./own-avatar.js";
+import type { OwnAvatarData } from "../domain/avatar-values.js";
 
 export class OwnAccountPreferences {
-  public constructor(private readonly repository: AccountPreferencesRepository) {}
+  public constructor(private readonly repository: AccountPreferencesRepository, private readonly avatar?: OwnAvatar) {}
+
+  public getAvatar(principal: AuthPrincipal): Promise<Result<OwnAvatarData, AppFailure>> {
+    return this.avatar?.getAvatar(principal) ?? Promise.resolve(err(appFailure("SERVICE_UNAVAILABLE")));
+  }
+
+  public saveAvatar(input: Parameters<OwnAvatar["saveAvatar"]>[0]): Promise<Result<OwnAvatarData, AppFailure>> {
+    return this.avatar?.saveAvatar(input) ?? Promise.resolve(err(appFailure("SERVICE_UNAVAILABLE")));
+  }
 
   public async getProfile(principal: AuthPrincipal): Promise<Result<OwnProfile, AppFailure>> {
     return this.readResult(await this.repository.getProfile(principal.firebaseUid));

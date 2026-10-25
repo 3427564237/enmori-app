@@ -11,7 +11,7 @@ import { requireFeatureEnvironment } from "../../shared/infrastructure/firebase/
 type ResolvedAccount = { readonly kind: "found"; readonly path: string; readonly data: StoredDocument }
   | { readonly kind: "onboarding_required" } | typeof dependencyUnavailable;
 
-async function resolveAccount(transaction: FirestoreTransactionGateway, uid: string): Promise<ResolvedAccount> {
+export async function resolveAccount(transaction: FirestoreTransactionGateway, uid: string): Promise<ResolvedAccount> {
   const id = createAuthBindingDocumentId(uid);
   if (id === undefined) return dependencyUnavailable;
   const binding = await transaction.get(`auth_bindings/${id}`);
