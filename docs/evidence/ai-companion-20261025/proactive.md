@@ -959,7 +959,8 @@ test assumes every conversation subroute is tagged isolated-emulator, while the
 approved read-state path is now explicitly tagged first-flow candidate. This
 specific assertion mismatch was reported to Integration, which owns its shared
 contract/test update. It does not change the 24-case cleanup result. Raw output:
-`timeout-combined.tap`. Independent QA rerun of the cleanup fix remains pending.
+`timeout-combined.tap`. Independent QA rerun was pending at that checkpoint;
+the subsequent result is recorded below.
 
 Integration's original `edaad75411481436c751f30032c340167636b224` now includes
 the cleanup fix, actual bootstrap/source wrappers, Context's F1a closure and the
@@ -978,7 +979,13 @@ while the next intent could generate and canonically publish. That replay's
 original sender stub did not claim a dispatch; its total next-intent unavailable
 result is not an FCM observation. QA retained an initial fixture failure from
 reusing a consumed Response and corrected the fixture to create one per call.
-The formal QA documentation checkpoint will supply the independent record.
+The formal independent record is persisted at original QA commit
+`355503a187edcf6cfebadb580e29c648a17a73d3` in
+[qa-delivery-recovery.md](qa-delivery-recovery.md), merged unchanged. Its extra
+actual-class/fake-HTTP-503 counterexample also confirms that unknown physical
+completion retains the pending lane, reservation and in-flight marker, with
+repeat execution/recovery unavailable. The original P2 is closed at this
+explicit source/fake boundary.
 
 ## Optional delivery-reference navigation capability
 
