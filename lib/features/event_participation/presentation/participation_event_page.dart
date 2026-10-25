@@ -25,11 +25,13 @@ final class ParticipationEventPage extends ConsumerStatefulWidget {
     required this.eventId,
     required this.opener,
     required this.onParticipants,
+    this.detailBuilder,
     super.key,
   });
   final String eventId;
   final ExternalActivityOpener opener;
   final ValueChanged<ParticipantSelection> onParticipants;
+  final Widget Function(BuildContext, EventDetail)? detailBuilder;
   @override
   ConsumerState<ParticipationEventPage> createState() =>
       _ParticipationEventPageState();
@@ -164,7 +166,8 @@ final class _ParticipationEventPageState
             if (_failure case final failure?)
               Text(localizedFailure(context, failure)),
             if (details != null)
-              EventCard(event: details, onSelect: null)
+              widget.detailBuilder?.call(context, details) ??
+                  EventCard(event: details, onSelect: null)
             else if (!_loading)
               Text(
                 context.tr(

@@ -37,10 +37,13 @@ final class ActivityDetail extends ActivityRead {
     required this.sourceUrl,
     this.locationLabel,
     this.categoryLabel,
+    this.shortDescription,
+    this.coverImageUrl,
   });
   final ActivitySummary summary;
   final Uri sourceUrl;
   final String? locationLabel, categoryLabel;
+  final String? shortDescription, coverImageUrl;
 }
 
 abstract interface class ActivityRepository {

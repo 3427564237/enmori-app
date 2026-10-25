@@ -10,11 +10,12 @@ final class EventDetail {
     this.locationLabel,
     this.categoryLabel,
     this.shortDescription,
+    this.coverImageUrl,
   });
   final String eventId, title, externalSourceUrl;
   final DateTime startAt;
   final DateTime? endAt;
-  final String? locationLabel, categoryLabel, shortDescription;
+  final String? locationLabel, categoryLabel, shortDescription, coverImageUrl;
 }
 
 abstract interface class EventDetailRepository {

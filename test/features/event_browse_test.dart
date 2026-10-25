@@ -359,17 +359,17 @@ void main() {
       );
       await pump(tester, repo, key: id, opener: opener);
       expect(opener.calls, 0);
-      expect(find.text('Description unavailable.'), findsOneWidget);
-      await reveal(tester, find.text('View on Ticketmaster'));
-      await tester.tap(find.text('View on Ticketmaster'));
+      expect(find.text('Ticketmaster has not provided a description for this event.'), findsOneWidget);
+      await reveal(tester, find.text('Tickets / booking on Ticketmaster'));
+      await tester.tap(find.text('Tickets / booking on Ticketmaster'));
       await tester.pumpAndSettle();
       expect(opener.calls, 1);
       expect(opener.received, detail.sourceUrl);
       expect(find.textContaining('registered'), findsNothing);
       expect(find.text('Going'), findsNothing);
       opener.success = false;
-      await reveal(tester, find.text('View on Ticketmaster'));
-      await tester.tap(find.text('View on Ticketmaster'));
+      await reveal(tester, find.text('Tickets / booking on Ticketmaster'));
+      await tester.tap(find.text('Tickets / booking on Ticketmaster'));
       await tester.pumpAndSettle();
       expect(
         find.text('Could not open the source page. You can copy the link.'),
@@ -493,7 +493,7 @@ void main() {
       final repo = Repo()..result = Success(detail), opener = Opener();
       await pump(tester, repo, key: id, opener: opener, scale: 2);
       final explanation = find.text(
-        '“View on Ticketmaster” opens the source page in your browser. Your browser '
+        '“Tickets / booking on Ticketmaster” opens the event’s ticket link in your browser. Ticketmaster controls the destination, including booking or seat selection. Your browser '
         'connects directly to Ticketmaster; its privacy and cookie policies apply. '
         'Opening or copying a link does not register you or mark you as Going. '
         "A copied link can remain on your device's clipboard.",
@@ -501,12 +501,12 @@ void main() {
       await reveal(tester, explanation);
       expect(explanation, findsOneWidget);
       expect(opener.calls, 0);
-      await reveal(tester, find.text('View on Ticketmaster'));
+      await reveal(tester, find.text('Tickets / booking on Ticketmaster'));
       expect(
         tester.getTopLeft(explanation).dy,
-        lessThan(tester.getTopLeft(find.text('View on Ticketmaster')).dy),
+        lessThan(tester.getTopLeft(find.text('Tickets / booking on Ticketmaster')).dy),
       );
-      await tester.tap(find.text('View on Ticketmaster'));
+      await tester.tap(find.text('Tickets / booking on Ticketmaster'));
       await tester.pumpAndSettle();
       expect(opener.calls, 1);
       expect(opener.received, detail.sourceUrl);

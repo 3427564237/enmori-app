@@ -4,6 +4,7 @@ import '../../../core/network/backend_api_client.dart';
 import '../../../core/network/utc_timestamp_parser.dart';
 import '../../../core/result/result.dart';
 import '../domain/activity_repository.dart';
+import '../../event_detail/domain/event_cover.dart';
 
 bool validBrowseId(Object? value) {
   if (value is! String ||
@@ -169,6 +170,8 @@ final class BackendActivityRepository implements PagedActivityRepository {
               'startAt',
               'endAt',
               'externalSourceUrl',
+              'shortDescription',
+              'coverImageUrl',
               'locationLabel',
               'categoryLabel',
             ].contains(k),
@@ -188,6 +191,7 @@ final class BackendActivityRepository implements PagedActivityRepository {
       for (final (field, max) in [
         ('locationLabel', 200),
         ('categoryLabel', 100),
+        ('shortDescription', 1000),
       ]) {
         if (raw.containsKey(field) && !_text(raw[field], max)) {
           return _invalid();
@@ -199,6 +203,9 @@ final class BackendActivityRepository implements PagedActivityRepository {
           sourceUrl: url,
           locationLabel: raw['locationLabel'] as String?,
           categoryLabel: raw['categoryLabel'] as String?,
+          shortDescription: raw['shortDescription'] as String?,
+          coverImageUrl: validEventCoverUrl(raw['coverImageUrl'])
+              ? raw['coverImageUrl'] as String : null,
         ),
       );
     } catch (_) {

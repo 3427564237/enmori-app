@@ -4,6 +4,12 @@ import '../../app/providers.dart';
 import '../event_browse/domain/activity_repository.dart';
 import 'data/backend_event_detail_repository.dart';
 import 'domain/event_detail_repository.dart';
+import 'domain/event_cover.dart';
+import 'data/ticketmaster_event_cover_loader.dart';
+
+final eventCoverLoaderProvider = Provider<EventCoverLoader>(
+  (ref) => const TicketmasterEventCoverLoader(),
+);
 
 final eventDetailRepositoryProvider = Provider<EventDetailRepository>(
   (ref) => BackendEventDetailRepository(ref.watch(backendApiClientProvider)),

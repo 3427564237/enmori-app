@@ -85,15 +85,15 @@ final class _ExternalRegistrationActionState
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          context.tr('Continue to third-party registration?', '前往第三方报名？'),
+          context.tr('Continue to Ticketmaster tickets?', '前往 Ticketmaster 购票？'),
         ),
         content: SingleChildScrollView(
           child: Text(
             context.tr(
-              'Your browser opens the organiser website. Its privacy and payment '
+              'Your browser opens the event’s Ticketmaster ticket link. Ticketmaster controls the destination, including any booking or seat selection. Its privacy and payment '
                   'terms apply. ENMORI does not verify registration or take payment. '
                   'Opening the page does not mark you as Going.',
-              '浏览器将打开主办方网站，其隐私和支付条款适用。ENMORI 不核实报名，也不收款。打开网页不会自动标记为将参加。',
+              '浏览器将打开此活动的 Ticketmaster 购票链接，具体页面及预订或选座步骤由 Ticketmaster 决定，其隐私和支付条款适用。ENMORI 不核实报名，也不收款。打开网页不会自动标记为将参加。',
             ),
           ),
         ),
@@ -205,8 +205,8 @@ final class _ExternalRegistrationActionState
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
             context.tr(
-              'Registration takes place on the external website.',
-              '报名需要在外部网站完成。',
+              'Tickets and booking are handled by Ticketmaster. Its link may open booking or seat selection.',
+              '购票与预订由 Ticketmaster 处理，链接可能打开预订或选座页面。',
             ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
@@ -248,7 +248,7 @@ final class _ExternalRegistrationActionState
               ? _open
               : null,
           icon: const Icon(Icons.open_in_new),
-          label: Text(context.tr('Register on original website', '前往原网站报名')),
+          label: Text(context.tr('Tickets / booking on Ticketmaster', '在 Ticketmaster 购票／预订')),
         ),
       ],
     );

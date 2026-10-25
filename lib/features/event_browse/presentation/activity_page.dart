@@ -15,7 +15,8 @@ const _listDisclosure =
     'not shared with Ticketmaster. Ticketmaster receives the activity request '
     'and server connection information.';
 const _sourceActionDisclosure =
-    '“View on Ticketmaster” opens the source page in your browser. Your browser '
+    '“Tickets / booking on Ticketmaster” opens the event’s ticket link in your browser. '
+    'Ticketmaster controls the destination, including booking or seat selection. Your browser '
     'connects directly to Ticketmaster; its privacy and cookie policies apply. '
     'Opening or copying a link does not register you or mark you as Going. '
     "A copied link can remain on your device's clipboard.";
@@ -26,9 +27,10 @@ const _lifetimeDisclosure =
 
 /// LI supplies route/session guards and list navigation. Never remaps /events.
 final class ActivityPage extends ConsumerStatefulWidget {
-  const ActivityPage({this.browseId = '', this.onSelect, super.key});
+  const ActivityPage({this.browseId = '', this.onSelect, this.detailBuilder, super.key});
   final String browseId;
   final ValueChanged<String>? onSelect;
+  final Widget Function(BuildContext, ActivityDetail)? detailBuilder;
   @override
   ConsumerState<ActivityPage> createState() => _ActivityPageState();
 }
@@ -168,54 +170,52 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                       ),
                   ],
                 ),
-              AsyncData<ActivityRead?>(
-                value: ActivityDetail(
-                  :final summary,
-                  :final locationLabel,
-                  :final categoryLabel,
-                ),
-              ) =>
+              AsyncData<ActivityRead?>(value: final ActivityDetail detail) =>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (widget.detailBuilder != null)
+                      widget.detailBuilder!(context, detail)
+                    else ...[
                     Text(
-                      summary.title,
+                      detail.summary.title,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     Text(
                       context.tr(
-                        'Starts: ${_time(context, summary.startAt)}',
-                        '开始：${_time(context, summary.startAt)}',
+                        'Starts: ${_time(context, detail.summary.startAt)}',
+                        '开始：${_time(context, detail.summary.startAt)}',
                       ),
                     ),
                     Text(
-                      summary.endAt == null
+                      detail.summary.endAt == null
                           ? context.tr('End time not provided.', '未提供结束时间。')
                           : context.tr(
-                              'Ends: ${_time(context, summary.endAt!)}',
-                              '结束：${_time(context, summary.endAt!)}',
+                              'Ends: ${_time(context, detail.summary.endAt!)}',
+                              '结束：${_time(context, detail.summary.endAt!)}',
                             ),
                     ),
                     Text(
-                      locationLabel ??
+                      detail.locationLabel ??
                           context.tr('Location unavailable.', '暂无地点信息。'),
                     ),
                     Text(
-                      categoryLabel ??
+                      detail.categoryLabel ??
                           context.tr('Category unavailable.', '暂无分类信息。'),
                     ),
-                    Text(context.tr('Description unavailable.', '暂无简介。')),
+                    Text(detail.shortDescription ?? context.tr('Ticketmaster has not provided a description for this event.', 'Ticketmaster 未提供此活动的简介。')),
+                    ],
                     const SizedBox(height: 16),
                     Text(
                       context.tr(
                         _sourceActionDisclosure,
-                        '在 Ticketmaster 查看会通过浏览器打开来源页面。浏览器将直接连接 Ticketmaster，其隐私与 Cookie 政策适用。打开或复制链接不代表报名，也不会标记为将参加。复制的链接可能保留在设备剪贴板中。',
+                        '购票／预订会通过浏览器打开 Ticketmaster 的购票链接，具体预订或选座页面由 Ticketmaster 决定。浏览器将直接连接 Ticketmaster，其隐私与 Cookie 政策适用。打开或复制链接不代表报名，也不会标记为将参加。复制的链接可能保留在设备剪贴板中。',
                       ),
                     ),
                     FilledButton(
                       onPressed: () => _action(true),
                       child: Text(
-                        context.tr('View on Ticketmaster', '在 Ticketmaster 查看'),
+                        context.tr('Tickets / booking on Ticketmaster', '在 Ticketmaster 购票／预订'),
                       ),
                     ),
                     TextButton(
