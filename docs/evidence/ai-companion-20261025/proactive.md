@@ -233,7 +233,7 @@ from consent to use private context or send it to a cloud model.
 | Option | Services and resource scope | Costs / boundaries |
 | --- | --- | --- |
 | D0: in-app only | Existing Backend host; approved durable minimal intent/effect storage, bounded due scan and existing authorized app reads. | No FCM registration or system push. Cannot satisfy background/terminated notification acceptance. Still needs new product-data/schema/retention approval. |
-| D1: recommend existing-host worker + FCM | Extend the existing supervised Backend only after review. For the first test, a bounded 30-minute, one-owner due scan (candidate 60s), persisted occurrence/budget/outbox and current-source rereads; existing Admin messaging capability behind a Port; one reviewed `firebase_messaging` dependency/platform change; Firebase project/package configuration and FCM send permission. | FCM is listed as no-cost, but storage/reads/egress and host availability are not thereby free or guaranteed. No new VM, cloud scheduler, function or vector service is required by this option. Exact project capability/IAM and current account billing are unverified. |
+| D1: recommend existing-host worker + FCM | Extend the existing supervised Backend only after review. For the first test, a bounded 30-minute, one-owner due scan (candidate 60s), persisted occurrence/budget/outbox and current-source rereads; existing Admin **credential** plus a single-POST native HTTP Port as corrected in S1 below; one reviewed `firebase_messaging` dependency/platform change; Firebase project/package configuration and FCM send permission. | FCM is listed as no-cost, but storage/reads/egress and host availability are not thereby free or guaranteed. No new VM, cloud scheduler, function or vector service is required by this option. Exact project capability/IAM and current account billing are unverified. |
 | D2: managed scheduler/worker | One Cloud Scheduler job invoking an authenticated managed worker plus approved datastore/outbox and FCM. Backend/private-model connectivity must be resolved without exposing Ollama publicly. | Cloud Scheduler lists 3 free jobs per billing account and USD 0.10/job/31 days otherwise; worker/database/egress are separate. This is a bigger topology/credential/billing change and is not the first recommendation. |
 
 Pricing facts: [Firebase pricing](https://firebase.google.com/pricing),
@@ -251,7 +251,8 @@ To respect the recommended 1/24h and 8h cooldown, choose either:
 - **T1, recommend bounded evidence:** one normal-policy E2E contact. If separately
   approved, up to two transport-only diagnostics for the remaining device states,
   using fixed generic synthetic text, an expiring one-use operator permit and a
-  maximum of one sender invocation per permit. They may reference the one
+  maximum of one actual FCM message POST per permit under S1 (not one potentially
+  retrying SDK method invocation). They may reference the one
   canonical synthetic message but do not create more proactive messages or alter
   normal settings/budgets. No public diagnostic-send endpoint is proposed. Label
   evidence `trigger-policy E2E` versus `transport-only`; do not report three normal
@@ -324,7 +325,7 @@ or new distributed scheduler is needed.
 | `accounts/{owner}/proactive_registration/current` | `revision`, `installationRef`, literal `registrationKind:fcm_token`, `registrationValue`, `enabled`, `registeredAt`, `expiresAt`. For the first test, expire no later than the named 30-minute test window + 15min, and disable/erase on completion/withdrawal/sign-out. Do not retain previous registration values. Backend erasure does not promise immediate Google backup deletion. Do not delete shared Firebase Auth/Core installation state as a cleanup shortcut. |
 | `accounts/{owner}/conversations/{topic}/read_state/current` | `revision`, monotonic `readThroughSequence`, `updatedAt`; never advances `lastPersistedMessageAt`. No independent private history. Delete with the topic. Unread derives only from currently authorized available proactive messages after this sequence; use an unread dot if a complete count is unavailable. |
 | Existing canonical message and source provenance | Server-assigned sequence/messageId, role assistant, explicit proactive origin, accepted text, occurrenceId/category and approved minimized provenance. An internal `appendProactive` operation checks original topic cutoff and versions, appends once, and **does not advance the old anchor under R-ANCHOR**. It cannot call the existing user/assistant-pair saver with an invented user. Existing serializers/resolvers/retention logic must be explicitly adapted and independently reviewed. |
-| Optional test-only `accounts/{owner}/proactive_transport_diagnostics/{permitId}` | Only if T1's extra two sends are expressly approved: `revision`, `installationRef`, `canonicalMessageId`, `permittedDeviceState:background/ordinary_closed`, `expiresAt` at the named window end, `attemptLimit:1`, `state:not_started/dispatching/accepted/unknown/skipped`, `attemptedAt?`, `providerAcceptedAt?`. Operator-created, no public create/send endpoint, at most two records. Claim dispatching atomically before one sender invocation; unknown never replays. Reauthorize the referenced canonical message and all normal non-frequency permissions before send. No model call, new assistant message, raw packet or registration value. Minimize/delete this diagnostic metadata within 24h of test end; no general diagnostic retention is authorized. |
+| Optional test-only `accounts/{owner}/proactive_transport_diagnostics/{permitId}` | Only if T1's extra two sends are expressly approved: `revision`, `installationRef`, `canonicalMessageId`, `permittedDeviceState:background/ordinary_closed`, `expiresAt` at the named window end, `attemptLimit:1` (actual FCM message HTTP POST), `state:not_started/dispatching/accepted/unknown/skipped`, `attemptedAt?`, `providerAcceptedAt?`. Operator-created, no public create/send endpoint, at most two records. Claim dispatching atomically before the one S1 POST; unknown never replays. Reauthorize the referenced canonical message and all normal non-frequency permissions after token acquisition and before send. No model call, new assistant message, raw packet or registration value. Minimize/delete this diagnostic metadata within 24h of test end; no general diagnostic retention is authorized. |
 
 The owner-local registration singleton is **not proof of global installation
 uniqueness**. This first contract relies on the trusted fixed owner/device gate
@@ -381,12 +382,15 @@ Transactions and recovery proposed for this schema:
    on provider submission.
    Recheck the existing topic's original expiry; do not recreate an expired topic.
    Source/grant/topic invalidation and this commit need compatible version fences.
-4. Before the external sender invocation, re-read the occurrence and current
+4. Obtain an ephemeral access token through the existing public Credential Port
+   before the final claim. After this await, re-read the occurrence and current
    installation, permission/purpose, quiet/zone and source authority again. If
    invalid, skip the unsent push and apply current content invalidation. Only a
    successful atomic CAS `dispatchState:not_started -> dispatching` with
-   `attemptedAt` grants the one-use sender capability; one winner invokes the
-   provider. No second worker may claim an already-dispatching record. This is a
+   `attemptedAt` grants the one-use sender capability; one winner may initiate
+   the single S1 FCM POST. Check current expiry/running/abort authority again
+   after awaiting the claim and immediately before fetch. No second worker may
+   claim an already-dispatching record. This is a
    fresh source/channel guard over the published receipt, not replaying generation
    or invoking pure preflight on an already-dispatching ledger. Send only the generic
    envelope. Commit provider acceptance as a status; a timeout/crash means unknown.
@@ -449,12 +453,13 @@ It has no FID `register/onRegistered` API. Therefore F0 stores only the opaque
 FCM registration token under `registrationKind:fcm_token`; an FID or APNs token
 is not interchangeable. Do not parse identifier shape for authorization.
 
-The existing Admin `14.3.0` installed declarations contain `TokenMessage{token}`
-and `Messaging.send(message,dryRun?)`; use a future Backend-only Port adapter
-with `getMessaging(existingFirebaseApp).send({token, notification:<generic>,
-data:<opaque-reference>, android:{priority:'normal',ttl:0}})` after the final
-claim. SDK `ttl` is milliseconds; zero is deliberate. No multicast/topic API or
-new auth library is needed. [Pinned Admin message types](https://github.com/firebase/firebase-admin-node/blob/v14.3.0/src/messaging/messaging-api.ts),
+The existing Admin `14.3.0` declarations contain `TokenMessage{token}` and
+`Messaging.send(message,dryRun?)`. The initial `4a388d9` audit proposed that SDK
+method as the sender; **S1 below supersedes that sender choice** because its
+internal transport retries. Token type compatibility remains evidence, but
+`Messaging.send` is not the D1 no-repeat transport. SDK TTL milliseconds must not
+be copied to the REST wire, which uses a Duration string. No multicast/topic API
+or new auth library is needed. [Pinned Admin message types](https://github.com/firebase/firebase-admin-node/blob/v14.3.0/src/messaging/messaging-api.ts),
 [Admin sender guide](https://firebase.google.com/docs/cloud-messaging/send/admin-sdk).
 
 **Support limitation:** Admin's token interface is explicitly deprecated and
@@ -500,6 +505,92 @@ remain **post-approval environment checks**. No key or service-account material
 was inspected. No IAM grant, billing upgrade, registration or real notification
 is inferred from package compatibility.
 
+### S1 — single-POST sender correction after Integration / QA review
+
+**Proposed, not implemented or called.** This narrows only the D1 sender and
+attempt vocabulary. Keep the earlier commits as history: the SDK version,
+literal `fcm_token`, Android setup, fixed recipient, generic packet, TTL0,
+one-use claims, permission/IAM and cost envelope are unchanged. The initial
+single-SDK-invocation wording did not establish a single HTTP attempt.
+
+Integration identified this chain; Delivery and QA independently read the pinned
+installed `firebase-admin 14.3.0` source and its public declarations:
+
+| Pinned source | Finding |
+| --- | --- |
+| `lib/messaging/messaging.js:120-135` | `Messaging.send` constructs the message request and calls the internal request handler. |
+| `lib/messaging/messaging-api-request-internal.js:39-40,59` | The handler creates `new AuthorizedHttpClient(app)` and calls its `send`. It supplies no retry override. |
+| `lib/utils/api-request.js:109-118,152-158,258-279,834-859` | Default retry configuration has `maxRetries:4`, status 503 and network codes ECONNRESET/ETIMEDOUT. `AuthorizedHttpClient` calls its default parent constructor; `sendWithRetry` may recursively reissue the same request. One SDK invocation can therefore have the initial attempt plus up to four retries. |
+| Public `lib/messaging/messaging.d.ts:62`, `lib/app/core.d.ts:24-78` | `send(message,dryRun?)` has no retry-disable option. AppOptions' `httpAgent` is a network agent, not a supported retry-policy parameter. `enableLegacyHttpTransport` is not a no-retry switch. The internal retry constructor is not exposed through this public Messaging path. |
+
+Primary upstream source: [pinned handler](https://github.com/firebase/firebase-admin-node/blob/v14.3.0/src/messaging/messaging-api-request-internal.ts),
+[pinned HTTP retry implementation](https://github.com/firebase/firebase-admin-node/blob/v14.3.0/src/utils/api-request.ts),
+[public Messaging API](https://firebase.google.com/docs/reference/admin/node/firebase-admin.messaging.messaging).
+Conclusion is bounded to this inspected version/public surface: no supported
+public disable-retry setting was found. Do not patch installed files, import a
+private HttpClient, change prototypes or use a legacy protocol flag to pretend
+that retries are disabled.
+
+**Replacement Backend Port proposal:** use the existing initialized app's public
+`Credential.getAccessToken()` to borrow `access_token` transiently, then pinned
+Node 24's native `fetch` for exactly one fixed-target FCM HTTP v1 message POST.
+Missing credential/project/scope fails closed; do not construct another identity
+or use `app.INTERNAL`. The public credential API returns OAuth token metadata;
+credential exchange/refresh may have its own HTTP traffic, which is **not a
+second FCM message attempt**. Never log, persist, return or embed this token in a
+product message. [Public Credential API](https://firebase.google.com/docs/reference/admin/node/firebase-admin.app.credential).
+
+The future adapter contract is:
+
+1. Validate the trusted fixed project/recipient and generic <=512-byte application
+   packet. Fetch an access token through that public credential only; no FCM
+   message request has happened at this step. On failure, hold/stop without
+   declaring delivery success.
+2. **After token acquisition's await**, revalidate current source/topic/retained
+   use, grant/intent/registration lease, quiet/zone, expiry, runtime and abort
+   state. Atomically claim `not_started -> dispatching` with the checked versions.
+   After awaiting that claim, recheck current running/abort/expiry authority
+   immediately before the external call. A valid OAuth token cannot authorize
+   stale business work. If authority is lost, emit zero message POSTs and do not
+   recycle the claim.
+3. Invoke native fetch once with `method:'POST'`, `redirect:'error'`, bounded abort
+   signal, JSON content type and ephemeral Bearer header. Endpoint is exactly
+   `https://fcm.googleapis.com/v1/projects/{approvedProjectId}/messages:send`;
+   project ID comes from approved server configuration, never a caller/model URL.
+   Body is `{message:{token:<fcm_token>,notification:<generic>,
+   data:<opaque-reference>,android:{priority:'NORMAL',ttl:'0s'}}}`. REST TTL is a
+   Duration string (`'0s'`), unlike Admin's millisecond number. No SDK `send`,
+   retried Google-auth request wrapper, retry loop/interceptor/RetryAgent or
+   redirect fallback surrounds this POST. [FCM HTTP v1](https://firebase.google.com/docs/cloud-messaging/send/v1-api),
+   [REST Android configuration](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages#AndroidConfig).
+4. There is **no automatic message retry** after 401, 503, redirect denial,
+   abort/timeout, reset or ambiguous body/ACK. In particular, do not refresh a
+   credential after 401 and re-POST the same message. A timeout/abort is not proof
+   that the provider received nothing. Only a validated successful provider
+   response confirms acceptance; otherwise preserve the safe rejected/unknown
+   outcome, never requeue automatically. Acceptance is still not device receipt,
+   display or read. Current content/click source checks remain mandatory.
+
+`attemptLimit:1` and T1's <=3 total limit now mean **actual FCM messages:send HTTP
+POST attempts**, not SDK invocations, OAuth exchanges, model calls, device
+displays or read events. `attemptedAt` records the consumed pre-send claim; a
+crash immediately afterward can leave zero actual requests and an unknown state.
+The canonical publication/contact budget is charged once at `publishedAt` as
+before; it is not charged again when a POST starts. A single provider request
+also cannot guarantee that FCM/Android itself never produces duplicate delivery;
+canonical message identity and click/read idempotency are separate controls.
+
+This is a transport **requirement**, not a verified network property of code that
+does not exist yet. Future isolated adapter verification must count actual
+received POSTs under 503/reset/delay/redirect and the pinned native dispatcher,
+not merely count wrapper invocations. No hidden retrying dispatcher may be
+introduced. Credential failure must give zero message POSTs; a delayed token or
+claim followed by revocation/expiry/abort must also give zero. Tests must not
+contact FCM or shared data. If the chosen runtime/dispatcher cannot establish
+that contract, hold D1 rather than equating one `fetch` call with a proven wire
+attempt. No such transport test, token acquisition or real send ran in this
+documentation correction; the existing 29 pure-policy tests are unchanged.
+
 ### Small-scope operation and cost estimate — Proposed
 
 Source evidence in `tool/run_real_account_local.mjs` and
@@ -510,9 +601,10 @@ Integration still must match the running launcher and database region; this
 worker did not read runtime credentials/configuration or the billing account.
 
 T1's proposed 30-minute one-owner test envelope has at most one canonical model
-generation/message, three provider sender invocations total (one normal, two
+generation/message, at most three actual FCM message POST attempts total (one normal, two
 separately permitted diagnostics), one registration and three explicit click
-checks. No automatic provider retry. Estimated operations for the exact bounded
+checks. Credential/OAuth acquisition is separate traffic, not a message attempt.
+No automatic FCM POST retry. Estimated operations for the exact bounded
 record/read approach above are:
 
 | Work | Estimated document reads / writes / deletes |
@@ -572,7 +664,7 @@ The concrete decision request is:
    appendix, including the new candidate paths, concurrency, expiry and cleanup.
    No normative API/schema, index or migration has been changed here.
 5. Select T1 or T2 and name the one existing test account/device, synthetic source,
-   allowed device state(s), window and <=3 sender invocations. For T1 explicitly
+   allowed device state(s), window and <=3 actual FCM message POST attempts. For T1 explicitly
    distinguish the one normal E2E contact from <=2 one-use transport-only permits.
    Approve the measured-region conditional resource/cost bound; no broad pilot.
    LI/SHI perform physical-device checks through Integration. No notification,
