@@ -519,7 +519,7 @@ installed `firebase-admin 14.3.0` source and its public declarations:
 | Pinned source | Finding |
 | --- | --- |
 | `lib/messaging/messaging.js:120-135` | `Messaging.send` constructs the message request and calls the internal request handler. |
-| `lib/messaging/messaging-api-request-internal.js:42-44,64-67` | The handler creates `new AuthorizedHttpClient(app)` and calls its `send`. It supplies no retry override. |
+| `lib/messaging/messaging-api-request-internal.js:39-40,59` | The handler creates `new AuthorizedHttpClient(app)` and calls its `send`. It supplies no retry override. |
 | `lib/utils/api-request.js:109-118,152-158,258-279,834-859` | Default retry configuration has `maxRetries:4`, status 503 and network codes ECONNRESET/ETIMEDOUT. `AuthorizedHttpClient` calls its default parent constructor; `sendWithRetry` may recursively reissue the same request. One SDK invocation can therefore have the initial attempt plus up to four retries. |
 | Public `lib/messaging/messaging.d.ts:62`, `lib/app/core.d.ts:24-78` | `send(message,dryRun?)` has no retry-disable option. AppOptions' `httpAgent` is a network agent, not a supported retry-policy parameter. `enableLegacyHttpTransport` is not a no-retry switch. The internal retry constructor is not exposed through this public Messaging path. |
 
