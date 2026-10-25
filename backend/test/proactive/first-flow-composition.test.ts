@@ -86,7 +86,7 @@ class CompositionGateway implements FirestoreGateway {
 }
 
 function fixture(options: { model?: () => Promise<Response>; credential?: () => Promise<void>;
-  providerStatus?: number; leaseDurationMs?: number } = {}) {
+  providerStatus?: number; leaseDurationMs?: number; modelTimeoutMs?: number } = {}) {
   const gateway = new CompositionGateway();
   gateway.put(`auth_bindings/${createAuthBindingDocumentId(principal.firebaseUid)!}`, { accountId: owner });
   gateway.put(base, { username: "composition_owner", optionalProcessingConsent: "accepted", checkInVisibility: "private",
@@ -125,7 +125,8 @@ function fixture(options: { model?: () => Promise<Response>; credential?: () => 
         : new Response(null, { status: options.providerStatus });
     } });
   const app = new FirstFlowApplication({ store, model: new LocalFirstFlowTransport(lane), sender,
-    nowMs: () => gateway.now, newMessageId: () => messageId });
+    nowMs: () => gateway.now, newMessageId: () => messageId,
+    ...(options.modelTimeoutMs === undefined ? {} : { modelTimeoutMs: options.modelTimeoutMs }) });
   const queued = async () => {
     assert.equal(resultValue(await app.settings(actor)).mode, "off");
     resultValue(await app.replaceSettings(actor, 0, settings));
@@ -237,4 +238,69 @@ test("ambiguous fake provider response is persisted as unknown and cannot trigge
   assert.equal(resultValue(await f.run()).dispatchState, "unknown");
   resultValue(await f.app.recover(f.actor)); resultValue(await f.run());
   assert.deepEqual(f.counts(), { model: 1, provider: 1, credentials: 1 });
+});
+
+test("timed-out generation retires its reservation only after matching physical completion, leaving a later intent usable", async () => {
+  const response = deferred<Response>(), entered = deferred<void>(); let calls = 0;
+  const f = fixture({ modelTimeoutMs: 10, model: async () => {
+    calls++; if (calls === 1) { entered.resolve(); return response.promise; } return done();
+  } });
+  await f.queued();
+  resultValue(await f.app.createIntent(f.actor, { intentId: id(11), conversationId: topic, sourceMessageId: user,
+    category: "explicit_follow_up", dueAt: new Date(start + 120000).toISOString(), timeZone: "UTC",
+    processing: "local", expectedSettingsRevision: 1 }));
+  const pending = f.run(); await entered.promise;
+  await new Promise(resolve => setTimeout(resolve, 30));
+  assert.deepEqual(f.lane.state, { pending: true, outcomeUnknown: false });
+  assert.deepEqual(f.app.executionState, { running: true, modelPending: true });
+  assert.equal(resultValue(await f.app.intent(f.actor, intentId)).state, "reserved");
+  assert.equal(f.gateway.rows.get(`${base}/proactive_state/current`)!.data.inFlightOccurrenceId, intentId);
+  assert.equal((await f.app.runIntent(f.actor, id(11), new AbortController().signal)).kind, "unavailable");
+  response.resolve(done()); assert.notEqual((await pending).kind, "ok");
+  assert.deepEqual(f.lane.state, { pending: false, outcomeUnknown: false });
+  assert.equal(resultValue(await f.app.intent(f.actor, intentId)).state, "failed");
+  assert.equal(f.gateway.rows.get(`${base}/proactive_state/current`)!.data.inFlightOccurrenceId, undefined);
+  assert.deepEqual(f.counts(), { model: 1, provider: 0, credentials: 0 });
+  assert(!f.gateway.rows.has(`${conversation}/messages/${messageId}`));
+  f.gateway.now = start + 120000;
+  assert.equal(resultValue(await f.app.runIntent(f.actor, id(11), new AbortController().signal)).state, "published");
+  assert.deepEqual(f.counts(), { model: 2, provider: 1, credentials: 1 });
+});
+
+test("external delivery abort closes only the failed reservation after physical settlement", async () => {
+  const response = deferred<Response>(), entered = deferred<void>();
+  const f = fixture({ model: async () => { entered.resolve(); return response.promise; } }); await f.queued();
+  const signal = new AbortController(); const pending = f.app.runIntent(f.actor, intentId, signal.signal); await entered.promise;
+  signal.abort();
+  assert.equal(resultValue(await f.app.intent(f.actor, intentId)).state, "reserved");
+  response.resolve(done()); assert.notEqual((await pending).kind, "ok");
+  assert.equal(resultValue(await f.app.intent(f.actor, intentId)).state, "failed");
+  assert.equal(f.gateway.rows.get(`${base}/proactive_state/current`)!.data.inFlightOccurrenceId, undefined);
+  assert.deepEqual(f.counts(), { model: 1, provider: 0, credentials: 0 });
+  assert(!f.gateway.rows.has(`${conversation}/messages/${messageId}`));
+});
+
+test("post-settlement cleanup requires fresh original-owner verification, and cannot use a revoked identity", async () => {
+  const response = deferred<Response>(), entered = deferred<void>();
+  const f = fixture({ model: async () => { entered.resolve(); return response.promise; } }); await f.queued();
+  const signal = new AbortController(); const pending = f.app.runIntent(f.actor, intentId, signal.signal); await entered.promise;
+  let checks = 0;
+  f.actor.verifyCurrentAuth = async () => { checks++; return { kind: "forbidden" }; };
+  signal.abort(); response.resolve(done()); assert.notEqual((await pending).kind, "ok");
+  assert(checks > 0, "cleanup rechecks current identity rather than bypassing authorization");
+  const row = [...f.gateway.rows.values()].find(row => row.data.intentId === intentId)!;
+  assert.equal(row.data.state, "reserved"); assert.equal(f.gateway.rows.get(`${base}/proactive_state/current`)!.data.inFlightOccurrenceId, intentId);
+  assert.deepEqual(f.counts(), { model: 1, provider: 0, credentials: 0 });
+});
+
+test("a lost cleanup ACK remains unknown, with no regeneration or provider attempt", async () => {
+  const response = deferred<Response>(), entered = deferred<void>();
+  const f = fixture({ model: async () => { entered.resolve(); return response.promise; } }); await f.queued();
+  const signal = new AbortController(); const pending = f.app.runIntent(f.actor, intentId, signal.signal); await entered.promise;
+  f.gateway.loseAckOn = writes => [...writes.values()].some(row => row.state === "failed");
+  signal.abort(); response.resolve(done()); assert.equal((await pending).kind, "unknown");
+  assert.equal(resultValue(await f.app.intent(f.actor, intentId)).state, "failed");
+  assert.equal(f.gateway.rows.get(`${base}/proactive_state/current`)!.data.inFlightOccurrenceId, undefined);
+  assert.deepEqual(f.counts(), { model: 1, provider: 0, credentials: 0 });
+  assert(!f.gateway.rows.has(`${conversation}/messages/${messageId}`));
 });

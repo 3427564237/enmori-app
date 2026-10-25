@@ -114,8 +114,15 @@ export class FirstFlowApplication {
       if (reserved.kind !== "ok") return reserved;
       const reservation = reserved.value;
       const allowed = await this.authorized(operationActor);
-      if (allowed.kind !== "ok") { await this.fail(operationActor, reservation); return allowed; }
-      if (!live()) return { kind: "terminated" };
+      // Terminal metadata cleanup uses a freshly verified original owner, not
+      // an expired delivery deadline/signal. It is invoked only before model
+      // submission or after its physical promise settles. Publish/dispatch
+      // continue to require operationActor and can never borrow this scope.
+      if (allowed.kind !== "ok") { await this.fail(actor, reservation); return allowed; }
+      if (!live()) {
+        const failed = await this.fail(actor, reservation);
+        return failed.kind === "unknown" ? failed : { kind: "terminated" };
+      }
       const source = reservation.source;
       const modelInput: FirstFlowModelInput = Object.freeze({ inputKind: "proactive_followup",
         quotedRequest: Object.freeze({ occurredAt: source.occurredAt, text: source.text }),
@@ -130,21 +137,24 @@ export class FirstFlowApplication {
           signal: combined, deadline, remainingMs: () => Math.max(0, deadline - this.now()),
         });
       } catch {
-        const failed = await this.fail(operationActor, reservation);
+        const failed = await this.fail(actor, reservation);
         return failed.kind === "unknown" ? failed : { kind: "unavailable" };
       } finally { this.modelPending = false; }
-      if (!live()) { await this.fail(operationActor, reservation); return { kind: "terminated" }; }
+      if (!live()) {
+        const failed = await this.fail(actor, reservation);
+        return failed.kind === "unknown" ? failed : { kind: "terminated" };
+      }
       // LocalChatTransport already strips the Ollama envelope. This is the
       // existing two-string JSON parser in plain-text MVP mode, no content filter.
       const parsed = parseOutput(raw, "ai_assistant_message_v1", true);
       if (!parsed.ok) {
-        const failed = await this.fail(operationActor, reservation);
+        const failed = await this.fail(actor, reservation);
         return failed.kind === "unknown" ? failed : { kind: "unavailable" };
       }
       const fresh = await this.authorized(operationActor);
-      if (fresh.kind !== "ok") { await this.fail(operationActor, reservation); return fresh; }
+      if (fresh.kind !== "ok") { await this.fail(actor, reservation); return fresh; }
       const messageId = this.options.newMessageId();
-      if (!uuid(messageId)) { await this.fail(operationActor, reservation); return { kind: "unavailable" }; }
+      if (!uuid(messageId)) { await this.fail(actor, reservation); return { kind: "unavailable" }; }
       const published = await this.call(operationActor, () => this.options.store.publish(operationActor, {
         reservation, messageId, text: parsed.value.message,
         presentation: source.persona ? { presentationMode: "persona", presentationProjectionVersion: "persona_presentation_v1" }
@@ -152,7 +162,7 @@ export class FirstFlowApplication {
       }), true);
       // An unknown publish ACK is never permission for another model/send.
       if (published.kind !== "ok") {
-        if (published.kind !== "unknown") await this.fail(operationActor, reservation);
+        if (published.kind !== "unknown") await this.fail(actor, reservation);
         return published;
       }
       if (!live()) return { kind: "terminated" };
