@@ -346,7 +346,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     if (!ref.read(aiCompanionReferencesEnabledProvider)) return true;
     final selection = ref.read(aiSelectedSourcesControllerProvider);
     return !selection.active ||
-        ref.read(aiSelectedSourcesControllerProvider.notifier).canSend;
+        ref.read(aiSelectedSourcesControllerProvider.notifier).canSubmit;
   }
 
   Future<void> _openReferences({String? initialCheckInId}) async {
@@ -432,10 +432,22 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           Padding(
             padding: const EdgeInsets.only(left: 12, bottom: 8),
             child: Text(
-              selected.confirmed && _selectionReady
+              selected.confirmed &&
+                      ref
+                          .read(aiSelectedSourcesControllerProvider.notifier)
+                          .canSend
                   ? context.tr(
                       'Reviewed for this local reply. Send when ready.',
                       '已审阅，仅用于本次本地回复。准备好后明确发送。',
+                    )
+                  : {
+                      AiSelectionNotice.none,
+                      AiSelectionNotice.recheck,
+                      AiSelectionNotice.expired,
+                    }.contains(selected.notice)
+                  ? context.tr(
+                      'References will be checked when you send. Your draft is kept if they change.',
+                      '发送时会核对本次参考；来源变化时会保留草稿。',
                     )
                   : aiSelectionNoticeCopy(
                       context,
@@ -1035,9 +1047,10 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     if (ref.read(aiCompanionReferencesEnabledProvider) &&
         ref.read(aiSelectedSourcesControllerProvider).active) {
       if (!_selectionReady) return;
+      if (!_controller.validateSelectedInput(text)) return;
       _messageFocus.unfocus();
       unawaited(
-        ref.read(aiSelectedSourcesControllerProvider.notifier).send(text),
+        ref.read(aiSelectedSourcesControllerProvider.notifier).submit(text),
       );
       return;
     }
@@ -1377,7 +1390,9 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         key: const Key('ai-message-input'),
                         controller: _message,
                         focusNode: _messageFocus,
-                        enabled: state.canSend || state.canRetry,
+                        enabled:
+                            (state.canSend || state.canRetry) &&
+                            _selectionReady,
                         minLines: 2,
                         maxLines: 6,
                         onChanged: (_) => setState(() {}),
@@ -1651,7 +1666,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   key: const Key('ai-message-input'),
                   controller: _message,
                   focusNode: _messageFocus,
-                  enabled: state.canSend || state.canRetry,
+                  enabled: (state.canSend || state.canRetry) && _selectionReady,
                   minLines: 1,
                   maxLines: 4,
                   onChanged: (_) => setState(() {}),

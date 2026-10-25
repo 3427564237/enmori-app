@@ -116,6 +116,7 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
   final _usedCursors = <String, Set<String>>{};
   AiPreparedReplySelection? _review;
   Set<String> _excludedHistory = {};
+  List<_HistoryIdentity> _excludedHistoryIntent = const [];
   AiSelectionNotice _notice = AiSelectionNotice.none;
 
   @override
@@ -270,6 +271,7 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
     _recoveringSelected = false;
     _review = null;
     _excludedHistory = {};
+    _excludedHistoryIntent = const [];
     _notice = AiSelectionNotice.none;
   }
 
@@ -286,6 +288,7 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
     _confirmed = false;
     _review = null;
     _excludedHistory = {};
+    _excludedHistoryIntent = const [];
     _sending = false;
     _recoveringSelected = false;
     _notice = AiSelectionNotice.none;
@@ -539,9 +542,14 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
     if (!_permitted || _busy || _sending || (!ai.canSend && !ai.canRetry)) {
       return;
     }
-    final oldPairs = excludeDisplayedHistory ? _review?.historyPairs : null;
+    final oldPairs = excludeDisplayedHistory
+        ? _review?.historyPairs.map(_historyIdentity).toList()
+        : _excludedHistoryIntent;
     if (excludeDisplayedHistory && (oldPairs == null || oldPairs.isEmpty)) {
       return;
+    }
+    if (excludeDisplayedHistory) {
+      _excludedHistoryIntent = List.unmodifiable(oldPairs!);
     }
     _busy = true;
     _active = true;
@@ -584,14 +592,16 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
     }
     _review = prepared;
     _confirmed = false;
-    if (oldPairs != null && _samePairs(oldPairs, prepared.historyPairs)) {
+    if (oldPairs != null &&
+        oldPairs.isNotEmpty &&
+        _sameHistoryIntent(oldPairs, prepared.historyPairs)) {
       _excludedHistory = prepared.historyPairs
           .map((pair) => pair.historyKey)
           .toSet();
       _notice = AiSelectionNotice.recheck;
     } else {
       _excludedHistory = {};
-      _notice = oldPairs == null
+      _notice = oldPairs == null || oldPairs.isEmpty
           ? AiSelectionNotice.none
           : AiSelectionNotice.pastPairsChanged;
     }
@@ -635,6 +645,27 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
           (id) =>
               _records[id] != null && _eligible(_records[id]!, _now().toUtc()),
         );
+  }
+
+  /// Button availability describes an explicit Send action, not whether a
+  /// short-lived preparation was completed in a separate reference screen.
+  bool get canSubmit => _permitted && !_busy && !_sending;
+
+  Future<void> submit(String text) async {
+    if (!canSubmit || !_conversation.validateSelectedInput(text)) return;
+    if (!canSend) {
+      final epoch = _epoch;
+      await review();
+      if (!ref.mounted ||
+          !identical(epoch, _epoch) ||
+          !canSubmit ||
+          _review == null ||
+          _notice == AiSelectionNotice.pastPairsChanged) {
+        return;
+      }
+      confirm(_review!.selectionRevision);
+    }
+    await send(text);
   }
 
   Future<void> send(String text) async {
@@ -688,13 +719,28 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
   }
 }
 
-bool _samePairs(List<AiPreparedHistoryPair> a, List<AiPreparedHistoryPair> b) =>
+typedef _HistoryIdentity = ({
+  String userId,
+  String assistantId,
+  int userSequence,
+  int assistantSequence,
+});
+_HistoryIdentity _historyIdentity(AiPreparedHistoryPair pair) => (
+  userId: pair.userMessageId,
+  assistantId: pair.assistantMessageId,
+  userSequence: pair.userSequence,
+  assistantSequence: pair.assistantSequence,
+);
+bool _sameHistoryIntent(
+  List<_HistoryIdentity> a,
+  List<AiPreparedHistoryPair> b,
+) =>
     a.length == b.length &&
     List.generate(
       a.length,
       (i) =>
-          a[i].userMessageId == b[i].userMessageId &&
-          a[i].assistantMessageId == b[i].assistantMessageId &&
+          a[i].userId == b[i].userMessageId &&
+          a[i].assistantId == b[i].assistantMessageId &&
           a[i].userSequence == b[i].userSequence &&
           a[i].assistantSequence == b[i].assistantSequence,
     ).every((same) => same);

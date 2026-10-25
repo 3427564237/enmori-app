@@ -374,6 +374,20 @@ class AiConversationController extends Notifier<AiConversationState> {
     await _start(text, retryUser: user);
   }
 
+  /// Local validation before a selected Send performs any source reads.
+  bool validateSelectedInput(String text) {
+    if (!state.canSend && !state.canRetry) return false;
+    if (!_validInput(text)) {
+      _show(state.phase, message: 'Enter 1–2400 characters of valid text.');
+      return false;
+    }
+    if (state.canRetry && _retryUser?.text != text) {
+      _show(state.phase, message: 'Enter the same saved message to retry.');
+      return false;
+    }
+    return true;
+  }
+
   bool hasSelectedPreparation(String revision) {
     final p = _selectedPreparation;
     return p != null &&
