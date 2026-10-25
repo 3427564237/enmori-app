@@ -26,9 +26,9 @@ async function tags(tx:Reader,id:string):Promise<Map<string,string>>{
 /** Request-local computation; no persisted recommendations or result history. */
 export class FirestoreFriendRecommendations implements FriendRecommendations {
   constructor(private readonly store:FirestoreGateway,private readonly clock:Clock,private readonly authority:SocialAuthority,private readonly events?:FriendEventProjection){}
-  private async eventProjection(tx:Reader,requester:string,subject:string){
+  private async eventProjection(tx:Reader,requester:string,subject:string,asOf:string){
     if(!this.events)return fail("SERVICE_UNAVAILABLE");
-    const value=await this.events.read(tx,requester,subject,"friend_recommendation_v1");
+    const value=await this.events.read(tx,requester,subject,"friend_recommendation_v1",asOf);
     if(!value||![value.interestedEventIds,value.goingEventIds].every(ids=>Array.isArray(ids)&&ids.length<=1000&&
       ids.every(id=>typeof id==="string"&&isSafeDocumentId(id))))return fail("SERVICE_UNAVAILABLE");
     return {authorizedInterestedEventIds:value.interestedEventIds,authorizedGoingEventIds:value.goingEventIds};
@@ -46,9 +46,19 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
     return fail("SERVICE_UNAVAILABLE");
   }
   async recommend(uid:string,view:"home"|"all"){
-    try{return await this.store.runTransaction(async tx=>{
+    try{
+      if(this.events?.prepare){
+        const permitted=await this.store.runTransaction(async tx=>(await this.authority.viewer(tx,uid)).data.optionalProcessingConsent==="accepted");
+        if(!permitted)return ok({suggestions:[]});
+        const before=this.clock.now();if(!before.ok||!Number.isFinite(before.value.getTime()))return fail("SERVICE_UNAVAILABLE");
+        // Provider readiness never holds a Firestore transaction open. Waiting
+        // cannot grant source/owner authority: the full transaction below rereads it.
+        await this.events.prepare(before.value.toISOString());
+      }
+      return await this.store.runTransaction(async tx=>{
       const own=await this.authority.viewer(tx,uid),now=this.clock.now();
-      if(!now.ok)return fail("SERVICE_UNAVAILABLE");
+      if(!now.ok||!Number.isFinite(now.value.getTime()))return fail("SERVICE_UNAVAILABLE");
+      const asOf=now.value.toISOString();
       // Q17 consent precedes candidate construction; manual Friend paths remain available.
       if(own.data.optionalProcessingConsent!=="accepted")return ok({suggestions:[]});
       const ownTags=await tags(tx,own.id),candidates:AuthorizedFriendRankingCandidateProjection[]=[],
@@ -72,8 +82,8 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
         const permittedTags=visible(candidate.fields.interests,false,false)?await tags(tx,candidate.id):new Map<string,string>();
         let eventProjection=emptyEvents as Omit<AuthorizedFriendRankingProjection,"authorizedInterestTagIds">;
         if(visible(candidate.fields.participation,false,false)){
-          ownEvents??=await this.eventProjection(tx,own.id,own.id);
-          eventProjection=await this.eventProjection(tx,own.id,candidate.id);
+          ownEvents??=await this.eventProjection(tx,own.id,own.id,asOf);
+          eventProjection=await this.eventProjection(tx,own.id,candidate.id,asOf);
         }
         candidates.push({candidateAccountId:candidate.id,authorizedInterestTagIds:[...permittedTags.keys()],...eventProjection});
         displays.set(candidate.id,{username:candidate.username,displayName:candidate.displayName,

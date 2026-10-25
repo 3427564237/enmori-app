@@ -145,7 +145,7 @@ entry. Empty, unavailable and ignored results remain distinct states.
 
 ## Validation and remaining evidence
 
-Strict TypeScript compilation passed using the existing pinned Node 24.19.0 /
+The initial today packet's strict TypeScript compilation passed using the existing pinned Node 24.19.0 /
 TypeScript 7.0.2 toolchain. The focused suite passed **78/78, zero failures**:
 
 ```text
@@ -171,3 +171,47 @@ integrate its HTTP/API companion changes and App's matching UI before claiming
 the new automatic path is available. Real-service and physical-phone evidence
 remain separate. Source findings and the agreed shapes have been sent to
 Integration, App, Product, Runtime and Delivery within their ownership boundaries.
+
+## Bounded Friend source readiness follow-up
+
+Integration authorized this follow-up after reviewing the concrete cold/expired
+projection cause. `FriendEventProjection` now offers optional
+`prepare(asOf):Promise<void>` for the same existing public Event source, outside
+any Firestore transaction. `read` receives the complete ranking transaction's
+one captured `asOf`, shared by requester and candidate Event projections.
+
+When preparation is supplied, the producer first checks current owner and purpose
+in a read transaction, waits for preparation outside it, then starts the complete
+recommendation transaction and rereads owner, consent, candidates and all privacy,
+relationship and ignore rules. A failed preparation stays unavailable; it cannot
+replace unknown common Events with zero or change scores/order. Consent withdrawal
+during the wait stops before candidate construction. Compositions without the
+optional preparation retain their old path. This public source preparation uses
+no personal Event associations. Concurrent refresh/disable or genuine provider
+failure may still fail closed; the change does not invent a stale fallback.
+
+Integration owns connecting preparation to the same guarded
+`eventBrowseControl.source.firstBatch(asOf,signal)` and using the supplied `asOf`
+in `socialEventSource` ready/peek. Context did not edit projection, bootstrap,
+provider, cache duration, formulas or authorization semantics.
+
+Four focused regressions were added to `friend-recommendation-source.test.ts`:
+waiting outside transactions for cold/expired/pending supply; no warm/candidate
+reads for missing owner or withdrawn purpose; provider failure without an
+interest-only fallback; and permission revocation during the wait. They have
+**not been executed in this follow-up**, in accordance with LI's request to
+finish promptly and concentrate tests at Integration's final head. The earlier
+78/78 count belongs to the initial today packet, not these new regressions.
+
+The additional Emulator script was stopped before any file or service was
+created. The existing compiled `selected-reply-first-flow.integration.test.js`
+can be reused in the scheduled isolated environment with
+`ENMORI_F1A_EMULATOR_PROOF=true node --test` (the file is under
+`backend/dist/emulator-test/`). Its existing five author cases prove the lower
+selected-source/store boundary, not the new today HTTP form. Final composed
+today coverage should reuse the existing `createIsolatedConversationComposition`
+plus `buildApp` harness with `simpleChat:true`, `selectedReplies:true`, synthetic
+transport and the trusted `utcMilliseconds` test seam: empty-day chat; latest
+five/hasMore and identity exclusion without backfill; explicit off; edit/delete
+and civil-day conflicts; and original-operation readback after any dispatched
+execute. No new service window or independent tool framework was requested.
