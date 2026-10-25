@@ -269,7 +269,7 @@ void main() {
       expect(r.sourceState.selectedIds, {'owned'});
       expect(
         tester.widget<FilledButton>(find.byKey(const Key('ai-send'))).onPressed,
-        isNull,
+        isNotNull,
       );
       await _tap(tester, 'ai-references');
       await _tap(tester, 'ai-selected-review');
@@ -300,7 +300,7 @@ void main() {
   );
 
   testWidgets(
-    'expired review keeps draft and choices but cannot send until a new explicitly confirmed review',
+    'expired preview keeps choices until explicit Send obtains fresh keys without another confirmation screen',
     (tester) async {
       final r = await SelectedRig.create(tester);
       r.add('owned');
@@ -313,13 +313,14 @@ void main() {
       await _tap(tester, 'ai-select-owned');
       await _tap(tester, 'ai-selected-review');
       await _tap(tester, 'ai-review-confirm');
-      final staleSend = tester
+      final oldKey = r.sourceState.review!.sourceCards.single.selectionKey;
+      final send = tester
           .widget<FilledButton>(find.byKey(const Key('ai-send')))
           .onPressed!;
       await r.advance(tester, const Duration(seconds: 15));
       await tester.pumpAndSettle();
-      staleSend();
-      await tester.pump();
+      expect(r.sourceState.review, isNull);
+      expect(r.sourceState.selectedIds, {'owned'});
       expect(r.repo.selectedExecutes, isEmpty);
       expect(
         tester
@@ -328,18 +329,16 @@ void main() {
             .text,
         'Retain this draft',
       );
-      expect(r.sourceState.selectedIds, {'owned'});
       expect(
         tester.widget<FilledButton>(find.byKey(const Key('ai-send'))).onPressed,
-        isNull,
+        isNotNull,
       );
-      await _tap(tester, 'ai-references');
-      await _tap(tester, 'ai-selected-review');
+      send();
+      await tester.pumpAndSettle();
       expect(r.repo.selectedPrepares, hasLength(2));
-      expect(r.repo.selectedExecutes, isEmpty);
-      await _tap(tester, 'ai-review-confirm');
-      await _tap(tester, 'ai-send');
       expect(r.repo.selectedExecutes.single.included, ['source-key-2-0']);
+      expect(r.repo.selectedExecutes.single.included, isNot(contains(oldKey)));
+      expect(r.repo.ordinaryPrepares, 0);
       expect(
         tester
             .widget<TextField>(find.byKey(const Key('ai-message-input')))
