@@ -6,6 +6,55 @@ Authority: [LI's bounded round request](../decisions/2026-10-25-li-ai-companion-
 The local launch roster and exact prompts are under
 `/home/miku/.local/state/enmori-ai-companion-20261025/`.
 
+## Current checkpoint — C selected; reviewed candidates assembled
+
+LI selected **C**, recorded at `2bb638b47e682217007cf02cd505550d88d627cf` in
+[the scoped decision](../decisions/2026-10-25-li-ai-entry-c.md). The original
+launch/first-checkpoint statements below remain historical. The new native C
+increment is undergoing its own source/widget validation. The
+[next decision packet](../planning/2026-10-25-ai-companion-next-decisions.md)
+separately proposes F0 explicit local follow-up, F1a hand-selected own Check-ins,
+D1 Android delivery and the USD 1 synthetic Gemini experiment; none is granted
+by the entry choice.
+
+| Module | Exact delivered head / source | Review and present boundary |
+| --- | --- | --- |
+| Product / UX | `c7adc9837850972018ddd91b3c5491256f09a230` | A/B/C comparison, phone prototype and C handoff integrated; independent browser/layout review, synthetic design only |
+| App initial usability | `f514a325878d351ecfd5de314a516954db2161ad` | Independently reviewed and integrated; C follow-up has a separate final head pending |
+| Context / Backend | `3ed4b3ed6a97f501069c692e1b98a47da7db4305`; source `8ce74a82b635e6a7b0ada6b2d17255ecb09714c0` | 44 source tests and original exclusion counterexample independently passed; full F0/F1 contract remains proposed, no production reader |
+| Proactive / Delivery | `4a388d9fdb96596482fb7aa30760d0f1dbe203df`; source `6d3b590a75bdafb6130b7adb920cf90ace32b4cc` | 29 pure policy cases independently reviewed; exact proposed SDK compatibility audited read-only; no database transaction, scheduler, registration or send |
+| AI Runtime / Models | `15a76655f6bcda67eeaba8767ca31cd9a60ecf5f`; source `24f913dd26afa9af82f7c31ac9eefcf543b64140` | Source/mock guard findings independently closed; one actual local batch completed; cloud remains disabled |
+| QA / Evaluation | `925ba38732772d1a71c24f19d2b8c750d538fab5` | Independent source counterexamples, prototype, exact physical-contract consistency and all 24 raw model judgments integrated |
+
+Integration preserved all author lineages through local merge commits. The
+integrated Backend at `e377fa2f3fdaf77dd6ffc37e94c20d665c41afb3` passed the
+strict TypeScript build with Node 24.19.0, exit 0. Later merges through the above
+checkpoint change only documentation; Backend source remains identical.
+The earlier 40/40 router run below applies to the initial App change, not the
+new C slice. No overlapping author/QA/Integration test totals are added together.
+
+The real local Qwen run used frozen source `24f913d`, the current production
+serializer and synthetic input: one empty preload plus exactly 24 generations,
+no retries or parameter/model changes. All responses physically settled;
+23/24 were structurally eligible, one output truncated. Independent QA found
+**12 Pass / 12 Fail / 0 unreviewed**. Preserved 16 cases are 6/10, new 8 are 6/2.
+Median latency was 4.1215 s, p95 12.4966 s, maximum 27.6998 s; local host cost
+was not measured. [Full per-case review](../evidence/ai-companion-20261025/qa-model-review.md)
+retains task misreading, correction failures and an instruction-violating
+clear-data suggestion as model-output failures, not actual storage operations.
+Small-plan semantics remain **Fail**. The eight proposed context cases and
+Gemini calls remain **Not Run** against real providers.
+
+All seven development-agent configurations remain the explicitly requested
+model / max values, independently verified from actual turn records; no model
+was silently downgraded. These settings are separate from ENMORI's model choice.
+Service/deployment, current real-data preservation, native APK/device and push
+acceptance remain separate gates. No new source use, cloud charge, external
+send, shared-service restart or phone write occurred at this checkpoint.
+The service was read back active/running again at the original clean `7a3c4fa`
+working directory; all six original reference files still match their preserved
+startup hashes. This is source/service readback, not a fresh account-data inventory.
+
 ## Verified startup state
 
 - Product/evidence parent: `40ec21d69cec396bad49b834750fc4b1894c8a3c`, containing
@@ -72,3 +121,44 @@ phone evidence separate. Unknown operation outcomes are not retried blindly.
 Preserve original failures and existing business/privacy semantics. First build
 the decision packet while independent approved work continues; this launch is
 not a completed product or acceptance claim.
+
+## First local integration checkpoint
+
+All seven actual development models/efforts match LI's configuration, verified
+from recorded current turns and independently checked by QA. See
+[configuration evidence](../evidence/ai-companion-20261025/agent-configuration.md).
+The new six-chat roster is live; no historical work chat was assigned new work.
+
+| Delivery | Exact author commit | Current disposition |
+| --- | --- | --- |
+| QA acceptance matrix and hash comparator | `fa56f0e1cab0bf9599b3920eddfca6e3ba814f74` | Integrated after Integration source review; comparator's 12 tests are tool-only evidence |
+| Product A/B/C decision text | `22e8bea4bf71fc2404d357b64a695985202a9633` | Integrated as a reviewed proposal; C remains unselected; phone prototype in progress |
+| App chat usability | `f514a325878d351ecfd5de314a516954db2161ad` | Integrated after QA's independent exact-head source review and 16 selected widget cases |
+| Runtime evaluator/adapter | `f9a97652ee532cfe374120962b2c5dd66643dd62` | Not integrated yet; unknown-provider termination and raw-output path findings under repair; cloud guard/runner being completed |
+| Proactive pure policy | `48ac991b8978d1d7ad47ee21e9a5b7d52c3f5221` | Independent review in progress; isolated policy only |
+| Context pure projection | No final author SHA received at this checkpoint | Independent counterexamples under reconciliation; no production wiring |
+
+App's source change stops showing active Sending after dispatch closes while
+retaining the original unknown-result text; system Back first closes the social
+chat drawer; chat/search bodies use existing bodyLarge and 1.5 line height.
+Existing send/retry/authority behavior and raw content are unchanged.
+
+Integration's tested assembly is
+`9f14fb0318a9633d05b689d3a5a14324b6d1d012`. Under the shared Flutter lock, offline
+frozen dependency preparation completed without tracked manifest/lock changes,
+then `ai_conversation_shared_router_test.dart` and
+`history_ai_home_router_test.dart` passed **40/40**. The original output is in
+`/home/miku/.local/state/enmori-ai-companion-20261025/integration-ui-regression.log`.
+These are source/widget composition checks, separate from App's 8 new/82 existing
+cases and QA's 16 selected cases; overlapping counts are not added together.
+The Flutter slot was released. No APK, runtime deployment, real generation,
+notification, personal-data capture or phone write occurred.
+
+Product/Context identified Q19 Backend-only provenance, Q17 location restrictions
+and Q14's 90-day message anchor as concrete contracts requiring scoped decisions.
+The recommended first proactive path is explicitly confirmed later follow-up;
+the first proposed external check is limited to LI's one chosen account/device
+and synthetic foreground/background/ordinary-close notifications. A broader
+multi-account pilot is not the default request. Product form, private-context
+use, source UI, proactive storage/retention/delivery and cloud budget/provider
+conditions remain unresolved; independent candidate work continues.

@@ -18,10 +18,10 @@ String aiStatusCopy(BuildContext context, String message) => switch (message) {
   ),
   'This conversation is no longer available. Choose another conversation or send a new message.' =>
     context.tr(message, '此对话已不可用。请选择其他对话或发送新消息。'),
-  'New conversation.' => context.tr(message, '新对话。'),
+  'New conversation.' => context.tr('New topic.', '新话题。'),
   'New conversation. Previous messages remain saved.' => context.tr(
-    message,
-    '已开始新对话。之前的消息仍然保留。',
+    'New topic. Previous messages remain saved.',
+    '已开始新话题。之前的消息仍然保留。',
   ),
   'Could not load conversation history. Try again.' => context.tr(
     message,
