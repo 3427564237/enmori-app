@@ -349,3 +349,29 @@ No real service/model, Firebase data, push registration/send, APK/Gradle,
 phone write or deployment was exercised. Source/widget evidence is not runtime,
 physical-device, UAT, Release or Done acceptance. The exact source commit is
 handed off separately for independent QA; these local results do not replace it.
+
+### Independent Product finding — first-read recovery
+
+Product reviewed the frozen `d893d2d9b631779f40c540acac50251a86013220`
+and found a P2: the follow-up form offered readback for an uncertain settings
+write, but not for a failed initial settings/active-intents GET. This left
+scheduling disabled until route exit, which could lose unsubmitted choices.
+The finding was confirmed against source; the earlier failed-read widget case
+covered only the separate settings page.
+
+The form now exposes **Check contact settings** whenever settings are unknown,
+and **Check active follow-ups** whenever the complete active set is unknown.
+Both perform only their existing GET, retain all current date/time/zone,
+candidate and confirmation values, and never enable by guessing or create an
+intent automatically. Two new widget cases fail each initial prerequisite
+independently, explicitly recover it on the same form, check preserved choices
+and verify zero settings/create writes.
+
+Integration released the coordinated Flutter slot for this correction. The
+next origin/source-port work was isolated in a local WIP checkpoint first, so
+this validation has exactly the F0 fix on `d893d2d`. Targeted analyzer passed
+with no issues and the complete proactive suite passed **51/51**. Raw output:
+`/home/miku/.local/state/enmori-ai-companion-20261025/app-f0-prerequisite-recovery.log`.
+No shared route, ordinary AI behavior, dependency, native or real-service
+operation changed. The existing 155-case record remains the checkpoint's
+record; it is not added to this rerun's count.
