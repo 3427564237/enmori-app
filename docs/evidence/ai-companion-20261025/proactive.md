@@ -828,3 +828,52 @@ production route registration, actual host-lane composition, real model quality,
 FCM/IAM or native behavior. Context's real Store/bridge and Root composition still
 need their corresponding integrated tests; no deployment/data/device acceptance
 is inferred from this checkpoint.
+
+## Real component composition with replaced I/O
+
+Composition baseline `b7adead` preserves Context's original `14f7390` Store and
+conversation bridge and Runtime's original `e2f092e` shared lane. The new
+`first-flow-composition.test.ts` injects those actual components into
+`FirstFlowApplication` and `SinglePostFcmSender`. Only Firestore transactions,
+OAuth, model HTTP and FCM HTTP are replaced; all accounts, messages and routing
+values are synthetic. No emulator, model, OAuth, Firebase or FCM service runs.
+
+The strict pinned build and **6/6 composition tests** pass. They cover:
+
+- One dated authorized quote reaches Runtime; one standalone canonical
+  assistant/proactive message and its source receipt are readable through the
+  actual conversation reader/resolver. A read watermark does not extend the
+  original conversation's 90-day lifetime.
+- A lost publish ACK leaves one message and one budget charge. Ordinary
+  readback/recovery dispatches that same message without another generation.
+- A lost claim ACK consumes the persisted claim, emits zero provider requests
+  and recovers to unknown without reclaiming permission to send.
+- Source deletion, purpose revoke/regrant and installation lease expiry after
+  OAuth each prevent provider dispatch. The lease case expires within the
+  application's operation deadline, so it exercises the Store lease fence.
+- Off during generation prevents late publication and dispatch. The same lane
+  blocks chat until the original matching physical completion is observed.
+- An ambiguous 503 becomes persisted unknown and is never sent again.
+
+The first composition run passed five cases; its cancellation assertion expected
+the application's direct `terminated` branch while the real Runtime rejects
+cancelled delivery through the application's failure branch. The test now checks
+the required failed delivery, no publication, no provider call and retained lane
+until physical completion. Production code was unchanged. A subsequent strict
+compile caught an explicit undefined optional property in the new lease fixture;
+the fixture now omits the property. Owner-local `f0-composition-first.tap` and
+`f0-composition-build-before.log` retain those diagnostics; final output is
+`f0-composition.tap` / `f0-composition-build.log`.
+
+This adds evidence for the actual component seams, including canonical reads and
+the shared host lane. The transaction gateway is still an in-memory substitute:
+it checks read-before-write, all-or-nothing fake commits and immutable timestamps,
+but it does not establish Firestore/emulator behavior, cross-process persistence,
+provider acceptance, actual model relevance, native delivery or user acceptance.
+Independent QA and Integration's actual bootstrap remain separate gates.
+
+The final merged targeted regression run passes **212/212** across all six
+Proactive test files plus Runtime's shared-lane transport, parser, application
+and bounded-runtime suites. This includes peer-owned Store/Runtime tests as
+well as this worker's cases; it is an author-run combined regression count,
+not independent QA approval. Raw output: owner-local `f0-composed-all.tap`.
