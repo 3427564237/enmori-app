@@ -25,6 +25,8 @@ export function sourceBundle(root) {
     'backend/dist/src/ai-runtime/infrastructure/ollama-response.js',
     'backend/dist/src/ai-conversation/application/persona-expression.js',
     'backend/dist/src/personas/domain/persona-values.js',
+    'backend/dist/src/check-ins/domain/content.js', 'backend/dist/src/check-ins/domain/note.js',
+    'backend/dist/src/shared/domain/result.js', 'backend/dist/src/shared/application/app-failure.js',
     'backend/dist/src/ai-runtime/domain/parse-output.js',
     'backend/dist/src/ai-conversation/application/open-conversation-semantic-policy.js', 'pnpm-lock.yaml'];
   const hashes = Object.fromEntries(files.map(p => [p, sha256(readFileSync(resolve(root, p)))]));
