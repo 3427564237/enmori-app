@@ -22,9 +22,10 @@ earlier failure.
 - **Not Run** means the required evidence is absent, incomplete, unavailable or
   cannot safely be collected under current authority. Missing approval is a
   reason attached to Not Run, not evidence of correct behavior or a defect.
-- Unless an exception is stated below, **every row is Not Run for the new
-  integrated candidate**. No candidate has yet been supplied to this QA checkout.
-  The old small-plan semantic result is explicitly **Fail (historical)**.
+- Unless an exact layer/head is named in the linked QA ledgers, rows remain
+  **Not Run for the integrated candidate**. Independent source, prototype and
+  local-model observations below do not close its service/device gates.
+  The old small-plan semantic result remains **Fail (historical)**.
 - Design coverage, source inspection and executable observations are separate.
   A prototype can pass a design review while the feature remains Not Run.
 - A request that was dispatched but lacks a known result is **unknown outcome**.
@@ -38,6 +39,18 @@ injected-boundary test; **I** isolated composed service/storage test; **M** actu
 model with synthetic input/raw output; **R** authorized deployed service;
 **P** installed signed app on a physical phone, performed by LI/SHI and reviewed
 by QA. A comma lists distinct required observations, not interchangeable proof.
+
+Current M checkpoint: [fixed local24](qa-model-review.md), Runtime `24f913d`,
+**12 Pass / 12 Fail** with every raw result hash-bound. MOD-06 remains **Fail**;
+MOD-03/04/07 also have observed correction, recall, control and preservation
+failures. MOD-01 has mixed English/Chinese results and one-question failures.
+MOD-05 passes its one missing-goal fixture; MOD-02 has passing explicit-language
+and language-switch fixtures, with S/P portions still separate. MOD-08's missing
+Event/no-execution controls pass their limited cases, not the full Mood/attendance
+row. MOD-09 retains the actual truncated response and all 24 attempts; no protocol
+or latency result implies semantic success. Eight candidate-context real-model
+cases remain Not Run. [F0/F1 contract review](qa-contract-review.md) is D only,
+with new contracts still Proposed.
 
 ## Context, permission and provenance
 
