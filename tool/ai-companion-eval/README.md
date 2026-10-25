@@ -164,7 +164,11 @@ retention, prove paid project status or promise zero retention. The request has
 no tools/caches/files/continuations; no alternate model/provider is attempted.
 Unknown status, missing model revision/usage, exceeded observed token limits,
 expired authorization, cancellation or evidence-write failure stops the batch.
-SIGINT/SIGTERM prevent another request while the original receive remains bounded.
+Authorization and cancellation are checked again at the actual HTTP boundary,
+after the durable intent write. A blocked dispatch is recorded as not started;
+its reservation remains consumed. Count requests combine external cancellation
+with the receive timeout. SIGINT/SIGTERM prevent another request while an
+already-dispatched generation retains its bounded original receive.
 
 Raw responses are preserved up to the 1 MiB receive bound; any exact credential
 echo is redacted and labelled before any artifact is written. No headers or key

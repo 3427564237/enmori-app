@@ -132,6 +132,59 @@ test('failed evidence write before generation causes zero generation calls and p
   assert.equal(report.stopReason, 'EVIDENCE_WRITE_FAILED');
 });
 
+test('cancellation or expiry during count-intent persistence prevents the actual count dispatch', async () => {
+  for (const boundary of ['cancel', 'expire']) {
+    const controller = new AbortController(), authorization = grant();
+    let at = instant, calls = 0;
+    const report = await runSyntheticCloud(setup({ authorization, signal: controller.signal, now: () => at,
+      save: name => {
+        if (!name.endsWith('.count-intent.json')) return;
+        if (boundary === 'cancel') controller.abort();
+        else at = authorization.expiresAt;
+      }, http: async req => { calls++; return fakeHttp(req); } }));
+    assert.equal(calls, 0, boundary);
+    assert.equal(report.stopReason, boundary === 'cancel' ? 'CANCELLED' : 'AUTHORIZATION_EXPIRED');
+    assert.equal(report.budget.countAttempts, 1); assert.equal(report.budget.generationAttempts, 0);
+    assert.equal(report.rows[0].count.outcome, 'not-started');
+  }
+});
+
+test('cancellation or expiry during generation-intent persistence prevents dispatch without refunding reservation', async () => {
+  for (const boundary of ['cancel', 'expire']) {
+    const controller = new AbortController(), authorization = grant();
+    let at = instant, counts = 0, generations = 0;
+    const report = await runSyntheticCloud(setup({ authorization, signal: controller.signal, now: () => at,
+      save: name => {
+        if (!name.endsWith('.generation-intent.json')) return;
+        if (boundary === 'cancel') controller.abort();
+        else at = authorization.expiresAt;
+      }, http: async req => {
+        if (req.url.endsWith(':countTokens')) counts++; else generations++;
+        return fakeHttp(req);
+      } }));
+    assert.equal(counts, 1); assert.equal(generations, 0, boundary);
+    assert.equal(report.stopReason, boundary === 'cancel' ? 'CANCELLED' : 'AUTHORIZATION_EXPIRED');
+    assert.equal(report.budget.reservedMicroUsd, reservationMicroUsd);
+    assert.equal(report.rows[0].observation.outcome, 'not-started');
+    assert.equal(report.rows[0].protocol.eligible, false);
+  }
+});
+
+test('an in-flight count observes external cancellation and stops before generation', async () => {
+  const controller = new AbortController(); let calls = 0, observedAbort = false;
+  const report = await runSyntheticCloud(setup({ signal: controller.signal, http: async (_request, signal) => {
+    calls++;
+    signal.addEventListener('abort', () => { observedAbort = true; }, { once: true });
+    controller.abort();
+    if (signal.aborted) throw signal.reason;
+    return Response.json({ totalTokens: 512 });
+  } }));
+  assert.equal(observedAbort, true); assert.equal(calls, 1);
+  assert.equal(report.stopReason, 'CANCELLED');
+  assert.equal(report.rows[0].count.outcome, 'unconfirmed');
+  assert.equal(report.budget.generationAttempts, 0);
+});
+
 test('credential is only in the request header, fixed URL and redirect guard; vendor echoes are redacted from every artifact', async () => {
   const secret = 'SYNTHETIC_KEY_NOT_REAL_123456789'; let requests = 0;
   const http = createGeminiHttp(secret, async (url, init) => {

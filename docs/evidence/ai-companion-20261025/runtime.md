@@ -248,3 +248,35 @@ These runs record their pre-commit dirty state honestly and include exact
 source/compiled hashes; they are not presented as runs from a later commit.
 Real cloud/local generation remains **Not Run** pending QA and Integration's
 specific execution decision; source/mock success does not alter semantic status.
+
+## Follow-up: dispatch-time authorization and cancellation
+
+Independent QA reproduced a cloud-only P2 on `ff39304`: a cancellation/expiry
+during count-intent persistence, or expiry during generation-intent persistence,
+could pass the earlier guard and still dispatch. The original QA script/log at
+`qa-review/runtime-ff39304/cloud-dispatch-counterexample.{mjs,log}` remain intact
+under the private round state. Three new regression groups were first run red
+(`runtime/tests-cloud-dispatch-red.log`), including external cancellation of an
+in-flight token count.
+
+The HTTP wrapper now revalidates the full grant, external cancellation and
+receive signal synchronously immediately before counting/dispatching the call.
+A local dispatch denial is recorded as `not-started`, distinct from an unknown
+request already sent. Count requests combine external cancellation and timeout;
+an already-dispatched generation still receives its original response within
+the existing physical bound. Reservations are retained in both cases.
+
+The three original QA counterexamples now show zero forbidden dispatches
+(`runtime/cloud-dispatch-counterexample-fixed.log`). All **34/34** focused tests
+pass (`runtime/tests-dispatch-final.log`): the prior 31 plus three new regression
+groups. No backend adapter, local runner, corpus or compiled file changed for
+this follow-up, and no real provider request was used to verify it.
+
+Integration subsequently assigned the unique local 24-case current-prompt slot,
+including at most one empty preload if needed, with no retries/provider changes
+and an immediate stop on unknown outcome. This supersedes only the earlier
+local-execution scheduling hold. Execution will use a clean committed snapshot
+and frozen source/compiled hashes. Cloud execution/budget remains unapproved;
+local results will be recorded separately after the batch and independently
+reviewed. LI's separate entry-C decision at Integration commit `2bb638b` changes
+only presentation/navigation and supplies no cloud or additional data authority.

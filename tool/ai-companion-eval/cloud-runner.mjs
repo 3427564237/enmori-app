@@ -57,11 +57,12 @@ export function redactCredential(value, secret) {
   return serialized.includes(secret) ? { ...JSON.parse(serialized.split(secret).join('[REDACTED]')), credentialRedacted: true } : value;
 }
 
-async function countInput(request, http) {
+async function countInput(request, http, signal) {
   let rawBody = '', httpStatus;
   const started = performance.now();
   try {
-    const response = await http(request, AbortSignal.timeout(120_000));
+    const timeout = AbortSignal.timeout(120_000);
+    const response = await http(request, signal ? AbortSignal.any([signal, timeout]) : timeout);
     httpStatus = response.status;
     requireValue(response.body, 'COUNT_BODY_MISSING');
     const reader = response.body.getReader(), decoder = new TextDecoder('utf8', { fatal: true });
@@ -93,14 +94,29 @@ export async function runSyntheticCloud({ mode, authorization, passes, maxUsd, s
   const corpus = loadCases(), verify = () => validateCloudAuthorization(authorization, { corpusSha256: corpus.corpusSha256,
     sourceBundleSha256, passes, maxUsd, now: now(), mock: mode === 'mock' });
   const grant = verify(), budget = new CloudBudget(grant), rows = [];
-  let generationCalls = 0, countCalls = 0;
+  let generationCalls = 0, countCalls = 0, dispatchBlockReason;
   const measuredHttp = async (request, abortSignal) => {
+    // Intent persistence can cross expiry or observe cancellation. Recheck
+    // synchronously at the actual HTTP boundary before counting or dispatching.
+    try {
+      verify();
+      requireValue(!signal?.aborted, 'CANCELLED');
+      requireValue(!abortSignal.aborted, 'RECEIVE_DEADLINE_EXPIRED');
+    } catch (error) {
+      dispatchBlockReason = safeErrorCode(error);
+      throw error;
+    }
     if (request.url === generateUrl) generationCalls++;
     else if (request.url === countUrl) countCalls++;
     else throw Error('PROVIDER_URL_FORBIDDEN');
     return http(request, abortSignal);
   };
   const safe = value => redactCredential(value, secret);
+  const observedDispatch = value => {
+    if (!dispatchBlockReason) return value;
+    const { failure: _failure, ...rest } = value;
+    return { ...rest, outcome: 'not-started', dispatchBlockReason };
+  };
   const persist = (name, value) => save(name, safe(value));
   const report = { schemaVersion: 'synthetic_evaluation_run_v1', mode, provider: 'gemini-candidate', syntheticOnly: true,
     startedAt: now(), intendedCases: corpus.cases.length * passes, sourceBundleSha256,
@@ -119,23 +135,26 @@ export async function runSyntheticCloud({ mode, authorization, passes, maxUsd, s
         const reservedCount = budget.reserveCount();
         // Durable reservation/intent first; a crash never means safe to resend.
         persist(`${id}.count-intent.json`, { id, fixture, prompt, request: countRequest, budget: reservedCount, at: now() });
-        const count = safe(await countInput(countRequest, measuredHttp));
+        const count = safe(observedDispatch(await countInput(countRequest, measuredHttp, signal)));
         persist(`${id}.count-response.json`, count);
         row = { id, caseId: fixture.id, pass, track: fixture.track, tags: fixture.tags, criteria: fixture.criteria, count,
           protocol: { valid: false, eligible: false }, semanticReview: 'unreviewed' };
+        requireValue(!dispatchBlockReason, dispatchBlockReason);
+        requireValue(!signal?.aborted, 'CANCELLED');
         requireValue(count.outcome === 'response-observed', 'COUNT_UNCONFIRMED');
         verify(); requireValue(!signal?.aborted, 'CANCELLED');
         const reservation = budget.reserveGeneration(count.totalTokens);
         persist(`${id}.generation-intent.json`, { id, request, requestSha256: sha256(JSON.stringify(request)),
           budget: reservation, at: now() });
-        const observation = safe(await observeSyntheticEvaluation('gemini-candidate', prompt, measuredHttp, { signal }));
+        const observation = safe(observedDispatch(await observeSyntheticEvaluation('gemini-candidate', prompt, measuredHttp, { signal })));
         row = { ...row, requestSha256: sha256(JSON.stringify(request)), observation,
           protocol: protocolAssessment(observation), cost: costObservation(observation, mode === 'mock') };
         // Persist each response before interpreting failures or considering the next case.
         persist(`${id}.response.json`, row);
         rows.push(row);
-        requireValue(observation.outcome === 'response-observed', 'GENERATION_UNCONFIRMED');
+        requireValue(!dispatchBlockReason, dispatchBlockReason);
         requireValue(!signal?.aborted, 'CANCELLED');
+        requireValue(observation.outcome === 'response-observed', 'GENERATION_UNCONFIRMED');
         requireValue(row.protocol.eligible, 'GENERATION_INELIGIBLE');
         requireValue(typeof observation.modelRevision === 'string' && observation.modelRevision.startsWith('gemini-3.8-flash'),
           'MODEL_REVISION_UNCONFIRMED');
