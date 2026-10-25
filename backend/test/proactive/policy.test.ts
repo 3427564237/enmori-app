@@ -128,10 +128,15 @@ test("generation proof binds the original source revisions and target even after
   const f = fixture();
   const before = f.generation();
   assert.equal(before.kind, "allow");
-  const candidate: ProactiveCandidate = { ...f.candidate, sources: f.candidate.sources.map(s => ({ ...s, revision: "2" })) };
-  const authority: CurrentAuthority = { ...f.authority, sources: f.authority.sources.map(s => ({ ...s, revision: "2" })) };
-  expectReason(evaluateProactive({ phase: "delivery", nowMs: f.clock.nowMs, candidate, authority,
-    generated: before.proof, ledger: { ...f.ledger, records: [{ occurrenceId: candidate.occurrenceId, state: "prepared" }] }, limits }), "suppress", "generation_stale");
+  for (const candidate of [
+    { ...f.candidate, sources: f.candidate.sources.map(s => ({ ...s, revision: "2" })) },
+    { ...f.candidate, topicId: "replacement-topic" },
+  ]) {
+    const authority: CurrentAuthority = { ...f.authority, topicId: candidate.topicId,
+      sources: candidate.sources.map(s => ({ ...s, state: "available", observedAtMs: f.clock.nowMs, allowedProcessing: ["local"] })) };
+    expectReason(evaluateProactive({ phase: "delivery", nowMs: f.clock.nowMs, candidate, authority,
+      generated: before.proof, ledger: { ...f.ledger, records: [{ occurrenceId: candidate.occurrenceId, state: "prepared" }] }, limits }), "suppress", "generation_stale");
+  }
 });
 
 test("generation snapshots expire and a future read timestamp never grants permission", () => {

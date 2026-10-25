@@ -107,7 +107,8 @@ text. These proofs are internal, never logged or exposed as model instructions.
 | Deleted source/topic, denied access, revoked use, None/Interested | Cancel the occurrence | Prevent publication; invalidate dependent readable content under the reconciled lifecycle contract |
 | Unknown, missing read, provider error, invalid zone or expired observation | Hold; no model call | Hold; never treat an error/missing row as “no private data” success |
 | Quiet, not due, cap or cooldown | Return recheck instant | Re-run the complete policy then; a returned instant is not permission to send |
-| Expired trigger / source | Drop old occurrence | Never send late backlog |
+| Trigger or actual source/topic lifecycle expired | Drop old occurrence | Never send late backlog |
+| Cached source observation expired | Hold for fresh authoritative read | Do not use the expired observation or silently extend it |
 
 Context's proposed `{kind,id,version,observedAt,validUntil?}` maps to this module's
 `revision/observedAtMs/validUntilMs` at a future adapter. Kinds include original
@@ -295,7 +296,9 @@ fresh envelope could carry an arbitrarily old non-event source observation;
 the new counterexample reproduced `allow` instead of `authority_stale`. The
 per-source age check now uses the same proposed freshness bound, separate from
 the source's historical recorded time. Pause/quiet tests now explicitly supply
-fresh source observations after advancing their fake clock.
+fresh source observations after advancing their fake clock. The final full
+targeted run passed all 29 cases, including a separately replaced topic with an
+old generation proof. No production or platform evidence is inferred.
 Owner-local raw logs retain both failures and final output under
 `/home/miku/.local/state/enmori-ai-companion-20261025/proactive/`:
 `build.log`, `generation-proof-before.tap`, `stale-source-before.tap`,
