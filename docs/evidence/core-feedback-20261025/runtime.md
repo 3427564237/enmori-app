@@ -225,3 +225,37 @@ No Emulator, Flutter, Gradle, APK, installation, service restart/deployment,
 real Firestore mutation, Ollama/provider request or notification send ran.
 The exact phone Send-button cause, integrated automatic-today selector,
 live F0/F1 operation and semantic acceptance remain separate open evidence.
+
+QA independently reviewed entry commit `193b1e3b7749fc12482792f482afe84fba193f86`
+and reported no blocking source issue in review commit
+`8d440b6c1d25117356946d7a1615c7c29c00ceaa`,
+`docs/evidence/core-feedback-20261025/qa-runtime-entry-review.md`. QA inspected
+the tests without rerunning them; the 13/13 count remains author execution
+evidence. That review does not cover the quotation follow-up below.
+
+## Authorized current-day quotation wording
+
+Root's normative `api/ai-today-context-contract.md` at
+`72fc616ca81d6d7703fc139600ce959d7a84dc9e` confirms reuse of the inner
+`selected_checkins_v1` projection for the explicit-source and automatic-today
+entry paths. Runtime read the complete contract at that exact head; Context
+confirmed that it owns the day/source resolver and will not edit the prompt.
+
+The quoted-context instruction now says the supplied Check-ins were **authorized
+and supplied for this one reply**, replacing its claim that they were explicitly
+hand-selected. This is a provenance-description correction. The source type,
+model parameters, dated observation boundaries, current-user corrections,
+Persona limits and empty-source behavior remain unchanged. Date, zone, owner,
+IDs, cap and `hasMore` remain application metadata; none was added to model input.
+No source lookup, permission decision, new provider or model experiment was added.
+
+This follow-up changes only `local-chat-transport.ts` and this evidence record.
+It does not implement or independently validate Context's automatic-today
+resolver, the App Send flow or an integrated service.
+
+Pinned strict compilation passed. The existing six selected-context tests and
+five evaluation-tool tests passed **11/11**, including full byte-for-byte
+comparison of all **24/24** historical production requests. No new test merely
+asserting the edited wording was added. Logs are `quotation-build.log` and
+`quotation-fakes.log` in the private Runtime evidence directory above. All model
+HTTP calls in this batch were intercepted by fakes; there was no real generation.
