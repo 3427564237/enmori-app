@@ -55,7 +55,9 @@ records the introduction/link coverage gap; no start, ETA or completion is claim
 | Signed APK build | Pass; `assembleRelease` 146.3 seconds |
 | Frozen inputs | All tracked contents, private client/signing configurations and source head unchanged during build |
 | Independent review | Pending for this new change; SHI #187's approval does not cover it |
-| v31 installation / phone / UAT | Not Run; ADB returned zero connected devices before and after build |
+| v31 installation | Pass on 26 Oct at 11:29 SGT; exact APK hash and original first-install time retained; no data clear |
+| Device launch smoke | Pass at 11:30 SGT; foreground package/process present after three seconds; no matching fatal crash in the observed crash buffer |
+| Interaction / UAT | Pending LI; references, real AI replies, search and website-return flows not exercised |
 
 These are focused source/widget/build results, not a full-repository green
 suite, deployed Backend proof, device acceptance, Release or Done. Existing
@@ -86,9 +88,16 @@ synthetic auth fixtures were corrected separately from product fixes. The final
 | Upgrade verification | Same package/certificate/nine permissions as retained verified v30; higher version |
 | Manifest | Not debuggable; messaging auto-init and analytics collection disabled |
 
-`candidate.json` and `SHA256SUMS` accompany the APK. No v31 installation was
-attempted while the device was unavailable. v30 remains retained locally. This
-change does not deploy/restart the Backend, change credentials or call a model.
+`candidate.json` and `SHA256SUMS` accompany the APK. At build time the device
+was absent. After LI reconnected it, the first installation attempt returned
+`INSTALL_FAILED_ABORTED: User rejected permissions`; the installed app remained
+v30. LI confirmed device-side readiness, then `adb install -r` succeeded. The
+installed v31 SHA-256 exactly matches the artifact above and first-install time
+remains `2026-10-21 12:13:08`. No data clear was performed. A launch/process smoke
+check passed; login and business data were not inspected. The short crash-buffer
+observation is not full stability or interaction acceptance. v30 remains retained
+locally. This change does not deploy/restart the Backend, change credentials or
+call a model.
 Private execution logs and synthetic preview images are under the owner-only
 local `enmori-reference-details-20261026` state directory and are not committed.
 

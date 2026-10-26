@@ -147,10 +147,31 @@
   },
   "independentReview": "Pending for the new LI change",
   "installation": {
-    "status": "Not Run",
-    "reason": "ADB enumerated zero connected devices before and after the build"
+    "installedAt": "2026-10-26T03:29:51.884491+00:00",
+    "package": "com.enmori.app.group",
+    "versionCode": 31,
+    "versionName": "1.0.0-group20261026",
+    "firstInstallTime": "2026-10-21 12:13:08",
+    "firstInstallTimeUnchanged": true,
+    "installedApkSha256": "d6c0a7c9a1e59c4a2663e9ea2ef40595f8436217bd40f9c8840b28d80902c590",
+    "method": "adb install -r",
+    "dataClearPerformed": false,
+    "appLaunched": true,
+    "loginAndBusinessDataReadback": "Not Run",
+    "deviceAcceptance": "Install and launch smoke passed; user interaction acceptance pending",
+    "deviceMatchedPreviousTarget": true,
+    "priorAttempt": "INSTALL_FAILED_ABORTED: User rejected permissions; retried after explicit user device readiness",
+    "launchSmoke": {
+      "checkedAt": "2026-10-26T03:30:57.275760+00:00",
+      "launchSucceeded": true,
+      "processAliveAfterSeconds": 3,
+      "foregroundPackageMatched": true,
+      "crashBufferReadSucceeded": true,
+      "matchingFatalCrashObserved": false,
+      "scope": "Installation and process-launch smoke only; no UI flow, message, Check-in, external-site or registration action performed"
+    }
   },
-  "physicalAcceptance": "Not Run; LI performs",
+  "physicalAcceptance": "Installation and launch smoke passed; LI interaction/UAT pending",
   "fullRepositorySuite": "Not Run in this increment",
   "backendChanges": false,
   "backendDeployed": false,
@@ -161,5 +182,6 @@
     "tags": 14,
     "handoffPublishedAndReadBack": true,
     "implementationCompletion": "Not claimed"
-  }
+  },
+  "installationEvidenceUpdatedAt": "2026-10-26T03:31:46.383728+00:00"
 }
