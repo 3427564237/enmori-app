@@ -1,0 +1,215 @@
+{
+  "date": "2026-10-26",
+  "timezone": "Asia/Shanghai",
+  "base": "2cfbc8f2ea8b111ffa82cd6609c2090d28a08744",
+  "branch": "souma/zhou-ai-closeout-20261026",
+  "testedProductCommit": "1f815aea6b9b008942d9c01769455201afa67fcf",
+  "toolchain": {
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "flutterExecutable": "C:/Users/ASUS/fvm/versions/3.47.2/bin/flutter.bat",
+    "backendDependencyResolution": "Reuse installed exact-lock dependencies; no pnpm version substitution or manifest/lock change",
+    "flutterResolution": "pub get --offline --enforce-lockfile failed due missing cached firebase_messaging 16.7.0; pub get --enforce-lockfile succeeded with unchanged lock"
+  },
+  "checks": [
+    {
+      "name": "backend compile",
+      "command": "node node_modules/typescript/bin/tsc --project backend/tsconfig.json",
+      "exit": 0
+    },
+    {
+      "name": "backend source audit",
+      "executable": "node",
+      "arguments": [
+        "--test",
+        "backend/dist/test/ai-runtime/local-first-flow-transport.test.js",
+        "backend/dist/test/ai-runtime/selected-context-transport.test.js",
+        "backend/dist/test/ai-conversation/today-selected-reply.test.js",
+        "backend/dist/test/ai-conversation/selected-reply.test.js",
+        "backend/dist/test/ai-conversation/application-conversation-operations.test.js",
+        "backend/dist/test/ai-conversation/conversation-history.test.js",
+        "backend/dist/test/ai-conversation/acknowledgment-races.test.js"
+      ],
+      "passed": 137,
+      "failed": 0,
+      "exit": 0,
+      "log": "backend-audit.log",
+      "attribution": "Executed at integration baseline; Backend files unchanged by this patch"
+    },
+    {
+      "name": "final Flutter regression",
+      "executable": "C:/Users/ASUS/fvm/versions/3.47.2/bin/flutter.bat",
+      "arguments": [
+        "test",
+        "--no-pub",
+        "--reporter",
+        "expanded",
+        "--concurrency=1",
+        "test/features/ai_conversation/ai_sourced_reply_readback_test.dart",
+        "test/features/ai_conversation/ai_today_sources_test.dart",
+        "test/features/ai_conversation/ai_selected_sources_page_test.dart",
+        "test/features/ai_conversation/ai_send_availability_test.dart",
+        "test/features/ai_conversation/ai_owned_sources_controller_test.dart",
+        "test/features/ai_conversation/ai_owned_sources_page_test.dart",
+        "test/features/ai_conversation/ai_conversation_recovery_test.dart",
+        "test/features/ai_conversation/ai_conversation_page_test.dart",
+        "test/features/ai_conversation/ai_conversation_review_regression_test.dart",
+        "test/features/ai_conversation/ai_visible_message_test.dart",
+        "test/features/ai_conversation/ai_conversation_controller_test.dart",
+        "test/features/ai_conversation/ai_message_search_test.dart"
+      ],
+      "passed": 240,
+      "failed": 0,
+      "newRegressionCases": 8,
+      "exit": 0,
+      "log": "flutter-final-12files.log",
+      "attribution": "Supersedes the overlapping 183-case intermediate run for current source; counts are not added"
+    },
+    {
+      "name": "Flutter analysis",
+      "arguments": [
+        "analyze",
+        "--no-pub",
+        "lib/features/ai_conversation",
+        "test/features/ai_conversation/ai_sourced_reply_readback_test.dart"
+      ],
+      "exit": 0,
+      "log": "flutter-analysis-final.log",
+      "result": "No issues found"
+    },
+    {
+      "name": "Dart format",
+      "arguments": [
+        "format",
+        "--output=none",
+        "--set-exit-if-changed",
+        "lib/features/ai_conversation/ai_conversation_providers.dart",
+        "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+        "test/features/ai_conversation/ai_sourced_reply_readback_test.dart"
+      ],
+      "exit": 0,
+      "files": 3,
+      "changed": 0
+    },
+    {
+      "name": "whitespace",
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "confirmedBeforeFixFailures": [
+    {
+      "log": "sourced-readback-before-ready.log",
+      "result": "One successful selected execute; expected transcript GET was absent",
+      "passed": 0,
+      "failed": 1
+    },
+    {
+      "log": "source-access-before.log",
+      "result": "Pending GET completed after source invalidation and exposed old body",
+      "passed": 0,
+      "failed": 1
+    }
+  ],
+  "fixtureDevelopmentFailures": [
+    {
+      "log": "sourced-readback-before.log",
+      "reason": "New fixture used Iterable where List was required; corrected before application reproduction"
+    },
+    {
+      "log": "sourced-readback-before-compiled.log",
+      "reason": "New fixture tapped stale disabled button before a frame; corrected before application reproduction"
+    }
+  ],
+  "frozenInputs": {
+    "algorithm": "SHA-256 of working-file bytes",
+    "unchangedBeforeAfterFinalVerification": true,
+    "files": [
+      {
+        "path": "lib/features/ai_conversation/ai_conversation_providers.dart",
+        "sha256": "6395f67b8eb5be7a5f9c4f88106d4676adb5b7ad01caca5409517890afbc970d"
+      },
+      {
+        "path": "lib/features/ai_conversation/presentation/ai_conversation_page.dart",
+        "sha256": "11bac75b3307f027cdf5bd597032eb22cafabad05a76326d1085ada9d9409461"
+      },
+      {
+        "path": "test/features/ai_conversation/ai_sourced_reply_readback_test.dart",
+        "sha256": "3c2c13fa2d629482e2177fc0ff5eb7964acfc3c525eaa3f5daaf73e085396a22"
+      },
+      {
+        "path": "pubspec.lock",
+        "sha256": "27bed7c8df3b85af4a2aae9c3d8fe42530bc3d985da95341e956bc9f004d20ae"
+      },
+      {
+        "path": "pnpm-lock.yaml",
+        "sha256": "2db26b46c583886ef4db5b58258b78cedd325dd3bf4e469e380a62f2a3321351"
+      }
+    ]
+  },
+  "logs": [
+    {
+      "name": "backend-audit.log",
+      "bytes": 14837,
+      "sha256": "7d16764a5d98efb3967228ef4f3115e8bf51e5295c297121919f8623324bd554"
+    },
+    {
+      "name": "flutter-analysis-final.log",
+      "bytes": 98,
+      "sha256": "067dc7e66f5a56a4b8e3e826990362480f2b5b2a59496b0bf4c95f036ae37c39"
+    },
+    {
+      "name": "flutter-final-12files.log",
+      "bytes": 52694,
+      "sha256": "0940ebd5979829cb6522914d5f536ee25aa4ee184a981859bbd463379273a079"
+    },
+    {
+      "name": "flutter-focused-final.log",
+      "bytes": 40494,
+      "sha256": "8a0d7de1be0ddf2d3f7c196665e4a6ef53aa7ca7684de772ef3e28c4d37b3059"
+    },
+    {
+      "name": "source-access-before.log",
+      "bytes": 3070,
+      "sha256": "7a89bf8f49553f3031dd3148dd07b4b9563f74fcd2a06c73ac75310b20c53344"
+    },
+    {
+      "name": "sourced-readback-before-compiled.log",
+      "bytes": 2328,
+      "sha256": "3288f28337e89d0ddecddc12a41910cea427e615ea1be26de93f61ec3f5dd240"
+    },
+    {
+      "name": "sourced-readback-before-ready.log",
+      "bytes": 2350,
+      "sha256": "62aaf7c6a8662dd23b9e7bbaa0197aba7b764dc4340e5383a2d30688b8f71162"
+    },
+    {
+      "name": "sourced-readback-before.log",
+      "bytes": 2031,
+      "sha256": "a11d10f0f189d8a387c327792686deed4550b1754ffd93b1cd45f48ea6fdf046"
+    }
+  ],
+  "review": {
+    "internalIndependentSourceReview": "Access blocker corrected; no further evidence-backed source blocker",
+    "jinFormalReview": "pending",
+    "jinNextRoundPackageReview": "No new JIN module package was found in checked GitHub state; no review is fabricated"
+  },
+  "notRun": [
+    "Real model/semantic rerun",
+    "Real account, Firestore or provider operations",
+    "Phone/device acceptance",
+    "APK build/install",
+    "Service restart/deployment",
+    "Actual push or expired follow-up window",
+    "Full application test suite"
+  ],
+  "smallPlan": {
+    "historical24CasePass": 12,
+    "historical24CaseFail": 12,
+    "newModelRun": false,
+    "semanticRepairClaim": false,
+    "handoff": "zhou-small-plan-diagnosis.md"
+  }
+}
