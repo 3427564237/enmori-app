@@ -57,6 +57,7 @@ export class LocalChatTransport implements GenerationTransport<ConversationInput
   }
   get state() { return this.lane.state; }
   prepareModel(): Promise<void> { return this.lane.prepareModel(); }
+  prepareForChat(): Promise<void> { return this.lane.prepareForChat(); }
   async generate(input: ConversationInput, budget: RequestBudget): Promise<Uint8Array> {
     if (this.lane.state.pending || budget.signal.aborted || !validLocalChatInput(input)) {
       throw Error('AI_UNAVAILABLE');

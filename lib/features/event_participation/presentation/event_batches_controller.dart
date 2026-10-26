@@ -14,9 +14,15 @@ final eventBatchesProvider =
     );
 
 final class EventBatchesState {
-  const EventBatchesState({this.batch, this.busy = false, this.failure});
+  const EventBatchesState({
+    this.batch,
+    this.busy = false,
+    this.loadingMore = false,
+    this.failure,
+  });
   final ActivityBatch? batch;
   final bool busy;
+  final bool loadingMore;
   final AppFailure? failure;
 }
 
@@ -24,6 +30,8 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
   Timer? _expiry;
   int _generation = 0;
   bool _authenticated = false;
+  bool _foreground = true;
+  int _search = 0;
   late ActivityRepository _repository;
   @override
   EventBatchesState build() {
@@ -47,10 +55,29 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
     state = const EventBatchesState();
   }
 
+  bool get hasFreshBatch =>
+      _authenticated && state.batch != null && (_expiry?.isActive ?? false);
+
+  void setForeground(bool foreground) {
+    if (_foreground == foreground) return;
+    _foreground = foreground;
+    if (!foreground) stopSearch();
+  }
+
+  void stopSearch() {
+    _search++;
+    _generation++;
+    state = EventBatchesState(
+      batch: hasFreshBatch ? state.batch : null,
+      failure: state.failure,
+    );
+  }
+
   bool isCurrentSnapshot(EventBatchesState snapshot) =>
       ref.mounted &&
       _authenticated &&
-      !state.busy &&
+      _foreground &&
+      (!state.busy || state.loadingMore) &&
       identical(state, snapshot) &&
       (_expiry?.isActive ?? false);
   Future<void> load() => _load(false);
@@ -59,21 +86,33 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
   /// Explicit Search/filter actions can cover later available source batches.
   /// Retain opaque cursors and stop at an error or invalidated view; never
   /// silently call the first-page refresh a complete catalogue search.
-  Future<void> loadAvailablePages() async {
-    if (state.busy || !_authenticated) return;
+  Future<void> loadAvailablePages({bool Function()? shouldContinue}) async {
+    if (state.busy ||
+        !_authenticated ||
+        !_foreground ||
+        shouldContinue?.call() == false) {
+      return;
+    }
+    final search = ++_search;
     var generation = _generation;
     if (state.batch == null) {
       final loading = load();
       generation = _generation;
       await loading;
     }
-    if (!ref.mounted || generation != _generation || state.failure != null) {
+    if (!ref.mounted || generation != _generation) {
       return;
     }
+    // Explicit Search retries the failed next cursor; it is not an automatic
+    // retry and does not discard the already available rows or query.
+    if (state.failure != null && state.batch != null) await next();
     final seen = <String>{};
     for (var page = 0; page < 49; page++) {
       if (!ref.mounted ||
           generation != _generation ||
+          search != _search ||
+          !_foreground ||
+          shouldContinue?.call() == false ||
           !_authenticated ||
           state.busy ||
           state.failure != null) {
@@ -86,7 +125,7 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
   }
 
   Future<void> _load(bool next) async {
-    if (state.busy || !_authenticated) return;
+    if (state.busy || !_authenticated || !_foreground) return;
     final freshDeadline = DateTime.now().add(const Duration(minutes: 5));
     final previous = state.batch;
     final cursor = previous?.nextCursor;
@@ -101,7 +140,7 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
       });
     }
     final generation = _generation;
-    state = EventBatchesState(batch: previous, busy: true);
+    state = EventBatchesState(batch: previous, busy: true, loadingMore: next);
     Result<ActivityRead> result;
     try {
       result = await (next

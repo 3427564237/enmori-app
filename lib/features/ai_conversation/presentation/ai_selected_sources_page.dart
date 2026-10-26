@@ -61,6 +61,12 @@ final class _AiSelectedSourcesPageState
     final ai = ref.watch(aiConversationControllerProvider);
     final controller = ref.read(aiSelectedSourcesControllerProvider.notifier);
     final available = state.sessionKey == _session && state.permitted;
+    final canChoose =
+        available &&
+        !state.busy &&
+        !state.sending &&
+        ai.canEditDraft &&
+        !ai.canCancel;
     final canReview =
         available &&
         !state.busy &&
@@ -97,7 +103,7 @@ final class _AiSelectedSourcesPageState
                     )
                   else ...[
                     if (state.automaticAvailable) ...[
-                      _modeControls(context, state, controller, canReview),
+                      _modeControls(context, state, controller, canChoose),
                       const SizedBox(height: 20),
                     ],
                     Text(
@@ -142,7 +148,7 @@ final class _AiSelectedSourcesPageState
                     if (!state.reviewRequired)
                       FilledButton(
                         key: const Key('ai-references-done'),
-                        onPressed: canReview ? _finish : null,
+                        onPressed: canChoose ? _finish : null,
                         child: Text(context.tr('Done', '完成')),
                       ),
                     if (review != null) ...[
@@ -387,6 +393,13 @@ final class _AiSelectedSourcesPageState
     bool canReview,
   ) {
     final enabled = state.mode == AiReferenceMode.today;
+    final ai = ref.read(aiConversationControllerProvider);
+    final canChoose =
+        state.permitted &&
+        !state.busy &&
+        !state.sending &&
+        ai.canEditDraft &&
+        !ai.canCancel;
     final current = state.review;
     return PopScope<void>(
       onPopInvokedWithResult: (didPop, _) {
@@ -402,7 +415,7 @@ final class _AiSelectedSourcesPageState
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              _modeControls(context, state, controller, canReview),
+              _modeControls(context, state, controller, canChoose),
               if (!enabled)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -593,7 +606,7 @@ final class _AiSelectedSourcesPageState
               if (!state.reviewRequired)
                 FilledButton(
                   key: const Key('ai-references-done'),
-                  onPressed: canReview ? _finish : null,
+                  onPressed: canChoose ? _finish : null,
                   child: Text(context.tr('Done', '完成')),
                 ),
               Text(

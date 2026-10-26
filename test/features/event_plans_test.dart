@@ -240,70 +240,78 @@ Future<void> tap(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
-  testWidgets('Event detail reloads after foreground and child-route return', (
-    tester,
-  ) async {
-    final details = Details(), repo = PlansRepo();
-    final nav = GlobalKey<NavigatorState>();
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          authSessionProvider.overrideWithValue(
-            const AsyncData(AuthSessionAuthenticated(subject: 'owner')),
+  testWidgets(
+    'Event detail preserves valid state on returns and reloads after expiry',
+    (tester) async {
+      final details = Details(), repo = PlansRepo();
+      final nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authSessionProvider.overrideWithValue(
+              const AsyncData(AuthSessionAuthenticated(subject: 'owner')),
+            ),
+            participationRepositoryProvider.overrideWithValue(repo),
+            eventDetailRepositoryProvider.overrideWithValue(details),
+          ],
+          child: MaterialApp(
+            navigatorKey: nav,
+            theme: ThemeData(splashFactory: NoSplash.splashFactory),
+            home: ParticipationEventPage(
+              eventId: 'a',
+              opener: Opener(),
+              onParticipants: (_) {},
+            ),
           ),
-          participationRepositoryProvider.overrideWithValue(repo),
-          eventDetailRepositoryProvider.overrideWithValue(details),
-        ],
-        child: MaterialApp(
-          navigatorKey: nav,
-          theme: ThemeData(splashFactory: NoSplash.splashFactory),
-          home: ParticipationEventPage(
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(details.reads, 1);
+      expect(find.text('An evening of music a'), findsOneWidget);
+      final resumedRead = Completer<Result<EventDetail>>();
+      details.pending = resumedRead;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pump();
+      expect(details.reads, 1);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      await tester.pump();
+      expect(details.reads, 1);
+      expect(find.text('An evening of music a'), findsOneWidget);
+      unawaited(
+        nav.currentState!.push<void>(
+          MaterialPageRoute(
+            builder: (_) => const Scaffold(body: Text('Other page')),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      nav.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(details.reads, 1);
+      await tester.pump(const Duration(minutes: 5));
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      await tester.pump();
+      expect(details.reads, 2);
+      expect(find.text('An evening of music a'), findsNothing);
+      resumedRead.complete(
+        Success(
+          EventDetail(
             eventId: 'a',
-            opener: Opener(),
-            onParticipants: (_) {},
+            title: 'Fresh Event detail',
+            startAt: DateTime.utc(2027),
+            externalSourceUrl: 'https://www.ticketmaster.sg/event/a',
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(details.reads, 1);
-    expect(find.text('An evening of music a'), findsOneWidget);
-    final resumedRead = Completer<Result<EventDetail>>();
-    details.pending = resumedRead;
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    await tester.pump();
-    expect(details.reads, 1);
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pump();
-    await tester.pump();
-    expect(details.reads, 2);
-    expect(find.text('An evening of music a'), findsNothing);
-    resumedRead.complete(
-      Success(
-        EventDetail(
-          eventId: 'a',
-          title: 'Fresh Event detail',
-          startAt: DateTime.utc(2027),
-          externalSourceUrl: 'https://www.ticketmaster.sg/event/a',
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Fresh Event detail'), findsOneWidget);
-    unawaited(
-      nav.currentState!.push<void>(
-        MaterialPageRoute(
-          builder: (_) => const Scaffold(body: Text('Other page')),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    nav.currentState!.pop();
-    await tester.pumpAndSettle();
-    expect(details.reads, 3);
-    expect(repo.writes, isEmpty);
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Fresh Event detail'), findsOneWidget);
+      expect(repo.writes, isEmpty);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
   test('pages accumulate, deduplicate, retain cursor on failure and continue after empty pages', () async {
     final repo = PlansRepo()
       ..pages[null] = Success(EventParticipationPage([fact('a')], 'p1'));

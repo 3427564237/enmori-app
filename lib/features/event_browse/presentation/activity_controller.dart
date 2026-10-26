@@ -21,6 +21,7 @@ final class ActivityController extends Notifier<AsyncValue<ActivityRead?>> {
   Timer? _expiry;
   int _generation = 0;
   bool _authenticated = false, _busy = false;
+  bool _foreground = true;
   @override
   AsyncValue<ActivityRead?> build() {
     // Watch the whole observation, not only UID: replacement sessions discard old reads.
@@ -46,10 +47,24 @@ final class ActivityController extends Notifier<AsyncValue<ActivityRead?>> {
     state = const AsyncData(null);
   }
 
+  bool get hasFreshData =>
+      _authenticated && state.value != null && (_expiry?.isActive ?? false);
+
+  void setForeground(bool foreground) {
+    if (_foreground == foreground) return;
+    _foreground = foreground;
+    if (!foreground) {
+      _generation++;
+      _busy = false;
+      state = AsyncData(hasFreshData ? state.value : null);
+    }
+  }
+
   bool _current(int generation) =>
       ref.mounted &&
       generation == _generation &&
       _authenticated &&
+      _foreground &&
       (_expiry?.isActive ?? false);
 
   /// A queued tile action cannot outlive the exact displayed read snapshot.
@@ -58,7 +73,7 @@ final class ActivityController extends Notifier<AsyncValue<ActivityRead?>> {
 
   Future<void> load() async {
     // The previous Reload button can still receive another tap before repaint.
-    if (state.isLoading) return;
+    if (state.isLoading || !_foreground) return;
     clear();
     final generation = _generation;
     if (!_authenticated) {
@@ -73,7 +88,7 @@ final class ActivityController extends Notifier<AsyncValue<ActivityRead?>> {
     }
     state = const AsyncLoading();
     _expiry = Timer(const Duration(minutes: 5), () {
-      if (ref.mounted && generation == _generation) clear();
+      if (ref.mounted) clear();
     });
     Result<ActivityRead> result;
     try {

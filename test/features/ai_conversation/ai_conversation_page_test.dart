@@ -555,12 +555,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('ai-check-result')), findsOneWidget);
-      expect(find.byKey(const Key('ai-recovery-explanation')), findsOneWidget);
-      expect(
-        find.byKey(const Key('ai-leave-without-retrying')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const Key('ai-check-result')), findsNothing);
+      expect(find.byKey(const Key('ai-recovery-explanation')), findsNothing);
+      expect(find.byKey(const Key('ai-leave-without-retrying')), findsNothing);
       expect(find.byKey(const Key('ai-cancel')), findsNothing);
       expect(find.byKey(const Key('ai-make-plan')), findsNothing);
       expect(controller.sent, isEmpty);
@@ -1232,7 +1229,7 @@ void main() {
     await tester.tap(find.byKey(const Key('ai-cancel')));
     expect(controller.cancels, 1);
     await tester.pumpAndSettle();
-    expect(find.text('Check result'), findsOneWidget);
+    expect(find.text('Check result'), findsNothing);
     expect(find.byKey(const Key('ai-retry')), findsNothing);
     expect(controller.sent, hasLength(1));
   });
@@ -1471,7 +1468,7 @@ void main() {
     AiConversationPhase.rejected: 'A reply could not be provided.',
     AiConversationPhase.timedOut:
         'This request timed out. Check saved messages before trying again.',
-    AiConversationPhase.unknown: 'We couldn’t confirm the result. Check saved messages before trying again.',
+    AiConversationPhase.unknown: 'The previous reply is not confirmed. Recovery is being attempted; you can keep drafting or start a new topic.',
     AiConversationPhase.authorityChanged: 'This reply is no longer available.',
     AiConversationPhase.deleted: 'Conversation deleted.',
     AiConversationPhase.unauthenticated:
@@ -1609,7 +1606,7 @@ void main() {
     },
   );
 
-  testWidgets('ordinary reads and outcome checks do not resend', (
+  testWidgets('ordinary reads and bounded outcome recovery do not resend', (
     tester,
   ) async {
     final controller = _PageController(
@@ -1618,21 +1615,21 @@ void main() {
         conversationId: 'conversation',
         nextCursor: 'earlier',
         canCheckResult: true,
+        canLeaveWithoutRetrying: true,
       ),
     );
     await _pump(tester, controller);
     expect(controller.reads, [null]);
-    await _tap(tester, 'ai-check-result');
     await _tap(tester, 'ai-reload-messages');
     await _tap(tester, 'ai-load-earlier');
-    expect(controller.checks, 1);
+    expect(controller.checks, inInclusiveRange(1, 3));
     expect(controller.reads, [null, null, 'earlier']);
     expect(controller.sent, isEmpty);
     expect(controller.retried, isEmpty);
   });
 
   testWidgets(
-    'R-A explains unknown and clears private display and draft before leaving',
+    'unknown keeps the draft and regular Back navigates without a separate leave action',
     (tester) async {
       final controller = _PageController(_state(canSend: true));
       late TextEditingController draft;
@@ -1640,8 +1637,8 @@ void main() {
         tester,
         controller,
         onBack: () {
-          expect(draft.text, isEmpty);
-          expect(controller.view.messages, isEmpty);
+          expect(draft.text, 'private unsent draft');
+          expect(controller.view.messages, hasLength(1));
           expect(controller.view.canSend, isFalse);
           controller.events.add('back');
         },
@@ -1665,76 +1662,57 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         find.text(
-          'We couldn’t confirm the result. Check saved messages before trying again.',
+          'The previous reply is not confirmed. Recovery is being attempted; you can keep drafting or start a new topic.',
         ),
         findsOneWidget,
       );
-      expect(
-        find.text(
-          'We may not be able to confirm whether this message was saved. '
-          'You can leave without retrying it. Leaving does not delete saved messages.',
-        ),
-        findsOneWidget,
-      );
-      await _tap(tester, 'ai-leave-without-retrying');
-      expect(controller.events, ['leave', 'back']);
-      expect(find.text('saved private text'), findsNothing);
+      expect(find.byKey(const Key('ai-leave-without-retrying')), findsNothing);
+      await tester.tap(find.byKey(const Key('ai-back')));
+      await tester.pump();
+      expect(controller.events, ['back']);
+      expect(find.text('saved private text'), findsOneWidget);
       expect(find.text('Conversation deleted.'), findsNothing);
       expect(find.byKey(const Key('ai-retry')), findsNothing);
       expect(controller.sent, isEmpty);
       expect(controller.retried, isEmpty);
-      expect(controller.checks, 0);
+      expect(controller.checks, inInclusiveRange(1, 3));
       expect(controller.deletes, 0);
     },
   );
 
-  testWidgets(
-    'R-A exit stays reachable during a result read at 2x text on a small screen',
-    (tester) async {
-      tester.view.physicalSize = const Size(320, 640);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final semantics = tester.ensureSemantics();
-      try {
-        final controller = _PageController(
-          _state(
-            phase: AiConversationPhase.unknown,
-            conversationId: 'conversation',
-            canLeaveWithoutRetrying: true,
-            readBusy: true,
-          ),
-        );
-        await _pump(tester, controller, textScale: 2);
-        final exit = find.byKey(const Key('ai-leave-without-retrying'));
-        await tester.scrollUntilVisible(
-          exit,
-          200,
-          scrollable: find
-              .descendant(
-                of: find.byKey(const Key('route-ai-conversation')),
-                matching: find.byType(Scrollable),
-              )
-              .first,
-        );
-        await tester.ensureVisible(exit);
-        await tester.pumpAndSettle();
-        expect(find.bySemanticsLabel('Leave without retrying'), findsOneWidget);
-        expect(tester.getSize(exit).height, greaterThanOrEqualTo(48));
-        expect(tester.getSize(exit).width, greaterThanOrEqualTo(48));
-        expect(tester.widget<OutlinedButton>(exit).onPressed, isNotNull);
-        expect(tester.takeException(), isNull);
-        await _tap(tester, 'ai-leave-without-retrying');
-        expect(controller.events, ['leave']);
-        expect(controller.checks, 0);
-        expect(controller.sent, isEmpty);
-        expect(controller.retried, isEmpty);
-        expect(tester.takeException(), isNull);
-      } finally {
-        semantics.dispose();
-      }
-    },
-  );
+  testWidgets('regular Back stays reachable during a result read at 2x text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final semantics = tester.ensureSemantics();
+    try {
+      final controller = _PageController(
+        _state(
+          phase: AiConversationPhase.unknown,
+          conversationId: 'conversation',
+          canLeaveWithoutRetrying: true,
+          readBusy: true,
+        ),
+      );
+      await _pump(tester, controller, textScale: 2);
+      final exit = find.byKey(const Key('ai-back'));
+      expect(exit.hitTestable(), findsOneWidget);
+      expect(tester.getSize(exit).height, greaterThanOrEqualTo(48));
+      expect(tester.widget<IconButton>(exit).onPressed, isNotNull);
+      expect(tester.takeException(), isNull);
+      await tester.tap(exit);
+      expect(controller.events, isEmpty);
+      expect(controller.checks, 0);
+      expect(controller.sent, isEmpty);
+      expect(controller.retried, isEmpty);
+      expect(tester.takeException(), isNull);
+    } finally {
+      semantics.dispose();
+    }
+  });
 
   testWidgets(
     'small screen at 2x text keeps labeled Cancel reachable at 48dp',

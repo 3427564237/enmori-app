@@ -62,6 +62,101 @@ final class Repo implements PagedActivityRepository {
 }
 
 void main() {
+  test('explicit Search retries the failed opaque batch without restarting the list', () async {
+    final repo = Repo();
+    final c = ProviderContainer(
+      overrides: [
+        activityRepositoryProvider.overrideWithValue(repo),
+        authSessionProvider.overrideWithValue(
+          const AsyncData(AuthSessionAuthenticated(subject: 'owner')),
+        ),
+      ],
+    );
+    final sub = c.listen(eventBatchesProvider, (_, _) {});
+    addTearDown(sub.close);
+    addTearDown(c.dispose);
+    final controller = c.read(eventBatchesProvider.notifier);
+    await controller.load();
+    repo.nextResults['page1'] = const Failure(
+      AppFailure(
+        kind: AppFailureKind.serviceUnavailable,
+        message: 'Synthetic batch failure',
+      ),
+    );
+    await controller.loadAvailablePages();
+    expect(c.read(eventBatchesProvider).failure, isNotNull);
+    repo.nextResults['page1'] = Success(
+      ActivityBatch(asOf: instant, items: [item('wanted')]),
+    );
+    await controller.loadAvailablePages();
+    expect(repo.first, 1);
+    expect(repo.cursors, ['page1', 'page1']);
+    expect(c.read(eventBatchesProvider).batch!.items.map((e) => e.eventId), [
+      'a',
+      'wanted',
+    ]);
+    expect(c.read(eventBatchesProvider).failure, isNull);
+  });
+
+  testWidgets(
+    'search can stop a slow later batch without losing query, rows or cursor',
+    (tester) async {
+      final repo = Repo()..pending = Completer<Result<ActivityRead>>();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            activityRepositoryProvider.overrideWithValue(repo),
+            authSessionProvider.overrideWithValue(
+              const AsyncData(AuthSessionAuthenticated(subject: 'owner')),
+            ),
+          ],
+          child: MaterialApp(
+            theme: ThemeData(splashFactory: NoSplash.splashFactory),
+            home: ParticipationEventsPage(onSelect: (_) {}),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('events-search')), 'a');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
+      expect(repo.cursors, ['page1']);
+      expect(find.byKey(const Key('events-stop-search')), findsOneWidget);
+      expect(find.byKey(const ValueKey('a')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('events-stop-search')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('a')), findsOneWidget);
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('events-search')))
+            .controller!
+            .text,
+        'a',
+      );
+      repo.pending!.complete(
+        Success(
+          ActivityBatch(
+            asOf: instant,
+            items: [item('late')],
+            nextCursor: 'page2',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('late')), findsNothing);
+      expect(repo.cursors, ['page1']);
+      repo.pending = null;
+      repo.nextResults['page1'] = Success(
+        ActivityBatch(asOf: instant, items: [item('available')]),
+      );
+      await tester.tap(find.byTooltip('Search available events'));
+      await tester.pumpAndSettle();
+      expect(repo.cursors, ['page1', 'page1']);
+      expect(find.byKey(const ValueKey('available')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   test(
     'an invalidated initial search cannot page a replacement session',
     () async {
@@ -96,7 +191,7 @@ void main() {
   );
 
   testWidgets(
-    'search includes later batches and restores on foreground return',
+    'search includes later batches and preserves valid results on return',
     (tester) async {
       final repo = Repo();
       repo.nextResults['page1'] = Success(
@@ -129,8 +224,8 @@ void main() {
       _resume(tester);
       await tester.pumpAndSettle();
       expect(tester.widget<TextField>(search).controller!.text, 'wanted');
-      expect(repo.first, 2);
-      expect(repo.cursors, ['page1', 'page1']);
+      expect(repo.first, 1);
+      expect(repo.cursors, ['page1']);
       expect(find.byKey(const ValueKey('wanted')), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
     },
@@ -293,7 +388,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
   testWidgets(
-    'bottom Next and Retry preserve rows then show terminal hint; background clears all',
+    'bottom Next and Retry preserve rows then show terminal hint; background retains the original fresh snapshot',
     (tester) async {
       final repo = Repo();
       final sessions = StreamController<AuthSession>();
@@ -382,12 +477,12 @@ void main() {
         tester.element(find.byType(ParticipationEventsPage)),
       );
       _pause(tester);
-      expect(container.read(eventBatchesProvider).batch, isNull);
-      // Paused apps do not draw frames. The first resumed frame must stay clear.
+      expect(container.read(eventBatchesProvider).batch, isNotNull);
+      // Foreground return retains the original lifetime without another read.
       _resume(tester);
       await tester.pump();
       expect(find.text('Load more events'), findsNothing);
-      expect(find.text('Second activity'), findsNothing);
+      expect(find.text('Second activity'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     },
   );

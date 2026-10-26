@@ -18,9 +18,11 @@ final class EventDetailController extends Notifier<AsyncValue<EventDetail>> {
   late EventDetailRepository _repository;
   int _operation = 0;
   Timer? _expiry;
+  bool _foreground = true;
   @override
   AsyncValue<EventDetail> build() {
     ref.watch(currentAuthSubjectProvider);
+    ref.watch(authSessionProvider);
     _repository = ref.watch(eventDetailRepositoryProvider);
     _operation++;
     _expiry?.cancel();
@@ -32,10 +34,11 @@ final class EventDetailController extends Notifier<AsyncValue<EventDetail>> {
   }
 
   Future<void> load() async {
+    if (!_foreground) return;
     _expiry?.cancel();
     final operation = ++_operation;
     _expiry = Timer(const Duration(minutes: 5), () {
-      if (ref.mounted && operation == _operation) clear();
+      if (ref.mounted) clear();
     });
     state = const AsyncLoading();
     final result = await _repository.read(eventId);
@@ -47,6 +50,21 @@ final class EventDetailController extends Notifier<AsyncValue<EventDetail>> {
         StackTrace.current,
       ),
     };
+  }
+
+  bool get hasFreshData => state.hasValue && (_expiry?.isActive ?? false);
+
+  void setForeground(bool foreground) {
+    if (_foreground == foreground) return;
+    _foreground = foreground;
+    if (!foreground) {
+      _operation++;
+      if (hasFreshData) {
+        state = AsyncData(state.requireValue);
+      } else {
+        clear();
+      }
+    }
   }
 
   void clear() {
@@ -64,7 +82,7 @@ final class EventDetailController extends Notifier<AsyncValue<EventDetail>> {
   Future<Result<void>> openSource(EventDetail event) async {
     final snapshot = state;
     final actions = ref.read(eventDetailSourceActionsProvider);
-    if (actions == null || !identical(snapshot.value, event)) {
+    if (!_foreground || actions == null || !identical(snapshot.value, event)) {
       return const Failure(
         AppFailure(
           kind: AppFailureKind.serviceUnavailable,
@@ -82,7 +100,9 @@ final class EventDetailController extends Notifier<AsyncValue<EventDetail>> {
   }
 
   Future<Result<void>> copyLink(EventDetail event) {
-    if (!identical(state.value, event) || !(_expiry?.isActive ?? false)) {
+    if (!_foreground ||
+        !identical(state.value, event) ||
+        !(_expiry?.isActive ?? false)) {
       return Future.value(
         const Failure(
           AppFailure(

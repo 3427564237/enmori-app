@@ -29,6 +29,7 @@ import type { MaintenanceResult } from "../ai-conversation/ports/conversation-ma
 import { startConversationMaintenance, type MaintenanceSchedule } from "./conversation-maintenance-runner.js";
 import { FirestoreSelectedReplyReader } from "../ai-conversation/infrastructure/firestore-selected-reply-reader.js";
 import { createOwnedSourceOperations } from "./owned-source-composition.js";
+import { prepareConversationHost } from './prepare-conversation-host.js';
 
 /** Explicit isolated composition; ordinary buildApp/main never invokes it.
  * Caller validates and owns the actual Emulator Firestore instance. No fake
@@ -42,6 +43,7 @@ interface ConversationCompositionOptions {
   readonly notePrerequisites?: SourceBoundNotePrerequisites;
   readonly simpleChat?: true;
   readonly selectedReplies?: true;
+  readonly prepareHost?: () => Promise<void>;
   readonly report: (phase: "expiry" | "source", result: MaintenanceResult) => void;
   readonly reportRetirement: (confirmed: boolean) => void;
   readonly schedule?: MaintenanceSchedule;
@@ -82,10 +84,7 @@ async function createConversationComposition(options: ConversationCompositionOpt
   const operationReaders = prepareReader ? Object.assign(readers, {
     prepareSelection: (context: Parameters<FirestoreSelectedReplyReader["prepare"]>[0], input: Parameters<FirestoreSelectedReplyReader["prepare"]>[1], conversationId?: string) => prepareReader.prepare(context, input, conversationId),
   }) : readers;
-  consumer = new ApplicationConversationOperations(
-    authority,
-    {uuid:randomUUID,operationKey:()=>randomBytes(32).toString("base64url")},
-    {now:()=>clock.now(),at:(at,wake)=>clock.at(at,wake),utcMilliseconds},
+  const executor: import('../ai-conversation/ports/application-conversation-operations.js').ConversationOperationExecutor =
     {create:(input,delivery)=>new AsyncConversationOperationExecutor({runtime,gates:options.gates,
       ...(options.conversationStrategy ? {strategy:options.conversationStrategy} : {}),
       clock:{monotonicNow:()=>clock.now(),utcNow:()=>{const ms=utcMilliseconds(),seconds=Math.floor(ms/1000);return {seconds,nanoseconds:(ms-seconds*1000)*1000000};}},
@@ -102,7 +101,12 @@ async function createConversationComposition(options: ConversationCompositionOpt
           io.run(ownerId,conversationId,operationId,()=>gateway.runTransaction(work,transactionOptions))};
         return {authority,reads,store:bridge,acknowledgedPair:bridge,
           ...(options.selectedReplies ? { selectedReads: new FirestoreSelectedReplyReader(selectedGateway, options.environment, original, utcMilliseconds, historySnapshot) } : {})};
-      }}).create(input,delivery)},operationReaders);
+      }}).create(input,delivery)};
+  consumer = new ApplicationConversationOperations(
+    authority,
+    {uuid:randomUUID,operationKey:()=>randomBytes(32).toString("base64url")},
+    {now:()=>clock.now(),at:(at,wake)=>clock.at(at,wake),utcMilliseconds},
+    options.prepareHost ? prepareConversationHost(executor, options.prepareHost) : executor, operationReaders);
   const maintenance=new FirestoreConversationMaintenance(gateway,options.environment,cleanup,quiescence,utcMilliseconds,notePrerequisites);
   // Construct consumer BEFORE startup sweeps, expose operations only AFTER them.
   const runner=startConversationMaintenance(maintenance,epoch,options.report,options.schedule);

@@ -47,10 +47,12 @@ final class _ParticipationEventsPageState
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    ref
+        .read(eventBatchesProvider.notifier)
+        .setForeground(state == AppLifecycleState.resumed);
     if (state != AppLifecycleState.resumed && mounted) {
       _searchGeneration++;
       _searching = false;
-      ref.read(eventBatchesProvider.notifier).clear();
     }
   }
 
@@ -133,7 +135,10 @@ final class _ParticipationEventsPageState
                     icon: const Icon(Icons.arrow_forward),
                   ),
                 ),
-                onChanged: (value) => setState(() => _query = value),
+                onChanged: (value) {
+                  if (_searching) _stopSearch();
+                  setState(() => _query = value);
+                },
                 onSubmitted: (_) => unawaited(_searchAvailable()),
               ),
               if (_query.isNotEmpty)
@@ -170,6 +175,24 @@ final class _ParticipationEventsPageState
                   child: LinearProgressIndicator(
                     semanticsLabel: context.tr('Loading events', '正在加载活动'),
                   ),
+                ),
+              if (_searching)
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.tr(
+                          'Searching… ${items.length} events loaded',
+                          '正在搜索，已加载 ${items.length} 个活动',
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      key: const Key('events-stop-search'),
+                      onPressed: _stopSearch,
+                      child: Text(context.tr('Stop', '停止')),
+                    ),
+                  ],
                 ),
               if (state.failure case final failure?)
                 StatusPanel(
@@ -317,7 +340,19 @@ final class _ParticipationEventsPageState
         ),
       ),
     );
-    return RefreshOnReturn(onRefresh: () => unawaited(_reload()), child: page);
+    return RefreshOnReturn(
+      onRefresh: () {
+        final controller = ref.read(eventBatchesProvider.notifier);
+        if (!controller.hasFreshBatch) unawaited(_reload());
+      },
+      child: page,
+    );
+  }
+
+  void _stopSearch() {
+    _searchGeneration++;
+    ref.read(eventBatchesProvider.notifier).stopSearch();
+    setState(() => _searching = false);
   }
 
   Future<void> _searchAvailable() async {
@@ -328,7 +363,12 @@ final class _ParticipationEventsPageState
     }
     final generation = ++_searchGeneration;
     setState(() => _searching = true);
-    await ref.read(eventBatchesProvider.notifier).loadAvailablePages();
+    await ref
+        .read(eventBatchesProvider.notifier)
+        .loadAvailablePages(
+          shouldContinue: () =>
+              mounted && ModalRoute.of(context)?.isCurrent != false,
+        );
     if (mounted && generation == _searchGeneration) {
       setState(() => _searching = false);
     }

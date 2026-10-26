@@ -83,7 +83,7 @@ final class _ParticipationEventPageState
         state == AppLifecycleState.hidden) {
       setState(() {
         _generation++;
-        _detail = null;
+        if (!(_expiry?.isActive ?? false)) _detail = null;
         _loading = false;
       });
     }
@@ -218,7 +218,14 @@ final class _ParticipationEventPageState
         ),
       ),
     );
-    return RefreshOnReturn(onRefresh: () => unawaited(_load()), child: page);
+    return RefreshOnReturn(
+      onRefresh: () {
+        if (_detail == null || !(_expiry?.isActive ?? false)) {
+          unawaited(_load());
+        }
+      },
+      child: page,
+    );
   }
 
   @override

@@ -26,7 +26,7 @@ const _sourceActionDisclosure =
     "A copied link can remain on your device's clipboard.";
 const _lifetimeDisclosure =
     "This activity view stays in ENMORI's memory for at most five minutes and "
-    'clears when the app goes into the background or you sign out. Reload to '
+    'clears when it expires or you sign out. Reload to '
     'request current information.';
 
 /// LI supplies route/session guards and list navigation. Never remaps /events.
@@ -73,9 +73,9 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) {
-      ref.read(activityControllerProvider(widget.browseId).notifier).clear();
-    }
+    ref
+        .read(activityControllerProvider(widget.browseId).notifier)
+        .setForeground(state == AppLifecycleState.resumed);
   }
 
   @override
@@ -288,7 +288,7 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
             Text(
               context.tr(
                 _lifetimeDisclosure,
-                '活动数据最多在 ENMORI 内存中保留五分钟，应用进入后台或退出登录时会清除。重新加载可获取最新信息。',
+                '活动数据最多在 ENMORI 内存中保留五分钟，到期或退出登录时会清除。重新加载可获取最新信息。',
               ),
             ),
           ],
@@ -296,9 +296,12 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
       ),
     );
     return RefreshOnReturn(
-      onRefresh: () => unawaited(
-        ref.read(activityControllerProvider(widget.browseId).notifier).load(),
-      ),
+      onRefresh: () {
+        final controller = ref.read(
+          activityControllerProvider(widget.browseId).notifier,
+        );
+        if (!controller.hasFreshData) unawaited(controller.load());
+      },
       child: page,
     );
   }

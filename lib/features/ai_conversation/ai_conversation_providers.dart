@@ -91,6 +91,15 @@ class AiConversationController extends Notifier<AiConversationState> {
   Object? _draftSessionKey;
   Object? _draftEditor;
   TextEditingValue get draft => _draft;
+  Object? get resultRecoveryKey => state.canLeaveWithoutRetrying
+      ? (
+          state.sessionKey,
+          state.contextScopeKey,
+          state.conversationId,
+          state.localOutgoingKey,
+          state.outgoingMessageId,
+        )
+      : null;
   TextEditingValue draftFor(Object sessionKey) =>
       identical(_draftSessionKey, sessionKey) ? _draft : TextEditingValue.empty;
   void claimDraftEditor(Object editor, {required Object sessionKey}) {
@@ -270,6 +279,8 @@ class AiConversationController extends Notifier<AiConversationState> {
       contextScopeKey: _contextScopeKey,
       nextCursor: nextCursor,
       statusMessage: statusMessage,
+      canEditDraft:
+          available && !terminalView && !_memory.deleting && !_memory.deleted,
       canSend:
           ready &&
           located &&
@@ -307,10 +318,9 @@ class AiConversationController extends Notifier<AiConversationState> {
       canStartNewConversation:
           available &&
           !generating &&
-          _reads.isEmpty &&
           !_memory.deleting &&
           (_memory.conversationId != null || _location != null) &&
-          (!_memory.unresolved || _memory.deleted),
+          (!terminalView || phase == AiConversationPhase.deleted),
       readBusy: _reads.isNotEmpty,
       messageReadRevision: _messageReadRevision,
       lastReadMessageIds: _lastReadMessageIds,
@@ -337,8 +347,7 @@ class AiConversationController extends Notifier<AiConversationState> {
           (!terminalView || phase == AiConversationPhase.deleted) &&
           !generating &&
           !_memory.deleting &&
-          _reads.isEmpty &&
-          !_memory.unresolved,
+          _reads.isEmpty,
     );
   }
 
@@ -1050,6 +1059,7 @@ class AiConversationController extends Notifier<AiConversationState> {
               break;
             }
             _memory.unresolved = false;
+            _memory.resolved(conversation);
             if (!_memory.established) {
               _memory.conversationId = null;
               _memory.operationId = null;
@@ -1070,6 +1080,7 @@ class AiConversationController extends Notifier<AiConversationState> {
               _memory.recordOperationUser(user);
               _retryUser = value.userMessage;
               _memory.unresolved = false;
+              _memory.resolved(conversation);
               _show(AiConversationPhase.idle);
             }
           case AiOutcomeState.assistantSaved:
@@ -1081,6 +1092,7 @@ class AiConversationController extends Notifier<AiConversationState> {
             if (_merge([value.userMessage!, value.assistantMessage!], number)) {
               _recordPair(value.userMessage!, value.assistantMessage!);
               _memory.unresolved = false;
+              _memory.resolved(conversation);
               _completeSelectedDraft();
               _show(AiConversationPhase.success);
             }
@@ -1130,6 +1142,7 @@ class AiConversationController extends Notifier<AiConversationState> {
   }
 
   void _resetConversationIdentity(String conversationId) {
+    _memory.parkUnresolved();
     _contextScopeKey = Object();
     _selectedSubmittedText = null;
     discardSelectedPreparation();
@@ -1150,8 +1163,10 @@ class AiConversationController extends Notifier<AiConversationState> {
     _memory.operationUserPersistedAt = null;
     _memory.operationAssistantId = null;
     _memory.operationHasAssistant = false;
+    _memory.unresolved = false;
     _memory.established = true;
     _memory.deleted = false;
+    _memory.restoreUnresolved(conversationId);
   }
 
   void replyToFollowUp(String messageId) {
@@ -1329,14 +1344,17 @@ class AiConversationController extends Notifier<AiConversationState> {
   }
 
   Future<void> loadMessages({String? before}) async {
+    if (!_alive || !ref.mounted) return;
     final conversation = _memory.conversationId;
+    final access = ref.read(contentAccessProvider);
     if (!_alive ||
         !_memory.authenticated ||
         _repository == null ||
         conversation == null ||
         _memory.deleted ||
         _memory.deleting ||
-        _attempt != null) {
+        _attempt != null ||
+        !access.foreground) {
       return;
     }
     if (_location != null && _location!.phase != AiMessageLocationPhase.ready) {
@@ -1346,15 +1364,26 @@ class AiConversationController extends Notifier<AiConversationState> {
     final command = _commandVersion;
     final number = ++_requestNumber;
     final repository = _repository!;
-    final result = await _ordinary(
-      (token, abort) => repository.readMessages(
+    final result = await _ordinary((token, abort) {
+      final currentAccess = ref.read(contentAccessProvider);
+      if (!identical(access, currentAccess) || !currentAccess.foreground) {
+        return Future<Result<AiMessagePage>>.value(const Failure(_unknown));
+      }
+      return repository.readMessages(
         token: token,
         abort: abort,
         conversationId: conversation,
         before: before,
-      ),
-    );
+      );
+    });
     if (!_validReadResult(epoch, command)) return;
+    final currentAccess = ref.read(contentAccessProvider);
+    if (!identical(access, currentAccess) || !currentAccess.foreground) {
+      // Retired source authority cannot release hidden content, even when this
+      // earlier page succeeds. Keep explicit recovery and release local busy.
+      _show(state.phase, message: state.statusMessage);
+      return;
+    }
     switch (result) {
       case Failure<AiMessagePage>(:final failure):
         // Discovery is an ordinary read: a subsequently expired/deleted target
@@ -1527,9 +1556,10 @@ class AiConversationController extends Notifier<AiConversationState> {
   }
 
   /// Uses the existing reserved-new prepare path on the next explicit send.
-  /// No DELETE, automatic resend, unknown-result escape or message replacement.
+  /// An independent input never clears another topic's unresolved target guard.
   void startNewConversation() {
     if (!state.canStartNewConversation) return;
+    _memory.parkUnresolved();
     _contextScopeKey = Object();
     discardSelectedPreparation();
     _selectedSubmittedText = null;
@@ -1679,6 +1709,40 @@ final class _Memory {
   bool established = false;
   bool deleting = false;
   bool deleted = false;
+  final Map<String, _UnresolvedTarget> _unresolvedTargets = {};
+
+  void parkUnresolved() {
+    final conversation = conversationId, operation = operationId;
+    if (!unresolved || conversation == null || operation == null || deleting) {
+      return;
+    }
+    _unresolvedTargets[conversation] = _UnresolvedTarget(
+      operation,
+      operationUserId,
+      operationUserSequence,
+      operationUserPersistedAt,
+      operationHasAssistant,
+      operationAssistantId,
+      established,
+      Set.of(tombstones),
+    );
+  }
+
+  void restoreUnresolved(String conversation) {
+    final target = _unresolvedTargets[conversation];
+    if (target == null) return;
+    operationId = target.operationId;
+    operationUserId = target.userId;
+    operationUserSequence = target.sequence;
+    operationUserPersistedAt = target.persistedAt;
+    operationHasAssistant = target.hasAssistant;
+    operationAssistantId = target.assistantId;
+    established = target.established;
+    tombstones.addAll(target.tombstones);
+    unresolved = true;
+  }
+
+  void resolved(String conversation) => _unresolvedTargets.remove(conversation);
 
   void recordOperationUser(AiMessage user) {
     operationUserId = user.messageId;
@@ -1693,6 +1757,25 @@ final class _Memory {
           operationUserPersistedAt == user.persistedAt &&
           user.role == AiRole.user &&
           user.availability == AiAvailability.available);
+}
+
+final class _UnresolvedTarget {
+  const _UnresolvedTarget(
+    this.operationId,
+    this.userId,
+    this.sequence,
+    this.persistedAt,
+    this.hasAssistant,
+    this.assistantId,
+    this.established,
+    this.tombstones,
+  );
+  final String operationId;
+  final String? userId, assistantId;
+  final int? sequence;
+  final DateTime? persistedAt;
+  final bool hasAssistant, established;
+  final Set<String> tombstones;
 }
 
 final class _SelectedPreparation {

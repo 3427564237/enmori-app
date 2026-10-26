@@ -516,6 +516,7 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
       _selected.add(id);
     }
     _active = true;
+    _recoveringSelected = false;
     _mode = AiReferenceMode.manual;
     _retireReview();
     _notice = AiSelectionNotice.recheck;
@@ -750,6 +751,7 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
   void setTodayEnabled(bool enabled) {
     if (!_automaticAvailable || !_canChangeMode) return;
     _topicUsesToday = enabled;
+    _recoveringSelected = false;
     _mode = enabled ? AiReferenceMode.today : AiReferenceMode.off;
     _selected.clear();
     _active = true;
@@ -761,12 +763,17 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
 
   bool get _canChangeMode {
     final ai = ref.read(aiConversationControllerProvider);
-    return _permitted && !_busy && !_sending && (ai.canSend || ai.canRetry);
+    return _permitted &&
+        !_busy &&
+        !_sending &&
+        ai.canEditDraft &&
+        !ai.canCancel;
   }
 
   void useManualSelection() {
     if (!_canChangeMode || _mode == AiReferenceMode.manual) return;
     _mode = AiReferenceMode.manual;
+    _recoveringSelected = false;
     _active = true;
     _selected.clear();
     _clearCandidateListing();
@@ -793,6 +800,7 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
         (!_automaticIds.contains(id) && !_excludedCheckIns.contains(id))) {
       return;
     }
+    _recoveringSelected = false;
     if (!_excludedCheckIns.remove(id)) _excludedCheckIns.add(id);
     _retireReview();
     _notice = AiSelectionNotice.none;

@@ -58,8 +58,15 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      ref
+          .read(eventDetailControllerProvider(widget.eventId).notifier)
+          .setForeground(true);
+    }
     if (state != AppLifecycleState.resumed && mounted) {
-      ref.read(eventDetailControllerProvider(widget.eventId).notifier).clear();
+      ref
+          .read(eventDetailControllerProvider(widget.eventId).notifier)
+          .setForeground(false);
     }
   }
 
@@ -194,9 +201,12 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
       ),
     );
     return RefreshOnReturn(
-      onRefresh: () => unawaited(
-        ref.read(eventDetailControllerProvider(widget.eventId).notifier).load(),
-      ),
+      onRefresh: () {
+        final controller = ref.read(
+          eventDetailControllerProvider(widget.eventId).notifier,
+        );
+        if (!controller.hasFreshData) unawaited(controller.load());
+      },
       child: page,
     );
   }

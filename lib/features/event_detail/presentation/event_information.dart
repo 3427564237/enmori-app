@@ -59,16 +59,6 @@ final class EventInformation extends StatelessWidget {
             : context.tr('Source: Ticketmaster', '来源：Ticketmaster'),
       ),
       const SizedBox(height: 8),
-      if (!syntheticPreview)
-        Text(
-          context.tr(
-            'An available cover loads directly from Ticketmaster’s image service. '
-                'It receives your connection information, without your ENMORI sign-in or private content. '
-                'Event information is kept in memory for at most five minutes and is checked again when you return.',
-            '可用封面直接从 Ticketmaster 图片服务加载。该服务会收到你的连接信息，不会收到 ENMORI 登录信息或私人内容。活动信息最多在内存保留五分钟，返回时会重新核对。',
-          ),
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
       const SizedBox(height: 16),
       _EventCover(
         key: ObjectKey(event),
@@ -150,11 +140,19 @@ final class _EventCoverState extends ConsumerState<_EventCover>
   ui.Image? _image;
   bool _loading = false;
   bool _started = false, _cleared = false;
+  bool _foreground = true;
   ModalRoute<Object?>? _route;
   int _generation = 0;
+  Timer? _expiry;
   @override
   void initState() {
     super.initState();
+    _foreground =
+        WidgetsBinding.instance.lifecycleState == null ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    _expiry = Timer(const Duration(minutes: 5), () {
+      if (mounted) setState(_clear);
+    });
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -162,22 +160,38 @@ final class _EventCoverState extends ConsumerState<_EventCover>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _route = ModalRoute.of(context);
-    if (_route?.isCurrent == false) {
-      _started = true;
-      _clear();
-    } else if (!_started &&
-        validEventCoverUrl(widget.url) &&
-        (WidgetsBinding.instance.lifecycleState == null ||
-            WidgetsBinding.instance.lifecycleState ==
-                AppLifecycleState.resumed)) {
+    if (_route?.isCurrent == false || !_foreground) {
+      _suspend();
+    } else {
+      _startVisible();
+    }
+  }
+
+  void _startVisible() {
+    if (!_started &&
+        !_cleared &&
+        _foreground &&
+        (_route?.isCurrent ?? true) &&
+        validEventCoverUrl(widget.url)) {
       _started = true;
       _loading = true;
       unawaited(_read());
     }
   }
 
+  void _suspend() {
+    _generation++;
+    _load?.cancel();
+    _load = null;
+    _loading = false;
+    _started = _image != null;
+  }
+
   bool _current(int generation) =>
-      mounted && generation == _generation && (_route?.isCurrent ?? true);
+      mounted &&
+      _foreground &&
+      generation == _generation &&
+      (_route?.isCurrent ?? true);
 
   Future<void> _read() async {
     final generation = ++_generation;
@@ -251,7 +265,8 @@ final class _EventCoverState extends ConsumerState<_EventCover>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed && mounted) setState(_clear);
+    _foreground = state == AppLifecycleState.resumed;
+    if (mounted) setState(_foreground ? _startVisible : _suspend);
   }
 
   @override
@@ -312,6 +327,7 @@ final class _EventCoverState extends ConsumerState<_EventCover>
 
   @override
   void dispose() {
+    _expiry?.cancel();
     _clear();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

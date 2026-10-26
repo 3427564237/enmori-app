@@ -42,5 +42,11 @@ source label and existing optional source/website privacy information.
 
 Event introductions and alternative information links still require actual
 permitted source data under JIN's all-interest handoff. Do not fabricate them.
-The model's existing idle-release policy is a separate pending question to LI;
-this record does not yet select a new model-residency value or infrastructure.
+LI subsequently confirmed the same account is in use and selected: keep idle
+release and accept the first-load wait. Keep the existing 30-minute residency,
+model, 8192 context, generation limit and original client 15/75/90-second limits.
+For an explicit chat send, check local host residency and finish an empty-prompt
+preload before starting the existing business/runtime generation budget. This
+is host preparation, not a generated reply, replay, new purpose or background
+warmup. Cancellation/authority loss must prevent a later dispatch; physical
+preload receipt still owns the shared model lane until settled.
