@@ -12,6 +12,17 @@ final class MatchedInterest {
   final String displayName;
 }
 
+final class EventRecommendationReason {
+  const EventRecommendationReason({
+    required this.code,
+    required this.count,
+    required this.points,
+  });
+  final String code;
+  final int count;
+  final int points;
+}
+
 final class EventRecommendation {
   const EventRecommendation({
     required this.eventId,
@@ -20,6 +31,7 @@ final class EventRecommendation {
     this.endAt,
     required this.matchedInterests,
     required this.reasonCode,
+    this.reasons = const [],
   });
 
   final String eventId;
@@ -28,6 +40,7 @@ final class EventRecommendation {
   final DateTime? endAt;
   final List<MatchedInterest> matchedInterests;
   final String reasonCode;
+  final List<EventRecommendationReason> reasons;
 }
 
 final class EventRecommendationResponse {

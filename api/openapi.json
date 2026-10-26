@@ -13395,7 +13395,7 @@
           },
           "displayName": {
             "type": "string",
-            "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+            "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
           },
           "tone": {
             "type": "string",
@@ -13505,7 +13505,7 @@
                 },
                 "displayName": {
                   "type": "string",
-                  "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                  "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
                 },
                 "tone": {
                   "type": "string",
@@ -13627,7 +13627,7 @@
               },
               "displayName": {
                 "type": "string",
-                "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
               },
               "tone": {
                 "type": "string",
@@ -13751,7 +13751,7 @@
                     },
                     "displayName": {
                       "type": "string",
-                      "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                      "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
                     },
                     "tone": {
                       "type": "string",
@@ -13851,7 +13851,7 @@
         "properties": {
           "displayName": {
             "type": "string",
-            "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+            "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
           },
           "tone": {
             "type": "string",
@@ -13925,7 +13925,7 @@
         "properties": {
           "displayName": {
             "type": "string",
-            "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+            "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
           },
           "tone": {
             "type": "string",
@@ -14382,14 +14382,50 @@
           },
           "matchedInterests": {
             "type": "array",
-            "minItems": 1,
             "items": {
               "$ref": "#/components/schemas/MatchedInterest"
             }
           },
           "reasonCode": {
             "type": "string",
-            "const": "interest_match"
+            "enum": [
+              "interest_match",
+              "relevance_match"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "count",
+                "points"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "shared_interests",
+                    "friends_participating",
+                    "same_region"
+                  ]
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                },
+                "points": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 40
+                }
+              }
+            }
           }
         }
       },
@@ -14407,7 +14443,10 @@
           },
           "formulaVersion": {
             "type": "string",
-            "const": "event_recommendation_v1"
+            "enum": [
+              "event_recommendation_v1",
+              "event_recommendation_v2"
+            ]
           },
           "items": {
             "type": "array",
@@ -15650,7 +15689,7 @@
             "properties": {
               "displayName": {
                 "type": "string",
-                "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
               },
               "tone": {
                 "type": "string",

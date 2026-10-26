@@ -1,4 +1,4 @@
-import '../core/presentation/enmori_localizations.dart';
+import '../features/event_recommendations/presentation/recommendation_reason.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,10 +38,7 @@ final class ConnectedRecommendationCard extends ConsumerWidget {
             startAt: event.startAt.toLocal().toString(),
             endAt: event.endAt?.toLocal().toString(),
           ),
-          authorizedReason: context.tr(
-            'Matches: ${event.matchedInterests.map((interest) => interest.displayName).join(', ')}',
-            '匹配兴趣：${event.matchedInterests.map((interest) => interest.displayName).join('、')}',
-          ),
+          authorizedReason: recommendationReason(context, event),
           onSelect: onOpen,
           actions: ParticipationControls(eventId: event.eventId),
         ),

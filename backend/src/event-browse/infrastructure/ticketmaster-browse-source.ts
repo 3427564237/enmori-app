@@ -49,7 +49,9 @@ export class TicketmasterBrowseSource implements BrowseSource {
     for(const [key,value]of this.observed)if(value.expires<=now)this.observed.delete(key);
     for(const row of items){this.observed.delete(sourceEventId(row.browseId));this.observed.set(sourceEventId(row.browseId),{browseId:row.browseId,expires:now+300000});}
     while(this.observed.size>1000)this.observed.delete(this.observed.keys().next().value!);
-    const more=(page+1)*20<raw.page.totalElements&&page<49;
+    // Never silently claim exhaustive coverage at the provider's 1000-item cap.
+    if (page===49 && raw.page.totalElements>1000) throw dependencyUnavailable;
+    const more=(page+1)*20<raw.page.totalElements;
     return {items,...(more?{nextPage:page+1}:{})};
   }
   async availableEvent(eventId:string,asOf:string,signal:AbortSignal):Promise<boolean>{

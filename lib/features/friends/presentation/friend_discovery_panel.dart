@@ -30,6 +30,8 @@ final class _FriendDiscoveryPanelState
     extends ConsumerState<FriendDiscoveryPanel>
     with WidgetsBindingObserver {
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _snack;
+  Object? _suggestionSnapshot;
+  int _groupStart = 0;
   void _closeSnack() {
     final snack = _snack;
     _snack = null;
@@ -95,6 +97,10 @@ final class _FriendDiscoveryPanelState
       }
     });
     final state = ref.watch(friendDiscoveryControllerProvider(widget.home));
+    if (!identical(_suggestionSnapshot, state.suggestions)) {
+      _suggestionSnapshot = state.suggestions;
+      _groupStart = 0;
+    }
     final preference = ref.watch(friendIgnoreControllerProvider);
     final preferences = ref.read(friendIgnoreControllerProvider.notifier);
     final renderedEpoch = preferences.epoch;
@@ -230,7 +236,56 @@ final class _FriendDiscoveryPanelState
               ],
             ),
           ),
-        for (final person in state.suggestions)
+        if (!widget.home && state.loaded && state.suggestions.isNotEmpty)
+          Wrap(
+            spacing: 12,
+            children: [
+              if (_groupStart > 0)
+                TextButton(
+                  onPressed: locked
+                      ? null
+                      : () {
+                          if (identical(
+                            state,
+                            ref.read(
+                              friendDiscoveryControllerProvider(widget.home),
+                            ),
+                          )) {
+                            setState(() => _groupStart -= 2);
+                          }
+                        },
+                  child: Text(context.tr('Previous group', '上一组')),
+                ),
+              if (_groupStart + 2 < state.suggestions.length)
+                TextButton(
+                  key: const Key('friend-recommendations-next-group'),
+                  onPressed: locked
+                      ? null
+                      : () {
+                          if (identical(
+                            state,
+                            ref.read(
+                              friendDiscoveryControllerProvider(widget.home),
+                            ),
+                          )) {
+                            setState(() => _groupStart += 2);
+                          }
+                        },
+                  child: Text(context.tr('Next group', '下一组')),
+                )
+              else
+                Text(
+                  context.tr(
+                    'You have reached the end of this list.',
+                    '已浏览到本次推荐列表的末尾。',
+                  ),
+                ),
+            ],
+          ),
+        for (final person
+            in widget.home
+                ? state.suggestions
+                : state.suggestions.skip(_groupStart).take(2))
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(

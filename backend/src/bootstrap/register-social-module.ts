@@ -30,7 +30,7 @@ export async function registerSocialModule(app:FastifyInstance,input:{identity:I
   recommendationEvents?:FriendEventProjection;activityEvents?:EventActivitySource}){
   await registerSocialRoutes(app,input.identity,new SocialProfiles(new FirestoreSocialRepository(input.store,input.history,input.cursor,input.clock)));
   await registerFriendSummary(app,input.identity,new FirestoreFriendSummary(input.store,input.clock));
-  await registerFriendRecommendations(app,input.identity,new FirestoreFriendRecommendations(input.store,input.clock, firestoreSocialAuthority,input.recommendationEvents));
+  await registerFriendRecommendations(app,input.identity,new FirestoreFriendRecommendations(input.store,input.clock, firestoreSocialAuthority,input.recommendationEvents,true));
   await registerFriendIgnoreRoutes(app,input.identity,new FirestoreFriendIgnoreRepository(input.store,input.clock, firestoreSocialAuthority));
   await registerFriendActivity(app,input.identity,new FirestoreFriendActivity(input.store,input.clock, firestoreSocialAuthority,input.activityEvents));
   await registerHomeWeather(app,input.identity,new HomeWeather(new FirestoreWeatherPurposeAuthority(input.store),input.weather,input.clock));
