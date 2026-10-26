@@ -10,6 +10,7 @@ import '../../../core/presentation/local_time.dart';
 import '../ai_conversation_providers.dart';
 import '../ai_owned_sources_providers.dart';
 import '../ai_selected_sources_providers.dart';
+import '../../account/content_access.dart';
 import '../../proactive/domain/proactive.dart';
 import 'ai_plan_draft_page.dart';
 import 'ai_message_search_page.dart';
@@ -675,7 +676,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         ? ref.read(aiOwnedSourcesControllerProvider)
         : null;
     if (messages.length == 1 &&
-        canDisplayAiMessage(current, messages.single, sources: currentSources)) {
+        canDisplayAiMessage(
+          current,
+          messages.single,
+          sources: currentSources,
+        )) {
       _followUpAction(current, messages.single)?.call();
     }
   }
@@ -1315,6 +1320,61 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     ),
   );
 
+  void _readSavedReply(
+    AiConversationState? previous,
+    AiConversationState next,
+  ) {
+    if (!_isCurrentEditor ||
+        !ref.read(aiCompanionReferencesEnabledProvider) ||
+        previous?.phase == AiConversationPhase.success ||
+        next.phase != AiConversationPhase.success ||
+        next.conversationId == null) {
+      return;
+    }
+    final sources = ref.read(aiOwnedSourcesControllerProvider);
+    final pending = next.messages
+        .where(
+          (message) =>
+              message.role == AiRole.assistant &&
+              !message.isProactive &&
+              message.sources.isNotEmpty &&
+              message.availability == AiAvailability.available &&
+              !canDisplayAiMessage(next, message, sources: sources),
+        )
+        .map((message) => message.messageId)
+        .toSet();
+    final access = ref.read(contentAccessProvider);
+    if (pending.isEmpty || !access.foreground) return;
+    final session = next.sessionKey;
+    final topic = next.conversationId;
+    final scope = next.contextScopeKey;
+    // A successful execute/readback is a saved pair, but it does not release
+    // source display guards. Read the transcript independently once; failure
+    // keeps the existing explicit recheck action and cannot replay a Send.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_isCurrentEditor ||
+          !identical(access, ref.read(contentAccessProvider))) {
+        return;
+      }
+      final current = ref.read(aiConversationControllerProvider);
+      if (current.sessionKey != session ||
+          current.conversationId != topic ||
+          current.contextScopeKey != scope ||
+          current.phase != AiConversationPhase.success ||
+          current.readBusy) {
+        return;
+      }
+      final currentSources = ref.read(aiOwnedSourcesControllerProvider);
+      if (current.messages.any(
+        (message) =>
+            pending.contains(message.messageId) &&
+            !canDisplayAiMessage(current, message, sources: currentSources),
+      )) {
+        unawaited(_controller.loadMessages());
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<AiConversationState>(aiConversationControllerProvider, (
@@ -1322,6 +1382,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       next,
     ) {
       _followMessages(previous, next);
+      _readSavedReply(previous, next);
       if (_isCurrentEditor &&
           previous?.draftSyncRevision != next.draftSyncRevision) {
         _syncingEditor = true;

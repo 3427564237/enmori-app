@@ -1329,14 +1329,17 @@ class AiConversationController extends Notifier<AiConversationState> {
   }
 
   Future<void> loadMessages({String? before}) async {
+    if (!_alive || !ref.mounted) return;
     final conversation = _memory.conversationId;
+    final access = ref.read(contentAccessProvider);
     if (!_alive ||
         !_memory.authenticated ||
         _repository == null ||
         conversation == null ||
         _memory.deleted ||
         _memory.deleting ||
-        _attempt != null) {
+        _attempt != null ||
+        !access.foreground) {
       return;
     }
     if (_location != null && _location!.phase != AiMessageLocationPhase.ready) {
@@ -1346,15 +1349,26 @@ class AiConversationController extends Notifier<AiConversationState> {
     final command = _commandVersion;
     final number = ++_requestNumber;
     final repository = _repository!;
-    final result = await _ordinary(
-      (token, abort) => repository.readMessages(
+    final result = await _ordinary((token, abort) {
+      final currentAccess = ref.read(contentAccessProvider);
+      if (!identical(access, currentAccess) || !currentAccess.foreground) {
+        return Future<Result<AiMessagePage>>.value(const Failure(_unknown));
+      }
+      return repository.readMessages(
         token: token,
         abort: abort,
         conversationId: conversation,
         before: before,
-      ),
-    );
+      );
+    });
     if (!_validReadResult(epoch, command)) return;
+    final currentAccess = ref.read(contentAccessProvider);
+    if (!identical(access, currentAccess) || !currentAccess.foreground) {
+      // Retired source authority cannot release hidden content, even when this
+      // earlier page succeeds. Keep explicit recovery and release local busy.
+      _show(state.phase, message: state.statusMessage);
+      return;
+    }
     switch (result) {
       case Failure<AiMessagePage>(:final failure):
         // Discovery is an ordinary read: a subsequently expired/deleted target
