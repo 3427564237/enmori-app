@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <link rel="icon" href="data:,">
+  <title>ENMORI · AI 陪伴 F0 / F1a 原型</title>
+  <link rel="stylesheet" href="prototype.css">
+  <script src="prototype.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#screen">跳到手机原型</a>
+  <main class="workbench">
+    <aside class="brief">
+      <p class="eyebrow">ENMORI / PRODUCT STUDY 01</p>
+      <h1>让每次回来，<br>都能接着说。</h1>
+      <p class="intro">AI 陪伴体验 · 25 OCT 2026<br>明确约一次跟进，手选这次想聊的记录。</p>
+      <div class="proposal"><strong>C / F0 / F1a · 已批准范围的合成设计</strong><p>所有记录、回复和通知均为演示。无账号、模型调用或网络发送；刷新即重置。实现批准不等于已上线或验收。</p></div>
+      <details class="lab" open>
+        <summary>查看首流与体验状态</summary>
+        <div class="lab-content">
+          <label for="mode">对话形态</label>
+          <select id="mode"><option value="C">已选 C · 连续主入口 + 历史/新话题</option></select>
+          <p id="mode-note" class="small"></p>
+          <label for="scenario">体验入口 / 异常状态</label>
+          <select id="scenario">
+            <option value="return">日常返回</option><option value="welcome">首次进入</option>
+            <option value="proactive">主动消息 → 原因 → 回复</option><option value="notification">模拟通知点击</option>
+            <option value="unknown">发送结果尚未确认</option><option value="failed">已确认未发送 / 本地失败</option>
+            <option value="stale">来源已更新，发送前重核</option><option value="source-unknown">来源核对失败 / 状态未知</option><option value="deleted">来源已删除</option>
+            <option value="revoked">数据用途许可已撤回</option><option value="offline">离线后迟到 / 已过期</option>
+            <option value="followup">已保存消息 → 预约一次跟进</option><option value="follow-unknown">预约结果未知</option>
+            <option value="follow-expired">预约已过期</option><option value="zone-unknown">时区变化，等待确认</option>
+            <option value="contact-off">明确跟进关闭</option><option value="contact-paused">明确跟进暂停</option>
+            <option value="provider-disabled">推送当前不可用</option><option value="provider-unknown">推送状态未知</option>
+            <option value="selection-conflict">排除与关联历史冲突</option><option value="read-unknown">阅读状态尚未同步</option>
+            <option value="home-entry">Home → AI</option><option value="checkin-entry">手选本人签到 → 审阅</option>
+          </select>
+          <div class="row"><button id="language" type="button">English UI</button><button id="large-text" type="button" aria-pressed="false">大字体</button></div>
+          <button id="reset" type="button" class="text-button">重置合成演示</button>
+        </div>
+      </details>
+      <p class="small review-note">C 保留原会话容器和删除边界。F0 明确跟进、F1a 本次手选签到均用本地模型；D1 只到推送候选实现。</p>
+      <a class="doc-link" href="first-flow-handoff.md">阅读首流交接 ↗</a><br>
+      <a class="doc-link" href="product-choices.md">查看选择前 A / B / C 记录 ↗</a>
+    </aside>
+    <section class="preview" aria-label="手机尺寸的交互原型">
+      <div class="preview-label"><span>INTERACTIVE STUDY</span><span>390 × 844</span></div>
+      <div class="phone" id="phone">
+        <div class="prototype-ribbon" id="ribbon">交互原型 · 新能力待实现 · 仅合成数据</div>
+        <header id="app-header"></header>
+        <div id="screen" tabindex="-1"></div>
+        <div id="composer"></div>
+        <nav id="app-nav" aria-label="应用导航"></nav>
+        <div class="home-indicator" aria-hidden="true"></div>
+      </div>
+      <p class="preview-foot">可直接点按。浏览器返回可回到上一步；支持键盘和减少动画偏好。</p>
+    </section>
+    <aside class="reading-guide">
+      <p class="eyebrow">TRY THIS</p>
+      <ol><li>从已保存的消息预约一次跟进</li><li>模拟设置与预约各自的结果</li><li>手选签到、审阅后再发送</li><li>打开主动消息，查看原始要求</li><li>核对阅读状态与同话题回复</li></ol>
+      <div class="guide-card"><strong>连续入口 ≠ 永久记忆</strong><p>当前消息、会话历史和已选记录各有边界。原型不会证明后台推送、真实生成或数据迁移。</p></div>
+      <p class="small">背景、终止和强制停止后的投递，须分别使用真实平台机制验收。</p>
+    </aside>
+  </main>
+</body>
+</html>

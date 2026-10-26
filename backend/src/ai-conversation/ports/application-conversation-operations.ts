@@ -12,6 +12,7 @@ export interface RequestOriginalConversationIdentity {
   /** Only the exact approved Application start context, under its original
    * token instance and runtime budget. No reusable identity or write permit. */
   verifyRead(context: AcceptedContextRead): Promise<ContextReadResult<AuthPrincipal>>;
+  currentRead?(context:AcceptedContextRead):boolean;
 }
 /** JIN's guarded projection of the actual settled canonical pair, including its
  * selected presentation. Fresh owner/source/full-precision expiry/all-pending
@@ -105,6 +106,7 @@ export interface ConversationOperationExecutor {
    * definite U metadata and retry invariants must come from authoritative storage. */
   create(input: { readonly identity: AsyncConversationIdentity; readonly operation: AsyncOperation;
     readonly text: () => string | undefined; readonly retryUser?: AsyncSavedUser;
+    readonly selectedReply?:import("./selected-reply.js").SelectedReplyGrant;readonly replyToMessageId?:string;
     readonly verifyCurrentAuth: ConversationCaller["verifyCurrentAuth"] },
     delivery: ConversationExecutionDelivery): ConversationExecution;
 }
@@ -112,6 +114,7 @@ export interface ConversationOperationExecutor {
  * live/full-precision expiry, source rules and all same-U pending/canonical pair.
  * Missing methods fail unavailable; no absent-row/no-op deletion success. */
 export interface ConversationOperationReaders {
+  prepareSelection?(context:ConversationOrdinaryContext,input:import("./selected-reply.js").SelectReplyContext,conversationId?:string):Promise<ConversationResult<import("./selected-reply.js").SelectedReplySnapshot>>;
   listConversations?(context: ConversationOrdinaryContext, after: string | undefined): Promise<ConversationResult<ConversationSummaryPage>>;
   verifyTarget?(context: ConversationOrdinaryContext, conversationId: string,
     userMessageId?: string): Promise<ConversationResult<void>>;

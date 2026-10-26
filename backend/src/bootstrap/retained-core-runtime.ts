@@ -1,3 +1,5 @@
+import { OwnAvatar } from "../account/application/own-avatar.js";
+import { FirestoreOwnAvatarRepository } from "../account/infrastructure/firestore-own-avatar-repository.js";
 import { socialEventSource } from './social-event-source.js';
 import { OpenMeteoWeatherProvider } from '../weather/infrastructure/open-meteo-weather-provider.js';
 import { requireRemoteGroupEnvironment } from '../shared/infrastructure/firebase/feature-environment.js';
@@ -6,6 +8,9 @@ import { createIsolatedEventParticipation, createRemoteEventParticipation } from
 import { setTimeout as wait } from "node:timers/promises";
 import { createIsolatedConversationComposition, createRemoteConversationComposition } from "./isolated-conversation-composition.js";
 import { LocalChatTransport, simpleChatGates } from "../ai-runtime/infrastructure/local-chat-transport.js";
+import { LocalModelLane } from "../ai-runtime/infrastructure/local-model-lane.js";
+import { createFirstFlowComposition, type FirstFlowConfiguration } from "./first-flow-composition.js";
+import { withDeliveryResolution } from "./owned-source-composition.js";
 import { createControlledEventBrowse } from "./controlled-event-browse.js";
 import { createControlledEventRecommendations } from "./controlled-event-recommendations.js";
 import type { BrowseSource } from "../event-browse/ports/event-browse.js";
@@ -36,6 +41,7 @@ import { FirebaseAdminEventReadGateway } from "../event-recommendations/infrastr
 
 import {
   deleteApp,
+  applicationDefault,
   initializeApp,
   type App as FirebaseApp,
 } from "firebase-admin/app";
@@ -71,12 +77,39 @@ interface ControlledRuntime {
   readonly aiStatus: () => { configured: boolean; available: boolean; maintenanceHealthy: boolean; pending: boolean; outcomeUnknown: boolean };
 }
 
+/** Private real-entry selection only. Absence keeps F0/F1 off; this never
+ * grants user consent, enables intents, discovers an owner or configures push. */
+export function parseLocalFirstFlowConfiguration(value: unknown, nowMs = Date.now()): FirstFlowConfiguration | undefined {
+  if (value === undefined) return undefined;
+  const record = (v: unknown): v is Record<string, unknown> =>
+    typeof v === "object" && v !== null && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype;
+  const invalid = () => { throw Error("Invalid local first-flow configuration"); };
+  if (!record(value) || !Object.hasOwn(value, "ownerAccountId") || !Object.hasOwn(value, "firebaseUid") ||
+      Object.keys(value).some(key => !["ownerAccountId", "firebaseUid", "worker"].includes(key))) return invalid();
+  const { ownerAccountId, firebaseUid, worker } = value;
+  if (typeof ownerAccountId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(ownerAccountId) ||
+      typeof firebaseUid !== "string" || !firebaseUid || firebaseUid.length > 128 || !firebaseUid.isWellFormed() ||
+      /[\u0000-\u001f\u007f]/u.test(firebaseUid)) return invalid();
+  if (worker === undefined && !Object.hasOwn(value, "worker")) return Object.freeze({ ownerAccountId, firebaseUid });
+  if (!record(worker) || Object.keys(worker).some(key => !["endsAtMs", "intervalMs"].includes(key))) return invalid();
+  const { endsAtMs, intervalMs } = worker;
+  if (typeof endsAtMs !== "number" || !Number.isSafeInteger(endsAtMs) || !Number.isSafeInteger(nowMs) ||
+      endsAtMs <= nowMs || endsAtMs - nowMs > 30 * 60000 ||
+      (Object.hasOwn(worker, "intervalMs") && (typeof intervalMs !== "number" || !Number.isSafeInteger(intervalMs) ||
+        intervalMs < 1000 || intervalMs > 2_147_483_647))) return invalid();
+  // Copy the fixed selection; do not retain a mutable JSON/configuration object.
+  return Object.freeze({ ownerAccountId, firebaseUid, worker: Object.freeze({ endsAtMs,
+    ...(typeof intervalMs === "number" ? { intervalMs } : {}) }) });
+}
+
 async function createControlledRuntime(
   configuration: ControlledRuntimeConfiguration,
   isolatedEnvironment?: Readonly<Record<string, string | undefined>>,
   eventInput?: { readonly source: BrowseSource; readonly musicInterestTagId: string },
   chatModel?: string,
+  firstFlowConfiguration?: FirstFlowConfiguration,
 ): Promise<ControlledRuntime> {
+  if (firstFlowConfiguration && (!isolatedEnvironment || chatModel !== "qwen3.5:9b")) throw Error("First-flow requires the approved local model and feature environment");
   const remote = isolatedEnvironment?.ENMORI_REMOTE_GROUP === 'true';
   const firebaseApp = initializeApp(
     { projectId: configuration.firebaseProjectId },
@@ -122,33 +155,42 @@ async function createControlledRuntime(
     let healthy = true;
     let previewAccepting = true;
     let maintenanceHealthy = true;
-    const chatTransport = chatModel ? new LocalChatTransport(chatModel) : undefined;
+    // One physical host lane is also supplied to the explicit first-flow
+    // composition. A delivery timeout never releases it for another feature.
+    const modelLane = chatModel ? new LocalModelLane(chatModel) : undefined;
+    const chatTransport = modelLane ? new LocalChatTransport(modelLane) : undefined;
     if (chatTransport && isolatedEnvironment) {
       try {
         await chatTransport.prepareModel();
         chat = await (remote ? createRemoteConversationComposition : createIsolatedConversationComposition)({
           firestore: getFirestore(firebaseApp), environment: isolatedEnvironment,
           transport: chatTransport, gates: simpleChatGates, simpleChat: true,
+          ...(firstFlowConfiguration ? { selectedReplies: true as const } : {}),
           conversationStrategy: 'open_conversation_v1',
           report: (_phase, result) => { if (!result.complete) maintenanceHealthy = false; },
           reportRetirement: confirmed => { if (!confirmed) healthy = false; },
         });
       } catch { healthy = false; }
     }
+    const firstFlow = firstFlowConfiguration && chat && healthy && modelLane && isolatedEnvironment
+      ? createFirstFlowComposition({ configuration: firstFlowConfiguration, environment: isolatedEnvironment,
+        conversation: chat, lane: modelLane, auth: getAuth(firebaseApp), healthy: () => healthy && maintenanceHealthy,
+        ...(firstFlowConfiguration.push ? { credential: firebaseApp.options.credential ?? applicationDefault() } : {}) }) : undefined;
     const stopAi = async () => {
       previewAccepting = false;
+      await firstFlow?.stop();
       if (!chat) return;
       await chat.stopAdmissionAndMaintenance();
       // Let accepted work settle normally. Unknown generation outcomes retain
       // the process/data rather than exporting a false clean shutdown.
-      while (chat.runtime.state.nonTerminal > 0 || chatTransport?.state.pending) await wait(250);
+      while (chat.runtime.state.nonTerminal > 0 || modelLane?.state.pending || firstFlow?.application.executionState.running) await wait(250);
       chat.runtime.shutdown();
     };
     const aiStatus = () => ({ configured: !!chatTransport, available: !!chat && healthy,
-      maintenanceHealthy, pending: chatTransport?.state.pending ?? false, outcomeUnknown: chatTransport?.state.outcomeUnknown ?? false });
+      maintenanceHealthy, pending: modelLane?.state.pending ?? false, outcomeUnknown: modelLane?.state.outcomeUnknown ?? false });
     const personaPreview = chat && healthy && chatTransport ? new PreviewPersona(
       new FirestorePersonaPreviewAuthority(gateway), chatTransport,
-      () => performance.now(), () => chatTransport.state.pending,
+      () => performance.now(), () => modelLane?.state.pending ?? true,
     ) : undefined;
     const initializeOwner = async (uid: string) => {
       await gateway.runTransaction(async tx => {
@@ -173,8 +215,11 @@ async function createControlledRuntime(
       });
     };
     const getOnboarding = new GetOnboarding(onboardingRepository);
-    const socialEvents = socialEventSource(eventBrowseControl.peek, eventBrowseControl.projectionReady);
+    const socialEvents = socialEventSource(eventBrowseControl.peek, eventBrowseControl.projectionReady, async (asOf) => { await eventBrowseControl.source.firstBatch(asOf, new AbortController().signal); });
     const app = await buildApp({
+      ...(firstFlow ? { firstFlow } : {}),
+      ...(chat?.ownedSources ? { ownedSources: firstFlow
+        ? withDeliveryResolution(chat.ownedSources, firstFlow.application, firstFlow.accepting) : chat.ownedSources } : {}),
       ...(remote ? {socialModule: {identity: new FirebaseIdentityVerifier(getAuth(firebaseApp)), store: gateway,
         history: new FirebaseAdminCheckInHistoryGateway(getFirestore(firebaseApp)), cursor: createHistoryCursorCodec(), clock, weather, activityEvents: socialEvents.activity, recommendationEvents: socialEvents.recommendations}} : {}),
       ...(isolatedEnvironment ? { [remote ? 'remoteSlices' : 'isolatedSlices']: {
@@ -203,7 +248,7 @@ async function createControlledRuntime(
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
       createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(getAuth(firebaseApp)), new FirestoreCatalogueWriter(gateway)),
       getInterestAdminCapability: new GetInterestAdminCapability(new FirebaseInterestAdmin(getAuth(firebaseApp))),
-      accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, isolatedEnvironment)),
+      accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, isolatedEnvironment), new OwnAvatar(new FirestoreOwnAvatarRepository(gateway))),
       recommendEvents: realEvents.recommendEvents,
       identityVerifier: new FirebaseIdentityVerifier(getAuth(firebaseApp)),
       completeOnboarding: { execute: async input => {
@@ -224,6 +269,7 @@ async function createControlledRuntime(
       getOwnInterests: new GetOwnInterests(interestRepository),
       replaceOwnInterests: new ReplaceOwnInterests(interestRepository),
     });
+    firstFlow?.start();
     return { app, firebaseApp, eventBrowseControl, stopEvents, stopAi, aiStatus };
   } catch (error: unknown) {
     await deleteApp(firebaseApp);
@@ -242,17 +288,19 @@ export async function closeControlledRuntime(runtime: ControlledRuntime): Promis
 export async function createRetainedCoreRuntime(environment: Readonly<Record<string, string | undefined>>,
   events?: { readonly source: BrowseSource; readonly musicInterestTagId: string },
   chatModel?: string,
+  firstFlow?: FirstFlowConfiguration,
 ): Promise<ControlledRuntime> {
   const checked = requireControlledEmulatorEnvironment(environment);
   if (JSON.stringify(requireControlledEmulatorEnvironment(process.env)) !== JSON.stringify(checked)) {
     throw new Error('Core SDK environment does not match the verified endpoints');
   }
-  return createControlledRuntime({ firebaseProjectId: checked.projectId, host: '127.0.0.1', port: 9380 }, environment, events, chatModel);
+  return createControlledRuntime({ firebaseProjectId: checked.projectId, host: '127.0.0.1', port: 9380 }, environment, events, chatModel, firstFlow);
 }
 
 /** Public group entry uses real Firebase only; it cannot select Emulator bindings. */
 export async function createRemoteGroupRuntime(environment: Readonly<Record<string, string | undefined>>,
-  events?: { readonly source: BrowseSource; readonly musicInterestTagId: string }, chatModel?: string): Promise<ControlledRuntime> {
+  events?: { readonly source: BrowseSource; readonly musicInterestTagId: string }, chatModel?: string,
+  firstFlow?: FirstFlowConfiguration): Promise<ControlledRuntime> {
   requireRemoteGroupEnvironment(environment);
-  return createControlledRuntime({firebaseProjectId: 'enmori-rmvp-controlled', host: '127.0.0.1', port: 9381}, environment, events, chatModel);
+  return createControlledRuntime({firebaseProjectId: 'enmori-rmvp-controlled', host: '127.0.0.1', port: 9381}, environment, events, chatModel, firstFlow);
 }

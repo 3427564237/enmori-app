@@ -7,6 +7,7 @@ import type { ConversationExecutionDelivery, ConversationOperationClock, Convers
 import type { AsyncCloseObservation } from "../../src/ai-conversation/ports/async-conversation.js";
 import type { StoredConversationMessage } from "../../src/ai-conversation/ports/real-conversation-store.js";
 import type { IdentityVerificationResult } from "../../src/shared/ports/identity-verifier.js";
+import type { SelectedReplySnapshot } from "../../src/ai-conversation/ports/selected-reply.js";
 
 const id = (n: number): string => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const owner = id(1), existing = id(2), originalUser = id(3);
@@ -374,4 +375,86 @@ test("concurrent/invalid acquisition has no lease and idempotent old release can
   original.lease.release(); assert.equal(fresh.lease.current(), true);
   assert.deepEqual(await f.app.prepare(f.original, { kind: "send", purpose: "checkin_conversation", conversationId: existing }), bad("AI_OPERATION_CONFLICT"));
   fresh.lease.release(); fresh.lease.release(); assert.equal(fresh.lease.current(), false);
+});
+
+test("F1a prepared choices are operation-bound and omission/foreign/incomplete keys preserve the prepared ticket",async()=>{
+  const f=fixture();f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:3,historyPairs:[],sources:[{kind:"check_in",checkInId:"private-source-id",version:"metadata-v1",sourceOccurredAt:"2026-10-14T09:00:00.000Z",observedAt:"2026-10-14T10:00:00.000Z"}]});
+  const ticket=value(await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",contextSelection:{processing:"local",sources:[{kind:"check_in",checkInId:"private-source-id"}]}}));
+  const c=ticket.contextSelection!;assert.equal(c.sourceCards.length,1);assert(!JSON.stringify(c).includes("private-source-id"));
+  const body={operationId:ticket.operationId,operationKey:ticket.operationKey,text:"keep this draft"};
+  for(const choice of [undefined,{selectionRevision:c.selectionRevision,includedKeys:["wrong"],excludedKeys:[]},{selectionRevision:c.selectionRevision,includedKeys:[],excludedKeys:[]}]){
+    assert.deepEqual(await f.app.execute(f.original,{...body,...(choice?{contextSelection:choice}:{})},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});assert.equal(f.counts().creates,0);
+  }
+  const key=c.sourceCards[0]!.selectionKey;
+  assert.equal((await f.app.execute(f.original,{...body,contextSelection:{selectionRevision:c.selectionRevision,includedKeys:[key],excludedKeys:[key]}},f.delivery())).kind,"success");
+  assert.deepEqual(f.inputs[0]?.selectedReply?.includedKeys,[key]);assert.deepEqual(f.inputs[0]?.selectedReply?.excludedKeys,[key]);
+});
+test("F1a selection cannot be inserted into an old unselected prepare, or adopted from another operation",async()=>{
+  const f=fixture(),ticket=await f.prepare();
+  assert.deepEqual(await f.app.execute(f.original,{operationId:ticket.operationId,operationKey:ticket.operationKey,text:"draft",contextSelection:{selectionRevision:id(800),includedKeys:[],excludedKeys:[]}},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});
+  assert.equal(f.counts().creates,0);assert.equal((await f.execute(ticket)).kind,"success");
+});
+test("reply association is allowed only for an existing topic and does not consume a rejected new-topic ticket",async()=>{
+  const f=fixture(),ticket=await f.prepare();
+  assert.deepEqual(await f.app.execute(f.original,{operationId:ticket.operationId,operationKey:ticket.operationKey,text:"draft",replyToMessageId:id(800)},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});assert.equal(f.counts().creates,0);assert.equal((await f.execute(ticket)).kind,"success");
+});
+
+test("history exclusions use only fresh prepared keys and preserve draft plus source choice through explicit Send",async()=>{
+  const f=fixture();f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:3,sources:[],historyPairs:[{userMessageId:id(800),assistantMessageId:id(801),userSequence:1,assistantSequence:2}]});
+  const ticket=value(await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",conversationId:existing,contextSelection:{processing:"local",sources:[]}})),s=ticket.contextSelection!,key=s.historyPairs[0]!.historyKey;
+  const body={operationId:ticket.operationId,operationKey:ticket.operationKey,text:"draft stays exactly"},selection={selectionRevision:s.selectionRevision,includedKeys:[],excludedKeys:[]};
+  for(const keys of [[id(999)],[key,key]])assert.deepEqual(await f.app.execute(f.original,{...body,contextSelection:{...selection,excludedHistoryKeys:keys}},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});
+  assert.equal(f.counts().creates,0);assert.equal((await f.app.execute(f.original,{...body,contextSelection:{...selection,excludedHistoryKeys:[key]}},f.delivery())).kind,"success");assert.deepEqual(f.inputs[0]?.selectedReply?.excludedHistoryKeys,[key]);assert.equal(f.accepted[0]?.userMessage.text,"draft stays exactly");
+});
+
+test("reprepare issues new history keys; old exclusions cannot transfer even with the same owner/topic",async()=>{
+  const f=fixture();f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:3,sources:[],historyPairs:[{userMessageId:id(820),assistantMessageId:id(821),userSequence:1,assistantSequence:2}]});
+  const prepare=async()=>value(await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",conversationId:existing,contextSelection:{processing:"local",sources:[]}}));
+  const old=await prepare(),oldKey=old.contextSelection!.historyPairs[0]!.historyKey;value(await f.app.cancel(f.original,{operationId:old.operationId,operationKey:old.operationKey}));
+  const fresh=await prepare(),s=fresh.contextSelection!,newKey=s.historyPairs[0]!.historyKey;assert.notEqual(s.selectionRevision,old.contextSelection!.selectionRevision);assert.notEqual(newKey,oldKey);
+  const body={operationId:fresh.operationId,operationKey:fresh.operationKey,text:"unchanged draft"},choice={selectionRevision:s.selectionRevision,includedKeys:[],excludedKeys:[]};
+  assert.deepEqual(await f.app.execute(f.original,{...body,contextSelection:{...choice,excludedHistoryKeys:[oldKey]}},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});
+  assert.equal((await f.app.execute(f.original,{...body,contextSelection:{...choice,excludedHistoryKeys:[newKey]}},f.delivery())).kind,"success");assert.equal(f.accepted[0]?.userMessage.text,"unchanged draft");
+});
+
+test("automatic today prepares owned ID metadata and passes the same bounded day grant on one Send",async()=>{
+  const f=fixture(),today={date:"2026-10-14",timeZone:"Asia/Singapore",limit:5 as const,hasMore:false};
+  f.readers.prepareSelection=async(_context,input)=>{
+    assert.deepEqual(input,{processing:"local",today:{timeZone:"Asia/Singapore"}});
+    return good({purposeRevocationGeneration:3,today,historyPairs:[],sources:[{kind:"check_in",checkInId:"owned-today-id",version:"metadata-v1",sourceOccurredAt:"2026-10-14T09:00:00.000Z",observedAt:"2026-10-14T10:00:00.000Z"}]});
+  };
+  const ticket=value(await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",contextSelection:{processing:"local",today:{timeZone:"Asia/Singapore"}}}));
+  const selected=ticket.contextSelection!;assert.deepEqual(selected.today,today);assert.equal(selected.sourceCards[0]?.checkInId,"owned-today-id");
+  const key=selected.sourceCards[0]!.selectionKey;
+  const result=await f.app.execute(f.original,{operationId:ticket.operationId,operationKey:ticket.operationKey,text:"exact draft",contextSelection:{selectionRevision:selected.selectionRevision,includedKeys:[key],excludedKeys:[key]}},f.delivery());
+  assert.equal(result.kind,"success");assert.deepEqual(f.inputs[0]?.selectedReply?.today,today);assert.deepEqual(f.inputs[0]?.selectedReply?.excludedKeys,[key]);assert.equal(f.counts().creates,1);
+});
+
+test("automatic empty day admits ordinary chat while metadata errors cannot become an empty grant",async()=>{
+  for(const malformed of [false,true]){
+    const f=fixture();f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:0,sources:[],historyPairs:[],today:{date:"2026-10-14",timeZone:"Asia/Singapore",limit:5,hasMore:malformed}});
+    const result=await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",contextSelection:{processing:"local",today:{timeZone:"Asia/Singapore"}}});
+    if(malformed){assert.deepEqual(result,{kind:"failure",code:"AI_UNAVAILABLE"});assert.equal(f.counts().creates,0);continue;}
+    const ticket=value(result),selection=ticket.contextSelection!;
+    assert.equal((await f.app.execute(f.original,{operationId:ticket.operationId,operationKey:ticket.operationKey,text:"normal chat",contextSelection:{selectionRevision:selection.selectionRevision,includedKeys:[],excludedKeys:[]}},f.delivery())).kind,"success");
+  }
+});
+
+test("automatic day rollover before execute preserves text and rejects before executor effects",async()=>{
+  const f=fixture();f.clock.instant=6*3600000-1000;
+  f.readers.prepareSelection=async()=>good({purposeRevocationGeneration:0,sources:[],historyPairs:[],today:{date:"2026-10-14",timeZone:"Asia/Singapore",limit:5,hasMore:false}});
+  const ticket=value(await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",contextSelection:{processing:"local",today:{timeZone:"Asia/Singapore"}}})),selection=ticket.contextSelection!;
+  f.clock.advance(1000);
+  assert.deepEqual(await f.app.execute(f.original,{operationId:ticket.operationId,operationKey:ticket.operationKey,text:"draft still here",contextSelection:{selectionRevision:selection.selectionRevision,includedKeys:[],excludedKeys:[]}},f.delivery()),{kind:"failure",code:"AI_CONTEXT_SELECTION_CONFLICT"});
+  assert.equal(f.counts().creates,0);assert.equal(f.accepted.length,0);
+});
+
+test("a manual source prepare cannot receive automatic metadata or a fabricated automatic day",async()=>{
+  const samples:SelectedReplySnapshot[]=[{purposeRevocationGeneration:0,sources:[],historyPairs:[],today:{date:"2026-10-14",timeZone:"Asia/Singapore",limit:5,hasMore:false}},
+    {purposeRevocationGeneration:0,sources:[],historyPairs:[]}];
+  for(const [i,snapshot]of samples.entries()){
+    const f=fixture();f.readers.prepareSelection=async()=>good(snapshot);
+    const result=await f.app.prepare(f.original,{kind:"send",purpose:"checkin_conversation",contextSelection:i===0?{processing:"local",sources:[]}:{processing:"local",today:{timeZone:"Asia/Singapore"}}});
+    assert.deepEqual(result,{kind:"failure",code:"AI_UNAVAILABLE"});
+  }
 });

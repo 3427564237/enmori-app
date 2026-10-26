@@ -11,6 +11,8 @@ final class HomeShellPage extends StatelessWidget {
     this.socialSection,
     this.weatherSection,
     this.daySection,
+    this.profileHeader,
+    this.onContinueDiscovery,
     this.onSelectTab,
     this.onOpenSettings,
     this.onEditInterests,
@@ -31,6 +33,8 @@ final class HomeShellPage extends StatelessWidget {
   final Widget? socialSection;
   final Widget? weatherSection;
   final Widget? daySection;
+  final Widget? profileHeader;
+  final VoidCallback? onContinueDiscovery;
   final ValueChanged<int>? onSelectTab;
   final VoidCallback? onOpenSettings;
   final VoidCallback onStartCheckIn;
@@ -56,6 +60,7 @@ final class HomeShellPage extends StatelessWidget {
           key: const Key('route-home'),
           padding: const EdgeInsets.all(24),
           children: [
+            if (profileHeader != null) _HomeSection(child: profileHeader!),
             Text(
               context.tr('Home', "首页"),
               style: Theme.of(context).textTheme.headlineMedium,
@@ -74,7 +79,7 @@ final class HomeShellPage extends StatelessWidget {
               icon: const Icon(Icons.edit_note),
               label: Text(context.tr('New Check-in', "新建签到")),
             ),
-            ?daySection,
+            if (daySection != null) _HomeSection(child: daySection!),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               key: const Key('edit-interests-button'),
@@ -130,10 +135,13 @@ final class HomeShellPage extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
-            EventRecommendationsSection(
-              onSeeAll: onSeeAllEvents,
-              onOpenEvent: onOpenEvent,
-              recommendationCardBuilder: recommendationCardBuilder,
+            _HomeSection(
+              child: EventRecommendationsSection(
+                onSeeAll: onSeeAllEvents,
+                onContinueDiscovery: onContinueDiscovery,
+                onOpenEvent: onOpenEvent,
+                recommendationCardBuilder: recommendationCardBuilder,
+              ),
             ),
           ],
         ),
@@ -188,6 +196,7 @@ final class HomeShellPage extends StatelessWidget {
             key: const Key('route-home'),
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
+              if (profileHeader != null) _HomeSection(child: profileHeader!),
               Semantics(
                 header: true,
                 child: Text(
@@ -215,21 +224,24 @@ final class HomeShellPage extends StatelessWidget {
                 icon: const Icon(Icons.edit_note),
                 label: Text(context.tr('New Check-in', "新建签到")),
               ),
-              ?daySection,
+              if (daySection != null) _HomeSection(child: daySection!),
               if (weatherSection != null) ...[
                 const SizedBox(height: 16),
-                weatherSection!,
+                _HomeSection(child: weatherSection!),
               ],
               const SizedBox(height: 24),
               if (onOpenEvent != null)
-                EventRecommendationsSection(
-                  heading: context.tr('Events for you', "为你推荐的活动"),
-                  onBrowseAll: onBrowseActivities,
-                  onSeeAll: null,
-                  onOpenEvent: onOpenEvent,
-                  recommendationCardBuilder: recommendationCardBuilder,
+                _HomeSection(
+                  child: EventRecommendationsSection(
+                    heading: context.tr('Events for you', "为你推荐的活动"),
+                    onBrowseAll: onBrowseActivities,
+                    onSeeAll: onSeeAllEvents,
+                    onContinueDiscovery: onContinueDiscovery,
+                    onOpenEvent: onOpenEvent,
+                    recommendationCardBuilder: recommendationCardBuilder,
+                  ),
                 ),
-              ?socialSection,
+              if (socialSection != null) _HomeSection(child: socialSection!),
               if (onSelectTab == null || onOpenProfile == null) ...[
                 const Divider(height: 32),
                 Semantics(
@@ -299,6 +311,29 @@ final class HomeShellPage extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// Home has a bounded set of sections whose own controllers govern freshness.
+/// Scrolling out of view must not remount them and restart their reads.
+final class _HomeSection extends StatefulWidget {
+  const _HomeSection({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_HomeSection> createState() => _HomeSectionState();
+}
+
+final class _HomeSectionState extends State<_HomeSection>
+    with AutomaticKeepAliveClientMixin<_HomeSection> {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
 }
 
 /// Availability follows the existing route callback, never a simulated result.

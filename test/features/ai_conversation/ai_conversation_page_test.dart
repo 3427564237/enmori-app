@@ -3,12 +3,247 @@ import 'dart:async';
 import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
 import 'package:enmori/features/ai_conversation/presentation/ai_conversation_page.dart';
 import 'package:enmori/harness/social/offline_social_pages.dart';
+import 'package:enmori/features/proactive/domain/proactive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets(
+    'Ask me later chooses a saved user message and keeps the composer draft',
+    (tester) async {
+      final saved = _message('saved-user', 1, AiRole.user, 'My saved source');
+      final controller = _PageController(
+        _state(
+          canSend: true,
+          canBrowseHistory: true,
+          canSelectConversation: true,
+          conversationId: 'topic',
+          messages: [
+            saved,
+            _message('assistant', 2, AiRole.assistant, 'Assistant reply'),
+            _message('removed', 3, AiRole.user, null, unavailable: true),
+          ],
+        ),
+      );
+      final opened = <SavedFollowUpSource>[];
+      await _pump(
+        tester,
+        controller,
+        socialStyle: true,
+        onFollowUp: opened.add,
+        onFollowUps: () {},
+      );
+      final input = find.byKey(const Key('ai-message-input'));
+      await tester.enterText(input, 'Keep this unsent draft');
+      await tester.tap(find.byTooltip('Open conversation menu'));
+      await tester.pumpAndSettle();
+      final entry = find.byKey(const Key('ai-follow-up-settings'));
+      await tester.ensureVisible(entry);
+      await tester.tap(entry);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('ai-later-source-saved-user')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('ai-later-source-assistant')), findsNothing);
+      expect(find.byKey(const Key('ai-later-source-removed')), findsNothing);
+      expect(opened, isEmpty);
+      await tester.tap(find.byKey(const Key('ai-later-source-saved-user')));
+      await tester.pumpAndSettle();
+      expect(opened.single.messageId, 'saved-user');
+      expect(
+        tester.widget<TextField>(input).controller!.text,
+        'Keep this unsent draft',
+      );
+      expect(controller.sent, isEmpty);
+    },
+  );
+
+  testWidgets(
+    'Ask me later explains an empty topic without scheduling or sending',
+    (tester) async {
+      final controller = _PageController(
+        _state(
+          canSend: true,
+          canSelectConversation: true,
+          canBrowseHistory: true,
+        ),
+      );
+      final opened = <SavedFollowUpSource>[];
+      await _pump(
+        tester,
+        controller,
+        socialStyle: true,
+        onFollowUp: opened.add,
+        onFollowUps: () {},
+      );
+      await tester.tap(find.byTooltip('Open conversation menu'));
+      await tester.pumpAndSettle();
+      final entry = find.byKey(const Key('ai-follow-up-settings'));
+      await tester.ensureVisible(entry);
+      await tester.tap(entry);
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Send a message in this topic first, then choose it here.'),
+        findsOneWidget,
+      );
+      expect(opened, isEmpty);
+      expect(controller.sent, isEmpty);
+    },
+  );
+
+  for (final social in [false, true]) {
+    testWidgets(
+      'saved-user follow-up entry preserves chat draft and rejects stale callbacks social=$social',
+      (tester) async {
+        final saved = _message('saved-user', 1, AiRole.user, 'My saved source');
+        final controller = _PageController(
+          _state(
+            canSend: true,
+            canSelectConversation: true,
+            conversationId: 'topic',
+            messages: [
+              saved,
+              _message('assistant', 2, AiRole.assistant, 'Reply'),
+              _message('removed', 3, AiRole.user, null, unavailable: true),
+            ],
+          ),
+        );
+        final opened = <SavedFollowUpSource>[];
+        await _pump(
+          tester,
+          controller,
+          socialStyle: social,
+          onFollowUp: opened.add,
+        );
+        final sourceButton = find.byKey(const Key('ai-follow-up-saved-user'));
+        expect(sourceButton, findsOneWidget);
+        expect(find.byKey(const Key('ai-follow-up-assistant')), findsNothing);
+        expect(find.byKey(const Key('ai-follow-up-removed')), findsNothing);
+        final input = find.byKey(const Key('ai-message-input'));
+        await _tap(tester, 'ai-message-input');
+        await tester.enterText(input, 'Unsent draft');
+        final editor = tester.widget<TextField>(input).controller!;
+        editor.selection = const TextSelection(baseOffset: 2, extentOffset: 6);
+        final before = editor.value;
+        if (!social) {
+          tester
+              .state<ScrollableState>(
+                find
+                    .descendant(
+                      of: find.byKey(const Key('route-ai-conversation')),
+                      matching: find.byType(Scrollable),
+                    )
+                    .first,
+              )
+              .position
+              .jumpTo(0);
+          await tester.pumpAndSettle();
+        }
+        await tester.ensureVisible(sourceButton);
+        await tester.pumpAndSettle();
+        final captured = tester.widget<TextButton>(sourceButton).onPressed!;
+        await tester.tap(sourceButton);
+        await tester.pumpAndSettle();
+        expect(opened.single.messageId, saved.messageId);
+        expect(opened.single.text, saved.text);
+        expect(editor.value, before);
+        expect(controller.sent, isEmpty);
+        expect(controller.checks, 0);
+        controller.publish(
+          _state(
+            canSend: true,
+            canSelectConversation: true,
+            conversationId: 'topic',
+            messages: [
+              _message('saved-user', 1, AiRole.user, null, unavailable: true),
+            ],
+          ),
+        );
+        await tester.pumpAndSettle();
+        captured();
+        await tester.pump();
+        expect(opened, hasLength(1));
+        controller.publish(
+          _state(
+            sessionKey: Object(),
+            canSend: true,
+            canSelectConversation: true,
+            conversationId: 'topic',
+            messages: [saved],
+          ),
+        );
+        await tester.pumpAndSettle();
+        captured();
+        await tester.pump();
+        expect(opened, hasLength(1));
+        expect(controller.sent, isEmpty);
+      },
+    );
+  }
+  testWidgets('follow-up settings drawer entry closes drawer and keeps draft', (
+    tester,
+  ) async {
+    final controller = _PageController(
+      _state(
+        canSend: true,
+        canBrowseHistory: true,
+        canSelectConversation: true,
+        conversationId: 'topic',
+      ),
+    );
+    var opens = 0;
+    await _pump(
+      tester,
+      controller,
+      socialStyle: true,
+      onFollowUps: () => opens++,
+    );
+    final input = find.byKey(const Key('ai-message-input'));
+    await tester.enterText(input, 'Keep my draft');
+    await tester.tap(find.byTooltip('Open conversation menu'));
+    await tester.pumpAndSettle();
+    final entry = find.byKey(const Key('ai-follow-up-settings'));
+    await tester.ensureVisible(entry);
+    await tester.pumpAndSettle();
+    await tester.tap(entry);
+    await tester.pumpAndSettle();
+    expect(opens, 1);
+    expect(
+      tester.state<ScaffoldState>(find.byType(Scaffold)).isDrawerOpen,
+      isFalse,
+    );
+    expect(tester.widget<TextField>(input).controller!.text, 'Keep my draft');
+    expect(controller.sent, isEmpty);
+  });
+
+  testWidgets(
+    'pending ordinary AI request has no follow-up action for local or saved rows',
+    (tester) async {
+      final controller = _PageController(
+        _state(
+          phase: AiConversationPhase.unknown,
+          conversationId: 'topic',
+          localOutgoingKey: 'pending',
+          localOutgoingText: 'Unconfirmed local source',
+          messages: [_message('saved-user', 1, AiRole.user, 'Saved')],
+          canCheckResult: true,
+        ),
+      );
+      await _pump(
+        tester,
+        controller,
+        socialStyle: true,
+        onFollowUp: (_) => fail('must not open'),
+      );
+      expect(find.byKey(const Key('ai-follow-up-saved-user')), findsNothing);
+      expect(find.text('Ask me later about this'), findsNothing);
+      expect(controller.sent, isEmpty);
+    },
+  );
+
   testWidgets('small plan reviews direct input and sends only from chat', (
     tester,
   ) async {
@@ -1605,6 +1840,8 @@ Future<void> _pump(
   VoidCallback? onBack,
   VoidCallback? onSettings,
   VoidCallback? onPersonas,
+  ValueChanged<SavedFollowUpSource>? onFollowUp,
+  VoidCallback? onFollowUps,
   double textScale = 1,
   bool reduceMotion = true,
   bool socialStyle = false,
@@ -1629,6 +1866,8 @@ Future<void> _pump(
           socialStyle: socialStyle,
           navigationBarBuilder: navigationBarBuilder,
           onOpenPersonas: onPersonas,
+          onFollowUpRequested: onFollowUp,
+          onOpenFollowUps: onFollowUps,
         ),
       ),
     ),

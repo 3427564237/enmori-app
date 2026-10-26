@@ -15,6 +15,9 @@ import { registerEventBrowseRoutes } from "../event-browse/transport/register-ro
 import { registerIsolatedSlices } from "../transport/register-isolated-slices.js";
 import { registerConversationRoutes } from "../ai-conversation/transport/register-routes.js";
 import type { ConversationOperations } from "../ai-conversation/ports/conversation-operations.js";
+import { registerFirstFlowRoutes } from "../proactive/transport/register-routes.js";
+import type { createFirstFlowComposition } from "./first-flow-composition.js";
+import { registerOwnedSourceRoutes, type OwnedSourceOperations } from "../ai-conversation/transport/register-owned-source-routes.js";
 import { registerPersonaRoutes, type PersonaOperations } from "../personas/transport/register-routes.js";
 import { registerPersonaPreviewRoute, type PersonaPreviewOperations } from "../personas/transport/preview-route.js";
 import { buildPersonaFrameworkErrors } from "../personas/transport/framework-errors.js";
@@ -43,6 +46,8 @@ export async function buildApp(
     readonly accountPreferences?: OwnAccountPreferences;
     readonly socialModule?: Parameters<typeof registerSocialModule>[1];
     readonly controlledPhoneDiagnostics?: ControlledPhoneDiagnostics;
+    readonly firstFlow?: ReturnType<typeof createFirstFlowComposition>;
+    readonly ownedSources?: OwnedSourceOperations;
     readonly isolatedSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly personaPreview?: PersonaPreviewOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput; readonly eventParticipation?: ReturnType<typeof createIsolatedEventParticipation> };
     readonly remoteSlices?: { readonly environment: NodeJS.ProcessEnv; readonly friends?: FriendRequests; readonly eventDetail?: GetEventDetail; readonly checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">; readonly personas?: PersonaOperations; readonly personaPreview?: PersonaPreviewOperations; readonly conversations?: ConversationOperations; readonly eventBrowse?: IsolatedEventBrowseInput; readonly eventParticipation?: ReturnType<typeof createIsolatedEventParticipation> } },
 ): Promise<FastifyInstance> {
@@ -54,6 +59,8 @@ export async function buildApp(
     requireRemoteGroupEnvironment(dependencies.remoteSlices.environment);
   }
   const slices = dependencies.remoteSlices ?? dependencies.isolatedSlices;
+  if (dependencies.firstFlow && !slices?.conversations) throw Error("First-flow requires explicit conversation composition");
+  if (dependencies.ownedSources && !slices?.conversations) throw Error("Source reads require explicit conversation composition");
   if (dependencies.controlledPhoneDiagnostics && dependencies.isolatedSlices === undefined) {
     throw new Error("CONTROLLED_PHONE_DIAGNOSTICS_REQUIRE_ISOLATED_ENVIRONMENT");
   }
@@ -106,6 +113,13 @@ export async function buildApp(
     }
     if (slices.conversations !== undefined) {
       await registerConversationRoutes(app, dependencies.identityVerifier, slices.conversations);
+    }
+    if (dependencies.firstFlow !== undefined) {
+      await registerFirstFlowRoutes(app, dependencies.identityVerifier, dependencies.firstFlow.application, dependencies.firstFlow.accepting);
+    }
+    if (dependencies.ownedSources !== undefined) {
+      await registerOwnedSourceRoutes(app, dependencies.identityVerifier, dependencies.ownedSources,
+        dependencies.firstFlow?.accepting);
     }
   }
   if (dependencies.socialModule) await registerSocialModule(app, dependencies.socialModule);

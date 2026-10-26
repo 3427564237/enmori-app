@@ -4,13 +4,158 @@ import 'dart:convert';
 import '../../../core/result/result.dart';
 import '../domain/ai_conversation.dart';
 import '../domain/ai_conversation_repository.dart';
+import '../domain/ai_owned_sources.dart';
+import '../domain/ai_selected_reply.dart';
 import 'ai_wire_transport.dart';
 
 final class AiWireRepository
-    implements AiConversationRepository, AiConversationHistoryRepository {
+    implements
+        AiConversationRepository,
+        AiConversationHistoryRepository,
+        AiOwnedSourcesRepository,
+        AiCompanionReplyRepository,
+        AiSelectedReplyRepository,
+        AiTodayReplyRepository {
   AiWireRepository(this._transport);
 
   final AiWireTransport _transport;
+
+  @override
+  Future<Result<AiMessageAnchor>> resolveDelivery({
+    required String token,
+    required AiAbortSignal abort,
+    required String deliveryRef,
+  }) {
+    if (!_uuid(deliveryRef)) return _invalid();
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'POST',
+      path: '/v1/me/ai/delivery-references/resolve',
+      status: 200,
+      body: {'deliveryRef': deliveryRef},
+      parse: _anchor,
+    );
+  }
+
+  @override
+  Future<Result<AiMessageAnchor>> readMessageAnchor({
+    required String token,
+    required AiAbortSignal abort,
+    required AiMessageLocator locator,
+  }) {
+    if (!_uuid(locator.conversationId) || !_uuid(locator.messageId)) {
+      return _invalid();
+    }
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'GET',
+      path:
+          '/v1/me/conversations/${locator.conversationId}/messages/${locator.messageId}/anchor',
+      status: 200,
+      parse: (raw) {
+        final anchor = _anchor(raw);
+        _require(
+          anchor.locator.conversationId == locator.conversationId &&
+              anchor.locator.messageId == locator.messageId,
+        );
+        return anchor;
+      },
+    );
+  }
+
+  @override
+  Future<Result<AiSourceTarget>> resolveSource({
+    required String token,
+    required AiAbortSignal abort,
+    required AiMessageLocator message,
+    required AiSourceCard card,
+  }) {
+    if (!_uuid(message.conversationId) ||
+        !_uuid(message.messageId) ||
+        !_uuid(card.cardRef)) {
+      return _invalid();
+    }
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'POST',
+      path: '/v1/me/ai/source-references/resolve',
+      status: 200,
+      body: {
+        'conversationId': message.conversationId,
+        'messageId': message.messageId,
+        'cardRef': card.cardRef,
+      },
+      parse: (raw) {
+        final dto = _object(raw, {'kind'}, {'anchor', 'checkInId'});
+        if (dto['kind'] == 'conversation_message' &&
+            card.kind == AiSourceKind.conversationMessage) {
+          _require(dto.length == 2 && dto.containsKey('anchor'));
+          return AiConversationMessageTarget(_anchor(dto['anchor']));
+        }
+        _require(
+          dto['kind'] == 'check_in' &&
+              card.kind == AiSourceKind.checkIn &&
+              dto.length == 2 &&
+              _safeDocumentId(dto['checkInId']),
+        );
+        return AiCheckInTarget(dto['checkInId'] as String);
+      },
+    );
+  }
+
+  @override
+  Future<Result<AiTopicReadState>> readTopicReadState({
+    required String token,
+    required AiAbortSignal abort,
+    required String conversationId,
+  }) {
+    if (!_uuid(conversationId)) return _invalid();
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'GET',
+      path: '/v1/me/conversations/$conversationId/read-state',
+      status: 200,
+      parse: _readState,
+    );
+  }
+
+  @override
+  Future<Result<AiTopicReadState>> markTopicRead({
+    required String token,
+    required AiAbortSignal abort,
+    required String conversationId,
+    required int expectedRevision,
+    required int readThroughSequence,
+  }) {
+    if (!_uuid(conversationId) ||
+        !_nonnegative(expectedRevision) ||
+        !_nonnegative(readThroughSequence)) {
+      return _invalid();
+    }
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'PUT',
+      path: '/v1/me/conversations/$conversationId/read-state',
+      status: 200,
+      body: {
+        'expectedRevision': expectedRevision,
+        'readThroughSequence': readThroughSequence,
+      },
+      parse: (raw) {
+        final value = _readState(raw);
+        _require(
+          value.revision >= expectedRevision &&
+              value.readThroughSequence >= readThroughSequence,
+        );
+        return value;
+      },
+    );
+  }
 
   @override
   Future<Result<AiConversationHistoryPage>> listConversations({
@@ -108,17 +253,211 @@ final class AiWireRepository
   }
 
   @override
+  Future<Result<AiSelectedReplyTicket>> prepareSelected({
+    required String token,
+    required AiAbortSignal abort,
+    String? conversationId,
+    String? userMessageId,
+    required List<String> sourceIds,
+  }) {
+    if (sourceIds.length > 5 ||
+        sourceIds.toSet().length != sourceIds.length ||
+        !sourceIds.every(_safeDocumentId)) {
+      return _invalid();
+    }
+    return _prepareContext(
+      token: token,
+      abort: abort,
+      conversationId: conversationId,
+      userMessageId: userMessageId,
+      sourceIds: sourceIds,
+    );
+  }
+
+  @override
+  Future<Result<AiSelectedReplyTicket>> prepareToday({
+    required String token,
+    required AiAbortSignal abort,
+    required String timeZone,
+    String? conversationId,
+    String? userMessageId,
+  }) {
+    if (timeZone.isEmpty ||
+        timeZone.length > 128 ||
+        timeZone.trim() != timeZone ||
+        !RegExp(r'^[A-Za-z0-9_+./-]+$').hasMatch(timeZone)) {
+      return _invalid();
+    }
+    return _prepareContext(
+      token: token,
+      abort: abort,
+      conversationId: conversationId,
+      userMessageId: userMessageId,
+      todayZone: timeZone,
+    );
+  }
+
+  Future<Result<AiSelectedReplyTicket>> _prepareContext({
+    required String token,
+    required AiAbortSignal abort,
+    String? conversationId,
+    String? userMessageId,
+    List<String>? sourceIds,
+    String? todayZone,
+  }) {
+    if ((conversationId != null && !_uuid(conversationId)) ||
+        (userMessageId != null &&
+            (conversationId == null || !_uuid(userMessageId)))) {
+      return _invalid();
+    }
+    return _call(
+      token: token,
+      abort: abort,
+      method: 'POST',
+      path: '/v1/me/ai/operations',
+      status: 201,
+      body: {
+        'kind': userMessageId == null ? 'send' : 'retry',
+        'purpose': 'checkin_conversation',
+        'conversationId': ?conversationId,
+        'userMessageId': ?userMessageId,
+        'contextSelection': {
+          'processing': 'local',
+          if (todayZone != null)
+            'today': {'timeZone': todayZone}
+          else
+            'sources': [
+              for (final id in sourceIds!)
+                {'kind': 'check_in', 'checkInId': id},
+            ],
+        },
+      },
+      parse: (value) {
+        final dto = _object(value, {
+          'operationId',
+          'operationKey',
+          'conversationId',
+          'preparationExpiresAt',
+          'contextSelection',
+        });
+        final operation = AiTicket(
+          operationId: _id(dto['operationId']),
+          operationKey: _key(dto['operationKey']),
+          conversationId: _id(dto['conversationId']),
+          preparationExpiresAt: _utc(dto['preparationExpiresAt']),
+        );
+        final selection = _preparedSelection(
+          dto['contextSelection'],
+          automatic: todayZone != null,
+        );
+        _require(
+          (conversationId == null ||
+                  operation.conversationId == conversationId) &&
+              selection.expiresAt == operation.preparationExpiresAt &&
+              (todayZone == null
+                  ? selection.sourceCards.length == sourceIds!.length
+                  : selection.today?.timeZone == todayZone),
+        );
+        return AiSelectedReplyTicket(
+          operation: operation,
+          selection: selection,
+        );
+      },
+    );
+  }
+
+  @override
+  Future<Result<AiReply>> executeSelected({
+    required String token,
+    required AiAbortSignal abort,
+    required AiSelectedReplyTicket ticket,
+    required String text,
+    required List<String> includedKeys,
+    required List<String> excludedKeys,
+    required List<String> excludedHistoryKeys,
+    String? replyToMessageId,
+  }) {
+    final selection = ticket.selection;
+    final sources = selection.sourceCards.map((v) => v.selectionKey).toSet();
+    final history = selection.historyPairs.map((v) => v.historyKey).toSet();
+    bool validChoices(List<String> choices, Set<String> available) =>
+        choices.toSet().length == choices.length &&
+        choices.every(available.contains);
+    if (!_uuid(selection.selectionRevision) ||
+        !selection.expiresAt.isUtc ||
+        selection.expiresAt != ticket.operation.preparationExpiresAt ||
+        sources.length > 5 ||
+        history.length > 2 ||
+        sources.length != selection.sourceCards.length ||
+        history.length != selection.historyPairs.length ||
+        !{...sources, ...history}.every(_uuid) ||
+        sources.intersection(history).isNotEmpty ||
+        !validChoices(includedKeys, sources) ||
+        !validChoices(excludedKeys, sources) ||
+        !validChoices(excludedHistoryKeys, history) ||
+        !sources.every(
+          (v) => includedKeys.contains(v) || excludedKeys.contains(v),
+        )) {
+      return _invalid();
+    }
+    return _execute(
+      token: token,
+      abort: abort,
+      ticket: ticket.operation,
+      text: text,
+      replyToMessageId: replyToMessageId,
+      contextSelection: {
+        'selectionRevision': selection.selectionRevision,
+        'includedKeys': includedKeys,
+        'excludedKeys': excludedKeys,
+        'excludedHistoryKeys': excludedHistoryKeys,
+      },
+    );
+  }
+
+  @override
   Future<Result<AiReply>> execute({
     required String token,
     required AiAbortSignal abort,
     required AiTicket ticket,
     required String text,
+  }) => _execute(token: token, abort: abort, ticket: ticket, text: text);
+
+  @override
+  Future<Result<AiReply>> executeReply({
+    required String token,
+    required AiAbortSignal abort,
+    required AiTicket ticket,
+    required String text,
+    required String replyToMessageId,
+  }) => _execute(
+    token: token,
+    abort: abort,
+    ticket: ticket,
+    text: text,
+    replyToMessageId: replyToMessageId,
+  );
+
+  Future<Result<AiReply>> _execute({
+    required String token,
+    required AiAbortSignal abort,
+    required AiTicket ticket,
+    required String text,
+    String? replyToMessageId,
+    Map<String, Object>? contextSelection,
   }) {
-    if (!_ticket(ticket)) return _invalid();
+    if (!_ticket(ticket) ||
+        (replyToMessageId != null && !_uuid(replyToMessageId))) {
+      return _invalid();
+    }
     if (!_validText(text)) {
       return Future.value(const Failure(_invalidInput));
     }
-    final body = {'text': text};
+    final body = <String, Object>{
+      'text': text,
+      'replyToMessageId': ?replyToMessageId,
+      'contextSelection': ?contextSelection,
+    };
     if (utf8.encode(jsonEncode(body)).length > 16 * 1024) {
       return Future.value(const Failure(_tooLarge));
     }
@@ -440,7 +779,7 @@ AiMessage _message(Object? value) {
   final dto = _object(
     value,
     {'messageId', 'sequence', 'role', 'persistedAt', 'availability'},
-    {'text'},
+    {'text', 'origin', 'occurrenceId', 'category', 'sources'},
   );
   final sequence = dto['sequence'];
   _require(sequence is int && sequence > 0 && sequence <= _maxSafeInteger);
@@ -455,6 +794,32 @@ AiMessage _message(Object? value) {
     _ => throw const FormatException(),
   };
   String? text;
+  var origin = AiMessageOrigin.ordinary;
+  String? occurrenceId;
+  if (dto.containsKey('origin') ||
+      dto.containsKey('occurrenceId') ||
+      dto.containsKey('category')) {
+    _require(
+      role == AiRole.assistant &&
+          dto['origin'] == 'proactive' &&
+          dto['category'] == 'explicit_follow_up',
+    );
+    occurrenceId = _id(dto['occurrenceId']);
+    origin = AiMessageOrigin.proactive;
+  }
+  List<AiSourceCard> sources = const [];
+  if (dto.containsKey('sources')) {
+    final rows = dto['sources'];
+    _require(
+      role == AiRole.assistant &&
+          availability == AiAvailability.available &&
+          rows is List &&
+          rows.isNotEmpty &&
+          rows.length <= 15,
+    );
+    sources = List.unmodifiable((rows as List).map(_sourceCard));
+    _require(sources.map((v) => v.cardRef).toSet().length == sources.length);
+  }
   if (availability == AiAvailability.unavailable) {
     _require(role == AiRole.assistant && !dto.containsKey('text'));
   } else {
@@ -469,14 +834,254 @@ AiMessage _message(Object? value) {
     persistedAt: _utc(dto['persistedAt']),
     availability: availability,
     text: text,
+    origin: origin,
+    occurrenceId: occurrenceId,
+    sources: sources,
   );
 }
 
 void _pair(AiMessage user, AiMessage assistant) {
-  _require(user.role == AiRole.user && assistant.role == AiRole.assistant);
+  _require(
+    user.role == AiRole.user &&
+        assistant.role == AiRole.assistant &&
+        !assistant.isProactive,
+  );
   _require(
     user.messageId != assistant.messageId && user.sequence < assistant.sequence,
   );
+}
+
+bool _nonnegative(Object? value) =>
+    value is int && value >= 0 && value <= _maxSafeInteger;
+bool _safeDocumentId(Object? value) =>
+    value is String &&
+    value.isNotEmpty &&
+    _wellFormed(value) &&
+    utf8.encode(value).length <= 1500 &&
+    value != '.' &&
+    value != '..' &&
+    !value.contains('/') &&
+    !RegExp(r'^__.*__$').hasMatch(value);
+
+AiTopicReadState _readState(Object? raw) {
+  final d = _object(raw, {'revision', 'readThroughSequence'});
+  _require(
+    _nonnegative(d['revision']) && _nonnegative(d['readThroughSequence']),
+  );
+  return AiTopicReadState(
+    revision: d['revision'] as int,
+    readThroughSequence: d['readThroughSequence'] as int,
+  );
+}
+
+AiMessageAnchor _anchor(Object? raw) {
+  final d = _object(raw, {
+    'conversationId',
+    'messageId',
+    'sequence',
+    'pageBefore',
+  });
+  final sequence = d['sequence'];
+  _require(
+    sequence is int &&
+        sequence > 0 &&
+        sequence < _maxSafeInteger &&
+        d['pageBefore'] is String,
+  );
+  final cursor = d['pageBefore'] as String;
+  _require(_cursor(cursor) == (sequence as int) + 1);
+  return AiMessageAnchor(
+    locator: AiMessageLocator(
+      conversationId: _id(d['conversationId']),
+      messageId: _id(d['messageId']),
+    ),
+    sequence: sequence,
+    pageBefore: cursor,
+  );
+}
+
+String _sourceInstant(Object? raw) {
+  _require(
+    raw is String &&
+        RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$')
+            .hasMatch(raw),
+  );
+  final value = raw as String;
+  final parsed = DateTime.tryParse(value);
+  _require(
+    parsed != null &&
+        parsed.isUtc &&
+        parsed.toIso8601String().substring(0, 19) == value.substring(0, 19),
+  );
+  return value;
+}
+
+AiSourceCard _sourceCard(Object? raw) {
+  final d = _object(raw, {
+    'cardRef',
+    'kind',
+    'version',
+    'sourceOccurredAt',
+    'observedAt',
+    'state',
+    'canNavigate',
+  });
+  _require(
+    d['state'] == 'available' &&
+        d['canNavigate'] == true &&
+        d['version'] is String &&
+        (d['version'] as String).isNotEmpty &&
+        (d['version'] as String).length <= 512 &&
+        _wellFormed(d['version'] as String),
+  );
+  return AiSourceCard(
+    cardRef: _id(d['cardRef']),
+    kind: switch (d['kind']) {
+      'conversation_message' => AiSourceKind.conversationMessage,
+      'check_in' => AiSourceKind.checkIn,
+      _ => throw const FormatException(),
+    },
+    version: d['version'] as String,
+    sourceOccurredAt: _sourceInstant(d['sourceOccurredAt']),
+    observedAt: _sourceInstant(d['observedAt']),
+  );
+}
+
+AiPreparedReplySelection _preparedSelection(
+  Object? raw, {
+  bool automatic = false,
+}) {
+  final d = _object(raw, {
+    'selectionRevision',
+    'expiresAt',
+    'sourceCards',
+    'historyPairs',
+    if (automatic) 'today',
+  });
+  final sourceRows = d['sourceCards'];
+  final historyRows = d['historyPairs'];
+  _require(sourceRows is List && sourceRows.length <= 5);
+  _require(historyRows is List && historyRows.length <= 2);
+  final cards = <AiSelectedSourceCard>[];
+  final keys = <String>{};
+  final cardRefs = <String>{};
+  final ownedIds = <String>{};
+  for (final row in sourceRows as List) {
+    final item = _object(row, {
+      'selectionKey',
+      'cardRef',
+      'kind',
+      'version',
+      'sourceOccurredAt',
+      'observedAt',
+      'state',
+      'canNavigate',
+      if (automatic) 'checkInId',
+    });
+    final key = _id(item['selectionKey']);
+    final ownedId = automatic ? item['checkInId'] : null;
+    _require(
+      !automatic ||
+          (_safeDocumentId(ownedId) && ownedIds.add(ownedId as String)),
+    );
+    final card = _sourceCard(
+      {...item}
+        ..remove('selectionKey')
+        ..remove('checkInId'),
+    );
+    _require(
+      card.kind == AiSourceKind.checkIn &&
+          keys.add(key) &&
+          cardRefs.add(card.cardRef),
+    );
+    cards.add(
+      AiSelectedSourceCard(
+        selectionKey: key,
+        card: card,
+        checkInId: ownedId as String?,
+      ),
+    );
+  }
+  final history = <AiPreparedHistoryPair>[];
+  final messageIds = <String>{};
+  final sequences = <int>{};
+  for (final row in historyRows as List) {
+    final item = _object(row, {
+      'historyKey',
+      'userMessageId',
+      'assistantMessageId',
+      'userSequence',
+      'assistantSequence',
+    });
+    final key = _id(item['historyKey']);
+    final userId = _id(item['userMessageId']);
+    final assistantId = _id(item['assistantMessageId']);
+    final user = item['userSequence'];
+    final assistant = item['assistantSequence'];
+    _require(
+      _nonnegative(user) &&
+          (user as int) > 0 &&
+          _nonnegative(assistant) &&
+          (assistant as int) > user &&
+          keys.add(key) &&
+          messageIds.add(userId) &&
+          messageIds.add(assistantId) &&
+          sequences.add(user) &&
+          sequences.add(assistant) &&
+          (history.isEmpty || history.last.assistantSequence < assistant),
+    );
+    history.add(
+      AiPreparedHistoryPair(
+        historyKey: key,
+        userMessageId: userId,
+        assistantMessageId: assistantId,
+        userSequence: user as int,
+        assistantSequence: assistant as int,
+      ),
+    );
+  }
+  AiTodayContext? today;
+  if (automatic) {
+    final receipt = _object(d['today'], {
+      'date',
+      'timeZone',
+      'limit',
+      'hasMore',
+    });
+    final date = receipt['date'], zone = receipt['timeZone'];
+    _require(
+      date is String &&
+          _civilDate(date) &&
+          zone is String &&
+          zone.isNotEmpty &&
+          zone.length <= 128 &&
+          receipt['limit'] is int &&
+          receipt['limit'] == 5 &&
+          receipt['hasMore'] is bool,
+    );
+    today = AiTodayContext(
+      date: date as String,
+      timeZone: zone as String,
+      hasMore: receipt['hasMore'] as bool,
+    );
+  }
+  return AiPreparedReplySelection(
+    selectionRevision: _id(d['selectionRevision']),
+    expiresAt: _utc(d['expiresAt']),
+    sourceCards: cards,
+    historyPairs: history,
+    today: today,
+  );
+}
+
+bool _civilDate(String value) {
+  if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value)) return false;
+  final parsed = DateTime.tryParse('${value}T00:00:00.000Z');
+  return parsed != null &&
+      parsed.toIso8601String().startsWith(
+        '$value'
+        'T',
+      );
 }
 
 int _cursor(String value) {
@@ -600,6 +1205,26 @@ const _errors = <String, (int, AppFailureKind, String)>{
     409,
     AppFailureKind.aiAuthorityChanged,
     'This reply is no longer available.',
+  ),
+  'AI_SOURCE_UNAVAILABLE': (
+    404,
+    AppFailureKind.aiSourceUnavailable,
+    'This source is unavailable. Keep your draft and review the sources.',
+  ),
+  'AI_CONTEXT_SELECTION_CONFLICT': (
+    409,
+    AppFailureKind.aiContextSelectionConflict,
+    'Review the selected sources before sending.',
+  ),
+  'PROACTIVE_REVISION_PRECONDITION_FAILED': (
+    412,
+    AppFailureKind.proactiveRevisionPreconditionFailed,
+    'Read the current state before changing it.',
+  ),
+  'PROACTIVE_INPUT_INVALID': (
+    422,
+    AppFailureKind.proactiveInputInvalid,
+    'Review this request.',
   ),
   'AI_OUTCOME_UNRESOLVED': (
     503,

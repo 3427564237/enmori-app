@@ -50,7 +50,7 @@ void main() {
       );
       sessions.add(AuthSessionAuthenticated(subject: 'synthetic'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Register on original website'));
+      await tester.tap(find.text('Tickets / booking on Ticketmaster'));
       await tester.pumpAndSettle();
       sessions.add(AuthSessionAuthenticated(subject: 'synthetic'));
       await tester.pumpAndSettle();
@@ -89,7 +89,7 @@ void main() {
     );
     sessions.add(AuthSessionAuthenticated(subject: 'synthetic'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Register on original website'));
+    await tester.tap(find.text('Tickets / booking on Ticketmaster'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Open website'));
     await tester.pumpAndSettle();
@@ -154,9 +154,9 @@ void main() {
     );
     sessions.add(AuthSessionAuthenticated(subject: 'synthetic'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Register on original website'));
+    await tester.tap(find.text('Tickets / booking on Ticketmaster'));
     await tester.pumpAndSettle();
-    expect(find.text('Continue to third-party registration?'), findsOneWidget);
+    expect(find.text('Continue to Ticketmaster tickets?'), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(opener.calls, 0);
@@ -193,7 +193,7 @@ void main() {
     );
     sessions.add(AuthSessionAuthenticated(subject: 'synthetic'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Register on original website'));
+    await tester.tap(find.text('Tickets / booking on Ticketmaster'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Open website'));
     await tester.pumpAndSettle();

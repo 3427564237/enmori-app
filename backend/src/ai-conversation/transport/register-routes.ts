@@ -3,6 +3,10 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { IdentityVerifier } from "../../shared/ports/identity-verifier.js";
 import type { ConversationOperations, ConversationCaller, ConversationFailureCode, PrepareConversation, ConversationResult, ExecutedConversationPair } from "../ports/conversation-operations.js";
 import type { StoredConversationMessage } from "../ports/real-conversation-store.js";
+import { isSafeDocumentId } from "../../shared/infrastructure/firebase/firestore-records.js";
+import type { OwnedSourceCard } from "../ports/owned-sources.js";
+import type { SelectReplyContext, ExecuteReplySelection, PreparedReplySelection } from "../ports/selected-reply.js";
+import { parseCivilDay } from "../../check-ins/application/check-in-history.js";
 
 const ID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const KEY = /^[A-Za-z0-9_-]{43}$/;
@@ -21,6 +25,8 @@ export const CONVERSATION_ERRORS: Record<ConversationFailureCode, readonly [numb
   AI_UNAVAILABLE: [503, "AI is temporarily unavailable."],
   AI_REPLY_REJECTED: [502, "The reply could not be accepted."],
   AI_AUTHORITY_CHANGED: [409, "Your permission to continue has changed."],
+  AI_SOURCE_UNAVAILABLE: [404, "This reference is unavailable. Keep your draft and review the sources."],
+  AI_CONTEXT_SELECTION_CONFLICT: [409, "The selected sources conflict with this context. Review them before continuing."],
   AI_OUTCOME_UNRESOLVED: [503, "We couldn’t confirm the result. Check saved messages before trying again."],
 };
 function failure(request: FastifyRequest, reply: FastifyReply, code: ConversationFailureCode): FastifyReply {
@@ -35,6 +41,63 @@ function keys(v: Record<string, unknown>, required: readonly string[], optional:
 function uuid(v: unknown): v is string { return typeof v === "string" && ID.test(v); }
 function operationKey(v: unknown): v is string {
   return typeof v === "string" && KEY.test(v) && Buffer.from(v, "base64url").length === 32 && Buffer.from(v, "base64url").toString("base64url") === v;
+}
+function selectContext(value: unknown): value is SelectReplyContext {
+  if (!record(value) || value.processing !== "local") return false;
+  if (Object.hasOwn(value, "today")) {
+    return keys(value, ["processing", "today"]) && record(value.today) &&
+      keys(value.today, ["timeZone"]) && typeof value.today.timeZone === "string" &&
+      value.today.timeZone.length <= 100 && parseCivilDay("2000-01-01", value.today.timeZone) !== undefined;
+  }
+  return keys(value, ["processing", "sources"]) &&
+    Array.isArray(value.sources) && value.sources.length <= 5 &&
+    value.sources.every(source => record(source) && keys(source, ["kind", "checkInId"]) && source.kind === "check_in" &&
+      typeof source.checkInId === "string" && isSafeDocumentId(source.checkInId)) &&
+    new Set(value.sources.map(source => source.checkInId)).size === value.sources.length;
+}
+function executeSelection(value: unknown): value is ExecuteReplySelection {
+  if (!record(value) || !keys(value, ["selectionRevision", "includedKeys", "excludedKeys"], ["excludedHistoryKeys"]) || !uuid(value.selectionRevision)) return false;
+  if (value.excludedHistoryKeys !== undefined && (!Array.isArray(value.excludedHistoryKeys) || value.excludedHistoryKeys.length > 2 ||
+      !value.excludedHistoryKeys.every(uuid) || new Set(value.excludedHistoryKeys).size !== value.excludedHistoryKeys.length)) return false;
+  return [value.includedKeys, value.excludedKeys].every(list => Array.isArray(list) && list.length <= 5 &&
+    list.every(uuid) && new Set(list).size === list.length);
+}
+function card(value: OwnedSourceCard): OwnedSourceCard {
+  const instant = (v: unknown) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/.test(v) && Number.isFinite(Date.parse(v));
+  if (!uuid(value.cardRef) || !["conversation_message", "check_in"].includes(value.kind) ||
+      typeof value.version !== "string" || !value.version || value.version.length > 512 || !value.version.isWellFormed() ||
+      !instant(value.sourceOccurredAt) || !instant(value.observedAt) || value.state !== "available" || value.canNavigate !== true) throw Error("Invalid inner source card");
+  return { cardRef: value.cardRef, kind: value.kind, version: value.version, sourceOccurredAt: value.sourceOccurredAt,
+    observedAt: value.observedAt, state: value.state, canNavigate: value.canNavigate };
+}
+function preparedSelection(value: PreparedReplySelection): PreparedReplySelection {
+  if (!uuid(value.selectionRevision) || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value.expiresAt) ||
+      new Date(value.expiresAt).toISOString() !== value.expiresAt || !Array.isArray(value.sourceCards) || value.sourceCards.length > 5 ||
+      new Set(value.sourceCards.map(v => v.selectionKey)).size !== value.sourceCards.length ||
+      new Set(value.sourceCards.map(v => v.cardRef)).size !== value.sourceCards.length) throw Error("Invalid inner selection");
+  if (!Array.isArray(value.historyPairs) || value.historyPairs.length > 2 ||
+      new Set(value.historyPairs.map(v => v.historyKey)).size !== value.historyPairs.length ||
+      new Set(value.historyPairs.flatMap(v => [v.userMessageId, v.assistantMessageId])).size !== value.historyPairs.length * 2 ||
+      new Set(value.historyPairs.flatMap(v => [v.userSequence, v.assistantSequence])).size !== value.historyPairs.length * 2 ||
+      value.historyPairs.some((v, i) => !uuid(v.historyKey) || !uuid(v.userMessageId) || !uuid(v.assistantMessageId) ||
+        !Number.isSafeInteger(v.userSequence) || !Number.isSafeInteger(v.assistantSequence) || v.userSequence < 1 || v.assistantSequence <= v.userSequence ||
+        i > 0 && v.assistantSequence <= value.historyPairs[i - 1]!.assistantSequence)) throw Error("Invalid inner history review");
+  const today = value.today;
+  if (today !== undefined && (!record(today) || !keys(today, ["date", "timeZone", "limit", "hasMore"]) ||
+      typeof today.date !== "string" || typeof today.timeZone !== "string" || today.timeZone.length > 100 ||
+      today.limit !== 5 || typeof today.hasMore !== "boolean" || !parseCivilDay(today.date, today.timeZone) ||
+      new Set(value.sourceCards.map(v => v.checkInId)).size !== value.sourceCards.length)) throw Error("Invalid inner today selection");
+  return { selectionRevision: value.selectionRevision, expiresAt: value.expiresAt,
+    ...(today === undefined ? {} : { today: { date: today.date, timeZone: today.timeZone, limit: 5 as const, hasMore: today.hasMore } }),
+    historyPairs: value.historyPairs.map(v => ({
+    historyKey: v.historyKey, userMessageId: v.userMessageId, assistantMessageId: v.assistantMessageId,
+    userSequence: v.userSequence, assistantSequence: v.assistantSequence,
+  })), sourceCards: value.sourceCards.map(v => {
+    if (!uuid(v.selectionKey) || v.kind !== "check_in") throw Error("Invalid inner selection key");
+    if (today !== undefined && (typeof v.checkInId !== "string" || !isSafeDocumentId(v.checkInId))) throw Error("Invalid inner today source");
+    return { ...card(v), selectionKey: v.selectionKey,
+      ...(today === undefined ? {} : { checkInId: v.checkInId! }) };
+  }) };
 }
 export function parseConversationCursor(v: unknown): number | undefined {
   if (typeof v !== "string" || v.length === 0 || v.length > 128 || !/^[A-Za-z0-9_-]+$/.test(v)) return undefined;
@@ -58,8 +121,14 @@ function message(m: StoredConversationMessage): Record<string, unknown> {
   // Accepted client UTC parser supports up to six fractional digits. This
   // projection never feeds retention/ordering authority back into the store.
   const persistedAt = `${base}.${String(Math.floor(m.persistedAt.nanoseconds / 1000)).padStart(6, "0")}Z`;
+  if ((m.origin !== undefined || m.occurrenceId !== undefined || m.category !== undefined) &&
+      !(m.role === "assistant" && m.origin === "proactive" && uuid(m.occurrenceId) && m.category === "explicit_follow_up")) throw Error("Invalid inner proactive message");
+  if (m.sources !== undefined && (m.role !== "assistant" || m.availability !== "available" || !Array.isArray(m.sources) ||
+      m.sources.length < 1 || m.sources.length > 15 || new Set(m.sources.map(v => v.cardRef)).size !== m.sources.length)) throw Error("Invalid inner message sources");
   return { messageId: m.messageId, sequence: m.sequence, role: m.role, persistedAt, availability: m.availability,
-    ...(m.text === undefined ? {} : { text: m.text }) };
+    ...(m.text === undefined ? {} : { text: m.text }),
+    ...(m.origin === undefined ? {} : { origin: m.origin, occurrenceId: m.occurrenceId, category: m.category }),
+    ...(m.sources === undefined ? {} : { sources: m.sources.map(card) }) };
 }
 function noBody(request: FastifyRequest): boolean {
   return request.body === undefined && Number(request.headers["content-length"] ?? 0) === 0 && request.headers["transfer-encoding"] === undefined;
@@ -97,18 +166,23 @@ export async function registerConversationRoutes(app: FastifyInstance, identity:
   app.post("/v1/me/ai/operations", options, async (request, reply) => {
     const b = request.body;
     if (!clean(request) || request.headers["ai-operation-key"] !== undefined || !record(b) || b.purpose !== "checkin_conversation" ||
-      !((b.kind === "send" && keys(b, ["kind", "purpose"], ["conversationId"]) && (b.conversationId === undefined || uuid(b.conversationId))) ||
-        (b.kind === "retry" && keys(b, ["kind", "purpose", "conversationId", "userMessageId"]) && uuid(b.conversationId) && uuid(b.userMessageId)))) return failure(request, reply, "REQUEST_INVALID");
+      (b.contextSelection !== undefined && !selectContext(b.contextSelection)) ||
+      !((b.kind === "send" && keys(b, ["kind", "purpose"], ["conversationId", "contextSelection"]) && (b.conversationId === undefined || uuid(b.conversationId))) ||
+        (b.kind === "retry" && keys(b, ["kind", "purpose", "conversationId", "userMessageId"], ["contextSelection"]) && uuid(b.conversationId) && uuid(b.userMessageId)))) return failure(request, reply, "REQUEST_INVALID");
     return deliver(request, reply, await operations.prepare(caller(request), b as unknown as PrepareConversation), 201, v => {
       if (!uuid(v.operationId) || !operationKey(v.operationKey) || !uuid(v.conversationId) ||
           !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(v.preparationExpiresAt) ||
           new Date(v.preparationExpiresAt).toISOString() !== v.preparationExpiresAt) throw new Error("Invalid inner preparation");
-      return { operationId: v.operationId, operationKey: v.operationKey, conversationId: v.conversationId, preparationExpiresAt: v.preparationExpiresAt };
+      return { operationId: v.operationId, operationKey: v.operationKey, conversationId: v.conversationId, preparationExpiresAt: v.preparationExpiresAt,
+        ...(v.contextSelection === undefined ? {} : { contextSelection: preparedSelection(v.contextSelection) }) };
     });
   });
   app.post<{ Params: { operationId: string } }>("/v1/me/ai/operations/:operationId/execute", options, async (request, reply) => {
     const key = request.headers["ai-operation-key"], b = request.body;
-    if (!clean(request) || !uuid(request.params.operationId) || !operationKey(key) || !record(b) || !keys(b, ["text"]) || typeof b.text !== "string") return failure(request, reply, "REQUEST_INVALID");
+    if (!clean(request) || !uuid(request.params.operationId) || !operationKey(key) || !record(b) ||
+      !keys(b, ["text"], ["contextSelection", "replyToMessageId"]) || typeof b.text !== "string" ||
+      (b.contextSelection !== undefined && !executeSelection(b.contextSelection)) ||
+      (b.replyToMessageId !== undefined && !uuid(b.replyToMessageId))) return failure(request, reply, "REQUEST_INVALID");
     if (!b.text.isWellFormed() || b.text.trim().length === 0 || [...b.text].length > 2400) return failure(request, reply, "AI_INPUT_INVALID");
     const controller = new AbortController();
     let accepted=false;
@@ -137,7 +211,9 @@ export async function registerConversationRoutes(app: FastifyInstance, identity:
     const disconnected = (): void => { if (!reply.raw.writableEnded) controller.abort(); };
     request.raw.once("aborted", disconnected); reply.raw.once("close", disconnected);
     try {
-      const result = await operations.execute(caller(request), { operationId: request.params.operationId, operationKey: key, text: b.text },
+      const result = await operations.execute(caller(request), { operationId: request.params.operationId, operationKey: key, text: b.text,
+        ...(b.contextSelection === undefined ? {} : { contextSelection: b.contextSelection as ExecuteReplySelection }),
+        ...(b.replyToMessageId === undefined ? {} : { replyToMessageId: b.replyToMessageId as string }) },
         { signal: controller.signal, current, acceptCompleteBody });
       if(accepted||reply.sent)return reply;
       if (controller.signal.aborted) { reply.hijack(); reply.raw.destroy(); return reply; }

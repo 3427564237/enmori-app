@@ -1,4 +1,8 @@
+import '../features/account/own_avatar_providers.dart';
+import '../features/account/data/backend_own_avatar_repository.dart';
 import 'controlled_demo_app.dart';
+import 'proactive_messaging_composition.dart';
+import '../features/proactive/data/firebase_proactive_messaging.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -36,16 +40,27 @@ Future<void> bootstrap() async {
     'ENMORI_CONTROLLED_REAL_ACCOUNT',
   );
   const remoteAccount = bool.fromEnvironment('ENMORI_REMOTE_GROUP');
+  const companionFirstFlow = bool.fromEnvironment(
+    'ENMORI_AI_COMPANION_FIRST_FLOW',
+  );
+  const companionInstallation = String.fromEnvironment(
+    'ENMORI_AI_COMPANION_INSTALLATION_REF',
+  );
   const backendUrl = String.fromEnvironment('ENMORI_API_BASE_URL');
   const certificate = String.fromEnvironment('ENMORI_API_CERTIFICATE_BASE64');
   final baseUri = parseApprovedBackendBaseUri(backendUrl);
-  final configurationValid = validAccountRuntimeConfiguration(
-    configuration,
-    controlledAccount: controlledAccount,
-    remoteAccount: remoteAccount,
-    certificateBase64: certificate,
-    baseUri: baseUri,
-  );
+  final configurationValid =
+      (companionInstallation.isEmpty ||
+          companionFirstFlow &&
+              remoteAccount &&
+              validCompanionInstallationRef(companionInstallation)) &&
+      validAccountRuntimeConfiguration(
+        configuration,
+        controlledAccount: controlledAccount,
+        remoteAccount: remoteAccount,
+        certificateBase64: certificate,
+        baseUri: baseUri,
+      );
   http.Client? controlledClient;
   var firebaseReady = false;
 
@@ -85,6 +100,13 @@ Future<void> bootstrap() async {
         dualAccounts: true,
         eventParticipationEnabled: true,
         remoteGroupEnabled: true,
+        companionFirstFlowEnabled: companionFirstFlow,
+        companionInstallationRef: companionInstallation.isEmpty
+            ? null
+            : companionInstallation,
+        companionMessagingPort: companionInstallation.isEmpty
+            ? null
+            : FirebaseProactiveMessagingPort(),
       ),
     );
     return;
@@ -109,6 +131,10 @@ Future<void> bootstrap() async {
           }),
         externalActivityOpenerProvider.overrideWithValue(
           const PlatformExternalActivityOpener(),
+        ),
+        ownAvatarRepositoryProvider.overrideWith(
+          (ref) =>
+              BackendOwnAvatarRepository(ref.watch(backendApiClientProvider)),
         ),
         accountPreferencesRepositoryProvider.overrideWith(
           (ref) => BackendAccountPreferencesRepository(

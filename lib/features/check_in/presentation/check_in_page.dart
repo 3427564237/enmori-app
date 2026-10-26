@@ -747,12 +747,14 @@ final class SavedCheckInPage extends ConsumerStatefulWidget {
     this.openAttribution,
     this.placeActions = false,
     this.onStartNewDraft,
+    this.onReferenceInAi,
     super.key,
   });
 
   final String checkInId;
   final bool placeActions;
   final ValueChanged<String>? onStartNewDraft;
+  final ValueChanged<String>? onReferenceInAi;
   final VoidCallback onReturnHome;
   final Future<bool> Function(Uri)? openAttribution;
 
@@ -854,6 +856,19 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
                     openAttribution:
                         widget.openAttribution ?? (_) async => false,
                   ),
+                  if (widget.onReferenceInAi != null &&
+                      value.checkInId == widget.checkInId) ...[
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      key: const Key('saved-check-in-reference-ai'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                      ),
+                      onPressed: _referenceInAi,
+                      icon: const Icon(Icons.forum_outlined),
+                      label: Text(context.tr('Reference in AI', '在 AI 中参考')),
+                    ),
+                  ],
                   if (widget.onStartNewDraft != null &&
                       value.checkInId == widget.checkInId) ...[
                     const SizedBox(height: 16),
@@ -905,6 +920,19 @@ final class _SavedCheckInPageState extends ConsumerState<SavedCheckInPage> {
     if (!mounted) return;
     _controller.readPersisted(checkInId: widget.checkInId);
     _activeOperation = _controller.operationToken;
+  }
+
+  void _referenceInAi() {
+    if (!mounted ||
+        ModalRoute.of(context)?.isCurrent != true ||
+        !ref.read(contentAccessProvider).foreground) {
+      return;
+    }
+    final current = ref.read(checkInControllerProvider);
+    if (current case CommandSucceeded<CheckIn>(:final value)
+        when value.checkInId == widget.checkInId) {
+      widget.onReferenceInAi?.call(value.checkInId);
+    }
   }
 
   String _confirmationFailureCopy(AppFailureKind kind) {

@@ -1,3 +1,5 @@
+import { OwnAvatar } from "../account/application/own-avatar.js";
+import { FirestoreOwnAvatarRepository } from "../account/infrastructure/firestore-own-avatar-repository.js";
 import type {CheckInHistoryFirestoreGateway} from "../check-ins/ports/check-in-history-firestore-gateway.js";
 import {OwnCheckInCalendar} from "../check-ins/application/check-in-calendar.js";
 import {FirestoreCheckInCalendar} from "../check-ins/infrastructure/firestore-check-in-calendar.js";
@@ -388,7 +390,7 @@ export async function createControlledPhoneService(options: {
           return result;
         } catch { return { kind: "dependency_unavailable" }; }
       } },
-      accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, options.environment)),
+      accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, options.environment), new OwnAvatar(new FirestoreOwnAvatarRepository(gateway))),
       completeOnboarding, getOnboarding: new GetOnboarding(new FirestoreOnboardingRepository(gateway)),
       createCheckIn: options.demoFeatures ? new CreateCheckIn(checkIns, clock, new CryptoOpaqueIdGenerator()) : unavailableOperation,
       getCheckIn: options.demoFeatures ? new GetCheckIn(checkIns) : unavailableOperation,

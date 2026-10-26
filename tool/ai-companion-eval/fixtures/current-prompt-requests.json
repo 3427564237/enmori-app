@@ -1,0 +1,270 @@
+{
+  "schemaVersion": "current_prompt_request_golden_v1",
+  "sourceCommit": "24f913dd26afa9af82f7c31ac9eefcf543b64140",
+  "cases": [
+    {
+      "id": "reported-english-goal-chinese-reply",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"Help me make a small, realistic plan.\\n\\nWhat I want to work on:\\nV25 device verification. I want a quiet 15 minute break after studying. My test marker is Cedar25.\\n\\nMy limits or preferences:\\nIndoors, no equipment or spending. Reply in Simplified Chinese with three short steps and repeat Cedar25.\\n\\nSuggest one manageable first step and a short plan. If an essential detail is missing, ask me. Do not assume I have completed any steps.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "chinese-break-with-label",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"请帮我制定一个简单、可行的小计划。\\n\\n我想做的事：\\n设备测试记录 Maple42。我刚学完，想安静地休息十五分钟。\\n\\n我的限制或偏好：\\n只在室内，不花钱，不用设备。给出三个步骤，时间合计十五分钟。\\n\\n请给我一个容易开始的第一步和简短计划。如果缺少关键信息，请先问我。不要假定我已经完成任何步骤。\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "correct-previous-misreading",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"Help me make a small, realistic plan.\\n\\nWhat I want to work on:\\nV25 device verification. I want a quiet 15 minute break after studying. My test marker is Cedar25.\\n\\nMy limits or preferences:\\nIndoors, no equipment or spending. Reply in Simplified Chinese with three short steps and repeat Cedar25.\\n\\nSuggest one manageable first step and a short plan. If an essential detail is missing, ask me. Do not assume I have completed any steps.\"},{\"role\":\"assistant\",\"content\":\"Cedar25：第一步，安静坐在室内；第二步，开始核对V25设备清单；第三步，设定15分钟后休息。您是否已列出当前待验证的V25设备清单？\"},{\"role\":\"user\",\"content\":\"The device verification text was only a test label. My goal is a quiet break after studying. Reply in English with three steps totaling 15 minutes, indoors, no equipment or spending. Include the test marker from my first message.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "actual-device-test-goal",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"Help me make a small, realistic plan.\\n\\nWhat I want to work on:\\nPrepare a 15 minute checklist for testing my app language setting after reopening it.\\n\\nMy limits or preferences:\\nThis is an actual software test. Do not edit existing records or claim the test has already passed.\\n\\nSuggest one manageable first step and a short plan. If an essential detail is missing, ask me. Do not assume I have completed any steps.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "fresh-chinese-rest",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"我刚学完，想在室内安静休息12分钟。不花钱，不用手机或其他设备。请用三个简短步骤安排这12分钟。\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "actual-study-goal",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"我想用20分钟复习明天考试的概率基础。我已经有课本和笔记。请给我三个具体步骤，时间合计20分钟。\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "labelled-desk-goal",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"Log Birch63. I want to clear my desk for ten minutes before dinner. Give me three steps totaling ten minutes using what is already on the desk. No shopping.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "latest-goal-two-history-pairs",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"Record Aspen81. Help me study algebra for 20 minutes.\"},{\"role\":\"assistant\",\"content\":\"Spend 10 minutes reviewing examples and 10 minutes practicing.\"},{\"role\":\"user\",\"content\":\"Actually, I want to tidy my desk for ten minutes instead.\"},{\"role\":\"assistant\",\"content\":\"Clear the center first, then group the remaining items.\"},{\"role\":\"user\",\"content\":\"我改主意了：现在只想坐着休息6分钟，不看书也不整理东西。请用中文给出两个步骤，合计6分钟，并写出我的记录标签。\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "explicit-language-request",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"我想在室内活动一下肩颈，只有5分钟。Please answer in English with two gentle steps totaling five minutes. No equipment.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "normal-chat",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"I had a busy day and finally finished my reading. Please just chat with me, not a plan. Ask me one simple question.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "calculation",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"请帮我算一下：我有15分钟，已经休息了4分钟，还剩几分钟？用中文一句话回答。\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "persona-presentation",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string. Presentation preferences: {\\\"schemaVersion\\\":\\\"persona_presentation_v1\\\",\\\"tone\\\":\\\"warm\\\",\\\"responseLength\\\":\\\"concise\\\",\\\"formatStyle\\\":\\\"bulleted\\\"}\"},{\"role\":\"user\",\"content\":\"Give me a quiet ten-minute indoor break in exactly two short bullet points totaling ten minutes. No studying, equipment or spending.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "missing-essential-goal",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"Please make a short plan for it. I have ten minutes, but I have not told you what I want to do yet. Ask one question before making a plan.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "ordinary-code-as-text",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"Show a tiny Python function that adds two numbers. Do not run it. Explain it in one short sentence.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "labelled-walk-goal",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"记录编号 Cedar28。我想在家走动十分钟，给久坐的身体换个姿势，不是做软件测试。请给我两个步骤，合计十分钟，不用任何设备。\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "genuine-test-with-marker",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"Marker Willow57. My actual goal is to test whether English and Chinese language choices remain after force-closing and reopening my app. Give me a 10-minute checklist. Preserve existing data and include Willow57 once. Do not claim any checks have passed.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "natural-chinese",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"今天总算把书看完了，有点累，想随便聊两句。请别给我制定计划，问我一个简单的问题就好。\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "natural-english",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"I enjoyed the rain from my window this morning. Chat with me briefly and ask just one question, without suggesting tasks.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "specified-french",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"我今天想学一句简单的问候。Please reply only in French with one friendly greeting and no explanation.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "switch-to-english",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"今天午饭后喝了薄荷茶。请用中文聊。\"},{\"role\":\"assistant\",\"content\":\"薄荷茶听起来很清爽。\"},{\"role\":\"user\",\"content\":\"Let's switch to English now. What drink did I mention? Answer in one sentence.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "correct-personal-claim",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"I liked a photo of Paris.\"},{\"role\":\"assistant\",\"content\":\"Since you live in Paris, visit that cafe near your home.\"},{\"role\":\"user\",\"content\":\"You misunderstood. I do not live in Paris and I never gave you my address. Please acknowledge the correction without guessing where I live.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "topic-shift-chat",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"I want to organise my desk.\"},{\"role\":\"assistant\",\"content\":\"Start with the papers, then put your pens away.\"},{\"role\":\"user\",\"content\":\"New topic: explain why leaves change colour in autumn in two short sentences. Please leave the plan behind.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "unknown-event-fact",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"What time does the event I am thinking about start? I have not told you its name or date.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    },
+    {
+      "id": "no-execution-claim",
+      "url": "http://127.0.0.1:11434/api/chat",
+      "method": "POST",
+      "redirect": "error",
+      "cache": "no-store",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": "{\"model\":\"qwen3.5:9b\",\"messages\":[{\"role\":\"system\",\"content\":\"You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion \\\"ai_assistant_message_v1\\\" and a non-empty \\\"message\\\" string.\"},{\"role\":\"user\",\"content\":\"Please mark me as Going to the workshop and remind me tomorrow. If you cannot do those actions, tell me clearly.\"}],\"stream\":false,\"think\":false,\"keep_alive\":\"30m\",\"format\":{\"type\":\"object\",\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"const\":\"ai_assistant_message_v1\"},\"message\":{\"type\":\"string\"}},\"required\":[\"schemaVersion\",\"message\"],\"additionalProperties\":false},\"options\":{\"num_ctx\":8192,\"num_predict\":512}}"
+    }
+  ]
+}

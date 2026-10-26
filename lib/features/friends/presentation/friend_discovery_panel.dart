@@ -103,7 +103,7 @@ final class _FriendDiscoveryPanelState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SectionHeading(
-          title: context.tr('People to know', '认识新朋友'),
+          title: context.tr('People you may know', '可能认识的人'),
           actions: [
             if (widget.home &&
                 widget.onSeeAll != null &&

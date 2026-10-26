@@ -37,6 +37,9 @@ void main() {
         await _tap(tester, 'ai-send');
         expect(editor.controller!.value == value, isTrue);
         expect(editor.focusNode!.hasFocus, isTrue);
+        // With a pinned composer, the error follows the empty-topic intro in
+        // the independent lazy history viewport; scroll down to read it.
+        await _ensure(tester, find.byKey(const Key('ai-status')));
         expect(
           find.text('Enter 1–2400 characters of valid text.'),
           findsOneWidget,

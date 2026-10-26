@@ -1,0 +1,102 @@
+{
+  "apkVersionCode": 30,
+  "unchangedBuildSourceHead": "c4f2ae98b0b4cd193fbef1c74d63db259cdd2eda",
+  "sourceBeforeRecoveryEvidence": "50527598ba28cc72697858cf132d9f8bf9a320db",
+  "startupBefore": {
+    "checkedAt": "2026-10-26T00:42:12.882Z",
+    "ai": {
+      "configured": true,
+      "available": false,
+      "maintenanceHealthy": true,
+      "pending": false,
+      "outcomeUnknown": false
+    }
+  },
+  "initialException": "Not retained by the existing initialization catch; exact original throw site not established",
+  "confirmedEnvironmentFault": "Deployed dependency link resolved through a missing managed checkout; fresh SDK import failed with MODULE_NOT_FOUND",
+  "recovery": {
+    "sameManifestAndLockfile": true,
+    "node": "24.19.0",
+    "pnpm": "11.19.0",
+    "cachedPackagesRestored": 692,
+    "applicationPackagesDownloaded": 0,
+    "installScriptsExecuted": false,
+    "directDependencies": {
+      "@js-temporal/polyfill": "0.5.1",
+      "fastify": "5.12.1",
+      "firebase-admin": "14.3.0"
+    },
+    "normalServiceRestarts": 1,
+    "newApk": false,
+    "productCodeChanges": false,
+    "oldOperationsReplayed": false,
+    "locksRemoved": false
+  },
+  "controlReadOnly": {
+    "runtimeShapeValid": true,
+    "fenceCount": 0,
+    "previousGeneration": 21
+  },
+  "readinessAfter": {
+    "phase": "listening",
+    "ready": true,
+    "checkedAt": "2026-10-26T01:23:31.803Z",
+    "ai": {
+      "configured": true,
+      "available": true,
+      "maintenanceHealthy": true,
+      "pending": false,
+      "outcomeUnknown": false
+    },
+    "firstFlow": {
+      "configured": true,
+      "workerConfigured": false,
+      "pushConfigured": false
+    }
+  },
+  "preservedData": {
+    "beforeAt": "2026-10-26T01:22:03.823Z",
+    "afterAt": "2026-10-26T01:25:48.903Z",
+    "accountUnchanged": true,
+    "interestsUnchanged": true,
+    "countsChangedDuringHumanTesting": true,
+    "countDelta": {
+      "checkInCount": 1,
+      "conversationCount": 1,
+      "messageCount": 2
+    },
+    "noGlobalUnchangedDataClaim": true,
+    "assistantBusinessWriteRequests": 0,
+    "userConfirmedReferenceOffAndOn": "Both normal"
+  },
+  "localModelHttpOutcomesAfter": [
+    {
+      "atUTC": "2026-10-26T01:23:11.191545+00:00",
+      "status": 200,
+      "path": "/api/generate"
+    },
+    {
+      "atUTC": "2026-10-26T01:25:12.770359+00:00",
+      "status": 200,
+      "path": "/api/chat"
+    },
+    {
+      "atUTC": "2026-10-26T01:26:52.242502+00:00",
+      "status": 200,
+      "path": "/api/chat"
+    }
+  ],
+  "phoneResult": {
+    "source": "Direct LI reply in this chat",
+    "referencesOff": "Normal reply",
+    "referencesOn": "Normal reply",
+    "scope": "Two reported sending modes only"
+  },
+  "receiptSha256": {
+    "control-readonly.json": "e98c814507a625ee4c0b94192e926b624b022cebb83300ad3bd82141c956837d",
+    "dependency-restoration.json": "d3d6e8138c84a35c34026babf192a1aaa5681148736cf1e7f4e25174e6ec5c75",
+    "readiness-after-restart.json": "fdd98b3fa96cfda04d2c13df2a522090a36c89c899efc2c860408944dcec995c",
+    "model-http-outcomes-after.json": "e910419db83322b3a985e5b0b16585cc873f02a4e6b9ac90fb8513a318a4fbbd",
+    "preserved-data-verification.json": "04f2120719a8dfa28d1f9b673f9bd2184bae4aec7ee7e7076b720c4e904c76a3"
+  }
+}

@@ -33,6 +33,10 @@ export interface FirestoreTransactionGateway {
   /** Purpose-bound metadata reads; never return Check-in content to ranking. */
   listActivityCheckInPage?(ownerAccountId:string,afterId:string|undefined,limit:number):Promise<readonly StoredDocumentEntry[]>;
   listDiscoverableAccountPage?(afterId:string|undefined,limit:number):Promise<readonly StoredDocumentEntry[]>;
+  /** Current own-day AI selection metadata only; full versioned sources are
+   * read separately in the SAME transaction. The sixth row is a cap sentinel. */
+  listOwnCheckInDayPage?(input:{readonly ownerAccountId:string;readonly startUtc:string;readonly endUtc:string|null;
+    readonly asOf:string;readonly limit:6}):Promise<readonly StoredDocumentEntry[]>;
 }
 
 export interface FirestoreGateway {
@@ -98,6 +102,16 @@ class FirebaseAdminTransactionGateway
     if(!Number.isInteger(limit)||limit<1||limit>25)throw new Error("Invalid discovery page");
     let query=this.firestore.collection("accounts").orderBy(FieldPath.documentId()).select("profileVisibility").limit(limit);
     if(afterId!==undefined)query=query.startAfter(afterId);
+    const snapshot=await this.transaction.get(query);
+    return snapshot.docs.map(doc=>({id:doc.id,data:{...doc.data()}}));
+  }
+  public async listOwnCheckInDayPage(input:Parameters<NonNullable<FirestoreTransactionGateway["listOwnCheckInDayPage"]>>[0]):Promise<readonly StoredDocumentEntry[]> {
+    if(input.limit!==6)throw new Error("Invalid own-day bound");
+    let query=this.firestore.collection("check_ins").where("ownerAccountId","==",input.ownerAccountId)
+      .where("createdAt",">=",input.startUtc).where("createdAt","<=",input.asOf)
+      .orderBy("createdAt","desc").orderBy(FieldPath.documentId(),"desc")
+      .select("ownerAccountId","createdAt").limit(input.limit);
+    if(input.endUtc!==null)query=query.where("createdAt","<",input.endUtc);
     const snapshot=await this.transaction.get(query);
     return snapshot.docs.map(doc=>({id:doc.id,data:{...doc.data()}}));
   }

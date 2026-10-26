@@ -25,6 +25,8 @@ export interface AsyncOperation {
   readonly targetKind: "reserved_new" | "existing";
 }
 export type AsyncConversationCommandInput = {
+  readonly selectedReply?:import("./selected-reply.js").SelectedReplyGrant;
+  readonly replyToMessageId?:string;
   readonly identity: AsyncConversationIdentity;
   readonly operation: AsyncOperation;
   readonly text: string;
@@ -54,9 +56,9 @@ export interface AsyncEffectIdentity {
   readonly conversationId: string;
 }
 export type AsyncFenceObservation = (AsyncEffectIdentity & { readonly kind: "open" })
-  | { readonly kind: "rejected"; readonly failure: RuntimeFailure }
+  | { readonly kind: "rejected"; readonly failure: RuntimeFailure;readonly selectionFailure?:import("./selected-reply.js").SelectedReplyFailure }
   | { readonly kind: "unknown" };
-type AsyncWriteFailure = { readonly kind: "rejected"; readonly failure: RuntimeFailure }
+type AsyncWriteFailure = { readonly kind: "rejected"; readonly failure: RuntimeFailure;readonly selectionFailure?:import("./selected-reply.js").SelectedReplyFailure }
   | { readonly kind: "unknown" };
 export type AsyncUserWriteObservation = (AsyncEffectIdentity & {
   readonly kind: "committed";

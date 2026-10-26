@@ -2,6 +2,10 @@ import type { FastifySchema } from "fastify";
 import { positionSchema, weatherRequestSchema, weatherProjectionSchema } from "../weather/transport/schemas.js";
 
 export const approvedFailureCodes = [
+  "PROACTIVE_REVISION_PRECONDITION_FAILED",
+  "PROACTIVE_INPUT_INVALID",
+  "AI_SOURCE_UNAVAILABLE",
+  "AI_CONTEXT_SELECTION_CONFLICT",
   "EVENT_PARTICIPATION_INVALID",
   "EVENT_PARTICIPATION_REVISION_PRECONDITION_FAILED",
   "FRIEND_IGNORE_PRECONDITION_FAILED",

@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
-import '../../../core/presentation/local_time.dart';
 import '../../auth/auth_providers.dart';
 import '../domain/event_detail_repository.dart';
 import 'event_detail_controller.dart';
+import 'event_information.dart';
 
 final class EventDetailPage extends ConsumerStatefulWidget {
   const EventDetailPage({
@@ -23,13 +23,25 @@ final class EventDetailPage extends ConsumerStatefulWidget {
 
 final class _EventDetailPageState extends ConsumerState<EventDetailPage>
     with WidgetsBindingObserver {
+  int _scheduledLoad = 0;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scheduleLoad();
+  }
+
+  @override
+  void didUpdateWidget(EventDetailPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.eventId != widget.eventId) _scheduleLoad();
+  }
+
+  void _scheduleLoad() {
+    final scheduled = ++_scheduledLoad, eventId = widget.eventId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        ref.read(eventDetailControllerProvider(widget.eventId).notifier).load();
+      if (mounted && scheduled == _scheduledLoad && widget.eventId == eventId) {
+        ref.read(eventDetailControllerProvider(eventId).notifier).load();
       }
     });
   }
@@ -101,66 +113,16 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
               AsyncData<EventDetail>(:final value) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    value.title,
-                    key: const Key('event-detail-title'),
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  EventInformation(
+                    event: value,
+                    syntheticPreview: widget.syntheticPreview,
                   ),
-                  const SizedBox(height: 16),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(Icons.schedule),
-                          const SizedBox(height: 8),
-                          Text(
-                            context.tr(
-                              'Starts: ${localTimeLabel(context, value.startAt)}',
-                              '开始：${localTimeLabel(context, value.startAt)}',
-                            ),
-                          ),
-                          Text(
-                            value.endAt == null
-                                ? context.tr(
-                                    'End time not provided.',
-                                    '未提供结束时间。',
-                                  )
-                                : context.tr(
-                                    'Ends: ${localTimeLabel(context, value.endAt!)}',
-                                    '结束：${localTimeLabel(context, value.endAt!)}',
-                                  ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    context.tr(
-                      'Location: ${value.locationLabel ?? 'Not provided'}',
-                      '地点：${value.locationLabel ?? '未提供'}',
-                    ),
-                  ),
-                  Text(
-                    context.tr(
-                      'Category: ${value.categoryLabel ?? 'Not provided'}',
-                      '分类：${value.categoryLabel ?? '未提供'}',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    value.shortDescription ?? context.tr('Not provided', '未提供'),
-                  ),
-                  const SizedBox(height: 16),
-                  SelectableText(value.externalSourceUrl),
                   const SizedBox(height: 8),
                   if (!widget.syntheticPreview) ...[
                     Text(
                       context.tr(
-                        'Ticketmaster source. Opens the organiser website; this does not register you for the event.',
-                        '来源为 Ticketmaster。打开主办方网站不代表你已报名。',
+                        'Ticketmaster handles tickets and booking. Its link may open booking or seat selection. Opening it does not register you for the event.',
+                        'Ticketmaster 处理购票与预订，链接可能打开预订或选座页面。打开网页不代表你已报名。',
                       ),
                     ),
                     FilledButton.icon(
@@ -183,7 +145,10 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
                       },
                       icon: const Icon(Icons.open_in_new),
                       label: Text(
-                        context.tr('View on Ticketmaster', '在 Ticketmaster 查看'),
+                        context.tr(
+                          'Tickets / booking on Ticketmaster',
+                          '在 Ticketmaster 购票／预订',
+                        ),
                       ),
                     ),
                   ],

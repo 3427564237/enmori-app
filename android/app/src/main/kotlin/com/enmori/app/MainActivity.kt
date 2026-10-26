@@ -1,7 +1,11 @@
 package com.enmori.app
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import java.net.URI
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -13,8 +17,23 @@ import java.util.Locale
 import java.util.TimeZone
 
 class MainActivity : FlutterActivity() {
+    private var avatarPhotoPicker: AvatarPhotoPicker? = null
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (avatarPhotoPicker?.onActivityResult(requestCode, resultCode, data) != true) {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    override fun onDestroy() {
+        avatarPhotoPicker?.dispose()
+        avatarPhotoPicker = null
+        super.onDestroy()
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        avatarPhotoPicker = AvatarPhotoPicker(this, flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/preferences")
             .setMethodCallHandler { call, result ->
                 try {
@@ -58,6 +77,23 @@ class MainActivity : FlutterActivity() {
                     } else {
                         result.success(format("yyyy-MM-dd", zone, Date()))
                     }
+                } else if (call.method == "resolveCivil") {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                        result.error("TIME_UNAVAILABLE", "Civil time resolution is unavailable.", null)
+                    } else {
+                        try {
+                            result.success(FollowUpCivilTimeResolver.resolve(
+                                requireNotNull(call.argument<String>("timeZone")),
+                                requireNotNull(call.argument<Int>("year")),
+                                requireNotNull(call.argument<Int>("month")),
+                                requireNotNull(call.argument<Int>("day")),
+                                requireNotNull(call.argument<Int>("hour")),
+                                requireNotNull(call.argument<Int>("minute")),
+                            ))
+                        } catch (_: Exception) {
+                            result.error("TIME_INVALID", "Civil time or IANA zone is invalid.", null)
+                        }
+                    }
                 } else if (call.method == "formatInstants") {
                     val zone = call.argument<String>("timeZone")
                     val instants = call.argument<List<String>>("instants")
@@ -73,6 +109,33 @@ class MainActivity : FlutterActivity() {
                     }
                 } else {
                     result.notImplemented()
+                }
+            }
+        // The feature calls this only after explicit push opt-in. Registering
+        // the handler itself creates no channel and obtains no token.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/proactive_notifications")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "prepareChannel") {
+                    result.notImplemented()
+                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    result.success(false)
+                } else {
+                    try {
+                        val manager = getSystemService(NotificationManager::class.java)
+                        val channel = NotificationChannel(
+                            "enmori_requested_followups",
+                            getString(R.string.enmori_requested_followups_name),
+                            NotificationManager.IMPORTANCE_DEFAULT,
+                        ).apply {
+                            description = getString(R.string.enmori_requested_followups_description)
+                            lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+                            setShowBadge(false)
+                        }
+                        manager.createNotificationChannel(channel)
+                        result.success(manager.getNotificationChannel(channel.id).importance != NotificationManager.IMPORTANCE_NONE)
+                    } catch (_: Exception) {
+                        result.success(false)
+                    }
                 }
             }
     }

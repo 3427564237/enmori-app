@@ -12,7 +12,8 @@ export const targetSchema = { type: "object", additionalProperties: false, requi
   username: { type: "string" }, displayName: { type: "string" }, relationshipState: { type: "string", enum: ["self","already_friends","outgoing_request_pending","incoming_request_pending","can_send_request"] } } } as const;
 export const eventDetailSchema = { type: "object", additionalProperties: false, required: ["eventId","title","startAt","externalSourceUrl"], properties: {
   eventId: { type: "string", minLength: 1 }, title: { type: "string", minLength: 1, maxLength: 200 }, startAt: { type: "string" }, externalSourceUrl: { type: "string", maxLength: 2048 }, endAt: { type: "string" },
-  locationLabel: { type: "string", minLength: 1, maxLength: 200 }, categoryLabel: { type: "string", minLength: 1, maxLength: 100 }, shortDescription: { type: "string", minLength: 1, maxLength: 1000 } } } as const;
+  locationLabel: { type: "string", minLength: 1, maxLength: 200 }, categoryLabel: { type: "string", minLength: 1, maxLength: 100 }, shortDescription: { type: "string", minLength: 1, maxLength: 1000 },
+  coverImageUrl: { type: "string", minLength: 1, maxLength: 2048 } } } as const;
 export const friendInboxSchema = { type: "object", additionalProperties: false, required: ["requests","nextCursor"], properties: {
   requests: { type: "array", maxItems: 20, items: { type: "object", additionalProperties: false, required: ["username","displayName","requestRef"], properties: { username: { type:"string" }, displayName: { type:"string" }, requestRef: { type:"string" } } } }, nextCursor: { anyOf: [{type:"string"},{type:"null"}] } } } as const;
 export const friendActionSchema = { type: "object", additionalProperties: false, required: ["result"], properties: { result: { type:"string", enum:["accepted","declined"] } } } as const;

@@ -15,7 +15,8 @@ const _listDisclosure =
     'not shared with Ticketmaster. Ticketmaster receives the activity request '
     'and server connection information.';
 const _sourceActionDisclosure =
-    '“View on Ticketmaster” opens the source page in your browser. Your browser '
+    '“Tickets / booking on Ticketmaster” opens the event’s ticket link in your browser. '
+    'Ticketmaster controls the destination, including booking or seat selection. Your browser '
     'connects directly to Ticketmaster; its privacy and cookie policies apply. '
     'Opening or copying a link does not register you or mark you as Going. '
     "A copied link can remain on your device's clipboard.";
@@ -26,22 +27,42 @@ const _lifetimeDisclosure =
 
 /// LI supplies route/session guards and list navigation. Never remaps /events.
 final class ActivityPage extends ConsumerStatefulWidget {
-  const ActivityPage({this.browseId = '', this.onSelect, super.key});
+  const ActivityPage({
+    this.browseId = '',
+    this.onSelect,
+    this.detailBuilder,
+    super.key,
+  });
   final String browseId;
   final ValueChanged<String>? onSelect;
+  final Widget Function(BuildContext, ActivityDetail)? detailBuilder;
   @override
   ConsumerState<ActivityPage> createState() => _ActivityPageState();
 }
 
 final class _ActivityPageState extends ConsumerState<ActivityPage>
     with WidgetsBindingObserver {
+  int _scheduledLoad = 0;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scheduleLoad();
+  }
+
+  @override
+  void didUpdateWidget(ActivityPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.browseId != widget.browseId) _scheduleLoad();
+  }
+
+  void _scheduleLoad() {
+    final scheduled = ++_scheduledLoad, browseId = widget.browseId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        ref.read(activityControllerProvider(widget.browseId).notifier).load();
+      if (mounted &&
+          scheduled == _scheduledLoad &&
+          widget.browseId == browseId) {
+        ref.read(activityControllerProvider(browseId).notifier).load();
       }
     });
   }
@@ -153,8 +174,8 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                               : const Icon(Icons.chevron_right),
                           subtitle: Text(
                             context.tr(
-                              '${_time(context, item.startAt)}${item.endAt == null ? '' : '\nUntil ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
-                              '${_time(context, item.startAt)}${item.endAt == null ? '' : '\n结束于 ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
+                              '${_time(context, item.startAt)}${item.endAt == null ? '\nEnd time not provided.' : '\nUntil ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
+                              '${_time(context, item.startAt)}${item.endAt == null ? '\n未提供结束时间。' : '\n结束于 ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
                             ),
                           ),
                           onTap: widget.onSelect == null
@@ -168,54 +189,61 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                       ),
                   ],
                 ),
-              AsyncData<ActivityRead?>(
-                value: ActivityDetail(
-                  :final summary,
-                  :final locationLabel,
-                  :final categoryLabel,
-                ),
-              ) =>
+              AsyncData<ActivityRead?>(value: final ActivityDetail detail) =>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      summary.title,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    Text(
-                      context.tr(
-                        'Starts: ${_time(context, summary.startAt)}',
-                        '开始：${_time(context, summary.startAt)}',
+                    if (widget.detailBuilder != null)
+                      widget.detailBuilder!(context, detail)
+                    else ...[
+                      Text(
+                        detail.summary.title,
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
-                    ),
-                    Text(
-                      summary.endAt == null
-                          ? context.tr('End time not provided.', '未提供结束时间。')
-                          : context.tr(
-                              'Ends: ${_time(context, summary.endAt!)}',
-                              '结束：${_time(context, summary.endAt!)}',
+                      Text(
+                        context.tr(
+                          'Starts: ${_time(context, detail.summary.startAt)}',
+                          '开始：${_time(context, detail.summary.startAt)}',
+                        ),
+                      ),
+                      Text(
+                        detail.summary.endAt == null
+                            ? context.tr('End time not provided.', '未提供结束时间。')
+                            : context.tr(
+                                'Ends: ${_time(context, detail.summary.endAt!)}',
+                                '结束：${_time(context, detail.summary.endAt!)}',
+                              ),
+                      ),
+                      Text(
+                        detail.locationLabel ??
+                            context.tr('Location unavailable.', '暂无地点信息。'),
+                      ),
+                      Text(
+                        detail.categoryLabel ??
+                            context.tr('Category unavailable.', '暂无分类信息。'),
+                      ),
+                      Text(
+                        detail.shortDescription ??
+                            context.tr(
+                              'Event description unavailable.',
+                              '暂无可用活动简介。',
                             ),
-                    ),
-                    Text(
-                      locationLabel ??
-                          context.tr('Location unavailable.', '暂无地点信息。'),
-                    ),
-                    Text(
-                      categoryLabel ??
-                          context.tr('Category unavailable.', '暂无分类信息。'),
-                    ),
-                    Text(context.tr('Description unavailable.', '暂无简介。')),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Text(
                       context.tr(
                         _sourceActionDisclosure,
-                        '在 Ticketmaster 查看会通过浏览器打开来源页面。浏览器将直接连接 Ticketmaster，其隐私与 Cookie 政策适用。打开或复制链接不代表报名，也不会标记为将参加。复制的链接可能保留在设备剪贴板中。',
+                        '购票／预订会通过浏览器打开 Ticketmaster 的购票链接，具体预订或选座页面由 Ticketmaster 决定。浏览器将直接连接 Ticketmaster，其隐私与 Cookie 政策适用。打开或复制链接不代表报名，也不会标记为将参加。复制的链接可能保留在设备剪贴板中。',
                       ),
                     ),
                     FilledButton(
                       onPressed: () => _action(true),
                       child: Text(
-                        context.tr('View on Ticketmaster', '在 Ticketmaster 查看'),
+                        context.tr(
+                          'Tickets / booking on Ticketmaster',
+                          '在 Ticketmaster 购票／预订',
+                        ),
                       ),
                     ),
                     TextButton(

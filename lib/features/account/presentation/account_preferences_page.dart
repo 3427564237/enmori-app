@@ -1,3 +1,5 @@
+import 'own_profile_header.dart';
+
 import 'package:enmori/core/presentation/enmori_localizations.dart';
 
 import '../domain/profile_details.dart';
@@ -87,8 +89,6 @@ final class _AccountPreferencesPageState
   bool _signingOut = false;
   bool _allowPopAfterDiscard = false;
   bool _confirmingLeave = false;
-  bool _locating = false;
-  String? _locationMessage;
   String? _signOutError;
   @override
   void dispose() {
@@ -135,8 +135,7 @@ final class _AccountPreferencesPageState
       }
       _setFields(profile, settings);
     }
-    final ready =
-        state.phase == PreferencesPhase.ready && !_signingOut && !_locating;
+    final ready = state.phase == PreferencesPhase.ready && !_signingOut;
     final profile = widget.view == PreferencesView.profile;
     final controller = ref.read(provider.notifier);
     final details = state.profile?.details ?? const ProfileDetails();
@@ -164,8 +163,7 @@ final class _AccountPreferencesPageState
               _privacy.location != privacy.location ||
               _privacy.participation != privacy.participation ||
               _privacy.mapSharedWithFriends != privacy.mapSharedWithFriends;
-    final busy =
-        state.phase == PreferencesPhase.saving || _signingOut || _locating;
+    final busy = state.phase == PreferencesPhase.saving || _signingOut;
     final saveButton = FilledButton(
       key: Key(profile ? 'profile-save' : 'settings-save'),
       onPressed: ready
@@ -443,30 +441,12 @@ final class _AccountPreferencesPageState
                           labelText: context.tr('Region', "地区"),
                         ),
                       ),
-                      OutlinedButton.icon(
-                        key: const Key('profile-sync-location'),
-                        onPressed: ready ? _syncLocation : null,
-                        icon: const Icon(Icons.my_location),
-                        label: Text(
-                          _locating
-                              ? context.tr('Getting location…', "正在获取位置…")
-                              : context.tr(
-                                  'Use current coarse location',
-                                  "使用当前大致位置",
-                                ),
-                        ),
-                      ),
                       Text(
                         context.tr(
-                          'Uses your location once and fills coarse coordinates. You can replace them with a region name before saving.',
-                          "获取一次当前位置并填入粗略坐标。保存前可以改成地区名称。",
+                          'Enter a city, neighbourhood or place name.',
+                          '填写城市、街区或具体地点名称。',
                         ),
                       ),
-                      if (_locationMessage != null)
-                        Text(
-                          accountFeedback(context, _locationMessage!),
-                          key: const Key('profile-location-message'),
-                        ),
                       const SizedBox(height: 24),
                       Text(
                         context.tr('Profile visibility', "资料可见范围"),
@@ -917,7 +897,8 @@ final class _AccountPreferencesPageState
     _name.text = profile?.displayName ?? '';
     _bio.text = profile?.details.bio ?? '';
     _affiliation.text = profile?.details.affiliationName ?? '';
-    _region.text = profile?.details.region ?? '';
+    final region = profile?.details.region ?? '';
+    _region.text = isCoordinateRegion(region) ? '' : region;
     _affiliationType = profile?.details.affiliationType;
     _profileVisibility = profile?.visibility ?? ProfileVisibility.private;
     _defaultLocation = settings?.defaultCheckInLocation ?? false;
@@ -927,55 +908,6 @@ final class _AccountPreferencesPageState
     _checkInVisibility =
         settings?.checkInVisibility ?? CheckInVisibility.private;
     _consent = settings?.consent ?? OptionalProcessingConsent.rejected;
-  }
-
-  Future<void> _syncLocation() async {
-    final agreed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.tr('Use your current location?', "使用当前位置？")),
-        content: Text(
-          context.tr(
-            'Get your location once to fill coarse coordinates (0.1°) in Region. Nothing is saved until you press Save.',
-            "获取一次位置，并在地区中填入粗略坐标（0.1°）。点击保存之前不会保存这些信息。",
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(context.tr('Cancel', "取消")),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(context.tr('Continue', "继续")),
-          ),
-        ],
-      ),
-    );
-    if (agreed != true || !mounted) return;
-    final controller = ref.read(
-      accountPreferencesControllerProvider(widget.view).notifier,
-    );
-    setState(() {
-      _locating = true;
-      _locationMessage = null;
-    });
-    final result = await controller.locateRegion();
-    if (!mounted) return;
-    setState(() {
-      _locating = false;
-      switch (result) {
-        case Success<String>(:final value):
-          _region.text = value;
-        case Failure<String>(:final failure):
-          _locationMessage = failure.message;
-      }
-    });
-    if (_locationMessage case final message?) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(accountFeedback(context, message))),
-      );
-    }
   }
 
   String? _nullable(String value) => value.trim().isEmpty ? null : value.trim();

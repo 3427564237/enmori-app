@@ -44,6 +44,11 @@ import '../route_status_pages.dart';
 import 'isolated_persona_pages.dart';
 import 'isolated_history_ai_pages.dart';
 import 'activity_routes.dart';
+import 'companion_navigation.dart';
+import '../../features/proactive/presentation/proactive_follow_up_page.dart';
+import '../../features/proactive/presentation/proactive_settings_page.dart';
+import '../../features/proactive/presentation/proactive_push_controls.dart';
+import '../../features/proactive/proactive_notification_controller.dart';
 
 abstract final class AppRoutes {
   static const startup = '/startup';
@@ -66,6 +71,10 @@ abstract final class AppRoutes {
   static const checkInHistory = '/check-ins/history';
   static const footprint = '/check-ins/footprint';
   static const aiAssistant = '/ai-assistant';
+  static const aiMessage = '/ai/message';
+  static const aiCheckIn = '/ai/reference';
+  static const aiFollowUps = '/ai/follow-ups';
+  static const newAiFollowUp = '/ai/follow-ups/new';
   static const interests = '/interests';
   static const adminInterests = '/admin/interests';
   static const eventRecommendations = '/events';
@@ -139,6 +148,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       : null;
   final aiPage = isolatedSlices
       ? ref.watch(isolatedAiConversationPageProvider)
+      : null;
+  final companionEnabled =
+      aiPage != null && ref.watch(companionFirstFlowEnabledProvider);
+  final companionMessagePage = companionEnabled
+      ? ref.watch(companionMessagePageProvider)
+      : null;
+  final companionCheckInPage = companionEnabled
+      ? ref.watch(companionCheckInPageProvider)
       : null;
 
   // Observe same-UID replacement only for an available shared feature. Existing
@@ -353,6 +370,77 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
         ),
+      if (companionEnabled) ...[
+        if (companionCheckInPage != null)
+          GoRoute(
+            path: AppRoutes.aiCheckIn,
+            builder: (context, state) {
+              final extra = state.extra;
+              if (extra is! AiCheckInNavigation ||
+                  extra.checkInId.trim().isEmpty ||
+                  routeSession == null ||
+                  !identical(extra.session, routeSession)) {
+                return const ConfigurationUnavailablePage();
+              }
+              return companionCheckInPage.build(
+                context,
+                checkInId: extra.checkInId,
+                onBack: () => backFromShared(context, AppRoutes.aiCheckIn),
+                onOpenSettings: () => openShared(
+                  context,
+                  AppRoutes.aiCheckIn,
+                  AppRoutes.aiSettings,
+                ),
+              );
+            },
+          ),
+        if (companionMessagePage != null)
+          GoRoute(
+            path: AppRoutes.aiMessage,
+            builder: (context, state) {
+              final extra = state.extra;
+              if (extra is! AiMessageNavigation ||
+                  routeSession == null ||
+                  !identical(extra.session, routeSession)) {
+                return const ConfigurationUnavailablePage();
+              }
+              return companionMessagePage.build(
+                context,
+                locator: extra.locator,
+                onBack: () => backFromShared(context, AppRoutes.aiMessage),
+                onOpenSettings: () => openShared(
+                  context,
+                  AppRoutes.aiMessage,
+                  AppRoutes.aiSettings,
+                ),
+              );
+            },
+          ),
+        GoRoute(
+          path: AppRoutes.aiFollowUps,
+          builder: (context, state) => ProactiveSettingsPage(
+            key: ValueKey((routeSession, AppRoutes.aiFollowUps)),
+            onBack: () => backFromShared(context, AppRoutes.aiFollowUps),
+            pushControls: const ProactivePushControls(),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.newAiFollowUp,
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is! FollowUpNavigation ||
+                routeSession == null ||
+                !identical(extra.session, routeSession)) {
+              return const ConfigurationUnavailablePage();
+            }
+            return ProactiveFollowUpPage(
+              key: ValueKey((routeSession, extra.source)),
+              source: extra.source,
+              onBack: () => backFromShared(context, AppRoutes.newAiFollowUp),
+            );
+          },
+        ),
+      ],
       if (personaPages != null) ...[
         GoRoute(
           path: AppRoutes.personas,
@@ -397,6 +485,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             1,
             remoteGroup
                 ? FriendModulePage(
+                    initialDiscovery:
+                        state.uri.queryParameters['view'] == 'discover',
                     openAttribution: openGroupAttribution,
                     recordBuilder: groupCheckInRecordBuilder,
                     participationBuilder: groupParticipationBuilder,
@@ -456,6 +546,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.home,
         name: 'root-home',
         builder: (context, state) => HomeShellPage(
+          profileHeader: remoteGroup
+              ? ConnectedOwnHeader(
+                  onEdit: () async {
+                    if (canNavigateShared(context, AppRoutes.home)) {
+                      await context.push<void>(AppRoutes.profileEdit);
+                    }
+                  },
+                )
+              : null,
+          onContinueDiscovery: () async {
+            if (!canNavigateShared(context, AppRoutes.home)) return;
+            await context.push<void>(
+              '${AppRoutes.eventRecommendations}?from=2',
+            );
+            if (context.mounted && canNavigateShared(context, AppRoutes.home)) {
+              ref
+                  .read(eventRecommendationsControllerProvider.notifier)
+                  .load(view: EventRecommendationView.home);
+            }
+          },
           daySection: historyPage != null
               ? HomeTodaySection(
                   onOpenCheckIn: (id) async {
@@ -656,8 +766,51 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             await context.push<void>(AppRoutes.profileEdit);
           },
           onSignOut: () async {
+            if (!ref.mounted) {
+              return const Failure<void>(
+                AppFailure(
+                  kind: AppFailureKind.authRequired,
+                  message: 'The signed-in session has changed.',
+                ),
+              );
+            }
             final entry = ref.read(signOutEntryProvider.notifier);
             final auth = ref.read(authRepositoryProvider);
+            final session = ref.read(authSessionProvider).asData?.value;
+            if (companionEnabled &&
+                (session is! AuthSessionAuthenticated ||
+                    !identical(session, routeSession))) {
+              return const Failure<void>(
+                AppFailure(
+                  kind: AppFailureKind.authRequired,
+                  message: 'The signed-in session has changed.',
+                ),
+              );
+            }
+            if (companionEnabled &&
+                ref.exists(proactiveNotificationControllerProvider)) {
+              try {
+                await ref
+                    .read(proactiveNotificationControllerProvider.notifier)
+                    .beforeSignOut()
+                    .timeout(const Duration(seconds: 15));
+              } catch (_) {
+                // Logout remains available if device/server cleanup is unknown.
+                // The controller retains its original session/physical guards.
+              }
+            }
+            if (!ref.mounted ||
+                !identical(
+                  ref.read(authSessionProvider).asData?.value,
+                  session,
+                )) {
+              return const Failure<void>(
+                AppFailure(
+                  kind: AppFailureKind.authRequired,
+                  message: 'The signed-in session has changed.',
+                ),
+              );
+            }
             entry.requested(true);
             final result = await auth.signOut();
             if (result is Failure<void>) entry.requested(false);
@@ -668,6 +821,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.eventRecommendations,
         builder: (context, state) => EventRecommendationsPage(
+          initialEventIndex: state.uri.queryParameters['from'] == '2' ? 2 : 0,
           recommendationCardBuilder: participationEnabled
               ? (context, event, onOpen) =>
                     ConnectedRecommendationCard(event: event, onOpen: onOpen)
@@ -749,6 +903,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           checkInId: state.pathParameters['checkInId'] ?? '',
           openAttribution: openGroupAttribution,
           onReturnHome: () => context.go(AppRoutes.home),
+          onReferenceInAi: companionCheckInPage != null
+              ? (id) {
+                  if (id != state.pathParameters['checkInId'] ||
+                      !canNavigateShared(context, state.uri.path) ||
+                      ModalRoute.of(context)?.isCurrent != true) {
+                    return;
+                  }
+                  context.push<void>(
+                    AppRoutes.aiCheckIn,
+                    extra: AiCheckInNavigation(
+                      session: routeSession!,
+                      checkInId: id,
+                    ),
+                  );
+                }
+              : null,
           onStartNewDraft: historyPage != null
               ? (id) {
                   final expectedId = state.pathParameters['checkInId'];

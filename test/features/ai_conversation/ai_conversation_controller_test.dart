@@ -43,6 +43,50 @@ const _unresolved = AppFailure(
 
 void main() {
   testWidgets(
+    'standalone proactive history cannot release or replace a real-user retry fence',
+    (tester) async {
+      final r = await _Rig.create(tester);
+      r.repo.executeResult = Future.value(const Failure(_unresolved));
+      await r.controller.send('note');
+      r.repo.readResult = Future.value(
+        Success(
+          AiReadback(
+            operationId: 'A',
+            state: AiOutcomeState.userSaved,
+            userMessage: _user,
+          ),
+        ),
+      );
+      await r.controller.checkResult();
+      expect(r.state.canRetry, isTrue);
+      r.repo.messagesResult = Future.value(
+        Success(
+          AiMessagePage(
+            messages: [
+              _user,
+              AiMessage(
+                messageId: 'proactive',
+                sequence: 3,
+                role: AiRole.assistant,
+                persistedAt: _date.add(const Duration(minutes: 1)),
+                availability: AiAvailability.available,
+                text: 'One requested follow-up',
+                origin: AiMessageOrigin.proactive,
+                occurrenceId: 'synthetic-occurrence',
+              ),
+            ],
+          ),
+        ),
+      );
+      await r.controller.loadMessages();
+      expect(r.state.canRetry, isTrue);
+      expect(r.state.canSend, isFalse);
+      expect(r.state.messages.where((m) => m.isProactive), hasLength(1));
+      expect(r.repo.executes, hasLength(1));
+      r.dispose();
+    },
+  );
+  testWidgets(
     'local outgoing appears before token/prepare and reconciles only with authoritative pair',
     (tester) async {
       final r = await _Rig.create(tester);

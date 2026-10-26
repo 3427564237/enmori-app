@@ -9,6 +9,23 @@ export function decodeBrowseId(v:unknown):string|undefined{
   try{const id=new TextDecoder("utf-8",{fatal:true}).decode(Buffer.from(v.slice(3),"base64url"));return browseId(id)===v?id:undefined;}catch{return undefined;}
 }
 function text(v:unknown,max:number):v is string{return typeof v==="string"&&v.isWellFormed()&&!!v.trim()&&[...v].length<=max&&!unsafe.test(v);}
+/** Only a returned occurrence asset. Never repair an HTTP URL or add a host. */
+export function coverImageUrl(v:unknown):v is string{
+  if(typeof v!=="string"||!v.isWellFormed()||v.length>2048||/[\s\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069?#]/u.test(v))return false;
+  try{const u=new URL(v);return u.protocol==="https:"&&u.hostname==="s1.ticketm.net"&&!u.username&&!u.password&&!u.port&&u.pathname!=="/";}catch{return false;}
+}
+function description(v:unknown):string|undefined{
+  if(typeof v!=="string"||!v.isWellFormed())return undefined;
+  const plain=v.replace(/\s+/gu," ").trim();
+  if(!plain||unsafe.test(plain))return undefined;
+  return [...plain].slice(0,1000).join("");
+}
+function cover(images:unknown):string|undefined{
+  if(!Array.isArray(images))return undefined;
+  const candidates=images.filter((v):v is Record<string,unknown>&{url:string;width:number;height:number}=>object(v)&&coverImageUrl(v.url)&&v.fallback!==true&&Number.isInteger(v.width)&&Number.isInteger(v.height)&&(v.width as number)>0&&(v.height as number)>0&&(v.width as number)<=4096&&(v.height as number)<=4096&&(v.width as number)*(v.height as number)<=8000000);
+  candidates.sort((a,b)=>Math.abs(a.width-1024)-Math.abs(b.width-1024));
+  return candidates[0]?.url;
+}
 export function sourceUrl(v:unknown):v is string{
   if(typeof v!=="string"||!v.isWellFormed()||v.length>2048||/[\s\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/u.test(v)||v.includes("#"))return false;
   try{const u=new URL(v);return u.protocol==="https:"&&["ticketmaster.sg","www.ticketmaster.sg"].includes(u.hostname)&&!u.username&&!u.password&&!u.port&&
@@ -38,8 +55,14 @@ export function projectOccurrence(raw:unknown,asOf:string):BrowseOccurrence|unde
     let category:unknown;
     if(raw.classifications!==undefined){if(!Array.isArray(raw.classifications))return undefined;const c=raw.classifications[0];if(c!==undefined){if(!object(c))return undefined;if(c.segment!==undefined){if(!object(c.segment))return undefined;category=c.segment.name;}}}
     if((Object.hasOwn(venue,"name")&&!text(venue.name,200))||(category!==undefined&&!text(category,100)))return undefined;
+    const shortDescription=description(raw.info)??description(raw.description),coverUrl=cover(raw.images);
+    const address=object(venue.address)&&text(venue.address.line1,200)?venue.address.line1:undefined;
+    const venueName=typeof venue.name==="string"?venue.name:undefined;
+    const withAddress=venueName&&address?`${venueName}, ${address}`:venueName??address;
+    const locationLabel=withAddress&&text(withAddress,200)?withAddress:venueName;
     return {browseId:id,title:raw.name,startAt:start.toString(),externalSourceUrl:raw.url,
+      ...(shortDescription?{shortDescription}:{}),...(coverUrl?{coverImageUrl:coverUrl}:{}),
       ...(Array.isArray(raw.classifications)&&raw.classifications.some(c=>object(c)&&object(c.segment)&&c.segment.id==="KZFzniwnSyZfZ7v7nJ")?{musicSegment:true as const}:{}),
-      ...(end?{endAt:end.toString()}:{}),...(typeof venue.name==="string"?{locationLabel:venue.name}:{}),...(typeof category==="string"?{categoryLabel:category}:{})};
+      ...(end?{endAt:end.toString()}:{}),...(locationLabel?{locationLabel}:{}),...(typeof category==="string"?{categoryLabel:category}:{})};
   }catch{return undefined;}
 }

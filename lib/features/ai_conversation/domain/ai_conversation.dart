@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'ai_owned_sources.dart';
+
 /// Cancels only the request receiving this signal; it never closes a client.
 final class AiAbortSignal {
   final Completer<void> _aborted = Completer<void>();
@@ -13,6 +15,8 @@ final class AiAbortSignal {
 }
 
 enum AiRole { user, assistant }
+
+enum AiMessageOrigin { ordinary, proactive }
 
 enum AiAvailability { available, unavailable }
 
@@ -40,6 +44,9 @@ final class AiMessage {
     required this.persistedAt,
     required this.availability,
     this.text,
+    this.origin = AiMessageOrigin.ordinary,
+    this.occurrenceId,
+    this.sources = const [],
   });
 
   final String messageId;
@@ -48,6 +55,11 @@ final class AiMessage {
   final DateTime persistedAt;
   final AiAvailability availability;
   final String? text;
+  final AiMessageOrigin origin;
+  final String? occurrenceId;
+  final List<AiSourceCard> sources;
+  bool get isProactive =>
+      role == AiRole.assistant && origin == AiMessageOrigin.proactive;
 }
 
 final class AiReply {

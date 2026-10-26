@@ -1,4 +1,5 @@
 import { errorEnvelopeSchema } from "../../transport/schemas.js";
+import { AVATAR_MAX_BASE64_LENGTH } from "../domain/avatar-values.js";
 
 const visibility = { type: "string", enum: ["private", "friends_only", "public"] } as const;
 const revision = { type: "integer", minimum: 0, maximum: Number.MAX_SAFE_INTEGER } as const;
@@ -36,3 +37,16 @@ export const getProfileSchema = { querystring: noQuery, response: response("prof
 export const getSettingsSchema = { querystring: noQuery, response: response("settings", settingsSchema, false) };
 export const putProfileSchema = { querystring: noQuery, body: saveProfileBody, response: response("profile", profileSchema, true) };
 export const putSettingsSchema = { querystring: noQuery, body: saveSettingsBody, response: response("settings", settingsSchema, true) };
+export const avatarSchema = {
+  type: "object", additionalProperties: false, required: ["pngBase64", "sourceSha256", "revision"],
+  properties: {
+    pngBase64: { type: ["string", "null"], maxLength: AVATAR_MAX_BASE64_LENGTH },
+    sourceSha256: { type: ["string", "null"], pattern: "^[0-9a-f]{64}$" }, revision,
+  },
+} as const;
+export const saveAvatarBody = {
+  type: "object", additionalProperties: false, required: ["pngBase64", "expectedRevision"],
+  properties: { pngBase64: avatarSchema.properties.pngBase64, expectedRevision: revision },
+} as const;
+export const getAvatarSchema = { querystring: noQuery, response: response("avatar", avatarSchema, false) };
+export const putAvatarSchema = { querystring: noQuery, body: saveAvatarBody, response: response("avatar", avatarSchema, true) };

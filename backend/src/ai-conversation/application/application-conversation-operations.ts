@@ -6,6 +6,8 @@ import type { ConversationExecution, ConversationExecutionDelivery, Conversation
   ConversationOperationReaders, ConversationOperationQuiescence, ConversationOrdinaryContext,
   ConversationTargetLeaseResult, ExecutedConversation } from "../ports/application-conversation-operations.js";
 import type { StoredConversationMessage } from "../ports/real-conversation-store.js";
+import type { ExecuteReplySelection, SelectedReplyGrant, SelectedReplySnapshot } from "../ports/selected-reply.js";
+import { currentReplyDay, validTodayReplySelection } from "./today-reply-selection.js";
 
 const uuid = (v: unknown): v is string => typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(v);
 const key = (v: unknown): v is string => typeof v === "string" && /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/u.test(v);
@@ -13,6 +15,9 @@ const validText = (v: unknown): v is string => typeof v === "string" && v.isWell
 const failure = <T = never>(code: ConversationFailureCode): ConversationResult<T> => ({ kind: "failure", code });
 const success = <T>(value: T): ConversationResult<T> => ({ kind: "success", value });
 interface Ticket {
+  selection:(SelectedReplySnapshot & {readonly selectionRevision:string;readonly keys:readonly string[];readonly historyKeys:readonly string[]})|undefined;
+  selectedGrant:SelectedReplyGrant|undefined;
+  replyToMessageId:string|undefined;
   readonly ownerId: string;
   readonly uid: string;
   readonly operation: AsyncOperation;
@@ -92,6 +97,25 @@ export class ApplicationConversationOperations implements ConversationOperations
           if (pending?.revoked || this.targetHeld(context.ownerId, input.conversationId)) return failure("AI_OPERATION_CONFLICT");
           if (target.kind !== "success") return target;
         }
+        let snapshot:SelectedReplySnapshot|undefined;
+        if(input.contextSelection!==undefined){
+          if(!this.readers.prepareSelection)return failure("AI_UNAVAILABLE");
+          const selected=await this.readers.prepareSelection(context,input.contextSelection,input.conversationId);
+          if(!context.current())return failure("AI_UNAVAILABLE");if(selected.kind!=="success")return selected;snapshot=selected.value;
+          if(!snapshot||!Number.isSafeInteger(snapshot.purposeRevocationGeneration)||snapshot.purposeRevocationGeneration<0||!Array.isArray(snapshot.sources)||
+            snapshot.sources.length>5||new Set(snapshot.sources.map(s=>s.checkInId)).size!==snapshot.sources.length||
+            snapshot.sources.some(s=>s.kind!=="check_in"||typeof s.checkInId!=="string"||!s.checkInId||typeof s.version!=="string"||!s.version)||
+            !Array.isArray(snapshot.historyPairs)||snapshot.historyPairs.length>2||snapshot.historyPairs.some(p=>!uuid(p.userMessageId)||!uuid(p.assistantMessageId)||
+              !Number.isSafeInteger(p.userSequence)||p.userSequence<1||!Number.isSafeInteger(p.assistantSequence)||p.assistantSequence<=p.userSequence))return failure("AI_UNAVAILABLE");
+          const selection=input.contextSelection;
+          if("today" in selection){
+            const now=this.clock.utcMilliseconds(),day=currentReplyDay(selection.today.timeZone,now);
+            if(!snapshot.today||snapshot.today.timeZone!==selection.today.timeZone||!validTodayReplySelection(snapshot.today,now)||!day||
+              snapshot.today.hasMore&&snapshot.sources.length!==5||snapshot.sources.some(s=>s.sourceOccurredAt<day.startUtc||
+                (day.endUtc!==null&&s.sourceOccurredAt>=day.endUtc)||!Number.isFinite(Date.parse(s.sourceOccurredAt))||Date.parse(s.sourceOccurredAt)>now))return failure("AI_UNAVAILABLE");
+          }else if(snapshot.today!==undefined||snapshot.sources.length!==selection.sources.length||
+            snapshot.sources.some(s=>!selection.sources.some(r=>r.checkInId===s.checkInId)))return failure("AI_UNAVAILABLE");
+        }
         const operationId = this.identifiers.uuid(), conversationId = input.conversationId ?? this.identifiers.uuid(),
           userMessageId = input.kind === "retry" ? input.userMessageId : this.identifiers.uuid(), operationKey = this.identifiers.operationKey();
         const now = this.clock.now(), utc = this.clock.utcMilliseconds();
@@ -101,21 +125,30 @@ export class ApplicationConversationOperations implements ConversationOperations
             !key(operationKey) || this.tickets.has(operationId) || !Number.isFinite(now) || !Number.isSafeInteger(utc) ||
             typeof caller.tokenInstance !== "string" || caller.tokenInstance.length === 0) return failure("AI_UNAVAILABLE");
         const ticket: Ticket = { ownerId: context.ownerId, uid: context.principal.firebaseUid,
+          selection:snapshot?{...snapshot,...(snapshot.today?{today:Object.freeze({...snapshot.today})}:{}),selectionRevision:this.identifiers.uuid(),keys:snapshot.sources.map(()=>this.identifiers.uuid()),historyKeys:snapshot.historyPairs.map(()=>this.identifiers.uuid())}:undefined,selectedGrant:undefined,replyToMessageId:undefined,
           operation: Object.freeze({ operationId, conversationId, userMessageId, kind: input.kind,
             targetKind: input.kind === "send" && input.conversationId === undefined ? "reserved_new" : "existing" }),
           session: Object.freeze({}), tokenIdentity: Object.freeze({}), digest: caller.tokenInstance, key: operationKey,
           phase: "prepared", deliveryAbandoned: false, expiresAt: now + 15_000, stopExpiry: () => {}, processing: undefined, caller: undefined,
           identity: undefined, execution: undefined, barrier: "closed", closing: undefined, closePending: false, dispatchSettled: undefined };
         const preparationExpiresAt = new Date(utc + 15_000).toISOString();
+        if(ticket.selection&&(!uuid(ticket.selection.selectionRevision)||![...ticket.selection.keys,...ticket.selection.historyKeys].every(uuid)||new Set([...ticket.selection.keys,...ticket.selection.historyKeys]).size!==ticket.selection.keys.length+ticket.selection.historyKeys.length))return failure("AI_UNAVAILABLE");
         this.tickets.set(operationId, ticket); this.preparedOwners.set(context.ownerId, ticket);
         ticket.stopExpiry = this.clock.at(ticket.expiresAt, () => { if (ticket.phase === "prepared") this.forget(ticket); });
-        return success(Object.freeze({ operationId, conversationId, operationKey, preparationExpiresAt }));
+        return success(Object.freeze({ operationId, conversationId, operationKey, preparationExpiresAt,
+          ...(ticket.selection?{contextSelection:{selectionRevision:ticket.selection.selectionRevision,expiresAt:preparationExpiresAt,
+            ...(ticket.selection.today?{today:ticket.selection.today}:{}),
+            historyPairs:ticket.selection.historyPairs.map((p,i)=>({...p,historyKey:ticket.selection!.historyKeys[i]!})),
+            sourceCards:ticket.selection.sources.map((s,i)=>({cardRef:ticket.selection!.keys[i]!,kind:s.kind,version:s.version,sourceOccurredAt:s.sourceOccurredAt,
+              ...(ticket.selection!.today?{checkInId:s.checkInId}:{}),
+              observedAt:s.observedAt,state:"available" as const,canNavigate:true as const,selectionKey:ticket.selection!.keys[i]!}))}}:{}) }));
       } catch { return failure("AI_UNAVAILABLE"); }
       finally { context.signal.removeEventListener("abort", release); release(); }
     });
   }
 
-  execute(caller: ConversationCaller, input: { readonly operationId: string; readonly operationKey: string; readonly text: string },
+  execute(caller: ConversationCaller, input: { readonly operationId: string; readonly operationKey: string; readonly text: string;
+    readonly contextSelection?:ExecuteReplySelection;readonly replyToMessageId?:string },
     delivery: ConversationExecutionDelivery): Promise<ConversationResult<ExecutedConversation>> {
     // Body validation always precedes single consumption, including invalid Unicode.
     if (!input || !uuid(input.operationId) || !key(input.operationKey)) return Promise.resolve(failure("REQUEST_INVALID"));
@@ -125,10 +158,25 @@ export class ApplicationConversationOperations implements ConversationOperations
     if (this.targetHeld(ticket.ownerId, ticket.operation.conversationId)) return Promise.resolve(failure("AI_OPERATION_CONFLICT"));
     if (ticket.phase !== "prepared") return Promise.resolve(failure("AI_OPERATION_CONFLICT"));
     if (!this.preparedCurrent(ticket)) { this.forget(ticket); return Promise.resolve(failure("AI_OPERATION_UNAVAILABLE")); }
+    const choice=input.contextSelection,selection=ticket.selection;
+    if((selection!==undefined)!==(choice!==undefined))return Promise.resolve(failure("AI_CONTEXT_SELECTION_CONFLICT"));
+    if(selection?.today&&!validTodayReplySelection(selection.today,this.clock.utcMilliseconds()))return Promise.resolve(failure("AI_CONTEXT_SELECTION_CONFLICT"));
+    if(selection&&choice){
+      if(choice.selectionRevision!==selection.selectionRevision||!Array.isArray(choice.includedKeys)||!Array.isArray(choice.excludedKeys)||
+        new Set(choice.includedKeys).size!==choice.includedKeys.length||new Set(choice.excludedKeys).size!==choice.excludedKeys.length||
+        [...choice.includedKeys,...choice.excludedKeys].some(k=>!selection.keys.includes(k))||selection.keys.some(k=>!choice.includedKeys.includes(k)&&!choice.excludedKeys.includes(k))||
+        (choice.excludedHistoryKeys!==undefined&&(!Array.isArray(choice.excludedHistoryKeys)||choice.excludedHistoryKeys.length>2||new Set(choice.excludedHistoryKeys).size!==choice.excludedHistoryKeys.length||choice.excludedHistoryKeys.some(k=>!selection.historyKeys.includes(k)))))return Promise.resolve(failure("AI_CONTEXT_SELECTION_CONFLICT"));
+    }
+    if(input.replyToMessageId!==undefined&&(!uuid(input.replyToMessageId)||ticket.operation.targetKind!=="existing"))return Promise.resolve(failure("AI_CONTEXT_SELECTION_CONFLICT"));
     // Old Transport cannot satisfy F02. Preserve the prepared ticket for the real
     // capability to arrive within its original 15s, rather than consume it falsely.
     if (!delivery || typeof delivery.acceptCompleteBody !== "function") return Promise.resolve(failure("AI_UNAVAILABLE"));
     if (!this.deliveryCurrent(delivery)) return Promise.resolve({ kind: "terminated" });
+    ticket.selectedGrant=selection&&choice?Object.freeze({purposeRevocationGeneration:selection.purposeRevocationGeneration,selectionRevision:selection.selectionRevision,
+      ...(selection.today?{today:Object.freeze({...selection.today})}:{}),
+      sources:Object.freeze(selection.sources.map((s,i)=>Object.freeze({...s,selectionKey:selection.keys[i]!}))),includedKeys:Object.freeze([...choice.includedKeys]),excludedKeys:Object.freeze([...choice.excludedKeys]),
+      historyPairs:Object.freeze(selection.historyPairs.map((p,i)=>Object.freeze({...p,historyKey:selection.historyKeys[i]!}))),excludedHistoryKeys:Object.freeze([...(choice.excludedHistoryKeys??[])])}):undefined;
+    ticket.replyToMessageId=input.replyToMessageId;
     ticket.phase = "running"; ticket.stopExpiry();
     if (this.preparedOwners.get(ticket.ownerId) === ticket) this.preparedOwners.delete(ticket.ownerId);
     ticket.processing = { text: input.text }; ticket.caller = caller;
@@ -156,6 +204,8 @@ export class ApplicationConversationOperations implements ConversationOperations
         const u = observed.value;
         if (!stored(u) || u.role !== "user" || u.messageId !== ticket.operation.userMessageId || u.text !== ticket.processing?.text)
           return failure("AI_OPERATION_CONFLICT");
+        if(ticket.replyToMessageId!==undefined&&ticket.replyToMessageId!==u.replyToMessageId)return failure("AI_CONTEXT_SELECTION_CONFLICT");
+        ticket.replyToMessageId=u.replyToMessageId;
         const saved: AsyncSavedUser = Object.freeze({ messageId: u.messageId, sequence: u.sequence,
           persistedAt: Object.freeze({ seconds: u.persistedAt.seconds, nanoseconds: u.persistedAt.nanoseconds }) });
         return success(saved);
@@ -164,6 +214,7 @@ export class ApplicationConversationOperations implements ConversationOperations
       if (authorization.kind !== "success") return authorization;
       const identity = ticket.identity!;
       const execution = this.executor.create({ identity, operation: ticket.operation,
+        ...(ticket.selectedGrant?{selectedReply:ticket.selectedGrant}:{}),...(ticket.replyToMessageId?{replyToMessageId:ticket.replyToMessageId}:{}),
         text: () => alive() ? ticket.processing?.text : undefined,
         ...(authorization.value === undefined ? {} : { retryUser: authorization.value }),
         verifyCurrentAuth: () => ticket.caller && alive() ? ticket.caller.verifyCurrentAuth() : Promise.resolve({ kind: "dependency_unavailable" }) },
@@ -372,7 +423,7 @@ export class ApplicationConversationOperations implements ConversationOperations
     t.phase = "terminal"; t.stopExpiry();
     if (this.preparedOwners.get(t.ownerId) === t) this.preparedOwners.delete(t.ownerId);
     if (t.processing) t.processing.text = "";
-    t.processing = undefined; t.caller = undefined;
+    t.processing = undefined; t.caller = undefined;t.selection=undefined;t.selectedGrant=undefined;t.replyToMessageId=undefined;
     try { t.execution?.dispose(); } catch { /* Fail closed; no private result is retained. */ }
   }
   private close(t: Ticket, explicit = false): Promise<boolean> {

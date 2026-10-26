@@ -1,0 +1,1079 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ENMORI approved first-flow candidate schemas",
+    "version": "2026-10-25"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Settings": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "revision",
+          "mode",
+          "categories",
+          "timeZone",
+          "quiet",
+          "maximumInRolling24h",
+          "cooldownMinutes",
+          "pushEnabled",
+          "preview"
+        ],
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "on",
+              "off",
+              "paused"
+            ]
+          },
+          "pausedUntil": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "categories": {
+            "type": "array",
+            "maxItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "explicit_follow_up"
+              ]
+            }
+          },
+          "timeZone": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Confirmed IANA zone for saved settings; empty only for the initial revision-zero/off response."
+          },
+          "quiet": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "disabled"
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "startMinute",
+                  "endMinute"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "window"
+                    ]
+                  },
+                  "startMinute": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1439
+                  },
+                  "endMinute": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1439
+                  }
+                }
+              }
+            ],
+            "description": "A window must have distinct startMinute and endMinute; semantic equality is rejected with 422."
+          },
+          "maximumInRolling24h": {
+            "type": "integer",
+            "const": 1
+          },
+          "cooldownMinutes": {
+            "type": "integer",
+            "const": 480
+          },
+          "pushEnabled": {
+            "type": "boolean"
+          },
+          "preview": {
+            "type": "string",
+            "enum": [
+              "generic",
+              "hidden"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "revision": {
+                  "const": 0
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "off"
+                },
+                "timeZone": {
+                  "const": ""
+                },
+                "pushEnabled": {
+                  "const": false
+                },
+                "categories": {
+                  "maxItems": 0
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "timeZone": {
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "pausedUntil"
+              ]
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "paused"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ReplaceSettings": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedRevision",
+          "mode",
+          "categories",
+          "timeZone",
+          "quiet",
+          "maximumInRolling24h",
+          "cooldownMinutes",
+          "pushEnabled",
+          "preview"
+        ],
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "on",
+              "off",
+              "paused"
+            ]
+          },
+          "pausedUntil": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "categories": {
+            "type": "array",
+            "maxItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "explicit_follow_up"
+              ]
+            }
+          },
+          "timeZone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Explicit confirmed IANA time zone, validated against zone rules; no implicit device offset."
+          },
+          "quiet": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "disabled"
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "startMinute",
+                  "endMinute"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "window"
+                    ]
+                  },
+                  "startMinute": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1439
+                  },
+                  "endMinute": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1439
+                  }
+                }
+              }
+            ],
+            "description": "A window must have distinct startMinute and endMinute; semantic equality is rejected with 422."
+          },
+          "maximumInRolling24h": {
+            "type": "integer",
+            "const": 1
+          },
+          "cooldownMinutes": {
+            "type": "integer",
+            "const": 480
+          },
+          "pushEnabled": {
+            "type": "boolean"
+          },
+          "preview": {
+            "type": "string",
+            "enum": [
+              "generic",
+              "hidden"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "required": [
+                "pausedUntil"
+              ]
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "paused"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CreateIntent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "conversationId",
+          "sourceMessageId",
+          "category",
+          "dueAt",
+          "timeZone",
+          "processing",
+          "expectedSettingsRevision"
+        ],
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "sourceMessageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "explicit_follow_up"
+            ]
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "timeZone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Explicit confirmed IANA time zone, validated against zone rules; no implicit device offset."
+          },
+          "processing": {
+            "type": "string",
+            "enum": [
+              "local"
+            ]
+          },
+          "expectedSettingsRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "Intent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "intentId",
+          "revision",
+          "state",
+          "dueAt",
+          "expiresAt",
+          "category",
+          "conversationId"
+        ],
+        "properties": {
+          "intentId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "reserved",
+              "prepared",
+              "published",
+              "cancelled",
+              "failed",
+              "expired",
+              "dispatching",
+              "accepted",
+              "unknown"
+            ]
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "explicit_follow_up"
+            ]
+          },
+          "conversationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "recallPossible": {
+            "type": "boolean",
+            "const": false
+          }
+        },
+        "description": "Owner-authorized status only. Accepted means provider accepted, not delivered or read. No source body, sourceMessageId, grant, routing value or authority proof is exposed."
+      },
+      "Intents": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "intents"
+        ],
+        "properties": {
+          "intents": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "$ref": "#/components/schemas/Intent"
+            }
+          }
+        }
+      },
+      "CancelIntent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedRevision"
+        ],
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "Registration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "revision",
+          "enabled",
+          "availability"
+        ],
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "installationRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "description": "Canonical UTC milliseconds. The server verifies the actual calendar instant."
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "registered",
+              "unregistered",
+              "expired"
+            ]
+          }
+        }
+      },
+      "ReplaceRegistration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedRevision",
+          "installationRef",
+          "registrationKind",
+          "registrationValue",
+          "enabled"
+        ],
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "installationRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          },
+          "registrationKind": {
+            "type": "string",
+            "enum": [
+              "fcm_token"
+            ]
+          },
+          "registrationValue": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "writeOnly": true,
+            "description": "Secret routing value; non-whitespace well-formed Unicode without control characters. Never returned by metadata GET or logged."
+          },
+          "enabled": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      },
+      "DeleteRegistration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedRevision",
+          "installationRef"
+        ],
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "installationRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "minLength": 36,
+            "maxLength": 36
+          }
+        }
+      },
+      "ReadState": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "revision",
+          "readThroughSequence"
+        ],
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "readThroughSequence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "MarkRead": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedRevision",
+          "readThroughSequence"
+        ],
+        "properties": {
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "readThroughSequence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "error",
+          "requestId"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "AI_AUTHORITY_CHANGED",
+                  "AI_BUSY",
+                  "AI_CONTEXT_NOT_PERMITTED",
+                  "AI_CONTEXT_SELECTION_CONFLICT",
+                  "AI_INPUT_INVALID",
+                  "AI_OPERATION_CONFLICT",
+                  "AI_OPERATION_UNAVAILABLE",
+                  "AI_OUTCOME_UNRESOLVED",
+                  "AI_REPLY_REJECTED",
+                  "AI_SOURCE_UNAVAILABLE",
+                  "AI_UNAVAILABLE",
+                  "AUTH_FORBIDDEN",
+                  "AUTH_REQUIRED",
+                  "CONVERSATION_UNAVAILABLE",
+                  "IDEMPOTENCY_CONFLICT",
+                  "IDEMPOTENCY_KEY_INVALID",
+                  "ONBOARDING_REQUIRED",
+                  "PROACTIVE_INPUT_INVALID",
+                  "PROACTIVE_REVISION_PRECONDITION_FAILED",
+                  "REQUEST_INVALID",
+                  "REQUEST_TOO_LARGE"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
+          "requestId": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "SourceCard": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cardRef",
+          "kind",
+          "version",
+          "sourceOccurredAt",
+          "observedAt",
+          "state",
+          "canNavigate"
+        ],
+        "properties": {
+          "cardRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "kind": {
+            "enum": [
+              "conversation_message",
+              "check_in"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "sourceOccurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "const": "available"
+          },
+          "canNavigate": {
+            "const": true
+          }
+        }
+      },
+      "SelectionCard": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cardRef",
+          "kind",
+          "version",
+          "sourceOccurredAt",
+          "observedAt",
+          "state",
+          "canNavigate",
+          "selectionKey"
+        ],
+        "properties": {
+          "cardRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "kind": {
+            "const": "check_in"
+          },
+          "version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "sourceOccurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "const": "available"
+          },
+          "canNavigate": {
+            "const": true
+          },
+          "selectionKey": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "checkInId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500,
+            "description": "Present only in automatic-today preparation, current-owner UI exclusion mapping; never a model input."
+          }
+        }
+      },
+      "SelectReplyContext": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "processing",
+              "sources"
+            ],
+            "properties": {
+              "processing": {
+                "const": "local"
+              },
+              "sources": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "kind",
+                    "checkInId"
+                  ],
+                  "properties": {
+                    "kind": {
+                      "const": "check_in"
+                    },
+                    "checkInId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1500,
+                      "description": "Current-owner Check-in document identifier; shared isSafeDocumentId validation, at most 1500 UTF-8 bytes, no slash, . or .. or reserved __name__. No client contents or paths."
+                    }
+                  }
+                },
+                "minItems": 0,
+                "maxItems": 5,
+                "uniqueItems": true
+              }
+            },
+            "description": "One request only. At most five unique own Check-ins in the inclusive last seven days. Zero selections is allowed for explicit exclusion review; no automatic category permission."
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "processing",
+              "today"
+            ],
+            "properties": {
+              "processing": {
+                "const": "local"
+              },
+              "today": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "timeZone"
+                ],
+                "properties": {
+                  "timeZone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Canonical IANA time zone; date and current owner are resolved by the server."
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "description": "Explicit local source IDs or automatic current-owner today selection, never both. See ai-today-context-contract.md."
+      },
+      "PreparedReplySelection": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "selectionRevision",
+          "expiresAt",
+          "sourceCards",
+          "historyPairs"
+        ],
+        "properties": {
+          "selectionRevision": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceCards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SelectionCard"
+            },
+            "minItems": 0,
+            "maxItems": 5
+          },
+          "historyPairs": {
+            "type": "array",
+            "maxItems": 2,
+            "items": {
+              "$ref": "#/components/schemas/PreparedHistoryPair"
+            }
+          },
+          "today": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "date",
+              "timeZone",
+              "limit",
+              "hasMore"
+            ],
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "timeZone": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "limit": {
+                "const": 5
+              },
+              "hasMore": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "ExecuteReplySelection": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "selectionRevision",
+          "includedKeys",
+          "excludedKeys"
+        ],
+        "properties": {
+          "selectionRevision": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "includedKeys": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "minItems": 0,
+            "maxItems": 5,
+            "uniqueItems": true
+          },
+          "excludedKeys": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "minItems": 0,
+            "maxItems": 5,
+            "uniqueItems": true
+          },
+          "excludedHistoryKeys": {
+            "type": "array",
+            "maxItems": 2,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "description": "Optional, defaults to no exclusions. Only keys from this prepared selection. Explicitly omit complete pairs for this reply, without deleting saved history or backfilling older pairs. Changed history requires a fresh review."
+          }
+        },
+        "description": "Each key must belong to this unconsumed preparation and both arrays together must cover it. Overlap is allowed: exclusion wins. Inherited dependencies are checked separately; conflict preserves the draft and requires review."
+      },
+      "MessageAnchor": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "conversationId",
+          "messageId",
+          "sequence",
+          "pageBefore"
+        ],
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "messageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740990
+          },
+          "pageBefore": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "description": "Canonical unpadded base64url(JSON.stringify({v:1,before:sequence+1})); pass as existing transcript before query, then locate this exact ID and sequence."
+          }
+        }
+      },
+      "ResolveSource": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "conversationId",
+          "messageId",
+          "cardRef"
+        ],
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "messageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "cardRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      },
+      "SourceTarget": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "anchor"
+            ],
+            "properties": {
+              "kind": {
+                "const": "conversation_message"
+              },
+              "anchor": {
+                "$ref": "#/components/schemas/MessageAnchor"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "checkInId"
+            ],
+            "properties": {
+              "kind": {
+                "const": "check_in"
+              },
+              "checkInId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500,
+                "description": "Current-owner Check-in document identifier; shared isSafeDocumentId validation, at most 1500 UTF-8 bytes, no slash, . or .. or reserved __name__. No client contents or paths."
+              }
+            }
+          }
+        ]
+      },
+      "PreparedHistoryPair": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "historyKey",
+          "userMessageId",
+          "assistantMessageId",
+          "userSequence",
+          "assistantSequence"
+        ],
+        "properties": {
+          "historyKey": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "userMessageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "assistantMessageId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "userSequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "assistantSequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "description": "One current complete user/assistant exchange, from the fixed latest-two window before exclusions. User sequence precedes its assistant sequence; all message IDs and sequences and all history keys are distinct. Pairs are ordered by assistant sequence, so an older user's later accepted Retry can overlap a more recent pair. No source IDs, source text or private provenance."
+      },
+      "ResolveDelivery": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "deliveryRef"
+        ],
+        "properties": {
+          "deliveryRef": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      }
+    }
+  }
+}

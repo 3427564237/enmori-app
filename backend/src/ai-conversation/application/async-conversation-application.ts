@@ -11,6 +11,8 @@ import type { AsyncAssistantWriteObservation, AsyncClaimSettlement, AsyncCloseOb
 import type { AcceptedAssistant, ConversationInput } from "../ports/conversation-lifecycle.js";
 import type { AcceptedContextRead, ContextDependencies, ConversationHistory, RealContextReadPort } from "../ports/real-context-reader.js";
 import { PreparedRealContextReader } from "./real-context-reader.js";
+import { SelectedReplyReader } from "./selected-reply-reader.js";
+import type { SelectedReplyGrant, SelectedReplyReadPort, SelectedReplyFailure } from "../ports/selected-reply.js";
 
 export type AsyncConversationCommand = object;
 export type AsyncConversationAdmission = { readonly accepted: true;
@@ -18,6 +20,8 @@ export type AsyncConversationAdmission = { readonly accepted: true;
   | { readonly accepted: false; readonly failure: "stale_authority" | "invalid_input" | "overload" | "dependency_unavailable" };
 interface Processing { text: string; candidate: OutputCandidate | undefined }
 interface State {
+  selectedReply:SelectedReplyGrant|undefined;
+  replyToMessageId:string|undefined;
   readonly identity: AsyncConversationIdentity;
   readonly operation: AsyncOperation;
   readonly retryUser: AsyncSavedUser | undefined;
@@ -25,7 +29,7 @@ interface State {
   history: ConversationHistory | undefined;
   dispatch: Promise<AsyncConversationAdmission> | undefined;
   control: RuntimeApplicationControl | undefined;
-  reader: PreparedRealContextReader | undefined;
+  reader: PreparedRealContextReader | SelectedReplyReader | undefined;
   context: AsyncEffectContext | undefined;
   readerReady: Promise<string> | undefined;
   terminal: boolean;
@@ -65,7 +69,8 @@ export class AsyncConversationApplication {
     private readonly authority: AsyncConversationAuthority, private readonly reads: RealContextReadPort,
     private readonly store: AsyncConversationStore, private readonly gates: AsyncConversationGates,
     private readonly sink: AsyncConversationDelivery, private readonly clock: AsyncConversationClock,
-    private readonly strategy?: "open_conversation_v1") {}
+    private readonly strategy?: "open_conversation_v1",private readonly selectedReads?:SelectedReplyReadPort,
+    private readonly selectedFailure?:(kind:SelectedReplyFailure)=>void) {}
 
   /** Input is from a verified, consumed N01 ticket, never an ordinary untrusted DTO. */
   create(input: AsyncConversationCommandInput): AsyncConversationCommand {
@@ -76,6 +81,7 @@ export class AsyncConversationApplication {
     const operation = Object.freeze({ operationId: input.operation.operationId, conversationId: input.operation.conversationId,
       userMessageId: input.operation.userMessageId, kind: input.operation.kind, targetKind: input.operation.targetKind });
     const state: State = { identity, operation, retryUser: input.retryUser === undefined ? undefined : user(input.retryUser),
+      selectedReply:input.selectedReply,replyToMessageId:input.replyToMessageId,
       history: undefined, processing: { text: input.text, candidate: undefined }, dispatch: undefined, control: undefined,
       reader: undefined, context: undefined, readerReady: undefined, terminal: false, disposeCount: 0,
       fenceIssued: false, uncertain: false, user: undefined, assistantMessageId: undefined,
@@ -105,7 +111,8 @@ export class AsyncConversationApplication {
           const read: AcceptedContextRead = Object.freeze({ principal: s.identity.principal,
             ownerId: s.identity.ownerId, session: s.identity.session, originalRequest: s.identity.originalRequest,
             acceptedAt: control.acceptedAt, deadline: control.deadline, asOf: instant(this.clock.utcNow()), signal: control.signal });
-          s.reader = new PreparedRealContextReader(read, this.reads, () => this.clock.monotonicNow(), () => this.live(s));
+          s.reader = s.selectedReply?new SelectedReplyReader(read,s.selectedReply,this.selectedReads,()=>this.clock.monotonicNow(),()=>this.live(s),kind=>this.selectedFailure?.(kind)):
+            new PreparedRealContextReader(read, this.reads, () => this.clock.monotonicNow(), () => this.live(s));
           s.context = Object.freeze({ identity: s.identity, operation: s.operation, read, budget: control,
             originalCurrent: () => this.live(s), dependencies: () => this.dependencies(s) });
           // Starts at acceptance, including while queued; never first captures at dequeue.
@@ -204,16 +211,25 @@ export class AsyncConversationApplication {
     if (!this.live(s)) return undefined;
     const base = s.reader?.dependencies();
     if (!base) return undefined;
-    if (!this.strategy) return base;
+    const dependencies={...base,...(s.replyToMessageId?{replyToMessageId:s.replyToMessageId}:{})};
+    if (!this.strategy) return dependencies;
     const sources = new Map(base.sources.map(source => [source.sourceId,source]));
     for (const source of s.history?.sources ?? []) sources.set(source.sourceId,source);
     if (sources.size > 15) return undefined;
-    return Object.freeze({...base,sources:Object.freeze([...sources.values()]),history:Object.freeze(s.history?.pairs.map(p => p.identity) ?? [])});
+    const messages=s.history?.messageSources??[],selected=base.selectedReply;
+    const flattened=[...(selected?.sources??[]),...messages].filter((ref,i,all)=>all.findIndex(r=>r.kind===ref.kind&&r.id===ref.id)===i);
+    if(flattened.length>15)return undefined;
+    return Object.freeze({...dependencies,sources:Object.freeze([...sources.values()]),history:Object.freeze(s.history?.pairs.map(p => p.identity) ?? []),
+      ...(selected||messages.length?{selectedReply:{processing:"local" as const,asOf:s.context!.read.asOf,permittedCheckInIds:selected?.permittedCheckInIds??[],
+        excludedCheckInIds:selected?.excludedCheckInIds??[],sources:Object.freeze(flattened),
+        ...(selected?.historySnapshot?{historySnapshot:selected.historySnapshot}:{}),...(selected?.excludedHistoryPairs?{excludedHistoryPairs:selected.excludedHistoryPairs}:{})}}:{})});
   }
   private model(s: State): ConversationInput | undefined {
     if (!this.live(s) || !s.processing) return undefined;
     const projection = s.reader?.modelContext();
     return projection && Object.freeze({ currentMessage: s.processing.text, checkIns: projection.checkIns, persona: projection.persona,
+      ...(s.selectedReply?{contextMode:"selected_checkins_v1" as const}:{}),
+      ...(s.history?.replyToAssistant?{replyToAssistant:s.history.replyToAssistant}:{}),
       ...(this.strategy ? {strategy:this.strategy,history:Object.freeze(s.history?.pairs.map(p => Object.freeze({user:p.user,assistant:p.assistant})) ?? [])} : {}) });
   }
   private assistant(s: State): AcceptedAssistant | undefined {
@@ -237,11 +253,12 @@ export class AsyncConversationApplication {
         const history = await this.store.readHistory?.(s.context!,s.history.pairs.map(p => p.identity));
         if (!this.live(s)) return false;
         if (history?.kind !== "read") {
+          if(history&&["selection_conflict","changed","source_unavailable"].includes(history.kind))this.selectedFailure?.(history.kind as SelectedReplyFailure);
           this.fail(s,history?.kind === "denied" ? "stale_authority" : "dependency_unavailable"); return false;
         }
         // Source/message identity and bytes are immutable; an adapter cannot
         // swap content after the complete input was budgeted or validated.
-        if (JSON.stringify(history.value.pairs) !== JSON.stringify(s.history.pairs)) {
+        if (JSON.stringify(history.value) !== JSON.stringify(s.history)) {
           this.fail(s,"stale_authority"); return false;
         }
       }
@@ -263,7 +280,9 @@ export class AsyncConversationApplication {
     if (this.strategy) {
       const history = await this.store.readHistory?.(s.context!);
       if (!this.live(s)) return;
-      if (history?.kind !== "read") { this.fail(s,history?.kind === "denied" ? "stale_authority" : "dependency_unavailable"); return; }
+      if (history?.kind !== "read") {
+        if(history&&["selection_conflict","changed","source_unavailable"].includes(history.kind))this.selectedFailure?.(history.kind as SelectedReplyFailure);
+        this.fail(s,history?.kind === "denied" ? "stale_authority" : "dependency_unavailable"); return; }
       s.history = history.value;
       if (!this.dependencies(s)) { this.fail(s,"dependency_unavailable"); return; }
     }
@@ -275,6 +294,7 @@ export class AsyncConversationApplication {
     const opened = await this.store.open(s.context!);
     if (!this.live(s)) return;
     if (opened.kind !== "open" || !this.matches(s, opened)) {
+      if(opened.kind==="rejected"&&opened.selectionFailure)this.selectedFailure?.(opened.selectionFailure);
       this.fail(s, opened.kind === "rejected" ? opened.failure : "dependency_unavailable"); return;
     }
     s.uncertain = false;
@@ -287,7 +307,7 @@ export class AsyncConversationApplication {
     if (!await this.checkpoint(s)) return;
   }
   private acceptUser(s: State, result: AsyncUserWriteObservation): boolean {
-    if (result.kind !== "committed") { this.fail(s, result.kind === "rejected" ? result.failure : "dependency_unavailable"); return false; }
+    if (result.kind !== "committed") {if(result.kind==="rejected"&&result.selectionFailure)this.selectedFailure?.(result.selectionFailure); this.fail(s, result.kind === "rejected" ? result.failure : "dependency_unavailable"); return false; }
     try {
       const observed = user(result.user);
       if (!this.matches(s, result) || observed.messageId !== s.operation.userMessageId || "assistantMessageId" in result ||
@@ -304,6 +324,7 @@ export class AsyncConversationApplication {
   }
   private acceptAssistant(s: State, result: AsyncAssistantWriteObservation | AsyncClaimSettlement): boolean {
     if (result.kind !== "committed" && result.kind !== "settled") {
+      if(result.kind==="rejected"&&result.selectionFailure)this.selectedFailure?.(result.selectionFailure);
       this.fail(s, result.kind === "rejected" ? result.failure : "dependency_unavailable"); return false;
     }
     try {
@@ -344,6 +365,7 @@ export class AsyncConversationApplication {
     const processing = s.processing; s.processing = undefined;
     if (processing) { processing.text = ""; processing.candidate = undefined; }
     s.history = undefined;
+    s.selectedReply=undefined;s.replyToMessageId=undefined;
     s.reader?.dispose(); s.reader = undefined; s.readerReady = undefined; s.context = undefined;
     // Do not await or claim remote cancellation. Only content-free matching close
     // observation may arrive after local disposal, never a late content ACK.

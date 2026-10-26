@@ -14,6 +14,7 @@ import '../domain/profile_details.dart';
 import '../../../core/result/result.dart';
 import '../../interests/domain/interest_repository.dart';
 import 'own_profile_controller.dart';
+import 'own_profile_header.dart';
 
 final class OwnProfilePage extends ConsumerWidget {
   const OwnProfilePage({
@@ -56,14 +57,6 @@ final class OwnProfilePage extends ConsumerWidget {
         title: Text(context.tr('My profile', "我的资料")),
         actions: [
           IconButton(
-            key: const Key('profile-edit'),
-            tooltip: context.tr('Edit profile', "编辑资料"),
-            onPressed: state.username == null || onEditProfile == null
-                ? null
-                : () => edit(onEditProfile),
-            icon: const Icon(Icons.edit_outlined),
-          ),
-          IconButton(
             key: const Key('profile-settings'),
             tooltip: context.tr('Settings', "设置"),
             onPressed: state.username == null || onOpenSettings == null
@@ -91,70 +84,13 @@ final class OwnProfilePage extends ConsumerWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 28,
-                                child: Text(
-                                  value.username.substring(0, 1).toUpperCase(),
-                                  style: const TextStyle(fontSize: 24),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      value.displayName ?? value.username,
-                                      key: const Key('profile-name'),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall,
-                                    ),
-                                    Text('@${value.username}'),
-                                  ],
-                                ),
-                              ),
-                            ],
+                          OwnProfileHeader(
+                            profile: value,
+                            onEdit: onEditProfile == null
+                                ? null
+                                : () => edit(onEditProfile),
                           ),
                           const SizedBox(height: 16),
-                          Material(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerLow,
-                            borderRadius: BorderRadius.circular(16),
-                            child: ListTile(
-                              key: const Key('profile-audience'),
-                              leading: const Icon(Icons.visibility_outlined),
-                              title: Text(switch (value.visibility) {
-                                ProfileVisibility.private => context.tr(
-                                  'Private profile',
-                                  "私密资料",
-                                ),
-                                ProfileVisibility.friendsOnly => context.tr(
-                                  'Friends-only profile',
-                                  "仅好友可见的资料",
-                                ),
-                                ProfileVisibility.public => context.tr(
-                                  'Public profile',
-                                  "公开资料",
-                                ),
-                              }),
-                              subtitle: Text(
-                                context.tr(
-                                  'Your records and sharing choices have separate controls.',
-                                  "记录与各项分享范围需要分别设置。",
-                                ),
-                              ),
-                              trailing: onEditProfile == null
-                                  ? null
-                                  : const Icon(Icons.chevron_right),
-                              onTap: onEditProfile == null
-                                  ? null
-                                  : () => edit(onEditProfile),
-                            ),
-                          ),
                           if (value.details.bio case final bio?)
                             Padding(
                               padding: const EdgeInsets.only(top: 16),
@@ -184,7 +120,12 @@ final class OwnProfilePage extends ConsumerWidget {
                                   if (value.details.region case final region?)
                                     _ProfileDetail(
                                       icon: Icons.place_outlined,
-                                      label: region,
+                                      label: isCoordinateRegion(region)
+                                          ? context.tr(
+                                              'Add a place name in Edit profile',
+                                              '在编辑资料中填写地点名称',
+                                            )
+                                          : region,
                                     ),
                                 ],
                               ),
