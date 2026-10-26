@@ -33,6 +33,7 @@ final class AiConversationState {
     this.nextCursor,
     this.statusMessage,
     this.canSend = false,
+    bool? canEditDraft,
     this.canRetry = false,
     this.canCheckResult = false,
     this.canCancel = false,
@@ -54,7 +55,8 @@ final class AiConversationState {
     this.historyError,
     this.canBrowseHistory = false,
     this.canSelectConversation = false,
-  }) : messages = List.unmodifiable(messages),
+  }) : canEditDraft = canEditDraft ?? (canSend || canRetry),
+       messages = List.unmodifiable(messages),
        conversations = List.unmodifiable(conversations),
        lastReadMessageIds = List.unmodifiable(lastReadMessageIds);
 
@@ -73,6 +75,7 @@ final class AiConversationState {
   final String? nextCursor;
   final String? statusMessage;
   final bool canSend;
+  final bool canEditDraft;
   final bool canRetry;
   final bool canCheckResult;
   final bool canCancel;

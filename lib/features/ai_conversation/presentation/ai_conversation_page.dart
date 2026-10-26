@@ -10,6 +10,7 @@ import '../../../core/presentation/local_time.dart';
 import '../ai_conversation_providers.dart';
 import '../ai_owned_sources_providers.dart';
 import '../ai_selected_sources_providers.dart';
+import '../../account/content_access.dart';
 import '../../proactive/domain/proactive.dart';
 import 'ai_plan_draft_page.dart';
 import 'ai_message_search_page.dart';
@@ -150,6 +151,10 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   final Object _editorToken = Object();
   bool? _routeCurrent;
   bool _syncingEditor = false;
+  Timer? _resultRecoveryTimer;
+  Object? _resultRecoveryKey;
+  int _resultRecoveryReads = 0;
+  bool _readingResult = false;
 
   @override
   void initState() {
@@ -222,10 +227,65 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         }
       });
     }
+    _scheduleResultRecovery();
+  }
+
+  void _scheduleResultRecovery() {
+    if (!_isCurrentEditor ||
+        (WidgetsBinding.instance.lifecycleState != null &&
+            WidgetsBinding.instance.lifecycleState !=
+                AppLifecycleState.resumed)) {
+      return;
+    }
+    final key = _controller.resultRecoveryKey;
+    if (key != _resultRecoveryKey) {
+      _resultRecoveryTimer?.cancel();
+      _resultRecoveryTimer = null;
+      _resultRecoveryKey = key;
+      _resultRecoveryReads = 0;
+    }
+    final state = ref.read(aiConversationControllerProvider);
+    if (key == null ||
+        {
+          AiConversationPhase.limited,
+          AiConversationPhase.authorityChanged,
+          AiConversationPhase.unauthenticated,
+          AiConversationPhase.deleted,
+          AiConversationPhase.deleting,
+          AiConversationPhase.deleteUnknown,
+        }.contains(state.phase) ||
+        !state.canCheckResult ||
+        _readingResult ||
+        _resultRecoveryTimer != null ||
+        _resultRecoveryReads >= 3) {
+      return;
+    }
+    final delay = _resultRecoveryReads == 0
+        ? Duration.zero
+        : Duration(seconds: _resultRecoveryReads == 1 ? 1 : 3);
+    _resultRecoveryTimer = Timer(delay, () async {
+      _resultRecoveryTimer = null;
+      if (!_isCurrentEditor ||
+          key != _controller.resultRecoveryKey ||
+          (WidgetsBinding.instance.lifecycleState != null &&
+              WidgetsBinding.instance.lifecycleState !=
+                  AppLifecycleState.resumed)) {
+        return;
+      }
+      _resultRecoveryReads++;
+      _readingResult = true;
+      try {
+        await _controller.checkResult();
+      } finally {
+        _readingResult = false;
+        if (mounted) _scheduleResultRecovery();
+      }
+    });
   }
 
   @override
   void dispose() {
+    _resultRecoveryTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _dismissConfirmation();
     _controller.releaseDraftEditor(_editorToken);
@@ -240,6 +300,12 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!_ownsCurrentSession) return;
+    if (state == AppLifecycleState.resumed) {
+      _scheduleResultRecovery();
+    } else {
+      _resultRecoveryTimer?.cancel();
+      _resultRecoveryTimer = null;
+    }
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       _controller.cancel();
@@ -293,7 +359,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   void _newConversation() {
     if (!_isCurrentEditor || _confirming || _leaving) return;
     _initialLocationDismissed = true;
-    final value = _message.value;
+    final state = ref.read(aiConversationControllerProvider);
+    final pendingOriginal =
+        state.canLeaveWithoutRetrying &&
+        _message.text == state.localOutgoingText;
+    final value = pendingOriginal ? TextEditingValue.empty : _message.value;
     final focused = _messageFocus.hasFocus;
     _controller.startNewConversation();
     // The same editor stays mounted. Switching a determined conversation must
@@ -413,30 +483,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         ],
         TextButton.icon(
           key: const Key('ai-references'),
-          onPressed:
-              !state.canCancel &&
-                  (state.canSend || state.canRetry || selected.active)
+          onPressed: !state.canCancel && state.canEditDraft
               ? () => unawaited(_openReferences())
               : null,
           icon: const Icon(Icons.fact_check_outlined),
-          label: Text(
-            selected.active
-                ? selected.mode == AiReferenceMode.today
-                      ? context.tr(
-                          "Today's Check-ins · local references",
-                          '今天的签到 · 本地参考',
-                        )
-                      : selected.mode == AiReferenceMode.off
-                      ? context.tr(
-                          'Check-in references off for this topic',
-                          '本话题签到参考已关闭',
-                        )
-                      : context.tr(
-                          'References: ${selected.selectedIds.length} selected',
-                          '本次参考：已选 ${selected.selectedIds.length} 条',
-                        )
-                : context.tr('References for this reply', '本次参考'),
-          ),
+          label: Text(context.tr('Check-in references', '签到参考')),
         ),
         if (selected.active)
           Padding(
@@ -452,7 +503,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   : selected.mode == AiReferenceMode.today
                   ? context.tr(
                       'Uses up to the latest 5 from today when you send.',
-                      '发送时最多参考今天最近 5 条。',
+                      '自动参考今天最近 5 条。',
                     )
                   : selected.mode == AiReferenceMode.off
                   ? context.tr('You can still chat.', '仍可正常聊天。')
@@ -470,8 +521,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                       AiSelectionNotice.expired,
                     }.contains(selected.notice)
                   ? context.tr(
-                      'References will be checked when you send. Your draft is kept if they change.',
-                      '发送时会核对本次参考；来源变化时会保留草稿。',
+                      '${selected.selectedIds.length} selected · checked when you send.',
+                      '已手选 ${selected.selectedIds.length} 条，发送时重新核对。',
                     )
                   : aiSelectionNoticeCopy(
                       context,
@@ -675,7 +726,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         ? ref.read(aiOwnedSourcesControllerProvider)
         : null;
     if (messages.length == 1 &&
-        canDisplayAiMessage(current, messages.single, sources: currentSources)) {
+        canDisplayAiMessage(
+          current,
+          messages.single,
+          sources: currentSources,
+        )) {
       _followUpAction(current, messages.single)?.call();
     }
   }
@@ -1315,6 +1370,61 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     ),
   );
 
+  void _readSavedReply(
+    AiConversationState? previous,
+    AiConversationState next,
+  ) {
+    if (!_isCurrentEditor ||
+        !ref.read(aiCompanionReferencesEnabledProvider) ||
+        previous?.phase == AiConversationPhase.success ||
+        next.phase != AiConversationPhase.success ||
+        next.conversationId == null) {
+      return;
+    }
+    final sources = ref.read(aiOwnedSourcesControllerProvider);
+    final pending = next.messages
+        .where(
+          (message) =>
+              message.role == AiRole.assistant &&
+              !message.isProactive &&
+              message.sources.isNotEmpty &&
+              message.availability == AiAvailability.available &&
+              !canDisplayAiMessage(next, message, sources: sources),
+        )
+        .map((message) => message.messageId)
+        .toSet();
+    final access = ref.read(contentAccessProvider);
+    if (pending.isEmpty || !access.foreground) return;
+    final session = next.sessionKey;
+    final topic = next.conversationId;
+    final scope = next.contextScopeKey;
+    // A successful execute/readback is a saved pair, but it does not release
+    // source display guards. Read the transcript independently once; failure
+    // keeps the existing explicit recheck action and cannot replay a Send.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_isCurrentEditor ||
+          !identical(access, ref.read(contentAccessProvider))) {
+        return;
+      }
+      final current = ref.read(aiConversationControllerProvider);
+      if (current.sessionKey != session ||
+          current.conversationId != topic ||
+          current.contextScopeKey != scope ||
+          current.phase != AiConversationPhase.success ||
+          current.readBusy) {
+        return;
+      }
+      final currentSources = ref.read(aiOwnedSourcesControllerProvider);
+      if (current.messages.any(
+        (message) =>
+            pending.contains(message.messageId) &&
+            !canDisplayAiMessage(current, message, sources: currentSources),
+      )) {
+        unawaited(_controller.loadMessages());
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<AiConversationState>(aiConversationControllerProvider, (
@@ -1322,6 +1432,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
       next,
     ) {
       _followMessages(previous, next);
+      _readSavedReply(previous, next);
+      _scheduleResultRecovery();
       if (_isCurrentEditor &&
           previous?.draftSyncRevision != next.draftSyncRevision) {
         _syncingEditor = true;
@@ -1470,40 +1582,6 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         child: Text(context.tr('Cancel', '取消')),
                       ),
                     ],
-                    if (state.canCheckResult) ...[
-                      const SizedBox(height: 12),
-                      OutlinedButton(
-                        key: const Key('ai-check-result'),
-                        style: _buttonStyle,
-                        onPressed: state.readBusy
-                            ? null
-                            : () => unawaited(_controller.checkResult()),
-                        child: Text(context.tr('Check result', '核对结果')),
-                      ),
-                    ],
-                    if (state.canLeaveWithoutRetrying) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        context.tr(
-                          'We may not be able to confirm whether this message was '
-                              'saved. You can leave without retrying it. Leaving does '
-                              'not delete saved messages.',
-                          '目前可能无法确认这条消息是否已保存。你可以先离开，无需重试。离开不会删除已保存的消息。',
-                        ),
-                        key: Key('ai-recovery-explanation'),
-                      ),
-                      const SizedBox(height: 12),
-                      OutlinedButton(
-                        key: const Key('ai-leave-without-retrying'),
-                        style: _buttonStyle,
-                        onPressed: () => unawaited(
-                          _navigate(widget.onBack, explicitUnknownExit: true),
-                        ),
-                        child: Text(
-                          context.tr('Leave without retrying', '直接离开，不重试'),
-                        ),
-                      ),
-                    ],
                     if (!contentHidden && !locationHidden) ...[
                       if (state.conversationId != null) ...[
                         const SizedBox(height: 12),
@@ -1550,9 +1628,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                         key: const Key('ai-message-input'),
                         controller: _message,
                         focusNode: _messageFocus,
-                        enabled:
-                            (state.canSend || state.canRetry) &&
-                            _selectionReady,
+                        enabled: state.canEditDraft,
                         minLines: 2,
                         maxLines: 6,
                         onChanged: (_) => setState(() {}),
@@ -1773,33 +1849,6 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
           context.tr('Cancel', '取消'),
           _controller.cancel,
         ),
-      if (state.canCheckResult &&
-          state.phase != AiConversationPhase.idle &&
-          state.phase != AiConversationPhase.success)
-        _socialAction(
-          'ai-check-result',
-          context.tr('Check result', '核对结果'),
-          state.readBusy ? null : () => unawaited(_controller.checkResult()),
-        ),
-      if (state.canLeaveWithoutRetrying) ...[
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          child: Text(
-            context.tr(
-              'We may not be able to confirm whether this message was '
-                  'saved. You can leave without retrying it. Leaving does '
-                  'not delete saved messages.',
-              '目前可能无法确认这条消息是否已保存。你可以先离开，无需重试。离开不会删除已保存的消息。',
-            ),
-            key: Key('ai-recovery-explanation'),
-          ),
-        ),
-        _socialAction(
-          'ai-leave-without-retrying',
-          context.tr('Leave without retrying', '直接离开，不重试'),
-          () => unawaited(_navigate(widget.onBack, explicitUnknownExit: true)),
-        ),
-      ],
       if (state.phase == AiConversationPhase.deleteUnknown)
         _socialAction(
           'ai-check-delete',
@@ -1826,7 +1875,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   key: const Key('ai-message-input'),
                   controller: _message,
                   focusNode: _messageFocus,
-                  enabled: (state.canSend || state.canRetry) && _selectionReady,
+                  enabled: state.canEditDraft,
                   minLines: 1,
                   maxLines: 4,
                   onChanged: (_) => setState(() {}),
@@ -2259,8 +2308,8 @@ String? _statusCopy(
     '请求已超时。请先核对已保存的消息，再决定是否重试。',
   ),
   AiConversationPhase.unknown => context.tr(
-    'We couldn’t confirm the result. Check saved messages before trying again.',
-    '未能确认结果。请先核对已保存的消息，再决定是否重试。',
+    'The previous reply is not confirmed. Recovery is being attempted; you can keep drafting or start a new topic.',
+    '上一条回复暂未确认，正在尝试恢复。你可以继续写草稿，或开启新话题。',
   ),
   AiConversationPhase.authorityChanged => context.tr(
     'This reply is no longer available.',

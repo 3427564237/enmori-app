@@ -61,6 +61,12 @@ final class _AiSelectedSourcesPageState
     final ai = ref.watch(aiConversationControllerProvider);
     final controller = ref.read(aiSelectedSourcesControllerProvider.notifier);
     final available = state.sessionKey == _session && state.permitted;
+    final canChoose =
+        available &&
+        !state.busy &&
+        !state.sending &&
+        ai.canEditDraft &&
+        !ai.canCancel;
     final canReview =
         available &&
         !state.busy &&
@@ -79,9 +85,7 @@ final class _AiSelectedSourcesPageState
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(context.tr('References for this reply', '本次参考')),
-        ),
+        appBar: AppBar(title: Text(context.tr('Check-in references', '签到参考'))),
         body: SafeArea(
           child: Align(
             alignment: Alignment.topCenter,
@@ -98,15 +102,22 @@ final class _AiSelectedSourcesPageState
                       ),
                     )
                   else ...[
+                    if (state.automaticAvailable) ...[
+                      _modeControls(context, state, controller, canChoose),
+                      const SizedBox(height: 20),
+                    ],
                     Text(
-                      context.tr('Choose your Check-ins', '手选自己的签到'),
+                      context.tr(
+                        'Choose Check-ins from different days',
+                        '选择不同日期的签到',
+                      ),
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       context.tr(
-                        'Up to 5 from the inclusive last 7 days, for this local reply only. Note quotations, recorded Mood/Activity and their original times are used. No location or weather is included.',
-                        '近 7 天内（含边界）最多 5 条，仅用于这一次本地回复。仅使用正文引文、记录时的心情／活动与原始时间，不包含位置或天气。',
+                        'Choose up to 5 from the last 7 days for your next reply. Only the note, recorded Mood/Activity and time are included, without location or weather.',
+                        '近 7 天内最多选 5 条，用于下一次回复。只参考正文、记录时的心情／活动和时间，不包含位置或天气。',
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -134,6 +145,12 @@ final class _AiSelectedSourcesPageState
                         context.tr('Checking current sources…', '正在核对当前来源…'),
                       ),
                     ],
+                    if (!state.reviewRequired)
+                      FilledButton(
+                        key: const Key('ai-references-done'),
+                        onPressed: canChoose ? _finish : null,
+                        child: Text(context.tr('Done', '完成')),
+                      ),
                     if (review != null) ...[
                       for (final record in state.records.where(
                         (record) => state.selectedIds.contains(record.id),
@@ -191,13 +208,13 @@ final class _AiSelectedSourcesPageState
                         onCancel: controller.editSelection,
                       ),
                     ] else ...[
-                      FilledButton(
+                      OutlinedButton(
                         key: const Key('ai-selected-review'),
                         onPressed: canReview
                             ? () => unawaited(controller.review())
                             : null,
                         child: Text(
-                          context.tr('Review current selection', '审阅本次选择'),
+                          context.tr('Check selected references', '核对所选签到'),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -318,6 +335,57 @@ final class _AiSelectedSourcesPageState
       ModalRoute.of(context)?.isCurrent == true &&
       ref.read(aiConversationControllerProvider).sessionKey == _session;
 
+  void _finish() {
+    if (_currentRoute && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  Widget _modeControls(
+    BuildContext context,
+    AiSelectedSourcesState state,
+    AiSelectedSourcesController controller,
+    bool canReview,
+  ) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      SwitchListTile(
+        key: const Key('ai-today-enabled'),
+        contentPadding: EdgeInsets.zero,
+        value: state.mode == AiReferenceMode.today,
+        onChanged: canReview
+            ? (enabled) {
+                if (!_currentRoute) return;
+                controller.setTodayEnabled(enabled);
+                if (enabled) unawaited(controller.previewToday());
+              }
+            : null,
+        title: Text(context.tr("Use today's Check-ins", '使用今天的签到')),
+        subtitle: Text(
+          context.tr(
+            'Automatically checks the latest 5 when you send.',
+            '发送时自动核对今天最近 5 条。',
+          ),
+        ),
+      ),
+      if (state.mode != AiReferenceMode.manual)
+        OutlinedButton.icon(
+          key: const Key('ai-reference-manual'),
+          onPressed: canReview
+              ? () {
+                  if (!_currentRoute) return;
+                  controller.useManualSelection();
+                  unawaited(controller.loadRecent());
+                }
+              : null,
+          icon: const Icon(Icons.checklist_outlined),
+          label: Text(
+            context.tr('Choose Check-ins from other days', '手动选择其他日期的签到'),
+          ),
+        ),
+    ],
+  );
+
   Widget _automatic(
     BuildContext context,
     AiSelectedSourcesState state,
@@ -325,6 +393,13 @@ final class _AiSelectedSourcesPageState
     bool canReview,
   ) {
     final enabled = state.mode == AiReferenceMode.today;
+    final ai = ref.read(aiConversationControllerProvider);
+    final canChoose =
+        state.permitted &&
+        !state.busy &&
+        !state.sending &&
+        ai.canEditDraft &&
+        !ai.canCancel;
     final current = state.review;
     return PopScope<void>(
       onPopInvokedWithResult: (didPop, _) {
@@ -335,41 +410,19 @@ final class _AiSelectedSourcesPageState
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            context.tr("Today's Check-ins · local references", '今天的签到 · 本地参考'),
-          ),
-        ),
+        appBar: AppBar(title: Text(context.tr('Check-in references', '签到参考'))),
         body: SafeArea(
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              SwitchListTile(
-                key: const Key('ai-today-enabled'),
-                value: enabled,
-                onChanged: state.busy || state.sending
-                    ? null
-                    : controller.setTodayEnabled,
-                title: Text(
-                  context.tr(
-                    "Use today's Check-ins in this topic",
-                    '此话题使用今天的签到',
-                  ),
-                ),
-              ),
-              Text(
-                context.tr(
-                  'Uses up to the latest 5 from today when you send. Excluded records are not replaced.',
-                  '发送时最多参考今天最近 5 条；排除后不会补入更早记录。',
-                ),
-              ),
+              _modeControls(context, state, controller, canChoose),
               if (!enabled)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Text(
                     context.tr(
-                      'Check-in references are off for this topic. You can still chat.',
-                      '本话题不新增参考签到，仍可正常聊天。',
+                      'References are off. Replies skip Check-ins and the latest two exchanges; your history stays saved.',
+                      '参考已关闭：回复不使用签到及最近两对旧问答，历史记录仍保留。',
                     ),
                   ),
                 ),
@@ -502,50 +555,60 @@ final class _AiSelectedSourcesPageState
                     context.tr('Preview reply references', '预览本次回复参考'),
                   ),
                 ),
-              if (current != null)
-                AiSelectedReplyReview(
-                  selection: current,
-                  excludedHistoryKeys: state.excludedHistoryKeys,
-                  confirmed: state.confirmed,
-                  expired: !ref
-                      .read(aiConversationControllerProvider.notifier)
-                      .hasSelectedPreparation(current.selectionRevision),
-                  busy: !canReview,
-                  onExcludeHistory: () {
-                    if (_currentRoute) {
-                      unawaited(
-                        controller.review(
-                          excludeDisplayedHistory: true,
-                          expectedRevision: current.selectionRevision,
-                        ),
+              if (current != null &&
+                  (state.reviewRequired || current.historyPairs.isNotEmpty))
+                _ReferenceReviewDisclosure(
+                  required: state.reviewRequired,
+                  child: AiSelectedReplyReview(
+                    selection: current,
+                    excludedHistoryKeys: state.excludedHistoryKeys,
+                    confirmed: state.confirmed,
+                    expired: !ref
+                        .read(aiConversationControllerProvider.notifier)
+                        .hasSelectedPreparation(current.selectionRevision),
+                    busy: !canReview,
+                    onExcludeHistory: () {
+                      if (_currentRoute) {
+                        unawaited(
+                          controller.review(
+                            excludeDisplayedHistory: true,
+                            expectedRevision: current.selectionRevision,
+                          ),
+                        );
+                      }
+                    },
+                    onRefresh: () {
+                      if (_currentRoute) {
+                        unawaited(
+                          controller.review(
+                            expectedRevision: current.selectionRevision,
+                          ),
+                        );
+                      }
+                    },
+                    onConfirm: () {
+                      if (!_currentRoute) return;
+                      controller.confirm(current.selectionRevision);
+                      final latest = ref.read(
+                        aiSelectedSourcesControllerProvider,
                       );
-                    }
-                  },
-                  onRefresh: () {
-                    if (_currentRoute) {
-                      unawaited(
-                        controller.review(
-                          expectedRevision: current.selectionRevision,
-                        ),
-                      );
-                    }
-                  },
-                  onConfirm: () {
-                    if (!_currentRoute) return;
-                    controller.confirm(current.selectionRevision);
-                    final latest = ref.read(
-                      aiSelectedSourcesControllerProvider,
-                    );
-                    if (latest.confirmed &&
-                        latest.review?.selectionRevision ==
-                            current.selectionRevision &&
-                        Navigator.of(context).canPop()) {
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  onCancel: controller.editSelection,
+                      if (latest.confirmed &&
+                          latest.review?.selectionRevision ==
+                              current.selectionRevision &&
+                          Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    onCancel: controller.editSelection,
+                  ),
                 ),
               const SizedBox(height: 12),
+              if (!state.reviewRequired)
+                FilledButton(
+                  key: const Key('ai-references-done'),
+                  onPressed: canChoose ? _finish : null,
+                  child: Text(context.tr('Done', '完成')),
+                ),
               Text(
                 context.tr(
                   'Previewing or changing references does not send a message.',
@@ -607,6 +670,23 @@ final class _AiSelectedSourcesPageState
       ),
     ),
   );
+}
+
+final class _ReferenceReviewDisclosure extends StatelessWidget {
+  const _ReferenceReviewDisclosure({
+    required this.required,
+    required this.child,
+  });
+  final bool required;
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => required
+      ? child
+      : ExpansionTile(
+          key: const Key('ai-reference-history-details'),
+          title: Text(context.tr('References in earlier replies', '历史回复里的参考')),
+          children: [child],
+        );
 }
 
 String aiSelectionNoticeCopy(BuildContext context, AiSelectionNotice notice) =>

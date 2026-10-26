@@ -178,7 +178,7 @@ void main() {
   );
 
   testWidgets(
-    'background cancels cover I/O and late bytes cannot repaint or automatically reload',
+    'background cancels unfinished cover I/O; return can restart a fresh image read',
     (tester) async {
       final covers = _Covers();
       await tester.pumpWidget(
@@ -196,9 +196,11 @@ void main() {
       load.pending.complete(Uint8List.fromList([1, 2, 3]));
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pump();
-      expect(covers.loads, hasLength(1));
+      expect(covers.loads, hasLength(2));
       expect(find.byKey(const Key('event-cover-image')), findsNothing);
-      expect(find.byKey(const Key('event-cover-unavailable')), findsOneWidget);
+      expect(find.byKey(const Key('event-cover-loading')), findsOneWidget);
+      covers.loads.last.pending.complete(null);
+      await tester.pump();
       expect(tester.takeException(), isNull);
     },
   );
@@ -285,13 +287,15 @@ void main() {
       );
       tester.state<NavigatorState>(find.byType(Navigator)).pop();
       await tester.pumpAndSettle();
-      expect(covers.loads, hasLength(1));
-      expect(find.byKey(const Key('event-cover-unavailable')), findsOneWidget);
+      expect(covers.loads, hasLength(2));
+      expect(find.byKey(const Key('event-cover-loading')), findsOneWidget);
+      covers.loads.last.pending.complete(null);
+      await tester.pump();
     },
   );
 
   testWidgets(
-    'a decoded cover stays out of the global cache and is released when a pushed page covers the retained detail',
+    'a decoded cover stays in its fresh snapshot across a pushed page and is released on disposal',
     (tester) async {
       final png = (await tester.runAsync(_png))!;
       final covers = _Covers();
@@ -318,12 +322,14 @@ void main() {
       await tester.tap(find.byKey(const Key('open-people')));
       await tester.pumpAndSettle();
       expect(element.mounted, isTrue);
-      expect(image.debugDisposed, isTrue);
+      expect(image.debugDisposed, isFalse);
       expect(PaintingBinding.instance.imageCache.currentSize, before);
       tester.state<NavigatorState>(find.byType(Navigator)).pop();
       await tester.pumpAndSettle();
       expect(covers.loads, hasLength(1));
-      expect(find.byKey(const Key('event-cover-image')), findsNothing);
+      expect(find.byKey(const Key('event-cover-image')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(image.debugDisposed, isTrue);
     },
   );
 

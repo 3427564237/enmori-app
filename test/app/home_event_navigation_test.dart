@@ -5,6 +5,7 @@ import 'package:enmori/app/providers.dart';
 import 'package:enmori/app/router/app_router.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
+import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 import 'package:enmori/features/event_recommendations/event_recommendations_providers.dart';
 import 'package:flutter/material.dart';
@@ -102,6 +103,13 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         routerGateProvider.overrideWith((ref) => gate),
+        authSessionProvider.overrideWith(
+          (ref) => Stream.value(
+            ref.watch(routerGateProvider) == RouterGateState.authenticated
+                ? const AuthSessionAuthenticated(subject: 'member-a')
+                : const AuthSessionUnauthenticated(),
+          ),
+        ),
         currentAuthSubjectProvider.overrideWithValue('member-a'),
         eventRecommendationRepositoryProvider.overrideWithValue(repository),
       ],
@@ -144,6 +152,9 @@ Future<void> _pumpRouter(
   final container = ProviderContainer(
     overrides: [
       routerGateProvider.overrideWithValue(RouterGateState.authenticated),
+      authSessionProvider.overrideWithValue(
+        const AsyncData(AuthSessionAuthenticated(subject: 'member-a')),
+      ),
       currentAuthSubjectProvider.overrideWithValue('member-a'),
       eventRecommendationRepositoryProvider.overrideWithValue(repository),
     ],

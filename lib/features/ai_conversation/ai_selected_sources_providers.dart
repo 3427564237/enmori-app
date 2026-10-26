@@ -516,6 +516,7 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
       _selected.add(id);
     }
     _active = true;
+    _recoveringSelected = false;
     _mode = AiReferenceMode.manual;
     _retireReview();
     _notice = AiSelectionNotice.recheck;
@@ -701,7 +702,14 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
         ..addAll(prepared.sourceCards.map((card) => card.checkInId!));
     }
     _confirmed = false;
-    if (oldPairs != null &&
+    if (_mode == AiReferenceMode.off) {
+      // Off explicitly excludes this preparation's current bounded history
+      // window as well as Check-ins. Never carry opaque keys to another send.
+      _excludedHistory = prepared.historyPairs
+          .map((pair) => pair.historyKey)
+          .toSet();
+      _notice = AiSelectionNotice.none;
+    } else if (oldPairs != null &&
         oldPairs.isNotEmpty &&
         _sameHistoryIntent(oldPairs, prepared.historyPairs)) {
       _excludedHistory = prepared.historyPairs
@@ -748,17 +756,47 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
   }
 
   void setTodayEnabled(bool enabled) {
-    if (!_automaticAvailable || !_permitted || _busy || _sending) return;
+    if (!_automaticAvailable || !_canChangeMode) return;
     _topicUsesToday = enabled;
+    _recoveringSelected = false;
     _mode = enabled ? AiReferenceMode.today : AiReferenceMode.off;
     _selected.clear();
     _active = true;
-    _today = null;
-    _automaticIds.clear();
-    _records.clear();
+    _clearCandidateListing();
     _retireReview();
     _notice = AiSelectionNotice.none;
     _emit();
+  }
+
+  bool get _canChangeMode {
+    final ai = ref.read(aiConversationControllerProvider);
+    return _permitted &&
+        !_busy &&
+        !_sending &&
+        ai.canEditDraft &&
+        !ai.canCancel;
+  }
+
+  void useManualSelection() {
+    if (!_canChangeMode || _mode == AiReferenceMode.manual) return;
+    _mode = AiReferenceMode.manual;
+    _recoveringSelected = false;
+    _active = true;
+    _selected.clear();
+    _clearCandidateListing();
+    _retireReview();
+    _notice = AiSelectionNotice.none;
+    _emit();
+  }
+
+  void _clearCandidateListing() {
+    _loaded = false;
+    _today = null;
+    _automaticIds.clear();
+    _records.clear();
+    _cursors.clear();
+    _usedCursors.clear();
+    _failedDates.clear();
   }
 
   void toggleTodaySource(String id) {
@@ -769,6 +807,7 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
         (!_automaticIds.contains(id) && !_excludedCheckIns.contains(id))) {
       return;
     }
+    _recoveringSelected = false;
     if (!_excludedCheckIns.remove(id)) _excludedCheckIns.add(id);
     _retireReview();
     _notice = AiSelectionNotice.none;

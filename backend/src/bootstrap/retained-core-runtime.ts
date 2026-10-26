@@ -167,8 +167,16 @@ async function createControlledRuntime(
           transport: chatTransport, gates: simpleChatGates, simpleChat: true,
           ...(firstFlowConfiguration ? { selectedReplies: true as const } : {}),
           conversationStrategy: 'open_conversation_v1',
+          prepareHost: () => chatTransport.prepareForChat(),
           report: (_phase, result) => { if (!result.complete) maintenanceHealthy = false; },
-          reportRetirement: confirmed => { if (!confirmed) healthy = false; },
+          // A closed target's failed control retirement degrades maintenance.
+          // Its own durable claim guards remain; other chats keep their checks.
+          reportRetirement: confirmed => {
+            if (!confirmed) {
+              maintenanceHealthy = false;
+              console.warn(JSON.stringify({ diagnostic: 'ai-control-retirement', status: 'unconfirmed' }));
+            }
+          },
         });
       } catch { healthy = false; }
     }

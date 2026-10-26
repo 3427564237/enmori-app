@@ -18,6 +18,108 @@ import 'ai_selected_test_support.dart';
 
 void main() {
   testWidgets(
+    'late recovery does not clear references or draft chosen for the next reply',
+    (tester) async {
+      final r = await SelectedRig.create(tester);
+      r.add('first');
+      r.add('second');
+      await r.sources.chooseOwned('first');
+      await r.sources.review();
+      r.sources.confirm(r.sourceState.review!.selectionRevision);
+      r.repo.nextExecute = Future.value(const Failure(selectedUnknown));
+      await r.sources.send('Original message');
+      await r.sources.loadRecent();
+      r.sources.toggle('first');
+      r.sources.toggle('second');
+      r.ai.updateDraft(
+        const TextEditingValue(text: 'Next draft'),
+        sessionKey: r.aiState.sessionKey,
+      );
+      r.repo.nextReadback = Future.value(
+        Success(
+          AiReadback(
+            operationId: 'operation-1',
+            state: AiOutcomeState.assistantSaved,
+            userMessage: r.repo.user('Original message'),
+            assistantMessage: AiMessage(
+              messageId: 'saved-assistant',
+              sequence: 2,
+              role: AiRole.assistant,
+              persistedAt: selectedNow.add(const Duration(seconds: 1)),
+              availability: AiAvailability.available,
+              text: 'Already saved reply',
+            ),
+          ),
+        ),
+      );
+      await r.ai.checkResult();
+      expect(r.aiState.canSend, isTrue);
+      expect(r.sourceState.selectedIds, {'second'});
+      expect(r.ai.draft.text, 'Next draft');
+      expect(r.repo.selectedExecutes, hasLength(1));
+      r.dispose();
+      await tester.pump();
+    },
+  );
+
+  testWidgets(
+    'unresolved reply keeps an editable draft and removes the recovery action loop',
+    (tester) async {
+      final r = await SelectedRig.create(tester);
+      await r.sources.review();
+      r.sources.confirm(r.sourceState.review!.selectionRevision);
+      r.repo.nextExecute = Future.value(const Failure(selectedUnknown));
+      await r.sources.send('An uncertain original input');
+      await _pump(tester, r);
+      final input = find.byKey(const Key('ai-message-input'));
+      expect(tester.widget<TextField>(input).enabled, isTrue);
+      await tester.enterText(input, 'A new draft to keep');
+      expect(r.ai.draft.text, 'A new draft to keep');
+      expect(r.aiState.canSend, isFalse);
+      expect(find.byKey(const Key('ai-check-result')), findsNothing);
+      expect(find.byKey(const Key('ai-leave-without-retrying')), findsNothing);
+      expect(
+        tester
+            .widget<TextButton>(find.byKey(const Key('ai-references')))
+            .onPressed,
+        isNotNull,
+      );
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 4));
+      expect(r.repo.operationReads, inInclusiveRange(1, 3));
+      final reads = r.repo.operationReads;
+      await tester.pump(const Duration(seconds: 30));
+      expect(r.repo.operationReads, reads);
+      expect(r.repo.selectedExecutes, hasLength(1));
+      await _dispose(tester, r);
+    },
+  );
+
+  testWidgets(
+    'independent new topic preserves the original unresolved target guard',
+    (tester) async {
+      final r = await SelectedRig.create(tester, existingTopic: true);
+      await r.sources.review();
+      r.sources.confirm(r.sourceState.review!.selectionRevision);
+      r.repo.nextExecute = Future.value(const Failure(selectedUnknown));
+      await r.sources.send('An uncertain original input');
+      expect(r.aiState.canStartNewConversation, isTrue);
+      r.ai.startNewConversation();
+      expect(r.aiState.canSend, isTrue);
+      expect(r.aiState.conversationId, isNull);
+      await r.ai.selectConversation('selected-topic');
+      expect(r.aiState.canSend, isFalse);
+      expect(r.aiState.canRetry, isFalse);
+      expect(r.aiState.canCheckResult, isTrue);
+      await r.ai.checkResult();
+      expect(r.aiState.canSend, isFalse);
+      expect(r.repo.selectedExecutes, hasLength(1));
+      r.dispose();
+      await tester.pump();
+    },
+  );
+
+  testWidgets(
     'an explicit owned-detail route adds only that ID alongside existing choices and keeps the draft',
     (tester) async {
       final r = await SelectedRig.create(tester, existingTopic: true);
@@ -287,7 +389,7 @@ void main() {
       await tester.pump();
       expect(r.repo.selectedExecutes, hasLength(1));
       expect(tester.widget<TextField>(input).controller!.text, expected.text);
-      expect(tester.widget<TextField>(input).enabled, isFalse);
+      expect(tester.widget<TextField>(input).enabled, isTrue);
       pending.complete(const Failure(selectedUnknown));
       await tester.pumpAndSettle();
       expect(tester.widget<TextField>(input).controller!.text, expected.text);

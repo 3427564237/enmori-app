@@ -1,0 +1,187 @@
+{
+  "recordedAt": "2026-10-26T03:18:27.163119+00:00",
+  "pullRequest": "https://github.com/3427564237/enmori-app/pull/189",
+  "sourceHead": "dee7b9fd5f2ae167cb32756b0585c60db46b90a7",
+  "sourceTree": "f3fe82a443728956919025fdb1df9f87a0e47c52",
+  "checks": {
+    "checkedAt": "2026-10-26T03:13:14.095087+00:00",
+    "results": [
+      {
+        "name": "analyze-verified",
+        "exit": 0,
+        "args": [
+          "analyze",
+          "--no-pub"
+        ]
+      },
+      {
+        "name": "regression-final",
+        "exit": 0,
+        "args": [
+          "test",
+          "--no-pub",
+          "--reporter",
+          "expanded",
+          "test/core/presentation/refresh_on_return_test.dart",
+          "test/features/ai_conversation/ai_selected_reply_wire_test.dart",
+          "test/features/ai_conversation/ai_selected_sources_page_test.dart",
+          "test/features/ai_conversation/ai_selected_reply_review_test.dart",
+          "test/features/ai_conversation/ai_today_sources_test.dart",
+          "test/features/ai_conversation/ai_send_availability_test.dart",
+          "test/features/ai_conversation/ai_selected_sources_test.dart",
+          "test/features/event_cover_loader_test.dart",
+          "test/features/event_plans_test.dart",
+          "test/features/event_recommendations_page_test.dart",
+          "test/features/event_participation_components_test.dart",
+          "test/features/event_page_retarget_test.dart",
+          "test/features/external_registration_flow_test.dart",
+          "test/features/event_batches_test.dart",
+          "test/features/event_information_test.dart",
+          "test/features/event_browse_test.dart",
+          "test/app/home_event_navigation_test.dart"
+        ]
+      }
+    ],
+    "testFiles": [
+      "test/core/presentation/refresh_on_return_test.dart",
+      "test/features/ai_conversation/ai_selected_reply_wire_test.dart",
+      "test/features/ai_conversation/ai_selected_sources_page_test.dart",
+      "test/features/ai_conversation/ai_selected_reply_review_test.dart",
+      "test/features/ai_conversation/ai_today_sources_test.dart",
+      "test/features/ai_conversation/ai_send_availability_test.dart",
+      "test/features/ai_conversation/ai_selected_sources_test.dart",
+      "test/features/event_cover_loader_test.dart",
+      "test/features/event_plans_test.dart",
+      "test/features/event_recommendations_page_test.dart",
+      "test/features/event_participation_components_test.dart",
+      "test/features/event_page_retarget_test.dart",
+      "test/features/external_registration_flow_test.dart",
+      "test/features/event_batches_test.dart",
+      "test/features/event_information_test.dart",
+      "test/features/event_browse_test.dart",
+      "test/app/home_event_navigation_test.dart"
+    ],
+    "sourceHead": "dee7b9fd5f2ae167cb32756b0585c60db46b90a7",
+    "sourceTree": "f3fe82a443728956919025fdb1df9f87a0e47c52",
+    "testsPassed": 158,
+    "analyze": "No issues found",
+    "scope": "17 focused files, not the full repository suite"
+  },
+  "build": {
+    "sourceHead": "dee7b9fd5f2ae167cb32756b0585c60db46b90a7",
+    "runs": [
+      {
+        "label": "v31-toolchain",
+        "exitCode": 0,
+        "seconds": 0.261,
+        "logSha256": "dd4a89d4d1ed3a6cc0f0e308571f2356ef22fcacf5643ec3180cb4266468b056"
+      },
+      {
+        "label": "v31-format",
+        "exitCode": 0,
+        "seconds": 1.011,
+        "logSha256": "68699dcc89feeb503bb392483373cff76d093f626f0e0e3ab8efdb015d33c6b9"
+      },
+      {
+        "label": "v31-build",
+        "exitCode": 0,
+        "seconds": 147.918,
+        "logSha256": "968caa51ebde4b2420ae522dd67d88bb668214c42acf6b4ff2811a5e295894c1"
+      }
+    ]
+  },
+  "artifactVerification": {
+    "verifiedAt": "2026-10-26T03:17:03.143392+00:00",
+    "sourceHead": "dee7b9fd5f2ae167cb32756b0585c60db46b90a7",
+    "artifacts": {
+      "v31": {
+        "package": "com.enmori.app.group",
+        "versionCode": 31,
+        "versionName": "1.0.0-group20261026",
+        "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+        "sha256": "d6c0a7c9a1e59c4a2663e9ea2ef40595f8436217bd40f9c8840b28d80902c590",
+        "bytes": 66939034,
+        "permissions": [
+          "android.permission.ACCESS_COARSE_LOCATION",
+          "android.permission.ACCESS_FINE_LOCATION",
+          "android.permission.ACCESS_NETWORK_STATE",
+          "android.permission.INTERNET",
+          "android.permission.POST_NOTIFICATIONS",
+          "android.permission.WAKE_LOCK",
+          "com.enmori.app.group.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+          "com.google.android.c2dm.permission.RECEIVE",
+          "com.google.android.providers.gsf.permission.READ_GSERVICES"
+        ],
+        "debuggable": false,
+        "messagingAutoInit": false,
+        "analyticsCollection": false
+      },
+      "retained-v30": {
+        "package": "com.enmori.app.group",
+        "versionCode": 30,
+        "versionName": "1.0.0-group20261026",
+        "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+        "sha256": "b1dae8da72df4ccf75776b9cb8c81627cfb9f8d9ed215d64cb9beae786fadf0c",
+        "bytes": 66906266,
+        "permissions": [
+          "android.permission.ACCESS_COARSE_LOCATION",
+          "android.permission.ACCESS_FINE_LOCATION",
+          "android.permission.ACCESS_NETWORK_STATE",
+          "android.permission.INTERNET",
+          "android.permission.POST_NOTIFICATIONS",
+          "android.permission.WAKE_LOCK",
+          "com.enmori.app.group.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+          "com.google.android.c2dm.permission.RECEIVE",
+          "com.google.android.providers.gsf.permission.READ_GSERVICES"
+        ],
+        "debuggable": false,
+        "messagingAutoInit": false,
+        "analyticsCollection": false
+      }
+    },
+    "samePackage": true,
+    "sameSigner": true,
+    "upgradeVersion": true,
+    "samePermissions": true,
+    "result": "Pass"
+  },
+  "independentReview": "Pending for the new LI change",
+  "installation": {
+    "installedAt": "2026-10-26T03:29:51.884491+00:00",
+    "package": "com.enmori.app.group",
+    "versionCode": 31,
+    "versionName": "1.0.0-group20261026",
+    "firstInstallTime": "2026-10-21 12:13:08",
+    "firstInstallTimeUnchanged": true,
+    "installedApkSha256": "d6c0a7c9a1e59c4a2663e9ea2ef40595f8436217bd40f9c8840b28d80902c590",
+    "method": "adb install -r",
+    "dataClearPerformed": false,
+    "appLaunched": true,
+    "loginAndBusinessDataReadback": "Not Run",
+    "deviceAcceptance": "Install and launch smoke passed; user interaction acceptance pending",
+    "deviceMatchedPreviousTarget": true,
+    "priorAttempt": "INSTALL_FAILED_ABORTED: User rejected permissions; retried after explicit user device readiness",
+    "launchSmoke": {
+      "checkedAt": "2026-10-26T03:30:57.275760+00:00",
+      "launchSucceeded": true,
+      "processAliveAfterSeconds": 3,
+      "foregroundPackageMatched": true,
+      "crashBufferReadSucceeded": true,
+      "matchingFatalCrashObserved": false,
+      "scope": "Installation and process-launch smoke only; no UI flow, message, Check-in, external-site or registration action performed"
+    }
+  },
+  "physicalAcceptance": "Installation and launch smoke passed; LI interaction/UAT pending",
+  "fullRepositorySuite": "Not Run in this increment",
+  "backendChanges": false,
+  "backendDeployed": false,
+  "providerIntroduction": "Still incomplete; sampled actual source responses omitted introduction fields",
+  "allInterestCoverage": {
+    "assignedTo": "JIN",
+    "issue": "https://github.com/3427564237/enmori-app/issues/84",
+    "tags": 14,
+    "handoffPublishedAndReadBack": true,
+    "implementationCompletion": "Not claimed"
+  },
+  "installationEvidenceUpdatedAt": "2026-10-26T03:31:46.383728+00:00"
+}

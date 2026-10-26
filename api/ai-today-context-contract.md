@@ -40,14 +40,18 @@ does not fetch or insert the sixth record. Show the latest-five limit when neede
 No records is valid and admits ordinary chat. Unknown date/source availability
 is visibly different from no records; the user can explicitly turn references
 off to continue. Turning off uses the existing explicit `sources:[]` form.
+Under [LI's 26 October correction](../docs/decisions/2026-10-26-li-reference-off-history-exclusion.md),
+off also excludes all pairs in this preparation's latest-two-complete-exchange
+window, using its fresh `historyKey`s. Stored history is retained; the UI explains
+this scope. No older pair is substituted and no rejected operation is resent.
 
 The UI defaults to automatic current-day references for this topic while the
 existing local-AI purpose is enabled, displays the scope and exclusions, and
 keeps an off control. This replaces mandatory manual picking and preconfirmation.
 One explicit Send performs fresh prepare and then one execute. It cannot bypass
 Persona/consent/source authorization, send twice, or recover an unknown execute
-by starting a new operation. Actual inherited-history conflicts still require
-explicit whole-pair exclusion; only unchanged pair identities may carry a user's
+by starting a new operation. In today/manual modes, inherited-history conflicts
+still require explicit whole-pair exclusion; only unchanged pair identities may carry a user's
 prior exclusion choice to new keys. Changed dependencies require fresh review.
 Drafts, source choices and the original saved-user Retry identity are preserved.
 

@@ -1,3 +1,4 @@
+import '../../../core/presentation/refresh_on_return.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'dart:async';
@@ -82,7 +83,7 @@ final class _ParticipationEventPageState
         state == AppLifecycleState.hidden) {
       setState(() {
         _generation++;
-        _detail = null;
+        if (!(_expiry?.isActive ?? false)) _detail = null;
         _loading = false;
       });
     }
@@ -146,7 +147,7 @@ final class _ParticipationEventPageState
     }
     final controller = ref.read(participationControllerProvider.notifier);
     final details = _detail;
-    return Scaffold(
+    final page = Scaffold(
       appBar: AppBar(
         title: Text(context.tr('Event details', '活动详情')),
         actions: [
@@ -216,6 +217,14 @@ final class _ParticipationEventPageState
           ],
         ),
       ),
+    );
+    return RefreshOnReturn(
+      onRefresh: () {
+        if (_detail == null || !(_expiry?.isActive ?? false)) {
+          unawaited(_load());
+        }
+      },
+      child: page,
     );
   }
 

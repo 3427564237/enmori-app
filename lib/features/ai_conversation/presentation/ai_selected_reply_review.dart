@@ -38,7 +38,7 @@ final class AiSelectedReplyReview extends StatelessWidget {
         historyKeys.every(excludedHistoryKeys.contains);
     final canConfirm = !busy && !expired && !confirmed && currentExclusions;
     final status = busy
-        ? context.tr('Checking the current references…', '正在核对当前参考范围…')
+        ? context.tr('Checking the selected sources…', '正在核对所选来源…')
         : expired || !currentExclusions
         ? context.tr(
             'This review is no longer current. Your draft and choices are kept. Check again before confirming.',
@@ -47,11 +47,11 @@ final class AiSelectedReplyReview extends StatelessWidget {
         : confirmed
         ? context.tr(
             'References reviewed for this reply. Return to your draft and explicitly send when ready.',
-            '已确认本次参考范围。返回草稿后，再明确发送。',
+            '所选来源已核对，返回对话后发送。',
           )
         : context.tr(
             'Review this reply’s references. Confirming here returns to your draft without sending.',
-            '请审阅这次回复的参考范围。此处确认只返回草稿，不会发送。',
+            '请核对所选签到和历史回复里的来源，确认后返回对话。',
           );
 
     Widget heading(String text) => Padding(
@@ -83,7 +83,10 @@ final class AiSelectedReplyReview extends StatelessWidget {
                 Semantics(
                   header: true,
                   child: Text(
-                    context.tr('References for this reply', '这次回复的参考范围'),
+                    context.tr(
+                      'Selected Check-ins and earlier references',
+                      '所选签到与历史参考',
+                    ),
                     style: theme.textTheme.headlineSmall,
                   ),
                 ),
@@ -99,8 +102,8 @@ final class AiSelectedReplyReview extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   context.tr(
-                    'A review is valid for up to 15 seconds. An expired review must be checked again.',
-                    '本次核对最多有效 15 秒，过期后需重新核对。',
+                    'Sources are checked again before sending. Recheck if this review expires.',
+                    '发送前还会核对来源；当前核对失效时，请重新核对。',
                   ),
                 ),
                 if (busy) ...[

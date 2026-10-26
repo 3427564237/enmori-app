@@ -283,14 +283,12 @@ void main() {
     },
   );
   testWidgets(
-    'clear permits an explicit fresh read without waiting for the invalidated request',
+    'return starts a fresh read without waiting for the invalidated request',
     (tester) async {
       final oldRead = Completer<Result<ActivityRead>>();
       final repo = Repo()..pending = oldRead;
       await pump(tester, repo);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pump();
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pump();
       const fresh = ActivitySummary(
         browseId: 'tm_U3ludGhldGljXzAy',
@@ -302,7 +300,7 @@ void main() {
         ..result = Success(
           ActivityBatch(asOf: '2026-10-16T00:00:00Z', items: [fresh]),
         );
-      await tester.tap(find.text('Reload'));
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
       expect(find.text(fresh.title), findsOneWidget);
       oldRead.complete(
@@ -393,7 +391,7 @@ void main() {
     },
   );
   testWidgets(
-    'background/return clears pending or visible content; no auto read or late resurrection',
+    'background retires old content and return reads fresh without resurrection',
     (tester) async {
       final repo = Repo()..pending = Completer<Result<ActivityRead>>();
       await pump(tester, repo);
@@ -402,11 +400,18 @@ void main() {
       await tester.pump();
       repo.pending!.complete(Success(detail));
       await tester.pump();
+      repo.pending = Completer<Result<ActivityRead>>();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pump();
       expect(find.text(summary.title), findsNothing);
       expect(find.text('Reload activities to continue.'), findsOneWidget);
-      expect(repo.calls, 1);
+      expect(repo.calls, 2);
+      repo.pending!.complete(
+        Success(ActivityBatch(asOf: '2026-10-16T00:00:00Z', items: [summary])),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(summary.title), findsOneWidget);
+      expect(repo.calls, 2);
       await tester.pumpWidget(const SizedBox());
     },
   );

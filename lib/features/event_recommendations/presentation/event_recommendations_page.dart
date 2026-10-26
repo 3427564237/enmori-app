@@ -1,3 +1,4 @@
+import '../../../core/presentation/refresh_on_return.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -124,17 +125,20 @@ final class _EventRecommendationsSectionState
       }
     });
     final state = ref.watch(eventRecommendationsControllerProvider);
-    return _RecommendationContent(
-      state: state,
-      onRetry: () => _load(userInitiated: true),
-      onSeeAll: widget.onSeeAll,
-      home: true,
-      heading: widget.heading,
-      onBrowseAll: widget.onBrowseAll,
-      onContinueDiscovery: widget.onContinueDiscovery,
-      onOpenEvent: widget.onOpenEvent,
-      recommendationCardBuilder: widget.recommendationCardBuilder,
-      syntheticPreview: widget.syntheticPreview,
+    return RefreshOnReturn(
+      onRefresh: _load,
+      child: _RecommendationContent(
+        state: state,
+        onRetry: () => _load(userInitiated: true),
+        onSeeAll: widget.onSeeAll,
+        home: true,
+        heading: widget.heading,
+        onBrowseAll: widget.onBrowseAll,
+        onContinueDiscovery: widget.onContinueDiscovery,
+        onOpenEvent: widget.onOpenEvent,
+        recommendationCardBuilder: widget.recommendationCardBuilder,
+        syntheticPreview: widget.syntheticPreview,
+      ),
     );
   }
 }
@@ -298,7 +302,7 @@ final class _EventRecommendationsPageState
     final hasNext =
         response != null &&
         (currentIndex < 0 ? 0 : currentIndex) + 2 < response.items.length;
-    return Scaffold(
+    final page = Scaffold(
       appBar: AppBar(title: Text(context.tr('Event recommendations', '活动推荐'))),
       body: SafeArea(
         child: ListView(
@@ -345,6 +349,7 @@ final class _EventRecommendationsPageState
               ),
             ),
     );
+    return RefreshOnReturn(onRefresh: _load, child: page);
   }
 }
 

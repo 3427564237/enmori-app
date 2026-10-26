@@ -78,9 +78,15 @@ try {
     const started = Date.now();
     // A fixed label avoids identifiers or user text from arbitrary URLs.
     const onboarding = request.url === '/v1/me/onboarding';
+    const aiAction = request.url === '/v1/me/ai/operations' ? 'prepare'
+      : /^\/v1\/me\/ai\/operations\/[^/?]+\/execute$/.test(request.url ?? '') ? 'execute'
+      : /^\/v1\/me\/ai\/operations\/[^/?]+\/cancel$/.test(request.url ?? '') ? 'cancel'
+      : /^\/v1\/me\/conversations\/[^/?]+\/operations\/[^/?]+$/.test(request.url ?? '') ? 'outcome'
+      : undefined;
     response.once('finish', () => {
-      if (onboarding || response.statusCode >= 500) console.log(JSON.stringify({
-        diagnostic: 'api-response', route: onboarding ? 'onboarding' : 'other',
+      if (onboarding || aiAction || response.statusCode >= 500) console.log(JSON.stringify({
+        diagnostic: 'api-response', route: onboarding ? 'onboarding' : aiAction ? 'ai' : 'other',
+        ...(aiAction ? { action: aiAction } : {}),
         status: response.statusCode, elapsedMs: Date.now() - started,
       }));
     });

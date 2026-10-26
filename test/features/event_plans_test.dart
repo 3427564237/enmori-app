@@ -98,19 +98,27 @@ final class PlansRepo implements ParticipationRepository {
 
 final class Details implements EventDetailRepository {
   bool available = true;
+  int reads = 0;
+  Completer<Result<EventDetail>>? pending;
   @override
   Future<Result<void>> copyLink(EventDetail event) async => const Success(null);
   @override
-  Future<Result<EventDetail>> read(String id) async => available
-      ? Success(
-          EventDetail(
-            eventId: id,
-            title: 'An evening of music $id',
-            startAt: DateTime.utc(2027),
-            externalSourceUrl: 'https://www.ticketmaster.sg/event/$id',
-          ),
-        )
-      : const Failure(participationUnavailable);
+  Future<Result<EventDetail>> read(String id) async {
+    reads++;
+    final held = pending;
+    pending = null;
+    if (held != null) return held.future;
+    return available
+        ? Success(
+            EventDetail(
+              eventId: id,
+              title: 'An evening of music $id',
+              startAt: DateTime.utc(2027),
+              externalSourceUrl: 'https://www.ticketmaster.sg/event/$id',
+            ),
+          )
+        : const Failure(participationUnavailable);
+  }
 }
 
 final class Opener implements ExternalActivityOpener {
@@ -232,6 +240,78 @@ Future<void> tap(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
+  testWidgets(
+    'Event detail preserves valid state on returns and reloads after expiry',
+    (tester) async {
+      final details = Details(), repo = PlansRepo();
+      final nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authSessionProvider.overrideWithValue(
+              const AsyncData(AuthSessionAuthenticated(subject: 'owner')),
+            ),
+            participationRepositoryProvider.overrideWithValue(repo),
+            eventDetailRepositoryProvider.overrideWithValue(details),
+          ],
+          child: MaterialApp(
+            navigatorKey: nav,
+            theme: ThemeData(splashFactory: NoSplash.splashFactory),
+            home: ParticipationEventPage(
+              eventId: 'a',
+              opener: Opener(),
+              onParticipants: (_) {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(details.reads, 1);
+      expect(find.text('An evening of music a'), findsOneWidget);
+      final resumedRead = Completer<Result<EventDetail>>();
+      details.pending = resumedRead;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pump();
+      expect(details.reads, 1);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      await tester.pump();
+      expect(details.reads, 1);
+      expect(find.text('An evening of music a'), findsOneWidget);
+      unawaited(
+        nav.currentState!.push<void>(
+          MaterialPageRoute(
+            builder: (_) => const Scaffold(body: Text('Other page')),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      nav.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(details.reads, 1);
+      await tester.pump(const Duration(minutes: 5));
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      await tester.pump();
+      expect(details.reads, 2);
+      expect(find.text('An evening of music a'), findsNothing);
+      resumedRead.complete(
+        Success(
+          EventDetail(
+            eventId: 'a',
+            title: 'Fresh Event detail',
+            startAt: DateTime.utc(2027),
+            externalSourceUrl: 'https://www.ticketmaster.sg/event/a',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Fresh Event detail'), findsOneWidget);
+      expect(repo.writes, isEmpty);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
   test('pages accumulate, deduplicate, retain cursor on failure and continue after empty pages', () async {
     final repo = PlansRepo()
       ..pages[null] = Success(EventParticipationPage([fact('a')], 'p1'));

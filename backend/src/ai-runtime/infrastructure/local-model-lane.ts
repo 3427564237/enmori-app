@@ -23,6 +23,21 @@ export class LocalModelLane {
   }
   get state() { return { pending: this.pending, outcomeUnknown: this.uncertain }; }
 
+  async prepareForChat(): Promise<void> {
+    if (this.pending || this.uncertain) throw unavailable();
+    const response = await this.http('http://127.0.0.1:11434/api/ps', {
+      method: 'GET', redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(120_000),
+    });
+    if (!response.ok) throw unavailable();
+    const value: unknown = await response.json();
+    if (!value || typeof value !== 'object' || !('models' in value) || !Array.isArray(value.models)) throw unavailable();
+    // Do not race an idle expiry during the existing 75-second client send.
+    if (value.models.some((model: unknown) => model && typeof model === 'object' &&
+      'name' in model && model.name === this.model && 'expires_at' in model &&
+      typeof model.expires_at === 'string' && Date.parse(model.expires_at) > Date.now() + 75_000)) return;
+    await this.prepareModel();
+  }
+
   async prepareModel(): Promise<void> {
     const value = await this.receive('/api/generate', JSON.stringify({ model: this.model,
       prompt: '', stream: false, keep_alive: '30m', options: { num_ctx: 8192 } }));
