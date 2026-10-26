@@ -1,0 +1,202 @@
+{
+  "sourceHead": "c4f2ae98b0b4cd193fbef1c74d63db259cdd2eda",
+  "sourceTree": "3a90e147ba687aed3b50fc54c6c1f2457bd820bf",
+  "previousIntegrationHead": "5cc207cd9c2879f2108546c505f58be14344c7ad",
+  "integratedPr": 187,
+  "approvedPrHead": "4adfc83809f9940919f7a07713ea2ca61030be38",
+  "reviewer": "397781783dk-prog",
+  "reviewState": "APPROVED",
+  "reviewSubmittedAt": "2026-10-25T14:35:00Z",
+  "trackedInputCount": 2173,
+  "trackedInputsUnchanged": true,
+  "clientConfigurationUnchanged": true,
+  "checks": [
+    {
+      "label": "toolchain",
+      "command": [
+        "/home/miku/.local/bin/fvm",
+        "flutter",
+        "--version"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-26T00:57:53.172253+00:00",
+      "seconds": 0.137,
+      "log": "toolchain.log",
+      "logSha256": "dd4a89d4d1ed3a6cc0f0e308571f2356ef22fcacf5643ec3180cb4266468b056"
+    },
+    {
+      "label": "format",
+      "command": [
+        "/home/miku/.local/bin/fvm",
+        "dart",
+        "format",
+        "--output=none",
+        "--set-exit-if-changed",
+        "lib/features/event_browse/presentation/activity_page.dart",
+        "lib/features/event_detail/presentation/event_detail_page.dart",
+        "test/features/event_browse_test.dart",
+        "test/features/event_information_test.dart",
+        "test/features/event_page_retarget_test.dart"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-26T00:57:53.309960+00:00",
+      "seconds": 0.256,
+      "log": "format.log",
+      "logSha256": "3f6a3f991a1f59e9f26975c37bc8644d058aa6f461201bf1e93a50d39cf1708e"
+    },
+    {
+      "label": "analyze",
+      "command": [
+        "/home/miku/.local/bin/fvm",
+        "flutter",
+        "analyze",
+        "--no-pub"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-26T00:57:53.565988+00:00",
+      "seconds": 3.78,
+      "log": "analyze.log",
+      "logSha256": "f77ab2f10c1b5cc678863aa89c507678ac9d135f074a85b40c50ef743a1d1c8a"
+    },
+    {
+      "label": "event-regressions",
+      "command": [
+        "/home/miku/.local/bin/fvm",
+        "flutter",
+        "test",
+        "--no-pub",
+        "--no-test-assets",
+        "--concurrency=1",
+        "--reporter=expanded",
+        "test/features/event_page_retarget_test.dart",
+        "test/features/event_information_test.dart",
+        "test/features/event_cover_loader_test.dart",
+        "test/features/event_browse_test.dart",
+        "test/features/external_registration_flow_test.dart"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-26T00:57:57.346124+00:00",
+      "seconds": 7.554,
+      "log": "event-regressions.log",
+      "logSha256": "403a547e993d06e9a70df660374f62c966dcf5787faf85fa354a377f2bcadc4a"
+    },
+    {
+      "label": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "5cc207cd9c2879f2108546c505f58be14344c7ad",
+        "HEAD"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-26T00:58:04.900138+00:00",
+      "seconds": 0.002,
+      "log": "diff-check.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "apk-build",
+      "command": [
+        "/home/miku/.local/bin/fvm",
+        "flutter",
+        "build",
+        "apk",
+        "--release",
+        "--no-pub",
+        "--target",
+        "lib/main.dart",
+        "--dart-define-from-file=<existing owner-only client configuration>",
+        "--dart-define=ENMORI_AI_COMPANION_FIRST_FLOW=true",
+        "--build-number=30",
+        "--build-name=1.0.0-group20261026"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-26T00:58:04.906718+00:00",
+      "seconds": 64.876,
+      "log": "apk-build.log",
+      "logSha256": "ef2ce9a93c5d91503c67b0fb6b4d267ae2173eb4c8c5ba7176c9e661400dbb3e"
+    }
+  ],
+  "focusedWidgetTests": {
+    "passed": 41,
+    "failed": 0,
+    "invocations": 1
+  },
+  "artifactVerification": {
+    "verifiedAt": "2026-10-26T01:00:24.625181+00:00",
+    "sourceHead": "c4f2ae98b0b4cd193fbef1c74d63db259cdd2eda",
+    "artifacts": {
+      "v30": {
+        "package": "com.enmori.app.group",
+        "versionCode": 30,
+        "versionName": "1.0.0-group20261026",
+        "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+        "sha256": "b1dae8da72df4ccf75776b9cb8c81627cfb9f8d9ed215d64cb9beae786fadf0c",
+        "bytes": 66906266,
+        "permissions": [
+          "android.permission.ACCESS_COARSE_LOCATION",
+          "android.permission.ACCESS_FINE_LOCATION",
+          "android.permission.ACCESS_NETWORK_STATE",
+          "android.permission.INTERNET",
+          "android.permission.POST_NOTIFICATIONS",
+          "android.permission.WAKE_LOCK",
+          "com.enmori.app.group.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+          "com.google.android.c2dm.permission.RECEIVE",
+          "com.google.android.providers.gsf.permission.READ_GSERVICES"
+        ],
+        "debuggable": false,
+        "messagingAutoInit": false,
+        "analyticsCollection": false
+      },
+      "installed-v29": {
+        "package": "com.enmori.app.group",
+        "versionCode": 29,
+        "versionName": "1.0.0-group20261025",
+        "certificateSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+        "sha256": "35e4b53688f729d01b80f322c838c92b6c4785ee9445528c63c00eb47ed2fd30",
+        "bytes": 66906266,
+        "permissions": [
+          "android.permission.ACCESS_COARSE_LOCATION",
+          "android.permission.ACCESS_FINE_LOCATION",
+          "android.permission.ACCESS_NETWORK_STATE",
+          "android.permission.INTERNET",
+          "android.permission.POST_NOTIFICATIONS",
+          "android.permission.WAKE_LOCK",
+          "com.enmori.app.group.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+          "com.google.android.c2dm.permission.RECEIVE",
+          "com.google.android.providers.gsf.permission.READ_GSERVICES"
+        ],
+        "debuggable": false,
+        "messagingAutoInit": false,
+        "analyticsCollection": false
+      }
+    },
+    "samePackage": true,
+    "sameSigner": true,
+    "upgradeVersion": true,
+    "samePermissions": true,
+    "result": "Pass"
+  },
+  "installation": {
+    "installedAt": "2026-10-26T01:00:55.527165+00:00",
+    "package": "com.enmori.app.group",
+    "versionCode": 30,
+    "versionName": "1.0.0-group20261026",
+    "firstInstallTime": "2026-10-21 12:13:08",
+    "firstInstallTimeUnchanged": true,
+    "installedApkSha256": "b1dae8da72df4ccf75776b9cb8c81627cfb9f8d9ed215d64cb9beae786fadf0c",
+    "method": "adb install -r",
+    "dataClearPerformed": false,
+    "appLaunched": false,
+    "loginAndBusinessDataReadback": "Not Run; LI performs",
+    "deviceAcceptance": "Not Run; LI performs"
+  },
+  "preservedV29Sha256": "35e4b53688f729d01b80f322c838c92b6c4785ee9445528c63c00eb47ed2fd30",
+  "backendAndApiChanges": false,
+  "backendRestarted": false,
+  "physicalAcceptance": "Not Run; LI performs",
+  "fullFlutterSuite": "Not Run",
+  "artifactVerificationSha256": "c93519bb0ed1a0befbcefac871c18de653b90559b8a5da2768a833e4cc38eddc",
+  "installationReceiptSha256": "dde25ca2968eced345e6b3e99962e577f9bc49c43277145485c19f958d13aa11"
+}
