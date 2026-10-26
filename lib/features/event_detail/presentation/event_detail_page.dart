@@ -1,3 +1,7 @@
+import '../../../core/presentation/refresh_on_return.dart';
+
+import 'dart:async';
+
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -62,7 +66,7 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(eventDetailControllerProvider(widget.eventId));
-    return Scaffold(
+    final page = Scaffold(
       appBar: AppBar(title: Text(context.tr('Event details', '活动详情'))),
       body: SafeArea(
         child: ListView(
@@ -188,6 +192,12 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
           ],
         ),
       ),
+    );
+    return RefreshOnReturn(
+      onRefresh: () => unawaited(
+        ref.read(eventDetailControllerProvider(widget.eventId).notifier).load(),
+      ),
+      child: page,
     );
   }
 }

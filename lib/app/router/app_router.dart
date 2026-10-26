@@ -27,8 +27,6 @@ import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/check_in/presentation/check_in_page.dart';
 import '../../features/check_in/presentation/check_in_from_record_page.dart';
 import '../../features/check_in/presentation/check_in_history_controller.dart';
-import '../../features/event_recommendations/domain/event_recommendation_repository.dart';
-import '../../features/event_recommendations/presentation/event_recommendations_controller.dart';
 import '../../features/event_recommendations/presentation/event_recommendations_page.dart';
 import '../../features/interests/presentation/interest_editor_page.dart';
 import '../../features/interests/presentation/admin_interest_catalogue_page.dart';
@@ -560,11 +558,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             await context.push<void>(
               '${AppRoutes.eventRecommendations}?from=2',
             );
-            if (context.mounted && canNavigateShared(context, AppRoutes.home)) {
-              ref
-                  .read(eventRecommendationsControllerProvider.notifier)
-                  .load(view: EventRecommendationView.home);
-            }
           },
           daySection: historyPage != null
               ? HomeTodaySection(
@@ -637,36 +630,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   }
                 }
               : null,
-          onOpenProfile: () async {
-            final subject = ref.read(currentAuthSubjectProvider);
-            await context.push<void>(AppRoutes.profile);
-            if (!context.mounted ||
-                ref.read(routerGateProvider) != RouterGateState.authenticated ||
-                ref.read(currentAuthSubjectProvider) != subject) {
-              return;
-            }
-            ref
-                .read(eventRecommendationsControllerProvider.notifier)
-                .load(view: EventRecommendationView.home);
-          },
-          onEditInterests: () async {
-            final saved = await context.push<bool>(AppRoutes.interests);
-            if (saved == true) {
-              ref
-                  .read(eventRecommendationsControllerProvider.notifier)
-                  .load(view: EventRecommendationView.home);
-            }
-          },
-          onSeeAllEvents: () async {
-            await context.push<void>(AppRoutes.eventRecommendations);
-            if (!context.mounted ||
-                ref.read(routerGateProvider) != RouterGateState.authenticated) {
-              return;
-            }
-            ref
-                .read(eventRecommendationsControllerProvider.notifier)
-                .load(view: EventRecommendationView.home);
-          },
+          // The visible recommendation section owns the fresh return read.
+          onOpenProfile: () => context.push<void>(AppRoutes.profile),
+          onEditInterests: () => context.push<bool>(AppRoutes.interests),
+          onSeeAllEvents: () =>
+              context.push<void>(AppRoutes.eventRecommendations),
         ),
       ),
       GoRoute(

@@ -155,20 +155,14 @@ void main() {
     expect(repository.views, [EventRecommendationView.all]);
   });
 
-  testWidgets('background clearing is refresh-needed, not a service failure', (
-    tester,
-  ) async {
+  testWidgets('foreground return reloads recommendations once', (tester) async {
     final repository = FakeEventRecommendationRepository();
     await _pump(tester, const EventRecommendationsPage(), repository);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
-    expect(find.text('Refresh event recommendations'), findsOneWidget);
+    expect(find.text('Refresh event recommendations'), findsNothing);
     expect(find.text('Event recommendations unavailable'), findsNothing);
-    expect(find.text('Third-ranked event'), findsNothing);
-    expect(repository.views, [EventRecommendationView.all]);
-    await tester.tap(find.byKey(const Key('event-recommendations-refresh')));
-    await tester.pumpAndSettle();
     expect(find.text('Third-ranked event'), findsOneWidget);
     expect(repository.views, [
       EventRecommendationView.all,

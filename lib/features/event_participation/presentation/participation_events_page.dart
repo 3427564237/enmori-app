@@ -1,9 +1,14 @@
+import '../../../core/presentation/refresh_on_return.dart';
+
+import 'dart:async';
+
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/status_panel.dart';
+import '../../auth/auth_providers.dart';
 
 import '../../event_browse/domain/activity_repository.dart';
 import 'event_batches_controller.dart';
@@ -27,6 +32,10 @@ final class _ParticipationEventsPageState
     extends ConsumerState<ParticipationEventsPage>
     with WidgetsBindingObserver {
   String? _category;
+  final _search = TextEditingController();
+  String _query = '';
+  bool _searching = false;
+  int _searchGeneration = 0;
   @override
   void initState() {
     super.initState();
@@ -39,18 +48,33 @@ final class _ParticipationEventsPageState
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed && mounted) {
+      _searchGeneration++;
+      _searching = false;
       ref.read(eventBatchesProvider.notifier).clear();
     }
   }
 
   @override
   void dispose() {
+    _searchGeneration++;
+    _search.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authSessionProvider, (before, after) {
+      if (!identical(before?.asData?.value, after.asData?.value)) {
+        _searchGeneration++;
+        _search.clear();
+        setState(() {
+          _query = '';
+          _category = null;
+          _searching = false;
+        });
+      }
+    });
     final state = ref.watch(eventBatchesProvider),
         controller = ref.read(eventBatchesProvider.notifier);
     final value = state.batch;
@@ -58,26 +82,72 @@ final class _ParticipationEventsPageState
     final categories =
         items.map((s) => s.categoryLabel).whereType<String>().toSet().toList()
           ..sort();
+    final query = _query.trim().toLowerCase();
+    final matching = items
+        .where(
+          (item) =>
+              (_category == null || item.categoryLabel == _category) &&
+              (query.isEmpty ||
+                  [
+                    item.title,
+                    item.categoryLabel ?? '',
+                    item.locationLabel ?? '',
+                  ].any((text) => text.toLowerCase().contains(query))),
+        )
+        .toList();
 
-    return Scaffold(
+    final page = Scaffold(
       appBar: AppBar(
         title: Text(context.tr('Events', '活动')),
         actions: [
           IconButton(
             tooltip: context.tr('Refresh events', '刷新活动'),
-            onPressed: state.busy ? null : controller.load,
+            onPressed: state.busy ? null : () => unawaited(_reload()),
             icon: const Icon(Icons.refresh),
           ),
         ],
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: controller.load,
+          onRefresh: _reload,
           child: ListView(
             key: const PageStorageKey("events-browse"),
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
             children: [
+              TextField(
+                key: const Key('events-search'),
+                controller: _search,
+                maxLength: 100,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  labelText: context.tr('Search events', '搜索活动'),
+                  hintText: context.tr('Name, place or category', '活动名称、地点或分类'),
+                  counterText: '',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: IconButton(
+                    tooltip: context.tr('Search available events', '搜索全部可用活动'),
+                    onPressed: state.busy || _searching
+                        ? null
+                        : () => unawaited(_searchAvailable()),
+                    icon: const Icon(Icons.arrow_forward),
+                  ),
+                ),
+                onChanged: (value) => setState(() => _query = value),
+                onSubmitted: (_) => unawaited(_searchAvailable()),
+              ),
+              if (_query.isNotEmpty)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: () => setState(() {
+                      _search.clear();
+                      _query = '';
+                    }),
+                    child: Text(context.tr('Clear search', '清除搜索')),
+                  ),
+                ),
+              const SizedBox(height: 12),
               if (widget.onOpenPlans != null) ...[
                 OutlinedButton.icon(
                   onPressed: widget.onOpenPlans,
@@ -94,7 +164,7 @@ final class _ParticipationEventsPageState
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 16),
-              if (state.busy)
+              if (state.busy || _searching)
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: LinearProgressIndicator(
@@ -127,8 +197,10 @@ final class _ParticipationEventsPageState
                       PopupMenuButton<String>(
                         tooltip: context.tr('Filter event category', '筛选活动分类'),
                         initialValue: _category,
-                        onSelected: (category) =>
-                            setState(() => _category = category),
+                        onSelected: (category) {
+                          setState(() => _category = category);
+                          unawaited(_searchAvailable());
+                        },
                         itemBuilder: (_) => [
                           for (final c in categories)
                             PopupMenuItem(value: c, child: Text(c)),
@@ -158,14 +230,16 @@ final class _ParticipationEventsPageState
                         ),
                     ],
                   ),
-                if (_category != null &&
-                    !items.any((item) => item.categoryLabel == _category))
+                if ((_category != null || query.isNotEmpty) &&
+                    matching.isEmpty &&
+                    !state.busy &&
+                    !_searching)
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
                     child: Text(
                       context.tr(
-                        'No matching events loaded. Clear the filter or load more events.',
-                        '已加载的活动中没有匹配项，请清除筛选或加载更多活动。',
+                        'No matching events in the loaded selection. Clear search/filter, or search the remaining available events.',
+                        '当前已加载范围内没有匹配活动，可清除搜索／筛选，或搜索剩余可用活动。',
                       ),
                     ),
                   ),
@@ -176,9 +250,7 @@ final class _ParticipationEventsPageState
                       '当前可用范围内没有活动，请稍后查看。',
                     ),
                   ),
-                for (final item in items.where(
-                  (s) => _category == null || s.categoryLabel == _category,
-                )) ...[
+                for (final item in matching) ...[
                   EventCard.summary(
                     key: ValueKey(item.eventId ?? item.browseId),
                     summary: item,
@@ -245,5 +317,34 @@ final class _ParticipationEventsPageState
         ),
       ),
     );
+    return RefreshOnReturn(onRefresh: () => unawaited(_reload()), child: page);
+  }
+
+  Future<void> _searchAvailable() async {
+    if (!mounted ||
+        _searching ||
+        (ModalRoute.of(context)?.isCurrent == false)) {
+      return;
+    }
+    final generation = ++_searchGeneration;
+    setState(() => _searching = true);
+    await ref.read(eventBatchesProvider.notifier).loadAvailablePages();
+    if (mounted && generation == _searchGeneration) {
+      setState(() => _searching = false);
+    }
+  }
+
+  Future<void> _reload() async {
+    final generation = ++_searchGeneration;
+    final session = ref.read(authSessionProvider);
+    await ref.read(eventBatchesProvider.notifier).load();
+    if (!mounted ||
+        generation != _searchGeneration ||
+        !identical(session, ref.read(authSessionProvider))) {
+      return;
+    }
+    if (_query.trim().isNotEmpty || _category != null) {
+      await _searchAvailable();
+    }
   }
 }

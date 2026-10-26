@@ -64,8 +64,8 @@ final class EventInformation extends StatelessWidget {
           context.tr(
             'An available cover loads directly from Ticketmaster’s image service. '
                 'It receives your connection information, without your ENMORI sign-in or private content. '
-                'Event information is kept in memory for at most five minutes; reload after leaving or returning to the app.',
-            '可用封面直接从 Ticketmaster 图片服务加载。该服务会收到你的连接信息，不会收到 ENMORI 登录信息或私人内容。活动信息最多在内存保留五分钟；离开或返回应用后请刷新。',
+                'Event information is kept in memory for at most five minutes and is checked again when you return.',
+            '可用封面直接从 Ticketmaster 图片服务加载。该服务会收到你的连接信息，不会收到 ENMORI 登录信息或私人内容。活动信息最多在内存保留五分钟，返回时会重新核对。',
           ),
           style: Theme.of(context).textTheme.bodySmall,
         ),
@@ -112,7 +112,10 @@ final class EventInformation extends StatelessWidget {
         event.shortDescription ??
             (syntheticPreview
                 ? context.tr('Description not provided.', '未提供简介。')
-                : context.tr('Event description unavailable.', '暂无可用活动简介。')),
+                : context.tr(
+                    'The current event source has not supplied an introduction. The ticket link may open seat selection directly.',
+                    '当前活动来源未提供介绍。购票链接可能直接进入选座页面。',
+                  )),
         key: const Key('event-detail-description'),
       ),
     ],

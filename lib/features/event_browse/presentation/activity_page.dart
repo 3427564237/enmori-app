@@ -1,3 +1,7 @@
+import '../../../core/presentation/refresh_on_return.dart';
+
+import 'dart:async';
+
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -104,7 +108,7 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
     final controller = ref.read(
       activityControllerProvider(widget.browseId).notifier,
     );
-    return Scaffold(
+    final page = Scaffold(
       appBar: AppBar(
         title: Text(
           widget.browseId.isEmpty
@@ -290,6 +294,12 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
           ],
         ),
       ),
+    );
+    return RefreshOnReturn(
+      onRefresh: () => unawaited(
+        ref.read(activityControllerProvider(widget.browseId).notifier).load(),
+      ),
+      child: page,
     );
   }
 }

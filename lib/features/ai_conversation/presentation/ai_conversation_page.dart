@@ -419,24 +419,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
               ? () => unawaited(_openReferences())
               : null,
           icon: const Icon(Icons.fact_check_outlined),
-          label: Text(
-            selected.active
-                ? selected.mode == AiReferenceMode.today
-                      ? context.tr(
-                          "Today's Check-ins · local references",
-                          '今天的签到 · 本地参考',
-                        )
-                      : selected.mode == AiReferenceMode.off
-                      ? context.tr(
-                          'Check-in references off for this topic',
-                          '本话题签到参考已关闭',
-                        )
-                      : context.tr(
-                          'References: ${selected.selectedIds.length} selected',
-                          '本次参考：已选 ${selected.selectedIds.length} 条',
-                        )
-                : context.tr('References for this reply', '本次参考'),
-          ),
+          label: Text(context.tr('Check-in references', '签到参考')),
         ),
         if (selected.active)
           Padding(
@@ -452,7 +435,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                   : selected.mode == AiReferenceMode.today
                   ? context.tr(
                       'Uses up to the latest 5 from today when you send.',
-                      '发送时最多参考今天最近 5 条。',
+                      '自动参考今天最近 5 条。',
                     )
                   : selected.mode == AiReferenceMode.off
                   ? context.tr('You can still chat.', '仍可正常聊天。')
@@ -470,8 +453,8 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
                       AiSelectionNotice.expired,
                     }.contains(selected.notice)
                   ? context.tr(
-                      'References will be checked when you send. Your draft is kept if they change.',
-                      '发送时会核对本次参考；来源变化时会保留草稿。',
+                      '${selected.selectedIds.length} selected · checked when you send.',
+                      '已手选 ${selected.selectedIds.length} 条，发送时重新核对。',
                     )
                   : aiSelectionNoticeCopy(
                       context,
@@ -675,7 +658,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         ? ref.read(aiOwnedSourcesControllerProvider)
         : null;
     if (messages.length == 1 &&
-        canDisplayAiMessage(current, messages.single, sources: currentSources)) {
+        canDisplayAiMessage(
+          current,
+          messages.single,
+          sources: currentSources,
+        )) {
       _followUpAction(current, messages.single)?.call();
     }
   }

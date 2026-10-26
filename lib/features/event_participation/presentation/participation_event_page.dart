@@ -1,3 +1,4 @@
+import '../../../core/presentation/refresh_on_return.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'dart:async';
@@ -146,7 +147,7 @@ final class _ParticipationEventPageState
     }
     final controller = ref.read(participationControllerProvider.notifier);
     final details = _detail;
-    return Scaffold(
+    final page = Scaffold(
       appBar: AppBar(
         title: Text(context.tr('Event details', '活动详情')),
         actions: [
@@ -217,6 +218,7 @@ final class _ParticipationEventPageState
         ),
       ),
     );
+    return RefreshOnReturn(onRefresh: () => unawaited(_load()), child: page);
   }
 
   @override

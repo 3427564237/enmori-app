@@ -55,6 +55,36 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
       (_expiry?.isActive ?? false);
   Future<void> load() => _load(false);
   Future<void> next() => _load(true);
+
+  /// Explicit Search/filter actions can cover later available source batches.
+  /// Retain opaque cursors and stop at an error or invalidated view; never
+  /// silently call the first-page refresh a complete catalogue search.
+  Future<void> loadAvailablePages() async {
+    if (state.busy || !_authenticated) return;
+    var generation = _generation;
+    if (state.batch == null) {
+      final loading = load();
+      generation = _generation;
+      await loading;
+    }
+    if (!ref.mounted || generation != _generation || state.failure != null) {
+      return;
+    }
+    final seen = <String>{};
+    for (var page = 0; page < 49; page++) {
+      if (!ref.mounted ||
+          generation != _generation ||
+          !_authenticated ||
+          state.busy ||
+          state.failure != null) {
+        return;
+      }
+      final cursor = state.batch?.nextCursor;
+      if (cursor == null || !seen.add(cursor)) return;
+      await next();
+    }
+  }
+
   Future<void> _load(bool next) async {
     if (state.busy || !_authenticated) return;
     final freshDeadline = DateTime.now().add(const Duration(minutes: 5));
