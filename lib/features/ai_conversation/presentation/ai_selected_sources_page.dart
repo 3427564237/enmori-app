@@ -421,8 +421,8 @@ final class _AiSelectedSourcesPageState
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Text(
                     context.tr(
-                      'Check-in references are off for this topic. You can still chat.',
-                      '本话题不新增参考签到，仍可正常聊天。',
+                      'References are off. Replies skip Check-ins and the latest two exchanges; your history stays saved.',
+                      '参考已关闭：回复不使用签到及最近两对旧问答，历史记录仍保留。',
                     ),
                   ),
                 ),

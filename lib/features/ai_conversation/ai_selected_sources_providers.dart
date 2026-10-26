@@ -702,7 +702,14 @@ class AiSelectedSourcesController extends Notifier<AiSelectedSourcesState> {
         ..addAll(prepared.sourceCards.map((card) => card.checkInId!));
     }
     _confirmed = false;
-    if (oldPairs != null &&
+    if (_mode == AiReferenceMode.off) {
+      // Off explicitly excludes this preparation's current bounded history
+      // window as well as Check-ins. Never carry opaque keys to another send.
+      _excludedHistory = prepared.historyPairs
+          .map((pair) => pair.historyKey)
+          .toSet();
+      _notice = AiSelectionNotice.none;
+    } else if (oldPairs != null &&
         oldPairs.isNotEmpty &&
         _sameHistoryIntent(oldPairs, prepared.historyPairs)) {
       _excludedHistory = prepared.historyPairs

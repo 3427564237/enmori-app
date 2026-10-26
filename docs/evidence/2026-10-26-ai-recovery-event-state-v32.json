@@ -1,0 +1,72 @@
+{
+  "recordedAt": "2026-10-26T10:52:41.956284+00:00",
+  "candidate": "v32",
+  "status": "Installed; physical AI acceptance failed on off transition",
+  "sourceHead": "44e44a2cc46f08c9f2eed47d3626cc156d469dda",
+  "sourceTree": "5b4bf1df4dc48c158683bc527a43cd5d1a282b97",
+  "flutter": {
+    "version": "3.47.2",
+    "dart": "3.13.2",
+    "analyze": "No issues",
+    "focusedFiles": 20,
+    "passed": 274
+  },
+  "backend": {
+    "sourceHead": "44e44a2cc46f08c9f2eed47d3626cc156d469dda",
+    "node": "24.19.0",
+    "strictBuild": "Pass",
+    "testsPassed": 1534,
+    "deployed": true
+  },
+  "artifact": {
+    "file": "ENMORI-group-v32-release.apk",
+    "sha256": "b118df4d6ee68c5335eb3994847abfcf431e491eaf2cd547f34746a0a9f937c6",
+    "bytes": 66939034,
+    "package": "com.enmori.app.group",
+    "versionCode": 32,
+    "versionName": "1.0.0-group20261026"
+  },
+  "signature": {
+    "result": "Pass",
+    "sameSigner": true,
+    "samePermissions": true,
+    "debuggable": false,
+    "messagingAutoInit": false,
+    "analyticsCollection": false
+  },
+  "installation": {
+    "installedAt": "2026-10-26T10:36:07.270517+00:00",
+    "package": "com.enmori.app.group",
+    "versionCode": 32,
+    "versionName": "1.0.0-group20261026",
+    "firstInstallTime": "2026-10-21 12:13:08",
+    "firstInstallTimeUnchanged": true,
+    "installedApkSha256": "b118df4d6ee68c5335eb3994847abfcf431e491eaf2cd547f34746a0a9f937c6",
+    "method": "adb install -r",
+    "dataClearPerformed": false,
+    "appLaunched": true,
+    "deviceAcceptance": "Installation identity passed; interaction confirmation pending",
+    "launchCheckedAt": "2026-10-26T10:37:33.738445+00:00"
+  },
+  "physicalAi": {
+    "syntheticNewTopic": true,
+    "today": {
+      "result": "Pass",
+      "replyVisible": true,
+      "executeStatus": 200,
+      "executeMs": 17467
+    },
+    "offAfterToday": {
+      "result": "Fail",
+      "executeStatus": 409,
+      "errorCategory": "AI_CONTEXT_SELECTION_CONFLICT",
+      "replyVisible": false
+    },
+    "inputAndReferenceEditing": "Passed in observed states",
+    "automaticResend": false,
+    "oldDataEditedOrDeleted": false
+  },
+  "supersededBy": "v33 correction; see 2026-10-26-li-reference-off-history-exclusion.md",
+  "fullUat": "Not Run",
+  "independentReview": "Pending"
+}

@@ -334,6 +334,76 @@ void main() {
   );
 
   testWidgets(
+    'off skips the exact current two exchanges without deleting history',
+    (tester) async {
+      final repo = _TodayRepository()
+        ..pairs = (n) => [
+          for (var i = 0; i < 2; i++)
+            AiPreparedHistoryPair(
+              historyKey: 'history-$n-$i',
+              userMessageId: 'old-user-$i',
+              assistantMessageId: 'old-assistant-$i',
+              userSequence: 1 + 2 * i,
+              assistantSequence: 2 + 2 * i,
+            ),
+        ];
+      final r = await _rig(tester, repo);
+      r.sources.setTodayEnabled(false);
+      await r.sources.submit('A fresh question without earlier references');
+      expect(repo.selectedPrepares.single.ids, isEmpty);
+      expect(repo.selectedExecutes.single.history, [
+        'history-1-0',
+        'history-1-1',
+      ]);
+      expect(repo.selectedExecutes.single.included, isEmpty);
+      expect(
+        repo.selectedExecutes.single.ticket.selection.historyPairs,
+        hasLength(2),
+      );
+      expect(repo.ordinaryExecutes, 0);
+      expect(r.aiState.phase, AiConversationPhase.success);
+      r.dispose();
+      await tester.pump();
+    },
+  );
+
+  testWidgets('off uses fresh exclusion keys when the latest window changes', (
+    tester,
+  ) async {
+    final repo = _TodayRepository()
+      ..pairs = (n) => [
+        AiPreparedHistoryPair(
+          historyKey: 'history-$n',
+          userMessageId: 'old-user-$n',
+          assistantMessageId: 'old-assistant-$n',
+          userSequence: 2 * n - 1,
+          assistantSequence: 2 * n,
+        ),
+      ];
+    final r = await _rig(tester, repo);
+    r.sources.setTodayEnabled(false);
+    await r.sources.review();
+    expect(r.sourceState.excludedHistoryKeys, {'history-1'});
+    await r.sources.submit('Use only the new input');
+    expect(repo.selectedPrepares, hasLength(2));
+    expect(repo.selectedExecutes.single.history, ['history-2']);
+    expect(
+      repo
+          .selectedExecutes
+          .single
+          .ticket
+          .selection
+          .historyPairs
+          .single
+          .userMessageId,
+      'old-user-2',
+    );
+    expect(r.sourceState.reviewRequired, isFalse);
+    r.dispose();
+    await tester.pump();
+  });
+
+  testWidgets(
     'unknown device day preserves draft and never becomes empty or legacy send',
     (tester) async {
       final repo = _TodayRepository();

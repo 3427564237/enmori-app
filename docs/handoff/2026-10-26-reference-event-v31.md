@@ -1,5 +1,9 @@
 # LI reference and Event usability candidate v31
 
+Historical v31 evidence. The subsequent
+[v32 correction and handoff](2026-10-26-ai-recovery-event-state-v32.md) supersedes
+the affected AI recovery and Event return behavior; use its acceptance checklist.
+
 26 October 2026, Asia/Singapore. Implements the confirmed
 [LI direction and scoped supersession](../decisions/2026-10-26-li-reference-and-event-usability.md).
 Source is [Draft PR #189](https://github.com/3427564237/enmori-app/pull/189),
