@@ -6,6 +6,8 @@ reply was displayed, but switching off then sending returned
 editing remained available. No automatic resend was attempted. LI subsequently
 approved [off-mode history exclusion](../decisions/2026-10-26-li-reference-off-history-exclusion.md)
 for the next v33 candidate. That correction is not contained in v32.
+The [v33 handoff](2026-10-26-ai-reference-off-v33.md) records the corrected build,
+installation and successful on-to-off physical check.
 
 26 October 2026, Asia/Singapore. This supersedes the behavior and acceptance
 instructions in the historical [v31 handoff](2026-10-26-reference-event-v31.md)
