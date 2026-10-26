@@ -83,6 +83,7 @@ Future<void> pump(
         externalActivityOpenerProvider.overrideWithValue(opener),
       ],
       child: MaterialApp(
+        theme: ThemeData(splashFactory: NoSplash.splashFactory),
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context)
               .copyWith(textScaler: TextScaler.linear(scale)),
@@ -420,7 +421,10 @@ void main() {
             authSessionProvider.overrideWith((_) => sessions.stream),
             activityRepositoryProvider.overrideWithValue(repo),
           ],
-          child: const MaterialApp(home: ActivityPage()),
+          child: MaterialApp(
+            theme: ThemeData(splashFactory: NoSplash.splashFactory),
+            home: const ActivityPage(),
+          ),
         ),
       );
       await tester.pump();

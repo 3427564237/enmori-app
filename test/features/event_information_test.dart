@@ -72,7 +72,7 @@ Widget _host(Widget child, _Covers covers, {double textScale = 1}) =>
         eventDetailRepositoryProvider.overrideWithValue(_Details()),
       ],
       child: MaterialApp(
-        theme: ThemeData.dark(),
+        theme: ThemeData.dark().copyWith(splashFactory: NoSplash.splashFactory),
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(
             textScaler: TextScaler.linear(textScale),

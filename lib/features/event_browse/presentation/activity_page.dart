@@ -42,13 +42,27 @@ final class ActivityPage extends ConsumerStatefulWidget {
 
 final class _ActivityPageState extends ConsumerState<ActivityPage>
     with WidgetsBindingObserver {
+  int _scheduledLoad = 0;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scheduleLoad();
+  }
+
+  @override
+  void didUpdateWidget(ActivityPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.browseId != widget.browseId) _scheduleLoad();
+  }
+
+  void _scheduleLoad() {
+    final scheduled = ++_scheduledLoad, browseId = widget.browseId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        ref.read(activityControllerProvider(widget.browseId).notifier).load();
+      if (mounted &&
+          scheduled == _scheduledLoad &&
+          widget.browseId == browseId) {
+        ref.read(activityControllerProvider(browseId).notifier).load();
       }
     });
   }
