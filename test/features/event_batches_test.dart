@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:enmori/features/event_participation/domain/event_time_filter.dart';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -62,6 +64,104 @@ final class Repo implements PagedActivityRepository {
 }
 
 void main() {
+  test(
+    'local time shortcuts include civil boundaries and Sunday current weekend',
+    () {
+      final monday = DateTime(2026, 10, 26, 12);
+      String day(int n, [int hour = 0]) =>
+          DateTime(2026, 10, n, hour).toUtc().toIso8601String();
+      expect(matchesEventTime(day(26), EventTimeFilter.today, monday), isTrue);
+      expect(matchesEventTime(day(27), EventTimeFilter.today, monday), isFalse);
+      expect(
+        matchesEventTime(day(31), EventTimeFilter.weekend, monday),
+        isTrue,
+      );
+      expect(
+        matchesEventTime(day(32, 23), EventTimeFilter.weekend, monday),
+        isTrue,
+      );
+      expect(
+        matchesEventTime(day(33), EventTimeFilter.weekend, monday),
+        isFalse,
+      );
+      expect(
+        matchesEventTime(
+          day(31),
+          EventTimeFilter.weekend,
+          DateTime(2026, 11, 1),
+        ),
+        isTrue,
+      );
+      expect(
+        matchesEventTime(day(32, 23), EventTimeFilter.sevenDays, monday),
+        isTrue,
+      );
+      expect(
+        matchesEventTime(day(33), EventTimeFilter.sevenDays, monday),
+        isFalse,
+      );
+      expect(
+        matchesEventTime('invalid', EventTimeFilter.today, monday),
+        isFalse,
+      );
+    },
+  );
+
+  testWidgets(
+    'time shortcuts combine with search, sort locally, and can be cleared',
+    (tester) async {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      ActivitySummary event(String id, int offset) => ActivitySummary(
+        browseId: id,
+        title: id,
+        startAt: today.add(Duration(hours: offset)).toUtc().toIso8601String(),
+      );
+      final repo = Repo()
+        ..result = Success(
+          ActivityBatch(
+            asOf: instant,
+            items: [
+              event('walk-late', 18),
+              event('walk-early', 8),
+              event('walk-tomorrow', 32),
+            ],
+          ),
+        );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            activityRepositoryProvider.overrideWithValue(repo),
+            authSessionProvider.overrideWithValue(
+              const AsyncData(AuthSessionAuthenticated(subject: 'owner')),
+            ),
+          ],
+          child: MaterialApp(home: ParticipationEventsPage(onSelect: (_) {})),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('events-time-today')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('walk-tomorrow')), findsNothing);
+      await tester.tap(find.byType(DropdownButtonFormField<int>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Earliest first').last);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const ValueKey('walk-early')));
+      expect(
+        tester.getTopLeft(find.byKey(const ValueKey('walk-early'))).dy,
+        lessThan(tester.getTopLeft(find.byKey(const ValueKey('walk-late'))).dy),
+      );
+      expect(repo.first, 1);
+      expect(repo.cursors, isEmpty);
+      await tester.ensureVisible(find.byKey(const Key('events-time-all')));
+      await tester.tap(find.byKey(const Key('events-time-all')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('walk-tomorrow')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   test('explicit Search retries the failed opaque batch without restarting the list', () async {
     final repo = Repo();
     final c = ProviderContainer(
@@ -372,17 +472,48 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+    await tester.ensureVisible(find.byTooltip('Filter event category'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byTooltip('Filter event category').hitTestable(),
+      findsOneWidget,
+    );
     await tester.tap(find.byTooltip('Filter event category'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Music').last);
     await tester.pumpAndSettle();
+    final outerScroll = find
+        .descendant(
+          of: find.byKey(const PageStorageKey('events-browse')),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.scrollUntilVisible(
+      find.text('Quiet music'),
+      250,
+      scrollable: outerScroll,
+    );
     expect(find.text('Quiet music'), findsOneWidget);
     expect(find.text('Garden gathering'), findsNothing);
     final calls = repo.first;
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('events-search')),
+      -400,
+      scrollable: outerScroll,
+    );
+    tester.state<ScrollableState>(outerScroll).position.jumpTo(0);
+    await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView), const Offset(0, 350));
     await tester.pumpAndSettle();
     expect(repo.first, calls + 1);
-    expect(find.text('Clear filter'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Clear filter'),
+      250,
+      scrollable: outerScroll,
+    );
+    await tester.ensureVisible(find.text('Clear filter'));
+    await tester.pumpAndSettle();
+    expect(find.text('Clear filter').hitTestable(), findsOneWidget);
     await tester.tap(find.text('Clear filter'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);

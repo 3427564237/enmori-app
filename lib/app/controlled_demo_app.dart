@@ -1,3 +1,5 @@
+import '../core/presentation/identity_avatar.dart';
+import '../features/account/presentation/authenticated_avatar.dart';
 import '../features/account/own_avatar_providers.dart';
 import '../features/account/data/backend_own_avatar_repository.dart';
 import '../features/account/content_access.dart';
@@ -267,8 +269,14 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       accountRepositoryProvider.overrideWithValue(
         BackendAccountRepository(_api),
       ),
+      identityAvatarBuilderProvider.overrideWithValue(
+        (username, size) => AuthenticatedAvatar(username: username, size: size),
+      ),
+      visibleAvatarRepositoryProvider.overrideWithValue(
+        BackendOwnAvatarRepository(_api, shared: true),
+      ),
       ownAvatarRepositoryProvider.overrideWithValue(
-        BackendOwnAvatarRepository(_api),
+        BackendOwnAvatarRepository(_api, shared: true),
       ),
       accountPreferencesRepositoryProvider.overrideWithValue(
         BackendAccountPreferencesRepository(_api),

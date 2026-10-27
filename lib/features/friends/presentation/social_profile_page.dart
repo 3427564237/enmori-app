@@ -1,3 +1,5 @@
+import '../../../core/presentation/identity_avatar.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -165,6 +167,11 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IdentityAvatar(username: widget.username, size: 52),
+                ),
+                const SizedBox(height: 12),
                 if (widget.recordId == null &&
                     widget.initialTab != SocialTab.map)
                   Wrap(
@@ -348,14 +355,6 @@ final class _SocialProfilePageState extends ConsumerState<SocialProfilePage>
   }
 
   List<Widget> _profile(SocialProfile profile, SocialState state) => [
-    Align(
-      alignment: Alignment.centerLeft,
-      child: CircleAvatar(
-        radius: 26,
-        child: Text(profile.username.substring(0, 1).toUpperCase()),
-      ),
-    ),
-    const SizedBox(height: 12),
     Text(
       profile.displayName ?? profile.username,
       style: Theme.of(context).textTheme.headlineSmall,

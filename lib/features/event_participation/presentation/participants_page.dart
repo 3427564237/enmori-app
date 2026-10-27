@@ -1,3 +1,4 @@
+import '../../../core/presentation/identity_avatar.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -158,9 +159,7 @@ final class _EventParticipantsPageState
                 ),
               for (final item in page.items)
                 ListTile(
-                  leading: CircleAvatar(
-                    child: Text(item.username.substring(0, 1).toUpperCase()),
-                  ),
+                  leading: IdentityAvatar(username: item.username),
                   trailing: const Icon(Icons.chevron_right),
                   title: Text(item.displayName ?? item.username),
                   subtitle: item.displayName == null

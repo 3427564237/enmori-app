@@ -1,3 +1,5 @@
+import '../core/presentation/identity_avatar.dart';
+import '../features/account/presentation/authenticated_avatar.dart';
 import '../features/account/own_avatar_providers.dart';
 import '../features/account/data/backend_own_avatar_repository.dart';
 import 'controlled_demo_app.dart';
@@ -132,9 +134,21 @@ Future<void> bootstrap() async {
         externalActivityOpenerProvider.overrideWithValue(
           const PlatformExternalActivityOpener(),
         ),
+        identityAvatarBuilderProvider.overrideWithValue(
+          (username, size) =>
+              AuthenticatedAvatar(username: username, size: size),
+        ),
+        visibleAvatarRepositoryProvider.overrideWith(
+          (ref) => BackendOwnAvatarRepository(
+            ref.watch(backendApiClientProvider),
+            shared: true,
+          ),
+        ),
         ownAvatarRepositoryProvider.overrideWith(
-          (ref) =>
-              BackendOwnAvatarRepository(ref.watch(backendApiClientProvider)),
+          (ref) => BackendOwnAvatarRepository(
+            ref.watch(backendApiClientProvider),
+            shared: true,
+          ),
         ),
         accountPreferencesRepositoryProvider.overrideWith(
           (ref) => BackendAccountPreferencesRepository(

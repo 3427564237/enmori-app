@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,12 +19,28 @@ final class OwnAvatarEditor extends ConsumerStatefulWidget {
 final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
   OwnAvatar? _base;
   AvatarPhoto? _draft;
+  bool _visible = false;
   bool _dirty = false, _busy = false, _picking = false, _unknown = false;
   int _epoch = 0;
-  int? _attemptRevision;
   String? _attemptHash;
   AvatarPendingSave? _attempt;
   String? _message;
+
+  bool _matchesAttempt(OwnAvatar value) {
+    final attempt = _attempt;
+    if (attempt == null ||
+        value.revision <= attempt.revision ||
+        value.visibleToAuthenticatedUsers !=
+            attempt.visibleToAuthenticatedUsers) {
+      return false;
+    }
+    // Publishing an existing canonical image may change the submitted-byte hash.
+    // Byte equality also proves the intended image, without a new hashing package.
+    return value.photo?.sourceSha256 == _attemptHash ||
+        (value.photo != null &&
+            attempt.photo != null &&
+            listEquals(value.photo!.bytes, attempt.photo!.bytes));
+  }
 
   bool get _foreground => ref.read(contentAccessProvider).foreground;
   bool _current(Object? session, int epoch) =>
@@ -42,7 +59,7 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
       _unknown = true;
       _dirty = true;
       _draft = pending.photo;
-      _attemptRevision = pending.revision;
+      _visible = pending.visibleToAuthenticatedUsers;
       _attemptHash = pending.photo?.sourceSha256;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => _read());
@@ -67,10 +84,7 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
       _busy = false;
       if (result case Success<OwnAvatar>(:final value)) {
         _base = value;
-        if (_unknown &&
-            _attemptRevision != null &&
-            value.revision > _attemptRevision! &&
-            value.photo?.sourceSha256 == _attemptHash) {
+        if (_unknown && _matchesAttempt(value)) {
           _unknown = false;
           _dirty = false;
           _draft = null;
@@ -111,6 +125,7 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
       _picking = false;
       if (result case Success<AvatarPhoto?>(value: final photo?)) {
         _draft = photo;
+        _visible = true;
         _dirty = true;
       } else if (result is Failure<AvatarPhoto?>) {
         _message = context.tr(
@@ -135,13 +150,16 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
     final session = ref.read(authSessionProvider).asData?.value;
     final epoch = ++_epoch;
     final revision = _base!.revision, desired = _draft;
-    final attempt = AvatarPendingSave(revision: revision, photo: desired);
+    final attempt = AvatarPendingSave(
+      revision: revision,
+      photo: desired,
+      visibleToAuthenticatedUsers: _visible,
+    );
     if (!ref.read(avatarPendingSaveProvider.notifier).begin(attempt)) return;
     setState(() {
       _attempt = attempt;
       _busy = true;
       _unknown = true;
-      _attemptRevision = revision;
       _attemptHash = desired?.sourceSha256;
       _message = null;
     });
@@ -149,6 +167,7 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
         .read(ownAvatarRepositoryProvider)
         .save(
           photo: desired,
+          visibleToAuthenticatedUsers: _visible,
           expectedRevision: revision,
           current: () => _current(session, epoch),
         );
@@ -156,8 +175,7 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
     setState(() {
       _busy = false;
       if (result case Success<OwnAvatar>(:final value)
-          when value.revision > revision &&
-              value.photo?.sourceSha256 == _attemptHash) {
+          when _matchesAttempt(value)) {
         _base = value;
         _dirty = false;
         _unknown = false;
@@ -185,6 +203,7 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
       }
     });
     ref.invalidate(ownAvatarProvider);
+    ref.read(contentAccessProvider.notifier).mutationSettled(session);
   }
 
   @override
@@ -196,14 +215,17 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
           _epoch++;
           _base = null;
           _draft = null;
+          _visible = false;
           _dirty = false;
           _unknown = false;
           _busy = false;
           _picking = false;
           _attempt = null;
-          _attemptRevision = null;
           _attemptHash = null;
         });
+        if (ref.read(currentAuthSubjectProvider) != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) => _read());
+        }
       }
     });
     ref.listen(contentAccessProvider, (before, after) {
@@ -238,8 +260,8 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
               const SizedBox(height: 16),
               Text(
                 context.tr(
-                  'Only you can see this photo for now.',
-                  '目前仅你自己能看到这张头像。',
+                  'New or replaced photos are visible to all signed-in users. Your profile privacy does not hide your shared photo.',
+                  '新上传或更换的头像对所有已登录用户可见，独立于个人资料隐私设置。',
                 ),
               ),
               Text(
@@ -255,12 +277,39 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
                 icon: const Icon(Icons.add_photo_alternate_outlined),
                 label: Text(context.tr('Choose photo', '选择照片')),
               ),
+              if (!_dirty &&
+                  _base?.photo != null &&
+                  _base?.visibleToAuthenticatedUsers == false) ...[
+                Text(
+                  context.tr(
+                    'Your existing photo is private until you explicitly share it.',
+                    '这张旧头像仍仅本人可见，确认公开后其他用户才能看到。',
+                  ),
+                ),
+                OutlinedButton(
+                  key: const Key('avatar-publish'),
+                  onPressed: locked
+                      ? null
+                      : () => setState(() {
+                          _draft = _base!.photo;
+                          _visible = true;
+                          _dirty = true;
+                        }),
+                  child: Text(
+                    context.tr(
+                      'Share this photo with signed-in users',
+                      '将这张头像对已登录用户公开',
+                    ),
+                  ),
+                ),
+              ],
               TextButton(
                 key: const Key('avatar-remove'),
                 onPressed: locked || (_base?.photo == null && !_dirty)
                     ? null
                     : () => setState(() {
                         _draft = null;
+                        _visible = false;
                         _dirty = true;
                         _message = null;
                       }),

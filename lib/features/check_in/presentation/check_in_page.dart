@@ -152,6 +152,25 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authSessionProvider, (before, after) {
+      if (!identical(before?.asData?.value, after.asData?.value)) {
+        setState(() {
+          _noteController.clear();
+          _mood = _activity = _locationLabel = null;
+          _committedCheckIn = null;
+          _defaults = null;
+          _defaultsApplied = _settingsReady = _settingsFailed = false;
+          _visibility = null;
+          _activeOperation = null;
+          _noteErrorText = null;
+        });
+        if (widget.located && ref.read(currentAuthSubjectProvider) != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _loadVisibility();
+          });
+        }
+      }
+    });
     ref.listen<CommandState<CheckIn>>(checkInControllerProvider, (
       previous,
       next,
@@ -289,6 +308,92 @@ final class _CheckInComposerPageState extends ConsumerState<CheckInComposerPage>
                         ),
                         const SizedBox(height: 16),
                       ],
+                      if (_noteController.text.isEmpty && !pending)
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  context.tr(
+                                    'A little inspiration',
+                                    '从一个小提示开始',
+                                  ),
+                                  style: Theme.of(context).textTheme.titleSmall,
+                                ),
+                                Text(
+                                  context.tr(
+                                    'Choose a prompt, edit it, then save when ready.',
+                                    '选择提示后自由修改，写好再保存。',
+                                  ),
+                                ),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  children: [
+                                    for (final prompt in [
+                                      (
+                                        id: 'joy',
+                                        title: context.tr(
+                                          'A small joy',
+                                          '今天的小确幸',
+                                        ),
+                                        text: context.tr(
+                                          'A small thing that made me smile today: ',
+                                          '今天让我开心的一件小事：',
+                                        ),
+                                      ),
+                                      (
+                                        id: 'outing',
+                                        title: context.tr('An outing', '一次出门'),
+                                        text: context.tr(
+                                          'Today I went to… What I want to remember: ',
+                                          '今天我去了……想记住的是：',
+                                        ),
+                                      ),
+                                      (
+                                        id: 'moment',
+                                        title: context.tr(
+                                          'A moment to keep',
+                                          '想记住的一刻',
+                                        ),
+                                        text: context.tr(
+                                          'A moment I want to remember: ',
+                                          '我想记住的一个瞬间：',
+                                        ),
+                                      ),
+                                    ])
+                                      ActionChip(
+                                        key: Key(
+                                          'check-in-prompt-${prompt.id}',
+                                        ),
+                                        label: Text(prompt.title),
+                                        onPressed: () {
+                                          if (!_foreground ||
+                                              _noteController.text.isNotEmpty ||
+                                              ref.read(
+                                                    currentAuthSubjectProvider,
+                                                  ) ==
+                                                  null) {
+                                            return;
+                                          }
+                                          setState(() {
+                                            _noteController.text = prompt.text;
+                                            _noteController.selection =
+                                                TextSelection.collapsed(
+                                                  offset: prompt.text.length,
+                                                );
+                                            _noteErrorText = null;
+                                          });
+                                        },
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       TextField(
                         key: const Key('r6-check-in-note'),
                         controller: _noteController,

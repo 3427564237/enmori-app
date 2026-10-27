@@ -1,3 +1,4 @@
+import '../../../core/presentation/identity_avatar.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
 import '../../account/content_access.dart';
@@ -442,6 +443,11 @@ final class FriendActivityContent extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
+      Align(
+        alignment: Alignment.centerLeft,
+        child: IdentityAvatar(username: item.username),
+      ),
+      const SizedBox(height: 8),
       Text(
         item.displayName ?? item.username,
         style: Theme.of(context).textTheme.titleMedium,

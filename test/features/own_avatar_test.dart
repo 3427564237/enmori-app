@@ -25,6 +25,7 @@ class _Repository implements OwnAvatarRepository {
   @override
   Future<Result<OwnAvatar>> save({
     required AvatarPhoto? photo,
+    bool visibleToAuthenticatedUsers = false,
     required int expectedRevision,
     required bool Function() current,
   }) async {
@@ -32,7 +33,11 @@ class _Repository implements OwnAvatarRepository {
     expect(expectedRevision, saved.revision);
     writes++;
     if (unknown) return const Failure(avatarUnavailable);
-    saved = OwnAvatar(photo: photo, revision: saved.revision + 1);
+    saved = OwnAvatar(
+      photo: photo,
+      revision: saved.revision + 1,
+      visibleToAuthenticatedUsers: visibleToAuthenticatedUsers,
+    );
     return Success(saved);
   }
 }
@@ -68,6 +73,53 @@ Future<void> _tap(WidgetTester tester, String key) async {
 }
 
 void main() {
+  testWidgets(
+    'old private image needs explicit sharing and save; preview alone does not publish',
+    (tester) async {
+      final repository = _Repository()
+        ..saved = OwnAvatar(photo: photo, revision: 3);
+      await _show(tester, repository);
+      expect(repository.saved.visibleToAuthenticatedUsers, isFalse);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('avatar-publish')),
+        200,
+      );
+      await _tap(tester, 'avatar-publish');
+      expect(repository.writes, 0);
+      await _tap(tester, 'avatar-save');
+      expect(repository.writes, 1);
+      expect(repository.saved.visibleToAuthenticatedUsers, isTrue);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+  testWidgets(
+    'unknown public save is not confirmed by same image with private visibility',
+    (tester) async {
+      final repository = _Repository()..unknown = true;
+      await _show(tester, repository);
+      await _tap(tester, 'avatar-pick');
+      await _tap(tester, 'avatar-save');
+      repository.saved = OwnAvatar(photo: photo, revision: 1);
+      await _tap(tester, 'avatar-check');
+      expect(find.text('Saved photo confirmed.'), findsNothing);
+      expect(
+        tester
+            .widget<FilledButton>(find.byKey(const Key('avatar-save')))
+            .onPressed,
+        isNull,
+      );
+      repository.saved = OwnAvatar(
+        photo: photo,
+        revision: 2,
+        visibleToAuthenticatedUsers: true,
+      );
+      await _tap(tester, 'avatar-check');
+      expect(find.text('Saved photo confirmed.'), findsOneWidget);
+      expect(repository.writes, 1);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   test('avatar preview parser rejects oversized dimensions and noncanonical base64', () {
     expect(parseAvatarPhoto(png, photo.sourceSha256), isNotNull);
     expect(parseAvatarPhoto('$png\n', photo.sourceSha256), isNull);
@@ -81,7 +133,10 @@ void main() {
       await _show(tester, repository);
       await _tap(tester, 'avatar-pick');
       expect(repository.writes, 0);
-      expect(find.text('Only you can see this photo for now.'), findsOneWidget);
+      expect(
+        find.textContaining('visible to all signed-in users'),
+        findsOneWidget,
+      );
       await _tap(tester, 'avatar-save');
       expect(repository.writes, 1);
       expect(repository.saved.photo?.sourceSha256, photo.sourceSha256);
@@ -110,7 +165,11 @@ void main() {
         isNull,
       );
       expect(repository.writes, 1);
-      repository.saved = OwnAvatar(photo: photo, revision: 1);
+      repository.saved = OwnAvatar(
+        photo: photo,
+        revision: 1,
+        visibleToAuthenticatedUsers: true,
+      );
       await _tap(tester, 'avatar-check');
       expect(find.text('Saved photo confirmed.'), findsOneWidget);
       expect(repository.writes, 1);

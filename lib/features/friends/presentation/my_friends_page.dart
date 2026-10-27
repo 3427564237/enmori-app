@@ -1,3 +1,4 @@
+import '../../../core/presentation/identity_avatar.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -192,13 +193,11 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
               ? ListTile(
                   key: Key('my-friend-profile-${friend.username}'),
                   title: Text(friend.displayName),
-                  leading: CircleAvatar(
-                    child: Icon(
-                      friend.specialCare ? Icons.star : Icons.person_outline,
-                      semanticLabel: friend.specialCare
-                          ? context.tr('Special Care', '特别关心')
-                          : null,
-                    ),
+                  leading: Semantics(
+                    label: friend.specialCare
+                        ? context.tr('Special Care', '特别关心')
+                        : null,
+                    child: IdentityAvatar(username: friend.username),
                   ),
                   subtitle: Text('@${friend.username}'),
                   trailing: const Icon(Icons.chevron_right),

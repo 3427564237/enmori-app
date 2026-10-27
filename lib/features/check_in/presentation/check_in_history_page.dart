@@ -12,6 +12,7 @@ import '../check_in_providers.dart';
 import '../domain/check_in_calendar_repository.dart';
 import 'check_in_calendar_page.dart';
 import 'check_in_history_controller.dart';
+import 'check_in_search_page.dart';
 
 Widget buildCheckInHistoryPage({
   required BuildContext context,
@@ -130,6 +131,17 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
         ),
         title: Text(context.tr('Check-in History', '签到历史')),
         actions: [
+          IconButton(
+            key: const Key('history-search'),
+            tooltip: context.tr('Search my Check-ins', '搜索我的签到'),
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (_) =>
+                    CheckInSearchPage(onOpen: widget.onOpenSavedCheckIn),
+              ),
+            ),
+            icon: const Icon(Icons.search),
+          ),
           if (ref.watch(checkInRepositoryProvider) is CheckInCalendarRepository)
             IconButton(
               key: const Key('history-month-calendar'),

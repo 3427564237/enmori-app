@@ -95,3 +95,58 @@ test("HTTP unknown write outcome returns safe 503 once; subsequent GET exposes o
   const read = await app.inject({ url, headers }); assert.equal(read.statusCode, 200); assert.equal(read.json().avatar.revision, 1);
   assert.equal(fixture.store.writes, 1);
 });
+
+test("shared avatar opt-in is independent of profile privacy, legacy writes reset sharing and other accounts cannot modify it", async t => {
+  const { store, preferences } = setup();
+  await store.runTransaction(async tx => tx.set("username_reservations/avatar_owner", { accountId: "owner" }));
+  const app = await buildApp({ ...unused, identityVerifier, accountPreferences: preferences }); t.after(() => app.close());
+  const shared = "/v1/me/profile/shared-avatar", visible = "/v1/users/avatar_owner/avatar";
+  const other = { authorization: "Bearer other" };
+  const empty = { avatar: { pngBase64: null, sourceSha256: null } };
+  const input = { pngBase64: png().toString("base64"), expectedRevision: 0 };
+  assert.equal((await app.inject({ method: "PUT", url, headers, payload: input })).statusCode, 200);
+  assert.deepEqual((await app.inject({ url: visible, headers: other })).json(), empty);
+  assert.equal((await app.inject({ url: shared, headers })).json().avatar.visibleToAuthenticatedUsers, false);
+  const publish = await app.inject({ method: "PUT", url: shared, headers,
+    payload: { ...input, expectedRevision: 1, visibleToAuthenticatedUsers: true } });
+  assert.equal(publish.statusCode, 200);
+  const response = await app.inject({ url: visible, headers: other });
+  assert.equal(response.statusCode, 200); assert.equal(response.headers["cache-control"], "no-store");
+  assert.deepEqual(Object.keys(response.json().avatar).sort(), ["pngBase64", "sourceSha256"]);
+  assert.equal(response.json().avatar.pngBase64, publish.json().avatar.pngBase64);
+  assert.equal(store.read("accounts/owner")!.profileVisibility, "private");
+  assert.equal((await app.inject({ url: visible })).statusCode, 401);
+  assert.equal((await app.inject({ method: "PUT", url: visible, headers: other, payload: input })).statusCode, 404);
+  assert.equal((await app.inject({ method: "PUT", url: shared, headers: other,
+    payload: { ...input, visibleToAuthenticatedUsers: true, accountId: "owner" } })).statusCode, 400);
+  assert.equal((await app.inject({ method: "PUT", url, headers, payload: { ...input, expectedRevision: 2 } })).statusCode, 200);
+  assert.deepEqual((await app.inject({ url: visible, headers: other })).json(), empty);
+  assert.equal((await app.inject({ method: "PUT", url: shared, headers,
+    payload: { ...input, expectedRevision: 3, visibleToAuthenticatedUsers: true } })).statusCode, 200);
+  assert.equal((await app.inject({ method: "PUT", url: shared, headers,
+    payload: { pngBase64: null, expectedRevision: 4, visibleToAuthenticatedUsers: false } })).statusCode, 200);
+  assert.deepEqual((await app.inject({ url: visible, headers: other })).json(), empty);
+  assert.deepEqual((await app.inject({ url: "/v1/users/no_such_user/avatar", headers: other })).json(), empty);
+});
+
+test("shared avatar rejects coerced confirmation, stale revisions and malformed state; unknown outcome retains authoritative visibility", async t => {
+  const fixture = avatarFixture();
+  fixture.store.put("username_reservations/avatar_owner", { accountId: "owner" });
+  const preferences = new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(fixture.store), fixture.use);
+  const app = await buildApp({ ...unused, identityVerifier, accountPreferences: preferences }); t.after(() => app.close());
+  const shared = "/v1/me/profile/shared-avatar";
+  const input = { pngBase64: png().toString("base64"), expectedRevision: 0, visibleToAuthenticatedUsers: true };
+  for (const bad of ["true", 1, null]) {
+    assert.equal((await app.inject({ method: "PUT", url: shared, headers, payload: { ...input, visibleToAuthenticatedUsers: bad } })).statusCode, 400);
+  }
+  assert.equal((await app.inject({ method: "PUT", url: shared, headers, payload: { ...input, pngBase64: null } })).statusCode, 422);
+  fixture.store.loseAck = true;
+  assert.equal((await app.inject({ method: "PUT", url: shared, headers, payload: input })).statusCode, 503);
+  assert.equal(fixture.store.writes, 1);
+  const read = (await app.inject({ url: shared, headers })).json().avatar;
+  assert.equal(read.visibleToAuthenticatedUsers, true); assert.equal(read.revision, 1);
+  assert.equal((await app.inject({ method: "PUT", url: shared, headers, payload: input })).statusCode, 412);
+  fixture.store.put("accounts/owner", { ...fixture.store.rows.get("accounts/owner")!.data, avatarVisibleToAuthenticatedUsers: "true" });
+  assert.equal((await app.inject({ url: shared, headers })).statusCode, 503);
+  assert.equal((await app.inject({ url: "/v1/users/avatar_owner/avatar", headers })).statusCode, 503);
+});

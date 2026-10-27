@@ -11,6 +11,16 @@ import type { OwnAvatarData } from "../domain/avatar-values.js";
 export class OwnAccountPreferences {
   public constructor(private readonly repository: AccountPreferencesRepository, private readonly avatar?: OwnAvatar) {}
 
+  public getSharedAvatar(principal: AuthPrincipal) {
+    return this.avatar?.getSharedAvatar(principal) ?? Promise.resolve(err(appFailure("SERVICE_UNAVAILABLE")));
+  }
+  public getVisibleAvatar(principal: AuthPrincipal, username: string) {
+    return this.avatar?.getVisibleAvatar(principal, username) ?? Promise.resolve(err(appFailure("SERVICE_UNAVAILABLE")));
+  }
+  public saveSharedAvatar(input: Parameters<OwnAvatar["saveSharedAvatar"]>[0]) {
+    return this.avatar?.saveSharedAvatar(input) ?? Promise.resolve(err(appFailure("SERVICE_UNAVAILABLE")));
+  }
+
   public getAvatar(principal: AuthPrincipal): Promise<Result<OwnAvatarData, AppFailure>> {
     return this.avatar?.getAvatar(principal) ?? Promise.resolve(err(appFailure("SERVICE_UNAVAILABLE")));
   }

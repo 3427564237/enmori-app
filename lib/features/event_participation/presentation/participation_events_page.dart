@@ -12,6 +12,7 @@ import '../../auth/auth_providers.dart';
 
 import '../../event_browse/domain/activity_repository.dart';
 import 'event_batches_controller.dart';
+import '../domain/event_time_filter.dart';
 import 'event_card.dart';
 
 /// Explicit next source batches, with display-only categories and stable dedupe.
@@ -32,6 +33,9 @@ final class _ParticipationEventsPageState
     extends ConsumerState<ParticipationEventsPage>
     with WidgetsBindingObserver {
   String? _category;
+  EventTimeFilter _timeFilter = EventTimeFilter.all;
+  int _timeSort = 0;
+  final _sortKey = GlobalKey<FormFieldState<int>>();
   final _search = TextEditingController();
   String _query = '';
   bool _searching = false;
@@ -73,6 +77,9 @@ final class _ParticipationEventsPageState
         setState(() {
           _query = '';
           _category = null;
+          _timeFilter = EventTimeFilter.all;
+          _timeSort = 0;
+          _sortKey.currentState?.didChange(0);
           _searching = false;
         });
       }
@@ -88,6 +95,7 @@ final class _ParticipationEventsPageState
     final matching = items
         .where(
           (item) =>
+              matchesEventTime(item.startAt, _timeFilter, DateTime.now()) &&
               (_category == null || item.categoryLabel == _category) &&
               (query.isEmpty ||
                   [
@@ -98,6 +106,16 @@ final class _ParticipationEventsPageState
         )
         .toList();
 
+    if (_timeSort != 0) {
+      matching.sort((a, b) {
+        final left = DateTime.tryParse(a.startAt);
+        final right = DateTime.tryParse(b.startAt);
+        if (left == null) return right == null ? 0 : 1;
+        if (right == null) return -1;
+        final order = left.compareTo(right) * _timeSort;
+        return order != 0 ? order : a.browseId.compareTo(b.browseId);
+      });
+    }
     final page = Scaffold(
       appBar: AppBar(
         title: Text(context.tr('Events', '活动')),
@@ -167,6 +185,56 @@ final class _ParticipationEventsPageState
                   '来源：Ticketmaster · 仅筛选已加载的活动',
                 ),
                 style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  for (final filter in EventTimeFilter.values)
+                    ChoiceChip(
+                      key: Key('events-time-${filter.name}'),
+                      label: Text(switch (filter) {
+                        EventTimeFilter.all => context.tr('Any time', '不限时间'),
+                        EventTimeFilter.today => context.tr('Today', '今天'),
+                        EventTimeFilter.weekend => context.tr(
+                          'This weekend',
+                          '本周末',
+                        ),
+                        EventTimeFilter.sevenDays => context.tr(
+                          'Next 7 days',
+                          '未来七天',
+                        ),
+                      }),
+                      selected: _timeFilter == filter,
+                      onSelected: (_) => setState(() => _timeFilter = filter),
+                    ),
+                ],
+              ),
+              DropdownButtonFormField<int>(
+                isExpanded: true,
+                key: _sortKey,
+                initialValue: _timeSort,
+                decoration: InputDecoration(
+                  labelText: context.tr('Time order', '时间排序'),
+                  helperText: context.tr('Device local time', '设备本地时间'),
+                  helperMaxLines: 2,
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 0,
+                    child: Text(context.tr('Source order', '来源顺序')),
+                  ),
+                  DropdownMenuItem(
+                    value: 1,
+                    child: Text(context.tr('Earliest first', '最早优先')),
+                  ),
+                  DropdownMenuItem(
+                    value: -1,
+                    child: Text(context.tr('Latest first', '最晚优先')),
+                  ),
+                ],
+                onChanged: (value) => setState(() => _timeSort = value ?? 0),
               ),
               const SizedBox(height: 16),
               if (state.busy || _searching)
@@ -253,7 +321,9 @@ final class _ParticipationEventsPageState
                         ),
                     ],
                   ),
-                if ((_category != null || query.isNotEmpty) &&
+                if ((_category != null ||
+                        query.isNotEmpty ||
+                        _timeFilter != EventTimeFilter.all) &&
                     matching.isEmpty &&
                     !state.busy &&
                     !_searching)

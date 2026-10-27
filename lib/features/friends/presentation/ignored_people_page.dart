@@ -1,3 +1,4 @@
+import '../../../core/presentation/identity_avatar.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -96,6 +97,7 @@ final class _IgnoredPeoplePageState extends ConsumerState<IgnoredPeoplePage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      IdentityAvatar(username: person.username),
                       Text(person.displayName ?? person.username),
                       Text('@${person.username}'),
                       TextButton(

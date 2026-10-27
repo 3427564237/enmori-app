@@ -12,3 +12,11 @@ export interface AvatarChange {
   readonly pngBase64: string | null;
   readonly expectedRevision: number;
 }
+
+export interface SharedAvatarData extends OwnAvatarData {
+  readonly visibleToAuthenticatedUsers: boolean;
+}
+export type VisibleAvatarData = Pick<OwnAvatarData, "pngBase64" | "sourceSha256">;
+export interface SharedAvatarChange extends AvatarChange {
+  readonly visibleToAuthenticatedUsers: boolean;
+}

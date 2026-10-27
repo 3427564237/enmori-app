@@ -1,3 +1,4 @@
+import '../../../core/presentation/identity_avatar.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -239,9 +240,7 @@ final class _FriendDiscoveryPanelState
                 Expanded(
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const CircleAvatar(
-                      child: Icon(Icons.person_outline),
-                    ),
+                    leading: IdentityAvatar(username: person.username),
                     title: Text(person.displayName ?? person.username),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

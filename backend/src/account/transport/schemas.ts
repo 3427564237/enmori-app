@@ -50,3 +50,16 @@ export const saveAvatarBody = {
 } as const;
 export const getAvatarSchema = { querystring: noQuery, response: response("avatar", avatarSchema, false) };
 export const putAvatarSchema = { querystring: noQuery, body: saveAvatarBody, response: response("avatar", avatarSchema, true) };
+
+export const sharedAvatarSchema = { ...avatarSchema,
+  required: [...avatarSchema.required, "visibleToAuthenticatedUsers"],
+  properties: { ...avatarSchema.properties, visibleToAuthenticatedUsers: { type: "boolean" } } };
+export const getSharedAvatarSchema = { querystring: noQuery, response: response("avatar", sharedAvatarSchema, false) };
+export const putSharedAvatarSchema = { querystring: noQuery,
+  body: { ...saveAvatarBody, required: [...saveAvatarBody.required, "visibleToAuthenticatedUsers"],
+    properties: { ...saveAvatarBody.properties, visibleToAuthenticatedUsers: { type: "boolean" } } },
+  response: response("avatar", sharedAvatarSchema, true) };
+export const getVisibleAvatarSchema = { querystring: noQuery,
+  params: { type: "object", additionalProperties: false, required: ["username"], properties: { username: { type: "string", maxLength: 64 } } },
+  response: response("avatar", { type: "object", additionalProperties: false, required: ["pngBase64", "sourceSha256"],
+    properties: { pngBase64: avatarSchema.properties.pngBase64, sourceSha256: avatarSchema.properties.sourceSha256 } }, false) };

@@ -49,23 +49,57 @@ AvatarPhoto? parseAvatarPhoto(Object? encoded, Object? hash) {
   }
 }
 
-final class BackendOwnAvatarRepository implements OwnAvatarRepository {
-  BackendOwnAvatarRepository(this.client);
+final class BackendOwnAvatarRepository
+    implements OwnAvatarRepository, VisibleAvatarRepository {
+  BackendOwnAvatarRepository(this.client, {this.shared = false});
+  final bool shared;
+  String get _path =>
+      shared ? '/v1/me/profile/shared-avatar' : '/v1/me/profile/avatar';
   final BackendApiClient client;
   @override
   Future<Result<OwnAvatar>> read(bool Function() current) async =>
-      _parse(await client.getGuarded('/v1/me/profile/avatar', current));
+      _parse(await client.getGuarded(_path, current));
   @override
   Future<Result<OwnAvatar>> save({
     required AvatarPhoto? photo,
+    bool visibleToAuthenticatedUsers = false,
     required int expectedRevision,
     required bool Function() current,
   }) async => _parse(
-    await client.putGuarded('/v1/me/profile/avatar', {
+    await client.putGuarded(_path, {
+      if (shared) 'visibleToAuthenticatedUsers': visibleToAuthenticatedUsers,
       'pngBase64': photo == null ? null : base64Encode(photo.bytes),
       'expectedRevision': expectedRevision,
     }, current),
   );
+
+  @override
+  Future<Result<AvatarPhoto?>> readForUsername(
+    String username,
+    bool Function() current,
+  ) async {
+    final response = await client.getGuarded(
+      '/v1/users/${Uri.encodeComponent(username)}/avatar',
+      current,
+    );
+    if (response case Failure<JsonObject>(:final failure)) {
+      return Failure(failure);
+    }
+    final body = (response as Success<JsonObject>).value;
+    final value = body['avatar'];
+    if (body.length != 1 ||
+        value is! Map<String, dynamic> ||
+        value.length != 2 ||
+        !value.containsKey('pngBase64') ||
+        !value.containsKey('sourceSha256')) {
+      return const Failure(avatarUnavailable);
+    }
+    if (value['pngBase64'] == null && value['sourceSha256'] == null) {
+      return const Success(null);
+    }
+    final photo = parseAvatarPhoto(value['pngBase64'], value['sourceSha256']);
+    return photo == null ? const Failure(avatarUnavailable) : Success(photo);
+  }
 
   Result<OwnAvatar> _parse(Result<JsonObject> response) {
     if (response case Failure<JsonObject>(:final failure)) {
@@ -75,7 +109,7 @@ final class BackendOwnAvatarRepository implements OwnAvatarRepository {
     final value = body['avatar'];
     if (body.length != 1 ||
         value is! Map<String, dynamic> ||
-        value.length != 3 ||
+        value.length != (shared ? 4 : 3) ||
         !value.keys.toSet().containsAll([
           'pngBase64',
           'sourceSha256',
@@ -83,17 +117,33 @@ final class BackendOwnAvatarRepository implements OwnAvatarRepository {
         ])) {
       return const Failure(avatarUnavailable);
     }
+    final visible = shared ? value['visibleToAuthenticatedUsers'] : false;
+    if (visible is! bool || value['pngBase64'] == null && visible) {
+      return const Failure(avatarUnavailable);
+    }
     final revision = value['revision'];
     if (revision is! int || revision < 0 || revision > 9007199254740991) {
       return const Failure(avatarUnavailable);
     }
     if (value['pngBase64'] == null && value['sourceSha256'] == null) {
-      return Success(OwnAvatar(photo: null, revision: revision));
+      return Success(
+        OwnAvatar(
+          photo: null,
+          revision: revision,
+          visibleToAuthenticatedUsers: visible,
+        ),
+      );
     }
     final photo = parseAvatarPhoto(value['pngBase64'], value['sourceSha256']);
     return photo == null
         ? const Failure(avatarUnavailable)
-        : Success(OwnAvatar(photo: photo, revision: revision));
+        : Success(
+            OwnAvatar(
+              photo: photo,
+              revision: revision,
+              visibleToAuthenticatedUsers: visible,
+            ),
+          );
   }
 }
 

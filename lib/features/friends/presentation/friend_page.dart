@@ -1,3 +1,4 @@
+import '../../../core/presentation/identity_avatar.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -131,6 +132,10 @@ final class _FriendPageState extends ConsumerState<FriendPage>
                 target.displayName,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IdentityAvatar(username: target.username),
+              ),
               Text('@${target.username}'),
               if (widget.onOpenProfile != null)
                 TextButton(
@@ -196,6 +201,10 @@ final class _FriendPageState extends ConsumerState<FriendPage>
                       Text(
                         request.displayName,
                         style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: IdentityAvatar(username: request.username),
                       ),
                       Text('@${request.username}'),
                       const SizedBox(height: 8),

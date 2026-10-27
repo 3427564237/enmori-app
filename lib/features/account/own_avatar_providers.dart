@@ -14,9 +14,14 @@ final avatarPhotoPickerProvider = Provider<AvatarPhotoPicker>(
 );
 
 final class AvatarPendingSave {
-  const AvatarPendingSave({required this.revision, required this.photo});
+  const AvatarPendingSave({
+    required this.revision,
+    required this.photo,
+    this.visibleToAuthenticatedUsers = false,
+  });
   final int revision;
   final AvatarPhoto? photo;
+  final bool visibleToAuthenticatedUsers;
 }
 
 /// An unresolved write and its small preview survive route departure in this
@@ -66,7 +71,29 @@ final class _UnavailableAvatar implements OwnAvatarRepository {
   @override
   Future<Result<OwnAvatar>> save({
     required AvatarPhoto? photo,
+    bool visibleToAuthenticatedUsers = false,
     required int expectedRevision,
     required bool Function() current,
   }) async => const Failure(avatarUnavailable);
 }
+
+final visibleAvatarRepositoryProvider = Provider<VisibleAvatarRepository?>(
+  (ref) => null,
+);
+final visibleAvatarProvider = FutureProvider.autoDispose
+    .family<Result<AvatarPhoto?>, String>((ref, username) {
+      final session = ref.watch(authSessionProvider).asData?.value;
+      final subject = ref.watch(currentAuthSubjectProvider);
+      final access = ref.watch(contentAccessProvider);
+      bool current() =>
+          ref.mounted &&
+          subject != null &&
+          access.foreground &&
+          identical(session, ref.read(authSessionProvider).asData?.value) &&
+          identical(access, ref.read(contentAccessProvider));
+      final repository = ref.watch(visibleAvatarRepositoryProvider);
+      if (!current() || repository == null) {
+        return const Failure(avatarUnavailable);
+      }
+      return repository.readForUsername(username, current);
+    });

@@ -3,8 +3,10 @@
 Scope update: the [27 October LI decision](../docs/decisions/2026-10-27-li-avatar-visibility.md)
 supersedes this first delivery's owner-only presentation scope for the planned
 authenticated-user avatar extension. Existing private photos require explicit
-owner confirmation before wider display. The extension is not implemented by
-this documentation change; the existing wire contract below remains unchanged.
+owner confirmation before wider display. The later [approved implementation contract](../docs/planning/2026-10-27-avatar-contract-proposal.md)
+adds separate shared-avatar operations. The existing wire contract below remains
+unchanged. Its legacy PUT clears any existing wider-visibility confirmation,
+so an old client cannot publish a replacement photo accidentally.
 
 Authority: LI explicitly [selected uploading their own photo](../docs/decisions/2026-10-25-li-core-experience-repair.md).
 The first delivery displays the saved photo on the owner's Home/Profile only,

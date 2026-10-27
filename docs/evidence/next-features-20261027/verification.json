@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-27",
+  "timezone": "Asia/Singapore",
+  "base": "857ebcb",
+  "branch": "souma/next-features-20261027",
+  "features": [
+    "Authenticated avatar visibility",
+    "Event civil-date filters and time order",
+    "Editable Check-in prompts",
+    "Own Check-in keyword range search"
+  ],
+  "flutter": {
+    "version": "3.47.2",
+    "dart": "3.13.2",
+    "relatedTestsPassed": 121,
+    "files": 16,
+    "lastEventSuitePassed": 13,
+    "syntheticPreviewCases": 8,
+    "staticAnalysis": "no issues"
+  },
+  "backend": {
+    "node": "24.19.0",
+    "typescriptBuild": "pass",
+    "fullOfflineTestsPassed": 1536,
+    "finalAccountAndOpenApiTestsPassed": 24
+  },
+  "preExistingFailures": {
+    "base": "857ebcb",
+    "count": 9,
+    "cases": [
+      {
+        "file": "event_social_preview_test.dart",
+        "test": "detail labels pending and successful synthetic reads"
+      },
+      {
+        "file": "event_social_preview_test.dart",
+        "test": "detail unavailable remains distinct and retry is read-only"
+      },
+      {
+        "file": "event_social_preview_test.dart",
+        "test": "small enlarged-text Event cards and details remain scrollable"
+      },
+      {
+        "file": "check_in_history_shared_router_test.dart",
+        "test": "real History builder and Backend repositories run through Home"
+      },
+      {
+        "file": "check_in_history_shared_router_test.dart",
+        "test": "date and long device zone remain clear at 200% text scale"
+      },
+      {
+        "file": "check_in_history_shared_router_test.dart",
+        "test": "saved Check-in uses existing owner read and return rereads date"
+      },
+      {
+        "file": "check_in_history_shared_router_test.dart",
+        "test": "pending History is discarded on session change (false)"
+      },
+      {
+        "file": "check_in_history_shared_router_test.dart",
+        "test": "pending History is discarded on session change (true)"
+      },
+      {
+        "file": "check_in_history_shared_router_test.dart",
+        "test": "dependency error stays failure until explicit Retry"
+      }
+    ]
+  },
+  "logs": {
+    "flutter-related": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/next-batch-validation/flutter-delivery.log",
+      "sha256": "b027ca85669f08045de800f925c38414a0256e49895d6bbc2c82ac877b053f6e"
+    },
+    "backend-full": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/next-batch-validation/backend-full.log",
+      "sha256": "ed3342819ad07ca36836134849370df1636268b3fdd5a14c6f67b112781b7909"
+    },
+    "backend-account-final": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/next-batch-validation/backend-account-final.log",
+      "sha256": "8e5f15d300121cf5ae3fe8c398220893018e58fc9ea3700ced541e4023899993"
+    },
+    "baseline-failures": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/next-batch-validation/baseline-failures.log",
+      "sha256": "692dff5295507810cd4cfdb47a54d19d2e38191816a3ac5b9af7188b1fa806ae"
+    },
+    "events-final": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/next-batch-validation/events-final.log",
+      "sha256": "92d2b8f9a84482f2dd72fe26b4ad1d2f9488d501a9b3009ead5c1c77996f549f"
+    },
+    "analyze": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/next-batch-validation/analyze.log",
+      "sha256": "9ac430597f60447952beaba6d0ecca66e19fe0a46b5cba035a70fec4eece70ee"
+    }
+  },
+  "notRun": [
+    "Firebase Emulator integration for this extension",
+    "Live two-account avatar validation",
+    "Backend deployment",
+    "APK build/install",
+    "Physical-device interaction/UAT",
+    "Independent review",
+    "Release"
+  ],
+  "publication": "Local source commit only; no push or merge"
+}
