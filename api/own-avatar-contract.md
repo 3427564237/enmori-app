@@ -1,5 +1,11 @@
 # Own photo avatar — bounded first delivery
 
+Scope update: the [27 October LI decision](../docs/decisions/2026-10-27-li-avatar-visibility.md)
+supersedes this first delivery's owner-only presentation scope for the planned
+authenticated-user avatar extension. Existing private photos require explicit
+owner confirmation before wider display. The extension is not implemented by
+this documentation change; the existing wire contract below remains unchanged.
+
 Authority: LI explicitly [selected uploading their own photo](../docs/decisions/2026-10-25-li-core-experience-repair.md).
 The first delivery displays the saved photo on the owner's Home/Profile only,
 with an explicit “Only you can see this photo for now” notice. It does not add
