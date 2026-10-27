@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../../account/content_access.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
@@ -27,6 +29,9 @@ final class EventRecommendationsController
   @override
   AsyncValue<EventRecommendationResponse> build() {
     ref.watch(currentAuthSubjectProvider);
+    ref.listen(contentAccessProvider, (before, after) {
+      if (!identical(before, after)) clear();
+    });
     _operation++;
     _expiry?.cancel();
     ref.onCancel(() {
@@ -42,6 +47,10 @@ final class EventRecommendationsController
   }
 
   int load({required EventRecommendationView view}) {
+    if (!ref.read(contentAccessProvider).foreground) {
+      clear();
+      return _operation;
+    }
     _expiry?.cancel();
     final operation = ++_operation;
     _expiry = Timer(const Duration(minutes: 5), () {
@@ -56,8 +65,13 @@ final class EventRecommendationsController
     required int operation,
     required EventRecommendationView view,
   }) async {
+    final access = ref.read(contentAccessProvider);
     final result = await _repository.read(view: view);
-    if (!ref.mounted || operation != _operation) return;
+    if (!ref.mounted ||
+        operation != _operation ||
+        !identical(access, ref.read(contentAccessProvider))) {
+      return;
+    }
     state = switch (result) {
       Success<EventRecommendationResponse>(:final value) => AsyncData(value),
       Failure<EventRecommendationResponse>(:final failure) => AsyncError(

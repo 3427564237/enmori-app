@@ -10,6 +10,21 @@ const value = { asOf: "2026-09-15T00:00:00Z", formulaVersion: "event_recommendat
   items: [{ eventId: "ev_a", title: "Synthetic", startAt: "2026-09-16T00:00:00Z",
     endAt: "2026-09-16T01:00:00Z", matchedInterests: [{ interestTagId: "interest_community", displayName: "Community" }] }] };
 const authHeaders = { authorization: "Bearer synthetic-token" };
+
+test("v2 transport preserves a genuine social-only reason without inventing an interest", async () => {
+  const reasons=[{code:"friends_participating" as const,count:2,points:4}];
+  const app=await appFor(async()=>ok({...value,formulaVersion:"event_recommendation_v2",
+    items:[{...value.items[0]!,matchedInterests:[],reasons}]}));
+  try {
+    const response=await app.inject({url:"/v1/recommendations/events?view=all",headers:authHeaders});
+    assert.equal(response.statusCode,200);
+    assert.equal(response.json().formulaVersion,"event_recommendation_v2");
+    assert.deepEqual(response.json().items[0].reasons,reasons);
+    assert.deepEqual(response.json().items[0].matchedInterests,[]);
+    assert.equal(response.json().items[0].reasonCode,"relevance_match");
+    assert.equal(response.headers["cache-control"],"no-store");
+  } finally {await app.close();}
+});
 async function appFor(execute: Pick<RecommendEvents, "execute">["execute"] = async () => ok(value),
   identity: IdentityVerificationResult = { kind: "verified", principal: { firebaseUid: "verified-only" } }) {
   return buildApp({

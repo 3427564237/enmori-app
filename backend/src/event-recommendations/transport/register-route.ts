@@ -36,7 +36,8 @@ export async function registerEventRecommendationRoute(app: FastifyInstance, dep
         eventId: item.eventId, title: item.title, startAt: item.startAt, ...(item.endAt === undefined ? {} : { endAt: item.endAt }),
         matchedInterests: item.matchedInterests.map((tag) => ({
           interestTagId: tag.interestTagId, displayName: tag.displayName,
-        })), reasonCode: "interest_match",
+        })), reasonCode: result.value.formulaVersion==="event_recommendation_v2"?"relevance_match":"interest_match",
+        ...(item.reasons?{reasons:item.reasons.map(({code,count,points})=>({code,count,points}))}:{}),
       })),
     });
   });

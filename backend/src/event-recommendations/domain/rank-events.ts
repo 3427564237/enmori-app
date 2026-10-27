@@ -7,9 +7,13 @@ export interface EventScoringInput {
   readonly published: boolean;
   readonly startInstant: bigint;
   readonly interestTagIds: readonly string[];
+  readonly visibleFriendCount?: number;
+  readonly sameRegion?: boolean;
 }
 
+export interface RecommendationReason { readonly code: "shared_interests" | "friends_participating" | "same_region"; readonly count: number; readonly points: number }
 export interface RankedEvent {
+  readonly reasons?: readonly RecommendationReason[];
   readonly eventId: string;
   readonly startInstant: bigint;
   readonly matchedInterestTagIds: readonly string[];
@@ -18,7 +22,7 @@ export interface RankedEvent {
     readonly factorCode: "interest_match_count";
     readonly matchedCount: number;
     readonly points: number;
-    readonly formulaVersion: typeof EVENT_FORMULA_VERSION;
+    readonly formulaVersion: typeof EVENT_FORMULA_VERSION | "event_recommendation_v2";
   };
 }
 
@@ -33,7 +37,7 @@ function distinctIds(ids: readonly string[]): string[] {
 
 function sameSource(left: EventScoringInput, right: EventScoringInput): boolean {
   return left.active === right.active && left.published === right.published &&
-    left.startInstant === right.startInstant &&
+    left.startInstant === right.startInstant && left.visibleFriendCount === right.visibleFriendCount && left.sameRegion === right.sameRegion &&
     JSON.stringify(distinctIds(left.interestTagIds)) ===
       JSON.stringify(distinctIds(right.interestTagIds));
 }
@@ -45,6 +49,7 @@ function sameSource(left: EventScoringInput, right: EventScoringInput): boolean 
  * Conflicting projections of one identity are invalid inputs, not extra votes.
  */
 export function rankEvents(input: {
+  readonly formulaVersion?: "event_recommendation_v2";
   readonly asOf: bigint;
   readonly activeSelectedInterestTagIds: readonly string[];
   readonly events: readonly EventScoringInput[];
@@ -63,17 +68,26 @@ export function rankEvents(input: {
     if (event.eventId.length === 0 || ambiguous.has(event.eventId) ||
         !event.active || !event.published || event.startInstant <= input.asOf) continue;
     const matched = distinctIds(event.interestTagIds).filter((id) => selected.has(id));
-    if (matched.length === 0) continue;
+    const v2=input.formulaVersion==="event_recommendation_v2";
+    const friends=event.visibleFriendCount??0;
+    if(!Number.isSafeInteger(friends)||friends<0||friends>1000)continue;
+    const region=event.sameRegion===true;
+    const reasons:RecommendationReason[]=[
+      ...(matched.length?[{code:"shared_interests" as const,count:matched.length,points:matched.length*4}]:[]),
+      ...(friends?[{code:"friends_participating" as const,count:friends,points:Math.min(friends,5)*2}]:[]),
+      ...(region?[{code:"same_region" as const,count:1,points:1}]:[])];
+    if(v2?reasons.length===0:matched.length===0)continue;
     ranked.push({
       eventId: event.eventId,
       startInstant: event.startInstant,
       matchedInterestTagIds: matched,
-      score: matched.length,
+      score: v2?reasons.reduce((sum,reason)=>sum+reason.points,0):matched.length,
+      ...(v2?{reasons}:{}),
       factor: {
         factorCode: "interest_match_count",
         matchedCount: matched.length,
-        points: matched.length,
-        formulaVersion: EVENT_FORMULA_VERSION,
+        points: matched.length * (v2 ? 4 : 1),
+        formulaVersion: v2 ? "event_recommendation_v2" : EVENT_FORMULA_VERSION,
       },
     });
   }

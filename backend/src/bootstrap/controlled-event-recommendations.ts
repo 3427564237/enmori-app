@@ -16,6 +16,7 @@ import { ok, err } from "../shared/domain/result.js";
  * as browse (including its disable gate and bounded atomic projection). */
 export function createControlledEventRecommendations(options: {
   readonly gateway: EventReadGateway;
+  readonly personalized?: {read(uid:string,asOf:string,snapshot:import("../event-browse/ports/event-browse.js").RecommendationSnapshot):Promise<import("../event-recommendations/ports/event-recommendation-repository.js").EventRecommendationReadResult>};
   readonly source: BrowseSource;
   readonly clock: Clock;
   /** Explicit identity binding for the approved Music concept; never inferred from labels. */
@@ -51,13 +52,21 @@ export function createControlledEventRecommendations(options: {
         }
         // Always establish current source health, even with no selected tags.
         // Source failure must not masquerade as an empty recommendation batch.
-        const rows = await options.source.firstBatch(asOf, new AbortController().signal);
+        const signal=new AbortController().signal;
+        const snapshot=options.source.recommendationSnapshot ? await options.source.recommendationSnapshot(asOf,signal)
+          : {items:await options.source.firstBatch(asOf,signal),current:()=>true};
+        if(options.personalized)return options.personalized.read(firebaseUid,asOf,snapshot);
+        const rows=snapshot.items;
         const ignored = new Set(options.ignoredEventIds && mayPersonalize ? await options.ignoredEventIds(firebaseUid,rows.map(row=>sourceEventId(row.browseId))) : []);
         if (options.requireRecommendationConsent) {
           const current = await owner(firebaseUid);
           if (!current || current.id !== account.id) return { kind: "onboarding_required" };
           if (current.consent !== "accepted") return { kind: "ready", sources: { selectedInterestTagIds: [], interestTags: [], events: [] } };
         }
+        if(!snapshot.current())return {kind:"dependency_unavailable"};
+        // Legacy compositions still recheck selection after provider/filter awaits.
+        const latest=mayPersonalize?await options.gateway.get(`account_interests/${account.id}`):undefined;
+        if(!snapshot.current()||JSON.stringify(latest)!==JSON.stringify(data))return {kind:"dependency_unavailable"};
         return { kind: "ready", sources: { selectedInterestTagIds: selected, interestTags,
           events: rows.filter(row=>!ignored.has(sourceEventId(row.browseId))).map(row => ({ scoring: {
             eventId: sourceEventId(row.browseId), active: true, published: true,

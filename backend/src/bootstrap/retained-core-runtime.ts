@@ -12,6 +12,8 @@ import { LocalModelLane } from "../ai-runtime/infrastructure/local-model-lane.js
 import { createFirstFlowComposition, type FirstFlowConfiguration } from "./first-flow-composition.js";
 import { withDeliveryResolution } from "./owned-source-composition.js";
 import { createControlledEventBrowse } from "./controlled-event-browse.js";
+import { FirestorePersonalizedEvents } from "../event-recommendations/infrastructure/firestore-personalized-events.js";
+import { firestoreSocialAuthority } from "../friends/infrastructure/social-authority.js";
 import { createControlledEventRecommendations } from "./controlled-event-recommendations.js";
 import type { BrowseSource } from "../event-browse/ports/event-browse.js";
 import {OwnCheckInCalendar} from "../check-ins/application/check-in-calendar.js";
@@ -145,7 +147,12 @@ async function createControlledRuntime(
       environment: isolatedEnvironment, firestore: gateway, clock,
       source: eventBrowseControl.source, cursorKey: randomBytes(32),
     }) : undefined;
+    const socialEvents = socialEventSource(eventBrowseControl.peek, eventBrowseControl.projectionReady, async (asOf) => {
+      if(eventBrowseControl.source.recommendationSnapshot)return eventBrowseControl.source.recommendationSnapshot(asOf,new AbortController().signal);
+      else await eventBrowseControl.source.firstBatch(asOf,new AbortController().signal);
+    });
     const realEvents = createControlledEventRecommendations({
+      personalized: new FirestorePersonalizedEvents(gateway,firestoreSocialAuthority,socialEvents.recommendations,eventInput?.musicInterestTagId??"interest_music"),
       gateway: new FirebaseAdminEventReadGateway(getFirestore(firebaseApp)),
       source: eventBrowseControl.source, clock, requireRecommendationConsent: true,
       ...(participation ? { ignoredEventIds: participation.ignoredEventIds } : {}),
@@ -215,7 +222,7 @@ async function createControlledRuntime(
       });
     };
     const getOnboarding = new GetOnboarding(onboardingRepository);
-    const socialEvents = socialEventSource(eventBrowseControl.peek, eventBrowseControl.projectionReady, async (asOf) => { await eventBrowseControl.source.firstBatch(asOf, new AbortController().signal); });
+
     const app = await buildApp({
       ...(firstFlow ? { firstFlow } : {}),
       ...(chat?.ownedSources ? { ownedSources: firstFlow

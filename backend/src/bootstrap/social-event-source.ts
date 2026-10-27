@@ -9,7 +9,7 @@ import { readFriendVisibility } from '../friends/infrastructure/firestore-friend
 import type { FirestoreTransactionGateway } from '../shared/infrastructure/firebase/firestore-gateway.js';
 
 /** Current transaction permission plus process-only provider projection. No network IO or archived title. */
-export function socialEventSource(peek: (id: string, asOf: string) => BrowseOccurrence | undefined, ready: (asOf: string) => boolean, prepare?: (asOf: string) => Promise<void>) {
+export function socialEventSource(peek: (id: string, asOf: string) => BrowseOccurrence | undefined, ready: (asOf: string) => boolean, prepare?: FriendEventProjection['prepare']) {
   async function permitted(tx: SocialSourceReader, viewer: string, owner: string) {
     const account = await tx.get(`accounts/${owner}`), access = await tx.get(`friend_access/${owner}`);
     if (!account || account.optionalProcessingConsent !== 'accepted' || access?.eligibilityState !== 'eligible') return false;

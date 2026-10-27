@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../account/content_access.dart';
+
 import '../../../core/result/result.dart';
 import '../../auth/auth_providers.dart';
 import '../../auth/domain/auth_repository.dart';
@@ -218,9 +220,12 @@ final class InterestEditorController extends Notifier<InterestEditorState> {
       clearValidationMessage: true,
       clearSavedSelection: true,
     );
-    final result = await _repository.replaceOwn(
-      interestTagIds: selectedIds,
-      expectedRevision: state.revision,
+    final result = await afterContentMutation(
+      ref,
+      () => _repository.replaceOwn(
+        interestTagIds: selectedIds,
+        expectedRevision: state.revision,
+      ),
     );
     if (!ref.mounted || operation != _operation) return;
     switch (result) {

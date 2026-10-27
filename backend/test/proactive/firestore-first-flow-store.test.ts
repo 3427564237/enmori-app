@@ -37,6 +37,31 @@ function fixture(configured=true){
   return {g,store,conversations,actor,cutoff,create,enable,reserve,publish,stop:()=>{live=false;},checks:()=>checks};
 }
 
+test("restart reads the committed rolling budget and cannot publish a second daily follow-up",async()=>{
+  const f=fixture(false);await f.enable();await f.publish(await f.reserve(await f.create()));
+  const restarted=new FirestoreFirstFlowStore(f.g,environment,{ownerAccountId:owner,utcMilliseconds:()=>f.g.now,
+    conversationTransaction:(tx,p,o,current)=>f.conversations.firstFlowTransaction(tx,p,o,current)});
+  const recovered=await restarted.recover(f.actor);assert.equal(recovered.kind,"ok");
+  const next=value(await restarted.createIntent(f.actor,{intentId:id(42),conversationId:topic,sourceMessageId:user,
+    category:"explicit_follow_up",dueAt:new Date(f.g.now+60000).toISOString(),timeZone:"UTC",processing:"local",expectedSettingsRevision:1}));
+  f.g.now+=60000;
+  const before=f.g.writes;
+  assert.equal((await restarted.reserve(f.actor,next.intentId,next.revision)).kind,"frequency");
+  assert.equal(f.g.writes,before);
+});
+
+test("restart expires a stale queued occurrence; idempotent readback never resurrects it",async()=>{
+  const f=fixture(false);await f.enable();const old=await f.create();
+  f.g.now=Date.parse(old.expiresAt);
+  const restarted=new FirestoreFirstFlowStore(f.g,environment,{ownerAccountId:owner,utcMilliseconds:()=>f.g.now,
+    conversationTransaction:(tx,p,o,current)=>f.conversations.firstFlowTransaction(tx,p,o,current)});
+  const recovered=value(await restarted.recover(f.actor));
+  assert.equal(recovered[0]?.state,"expired");
+  const read=value(await restarted.intent(f.actor,old.intentId));assert.equal(read.state,"expired");
+  assert.equal((await restarted.reserve(f.actor,read.intentId,read.revision)).kind,"conflict");
+  const settings=value(await restarted.settings(f.actor));assert.equal(settings.revision,1);
+});
+
 test("F0 defaults off, no implicit confirmed zone, no registration secret in metadata",async()=>{
   const f=fixture();const s=value(await f.store.settings(f.actor));assert.equal(s.mode,"off");assert.equal(s.timeZone,"");assert.equal(s.pushEnabled,false);assert.equal(f.g.writes,0);
   await f.enable();const registered=value(await f.store.replaceRegistration(f.actor,{expectedRevision:0,installationRef:installation,registrationKind:"fcm_token",registrationValue:"secret-canary",enabled:true}));

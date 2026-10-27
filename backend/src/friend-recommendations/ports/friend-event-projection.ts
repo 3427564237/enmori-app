@@ -10,7 +10,7 @@ export interface FriendEventProjection {
   /** Optional public Event source readiness, outside any Firestore transaction.
    * Called only after current owner/purpose authorization, then followed by a
    * fresh full authorization transaction. No owner data, retry or stale fallback. */
-  prepare?(asOf:string):Promise<void>;
+  prepare?(asOf:string):Promise<void | {readonly current:()=>boolean}>;
   /** Personal reads use this transaction only; no remote IO or writes here.
    * All subjects share the recommendation's captured ranking instant. */
   read(reader:SocialSourceReader,requesterAccountId:string,subjectAccountId:string,
