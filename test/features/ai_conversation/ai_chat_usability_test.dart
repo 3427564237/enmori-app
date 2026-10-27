@@ -54,7 +54,15 @@ void main() {
           expect(find.byKey(const Key('ai-pending-assistant')), findsNothing);
           expect(controller.sends, 0);
           expect(controller.retries, 0);
-          expect(controller.checks, 0);
+          // Approved recovery reads are bounded and must never resend.
+          expect(controller.checks, 1);
+          await tester.pump(const Duration(seconds: 1));
+          await tester.pump(const Duration(seconds: 3));
+          expect(controller.checks, 3);
+          await tester.pump(const Duration(seconds: 30));
+          expect(controller.checks, 3);
+          expect(controller.sends, 0);
+          expect(controller.retries, 0);
           expect(controller.view.canSend, isFalse);
           expect(controller.view.canRetry, isFalse);
           expect(controller.view.canCheckResult, isTrue);

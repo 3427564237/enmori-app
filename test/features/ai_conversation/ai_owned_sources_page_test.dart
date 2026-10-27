@@ -173,7 +173,7 @@ void main() {
     },
   );
   testWidgets(
-    'stacked target page preserves original unknown operation and returns an empty unsent editor',
+    'stacked target opens an independent topic and retains the original unknown guard',
     (tester) async {
       final r = await AiReferenceRig.create(tester);
       final navigator = GlobalKey<NavigatorState>();
@@ -207,17 +207,21 @@ void main() {
       await tester.pumpAndSettle();
       staleSend();
       await tester.pump();
-      expect(r.repo.anchors, isEmpty);
+      expect(r.repo.anchors.single.conversationId, 'other-owned-topic');
       expect(r.repo.executes, 1);
-      expect(r.conversationState.canCheckResult, isTrue);
-      expect(
-        find.byKey(const Key('ai-open-requested-message')),
-        findsOneWidget,
-      );
+      expect(r.conversationState.conversationId, 'other-owned-topic');
+      expect(r.conversationState.localOutgoingText, isNull);
+      expect(r.conversationState.canCheckResult, isFalse);
       navigator.currentState!.pop();
       await tester.pumpAndSettle();
       expect(tester.widget<TextField>(input).controller!.text, isEmpty);
-      expect(r.conversationState.localOutgoingText, 'One original request');
+      // Navigation may use another owned topic, but cannot release the old
+      // operation's guard or replay the stale Send callback.
+      await r.conversation.selectConversation(referenceTopic);
+      await tester.pumpAndSettle();
+      expect(r.conversationState.conversationId, referenceTopic);
+      expect(r.conversationState.canSend, isFalse);
+      expect(r.conversationState.canRetry, isFalse);
       expect(r.conversationState.canCheckResult, isTrue);
       expect(r.repo.executes, 1);
       await _dispose(tester, r);

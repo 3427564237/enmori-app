@@ -166,130 +166,134 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
         ],
       ),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                key: const Key('history-weekly-review'),
-                onPressed: state.selectedDate == null || state.ianaZone == null
-                    ? null
-                    : () => Navigator.of(context).push<void>(
-                        MaterialPageRoute(
-                          builder: (_) => CheckInWeeklyReviewPage(
-                            lastDate: state.selectedDate!,
-                            timeZone: state.ianaZone!,
-                            onOpen: widget.onOpenSavedCheckIn,
+        child: SingleChildScrollView(
+          key: const Key('history-scroll'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  key: const Key('history-weekly-review'),
+                  onPressed:
+                      state.selectedDate == null || state.ianaZone == null
+                      ? null
+                      : () => Navigator.of(context).push<void>(
+                          MaterialPageRoute(
+                            builder: (_) => CheckInWeeklyReviewPage(
+                              lastDate: state.selectedDate!,
+                              timeZone: state.ianaZone!,
+                              onOpen: widget.onOpenSavedCheckIn,
+                            ),
                           ),
                         ),
-                      ),
-                icon: const Icon(Icons.insights_outlined),
-                label: Text(
-                  context.tr(
-                    'Review 7 days ending on this date',
-                    '回顾截至所选日期的七天',
+                  icon: const Icon(Icons.insights_outlined),
+                  label: Text(
+                    context.tr(
+                      'Review 7 days ending on this date',
+                      '回顾截至所选日期的七天',
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 12,
-                runSpacing: 8,
-                children: [
-                  TextButton.icon(
-                    key: const Key('history-select-date'),
-                    onPressed:
-                        state.latestDate == null ||
-                            state.phase == CheckInHistoryPhase.loading
-                        ? null
-                        : () => _selectDate(context, controller, state),
-                    icon: const Icon(Icons.calendar_today_outlined),
-                    label: Text(
-                      state.selectedDate == null
-                          ? context.tr('Choose date', '选择日期')
-                          : MaterialLocalizations.of(context)
-                                .formatFullDate(state.selectedDate!),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    TextButton.icon(
+                      key: const Key('history-select-date'),
+                      onPressed:
+                          state.latestDate == null ||
+                              state.phase == CheckInHistoryPhase.loading
+                          ? null
+                          : () => _selectDate(context, controller, state),
+                      icon: const Icon(Icons.calendar_today_outlined),
+                      label: Text(
+                        state.selectedDate == null
+                            ? context.tr('Choose date', '选择日期')
+                            : MaterialLocalizations.of(context)
+                                  .formatFullDate(state.selectedDate!),
+                      ),
                     ),
-                  ),
-                  if (state.ianaZone case final zone?)
-                    Text(
-                      context.tr('Local time · $zone', '本地时间 · $zone'),
-                      key: const Key('history-device-zone'),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                ],
+                    if (state.ianaZone case final zone?)
+                      Text(
+                        context.tr('Local time · $zone', '本地时间 · $zone'),
+                        key: const Key('history-device-zone'),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                  ],
+                ),
               ),
-            ),
-            if (state.phase != CheckInHistoryPhase.failed &&
-                state.phase != CheckInHistoryPhase.signedOut &&
-                state.selectedDate != null &&
-                state.ianaZone != null &&
-                ref.watch(checkInRepositoryProvider)
-                    is CheckInCalendarRepository)
-              _RecordedDayNavigation(
-                state: state,
-                onSelect: controller.selectDate,
-              ),
-            const Divider(height: 1),
-            Expanded(
-              child: _HistoryBody(
+              if (state.phase != CheckInHistoryPhase.failed &&
+                  state.phase != CheckInHistoryPhase.signedOut &&
+                  state.selectedDate != null &&
+                  state.ianaZone != null &&
+                  ref.watch(checkInRepositoryProvider)
+                      is CheckInCalendarRepository)
+                _RecordedDayNavigation(
+                  state: state,
+                  onSelect: controller.selectDate,
+                ),
+              const Divider(height: 1),
+              _HistoryBody(
                 state: state,
                 onOpen: widget.onOpenSavedCheckIn,
                 highlight: _highlight,
                 anchor: _anchor,
                 onRetry: controller.reload,
               ),
-            ),
-            if (state.phase == CheckInHistoryPhase.ready &&
-                state.nextCursor != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (state.nextPageFailure != null) ...[
-                      Text(
-                        context.tr(
-                          'The next page is unavailable. Your current records are still shown.',
-                          '下一页暂时不可用，当前记录仍会保留。',
+              if (state.phase == CheckInHistoryPhase.ready &&
+                  state.nextCursor != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (state.nextPageFailure != null) ...[
+                        Text(
+                          context.tr(
+                            'The next page is unavailable. Your current records are still shown.',
+                            '下一页暂时不可用，当前记录仍会保留。',
+                          ),
+                          key: Key('history-next-page-error'),
+                          textAlign: TextAlign.center,
                         ),
-                        key: Key('history-next-page-error'),
-                        textAlign: TextAlign.center,
+                        const SizedBox(height: 8),
+                      ],
+                      FilledButton.tonalIcon(
+                        key: const Key('history-next-page'),
+                        onPressed: state.isLoadingNext
+                            ? null
+                            : controller.loadNext,
+                        icon: state.isLoadingNext
+                            ? const SizedBox.square(
+                                dimension: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Icon(
+                                state.nextPageFailure == null
+                                    ? Icons.navigate_next
+                                    : Icons.refresh,
+                              ),
+                        label: Text(
+                          state.isLoadingNext
+                              ? context.tr('Loading…', '正在加载…')
+                              : state.nextPageFailure == null
+                              ? context.tr('Load more', '加载更多')
+                              : context.tr('Retry next page', '重试下一页'),
+                        ),
                       ),
-                      const SizedBox(height: 8),
                     ],
-                    FilledButton.tonalIcon(
-                      key: const Key('history-next-page'),
-                      onPressed: state.isLoadingNext
-                          ? null
-                          : controller.loadNext,
-                      icon: state.isLoadingNext
-                          ? const SizedBox.square(
-                              dimension: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Icon(
-                              state.nextPageFailure == null
-                                  ? Icons.navigate_next
-                                  : Icons.refresh,
-                            ),
-                      label: Text(
-                        state.isLoadingNext
-                            ? context.tr('Loading…', '正在加载…')
-                            : state.nextPageFailure == null
-                            ? context.tr('Load more', '加载更多')
-                            : context.tr('Retry next page', '重试下一页'),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -368,7 +372,7 @@ final class _HistoryBody extends StatelessWidget {
         title: context.tr('No Check-ins for this date.', '当天没有签到。'),
         action: null,
       ),
-      CheckInHistoryPhase.ready => SingleChildScrollView(
+      CheckInHistoryPhase.ready => Padding(
         key: const Key('history-list'),
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(

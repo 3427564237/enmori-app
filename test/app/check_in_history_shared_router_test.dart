@@ -72,6 +72,9 @@ void main() {
       semantics.dispose();
     }
     expect(f.historyQueries.single['timeZone'], zone);
+    await _tap(tester, 'history-entry-chk_shared');
+    expect(f.router.state.uri.path, AppRoutes.savedCheckIn('chk_shared'));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(
@@ -299,6 +302,11 @@ final class _Fixture {
             },
           });
         case '/v1/me/check-ins':
+          // Home Today owns a separate request, including after a session
+          // change. Never return an old History completion to that new read.
+          if (router.state.uri.path == AppRoutes.home) {
+            return _page('Home Today synthetic Note');
+          }
           historyQueries.add(request.url.queryParameters);
           if (pending case final value?) return value.future;
           if (failNext) {

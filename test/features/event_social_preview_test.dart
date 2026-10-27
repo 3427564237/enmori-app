@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
+import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/event_detail/domain/event_detail_repository.dart';
 import 'package:enmori/features/event_detail/event_detail_providers.dart';
 import 'package:enmori/features/event_detail/presentation/event_detail_page.dart';
@@ -226,7 +227,9 @@ Future<void> _pump(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        currentAuthSubjectProvider.overrideWithValue('synthetic-owner'),
+        authSessionProvider.overrideWithValue(
+          AsyncData(AuthSessionAuthenticated(subject: 'synthetic-owner')),
+        ),
         eventRecommendationRepositoryProvider.overrideWithValue(
           recommendations ?? FakeEventRecommendationRepository(),
         ),
