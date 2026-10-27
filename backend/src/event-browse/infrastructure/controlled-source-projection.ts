@@ -4,6 +4,27 @@ import { parseBrowseInstant } from "../domain/browse-values.js";
 import { sourceEventId } from '../domain/source-event-id.js';
 type SourceSnapshot = { at: bigint; items: readonly BrowseOccurrence[]; candidates?: readonly BrowseOccurrence[] };
 
+/** A waiter owns its deadline, not the shared work it joins. Always observe
+ * the underlying promise, even when a source ignores cancellation. */
+function withinBudget<T>(work: Promise<T>, signal: AbortSignal): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const abort = () => {
+      signal.removeEventListener("abort", abort);
+      reject(dependencyUnavailable);
+    };
+    signal.addEventListener("abort", abort, { once: true });
+    work.then(value => {
+      signal.removeEventListener("abort", abort);
+      if (signal.aborted) reject(dependencyUnavailable);
+      else resolve(value);
+    }, error => {
+      signal.removeEventListener("abort", abort);
+      reject(error);
+    });
+    if (signal.aborted) abort();
+  });
+}
+
 /** One process-owned source generation, shared by browse, recommendation and
  * detail. No persistence, title merging, retry, or stale-on-error fallback. */
 export class ControlledSourceProjection implements BrowseSource {
@@ -82,43 +103,54 @@ export class ControlledSourceProjection implements BrowseSource {
   async recommendationSnapshot(asOf: string, signal: AbortSignal) {
     const now=parseBrowseInstant(asOf);
     if(now===undefined||signal.aborted)throw dependencyUnavailable;
-    if(this.pending)await this.pending;
-    let snapshot=this.snapshot;
-    if(!snapshot?.candidates||now<snapshot.at||now-snapshot.at>=300_000_000_000n) {
-      const epoch={}; this.epoch=epoch; this.snapshot=undefined;
-      this.observedPages.clear(); this.pageReads.clear();
-      const work=(async()=>{
-        const pages: (readonly BrowseOccurrence[])[]=[];
-        const unique=new Map<string,BrowseOccurrence>();
-        const bounded=AbortSignal.any([signal,AbortSignal.timeout(10000)]);
-        for(let page=0;page<50;page++){
-          const result=this.source.batch ? await this.source.batch(asOf,page,bounded)
-            : {items:await this.source.firstBatch(asOf,bounded)};
-          if(epoch!==this.epoch||bounded.aborted)throw dependencyUnavailable;
-          const items=this.freezePage(result.items); pages.push(items);
-          for(const item of items){
-            const prior=unique.get(item.browseId);
-            if(prior&&JSON.stringify(prior)!==JSON.stringify(item))throw dependencyUnavailable;
-            unique.set(item.browseId,item);
+    const deadline = new AbortController();
+    const timer = setTimeout(() => deadline.abort(), 10000);
+    const bounded = AbortSignal.any([signal, deadline.signal]);
+    try {
+      if(this.pending) {
+        const epoch = this.epoch;
+        await withinBudget(this.pending, bounded);
+        if(epoch!==this.epoch||bounded.aborted)throw dependencyUnavailable;
+      }
+      let snapshot=this.snapshot;
+      if(!snapshot?.candidates||now<snapshot.at||now-snapshot.at>=300_000_000_000n) {
+        const epoch={}; this.epoch=epoch; this.snapshot=undefined;
+        this.observedPages.clear(); this.pageReads.clear();
+        const work=(async()=>{
+          const pages: (readonly BrowseOccurrence[])[]=[];
+          const unique=new Map<string,BrowseOccurrence>();
+          for(let page=0;page<50;page++){
+            if(epoch!==this.epoch||bounded.aborted)throw dependencyUnavailable;
+            const result=this.source.batch ? await withinBudget(this.source.batch(asOf,page,bounded),bounded)
+              : {items:await withinBudget(this.source.firstBatch(asOf,bounded),bounded)};
+            if(epoch!==this.epoch||bounded.aborted)throw dependencyUnavailable;
+            const items=this.freezePage(result.items); pages.push(items);
+            for(const item of items){
+              const prior=unique.get(item.browseId);
+              if(prior&&JSON.stringify(prior)!==JSON.stringify(item))throw dependencyUnavailable;
+              unique.set(item.browseId,item);
+            }
+            if(result.nextPage===undefined)break;
+            if(result.nextPage!==page+1||page===49)throw dependencyUnavailable;
           }
-          if(result.nextPage===undefined)break;
-          if(result.nextPage!==page+1||page===49)throw dependencyUnavailable;
-        }
-        const items=pages[0]??[];
-        const candidates=Object.freeze([...unique.values()]);
-        this.snapshot={at:now,items,candidates};
-        pages.forEach((rows,page)=>{if(page>0)this.observedPages.set(page,rows);});
-        return items;
-      })();
-      this.pending=work;
-      try{await work;}finally{if(this.pending===work)this.pending=undefined;}
-      if(epoch!==this.epoch)throw dependencyUnavailable;
-      snapshot=this.snapshot;
+          const items=pages[0]??[];
+          const candidates=Object.freeze([...unique.values()]);
+          this.snapshot={at:now,items,candidates};
+          pages.forEach((rows,page)=>{if(page>0)this.observedPages.set(page,rows);});
+          return items;
+        })();
+        this.pending=work;
+        try{await work;}finally{if(this.pending===work)this.pending=undefined;}
+        if(epoch!==this.epoch)throw dependencyUnavailable;
+        snapshot=this.snapshot;
+      }
+      if(!snapshot?.candidates||bounded.aborted)throw dependencyUnavailable;
+      const captured=snapshot,candidates=snapshot.candidates;
+      return {items:candidates.filter(row=>parseBrowseInstant(row.startAt)!>now),
+        current:()=>!signal.aborted&&this.snapshot===captured&&!this.pending};
+    } finally {
+      clearTimeout(timer);
     }
-    if(!snapshot?.candidates||signal.aborted)throw dependencyUnavailable;
-    const captured=snapshot,candidates=snapshot.candidates;
-    return {items:candidates.filter(row=>parseBrowseInstant(row.startAt)!>now),
-      current:()=>!signal.aborted&&this.snapshot===captured&&!this.pending};
   }
   ready(asOf: string): boolean {
     const now = parseBrowseInstant(asOf), snapshot = this.snapshot;

@@ -10,7 +10,10 @@ credential, dependency, provider or persistent recommendation history is added.
 The retained composition selects event_recommendation_v2. Before personal reads,
 the controlled provider projection obtains every available page atomically,
 with the existing SG source, 20 raw occurrences/page, maximum 50 pages/1000 raw
-occurrences and a 10-second aggregate deadline. Capacity, inconsistent paging,
+occurrences and a 10-second aggregate deadline measured from entry, including
+any wait for a shared source read. A cancelled/timed-out waiter does not cancel
+the shared owner's request; its own traversal cannot publish after expiry.
+Capacity, inconsistent paging,
 conflicting duplicate identities, later-page failure and retired source
 generation are unavailable, not partial success or a successful empty batch.
 The same complete projection supplies current social participation identities.
@@ -73,9 +76,14 @@ then opaque account identity ascending. Full ranking precedes Home Top 2.
 Prepared provider generations must remain current through transaction completion.
 
 The existing Friend DTO's truthful reason string gains generic region/affiliation
-phrases; no new private fields are exposed. See all shows sequential groups of
+phrases; no new private fields are exposed. A profile-only row (empty shared
+interests and zero common Events) is valid only with `Same shared region`,
+`Same shared school or organization`, or their exact ` · `-joined combination.
+Other existing DTO validation remains strict. See all shows sequential groups of
 two with Previous/Next and explicit exhaustion, retaining the Backend order.
-Rendered callbacks are fenced against a replacement state/session. Ignore/Undo,
+Rendered callbacks are fenced against a replacement state/session, disposal and
+an already-changed group offset; repeated activation cannot skip or overrun groups.
+Ignore/Undo,
 restoration and unknown-write behavior remain on their existing operations.
 
 ## Consumers and integration

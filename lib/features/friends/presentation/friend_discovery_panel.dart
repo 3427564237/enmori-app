@@ -105,6 +105,7 @@ final class _FriendDiscoveryPanelState
     final preferences = ref.read(friendIgnoreControllerProvider.notifier);
     final renderedEpoch = preferences.epoch;
     final locked = preference.busy || preference.unresolvedUsername != null;
+    final renderedGroupStart = _groupStart;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -245,13 +246,20 @@ final class _FriendDiscoveryPanelState
                   onPressed: locked
                       ? null
                       : () {
-                          if (identical(
-                            state,
-                            ref.read(
-                              friendDiscoveryControllerProvider(widget.home),
-                            ),
-                          )) {
-                            setState(() => _groupStart -= 2);
+                          if (mounted &&
+                              _groupStart == renderedGroupStart &&
+                              renderedGroupStart >= 2 &&
+                              identical(
+                                state,
+                                ref.read(
+                                  friendDiscoveryControllerProvider(
+                                    widget.home,
+                                  ),
+                                ),
+                              )) {
+                            setState(
+                              () => _groupStart = renderedGroupStart - 2,
+                            );
                           }
                         },
                   child: Text(context.tr('Previous group', '上一组')),
@@ -262,13 +270,21 @@ final class _FriendDiscoveryPanelState
                   onPressed: locked
                       ? null
                       : () {
-                          if (identical(
-                            state,
-                            ref.read(
-                              friendDiscoveryControllerProvider(widget.home),
-                            ),
-                          )) {
-                            setState(() => _groupStart += 2);
+                          if (mounted &&
+                              _groupStart == renderedGroupStart &&
+                              renderedGroupStart + 2 <
+                                  state.suggestions.length &&
+                              identical(
+                                state,
+                                ref.read(
+                                  friendDiscoveryControllerProvider(
+                                    widget.home,
+                                  ),
+                                ),
+                              )) {
+                            setState(
+                              () => _groupStart = renderedGroupStart + 2,
+                            );
                           }
                         },
                   child: Text(context.tr('Next group', '下一组')),

@@ -1,0 +1,74 @@
+{
+  "region": {
+    "suggestions": [
+      {
+        "username": "member_target_1",
+        "displayName": "Member target_1",
+        "sharedInterests": [],
+        "commonEventCount": 0,
+        "reason": "Same shared region",
+        "ignoreVersion": "93453143235b6e9cf89bc33d5fc37d9cc6f17817baf1a0502a63de11b108d9c1"
+      }
+    ]
+  },
+  "affiliation": {
+    "suggestions": [
+      {
+        "username": "member_target_1",
+        "displayName": "Member target_1",
+        "sharedInterests": [],
+        "commonEventCount": 0,
+        "reason": "Same shared school or organization",
+        "ignoreVersion": "93453143235b6e9cf89bc33d5fc37d9cc6f17817baf1a0502a63de11b108d9c1"
+      }
+    ]
+  },
+  "both": {
+    "suggestions": [
+      {
+        "username": "member_target_1",
+        "displayName": "Member target_1",
+        "sharedInterests": [],
+        "commonEventCount": 0,
+        "reason": "Same shared region · Same shared school or organization",
+        "ignoreVersion": "93453143235b6e9cf89bc33d5fc37d9cc6f17817baf1a0502a63de11b108d9c1"
+      }
+    ]
+  },
+  "interest": {
+    "suggestions": [
+      {
+        "username": "member_target_1",
+        "displayName": "Member target_1",
+        "sharedInterests": [
+          "Music"
+        ],
+        "commonEventCount": 0,
+        "reason": "1 shared interest",
+        "ignoreVersion": "93453143235b6e9cf89bc33d5fc37d9cc6f17817baf1a0502a63de11b108d9c1"
+      }
+    ]
+  },
+  "mixed": {
+    "suggestions": [
+      {
+        "username": "member_target_2",
+        "displayName": "Member target_2",
+        "sharedInterests": [
+          "Music"
+        ],
+        "commonEventCount": 0,
+        "reason": "1 shared interest",
+        "ignoreVersion": "375ec5dd431b159ea667aa99350929eb71cd1f0cf90e0d646f19735b0bbde947"
+      },
+      {
+        "username": "member_target_1",
+        "displayName": "Member target_1",
+        "sharedInterests": [],
+        "commonEventCount": 0,
+        "reason": "Same shared region",
+        "ignoreVersion": "93453143235b6e9cf89bc33d5fc37d9cc6f17817baf1a0502a63de11b108d9c1"
+      }
+    ]
+  }
+}

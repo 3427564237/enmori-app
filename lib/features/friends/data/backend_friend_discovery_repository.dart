@@ -56,7 +56,9 @@ final class BackendFriendDiscoveryRepository
             tags.any((tag) => tag is! String || tag.isEmpty) ||
             count < 0 ||
             count > 2000 ||
-            tags.isEmpty && count == 0) {
+            tags.isEmpty &&
+                count == 0 &&
+                !_profileOnlyReasons.contains(row['reason'])) {
           return _invalid();
         }
         result.add(
@@ -89,6 +91,15 @@ final class BackendFriendDiscoveryRepository
         : _invalid();
   }
 }
+
+// The existing wire contract carries generic profile factors in reason, not
+// raw profile fields. Accept only the producer's three profile-only forms;
+// an arbitrary nonempty string must not turn an ineligible row into a match.
+const _profileOnlyReasons = {
+  'Same shared region',
+  'Same shared school or organization',
+  'Same shared region · Same shared school or organization',
+};
 
 Failure<T> _invalid<T>() => const Failure(
   AppFailure(

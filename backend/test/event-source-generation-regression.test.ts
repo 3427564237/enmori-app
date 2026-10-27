@@ -47,7 +47,11 @@ test('stable Detail joins in-progress page-zero refresh instead of returning lat
   const page=(title:string)=>Response.json({page:{number:0,totalElements:1},_embedded:{events:[row(title)]}});
   const raw=new TicketmasterBrowseSource({key:()=> 'synthetic-only',enabled:()=>true},async input=>{
     if(new URL(String(input)).pathname.includes('/events/')){details++;return oldDetail.promise;}
-    lists++;if(lists===1)return page('OLD');entered.resolve();return refresh.promise;
+    lists++;if(lists===1)return page('OLD');
+    if(lists===2){entered.resolve();return refresh.promise;}
+    // Complete ranking now performs its own source traversal. A real fetch
+    // supplies fresh response bytes, not the already-consumed refresh body.
+    return page('NEW');
   });
   const gate=createControlledEventBrowse({source:raw,projectionCache:true,running:()=>true,track:work=>work()});gate.enable();
   await gate.source.firstBatch(instant,signal());
@@ -67,7 +71,7 @@ test('stable Detail joins in-progress page-zero refresh instead of returning lat
   assert.equal((await gate.source.detail(browseId('same')!,instant,signal()))?.title,'NEW');
   const recommendations=await joined.recommendEvents.execute({principal:{firebaseUid:EVENT_TEST_UID},view:'all'});
   assert.ok(recommendations.ok);if(recommendations.ok)assert.equal(recommendations.value.items[0]!.title,'NEW');
-  assert.equal(lists,2);assert.equal(details,0);assert.equal(gate.observation().pending,0);gate.disable();
+  assert.equal(lists,3);assert.equal(details,0);assert.equal(gate.observation().pending,0);gate.disable();
 });
 
 test('stable lookup cannot bypass a failed pending refresh or fallback to old raw content',async()=>{
