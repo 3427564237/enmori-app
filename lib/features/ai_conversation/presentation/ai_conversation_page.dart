@@ -316,8 +316,15 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   @override
   void didChangeMetrics() {
     // Capture bottom proximity before keyboard/viewport layout changes.
-    if (widget.socialStyle && _ownsCurrentSession) {
-      _followMessages(null, ref.read(aiConversationControllerProvider));
+    if (widget.socialStyle && _isCurrentEditor && !_finding) {
+      if (_searchHighlightId case final id?) {
+        // Returning from Search can restore the IME after the first reveal.
+        // Keep the explicit target visible in the resized viewport instead of
+        // treating a short transcript as an ordinary follow-to-latest request.
+        _revealSearchMessage(id);
+      } else {
+        _followMessages(null, ref.read(aiConversationControllerProvider));
+      }
     }
   }
 

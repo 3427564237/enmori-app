@@ -310,6 +310,57 @@ void main() {
     );
   }
 
+  testWidgets(
+    'keyboard resize keeps a short conversation search target and draft',
+    (tester) async {
+      tester.view.physicalSize = const Size(375, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetViewInsets);
+      final controller = _Controller(
+        _state(
+          messages: [
+            _message('target', 1, 'unique needle', user: true),
+            _message('reply', 2, 'A saved reply. ' * 12),
+          ],
+        ),
+      );
+      await _pump(tester, controller);
+      final composer = find.byKey(const Key('ai-message-input'));
+      await tester.enterText(composer, 'Keep this unsent draft');
+      final editor = tester.widget<TextField>(composer).controller!;
+      editor.selection = const TextSelection(baseOffset: 2, extentOffset: 7);
+      final original = editor.value;
+      await _open(tester);
+      await tester.enterText(
+        find.byKey(const Key('ai-search-query')),
+        'needle',
+      );
+      await tester.pumpAndSettle();
+      await _tap(tester, 'ai-search-match-target');
+      await _tap(tester, 'ai-search-jump');
+      expect(find.byKey(const Key('ai-search-latest')), findsOneWidget);
+      // A real IME can restore after the search route pops. The short list is
+      // close to its end, so ordinary follow-to-latest must not take over.
+      tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-search-latest')), findsOneWidget);
+      expect(find.text('unique needle').hitTestable(), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('Located message')), findsOneWidget);
+      expect(editor.value, original);
+      tester.view.resetViewInsets();
+      await tester.pumpAndSettle();
+      expect(find.text('unique needle').hitTestable(), findsOneWidget);
+      await tester.tap(find.byKey(const Key('ai-search-latest')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-search-latest')), findsNothing);
+      expect(editor.value, original);
+      expect(controller.commands, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   for (final language in ['en', 'zh']) {
     testWidgets(
       '$language narrow 2x text search and context remain reachable',
