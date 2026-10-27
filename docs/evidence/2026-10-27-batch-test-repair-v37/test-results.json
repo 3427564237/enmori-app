@@ -1,0 +1,28 @@
+{
+  "baseline": "739f4a2",
+  "candidate": "c16c262",
+  "currentFailures": 73,
+  "baselineFailures": 87,
+  "newFailures": [],
+  "fixedFailures": [
+    "app/check_in_history_shared_router_test.dart: date and long device zone remain clear at 200% text scale",
+    "app/check_in_history_shared_router_test.dart: dependency error stays failure until explicit Retry",
+    "app/check_in_history_shared_router_test.dart: pending History is discarded on session change (false)",
+    "app/check_in_history_shared_router_test.dart: pending History is discarded on session change (true)",
+    "app/check_in_history_shared_router_test.dart: real History builder and Backend repositories run through Home",
+    "app/check_in_history_shared_router_test.dart: saved Check-in uses existing owner read and return rereads date",
+    "features/ai_conversation/ai_chat_usability_test.dart: retained outgoing text stops claiming Sending after unknown (false/en)",
+    "features/ai_conversation/ai_chat_usability_test.dart: retained outgoing text stops claiming Sending after unknown (false/zh)",
+    "features/ai_conversation/ai_chat_usability_test.dart: retained outgoing text stops claiming Sending after unknown (true/en)",
+    "features/ai_conversation/ai_chat_usability_test.dart: retained outgoing text stops claiming Sending after unknown (true/zh)",
+    "features/ai_conversation/ai_owned_sources_page_test.dart: stacked target page preserves original unknown operation and returns an empty unsent editor",
+    "features/event_social_preview_test.dart: detail labels pending and successful synthetic reads",
+    "features/event_social_preview_test.dart: detail unavailable remains distinct and retry is read-only",
+    "features/event_social_preview_test.dart: small enlarged-text Event cards and details remain scrollable"
+  ],
+  "baselinePassed": 1438,
+  "candidatePassed": 1452,
+  "focusedPassed": 37,
+  "backendPassed": 1540,
+  "staticAnalysis": "No issues"
+}

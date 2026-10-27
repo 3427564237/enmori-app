@@ -1,0 +1,15 @@
+{
+  "sourceHead": "c16c26294c3d64f9bcd76808a451241e15889b52",
+  "package": "com.enmori.app.group",
+  "versionCode": 37,
+  "versionName": "1.0.0-group20261027",
+  "bytes": 67214466,
+  "sha256": "c2f48a76ff7c173cb4d642bb704cdeafed8d49a7ff4dd4eee2efb05f85eee8f6",
+  "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "signerMatchesInstalledV36": true,
+  "debuggable": false,
+  "calendarPermissions": false,
+  "backendSourceHead": "c16c26294c3d64f9bcd76808a451241e15889b52",
+  "backendReady": true,
+  "initialInstallAttempt": "INSTALL_FAILED_ABORTED: User rejected permissions"
+}

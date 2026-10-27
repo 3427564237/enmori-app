@@ -1,0 +1,34 @@
+{
+  "enmori-failures-reproduce.log": {
+    "path": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v37/enmori-failures-reproduce.log",
+    "sha256": "12f41649dab46b56a0c915de293497520605fd0c3c5b84e14e31e97edb599dc7"
+  },
+  "enmori-failures-fix2.log": {
+    "path": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v37/enmori-failures-fix2.log",
+    "sha256": "8d10b25aa434970a6dad6bef04738f10402baff62f4336b2bb095b3c5814bbeb"
+  },
+  "analyze.log": {
+    "path": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v37/analyze.log",
+    "sha256": "3d841ec05ad55617ca78ef294e9fd83af7e25248615683298681dd28c156205e"
+  },
+  "flutter-full.log": {
+    "path": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v37/flutter-full.log",
+    "sha256": "c52de0100a19af6fea3b8f52da3c81af1e5118cb542eba7682bebd22c3090aaf"
+  },
+  "baseline-full.log": {
+    "path": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v37/baseline-full.log",
+    "sha256": "08a1708a750a1939548d9a476ca8cf3724231f6218f5146a0a8fd796f3c5c699"
+  },
+  "backend-full.log": {
+    "path": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v37/backend-full.log",
+    "sha256": "aeee78839c126bc57348190667e46f112fab3dfe3822f47dc1ffed4cb394ed58"
+  },
+  "apk-build.log": {
+    "path": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v37/apk-build.log",
+    "sha256": "0fc39b760f975f803a756c1260eb8d8dff39bd82707019b3fd03e83a954a9c82"
+  },
+  "runtime-auth-gates.json": {
+    "path": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v37/runtime-auth-gates.json",
+    "sha256": "fb829ee9f38d787cf09c79fa8126a17eaa1d86ba72604821951ed8179aed7607"
+  }
+}

@@ -1,0 +1,79 @@
+# Full-suite failures outside the recorded batch
+
+All 73 cases below also fail on the independent unmodified `739f4a2` export.
+They are not newly introduced by `c16c262`; this run does not claim a green
+full suite or close these cases. Original batch records remain intact.
+
+- `app/activity_shared_router_test.dart: background and return clear list and require explicit reload`
+- `app/activity_shared_router_test.dart: pending source action cannot restore notices or data after background and return`
+- `app/app_language_copy_test.dart: Chinese profile renders user content unchanged and shows saved audience`
+- `app/controlled_demo_app_test.dart: v2 social Home reads recommendations and opens manual Events using its authenticated Backend repository`
+- `app/history_ai_home_router_test.dart: one ready feature does not wait for the other (false)`
+- `app/history_ai_home_router_test.dart: one ready feature does not wait for the other (true)`
+- `app/persona_home_router_test.dart: Home traverses all four surfaces and Back preserves Home reads`
+- `app/persona_home_router_test.dart: Manage Personas remains reachable on small enlarged-text Home`
+- `app/persona_home_router_test.dart: Persona route cannot bypass RouterGateState.configurationUnavailable`
+- `app/persona_home_router_test.dart: Persona route cannot bypass RouterGateState.forbidden`
+- `app/persona_home_router_test.dart: Persona route cannot bypass RouterGateState.onboardingRequired`
+- `app/persona_home_router_test.dart: Persona route cannot bypass RouterGateState.resolving`
+- `app/persona_home_router_test.dart: Persona route cannot bypass RouterGateState.signInRequired`
+- `app/persona_home_router_test.dart: Persona route cannot bypass RouterGateState.unauthenticated`
+- `app/persona_home_router_test.dart: Persona route cannot bypass RouterGateState.unavailable`
+- `app/persona_home_router_test.dart: account replacement removes old stack and old callbacks`
+- `app/persona_home_router_test.dart: disposed page callback and auth-loss callback cannot navigate`
+- `app/persona_home_router_test.dart: edit ID is encoded once and delivered as one decoded parameter`
+- `app/persona_home_router_test.dart: form owns discard confirmation before invoking router Back`
+- `app/persona_home_router_test.dart: isolated flag without complete pages omits Persona entry/routes`
+- `app/persona_home_router_test.dart: ordinary build omits Persona entry/routes (pages=false)`
+- `app/persona_home_router_test.dart: ordinary build omits Persona entry/routes (pages=true)`
+- `app/persona_home_router_test.dart: route opened without a parent returns to overview`
+- `app/recovery_flow_test.dart: existing-email registration offers executable sign-in`
+- `app/shared_uiux_test.dart: Home actions and navigation remain reachable at Size(375.0, 667.0)`
+- `app/shared_uiux_test.dart: Home actions and navigation remain reachable at Size(667.0, 375.0)`
+- `app/shared_uiux_test.dart: startup, error retry and configuration states stay distinct`
+- `features/ai_conversation/ai_continuous_entry_test.dart: unknown entry keeps recovery through its authorized message read`
+- `features/ai_conversation/ai_conversation_controller_test.dart: New conversation cannot bypass pending generation or an unknown outcome`
+- `features/ai_conversation/ai_conversation_controller_test.dart: unknown request cannot be bypassed by history selection or New`
+- `features/ai_conversation/ai_localization_test.dart: language changes preserve chat content and guided draft input`
+- `features/backend_transport_failure_test.dart: stalled AI execution leaves waiting at its existing deadline`
+- `features/blocker_slices_test.dart: Event Detail shows missing information, copies only on action, retries without fabricated data`
+- `features/blocker_slices_test.dart: small/enlarged/reduced-motion pages fit Size(375.0, 667.0) dark=false`
+- `features/blocker_slices_test.dart: small/enlarged/reduced-motion pages fit Size(375.0, 667.0) dark=true`
+- `features/blocker_slices_test.dart: small/enlarged/reduced-motion pages fit Size(800.0, 360.0) dark=false`
+- `features/blocker_slices_test.dart: small/enlarged/reduced-motion pages fit Size(800.0, 360.0) dark=true`
+- `features/event_source_projection_test.dart: recommendation detail opens only on action and expires with no stale copy`
+- `features/journal_language_flow_test.dart: en Calendar History and edit use real locale delegates at large text`
+- `features/layout_refinement_test.dart: friends editorial layout fits 320dp and 2x text; retained actions work`
+- `features/layout_refinement_test.dart: saved editorial layout fits 320dp and 2x text; retained actions work`
+- `features/participation_journey_test.dart: ordinary parent rebuild with fresh callbacks preserves in-flight browser return`
+- `features/profile_location_flow_test.dart: GPS requires confirmation, denial preserves draft, success is saved only by Save`
+- `features/social_localization_test.dart: Chinese activity labels preserve friend name, Mood and source title`
+- `features/social_localization_test.dart: Chinese third-party disclosure keeps cancellation a no-write action`
+- `harness/ai_connected_repeat_journey_test.dart: connected device script sends twice and explicitly reloads twice`
+- `harness/ai_connected_repeat_journey_test.dart: connected script refuses wrongSecondOperation without recovery`
+- `harness/ai_connected_repeat_journey_test.dart: fresh cleared-view history refuses emptyFreshHistory`
+- `harness/ai_connected_repeat_journey_test.dart: fresh cleared-view history refuses partialFreshHistory`
+- `harness/ai_conversation_harness_test.dart: harness limited fixture and Settings callback remain explicitly synthetic`
+- `harness/ai_local_rejection_journey_test.dart: local Retry mismatch retains draft before exact Retry readback and next Send social=false`
+- `harness/ai_local_rejection_journey_test.dart: local Retry mismatch retains draft before exact Retry readback and next Send social=true`
+- `harness/ai_network_cancel_return_test.dart: cancel and repeated return keep canonical history unknown until explicit outcome readback`
+- `harness/ai_network_cancel_return_test.dart: same UID replacement fences late AI and Persona drafts across repeated detours`
+- `harness/ai_network_persona_harness_test.dart: AI Persona detour cancels original attempt, hides late output and requires explicit readback`
+- `harness/ai_network_persona_harness_test.dart: caller Persona callback remains the navigation boundary`
+- `harness/ai_network_persona_harness_test.dart: explicit AI HTTP loopback never bypasses Persona HTTPS authority`
+- `harness/ai_network_persona_harness_test.dart: label rebuild preserves Persona draft while replacing the client resets its session`
+- `harness/ai_network_persona_harness_test.dart: same UID replacement clears Persona draft and ignores old create completion`
+- `harness/ai_network_persona_harness_test.dart: shared HTTP composition supports Persona CRUD, explicit activation and dirty guards`
+- `harness/ai_persona_harness_test.dart: AI → real Persona pages → return uses explicit fixture read only`
+- `harness/ai_persona_harness_test.dart: Persona detour cancels only the active attempt and never resumes it`
+- `harness/ai_persona_harness_test.dart: draft guard prevents navigation until explicit discard`
+- `harness/controlled_phone_harness_test.dart: controlled Activity client reads respect service availability false and clear on background`
+- `harness/controlled_phone_harness_test.dart: controlled Activity client reads respect service availability true and clear on background`
+- `harness/controlled_phone_harness_test.dart: mounts Auth observation before sign-in, Settings and Profile use shared HTTP and signout closes only local handles`
+- `harness/social/hci_offline_candidate_test.dart: HCI Persona invalid save creates nothing; valid edits stay local`
+- `harness/social/offline_account_setup_test.dart: registration validation remains visible and does not create a sample account`
+- `harness/social/offline_account_setup_test.dart: rejected Username can be corrected and completed on a narrow large-text display`
+- `harness/social/offline_social_app_test.dart: Persona creation uses the existing session controller and survives returning to management`
+- `harness/social/offline_social_feedback_test.dart: Home and Friends open the current minimum sample profile; Me has no duplicate friend entry`
+- `harness/social/offline_social_feedback_test.dart: new phone layouts and optional actual Flutter rasters retain Note confirmation`
+- `harness/social/offline_social_feedback_test.dart: shared AI tab protects draft before opening reviewed Persona management`
