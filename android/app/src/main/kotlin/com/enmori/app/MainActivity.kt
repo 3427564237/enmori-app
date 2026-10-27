@@ -33,6 +33,11 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/event_actions")
+            .setMethodCallHandler { call, result ->
+                if (call.method !in setOf("openMap", "editCalendar")) result.notImplemented()
+                else result.success(EventActions.open(this, call.method, call.arguments))
+            }
         avatarPhotoPicker = AvatarPhotoPicker(this, flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/preferences")
             .setMethodCallHandler { call, result ->

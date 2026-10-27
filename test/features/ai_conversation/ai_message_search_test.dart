@@ -249,6 +249,67 @@ void main() {
     });
   }
 
+  for (final social in [false, true]) {
+    testWidgets(
+      'jump to original message and latest preserves selected draft (social=$social)',
+      (tester) async {
+        final controller = _Controller(
+          _state(
+            messages: [
+              for (var i = 0; i < 65; i++)
+                _message(
+                  'm$i',
+                  i + 1,
+                  i == 30 ? 'unique needle' : 'message $i',
+                ),
+            ],
+          ),
+        );
+        await _pump(tester, controller, social: social);
+        final composer = find.byKey(const Key('ai-message-input'));
+        if (!social) {
+          await tester.scrollUntilVisible(
+            composer,
+            500,
+            scrollable: find
+                .descendant(
+                  of: find.byKey(const Key('route-ai-conversation')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+            maxScrolls: 100,
+          );
+        }
+        await tester.enterText(composer, 'preserved draft');
+        final draft = tester.widget<TextField>(composer).controller!;
+        draft.selection = const TextSelection(baseOffset: 1, extentOffset: 4);
+        final original = draft.value;
+        await _open(tester, social: social);
+        await tester.enterText(
+          find.byKey(const Key('ai-search-query')),
+          'unique needle',
+        );
+        await tester.pumpAndSettle();
+        await _tap(tester, 'ai-search-match-m30');
+        await _tap(tester, 'ai-search-jump');
+        await tester.pumpAndSettle();
+        expect(find.byType(AiMessageSearchPage), findsNothing);
+        expect(find.text('unique needle').hitTestable(), findsOneWidget);
+        expect(
+          find.bySemanticsLabel(RegExp('Located message')),
+          findsOneWidget,
+        );
+        expect(draft.value, original);
+        await tester.tap(find.byKey(const Key('ai-search-latest')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('ai-search-latest')), findsNothing);
+        expect(draft.value, original);
+        expect(controller.commands, isEmpty);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   for (final language in ['en', 'zh']) {
     testWidgets(
       '$language narrow 2x text search and context remain reachable',

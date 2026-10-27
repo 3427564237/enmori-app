@@ -152,6 +152,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   bool? _routeCurrent;
   bool _syncingEditor = false;
   Timer? _resultRecoveryTimer;
+  String? _searchHighlightId;
   Object? _resultRecoveryKey;
   int _resultRecoveryReads = 0;
   bool _readingResult = false;
@@ -548,12 +549,64 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
     _finding = true;
     _messageFocus.unfocus();
     try {
-      await Navigator.of(context).push<void>(
+      final before = ref.read(aiConversationControllerProvider);
+      final id = await Navigator.of(context).push<String>(
         MaterialPageRoute(builder: (_) => const AiMessageSearchPage()),
       );
+      if (!_ownsCurrentSession || id == null) return;
+      final after = ref.read(aiConversationControllerProvider);
+      final sources = ref.read(aiCompanionReferencesEnabledProvider)
+          ? ref.read(aiOwnedSourcesControllerProvider)
+          : null;
+      if (before.sessionKey != after.sessionKey ||
+          before.conversationId != after.conversationId ||
+          !canFindAiMessages(after) ||
+          !after.messages.any(
+            (m) =>
+                m.messageId == id &&
+                canDisplayAiMessage(after, m, sources: sources),
+          )) {
+        return;
+      }
+      setState(() => _searchHighlightId = id);
+      _revealSearchMessage(id);
     } finally {
       if (mounted) _finding = false;
     }
+  }
+
+  void _revealSearchMessage(String id) {
+    final generation = ++_scrollGeneration;
+    var started = false;
+    void reveal() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_ownsCurrentSession ||
+            generation != _scrollGeneration ||
+            _searchHighlightId != id ||
+            !_historyScroll.hasClients) {
+          return;
+        }
+        final target = _messageKeys[id]?.currentContext;
+        if (target != null) {
+          unawaited(Scrollable.ensureVisible(target, alignment: .35));
+          return;
+        }
+        final position = _historyScroll.position;
+        if (!started) {
+          started = true;
+          _historyScroll.jumpTo(0);
+        } else {
+          final next = (position.pixels + position.viewportDimension * .7)
+              .clamp(0.0, position.maxScrollExtent);
+          if (next <= position.pixels) return;
+          _historyScroll.jumpTo(next);
+        }
+        reveal();
+      });
+      WidgetsBinding.instance.scheduleFrame();
+    }
+
+    reveal();
   }
 
   void _openHistoryMenu() {
@@ -864,9 +917,11 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         !canDisplayAiMessage(conversation, message, sources: sources);
     final located = conversation.messageLocation;
     final focused =
-        located?.phase == AiMessageLocationPhase.ready &&
-        located?.locator.messageId == message.messageId &&
-        located?.sequence == message.sequence;
+        !hidden &&
+        (_searchHighlightId == message.messageId ||
+            (located?.phase == AiMessageLocationPhase.ready &&
+                located?.locator.messageId == message.messageId &&
+                located?.sequence == message.sequence));
     final tile = _MessageTile(
       message: message,
       bubble: bubble,
@@ -1317,6 +1372,7 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
   }
 
   void _jumpToLatest() {
+    if (_searchHighlightId != null) setState(() => _searchHighlightId = null);
     final generation = ++_scrollGeneration;
     void settle(int remaining) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1440,6 +1496,17 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
         _message.value = _controller.draftFor(_sessionKey);
         _syncingEditor = false;
       }
+      if (_searchHighlightId != null &&
+          (previous?.conversationId != next.conversationId ||
+              !canFindAiMessages(next) ||
+              !next.messages.any(
+                (m) =>
+                    m.messageId == _searchHighlightId &&
+                    m.availability == AiAvailability.available,
+              ))) {
+        _searchHighlightId = null;
+        _scrollGeneration++;
+      }
       if (previous?.conversationId != next.conversationId) _messageKeys.clear();
       if (ref.read(aiCompanionReferencesEnabledProvider) &&
           previous?.conversationId != next.conversationId &&
@@ -1519,6 +1586,13 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
               icon: const Icon(Icons.arrow_back),
             ),
             actions: [
+              if (_searchHighlightId != null)
+                IconButton(
+                  key: const Key('ai-search-latest'),
+                  tooltip: context.tr('Latest messages', '最新消息'),
+                  onPressed: _jumpToLatest,
+                  icon: const Icon(Icons.arrow_downward),
+                ),
               if (canFindAiMessages(state))
                 IconButton(
                   key: const Key('ai-find-messages'),
@@ -2081,6 +2155,13 @@ final class _ConversationPageState extends ConsumerState<_ConversationPage>
             overflow: TextOverflow.ellipsis,
           ),
           actions: [
+            if (_searchHighlightId != null)
+              IconButton(
+                key: const Key('ai-search-latest'),
+                tooltip: context.tr('Latest messages', '最新消息'),
+                onPressed: _jumpToLatest,
+                icon: const Icon(Icons.arrow_downward),
+              ),
             IconButton(
               key: const Key('ai-open-history'),
               tooltip: context.tr('History', '历史'),

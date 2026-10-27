@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-27",
+  "timezone": "Asia/Singapore",
+  "base": "4d7946a",
+  "branch": "souma/next-features-20261027",
+  "features": [
+    "Own seven-day review",
+    "Complete source address map handoff",
+    "User-confirmed system calendar editor",
+    "Session-only recently viewed Event IDs",
+    "Search-to-original AI message jump"
+  ],
+  "flutter": {
+    "version": "3.47.2",
+    "dart": "3.13.2",
+    "relatedTestsPassed": 212,
+    "files": 17,
+    "finalActionAndRecentTestsPassed": 7,
+    "staticAnalysis": "no issues",
+    "syntheticPreviewCases": 14,
+    "newPreviewCases": 6
+  },
+  "backend": {
+    "node": "24.19.0",
+    "typescriptBuild": "pass",
+    "fullOfflineTestsPassed": 1540
+  },
+  "android": {
+    "gradle": "9.3.1",
+    "task": ":app:compileDebugKotlin --offline",
+    "result": "BUILD SUCCESSFUL",
+    "apkBuiltOrInstalled": false
+  },
+  "preExistingFailures": {
+    "base": "4d7946a",
+    "count": 5,
+    "cases": [
+      "ai_conversation/ai_chat_usability_test.dart: retained outgoing text stops claiming Sending after unknown (false/en) [E]",
+      "ai_conversation/ai_chat_usability_test.dart: retained outgoing text stops claiming Sending after unknown (false/zh) [E]",
+      "ai_conversation/ai_chat_usability_test.dart: retained outgoing text stops claiming Sending after unknown (true/en) [E]",
+      "ai_conversation/ai_chat_usability_test.dart: retained outgoing text stops claiming Sending after unknown (true/zh) [E]",
+      "ai_conversation/ai_owned_sources_page_test.dart: stacked target page preserves original unknown operation and returns an empty unsent editor [E]"
+    ],
+    "baseline": "Independent git archive of 4d7946a; offline dependency resolution; identical failing cases"
+  },
+  "logs": {
+    "flutter-related": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/remaining-validation/flutter-related.log",
+      "sha256": "d85dfafd8b4c8a1db847ac64e0a9d942e0ed414c969353ed0c0eb92cf3039639"
+    },
+    "flutter-final-actions": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/remaining-validation/flutter-final-actions.log",
+      "sha256": "412683de645de581b4b4bdbdc2204587771fc7710747f26e973819acf088d734"
+    },
+    "backend-full": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/remaining-validation/backend-full.log",
+      "sha256": "0a6233fe8caeb2564dfb2e060877005f2f18be9ea543a09476f55d6349ed4920"
+    },
+    "android-compile": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/remaining-validation/android-compile.log",
+      "sha256": "9e9ddb0c5f1c1f7aa9f03b0e051912008df7108efd4e05de06356a6e85de85a9"
+    },
+    "analyze": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/remaining-validation/analyze.log",
+      "sha256": "5ec48ce0ea0962d36cd4f067d9f1de66c67d6241299cb565a45279fcc1df271a"
+    },
+    "baseline-failures": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/remaining-validation/baseline-failures.log",
+      "sha256": "e08ad342a5ee38a14fcd2bad979b353b77c45b10c2d6c31998d51f505e7f8f96"
+    },
+    "previews": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/remaining-validation/previews.log",
+      "sha256": "8fc9596e115d8b70b196772d92078af60bed32d73110c2b8de7861700da7d05d"
+    },
+    "review-preview-final": {
+      "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/remaining-validation/review-preview-final.log",
+      "sha256": "e5bd1fac7fb3bfd7ebc6b46c2929fd0e3608c78c659bec6a0b68bd9a61bb5fb5"
+    }
+  },
+  "notRun": [
+    "Deployment",
+    "APK installation",
+    "Live two-account validation",
+    "Physical map/calendar handoff and cancellation",
+    "Firebase Emulator integration",
+    "Independent review",
+    "UAT",
+    "Release"
+  ],
+  "publication": "Local commit only; no push or merge"
+}

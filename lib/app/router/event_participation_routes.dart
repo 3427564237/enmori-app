@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/presentation/enmori_localizations.dart';
 import '../../features/event_browse/domain/activity_repository.dart';
 import '../../features/event_detail/presentation/event_information.dart';
+import '../../features/event_detail/presentation/event_action_buttons.dart';
+import '../../features/event_detail/presentation/recent_events_page.dart';
 import '../../features/event_participation/domain/participation_repository.dart';
 import '../../features/event_participation/presentation/event_plans_page.dart';
 import '../../features/event_participation/presentation/participation_event_page.dart';
@@ -25,6 +27,22 @@ List<GoRoute> eventParticipationRoutes({
     name: 'root-events',
     builder: (context, state) {
       final page = ParticipationEventsPage(
+        onOpenRecent: () {
+          if (!_atCurrentRoute(context, listPath, current)) return;
+          Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (recentContext) => RecentEventsPage(
+                onSelect: (id) {
+                  if (!current() || !recentContext.mounted) return;
+                  Navigator.of(recentContext).pop();
+                  context.push(
+                    '/events/${Uri.encodeComponent(id)}/participation',
+                  );
+                },
+              ),
+            ),
+          );
+        },
         onSelect: (id) {
           if (_atCurrentRoute(context, listPath, current)) {
             context.push('/events/${Uri.encodeComponent(id)}/participation');
@@ -68,6 +86,8 @@ List<GoRoute> eventParticipationRoutes({
       key: ValueKey(state.pathParameters['eventId']),
       eventId: state.pathParameters['eventId'] ?? '',
       detailBuilder: (context, event) => EventInformation(event: event),
+      actionsBuilder: (context, event, current) =>
+          EventActionButtons(event: event, current: current),
       opener: opener,
       onParticipants: (s) {
         if (_atCurrentRoute(context, state.uri.path, current)) {

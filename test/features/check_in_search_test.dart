@@ -10,6 +10,7 @@ import 'package:enmori/features/check_in/domain/check_in_repository.dart';
 import 'package:enmori/features/check_in/history_device_port.dart';
 import 'package:enmori/features/check_in/presentation/check_in_search_controller.dart';
 import 'package:enmori/features/check_in/presentation/check_in_search_page.dart';
+import 'package:enmori/features/check_in/presentation/check_in_weekly_review_page.dart';
 import 'package:enmori/features/account/content_access.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -126,6 +127,89 @@ void main() {
     container.dispose();
     await sessions.close();
   });
+
+  test('weekly scan includes blank notes and keeps civil-date identity across pages', () async {
+    repository.queued.addAll([
+      Success(
+        _page([
+          CheckIn(checkInId: 'a', note: '', mood: 'calm', createdAt: last),
+        ], cursor: 'page2'),
+      ),
+      Success(
+        _page([
+          CheckIn(checkInId: 'b', note: '', activity: 'walk', createdAt: last),
+        ]),
+      ),
+      Success(
+        _page([
+          CheckIn(checkInId: 'c', note: '', mood: 'calm', createdAt: first),
+        ]),
+      ),
+    ]);
+    await controller().start(
+      '',
+      first,
+      last,
+      allRecords: true,
+      capturedZone: device.zone,
+    );
+    expect(state().phase, CheckInSearchPhase.complete);
+    expect(state().matches.length, 3);
+    expect(state().matches.map((m) => m.civilDate).toSet(), {
+      '2026-10-12',
+      '2026-10-11',
+    });
+  });
+
+  testWidgets(
+    'weekly review labels exact distributions, missing labels and opens original record',
+    (tester) async {
+      repository.queued.addAll([
+        Success(
+          _page([
+            CheckIn(
+              checkInId: 'a',
+              note: 'original note',
+              mood: 'calm',
+              activity: 'walk',
+              createdAt: last,
+            ),
+            CheckIn(checkInId: 'b', note: '', mood: 'calm', createdAt: last),
+          ]),
+        ),
+        for (var i = 0; i < 6; i++) Success(_page([])),
+      ]);
+      String? opened;
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: CheckInWeeklyReviewPage(
+              lastDate: last,
+              timeZone: device.zone,
+              onOpen: (id) => opened = id,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(const Key('weekly-review-load')));
+      await tester.pumpAndSettle();
+      expect(find.text('All 7 dates checked'), findsOneWidget);
+      expect(find.text('1 day with records · 2 records'), findsOneWidget);
+      expect(find.text('calm · 2'), findsOneWidget);
+      expect(find.text('walk · 1'), findsOneWidget);
+      expect(find.text('Not filled in · 1'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('weekly-record-a')),
+        180,
+      );
+      await tester.tap(find.byKey(const Key('weekly-record-a')));
+      await tester.pump();
+      expect(opened, 'a');
+      expect(container.read(checkInWeeklyReviewProvider).matches, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   test('search follows each opaque page and each civil day, matching note/activity/place without exposing unmatched records', () async {
     repository.queued.addAll([

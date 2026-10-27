@@ -47,3 +47,12 @@ documents event detail, images, venue and the ticket-purchase website URL;
 reasonable caching, removal and visitor-data disclosure obligations.
 This bounded ENMORI discovery/detail display does not implement Ticketmaster
 checkout, seat selection, account activity or a replacement ticketing service.
+
+## 27 October opt-in complete venue address
+
+LI confirmed the [complete-address and native action contract](../docs/planning/2026-10-27-event-address-platform-contract.md)
+for the next batch. This extends only the authenticated Event detail response
+when `includeVenueAddress=true` is explicitly requested. The original response
+and `locationLabel` meaning above remain unchanged for requests without it.
+`venueAddress` is a separate complete source object; `locationLabel` is never
+accepted as its substitute. No Firestore field, geocoding or migration is added.

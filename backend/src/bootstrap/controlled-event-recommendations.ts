@@ -76,8 +76,9 @@ export function createControlledEventRecommendations(options: {
         if(!row){const rows = await options.source.firstBatch(now.value.toISOString(), new AbortController().signal);
           row = rows.find(value => sourceEventId(value.browseId) === eventId);}
         if (!row) return err("event_unavailable");
-        const { title, startAt, externalSourceUrl, endAt, locationLabel, categoryLabel, shortDescription, coverImageUrl } = row;
+        const { title, startAt, externalSourceUrl, endAt, locationLabel, categoryLabel, shortDescription, coverImageUrl, venueAddress } = row;
         return ok({ eventId, title, startAt, externalSourceUrl,
+          ...(venueAddress === undefined ? {} : { venueAddress }),
           ...(endAt === undefined ? {} : { endAt }), ...(locationLabel === undefined ? {} : { locationLabel }),
           ...(categoryLabel === undefined ? {} : { categoryLabel }),
           ...(shortDescription === undefined ? {} : { shortDescription }),

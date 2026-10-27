@@ -14,6 +14,13 @@ export const eventDetailSchema = { type: "object", additionalProperties: false, 
   eventId: { type: "string", minLength: 1 }, title: { type: "string", minLength: 1, maxLength: 200 }, startAt: { type: "string" }, externalSourceUrl: { type: "string", maxLength: 2048 }, endAt: { type: "string" },
   locationLabel: { type: "string", minLength: 1, maxLength: 200 }, categoryLabel: { type: "string", minLength: 1, maxLength: 100 }, shortDescription: { type: "string", minLength: 1, maxLength: 1000 },
   coverImageUrl: { type: "string", minLength: 1, maxLength: 2048 } } } as const;
+export const venueAddressSchema = {type: 'object', additionalProperties: false,
+  required: ['street', 'city', 'postalCode', 'countryCode'], properties: {
+    street: {type: 'string', minLength: 1, maxLength: 200}, street2: {type: 'string', minLength: 1, maxLength: 200},
+    city: {type: 'string', minLength: 1, maxLength: 100}, postalCode: {type: 'string', pattern: '^[0-9]{6}$'},
+    countryCode: {type: 'string', enum: ['SG']},
+  }} as const;
+const eventWithAddressSchema = {...eventDetailSchema, properties: {...eventDetailSchema.properties, venueAddress: venueAddressSchema}};
 export const friendInboxSchema = { type: "object", additionalProperties: false, required: ["requests","nextCursor"], properties: {
   requests: { type: "array", maxItems: 20, items: { type: "object", additionalProperties: false, required: ["username","displayName","requestRef"], properties: { username: { type:"string" }, displayName: { type:"string" }, requestRef: { type:"string" } } } }, nextCursor: { anyOf: [{type:"string"},{type:"null"}] } } } as const;
 export const friendActionSchema = { type: "object", additionalProperties: false, required: ["result"], properties: { result: { type:"string", enum:["accepted","declined"] } } } as const;
@@ -68,9 +75,14 @@ export async function registerIsolatedSlices(app: FastifyInstance, identity: Ide
       });
     }
   }
-  if (events !== undefined) app.get<{Params:{eventId:string}}>("/v1/events/:eventId", {onRequest:[async (_request, reply) => { reply.header("Cache-Control", "no-store"); }, authenticate],schema:{querystring:emptyQuery,params:{type:"object",additionalProperties:false,required:["eventId"],properties:{eventId:{type:"string",minLength:1}}},response:responses({type:"object",additionalProperties:false,required:["event"],properties:{event:eventDetailSchema}})}}, async(request,reply) => {
+  if (events !== undefined) app.get<{Params:{eventId:string};Querystring:{includeVenueAddress?:string}}>("/v1/events/:eventId", {onRequest:[async (_request, reply) => { reply.header("Cache-Control", "no-store"); }, authenticate],schema:{querystring:{type:"object",additionalProperties:false,properties:{includeVenueAddress:{type:"string",enum:["true"]}}},params:{type:"object",additionalProperties:false,required:["eventId"],properties:{eventId:{type:"string",minLength:1}}},response:responses({type:"object",additionalProperties:false,required:["event"],properties:{event:eventWithAddressSchema}})}}, async(request,reply) => {
+    const query = new URL(request.url, 'http://localhost').searchParams;
+    if ([...query.keys()].some(key => key !== 'includeVenueAddress') || query.getAll('includeVenueAddress').length > 1 ||
+        (query.has('includeVenueAddress') && query.get('includeVenueAddress') !== 'true')) return sendFailureCode(request, reply, 'REQUEST_INVALID');
     const result = await events.execute(requirePrincipal(request),request.params.eventId);
-    return result.ok ? reply.send({event:result.value}) : sendFailure(request,reply,result.failure);
+    if (!result.ok) return sendFailure(request,reply,result.failure);
+    const {venueAddress, ...legacy} = result.value;
+    return reply.send({event: query.get('includeVenueAddress') === 'true' ? result.value : legacy});
   });
   if (checkInHistory !== undefined) {
     app.get<{ Querystring: { date: string; timeZone: string; cursor?: string } }>(

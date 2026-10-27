@@ -10,9 +10,10 @@ import '../history_device_port.dart';
 enum CheckInSearchPhase { idle, searching, stopped, failed, complete }
 
 final class CheckInSearchMatch {
-  const CheckInSearchMatch(this.record, this.localTime);
+  const CheckInSearchMatch(this.record, this.localTime, [this.civilDate]);
   final CheckIn record;
   final String localTime;
+  final String? civilDate;
 }
 
 final class CheckInSearchState {
@@ -44,6 +45,7 @@ final class CheckInSearchController extends Notifier<CheckInSearchState> {
   DateTime? _first, _day;
   String? _zone, _cursor;
   String _query = '';
+  bool _allRecords = false;
   final _seenCursors = <String>{};
   bool _canResume = false;
 
@@ -99,7 +101,14 @@ final class CheckInSearchController extends Notifier<CheckInSearchState> {
     );
   }
 
-  Future<void> start(String query, DateTime first, DateTime last) async {
+  Future<void> start(
+    String query,
+    DateTime first,
+    DateTime last, {
+    bool allRecords = false,
+    String? capturedZone,
+  }) async {
+    _allRecords = allRecords;
     final generation = ++_generation;
     _canResume = false;
     _first = DateTime.utc(first.year, first.month, first.day);
@@ -111,13 +120,13 @@ final class CheckInSearchController extends Notifier<CheckInSearchState> {
       state = const CheckInSearchState();
       return;
     }
-    if (_query.isEmpty || _day!.isBefore(_first!)) return;
+    if ((!_allRecords && _query.isEmpty) || _day!.isBefore(_first!)) return;
     state = CheckInSearchState(
       phase: CheckInSearchPhase.searching,
       totalDays: _day!.difference(_first!).inDays + 1,
     );
     try {
-      final zone = await _device.captureIanaZone();
+      final zone = capturedZone ?? await _device.captureIanaZone();
       if (!_current(generation)) return;
       final today = await _device.todayInZone(zone);
       if (!_current(generation)) return;
@@ -179,11 +188,13 @@ final class CheckInSearchController extends Notifier<CheckInSearchState> {
         }
         final matching = page.checkIns
             .where(
-              (record) => [
-                record.note,
-                record.activity ?? '',
-                record.locationLabel ?? '',
-              ].any((text) => text.toLowerCase().contains(_query)),
+              (record) =>
+                  _allRecords ||
+                  [
+                    record.note,
+                    record.activity ?? '',
+                    record.locationLabel ?? '',
+                  ].any((text) => text.toLowerCase().contains(_query)),
             )
             .toList();
         final times = await _device.formatInstants(
@@ -197,7 +208,11 @@ final class CheckInSearchController extends Notifier<CheckInSearchState> {
         final merged = {
           for (final entry in state.matches) entry.record.checkInId: entry,
           for (var i = 0; i < matching.length; i++)
-            matching[i].checkInId: CheckInSearchMatch(matching[i], times[i]),
+            matching[i].checkInId: CheckInSearchMatch(
+              matching[i],
+              times[i],
+              date,
+            ),
         };
         if (_cursor != null) _seenCursors.add(_cursor!);
         _cursor = next;

@@ -13,6 +13,7 @@ import '../domain/check_in_calendar_repository.dart';
 import 'check_in_calendar_page.dart';
 import 'check_in_history_controller.dart';
 import 'check_in_search_page.dart';
+import 'check_in_weekly_review_page.dart';
 
 Widget buildCheckInHistoryPage({
   required BuildContext context,
@@ -168,6 +169,30 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: const Key('history-weekly-review'),
+                onPressed: state.selectedDate == null || state.ianaZone == null
+                    ? null
+                    : () => Navigator.of(context).push<void>(
+                        MaterialPageRoute(
+                          builder: (_) => CheckInWeeklyReviewPage(
+                            lastDate: state.selectedDate!,
+                            timeZone: state.ianaZone!,
+                            onOpen: widget.onOpenSavedCheckIn,
+                          ),
+                        ),
+                      ),
+                icon: const Icon(Icons.insights_outlined),
+                label: Text(
+                  context.tr(
+                    'Review 7 days ending on this date',
+                    '回顾截至所选日期的七天',
+                  ),
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Wrap(

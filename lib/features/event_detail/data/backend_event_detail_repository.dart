@@ -1,3 +1,5 @@
+import '../domain/event_actions.dart';
+
 import 'package:flutter/services.dart';
 
 import '../../../core/network/backend_api_client.dart';
@@ -7,12 +9,13 @@ import '../domain/event_detail_repository.dart';
 import '../domain/event_cover.dart';
 
 final class BackendEventDetailRepository implements EventDetailRepository {
-  BackendEventDetailRepository(this.client);
+  BackendEventDetailRepository(this.client, {this.includeVenueAddress = false});
+  final bool includeVenueAddress;
   final BackendApiClient client;
   @override
   Future<Result<EventDetail>> read(String eventId) async {
     final result = await client.get(
-      '/v1/events/${Uri.encodeComponent(eventId)}',
+      '/v1/events/${Uri.encodeComponent(eventId)}${includeVenueAddress ? '?includeVenueAddress=true' : ''}',
     );
     if (result case Failure<JsonObject>(:final failure)) {
       return Failure(failure);
@@ -28,6 +31,7 @@ final class BackendEventDetailRepository implements EventDetailRepository {
       'categoryLabel',
       'shortDescription',
       'coverImageUrl',
+      'venueAddress',
     ];
     bool text(Object? v, int max) =>
         v is String &&
@@ -65,9 +69,44 @@ final class BackendEventDetailRepository implements EventDetailRepository {
     ]) {
       if (value.containsKey(key) && !text(value[key], max)) return _invalid();
     }
+    VenueAddress? address;
+    if (value.containsKey('venueAddress')) {
+      final raw = value['venueAddress'];
+      bool addressText(Object? v, int max) =>
+          text(v, max) &&
+          !RegExp(
+            r'[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069<>]|```',
+          ).hasMatch(v as String);
+      if (raw is! Map<String, dynamic> ||
+          raw.keys.any(
+            (key) => !{
+              'street',
+              'street2',
+              'city',
+              'postalCode',
+              'countryCode',
+            }.contains(key),
+          ) ||
+          !addressText(raw['street'], 200) ||
+          !addressText(raw['city'], 100) ||
+          raw['countryCode'] != 'SG' ||
+          raw['postalCode'] is! String ||
+          !RegExp(r'^[0-9]{6}$').hasMatch(raw['postalCode'] as String) ||
+          (raw.containsKey('street2') && !addressText(raw['street2'], 200))) {
+        return _invalid();
+      }
+      address = VenueAddress(
+        street: raw['street'] as String,
+        city: raw['city'] as String,
+        street2: raw['street2'] as String?,
+        postalCode: raw['postalCode'] as String,
+        countryCode: 'SG',
+      );
+    }
     return Success(
       EventDetail(
         eventId: eventId,
+        venueAddress: address,
         title: value['title'] as String,
         startAt: start,
         externalSourceUrl: value['externalSourceUrl'] as String,

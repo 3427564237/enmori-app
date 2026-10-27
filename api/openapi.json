@@ -2602,6 +2602,18 @@
               "type": "string",
               "minLength": 1
             }
+          },
+          {
+            "name": "includeVenueAddress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            },
+            "description": "Opt in to the complete source venue address. Omitted by default."
           }
         ],
         "responses": {
@@ -2610,16 +2622,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": [
-                    "event"
-                  ],
-                  "properties": {
-                    "event": {
-                      "$ref": "#/components/schemas/EventDetail"
-                    }
-                  }
+                  "$ref": "#/components/schemas/EventDetailWithVenueAddressResponse"
                 }
               }
             }
@@ -16074,6 +16077,106 @@
               "null"
             ],
             "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      },
+      "VenueAddress": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "street",
+          "city",
+          "postalCode",
+          "countryCode"
+        ],
+        "properties": {
+          "street": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "street2": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "city": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "postalCode": {
+            "type": "string",
+            "pattern": "^[0-9]{6}$"
+          },
+          "countryCode": {
+            "type": "string",
+            "enum": [
+              "SG"
+            ]
+          }
+        }
+      },
+      "EventDetailWithVenueAddressResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "event"
+        ],
+        "properties": {
+          "event": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "eventId",
+              "title",
+              "startAt",
+              "externalSourceUrl"
+            ],
+            "properties": {
+              "eventId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "startAt": {
+                "type": "string"
+              },
+              "externalSourceUrl": {
+                "type": "string",
+                "maxLength": 2048
+              },
+              "endAt": {
+                "type": "string"
+              },
+              "locationLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "categoryLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "shortDescription": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "coverImageUrl": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048
+              },
+              "venueAddress": {
+                "$ref": "#/components/schemas/VenueAddress"
+              }
+            }
           }
         }
       }

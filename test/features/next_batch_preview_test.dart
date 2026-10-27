@@ -1,3 +1,11 @@
+import 'package:enmori/features/check_in/domain/check_in_repository.dart';
+import 'package:enmori/features/check_in/history_device_port.dart';
+import 'package:enmori/features/check_in/presentation/check_in_weekly_review_page.dart';
+import 'package:enmori/features/event_detail/presentation/event_action_buttons.dart';
+import 'package:enmori/features/event_detail/presentation/recent_events_page.dart';
+
+import 'event_actions_test.dart' as actions;
+
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -38,9 +46,62 @@ class _PrivateAvatar implements OwnAvatarRepository {
   }) async => throw StateError('Preview never saves');
 }
 
+class _PreviewHistory implements CheckInRepository {
+  @override
+  Future<Result<CheckInHistoryPage>> readOwnForDate({
+    required String date,
+    required String timeZone,
+    String? cursor,
+  }) async => Success(
+    CheckInHistoryPage(
+      checkIns: date == '2026-10-27'
+          ? [
+              CheckIn(
+                checkInId: 'one',
+                note: 'A quiet afternoon walk / 午后散步',
+                mood: 'Calm / 平静',
+                activity: 'Walking / 散步',
+                createdAt: DateTime.utc(2026, 10, 27),
+              ),
+              CheckIn(
+                checkInId: 'two',
+                note: 'Coffee and a good book / 咖啡和书',
+                mood: 'Happy / 开心',
+                createdAt: DateTime.utc(2026, 10, 27),
+              ),
+            ]
+          : [],
+      nextCursor: null,
+    ),
+  );
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw StateError('Preview has no writes');
+}
+
+class _PreviewTime implements HistoryDevicePort {
+  @override
+  Future<String> captureIanaZone() async => 'Asia/Singapore';
+  @override
+  Future<DateTime> todayInZone(String zone) async => DateTime(2026, 10, 27);
+  @override
+  Future<List<String>> formatInstants(
+    List<DateTime> values,
+    String zone,
+  ) async => values.map((_) => '27 Oct · 15:00').toList();
+}
+
 void main() {
   for (final config in [(375.0, 1.0, 'en'), (320.0, 2.0, 'zh')]) {
-    for (final screen in ['events', 'prompts', 'search', 'avatar']) {
+    for (final screen in [
+      'events',
+      'prompts',
+      'search',
+      'avatar',
+      'review',
+      'actions',
+      'recent',
+    ]) {
       testWidgets('$screen fits ${config.$1}dp ${config.$2}x ${config.$3}', (
         tester,
       ) async {
@@ -93,6 +154,22 @@ void main() {
             ),
           );
         final page = switch (screen) {
+          'review' => CheckInWeeklyReviewPage(
+            lastDate: DateTime(2026, 10, 27),
+            timeZone: 'Asia/Singapore',
+            onOpen: (_) {},
+          ),
+          'actions' => Scaffold(
+            appBar: AppBar(title: const Text('Event / 活动')),
+            body: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                const Text('Synthetic event / 合成活动'),
+                EventActionButtons(event: actions.event(), current: () => true),
+              ],
+            ),
+          ),
+          'recent' => RecentEventsPage(onSelect: (_) {}),
           'events' => ParticipationEventsPage(onSelect: (_) {}),
           'prompts' => const CheckInComposerPage(socialStyle: true),
           'search' => CheckInSearchPage(onOpen: (_) {}),
@@ -102,6 +179,7 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
+              historyDevicePortProvider.overrideWithValue(_PreviewTime()),
               authSessionProvider.overrideWithValue(
                 const AsyncData(
                   AuthSessionAuthenticated(subject: 'synthetic-preview'),
@@ -109,7 +187,9 @@ void main() {
               ),
               activityRepositoryProvider.overrideWithValue(repo),
               checkInRepositoryProvider.overrideWithValue(
-                FakeCheckInRepository(),
+                screen == 'review'
+                    ? _PreviewHistory()
+                    : FakeCheckInRepository(),
               ),
               ownAvatarRepositoryProvider.overrideWithValue(_PrivateAvatar()),
             ],
@@ -143,6 +223,10 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        if (screen == 'review') {
+          await tester.tap(find.byKey(const Key('weekly-review-load')));
+          await tester.pumpAndSettle();
+        }
         expect(tester.takeException(), isNull);
         if (directory != null) {
           await tester.runAsync(

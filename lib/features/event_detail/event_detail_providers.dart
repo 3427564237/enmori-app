@@ -1,3 +1,5 @@
+import 'domain/event_actions.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
@@ -12,10 +14,15 @@ final eventCoverLoaderProvider = Provider<EventCoverLoader>(
 );
 
 final eventDetailRepositoryProvider = Provider<EventDetailRepository>(
-  (ref) => BackendEventDetailRepository(ref.watch(backendApiClientProvider)),
+  (ref) => BackendEventDetailRepository(
+    ref.watch(backendApiClientProvider),
+    includeVenueAddress: true,
+  ),
 );
 
 /// Composition supplies the existing guarded platform source capability.
 final eventDetailSourceActionsProvider = Provider<ActivitySourceActions?>(
   (ref) => null,
 );
+
+final eventActionsProvider = Provider<EventActions?>((ref) => null);

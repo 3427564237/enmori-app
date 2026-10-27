@@ -12,6 +12,8 @@ import '../../auth/auth_providers.dart';
 import '../domain/event_detail_repository.dart';
 import 'event_detail_controller.dart';
 import 'event_information.dart';
+import 'event_action_buttons.dart';
+import '../recent_events_provider.dart';
 
 final class EventDetailPage extends ConsumerStatefulWidget {
   const EventDetailPage({
@@ -72,6 +74,13 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(eventDetailControllerProvider(widget.eventId), (_, next) {
+      if (!widget.syntheticPreview &&
+          next.hasValue &&
+          ModalRoute.of(context)?.isCurrent == true) {
+        ref.read(recentEventsProvider.notifier).viewed(widget.eventId);
+      }
+    });
     final state = ref.watch(eventDetailControllerProvider(widget.eventId));
     final page = Scaffold(
       appBar: AppBar(title: Text(context.tr('Event details', '活动详情'))),
@@ -128,6 +137,27 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
                     event: value,
                     syntheticPreview: widget.syntheticPreview,
                   ),
+                  if (!widget.syntheticPreview)
+                    EventActionButtons(
+                      event: value,
+                      current: () {
+                        final controller = ref.read(
+                          eventDetailControllerProvider(widget.eventId)
+                              .notifier,
+                        );
+                        return controller.hasFreshData &&
+                            identical(
+                              ref
+                                  .read(
+                                    eventDetailControllerProvider(
+                                      widget.eventId,
+                                    ),
+                                  )
+                                  .value,
+                              value,
+                            );
+                      },
+                    ),
                   const SizedBox(height: 8),
                   if (!widget.syntheticPreview) ...[
                     Text(

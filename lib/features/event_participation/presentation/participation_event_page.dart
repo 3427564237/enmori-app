@@ -12,6 +12,7 @@ import '../../auth/domain/auth_repository.dart';
 import '../../event_browse/domain/activity_repository.dart';
 import '../../event_detail/domain/event_detail_repository.dart';
 import '../../event_detail/event_detail_providers.dart';
+import '../../event_detail/recent_events_provider.dart';
 import '../participation_providers.dart';
 import 'event_card.dart';
 import 'external_registration_action.dart';
@@ -27,12 +28,15 @@ final class ParticipationEventPage extends ConsumerStatefulWidget {
     required this.opener,
     required this.onParticipants,
     this.detailBuilder,
+    this.actionsBuilder,
     super.key,
   });
   final String eventId;
   final ExternalActivityOpener opener;
   final ValueChanged<ParticipantSelection> onParticipants;
   final Widget Function(BuildContext, EventDetail)? detailBuilder;
+  final Widget Function(BuildContext, EventDetail, bool Function())?
+  actionsBuilder;
   @override
   ConsumerState<ParticipationEventPage> createState() =>
       _ParticipationEventPageState();
@@ -122,6 +126,7 @@ final class _ParticipationEventPageState
       if (result case Success<EventDetail>(:final value)
           when value.eventId == widget.eventId) {
         _detail = value;
+        ref.read(recentEventsProvider.notifier).viewed(value.eventId);
         _returnUrl = Uri.tryParse(value.externalSourceUrl);
         _expiry?.cancel();
         _expiry = Timer(const Duration(minutes: 5), () {
@@ -178,6 +183,15 @@ final class _ParticipationEventPageState
                       'Your saved Interested/Going choice is unchanged.',
                   '暂时无法获取活动详情。请点击上方刷新图标重试；如果仍不可用，请返回活动列表刷新后再打开。你保存的感兴趣或将参加状态保持不变。',
                 ),
+              ),
+            if (details != null && widget.actionsBuilder != null)
+              widget.actionsBuilder!(
+                context,
+                details,
+                () =>
+                    mounted &&
+                    identical(_detail, details) &&
+                    (_expiry?.isActive ?? false),
               ),
             const SizedBox(height: 16),
             Text(

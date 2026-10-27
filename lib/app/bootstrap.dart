@@ -1,3 +1,5 @@
+import '../features/event_detail/event_detail_providers.dart';
+import '../features/event_detail/data/platform_event_actions.dart';
 import '../core/presentation/identity_avatar.dart';
 import '../features/account/presentation/authenticated_avatar.dart';
 import '../features/account/own_avatar_providers.dart';
@@ -117,6 +119,7 @@ Future<void> bootstrap() async {
   runApp(
     ProviderScope(
       overrides: [
+        eventActionsProvider.overrideWithValue(const PlatformEventActions()),
         if (controlledAccount || remoteAccount)
           backendBaseUriProvider.overrideWithValue(
             firebaseReady ? baseUri : null,

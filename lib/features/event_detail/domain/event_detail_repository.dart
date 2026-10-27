@@ -1,3 +1,4 @@
+import 'event_actions.dart';
 import '../../../core/result/result.dart';
 
 final class EventDetail {
@@ -11,7 +12,9 @@ final class EventDetail {
     this.categoryLabel,
     this.shortDescription,
     this.coverImageUrl,
+    this.venueAddress,
   });
+  final VenueAddress? venueAddress;
   final String eventId, title, externalSourceUrl;
   final DateTime startAt;
   final DateTime? endAt;

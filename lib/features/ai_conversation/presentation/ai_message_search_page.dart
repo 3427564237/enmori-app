@@ -218,6 +218,34 @@ final class _AiMessageSearchPageState
                       ),
                     )
                   else ...[
+                    FilledButton.icon(
+                      key: const Key('ai-search-jump'),
+                      onPressed: () {
+                        final latest = ref.read(
+                          aiConversationControllerProvider,
+                        );
+                        final sources =
+                            ref.read(aiCompanionReferencesEnabledProvider)
+                            ? ref.read(aiOwnedSourcesControllerProvider)
+                            : null;
+                        if (_available(latest) &&
+                            latest.messages.any(
+                              (m) =>
+                                  m.messageId == _selectedId &&
+                                  canDisplayAiMessage(
+                                    latest,
+                                    m,
+                                    sources: sources,
+                                  ),
+                            )) {
+                          Navigator.of(context).pop(_selectedId);
+                        }
+                      },
+                      icon: const Icon(Icons.my_location),
+                      label: Text(
+                        context.tr('Jump to original message', '跳到原消息'),
+                      ),
+                    ),
                     for (
                       var i = selectedIndex > 0 ? selectedIndex - 1 : 0;
                       i < state.messages.length && i <= selectedIndex + 1;

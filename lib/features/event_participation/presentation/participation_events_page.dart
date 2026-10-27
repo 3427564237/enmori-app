@@ -20,10 +20,12 @@ final class ParticipationEventsPage extends ConsumerStatefulWidget {
   const ParticipationEventsPage({
     required this.onSelect,
     this.onOpenPlans,
+    this.onOpenRecent,
     super.key,
   });
   final ValueChanged<String> onSelect;
   final VoidCallback? onOpenPlans;
+  final VoidCallback? onOpenRecent;
   @override
   ConsumerState<ParticipationEventsPage> createState() =>
       _ParticipationEventsPageState();
@@ -120,6 +122,13 @@ final class _ParticipationEventsPageState
       appBar: AppBar(
         title: Text(context.tr('Events', '活动')),
         actions: [
+          if (widget.onOpenRecent != null)
+            IconButton(
+              key: const Key('events-recent'),
+              tooltip: context.tr('Recently viewed', '最近浏览'),
+              onPressed: widget.onOpenRecent,
+              icon: const Icon(Icons.history),
+            ),
           IconButton(
             tooltip: context.tr('Refresh events', '刷新活动'),
             onPressed: state.busy ? null : () => unawaited(_reload()),

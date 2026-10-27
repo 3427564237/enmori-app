@@ -1,3 +1,4 @@
+import '../features/event_detail/data/platform_event_actions.dart';
 import '../core/presentation/identity_avatar.dart';
 import '../features/account/presentation/authenticated_avatar.dart';
 import '../features/account/own_avatar_providers.dart';
@@ -241,6 +242,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
   Widget build(BuildContext context) => ProviderScope(
     key: ObjectKey(_api),
     overrides: [
+      eventActionsProvider.overrideWithValue(const PlatformEventActions()),
       authRepositoryProvider.overrideWithValue(widget.auth),
       backendBaseUriProvider.overrideWithValue(widget.baseUri),
       backendApiClientProvider.overrideWithValue(_api),

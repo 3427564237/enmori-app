@@ -122,3 +122,19 @@ test("retained rejected consent never reads interests; revocation during source 
   records['accounts/s2-account']!.optionalProcessingConsent = 'accepted'; revoke = true;
   const revoked = await read(); assert.ok(revoked.ok && revoked.value.items.length === 0); assert.equal(interestReads, 1);
 });
+
+
+test('complete source address survives production Event composition but never enters legacy browse DTO', async () => {
+  const venueAddress = {street:'1 Example Road',city:'Singapore',postalCode:'123456',countryCode:'SG' as const};
+  const row = {...item(), venueAddress};
+  const records = eventTestRecords();
+  const source: BrowseSource = {firstBatch:async()=>[row], detail:async()=>row};
+  const joined = createControlledEventRecommendations({gateway:{get:async path=>records[path],listEvents:async()=>[]},source,clock:{now:()=>ok(new Date(EVENT_AS_OF))}});
+  const detail = await joined.eventDetail.execute({firebaseUid:EVENT_TEST_UID},sourceEventId(row.browseId));
+  assert.ok(detail.ok);
+  if (detail.ok) assert.deepEqual(detail.value.venueAddress,venueAddress);
+  const browse = new EventBrowse({verify:async()=>ok(undefined)},source,()=>new Date(EVENT_AS_OF));
+  const old = await browse.read({firebaseUid:EVENT_TEST_UID},row.browseId,signal());
+  assert.ok(old.ok);
+  if (old.ok) assert.equal(Object.hasOwn(old.value,'venueAddress'),false);
+});
