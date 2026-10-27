@@ -904,6 +904,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.unavailable,
         builder: (context, state) => UnavailablePage(
           onRetry: () {
+            if (ref.read(authSessionProvider).hasError) {
+              // Retry observation; the SDK still supplies the actual identity.
+              ref.invalidate(authSessionProvider);
+              return;
+            }
             final subject = ref.read(currentAuthSubjectProvider);
             if (subject != null) {
               ref.invalidate(onboardingStatusProvider(subject));
