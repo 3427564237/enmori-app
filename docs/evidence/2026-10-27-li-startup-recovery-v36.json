@@ -1,0 +1,129 @@
+{
+  "recordedAt": "2026-10-27T04:00:15.198179+00:00",
+  "appSourceHead": "694bbb3407158c949323494f2160461ea4e22fdb",
+  "baseHead": "afe06ae9ec97abb2f5c0448501ccc7fd5eb47733",
+  "backendSourceHead": "44e44a2cc46f08c9f2eed47d3626cc156d469dda",
+  "artifact": {
+    "package": "com.enmori.app.group",
+    "version": 36,
+    "certificate": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+    "permissions": [
+      "android.permission.ACCESS_COARSE_LOCATION",
+      "android.permission.ACCESS_FINE_LOCATION",
+      "android.permission.ACCESS_NETWORK_STATE",
+      "android.permission.INTERNET",
+      "android.permission.POST_NOTIFICATIONS",
+      "android.permission.WAKE_LOCK",
+      "com.enmori.app.group.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+      "com.google.android.c2dm.permission.RECEIVE",
+      "com.google.android.providers.gsf.permission.READ_GSERVICES"
+    ],
+    "debuggable": false,
+    "sha256": "bb2dce4f9ab5cc0d5e483dd7cbba160ff9e8d8680f24bc0bbbf78ce23cc112cc"
+  },
+  "sourceValidation": {
+    "analyze": "Pass",
+    "focusedTests": 20,
+    "regressionsFailBefore": 2,
+    "regressionsPassAfter": 2,
+    "preexistingFailure": "recovery_flow_test: existing-email registration offers executable sign-in; reproduced on unchanged baseline; excluded from final focused run"
+  },
+  "installation": {
+    "method": "adb install -r",
+    "installedHashMatches": true,
+    "firstInstallTime": "2026-10-21 12:13:08",
+    "dataCleared": false,
+    "originalLoginRetained": true
+  },
+  "diagnosticBuilds": {
+    "v34": "Temporary diagnostic build missing generated native plugins; this is not a proven cause of the original v33 failure.",
+    "v35": "Corrected release plugin registration and restored home; temporary diagnostics removed before v36."
+  },
+  "originalFailure": {
+    "phoneDnsFailed": true,
+    "phoneDnsRecoveredAfterMobileReconnect": true,
+    "subsequentStartupFailureRootCause": "Not conclusively established",
+    "confirmedIndependentBug": "Retry did not resubscribe after auth observation failed; fixed with two red/green widget regressions"
+  },
+  "fullUat": "Not complete",
+  "releaseOrDoneClaim": false,
+  "physical": {
+    "startup": "Home and prior login recovered on v36; onboarding HTTP 200",
+    "coldAfterIdle": {
+      "result": "Fail",
+      "modelUnloadedBefore": true,
+      "modelLoadSeconds": 58,
+      "preloadRequestSeconds": 60,
+      "clientExecuteBudgetSeconds": 75,
+      "assistantVisible": false,
+      "userRowLaterVisible": true,
+      "noResendOfOriginalOperation": true,
+      "qualification": "Timing indicates preload plus execution work can exceed the retained client window; original request was cancelled/reconciled, not reported as success."
+    },
+    "warmRequests": {
+      "executeStatus": [
+        200,
+        200
+      ],
+      "executeElapsedMs": [
+        28514,
+        26895
+      ],
+      "secondWarmAssistantVisiblyConfirmed": true,
+      "editorAndReferencesEnabledAfterReply": true
+    },
+    "manualReferences": {
+      "result": "Pass",
+      "enteredFromExistingCheckin": true,
+      "selectedDates": [
+        "2026-10-26",
+        "2026-10-25"
+      ],
+      "selectedCount": 2,
+      "reopenedSelectionRetained": true,
+      "draftRetained": true,
+      "returnedToAutomaticToday": true,
+      "selectionNavigationSentMessages": false
+    },
+    "events": {
+      "result": "Pass",
+      "searchQuery": "Benson",
+      "stoppedWithPartialResults": true,
+      "continuedSearch": true,
+      "cancelTicketOpeningRetainedDetail": true,
+      "browserOpenedTicketmaster": true,
+      "returnedWithinFiveMinutes": true,
+      "declinedRegistrationClaim": true,
+      "detailUsableAfterReturn": true,
+      "queryAndResultsRetainedAfterDetailReturn": true,
+      "purchaseOrParticipationWrite": false
+    },
+    "interruption": {
+      "result": "Bounded protection and independent-topic checks pass; original outcome remains unconfirmed",
+      "mobileDataDisabledSeconds": 8,
+      "mobileDataRestored": true,
+      "executeStatus": 503,
+      "diagnostic": "identity-dependency-failure",
+      "draftEditableAndRetained": true,
+      "sendBlockedOnUnconfirmedOriginal": true,
+      "newTopicAllowed": true,
+      "newTopicRetainedDraft": true,
+      "originalOperationResent": false,
+      "qualification": "Phone data interruption may also have affected host connectivity; this is not a phone-only transport isolation test."
+    }
+  },
+  "automationLimitations": [
+    "Other-app floating windows repeatedly covered the app; foreground checks aborted actions outside ENMORI.",
+    "Keyboard could obscure navigation despite underlying semantic nodes; visible keyboard was explicitly hidden.",
+    "The second synthetic warm send used the edited synthetic draft after an attempted select-all did not clear it; no private user draft was overwritten."
+  ],
+  "syntheticSendCount": 4,
+  "existingCheckinsEditedOrDeleted": false,
+  "temporaryNotificationSettingRestored": true,
+  "remaining": [
+    "Cold-after-idle first-send acceptance failed under retained 15/75/90 limits.",
+    "Network-interrupted operation remains protected until authoritative readback.",
+    "Independent review of this correction and integration PR 189.",
+    "JIN source-data coverage and PR 190 review corrections remain separate owner work."
+  ]
+}

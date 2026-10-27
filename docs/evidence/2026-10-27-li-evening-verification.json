@@ -1,0 +1,215 @@
+{
+  "recordedAt": "2026-10-27T17:29:33.348323+08:00",
+  "supplements": "2026-10-27-li-startup-recovery-v36.json",
+  "appVersion": 36,
+  "appSourceHead": "694bbb3407158c949323494f2160461ea4e22fdb",
+  "backendSourceHead": "44e44a2cc46f08c9f2eed47d3626cc156d469dda",
+  "codeChangedThisSession": false,
+  "servicesRestartedByThisSession": false,
+  "coldPhone": {
+    "observedAt": "2026-10-27T17:24:56+08:00",
+    "modelAbsentBefore": true,
+    "preloadSeconds": 6.856384678,
+    "runnerLoadSeconds": 5.55,
+    "modelChatSeconds": 1.583225849,
+    "executeHttpStatus": 200,
+    "executeElapsedMs": 22196,
+    "savedUserAndAssistantVisible": true,
+    "explicitReadChecksAndPageReturn": true,
+    "independentFirestoreAudit": false,
+    "priorUnknownOperationReplayed": false,
+    "qualification": "One bounded pass on a different host boot/load; morning failed cold case remains; resource contention is unproven."
+  },
+  "evaluation": {
+    "slot": "LI-20261027-evening-one-pass",
+    "sourceHead": "cf50715556e6124513305323c2cc4d4d89a508f5",
+    "sourceDirty": false,
+    "node": "24.19.0",
+    "lockfileSha256": "27fcc951d38f289233cf8105e429dc0b3430575933e0f96239f0a3cd04b26c69",
+    "preservedSha256": "837d0a2076e86736e9e46f9d950ff0bcaaec1e1f10c825bf6aee9476e281311b",
+    "corpusSha256": "1f216f2d8a4facafaac55eb9567c2136864999cc68c6759e831a81693ff0912a",
+    "sourceSha256": {
+      "backend/src/ai-runtime/infrastructure/local-chat-transport.ts": "8944fb11e408378d116efd2945fc5f037fdcc17d500b10c1f4e6aa53cd4ff6bd",
+      "backend/src/ai-runtime/infrastructure/synthetic-evaluation-adapters.ts": "f5ff121c739c455ec7d45316c1b71e9262b828e1599133b4e66017c81daca805",
+      "backend/src/ai-runtime/ports/synthetic-evaluation.ts": "76adef1c1b67a345851ba1cd3e354cd655b12cc44c86486fa56c0b013f06b921",
+      "tool/ai-companion-eval/evaluation.mjs": "7cb03bf1efdeeaec99840087169f3948bc8a76cceb575306df01e070b1e538e3",
+      "tool/ai-companion-eval/run.mjs": "58e915efff81ac950b938b0b2e14f4bcf610f935471a2452645112d0b4b63105",
+      "tool/ai-companion-eval/private-output.mjs": "135f6b8aab9edfa739a27593fb0ebacbc52b6b2be4ac7f59f7e3f27c12b3873f",
+      "tool/ai-companion-eval/fixtures/companion-cases.json": "8e2a7b8afb813e147b6d48c2635156b187bd9a9a01e1b65b827e9746ff7e80e7",
+      "tool/ai-companion-eval/fixtures/preserved-small-plan-cases.json": "837d0a2076e86736e9e46f9d950ff0bcaaec1e1f10c825bf6aee9476e281311b"
+    },
+    "compiledSha256": {
+      "backend/dist/src/ai-runtime/infrastructure/local-chat-transport.js": "58c0872a4d18e8650a2356515de06bddd1ccd81e3584cbd330aa59e9781322ea",
+      "backend/dist/src/ai-runtime/infrastructure/synthetic-evaluation-adapters.js": "1e861332bcb2c7d6a218594c2cc2fb897de784cfad1afbecfd36776c3da5df0b",
+      "backend/dist/src/ai-runtime/domain/parse-output.js": "d47255f926edf666b185cd0832df931368e48b32d5f18d599b0e61bf20dbde9b",
+      "backend/dist/src/ai-conversation/application/open-conversation-semantic-policy.js": "4e863810822794c858e3198fdcf60decbbff84c7ddf3457904efc9d99b6e93b5"
+    },
+    "model": "qwen3.5:9b",
+    "digest": "56671c2ab9385f9cfcb404638e32cd62d88e3501d44822208363c010179a3c90",
+    "startedAt": "2026-10-27T09:26:16.593Z",
+    "finishedAt": "2026-10-27T09:27:48.872Z",
+    "intendedCases": 24,
+    "observedCases": 24,
+    "protocolEligible": 24,
+    "independentSemanticUnreviewed": 24,
+    "reportSha256": "16c63c03e24db8d0676b112b82d5ddbd3c860ebf8155c14dc62afed5381a8b2a",
+    "manifestSha256": "fbb9bb663fd4399b1d59ef10bcf76b6d270f7a6f6e982038f05ea43d9d467e09",
+    "sourceTestsPassed": 17,
+    "strictCompilation": "Pass",
+    "rawOutputDirectory": "/home/miku/.local/state/enmori-recovery-20261027/zhou-local-cf50715",
+    "caseObservations": [
+      {
+        "id": "reported-english-goal-chinese-reply",
+        "elapsedMs": 3865,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "chinese-break-with-label",
+        "elapsedMs": 5906,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "correct-previous-misreading",
+        "elapsedMs": 2798,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "actual-device-test-goal",
+        "elapsedMs": 3693,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "fresh-chinese-rest",
+        "elapsedMs": 2813,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "actual-study-goal",
+        "elapsedMs": 6438,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "labelled-desk-goal",
+        "elapsedMs": 7205,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "latest-goal-two-history-pairs",
+        "elapsedMs": 2286,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "explicit-language-request",
+        "elapsedMs": 7508,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "normal-chat",
+        "elapsedMs": 1177,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "calculation",
+        "elapsedMs": 1174,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "persona-presentation",
+        "elapsedMs": 3082,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "missing-essential-goal",
+        "elapsedMs": 2790,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "ordinary-code-as-text",
+        "elapsedMs": 1641,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "labelled-walk-goal",
+        "elapsedMs": 9780,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "genuine-test-with-marker",
+        "elapsedMs": 11587,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "natural-chinese",
+        "elapsedMs": 1978,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "natural-english",
+        "elapsedMs": 1908,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "specified-french",
+        "elapsedMs": 908,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "switch-to-english",
+        "elapsedMs": 1722,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "correct-personal-claim",
+        "elapsedMs": 2224,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "topic-shift-chat",
+        "elapsedMs": 2622,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "unknown-event-fact",
+        "elapsedMs": 2946,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      },
+      {
+        "id": "no-execution-claim",
+        "elapsedMs": 3477,
+        "protocolEligible": true,
+        "independentSemanticReview": "Unreviewed"
+      }
+    ]
+  },
+  "knownRemaining": [
+    "Cold-load variability unresolved",
+    "Semantic failures observed; independent review pending",
+    "Initial Home recommendation 503, later recovery",
+    "PR190 corrected head awaits ZHOU review before integration",
+    "PR189/191 independent review",
+    "Full UAT and Release incomplete"
+  ]
+}
