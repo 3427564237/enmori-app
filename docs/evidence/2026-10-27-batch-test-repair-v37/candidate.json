@@ -11,5 +11,7 @@
   "calendarPermissions": false,
   "backendSourceHead": "c16c26294c3d64f9bcd76808a451241e15889b52",
   "backendReady": true,
-  "initialInstallAttempt": "INSTALL_FAILED_ABORTED: User rejected permissions"
+  "initialInstallAttempt": "INSTALL_FAILED_ABORTED: User rejected permissions",
+  "laterRetryInstalled": true,
+  "supersededByVersionCode": 38
 }

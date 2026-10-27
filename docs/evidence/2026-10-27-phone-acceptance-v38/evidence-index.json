@@ -1,0 +1,102 @@
+{
+  "weekly-stopped.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/weekly-stopped.xml",
+    "sha256": "c1817f76c06489dcf242e0b2748ff3305170615384eb9d56df17c8cabf0cd2f1"
+  },
+  "weekly-original-loaded.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/weekly-original-loaded.xml",
+    "sha256": "1f5c364713f358487b382bf5c2b30490e114b99bced782681e1adca0b675c471"
+  },
+  "events-today.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/events-today.xml",
+    "sha256": "b8677be5a3f538c0e4bab893972c6eea7c024d4fdd057fb9381862fabf15f026"
+  },
+  "events-seven-days.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/events-seven-days.xml",
+    "sha256": "2ac5f8715c5d327fea55863881ac590a857daa00b593f0a0bf9ed1795b04567f"
+  },
+  "calendar-handoff.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/calendar-handoff.xml",
+    "sha256": "ed49b16e0ce18194d89b444c3b3910c96ff14c8fb46125aee2ce1a7f7b5f4ab8"
+  },
+  "calendar-cancel.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/calendar-cancel.xml",
+    "sha256": "839386b051a31694a07bbe7ce12dee38b6835013645af7917a67782f2a619b15"
+  },
+  "calendar-return.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/calendar-return.xml",
+    "sha256": "7965f94affe50f8e9252304ca0ea62c776f7875aa3318f8877fe23cb28162ee8"
+  },
+  "recent-events.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/recent-events.xml",
+    "sha256": "6d16ac125aa3163753350c59324efda8296bd75e1bc4e76bbb326ecedd635fdd"
+  },
+  "recent-empty.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/recent-empty.xml",
+    "sha256": "39d1186e3ca048a8d5e54104bfb36abaa397d6fd3074ae55b57f892d688b09ab"
+  },
+  "avatar-loaded.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/avatar-loaded.xml",
+    "sha256": "7a23b5c4fb2b3b9ad4dd8ab183041ce0258160f8134be3aae1d42020aeaafee4"
+  },
+  "prompted-draft.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/prompted-draft.xml",
+    "sha256": "75d207a7eaa48c3b0a5de419f0ed3e45a6c3455de11862c7a0919728f335c8e5"
+  },
+  "check-in-discard.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/check-in-discard.xml",
+    "sha256": "32037ddade1d9f058e1703d6253982bd3a32a99197413e302ec8569fa48a017d"
+  },
+  "check-in-search-result.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/check-in-search-result.xml",
+    "sha256": "6eb4c00727fdf99bac32359b849fa8ab3a246b7f74959b7c0a458e878cf55dff"
+  },
+  "ai-jump-original.png": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/ai-jump-original.png",
+    "sha256": "779d53b25dbdc7af69e2a6048f5c192550bbe307309aebf9714d01d1a2832618"
+  },
+  "v38-search-jump.png": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/v38-search-jump.png",
+    "sha256": "072843a6fd02413d47778d447fd426e99dddbcf2559aa6a2467851a619ff9f48"
+  },
+  "v38-keyboard-closed.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/v38-keyboard-closed.xml",
+    "sha256": "8502ce5cb9ae2666d3aa1dd696ac0e9bf09c4e794708b2b042bcfcb9b789e4d1"
+  },
+  "v38-latest.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/v38-latest.xml",
+    "sha256": "435fb13e674e50059826f3e66c183ac0c9ed22e5d44732f0cf07482960bf0d3b"
+  },
+  "v38-clean-editor.xml": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/v38-clean-editor.xml",
+    "sha256": "5f6c79a9f58999bb10eda193ed40d52c2e11671072ac05e6f7c178f901eab2d4"
+  },
+  "source-address-availability.json": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/source-address-availability.json",
+    "sha256": "86ff2506d7b1e65220b8e6964910f93ab2303ccb2299739c215f3f2972d3154a"
+  },
+  "install-v38.json": {
+    "privateLocalPath": "/home/miku/.local/state/enmori-v37-phone-20261027/install-v38.json",
+    "sha256": "a1a3affae3d0a04d3f73b4b215fbd1f3738b7bb9f9435efd2e435886df5ea667"
+  },
+  "keyboard-before.log": {
+    "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v38/keyboard-before.log",
+    "sha256": "dcd5d10c7b82b772f499ffd823d8e46faf6ae946d58b1d4f103c4f5d1d317514"
+  },
+  "keyboard-after.log": {
+    "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v38/keyboard-after.log",
+    "sha256": "5bfee368d136aef272750f7496df1c551b632efc1e0bd0c64a325178dde34a0c"
+  },
+  "related.log": {
+    "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v38/related.log",
+    "sha256": "11d7a99da45c0f29b2ad07e0a5ecbf522acd0080d2a184d6ea9d88c659f326b7"
+  },
+  "analyze.log": {
+    "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v38/analyze.log",
+    "sha256": "3cdd7e587e6993485d32b537dd52d86683f6d30973c95d6e0a9ca80eae9f4a88"
+  },
+  "apk-build.log": {
+    "localLog": "/home/miku/.codex/worktrees/next-features-20261027/ENMORI/build/phone-validation-v38/apk-build.log",
+    "sha256": "43ecad9514e50b17a15c44ad7c5abb2a72a16db92b035b4f7c0207c31528f267"
+  }
+}

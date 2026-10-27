@@ -1,6 +1,6 @@
 # ENMORI 下一轮功能优先级
 
-状态：LI 已确认的产品计划。首批头像及第 1–3 项已进入 27 October 实施批次；源码验证与运行验收见[交付记录](../handoff/2026-10-27-next-features.md)。第 4–8 项也已完成本地源码实施，见[剩余功能交付](../handoff/2026-10-27-remaining-features.md)；实际设备与 Release 仍待验收。
+状态：LI 已确认的产品计划。首批头像及第 1–3 项已进入 27 October 实施批次；源码验证与运行验收见[交付记录](../handoff/2026-10-27-next-features.md)。第 4–8 项也已完成本地源码实施，见[剩余功能交付](../handoff/2026-10-27-remaining-features.md)；已继续执行有限范围手机验收并安装 v38，见[手机记录](../handoff/2026-10-27-phone-acceptance-v38.md)；地图正向、跨账号头像及完整 UAT/Release 仍待验收。
 
 ## 来源与执行顺序
 

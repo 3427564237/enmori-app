@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-27",
+  "timezone": "Asia/Singapore",
+  "sourceHead": "d3d9777cea938efa19c86c1e163657a80d065a4b",
+  "backendSourceHead": "c16c26294c3d64f9bcd76808a451241e15889b52",
+  "apk": {
+    "package": "com.enmori.app.group",
+    "versionCode": 38,
+    "versionName": "1.0.0-group20261027",
+    "bytes": 67214466,
+    "sha256": "ec8f6dd2cba129a95575b7f235cadab9ec2838b6c54851d35ea7bfa1ab53fe08",
+    "installedHashMatches": true,
+    "sameSignerAsV36": true,
+    "debuggable": false,
+    "firstInstallTimePreserved": true
+  },
+  "tests": {
+    "regressionBeforeFix": "failed: keyboard resize removed search location",
+    "relatedPassed": 139,
+    "analyze": "No issues found",
+    "fullSuiteRerunAfterKeyboardFix": false,
+    "previousFullSuiteBaselineFailures": 73
+  },
+  "phone": {
+    "deviceModel": "vivo V2405A",
+    "loginPreserved": true,
+    "temporaryDraftsRemovedWithoutSend": true,
+    "network": {
+      "activeTransport": "CELLULAR",
+      "wifiEnabled": false,
+      "adbReverseMappings": 0,
+      "usbConnected": true
+    },
+    "observations": [
+      {
+        "feature": "Seven-day review",
+        "candidate": 37,
+        "result": "Completed 7/7 civil dates and opened a saved original record"
+      },
+      {
+        "feature": "Check-in keyword search",
+        "candidate": 37,
+        "result": "Completed chosen seven-day range, found and displayed one matching existing record"
+      },
+      {
+        "feature": "Check-in prompt",
+        "candidate": 37,
+        "result": "Filled editable draft; Back required discard confirmation; test draft discarded without save"
+      },
+      {
+        "feature": "Event date filters",
+        "candidate": 37,
+        "result": "Today and next-seven-days differ; empty copy explicitly limits to loaded scope"
+      },
+      {
+        "feature": "Native calendar",
+        "candidate": 37,
+        "result": "vivo editor opened with source title, start time, location and URL; absent source end became OS default one-hour duration; cancellation and explicit discard returned to event"
+      },
+      {
+        "feature": "Complete-address map guard",
+        "candidate": 37,
+        "result": "Source address missing; map disabled; no venue-name fallback"
+      },
+      {
+        "feature": "Recent Events",
+        "candidate": 37,
+        "result": "Viewed Event listed; reopening started fresh detail read; explicit clear yielded empty list"
+      },
+      {
+        "feature": "Legacy own avatar",
+        "candidate": 37,
+        "result": "Existing image loaded and remained private with explicit publication action; no publication or upload performed"
+      },
+      {
+        "feature": "AI search jump",
+        "candidate": 38,
+        "result": "Existing messages searched; original located and visibly highlighted across IME opening/closing; Latest exited location; unsent draft preserved then removed without send"
+      }
+    ]
+  },
+  "limits": [
+    "No complete-address positive map handoff: none of 18 occurrences in observed first source batch had a complete approved address",
+    "No two-account avatar publication/update/removal validation",
+    "No real calendar save",
+    "No new model generation",
+    "No USB-disconnected run",
+    "No full UAT, independent review, Release or Done claim"
+  ],
+  "runtimeDiagnostics": {
+    "aiActionRequestsInValidationWindow": 0,
+    "unattributedOther503": {
+      "atUtc": "2026-10-27T12:40:43.184194Z",
+      "elapsedMs": 1603,
+      "note": "Fixed privacy-safe route label cannot identify the feature; inspected acceptance flows completed subsequently. Not a zero-error runtime claim."
+    }
+  }
+}
