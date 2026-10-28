@@ -21,7 +21,9 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
   AvatarPhoto? _draft;
   bool _visible = false;
   bool _dirty = false, _busy = false, _picking = false, _unknown = false;
+  bool _routeVisible = false;
   int _epoch = 0;
+  int _pickerEpoch = 0;
   String? _attemptHash;
   AvatarPendingSave? _attempt;
   String? _message;
@@ -46,6 +48,7 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
   bool _current(Object? session, int epoch) =>
       mounted &&
       epoch == _epoch &&
+      _routeVisible &&
       _foreground &&
       ref.read(currentAuthSubjectProvider) != null &&
       identical(session, ref.read(authSessionProvider).asData?.value) &&
@@ -62,17 +65,44 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
       _visible = pending.visibleToAuthenticatedUsers;
       _attemptHash = pending.photo?.sourceSha256;
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) => _read());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final visible =
+        ModalRoute.of(context)?.isCurrent == true &&
+        TickerMode.valuesOf(context).enabled;
+    if (visible == _routeVisible) return;
+    _routeVisible = visible;
+    // Retire hidden reads and picker callbacks while keeping any unsaved draft
+    // or unresolved write. Returning establishes a fresh authoritative revision.
+    _epoch++;
+    _pickerEpoch++;
+    _base = null;
+    _busy = false;
+    _picking = false;
+    if (visible) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _read());
+    }
   }
 
   @override
   void dispose() {
     _epoch++;
+    _pickerEpoch++;
     super.dispose();
   }
 
   Future<void> _read() async {
-    if (!mounted || !_foreground || _busy || _picking) return;
+    if (!mounted ||
+        !_routeVisible ||
+        !_foreground ||
+        _busy ||
+        _picking ||
+        ref.read(currentAuthSubjectProvider) == null) {
+      return;
+    }
     final session = ref.read(authSessionProvider).asData?.value;
     final epoch = ++_epoch;
     setState(() => _busy = true);
@@ -109,14 +139,17 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
   }
 
   Future<void> _pick() async {
-    if (_busy || _picking || _unknown) return;
+    if (!_routeVisible || !_foreground || _busy || _picking || _unknown) return;
     final session = ref.read(authSessionProvider).asData?.value;
+    final pickerEpoch = ++_pickerEpoch;
     setState(() {
       _picking = true;
       _message = null;
     });
     final result = await ref.read(avatarPhotoPickerProvider).pick();
     if (!mounted ||
+        pickerEpoch != _pickerEpoch ||
+        !_routeVisible ||
         !identical(session, ref.read(authSessionProvider).asData?.value) ||
         ModalRoute.of(context)?.isCurrent != true) {
       return;
@@ -140,6 +173,7 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
 
   Future<void> _save() async {
     if (!_dirty ||
+        !_routeVisible ||
         _busy ||
         _picking ||
         _unknown ||
@@ -213,6 +247,7 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
       if (!identical(before?.asData?.value, after.asData?.value)) {
         setState(() {
           _epoch++;
+          _pickerEpoch++;
           _base = null;
           _draft = null;
           _visible = false;
@@ -239,7 +274,8 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
         WidgetsBinding.instance.addPostFrameCallback((_) => _read());
       }
     });
-    final locked = _busy || _picking || _unknown || !access.foreground;
+    final locked =
+        _busy || _picking || _unknown || !access.foreground || !_routeVisible;
     return PopScope(
       canPop: !_busy,
       child: Scaffold(
@@ -250,7 +286,7 @@ final class _OwnAvatarEditorState extends ConsumerState<OwnAvatarEditor> {
             children: [
               Center(
                 child: AvatarPixels(
-                  photo: access.foreground
+                  photo: access.foreground && _routeVisible
                       ? (_dirty ? _draft : _base?.photo)
                       : null,
                   initial: '?',
