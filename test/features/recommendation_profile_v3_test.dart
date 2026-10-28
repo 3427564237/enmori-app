@@ -6,6 +6,7 @@ import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/event_detail/domain/event_content.dart';
+import 'package:enmori/features/event_detail/presentation/event_information.dart';
 import 'package:enmori/features/event_browse/data/backend_activity_repository.dart';
 import 'package:enmori/features/recommendation_profile/data/backend_recommendation_profile_repository.dart';
 import 'package:enmori/features/recommendation_profile/domain/recommendation_profile.dart';
@@ -61,6 +62,22 @@ class Regions implements RegionRepository {
 }
 
 void main() {
+  testWidgets(
+    'registration deadline uses Singapore civil day and readable local time',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) =>
+                Text(eventDeadlineLabel(context, '2026-10-28T17:00:00.000Z')),
+          ),
+        ),
+      );
+      expect(find.textContaining('Oct 29'), findsOneWidget);
+      expect(find.textContaining('1:00 AM SGT'), findsOneWidget);
+      expect(find.textContaining('T17:00'), findsNothing);
+    },
+  );
   test(
     'new event reads explicitly negotiate v3 without changing auth identity',
     () async {

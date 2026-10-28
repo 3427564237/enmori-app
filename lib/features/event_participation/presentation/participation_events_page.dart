@@ -356,7 +356,7 @@ final class _ParticipationEventsPageState
                   ),
                 for (final source in value.sourceStatus.entries)
                   Text(
-                    '${source.key}: ${source.value ? context.tr('available', '可用') : context.tr('unavailable; other source remains available', '暂不可用，仍可浏览其他来源')}',
+                    '${source.key == 'onepa' ? 'onePA' : 'Ticketmaster'}: ${source.value ? context.tr('available', '可用') : context.tr('unavailable; other source remains available', '暂不可用，仍可浏览其他来源')}',
                   ),
                 for (final item in matching) ...[
                   EventCard.summary(

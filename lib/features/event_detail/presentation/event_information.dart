@@ -122,13 +122,7 @@ final class EventInformation extends StatelessWidget {
         const SizedBox(height: 16),
         Text('Asia/Singapore (UTC+8)'),
         _Heading(context.tr('Registration and conditions', '报名与条件')),
-        Text(
-          content.priceLabel ??
-              context.tr(
-                'Price not provided. Confirm on the official site.',
-                '未提供价格，请前往官网确认。',
-              ),
-        ),
+        Text(eventPriceLabel(context, content.priceLabel)),
         Text(
           context.tr(
             'Status: ${eventStatusLabel(context, content.status)}',
@@ -136,7 +130,12 @@ final class EventInformation extends StatelessWidget {
           ),
         ),
         if (content.registrationDeadline case final deadline?)
-          Text(context.tr('Registration closes: $deadline', '报名截止：$deadline')),
+          Text(
+            context.tr(
+              'Registration closes: ${eventDeadlineLabel(context, deadline)}',
+              '报名截止：${eventDeadlineLabel(context, deadline)}',
+            ),
+          ),
         if (content.minimumAge != null || content.maximumAge != null)
           Text(
             context.tr(
@@ -390,3 +389,23 @@ String eventStatusLabel(BuildContext context, String? status) =>
         '请到官网确认报名状态',
       ),
     };
+
+String eventDeadlineLabel(BuildContext context, String value) {
+  if (value.length == 10) return value;
+  final date = DateTime.tryParse(value);
+  return date == null ? value : singaporeEventTimeLabel(context, date);
+}
+
+String eventPriceLabel(BuildContext context, String? value) {
+  if (value == 'Log in to onePA to confirm pricing and vacancies') {
+    return context.tr(
+      'Log in to onePA to confirm pricing and vacancies',
+      '需登录 onePA 确认费用和余位',
+    );
+  }
+  return value ??
+      context.tr(
+        'Price not provided. Confirm on the official site.',
+        '未提供价格，请前往官网确认。',
+      );
+}

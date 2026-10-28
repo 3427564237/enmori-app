@@ -1,5 +1,5 @@
 import '../../event_detail/presentation/event_information.dart'
-    show EventCover, eventStatusLabel;
+    show EventCover, eventStatusLabel, eventDeadlineLabel, eventPriceLabel;
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -141,7 +141,8 @@ final class EventCard extends StatelessWidget {
                     if (content != null) ...[
                       const SizedBox(height: 8),
                       Text(content.sourceName),
-                      if (content.priceLabel != null) Text(content.priceLabel!),
+                      if (content.priceLabel != null)
+                        Text(eventPriceLabel(context, content.priceLabel)),
                       if (content.status != null &&
                           content.status != 'unknown' &&
                           content.status != 'available')
@@ -149,8 +150,8 @@ final class EventCard extends StatelessWidget {
                       if (content.registrationDeadline != null)
                         Text(
                           context.tr(
-                            'Closes: ${content.registrationDeadline}',
-                            '截止：${content.registrationDeadline}',
+                            'Closes: ${eventDeadlineLabel(context, content.registrationDeadline!)}',
+                            '截止：${eventDeadlineLabel(context, content.registrationDeadline!)}',
                           ),
                         ),
                     ],
