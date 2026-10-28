@@ -123,3 +123,16 @@ least 61 seconds between starts, and requires a new specific grant. Its
 preparation neither extends the exhausted 48-call grant nor adopts Groq for
 real-user data. The [diagnosis and exact proposal](../planning/2026-10-28-ai-semantic-repair-next-step.md)
 remain separate from a successful semantic result.
+
+## Third Groq pass: single-variable reasoning comparison
+
+After the prepared profile and 38/38 source tests were reported, LI explicitly
+approved “允许这 24 条单变量验证”. This grants one additional pass of at most
+24 unchanged synthetic cases using `baseline-medium`: original baseline
+messages, GPT-OSS 120B, strict schema, 2,048 completion tokens and only
+`reasoning_effort` changed from `low` to `medium`. Keep Groq Free Plan, US$0,
+no real-user data, at least 61 seconds between starts and no automatic retry.
+Recheck account eligibility before dispatch. Ineligible, truncated, unknown,
+rate-limited or missing/over-bound usage stops the run. This supersedes only the
+previous absence of a grant for this one profile/pass; the first two consumed
+grants, rejected profiles and production adoption boundary are unchanged.
