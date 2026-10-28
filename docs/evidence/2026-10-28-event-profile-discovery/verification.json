@@ -3,7 +3,7 @@
   "timezone": "Asia/Singapore",
   "authority": "docs/decisions/2026-10-28-li-event-profile-discovery.md",
   "baseCommit": "d811c23375fbf5465fd4176e907072546fb20a78",
-  "backendSourceCommit": "447ef003c27407e3e26433244d5a8eb6879ecab0",
+  "backendSourceCommit": "dfec1313885e7ccd3877b145798892f6a2a60a5e",
   "apkSourceCommit": "301cb9c51d2fb2f7ead63f1f37e4eac3ab6b7f95",
   "apk": {
     "name": "ENMORI-group-v42-release.apk",
@@ -59,6 +59,31 @@
       "name": "enmori-v42-real-source-probe.txt",
       "bytes": 366,
       "sha256": "af016b5ff18520482a22ae1a4a31d9e92f4f40d65f61e1883be83f6a57f54294"
+    },
+    {
+      "name": "enmori-combined-social-before.txt",
+      "bytes": 1094,
+      "sha256": "20a070f3d2d2583d35d84c69aade12eb1848be130c72f2fe0b738c6383d31c57"
+    },
+    {
+      "name": "enmori-v42-social-final-backend.txt",
+      "bytes": 160195,
+      "sha256": "0fd82081d518f71f4620adb6a3458097054735ad44f587adb912c6e97e1f5892"
+    },
+    {
+      "name": "enmori-recommendation-source-probe.txt",
+      "bytes": 737,
+      "sha256": "eee8618deeb6a6a608d1837f404b04f73c00bd4a2655150ed09b0eb546897800"
+    },
+    {
+      "name": "enmori-v42-social-source-after.txt",
+      "bytes": 737,
+      "sha256": "185ee72b247891e9b0c38d73bf78c7dc2e0a3be9af8caba9170bb40e50da877f"
+    },
+    {
+      "name": "enmori-owner-recommendation-probe.txt",
+      "bytes": 737,
+      "sha256": "73c17d14d6f875f2f502d9294533a334fb760bd7f281f38e44a5fabb95d85d37"
     }
   ],
   "physicalDevice": {
@@ -77,9 +102,17 @@
     "onePaReturnSameVisibleTextBoundsSelection": true,
     "ticketmasterActualCoverSeen": true,
     "ticketmasterDescriptionUnavailableShown": true,
-    "ticketmasterOfficialSameOccurrenceSeatPageOpened": true
+    "ticketmasterOfficialSameOccurrenceSeatPageOpened": true,
+    "homeRecommendationInitialTransientFailure": true,
+    "homeRecommendationRetryDisplayedActualCard": true,
+    "finalBackendRelaunchHomeCardsWithoutManualRetry": true
   },
   "screenshots": [
+    {
+      "name": "home-recommendation.png",
+      "bytes": 867829,
+      "sha256": "9d603f12a8bb88c0e2414829abd64e30d638b56576f87a41e8ead90f15218e11"
+    },
     {
       "name": "onepa-detail.png",
       "bytes": 363045,
@@ -108,7 +141,8 @@
     "twoFreshRealAccountsMutualOptIn": false,
     "realMultiDeviceConflict": false,
     "successfulPhysicalGeolocation": false,
-    "fullPlanAccepted": false
+    "fullPlanAccepted": false,
+    "coldStartReliabilityAccepted": false
   },
   "privateReceiptsExcluded": true
 }

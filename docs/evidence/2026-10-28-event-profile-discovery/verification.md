@@ -13,9 +13,9 @@ Authority: [approved decision](../../decisions/2026-10-28-li-event-profile-disco
 
 ## Source and executable identity
 
-Base: `d811c233`. Feature: `b0a6f78f`; installed-client compatibility: `447ef003`; phone-discovered deadline/localized-price fix: `301cb9c5`.
+Base: `d811c233`. Feature: `b0a6f78f`; installed-client compatibility: `447ef003`; phone-discovered deadline/localized-price fix: `301cb9c5`; combined-source social identity fix: `dfec131`.
 
-The active backend is the isolated `service-447ef003c274` snapshot under the local v42 state directory. The final APK includes `301cb9c5`; that final change is Flutter-only. The existing service credentials, project, host endpoint, port binding and account data were retained. An initial pre-compatibility candidate was rolled back before switching to the compatible snapshot. The service change is a reversible WorkingDirectory override; it is not a cloud deployment.
+The active backend is the isolated `service-dfec131` snapshot under the local v42 state directory, replacing the compatible `service-447ef003c274` snapshot with the final backend-only social identity fix. The final APK includes `301cb9c5`; its last change is Flutter-only. The existing service credentials, project, host endpoint, port binding and account data were retained. An initial pre-compatibility candidate was rolled back before switching to the compatible snapshot. The service change is a reversible WorkingDirectory override; it is not a cloud deployment.
 
 Final APK: `build/group-delivery-v42/ENMORI-group-v42-release.apk`, 68,113,696 bytes, package `com.enmori.app.group`, versionCode 42, versionName `1.0.0-group20261028`.
 
@@ -27,7 +27,7 @@ Signer SHA-256: `0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966e
 
 | Layer | Observed result | Limit |
 | --- | --- | --- |
-| Backend strict TypeScript and complete tests after compatibility | 1,606 passed, zero failed | Source/test execution, not provider or device acceptance |
+| Backend strict TypeScript and complete tests after final social fix | 1,607 passed, zero failed | Earlier compatible version passed 1,606; these runs overlap |
 | OpenAPI contract checks | Six passed | Included in broader backend validation; not additive |
 | Flutter affected compatibility regression | 51 passed | Includes profile, Event browse/projection/recommendations and discovery/map consistency |
 | Final phone-fix regression | 13 passed | Includes six profile/region/contract/time tests and card/participation widgets; overlaps earlier selections |
@@ -54,6 +54,11 @@ Device: vivo X200 Pro. Existing group account, upgraded from v40 to final v42 wi
 3. The onePA official action opened Chrome on exactly the same event and date, showing its login-only pricing/vacancy message. No provider login, reservation or payment was performed.
 4. Returning showed the existing explicit participation question. Selecting No preserved all visible detail text, node bounds/scroll position and unselected participation state exactly against the pre-navigation UI snapshot. Opening the site did not mark Going.
 5. Searching Benson displayed Ticketmaster's real cover, title, date, venue and honest missing-summary message while onePA failure remained explicit. Its detail displayed the cover, SGT start, API on-sale status, unavailable price/end-time/address and the explicit failed-supplementary-detail message. The official action opened the API's exact occurrence URL, `/ticket/area/26sg_bensonboone/3587`. Phone Chrome successfully rendered the seat-selection page with the same title, 2 November 20:00 and The Star Theatre. Its prices/booking-fee note remain unavailable to the server-side supplementary reader; phone browser success is not server acquisition success. No section, seat, login or payment was selected.
+6. Home initially returned an explicit temporary Event recommendation failure after navigating between source pages. An owner-only read diagnostic returned a valid 135-event personalized source projection in 6.504 seconds, excluding invalid profile data as the observed cause. Retrying on the phone displayed the actual Benson recommendation card with cover, time, venue and Music matching reason; the friend section correctly showed no current match. The transient failure's exact cause was not established, and this successful retry is not cold-start reliability acceptance.
+
+That investigation also reproduced a separate deterministic defect: combined sources were excluded from synchronous `peek`, removing current activity identities from social matching. A new regression failed before the fix and passed after it. `dfec131` restores current first/later-page identity reads, retains expiry/generation invalidation, and still acquires supplementary content on detail actions. No missing provider read or unauthorized factor is converted into zero as part of this fix.
+
+After deploying `dfec131`, service readiness and identity/Firestore gates were verified again; anonymous owner-profile access remained 401/no-store. A fresh phone app launch showed both real Home recommendation cards without a manual retry. A fresh public-source traversal returned 136 current occurrences in 5.423 seconds and confirmed `peekFirst: true`, compared with false before the fix. These are bounded observations, not a claim that the earlier transient failure has a proven cause or cannot recur.
 
 Local screenshots stay in the ignored APK delivery directory. Temporary UI XML containing owner fields is removed after validation; no token, birthday, raw coordinates, account UID, username or device serial is committed here.
 
