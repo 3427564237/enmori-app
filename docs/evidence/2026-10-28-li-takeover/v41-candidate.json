@@ -1,0 +1,17 @@
+{
+  "sourceHead": "08efef09f61c4b2a70e412544ff2a3a2db4fd398",
+  "productCommit": "a682f020c98359b41277f953230d3fd940e7d229",
+  "versionCode": 41,
+  "package": "com.enmori.app.group",
+  "bytes": 67230850,
+  "sha256": "dc43abd531f507a4a1378ed6acdbd2bbb5bee371fc695acc74ca6253eddf58d2",
+  "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "samePermissionsAsV40": true,
+  "permissionCount": 9,
+  "debuggable": false,
+  "build": "passed",
+  "installed": false,
+  "deviceVerification": "Not run: adb device list empty",
+  "backendDeployment": "unchanged v40 service; this build only adds the avatar client fix",
+  "cloudDeployment": false
+}

@@ -1,0 +1,28 @@
+{
+  "testSourceHead": "cda73930f135a2df59d2f59fc96196c97660bf42",
+  "initialRegression": {
+    "pass": 531,
+    "fail": 4,
+    "cause": "Assertions predated approved v31 independent-topic and bounded automatic-readback behavior"
+  },
+  "focusedAfterCorrection": {
+    "pass": 53,
+    "fail": 0
+  },
+  "finalAffectedRegression": {
+    "pass": 535,
+    "fail": 0
+  },
+  "analysis": "full Flutter analysis with --fatal-infos: no issues",
+  "runtimeChanges": "none in this continuation; test-only updates after v41 build",
+  "providerCalls": 0,
+  "physicalDevice": "not connected; no install",
+  "semanticBindingsVerified": 24,
+  "logsSha256": {
+    "enmori-takeover-v41-build.log": "e5e0c0a15318b220a6c9931cd150d4b0577f869a5c80873262ca052692aeb8c9",
+    "enmori-takeover-remaining-tests.log": "df543e1f0eb8f307a96e9ae4f5aedbbe5d1e02ac97824b8a89c859e42ac6d3a2",
+    "enmori-takeover-recovery-focused.log": "f18d5dd97d7aa14d6963fb748a267202fa956a57596932780eee0f966e555799",
+    "enmori-takeover-remaining-final.log": "8be5bff401129678ca5d4f47ca760b0f73545cca2dae93081f82766af27d90cd",
+    "enmori-takeover-analyze.log": "ba143f96e2c792b1ba050b8fdd42630e4b7d114404aa05a445e4babe08a0c8d7"
+  }
+}
