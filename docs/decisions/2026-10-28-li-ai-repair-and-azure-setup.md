@@ -32,3 +32,62 @@ on the fixed 24 current-prompt cases: at most 24 serial generations, no retry,
 limits. Isolate its service slot and restore the existing unmodified service
 after confirmed settlement. A second candidate requires inspecting this first
 result and recording the concrete change; do not repeat blind prompt sweeps.
+
+## Candidate disposition and Groq synthetic grant
+
+The first local candidate completed 24 terminal responses. Unchanged-rubric owner
+assessment: 15 pass / 9 fail, including three regressions. It is rejected and the
+production prompt is restored; the failed experiment remains in commit
+`012ae1ed` and `docs/evidence/2026-10-28-li-ai-repair/`.
+
+LI completed Groq login and then explicitly completed creation of the requested
+seven-day `enmori-synthetic-eval-20261028` key after being told it would be stored
+only in a private local file and used for at most 24 synthetic cases. Browser
+readback confirms Free Current Plan and GPT-OSS 120B limits of 30 RPM, 1,000 RPD,
+8,000 TPM and 200,000 TPD. This authorizes one isolated, serial, no-retry pass of
+the unchanged 24 current-prompt fixtures with `openai/gpt-oss-120b`, strict JSON
+schema, non-streaming, low reasoning, no returned reasoning and at most 2,048
+completion tokens including reasoning. Starts are spaced at least 30.1 seconds;
+input plus output reservation remains below 4,000 tokens per call. Stop the run
+on unknown, ineligible, over-limit or missing usage. No private account data,
+tools, payment method, upgrade or production adoption is included.
+
+Azure Education Hub shows US$100 of US$100 remaining and expiry 2027-10-28.
+The older Sponsorships portal returned no active Sponsorship; Education Hub is
+the applicable direct account balance evidence, not the generic offer page.
+
+## One-time service ownership recovery
+
+After being given the concrete same-boot dead-process lock recovery proposal,
+LI replied: “使用灵活的方式自行决定，不需要死守规则”. This authorizes that
+specific operational recovery: preserve the original lock and diagnostic
+evidence, establish that its process and the service are stopped, archive the
+lock, then start the original service once. It does not waive account privacy,
+unknown-operation fences or authorize replaying an AI request. The standing
+automatic lock guard is unchanged.
+
+Read-only diagnosis found the configured first two DNS servers unresponsive,
+while existing later resolvers worked. A process-scoped
+`RES_OPTIONS=timeout:1 attempts:1` made the existing Firebase Auth and binding
+reads succeed. Apply this reversible setting only to the original user service;
+do not replace system DNS, change the model's delivery limits or migrate data.
+
+## Second Groq pass
+
+After the first Groq pass exposed remaining goal/label errors, LI explicitly
+approved “允许再验证 24 条” in response to a proposal of one additional fixed
+24-case synthetic pass, Free Plan only, US$0, no real-user data. Use profile
+`goal-v2`: general goal/constraint instructions from
+`tool/ai-companion-eval/goal-prompt-candidate.mjs`, preserving the original user
+messages, history, Persona suffix and rubric. The output ceiling is reduced to
+1,024 combined completion/reasoning tokens for the requested brief answers;
+truncation remains failure. This parameter difference is part of the candidate,
+not a speed comparison or a pure prompt-only experiment.
+
+The first pass's 4,000-token reservation wording above described an estimate,
+not a proven server token limit. Both passes use at least 30.1 seconds between
+starts. Candidate whole-request UTF-8 byte estimates plus 1,024 output and 512
+wrapper allowance have adjacent-pair maximum 7,534; that is still an estimate,
+not a tokenizer or rate-limit guarantee. Actual usage is recorded and checked;
+429, unknown outcomes, missing usage and ineligible output stop the run without
+retry or upgrade. Free-plan eligibility is verified again before dispatch.

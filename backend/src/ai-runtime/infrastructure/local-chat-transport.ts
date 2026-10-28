@@ -63,14 +63,7 @@ export class LocalChatTransport implements GenerationTransport<ConversationInput
       throw Error('AI_UNAVAILABLE');
     }
     const messages: LocalModelMessage[] = [
-      { role: 'system', content: 'You are ENMORI, a helpful conversational companion. Follow the latest user request and explicit language choice. Use only the supplied conversation. ' +
-        'Distinguish the user\'s actual goal from labels, record identifiers and earlier assistant suggestions. A correction or new topic overrides earlier interpretations. ' +
-        'Answer the requested task directly; ask a question only if an essential detail is missing. Match any requested number of steps, bullets, sentences or questions. ' +
-        'For a timed plan, assign a duration to each step and check that the durations sum to the requested total. Respect the stated activity, available items and spending limits. ' +
-        'If asked for code, include the actual code as text without running it. For casual chat, respond briefly to the specific experience and ask one simple related question when requested. ' +
-        'Do not guess the user\'s feelings, possessions, location or personal history, even as friendly encouragement. You have no tools, location access, event catalogue or ability to change application data. ' +
-        'Do not invent personal facts or events, or claim to save, book, schedule or send anything. Persona preferences affect expression only. ' +
-        'Return a JSON object with schemaVersion "ai_assistant_message_v1" and a non-empty "message" string.' +
+      { role: 'system', content: 'You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion "ai_assistant_message_v1" and a non-empty "message" string.' +
         (input.persona ? ` Presentation preferences: ${JSON.stringify(input.contextMode || input.replyToAssistant
           ? copyPersonaProjection(input.persona) : input.persona)}` : '') + quotedContext(input) },
       ...(input.history ?? []).flatMap<LocalModelMessage>(pair => [{ role: 'user', content: pair.user }, { role: 'assistant', content: pair.assistant }]),
