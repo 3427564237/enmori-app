@@ -9,7 +9,7 @@ import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
 import type { ConversationMaintenance, MaintenanceResult } from "../ports/conversation-maintenance.js";
 
 import { inspectProvenance, parseProvenance, type TransactionalNotePrerequisites } from "./transactional-note-sources.js";
-import { inspectSourceUseV2, parseSourceUseV2 } from "./source-use-v2.js";
+import { inspectSourceUseV2, parseSourceUse } from "./source-use-v2.js";
 
 const RUNTIME="ai_runtime_fence/current", PROGRESS="ai_cleanup_progress/source_sweep";
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -119,7 +119,7 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
           return source || Object.hasOwn(a.data,"text") ? "changed" : "kept";
         }
         if(a.data.availability !== "available" || typeof a.data.text !== "string" || !a.data.text.isWellFormed() || !a.data.text.trim()) unavailable();
-        const receipt = parseSourceUseV2(source); if(!receipt)unavailable();
+        const receipt = parseSourceUse(source); if(!receipt)unavailable();
         const checked = await inspectSourceUseV2(tx,at.ownerAccountId,at.conversationId,receipt,
           this.utcMilliseconds,()=>{});
         if(checked.kind === "unavailable")unavailable();
@@ -140,8 +140,8 @@ export class FirestoreConversationMaintenance implements ConversationMaintenance
         return source||Object.hasOwn(a.data,"text")?"changed":"kept";
       }
       if(typeof a.data.text!=="string"||!a.data.text.isWellFormed()||!a.data.text.trim())unavailable();
-      if(source?.schemaVersion==="source_use_v2"){
-        const receipt=parseSourceUseV2(source);if(!receipt)unavailable();
+      if(["source_use_v2","source_use_v3"].includes(String(source?.schemaVersion))){
+        const receipt=parseSourceUse(source);if(!receipt)unavailable();
         const checked=await inspectSourceUseV2(tx,at.ownerAccountId,at.conversationId,receipt,this.utcMilliseconds,()=>{});
         if(checked.kind==="unavailable")unavailable();if(checked.kind==="valid")return "kept";
         const {text:_discarded,...metadata}=a.data;

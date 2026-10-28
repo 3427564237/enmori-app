@@ -7,10 +7,10 @@ import type { ConversationResult } from "./conversation-operations.js";
 /** The mutable local reply branch; never the old immutable Note
  * reader or a category-wide permission. No contents or IDs enter model keys. */
 export type SelectReplyContext = {
-  readonly processing:"local";
+  readonly processing:"local" | "cloud";
   readonly sources:readonly {readonly kind:"check_in";readonly checkInId:string}[];
 } | {
-  readonly processing:"local";
+  readonly processing:"local" | "cloud";
   readonly today:{readonly timeZone:string};
 };
 /** Request-only UI metadata. Never model input or a persisted category grant. */
@@ -34,6 +34,8 @@ export interface SelectedSourceIdentity {
   readonly observedAt:string;
 }
 export interface SelectedReplySnapshot {
+  readonly processing?: "local" | "cloud";
+  readonly cloudAiConsentGeneration?: number;
   readonly purposeRevocationGeneration:number;
   readonly sources:readonly SelectedSourceIdentity[];
   readonly historyPairs:readonly HistoryPairIdentity[];
@@ -47,6 +49,8 @@ export interface PreparedReplySelection {
   readonly today?:TodayReplySelection;
 }
 export interface SelectedReplyGrant extends ExecuteReplySelection {
+  readonly processing?: "local" | "cloud";
+  readonly cloudAiConsentGeneration?: number;
   readonly purposeRevocationGeneration:number;
   readonly sources:readonly (SelectedSourceIdentity & {readonly selectionKey:string})[];
   readonly historyPairs:readonly (HistoryPairIdentity & {readonly historyKey:string})[];
@@ -67,9 +71,10 @@ export interface SelectedReplyReadPort {
   read(context:AcceptedContextRead,grant:SelectedReplyGrant):Promise<SelectedReplyReadResult>;
 }
 export interface SelectedReplyDependencies {
+  readonly cloudAiConsentGeneration?: number;
   readonly historySnapshot?:readonly HistoryPairIdentity[];
   readonly excludedHistoryPairs?:readonly HistoryPairIdentity[];
-  readonly processing:"local";
+  readonly processing:"local" | "cloud";
   readonly asOf:FullPrecisionInstant;
   readonly permittedCheckInIds:readonly string[];
   readonly excludedCheckInIds:readonly string[];

@@ -1,3 +1,4 @@
+import type { CloudAiConsentAuthority } from "../../src/account/ports/cloud-ai-consent-authority.js";
 import { BoundedAiRuntime } from "../../src/ai-runtime/application/bounded-ai-runtime.js";
 import type { GenerationTransport, RequestBudget } from "../../src/ai-runtime/ports/generation-transport.js";
 import { AsyncConversationApplication } from "../../src/ai-conversation/application/async-conversation-application.js";
@@ -142,7 +143,7 @@ export class FakeAsyncStore implements AsyncConversationStore {
   }
 }
 export function fixture(strategy?: "open_conversation_v1",
-  runtimeFactory?: (clock: FakeClock, model: GenerationTransport<ConversationInput>) => BoundedAiRuntime<AsyncConversationModelInput>) {
+  runtimeFactory?: (clock: FakeClock, model: GenerationTransport<ConversationInput>) => BoundedAiRuntime<AsyncConversationModelInput>, cloudConsent?: CloudAiConsentAuthority) {
   const clock = new FakeClock(), auth = new FakeAuthority(), reads = new FakeReads(), store = new FakeAsyncStore();
   const calls: { input: ConversationInput; budget: RequestBudget; completion: ReturnType<typeof deferred<Uint8Array>> }[] = [];
   const model: GenerationTransport<ConversationInput> = { generate(input, budget) {
@@ -159,7 +160,7 @@ export function fixture(strategy?: "open_conversation_v1",
     candidate: async () => ({ ok: true as const, value: undefined }) };
   let utc = { ...timestamp };
   const app = new AsyncConversationApplication(runtime, auth, reads, store, gates, delivery,
-    { monotonicNow: () => clock.now(), utcNow: () => ({ ...utc }) }, strategy);
+    { monotonicNow: () => clock.now(), utcNow: () => ({ ...utc }) }, strategy, undefined, undefined, cloudConsent);
   const who = identity();
   const create = (op = operation(), text = "Synthetic current input", retryUser?: AsyncSavedUser) => app.create({ identity: who,
     operation: op, text, ...(retryUser ? { retryUser } : {}) });

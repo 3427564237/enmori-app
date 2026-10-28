@@ -1,3 +1,4 @@
+import { hasCloudAiConsent } from "../../account/domain/cloud-ai-consent.js";
 import { randomUUID } from "node:crypto";
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx, StoredDocument as RecordData,
   StoredDocumentSnapshot as Snapshot } from "../../shared/infrastructure/firebase/firestore-gateway.js";
@@ -14,7 +15,7 @@ import type { PresentationMetadata } from "../ports/conversation-lifecycle.js";
 import { normalizePersonaInput } from "../../personas/domain/persona-values.js";
 import type { FirstFlowConversationTransaction } from "../../proactive/ports/conversation-transaction.js";
 import type { FirstFlowResult, FirstFlowSource, FirstFlowReservation } from "../../proactive/ports/first-flow.js";
-import { inspectSourceUseV2, messageSourceVersion, checkInSourceVersion, parseSourceUseV2 } from "./source-use-v2.js";
+import { inspectSourceUseV2, messageSourceVersion, checkInSourceVersion, parseSourceUse } from "./source-use-v2.js";
 import { parseCheckInProjection, isSafeDocumentId } from "../../shared/infrastructure/firebase/firestore-records.js";
 import { parseReadAuthority, parseReadPersona, parseReadPersonaState } from "./real-context-records.js";
 import type { ConversationReadback, ConversationSummary, ConversationSummaryPage } from "../ports/conversation-operations.js";
@@ -167,7 +168,7 @@ export class FirestoreConversationStore implements RealConversationStore {
       const check=()=>this.readCurrent(current),location=this.location(owner,id);check();await this.owner(tx,principal,owner,check);
       const inv=await this.inventory(tx,location,false,check);if(!inv)refuse("conversation_unavailable");
       const row=inv.rows.find(r=>r.id===assistantMessageId);if(!row||row.data.role!=="assistant"||row.data.availability!=="available")refuse("conversation_unavailable");
-      const receipt=parseSourceUseV2(await readWhileCurrent(check,()=>tx.get(`${parentPath(location)}/message_sources/${row.id}`)));
+      const receipt=parseSourceUse(await readWhileCurrent(check,()=>tx.get(`${parentPath(location)}/message_sources/${row.id}`)));
       if(!receipt)refuse("conversation_unavailable");
       const state=await inspectSourceUseV2(tx,owner,id,receipt,this.utcMilliseconds,check);
       if(state.kind!=="valid")refuse(state.kind==="invalid"?(state.reason==="changed"?"conflict":"conversation_unavailable"):"unavailable");
@@ -229,7 +230,8 @@ export class FirestoreConversationStore implements RealConversationStore {
     if (!validDependencies(deps)) refuse("unavailable");
     if(deps.selectedReply){
       const selected=deps.selectedReply,started=this.utcMilliseconds();
-      if(selected.processing!=="local"||!Array.isArray(selected.permittedCheckInIds)||selected.permittedCheckInIds.length>5||
+      if (selected.processing === 'cloud' && (!hasCloudAiConsent(account.cloudAiConsent, account.optionalProcessingConsent) || !nonnegative(selected.cloudAiConsentGeneration) || selected.cloudAiConsentGeneration !== account.cloudAiConsentGeneration)) refuse('denied');
+      if(!["local","cloud"].includes(selected.processing)||!Array.isArray(selected.permittedCheckInIds)||selected.permittedCheckInIds.length>5||
         new Set(selected.permittedCheckInIds).size!==selected.permittedCheckInIds.length||!Array.isArray(selected.excludedCheckInIds)||!Array.isArray(selected.sources)||selected.sources.length>15||
         selected.permittedCheckInIds.some(id=>selected.excludedCheckInIds.includes(id))||deps.sources.some(s=>!selected.permittedCheckInIds.includes(s.sourceId)))refuse("selection_conflict");
       const checkIns=selected.sources.filter(s=>s.kind==="check_in");
@@ -465,7 +467,8 @@ export class FirestoreConversationStore implements RealConversationStore {
       tx.create(path, { role: "assistant", sequence, availability: "available", text: input.text, replyToUserMessageId: op.userMessageId,
         ...input.presentation, appendBefore: inv.cutoff });
       const selected=a.dependencies.selectedReply;
-      tx.create(provenance,selected&&selected.sources.length?{schemaVersion:"source_use_v2",purpose:"selected_checkin_reply",processing:"local",
+      tx.create(provenance,selected&&(selected.sources.length||selected.processing==="cloud")?{schemaVersion:selected.processing==="cloud"?"source_use_v3":"source_use_v2",purpose:"selected_checkin_reply",processing:selected.processing,
+        ...(selected.processing==="cloud"?{provider:"groq",disclosureVersion:"groq_cloud_v1",cloudAiConsentGeneration:selected.cloudAiConsentGeneration}:{}),
         sources:selected.sources.map(s=>({...s,cardRef:randomUUID()})),requiredCategories:[...(selected.sources.some(s=>s.kind==="check_in")?["check_ins"]:[]),
           ...(selected.sources.some(s=>s.kind==="conversation_message")?["conversation_history"]:[])],purposeRevocationGeneration:a.dependencies.purposeRevocationGeneration}:
         { sources: a.dependencies.sources.map(({ sourceType, sourceId }) => ({ sourceType, sourceId })),
@@ -497,7 +500,7 @@ export class FirestoreConversationStore implements RealConversationStore {
       if (sources !== undefined) refuse("unavailable");
       return this.message(assistant);
     }
-    if (sources?.schemaVersion === "source_use_v2") return this.sourcedV2(tx,t,assistant,sources,check);
+    if (["source_use_v2","source_use_v3"].includes(String(sources?.schemaVersion))) return this.sourcedV2(tx,t,assistant,sources,check);
     const parsed = parseProvenance(sources); if (!parsed) refuse("unavailable");
     const state = await readWhileCurrent(check, () => inspectProvenance(tx, this.gateway, this.notePrerequisites, t.ownerAccountId, parsed, check));
     if (state === "unavailable") refuse("unavailable");
@@ -534,7 +537,7 @@ export class FirestoreConversationStore implements RealConversationStore {
       if(source !== undefined)refuse("unavailable");
       return this.message(row);
     }
-    const receipt = parseSourceUseV2(source); if(!receipt)refuse("unavailable");
+    const receipt = parseSourceUse(source); if(!receipt)refuse("unavailable");
     this.now();
     const result = await inspectSourceUseV2(tx,t.ownerAccountId,t.conversationId,receipt,this.utcMilliseconds,()=>check?.());
     check?.();
@@ -544,7 +547,8 @@ export class FirestoreConversationStore implements RealConversationStore {
       return this.message({...row,data:{...metadata,availability:"unavailable"}});
     }
     if(result.kind!=="valid")refuse("unavailable");
-    return {...this.message(row),sources:result.cards};
+    return {...this.message(row),...(result.cards.length ? {sources:result.cards} : {}),
+      ...(receipt.processing === 'cloud' ? {processing:'cloud' as const,provider:'groq' as const,disclosureVersion:'groq_cloud_v1' as const} : {})};
   }
   /** Select the latest TWO canonical complete pairs before exclusions. Never backfill.
    * An explicit expected set rechecks precisely the borrowed pairs at every effect. */
@@ -569,7 +573,7 @@ export class FirestoreConversationStore implements RealConversationStore {
       const candidate=inv.rows.find(r=>r.id===row.data.acceptedAssistantMessageId);
       if(candidate?.data.availability==="available"){
         const proof=await readWhileCurrent(check,()=>tx.get(`${parentPath(t)}/message_sources/${candidate.id}`));
-        const required=proof?.schemaVersion==="source_use_v2"?parseSourceUseV2(proof)?.sources.filter(s=>s.kind==="check_in").map(s=>s.id):parseProvenance(proof)?.sources.map(s=>s.sourceId);
+        const required=["source_use_v2","source_use_v3"].includes(String(proof?.schemaVersion))?parseSourceUse(proof)?.sources.filter(s=>s.kind==="check_in").map(s=>s.id):parseProvenance(proof)?.sources.map(s=>s.sourceId);
         if(required?.some(id=>!deps?.selectedReply?.permittedCheckInIds.includes(id)||deps.selectedReply.excludedCheckInIds.includes(id)))refuse("selection_conflict");
       }
       const assistant = await this.pair(tx,t,inv,row,check);
@@ -582,8 +586,8 @@ export class FirestoreConversationStore implements RealConversationStore {
       if (expected && !expected.some(p => p.userMessageId === identity.userMessageId && p.assistantMessageId === identity.assistantMessageId &&
           p.userSequence === identity.userSequence && p.assistantSequence === identity.assistantSequence)) refuse("denied");
       const receipt=await readWhileCurrent(check, () => tx.get(`${parentPath(t)}/message_sources/${assistant.messageId}`));
-      if(receipt?.schemaVersion==="source_use_v2"){
-        const v2=parseSourceUseV2(receipt);if(!v2)refuse("unavailable");
+      if(["source_use_v2","source_use_v3"].includes(String(receipt?.schemaVersion))){
+        const v2=parseSourceUse(receipt);if(!v2)refuse("unavailable");
         const closure=deps?.selectedReply;
         for(const source of v2.sources){
           if(source.kind==="check_in"&&(!closure||!closure.permittedCheckInIds.includes(source.id)||closure.excludedCheckInIds.includes(source.id)))refuse("selection_conflict");
@@ -618,7 +622,7 @@ export class FirestoreConversationStore implements RealConversationStore {
     let replyToAssistant:ConversationHistory["replyToAssistant"];
     if(deps?.replyToMessageId){
       const row=inv.rows.find(r=>r.id===deps.replyToMessageId);if(!row||row.data.origin!=="proactive")refuse("source_unavailable");
-      const proof=await readWhileCurrent(check,()=>tx.get(`${parentPath(t)}/message_sources/${row.id}`)),receipt=parseSourceUseV2(proof);
+      const proof=await readWhileCurrent(check,()=>tx.get(`${parentPath(t)}/message_sources/${row.id}`)),receipt=parseSourceUse(proof);
       const message=await this.sourcedV2(tx,t,row,proof,check);if(message.availability!=="available"||!message.text||!receipt)refuse("source_unavailable");
       for(const source of receipt.sources){if(source.kind!=="conversation_message")refuse("selection_conflict");messageSources.set(source.id,{kind:source.kind,id:source.id,version:source.version});}
       replyToAssistant={occurredAt:new Date(row.createTime.seconds*1000+Math.floor(row.createTime.nanoseconds/1e6)).toISOString(),text:message.text};

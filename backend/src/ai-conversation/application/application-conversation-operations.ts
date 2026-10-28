@@ -172,7 +172,7 @@ export class ApplicationConversationOperations implements ConversationOperations
     // capability to arrive within its original 15s, rather than consume it falsely.
     if (!delivery || typeof delivery.acceptCompleteBody !== "function") return Promise.resolve(failure("AI_UNAVAILABLE"));
     if (!this.deliveryCurrent(delivery)) return Promise.resolve({ kind: "terminated" });
-    ticket.selectedGrant=selection&&choice?Object.freeze({purposeRevocationGeneration:selection.purposeRevocationGeneration,selectionRevision:selection.selectionRevision,
+    ticket.selectedGrant=selection&&choice?Object.freeze({...(selection.processing ? {processing:selection.processing,...(selection.processing === "cloud" ? {cloudAiConsentGeneration:selection.cloudAiConsentGeneration!} : {})} : {}),purposeRevocationGeneration:selection.purposeRevocationGeneration,selectionRevision:selection.selectionRevision,
       ...(selection.today?{today:Object.freeze({...selection.today})}:{}),
       sources:Object.freeze(selection.sources.map((s,i)=>Object.freeze({...s,selectionKey:selection.keys[i]!}))),includedKeys:Object.freeze([...choice.includedKeys]),excludedKeys:Object.freeze([...choice.excludedKeys]),
       historyPairs:Object.freeze(selection.historyPairs.map((p,i)=>Object.freeze({...p,historyKey:selection.historyKeys[i]!}))),excludedHistoryKeys:Object.freeze([...(choice.excludedHistoryKeys??[])])}):undefined;

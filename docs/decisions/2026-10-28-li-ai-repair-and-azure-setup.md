@@ -194,3 +194,9 @@ user data or paid upgrade. Offline profile and evaluator tests passed 44/44.
 Official compatibility references: [model](https://console.groq.com/docs/model/qwen/qwen3.8-27b),
 [reasoning](https://console.groq.com/docs/reasoning), and
 [strict structured outputs](https://console.groq.com/docs/structured-outputs).
+
+The fifth pass stopped on its third call (HTTP 429), after two protocol-eligible
+responses. Both observed responses fail grounding/goal criteria. No retry or
+fallback was made; the candidate is rejected without claiming a complete score.
+This pass consumed 3 calls, taking the total to 99; 21 of the latest maximum
+24-call grant remain unused. [Partial assessment](../evidence/2026-10-28-li-ai-repair/groq-qwen38-partial-assessment.md).

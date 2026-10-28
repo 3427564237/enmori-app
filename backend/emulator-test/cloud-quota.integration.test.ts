@@ -1,3 +1,5 @@
+import { createCloudConsentServices } from '../src/bootstrap/cloud-consent-services.js';
+import { createAuthBindingDocumentId } from '../src/shared/infrastructure/firebase/firestore-records.js';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { after, beforeEach, test } from 'node:test';
@@ -51,4 +53,31 @@ test('committed but unacknowledged reservation survives actual SDK recovery into
   assert.equal(restored.reservations.length, 1);
   assert.equal(await restarted.reserve(restored.lease, { tokens: 10, conservativeExpiresAt: 86460000 }, () => true), 'rejected');
   assert.equal((await db.doc(path).get()).data()!.generation, 2);
+});
+
+test('actual SDK cloud consent save, stale revision and lost acknowledgment preserve independent generations',async()=>{
+ const principal={firebaseUid:'synthetic-cloud-consent-emulator'},accountPath='accounts/cloud-consent-emulator';
+ const bindingPath=`auth_bindings/${createAuthBindingDocumentId(principal.firebaseUid)!}`;
+ await db.doc(bindingPath).set({accountId:'cloud-consent-emulator'});
+ await db.doc(accountPath).set({username:'cloud_consent',checkInVisibility:'private',optionalProcessingConsent:'accepted',onboardingCompletedAt:'2026-10-28T00:00:00.000Z',purposeRevocationGeneration:3});
+ let loseAck=false;
+ const wrapped:FirestoreGateway={async runTransaction(work,options){const result=await gateway.runTransaction(work,options);if(loseAck)throw Error('synthetic lost acknowledgment');return result;}};
+ const services=createCloudConsentServices(wrapped,process.env,epoch,()=>true);
+ const change={principal,checkInVisibility:'private',optionalProcessingConsent:'accepted',expectedRevision:0,cloudAiConsent:{state:'accepted',disclosureVersion:'groq_cloud_v1'}};
+ try {
+  assert.equal((await services.preferences.saveSettings(change)).ok,true);
+  const permit=await services.authority.read(principal,'cloud-consent-emulator',()=>true);assert.equal(permit.kind,'authorized');if(permit.kind!=='authorized')throw Error();
+  assert.equal(permit.generation,1);assert.equal(permit.purposeGeneration,3);
+  assert.equal((await services.preferences.saveSettings(change)).ok,false);assert.equal(permit.current(),false);permit.release();
+  loseAck=true;const result=await services.preferences.saveSettings({...change,expectedRevision:1,cloudAiConsent:{state:'declined',disclosureVersion:'groq_cloud_v1'}});assert.equal(result.ok,false);
+  loseAck=false;const actual=(await db.doc(accountPath).get()).data()!;
+  assert.equal(actual.cloudAiConsentGeneration,2);assert.equal(actual.purposeRevocationGeneration,3);
+  assert.equal((await services.authority.read(principal,'cloud-consent-emulator',()=>true)).kind,'terminated');
+  const next={processEpoch:randomUUID(),generation:2};
+  await db.doc(fence).set({...next,cleanupGeneration:0});
+  const restarted=createCloudConsentServices(gateway,process.env,next,()=>true);
+  assert.equal((await restarted.authority.read(principal,'cloud-consent-emulator',()=>true)).kind,'denied');
+  assert.equal((await services.preferences.saveSettings({...change,expectedRevision:2})).ok,false);
+  assert.equal((await db.doc(accountPath).get()).data()!.cloudAiConsent.state,'declined');
+ } finally {await db.doc(bindingPath).delete();await db.doc(accountPath).delete();}
 });

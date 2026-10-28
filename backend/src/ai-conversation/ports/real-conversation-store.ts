@@ -37,6 +37,9 @@ export interface OriginalWriteAuthority {
     | { readonly kind: "denied" | "unavailable" }>;
 }
 export interface StoredConversationMessage {
+  readonly processing?: 'cloud';
+  readonly provider?: 'groq';
+  readonly disclosureVersion?: 'groq_cloud_v1';
   readonly messageId: string;
   readonly sequence: number;
   readonly role: "user" | "assistant";

@@ -1,3 +1,5 @@
+import type { CloudConsentFence } from "./cloud-consent-fence.js";
+import { parseCloudAiConsent } from '../domain/cloud-ai-consent.js';
 import { parseProfileDetails, parseFieldPrivacy } from '../domain/profile-details.js';
 import { appFailure, type AppFailure } from "../../shared/application/app-failure.js";
 import { err, ok, type Result } from "../../shared/domain/result.js";
@@ -9,7 +11,7 @@ import type { OwnAvatar } from "./own-avatar.js";
 import type { OwnAvatarData } from "../domain/avatar-values.js";
 
 export class OwnAccountPreferences {
-  public constructor(private readonly repository: AccountPreferencesRepository, private readonly avatar?: OwnAvatar) {}
+  public constructor(private readonly repository: AccountPreferencesRepository, private readonly avatar?: OwnAvatar, private readonly cloudFence?: CloudConsentFence) {}
 
   public getSharedAvatar(principal: AuthPrincipal) {
     return this.avatar?.getSharedAvatar(principal) ?? Promise.resolve(err(appFailure("SERVICE_UNAVAILABLE")));
@@ -52,21 +54,29 @@ export class OwnAccountPreferences {
 
   public async saveSettings(input: { readonly principal: AuthPrincipal; readonly checkInVisibility: unknown;
     readonly defaultCheckInLocation?: unknown; readonly defaultCheckInWeather?: unknown; readonly homeWeatherAuto?: unknown;
-    readonly optionalProcessingConsent: unknown; readonly fieldPrivacy?: unknown; readonly expectedRevision: unknown }): Promise<Result<OwnSettings, AppFailure>> {
+    readonly optionalProcessingConsent: unknown; readonly cloudAiConsent?: unknown; readonly fieldPrivacy?: unknown; readonly expectedRevision: unknown }): Promise<Result<OwnSettings, AppFailure>> {
     if ([input.defaultCheckInLocation, input.defaultCheckInWeather, input.homeWeatherAuto].some(v => v !== undefined && typeof v !== "boolean")) return err(appFailure("SETTINGS_INVALID"));
+    const cloudAiConsent = input.cloudAiConsent === undefined ? undefined : parseCloudAiConsent(input.cloudAiConsent);
+    if (input.cloudAiConsent !== undefined && (!cloudAiConsent || cloudAiConsent.state === 'accepted' && input.optionalProcessingConsent !== 'accepted')) return err(appFailure('SETTINGS_INVALID'));
     const fieldPrivacy = input.fieldPrivacy === undefined ? undefined : parseFieldPrivacy(input.fieldPrivacy);
     if (input.fieldPrivacy !== undefined && fieldPrivacy === undefined) return err(appFailure("SETTINGS_INVALID"));
     if (!isVisibility(input.checkInVisibility) || !isRevision(input.expectedRevision) ||
       (input.optionalProcessingConsent !== "accepted" && input.optionalProcessingConsent !== "rejected")) {
       return err(appFailure("SETTINGS_INVALID"));
     }
-    return this.saveResult(await this.repository.saveSettings(input.principal.firebaseUid, {
+    const release = this.cloudFence?.saving(input.principal, input.expectedRevision);
+    let confirmed: number | false | undefined;
+    try { const result = await this.repository.saveSettings(input.principal.firebaseUid, {
+      ...(cloudAiConsent === undefined ? {} : { cloudAiConsent }),
       ...(input.defaultCheckInLocation === undefined ? {} : { defaultCheckInLocation: input.defaultCheckInLocation as boolean }),
       ...(input.defaultCheckInWeather === undefined ? {} : { defaultCheckInWeather: input.defaultCheckInWeather as boolean }),
       ...(input.homeWeatherAuto === undefined ? {} : { homeWeatherAuto: input.homeWeatherAuto as boolean }),
       ...(fieldPrivacy === undefined ? {} : { fieldPrivacy }), checkInVisibility: input.checkInVisibility, optionalProcessingConsent: input.optionalProcessingConsent,
       expectedRevision: input.expectedRevision,
-    }), "SETTINGS_REVISION_PRECONDITION_FAILED");
+    });
+      confirmed = result.kind === 'saved' ? result.value.revision : result.kind === 'dependency_unavailable' ? undefined : false;
+      return this.saveResult(result, "SETTINGS_REVISION_PRECONDITION_FAILED");
+    } finally { release?.(confirmed); }
   }
 
   private readResult<T>(result: AccountRead<T>): Result<T, AppFailure> {

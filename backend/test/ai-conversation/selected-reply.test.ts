@@ -1,3 +1,8 @@
+import { CloudConsentFence } from "../../src/account/application/cloud-consent-fence.js";
+import { FirestoreCloudAiConsentAuthority } from "../../src/account/infrastructure/firestore-cloud-ai-consent-authority.js";
+import { BoundedAiRuntime } from "../../src/ai-runtime/application/bounded-ai-runtime.js";
+import { CloudAdmissionOwner } from "../../src/ai-runtime/application/cloud-admission-owner.js";
+import { AuthorizedAsyncCloudConversationTransport, ApplicationCloudConversationConsent } from "../../src/ai-conversation/application/async-cloud-conversation-transport.js";
 import assert from "node:assert/strict";
 import { fixture as runtimeFixture, until } from "./async-conversation-fakes.js";
 import { valid } from "../ai-runtime/support.js";
@@ -22,18 +27,18 @@ const base=`accounts/${owner}`,root=`${base}/conversations/${topic}`,principal={
 const profile="synthetic-selected-profile",environment={ENMORI_ENVIRONMENT:"test",ENMORI_CONTROLLED_PROFILE_DIRECTORY:profile,APPDATA:profile,HOME:profile,USERPROFILE:profile,XDG_CONFIG_HOME:profile,
   GCLOUD_PROJECT:"demo-enmori-rmvp01a-r10",FIRESTORE_EMULATOR_HOST:"127.0.0.1:8080",FIREBASE_AUTH_EMULATOR_HOST:"127.0.0.1:9099"};
 function value<T>(r:ConversationResult<T>):T{assert.equal(r.kind,"success");if(r.kind!=="success")throw Error("expected success");return r.value;}
-function fixture(){
+function fixture(cloud=false){
   const g=new MetadataFirestoreGateway(now);let live=true,monotonic=0;
   g.put(`auth_bindings/${createAuthBindingDocumentId(principal.firebaseUid)!}`,{accountId:owner});
-  g.put(base,{username:"selected_owner",optionalProcessingConsent:"accepted",checkInVisibility:"private",onboardingCompletedAt:new Date(now).toISOString(),purposeRevocationGeneration:0});
+  g.put(base,{username:"selected_owner",optionalProcessingConsent:"accepted",checkInVisibility:"private",onboardingCompletedAt:new Date(now).toISOString(),purposeRevocationGeneration:0,...(cloud?{cloudAiConsent:{state:"accepted",disclosureVersion:"groq_cloud_v1"},cloudAiConsentGeneration:1}:{})});
   g.put(`${base}/persona_state/current`,{stateRevision:0,livePersonaIds:[]});
   for(const [index,key]of [a,b].entries())g.put(`check_ins/${key}`,{ownerAccountId:owner,note:`quoted-${key}`,mood:"calm",activity:"walking",createdAt:new Date(now-60000-index*60000).toISOString(),
     locationLabel:"location-canary",revision:1},now-60000-index*60000);
   const controller=new AbortController(),context:AcceptedContextRead={principal,ownerId:owner,session:{},originalRequest:{},acceptedAt:0,deadline:60000,asOf:{seconds:now/1000,nanoseconds:0},signal:controller.signal};
-  const adapter=new FirestoreSelectedReplyReader(g,environment,{verifyRead:async c=>c===context&&live?{kind:"read",value:principal}:{kind:"denied"},currentRead:c=>c===context&&live},()=>g.now,(tx,p,o,c,current)=>store.prepareHistorySnapshot(tx,p,o,c,current));
+  const adapter=new FirestoreSelectedReplyReader(g,environment,{verifyRead:async c=>c===context&&live?{kind:"read",value:principal}:{kind:"denied"},currentRead:c=>c===context&&live},()=>g.now,(tx,p,o,c,current)=>store.prepareHistorySnapshot(tx,p,o,c,current),cloud?"cloud":"local");
   const ordinary={principal,ownerId:owner,signal:controller.signal,deadline:15000,current:()=>live};
-  const prepare=async(ids=[a])=>value(await adapter.prepare(ordinary,{processing:"local",sources:ids.map(checkInId=>({kind:"check_in",checkInId}))},g.rows.has(root)?topic:undefined));
-  const grant=(snapshot:SelectedReplySnapshot,include=snapshot.sources.map((_,i)=>id(100+i)),exclude:string[]=[]):SelectedReplyGrant=>({purposeRevocationGeneration:snapshot.purposeRevocationGeneration,selectionRevision:id(90),historyPairs:snapshot.historyPairs.map((p,i)=>({...p,historyKey:id(200+i)})),excludedHistoryKeys:[],sources:snapshot.sources.map((s,i)=>({...s,selectionKey:id(100+i)})),includedKeys:include,excludedKeys:exclude});
+  const prepare=async(ids=[a])=>value(await adapter.prepare(ordinary,{processing:cloud?"cloud":"local",sources:ids.map(checkInId=>({kind:"check_in",checkInId}))},g.rows.has(root)?topic:undefined));
+  const grant=(snapshot:SelectedReplySnapshot,include=snapshot.sources.map((_,i)=>id(100+i)),exclude:string[]=[]):SelectedReplyGrant=>({...snapshot,purposeRevocationGeneration:snapshot.purposeRevocationGeneration,selectionRevision:id(90),historyPairs:snapshot.historyPairs.map((p,i)=>({...p,historyKey:id(200+i)})),excludedHistoryKeys:[],sources:snapshot.sources.map((s,i)=>({...s,selectionKey:id(100+i)})),includedKeys:include,excludedKeys:exclude});
   const failures:string[]=[];const reader=(selection:SelectedReplyGrant)=>new SelectedReplyReader(context,selection,adapter,()=>monotonic,()=>live,k=>failures.push(k));
   const store=new FirestoreConversationStore(g,environment,()=>g.now);
   const target:OperationTarget={ownerAccountId:owner,conversationId:topic,userMessageId:id(30),operationId:id(31),kind:"send",targetKind:"existing"};
@@ -100,14 +105,18 @@ test("effect transaction independently rejects a changed selected source before 
   assert.equal((await f.store.initializeOperation(f.target,epoch.value,auth)).kind,"source_changed");assert.equal(f.g.writes,before);assert(!f.g.rows.has(`ai_operation_fences/${f.target.operationId}`));
 });
 
-async function executionFixture(selected:string[]|null=[a],existing=false,replyToMessageId?:string,initialPairSource?:string){
-  const f=fixture(),runtime=runtimeFixture();if(initialPairSource)seedPair(f,initialPairSource);const snapshot=selected===null?undefined:await f.prepare(selected),grant=snapshot?f.grant(snapshot):undefined,epoch=await f.store.startEpoch(id(50));assert.equal(epoch.kind,"confirmed");if(epoch.kind!=="confirmed")throw Error("epoch");
+async function executionFixture(selected:string[]|null=[a],existing=false,replyToMessageId?:string,initialPairSource?:string,cloud=false){
+  const f=fixture(cloud),runtime=runtimeFixture(undefined,cloud?(clock,model)=>{
+    const lease={};const transport=new AuthorizedAsyncCloudConversationTransport({dispatch:async(input,budget)=>({kind:"response",physical:"stopped",raw:await model.generate(input,budget)})},new ApplicationCloudConversationConsent());
+    const owner=new CloudAdmissionOwner(clock,transport,{recover:async()=>({kind:"confirmed",lease,reservations:[],previousRemote:"none_confirmed"}),current:l=>l===lease,reserve:async()=>"confirmed"},{windowMs:86400000,maxRequests:24,maxTokens:24000,tokensPerRequest:1000});
+    void owner.recover();return new BoundedAiRuntime(clock,{kind:"cloud",owner},true);
+  }:undefined);if(initialPairSource)seedPair(f,initialPairSource);const snapshot=selected===null?undefined:await f.prepare(selected),grant=snapshot?f.grant(snapshot):undefined,epoch=await f.store.startEpoch(id(50));assert.equal(epoch.kind,"confirmed");if(epoch.kind!=="confirmed")throw Error("epoch");
   const accepted:ExecutedConversation[]=[];runtime.reads.authority={...runtime.reads.authority,purposeRevocationGeneration:0};
-  const executor=new AsyncConversationOperationExecutor({runtime:runtime.runtime,strategy:"open_conversation_v1",clock:{monotonicNow:()=>runtime.clock.now(),utcNow:()=>({seconds:f.g.now/1000,nanoseconds:0})},gates:runtime.gates,
+  const executor=new AsyncConversationOperationExecutor({...(cloud?{cloudConsent:new FirestoreCloudAiConsentAuthority(f.g,new CloudConsentFence())}:{}),runtime:runtime.runtime,strategy:"open_conversation_v1",clock:{monotonicNow:()=>runtime.clock.now(),utcNow:()=>({seconds:f.g.now/1000,nanoseconds:0})},gates:runtime.gates,
     ports:original=>{
       const authority:AsyncConversationAuthority={current:i=>original.current(i),freshAuth:async i=>{const r=await original.verify(i);return r.kind==="verified"?"authorized":r.kind==="dependency_unavailable"?"unavailable":"denied";},preaccept:async i=>{const r=await original.verify(i);return r.kind==="verified"?"authorized":"denied";}};
       const store=new AsyncFirestoreConversationStore(f.store,epoch.value,authority);
-      return {authority,reads:runtime.reads,selectedReads:new FirestoreSelectedReplyReader(f.g,environment,original,()=>f.g.now,(tx,p,o,c,current)=>f.store.prepareHistorySnapshot(tx,p,o,c,current)),store,acknowledgedPair:store};
+      return {authority,reads:runtime.reads,selectedReads:new FirestoreSelectedReplyReader(f.g,environment,original,()=>f.g.now,(tx,p,o,c,current)=>f.store.prepareHistorySnapshot(tx,p,o,c,current),cloud?"cloud":"local"),store,acknowledgedPair:store};
     }});
   const identity={principal,ownerId:owner,session:{},tokenInstance:{},originalRequest:{}},operation={operationId:id(80),conversationId:topic,userMessageId:id(81),kind:"send" as const,targetKind:existing?"existing" as const:"reserved_new" as const};
   const create=(chosen=grant)=>executor.create({identity,operation,text:()=>"Synthetic exact draft",verifyCurrentAuth:async()=>({kind:"verified",principal}),...(chosen?{selectedReply:chosen}:{}),...(replyToMessageId?{replyToMessageId}: {})},
@@ -213,4 +222,14 @@ test("excluding the prepared top two exchanges never backfills an older source-f
   const r=f.reader({...grant,excludedHistoryKeys:grant.historyPairs.map(p=>p.historyKey)});assert.equal(await r.prepare(),"ready");
   const auth:OriginalWriteAuthority={principal,current:()=>true,verifyCurrentAuth:async()=>({kind:"verified",principal}),dependencies:r.dependencies()!},result=await f.store.readHistory(f.target,auth);
   assert.deepEqual(result,{kind:"confirmed",value:{pairs:[],sources:[]}});assert.equal(f.g.writes,0);assert.equal([...f.g.rows.keys()].filter(p=>p.startsWith(`${root}/messages/`)).length,6);
+});
+
+test("cloud selected execution persists v3 and returns cloud provenance through actual executor/readback",async()=>{
+ const f=await executionFixture([a],false,undefined,undefined,true),pending=f.create().dispatch();await waitModel(f,pending);
+ assert(!JSON.stringify(f.runtime.calls[0]!.input).includes('cloudAiConsent'));
+ f.runtime.calls[0]!.completion.resolve(valid('Synthetic cloud reply'));const result=await pending;
+ assert.equal(result.kind,'success');if(result.kind!=='success')return;
+ assert.equal(result.value.assistantMessage.processing,'cloud');assert.equal(result.value.assistantMessage.provider,'groq');
+ const proof=f.g.rows.get(`${root}/message_sources/${result.value.assistantMessage.messageId}`)!.data;
+ assert.equal(proof.schemaVersion,'source_use_v3');assert.equal(proof.cloudAiConsentGeneration,1);assert.equal(proof.processing,'cloud');
 });

@@ -82,6 +82,7 @@ final class _AccountPreferencesPageState
   List<String>? _reviewConflicts;
   ProfileVisibility _profileVisibility = ProfileVisibility.private;
   CheckInVisibility _checkInVisibility = CheckInVisibility.private;
+  CloudAiConsent? _cloudConsent;
   OptionalProcessingConsent _consent = OptionalProcessingConsent.rejected;
   bool _defaultLocation = false,
       _defaultWeather = false,
@@ -148,7 +149,8 @@ final class _AccountPreferencesPageState
               _region.text != (details.region ?? '') ||
               _profileVisibility !=
                   (state.profile?.visibility ?? ProfileVisibility.private)
-        : _homeWeatherAuto != (state.settings?.homeWeatherAuto ?? false) ||
+        : _cloudConsent != state.settings?.cloudAiConsent ||
+              _homeWeatherAuto != (state.settings?.homeWeatherAuto ?? false) ||
               _defaultLocation !=
                   (state.settings?.defaultCheckInLocation ?? false) ||
               _defaultWeather !=
@@ -187,6 +189,13 @@ final class _AccountPreferencesPageState
                 controller.saveSettings(
                   _checkInVisibility,
                   _consent,
+                  cloudAiConsent:
+                      _cloudConsent !=
+                              (state.settings?.cloudAiConsent ??
+                                  CloudAiConsent.declined) ||
+                          state.settings?.cloudAiConsent != null
+                      ? _cloudConsent
+                      : null,
                   fieldPrivacy: _privacy,
                   defaultCheckInLocation: _defaultLocation,
                   defaultCheckInWeather: _defaultWeather,
@@ -697,10 +706,44 @@ final class _AccountPreferencesPageState
                         ),
                         value: _consent == OptionalProcessingConsent.accepted,
                         onChanged: ready
-                            ? (v) => setState(
-                                () => _consent = v
+                            ? (v) => setState(() {
+                                _consent = v
                                     ? OptionalProcessingConsent.accepted
-                                    : OptionalProcessingConsent.rejected,
+                                    : OptionalProcessingConsent.rejected;
+                                if (!v && _cloudConsent != null) {
+                                  _cloudConsent = CloudAiConsent.declined;
+                                }
+                              })
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        context.tr('Groq cloud processing', 'Groq 云端处理'),
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      Text(
+                        context.tr(
+                          'When cloud AI is available, your current message, selected conversation or Check-in text, and applicable Persona expression are sent through the Azure backend to GroqCloud. Unselected records, location, weather and account IDs are excluded. Groq may retain content for reliability or abuse investigations for up to 30 days, or longer if legally required; retained data is stored in the United States. Declining does not disable ordinary features. You can revoke this permission here. This setting does not switch the current service to cloud.',
+                          '云端 AI 可用时，当前消息、选中的对话或打卡文字，以及适用的人设表达偏好会经 Azure 后端发送到 GroqCloud。不发送未选中的记录、位置、天气或账号 ID。Groq 可能因可靠性或滥用调查保留内容最多 30 天，法律另有要求时更久；保留的数据存储于美国。拒绝不会停用普通功能，你可随时在此撤回。此设置不会把当前服务切换到云端。',
+                        ),
+                      ),
+                      SwitchListTile(
+                        key: const Key('settings-cloud-consent'),
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          context.tr(
+                            'Allow Groq cloud processing',
+                            '允许 Groq 云端处理',
+                          ),
+                        ),
+                        value: _cloudConsent == CloudAiConsent.accepted,
+                        onChanged:
+                            ready &&
+                                _consent == OptionalProcessingConsent.accepted
+                            ? (value) => setState(
+                                () => _cloudConsent = value
+                                    ? CloudAiConsent.accepted
+                                    : CloudAiConsent.declined,
                               )
                             : null,
                       ),
@@ -810,6 +853,7 @@ final class _AccountPreferencesPageState
     "BIO" => context.tr(label, "个人简介"),
     "Region" => context.tr(label, "地区"),
     "Check-in default visibility" => context.tr(label, "签到默认可见范围"),
+    "Groq cloud processing" => context.tr(label, "Groq 云端处理"),
     "Optional data use" => context.tr(label, "可选数据使用"),
     "Check-in location" => context.tr(label, "签到位置"),
     "Check-in weather" => context.tr(label, "签到天气"),
@@ -836,6 +880,10 @@ final class _AccountPreferencesPageState
         profile == null ? null : _profileLabel(profile.visibility),
       'Check-in default visibility' =>
         settings == null ? null : _checkInLabel(settings.checkInVisibility),
+      'Groq cloud processing' =>
+        state.settings?.cloudAiConsent == CloudAiConsent.accepted
+            ? context.tr('Allowed', '允许')
+            : context.tr('Not allowed', '不允许'),
       'Optional data use' =>
         settings == null
             ? null
@@ -887,6 +935,7 @@ final class _AccountPreferencesPageState
     revision: base.revision,
     checkInVisibility: _checkInVisibility,
     consent: _consent,
+    cloudAiConsent: _cloudConsent,
     defaultCheckInLocation: _defaultLocation,
     defaultCheckInWeather: _defaultWeather,
     homeWeatherAuto: _homeWeatherAuto,
@@ -907,6 +956,7 @@ final class _AccountPreferencesPageState
     _privacy = settings?.fieldPrivacy ?? const FieldPrivacy();
     _checkInVisibility =
         settings?.checkInVisibility ?? CheckInVisibility.private;
+    _cloudConsent = settings?.cloudAiConsent;
     _consent = settings?.consent ?? OptionalProcessingConsent.rejected;
   }
 

@@ -11,6 +11,70 @@ import 'package:enmori/features/account/domain/account_preferences_repository.da
 import 'package:enmori/features/account/domain/account_repository.dart';
 
 void main() {
+  test('cloud consent is explicit, version-bound and omitted by legacy-style saves', () async {
+    final settings = <String, dynamic>{
+      'checkInVisibility': 'private',
+      'optionalProcessingConsent': 'accepted',
+      'revision': 0,
+    };
+    Map<String, dynamic>? sent;
+    final client = BackendApiClient(
+      Uri.parse('https://example.invalid'),
+      () async => const Success('synthetic'),
+      httpClient: MockClient((request) async {
+        if (request.method == 'PUT') {
+          sent = jsonDecode(request.body) as Map<String, dynamic>;
+        }
+        return http.Response(jsonEncode({'settings': settings}), 200);
+      }),
+    );
+    addTearDown(client.close);
+    final repository = BackendAccountPreferencesRepository(client);
+    expect(
+      (await repository.readSettings() as Success<OwnSettings>)
+          .value
+          .cloudAiConsent,
+      isNull,
+    );
+    settings['cloudAiConsent'] = {
+      'state': 'accepted',
+      'disclosureVersion': 'groq_cloud_v1',
+    };
+    expect(
+      (await repository.readSettings() as Success<OwnSettings>)
+          .value
+          .cloudAiConsent,
+      CloudAiConsent.accepted,
+    );
+    await repository.saveSettings(
+      visibility: CheckInVisibility.private,
+      consent: OptionalProcessingConsent.accepted,
+      expectedRevision: 0,
+    );
+    expect(sent!.containsKey('cloudAiConsent'), isFalse);
+    await repository.saveSettings(
+      visibility: CheckInVisibility.private,
+      consent: OptionalProcessingConsent.accepted,
+      expectedRevision: 0,
+      cloudAiConsent: CloudAiConsent.declined,
+    );
+    expect(sent!['cloudAiConsent'], {
+      'state': 'declined',
+      'disclosureVersion': 'groq_cloud_v1',
+    });
+    for (final invalid in [
+      null,
+      {'state': 'accepted', 'disclosureVersion': 'other'},
+      {
+        'state': 'accepted',
+        'disclosureVersion': 'groq_cloud_v1',
+        'provider': 'other',
+      },
+    ]) {
+      settings['cloudAiConsent'] = invalid;
+      expect(await repository.readSettings(), isA<Failure<OwnSettings>>());
+    }
+  });
   test(
     'default booleans decode legacy as off and reject malformed present values',
     () async {

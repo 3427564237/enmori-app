@@ -29,3 +29,15 @@ export class AuthorizedAsyncCloudConversationTransport implements CloudGeneratio
     } catch { return unknown(); }
   }
 }
+
+/** Concrete bridge for handles produced by the cloud-enabled Application.
+ * authorize() performs fresh Auth, cloud grant, source and generation checks. */
+export class ApplicationCloudConversationConsent implements CloudConversationConsent {
+  async verify(handle: AsyncConversationModelInput, budget: RequestBudget): Promise<boolean> {
+    return !budget.signal.aborted && budget.remainingMs() > 0 && this.current(handle);
+  }
+  current(handle: AsyncConversationModelInput): boolean {
+    try { return handle.processing === 'cloud' && handle.cloudConsentCurrent?.() === true; }
+    catch { return false; }
+  }
+}

@@ -141,6 +141,8 @@ export interface AsyncConversationClock {
 export type AsyncConversationGates = ConversationGates;
 /** Backend-local dispatch handle, NEVER serialized into a model payload. */
 export interface AsyncConversationModelInput {
+  readonly processing?: "cloud";
+  readonly cloudConsentCurrent?: () => boolean;
   readonly authorize: () => Promise<boolean>;
   /** Borrow only after authorize succeeds, immediately at actual model dispatch. */
   readonly projection: () => ConversationInput | undefined;

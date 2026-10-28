@@ -1,3 +1,4 @@
+import { hasCloudAiConsent } from "../../account/domain/cloud-ai-consent.js";
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx, StoredDocumentSnapshot } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId, parseAuthBinding, isSafeDocumentId, parseCheckInProjection } from "../../shared/infrastructure/firebase/firestore-records.js";
 import { requireFeatureEnvironment } from "../../shared/infrastructure/firebase/feature-environment.js";
@@ -20,11 +21,11 @@ const uint=(x:unknown):x is number=>typeof x==="number"&&Number.isSafeInteger(x)
 export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
   constructor(private readonly gateway:FirestoreGateway,environment:Readonly<Record<string,string|undefined>>,
     private readonly original:Pick<RequestOriginalConversationIdentity,"verifyRead"|"currentRead">|undefined,
-    private readonly utcMilliseconds:()=>number=Date.now,private readonly historySnapshot?:SelectedHistorySnapshot){requireFeatureEnvironment(environment);}
+    private readonly utcMilliseconds:()=>number=Date.now,private readonly historySnapshot?:SelectedHistorySnapshot, private readonly processing: "local" | "cloud" = "local"){requireFeatureEnvironment(environment);}
   private check(current:()=>boolean){try{if(current())return;}catch{}fail("terminated");}
   private async guardedRead<T>(current:()=>boolean,operation:()=>Promise<T>):Promise<T>{this.check(current);const result=await operation();this.check(current);return result;}
   private valid(input:SelectReplyContext):void{
-    if(!input||input.processing!=="local")fail("selection_conflict");
+    if(!input||input.processing!==this.processing)fail("selection_conflict");
     if("today" in input){
       if(Object.keys(input).some(k=>k!=="processing"&&k!=="today")||!input.today||
         Object.keys(input.today).length!==1||!Object.hasOwn(input.today,"timeZone")||typeof input.today.timeZone!=="string")fail("selection_conflict");
@@ -37,7 +38,7 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
   private async authority(tx:Tx,principal:AcceptedContextRead["principal"],owner:string,current:()=>boolean){
     const id=createAuthBindingDocumentId(principal.firebaseUid);if(id===undefined)fail("denied");
     const binding=await this.guardedRead(current,()=>tx.get(`auth_bindings/${id}`));if(!binding)fail("denied");const actual=parseAuthBinding(binding);if(!actual)fail("unavailable");if(actual!==owner)fail("denied");
-    const authority=parseReadAuthority(await this.guardedRead(current,()=>tx.get(`accounts/${owner}`)),owner);if(!authority)fail("unavailable");if(authority.consent!=="accepted")fail("denied");return authority;
+    const authority=parseReadAuthority(await this.guardedRead(current,()=>tx.get(`accounts/${owner}`)),owner);if(!authority || this.processing === "cloud" && authority.cloudAiConsentUnavailable)fail("unavailable");if(authority.consent!=="accepted" || this.processing === "cloud" && !hasCloudAiConsent(authority.cloudAiConsent, authority.consent))fail("denied");return authority;
   }
   private async source(tx:Tx,owner:string,id:string,asOf:number,current:()=>boolean){
     if(!tx.getSnapshot)fail("unavailable");const observed=this.utcMilliseconds();
@@ -83,7 +84,7 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
         const ended=this.utcMilliseconds();if(ended<started||ended-started>5000)fail("unavailable");this.check(context.current);
         if(today&&!validTodayReplySelection(today,ended))fail("selection_conflict");
         if(!today)sources.sort((a,b)=>b.sourceOccurredAt.localeCompare(a.sourceOccurredAt)||a.checkInId.localeCompare(b.checkInId));
-        return {purposeRevocationGeneration:authority.purposeRevocationGeneration,sources,historyPairs,...(today?{today}:{})};
+        return {...(this.processing === "cloud" ? {processing:"cloud" as const,cloudAiConsentGeneration:authority.cloudAiConsentGeneration!} : {}),purposeRevocationGeneration:authority.purposeRevocationGeneration,sources,historyPairs,...(today?{today}:{})};
       },{maxAttempts:1});this.check(context.current);return {kind:"success",value};
     }catch(e){return {kind:"failure",code:e instanceof Failure?e.kind==="selection_conflict"?"AI_CONTEXT_SELECTION_CONFLICT":e.kind==="source_unavailable"?"AI_SOURCE_UNAVAILABLE":e.kind==="denied"?"AI_CONTEXT_NOT_PERMITTED":"AI_UNAVAILABLE":"AI_UNAVAILABLE"};}
   }
@@ -98,7 +99,7 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
         [...ids].some(key=>!grant.includedKeys.includes(key)&&!grant.excludedKeys.includes(key)))fail("selection_conflict");
       if(!Array.isArray(grant.historyPairs)||grant.historyPairs.length>2||new Set(grant.historyPairs.map(p=>p.historyKey)).size!==grant.historyPairs.length||
         (grant.excludedHistoryKeys??[]).some(key=>!grant.historyPairs.some(p=>p.historyKey===key))||new Set(grant.excludedHistoryKeys??[]).size!==(grant.excludedHistoryKeys??[]).length)fail("selection_conflict");
-      this.valid({processing:"local",sources:grant.sources.map(s=>({kind:"check_in",checkInId:s.checkInId}))});
+      this.valid({processing:grant.processing??"local",sources:grant.sources.map(s=>({kind:"check_in",checkInId:s.checkInId}))});
       const started=this.utcMilliseconds(),asOf=context.asOf.seconds*1000+Math.floor(context.asOf.nanoseconds/1e6);
       if(!uint(started)||started<asOf)fail("unavailable");
       if(grant.today!==undefined&&!validTodayReplySelection(grant.today,asOf))fail("selection_conflict");
@@ -106,6 +107,7 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
       if(grant.today?.hasMore&&grant.sources.length!==5)fail("selection_conflict");
       const value=await this.gateway.runTransaction(async tx=>{
         const authority=await this.authority(tx,context.principal,context.ownerId,current);
+        if(this.processing === "cloud" && (!uint(grant.cloudAiConsentGeneration) || grant.cloudAiConsentGeneration !== authority.cloudAiConsentGeneration))fail("changed");
         if(authority.purposeRevocationGeneration!==grant.purposeRevocationGeneration)fail(authority.purposeRevocationGeneration>grant.purposeRevocationGeneration?"changed":"unavailable");
         const state=parseReadPersonaState(await this.guardedRead(current,()=>tx.get(`accounts/${context.ownerId}/persona_state/current`)));if(!state)fail("unavailable");
         const items:ReadPersonaSet["items"][number][]=[];

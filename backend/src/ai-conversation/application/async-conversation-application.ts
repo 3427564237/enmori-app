@@ -1,3 +1,4 @@
+import type { CloudAiConsentAuthority } from "../../account/ports/cloud-ai-consent-authority.js";
 import { BoundedAiRuntime, type Cancellation, type RuntimeApplicationControl,
   type RuntimeApplicationRequest, type RuntimeApplicationWork, type RuntimeFailure } from "../../ai-runtime/application/bounded-ai-runtime.js";
 import type { OutputCandidate } from "../../ai-runtime/domain/parse-output.js";
@@ -20,6 +21,8 @@ export type AsyncConversationAdmission = { readonly accepted: true;
   | { readonly accepted: false; readonly failure: "stale_authority" | "invalid_input" | "overload" | "dependency_unavailable" };
 interface Processing { text: string; candidate: OutputCandidate | undefined }
 interface State {
+  cloudGeneration: number | undefined;
+  cloudLease: Extract<Awaited<ReturnType<CloudAiConsentAuthority["read"]>>, {kind:"authorized"}> | undefined;
   selectedReply:SelectedReplyGrant|undefined;
   replyToMessageId:string|undefined;
   readonly identity: AsyncConversationIdentity;
@@ -70,7 +73,10 @@ export class AsyncConversationApplication {
     private readonly store: AsyncConversationStore, private readonly gates: AsyncConversationGates,
     private readonly sink: AsyncConversationDelivery, private readonly clock: AsyncConversationClock,
     private readonly strategy?: "open_conversation_v1",private readonly selectedReads?:SelectedReplyReadPort,
-    private readonly selectedFailure?:(kind:SelectedReplyFailure)=>void) {}
+    private readonly selectedFailure?:(kind:SelectedReplyFailure)=>void,
+    private readonly cloudConsent?: CloudAiConsentAuthority) {
+      if (cloudConsent && strategy !== 'open_conversation_v1') throw Error('CLOUD_STRATEGY_REQUIRED');
+    }
 
   /** Input is from a verified, consumed N01 ticket, never an ordinary untrusted DTO. */
   create(input: AsyncConversationCommandInput): AsyncConversationCommand {
@@ -80,7 +86,7 @@ export class AsyncConversationApplication {
       originalRequest: input.identity.originalRequest });
     const operation = Object.freeze({ operationId: input.operation.operationId, conversationId: input.operation.conversationId,
       userMessageId: input.operation.userMessageId, kind: input.operation.kind, targetKind: input.operation.targetKind });
-    const state: State = { identity, operation, retryUser: input.retryUser === undefined ? undefined : user(input.retryUser),
+    const state: State = { cloudGeneration: undefined, cloudLease: undefined, identity, operation, retryUser: input.retryUser === undefined ? undefined : user(input.retryUser),
       selectedReply:input.selectedReply,replyToMessageId:input.replyToMessageId,
       history: undefined, processing: { text: input.text, candidate: undefined }, dispatch: undefined, control: undefined,
       reader: undefined, context: undefined, readerReady: undefined, terminal: false, disposeCount: 0,
@@ -101,6 +107,7 @@ export class AsyncConversationApplication {
     try {
       if (s.terminal || !this.originalCurrent(s)) return this.reject(s, "stale_authority");
       if (!this.validInput(s)) return this.reject(s, "invalid_input");
+      if ((s.selectedReply?.processing ?? 'local') !== (this.cloudConsent ? 'cloud' : 'local') && s.selectedReply) return this.reject(s, 'stale_authority');
       const authorized = await this.authority.preaccept(s.identity, s.operation);
       if (s.terminal || !this.originalCurrent(s)) return this.reject(s, "stale_authority");
       if (authorized !== "authorized") return this.reject(s, authorized === "denied" ? "stale_authority" : "dependency_unavailable");
@@ -197,7 +204,7 @@ export class AsyncConversationApplication {
   }
   private live(s: State): boolean {
     if (s.terminal || !s.control?.live()) return false;
-    if (this.originalCurrent(s)) return true;
+    if (this.originalCurrent(s) && (!s.cloudLease || s.cloudLease.current())) return true;
     s.control.fail("stale_authority"); return false;
   }
   private fail(s: State, failure: RuntimeFailure): void { s.control?.fail(failure); }
@@ -209,6 +216,7 @@ export class AsyncConversationApplication {
   }
   private dependencies(s: State): ContextDependencies | undefined {
     if (!this.live(s)) return undefined;
+    if (this.cloudConsent && s.cloudGeneration === undefined) return undefined;
     const base = s.reader?.dependencies();
     if (!base) return undefined;
     const dependencies={...base,...(s.replyToMessageId?{replyToMessageId:s.replyToMessageId}:{})};
@@ -220,7 +228,7 @@ export class AsyncConversationApplication {
     const flattened=[...(selected?.sources??[]),...messages].filter((ref,i,all)=>all.findIndex(r=>r.kind===ref.kind&&r.id===ref.id)===i);
     if(flattened.length>15)return undefined;
     return Object.freeze({...dependencies,sources:Object.freeze([...sources.values()]),history:Object.freeze(s.history?.pairs.map(p => p.identity) ?? []),
-      ...(selected||messages.length?{selectedReply:{processing:"local" as const,asOf:s.context!.read.asOf,permittedCheckInIds:selected?.permittedCheckInIds??[],
+      ...(selected||messages.length||this.cloudConsent?{selectedReply:{processing:this.cloudConsent ? "cloud" as const : "local" as const,...(this.cloudConsent ? {cloudAiConsentGeneration:s.cloudGeneration!} : {}),asOf:s.context!.read.asOf,permittedCheckInIds:selected?.permittedCheckInIds??[],
         excludedCheckInIds:selected?.excludedCheckInIds??[],sources:Object.freeze(flattened),
         ...(selected?.historySnapshot?{historySnapshot:selected.historySnapshot}:{}),...(selected?.excludedHistoryPairs?{excludedHistoryPairs:selected.excludedHistoryPairs}:{})}}:{})});
   }
@@ -246,6 +254,7 @@ export class AsyncConversationApplication {
       const auth = await this.authority.freshAuth(s.identity);
       if (!this.live(s)) return false;
       if (auth !== "authorized") { this.fail(s, auth === "denied" ? "stale_authority" : "dependency_unavailable"); return false; }
+      if (!await this.checkCloudConsent(s)) return false;
       const current = await s.reader!.revalidate();
       if (!this.live(s)) return false;
       if (current !== "ready") { this.fail(s, current === "denied" ? "stale_authority" : "dependency_unavailable"); return false; }
@@ -265,10 +274,25 @@ export class AsyncConversationApplication {
       return true;
     } catch { this.fail(s, "dependency_unavailable"); return false; }
   }
+  private async checkCloudConsent(s: State): Promise<boolean> {
+    if (!this.cloudConsent) return true;
+    if (!this.live(s)) return false;
+    const result = await this.cloudConsent.read(s.identity.principal, s.identity.ownerId, () => this.live(s), s.control!.signal);
+    if (!this.live(s)) { if (result.kind === 'authorized') result.release(); return false; }
+    if (result.kind !== 'authorized' || s.cloudGeneration !== undefined && result.generation !== s.cloudGeneration ||
+        result.kind === 'authorized' && result.purposeGeneration !== s.reader?.dependencies()?.purposeRevocationGeneration || result.kind === 'authorized' && !result.current()) {
+      if (result.kind === 'authorized') result.release();
+      this.fail(s, result.kind === 'unavailable' ? 'dependency_unavailable' : 'stale_authority'); return false;
+    }
+    s.cloudLease?.release(); s.cloudLease = result;
+    s.cloudGeneration = result.generation;
+    return true;
+  }
   private work(s: State): RuntimeApplicationWork<AsyncConversationModelInput> {
     return { purpose: "ai_assistant_message_v1", prepare: () => this.prepare(s),
       dispatchInput: () => this.live(s) && !!s.user && !s.uncertain && !!this.model(s)
-        ? ok(Object.freeze({ authorize: () => this.checkpoint(s), projection: () => this.model(s) }))
+        ? ok(Object.freeze({ ...(this.cloudConsent ? { processing: 'cloud' as const,
+            cloudConsentCurrent: () => this.live(s) && s.cloudGeneration !== undefined } : {}), authorize: () => this.checkpoint(s), projection: () => this.model(s) }))
         : err("dependency_unavailable"),
       acceptCandidate: candidate => { if (this.live(s) && s.processing) s.processing.candidate = candidate; },
       checkCandidate: () => this.checkCandidate(s), commitAndDeliver: () => this.commitAndDeliver(s), dispose: () => this.dispose(s) };
@@ -277,6 +301,7 @@ export class AsyncConversationApplication {
     const ready = await s.readerReady;
     if (!this.live(s)) return;
     if (ready !== "ready") { this.fail(s, ready === "denied" ? "stale_authority" : "dependency_unavailable"); return; }
+    if (!await this.checkCloudConsent(s)) return;
     if (this.strategy) {
       const history = await this.store.readHistory?.(s.context!);
       if (!this.live(s)) return;
@@ -360,6 +385,7 @@ export class AsyncConversationApplication {
     if (this.live(s)) this.fail(s, delivered === "refused" ? "abandoned" : "dependency_unavailable");
   }
   private dispose(s: State): void {
+    s.cloudLease?.release(); s.cloudLease = undefined;
     if (s.terminal) return;
     s.terminal = true; s.disposeCount++;
     const processing = s.processing; s.processing = undefined;

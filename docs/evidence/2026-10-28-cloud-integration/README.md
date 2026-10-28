@@ -1,5 +1,9 @@
 # Groq transport and durable quota — integration-source receipt
 
+Latest continuation: [approved cloud consent/provenance and independent counter](consent-provenance.md).
+The historical source receipt below is retained; its consent status and call counts
+are superseded only by that continuation.
+
 28 October 2026. Source `cadaa9640d87e3acb224592a5da6aa3de5cbf311`.
 [Approval](../../decisions/2026-10-28-li-cloud-independent-request-recovery.md) ·
 [Retained persistence proposal](../../planning/2026-10-28-cloud-durable-quota-proposal.md) ·

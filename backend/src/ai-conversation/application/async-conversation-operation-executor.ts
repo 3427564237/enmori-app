@@ -1,3 +1,4 @@
+import type { CloudAiConsentAuthority } from "../../account/ports/cloud-ai-consent-authority.js";
 import type { BoundedAiRuntime, RuntimeFailure } from "../../ai-runtime/application/bounded-ai-runtime.js";
 import type { AuthPrincipal, IdentityVerificationResult } from "../../shared/ports/identity-verifier.js";
 import type { ConversationExecution, ConversationExecutionDelivery, ConversationOperationExecutor,
@@ -22,6 +23,7 @@ export interface AsyncConversationExecutionPorts {
   readonly acknowledgedPair?: AsyncAcknowledgedConversationPair;
 }
 export interface AsyncConversationExecutionProviders {
+  readonly cloudConsent?: CloudAiConsentAuthority;
   readonly runtime: BoundedAiRuntime<AsyncConversationModelInput>;
   readonly strategy?: "open_conversation_v1";
   /** Explicit composition only, no I/O. Bind all three adapters to the SAME
@@ -54,12 +56,14 @@ function copyMessage(value: StoredConversationMessage, role: StoredConversationM
       value.role !== role || !instant(value.persistedAt) || value.availability !== "available" ||
       typeof value.text !== "string" || !value.text.isWellFormed() || !/\S/u.test(value.text) || [...value.text].length > 2400) return undefined;
   if(value.replyToMessageId!==undefined&&!uuid(value.replyToMessageId))return undefined;
+  const cloud = value.processing !== undefined || value.provider !== undefined || value.disclosureVersion !== undefined;
+  if (cloud && (role !== 'assistant' || value.processing !== 'cloud' || value.provider !== 'groq' || value.disclosureVersion !== 'groq_cloud_v1')) return undefined;
   const sources=value.sources?.map(s=>Object.freeze({cardRef:s.cardRef,kind:s.kind,version:s.version,sourceOccurredAt:s.sourceOccurredAt,observedAt:s.observedAt,state:s.state,canNavigate:s.canNavigate}));
   if(sources&&(sources.length>15||sources.some(s=>typeof s.cardRef!=="string"||!s.cardRef||!s.version||s.state!=="available"||s.canNavigate!==true||
     !["conversation_message","check_in"].includes(s.kind)||!Number.isFinite(Date.parse(s.sourceOccurredAt))||!Number.isFinite(Date.parse(s.observedAt)))))return undefined;
   return Object.freeze({ messageId: value.messageId, sequence: value.sequence, role,
     persistedAt: Object.freeze({ seconds: value.persistedAt.seconds, nanoseconds: value.persistedAt.nanoseconds }),
-    availability: "available", text: value.text,...(sources?{sources:Object.freeze(sources)}:{}),...(value.replyToMessageId?{replyToMessageId:value.replyToMessageId}:{}) });
+    availability: "available", text: value.text,...(cloud ? {processing:'cloud' as const,provider:'groq' as const,disclosureVersion:'groq_cloud_v1' as const} : {}),...(sources?{sources:Object.freeze(sources)}:{}),...(value.replyToMessageId?{replyToMessageId:value.replyToMessageId}:{}) });
 }
 function failure(value: RuntimeFailure | "overload" | "invalid_input"): ConversationFailureCode {
   switch (value) {
@@ -206,7 +210,7 @@ class Execution implements ConversationExecution {
       }, this.providers.strategy,ports.selectedReads?{
         prepare:(context,selection)=>ports.selectedReads!.prepare(context,selection),
         read:(context,grant)=>registerRead(context)?ports.selectedReads!.read(context,grant):Promise.resolve({kind:"terminated"}),
-      }:undefined,kind=>this.selectionFailure(kind));
+      }:undefined,kind=>this.selectionFailure(kind),this.providers.cloudConsent);
     this.command = this.app.create({ identity: this.identity, operation: this.operation, text,
       ...(this.private.selectedReply?{selectedReply:this.private.selectedReply}:{}),...(this.private.replyToMessageId?{replyToMessageId:this.private.replyToMessageId}:{}),
       ...(this.retry ? { retryUser: this.retry } : {}) });

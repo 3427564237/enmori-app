@@ -160,3 +160,19 @@ Real tokenizer, cloud consent/provenance, all-consumer production composition,
 Azure identity/HTTPS, real quota initialization and phone/off-host validation
 remain open. No real database writes, VM, new credential, published endpoint or
 new APK is included. The existing personal-host service remains required.
+
+## Subsequent continuation: free model comparison and cloud consent
+
+The Qwen 3.8 27B model-only run stopped without retry at the third request (HTTP
+429); two responses were assessable and the candidate remains rejected. Total
+Groq calls: 99, cost US$0, 21 of this grant unused; no complete new 24-case score.
+[Partial assessment](../evidence/2026-10-28-li-ai-repair/groq-qwen38-partial-assessment.md).
+
+Approved Conversation cloud consent/provenance and the independent cloud
+revocation counter are now implemented, including Settings UI/draft recovery,
+final-dispatch revocation, revision-aware unknown-save fences and existing-epoch
+transaction checks. Backend 1664/1664, Flutter 143/143 plus clean analysis, and
+actual-SDK emulator 3/3 pass. See the
+[verification and remaining rollout boundary](../evidence/2026-10-28-cloud-integration/consent-provenance.md).
+No failed model adoption, production cloud switch, Azure VM/HTTPS, real IAM or
+Account migration, new APK or host-off phone acceptance is claimed.

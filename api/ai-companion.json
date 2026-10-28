@@ -763,7 +763,10 @@
             ],
             "properties": {
               "processing": {
-                "const": "local"
+                "enum": [
+                  "local",
+                  "cloud"
+                ]
               },
               "sources": {
                 "type": "array",
@@ -802,7 +805,10 @@
             ],
             "properties": {
               "processing": {
-                "const": "local"
+                "enum": [
+                  "local",
+                  "cloud"
+                ]
               },
               "today": {
                 "type": "object",

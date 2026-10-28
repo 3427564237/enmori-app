@@ -2,6 +2,8 @@ import 'profile_details.dart';
 import '../../../core/result/result.dart';
 import 'account_repository.dart';
 
+enum CloudAiConsent { accepted, declined }
+
 enum ProfileVisibility { private, friendsOnly, public }
 
 final class OwnProfile {
@@ -21,6 +23,7 @@ final class OwnProfile {
 
 final class OwnSettings {
   const OwnSettings({
+    this.cloudAiConsent,
     this.defaultCheckInLocation = false,
     this.defaultCheckInWeather = false,
     this.homeWeatherAuto = false,
@@ -29,6 +32,7 @@ final class OwnSettings {
     required this.consent,
     required this.revision,
   });
+  final CloudAiConsent? cloudAiConsent;
   final bool defaultCheckInLocation, defaultCheckInWeather, homeWeatherAuto;
   final FieldPrivacy fieldPrivacy;
   final CheckInVisibility checkInVisibility;
@@ -46,6 +50,7 @@ abstract interface class AccountPreferencesRepository {
     required int expectedRevision,
   });
   Future<Result<OwnSettings>> saveSettings({
+    CloudAiConsent? cloudAiConsent,
     bool? defaultCheckInLocation,
     bool? defaultCheckInWeather,
     bool? homeWeatherAuto,

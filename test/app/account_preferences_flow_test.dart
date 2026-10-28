@@ -23,6 +23,45 @@ import '../support/fake_account_preferences.dart';
 
 void main() {
   testWidgets(
+    'cloud consent requires a separate choice and survives uncertain save for review',
+    (tester) async {
+      final h = await start(tester);
+      await tap(tester, 'profile-settings');
+      await tap(tester, 'settings-consent');
+      await tap(tester, 'settings-cloud-consent');
+      h.prefs.saveFailure = const AppFailure(
+        kind: AppFailureKind.serviceUnavailable,
+        message: 'unavailable',
+      );
+      await tap(tester, 'settings-save');
+      expect(h.prefs.settingsSaveCount, 1);
+      expect(
+        tester
+            .widget<FilledButton>(find.byKey(const Key('settings-save')))
+            .onPressed,
+        isNull,
+      );
+      h.prefs.saveFailure = null;
+      await tap(tester, 'preferences-review');
+      await tester.ensureVisible(
+        find.byKey(const Key('settings-cloud-consent')),
+      );
+      expect(
+        tester
+            .widget<SwitchListTile>(
+              find.byKey(const Key('settings-cloud-consent')),
+            )
+            .value,
+        isTrue,
+      );
+      await tap(tester, 'settings-save');
+      expect(h.prefs.settings.cloudAiConsent, CloudAiConsent.accepted);
+      await tap(tester, 'settings-consent');
+      await tap(tester, 'settings-save');
+      expect(h.prefs.settings.cloudAiConsent, CloudAiConsent.declined);
+    },
+  );
+  testWidgets(
     'profile recovery keeps edits, adopts remote privacy, saves latest revision and rereads',
     (tester) async {
       final h = await start(tester);

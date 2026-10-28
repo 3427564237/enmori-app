@@ -14373,6 +14373,29 @@
           },
           "homeWeatherAuto": {
             "type": "boolean"
+          },
+          "cloudAiConsent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "state",
+              "disclosureVersion"
+            ],
+            "properties": {
+              "state": {
+                "type": "string",
+                "enum": [
+                  "accepted",
+                  "declined"
+                ]
+              },
+              "disclosureVersion": {
+                "type": "string",
+                "enum": [
+                  "groq_cloud_v1"
+                ]
+              }
+            }
           }
         }
       },
@@ -14519,6 +14542,29 @@
           },
           "homeWeatherAuto": {
             "type": "boolean"
+          },
+          "cloudAiConsent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "state",
+              "disclosureVersion"
+            ],
+            "properties": {
+              "state": {
+                "type": "string",
+                "enum": [
+                  "accepted",
+                  "declined"
+                ]
+              },
+              "disclosureVersion": {
+                "type": "string",
+                "enum": [
+                  "groq_cloud_v1"
+                ]
+              }
+            }
           }
         }
       },
@@ -15533,20 +15579,38 @@
             },
             "minItems": 1,
             "maxItems": 15
+          },
+          "processing": {
+            "type": "string",
+            "enum": [
+              "cloud"
+            ]
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "groq"
+            ]
+          },
+          "disclosureVersion": {
+            "type": "string",
+            "enum": [
+              "groq_cloud_v1"
+            ]
           }
         },
         "dependentRequired": {
-          "origin": [
-            "occurrenceId",
-            "category"
+          "processing": [
+            "provider",
+            "disclosureVersion"
           ],
-          "occurrenceId": [
-            "origin",
-            "category"
+          "provider": [
+            "processing",
+            "disclosureVersion"
           ],
-          "category": [
-            "origin",
-            "occurrenceId"
+          "disclosureVersion": [
+            "processing",
+            "provider"
           ]
         }
       },

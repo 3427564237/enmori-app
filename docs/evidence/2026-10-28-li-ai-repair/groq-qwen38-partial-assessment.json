@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "groq_qwen38_partial_assessment_v1",
+  "assessedOn": "2026-10-28",
+  "independent": false,
+  "reviewer": "Assistant for LI; owner-assisted, not independent QA",
+  "sourceHead": "8d29eba3df54cf40d9a6486b1ccb0aaac424f65d",
+  "sourceDirty": true,
+  "sourceDirtyNote": "Only two unrelated Event documents untracked at dispatch.",
+  "runSha256": "b66747bad69568157e730c8e7cada867a291614b3a32b1aaa5d9721685e65941",
+  "corpusSha256": "1f216f2d8a4facafaac55eb9567c2136864999cc68c6759e831a81693ff0912a",
+  "model": "qwen/qwen3.8-27b",
+  "profile": "qwen38-medium",
+  "actualProviderCalls": 3,
+  "totalGroqCallsConsumed": 99,
+  "currentGrantMaximum": 24,
+  "currentGrantUnused": 21,
+  "maxUsd": 0,
+  "stopReason": "ineligible-or-unconfirmed-no-retry",
+  "httpStatuses": [
+    200,
+    200,
+    429
+  ],
+  "protocolEligible": 2,
+  "complete24CaseAssessment": false,
+  "sourceVerification": {
+    "tool/ai-companion-eval/groq-run.mjs": true,
+    "tool/ai-companion-eval/groq-run-policy.mjs": true,
+    "tool/ai-companion-eval/groq-evaluation.mjs": true,
+    "tool/ai-companion-eval/evaluation.mjs": true,
+    "tool/ai-companion-eval/goal-prompt-candidate.mjs": true,
+    "tool/ai-companion-eval/constraints-prompt-candidate.mjs": true,
+    "tool/ai-companion-eval/fixtures/current-prompt-requests.json": true,
+    "backend/dist/src/ai-runtime/infrastructure/local-chat-transport.js": true
+  },
+  "modelOnlyRequestComparison": [
+    "reported-english-goal-chinese-reply",
+    "chinese-break-with-label",
+    "correct-previous-misreading"
+  ],
+  "assessment": [
+    {
+      "id": "reported-english-goal-chinese-reply",
+      "result": "fail",
+      "reason": "Rest goal replaced by V25 device verification, studying and paper/pen tasks; exceeds three requested steps and invents verification materials."
+    },
+    {
+      "id": "chinese-break-with-label",
+      "result": "fail",
+      "reason": "Rest goal and 15-minute total improve. Opening assigns device-test records as the subject the user studied, which the input does not state. Borderline grounding weakness; owner-assisted judgment, not independent QA."
+    },
+    {
+      "id": "correct-previous-misreading",
+      "result": "not-assessable",
+      "reason": "HTTP 429; no eligible response; no automatic retry."
+    }
+  ],
+  "disposition": "Rejected for observed semantic failures; incomplete comparison. No further requests, fallback or resume. Remaining 21 authorizations are unused, not consumed; original one-shot claim cannot be reused."
+}

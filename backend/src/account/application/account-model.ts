@@ -1,3 +1,4 @@
+import type { CloudAiConsent } from '../domain/cloud-ai-consent.js';
 import type { ProfileDetails, FieldPrivacy } from '../domain/profile-details.js';
 import type { ProfileVisibility } from "../domain/profile-values.js";
 import type { OptionalProcessingConsent, CheckInVisibility } from "../../onboarding/domain/initial-choice.js";
@@ -11,6 +12,7 @@ export interface OwnProfile {
 }
 
 export interface OwnSettings {
+  readonly cloudAiConsent?: CloudAiConsent;
   readonly defaultCheckInLocation?: boolean;
   readonly defaultCheckInWeather?: boolean;
   readonly homeWeatherAuto?: boolean;

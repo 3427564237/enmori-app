@@ -433,6 +433,7 @@ class Preferences implements AccountPreferencesRepository {
 
   @override
   Future<Result<OwnSettings>> saveSettings({
+    CloudAiConsent? cloudAiConsent,
     bool? defaultCheckInLocation,
     bool? defaultCheckInWeather,
     bool? homeWeatherAuto,

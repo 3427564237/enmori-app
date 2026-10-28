@@ -5,6 +5,33 @@ import 'package:enmori/features/account/domain/profile_details.dart';
 import 'package:enmori/features/account/presentation/preferences_recovery.dart';
 
 void main() {
+  test('untouched absent cloud consent adopts another device grant during recovery', () {
+    const base = OwnSettings(
+      checkInVisibility: CheckInVisibility.private,
+      consent: OptionalProcessingConsent.accepted,
+      revision: 1,
+    );
+    const draft = OwnSettings(
+      checkInVisibility: CheckInVisibility.private,
+      consent: OptionalProcessingConsent.accepted,
+      revision: 1,
+      homeWeatherAuto: true,
+    );
+    const latest = OwnSettings(
+      checkInVisibility: CheckInVisibility.private,
+      consent: OptionalProcessingConsent.accepted,
+      revision: 2,
+      cloudAiConsent: CloudAiConsent.accepted,
+    );
+    final review = reviewSettingsDraft(
+      base: base,
+      draft: draft,
+      latest: latest,
+    );
+    expect(review.value.cloudAiConsent, CloudAiConsent.accepted);
+    expect(review.value.homeWeatherAuto, isTrue);
+    expect(review.conflicts, isEmpty);
+  });
   test('affiliation stays atomic while unrelated remote fields survive', () {
     const base = OwnProfile(
       username: 'member',

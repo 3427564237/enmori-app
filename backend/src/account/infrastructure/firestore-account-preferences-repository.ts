@@ -1,3 +1,4 @@
+import { parseCloudAiConsent } from '../domain/cloud-ai-consent.js';
 import { emptyProfileDetails, privateFields, parseProfileDetails, parseFieldPrivacy } from '../domain/profile-details.js';
 import type { AccountPreferencesRepository, AccountRead, AccountSave } from "../ports/account-preferences-repository.js";
 import type { OwnProfile, OwnSettings, ProfileChange, SettingsChange } from "../application/account-model.js";
@@ -48,7 +49,9 @@ export function parseOwnSettings(data: StoredDocument): OwnSettings | undefined 
   const revision = Object.hasOwn(data, "settingsRevision") ? data.settingsRevision : 0;
   if (!isRevision(revision) || (Object.hasOwn(data, "settingsRevision") && revision < 1)) return undefined;
   if ([data.defaultCheckInLocation, data.defaultCheckInWeather, data.homeWeatherAuto].some(v => v !== undefined && typeof v !== "boolean")) return undefined;
-  return { defaultCheckInLocation: data.defaultCheckInLocation === true, defaultCheckInWeather: data.defaultCheckInWeather === true, homeWeatherAuto: data.homeWeatherAuto === true, fieldPrivacy, checkInVisibility: account.checkInVisibility, optionalProcessingConsent: account.optionalProcessingConsent, revision };
+  const cloudAiConsent = Object.hasOwn(data, 'cloudAiConsent') ? parseCloudAiConsent(data.cloudAiConsent) : undefined;
+  if (Object.hasOwn(data, 'cloudAiConsent') && (!cloudAiConsent || !isRevision(data.cloudAiConsentGeneration))) return undefined;
+  return { ...(cloudAiConsent ? { cloudAiConsent } : {}), defaultCheckInLocation: data.defaultCheckInLocation === true, defaultCheckInWeather: data.defaultCheckInWeather === true, homeWeatherAuto: data.homeWeatherAuto === true, fieldPrivacy, checkInVisibility: account.checkInVisibility, optionalProcessingConsent: account.optionalProcessingConsent, revision };
 }
 
 export class FirestoreAccountPreferencesRepository implements AccountPreferencesRepository {
@@ -73,6 +76,7 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
   }
   public saveSettings(uid: string, change: SettingsChange): Promise<AccountSave<OwnSettings>> {
     return this.save(uid, change.expectedRevision, parseOwnSettings, (revision) => ({
+      ...(change.cloudAiConsent === undefined ? {} : { cloudAiConsent: change.cloudAiConsent }),
       ...(change.defaultCheckInLocation === undefined ? {} : { defaultCheckInLocation: change.defaultCheckInLocation }),
       ...(change.defaultCheckInWeather === undefined ? {} : { defaultCheckInWeather: change.defaultCheckInWeather }),
       ...(change.homeWeatherAuto === undefined ? {} : { homeWeatherAuto: change.homeWeatherAuto }),
@@ -106,6 +110,17 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
         // Account. It may still preserve independent Profile/visibility fields.
         if (!this.isolatedAiPurpose && Object.hasOwn(account.data, "purposeRevocationGeneration") &&
             next.optionalProcessingConsent !== account.data.optionalProcessingConsent) return dependencyUnavailable;
+        const beforeCloud = parseCloudAiConsent(account.data.cloudAiConsent), afterCloud = parseCloudAiConsent(next.cloudAiConsent);
+        const cloudChanged = beforeCloud?.state !== afterCloud?.state || beforeCloud?.disclosureVersion !== afterCloud?.disclosureVersion;
+        const cloudGeneration = account.data.cloudAiConsent === undefined && account.data.cloudAiConsentGeneration === undefined ? 0 : account.data.cloudAiConsentGeneration;
+        if ((account.data.cloudAiConsent !== undefined || account.data.cloudAiConsentGeneration !== undefined || cloudChanged) &&
+            (typeof cloudGeneration !== 'number' || !Number.isSafeInteger(cloudGeneration) || cloudGeneration < 0)) return dependencyUnavailable;
+        if (cloudChanged) {
+          if (cloudGeneration === Number.MAX_SAFE_INTEGER) return dependencyUnavailable;
+          next.cloudAiConsentGeneration = (cloudGeneration as number) + 1;
+        }
+        if (cloudChanged && !this.isolatedAiPurpose) return dependencyUnavailable;
+        if (cloudChanged && parseCloudAiConsent(next.cloudAiConsent)?.state === 'accepted' && next.optionalProcessingConsent !== 'accepted') return dependencyUnavailable;
         if (this.isolatedAiPurpose) {
           const generation = nextPurposeRevocationGeneration(account.data.purposeRevocationGeneration,
             account.data.optionalProcessingConsent, next.optionalProcessingConsent);
@@ -116,7 +131,7 @@ export class FirestoreAccountPreferencesRepository implements AccountPreferences
         if (value === undefined) return dependencyUnavailable;
         transaction.set(account.path, next);
         return { kind: "saved", value };
-      });
+      }, {maxAttempts:1});
     } catch { return dependencyUnavailable; }
   }
 }

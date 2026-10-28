@@ -2456,6 +2456,14 @@ final class _MessageTile extends StatelessWidget {
       sourcePending || message.availability != AiAvailability.available
       ? const []
       : [
+          if (message.cloudProcessed)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                context.tr('Processed by GroqCloud', '由 GroqCloud 云端处理'),
+                key: ValueKey('ai-cloud-origin-${message.messageId}'),
+              ),
+            ),
           if (message.isProactive)
             Padding(
               padding: const EdgeInsets.only(top: 8),
