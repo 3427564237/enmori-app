@@ -3,6 +3,11 @@
 Status: **Proposed, not approved or implemented.** This is a concrete design
 decision needed before a dependable cloud replacement, not a new model grant.
 
+Subsequent status: LI approved implementation and offline tests in
+[the 28 October recovery decision](../decisions/2026-10-28-li-cloud-independent-request-recovery.md).
+The original proposal below is retained as the exact reviewed scope. No cloud
+deployment or production-model adoption follows from this approval.
+
 The approved [Q31-B local-host contract](../decisions/2026-09-02-qwen-runtime-failure-contract.md)
 keeps the single Ollama generation lane quarantined until physical termination
 is confirmed. A local host restart can restore a supervised local process; it
