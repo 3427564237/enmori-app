@@ -173,7 +173,9 @@ export class ControlledSourceProjection implements BrowseSource {
     // First page wins duplicate identities. No title merging or provider IO.
     for(const items of [snapshot.items,...[...this.observedPages].sort(([a],[b])=>a-b).map(([,rows])=>rows)]){
       const found=items.find(item=>sourceEventId(item.browseId)===id&&parseBrowseInstant(item.startAt)!>now);
-      if(found&&!this.source.status)return found;
+      // Social matching needs only the current authorized occurrence identity.
+      // Supplementary detail acquisition must not hide combined-source rows.
+      if(found)return found;
     }
     return undefined;
   }
