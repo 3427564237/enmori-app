@@ -1,0 +1,42 @@
+{
+  "provider-coverage.mjs": {
+    "sha256": "4023314279be4142603c33ddba21963848d2fb06f7b56e0e5b1dcfd149959ad8",
+    "path": "/home/miku/.codex/worktrees/li-pr190-integration-20261028/ENMORI/build/pr190-validation/provider-coverage.mjs"
+  },
+  "analyze.log": {
+    "sha256": "cae5b46cfb082fe5dd1ecbf0bf65327004f2b0165eae17fc52a572db33787db4",
+    "path": "/home/miku/.codex/worktrees/li-pr190-integration-20261028/ENMORI/build/pr190-validation/analyze.log"
+  },
+  "backend-full.log": {
+    "sha256": "2ac65562baa704a777256712163725cad029425811511becf00367e4ad10ebdd",
+    "path": "/home/miku/.codex/worktrees/li-pr190-integration-20261028/ENMORI/build/pr190-validation/backend-full.log"
+  },
+  "emulator.log": {
+    "sha256": "bf1b7702a45650252e4cead87b027416616b569e31e206c648072f98dca1fc80",
+    "path": "/home/miku/.codex/worktrees/li-pr190-integration-20261028/ENMORI/build/pr190-validation/emulator.log"
+  },
+  "apk-signature.txt": {
+    "sha256": "a3a28911b90628c4abb6b3731f6f6ab2436e70b5c16767d37fc4b17751bdd8a8",
+    "path": "/home/miku/.codex/worktrees/li-pr190-integration-20261028/ENMORI/build/pr190-validation/apk-signature.txt"
+  },
+  "flutter-composition.log": {
+    "sha256": "f1859d969bcc05877ca31b0046bf79ab562d87f78f5c9f3686cd4c7c38101d15",
+    "path": "/home/miku/.codex/worktrees/li-pr190-integration-20261028/ENMORI/build/pr190-validation/flutter-composition.log"
+  },
+  "backend-compile.log": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "path": "/home/miku/.codex/worktrees/li-pr190-integration-20261028/ENMORI/build/pr190-validation/backend-compile.log"
+  },
+  "apk-badging.txt": {
+    "sha256": "b6911df5dc542970c554eb8bb37d4183af5e7980811aad67ebbab877138a4e5a",
+    "path": "/home/miku/.codex/worktrees/li-pr190-integration-20261028/ENMORI/build/pr190-validation/apk-badging.txt"
+  },
+  "apk-build.log": {
+    "sha256": "0585e37df124e22fa7683f6d2450d84d1ac99581f63944aa9031ab719349fa40",
+    "path": "/home/miku/.codex/worktrees/li-pr190-integration-20261028/ENMORI/build/pr190-validation/apk-build.log"
+  },
+  "flutter-affected.log": {
+    "sha256": "4ece4e72e315faf60a61a1216e233c92d646f9a35a8fa5810c2dd588f2ebd2bf",
+    "path": "/home/miku/.codex/worktrees/li-pr190-integration-20261028/ENMORI/build/pr190-validation/flutter-affected.log"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "sourceHead": "0c8efb7deae33ac78656fc3404d8ba633e71f4bb",
+  "normalStopStart": true,
+  "configurationUnchanged": true,
+  "previousCandidateRetained": true,
+  "status": {
+    "ownedRunner": true,
+    "httpsIdentityGate": true,
+    "ready": true,
+    "lastState": {
+      "phase": "listening",
+      "ready": true,
+      "authAdminRead": true,
+      "firestoreRead": true,
+      "remoteLoopbackEnabled": true,
+      "fullFeatures": true,
+      "firstFlow": {
+        "configured": true,
+        "workerConfigured": false,
+        "pushConfigured": false
+      },
+      "ai": {
+        "configured": true,
+        "available": true,
+        "maintenanceHealthy": true,
+        "pending": false,
+        "outcomeUnknown": false
+      },
+      "events": {
+        "configured": true,
+        "enabled": true,
+        "pending": 0
+      },
+      "emailVerified": true,
+      "bindingExists": true,
+      "checkedAt": "2026-10-28T02:58:05.739Z"
+    },
+    "lockPresent": true
+  },
+  "anonymousHTTP": {
+    "/v1/recommendations/events?view=all": 401,
+    "/v1/me/friend-suggestions?view=all": 404,
+    "/v1/me/onboarding": 401,
+    "/v1/recommendations/friends?view=all": 401
+  },
+  "configuredPhoneHTTPSAnonymousStatus": 401,
+  "probeNote": "Initial nonexistent friend-suggestions URL returned 404; corrected to the actual client route, which returned 401."
+}

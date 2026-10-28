@@ -1,0 +1,155 @@
+{
+  "checkedAt": "2026-10-28T02:55:17.860Z",
+  "sourceHead": "0c8efb7deae33ac78656fc3404d8ba633e71f4bb",
+  "mode": "read-only existing provider",
+  "pages": [
+    {
+      "number": 0,
+      "totalElements": 85,
+      "rawCount": 20
+    },
+    {
+      "number": 1,
+      "totalElements": 85,
+      "rawCount": 20
+    },
+    {
+      "number": 2,
+      "totalElements": 85,
+      "rawCount": 20
+    },
+    {
+      "number": 3,
+      "totalElements": 85,
+      "rawCount": 20
+    },
+    {
+      "number": 4,
+      "totalElements": 85,
+      "rawCount": 5
+    }
+  ],
+  "status": "pass",
+  "elapsedMs": 2360,
+  "eligibleEvents": 79,
+  "withCompleteAddress": 0,
+  "taxonomyStatus": "read",
+  "coverage": [
+    {
+      "interest": "Books",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [],
+      "taxonomyConditionPresent": false
+    },
+    {
+      "interest": "Travel",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [],
+      "taxonomyConditionPresent": false
+    },
+    {
+      "interest": "Films",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [
+        "Film"
+      ],
+      "taxonomyConditionPresent": true
+    },
+    {
+      "interest": "Fitness",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [
+        "Fitness"
+      ],
+      "taxonomyConditionPresent": true
+    },
+    {
+      "interest": "Dance",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [
+        "Dance"
+      ],
+      "taxonomyConditionPresent": true
+    },
+    {
+      "interest": "Food",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [
+        "Food & Drink"
+      ],
+      "taxonomyConditionPresent": true
+    },
+    {
+      "interest": "Photography",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [],
+      "taxonomyConditionPresent": false
+    },
+    {
+      "interest": "Technology",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [],
+      "taxonomyConditionPresent": false
+    },
+    {
+      "interest": "Outdoors",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [],
+      "taxonomyConditionPresent": false
+    },
+    {
+      "interest": "Volunteering",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [],
+      "taxonomyConditionPresent": false
+    },
+    {
+      "interest": "Art",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [
+        "Fine Art"
+      ],
+      "taxonomyConditionPresent": true
+    },
+    {
+      "interest": "Gaming",
+      "eligibleMatches": 4,
+      "matchedTaxonomyNames": [
+        "eSports"
+      ],
+      "taxonomyConditionPresent": true
+    },
+    {
+      "interest": "Community",
+      "eligibleMatches": 0,
+      "matchedTaxonomyNames": [
+        "Community/Civic"
+      ],
+      "taxonomyConditionPresent": true
+    },
+    {
+      "interest": "Music",
+      "eligibleMatches": 59,
+      "matchedTaxonomyNames": [
+        "Music"
+      ],
+      "taxonomyConditionPresent": true
+    }
+  ],
+  "observedClassificationNames": [
+    "Alternative",
+    "Alternative Rock",
+    "Arts & Theatre",
+    "Ballads/Romantic",
+    "Classical",
+    "Comedy",
+    "Football",
+    "Music",
+    "Netball",
+    "Pop",
+    "Religious",
+    "Sports",
+    "Undefined",
+    "eSports"
+  ]
+}

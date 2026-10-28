@@ -1,0 +1,28 @@
+{
+  "base": "3ac2230766ac41dc980294babf2374a2e0ad1d39",
+  "incoming": "127943d292c3e9e42346989ef6041c5a7e305c39",
+  "sourceHead": "0c8efb7deae33ac78656fc3404d8ba633e71f4bb",
+  "incomingReview": "https://github.com/3427564237/enmori-app/pull/190#pullrequestreview-5668581504",
+  "backendFull": {
+    "passed": 1585,
+    "failed": 0,
+    "skipped": 0
+  },
+  "flutterRecommendation": {
+    "passed": 56,
+    "commandFailure": "One nonexistent test path; not a product-test failure"
+  },
+  "flutterComposition": {
+    "passed": 38,
+    "failed": 0
+  },
+  "analysis": "No issues found",
+  "isolatedSDK": {
+    "passed": 1,
+    "failed": 0,
+    "profileRemoved": true,
+    "fivePortsReleased": true
+  },
+  "physical": "LI manual; Not Run",
+  "fullFlutterSuite": "Not Run; preceding candidate documented 73 baseline failures"
+}

@@ -1,0 +1,13 @@
+{
+  "sourceHead": "0c8efb7deae33ac78656fc3404d8ba633e71f4bb",
+  "versionCode": 39,
+  "package": "com.enmori.app.group",
+  "bytes": 67214466,
+  "sha256": "becf5d517f1c4862c7a6c29e1ba1fd69284c3e339d604b8d534a2ef184d7c1f1",
+  "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "matchesV38Signer": true,
+  "samePermissionsAsV38": true,
+  "permissionCount": 9,
+  "debuggable": false,
+  "physicalAcceptance": "LI manual; not run by assistant"
+}
