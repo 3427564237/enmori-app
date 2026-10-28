@@ -1,0 +1,87 @@
+{
+  "sourceHead": "2306ac0c5a060b2d999a5b8c34e09704c446de31",
+  "node": "24.19.0",
+  "flutter": "3.47.2",
+  "backend": {
+    "strictBuild": "pass",
+    "fullSuite": {
+      "passed": 1590,
+      "failed": 0
+    },
+    "laterAddedRegionRegression": {
+      "filePassed": 26,
+      "newCases": 1,
+      "failed": 0
+    }
+  },
+  "flutterChecks": {
+    "focusedPassed": 30,
+    "focusedFailed": 0,
+    "analysis": "No issues found"
+  },
+  "cancelProbe": {
+    "originalBefore": {
+      "pass": 1,
+      "fail": 2
+    },
+    "originalAfter": {
+      "pass": 2,
+      "fail": 1
+    },
+    "physicalSettlementAwareAfter": {
+      "pass": 3,
+      "fail": 0
+    },
+    "note": "Original control assumed awaiting business termination also awaited physical completion. After cancellation detaches business, explicitly drain physical completion before checking idle; both original failure counterexamples pass unchanged."
+  },
+  "retainedLogs": {
+    "backend-red.log": {
+      "bytes": 4298,
+      "sha256": "78274d4d9faa0e2c23355b5b96e4faf567f78b2532a60b80feef3533e2ec722b"
+    },
+    "backend-targeted.log": {
+      "bytes": 10036,
+      "sha256": "c7ed15519eb459f00305a8a78443c2bc189a4e3c18f3f6e1fed7f596baa47439"
+    },
+    "backend-full.log": {
+      "bytes": 158098,
+      "sha256": "e49817662be47225128946fda2076615804daff27548494fa61536704e78d54c"
+    },
+    "region-reason.log": {
+      "bytes": 2633,
+      "sha256": "c0d60538e100ce327a9a897f630bdfb23df7ce8bee75c9b95cadbefd5e7a71bf"
+    },
+    "jin-cancel-before.log": {
+      "bytes": 2200,
+      "sha256": "49cdbcbe5ea569100e393c765e0b4f522a5d74572f6a9198c549db157cd6adb0"
+    },
+    "jin-cancel-after.log": {
+      "bytes": 1709,
+      "sha256": "279c2421929460575aa1d35fc13decd9d47c0594e48ad53ebd38df513a1f2de7"
+    },
+    "jin-cancel-settlement.log": {
+      "bytes": 955,
+      "sha256": "43f10551718434e40c5aac4f46cb85918b3c211d191729d75d3360a0e28c8c0f"
+    },
+    "flutter-red.log": {
+      "bytes": 11516,
+      "sha256": "24f45881d1c78a7a7f49bf75b77a2b251eaff86b5204e0b4c0a793ac65e3ebd4"
+    },
+    "flutter-targeted.log": {
+      "bytes": 9826,
+      "sha256": "c432654bfb55e152d4ef691148d4234163cd0233ae38ee77acf227872786b6e2"
+    },
+    "flutter-final.log": {
+      "bytes": 7590,
+      "sha256": "b3af2abb5c1dd48b41a5d9f09ff3f7edab4227e2f74721c3cbb8b74f36bc8f48"
+    },
+    "flutter-analyze.log": {
+      "bytes": 2168,
+      "sha256": "412e0e3d1c8a0b872817ec4b44ea47a363c1ff85bd00cb6617b8a00a7960a807"
+    },
+    "apk-build.log": {
+      "bytes": 3990,
+      "sha256": "2d5bfbe8d34d4e85726a57d48e6bdb6cefc0e749d2789ad2e0fd7201cda99033"
+    }
+  }
+}
