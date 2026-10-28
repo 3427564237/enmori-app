@@ -150,10 +150,16 @@ export interface PublicPage {
 export class PublicEventBrowser {
   private browser: Promise<Browser> | undefined;
   private active = 0;
+  constructor(
+    private readonly reportFailure: (category: string) => void = () => {},
+  ) {}
   async read(url: string, signal: AbortSignal): Promise<PublicPage> {
     if (!permittedPublicPage(url) || signal.aborted)
       throw Error("Source unavailable");
-    if (this.active >= 2) throw Error("Source busy");
+    if (this.active >= 2) {
+      this.reportFailure("EVENT_READER_BUSY");
+      throw Error("Source busy");
+    }
     this.active++;
     let context;
     try {
@@ -169,6 +175,7 @@ export class PublicEventBrowser {
         acceptDownloads: false,
       });
     } catch {
+      this.reportFailure("EVENT_READER_LAUNCH_UNAVAILABLE");
       this.active--;
       if (this.active === 0) await this.close().catch(() => {});
       throw Error("Source unavailable");
@@ -178,6 +185,7 @@ export class PublicEventBrowser {
     };
     signal.addEventListener("abort", abort, { once: true });
     const timer = setTimeout(abort, 20000);
+    let stage = "SETUP";
     try {
       await context.route("**/*", (route) => {
         const u = new URL(route.request().url());
@@ -197,10 +205,12 @@ export class PublicEventBrowser {
       if (new URL(url).hostname.endsWith("ticketmaster.sg")) {
         // Use the provider's linked information page, never a guessed rewrite
         // of a booking URL. The homepage also completes normal page bootstrap.
+        stage = "HOME_NAVIGATION";
         await page.goto("https://ticketmaster.sg/", {
           waitUntil: "domcontentloaded",
           timeout: 8000,
         });
+        stage = "HOME_LINKS";
         await page
           .locator('a[href*="/activity/detail/"]')
           .first()
@@ -221,10 +231,12 @@ export class PublicEventBrowser {
           );
           if (discovered) target = discovered;
           else {
+            stage = "BOOKING_NAVIGATION";
             await page.goto(url, {
               waitUntil: "domcontentloaded",
               timeout: 8000,
             });
+            stage = "BOOKING_LINKS";
             await page
               .locator('a[href*="/activity/detail/"]')
               .first()
@@ -244,9 +256,11 @@ export class PublicEventBrowser {
           }
         }
       }
+      stage = "DETAIL_NAVIGATION";
       await page.goto(target, { waitUntil: "domcontentloaded", timeout: 8000 });
       // Public pages may render after an initial non-200 bootstrap response.
       // Only real content on an allowed final URL establishes successful read.
+      stage = "DETAIL_CONTENT";
       await page
         .locator("#activityContent")
         .waitFor({ state: "visible", timeout: 8000 });
@@ -260,6 +274,11 @@ export class PublicEventBrowser {
       )
         throw Error("Source unavailable");
       return value;
+    } catch (error) {
+      this.reportFailure(
+        `EVENT_READER_${stage}_${error instanceof Error && error.name === "TimeoutError" ? "TIMEOUT" : "UNAVAILABLE"}`,
+      );
+      throw error;
     } finally {
       clearTimeout(timer);
       signal.removeEventListener("abort", abort);

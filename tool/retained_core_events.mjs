@@ -36,7 +36,7 @@ export function retainedCoreEvents(directory, requested, enabled) {
     return {
       configuration: 'configured',
       input: {
-        source: new CombinedEventSource(new EnrichedTicketmasterSource(new TicketmasterBrowseSource({ key: () => credential.apiKey, enabled }), new PublicEventBrowser()), new OnePaBrowseSource(enabled, new OnePaPublicReader().read, readOnePaCatalogue)),
+        source: new CombinedEventSource(new EnrichedTicketmasterSource(new TicketmasterBrowseSource({ key: () => credential.apiKey, enabled }), new PublicEventBrowser(category => console.warn(JSON.stringify({dependency: 'ticketmaster', errorCategory: category})))), new OnePaBrowseSource(enabled, new OnePaPublicReader().read, readOnePaCatalogue)),
         musicInterestTagId: config.musicInterestTagId,
       },
     };

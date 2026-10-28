@@ -82,9 +82,17 @@ export function createControlledEventRecommendations(options: {
         if (!(await owner(uid))) return err("onboarding_required");
         const now = options.clock.now();
         if (!now.ok) return err("dependency_unavailable");
-        let row = await options.source.event?.(eventId,now.value.toISOString(),new AbortController().signal);
-        if(!row){const rows = await options.source.firstBatch(now.value.toISOString(), new AbortController().signal);
-          row = rows.find(value => sourceEventId(value.browseId) === eventId);}
+        const asOf = now.value.toISOString(), signal = new AbortController().signal;
+        let row = await options.source.event?.(eventId, asOf, signal);
+        if (!row) {
+          const rows = await options.source.firstBatch(asOf, signal);
+          const summary = rows.find(value => sourceEventId(value.browseId) === eventId);
+          // The observed-ID lookup can expire or be empty after a restart.
+          // A list row resolves identity only; it is not full Event Details.
+          // Re-enter the guarded detail read so source identity, generation and
+          // availability checks still apply, including when the event vanished.
+          row = summary ? await options.source.detail(summary.browseId, asOf, signal) : undefined;
+        }
         if (!row) return err("event_unavailable");
         const { title, startAt, externalSourceUrl, endAt, locationLabel, categoryLabel, shortDescription, coverImageUrl, venueAddress } = row;
         return ok({ ...eventPresentation(row), eventId, title, startAt, externalSourceUrl,
