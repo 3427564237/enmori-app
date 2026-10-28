@@ -6,5 +6,5 @@ export interface FriendSuggestion {
   readonly ignoreVersion:string;
 }
 export interface FriendRecommendations {
-  recommend(uid:string,view:"home"|"all"):Promise<Result<{suggestions:readonly FriendSuggestion[]},AppFailure>>;
+  recommend(uid:string,view:"home"|"all"):Promise<Result<{suggestions:readonly FriendSuggestion[];ownState?:"disabled"|"incomplete"|"no_matches"|"ready"},AppFailure>>;
 }

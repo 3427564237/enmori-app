@@ -1,3 +1,8 @@
+import 'discovery_card_page.dart';
+import '../../recommendation_profile/presentation/recommendation_profile_page.dart';
+import '../../recommendation_profile/recommendation_profile_providers.dart';
+import '../../recommendation_profile/domain/recommendation_profile.dart';
+import '../../../core/result/result.dart';
 import '../../../core/presentation/identity_avatar.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
@@ -33,6 +38,7 @@ final class _FriendDiscoveryPanelState
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _snack;
   Object? _suggestionSnapshot;
   int _groupStart = 0;
+  int? _profileRevision;
   void _closeSnack() {
     final snack = _snack;
     _snack = null;
@@ -86,6 +92,7 @@ final class _FriendDiscoveryPanelState
     ref.listen(authSessionProvider, (previous, next) {
       if (!identical(previous?.asData?.value, next.asData?.value)) {
         _closeSnack();
+        _profileRevision = null;
       }
     });
     ref.listen(friendIgnoreControllerProvider, (previous, next) {
@@ -94,6 +101,25 @@ final class _FriendDiscoveryPanelState
           next.unresolvedUsername == null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) controller.load();
+        });
+      }
+    });
+    final own = ref.watch(recommendationProfileProvider).asData?.value;
+    final ownProfile = own is Success<RecommendationProfile> ? own.value : null;
+    ref.listen(recommendationProfileProvider, (_, next) {
+      final value = next.asData?.value;
+      if (value is! Success<RecommendationProfile>) return;
+      final changed =
+          _profileRevision != null && _profileRevision != value.value.revision;
+      _profileRevision = value.value.revision;
+      if (changed) {
+        controller.clear();
+        final session = ref.read(authSessionProvider).asData?.value;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted &&
+              identical(session, ref.read(authSessionProvider).asData?.value)) {
+            controller.load();
+          }
         });
       }
     });
@@ -166,6 +192,17 @@ final class _FriendDiscoveryPanelState
             ),
           ],
         ),
+        TextButton.icon(
+          onPressed: () => _open(
+            () => Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (_) => const RecommendationProfilePage(),
+              ),
+            ),
+          ),
+          icon: const Icon(Icons.tune),
+          label: Text(context.tr('Discovery settings', '好友发现设置')),
+        ),
         if (state.busy)
           LinearProgressIndicator(
             semanticsLabel: context.tr('Loading friends', '正在加载好友'),
@@ -216,8 +253,26 @@ final class _FriendDiscoveryPanelState
                     children: [
                       Text(
                         context.tr(
-                          'No friend recommendations right now',
-                          '暂时没有好友推荐',
+                          state.ownState == 'disabled' ||
+                                  ownProfile?.discoverable == false
+                              ? 'Discovery is off'
+                              : state.ownState == 'incomplete' ||
+                                    ownProfile != null &&
+                                        !ownProfile.matchInterests &&
+                                        !ownProfile.matchRegion &&
+                                        !ownProfile.matchAffiliation
+                              ? 'Add matching preferences'
+                              : 'No matches right now',
+                          state.ownState == 'disabled' ||
+                                  ownProfile?.discoverable == false
+                              ? '好友发现尚未开启'
+                              : state.ownState == 'incomplete' ||
+                                    ownProfile != null &&
+                                        !ownProfile.matchInterests &&
+                                        !ownProfile.matchRegion &&
+                                        !ownProfile.matchAffiliation
+                              ? '请补充用于匹配的资料'
+                              : '当前暂无匹配',
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -329,8 +384,14 @@ final class _FriendDiscoveryPanelState
                           ),
                       ],
                     ),
-                    onTap: () =>
-                        _open(() => widget.onOpenProfile(person.username)),
+                    onTap: () => _open(
+                      () => Navigator.of(context).push<void>(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              DiscoveryCardPage(username: person.username),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 IconButton(

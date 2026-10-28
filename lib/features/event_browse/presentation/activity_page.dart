@@ -1,3 +1,4 @@
+import '../../event_participation/presentation/event_card.dart';
 import '../../../core/presentation/refresh_on_return.dart';
 
 import 'dart:async';
@@ -14,12 +15,12 @@ import '../domain/activity_repository.dart';
 import 'activity_controller.dart';
 
 const _listDisclosure =
-    'Source: Ticketmaster. Activity requests pass through ENMORI to Ticketmaster. '
+    'Sources: Ticketmaster / onePA. Activity requests pass through ENMORI to these public sources. '
     'Your ENMORI sign-in token, profile, Check-ins, Personas and AI messages are '
     'not shared with Ticketmaster. Ticketmaster receives the activity request '
     'and server connection information.';
 const _sourceActionDisclosure =
-    '“Tickets / booking on Ticketmaster” opens the event’s ticket link in your browser. '
+    '“Official registration / tickets” opens the event’s ticket link in your browser. '
     'Ticketmaster controls the destination, including booking or seat selection. Your browser '
     'connects directly to Ticketmaster; its privacy and cookie policies apply. '
     'Opening or copying a link does not register you or mark you as Going. '
@@ -123,18 +124,23 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
             if (widget.browseId.isEmpty)
               Text(
                 context.tr(
-                  'Explore a selection of events near and far. This is not Ticketmaster’s full catalogue.',
-                  '探索这里提供的活动，当前列表并非 Ticketmaster 的完整目录。',
+                  'Explore a selection of events near and far. This is a bounded selection from the sources.',
+                  '探索这里提供的活动，当前列表为来源提供的有界活动范围。',
                 ),
               ),
-            Text(context.tr('Source: Ticketmaster', '来源：Ticketmaster')),
+            Text(
+              context.tr(
+                'Sources: Ticketmaster / onePA',
+                '来源：Ticketmaster／onePA',
+              ),
+            ),
             const SizedBox(height: 16),
             switch (state) {
               AsyncLoading<ActivityRead?>() => StatusPanel(
                 title: context.tr('Loading activities…', '正在加载活动…'),
                 body: context.tr(
-                  'Requesting current information from Ticketmaster.',
-                  '正在向 Ticketmaster 请求最新信息。',
+                  'Requesting current source information.',
+                  '正在向活动来源请求最新信息。',
                 ),
                 icon: Icons.event_outlined,
                 loading: true,
@@ -150,9 +156,15 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                 icon: Icons.cloud_off_outlined,
                 isError: true,
               ),
-              AsyncData<ActivityRead?>(value: ActivityBatch(:final items)) =>
+              AsyncData<ActivityRead?>(
+                value: ActivityBatch(:final items, :final sourceStatus),
+              ) =>
                 Column(
                   children: [
+                    for (final source in sourceStatus.entries)
+                      Text(
+                        '${source.key}: ${source.value ? context.tr('available', '可用') : context.tr('unavailable', '暂不可用')}',
+                      ),
                     if (items.isEmpty)
                       StatusPanel(
                         title: context.tr('No activities to show', '暂无活动'),
@@ -163,33 +175,15 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                         icon: Icons.event_busy_outlined,
                       ),
                     for (final item in items)
-                      Card(
-                        child: ListTile(
-                          title: Text(
-                            item.title,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          trailing: widget.onSelect == null
-                              ? null
-                              : const Icon(Icons.chevron_right),
-                          subtitle: Text(
-                            context.tr(
-                              '${_time(context, item.startAt)}${item.endAt == null ? '\nEnd time not provided.' : '\nUntil ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
-                              '${_time(context, item.startAt)}${item.endAt == null ? '\n未提供结束时间。' : '\n结束于 ${_time(context, item.endAt!)}'}${item.locationLabel == null ? '' : '\n${item.locationLabel}'}',
-                            ),
-                          ),
-                          onTap: widget.onSelect == null
-                              ? null
-                              : () {
-                                  if (controller.isCurrentSnapshot(state)) {
-                                    widget.onSelect!(item.browseId);
-                                  }
-                                },
-                        ),
+                      EventCard.summary(
+                        summary: item,
+                        onSelect: widget.onSelect == null
+                            ? null
+                            : (_) {
+                                if (controller.isCurrentSnapshot(state)) {
+                                  widget.onSelect!(item.browseId);
+                                }
+                              },
                       ),
                   ],
                 ),
@@ -245,8 +239,8 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                       onPressed: () => _action(true),
                       child: Text(
                         context.tr(
-                          'Tickets / booking on Ticketmaster',
-                          '在 Ticketmaster 购票／预订',
+                          'Official registration / tickets',
+                          '官网报名／购票',
                         ),
                       ),
                     ),

@@ -96,7 +96,7 @@ export class ControlledSourceProjection implements BrowseSource {
       const now=parseBrowseInstant(asOf),cached=this.snapshot;
       if(now!==undefined&&cached&&covers(cached,now)){
         const found=cached.items.find(item=>sourceEventId(item.browseId)===id&&parseBrowseInstant(item.startAt)!>now);
-        if(found)return found;
+        if(found&&!this.source.status)return found;
       }
       const result=await source.event!(id,asOf,signal);
       // A refresh can also begin/publish after the initial cache miss. Raw
@@ -110,7 +110,7 @@ export class ControlledSourceProjection implements BrowseSource {
     const now=parseBrowseInstant(asOf);
     if(now===undefined||signal.aborted)throw dependencyUnavailable;
     const deadline = new AbortController();
-    const timer = setTimeout(() => deadline.abort(), 10000);
+    const timer = setTimeout(() => deadline.abort(), this.source.status?45000:10000);
     const bounded = AbortSignal.any([signal, deadline.signal]);
     try {
       if(this.pending) {
@@ -173,12 +173,12 @@ export class ControlledSourceProjection implements BrowseSource {
     // First page wins duplicate identities. No title merging or provider IO.
     for(const items of [snapshot.items,...[...this.observedPages].sort(([a],[b])=>a-b).map(([,rows])=>rows)]){
       const found=items.find(item=>sourceEventId(item.browseId)===id&&parseBrowseInstant(item.startAt)!>now);
-      if(found)return found;
+      if(found&&!this.source.status)return found;
     }
     return undefined;
   }
   private freezePage(items: readonly BrowseOccurrence[]): readonly BrowseOccurrence[] {
-    if(items.length>20||new Set(items.map(item=>item.browseId)).size!==items.length)throw dependencyUnavailable;
+    if(items.length>(this.source.status?40:20)||new Set(items.map(item=>item.browseId)).size!==items.length)throw dependencyUnavailable;
     return Object.freeze(items.map(item=>Object.freeze({...item,...(item.interestConcepts?{interestConcepts:Object.freeze([...item.interestConcepts])}:{}),...(item.regionNames?{regionNames:Object.freeze([...item.regionNames])}:{})})));
   }
   private current() { return this.snapshot; }
@@ -223,7 +223,7 @@ export class ControlledSourceProjection implements BrowseSource {
     const now=parseBrowseInstant(asOf);
     if(now===undefined)throw dependencyUnavailable;
     const found=cached?.items.find(item=>item.browseId===id&&parseBrowseInstant(item.startAt)!>now);
-    if(found)return found;
+    if(found&&!this.source.status)return found;
     if(!this.source.batch)return undefined;
     const result=await this.source.detail(id,asOf,signal);
     // Legitimate later-page reads remain available only within their admitted

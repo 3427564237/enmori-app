@@ -1,3 +1,5 @@
+import '../domain/event_content.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -75,6 +77,7 @@ final class _EventActionButtonsState extends ConsumerState<EventActionButtons> {
         const SizedBox(height: 12),
         Text(
           address?.formatted ??
+              widget.event.content?.address ??
               context.tr('Complete venue address unavailable.', '暂未提供完整场馆地址。'),
         ),
         Wrap(
@@ -83,7 +86,11 @@ final class _EventActionButtonsState extends ConsumerState<EventActionButtons> {
           children: [
             OutlinedButton.icon(
               key: const Key('event-open-map'),
-              onPressed: _busy || address == null ? null : () => _open(true),
+              onPressed:
+                  _busy ||
+                      (address == null && widget.event.content?.address == null)
+                  ? null
+                  : () => _open(true),
               icon: const Icon(Icons.map_outlined),
               label: Text(context.tr('Open map', '打开地图')),
             ),

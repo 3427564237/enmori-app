@@ -1,3 +1,5 @@
+import '../../event_detail/presentation/event_information.dart'
+    show EventCover, eventStatusLabel;
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -42,7 +44,7 @@ final class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final id = event?.eventId ?? summary?.eventId,
+    final id = event?.eventId ?? summary?.eventId ?? summary?.browseId,
         title = event?.title ?? summary!.title;
     final start = DateTime.tryParse(
       event?.startAt.toIso8601String() ?? summary!.startAt,
@@ -51,6 +53,7 @@ final class EventCard extends StatelessWidget {
     final open = onSelect != null && id != null ? () => onSelect!(id) : null;
     final location = event?.locationLabel ?? summary?.locationLabel,
         category = event?.categoryLabel ?? summary?.categoryLabel;
+    final content = event?.content ?? summary?.content;
     return MotionReveal(
       trigger: id ?? summary?.browseId,
       child: Card(
@@ -67,6 +70,19 @@ final class EventCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if ((event?.coverImageUrl ?? summary?.coverImageUrl)
+                        case final cover?)
+                      EventCover(key: ValueKey(cover), url: cover)
+                    else
+                      SizedBox(
+                        height: 64,
+                        child: Center(
+                          child: Text(
+                            context.tr('Event cover unavailable.', '暂无活动封面。'),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 12),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -86,17 +102,19 @@ final class EventCard extends StatelessWidget {
                     Text(
                       start == null
                           ? context.tr('Time unavailable', '暂无时间信息')
-                          : localTimeLabel(context, start),
+                          : singaporeEventTimeLabel(context, start),
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     if (end != null)
                       Text(
                         context.tr(
-                          'Until ${localTimeLabel(context, end)}',
-                          '结束于 ${localTimeLabel(context, end)}',
+                          'Until ${singaporeEventTimeLabel(context, end)}',
+                          '结束于 ${singaporeEventTimeLabel(context, end)}',
                         ),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
+                    if (end == null)
+                      Text(context.tr('End time not provided.', '未提供结束时间。')),
                     const SizedBox(height: 4),
                     Text(
                       location ??
@@ -111,10 +129,41 @@ final class EventCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
-                    if (event?.shortDescription case final description?) ...[
+                    if ((event?.shortDescription ?? summary?.shortDescription)
+                        case final description?) ...[
                       const SizedBox(height: 8),
-                      Text(description),
+                      Text(
+                        description,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
+                    if (content != null) ...[
+                      const SizedBox(height: 8),
+                      Text(content.sourceName),
+                      if (content.priceLabel != null) Text(content.priceLabel!),
+                      if (content.status != null &&
+                          content.status != 'unknown' &&
+                          content.status != 'available')
+                        Text(eventStatusLabel(context, content.status)),
+                      if (content.registrationDeadline != null)
+                        Text(
+                          context.tr(
+                            'Closes: ${content.registrationDeadline}',
+                            '截止：${content.registrationDeadline}',
+                          ),
+                        ),
+                    ],
+                    if ((event?.shortDescription ??
+                            summary?.shortDescription) ==
+                        null)
+                      Text(
+                        context.tr(
+                          'Introduction unavailable. Open official details to check.',
+                          '暂无简介，可打开官网详情查看。',
+                        ),
+                        maxLines: 2,
+                      ),
                     if (authorizedReason case final reason?) ...[
                       const SizedBox(height: 8),
                       Text(

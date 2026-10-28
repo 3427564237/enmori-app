@@ -1,3 +1,5 @@
+import {locateArea} from '../../recommendation-profile/infrastructure/region-geometry.js';
+import {plain} from './public-event-pages.js';
 import {Temporal} from "@js-temporal/polyfill";
 import {decodeBrowseId,object,projectOccurrence} from "../domain/browse-values.js";
 import {dependencyUnavailable} from "../../shared/ports/dependency-failure.js";
@@ -8,6 +10,20 @@ import {sourceEventId} from '../domain/source-event-id.js';
 export class TicketmasterBrowseSource implements BrowseSource {
   private readonly observed = new Map<string,{browseId:string;expires:number}>();
   constructor(private readonly access:{key():string|undefined;enabled():boolean},private readonly http:typeof fetch=fetch){}
+  private project(raw:unknown,asOf:string):BrowseOccurrence|undefined{
+    const row=projectOccurrence(raw,asOf);if(!row||!object(raw))return row;
+    const embedded=object(raw._embedded)?raw._embedded:undefined;
+    const venue=Array.isArray(embedded?.venues)?embedded.venues[0]:undefined;
+    const loc=object(venue)&&object(venue.location)?venue.location:undefined;
+    const areaCode=loc?locateArea(Number(loc.latitude),Number(loc.longitude)):undefined;
+    const description=plain(raw.info??raw.description),note=plain(raw.pleaseNote,12000);
+    const rawStatus=object(raw.dates)&&object(raw.dates.status)?raw.dates.status.code:undefined;
+    const status=rawStatus==='cancelled'?'cancelled' as const:rawStatus==='postponed'?'postponed' as const:rawStatus==='rescheduled'?'rescheduled' as const:rawStatus==='offsale'?'not_on_sale' as const:'available' as const;
+    const sections=note?[{heading:'Important information',text:note}]:[];
+    const prices=Array.isArray(raw.priceRanges)?raw.priceRanges.filter(p=>object(p)&&p.currency==='SGD'&&typeof p.min==='number'&&p.min>=0):[];
+    const priceLabel=prices.length?`From SGD ${Math.min(...prices.map(p=>Number(p.min)))}; confirm fees and availability on the official site`:undefined;
+    return {...row,content:{provider:'ticketmaster',sourceId:String(raw.id),fetchedAt:new Date().toISOString(),timeZone:'Asia/Singapore',detailUrl:row.externalSourceUrl,status,...(areaCode?{areaCode}:{}),...(description?{fullDescription:description}:{}),...(sections.length?{sections}:{}),...(priceLabel?{priceLabel}:{})}};
+  }
   private async read(path:string,query:Record<string,string>,signal:AbortSignal):Promise<unknown>{
     const key=this.access.key();if(signal.aborted||!this.access.enabled()||!key||/\s/.test(key))throw dependencyUnavailable;
     const url=new URL(`https://app.ticketmaster.com/discovery/v2/${path}.json`);
@@ -44,7 +60,7 @@ export class TicketmasterBrowseSource implements BrowseSource {
     // source response, not a batch whose supplied occurrences were excluded.
     if(rows.length>20||raw.page.totalElements<rows.length||(raw.page.totalElements>0&&rows.length===0))throw dependencyUnavailable;
     const items:BrowseOccurrence[]=[];const ids=new Set<string>();
-    for(const row of rows){const v=projectOccurrence(row,asOf);if(v){if(ids.has(v.browseId))throw dependencyUnavailable;ids.add(v.browseId);items.push(v);}}
+    for(const row of rows){const v=this.project(row,asOf);if(v){if(ids.has(v.browseId))throw dependencyUnavailable;ids.add(v.browseId);items.push(v);}}
     const now=Date.now();
     for(const [key,value]of this.observed)if(value.expires<=now)this.observed.delete(key);
     for(const row of items){this.observed.delete(sourceEventId(row.browseId));this.observed.set(sourceEventId(row.browseId),{browseId:row.browseId,expires:now+300000});}
@@ -68,7 +84,7 @@ export class TicketmasterBrowseSource implements BrowseSource {
     if(raw===undefined)return undefined;
     if(!object(raw))throw dependencyUnavailable;
     if(raw.id!==source)return undefined;
-    const result=projectOccurrence(raw,asOf);
+    const result=this.project(raw,asOf);
     if(result){this.observed.delete(sourceEventId(result.browseId));this.observed.set(sourceEventId(result.browseId),{browseId:result.browseId,expires:Date.now()+300000});while(this.observed.size>1000)this.observed.delete(this.observed.keys().next().value!);}
     return result;
   }

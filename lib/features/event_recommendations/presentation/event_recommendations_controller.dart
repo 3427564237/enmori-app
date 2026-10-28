@@ -1,3 +1,6 @@
+import '../../recommendation_profile/domain/recommendation_profile.dart';
+import '../../recommendation_profile/recommendation_profile_providers.dart';
+
 import 'dart:async';
 
 import '../../account/content_access.dart';
@@ -25,9 +28,31 @@ final class EventRecommendationsController
   late EventRecommendationRepository _repository;
   int _operation = 0;
   Timer? _expiry;
+  EventRecommendationView? _view;
+  int? _profileRevision;
+  void _refreshContext() {
+    _operation++;
+    final view = _view;
+    if (view != null) {
+      scheduleMicrotask(() {
+        if (ref.mounted) load(view: view);
+      });
+    }
+  }
 
   @override
   AsyncValue<EventRecommendationResponse> build() {
+    ref.listen(activityAreaProvider, (before, after) {
+      if (before?.code != after.code) _refreshContext();
+    });
+    ref.listen(recommendationProfileProvider, (_, next) {
+      final p = next.asData?.value;
+      if (p is Success<RecommendationProfile>) {
+        final previous = _profileRevision;
+        _profileRevision = p.value.revision;
+        if (previous != null && previous != p.value.revision) _refreshContext();
+      }
+    });
     ref.watch(currentAuthSubjectProvider);
     ref.listen(contentAccessProvider, (before, after) {
       if (!identical(before, after)) clear();
@@ -47,6 +72,7 @@ final class EventRecommendationsController
   }
 
   int load({required EventRecommendationView view}) {
+    _view = view;
     if (!ref.read(contentAccessProvider).foreground) {
       clear();
       return _operation;

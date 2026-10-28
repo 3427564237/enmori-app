@@ -1,3 +1,4 @@
+import {emptyRecommendationProfile} from '../../src/recommendation-profile/domain/recommendation-profile.js';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { FirestorePersonalizedEvents } from '../../src/event-recommendations/infrastructure/firestore-personalized-events.js';
@@ -18,11 +19,12 @@ import { rankEvents } from '../../src/event-recommendations/domain/rank-events.j
 import { rankAuthorizedFriendHomeTop2 } from '../../src/friend-recommendations/domain/friend-ranking.js';
 const asOf='2026-10-07T00:00:00.000Z';
 const item=(n:number,concept='Dance'):BrowseOccurrence=>({browseId:browseId(`candidate_${n}`)!,title:`Candidate ${n}`,
-  startAt:'2026-11-10T00:00:00Z',externalSourceUrl:'https://ticketmaster.sg/event/a',interestConcepts:[concept],regionNames:['Singapore']});
+  startAt:'2026-11-10T00:00:00Z',externalSourceUrl:'https://ticketmaster.sg/event/a',interestConcepts:[concept],regionNames:['Singapore'],content:{provider:'ticketmaster',sourceId:String(n),fetchedAt:asOf,timeZone:'Asia/Singapore',detailUrl:'https://ticketmaster.sg/event/a',areaCode:'TM'}});
 function fixture(){
   const seed=myFriendsSeed(2);
   for(const id of ['owner','target_1','target_2']){
     seed[`accounts/${id}`]={...seed[`accounts/${id}`],optionalProcessingConsent:'accepted',profileVisibility:'public',
+      recommendationProfile:{...emptyRecommendationProfile,discoverable:true,matchRegion:true,matchAffiliation:true,matchInterests:true,homeAreaCode:'TM'},
       fieldPrivacy:{interests:'public',location:'public',participation:'friends_only',mapSharedWithFriends:false},
       profileDetails:{bio:null,region:'Singapore',affiliationType:'school',affiliationName:'Example University'}};
     seed[`account_interests/${id}`]={interestTagIds:['dance'],revision:1};
@@ -38,9 +40,9 @@ function fixture(){
   const patch=(path:string,changes:Record<string,unknown>)=>store.runTransaction(async tx=>tx.set(path,{...store.read(path),...changes}));
   return {store,rows,reader,snapshot,read,patch,invalidate:()=>{live=false;},failSource:()=>{sourceFailed=true;}};
 }
-test('Havelock does not invent a Singapore region reason; exact normalized city does',async()=>{
+test('Havelock does not invent a Singapore region reason; legacy city text never replaces standard area',async()=>{
   const f=fixture();
-  for(const [region,matches] of [['havelock',false],['  SINGAPORE  ',true]] as const){
+  for(const [region,matches] of [['havelock',false],['  SINGAPORE  ',false]] as const){
     await f.patch('accounts/owner',{profileDetails:{bio:null,region,affiliationType:null,affiliationName:null}});
     const read=await f.read();assert.ok(read.ok);
     assert.ok(read.value.items.length>0);
@@ -59,10 +61,10 @@ test('broad categories, title words and Music label lookalikes never imply an in
 });
 test('v2 weights/reasons and stable Top2/all alignment use the complete current signals',async()=>{
   const f=fixture(),all=await f.read(),home=await f.read('home');assert.ok(all.ok&&home.ok);
-  assert.equal(all.value.formulaVersion,'event_recommendation_v2');
+  assert.equal(all.value.formulaVersion,'event_recommendation_v3');
   assert.deepEqual(home.value.items,all.value.items.slice(0,2));
   const social=all.value.items.find(row=>row.title==='Candidate 2')!;
-  assert.deepEqual(social.reasons,[{code:'friends_participating',count:2,points:4},{code:'same_region',count:1,points:1}]);
+  assert.deepEqual(social.reasons,[{code:'friends_participating',count:2,points:4},{code:'same_area',count:1,points:2}]);
   assert.equal(social.matchedInterests.length,0);
   const ordered=await f.read();assert.deepEqual(ordered,all);
 });
@@ -106,8 +108,8 @@ test('Friend v2 uses only current public profile fields, with missing age neutra
   });
   const repo=new FirestoreFriendRecommendations(f.store,clock,firestoreSocialAuthority,undefined,true);
   const all=await repo.recommend('owner','all');assert.ok(all.ok);
-  assert.ok(all.value.suggestions.every(row=>row.reason.includes('Same shared region')&&row.reason.includes('Same shared school')));
-  await f.patch('accounts/target_1',{fieldPrivacy:{interests:'public',location:'private',participation:'private',mapSharedWithFriends:false},
+  assert.ok(all.value.suggestions.every(row=>row.reason.includes('Same area')&&row.reason.includes('Same shared school')));
+  await f.patch('accounts/target_1',{recommendationProfile:{...emptyRecommendationProfile,discoverable:true,matchInterests:true},fieldPrivacy:{interests:'public',location:'private',participation:'private',mapSharedWithFriends:false},
     profileDetails:{bio:null,region:'Singapore',affiliationType:null,affiliationName:null}});
   const reread=await repo.recommend('owner','all');assert.ok(reread.ok);
   const changed=reread.value.suggestions.find(row=>row.username==='member_target_1')!;
@@ -159,4 +161,17 @@ test('Friend read refuses a completed calculation when its prepared source retir
   const repo=new FirestoreFriendRecommendations(f.store,clock,firestoreSocialAuthority,events,true);
   const result=await repo.recommend('owner','all');
   assert.ok(!result.ok&&result.failure.code==='SERVICE_UNAVAILABLE');
+});
+
+test('v3 event-day birthday boundary and explicit target range change actual ranking; deletion removes age inference', async()=>{
+ const f=fixture();
+ f.rows[0]={...f.rows[0]!,content:{...f.rows[0]!.content!,minimumAge:18,targetMinimumAge:18,targetMaximumAge:30}};
+ for(const [birth,eligible,target] of [['2008-11-11',false,false],['2008-11-10',true,true],[null,true,false]] as const){
+  await f.patch('accounts/owner',{recommendationProfile:{...emptyRecommendationProfile,homeAreaCode:'TM',birthDate:birth}});
+  const read=await f.read();assert.ok(read.ok);
+  const event=read.value.items.find(r=>r.eventId===sourceEventId(f.rows[0]!.browseId));
+  assert.equal(!!event,eligible);if(event)assert.equal(event.reasons?.some(r=>r.code==='target_age'),target);
+ }
+ const baseline=await f.reader.read('owner',asOf,f.snapshot,'PR');assert.equal(baseline.kind,'ready');
+ if(baseline.kind==='ready'){const e=baseline.sources.events[0]!;assert.equal(e.scoring.sameArea,false);assert.equal(e.scoring.sameRegion,true);}
 });

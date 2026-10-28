@@ -1,3 +1,4 @@
+import { eventPresentation,eventSummaryPresentation } from "../event-detail/domain/event-content.js";
 import { RecommendEvents } from "../event-recommendations/application/recommend-events.js";
 import { GetEventDetail } from "../event-detail/application/get-event-detail.js";
 import type { EventReadGateway } from "../event-recommendations/infrastructure/event-read-gateway.js";
@@ -16,7 +17,7 @@ import { ok, err } from "../shared/domain/result.js";
  * as browse (including its disable gate and bounded atomic projection). */
 export function createControlledEventRecommendations(options: {
   readonly gateway: EventReadGateway;
-  readonly personalized?: {read(uid:string,asOf:string,snapshot:import("../event-browse/ports/event-browse.js").RecommendationSnapshot):Promise<import("../event-recommendations/ports/event-recommendation-repository.js").EventRecommendationReadResult>};
+  readonly personalized?: {read(uid:string,asOf:string,snapshot:import("../event-browse/ports/event-browse.js").RecommendationSnapshot,activityAreaCode?:string):Promise<import("../event-recommendations/ports/event-recommendation-repository.js").EventRecommendationReadResult>};
   readonly source: BrowseSource;
   readonly clock: Clock;
   /** Explicit identity binding for the approved Music concept; never inferred from labels. */
@@ -36,7 +37,7 @@ export function createControlledEventRecommendations(options: {
     return id && parsed ? { id, consent: parsed.optionalProcessingConsent } : undefined;
   }
   const repository: EventRecommendationRepository = {
-    async readForRequester({ firebaseUid, asOf }) {
+    async readForRequester({ firebaseUid, asOf, activityAreaCode }) {
       try {
         const account = await owner(firebaseUid);
         if (!account) return { kind: "onboarding_required" };
@@ -55,7 +56,7 @@ export function createControlledEventRecommendations(options: {
         const signal=new AbortController().signal;
         const snapshot=options.source.recommendationSnapshot ? await options.source.recommendationSnapshot(asOf,signal)
           : {items:await options.source.firstBatch(asOf,signal),current:()=>true};
-        if(options.personalized)return options.personalized.read(firebaseUid,asOf,snapshot);
+        if(options.personalized)return options.personalized.read(firebaseUid,asOf,snapshot,activityAreaCode);
         const rows=snapshot.items;
         const ignored = new Set(options.ignoredEventIds && mayPersonalize ? await options.ignoredEventIds(firebaseUid,rows.map(row=>sourceEventId(row.browseId))) : []);
         if (options.requireRecommendationConsent) {
@@ -71,7 +72,7 @@ export function createControlledEventRecommendations(options: {
           events: rows.filter(row=>!ignored.has(sourceEventId(row.browseId))).map(row => ({ scoring: {
             eventId: sourceEventId(row.browseId), active: true, published: true,
             startInstant: parseEventInstant(row.startAt)!, interestTagIds: row.musicSegment === true ? [options.musicInterestTagId ?? "interest_music"] : [],
-          }, presentation: { title: row.title, startAt: row.startAt, ...(row.endAt === undefined ? {} : { endAt: row.endAt }) } })) } };
+          }, presentation: { ...eventSummaryPresentation(row), title: row.title, startAt: row.startAt, ...(row.endAt === undefined ? {} : { endAt: row.endAt }) } })) } };
       } catch { return { kind: "dependency_unavailable" }; }
     },
   };
@@ -86,7 +87,7 @@ export function createControlledEventRecommendations(options: {
           row = rows.find(value => sourceEventId(value.browseId) === eventId);}
         if (!row) return err("event_unavailable");
         const { title, startAt, externalSourceUrl, endAt, locationLabel, categoryLabel, shortDescription, coverImageUrl, venueAddress } = row;
-        return ok({ eventId, title, startAt, externalSourceUrl,
+        return ok({ ...eventPresentation(row), eventId, title, startAt, externalSourceUrl,
           ...(venueAddress === undefined ? {} : { venueAddress }),
           ...(endAt === undefined ? {} : { endAt }), ...(locationLabel === undefined ? {} : { locationLabel }),
           ...(categoryLabel === undefined ? {} : { categoryLabel }),

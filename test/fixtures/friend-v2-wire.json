@@ -6,10 +6,11 @@
         "displayName": "Member target_1",
         "sharedInterests": [],
         "commonEventCount": 0,
-        "reason": "Same shared region",
+        "reason": "Same area",
         "ignoreVersion": "93453143235b6e9cf89bc33d5fc37d9cc6f17817baf1a0502a63de11b108d9c1"
       }
-    ]
+    ],
+    "ownState": "ready"
   },
   "affiliation": {
     "suggestions": [
@@ -21,7 +22,8 @@
         "reason": "Same shared school or organization",
         "ignoreVersion": "93453143235b6e9cf89bc33d5fc37d9cc6f17817baf1a0502a63de11b108d9c1"
       }
-    ]
+    ],
+    "ownState": "ready"
   },
   "both": {
     "suggestions": [
@@ -30,10 +32,11 @@
         "displayName": "Member target_1",
         "sharedInterests": [],
         "commonEventCount": 0,
-        "reason": "Same shared region · Same shared school or organization",
+        "reason": "Same area · Same shared school or organization",
         "ignoreVersion": "93453143235b6e9cf89bc33d5fc37d9cc6f17817baf1a0502a63de11b108d9c1"
       }
-    ]
+    ],
+    "ownState": "ready"
   },
   "interest": {
     "suggestions": [
@@ -47,7 +50,8 @@
         "reason": "1 shared interest",
         "ignoreVersion": "93453143235b6e9cf89bc33d5fc37d9cc6f17817baf1a0502a63de11b108d9c1"
       }
-    ]
+    ],
+    "ownState": "ready"
   },
   "mixed": {
     "suggestions": [
@@ -66,9 +70,10 @@
         "displayName": "Member target_1",
         "sharedInterests": [],
         "commonEventCount": 0,
-        "reason": "Same shared region",
+        "reason": "Same area",
         "ignoreVersion": "93453143235b6e9cf89bc33d5fc37d9cc6f17817baf1a0502a63de11b108d9c1"
       }
-    ]
+    ],
+    "ownState": "ready"
   }
 }

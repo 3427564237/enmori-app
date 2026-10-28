@@ -127,7 +127,11 @@ final class _ParticipationEventPageState
           when value.eventId == widget.eventId) {
         _detail = value;
         ref.read(recentEventsProvider.notifier).viewed(value.eventId);
-        _returnUrl = Uri.tryParse(value.externalSourceUrl);
+        _returnUrl = Uri.tryParse(
+          value.content?.bookingUrl ??
+              value.content?.detailUrl ??
+              value.externalSourceUrl,
+        );
         _expiry?.cancel();
         _expiry = Timer(const Duration(minutes: 5), () {
           if (mounted) setState(_reset);
@@ -211,6 +215,36 @@ final class _ParticipationEventPageState
               eventId: widget.eventId,
             ),
             const Divider(height: 32),
+            if (details?.content?.bookingUrl != null &&
+                details!.content!.detailUrl != details.content!.bookingUrl)
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final session = _session;
+                  final opened = await widget.opener.open(
+                    Uri.parse(details.content!.detailUrl),
+                    current: () =>
+                        mounted &&
+                        identical(_session, session) &&
+                        identical(_detail, details) &&
+                        (_expiry?.isActive ?? false) &&
+                        ModalRoute.of(context)?.isCurrent == true,
+                  );
+                  if (context.mounted && !opened) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          context.tr(
+                            'Could not open official details.',
+                            '无法打开官网详情。',
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.open_in_new),
+                label: Text(context.tr('Official event details', '官网活动详情')),
+              ),
             if (_returnUrl case final url?)
               ExternalRegistrationAction(
                 key: ValueKey('registration-${widget.eventId}'),

@@ -1,3 +1,4 @@
+import '../../recommendation_profile/presentation/activity_area_bar.dart';
 import '../../../core/presentation/refresh_on_return.dart';
 
 import 'dart:async';
@@ -144,6 +145,7 @@ final class _ParticipationEventsPageState
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
             children: [
+              const ActivityAreaBar(),
               TextField(
                 key: const Key('events-search'),
                 controller: _search,
@@ -190,8 +192,8 @@ final class _ParticipationEventsPageState
               ],
               Text(
                 context.tr(
-                  'Source: Ticketmaster · filters apply to loaded events',
-                  '来源：Ticketmaster · 仅筛选已加载的活动',
+                  'Sources: Ticketmaster / onePA · bounded available selection',
+                  '来源：Ticketmaster／onePA · 当前可用活动范围',
                 ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
@@ -352,6 +354,10 @@ final class _ParticipationEventsPageState
                       '当前可用范围内没有活动，请稍后查看。',
                     ),
                   ),
+                for (final source in value.sourceStatus.entries)
+                  Text(
+                    '${source.key}: ${source.value ? context.tr('available', '可用') : context.tr('unavailable; other source remains available', '暂不可用，仍可浏览其他来源')}',
+                  ),
                 for (final item in matching) ...[
                   EventCard.summary(
                     key: ValueKey(item.eventId ?? item.browseId),
@@ -407,8 +413,8 @@ final class _ParticipationEventsPageState
                     padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
                     child: Text(
                       context.tr(
-                        'Ticketmaster supplies this available selection, not its full catalogue. ENMORI sends the activity request and server connection information, not your sign-in token, profile or private content. Category labels are source labels, not new interest mappings. Views expire after five minutes. Opening the source website does not register or pay for an event.',
-                        '这里展示 Ticketmaster 提供的可用活动，并非其完整目录。ENMORI 发送活动请求和服务器连接信息，不发送你的登录令牌、资料或私人内容。分类来自活动来源，不会创建新的兴趣映射。页面数据五分钟后过期。打开来源网站不代表报名或付款。',
+                        'Ticketmaster and onePA supply this bounded selection; it is not their full catalogues. ENMORI sends the activity request and server connection information, not your sign-in token, profile or private content. Category labels are source labels, not new interest mappings. Views expire after five minutes. Opening the source website does not register or pay for an event.',
+                        '这里展示 Ticketmaster 和 onePA 提供的有限活动，并非完整目录。ENMORI 发送活动请求和服务器连接信息，不发送你的登录令牌、资料或私人内容。分类来自活动来源，不会创建新的兴趣映射。页面数据五分钟后过期。打开来源网站不代表报名或付款。',
                       ),
                     ),
                   ),

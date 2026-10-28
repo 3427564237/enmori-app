@@ -1,3 +1,4 @@
+import { eventPresentationSchema } from "../event-detail/transport/content-schema.js";
 import { checkInResponse } from "../check-ins/transport/check-in-response.js";
 import type { FastifyInstance, FastifySchema } from "fastify";
 import type { IdentityVerifier } from "../shared/ports/identity-verifier.js";
@@ -10,7 +11,7 @@ import { sendFailure, sendFailureCode } from "./error-response.js";
 import { errorEnvelopeSchema, getCheckInHistorySchema } from "./schemas.js";
 export const targetSchema = { type: "object", additionalProperties: false, required: ["username","displayName","relationshipState"], properties: {
   username: { type: "string" }, displayName: { type: "string" }, relationshipState: { type: "string", enum: ["self","already_friends","outgoing_request_pending","incoming_request_pending","can_send_request"] } } } as const;
-export const eventDetailSchema = { type: "object", additionalProperties: false, required: ["eventId","title","startAt","externalSourceUrl"], properties: {
+export const eventDetailSchema = { type: "object", additionalProperties: false, required: ["eventId","title","startAt","externalSourceUrl"], properties: {...eventPresentationSchema,
   eventId: { type: "string", minLength: 1 }, title: { type: "string", minLength: 1, maxLength: 200 }, startAt: { type: "string" }, externalSourceUrl: { type: "string", maxLength: 2048 }, endAt: { type: "string" },
   locationLabel: { type: "string", minLength: 1, maxLength: 200 }, categoryLabel: { type: "string", minLength: 1, maxLength: 100 }, shortDescription: { type: "string", minLength: 1, maxLength: 1000 },
   coverImageUrl: { type: "string", minLength: 1, maxLength: 2048 } } } as const;

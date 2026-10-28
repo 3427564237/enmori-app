@@ -9,6 +9,8 @@ export const FRIEND_RECOMMENDATION_FORMULA_VERSION =
  */
 export interface AuthorizedFriendRankingProjection {
   readonly authorizedRegion?: string;
+  readonly authorizedBroadRegion?: string;
+  readonly authorizedAge?: number;
   readonly authorizedAffiliation?: string;
   readonly authorizedInterestTagIds: readonly string[];
   readonly authorizedInterestedEventIds: readonly string[];
@@ -30,11 +32,13 @@ export interface RankedFriendCandidate {
   readonly score: number;
   readonly factors: {
     readonly same_region?: FriendRankingFactor;
+    readonly same_broad_region?: FriendRankingFactor;
+    readonly similar_age?: FriendRankingFactor;
     readonly same_affiliation?: FriendRankingFactor;
     readonly shared_interest: FriendRankingFactor;
     readonly common_event: FriendRankingFactor;
   };
-  readonly formulaVersion: typeof FRIEND_RECOMMENDATION_FORMULA_VERSION | "friend_recommendation_v2";
+  readonly formulaVersion: typeof FRIEND_RECOMMENDATION_FORMULA_VERSION | "friend_recommendation_v2" | "friend_recommendation_v3";
 }
 
 const HOME_RESULT_LIMIT = 2;
@@ -70,6 +74,8 @@ function authorizedEventIds(
 
 interface CandidateFactors {
   readonly region: string | undefined;
+  readonly broadRegion: string | undefined;
+  readonly age: number | undefined;
   readonly affiliation: string | undefined;
   readonly interests: ReadonlySet<string>;
   readonly events: ReadonlySet<string>;
@@ -90,14 +96,14 @@ function uniqueCandidateFactors(
     if (previous === null) continue;
 
     const current: CandidateFactors = {
-      region: candidate.authorizedRegion, affiliation:candidate.authorizedAffiliation,
+      region: candidate.authorizedRegion, broadRegion:candidate.authorizedBroadRegion, age:candidate.authorizedAge, affiliation:candidate.authorizedAffiliation,
       interests: distinctIds(candidate.authorizedInterestTagIds),
       events: authorizedEventIds(candidate),
     };
     if (previous === undefined) {
       unique.set(id, current);
     } else if (!sameIds(previous.interests, current.interests) ||
-      !sameIds(previous.events, current.events) || previous.region!==current.region || previous.affiliation!==current.affiliation) {
+      !sameIds(previous.events, current.events) || previous.age!==current.age || previous.broadRegion!==current.broadRegion || previous.region!==current.region || previous.affiliation!==current.affiliation) {
       // Do not synthesize a larger projection or trust an arbitrary first/last
       // record when upstream supplies inconsistent source data for one ID.
       unique.set(id, null);
@@ -117,7 +123,7 @@ function uniqueCandidateFactors(
 export function rankAuthorizedFriendCandidates(
   requester: AuthorizedFriendRankingProjection,
   candidates: readonly AuthorizedFriendRankingCandidateProjection[],
-  version: "v1" | "v2" = "v1",
+  version: "v1" | "v2" | "v3" = "v1",
 ): readonly RankedFriendCandidate[] {
   const requesterInterests = distinctIds(requester.authorizedInterestTagIds);
   const requesterEvents = authorizedEventIds(requester);
@@ -134,16 +140,20 @@ export function rankAuthorizedFriendCandidates(
       factors.events,
     );
 
-    const sameRegion=version==="v2"&&!!requester.authorizedRegion&&requester.authorizedRegion===factors.region;
-    const sameAffiliation=version==="v2"&&!!requester.authorizedAffiliation&&requester.authorizedAffiliation===factors.affiliation;
-    if (sharedInterestCount === 0 && commonEventCount === 0&&!sameRegion&&!sameAffiliation) continue;
-    const sharedInterestPoints = sharedInterestCount * (version==="v2"?4:2);
-    const commonEventPoints = commonEventCount * (version==="v2"?2:1);
+    const sameRegion=version!=="v1"&&!!requester.authorizedRegion&&requester.authorizedRegion===factors.region;
+    const sameAffiliation=version!=="v1"&&!!requester.authorizedAffiliation&&requester.authorizedAffiliation===factors.affiliation;
+    const sameBroadRegion=version==="v3"&&!sameRegion&&!!requester.authorizedBroadRegion&&requester.authorizedBroadRegion===factors.broadRegion;
+    const similarAge=version==="v3"&&requester.authorizedAge!==undefined&&factors.age!==undefined&&Math.abs(requester.authorizedAge-factors.age)<=5;
+    if (sharedInterestCount === 0 && commonEventCount === 0&&!sameRegion&&!sameBroadRegion&&!sameAffiliation) continue;
+    const sharedInterestPoints = sharedInterestCount * (version!=="v1"?4:2);
+    const commonEventPoints = commonEventCount * (version!=="v1"?2:1);
     ranked.push({
       candidateAccountId,
-      score: sharedInterestPoints + commonEventPoints + Number(sameRegion) + Number(sameAffiliation),
+      score: sharedInterestPoints + commonEventPoints + Number(sameRegion)*(version==="v3"?2:1) + Number(sameBroadRegion) + Number(similarAge) + Number(sameAffiliation),
       factors: {
-        ...(sameRegion?{same_region:{matchedCount:1,points:1}}:{}),
+        ...(sameRegion?{same_region:{matchedCount:1,points:version==="v3"?2:1}}:{}),
+        ...(sameBroadRegion?{same_broad_region:{matchedCount:1,points:1}}:{}),
+        ...(similarAge?{similar_age:{matchedCount:1,points:1}}:{}),
         ...(sameAffiliation?{same_affiliation:{matchedCount:1,points:1}}:{}),
         shared_interest: {
           matchedCount: sharedInterestCount,
@@ -154,7 +164,7 @@ export function rankAuthorizedFriendCandidates(
           points: commonEventPoints,
         },
       },
-      formulaVersion: version==="v2"?"friend_recommendation_v2":FRIEND_RECOMMENDATION_FORMULA_VERSION,
+      formulaVersion: version==="v3"?"friend_recommendation_v3":version!=="v1"?"friend_recommendation_v2":FRIEND_RECOMMENDATION_FORMULA_VERSION,
     });
   }
 
@@ -173,7 +183,7 @@ export function rankAuthorizedFriendCandidates(
 export function rankAuthorizedFriendHomeTop2(
   requester: AuthorizedFriendRankingProjection,
   candidates: readonly AuthorizedFriendRankingCandidateProjection[],
-  version: "v1" | "v2" = "v1",
+  version: "v1" | "v2" | "v3" = "v1",
 ): readonly RankedFriendCandidate[] {
   return rankAuthorizedFriendCandidates(requester, candidates, version).slice(
     0,

@@ -46,7 +46,7 @@ test('readable venue/address stays within its existing bound; no coordinates bec
   assert.equal(value.locationLabel,undefined);
 });
 
-test('actual source projection crosses detail HTTP serialization, while list strips detail-only content',async()=>{
+test('actual source projection crosses detail HTTP serialization, while list carries summary and cover',async()=>{
   let reads=0;
   const source=new TicketmasterBrowseSource({enabled:()=>true,key:()=>'synthetic-only'},async input=>{
     reads++;
@@ -69,8 +69,8 @@ test('actual source projection crosses detail HTTP serialization, while list str
     assert.equal(detail.json().externalSourceUrl,'https://ticketmaster.sg/event/synthetic');
     const batch=await server.inject({method:'GET',url:'/v1/event-browse',headers});
     assert.equal(batch.statusCode,200);
-    assert.equal(Object.hasOwn(batch.json().items[0],'coverImageUrl'),false);
-    assert.equal(Object.hasOwn(batch.json().items[0],'shortDescription'),false);
+    assert.equal(Object.hasOwn(batch.json().items[0],'coverImageUrl'),true);
+    assert.equal(Object.hasOwn(batch.json().items[0],'shortDescription'),true);
     assert.equal(reads,2);
   }finally{await server.close();}
 });

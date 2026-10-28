@@ -1,3 +1,4 @@
+import '../../event_detail/domain/event_content.dart';
 import '../../../core/result/result.dart';
 
 enum EventRecommendationView { home, all }
@@ -32,8 +33,14 @@ final class EventRecommendation {
     required this.matchedInterests,
     required this.reasonCode,
     this.reasons = const [],
+    this.content,
+    this.locationLabel,
+    this.shortDescription,
+    this.coverImageUrl,
   });
 
+  final EventContent? content;
+  final String? locationLabel, shortDescription, coverImageUrl;
   final String eventId;
   final String title;
   final DateTime startAt;

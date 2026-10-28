@@ -1,3 +1,7 @@
+import { OnePaBrowseSource } from '../backend/dist/src/event-browse/infrastructure/onepa-browse-source.js';
+import { CombinedEventSource } from '../backend/dist/src/event-browse/infrastructure/combined-event-source.js';
+import { EnrichedTicketmasterSource } from '../backend/dist/src/event-browse/infrastructure/enriched-ticketmaster-source.js';
+import { PublicEventBrowser } from '../backend/dist/src/event-browse/infrastructure/public-event-pages.js';
 /** Explicit local configuration only. Never discover keys or log file contents. */
 import { constants, openSync, fstatSync, readFileSync, closeSync, realpathSync } from 'node:fs';
 import { isAbsolute, join } from 'node:path';
@@ -30,7 +34,7 @@ export function retainedCoreEvents(directory, requested, enabled) {
     return {
       configuration: 'configured',
       input: {
-        source: new TicketmasterBrowseSource({ key: () => credential.apiKey, enabled }),
+        source: new CombinedEventSource(new EnrichedTicketmasterSource(new TicketmasterBrowseSource({ key: () => credential.apiKey, enabled }), new PublicEventBrowser()), new OnePaBrowseSource(enabled)),
         musicInterestTagId: config.musicInterestTagId,
       },
     };

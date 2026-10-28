@@ -1,3 +1,5 @@
+import '../domain/event_content.dart';
+
 import 'package:flutter/services.dart';
 
 import '../domain/event_actions.dart';
@@ -10,7 +12,19 @@ final class PlatformEventActions implements EventActions {
   @override
   Future<bool> openMap(EventDetail event, bool Function() current) async {
     final address = event.venueAddress;
-    if (address == null) return false;
+    if (address == null) {
+      final text = event.content?.address;
+      if (text == null || !current()) return false;
+      try {
+        return await channel.invokeMethod<bool>('openSourceAddress', {
+              'address': text,
+              'countryCode': 'SG',
+            }) ==
+            true;
+      } catch (_) {
+        return false;
+      }
+    }
     try {
       if (!current()) return false;
       return await channel.invokeMethod<bool>('openMap', {
@@ -31,7 +45,12 @@ final class PlatformEventActions implements EventActions {
     final url = Uri.tryParse(event.externalSourceUrl);
     if (url == null ||
         url.scheme != 'https' ||
-        !{'ticketmaster.sg', 'www.ticketmaster.sg'}.contains(url.host) ||
+        !{
+          'ticketmaster.sg',
+          'www.ticketmaster.sg',
+          'www1.ticketmaster.sg',
+          'www.onepa.gov.sg',
+        }.contains(url.host) ||
         url.userInfo.isNotEmpty ||
         url.hasFragment ||
         (url.hasPort && url.port != 443)) {

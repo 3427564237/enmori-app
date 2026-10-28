@@ -1,3 +1,5 @@
+import { parseRecommendationProfile, civilAge, singaporeDate } from "../../recommendation-profile/domain/recommendation-profile.js";
+import { area } from "../../recommendation-profile/domain/areas.js";
 import { rankAuthorizedFriendCandidates,type AuthorizedFriendRankingCandidateProjection,type AuthorizedFriendRankingProjection } from "../domain/friend-ranking.js";
 import type { FriendEventProjection } from "../ports/friend-event-projection.js";
 import { fail, failure, SocialFailure, visible } from "../../friends/domain/social-failure.js";
@@ -26,12 +28,15 @@ async function tags(tx:Reader,id:string):Promise<Map<string,string>>{
 /** Request-local computation; no persisted recommendations or result history. */
 export class FirestoreFriendRecommendations implements FriendRecommendations {
   constructor(private readonly store:FirestoreGateway,private readonly clock:Clock,private readonly authority:SocialAuthority,private readonly events?:FriendEventProjection,private readonly personalized=false){}
-  private profileSignals(member:Member,self:boolean){
+  private profileSignals(member:Member,self:boolean,asOf:string){
     if(!this.personalized)return {};
+    const p=parseRecommendationProfile(member.data.recommendationProfile);if(!p)return fail("SERVICE_UNAVAILABLE");
+    const a=p.matchRegion?area(p.homeAreaCode):undefined;
+    const age=p.matchAge?civilAge(p.birthDate,singaporeDate(asOf)):undefined;
     const canonical=(s:string)=>s.normalize("NFC").trim().toLowerCase().replace(/\s+/gu," ");
-    const region=(self||visible(member.fields.location,false,false))&&member.details.region;
-    const affiliation=(self||member.visibility==="public")&&member.details.affiliationType&&member.details.affiliationName;
-    return {...(region?{authorizedRegion:canonical(region)}:{}),
+    const affiliation=p.matchAffiliation&&member.details.affiliationType&&member.details.affiliationName;
+    return {...(a?{authorizedRegion:a.code,authorizedBroadRegion:a.regionCode}:{}),
+      ...(age!==undefined?{authorizedAge:age}:{}),
       ...(affiliation?{authorizedAffiliation:member.details.affiliationType+":"+canonical(affiliation)}:{})};
   }
   private async eventProjection(tx:Reader,requester:string,subject:string,asOf:string){
@@ -53,12 +58,12 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
     // Explicit capacity failure. Never rank just an arbitrary prefix of users.
     return fail("SERVICE_UNAVAILABLE");
   }
-  async recommend(uid:string,view:"home"|"all"){
+  async recommend(uid:string,view:"home"|"all"):ReturnType<FriendRecommendations["recommend"]>{
     try{
       let source:void|{readonly current:()=>boolean}=undefined;
       if(this.events?.prepare){
-        const permitted=await this.store.runTransaction(async tx=>(await this.authority.viewer(tx,uid)).data.optionalProcessingConsent==="accepted");
-        if(!permitted)return ok({suggestions:[]});
+        const permitted=await this.store.runTransaction(async tx=>{const own=await this.authority.viewer(tx,uid);const p=parseRecommendationProfile(own.data.recommendationProfile);if(!p)return fail("SERVICE_UNAVAILABLE");return own.data.optionalProcessingConsent==="accepted"&&(!this.personalized||p.discoverable);});
+        if(!permitted)return ok({suggestions:[],...(this.personalized?{ownState:"disabled" as const}:{})});
         const before=this.clock.now();if(!before.ok||!Number.isFinite(before.value.getTime()))return fail("SERVICE_UNAVAILABLE");
         // Provider readiness never holds a Firestore transaction open. Waiting
         // cannot grant source/owner authority: the full transaction below rereads it.
@@ -69,17 +74,21 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
       if(!now.ok||!Number.isFinite(now.value.getTime()))return fail("SERVICE_UNAVAILABLE");
       const asOf=now.value.toISOString();
       // Q17 consent precedes candidate construction; manual Friend paths remain available.
-      if(own.data.optionalProcessingConsent!=="accepted")return ok({suggestions:[]});
-      const ownTags=await tags(tx,own.id),candidates:AuthorizedFriendRankingCandidateProjection[]=[],
+      if(own.data.optionalProcessingConsent!=="accepted")return ok({suggestions:[],...(this.personalized?{ownState:"disabled" as const}:{})});
+      const ownPreference=parseRecommendationProfile(own.data.recommendationProfile);if(!ownPreference)return fail("SERVICE_UNAVAILABLE");
+      if(this.personalized&&!ownPreference.discoverable)return ok({suggestions:[],...(this.personalized?{ownState:"disabled" as const}:{})});
+      const ownTags=!this.personalized||ownPreference.matchInterests?await tags(tx,own.id):new Map<string,string>(),candidates:AuthorizedFriendRankingCandidateProjection[]=[],
         displays=new Map<string,{username:string;displayName:string|null;sharedInterests:string[];ignoreVersion:string}>();
       let ownEvents:Omit<AuthorizedFriendRankingProjection,"authorizedInterestTagIds">|undefined;
       for(const row of await this.pool(tx)){
-        if(row.id===own.id||row.data.profileVisibility!=="public")continue;
+        if(row.id===own.id)continue;
+        if(!this.personalized&&row.data.profileVisibility!=="public")continue;
         let candidate;
         try{candidate=await this.authority.member(tx,row.id);}catch(e){
           if(e instanceof SocialFailure&&e.code==="ADD_FRIEND_TARGET_UNAVAILABLE")continue;throw e;
         }
-        if(candidate.visibility!=="public"||candidate.data.optionalProcessingConsent!=="accepted")continue;
+        const candidatePreference=parseRecommendationProfile(candidate.data.recommendationProfile);if(!candidatePreference)return fail("SERVICE_UNAVAILABLE");
+        if((this.personalized?!candidatePreference.discoverable:candidate.visibility!=="public")||candidate.data.optionalProcessingConsent!=="accepted")continue;
         const reservation=await tx.get(`username_reservations/${candidate.username}`);
         if(reservation?.accountId!==candidate.id)continue;
         const stored=await tx.get(`friend_pairs/${this.authority.pairKey(own.id,candidate.id)}`),pair=stored&&this.authority.parsePair(stored,own.id,candidate.id);
@@ -88,28 +97,30 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
           (pair?.pending&&Date.parse(pair.pending.expiresAt)>now.value.getTime()))continue;
         const preference=await readPreference(tx,own.id,candidate.id);
         if(preference.ignored)continue;
-        const permittedTags=visible(candidate.fields.interests,false,false)?await tags(tx,candidate.id):new Map<string,string>();
+        const permittedTags=(this.personalized?candidatePreference.matchInterests:visible(candidate.fields.interests,false,false))?await tags(tx,candidate.id):new Map<string,string>();
         let eventProjection=emptyEvents as Omit<AuthorizedFriendRankingProjection,"authorizedInterestTagIds">;
         if(visible(candidate.fields.participation,false,false)){
           ownEvents??=await this.eventProjection(tx,own.id,own.id,asOf);
           eventProjection=await this.eventProjection(tx,own.id,candidate.id,asOf);
         }
-        candidates.push({...this.profileSignals(candidate,false),candidateAccountId:candidate.id,authorizedInterestTagIds:[...permittedTags.keys()],...eventProjection});
+        candidates.push({...this.profileSignals(candidate,false,asOf),candidateAccountId:candidate.id,authorizedInterestTagIds:[...permittedTags.keys()],...eventProjection});
         displays.set(candidate.id,{username:candidate.username,displayName:candidate.displayName,
           ignoreVersion:preferenceVersion(own.id,candidate.id,preference.revision),
-          sharedInterests:[...permittedTags].filter(([id])=>ownTags.has(id)).map(([,name])=>name)});
+          sharedInterests:(visible(candidate.fields.interests,false,false)?[...permittedTags]:[]).filter(([id])=>ownTags.has(id)).map(([,name])=>name)});
       }
-      const ranked=rankAuthorizedFriendCandidates({...this.profileSignals(own,true),authorizedInterestTagIds:[...ownTags.keys()],...(ownEvents??emptyEvents)},candidates,this.personalized?"v2":"v1");
+      const ranked=rankAuthorizedFriendCandidates({...this.profileSignals(own,true,asOf),authorizedInterestTagIds:[...ownTags.keys()],...(ownEvents??emptyEvents)},candidates,this.personalized?"v3":"v1");
       const selected=view==="home"?ranked.slice(0,2):ranked;
       const suggestions:FriendSuggestion[]=selected.map(row=>{
         const display=displays.get(row.candidateAccountId)!;
         const commonEventCount=row.factors.common_event.matchedCount;
         const parts=[...(display.sharedInterests.length?[`${display.sharedInterests.length} shared interest${display.sharedInterests.length===1?"":"s"}`]:[]),
           ...(commonEventCount?[`${commonEventCount} common event${commonEventCount===1?"":"s"}`]:[]),
-          ...(row.factors.same_region?["Same shared region"]:[]),...(row.factors.same_affiliation?["Same shared school or organization"]:[])];
+          ...(row.factors.same_region?[this.personalized?"Same area":"Same shared region"]:[]),...(row.factors.same_broad_region?["Same region"]:[]),...(row.factors.similar_age?["Similar age range"]:[]),...(row.factors.shared_interest.matchedCount&&!display.sharedInterests.length?["Shared interests"]:[]),...(row.factors.same_affiliation?["Same shared school or organization"]:[])];
         return {...display,commonEventCount,reason:parts.join(" · ")};
       });
-      return ok({suggestions});
+      const signals=this.profileSignals(own,true,asOf);
+      const hasSignals=ownTags.size>0||!!signals.authorizedRegion||!!signals.authorizedAffiliation||!!ownEvents&&(ownEvents.authorizedInterestedEventIds.length>0||ownEvents.authorizedGoingEventIds.length>0);
+      return ok({suggestions,...(this.personalized?{ownState:suggestions.length?'ready' as const:hasSignals?'no_matches' as const:'incomplete' as const}:{})});
     });
       if(source&&!source.current())return fail("SERVICE_UNAVAILABLE");
       return result;

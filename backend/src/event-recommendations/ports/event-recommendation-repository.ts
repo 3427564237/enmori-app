@@ -1,3 +1,4 @@
+import type { EventPresentation } from "../../event-detail/domain/event-content.js";
 import type { EventScoringInput } from "../domain/rank-events.js";
 import type { DependencyUnavailable } from "../../shared/ports/dependency-failure.js";
 
@@ -8,12 +9,12 @@ export interface InterestMatchingProjection {
 }
 
 export interface EventRecommendationSources {
-  readonly formulaVersion?: "event_recommendation_v2";
+  readonly formulaVersion?: "event_recommendation_v2" | "event_recommendation_v3";
   readonly selectedInterestTagIds: readonly string[];
   readonly interestTags: readonly InterestMatchingProjection[];
   readonly events: readonly {
     readonly scoring: EventScoringInput;
-    readonly presentation: {
+    readonly presentation: EventPresentation & {
       readonly title: string;
       readonly startAt: string;
       readonly endAt?: string;
@@ -45,5 +46,6 @@ export interface EventRecommendationRepository {
   readForRequester(query: {
     readonly firebaseUid: string;
     readonly asOf: string;
+    readonly activityAreaCode?: string;
   }): Promise<EventRecommendationReadResult>;
 }

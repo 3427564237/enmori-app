@@ -38,6 +38,7 @@ final class EventInformation extends StatelessWidget {
       categoryLabel: activity.categoryLabel,
       shortDescription: activity.shortDescription,
       coverImageUrl: activity.coverImageUrl,
+      content: activity.content,
     ),
   );
   final EventDetail event;
@@ -56,11 +57,14 @@ final class EventInformation extends StatelessWidget {
       Text(
         syntheticPreview
             ? context.tr('Synthetic event preview', '合成活动预览')
-            : context.tr('Source: Ticketmaster', '来源：Ticketmaster'),
+            : context.tr(
+                'Source: ${event.content?.sourceName ?? 'Ticketmaster'}',
+                '来源：${event.content?.sourceName ?? 'Ticketmaster'}',
+              ),
       ),
       const SizedBox(height: 8),
       const SizedBox(height: 16),
-      _EventCover(
+      EventCover(
         key: ObjectKey(event),
         url: syntheticPreview ? null : event.coverImageUrl,
       ),
@@ -68,16 +72,16 @@ final class EventInformation extends StatelessWidget {
       _Heading(context.tr('When', '活动时间')),
       Text(
         context.tr(
-          'Starts: ${localTimeLabel(context, event.startAt)}',
-          '开始：${localTimeLabel(context, event.startAt)}',
+          'Starts: ${singaporeEventTimeLabel(context, event.startAt)}',
+          '开始：${singaporeEventTimeLabel(context, event.startAt)}',
         ),
       ),
       Text(
         event.endAt == null
             ? context.tr('End time not provided.', '未提供结束时间。')
             : context.tr(
-                'Ends: ${localTimeLabel(context, event.endAt!)}',
-                '结束：${localTimeLabel(context, event.endAt!)}',
+                'Ends: ${singaporeEventTimeLabel(context, event.endAt!)}',
+                '结束：${singaporeEventTimeLabel(context, event.endAt!)}',
               ),
       ),
       const SizedBox(height: 24),
@@ -87,8 +91,8 @@ final class EventInformation extends StatelessWidget {
             (syntheticPreview
                 ? context.tr('Location not provided.', '未提供地点。')
                 : context.tr(
-                    'Location not provided by Ticketmaster.',
-                    'Ticketmaster 未提供地点。',
+                    'Location not provided by the source.',
+                    '来源未提供地点。',
                   )),
         key: const Key('event-detail-location'),
       ),
@@ -99,8 +103,14 @@ final class EventInformation extends StatelessWidget {
       const SizedBox(height: 24),
       _Heading(context.tr('About this event', '活动简介')),
       SelectableText(
-        event.shortDescription ??
-            (syntheticPreview
+        event.content?.fullDescription ??
+            event.shortDescription ??
+            (event.content?.detailsStatus == 'unavailable'
+                ? context.tr(
+                    'Official details could not be read. Open the official site to check.',
+                    '官网详情暂时读取失败，请前往官网查看。',
+                  )
+                : syntheticPreview
                 ? context.tr('Description not provided.', '未提供简介。')
                 : context.tr(
                     'The current event source has not supplied an introduction. The ticket link may open seat selection directly.',
@@ -108,6 +118,38 @@ final class EventInformation extends StatelessWidget {
                   )),
         key: const Key('event-detail-description'),
       ),
+      if (event.content case final content?) ...[
+        const SizedBox(height: 16),
+        Text('Asia/Singapore (UTC+8)'),
+        _Heading(context.tr('Registration and conditions', '报名与条件')),
+        Text(
+          content.priceLabel ??
+              context.tr(
+                'Price not provided. Confirm on the official site.',
+                '未提供价格，请前往官网确认。',
+              ),
+        ),
+        Text(
+          context.tr(
+            'Status: ${eventStatusLabel(context, content.status)}',
+            '状态：${eventStatusLabel(context, content.status)}',
+          ),
+        ),
+        if (content.registrationDeadline case final deadline?)
+          Text(context.tr('Registration closes: $deadline', '报名截止：$deadline')),
+        if (content.minimumAge != null || content.maximumAge != null)
+          Text(
+            context.tr(
+              'Age requirement: ${content.minimumAge ?? 0}–${content.maximumAge ?? 'no upper limit'}',
+              '年龄要求：${content.minimumAge ?? 0}至${content.maximumAge ?? '无上限'}岁',
+            ),
+          ),
+        for (final section in content.sections) ...[
+          const SizedBox(height: 16),
+          _Heading(section.heading),
+          SelectableText(section.text),
+        ],
+      ],
     ],
   );
 }
@@ -127,14 +169,14 @@ final class _Heading extends StatelessWidget {
 
 /// RawImage avoids Flutter's global ImageCache. This state owns both request and
 /// decoded image; no bytes or image survive its original detail snapshot.
-final class _EventCover extends ConsumerStatefulWidget {
-  const _EventCover({required this.url, super.key});
+final class EventCover extends ConsumerStatefulWidget {
+  const EventCover({required this.url, super.key});
   final String? url;
   @override
-  ConsumerState<_EventCover> createState() => _EventCoverState();
+  ConsumerState<EventCover> createState() => EventCoverState();
 }
 
-final class _EventCoverState extends ConsumerState<_EventCover>
+final class EventCoverState extends ConsumerState<EventCover>
     with WidgetsBindingObserver {
   EventCoverLoad? _load;
   ui.Image? _image;
@@ -287,10 +329,7 @@ final class _EventCoverState extends ConsumerState<_EventCover>
         child: _image != null
             ? Semantics(
                 image: true,
-                label: context.tr(
-                  'Event cover supplied by Ticketmaster',
-                  'Ticketmaster 提供的活动封面',
-                ),
+                label: context.tr('Source event cover', '来源提供的活动封面'),
                 child: RawImage(
                   key: const Key('event-cover-image'),
                   image: _image,
@@ -333,3 +372,21 @@ final class _EventCoverState extends ConsumerState<_EventCover>
     super.dispose();
   }
 }
+
+String eventStatusLabel(BuildContext context, String? status) =>
+    switch (status) {
+      'available' => context.tr('On sale', '可购票'),
+      'sold_out' => context.tr('Sold out', '已售罄'),
+      'cancelled' => context.tr('Cancelled', '已取消'),
+      'postponed' => context.tr('Postponed', '已延期'),
+      'rescheduled' => context.tr(
+        'Rescheduled — check current time',
+        '已改期，请核对当前时间',
+      ),
+      'registration_closed' => context.tr('Registration closed', '报名已截止'),
+      'not_on_sale' => context.tr('Not on sale', '当前未售票'),
+      _ => context.tr(
+        'Confirm availability on the official site',
+        '请到官网确认报名状态',
+      ),
+    };

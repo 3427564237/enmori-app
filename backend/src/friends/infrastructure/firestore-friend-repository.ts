@@ -1,3 +1,4 @@
+import { parseRecommendationProfile } from "../../recommendation-profile/domain/recommendation-profile.js";
 import { normalizeFriendDisplayName, parseFriendSearchInput, encodeFriendSearchCursor } from "../domain/friend-search.js";
 import { randomUUID } from "node:crypto";
 import { Buffer } from "node:buffer";
@@ -91,7 +92,7 @@ export class FirestoreFriendRepository implements FriendRepository {
   }
   private presentation(member: Member): { username: string; displayName: string } | undefined {
     const profile = parseOwnProfile(member.data);
-    return profile?.displayName == null ? undefined : { username: profile.username, displayName: profile.displayName };
+    return !profile ? undefined : profile.displayName == null ? (parseRecommendationProfile(member.data.recommendationProfile)?.discoverable === true ? {username:profile.username, displayName:profile.username} : undefined) : { username: profile.username, displayName: profile.displayName };
   }
   public async authorize(uid: string): Promise<FriendResult<void>> {
     try { return await this.firestore.runTransaction(async tx => { const owner = await this.owner(tx, uid); return owner.ok ? ok(undefined) : owner; }); }

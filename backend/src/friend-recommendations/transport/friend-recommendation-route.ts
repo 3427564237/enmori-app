@@ -14,7 +14,7 @@ export const friendSuggestionSchema={
 export const friendRecommendationsSchema={
   querystring:{type:"object",additionalProperties:false,required:["view"],properties:{view:{enum:["home","all"]}}},
   response:{200:{type:"object",additionalProperties:false,required:["suggestions"],
-    properties:{suggestions:{type:"array",maxItems:999,items:friendSuggestionSchema}}},
+    properties:{ownState:{type:"string",enum:["disabled","incomplete","no_matches","ready"]},suggestions:{type:"array",maxItems:999,items:friendSuggestionSchema}}},
     ...Object.fromEntries([400,401,403,409,503].map(code=>[code,errorEnvelopeSchema]))},
 };
 export async function registerFriendRecommendations(app:FastifyInstance,identity:IdentityVerifier,recommendations:FriendRecommendations){

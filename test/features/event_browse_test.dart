@@ -179,11 +179,11 @@ void main() {
       await pump(tester, repo, select: (id) => selected = id);
       expect(find.text(summary.title), findsOneWidget);
       expect(
-        find.textContaining('not Ticketmaster’s full catalogue'),
+        find.textContaining('bounded selection from the sources'),
         findsOneWidget,
       );
       expect(find.textContaining('End time not provided.'), findsOneWidget);
-      await tester.tap(find.byType(ListTile));
+      await tester.tap(find.byKey(ValueKey('event-open-$id')));
       expect(selected, id);
       expect(repo.calls, 1);
       await tester.pumpWidget(const SizedBox());
@@ -211,7 +211,9 @@ void main() {
       final repo = Repo();
       final selections = <String>[];
       await pump(tester, repo, select: selections.add);
-      final oldTap = tester.widget<ListTile>(find.byType(ListTile)).onTap!;
+      final oldTap = tester
+          .widget<InkWell>(find.byKey(ValueKey('event-open-$id')))
+          .onTap!;
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       // Deliver a queued callback before Flutter paints the cleared state.
       oldTap();
@@ -227,14 +229,16 @@ void main() {
       final repo = Repo();
       final selections = <String>[];
       await pump(tester, repo, select: selections.add);
-      final oldTap = tester.widget<ListTile>(find.byType(ListTile)).onTap!;
+      final oldTap = tester
+          .widget<InkWell>(find.byKey(ValueKey('event-open-$id')))
+          .onTap!;
       await reveal(tester, find.text('Reload'));
       await tester.tap(find.text('Reload'));
       await tester.pumpAndSettle();
       oldTap();
       expect(selections, isEmpty);
-      await reveal(tester, find.byType(ListTile));
-      await tester.tap(find.byType(ListTile));
+      await reveal(tester, find.byKey(ValueKey('event-open-$id')));
+      await tester.tap(find.byKey(ValueKey('event-open-$id')));
       expect(selections, [id]);
       expect(repo.calls, 2);
       await tester.pumpWidget(const SizedBox());
@@ -246,7 +250,9 @@ void main() {
       final repo = Repo();
       final selections = <String>[];
       await pump(tester, repo, select: selections.add);
-      final oldTap = tester.widget<ListTile>(find.byType(ListTile)).onTap!;
+      final oldTap = tester
+          .widget<InkWell>(find.byKey(ValueKey('event-open-$id')))
+          .onTap!;
       repo.result = const Failure(
         AppFailure(
           kind: AppFailureKind.serviceUnavailable,
@@ -270,7 +276,9 @@ void main() {
       final repo = Repo();
       final selections = <String>[];
       await pump(tester, repo, select: selections.add);
-      final oldTap = tester.widget<ListTile>(find.byType(ListTile)).onTap!;
+      final oldTap = tester
+          .widget<InkWell>(find.byKey(ValueKey('event-open-$id')))
+          .onTap!;
       await tester.pump(const Duration(minutes: 5));
       oldTap();
       expect(selections, isEmpty);
@@ -364,16 +372,16 @@ void main() {
       await pump(tester, repo, key: id, opener: opener);
       expect(opener.calls, 0);
       expect(find.text('Event description unavailable.'), findsOneWidget);
-      await reveal(tester, find.text('Tickets / booking on Ticketmaster'));
-      await tester.tap(find.text('Tickets / booking on Ticketmaster'));
+      await reveal(tester, find.text('Official registration / tickets'));
+      await tester.tap(find.text('Official registration / tickets'));
       await tester.pumpAndSettle();
       expect(opener.calls, 1);
       expect(opener.received, detail.sourceUrl);
       expect(find.textContaining('registered'), findsNothing);
       expect(find.text('Going'), findsNothing);
       opener.success = false;
-      await reveal(tester, find.text('Tickets / booking on Ticketmaster'));
-      await tester.tap(find.text('Tickets / booking on Ticketmaster'));
+      await reveal(tester, find.text('Official registration / tickets'));
+      await tester.tap(find.text('Official registration / tickets'));
       await tester.pumpAndSettle();
       expect(
         find.text('Could not open the source page. You can copy the link.'),
@@ -468,7 +476,7 @@ void main() {
         );
       await pump(tester, repo, scale: 2);
       final disclosure = find.text(
-        'Source: Ticketmaster. Activity requests pass through ENMORI to Ticketmaster. '
+        'Sources: Ticketmaster / onePA. Activity requests pass through ENMORI to these public sources. '
         'Your ENMORI sign-in token, profile, Check-ins, Personas and AI messages are '
         'not shared with Ticketmaster. Ticketmaster receives the activity request '
         'and server connection information.',
@@ -507,7 +515,7 @@ void main() {
       final repo = Repo()..result = Success(detail), opener = Opener();
       await pump(tester, repo, key: id, opener: opener, scale: 2);
       final explanation = find.text(
-        '“Tickets / booking on Ticketmaster” opens the event’s ticket link in your browser. Ticketmaster controls the destination, including booking or seat selection. Your browser '
+        '“Official registration / tickets” opens the event’s ticket link in your browser. Ticketmaster controls the destination, including booking or seat selection. Your browser '
         'connects directly to Ticketmaster; its privacy and cookie policies apply. '
         'Opening or copying a link does not register you or mark you as Going. '
         "A copied link can remain on your device's clipboard.",
@@ -515,14 +523,14 @@ void main() {
       await reveal(tester, explanation);
       expect(explanation, findsOneWidget);
       expect(opener.calls, 0);
-      await reveal(tester, find.text('Tickets / booking on Ticketmaster'));
+      await reveal(tester, find.text('Official registration / tickets'));
       expect(
         tester.getTopLeft(explanation).dy,
         lessThan(
-          tester.getTopLeft(find.text('Tickets / booking on Ticketmaster')).dy,
+          tester.getTopLeft(find.text('Official registration / tickets')).dy,
         ),
       );
-      await tester.tap(find.text('Tickets / booking on Ticketmaster'));
+      await tester.tap(find.text('Official registration / tickets'));
       await tester.pumpAndSettle();
       expect(opener.calls, 1);
       expect(opener.received, detail.sourceUrl);

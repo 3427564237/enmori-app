@@ -147,16 +147,30 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Earliest first').last);
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.byKey(const ValueKey('walk-early')));
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('walk-late')),
+        150,
+        scrollable: _eventsScrollable(),
+      );
+      await tester.pumpAndSettle();
       expect(
         tester.getTopLeft(find.byKey(const ValueKey('walk-early'))).dy,
         lessThan(tester.getTopLeft(find.byKey(const ValueKey('walk-late'))).dy),
       );
       expect(repo.first, 1);
       expect(repo.cursors, isEmpty);
-      await tester.ensureVisible(find.byKey(const Key('events-time-all')));
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('events-time-all')),
+        -300,
+        scrollable: _eventsScrollable(),
+      );
       await tester.tap(find.byKey(const Key('events-time-all')));
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('walk-tomorrow')),
+        200,
+        scrollable: _eventsScrollable(),
+      );
       expect(find.byKey(const ValueKey('walk-tomorrow')), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
     },
@@ -252,6 +266,11 @@ void main() {
       await tester.tap(find.byTooltip('Search available events'));
       await tester.pumpAndSettle();
       expect(repo.cursors, ['page1', 'page1']);
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('available')),
+        200,
+        scrollable: _eventsScrollable(),
+      );
       expect(find.byKey(const ValueKey('available')), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
     },
@@ -364,7 +383,9 @@ void main() {
     await tester.tap(find.text('About these events'));
     await tester.pumpAndSettle();
     expect(
-      find.textContaining('Ticketmaster supplies this available selection'),
+      find.textContaining(
+        'Ticketmaster and onePA supply this bounded selection',
+      ),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -472,7 +493,11 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    await tester.ensureVisible(find.byTooltip('Filter event category'));
+    await tester.scrollUntilVisible(
+      find.byTooltip('Filter event category'),
+      250,
+      scrollable: _eventsScrollable(),
+    );
     await tester.pumpAndSettle();
     expect(
       find.byTooltip('Filter event category').hitTestable(),
@@ -568,12 +593,17 @@ void main() {
           .first;
       await tester.scrollUntilVisible(
         find.text('Load more events'),
-        -100,
+        200,
         scrollable: listScrollable,
       );
       await tester.tap(find.text('Load more events'));
       await tester.pumpAndSettle();
       expect(find.textContaining('Synthetic next failure'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Try loading more again'),
+        200,
+        scrollable: listScrollable,
+      );
       expect(find.text('Try loading more again'), findsOneWidget);
       repo.result = Success(
         ActivityBatch(
@@ -728,3 +758,10 @@ void main() {
     expect(c.read(eventBatchesProvider).batch, isNull);
   });
 }
+
+Finder _eventsScrollable() => find
+    .descendant(
+      of: find.byKey(const PageStorageKey("events-browse")),
+      matching: find.byType(Scrollable),
+    )
+    .first;

@@ -1,0 +1,201 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  projectOnePa,
+  onePaInstant,
+  OnePaBrowseSource,
+} from "../../src/event-browse/infrastructure/onepa-browse-source.js";
+import { CombinedEventSource } from "../../src/event-browse/infrastructure/combined-event-source.js";
+import { browseId } from "../../src/event-browse/domain/browse-values.js";
+import { sourceEventId } from "../../src/event-browse/domain/source-event-id.js";
+import { EnrichedTicketmasterSource } from "../../src/event-browse/infrastructure/enriched-ticketmaster-source.js";
+import type { PublicEventBrowser } from "../../src/event-browse/infrastructure/public-event-pages.js";
+const url = "https://www.onepa.gov.sg/events/synthetic-12345678",
+  asOf = "2026-10-28T00:00:00.000Z";
+function payload() {
+  const p = {
+    ID: "PA-Event-12345678",
+    Active: true,
+    Name: "Synthetic workshop",
+    xp: {
+      Private: 0,
+      Published: 1,
+      InvitationOnly: 0,
+      UsePassword: 0,
+      ProductType: "Event",
+      Timezone: "8.0",
+      Event: { Id: 12345678 },
+      StartDate: "2026-11-17T10:00:00+00:00",
+      EndDate: "2026-11-17T11:30:00+00:00",
+      TicketEndDate: "2026-11-16T11:30:00+00:00",
+      XmcDescription: "<p>Only for Age 60 and above.</p><p>Bring tools.</p>",
+      XmcVenue: "Example RN",
+      Address: "Example Road",
+      MapLat: 1.3759584,
+      MapLng: 103.9360385,
+    },
+  };
+  return {
+    props: {
+      pageProps: {
+        page: {
+          layout: {
+            sitecore: { route: { fields: { currentProduct: { value: p } } } },
+          },
+        },
+        componentProps: {
+          details: {
+            product: p,
+            xmcEventDetails: { faq: "No fees. Please bring tools." },
+          },
+        },
+      },
+    },
+  };
+}
+test("onePA wall time, explicit source age, paragraphs and namespace survive projection without invented vacancies", () => {
+  const row = projectOnePa(payload(), url, asOf)!;
+  assert.ok(row);
+  assert.equal(row.startAt, "2026-11-17T02:00:00.000Z");
+  assert.equal(row.content?.minimumAge, 60);
+  assert.ok(row.content?.fullDescription?.includes("\n"));
+  assert.equal(row.content?.areaCode, "PR");
+  assert.equal(row.content?.registrationDeadline, "2026-11-16T03:30:00.000Z");
+  assert.equal(row.content?.status, "unknown");
+  assert.equal(row.coverImageUrl, undefined);
+  assert.match(row.content!.priceLabel!, /Log in/);
+  assert.match(sourceEventId(row.browseId), /^pa_event_/);
+  assert.notEqual(
+    sourceEventId(row.browseId),
+    sourceEventId(browseId("PA-Event-12345678")!),
+  );
+  assert.equal(onePaInstant("2026-11-17"), undefined);
+  assert.equal(onePaInstant("2026-02-30T10:00:00+00:00"), undefined);
+  assert.equal(
+    projectOnePa(payload(), url, "2026-11-16T04:00:00.000Z")!.content?.status,
+    "registration_closed",
+  );
+  for (const key of ["Private", "InvitationOnly", "UsePassword"]) {
+    const data = payload();
+    (
+      data.props.pageProps.page.layout.sitecore.route.fields.currentProduct
+        .value.xp as Record<string, unknown>
+    )[key] = 1;
+    assert.equal(projectOnePa(data, url, asOf), undefined);
+  }
+  const other = payload();
+  other.props.pageProps.page.layout.sitecore.route.fields.currentProduct.value.xp.XmcDescription =
+    "An activity for older people.";
+  assert.equal(projectOnePa(other, url, asOf)!.content?.minimumAge, undefined);
+});
+test("onePA follows observed sitemap URL, coalesces same detail and refuses disabled access", async () => {
+  let calls = 0;
+  const source = new OnePaBrowseSource(
+    () => true,
+    async (u) => {
+      calls++;
+      return u.endsWith("/sitemap.xml")
+        ? "<loc>https://www.onepa.gov.sg/sitemap/sitemap-event.xml?rev=observed</loc>"
+        : u.includes("sitemap-event")
+          ? `<loc>${url}</loc>`
+          : `<script id="__NEXT_DATA__">${JSON.stringify(payload())}</script>`;
+    },
+  );
+  const first = await source.batch(asOf, 0, new AbortController().signal);
+  assert.equal(first.items.length, 1);
+  assert.equal(calls, 3);
+  await Promise.all([
+    source.detail(first.items[0]!.browseId, asOf, new AbortController().signal),
+    source.detail(first.items[0]!.browseId, asOf, new AbortController().signal),
+  ]);
+  assert.equal(calls, 3);
+  const disabled = new OnePaBrowseSource(
+    () => false,
+    async () => {
+      throw Error("must not fetch");
+    },
+  );
+  await assert.rejects(
+    disabled.detail(
+      first.items[0]!.browseId,
+      asOf,
+      new AbortController().signal,
+    ),
+  );
+});
+test("one failed provider preserves other data and explicit status; both failures remain failures", async () => {
+  const row = projectOnePa(payload(), url, asOf)!;
+  const good = { firstBatch: async () => [row], detail: async () => row },
+    bad = {
+      firstBatch: async () => {
+        throw Error("down");
+      },
+      detail: async () => undefined,
+    };
+  const combined = new CombinedEventSource(bad, good);
+  assert.deepEqual(
+    await combined.firstBatch(asOf, new AbortController().signal),
+    [row],
+  );
+  assert.deepEqual(combined.status(), [
+    { provider: "ticketmaster", available: false },
+    { provider: "onepa", available: true },
+  ]);
+  await assert.rejects(
+    new CombinedEventSource(bad, bad).firstBatch(
+      asOf,
+      new AbortController().signal,
+    ),
+  );
+});
+test("TM detail enrichment refuses a different occurrence and list never fans out browser detail requests", async () => {
+  const row = {
+    browseId: browseId("a")!,
+    title: "A",
+    startAt: "2026-12-01T10:00:00Z",
+    externalSourceUrl: "https://ticketmaster.sg/ticket/area/a/1",
+  };
+  let reads = 0;
+  const browser = {
+    read: async () => {
+      reads++;
+      return {
+        url: "https://ticketmaster.sg/activity/detail/a",
+        title: "A",
+        description: "Other occurrence content",
+        text: "",
+        links: ["https://ticketmaster.sg/ticket/area/a/2"],
+        sections: [],
+      };
+    },
+  } as unknown as PublicEventBrowser;
+  const source = new EnrichedTicketmasterSource(
+    { firstBatch: async () => [row], detail: async () => row },
+    browser,
+  );
+  await source.firstBatch(asOf, new AbortController().signal);
+  assert.equal(reads, 0);
+  const detail = await source.detail(
+    row.browseId,
+    asOf,
+    new AbortController().signal,
+  );
+  assert.equal(detail!.content?.fullDescription, undefined);
+});
+
+test("onePA saved stable event resolves from public index before any list is loaded", async () => {
+  const source = new OnePaBrowseSource(
+    () => true,
+    async (u) =>
+      u.endsWith("/sitemap.xml")
+        ? "<loc>https://www.onepa.gov.sg/sitemap/sitemap-event.xml?rev=observed</loc>"
+        : u.includes("sitemap-event")
+          ? `<loc>${url}</loc>`
+          : `<script id="__NEXT_DATA__">${JSON.stringify(payload())}</script>`,
+  );
+  const id = sourceEventId(browseId("PA-Event-12345678", "pa")!);
+  assert.equal(
+    (await source.event(id, asOf, new AbortController().signal))?.title,
+    "Synthetic workshop",
+  );
+});

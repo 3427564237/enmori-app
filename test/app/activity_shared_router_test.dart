@@ -45,12 +45,12 @@ void main() {
       final f = await _start(tester);
       await _tap(tester, find.byKey(const Key('home-browse-activities')));
       expect(f.repository.reads, [null]);
-      expect(find.text('Source: Ticketmaster'), findsOneWidget);
+      expect(find.text('Sources: Ticketmaster / onePA'), findsOneWidget);
       await _tap(tester, find.text('Synthetic browse activity'));
       expect(f.repository.reads, [null, 'tm_QQ']);
       expect(find.text('Activity details'), findsOneWidget);
       expect(f.opener.calls, 0);
-      await _tap(tester, find.text('Tickets / booking on Ticketmaster'));
+      await _tap(tester, find.text('Official registration / tickets'));
       expect(f.opener.calls, 1);
       expect(
         find.text('Could not open the source page. You can copy the link.'),
@@ -123,7 +123,7 @@ void main() {
       final pending = f.opener.pending = Completer<bool>();
       await _tap(tester, find.byKey(const Key('home-browse-activities')));
       await _tap(tester, find.text('Synthetic browse activity'));
-      await _tap(tester, find.text('Tickets / booking on Ticketmaster'));
+      await _tap(tester, find.text('Official registration / tickets'));
       expect(f.opener.calls, 1);
       expect(f.opener.pendingCurrent!(), isTrue);
       expect(f.repository.reads, [null, 'tm_QQ']);

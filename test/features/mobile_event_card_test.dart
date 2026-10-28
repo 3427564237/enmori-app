@@ -34,7 +34,13 @@ void main() {
                     eventId: 'event-a',
                     title: 'Evening at the gardens',
                     categoryLabel: 'Arts, culture and community gatherings',
-                    startAt: DateTime(2026, 10, 22, 20, 5).toIso8601String(),
+                    startAt: DateTime.utc(
+                      2026,
+                      10,
+                      22,
+                      12,
+                      5,
+                    ).toIso8601String(),
                   ),
                   onSelect: opened.add,
                   actions: FilledButton(

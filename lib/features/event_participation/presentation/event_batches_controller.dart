@@ -181,6 +181,7 @@ final class EventBatchesController extends Notifier<EventBatchesState> {
       state = EventBatchesState(
         batch: ActivityBatch(
           asOf: batch.asOf,
+          sourceStatus: batch.sourceStatus,
           items: items,
           nextCursor: batch.nextCursor,
         ),

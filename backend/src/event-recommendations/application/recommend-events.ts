@@ -1,3 +1,5 @@
+import { eventSummaryPresentation } from "../../event-detail/domain/event-content.js";
+import type { EventPresentation } from "../../event-detail/domain/event-content.js";
 import { readAuthoritativeInstant } from "../../shared/application/authoritative-values.js";
 import { appFailure, type AppFailure } from "../../shared/application/app-failure.js";
 import { ok, err, type Result } from "../../shared/domain/result.js";
@@ -9,8 +11,8 @@ import type { EventRecommendationRepository } from "../ports/event-recommendatio
 /** Internal result only. Transport mapping remains a separate contract gate. */
 export interface EventRecommendations {
   readonly asOf: string;
-  readonly formulaVersion: typeof EVENT_FORMULA_VERSION | "event_recommendation_v2";
-  readonly items: readonly {
+  readonly formulaVersion: typeof EVENT_FORMULA_VERSION | "event_recommendation_v2" | "event_recommendation_v3";
+  readonly items: readonly (EventPresentation & {
     readonly reasons?: import("../domain/rank-events.js").RankedEvent["reasons"];
     readonly eventId: string;
     readonly title: string;
@@ -20,7 +22,7 @@ export interface EventRecommendations {
       readonly interestTagId: string;
       readonly displayName: string;
     }[];
-  }[];
+  })[];
 }
 
 export class RecommendEvents {
@@ -33,12 +35,14 @@ export class RecommendEvents {
   public async execute(input: {
     readonly principal: AuthPrincipal;
     readonly view: "home" | "all";
+    readonly activityAreaCode?: string;
   }): Promise<Result<EventRecommendations, AppFailure>> {
     const instant = readAuthoritativeInstant(this.clock);
     if (!instant.ok) return instant;
     const read = await this.repository.readForRequester({
       firebaseUid: input.principal.firebaseUid,
       asOf: instant.value,
+      ...(input.activityAreaCode?{activityAreaCode:input.activityAreaCode}:{}),
     });
     switch (read.kind) {
       case "onboarding_required": return err(appFailure("ONBOARDING_REQUIRED"));
@@ -69,6 +73,7 @@ export class RecommendEvents {
         return {
           ...(event.reasons?{reasons:event.reasons}:{}),
           eventId: event.eventId,
+          ...eventSummaryPresentation(display),
           title: display.title,
           startAt: display.startAt,
           ...(display.endAt === undefined ? {} : { endAt: display.endAt }),

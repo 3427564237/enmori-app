@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Use your location once when you choose to fill your region or add a Check-in location.</string>
+	<string>With your permission, identify your activity area while using the app, or add a Check-in location. Your home area is not changed automatically.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

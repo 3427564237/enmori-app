@@ -1,3 +1,4 @@
+import '../domain/event_content.dart';
 import '../domain/event_actions.dart';
 
 import 'package:flutter/services.dart';
@@ -32,6 +33,7 @@ final class BackendEventDetailRepository implements EventDetailRepository {
       'shortDescription',
       'coverImageUrl',
       'venueAddress',
+      'content',
     ];
     bool text(Object? v, int max) =>
         v is String &&
@@ -103,8 +105,15 @@ final class BackendEventDetailRepository implements EventDetailRepository {
         countryCode: 'SG',
       );
     }
+    EventContent? content;
+    try {
+      content = EventContent.parse(value['content']);
+    } catch (_) {
+      return _invalid();
+    }
     return Success(
       EventDetail(
+        content: content,
         eventId: eventId,
         venueAddress: address,
         title: value['title'] as String,

@@ -46,7 +46,8 @@ test("S2-02 normative response schema exactly matches static Transport schema", 
   assert.equal(operation.requestBody, undefined);
   assert.deepEqual(operation.parameters, [{ name: "view", in: "query", required: true,
     schema: { type: "string", enum: ["home", "all"] },
-    description: "Exactly one value; missing, duplicate or invalid query parameters yield REQUEST_INVALID." }]);
+    description: "Exactly one value; missing, duplicate or invalid query parameters yield REQUEST_INVALID." },
+    {name:"activityAreaCode",in:"query",required:false,schema:{type:"string",minLength:1,maxLength:10},description:"URA MP2025 planning area code. Omit for saved home area fallback. Coordinates are not accepted."}]);
 });
 
 test("OpenAPI success statuses match the implemented route inventory", async () => {
