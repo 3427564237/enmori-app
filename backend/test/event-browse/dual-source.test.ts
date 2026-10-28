@@ -386,3 +386,76 @@ test("legacy browse serialization retains only known TM fields and keeps provide
     undefined,
   );
 });
+test("onePA lists reuse public summaries without individual detail fan-out, then open the exact observed URL", async () => {
+  const page = payload();
+  const product =
+    page.props.pageProps.page.layout.sitecore.route.fields.currentProduct.value;
+  (product.xp as Record<string, unknown>).SummaryBox =
+    "A source-provided summary. Another sentence.";
+  let lists = 0,
+    reads = 0;
+  const source = new OnePaBrowseSource(
+    () => true,
+    async (u) => {
+      reads++;
+      assert.equal(u, url);
+      return `<script id="__NEXT_DATA__">${JSON.stringify(page)}</script>`;
+    },
+    async () => {
+      lists++;
+      return [{ product, url }];
+    },
+  );
+  const [first, second] = await Promise.all([
+    source.firstBatch(asOf, new AbortController().signal),
+    source.firstBatch(asOf, new AbortController().signal),
+  ]);
+  assert.equal(lists, 1);
+  assert.equal(reads, 0);
+  assert.equal(
+    first[0]?.shortDescription,
+    "A source-provided summary. Another sentence.",
+  );
+  assert.equal(first[0]?.content?.fullDescription, undefined);
+  assert.deepEqual(
+    first.map((x) => x.browseId),
+    second.map((x) => x.browseId),
+  );
+  const detail = await source.detail(
+    first[0]!.browseId,
+    asOf,
+    new AbortController().signal,
+  );
+  assert.equal(reads, 1);
+  assert.match(detail!.content!.fullDescription!, /Only for Age 60/);
+  assert.equal(detail?.externalSourceUrl, url);
+});
+test("onePA public-list input stays bounded, rejects duplicate identities and does not turn a failed list into empty success", async () => {
+  const product =
+    payload().props.pageProps.page.layout.sitecore.route.fields.currentProduct
+      .value;
+  for (const list of [
+    Array.from({ length: 51 }, () => ({ product, url })),
+    [
+      { product, url },
+      { product, url },
+    ],
+  ]) {
+    const source = new OnePaBrowseSource(
+      () => true,
+      async () => {
+        throw Error("no detail read");
+      },
+      async () => list,
+    );
+    await assert.rejects(source.firstBatch(asOf, new AbortController().signal));
+  }
+  const source = new OnePaBrowseSource(
+    () => true,
+    async () => "",
+    async () => {
+      throw Error("unavailable");
+    },
+  );
+  await assert.rejects(source.firstBatch(asOf, new AbortController().signal));
+});

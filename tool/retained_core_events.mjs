@@ -1,3 +1,5 @@
+import { readOnePaCatalogue } from '../backend/dist/src/event-browse/infrastructure/onepa-public-catalogue.js';
+import { OnePaPublicReader } from '../backend/dist/src/event-browse/infrastructure/onepa-public-reader.js';
 import { OnePaBrowseSource } from '../backend/dist/src/event-browse/infrastructure/onepa-browse-source.js';
 import { CombinedEventSource } from '../backend/dist/src/event-browse/infrastructure/combined-event-source.js';
 import { EnrichedTicketmasterSource } from '../backend/dist/src/event-browse/infrastructure/enriched-ticketmaster-source.js';
@@ -34,7 +36,7 @@ export function retainedCoreEvents(directory, requested, enabled) {
     return {
       configuration: 'configured',
       input: {
-        source: new CombinedEventSource(new EnrichedTicketmasterSource(new TicketmasterBrowseSource({ key: () => credential.apiKey, enabled }), new PublicEventBrowser()), new OnePaBrowseSource(enabled)),
+        source: new CombinedEventSource(new EnrichedTicketmasterSource(new TicketmasterBrowseSource({ key: () => credential.apiKey, enabled }), new PublicEventBrowser()), new OnePaBrowseSource(enabled, new OnePaPublicReader().read, readOnePaCatalogue)),
         musicInterestTagId: config.musicInterestTagId,
       },
     };

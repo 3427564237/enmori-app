@@ -8,6 +8,7 @@ import {
   permittedPublicPage,
 } from "./public-event-pages.js";
 import { locateArea } from "../../recommendation-profile/infrastructure/region-geometry.js";
+import type { OnePaListItem } from "./onepa-public-catalogue.js";
 /** onePA xp timestamps are wall-clock fields; xp.Timezone=8.0 supplies the zone.
  * Verified against rendered page times. Do not parse misleading +00:00 as UTC. */
 export function onePaInstant(value: unknown): string | undefined {
@@ -122,14 +123,97 @@ export function projectOnePa(
     return undefined;
   }
 }
+/** Public list summaries are not represented as complete Event Details. */
+export function projectOnePaListItem(
+  item: OnePaListItem,
+  asOf: string,
+): BrowseOccurrence | undefined {
+  const row = projectOnePa(
+    {
+      props: {
+        pageProps: {
+          page: {
+            layout: {
+              sitecore: {
+                route: { fields: { currentProduct: { value: item.product } } },
+              },
+            },
+          },
+          componentProps: {},
+        },
+      },
+    },
+    item.url,
+    asOf,
+  );
+  if (!row) return undefined;
+  const summary = plain((item.product as any)?.xp?.SummaryBox);
+  const {
+    fullDescription: _,
+    sections: __,
+    detailsStatus: ___,
+    ...content
+  } = row.content!;
+  const minimum = summary?.match(
+    /only for age\s+(\d{1,3})\s+(?:and above|\+)/i,
+  );
+  return {
+    ...row,
+    ...(summary ? { shortDescription: excerpt(summary) } : {}),
+    content: {
+      ...content,
+      ...(minimum && Number(minimum[1]) <= 150
+        ? { minimumAge: Number(minimum[1]) }
+        : {}),
+    },
+  };
+}
 export class OnePaBrowseSource implements BrowseSource {
+  private catalogue:
+    | { until: number; items: readonly OnePaListItem[] }
+    | undefined;
+  private cataloguePending: Promise<readonly OnePaListItem[]> | undefined;
   private index: { until: number; urls: string[] } | undefined;
   private rows = new Map<string, { until: number; row: BrowseOccurrence }>();
   private pending = new Map<string, Promise<BrowseOccurrence | undefined>>();
   constructor(
     private readonly enabled: () => boolean,
     private readonly read = publicText,
+    private readonly readCatalogue?: (
+      signal: AbortSignal,
+    ) => Promise<readonly OnePaListItem[]>,
   ) {}
+  private async list(signal: AbortSignal): Promise<readonly OnePaListItem[]> {
+    if (this.catalogue && this.catalogue.until > Date.now())
+      return this.catalogue.items;
+    if (!this.cataloguePending) {
+      const work = this.readCatalogue!(signal).then((items) => {
+        if (
+          signal.aborted ||
+          !this.enabled() ||
+          items.length > 50 ||
+          new Set(items.map((x) => x.url)).size !== items.length ||
+          items.some(
+            (x) =>
+              typeof (x.product as any)?.ID !== "string" ||
+              !/^PA-Event-\d+$/.test((x.product as any).ID),
+          ) ||
+          new Set(items.map((x) => (x.product as any)?.ID)).size !==
+            items.length
+        )
+          throw Error("Source unavailable");
+        this.catalogue = { until: Date.now() + 300000, items };
+        return items;
+      });
+      this.cataloguePending = work;
+      void work
+        .finally(() => {
+          if (this.cataloguePending === work) this.cataloguePending = undefined;
+        })
+        .catch(() => {});
+    }
+    return this.cataloguePending;
+  }
   private async urls(signal: AbortSignal) {
     if (this.index && this.index.until > Date.now()) return this.index.urls;
     const index = await this.read(
@@ -188,6 +272,18 @@ export class OnePaBrowseSource implements BrowseSource {
       page > 49
     )
       throw Error("Source unavailable");
+    if (this.readCatalogue) {
+      const rows = await this.list(signal);
+      if (signal.aborted || !this.enabled()) throw Error("Source unavailable");
+      const items = rows.slice(page * 20, (page + 1) * 20).flatMap((item) => {
+        const row = projectOnePaListItem(item, asOf);
+        return row ? [row] : [];
+      });
+      return {
+        items,
+        ...((page + 1) * 20 < rows.length ? { nextPage: page + 1 } : {}),
+      };
+    }
     const urls = await this.urls(signal),
       selected = urls.slice(page * 20, (page + 1) * 20),
       items: BrowseOccurrence[] = [];
@@ -208,6 +304,11 @@ export class OnePaBrowseSource implements BrowseSource {
   }
   async detail(id: string, asOf: string, signal: AbortSignal) {
     if (!this.enabled() || signal.aborted) throw Error("Source unavailable");
+    if (this.readCatalogue) await this.list(signal);
+    const known = this.catalogue?.items.find(
+      (item) => browseId((item.product as any)?.ID, "pa") === id,
+    );
+    if (known) return this.load(known.url, asOf, signal);
     const urls = await this.urls(signal);
     for (const url of urls) {
       const match = url.match(/(\d+)$/);
@@ -218,6 +319,12 @@ export class OnePaBrowseSource implements BrowseSource {
   }
   async event(id: string, asOf: string, signal: AbortSignal) {
     if (!this.enabled() || signal.aborted) throw Error("Source unavailable");
+    if (this.readCatalogue) await this.list(signal);
+    const known = this.catalogue?.items.find((item) => {
+      const browse = browseId((item.product as any)?.ID, "pa");
+      return browse && sourceEventId(browse) === id;
+    });
+    if (known) return this.load(known.url, asOf, signal);
     // Stable saved identity can be resolved after process/cache restart without
     // fetching every detail or requiring the user to browse it first.
     for (const url of await this.urls(signal)) {
