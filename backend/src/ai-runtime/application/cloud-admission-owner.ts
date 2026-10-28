@@ -32,7 +32,7 @@ export class CloudAdmissionOwner<Input> {
 
   constructor(private readonly clock: RuntimeClock, private readonly transport: CloudGenerationTransport<Input>,
     private readonly authority: CloudRecoveryAuthority, limits: CloudAdmissionLimits) {
-    if (!limits || !positive(limits.windowMs) || limits.windowMs > Number.MAX_SAFE_INTEGER - 60_000 ||
+    if (!limits || !positive(limits.windowMs) || limits.windowMs > Number.MAX_SAFE_INTEGER - 60_001 ||
         !positive(limits.maxRequests) || !positive(limits.maxTokens) ||
         !positive(limits.tokensPerRequest) || limits.tokensPerRequest > limits.maxTokens ||
         typeof transport?.dispatch !== "function" || typeof authority?.recover !== "function" ||
@@ -85,7 +85,7 @@ export class CloudAdmissionOwner<Input> {
       let tokens = 0;
       const restored = snapshot.reservations.map((r: CloudRecoveredReservation) => {
         if (!r || !positive(r.tokens) || !Number.isSafeInteger(r.remainingMs) || r.remainingMs <= 0 ||
-            r.remainingMs > this.limits.windowMs + 60_000 || now > Number.MAX_SAFE_INTEGER - r.remainingMs) throw Error();
+            r.remainingMs > this.limits.windowMs + 60_001 || now > Number.MAX_SAFE_INTEGER - r.remainingMs) throw Error();
         tokens += r.tokens;
         if (!Number.isSafeInteger(tokens) || tokens > this.limits.maxTokens) throw Error();
         return { tokens: r.tokens, expiresAt: now + r.remainingMs };
@@ -151,7 +151,7 @@ export class CloudAdmissionOwner<Input> {
     try {
       const remaining = budget.remainingMs();
       if (!state || state.state !== "reserved" || this.phase !== "ready" ||
-          !this.current() || budget.signal !== state.signal || state.signal.aborted ||
+          !this.current() || (this.authority.dispatchAllowed && !this.authority.dispatchAllowed(this.lease!)) || budget.signal !== state.signal || state.signal.aborted ||
           !Number.isFinite(budget.deadline) || budget.deadline > state.overallDeadline ||
           !Number.isFinite(remaining) || remaining <= 0) return undefined;
       const now = this.now();

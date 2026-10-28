@@ -44,6 +44,8 @@ export interface CloudRecoveryAuthority {
   >;
   /** A replacement epoch must revoke earlier leases; it cannot reset quota. */
   current(lease: object): boolean;
+  /** Optional dynamic cooldown guard; also enforce at actual HTTP dispatch. */
+  dispatchAllowed?(lease: object): boolean;
   /** rejected proves no claim was recorded; unknown never means no effect. */
   reserve(lease: object, input: { readonly tokens: number; readonly conservativeExpiresAt: number },
     live: () => boolean): Promise<"confirmed" | "rejected" | "unknown">;

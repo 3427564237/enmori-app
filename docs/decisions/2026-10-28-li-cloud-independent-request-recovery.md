@@ -38,3 +38,24 @@ here. Any persistence change found necessary must be separately identified.
 Test unknown/late outcomes, deadline and cancellation races, independent new
 actions, same-target guard preservation, quotas, shared consumers and restart
 fencing. Report source verification separately from service/device acceptance.
+
+## Subsequent integration instruction
+
+LI subsequently requested real Groq transport, restart-safe request/quota
+storage, complete limiting, Azure/HTTPS/Firebase configuration and accurate
+cloud-processing disclosure, retaining Groq Free Plan. Implement and test the
+Groq HTTP boundary against the already approved cloud Port; keep production
+local until quality, durable authority and consent/configuration are verified.
+The [specific durable quota proposal](../planning/2026-10-28-cloud-durable-quota-proposal.md)
+identifies the new operational schema for explicit review rather than silently
+choosing a new data model. Existing business data stays in Firestore.
+
+## Durable quota implementation approval
+
+After reviewing the concrete one-document proposal, LI replied
+“批准该存储和限流实现” (reference
+`call_cc82908e001643acb11abd383eb6a3e0`). This authorizes the proposed
+Backend-only `ai_cloud_quota/current` schema, atomic Firestore adapter,
+minute/day accounting and offline tests. It does not authorize writes to the
+real database, a paid resource, cloud IAM expansion or model adoption. Preserve
+existing conversation state and the original proposal/supersession trail.
