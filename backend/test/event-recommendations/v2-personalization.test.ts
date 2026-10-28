@@ -175,3 +175,16 @@ test('v3 event-day birthday boundary and explicit target range change actual ran
  const baseline=await f.reader.read('owner',asOf,f.snapshot,'PR');assert.equal(baseline.kind,'ready');
  if(baseline.kind==='ready'){const e=baseline.sources.events[0]!;assert.equal(e.scoring.sameArea,false);assert.equal(e.scoring.sameRegion,true);}
 });
+
+test('legacy compatibility reranks authorized v3 candidates as v2, filters onePA, and does not expose v3 reason fields',async()=>{
+ const f=fixture();
+ const pa={...f.rows[0]!,browseId:browseId('PA-Event-12345678','pa')!};f.rows.push(pa);
+ const app=new RecommendEvents({readForRequester:()=>f.reader.read('owner',asOf,f.snapshot)},clock);
+ const modern=await app.execute({principal:{firebaseUid:'owner'},view:'all'});assert.ok(modern.ok);
+ assert.ok(modern.value.items.some(r=>r.eventId.startsWith('pa_event_')));
+ const old=await app.execute({principal:{firebaseUid:'owner'},view:'all',legacyClient:true});assert.ok(old.ok);
+ assert.equal(old.value.formulaVersion,'event_recommendation_v2');
+ assert.ok(old.value.items.every(r=>r.eventId.startsWith('tm_event_')&&!r.content));
+ assert.ok(old.value.items.every(r=>r.reasons?.every(x=>['shared_interests','friends_participating','same_region'].includes(x.code))));
+ assert.equal(old.value.items[0]!.reasons?.find(r=>r.code==='same_region')?.points,1);
+});

@@ -59,8 +59,16 @@ final class BackendApiClient {
     bool Function()? isEligible,
   }) => _send('DELETE', path, body: body, isEligible: isEligible);
 
-  Future<Result<JsonObject>> get(String path, {bool Function()? isEligible}) =>
-      _send('GET', path, isEligible: isEligible);
+  Future<Result<JsonObject>> get(
+    String path, {
+    bool Function()? isEligible,
+    int? contractVersion,
+  }) => _send(
+    'GET',
+    path,
+    isEligible: isEligible,
+    contractVersion: contractVersion,
+  );
 
   Future<Result<JsonObject>> getInterestAdminCapability(
     bool Function() current,
@@ -380,6 +388,7 @@ final class BackendApiClient {
     String? idempotencyKey,
     bool Function()? isEligible,
     _InterestAdminOperation? interestAdmin,
+    int? contractVersion,
   }) async {
     final baseUri = _baseUri;
     if (baseUri == null || !isApprovedBackendBaseUri(baseUri)) {
@@ -405,6 +414,8 @@ final class BackendApiClient {
       final headers = <String, String>{
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
+        if (contractVersion != null)
+          'X-ENMORI-Contract-Version': '$contractVersion',
       };
       if (idempotencyKey != null) {
         headers['Idempotency-Key'] = idempotencyKey;

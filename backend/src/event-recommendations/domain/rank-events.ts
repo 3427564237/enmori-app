@@ -73,12 +73,13 @@ export function rankEvents(input: {
     const v2=input.formulaVersion!==undefined;
     const friends=event.visibleFriendCount??0;
     if(!Number.isSafeInteger(friends)||friends<0||friends>1000)continue;
-    const region=event.sameRegion===true&&!event.sameArea;
+    const v3=input.formulaVersion==="event_recommendation_v3";
+    const region=event.sameRegion===true&&!(v3&&event.sameArea);
     const reasons:RecommendationReason[]=[
       ...(matched.length?[{code:"shared_interests" as const,count:matched.length,points:matched.length*4}]:[]),
       ...(friends?[{code:"friends_participating" as const,count:friends,points:Math.min(friends,5)*2}]:[]),
-      ...(event.sameArea?[{code:"same_area" as const,count:1,points:2}]:[]),
-      ...(event.targetAgeMatch?[{code:"target_age" as const,count:1,points:1}]:[]),
+      ...(v3&&event.sameArea?[{code:"same_area" as const,count:1,points:2}]:[]),
+      ...(v3&&event.targetAgeMatch?[{code:"target_age" as const,count:1,points:1}]:[]),
       ...(region?[{code:"same_region" as const,count:1,points:1}]:[])];
     if(v2?reasons.length===0:matched.length===0)continue;
     ranked.push({

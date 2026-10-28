@@ -44,7 +44,8 @@ test("S2-02 normative response schema exactly matches static Transport schema", 
   const paths = contract.paths as Record<string, JsonObject>;
   const operation = paths["/v1/recommendations/events"]!.get as JsonObject;
   assert.equal(operation.requestBody, undefined);
-  assert.deepEqual(operation.parameters, [{ name: "view", in: "query", required: true,
+  assert.ok((operation.parameters as JsonObject[]).some(p=>p.in==="header"&&p.name==="X-ENMORI-Contract-Version"));
+  assert.deepEqual((operation.parameters as JsonObject[]).filter(p=>p.in==="query"), [{ name: "view", in: "query", required: true,
     schema: { type: "string", enum: ["home", "all"] },
     description: "Exactly one value; missing, duplicate or invalid query parameters yield REQUEST_INVALID." },
     {name:"activityAreaCode",in:"query",required:false,schema:{type:"string",minLength:1,maxLength:10},description:"URA MP2025 planning area code. Omit for saved home area fallback. Coordinates are not accepted."}]);

@@ -29,3 +29,7 @@ Friend responses expose only the requesting user's `ownState`: disabled, incompl
 ## Verification boundaries
 
 Source tests, provider probes, running Backend, signed APK and physical-device/account UAT are separate. See the dated evidence record; an APK or successful source request alone does not establish the complete registration-to-booking journey.
+
+## Installed-client compatibility
+
+New Flutter reads send `X-ENMORI-Contract-Version: 3` on Event browse/detail and Event/Friend recommendation requests. The header selects a representation, never identity or authorization. Without it, Event browsing keeps its existing Ticketmaster-only identifiers/scope and fields; provider failure remains an error. Event recommendations rerank the same currently authorized signals using v2 weights, with no onePA rows or v3 age/area reasons. Stable detail omits the added `content` object. Friend discovery continues to require the new opt-in/processing permissions, but old clients receive only public-profile-compatible candidates and existing reason forms, without `ownState`. No existing user is opted in by the compatibility path. Installing v42 is required for the complete new flow.

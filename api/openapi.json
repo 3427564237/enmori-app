@@ -1763,6 +1763,18 @@
               "maxLength": 10
             },
             "description": "URA MP2025 planning area code. Omit for saved home area fallback. Coordinates are not accepted."
+          },
+          {
+            "name": "X-ENMORI-Contract-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "3"
+              ]
+            },
+            "description": "Explicit support for dual-source event content and v3 discovery. Omit for legacy-compatible projections; authentication and matching consent are always checked."
           }
         ],
         "responses": {
@@ -2625,6 +2637,18 @@
               ]
             },
             "description": "Opt in to the complete source venue address. Omitted by default."
+          },
+          {
+            "name": "X-ENMORI-Contract-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "3"
+              ]
+            },
+            "description": "Explicit support for dual-source event content and v3 discovery. Omit for legacy-compatible projections; authentication and matching consent are always checked."
           }
         ],
         "responses": {
@@ -4043,6 +4067,18 @@
               "minLength": 1,
               "maxLength": 512
             }
+          },
+          {
+            "name": "X-ENMORI-Contract-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "3"
+              ]
+            },
+            "description": "Explicit support for dual-source event content and v3 discovery. Omit for legacy-compatible projections; authentication and matching consent are always checked."
           }
         ]
       }
@@ -4386,6 +4422,18 @@
               "maxLength": 174,
               "pattern": "^tm_[A-Za-z0-9_-]+$"
             }
+          },
+          {
+            "name": "X-ENMORI-Contract-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "3"
+              ]
+            },
+            "description": "Explicit support for dual-source event content and v3 discovery. Omit for legacy-compatible projections; authentication and matching consent are always checked."
           }
         ],
         "description": "Isolated Emulator composition only; verified Firebase identity and completed Account required before any source read. No query parameters or request body. No pagination or database write. The approved Sponsor demo composition may reuse one atomic server-owned source projection for at most five minutes, shared with recommendations and detail; disable invalidates it and source failure never serves stale success. Other compositions retain request-only source reads. Real provider activation remains separately gated."
@@ -9543,6 +9591,18 @@
                 "all"
               ]
             }
+          },
+          {
+            "name": "X-ENMORI-Contract-Version",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "3"
+              ]
+            },
+            "description": "Explicit support for dual-source event content and v3 discovery. Omit for legacy-compatible projections; authentication and matching consent are always checked."
           }
         ],
         "responses": {
@@ -14543,7 +14603,7 @@
           },
           "displayName": {
             "type": "string",
-            "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+            "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
           },
           "tone": {
             "type": "string",
@@ -14653,7 +14713,7 @@
                 },
                 "displayName": {
                   "type": "string",
-                  "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                  "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
                 },
                 "tone": {
                   "type": "string",
@@ -14775,7 +14835,7 @@
               },
               "displayName": {
                 "type": "string",
-                "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
               },
               "tone": {
                 "type": "string",
@@ -14899,7 +14959,7 @@
                     },
                     "displayName": {
                       "type": "string",
-                      "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                      "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
                     },
                     "tone": {
                       "type": "string",
@@ -14999,7 +15059,7 @@
         "properties": {
           "displayName": {
             "type": "string",
-            "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+            "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
           },
           "tone": {
             "type": "string",
@@ -15073,7 +15133,7 @@
         "properties": {
           "displayName": {
             "type": "string",
-            "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+            "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
           },
           "tone": {
             "type": "string",
@@ -17131,7 +17191,7 @@
             "properties": {
               "displayName": {
                 "type": "string",
-                "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
               },
               "tone": {
                 "type": "string",

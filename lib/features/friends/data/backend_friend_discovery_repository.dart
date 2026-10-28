@@ -15,6 +15,7 @@ final class BackendFriendDiscoveryRepository
     ownState = null;
     final response = await client.get(
       '/v1/recommendations/friends?view=${home ? 'home' : 'all'}',
+      contractVersion: 3,
     );
     if (response case Failure<JsonObject>(:final failure)) {
       return Failure(failure);

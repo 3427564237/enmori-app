@@ -6,6 +6,7 @@ import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/event_detail/domain/event_content.dart';
+import 'package:enmori/features/event_browse/data/backend_activity_repository.dart';
 import 'package:enmori/features/recommendation_profile/data/backend_recommendation_profile_repository.dart';
 import 'package:enmori/features/recommendation_profile/domain/recommendation_profile.dart';
 import 'package:enmori/features/recommendation_profile/presentation/recommendation_profile_page.dart';
@@ -60,6 +61,32 @@ class Regions implements RegionRepository {
 }
 
 void main() {
+  test(
+    'new event reads explicitly negotiate v3 without changing auth identity',
+    () async {
+      String? capability;
+      final client = BackendApiClient(
+        Uri.parse('https://example.com'),
+        () async => const Success('synthetic'),
+        httpClient: MockClient((r) async {
+          capability =
+              r.headers['X-ENMORI-Contract-Version'] ??
+              r.headers['x-enmori-contract-version'];
+          expect(
+            r.headers['Authorization'] ?? r.headers['authorization'],
+            'Bearer synthetic',
+          );
+          return http.Response(
+            '{"asOf":"2026-10-28T00:00:00Z","scope":"singapore_events_v2","items":[]}',
+            200,
+          );
+        }),
+      );
+      await BackendActivityRepository(client).read(null);
+      expect(capability, '3');
+      client.close();
+    },
+  );
   test('profile save uses revision, no raw coordinates and preserves false/null rather than dropping fields', () async {
     late Map<String, dynamic> sent;
     final client = BackendApiClient(

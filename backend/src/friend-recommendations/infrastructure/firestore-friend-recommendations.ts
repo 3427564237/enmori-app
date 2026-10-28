@@ -58,7 +58,7 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
     // Explicit capacity failure. Never rank just an arbitrary prefix of users.
     return fail("SERVICE_UNAVAILABLE");
   }
-  async recommend(uid:string,view:"home"|"all"):ReturnType<FriendRecommendations["recommend"]>{
+  async recommend(uid:string,view:"home"|"all",legacyClient=false):ReturnType<FriendRecommendations["recommend"]>{
     try{
       let source:void|{readonly current:()=>boolean}=undefined;
       if(this.events?.prepare){
@@ -88,7 +88,7 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
           if(e instanceof SocialFailure&&e.code==="ADD_FRIEND_TARGET_UNAVAILABLE")continue;throw e;
         }
         const candidatePreference=parseRecommendationProfile(candidate.data.recommendationProfile);if(!candidatePreference)return fail("SERVICE_UNAVAILABLE");
-        if((this.personalized?!candidatePreference.discoverable:candidate.visibility!=="public")||candidate.data.optionalProcessingConsent!=="accepted")continue;
+        if((legacyClient&&candidate.visibility!=="public")||(this.personalized?!candidatePreference.discoverable:candidate.visibility!=="public")||candidate.data.optionalProcessingConsent!=="accepted")continue;
         const reservation=await tx.get(`username_reservations/${candidate.username}`);
         if(reservation?.accountId!==candidate.id)continue;
         const stored=await tx.get(`friend_pairs/${this.authority.pairKey(own.id,candidate.id)}`),pair=stored&&this.authority.parsePair(stored,own.id,candidate.id);
@@ -97,7 +97,7 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
           (pair?.pending&&Date.parse(pair.pending.expiresAt)>now.value.getTime()))continue;
         const preference=await readPreference(tx,own.id,candidate.id);
         if(preference.ignored)continue;
-        const permittedTags=(this.personalized?candidatePreference.matchInterests:visible(candidate.fields.interests,false,false))?await tags(tx,candidate.id):new Map<string,string>();
+        const permittedTags=(!legacyClient||visible(candidate.fields.interests,false,false))&&(this.personalized?candidatePreference.matchInterests:visible(candidate.fields.interests,false,false))?await tags(tx,candidate.id):new Map<string,string>();
         let eventProjection=emptyEvents as Omit<AuthorizedFriendRankingProjection,"authorizedInterestTagIds">;
         if(visible(candidate.fields.participation,false,false)){
           ownEvents??=await this.eventProjection(tx,own.id,own.id,asOf);
@@ -108,14 +108,14 @@ export class FirestoreFriendRecommendations implements FriendRecommendations {
           ignoreVersion:preferenceVersion(own.id,candidate.id,preference.revision),
           sharedInterests:(visible(candidate.fields.interests,false,false)?[...permittedTags]:[]).filter(([id])=>ownTags.has(id)).map(([,name])=>name)});
       }
-      const ranked=rankAuthorizedFriendCandidates({...this.profileSignals(own,true,asOf),authorizedInterestTagIds:[...ownTags.keys()],...(ownEvents??emptyEvents)},candidates,this.personalized?"v3":"v1");
+      const ranked=rankAuthorizedFriendCandidates({...this.profileSignals(own,true,asOf),authorizedInterestTagIds:[...ownTags.keys()],...(ownEvents??emptyEvents)},candidates,this.personalized?(legacyClient?"v2":"v3"):"v1");
       const selected=view==="home"?ranked.slice(0,2):ranked;
       const suggestions:FriendSuggestion[]=selected.map(row=>{
         const display=displays.get(row.candidateAccountId)!;
         const commonEventCount=row.factors.common_event.matchedCount;
         const parts=[...(display.sharedInterests.length?[`${display.sharedInterests.length} shared interest${display.sharedInterests.length===1?"":"s"}`]:[]),
           ...(commonEventCount?[`${commonEventCount} common event${commonEventCount===1?"":"s"}`]:[]),
-          ...(row.factors.same_region?[this.personalized?"Same area":"Same shared region"]:[]),...(row.factors.same_broad_region?["Same region"]:[]),...(row.factors.similar_age?["Similar age range"]:[]),...(row.factors.shared_interest.matchedCount&&!display.sharedInterests.length?["Shared interests"]:[]),...(row.factors.same_affiliation?["Same shared school or organization"]:[])];
+          ...(row.factors.same_region?[this.personalized&&!legacyClient?"Same area":"Same shared region"]:[]),...(row.factors.same_broad_region?["Same region"]:[]),...(row.factors.similar_age?["Similar age range"]:[]),...(row.factors.shared_interest.matchedCount&&!display.sharedInterests.length?["Shared interests"]:[]),...(row.factors.same_affiliation?["Same shared school or organization"]:[])];
         return {...display,commonEventCount,reason:parts.join(" · ")};
       });
       const signals=this.profileSignals(own,true,asOf);

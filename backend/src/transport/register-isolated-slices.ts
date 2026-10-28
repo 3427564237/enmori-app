@@ -82,8 +82,8 @@ export async function registerIsolatedSlices(app: FastifyInstance, identity: Ide
         (query.has('includeVenueAddress') && query.get('includeVenueAddress') !== 'true')) return sendFailureCode(request, reply, 'REQUEST_INVALID');
     const result = await events.execute(requirePrincipal(request),request.params.eventId);
     if (!result.ok) return sendFailure(request,reply,result.failure);
-    const {venueAddress, ...legacy} = result.value;
-    return reply.send({event: query.get('includeVenueAddress') === 'true' ? result.value : legacy});
+    const {venueAddress, content, ...legacy} = result.value;
+    return reply.send({event: {...legacy, ...(query.get('includeVenueAddress') === 'true' && venueAddress ? {venueAddress}:{}), ...(request.headers['x-enmori-contract-version'] === '3' && content ? {content}: {})}});
   });
   if (checkInHistory !== undefined) {
     app.get<{ Querystring: { date: string; timeZone: string; cursor?: string } }>(

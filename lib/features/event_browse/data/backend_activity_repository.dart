@@ -107,6 +107,7 @@ final class BackendActivityRepository implements PagedActivityRepository {
       browseId == null
           ? '/v1/event-browse${cursor == null ? '' : '?cursor=${Uri.encodeQueryComponent(cursor)}'}'
           : '/v1/event-browse/${Uri.encodeComponent(browseId)}',
+      contractVersion: 3,
     );
     if (result case Failure<JsonObject>(:final failure)) {
       return Failure(failure);

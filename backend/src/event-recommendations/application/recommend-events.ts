@@ -36,6 +36,7 @@ export class RecommendEvents {
     readonly principal: AuthPrincipal;
     readonly view: "home" | "all";
     readonly activityAreaCode?: string;
+    readonly legacyClient?: boolean;
   }): Promise<Result<EventRecommendations, AppFailure>> {
     const instant = readAuthoritativeInstant(this.clock);
     if (!instant.ok) return instant;
@@ -51,7 +52,12 @@ export class RecommendEvents {
       case "ready": break;
     }
 
-    const sources = read.sources;
+    const legacy = input.legacyClient && read.sources.formulaVersion === 'event_recommendation_v3';
+    // Re-rank current authorized signals under the existing client formula.
+    // Do not label v3 scores/reasons as v2 or take a prefix of the v3 Top 2.
+    const sources = legacy ? { ...read.sources, formulaVersion: 'event_recommendation_v2' as const,
+      events: read.sources.events.filter(e => e.scoring.eventId.startsWith('tm_event_')).map(e => ({...e, scoring:{...e.scoring, sameRegion:!!e.scoring.sameArea || !!e.scoring.sameRegion}})),
+    } : read.sources;
     const activeTags = new Map(sources.interestTags
       .filter((tag) => tag.lifecycleState === "active")
       .map((tag) => [tag.interestTagId, tag]));
@@ -73,7 +79,7 @@ export class RecommendEvents {
         return {
           ...(event.reasons?{reasons:event.reasons}:{}),
           eventId: event.eventId,
-          ...eventSummaryPresentation(display),
+          ...(!legacy ? eventSummaryPresentation(display) : {}),
           title: display.title,
           startAt: display.startAt,
           ...(display.endAt === undefined ? {} : { endAt: display.endAt }),

@@ -30,7 +30,7 @@ export async function registerEventRecommendationRoute(app: FastifyInstance, dep
     }],
   }, async (request, reply) => {
     const result = await dependencies.recommendEvents.execute({
-      principal: requirePrincipal(request), view: request.query.view,...(request.query.activityAreaCode?{activityAreaCode:request.query.activityAreaCode}:{}),
+      principal: requirePrincipal(request), view: request.query.view, legacyClient: request.headers["x-enmori-contract-version"] !== "3",...(request.query.activityAreaCode?{activityAreaCode:request.query.activityAreaCode}:{}),
     });
     if (!result.ok) return sendFailure(request, reply, result.failure);
     return reply.code(200).send({

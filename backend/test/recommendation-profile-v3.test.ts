@@ -251,3 +251,9 @@ test("HTTP profile rejects coercion/extra data and serializes owner-only no-stor
     await app.close();
   }
 });
+
+test('old clients never receive private full-profile candidates after opting into minimal discovery',async()=>{
+ const {friends}=setup();
+ const modern=await friends.recommend('owner','home');assert.ok(modern.ok);assert.equal(modern.value.suggestions.length,1);
+ const legacy=await friends.recommend('owner','home',true);assert.ok(legacy.ok);assert.equal(legacy.value.suggestions.length,0);
+});

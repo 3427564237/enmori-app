@@ -1,3 +1,4 @@
+import {legacyBrowse} from '../../src/event-browse/transport/legacy-browse.js';
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -198,4 +199,13 @@ test("onePA saved stable event resolves from public index before any list is loa
     (await source.event(id, asOf, new AbortController().signal))?.title,
     "Synthetic workshop",
   );
+});
+
+test('legacy browse serialization retains only known TM fields and keeps provider failures visible',()=>{
+ const pa=projectOnePa(payload(),url,asOf)!;
+ const tm={...pa,browseId:browseId('legacy-tm')!,eventId:sourceEventId(browseId('legacy-tm')!)};
+ const result=legacyBrowse({asOf,scope:'singapore_events_v2',items:[pa,tm],sourceStatus:[{provider:'ticketmaster',available:true}]});
+ assert.ok(result&&'items' in result);assert.equal(result.scope,'ticketmaster_sg_first_batch_v1');assert.equal(result.items.length,1);
+ assert.ok(!('content' in result.items[0]!)&&!('sourceStatus' in result));
+ assert.equal(legacyBrowse({asOf,scope:'singapore_events_v2',items:[pa],sourceStatus:[{provider:'ticketmaster',available:false}]}),undefined);
 });

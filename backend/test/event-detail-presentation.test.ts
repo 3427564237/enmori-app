@@ -59,7 +59,7 @@ test('actual source projection crosses detail HTTP serialization, while list car
   const identity={verifyIdToken:async()=>({kind:'verified' as const,principal:{firebaseUid:'synthetic-owner'}})};
   await registerEventBrowseRoutes(server,identity,app);
   try{
-    const headers={authorization:'Bearer synthetic'};
+    const headers={authorization:'Bearer synthetic','x-enmori-contract-version':'3'};
     const detail=await server.inject({method:'GET',url:`/v1/event-browse/${locator}`,headers});
     assert.equal(detail.statusCode,200);
     assert.equal(detail.headers['cache-control'],'no-store');
