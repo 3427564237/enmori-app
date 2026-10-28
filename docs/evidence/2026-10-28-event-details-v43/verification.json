@@ -1,0 +1,84 @@
+{
+  "sourceCommit": "04f65cdb4b6c4eaa2c0587e1fbb5f87bfa76d240",
+  "apk": {
+    "path": "build/group-delivery-v43/ENMORI-group-v43-release.apk",
+    "bytes": 68113696,
+    "sha256": "5b39313f18dcc2e062de98d80fbc026b248959845caa889af514553acb9f5e3f",
+    "package": "com.enmori.app.group",
+    "versionCode": 43,
+    "versionName": "1.0.0-group20261028",
+    "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee"
+  },
+  "service": {
+    "workingDirectory": "/home/miku/.local/state/enmori-event-details-v43-20261028/service-04f65cd",
+    "status": {
+      "ownedRunner": true,
+      "httpsIdentityGate": true,
+      "ready": true,
+      "lastState": {
+        "phase": "listening",
+        "ready": true,
+        "authAdminRead": true,
+        "firestoreRead": true,
+        "remoteLoopbackEnabled": true,
+        "fullFeatures": true,
+        "firstFlow": {
+          "configured": true,
+          "workerConfigured": false,
+          "pushConfigured": false
+        },
+        "ai": {
+          "configured": true,
+          "available": true,
+          "maintenanceHealthy": true,
+          "pending": false,
+          "outcomeUnknown": false
+        },
+        "events": {
+          "configured": true,
+          "enabled": true,
+          "pending": 0
+        },
+        "emailVerified": true,
+        "bindingExists": true,
+        "checkedAt": "2026-10-28T11:28:23.783Z"
+      },
+      "lockPresent": true
+    }
+  },
+  "logs": [
+    {
+      "localPath": "/tmp/enmori-v43-final-full-backend.txt",
+      "sha256": "338b27758f811ce824a0310ceacbc53847c013fd9a02f37e47deced54bc05ee0"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-final-flutter-tests.txt",
+      "sha256": "61d824480e7e4b384e58bd593ee04ea9dc6a1083a91a3972e54416588396b804"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-final-analyze.txt",
+      "sha256": "19794cfd134952013020da13809dab04f4c59ea2ad18a4914b53b9f2954e0ce2"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-final-build.txt",
+      "sha256": "96b384489bdeb570d9c5ed985355f8946b68b4b5de0dc63dc07cb94ac1cf6f8b"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-ai-baseline.txt",
+      "sha256": "2561672d2d12284556cc119b63cf40a6cd44af2e92104c83d9f2cfc2f0f41b0f"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-final-live-details.txt",
+      "sha256": "547ff3adbf29857c0730648e873d3e51f4a1ed98b41fbcface6dffe6e4d1c756"
+    }
+  ],
+  "physicalDevice": {
+    "state": "pending",
+    "reason": "phone absent from USB and ADB; user connection request pending"
+  },
+  "limitations": [
+    "Not a passing full Flutter suite",
+    "Not independent review or full UAT/Release",
+    "Source probes do not replace physical UI verification"
+  ]
+}
