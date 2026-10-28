@@ -88,3 +88,38 @@ Ollama Cloud structured-output limitation and pay-per-token terms are explicit
 in the proposal. This is an account/contract/cost decision, not waiting for a
 teammate implementation. Existing source gaps likewise need a permitted source;
 they cannot be completed by inventing event details or relabelling categories.
+
+## Later 28 October continuation: AI experiments and Azure setup
+
+The preceding sections preserve the original v41 packet. Subsequent work added
+an isolated Groq evaluator and completed one local 24-case candidate plus two
+separately authorized Groq 24-case passes. No real-user messages were sent to
+Groq. All 48 Groq responses were protocol eligible, but the baseline passed
+14/24 semantically and `goal-v2` passed 15/24. The latter improved seven of the
+original ten failures, retained three and regressed six original passes. The
+local candidate also failed adoption and its production prompt change was
+reverted; final production transport source matches the earlier packet.
+
+- [Local candidate and rejection](../evidence/2026-10-28-li-ai-repair/prompt-v1-assessment.md).
+- [Groq baseline](../evidence/2026-10-28-li-ai-repair/groq-baseline-assessment.md)
+  and [goal-v2](../evidence/2026-10-28-li-ai-repair/groq-goal-v2-assessment.md),
+  each with report/case hash bindings and non-independent assessment labels.
+- Strict Backend TypeScript compilation passed; initial Groq adapter and
+  unchanged golden-request tests passed 31/31. The prepared `baseline-medium`
+  profile then passed the combined adapter, authorization/pacing and unchanged
+  golden-request regression, **38/38**, on pinned Node 24.19.0. It is not run
+  against Groq and requires a fresh grant. These are evaluator/source checks, not
+  evidence that the nine remaining goal-v2 failures are fixed.
+- [Original service recovery](../evidence/2026-10-28-li-ai-repair/service-recovery.md)
+  preserved the same-boot lock and used a reversible, service-local DNS setting.
+  The original v40 service is active again; no failed AI operation was replayed.
+- [Azure/Groq account assessment](../planning/2026-10-28-azure-groq-account-evaluation.md):
+  Azure student credit verified, resource group created, Compute and Network
+  registered; Groq Free Plan verified. No VM, production cloud AI integration,
+  public cloud endpoint, paid upgrade or replacement phone installation.
+
+The authorized Groq evaluation allocation is consumed. The semantic and cloud
+deployment objectives remain open; no model is adopted from these results.
+The [offline diagnosis and next experiment](../planning/2026-10-28-ai-semantic-repair-next-step.md)
+trace the preserved text boundaries and propose a single reasoning-setting
+comparison, without rewriting the corpus or introducing a new product API.

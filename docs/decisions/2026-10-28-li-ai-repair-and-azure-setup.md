@@ -91,3 +91,35 @@ wrapper allowance have adjacent-pair maximum 7,534; that is still an estimate,
 not a tokenizer or rate-limit guarantee. Actual usage is recorded and checked;
 429, unknown outcomes, missing usage and ineligible output stop the run without
 retry or upgrade. Free-plan eligibility is verified again before dispatch.
+
+## Azure resource-provider registration
+
+Read-only Cloud Shell checks returned `NotRegistered` for both
+`Microsoft.Compute` and `Microsoft.Network`. LI then explicitly approved:
+“允许启用这两项并继续配置”, after being told registration enables these official
+providers and may add their Microsoft applications, but does not itself create
+a billed VM or open public ports. Register these two providers only and verify
+their states before treating SKU/quota results as provisioning evidence.
+
+Both providers subsequently read back `Registered`. East Asia quota returned
+0/6 regional vCPUs and 0/10 `standardBasv2Family` vCPUs. No VM, public endpoint,
+production cloud credential or paid-plan upgrade was created. Quota is not
+capacity or an adoption decision.
+
+## Evaluation disposition
+
+The original ten failures remain preserved. The local instruction candidate
+passed 15/24 with three regressions and was reverted. Groq baseline passed
+14/24; `goal-v2` passed 15/24, with seven original failures improved, three
+remaining and six original passes regressed. All assessments are explicitly
+non-independent. Neither Groq profile is adopted; the two authorized 24-case
+Groq passes are exhausted. The original production prompt, model and local
+processing boundary remain in force while the recurring failures are diagnosed.
+
+The isolated `baseline-medium` profile is prepared for review, not authorized
+for execution: it changes only baseline `reasoning_effort` from `low` to
+`medium`, keeps the original 24 inputs and 2,048 completion ceiling, uses at
+least 61 seconds between starts, and requires a new specific grant. Its
+preparation neither extends the exhausted 48-call grant nor adopts Groq for
+real-user data. The [diagnosis and exact proposal](../planning/2026-10-28-ai-semantic-repair-next-step.md)
+remain separate from a successful semantic result.

@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { buildGroqRequest, createGroqHttp, groqEndpoint, groqModel, loadGroqCases,
   observeGroq, prepareGroqCase } from './groq-evaluation.mjs';
 import { goalPromptCandidate } from './goal-prompt-candidate.mjs';
+import { withinGroqRequestBound } from './groq-run-policy.mjs';
 
 const goodText = JSON.stringify({ schemaVersion: 'ai_assistant_message_v1', message: 'Synthetic response only.' });
 const envelope = (changes = {}) => ({ model: groqModel,
@@ -88,6 +89,59 @@ test('goal-v2 preserves each exact golden history and Persona suffix with its ex
     assert.deepEqual(afterRest, beforeRest);
   }
   assert.ok(personaCases > 0, 'exercise the production Persona suffix');
+});
+
+test('baseline-medium changes only reasoning effort for every exact baseline request', async () => {
+  const fixtures = loadGroqCases();
+  assert.equal(fixtures.length, 24);
+  for (const fixture of fixtures) {
+    const baseline = await prepareGroqCase(fixture.id, 'baseline');
+    const medium = await prepareGroqCase(fixture.id, 'baseline-medium');
+    assert.deepEqual(medium, baseline);
+    const lowRequest = buildGroqRequest(baseline.prompt, 'baseline');
+    const mediumRequest = buildGroqRequest(medium.prompt, 'baseline-medium');
+    const lowBody = JSON.parse(lowRequest.body), mediumBody = JSON.parse(mediumRequest.body);
+    assert.equal(lowRequest.url, mediumRequest.url);
+    assert.equal(lowBody.reasoning_effort, 'low');
+    assert.equal(mediumBody.reasoning_effort, 'medium');
+    assert.equal(mediumBody.max_completion_tokens, 2048);
+    assert.equal(withinGroqRequestBound(mediumRequest.body, 'baseline-medium'), true);
+    assert.equal(mediumRequest.body.replace('"reasoning_effort":"medium"', '"reasoning_effort":"low"'), lowRequest.body);
+    assert.deepEqual({ ...mediumBody, reasoning_effort: 'low' }, lowBody);
+  }
+});
+
+test('baseline-medium rejects other profiles, modified messages and foreign hosts before dispatch', async () => {
+  const fixture = loadGroqCases()[0];
+  const original = (await prepareGroqCase(fixture.id, 'baseline-medium')).prompt;
+  const mediumRequest = buildGroqRequest(original, 'baseline-medium');
+  const baselineRequest = buildGroqRequest(original, 'baseline');
+  assert.throws(() => buildGroqRequest({ ...original, turns: [{ role: 'user', text: 'not a golden case' }] }, 'baseline-medium'), /GROQ_INPUT_INVALID/);
+  let calls = 0;
+  const http = createGroqHttp('synthetic_test_key', async () => { calls++; return response(envelope()); }, 'baseline-medium');
+  const signal = new AbortController().signal;
+  await assert.rejects(http(baselineRequest, signal), /GROQ_REQUEST_FORBIDDEN/);
+  await assert.rejects(http({ ...mediumRequest, url: 'https://elsewhere.example/' }, signal), /GROQ_REQUEST_FORBIDDEN/);
+  assert.equal(calls, 0);
+  const result = await observeGroq(original, http, { profile: 'baseline-medium' });
+  assert.equal(calls, 1);
+  assert.equal(result.protocol.eligible, true);
+});
+
+test('baseline-medium never accepts truncation or an unknown provider outcome', async () => {
+  const original = (await prepareGroqCase(loadGroqCases()[0].id, 'baseline-medium')).prompt;
+  for (const [makeResponse, outcome, failure] of [
+    [() => response(envelope({ choices: [{ index: 0, finish_reason: 'length', message: { role: 'assistant', content: goodText } }] })), 'response-observed', 'incomplete'],
+    [() => new Response('unavailable', { status: 429 }), 'unconfirmed', 'http'],
+    [() => { throw Error('unconfirmed'); }, 'unconfirmed', 'network-or-receive'],
+  ]) {
+    let calls = 0;
+    const result = await observeGroq(original, async () => { calls++; return makeResponse(); }, { profile: 'baseline-medium' });
+    assert.equal(calls, 1);
+    assert.equal(result.observation.outcome, outcome);
+    assert.equal(result.observation.failure, failure);
+    assert.equal(result.protocol.eligible, false);
+  }
 });
 
 test('profile and credential allowlists reject modified text, profile mixing, and foreign hosts', async () => {

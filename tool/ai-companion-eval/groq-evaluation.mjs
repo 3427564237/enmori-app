@@ -71,11 +71,12 @@ function candidateMessages(serialized) {
 
 const profileMessages = {
   baseline: goldenMessages,
+  'baseline-medium': goldenMessages,
   'goal-v2': goldenMessages.map(serialized => JSON.stringify(candidateMessages(serialized))),
 };
 const permittedMessages = Object.fromEntries(Object.entries(profileMessages).map(([profile, items]) => [profile, new Set(items)]));
 function checkedProfile(profile) {
-  if (profile !== 'baseline' && profile !== 'goal-v2') throw Error('GROQ_PROFILE_INVALID');
+  if (!Object.hasOwn(profileMessages, profile)) throw Error('GROQ_PROFILE_INVALID');
   return profile;
 }
 
@@ -87,7 +88,7 @@ function requestBody(messages, profile = 'baseline') {
     stream: false,
     // The candidate uses a smaller explicitly recorded ceiling; baseline is unchanged.
     max_completion_tokens: profile === 'goal-v2' ? 1024 : 2048,
-    reasoning_effort: 'low',
+    reasoning_effort: profile === 'baseline-medium' ? 'medium' : 'low',
     include_reasoning: false,
     response_format: {
       type: 'json_schema',
@@ -124,9 +125,9 @@ export async function prepareGroqCase(id, profile = 'baseline') {
   const prepared = await prepareCase(cases[index]);
   const messages = [{ role: 'system', content: prepared.prompt.system },
     ...prepared.prompt.turns.map(turn => ({ role: turn.role, content: turn.text }))];
-  // Both profiles are derived from the exact same original case capture.
+  // Every profile is derived from the exact same original case capture.
   if (JSON.stringify(messages) !== goldenMessages[index]) throw Error('GROQ_CORPUS_INVALID');
-  if (profile === 'baseline') return prepared;
+  if (profile !== 'goal-v2') return prepared;
   return { ...prepared, prompt: { ...prepared.prompt, system: candidateMessages(goldenMessages[index])[0].content } };
 }
 

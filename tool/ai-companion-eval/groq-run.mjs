@@ -8,6 +8,7 @@ import { createPrivateOutput, outsideRepository } from './private-output.mjs';
 import { sha256, loadCases } from './evaluation.mjs';
 import { claimCloudAuthorization } from './cloud-runner.mjs';
 import { groqModel, loadGroqCases, prepareGroqCase, buildGroqRequest, createGroqHttp, observeGroq } from './groq-evaluation.mjs';
+import { createGroqPacer, groqRunPolicy, validGroqAuthorization, withinGroqRequestBound, withinGroqUsageBound } from './groq-run-policy.mjs';
 
 // Explicit one-shot synthetic runner. No environment credentials, product data,
 // provider fallback, automatic retry, or paid-plan upgrade.
@@ -22,8 +23,8 @@ try {
   }
   assert(Object.keys(opt).length === 4);
   const profile = opt['--profile'];
-  assert(['baseline', 'goal-v2'].includes(profile));
-  const maxCompletionTokens = profile === 'goal-v2' ? 1024 : 2048;
+  const policy = groqRunPolicy(profile);
+  const maxCompletionTokens = policy.maximumCompletionTokens;
   function privateFile(path) {
     const s = lstatSync(path);
     assert(s.isFile() && !s.isSymbolicLink() && s.uid === process.getuid() && (s.mode & 0o077) === 0 &&
@@ -32,19 +33,13 @@ try {
   }
   const authorization = JSON.parse(privateFile(opt['--authorization']));
   const corpus = loadCases();
-  const verify = () => {
-    assert(authorization.approvedBy === 'LI' && authorization.scope === `groq-fixed24-${profile}-20261028` && authorization.profile === profile && authorization.maximumCompletionTokens === maxCompletionTokens &&
-      authorization.freePlanVerified === true && authorization.maxUsd === 0 && authorization.maxRequests === 24 &&
-      authorization.model === groqModel && authorization.corpusSha256 === corpus.corpusSha256 &&
-      authorization.approvalReference && Date.parse(authorization.expiresAt) > Date.now() &&
-      Date.parse(authorization.verifiedAt) <= Date.now() && Date.now() - Date.parse(authorization.verifiedAt) < 3600000);
-  };
+  const verify = () => assert(validGroqAuthorization(authorization, profile, corpus.corpusSha256, groqModel));
   verify();
   const key = privateFile(opt['--key-file']).trim();
   assert(/^gsk_[A-Za-z0-9_-]{20,}$/.test(key));
   const { save } = createPrivateOutput(root, opt['--out']);
   claimCloudAuthorization(resolve(opt['--authorization'], '../claims'), authorization);
-  const files = ['tool/ai-companion-eval/groq-run.mjs', 'tool/ai-companion-eval/groq-evaluation.mjs',
+  const files = ['tool/ai-companion-eval/groq-run.mjs', 'tool/ai-companion-eval/groq-run-policy.mjs', 'tool/ai-companion-eval/groq-evaluation.mjs',
     'tool/ai-companion-eval/evaluation.mjs', 'tool/ai-companion-eval/goal-prompt-candidate.mjs', 'tool/ai-companion-eval/fixtures/current-prompt-requests.json',
     'backend/dist/src/ai-runtime/infrastructure/local-chat-transport.js'];
   const report = { schemaVersion: 'groq_synthetic_run_v1', syntheticOnly: true, model: groqModel, profile,
@@ -53,27 +48,27 @@ try {
     sourceSha256: Object.fromEntries(files.map(p => [p, sha256(readFileSync(resolve(root, p)))])),
     corpusSha256: corpus.corpusSha256, authorization, startedAt: new Date().toISOString(),
     intendedCases: 24, maximumRequests: 24, maxUsd: 0, actualProviderCalls: 0,
-    maximumCompletionTokens: maxCompletionTokens, reasoningEffort: 'low', minimumSpacingMs: 30100,
+    maximumCompletionTokens: maxCompletionTokens, reasoningEffort: policy.reasoningEffort, minimumSpacingMs: policy.minimumSpacingMs,
     deliveryMs: 45000, receiveMs: 120000, rows: [], semanticReview: 'unreviewed' };
   save('manifest.json', report);
   const originalHttp = createGroqHttp(key, fetch, profile);
-  let nextStart = 0;
+  const pacer = createGroqPacer(profile, () => performance.now(), ms => delay(ms));
   for (const fixture of loadGroqCases()) {
     const { prompt } = await prepareGroqCase(fixture.id, profile);
     const request = buildGroqRequest(prompt, profile);
     // Fixed request byte bound, not proof of the provider's tokenizer or
     // server-side wrappers. Free-plan enforcement remains provider-side;
     // 429 and unknown responses stop, and never trigger a paid fallback.
-    assert(Buffer.byteLength(request.body, 'utf8') <= (profile === 'goal-v2' ? 2500 : 1900));
-    if (performance.now() < nextStart) await delay(nextStart - performance.now());
+    assert(withinGroqRequestBound(request.body, profile));
+    await pacer.waitForSlot();
     verify();
     save(`${fixture.id}.intent.json`, { fixture, request, requestSha256: sha256(JSON.stringify(request)),
       attempt: report.actualProviderCalls + 1, at: new Date().toISOString() });
     const measured = async (req, signal) => {
       verify();
-      assert(!signal.aborted && report.actualProviderCalls < 24 && performance.now() >= nextStart);
+      assert(!signal.aborted && report.actualProviderCalls < 24);
+      pacer.recordStart();
       report.actualProviderCalls++;
-      nextStart = performance.now() + 30100;
       return originalHttp(req, signal);
     };
     const result = await observeGroq(prompt, measured, { secret: key, profile });
@@ -84,8 +79,7 @@ try {
       ms: Math.round(row.observation.elapsedMs), status: row.observation.httpStatus }));
     if (!row.protocol.eligible) { report.stopReason = 'ineligible-or-unconfirmed-no-retry'; break; }
     const usage = row.observation.usage;
-    if (!Number.isSafeInteger(usage?.inputTokens) || !Number.isSafeInteger(usage?.outputTokens) ||
-        usage.inputTokens > 4000 - maxCompletionTokens || usage.outputTokens > maxCompletionTokens) {
+    if (!withinGroqUsageBound(usage, profile)) {
       report.stopReason = 'usage-unknown-or-over-reservation'; break;
     }
   }
