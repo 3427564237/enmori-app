@@ -6,6 +6,38 @@ const pageHosts = new Set([
   "www1.ticketmaster.sg",
   "www.onepa.gov.sg",
 ]);
+const resourceHosts = new Set([
+  ...pageHosts,
+  "static.ticketmaster.sg",
+  "s1.ticketm.net",
+  "challenges.cloudflare.com",
+  "www.gstatic.com",
+  "www.googletagmanager.com",
+  "global.ketchcdn.com",
+  "cdnjs.cloudflare.com",
+  "cdn.ketchjs.com",
+  "recaptcha.net",
+  "www.recaptcha.net",
+  "securepubads.g.doubleclick.net",
+]);
+export function permittedBrowserResource(
+  raw: string,
+  mainNavigation: boolean,
+): boolean {
+  try {
+    const u = new URL(raw);
+    return (
+      u.protocol === "https:" &&
+      !u.port &&
+      !u.username &&
+      !u.password &&
+      resourceHosts.has(u.hostname) &&
+      (!mainNavigation || permittedPublicPage(raw))
+    );
+  } catch {
+    return false;
+  }
+}
 export function permittedPublicPage(raw: string): boolean {
   try {
     const u = new URL(raw);
@@ -97,6 +129,13 @@ export const excerpt = (value: string) =>
   ]
     .slice(0, 1000)
     .join("");
+/** DOM innerText is already text, not HTML. Preserve literal comparison/arrow
+ * glyphs without dropping the entire description or treating them as tags. */
+export function renderedText(value: unknown, max = 30000): string | undefined {
+  return typeof value === "string"
+    ? plain(value.replace(/</g, "＜").replace(/>/g, "＞"), max)
+    : undefined;
+}
 export interface PublicPage {
   url: string;
   title: string;
@@ -104,6 +143,7 @@ export interface PublicPage {
   description?: string;
   links: string[];
   cover?: string;
+  occurrenceRows?: string[][];
   sections: { heading: string; text: string }[];
 }
 /** No login, storageState, CAPTCHA handling, persistent profile or private API. */
@@ -118,7 +158,10 @@ export class PublicEventBrowser {
     let context;
     try {
       const browser = await (this.browser ??= chromium.launch({
-        headless: true,
+        // The provider renders its public page in ordinary desktop Chromium.
+        // No fingerprint overrides or user profile are used.
+        headless: false,
+        args: ["--start-minimized"],
         timeout: 10000,
       }));
       context = await browser.newContext({
@@ -139,38 +182,76 @@ export class PublicEventBrowser {
       await context.route("**/*", (route) => {
         const u = new URL(route.request().url());
         if (
-          u.protocol !== "https:" ||
-          ![
-            "ticketmaster.sg",
-            "www.ticketmaster.sg",
-            "www1.ticketmaster.sg",
-            "static.ticketmaster.sg",
-            "s1.ticketm.net",
-            "www.onepa.gov.sg",
-            "challenges.cloudflare.com",
-          ].includes(u.hostname) ||
+          !permittedBrowserResource(
+            u.href,
+            route.request().isNavigationRequest() &&
+              route.request().frame().parentFrame() === null,
+          ) ||
           ["media", "font"].includes(route.request().resourceType())
-        )
-          return route.abort();
-        if (
-          route.request().isNavigationRequest() &&
-          !permittedPublicPage(u.href)
         )
           return route.abort();
         return route.continue();
       });
       const page = await context.newPage();
-      const response = await page.goto(url, {
-        waitUntil: "domcontentloaded",
-        timeout: 8000,
-      });
-      if (!response?.ok()) throw Error("Source unavailable");
+      let target = url;
+      if (new URL(url).hostname.endsWith("ticketmaster.sg")) {
+        // Use the provider's linked information page, never a guessed rewrite
+        // of a booking URL. The homepage also completes normal page bootstrap.
+        await page.goto("https://ticketmaster.sg/", {
+          waitUntil: "domcontentloaded",
+          timeout: 8000,
+        });
+        await page
+          .locator('a[href*="/activity/detail/"]')
+          .first()
+          .waitFor({ state: "attached", timeout: 8000 });
+        const booking = new URL(url).pathname.match(
+          /^\/ticket\/area\/([A-Za-z0-9_-]+)\//,
+        );
+        if (booking) {
+          const links = await page
+            .locator('a[href*="/activity/detail/"]')
+            .evaluateAll((nodes) =>
+              nodes.map((n) => (n as HTMLAnchorElement).href),
+            );
+          const discovered = links.find(
+            (link) =>
+              permittedPublicPage(link) &&
+              new URL(link).pathname === `/activity/detail/${booking[1]}`,
+          );
+          if (discovered) target = discovered;
+          else {
+            await page.goto(url, {
+              waitUntil: "domcontentloaded",
+              timeout: 8000,
+            });
+            await page
+              .locator('a[href*="/activity/detail/"]')
+              .first()
+              .waitFor({ state: "attached", timeout: 8000 });
+            const linked = await page
+              .locator('a[href*="/activity/detail/"]')
+              .evaluateAll((nodes) =>
+                nodes.map((n) => (n as HTMLAnchorElement).href),
+              );
+            const detail = linked.find(
+              (link) =>
+                permittedPublicPage(link) &&
+                new URL(link).pathname === `/activity/detail/${booking[1]}`,
+            );
+            if (!detail) throw Error("Information URL unavailable");
+            target = detail;
+          }
+        }
+      }
+      await page.goto(target, { waitUntil: "domcontentloaded", timeout: 8000 });
+      // Public pages may render after an initial non-200 bootstrap response.
+      // Only real content on an allowed final URL establishes successful read.
       await page
         .locator("#activityContent")
-        .waitFor({ timeout: 2000 })
-        .catch(() => {});
+        .waitFor({ state: "visible", timeout: 8000 });
       const value = (await page.evaluate(
-        `(() => {const body=document.querySelector('#activityContent');const sections=[];for(const heading of document.querySelectorAll('h2,h3')){if(!/pricing|admission|accessib|faq|entry|condition/i.test(heading.textContent||''))continue;let text='';let n=heading.nextElementSibling;while(n&&!/^H[123]$/.test(n.tagName)&&text.length<12000){text+='\\n'+(n.innerText||'');n=n.nextElementSibling;}if(text.trim())sections.push({heading:heading.textContent.trim(),text:text.trim().slice(0,12000)});}return {url:location.href,title:document.title,text:document.body.innerText.slice(0,60000),description:body?.innerText,links:[...document.querySelectorAll('a[href]')].map(a=>a.href),cover:document.querySelector('meta[property="og:image"]')?.content,sections:sections.slice(0,12)};})()`,
+        `(() => {const body=document.querySelector('#activityContent');const sections=[];for(const heading of document.querySelectorAll('h2,h3')){if(!/pricing|admission|accessib|faq|entry|condition|refund|ways to buy|^other$/i.test(heading.textContent||''))continue;let text='';let n=heading.nextElementSibling;while(n&&!/^H[123]$/.test(n.tagName)&&text.length<12000){text+='\\n'+(n.innerText||'');n=n.nextElementSibling;}if(text.trim())sections.push({heading:heading.textContent.trim(),text:text.trim().slice(0,12000)});}return {url:location.href,title:document.title,text:document.body.innerText.slice(0,60000),description:body?.innerText,links:[...document.querySelectorAll('a[href]')].map(a=>a.href),cover:document.querySelector('meta[property="og:image"]')?.content,occurrenceRows:[...document.querySelectorAll('table tbody tr')].map(r=>[...r.querySelectorAll('td')].map(c=>c.innerText.trim())).filter(r=>r.length===4),sections:sections.slice(0,12)};})()`,
       )) as PublicPage;
       if (
         !permittedPublicPage(value.url) ||

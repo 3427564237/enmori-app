@@ -1,4 +1,4 @@
-import {legacyBrowse} from '../../src/event-browse/transport/legacy-browse.js';
+import { legacyBrowse } from "../../src/event-browse/transport/legacy-browse.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -11,8 +11,157 @@ import { browseId } from "../../src/event-browse/domain/browse-values.js";
 import { sourceEventId } from "../../src/event-browse/domain/source-event-id.js";
 import { EnrichedTicketmasterSource } from "../../src/event-browse/infrastructure/enriched-ticketmaster-source.js";
 import type { PublicEventBrowser } from "../../src/event-browse/infrastructure/public-event-pages.js";
+import {
+  permittedBrowserResource,
+  renderedText,
+} from "../../src/event-browse/infrastructure/public-event-pages.js";
 const url = "https://www.onepa.gov.sg/events/synthetic-12345678",
   asOf = "2026-10-28T00:00:00.000Z";
+test("rendered source arrows and comparisons cannot erase a complete description", () => {
+  assert.equal(
+    renderedText("First paragraph.\n\nMore details>>\nAge < 12; adults > 18."),
+    "First paragraph.\n\nMore details＞＞\nAge ＜ 12; adults ＞ 18.",
+  );
+  assert.equal(renderedText("bad\u0000control"), undefined);
+});
+test("public renderer permits required embedded assets without granting top-level account or arbitrary-host navigation", () => {
+  assert.equal(
+    permittedBrowserResource(
+      "https://recaptcha.net/recaptcha/api2/anchor",
+      false,
+    ),
+    true,
+  );
+  assert.equal(
+    permittedBrowserResource(
+      "https://recaptcha.net/recaptcha/api2/anchor",
+      true,
+    ),
+    false,
+  );
+  for (const u of [
+    "http://ticketmaster.sg/",
+    "https://ticketmaster.sg:9443/",
+    "https://127.0.0.1/",
+    "https://evil.example/",
+    "https://name:secret@ticketmaster.sg/",
+  ])
+    assert.equal(permittedBrowserResource(u, false), false);
+  assert.equal(
+    permittedBrowserResource("https://ticketmaster.sg/login", true),
+    false,
+  );
+  assert.equal(
+    permittedBrowserResource(
+      "https://ticketmaster.sg/activity/detail/synthetic",
+      true,
+    ),
+    true,
+  );
+});
+test("TM full content preserves official detail and exact booking URLs, pricing, admission and source paragraphs", async () => {
+  const booking = "https://ticketmaster.sg/ticket/area/synthetic/123";
+  const row = {
+    browseId: browseId("synthetic")!,
+    title: "Synthetic show",
+    startAt: "2026-11-02T12:00:00Z",
+    locationLabel: "Synthetic Theatre",
+    externalSourceUrl: booking,
+  };
+  const source = new EnrichedTicketmasterSource(
+    { firstBatch: async () => [row], detail: async () => row },
+    {
+      read: async () => ({
+        url: "https://ticketmaster.sg/activity/detail/synthetic",
+        title: row.title,
+        text: "",
+        description: "First paragraph.\n\nSecond paragraph.",
+        links: [booking],
+        sections: [
+          {
+            heading: "Ticket Pricing",
+            text: "CAT 1: $248\nCAT 2: $128\nApplicable booking fees are not included.",
+          },
+          {
+            heading: "Admission Policy",
+            text: "There will be no admission for infants in arms and children below 6 years old.",
+          },
+        ],
+      }),
+    } as unknown as PublicEventBrowser,
+  );
+  const result = await source.detail(
+    row.browseId,
+    asOf,
+    new AbortController().signal,
+  );
+  assert.equal(
+    result?.content?.fullDescription,
+    "First paragraph.\n\nSecond paragraph.",
+  );
+  assert.equal(result?.content?.bookingUrl, booking);
+  assert.equal(
+    result?.content?.detailUrl,
+    "https://ticketmaster.sg/activity/detail/synthetic",
+  );
+  assert.equal(result?.content?.minimumAge, 6);
+  assert.equal(result?.content?.priceLabel, "From $128 · booking fees extra");
+  assert.equal(result?.content?.sections?.length, 2);
+});
+test("sold-out multi-session information binds the exact source group, local date, time and venue without a buy link", async () => {
+  const row = {
+    browseId: browseId("synthetic")!,
+    title: "Synthetic show",
+    startAt: "2026-12-19T11:00:00Z",
+    locationLabel: "Synthetic Stadium",
+    externalSourceUrl: "https://ticketmaster.sg/ticket/area/synthetic/222",
+  };
+  let cells = [
+    [
+      "17 Dec 2026 (Thu.) 07:00 pm",
+      "Synthetic show",
+      "Synthetic Stadium",
+      "Sold Out",
+    ],
+  ];
+  const reader = {
+    read: async () => ({
+      url: "https://ticketmaster.sg/activity/detail/synthetic",
+      title: row.title,
+      text: "",
+      description: "Full show details.",
+      links: [],
+      sections: [],
+      occurrenceRows: cells,
+    }),
+  } as unknown as PublicEventBrowser;
+  const make = () =>
+    new EnrichedTicketmasterSource(
+      { firstBatch: async () => [row], detail: async () => row },
+      reader,
+    );
+  assert.equal(
+    (await make().detail(row.browseId, asOf, new AbortController().signal))
+      ?.content?.fullDescription,
+    undefined,
+  );
+  cells = [
+    ...cells,
+    [
+      "19 Dec 2026 (Sat.) 07:00 pm",
+      "Synthetic show",
+      "Synthetic Stadium",
+      "Sold Out",
+    ],
+  ];
+  const matched = await make().detail(
+    row.browseId,
+    asOf,
+    new AbortController().signal,
+  );
+  assert.equal(matched?.content?.fullDescription, "Full show details.");
+  assert.equal(matched?.content?.status, "sold_out");
+});
 function payload() {
   const p = {
     ID: "PA-Event-12345678",
@@ -201,11 +350,30 @@ test("onePA saved stable event resolves from public index before any list is loa
   );
 });
 
-test('legacy browse serialization retains only known TM fields and keeps provider failures visible',()=>{
- const pa=projectOnePa(payload(),url,asOf)!;
- const tm={...pa,browseId:browseId('legacy-tm')!,eventId:sourceEventId(browseId('legacy-tm')!)};
- const result=legacyBrowse({asOf,scope:'singapore_events_v2',items:[pa,tm],sourceStatus:[{provider:'ticketmaster',available:true}]});
- assert.ok(result&&'items' in result);assert.equal(result.scope,'ticketmaster_sg_first_batch_v1');assert.equal(result.items.length,1);
- assert.ok(!('content' in result.items[0]!)&&!('sourceStatus' in result));
- assert.equal(legacyBrowse({asOf,scope:'singapore_events_v2',items:[pa],sourceStatus:[{provider:'ticketmaster',available:false}]}),undefined);
+test("legacy browse serialization retains only known TM fields and keeps provider failures visible", () => {
+  const pa = projectOnePa(payload(), url, asOf)!;
+  const tm = {
+    ...pa,
+    browseId: browseId("legacy-tm")!,
+    eventId: sourceEventId(browseId("legacy-tm")!),
+  };
+  const result = legacyBrowse({
+    asOf,
+    scope: "singapore_events_v2",
+    items: [pa, tm],
+    sourceStatus: [{ provider: "ticketmaster", available: true }],
+  });
+  assert.ok(result && "items" in result);
+  assert.equal(result.scope, "ticketmaster_sg_first_batch_v1");
+  assert.equal(result.items.length, 1);
+  assert.ok(!("content" in result.items[0]!) && !("sourceStatus" in result));
+  assert.equal(
+    legacyBrowse({
+      asOf,
+      scope: "singapore_events_v2",
+      items: [pa],
+      sourceStatus: [{ provider: "ticketmaster", available: false }],
+    }),
+    undefined,
+  );
 });

@@ -1,6 +1,62 @@
 import type { BrowseSource, BrowseOccurrence } from "../ports/event-browse.js";
 import { coverImageUrl } from "../domain/browse-values.js";
-import { plain, excerpt, PublicEventBrowser } from "./public-event-pages.js";
+import {
+  renderedText,
+  excerpt,
+  PublicEventBrowser,
+} from "./public-event-pages.js";
+import type { PublicPage } from "./public-event-pages.js";
+
+function selectedOccurrence(
+  page: PublicPage,
+  row: BrowseOccurrence,
+): string[] | undefined {
+  const booking = new URL(row.externalSourceUrl).pathname.match(
+    /^\/ticket\/area\/([A-Za-z0-9_-]+)\//,
+  );
+  if (
+    !booking ||
+    new URL(page.url).pathname !== `/activity/detail/${booking[1]}`
+  )
+    return undefined;
+  return page.occurrenceRows?.find((cells) => {
+    const m = cells[0]?.match(
+      /^(\d{1,2}) ([A-Za-z]{3}) (\d{4}) \([^)]*\) (\d{1,2}):(\d{2}) (am|pm)$/i,
+    );
+    if (!m) return false;
+    const month = [
+      "jan",
+      "feb",
+      "mar",
+      "apr",
+      "may",
+      "jun",
+      "jul",
+      "aug",
+      "sep",
+      "oct",
+      "nov",
+      "dec",
+    ].indexOf(m[2]!.toLowerCase());
+    const hour = (Number(m[4]) % 12) + (m[6]!.toLowerCase() === "pm" ? 12 : 0);
+    if (month < 0 || Number(m[4]) < 1 || Number(m[4]) > 12 || Number(m[5]) > 59)
+      return false;
+    const at = Date.UTC(
+      Number(m[3]),
+      month,
+      Number(m[1]),
+      hour - 8,
+      Number(m[5]),
+    );
+    const normalize = (s: string) =>
+      s.normalize("NFC").trim().replace(/\s+/g, " ").toLowerCase();
+    return (
+      at === Date.parse(row.startAt) &&
+      !!row.locationLabel &&
+      normalize(cells[2] ?? "") === normalize(row.locationLabel)
+    );
+  });
+}
 /** Enrichment follows only links actually returned by the same provider page. */
 export class EnrichedTicketmasterSource implements BrowseSource {
   private pending = new Map<string, Promise<BrowseOccurrence>>();
@@ -49,21 +105,49 @@ export class EnrichedTicketmasterSource implements BrowseSource {
           page = await this.browser.read(detail, signal);
         // An information page must link back to the exact API occurrence booking
         // URL, or be that URL itself. Never merge another occurrence by title.
+        const occurrence = selectedOccurrence(page, row);
         if (
           page.url !== row.externalSourceUrl &&
-          !page.links.includes(row.externalSourceUrl)
+          !page.links.includes(row.externalSourceUrl) &&
+          !occurrence
         )
           return base;
-        const description = plain(page.description),
+        const description = renderedText(page.description),
           sections = page.sections
             .map((s) => ({
-              heading: plain(s.heading, 100),
-              text: plain(s.text, 12000),
+              heading: renderedText(s.heading, 100),
+              text: renderedText(s.text, 12000),
             }))
             .filter(
               (s): s is { heading: string; text: string } =>
                 !!s.heading && !!s.text,
             );
+        const admission = sections
+          .filter((s) => /admission/i.test(s.heading))
+          .map((s) => s.text)
+          .join("\n");
+        const minimum = admission.match(
+          /no admission[^.]*?children below\s+(\d{1,3})\s+years old/i,
+        );
+        const pricing = sections
+          .filter((s) => /pricing|faq/i.test(s.heading))
+          .map((s) => s.text)
+          .join("\n");
+        const prices = [
+          ...pricing.matchAll(
+            /(?:CAT\s+\d+(?:\s*\([^)]*\))?|VIP)\s*:\s*\$([\d,]+(?:\.\d{1,2})?)/gi,
+          ),
+        ]
+          .map((m) => Number(m[1]!.replace(/,/g, "")))
+          .filter((n) => Number.isFinite(n) && n > 0);
+        const range = pricing.match(
+          /range from\s+\$([\d,]+(?:\.\d{1,2})?)\s+to\s+\$([\d,]+(?:\.\d{1,2})?)/i,
+        );
+        if (!prices.length && range) {
+          const minimum = Number(range[1]!.replace(/,/g, ""));
+          const maximum = Number(range[2]!.replace(/,/g, ""));
+          if (minimum > 0 && maximum >= minimum) prices.push(minimum);
+        }
         const result: BrowseOccurrence = {
           ...base,
           ...(description ? { shortDescription: excerpt(description) } : {}),
@@ -77,7 +161,15 @@ export class EnrichedTicketmasterSource implements BrowseSource {
               : {}),
             ...(description ? { fullDescription: description } : {}),
             ...(sections.length ? { sections } : {}),
-            ...(/FULLY SOLD OUT/i.test(page.text)
+            ...(minimum && Number(minimum[1]) <= 150
+              ? { minimumAge: Number(minimum[1]) }
+              : {}),
+            ...(prices.length
+              ? {
+                  priceLabel: `From $${Math.min(...prices)}${/booking fees?[^.]*not included|booking fee per ticket/i.test(pricing) ? " · booking fees extra" : ""}`,
+                }
+              : {}),
+            ...(/sold out/i.test(occurrence?.[3] ?? "")
               ? { status: "sold_out" as const }
               : {}),
           },

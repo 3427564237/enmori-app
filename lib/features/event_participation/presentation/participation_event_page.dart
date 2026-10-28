@@ -175,6 +175,35 @@ final class _ParticipationEventPageState
               Text(context.tr('Loading Event information…', '正在加载活动信息…')),
             if (_failure case final failure?)
               Text(localizedFailure(context, failure)),
+            if (details != null && details.content != null)
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final session = _session;
+                  final opened = await widget.opener.open(
+                    Uri.parse(details.content!.detailUrl),
+                    current: () =>
+                        mounted &&
+                        identical(_session, session) &&
+                        identical(_detail, details) &&
+                        (_expiry?.isActive ?? false) &&
+                        ModalRoute.of(context)?.isCurrent == true,
+                  );
+                  if (context.mounted && !opened) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          context.tr(
+                            'Could not open official details.',
+                            '无法打开官网详情。',
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.open_in_new),
+                label: Text(context.tr('Official event details', '官网活动详情')),
+              ),
             if (details != null)
               widget.detailBuilder?.call(context, details) ??
                   EventCard(event: details, onSelect: null)
@@ -215,37 +244,11 @@ final class _ParticipationEventPageState
               eventId: widget.eventId,
             ),
             const Divider(height: 32),
-            if (details?.content?.bookingUrl != null &&
-                details!.content!.detailUrl != details.content!.bookingUrl)
-              OutlinedButton.icon(
-                onPressed: () async {
-                  final session = _session;
-                  final opened = await widget.opener.open(
-                    Uri.parse(details.content!.detailUrl),
-                    current: () =>
-                        mounted &&
-                        identical(_session, session) &&
-                        identical(_detail, details) &&
-                        (_expiry?.isActive ?? false) &&
-                        ModalRoute.of(context)?.isCurrent == true,
-                  );
-                  if (context.mounted && !opened) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          context.tr(
-                            'Could not open official details.',
-                            '无法打开官网详情。',
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.open_in_new),
-                label: Text(context.tr('Official event details', '官网活动详情')),
-              ),
-            if (_returnUrl case final url?)
+            if (_returnUrl case final url?
+                when details?.content == null ||
+                    details!.content!.bookingUrl != null &&
+                        details.content!.bookingUrl !=
+                            details.content!.detailUrl)
               ExternalRegistrationAction(
                 key: ValueKey('registration-${widget.eventId}'),
                 eventId: widget.eventId,

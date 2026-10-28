@@ -28,3 +28,9 @@ Normal registration/social initialization must be regression-tested through the 
 ## Compatibility implementation detail
 
 28 October implementation audit found that installed v40/v41 clients reject the new identifiers, formula and additional fields. Within the approved compatibility scope, new reads opt into the v3 representation using `X-ENMORI-Contract-Version: 3`. Absent capability keeps a bounded legacy representation and v2 scoring of current authorized signals; it does not bypass opt-in, consent, age restrictions or privacy. Full onePA/detail/minimal-card functionality requires the new APK. The first candidate runtime was rolled back before the compatibility change; exact deployment receipts record subsequent switching.
+
+## Required Event detail completion
+
+LI explicitly reiterated that missing Event Details or a missing official event-detail button is unfinished work, regardless of a working booking link. Verify actual description/important sections and the distinct official information action on the installed phone before closing this slice. A source failure message is truthful degradation, not fulfillment of the required feature.
+
+The existing approved server-side Chromium reader may use normal rendered public navigation in an ephemeral browser context on the controlled desktop host. Wait for actual Event Details readiness, discover information links from the provider page and bind to the exact source occurrence/date; do not decide success solely from the first navigation response. No saved user browser profile, credentials, CAPTCHA solving, fingerprint overrides, retained catalogue, or phone-side scraping is introduced. Ordinary headed Chromium is an implementation detail of the already approved Playwright reader; the host display requirement must be documented and checked in service validation.
