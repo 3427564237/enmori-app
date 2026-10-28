@@ -67,6 +67,31 @@ its structural-candidate-only success remain supported and independently tested.
 See [internal Conversation lifecycle](../ai-conversation/README.md) for the
 handwritten fake-Port orchestration. This extension has no Bootstrap wiring.
 
+## Approved cloud-only recovery mode
+
+[LI's cloud recovery decision](../../../docs/decisions/2026-10-28-li-cloud-independent-request-recovery.md)
+authorizes an explicit `{ kind: "cloud", owner }` runtime configuration. The
+default local composition above retains physical-settlement quarantine.
+`CloudGenerationTransport` separately distinguishes confirmed stopped responses
+or failures from unknown remote execution. Application cancellation/timeout
+fences the old operation and releases admission for an independent new request;
+it does not claim the remote generation stopped or permit same-target replay.
+
+A single `CloudAdmissionOwner` binds one runtime and clock across consumers.
+It starts closed, requires explicit trusted authority recovery, and reserves
+request/token capacity before preparation. Unknown attempts are not refunded;
+quota expiry is accounting only. Dispatch permits are opaque, single-use and
+bound to the original signal, deadline and live reservation. Late results cannot
+commit, deliver or release a newer request's lane. Lease loss fails closed.
+
+The recovery authority is a Port with test fakes only. Production must supply
+atomic durable reservations and epoch fencing, verify restart clock/window
+correctness, and preserve existing operation/SDK uncertainty guards. The owner
+retains only quota/settlement metadata, not prompts, outputs or credentials.
+Its single configured window is not a complete provider minute/day quota or
+tokenizer implementation. No real provider, durable store or production wiring
+is added. See the [offline receipt](../../../docs/evidence/2026-10-28-cloud-recovery/README.md).
+
 ## Parsing and interpretation
 
 `parseOutput` uses fatal UTF-8 decoding and the exact two-string-property Q31

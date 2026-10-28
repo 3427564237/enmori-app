@@ -126,3 +126,20 @@ deployment objectives remain open; no model is adopted from these results.
 The [offline diagnosis and next experiment](../planning/2026-10-28-ai-semantic-repair-next-step.md)
 trace the preserved text boundaries and propose a single reasoning-setting
 comparison, without rewriting the corpus or introducing a new product API.
+
+## Latest continuation: approved cloud recovery implementation
+
+LI approved the cloud-only recovery rule and offline implementation. Source
+`f4ecb616ed56638a60a8f9793d5b3683006a16f0` implements explicit cloud observations,
+a shared admission owner, bounded reservations and independent request admission
+while preserving original unknown-target and late-write guards. Default local
+Ollama behavior is unchanged. Strict compilation passed; complete Backend
+**1609/1609**, evaluation regression **38/38**. No additional model calls.
+
+[Decision](../decisions/2026-10-28-li-cloud-independent-request-recovery.md) ·
+[Implementation and verification receipt](../evidence/2026-10-28-cloud-recovery/README.md).
+This supersedes the earlier proposal-only status, not the semantic rejection or
+production boundary. Durable recovery authority, actual cloud transport,
+provider-wide complete quotas, consent/identity/HTTPS and deployment remain
+unintegrated. The v41 artifact predates this Backend-only source change and still
+uses the personal host; neither a new APK nor off-host acceptance is claimed.

@@ -1,12 +1,15 @@
 # Cloud AI recovery contract — proposal for LI
 
-Status: **Proposed, not approved or implemented.** This is a concrete design
+Original proposal status: **Proposed, not approved or implemented.** This is a concrete design
 decision needed before a dependable cloud replacement, not a new model grant.
 
 Subsequent status: LI approved implementation and offline tests in
 [the 28 October recovery decision](../decisions/2026-10-28-li-cloud-independent-request-recovery.md).
 The original proposal below is retained as the exact reviewed scope. No cloud
-deployment or production-model adoption follows from this approval.
+deployment or production-model adoption follows from this approval. The bounded
+internal implementation is now complete with 1609 Backend and 38 evaluation
+regressions passing; see the [offline receipt](../evidence/2026-10-28-cloud-recovery/README.md).
+Real provider and durable authority implementations remain outside this slice.
 
 The approved [Q31-B local-host contract](../decisions/2026-09-02-qwen-runtime-failure-contract.md)
 keeps the single Ollama generation lane quarantined until physical termination

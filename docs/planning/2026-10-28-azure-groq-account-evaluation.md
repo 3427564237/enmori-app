@@ -118,7 +118,11 @@ local process supervision as remote termination. First-flow composition also
 currently binds `LocalModelLane` and `qwen3.5:9b`, while Persona preview shares
 chat's lane. Any provider-wide admission policy must account for all consumers.
 The [cloud-only unknown-operation proposal](2026-10-28-cloud-unknown-operation-policy-proposal.md)
-sets out the exact behavior for LI to decide; it is not yet approved or enabled.
+was subsequently approved by [LI](../decisions/2026-10-28-li-cloud-independent-request-recovery.md).
+The internal cloud mode and fake-Port recovery tests are implemented: full
+Backend 1609/1609 and evaluation regression 38/38 pass. See the
+[offline receipt](../evidence/2026-10-28-cloud-recovery/README.md). Production
+provider transport, durable authority and cloud composition are not enabled.
 
 1. Establish a model/profile that satisfies the unchanged semantic cases. The
    Groq baseline passed 14/24; `goal-v2` passed 15/24, improving seven original
