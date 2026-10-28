@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { loadCases, prepareCase, protocolAssessment } from './evaluation.mjs';
 import { goalPromptCandidate } from './goal-prompt-candidate.mjs';
+import { constraintsPromptCandidate } from './constraints-prompt-candidate.mjs';
 
 // Offline evaluation only. Constructing or importing this module never opens a
 // socket or looks up a credential. The caller supplies the HTTP function.
@@ -54,7 +55,7 @@ const baselineSystem = [...baselineBases][0];
 
 /** Preserve the exact suffix captured by the production serializer, not a
  * reconstruction of Persona data from the fixture or user/history text. */
-function candidateMessages(serialized) {
+function candidateMessages(serialized, candidate = goalPromptCandidate) {
   const messages = JSON.parse(serialized), system = messages[0].content;
   if (!system.startsWith(baselineSystem)) throw Error('GROQ_CORPUS_INVALID');
   const suffix = system.slice(baselineSystem.length);
@@ -66,12 +67,13 @@ function candidateMessages(serialized) {
       throw Error('GROQ_CORPUS_INVALID');
     }
   }
-  return [{ role: 'system', content: goalPromptCandidate + suffix }, ...messages.slice(1)];
+  return [{ role: 'system', content: candidate + suffix }, ...messages.slice(1)];
 }
 
 const profileMessages = {
   baseline: goldenMessages,
   'baseline-medium': goldenMessages,
+  'constraints-v3': goldenMessages.map(serialized => JSON.stringify(candidateMessages(serialized, constraintsPromptCandidate))),
   'goal-v2': goldenMessages.map(serialized => JSON.stringify(candidateMessages(serialized))),
 };
 const permittedMessages = Object.fromEntries(Object.entries(profileMessages).map(([profile, items]) => [profile, new Set(items)]));
@@ -88,7 +90,7 @@ function requestBody(messages, profile = 'baseline') {
     stream: false,
     // The candidate uses a smaller explicitly recorded ceiling; baseline is unchanged.
     max_completion_tokens: profile === 'goal-v2' ? 1024 : 2048,
-    reasoning_effort: profile === 'baseline-medium' ? 'medium' : 'low',
+    reasoning_effort: ['baseline-medium', 'constraints-v3'].includes(profile) ? 'medium' : 'low',
     include_reasoning: false,
     response_format: {
       type: 'json_schema',
@@ -127,8 +129,9 @@ export async function prepareGroqCase(id, profile = 'baseline') {
     ...prepared.prompt.turns.map(turn => ({ role: turn.role, content: turn.text }))];
   // Every profile is derived from the exact same original case capture.
   if (JSON.stringify(messages) !== goldenMessages[index]) throw Error('GROQ_CORPUS_INVALID');
-  if (profile !== 'goal-v2') return prepared;
-  return { ...prepared, prompt: { ...prepared.prompt, system: candidateMessages(goldenMessages[index])[0].content } };
+  if (!['goal-v2', 'constraints-v3'].includes(profile)) return prepared;
+  const candidate = profile === 'constraints-v3' ? constraintsPromptCandidate : goalPromptCandidate;
+  return { ...prepared, prompt: { ...prepared.prompt, system: candidateMessages(goldenMessages[index], candidate)[0].content } };
 }
 
 export function buildGroqRequest(prompt, profile = 'baseline') {

@@ -40,7 +40,8 @@ try {
   const { save } = createPrivateOutput(root, opt['--out']);
   claimCloudAuthorization(resolve(opt['--authorization'], '../claims'), authorization);
   const files = ['tool/ai-companion-eval/groq-run.mjs', 'tool/ai-companion-eval/groq-run-policy.mjs', 'tool/ai-companion-eval/groq-evaluation.mjs',
-    'tool/ai-companion-eval/evaluation.mjs', 'tool/ai-companion-eval/goal-prompt-candidate.mjs', 'tool/ai-companion-eval/fixtures/current-prompt-requests.json',
+    'tool/ai-companion-eval/evaluation.mjs', 'tool/ai-companion-eval/goal-prompt-candidate.mjs',
+    'tool/ai-companion-eval/constraints-prompt-candidate.mjs', 'tool/ai-companion-eval/fixtures/current-prompt-requests.json',
     'backend/dist/src/ai-runtime/infrastructure/local-chat-transport.js'];
   const report = { schemaVersion: 'groq_synthetic_run_v1', syntheticOnly: true, model: groqModel, profile,
     sourceHead: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),

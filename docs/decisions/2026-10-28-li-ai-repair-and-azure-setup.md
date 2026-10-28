@@ -144,3 +144,27 @@ the total to 72 synthetic Groq calls. Reject this candidate too; do not adopt a
 new processor or weaken the corpus based on protocol eligibility or the larger
 pass count. The [final assessment](../evidence/2026-10-28-li-ai-repair/groq-baseline-medium-assessment.md)
 preserves all failure evidence and the borderline case-15 judgment.
+
+## Fourth Groq pass: targeted system-instruction comparison
+
+LI requested continued quality repair and real cloud integration, retaining
+Groq Free Plan and deferring the replacement APK until off-host phone validation.
+After the eight remaining failures were grouped and the concrete
+`constraints-v3` profile passed 41 offline tests, LI explicitly replied
+“允许这 24 次对照验证” to a new maximum of 24 synthetic calls. Reference:
+`call_3833006e82c747b0bcc97d51a7917b36`.
+
+Compare against `baseline-medium`: same GPT-OSS 120B, medium reasoning,
+2048 completion tokens, strict schema, original 24 cases and exact user/history
+messages and Persona suffix. Only system instructions change, addressing latest
+goal/correction precedence, exact historical facts, available materials and
+whole-answer count/time limits. No case identifiers or expected answers enter
+the generic instructions. This is exploratory, not a guaranteed repair.
+
+The existing runner's serial 61-second spacing, 45-second delivery/120-second
+receive bounds, no retry/fallback/resume, fresh one-use private grant and stop
+conditions remain. Groq Free Plan and the 30 RPM / 1000 RPD / 8000 TPM / 200000
+TPD account limits were rechecked in the console before dispatch. US$0 maximum;
+no real-user data, paid upgrade or adoption of a failed model. Earlier 72 calls
+remain consumed; this adds only this one 24-call grant. Production prompt and
+processing boundary remain unchanged pending evidence and integration.
