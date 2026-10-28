@@ -28,7 +28,7 @@ Friend responses expose only the requesting user's `ownState`: disabled, incompl
 
 ## Verification boundaries
 
-Source tests, provider probes, running Backend, signed APK and physical-device/account UAT are separate. See the dated evidence record; an APK or successful source request alone does not establish the complete registration-to-booking journey.
+Source tests, provider probes, running Backend, signed APK and physical-device/account UAT are separate. See the [v42 evidence record](../docs/evidence/2026-10-28-event-profile-discovery/verification.md); an APK or successful source request alone does not establish the complete registration-to-booking journey.
 
 ## Installed-client compatibility
 
