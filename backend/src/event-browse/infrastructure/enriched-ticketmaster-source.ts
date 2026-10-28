@@ -95,14 +95,9 @@ export class EnrichedTicketmasterSource implements BrowseSource {
         },
       };
       try {
-        let page = await this.browser.read(row.externalSourceUrl, signal);
-        const detail = page.links.find((u) =>
-          /^https:\/\/(?:www\.)?ticketmaster\.sg\/activity\/detail\/[A-Za-z0-9_-]+$/.test(
-            u,
-          ),
-        );
-        if (detail && detail !== page.url)
-          page = await this.browser.read(detail, signal);
+        // The reader resolves the matching information page. Links in that
+        // page may advertise unrelated events and must not redirect enrichment.
+        const page = await this.browser.read(row.externalSourceUrl, signal);
         // An information page must link back to the exact API occurrence booking
         // URL, or be that URL itself. Never merge another occurrence by title.
         const occurrence = selectedOccurrence(page, row);

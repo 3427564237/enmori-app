@@ -63,11 +63,13 @@ final class BackendApiClient {
     String path, {
     bool Function()? isEligible,
     int? contractVersion,
+    Duration? readTimeout,
   }) => _send(
     'GET',
     path,
     isEligible: isEligible,
     contractVersion: contractVersion,
+    readTimeout: readTimeout,
   );
 
   Future<Result<JsonObject>> getInterestAdminCapability(
@@ -389,7 +391,11 @@ final class BackendApiClient {
     bool Function()? isEligible,
     _InterestAdminOperation? interestAdmin,
     int? contractVersion,
+    Duration? readTimeout,
   }) async {
+    final budget = method == 'GET'
+        ? readTimeout ?? _operationTimeout
+        : _operationTimeout;
     final baseUri = _baseUri;
     if (baseUri == null || !isApprovedBackendBaseUri(baseUri)) {
       return const Failure(
@@ -405,7 +411,11 @@ final class BackendApiClient {
       if (isEligible != null && !isEligible()) {
         return const Failure(_unavailable);
       }
-      final tokenResult = await _withinBudget(_authTokenProvider(), elapsed);
+      final tokenResult = await _withinBudget(
+        _authTokenProvider(),
+        elapsed,
+        budget,
+      );
       if (tokenResult case Failure<String>(:final failure)) {
         return Failure(failure);
       }
@@ -430,7 +440,7 @@ final class BackendApiClient {
       if (isEligible != null && !isEligible()) {
         return const Failure(_unavailable);
       }
-      if (elapsed.elapsed >= _operationTimeout) {
+      if (elapsed.elapsed >= budget) {
         throw TimeoutException('Backend operation timed out');
       }
       if (isEligible != null && !isEligible()) {
@@ -439,10 +449,12 @@ final class BackendApiClient {
       final streamedResponse = await _withinBudget(
         _httpClient.send(request),
         elapsed,
+        budget,
       );
       final response = await _withinBudget(
         http.Response.fromStream(streamedResponse),
         elapsed,
+        budget,
       );
       if (isEligible != null && !isEligible()) {
         return const Failure(_unavailable);
@@ -513,8 +525,12 @@ final class BackendApiClient {
     }
   }
 
-  Future<T> _withinBudget<T>(Future<T> work, Stopwatch elapsed) {
-    final remaining = _operationTimeout - elapsed.elapsed;
+  Future<T> _withinBudget<T>(
+    Future<T> work,
+    Stopwatch elapsed, [
+    Duration? timeout,
+  ]) {
+    final remaining = (timeout ?? _operationTimeout) - elapsed.elapsed;
     if (remaining <= Duration.zero) {
       return Future<T>.error(TimeoutException('Backend operation timed out'));
     }

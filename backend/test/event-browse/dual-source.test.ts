@@ -60,6 +60,7 @@ test("public renderer permits required embedded assets without granting top-leve
   );
 });
 test("TM full content preserves official detail and exact booking URLs, pricing, admission and source paragraphs", async () => {
+  let reads = 0;
   const booking = "https://ticketmaster.sg/ticket/area/synthetic/123";
   const row = {
     browseId: browseId("synthetic")!,
@@ -71,23 +72,26 @@ test("TM full content preserves official detail and exact booking URLs, pricing,
   const source = new EnrichedTicketmasterSource(
     { firstBatch: async () => [row], detail: async () => row },
     {
-      read: async () => ({
-        url: "https://ticketmaster.sg/activity/detail/synthetic",
-        title: row.title,
-        text: "",
-        description: "First paragraph.\n\nSecond paragraph.",
-        links: [booking],
-        sections: [
-          {
-            heading: "Ticket Pricing",
-            text: "CAT 1: $248\nCAT 2: $128\nApplicable booking fees are not included.",
-          },
-          {
-            heading: "Admission Policy",
-            text: "There will be no admission for infants in arms and children below 6 years old.",
-          },
-        ],
-      }),
+      read: async () => {
+        reads++;
+        return {
+          url: "https://ticketmaster.sg/activity/detail/synthetic",
+          title: row.title,
+          text: "",
+          description: "First paragraph.\n\nSecond paragraph.",
+          links: ["https://ticketmaster.sg/activity/detail/unrelated", booking],
+          sections: [
+            {
+              heading: "Ticket Pricing",
+              text: "CAT 1: $248\nCAT 2: $128\nApplicable booking fees are not included.",
+            },
+            {
+              heading: "Admission Policy",
+              text: "There will be no admission for infants in arms and children below 6 years old.",
+            },
+          ],
+        };
+      },
     } as unknown as PublicEventBrowser,
   );
   const result = await source.detail(
@@ -107,6 +111,11 @@ test("TM full content preserves official detail and exact booking URLs, pricing,
   assert.equal(result?.content?.minimumAge, 6);
   assert.equal(result?.content?.priceLabel, "From $128 · booking fees extra");
   assert.equal(result?.content?.sections?.length, 2);
+  assert.equal(
+    reads,
+    1,
+    "unrelated information links must not trigger a second read",
+  );
 });
 test("sold-out multi-session information binds the exact source group, local date, time and venue without a buy link", async () => {
   const row = {

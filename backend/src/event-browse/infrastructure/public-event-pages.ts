@@ -177,7 +177,7 @@ export class PublicEventBrowser {
       void context.close().catch(() => {});
     };
     signal.addEventListener("abort", abort, { once: true });
-    const timer = setTimeout(abort, 10000);
+    const timer = setTimeout(abort, 20000);
     try {
       await context.route("**/*", (route) => {
         const u = new URL(route.request().url());

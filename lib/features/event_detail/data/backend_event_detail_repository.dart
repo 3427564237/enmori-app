@@ -18,6 +18,7 @@ final class BackendEventDetailRepository implements EventDetailRepository {
     final result = await client.get(
       '/v1/events/${Uri.encodeComponent(eventId)}${includeVenueAddress ? '?includeVenueAddress=true' : ''}',
       contractVersion: 3,
+      readTimeout: const Duration(seconds: 30),
     );
     if (result case Failure<JsonObject>(:final failure)) {
       return Failure(failure);
