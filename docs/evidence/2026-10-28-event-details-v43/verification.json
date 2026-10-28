@@ -70,6 +70,18 @@
     {
       "localPath": "/tmp/enmori-v43-final-live-details.txt",
       "sha256": "547ff3adbf29857c0730648e873d3e51f4a1ed98b41fbcface6dffe6e4d1c756"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-public-wire-replay-tests.txt",
+      "sha256": "753fdbe5d5cc0991e08876aa6c10badde378255988823981e4e54205a54a94f9"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-replay-capture.txt",
+      "sha256": "d16814f7fc3be102d3546c1ddc4e3e0619f3ceffd0b1d550938f29dc8e8b9216"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-public-wire-replay.json",
+      "sha256": "9c8ff54ac5c7cf603a574933f1238a4b1fdf68804062f96baad0104a2b326875"
     }
   ],
   "physicalDevice": {
@@ -80,5 +92,14 @@
     "Not a passing full Flutter suite",
     "Not independent review or full UAT/Release",
     "Source probes do not replace physical UI verification"
-  ]
+  ],
+  "publicDtoReplay": {
+    "events": 3,
+    "passed": 3,
+    "widthLogicalPixels": 320,
+    "realPublicSource": true,
+    "syntheticAccountGate": true,
+    "mockHttpAndOpener": true,
+    "physicalDevice": false
+  }
 }
