@@ -7,6 +7,10 @@ import { constraintsPromptCandidate } from './constraints-prompt-candidate.mjs';
 // socket or looks up a credential. The caller supplies the HTTP function.
 export const groqEndpoint = 'https://api.groq.com/openai/v1/chat/completions';
 export const groqModel = 'openai/gpt-oss-120b';
+export function groqModelForProfile(profile) {
+  checkedProfile(profile);
+  return profile === 'qwen38-medium' ? 'qwen/qwen3.8-27b' : groqModel;
+}
 const maxResponseBytes = 1024 * 1024;
 const maxDeliveryMs = 45_000;
 const maxReceiveMs = 120_000;
@@ -73,6 +77,7 @@ function candidateMessages(serialized, candidate = goalPromptCandidate) {
 const profileMessages = {
   baseline: goldenMessages,
   'baseline-medium': goldenMessages,
+  'qwen38-medium': goldenMessages,
   'constraints-v3': goldenMessages.map(serialized => JSON.stringify(candidateMessages(serialized, constraintsPromptCandidate))),
   'goal-v2': goldenMessages.map(serialized => JSON.stringify(candidateMessages(serialized))),
 };
@@ -85,12 +90,12 @@ function checkedProfile(profile) {
 function requestBody(messages, profile = 'baseline') {
   checkedProfile(profile);
   return JSON.stringify({
-    model: groqModel,
+    model: groqModelForProfile(profile),
     messages,
     stream: false,
     // The candidate uses a smaller explicitly recorded ceiling; baseline is unchanged.
     max_completion_tokens: profile === 'goal-v2' ? 1024 : 2048,
-    reasoning_effort: ['baseline-medium', 'constraints-v3'].includes(profile) ? 'medium' : 'low',
+    reasoning_effort: ['baseline-medium', 'constraints-v3', 'qwen38-medium'].includes(profile) ? 'medium' : 'low',
     include_reasoning: false,
     response_format: {
       type: 'json_schema',
@@ -229,7 +234,7 @@ export async function observeGroq(prompt, http, options = {}) {
       if (receive.signal.aborted || current() >= receiveMs) return unknown('network-or-receive');
       let envelope;
       try { envelope = JSON.parse(raw); } catch { return unknown('malformed'); }
-      if (!record(envelope) || envelope.model !== groqModel || !Array.isArray(envelope.choices) ||
+      if (!record(envelope) || envelope.model !== groqModelForProfile(options.profile ?? 'baseline') || !Array.isArray(envelope.choices) ||
           envelope.choices.length !== 1 || !record(envelope.choices[0])) return unknown('malformed');
       const choice = envelope.choices[0], message = choice.message;
       if (choice.index !== 0 || !record(message) || message.role !== 'assistant' ||
@@ -239,7 +244,7 @@ export async function observeGroq(prompt, http, options = {}) {
       const usage = record(envelope.usage) ? envelope.usage : {};
       const details = record(usage.completion_tokens_details) ? usage.completion_tokens_details : {};
       const observation = { ...base(), outcome: 'response-observed', physicallySettled: true, httpStatus,
-        modelRevision: groqModel, finishReason: choice.finish_reason,
+        modelRevision: groqModelForProfile(options.profile ?? 'baseline'), finishReason: choice.finish_reason,
         usage: { ...(count(usage.prompt_tokens) ? { inputTokens: usage.prompt_tokens } : {}),
           // Groq completion_tokens already includes any reasoning tokens.
           ...(count(usage.completion_tokens) ? { outputTokens: usage.completion_tokens } : {}),

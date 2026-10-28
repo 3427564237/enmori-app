@@ -7,7 +7,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { createPrivateOutput, outsideRepository } from './private-output.mjs';
 import { sha256, loadCases } from './evaluation.mjs';
 import { claimCloudAuthorization } from './cloud-runner.mjs';
-import { groqModel, loadGroqCases, prepareGroqCase, buildGroqRequest, createGroqHttp, observeGroq } from './groq-evaluation.mjs';
+import { groqModelForProfile, loadGroqCases, prepareGroqCase, buildGroqRequest, createGroqHttp, observeGroq } from './groq-evaluation.mjs';
 import { createGroqPacer, groqRunPolicy, validGroqAuthorization, withinGroqRequestBound, withinGroqUsageBound } from './groq-run-policy.mjs';
 
 // Explicit one-shot synthetic runner. No environment credentials, product data,
@@ -24,6 +24,7 @@ try {
   assert(Object.keys(opt).length === 4);
   const profile = opt['--profile'];
   const policy = groqRunPolicy(profile);
+  const groqModel = groqModelForProfile(profile);
   const maxCompletionTokens = policy.maximumCompletionTokens;
   function privateFile(path) {
     const s = lstatSync(path);

@@ -6,6 +6,8 @@ const profiles = Object.freeze({
     maxRequestBodyBytes: 2500, maxInputTokens: 2976 }),
   // One request per rolling minute; UTF-8 bytes are an estimate rather than
   // proof of tokenization. Reserve 512 for provider-side wrappers.
+  'qwen38-medium': Object.freeze({ maximumCompletionTokens: 2048, reasoningEffort: 'medium', minimumSpacingMs: 61000,
+    maxRequestBodyBytes: 8000 - 2048 - 512, maxInputTokens: 8000 - 2048 - 512 }),
   'constraints-v3': Object.freeze({ maximumCompletionTokens: 2048, reasoningEffort: 'medium', minimumSpacingMs: 61000,
     maxRequestBodyBytes: 8000 - 2048 - 512, maxInputTokens: 8000 - 2048 - 512 }),
   'baseline-medium': Object.freeze({ maximumCompletionTokens: 2048, reasoningEffort: 'medium', minimumSpacingMs: 61000,
@@ -22,7 +24,7 @@ export function validGroqAuthorization(authorization, profile, corpusSha256, mod
   return !!authorization && authorization.approvedBy === 'LI' &&
     authorization.scope === `groq-fixed24-${profile}-20261028` && authorization.profile === profile &&
     authorization.maximumCompletionTokens === policy.maximumCompletionTokens &&
-    (!['baseline-medium', 'constraints-v3'].includes(profile) || (authorization.reasoningEffort === 'medium' &&
+    (!['baseline-medium', 'constraints-v3', 'qwen38-medium'].includes(profile) || (authorization.reasoningEffort === 'medium' &&
       typeof authorization.approvalReference === 'string' && !!authorization.approvalReference.trim())) &&
     authorization.freePlanVerified === true && authorization.maxUsd === 0 && authorization.maxRequests === 24 &&
     authorization.model === model && authorization.corpusSha256 === corpusSha256 &&

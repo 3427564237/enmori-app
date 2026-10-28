@@ -176,3 +176,21 @@ label recall and one-question adherence improve, while unsupported chapter
 content and an extra post-plan action regress. The candidate is rejected.
 All four grants are consumed: **96 synthetic Groq calls**, no further grant.
 [Assessment](../evidence/2026-10-28-li-ai-repair/groq-constraints-v3-assessment.md).
+
+## Fifth Groq pass: free model comparison
+
+LI explicitly requested another free model comparison and authorized at most
+24 additional synthetic calls at US$0 on 2026-10-28. This supersedes only the
+absence of a further evaluation grant above; previous 96 calls remain consumed.
+The selected evaluation profile is `qwen38-medium`, model `qwen/qwen3.8-27b`.
+Compare with baseline-medium: original messages, strict schema, medium reasoning,
+2048 completion ceiling and all 24 unchanged cases; only the model ID changes.
+The candidate is listed as Preview by Groq and is not adopted for production.
+
+Groq console freshly confirmed Free as Current Plan and this model's limits
+of 30 RPM, 1000 RPD, 8000 TPM and 200000 TPD. The one-use model-bound grant,
+61-second pacing, stop conditions and no retry/fallback/resume remain. No real
+user data or paid upgrade. Offline profile and evaluator tests passed 44/44.
+Official compatibility references: [model](https://console.groq.com/docs/model/qwen/qwen3.8-27b),
+[reasoning](https://console.groq.com/docs/reasoning), and
+[strict structured outputs](https://console.groq.com/docs/structured-outputs).
