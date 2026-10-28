@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:enmori/app/event_recommendation_card.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,6 +64,36 @@ final class _Friends implements FriendDiscoveryRepository {
 }
 
 void main() {
+  testWidgets(
+    'recommendation summary directs to location details without asserting absent source location',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      String? opened;
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: ConnectedRecommendationCard(
+                  event: testEventRecommendations().items.first,
+                  onOpen: (id) => opened = id,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Open details for location'), findsOneWidget);
+      expect(find.text('Location not provided.'), findsNothing);
+      await tester.tap(find.text('Open details for location'));
+      expect(opened, testEventRecommendations().items.first.eventId);
+      expect(tester.takeException(), isNull);
+    },
+  );
   for (final unknown in [false, true]) {
     test(
       'interest save invalidates covered Event results on ${unknown ? 'unknown' : 'success'}',

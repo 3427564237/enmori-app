@@ -2,7 +2,13 @@ import type { BrowseOccurrence, BrowseSource } from "../ports/event-browse.js";
 import { dependencyUnavailable } from "../../shared/ports/dependency-failure.js";
 import { parseBrowseInstant } from "../domain/browse-values.js";
 import { sourceEventId } from '../domain/source-event-id.js';
-type SourceSnapshot = { at: bigint; items: readonly BrowseOccurrence[]; candidates?: readonly BrowseOccurrence[] };
+import { Temporal } from '@js-temporal/polyfill';
+const cacheWindow = 300_000_000_000n;
+type SourceSnapshot = { at: bigint; from?: bigint; items: readonly BrowseOccurrence[]; candidates?: readonly BrowseOccurrence[] };
+// Coverage can precede freshness for out-of-order concurrent request instants.
+// Every consumer still applies its own exact future-time filter.
+const covers = (snapshot: SourceSnapshot, now: bigint) =>
+  now >= (snapshot.from ?? snapshot.at) && now - snapshot.at < cacheWindow;
 
 /** A waiter owns its deadline, not the shared work it joins. Always observe
  * the underlying promise, even when a source ignores cancellation. */
@@ -88,7 +94,7 @@ export class ControlledSourceProjection implements BrowseSource {
       if(pending)await pending;
       if(epoch!==this.epoch||signal.aborted)throw dependencyUnavailable;
       const now=parseBrowseInstant(asOf),cached=this.snapshot;
-      if(now!==undefined&&cached&&now>=cached.at&&now-cached.at<300_000_000_000n){
+      if(now!==undefined&&cached&&covers(cached,now)){
         const found=cached.items.find(item=>sourceEventId(item.browseId)===id&&parseBrowseInstant(item.startAt)!>now);
         if(found)return found;
       }
@@ -113,16 +119,20 @@ export class ControlledSourceProjection implements BrowseSource {
         if(epoch!==this.epoch||bounded.aborted)throw dependencyUnavailable;
       }
       let snapshot=this.snapshot;
-      if(!snapshot?.candidates||now<snapshot.at||now-snapshot.at>=300_000_000_000n) {
+      if(!snapshot?.candidates||!covers(snapshot,now)) {
         const epoch={}; this.epoch=epoch; this.snapshot=undefined;
         this.observedPages.clear(); this.pageReads.clear();
+        // Same bounded window as cache freshness, but not added to its TTL.
+        // A slower owner lookup must not replace another Home reader's complete
+        // generation merely because its captured request instant is earlier.
+        const from=now-cacheWindow, sourceAsOf=Temporal.Instant.fromEpochNanoseconds(from).toString();
         const work=(async()=>{
           const pages: (readonly BrowseOccurrence[])[]=[];
           const unique=new Map<string,BrowseOccurrence>();
           for(let page=0;page<50;page++){
             if(epoch!==this.epoch||bounded.aborted)throw dependencyUnavailable;
-            const result=this.source.batch ? await withinBudget(this.source.batch(asOf,page,bounded),bounded)
-              : {items:await withinBudget(this.source.firstBatch(asOf,bounded),bounded)};
+            const result=this.source.batch ? await withinBudget(this.source.batch(sourceAsOf,page,bounded),bounded)
+              : {items:await withinBudget(this.source.firstBatch(sourceAsOf,bounded),bounded)};
             if(epoch!==this.epoch||bounded.aborted)throw dependencyUnavailable;
             const items=this.freezePage(result.items); pages.push(items);
             for(const item of items){
@@ -135,7 +145,7 @@ export class ControlledSourceProjection implements BrowseSource {
           }
           const items=pages[0]??[];
           const candidates=Object.freeze([...unique.values()]);
-          this.snapshot={at:now,items,candidates};
+          this.snapshot={at:now,from,items,candidates};
           pages.forEach((rows,page)=>{if(page>0)this.observedPages.set(page,rows);});
           return items;
         })();
@@ -154,12 +164,12 @@ export class ControlledSourceProjection implements BrowseSource {
   }
   ready(asOf: string): boolean {
     const now = parseBrowseInstant(asOf), snapshot = this.snapshot;
-    return now !== undefined && snapshot !== undefined && !this.pending && now >= snapshot.at && now - snapshot.at < 300_000_000_000n;
+    return now !== undefined && snapshot !== undefined && !this.pending && covers(snapshot,now);
   }
   /** Synchronous current projection only: no source IO inside social transactions. */
   peek(id: string, asOf: string): BrowseOccurrence | undefined {
     const now = parseBrowseInstant(asOf), snapshot = this.snapshot;
-    if (now === undefined || !snapshot || this.pending || now < snapshot.at || now - snapshot.at >= 300_000_000_000n) return undefined;
+    if (now === undefined || !snapshot || this.pending || !covers(snapshot,now)) return undefined;
     // First page wins duplicate identities. No title merging or provider IO.
     for(const items of [snapshot.items,...[...this.observedPages].sort(([a],[b])=>a-b).map(([,rows])=>rows)]){
       const found=items.find(item=>sourceEventId(item.browseId)===id&&parseBrowseInstant(item.startAt)!>now);
@@ -180,7 +190,7 @@ export class ControlledSourceProjection implements BrowseSource {
     const now = parseBrowseInstant(asOf);
     if (now === undefined || signal.aborted) throw dependencyUnavailable;
     const current = this.snapshot;
-    if (current && now >= current.at && now - current.at < 300_000_000_000n) {
+    if (current && covers(current,now)) {
       return current.items.filter(item => parseBrowseInstant(item.startAt)! > now);
     }
     this.snapshot = undefined; // Expired generation cannot become a fallback.
@@ -200,7 +210,7 @@ export class ControlledSourceProjection implements BrowseSource {
     if (epoch!==this.epoch||signal.aborted) throw dependencyUnavailable;
     // A concurrent request can only consume a complete, still-current generation.
     const published = this.current();
-    if (!published || published.items!==items || now < published.at || now - published.at >= 300_000_000_000n) throw dependencyUnavailable;
+    if (!published || published.items!==items || !covers(published,now)) throw dependencyUnavailable;
     return items.filter(item => parseBrowseInstant(item.startAt)! > now);
   }
   async detail(id: string, asOf: string, signal: AbortSignal): Promise<BrowseOccurrence | undefined> {

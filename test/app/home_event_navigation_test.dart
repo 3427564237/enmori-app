@@ -103,12 +103,8 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         routerGateProvider.overrideWith((ref) => gate),
-        authSessionProvider.overrideWith(
-          (ref) => Stream.value(
-            ref.watch(routerGateProvider) == RouterGateState.authenticated
-                ? const AuthSessionAuthenticated(subject: 'member-a')
-                : const AuthSessionUnauthenticated(),
-          ),
+        authSessionProvider.overrideWithValue(
+          const AsyncData(AuthSessionAuthenticated(subject: 'member-a')),
         ),
         currentAuthSubjectProvider.overrideWithValue('member-a'),
         eventRecommendationRepositoryProvider.overrideWithValue(repository),
@@ -122,6 +118,14 @@ void main() {
     await _openSeeAll(tester, emptyHome: true);
 
     gate = RouterGateState.signInRequired;
+    container.updateOverrides([
+      routerGateProvider.overrideWith((ref) => gate),
+      authSessionProvider.overrideWithValue(
+        const AsyncData(AuthSessionUnauthenticated()),
+      ),
+      currentAuthSubjectProvider.overrideWithValue('member-a'),
+      eventRecommendationRepositoryProvider.overrideWithValue(repository),
+    ]);
     container.invalidate(routerGateProvider);
     await _pumpFrames(tester);
     expect(find.byKey(const Key('route-sign-in')), findsOneWidget);
@@ -179,6 +183,19 @@ Future<void> _openSeeAll(WidgetTester tester, {required bool emptyHome}) async {
           : 'event-recommendations-see-all',
     ),
   );
+  // The full app includes Today/weather above this lazily built Home section.
+  if (action.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      action,
+      250,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const Key('route-home')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+  }
   await tester.ensureVisible(action);
   await tester.pump();
   await tester.tap(action);

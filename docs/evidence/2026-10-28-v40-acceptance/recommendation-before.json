@@ -1,0 +1,43 @@
+[
+  {
+    "ms": 6984,
+    "id": 1,
+    "phase": "start",
+    "asOf": "2026-10-28T03:53:39.667Z"
+  },
+  {
+    "ms": 7260,
+    "id": 2,
+    "phase": "start",
+    "asOf": "2026-10-28T03:53:37.870Z"
+  },
+  {
+    "ms": 11964,
+    "id": 1,
+    "phase": "ready",
+    "count": 79
+  },
+  {
+    "ms": 15951,
+    "id": 1,
+    "phase": "current",
+    "current": false
+  },
+  {
+    "ms": 17263,
+    "id": 2,
+    "phase": "unavailable"
+  },
+  {
+    "ms": 17263,
+    "phase": "results",
+    "results": [
+      {
+        "ok": false
+      },
+      {
+        "ok": false
+      }
+    ]
+  }
+]

@@ -18,13 +18,15 @@ final class EventCard extends StatelessWidget {
     this.visibleParticipantCount,
     this.actions,
     super.key,
-  }) : summary = null;
+  }) : summary = null,
+       locationHint = null;
   const EventCard.summary({
     required ActivitySummary this.summary,
     required this.onSelect,
     this.authorizedReason,
     this.visibleParticipantCount,
     this.actions,
+    this.locationHint,
     super.key,
   }) : event = null;
 
@@ -34,6 +36,9 @@ final class EventCard extends StatelessWidget {
   final String? authorizedReason;
   final int? visibleParticipantCount;
   final Widget? actions;
+
+  /// Summaries can omit a field that is still available in the detail source.
+  final String? locationHint;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +100,7 @@ final class EventCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       location ??
+                          locationHint ??
                           context.tr('Location not provided.', '未提供地点。'),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),

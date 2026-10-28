@@ -1,4 +1,5 @@
 import '../features/event_recommendations/presentation/recommendation_reason.dart';
+import '../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,6 +40,7 @@ final class ConnectedRecommendationCard extends ConsumerWidget {
             endAt: event.endAt?.toLocal().toString(),
           ),
           authorizedReason: recommendationReason(context, event),
+          locationHint: context.tr('Open details for location', '查看详情了解地点'),
           onSelect: onOpen,
           actions: ParticipationControls(eventId: event.eventId),
         ),

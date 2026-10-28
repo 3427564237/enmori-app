@@ -16,6 +16,36 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fakes.dart';
 
 void main() {
+  testWidgets(
+    'Home names the catalogue and personalized list destinations distinctly at 320px',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      var browse = 0, recommendations = 0;
+      await _pump(
+        tester,
+        Scaffold(
+          body: SingleChildScrollView(
+            child: EventRecommendationsSection(
+              heading: 'For you',
+              onBrowseAll: () => browse++,
+              onSeeAll: () => recommendations++,
+            ),
+          ),
+        ),
+        FakeEventRecommendationRepository(),
+      );
+      await tester.tap(find.text('Browse all activities'));
+      final all = find.text('All recommendations');
+      await tester.ensureVisible(all);
+      await tester.tap(all);
+      expect(browse, 1);
+      expect(recommendations, 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
   for (final heading in <String?>[null, 'For you']) {
     testWidgets('Home next group delegates without reloading ($heading)', (
       tester,

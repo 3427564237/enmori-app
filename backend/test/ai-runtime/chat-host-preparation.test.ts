@@ -5,6 +5,29 @@ import { LocalModelLane } from '../../src/ai-runtime/infrastructure/local-model-
 import type { ConversationOperationExecutor, ExecutedConversation, ConversationExecutionDelivery } from '../../src/ai-conversation/ports/application-conversation-operations.js';
 import type { ConversationResult } from '../../src/ai-conversation/ports/conversation-operations.js';
 
+for (const revoke of ['cancel', 'dispose', 'abort'] as const) {
+ test(`pending physical preload does not retain the ${revoke} business waiter`, async () => {
+  let complete!:()=>void, dispatches=0;
+  const pending=new Promise<void>(resolve=>{complete=resolve;});
+  const abort=new AbortController();
+  const inner:ConversationOperationExecutor={create:()=>({
+   dispatch:async()=>{dispatches++;return {kind:'terminated'};},
+   cancel:async()=>({kind:'unresolved'}),dispose:()=>{},
+  })};
+  const execution=prepareConversationHost(inner,()=>pending).create({} as Parameters<ConversationOperationExecutor['create']>[0],
+   {signal:abort.signal,current:()=>true,acceptCompleteBody:()=>false});
+  let settled=false;
+  const result=execution.dispatch().then(value=>{settled=true;return value;});
+  if(revoke==='cancel')await execution.cancel();
+  else if(revoke==='dispose')execution.dispose();
+  else abort.abort();
+  for(let i=0;i<12;i++)await Promise.resolve();
+  try { assert.equal(settled,true); assert.deepEqual(await result,{kind:'terminated'}); }
+  finally { complete(); await result; }
+  assert.equal(dispatches,0);
+ });
+}
+
 test('warm host does not reload the model; cold host preloads with unchanged idle release', async () => {
   for (const loaded of [true, false]) {
     const calls: {url:string;body?:string}[]=[];

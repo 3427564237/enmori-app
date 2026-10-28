@@ -127,7 +127,7 @@ final class HomeShellPage extends StatelessWidget {
                 key: const Key('home-browse-activities'),
                 onPressed: onBrowseActivities,
                 icon: const Icon(Icons.explore_outlined),
-                label: Text(context.tr('Browse activities', "浏览活动")),
+                label: Text(context.tr('Browse all activities', '浏览所有活动')),
               ),
             const SizedBox(height: 32),
             Text(

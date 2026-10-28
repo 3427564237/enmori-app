@@ -1,0 +1,58 @@
+[
+  {
+    "ms": 7353,
+    "id": 1,
+    "phase": "start",
+    "asOf": "2026-10-28T03:58:04.770Z"
+  },
+  {
+    "ms": 7610,
+    "id": 2,
+    "phase": "start",
+    "asOf": "2026-10-28T03:58:02.611Z"
+  },
+  {
+    "ms": 12810,
+    "id": 1,
+    "phase": "ready",
+    "count": 79
+  },
+  {
+    "ms": 12810,
+    "id": 2,
+    "phase": "ready",
+    "count": 79
+  },
+  {
+    "ms": 13291,
+    "id": 1,
+    "phase": "current",
+    "current": true
+  },
+  {
+    "ms": 17153,
+    "id": 2,
+    "phase": "current",
+    "current": true
+  },
+  {
+    "ms": 17193,
+    "id": 2,
+    "phase": "current",
+    "current": true
+  },
+  {
+    "ms": 17193,
+    "phase": "results",
+    "results": [
+      {
+        "ok": true,
+        "count": 2
+      },
+      {
+        "ok": true,
+        "count": 0
+      }
+    ]
+  }
+]

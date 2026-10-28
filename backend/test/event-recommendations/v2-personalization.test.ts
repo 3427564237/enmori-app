@@ -38,6 +38,15 @@ function fixture(){
   const patch=(path:string,changes:Record<string,unknown>)=>store.runTransaction(async tx=>tx.set(path,{...store.read(path),...changes}));
   return {store,rows,reader,snapshot,read,patch,invalidate:()=>{live=false;},failSource:()=>{sourceFailed=true;}};
 }
+test('Havelock does not invent a Singapore region reason; exact normalized city does',async()=>{
+  const f=fixture();
+  for(const [region,matches] of [['havelock',false],['  SINGAPORE  ',true]] as const){
+    await f.patch('accounts/owner',{profileDetails:{bio:null,region,affiliationType:null,affiliationName:null}});
+    const read=await f.read();assert.ok(read.ok);
+    assert.ok(read.value.items.length>0);
+    assert.ok(read.value.items.every(row=>row.reasons?.some(reason=>reason.code==='same_region')===matches));
+  }
+});
 for(const [concept,rules] of Object.entries(INTEREST_CLASSIFICATION_RULES)){
   test(`classification covers ${concept} only from explicit provider classification`,()=>{
     const classification=concept==='Music'?{segment:{id:'KZFzniwnSyZfZ7v7nJ',name:'Music'}}:{genre:{id:'synthetic_taxonomy_id',name:rules[0]}};

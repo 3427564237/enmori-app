@@ -113,8 +113,8 @@ final class _EventRecommendationsSectionState
             content: Text(
               items.isEmpty
                   ? context.tr(
-                      'No recommendations available yet. Try Browse all.',
-                      '暂时没有推荐，请尝试浏览活动。',
+                      'No recommendations available yet. Try Browse all activities.',
+                      '暂时没有推荐，请尝试浏览所有活动。',
                     )
                   : context.tr(
                       'Latest details loaded for the same events.',
@@ -500,7 +500,7 @@ final class _RecommendationContent extends StatelessWidget {
                     : OutlinedButton(
                         key: const Key('event-recommendations-see-all-empty'),
                         onPressed: onSeeAll,
-                        child: Text(context.tr('See all', '查看全部')),
+                        child: Text(context.tr('All recommendations', '查看全部推荐')),
                       ),
               )
             : _RecommendationList(
@@ -522,7 +522,7 @@ final class _RecommendationContent extends StatelessWidget {
                 TextButton(
                   key: const Key('home-browse-activities'),
                   onPressed: onBrowseAll,
-                  child: Text(context.tr('Browse all', '浏览活动')),
+                  child: Text(context.tr('Browse all activities', '浏览所有活动')),
                 ),
               if (continueDiscovery)
                 TextButton.icon(
@@ -664,7 +664,7 @@ final class _RecommendationList extends StatelessWidget {
           OutlinedButton(
             key: const Key('event-recommendations-see-all'),
             onPressed: onSeeAll,
-            child: Text(context.tr('See all', '查看全部')),
+            child: Text(context.tr('All recommendations', '查看全部推荐')),
           ),
       ],
     );
