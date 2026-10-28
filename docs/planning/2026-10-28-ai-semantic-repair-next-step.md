@@ -29,7 +29,15 @@ The production [parser](../../backend/src/ai-runtime/domain/parse-output.ts#L35)
 
 Do not globally replace backslash-`n` with a newline: the literal sequence is valid in code and in a user's requested exact text. Nor should a presentation fix silently rewrite stored messages. If a future approved design needs to normalize provider output, it must first define a trustworthy context or explicit user-controlled, reversible display behavior; an ordinary plain-text message alone does not distinguish intended code from an accidental escape.
 
-## One reviewable next experiment, not executed
+## Single-variable experiment: original proposal and execution update
+
+**Subsequent execution update:** LI later granted this specific pass in
+`d811c23`. It completed 24 calls on 28 October; the
+[baseline-medium assessment](../evidence/2026-10-28-li-ai-repair/groq-baseline-medium-assessment.md)
+records 16 passes and eight failures, with six original failures improved,
+four remaining and four regressions. The candidate is rejected. The proposal
+below preserves what was reviewed before execution; it is no longer a pending
+or reusable grant, and it does not establish a production model selection.
 
 **Hypothesis:** with the original production-prompt messages and the same Groq model and output ceiling, selecting `reasoning_effort: "medium"` instead of `"low"` may improve some goal, constraint, and historical-context failures. A negative or mixed outcome is useful evidence too. This asks whether that provider setting is worth investigating; it does not assume or prove the model's hidden reasoning process or a particular amount of additional reasoning.
 

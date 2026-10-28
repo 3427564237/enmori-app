@@ -92,24 +92,27 @@ they cannot be completed by inventing event details or relabelling categories.
 ## Later 28 October continuation: AI experiments and Azure setup
 
 The preceding sections preserve the original v41 packet. Subsequent work added
-an isolated Groq evaluator and completed one local 24-case candidate plus two
+an isolated Groq evaluator and completed one local 24-case candidate plus three
 separately authorized Groq 24-case passes. No real-user messages were sent to
-Groq. All 48 Groq responses were protocol eligible, but the baseline passed
+Groq. All 72 Groq responses were protocol eligible, but the baseline passed
 14/24 semantically and `goal-v2` passed 15/24. The latter improved seven of the
-original ten failures, retained three and regressed six original passes. The
+original ten failures, retained three and regressed six original passes.
+The final `baseline-medium` single-variable comparison passed 16/24, improving
+six original failures, retaining four and regressing four original passes. The
 local candidate also failed adoption and its production prompt change was
 reverted; final production transport source matches the earlier packet.
 
 - [Local candidate and rejection](../evidence/2026-10-28-li-ai-repair/prompt-v1-assessment.md).
 - [Groq baseline](../evidence/2026-10-28-li-ai-repair/groq-baseline-assessment.md)
-  and [goal-v2](../evidence/2026-10-28-li-ai-repair/groq-goal-v2-assessment.md),
+  and [goal-v2](../evidence/2026-10-28-li-ai-repair/groq-goal-v2-assessment.md), plus
+  [baseline-medium](../evidence/2026-10-28-li-ai-repair/groq-baseline-medium-assessment.md),
   each with report/case hash bindings and non-independent assessment labels.
 - Strict Backend TypeScript compilation passed; initial Groq adapter and
   unchanged golden-request tests passed 31/31. The prepared `baseline-medium`
   profile then passed the combined adapter, authorization/pacing and unchanged
-  golden-request regression, **38/38**, on pinned Node 24.19.0. It is not run
-  against Groq and requires a fresh grant. These are evaluator/source checks, not
-  evidence that the nine remaining goal-v2 failures are fixed.
+  golden-request regression, **38/38**, on pinned Node 24.19.0. It was then run
+  under LI's specific third grant and rejected on semantic evidence. These are
+  evaluator/source checks, not evidence that the semantic failures are fixed.
 - [Original service recovery](../evidence/2026-10-28-li-ai-repair/service-recovery.md)
   preserved the same-boot lock and used a reversible, service-local DNS setting.
   The original v40 service is active again; no failed AI operation was replayed.

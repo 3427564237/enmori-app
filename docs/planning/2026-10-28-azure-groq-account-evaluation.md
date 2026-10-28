@@ -34,6 +34,13 @@ owner-only local file, not in Git, Flutter, a browser URL or a report. No paymen
 method or Developer upgrade was added. The key is for synthetic evaluation, not
 a lasting production credential.
 
+A later read-only Data Controls check showed **Global ZDR Disabled** and
+**Inference APIs ZDR Disabled**. The page states that inference inputs/outputs
+may be retained for up to 30 days for reliability/compliance, with an inference
+opt-out available. No setting was changed, and all calls remain synthetic.
+Do not describe this account as zero-retention or reuse local-only AI consent
+for real records. [Groq data policy](https://console.groq.com/docs/your-data).
+
 ## Free-first provider choice
 
 | Candidate | Current evidence | Migration implications |
@@ -97,12 +104,32 @@ an owned runtime directory, and listens on loopback. Its existing Firebase ADC
 does not automatically exist on Azure. Flutter also has an explicit host
 allowlist and several user disclosures promise local AI processing.
 
+There is a specific runtime contract issue, not just a missing adapter:
+[`GenerationTransport`](../../backend/src/ai-runtime/ports/generation-transport.ts)
+may settle only after underlying generation termination is confirmed.
+[Q31-B](../decisions/2026-09-02-qwen-runtime-failure-contract.md) requires the
+controlled local generation lane to remain quarantined after disconnect or
+timeout. A synthetic evaluator's `unconfirmed` observation cannot be plugged
+into that promise as a normal rejection. Nor does restarting an Azure backend
+prove that a remote Groq invocation ended. A deployable cloud mode needs an
+explicitly approved capacity/unknown-recovery contract, preserving original
+operation fencing and no automatic retry; it must not silently reinterpret
+local process supervision as remote termination. First-flow composition also
+currently binds `LocalModelLane` and `qwen3.5:9b`, while Persona preview shares
+chat's lane. Any provider-wide admission policy must account for all consumers.
+The [cloud-only unknown-operation proposal](2026-10-28-cloud-unknown-operation-policy-proposal.md)
+sets out the exact behavior for LI to decide; it is not yet approved or enabled.
+
 1. Establish a model/profile that satisfies the unchanged semantic cases. The
    Groq baseline passed 14/24; `goal-v2` passed 15/24, improving seven original
    failures but retaining three and introducing six regressions from the
    original local baseline. Both are rejected for adoption. The authorized
    48 Groq synthetic calls are complete; no further calls are implied by this
    report. See the [goal-v2 assessment](../evidence/2026-10-28-li-ai-repair/groq-goal-v2-assessment.md).
+   LI subsequently authorized one more 24-case `baseline-medium` comparison.
+   It completed with 16/24 passes, six original failures improved, four
+   remaining and four regressions; it is also rejected. Total Groq calls are
+   now **72**, all synthetic. The three grants are consumed.
 2. Implement the production cloud transport and composition while preserving
    admission, cancellation, unknown outcomes, authorization and consent fences.
    The added synthetic adapter deliberately cannot be used as a product adapter.
@@ -117,4 +144,6 @@ allowlist and several user disclosures promise local AI processing.
 
 The existing backend's observed service memory (~193 MiB, excluding OS, proxy,
 local Ollama and load peaks) makes a 1 GiB host a candidate, not a capacity
-guarantee. No database migration is needed merely to move this backend.
+guarantee. Moving the backend alone does not require relocating its Firebase
+database; any new durable cloud recovery metadata would need its own contract
+review rather than being inferred from that hosting observation.

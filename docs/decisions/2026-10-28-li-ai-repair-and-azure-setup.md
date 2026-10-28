@@ -136,3 +136,11 @@ Recheck account eligibility before dispatch. Ineligible, truncated, unknown,
 rate-limited or missing/over-bound usage stops the run. This supersedes only the
 previous absence of a grant for this one profile/pass; the first two consumed
 grants, rejected profiles and production adoption boundary are unchanged.
+
+The pass completed 24 protocol-eligible responses without retry. Owner-assisted
+assessment is 16 pass / eight fail: six original failures improved, four
+remaining and four original passes regressed. The grant is consumed, bringing
+the total to 72 synthetic Groq calls. Reject this candidate too; do not adopt a
+new processor or weaken the corpus based on protocol eligibility or the larger
+pass count. The [final assessment](../evidence/2026-10-28-li-ai-repair/groq-baseline-medium-assessment.md)
+preserves all failure evidence and the borderline case-15 judgment.

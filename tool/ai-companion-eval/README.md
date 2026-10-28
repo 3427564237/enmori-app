@@ -58,7 +58,7 @@ It accepts only the fixed 24 current-prompt cases. `baseline` keeps their exact
 golden messages and uses GPT-OSS 120B with 2048 completion tokens;
 `goal-v2` substitutes only the general system instructions, retains the original
 Persona suffix and user/history text, and uses 1024 completion tokens. Both use
-low reasoning. The **prepared, not run** `baseline-medium` profile preserves
+low reasoning. The separately authorized `baseline-medium` profile preserves
 every `baseline` request property and message, including its 2048 completion
 ceiling, except that `reasoning_effort` is `medium`. All three use strict JSON
 Schema and non-streaming requests. Refusal, truncation, malformed output,
@@ -84,6 +84,12 @@ node tool/ai-companion-eval/groq-run.mjs --profile goal-v2 --key-file /private/k
 
 This command is not a grant to make calls. Use only a separately authorized,
 account-verified pass. Keep its source/corpus frozen until the report is saved.
+The separately authorized baseline-medium pass later completed 24 calls with
+16/24 owner-assessed semantic passes and was rejected; see its
+[assessment](../../docs/evidence/2026-10-28-li-ai-repair/groq-baseline-medium-assessment.md).
+That consumed grant is not reusable. All three Groq runs remain synthetic and
+none selects a production provider/model.
+
 The baseline and goal-v2 profiles retain 30.1-second start spacing; baseline-medium
 requires at least 61 seconds. Its conservative per-request check reserves the
 whole request's UTF-8 byte count plus 2048 completion tokens plus 512 wrapper
