@@ -168,3 +168,11 @@ TPD account limits were rechecked in the console before dispatch. US$0 maximum;
 no real-user data, paid upgrade or adoption of a failed model. Earlier 72 calls
 remain consumed; this adds only this one 24-call grant. Production prompt and
 processing boundary remain unchanged pending evidence and integration.
+
+The fourth pass completed 24 protocol-eligible responses. Under the unchanged
+rubric, `constraints-v3` remains 16/24: seven original failures improve, three
+remain, and five original passes regress. Compared with baseline-medium,
+label recall and one-question adherence improve, while unsupported chapter
+content and an extra post-plan action regress. The candidate is rejected.
+All four grants are consumed: **96 synthetic Groq calls**, no further grant.
+[Assessment](../evidence/2026-10-28-li-ai-repair/groq-constraints-v3-assessment.md).

@@ -84,13 +84,25 @@ quota expiry is accounting only. Dispatch permits are opaque, single-use and
 bound to the original signal, deadline and live reservation. Late results cannot
 commit, deliver or release a newer request's lane. Lease loss fails closed.
 
-The recovery authority is a Port with test fakes only. Production must supply
-atomic durable reservations and epoch fencing, verify restart clock/window
-correctness, and preserve existing operation/SDK uncertainty guards. The owner
-retains only quota/settlement metadata, not prompts, outputs or credentials.
-Its single configured window is not a complete provider minute/day quota or
-tokenizer implementation. No real provider, durable store or production wiring
-is added. See the [offline receipt](../../../docs/evidence/2026-10-28-cloud-recovery/README.md).
+The [first internal receipt](../../../docs/evidence/2026-10-28-cloud-recovery/README.md)
+is followed by the [Groq/Firestore integration receipt](../../../docs/evidence/2026-10-28-cloud-integration/README.md).
+`FirestoreCloudQuotaAuthority` now implements the approved Backend-only quota
+document with atomic minute/day reservations, persisted 429 cooldown and strict
+runtime-epoch checks. Missing state never initializes itself. Recovery does not
+credit unproved downtime: remaining windows at the last confirmed ledger write
+are conservatively carried forward. Frequent restarts can therefore extend
+waiting. Unknown acknowledgments close admission without retry or refund.
+
+`GroqCloudTransport` uses explicit HTTP and framing-aware input-token bounds,
+fixed HTTPS, bounded receipt, terminal-envelope validation and a final dynamic
+admission guard. The factory binds the reservation to the same durable policy;
+it supplies no tokenizer, credentials, consent or HTTP defaults. A separate
+cloud-consent verifier is required; existing local consent is insufficient.
+The factory starts closed and neither initializes a ledger nor wires a route.
+The owner retains only quota/settlement metadata. Real token framing, cloud
+consent/provenance, shared Persona/F0 production composition, confirmed exclusive
+host ownership and deployment remain unintegrated. Emulator evidence is not
+proof of a real database migration, IAM or off-host availability.
 
 ## Parsing and interpretation
 

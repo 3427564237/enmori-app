@@ -151,3 +151,19 @@ local Ollama and load peaks) makes a 1 GiB host a candidate, not a capacity
 guarantee. Moving the backend alone does not require relocating its Firebase
 database; any new durable cloud recovery metadata would need its own contract
 review rather than being inferred from that hosting observation.
+
+## Subsequent integration progress
+
+The fourth Groq comparison remains 16/24 and is rejected; all 96 synthetic
+calls are consumed. The account was again verified as Free Plan with GPT-OSS
+120B limits 30 RPM / 1000 RPD / 8000 TPM / 200000 TPD. This is account evidence,
+not production model acceptance.
+
+The approved Groq transport and Firestore minute/day quota adapters now have
+source and emulator evidence: [integration receipt](../evidence/2026-10-28-cloud-integration/README.md).
+The closed factory does not enable production; existing local processing
+consent/provenance cannot silently authorize cloud transfer. No new cloud
+resource was created during this continuation. Azure VM retail rates were
+rechecked against official sources; the prior account balance/quota observations
+were not newly refreshed in this continuation. Retain their observation date
+rather than treating them as a fresh capacity or deployment result.

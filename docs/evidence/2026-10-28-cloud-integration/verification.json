@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-28",
+  "sourceCommit": "cadaa9640d87e3acb224592a5da6aa3de5cbf311",
+  "runtime": "Node.js 24.19.0",
+  "compiler": "TypeScript 7.0.2",
+  "commands": {
+    "build": "/home/miku/.local/share/pnpm/store/v11/links/@/node/24.19.0/00cf8b7bd601ac85fa8bfdb2a328cdee2766a25aaf53b02afe1a55508b36b33e/node_modules/node/bin/node node_modules/typescript/bin/tsc --project backend/tsconfig.json",
+    "backend": "/home/miku/.local/share/pnpm/store/v11/links/@/node/24.19.0/00cf8b7bd601ac85fa8bfdb2a328cdee2766a25aaf53b02afe1a55508b36b33e/node_modules/node/bin/node --test --test-reporter=spec 'backend/dist/test/**/*.test.js'",
+    "evaluation": "/home/miku/.local/share/pnpm/store/v11/links/@/node/24.19.0/00cf8b7bd601ac85fa8bfdb2a328cdee2766a25aaf53b02afe1a55508b36b33e/node_modules/node/bin/node --test --test-reporter=spec tool/ai-companion-eval/constraints-candidate.test.mjs tool/ai-companion-eval/groq-evaluation.test.mjs tool/ai-companion-eval/groq-run-policy.test.mjs tool/ai-companion-eval/evaluation.test.mjs",
+    "emulator": "/home/miku/.local/share/pnpm/store/v11/links/@/node/24.19.0/00cf8b7bd601ac85fa8bfdb2a328cdee2766a25aaf53b02afe1a55508b36b33e/node_modules/node/bin/node tool/run_cloud_quota_emulators.mjs"
+  },
+  "results": {
+    "build": "passed",
+    "backend": {
+      "tests": 1640,
+      "pass": 1640,
+      "fail": 0,
+      "skipped": 0
+    },
+    "evaluation": {
+      "tests": 41,
+      "pass": 41,
+      "fail": 0,
+      "skipped": 0
+    },
+    "emulator": {
+      "tests": 2,
+      "pass": 2,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "earlierVerification": {
+    "separateOutputBackendRun": {
+      "tests": 1640,
+      "pass": 1638,
+      "fail": 2
+    },
+    "cause": "Two existing calendar index tests resolve the repository root relative to standard backend/dist; a temporary output path instead resolved build/firestore.indexes.json. Rebuilt to standard output only after evaluation input hashes were verified; full suite then passed without source changes for those tests."
+  },
+  "sourceSha256": {
+    "backend/emulator-test/cloud-quota.integration.test.ts": "2600e3eb44d4c3e40c441ca48ec5ddc63817cb1999f06a701a8b4fcc87d4c367",
+    "backend/src/ai-conversation/application/async-cloud-conversation-transport.ts": "7e9021d414b6a01fc235474e6b2a215484fac082f1f291e3dca60a779a89ab5d",
+    "backend/src/ai-runtime/application/cloud-admission-owner.ts": "95ca358ef1e3a60ee40696cf72452d328fdb5ef4dd1dd5bd0416b9709aec8360",
+    "backend/src/ai-runtime/infrastructure/firestore-cloud-quota-authority.ts": "1b7ae64da1256470e9d1044ce48bd5c94fffb999c48bf813b749af47d1ddbc4a",
+    "backend/src/ai-runtime/infrastructure/groq-chat-transport.ts": "7b38f5e0fae845e18520fb5ddfad8312e842706c89e0ea2b0abfb653b8317182",
+    "backend/src/ai-runtime/infrastructure/groq-cloud-transport.ts": "8f13d2e8bfbd682b6ff47f4450f5e2b51e242ff11f9a68740c31e0de2cc11223",
+    "backend/src/ai-runtime/infrastructure/local-chat-transport.ts": "0c41d53b3a3d6a48ffc59dbdd59064742f033bcfdbccad1908c1b8f24f3a94c6",
+    "backend/src/ai-runtime/ports/cloud-generation-transport.ts": "12c5f3892943af2ddc584c090bc9209cd61390c51f4bf5530194866364941e10",
+    "backend/src/bootstrap/cloud-conversation-runtime.ts": "7817be8ec2984329101e703a703905ff0d06647e25fb66ab64a9f4ca7dbb1a53",
+    "backend/test/ai-runtime/firestore-cloud-quota-authority.test.ts": "92d31fd1cc769fc7f7b880da73af50590dfc60df91269adb9210b7865d0dded7",
+    "backend/test/ai-runtime/groq-cloud-transport.test.ts": "f00fc1f7f331f052b40bfcec1788f366b552d248f1bf8b7e2d94bca53b2f7f61",
+    "tool/run_cloud_quota_emulators.mjs": "7fa338e0366fb24a0fa54e91f5b584450db01ca1c4cd887d82da77dd344cd18c"
+  },
+  "localLogSha256": {
+    "build/cloud-integration/backend-tests-final.log": "538615ac047c90a7f54a7c3afbef878b891ea2be97ba287976b9627f0ae7bf48",
+    "build/cloud-integration/evaluation-tests.log": "3cf00816eaa7d4d31ebadaee77aefa7347ca1a1a9258f546e23dc39493771516",
+    "build/cloud-integration/emulator-tests-final.log": "e72e58a66a78af12ca914536ed406c8e2acf9c46b215ee6cd349d98f79d9b0af"
+  },
+  "providerCallsInBackendTests": 0,
+  "realDatabaseWrites": 0,
+  "productionWiring": false,
+  "newCloudResources": 0,
+  "emulatorProject": "demo-enmori-rmvp01a-r10",
+  "review": "Author validation plus focused subagent review; not independent team acceptance"
+}

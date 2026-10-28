@@ -143,3 +143,20 @@ production boundary. Durable recovery authority, actual cloud transport,
 provider-wide complete quotas, consent/identity/HTTPS and deployment remain
 unintegrated. The v41 artifact predates this Backend-only source change and still
 uses the personal host; neither a new APK nor off-host acceptance is claimed.
+
+## Subsequent continuation: cloud adapters and fourth quality comparison
+
+The separately authorized `constraints-v3` pass completed but remains **16/24**;
+seven original failures improve, three remain, and five original passes regress.
+All **96** Groq synthetic calls are consumed; no failed candidate is adopted.
+[Fourth assessment](../evidence/2026-10-28-li-ai-repair/groq-constraints-v3-assessment.md).
+
+Approved source work now adds a Groq HTTP adapter, separate cloud authorization,
+Firestore minute/day quota authority and an explicitly closed construction
+factory. Complete Backend **1640/1640**, evaluation tools **41/41**, and focused
+actual-SDK Firestore emulator **2/2** pass. See the
+[integration receipt](../evidence/2026-10-28-cloud-integration/README.md).
+Real tokenizer, cloud consent/provenance, all-consumer production composition,
+Azure identity/HTTPS, real quota initialization and phone/off-host validation
+remain open. No real database writes, VM, new credential, published endpoint or
+new APK is included. The existing personal-host service remains required.

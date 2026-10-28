@@ -2,6 +2,25 @@
 
 Date: 2026-10-28. This is an investigation and proposal, not an approval to change production behavior or use a provider. No model or API was called for this diagnosis. The [PM decision](../decisions/2026-10-28-li-ai-repair-and-azure-setup.md) preserves the original corpus, rejects the evaluated candidates, and exhausts the two Groq grants. The three assessments below are owner-assisted (`independent: false`), not independent QA or acceptance.
 
+## Latest continuation
+
+A fourth, separately authorized Groq pass tested `constraints-v3`, changing
+only baseline-medium system instructions. It completed 24/24 protocol-eligible
+responses but remains **16/24** semantically. Cases 8 and 17 improve; 6 and 15
+regress. Three original failures remain and five original passes regress.
+See the [full assessment](../evidence/2026-10-28-li-ai-repair/groq-constraints-v3-assessment.md).
+All 96 Groq calls are now consumed. The candidate is not adopted. The older
+proposal/execution history below is retained; it grants no additional calls.
+
+The recurring goal/correction failures across these samples support testing a
+different model family next, rather than assuming a further instruction list
+will solve them. This is a recommendation, not a selected production model or
+new grant. Current Groq documentation lists Qwen 3.8 27B with strict output
+support and Free limits, but as a preview model; preview evaluation would not
+establish a dependable production replacement. [Models](https://console.groq.com/docs/models),
+[structured outputs](https://console.groq.com/docs/structured-outputs),
+[rate limits](https://console.groq.com/docs/rate-limits), checked 28 October 2026.
+
 ## What the three candidates show
 
 | Candidate | Unchanged 24-case assessment | Recurring failures |

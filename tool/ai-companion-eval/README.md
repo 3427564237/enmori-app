@@ -230,3 +230,14 @@ are recorded. Truncated/unknown bodies remain failures, with their available
 prefix preserved. Complete reports and independent review templates retain all
 attempted cases; real cloud latency/cost remains Not Run until a separately authorized
 evaluation actually occurs.
+
+### Subsequent constraints-v3 comparison
+
+The separately authorized fourth Groq pass changes only the system instruction
+from baseline-medium; all 24 actual request pairs were checked. It retains
+GPT-OSS 120B, medium reasoning, 2048 completion tokens, strict schema, exact
+history/Persona and 61-second start spacing. The combined offline regression is
+41/41. Live outcome: 24 protocol-eligible responses, **16/24 semantic passes**,
+rejected with remaining failures and regressions. All **96** Groq grants/calls
+are consumed; this profile is neither production wiring nor a reusable grant.
+See [assessment](../../docs/evidence/2026-10-28-li-ai-repair/groq-constraints-v3-assessment.md).
