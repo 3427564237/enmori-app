@@ -141,14 +141,15 @@ export class FakeAsyncStore implements AsyncConversationStore {
       user: row?.user, assistantMessageId: row?.assistantMessageId };
   }
 }
-export function fixture(strategy?: "open_conversation_v1") {
+export function fixture(strategy?: "open_conversation_v1",
+  runtimeFactory?: (clock: FakeClock, model: GenerationTransport<ConversationInput>) => BoundedAiRuntime<AsyncConversationModelInput>) {
   const clock = new FakeClock(), auth = new FakeAuthority(), reads = new FakeReads(), store = new FakeAsyncStore();
   const calls: { input: ConversationInput; budget: RequestBudget; completion: ReturnType<typeof deferred<Uint8Array>> }[] = [];
   const model: GenerationTransport<ConversationInput> = { generate(input, budget) {
     const completion = deferred<Uint8Array>(); calls.push({ input, budget, completion }); return completion.promise;
   } };
   const transport = new AuthorizedAsyncConversationGenerationTransport(model);
-  const runtime = new BoundedAiRuntime<AsyncConversationModelInput>(clock, transport);
+  const runtime = runtimeFactory?.(clock, model) ?? new BoundedAiRuntime<AsyncConversationModelInput>(clock, transport);
   const delivered: AsyncDeliveryMessage[] = [];
   const delivery: AsyncConversationDelivery = { async deliver(_context, revalidate, event) {
     if (!await revalidate()) return "refused";

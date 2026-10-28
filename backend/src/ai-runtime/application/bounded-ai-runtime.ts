@@ -2,6 +2,8 @@ import { parseOutput, type OutputCandidate, type OutputPurpose } from "../domain
 import type { GenerationTransport, RequestBudget } from "../ports/generation-transport.js";
 import type { RuntimeClock } from "../ports/runtime-clock.js";
 import type { Result } from "../../shared/domain/result.js";
+import { CloudAdmissionOwner, type CloudAttempt } from "./cloud-admission-owner.js";
+import type { CloudGenerationObservation } from "../ports/cloud-generation-transport.js";
 
 export type RuntimeFailure = "queue_expired" | "generation_timed_out" | "timed_out"
   | "abandoned" | "cancelled" | "dependency_unavailable" | "invalid_output"
@@ -90,10 +92,17 @@ interface Entry<Input> {
   failure: RuntimeFailure | undefined;
   phase: "accepted" | "preparing" | "generating" | "checking" | "delivering" | "terminal";
   generating: boolean;
+  cloudAttempt: CloudAttempt | undefined;
   generationEnd: number | undefined;
   cancelOverall: () => void;
   cancelQueue: () => void;
   cancelGeneration: () => void;
+}
+
+/** Explicit internal cloud mode. One owner binds to one shared runtime. */
+export interface CloudRuntimeConfiguration<Input> {
+  readonly kind: "cloud";
+  readonly owner: CloudAdmissionOwner<Input>;
 }
 
 /** One instance per controlled host. Internal only; never wired to a route. */
@@ -105,12 +114,26 @@ export class BoundedAiRuntime<Input> {
   private active: Entry<Input> | undefined;
   private stopped = false;
 
-  constructor(private readonly clock: RuntimeClock, private readonly transport: GenerationTransport<Input>, private readonly plainTextOutput = false) {}
+  private readonly transport: GenerationTransport<Input> | undefined;
+  private readonly cloudOwner: CloudAdmissionOwner<Input> | undefined;
+
+  constructor(private readonly clock: RuntimeClock, transport: GenerationTransport<Input> | CloudRuntimeConfiguration<Input>,
+    private readonly plainTextOutput = false) {
+    if ("kind" in transport && transport.kind === "cloud") {
+      if (!(transport.owner instanceof CloudAdmissionOwner)) throw Error("CLOUD_CONFIGURATION_INVALID");
+      transport.owner.bindRuntime(clock);
+      this.cloudOwner = transport.owner;
+    } else this.transport = transport as GenerationTransport<Input>;
+  }
+
+  /** Separate from the local quarantine flag: no unknown is called settled. */
+  get cloudState() { return this.cloudOwner?.state; }
 
   get state(): { readonly admission: "open" | "busy" | "stopped"; readonly quarantined: boolean; readonly queued: number; readonly nonTerminal: number } {
     return {
-      admission: this.stopped ? "stopped" : this.active && this.queue.length >= 2 ? "busy" : "open",
-      quarantined: Boolean(this.active?.terminal && this.active.generating),
+      admission: this.stopped ? "stopped" : this.cloudOwner && this.cloudOwner.admission() !== "ready"
+        ? "busy" : this.active && this.queue.length >= 2 ? "busy" : "open",
+      quarantined: Boolean(!this.cloudOwner && this.active?.terminal && this.active.generating),
       queued: this.queue.length,
       nonTerminal: this.users.size,
     };
@@ -160,12 +183,16 @@ export class BoundedAiRuntime<Input> {
     { readonly accepted: true; readonly entry: Entry<Input> }
     | { readonly accepted: false; readonly failure: "overload" | "dependency_unavailable" } {
     if (this.stopped || this.state.quarantined) return { accepted: false, failure: "dependency_unavailable" };
+    if (this.cloudOwner) {
+      const admission = this.cloudOwner.admission();
+      if (admission !== "ready") return { accepted: false, failure: admission === "capacity" ? "overload" : "dependency_unavailable" };
+    }
     if (this.users.has(trustedUser) || (this.active && this.queue.length >= 2)) return { accepted: false, failure: "overload" };
     const acceptedAt = this.clock.now();
     const entry: Entry<Input> = {
       user: trustedUser, acceptedAt, deadline: acceptedAt + 60_000,
       abort: new AbortController(), pipeline, terminal: false, failure: undefined, phase: "accepted",
-      generating: false, generationEnd: undefined,
+      generating: false, cloudAttempt: undefined, generationEnd: undefined,
       cancelOverall: () => {}, cancelQueue: () => {}, cancelGeneration: () => {},
     };
     this.users.set(trustedUser, entry);
@@ -180,6 +207,7 @@ export class BoundedAiRuntime<Input> {
 
   shutdown(): void {
     this.stopped = true;
+    this.cloudOwner?.shutdown();
     for (const entry of [...this.users.values()]) this.fail(entry, "cancelled");
   }
 
@@ -220,10 +248,16 @@ export class BoundedAiRuntime<Input> {
     this.active = entry;
     if (this.expired(entry)) return;
     entry.phase = "preparing";
+    if (this.cloudOwner) { this.reserveCloud(entry); return; }
+    this.prepare(entry);
+  }
+
+  private prepare(entry: Entry<Input>): void {
+    if (this.expired(entry)) return;
     try {
       if (entry.pipeline.kind === "component") {
         entry.pipeline.work!.prepare(this.budget(entry)).then(
-          (input) => this.dispatch(entry, input), () => this.fail(entry, "dependency_unavailable"));
+          (input) => this.dispatchPrepared(entry, input), () => this.fail(entry, "dependency_unavailable"));
       } else {
         entry.pipeline.work!.prepare().then(
           () => this.dispatchApplication(entry), () => this.fail(entry, "dependency_unavailable"));
@@ -238,10 +272,15 @@ export class BoundedAiRuntime<Input> {
     try {
       const input = entry.pipeline.work!.dispatchInput();
       if (!input.ok) { this.fail(entry, input.failure); return; }
-      this.dispatch(entry, input.value);
+      this.dispatchPrepared(entry, input.value);
     } catch {
       this.fail(entry, "dependency_unavailable");
     }
+  }
+
+  private dispatchPrepared(entry: Entry<Input>, input: Input): void {
+    if (!this.cloudOwner) this.dispatch(entry, input);
+    else if (!this.expired(entry) && entry.cloudAttempt) this.dispatchCloud(entry, entry.cloudAttempt, input);
   }
 
   private dispatch(entry: Entry<Input>, input: Input): void {
@@ -251,11 +290,63 @@ export class BoundedAiRuntime<Input> {
     entry.generationEnd = Math.min(this.clock.now() + 45_000, entry.deadline);
     entry.cancelGeneration = this.clock.at(entry.generationEnd, () => this.fail(entry, "generation_timed_out"));
     try {
-      this.observeGeneration(entry, this.transport.generate(input, this.budget(entry, entry.generationEnd)));
+      this.observeGeneration(entry, this.transport!.generate(input, this.budget(entry, entry.generationEnd)));
     } catch {
       // A synchronous throw is also a settled invocation under the Port contract.
       this.generationRejected(entry);
     }
+  }
+
+  /** Acquire an authoritative quota claim before application preparation may
+   * persist a user message. The original deadline is never extended. */
+  private reserveCloud(entry: Entry<Input>): void {
+    if (this.expired(entry) || !this.cloudOwner) return;
+    const owner = this.cloudOwner;
+    owner.reserve(this.budget(entry), () => !this.expired(entry)).then(attempt => {
+      if (!attempt) { this.fail(entry, "dependency_unavailable"); return; }
+      if (this.expired(entry)) { owner.notStarted(attempt); return; }
+      entry.cloudAttempt = attempt;
+      this.prepare(entry);
+    }, () => this.fail(entry, "dependency_unavailable"));
+  }
+
+  private dispatchCloud(entry: Entry<Input>, attempt: CloudAttempt, input: Input): void {
+    const owner = this.cloudOwner!;
+    entry.phase = "generating";
+    entry.generating = true;
+    entry.cloudAttempt = attempt;
+    entry.generationEnd = Math.min(this.clock.now() + 45_000, entry.deadline);
+    entry.cancelGeneration = this.clock.at(entry.generationEnd, () => this.fail(entry, "generation_timed_out"));
+    const completion = owner.dispatch(attempt, input, this.budget(entry, entry.generationEnd));
+    if (!completion) {
+      owner.notStarted(attempt);
+      entry.generating = false;
+      entry.cloudAttempt = undefined;
+      this.fail(entry, "dependency_unavailable");
+      return;
+    }
+    completion.then(observation => this.cloudObserved(entry, attempt, observation),
+      () => this.cloudObserved(entry, attempt, { kind: "unknown", physical: "unknown" }));
+  }
+
+  private cloudObserved(entry: Entry<Input>, attempt: CloudAttempt, observation: CloudGenerationObservation): void {
+    const owner = this.cloudOwner!;
+    try {
+      if (observation?.kind === "response" && observation.physical === "stopped" && observation.raw instanceof Uint8Array) {
+        owner.stopped(attempt);
+        entry.cloudAttempt = undefined;
+        this.generated(entry, observation.raw);
+        return;
+      }
+      if (observation?.kind === "failure" && observation.physical === "stopped") {
+        owner.stopped(attempt);
+        entry.cloudAttempt = undefined;
+        this.generationRejected(entry);
+        return;
+      }
+    } catch { /* malformed cloud observations never prove physical termination */ }
+    owner.unknown(attempt);
+    this.fail(entry, "dependency_unavailable");
   }
 
   private observeGeneration(entry: Entry<Input>, completion: Promise<Uint8Array>): void {
@@ -326,6 +417,7 @@ export class BoundedAiRuntime<Input> {
 
   private expired(entry: Entry<Input>): boolean {
     if (!entry.terminal && this.clock.now() >= entry.deadline) this.fail(entry, "timed_out");
+    if (!entry.terminal && this.cloudOwner && !this.cloudOwner.isCurrent()) this.fail(entry, "stale_authority");
     return entry.terminal;
   }
 
@@ -359,8 +451,12 @@ export class BoundedAiRuntime<Input> {
     const queuedIndex = this.queue.indexOf(entry);
     if (queuedIndex !== -1) this.queue.splice(queuedIndex, 1);
     entry.abort.abort();
+    if (entry.cloudAttempt) {
+      if (entry.generating) this.cloudOwner?.unknown(entry.cloudAttempt);
+      else this.cloudOwner?.notStarted(entry.cloudAttempt);
+    }
     // Preparation is not generation: it can be abandoned without quarantine.
-    if (!entry.generating) this.releaseLane(entry);
+    if (!entry.generating || this.cloudOwner) this.releaseLane(entry);
   }
 
   private dispose(work: RuntimeApplicationWork<Input>): void {
