@@ -22,7 +22,8 @@ and [previous matrix](jin-interest-coverage-oct26.md). The prior live-coverage
 wait is narrowed by LI's observation, not repeated as wholly unknown.
 [PR190 approval](https://github.com/3427564237/enmori-app/pull/190#pullrequestreview-5668581504)
 at the exact head above is reported in the supplied PM handoff; R1–R3 are no
-longer current blockers. This turn could not independently read GitHub back.
+longer current blockers. The initial GitHub access failure is superseded by the
+successful authenticated retrieval recorded below; it is not a current wait.
 PR188's completed review remains separate from LI's adaptations in PR189.
 
 ## All fourteen tags: disposition of the observed source
@@ -127,15 +128,18 @@ that limitation is a PM scope disposition, not a code defect hidden by a green
 test count. JIN has prepared the concrete choice; no product decision is made
 on LI's behalf. The approved ranking implementation is not reopened.
 
-## PR189 independent Backend/runtime review: access blocker
+## PR189 independent Backend/runtime review: access recovered
 
 Requested published head, as supplied by PM:
-`afe06ae9ec97abb2f5c0448501ccc7fd5eb47733`. It is absent from the local object
-database. Its current remote head/base/diff have **not** been verified this turn.
+`afe06ae9ec97abb2f5c0448501ccc7fd5eb47733`. Authenticated retrieval under
+`chuxi12483468` subsequently succeeded, and its exact source is now available.
+Remote head remained this commit; base is
+`4d81af2f3dc0f5d68d8346eb248b30ed93097f76`, review tree
+`d84c99edc2dd1f4cb233a43eca68c1b31f4b8773`.
 Local v39 `0c8efb7...` / evidence `5263f33` is also not available and is not being
 requested as a prerequisite for reviewing the published PR189.
 
-Actual attempts:
+Historical failed attempts, retained (superseded for current availability):
 
 - GitHub connector `fetch_pr` with correct repository/PR: HTTP404.
 - Existing `gh` network read: automatic approval timed out before process creation;
@@ -144,27 +148,31 @@ Actual attempts:
 - Public web retrieval: cache miss; existing in-app browser: GitHub page not found.
   No alternate signed-in browser is available through the browser inventory.
 - No new account/login, token inspection/transfer, network-rule change or
-  workaround service was attempted. No PR189 source, compile or test was executed.
+  workaround service was attempted. At that earlier checkpoint no PR189 source,
+  compile or test had been executed.
 
-Next review checkpoint is successful retrieval of the published PR189 exact
-head/base/diff under the existing JIN identity. Then isolate LI's new Backend/
-runtime adaptations from unchanged approved PR188 components; inspect preparation
-admission/cancellation before and after each awaited dependency, original deadline
-ownership, unknown outcome/readback behavior, late completion/lease retirement,
-and transport/diagnostic disclosure. Run only the changed boundary suites and
-any concrete counterexample; submit a commit-bound JIN formal review and read it
-back. No approval or REQUEST_CHANGES finding is fabricated from an unavailable diff.
+The focused review is now complete, with a reproducible **P2 cancellation-wait
+finding** in the new host-preparation wrapper. Independent strict compilation and
+97 affected cases pass, while the separate counterexample has one positive
+control pass and two failures exposing the same defect. See the
+[exact-source review and runnable probe](jin-pr189-backend-review-oct28.md).
+These are JIN executions on the published PR189 tree, not LI's author results or
+v39 approval. LI owns the correction; the next code checkpoint is its published
+fix and affected counterexample result. DU retains client/navigation review.
 
-The blocker owner is this task's GitHub access/approval channel, not DU, ZHOU or
-the model/phone environment. No credible finish ETA can be set until retrieval
-works. Review can continue immediately after that checkpoint, without waiting
-for LI's phone or v39 publication. Final combined-tree and real acceptance stay
-with LI. No duplicate component tests were run for this documentation-only packet.
+SHI's latest supplied 28 October receipt reports no independently identified
+Event presentation/source-consumption gap in its bounded inspection and no new
+provider request or tests. It is not used as formal approval of LI's Backend or
+client adaptations. Missing actual source fields remain the disposition above.
 
 ## Handoff status
 
-Source disposition is ready locally; PR189 review and GitHub publication/reply
-are blocked by the access failure above. PM/provider choice remains specific to
-the proposed onePA read/display basis. Existing failure records, PR190 approval
-and all owner boundaries are preserved. No merge, closure, Project transition,
-runtime/model/provider activation, install or whole-app acceptance.
+This coherent packet contains the source disposition and independent PR189 review
+evidence. The access wait is resolved. Remaining owners are LI for the new
+host-preparation correction and the specific onePA access/display-basis decision,
+and LI for final combined-source/device acceptance. No code ETA can be promised
+for an unselected provider access path; JIN's next acquisition checkpoint is an
+identified permitted feed and one real occurrence per claimed category. Existing
+failure records, PR190 approval and all owner boundaries are preserved. No merge,
+closure, Project transition, runtime/model/provider activation, install or
+whole-app acceptance.
