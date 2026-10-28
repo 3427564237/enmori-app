@@ -1,4 +1,5 @@
 import { projectVenueAddress } from "../../event-detail/domain/venue-address.js";
+import { classifyInterests } from "./interest-classification.js";
 import { Temporal } from "@js-temporal/polyfill";
 import type { BrowseOccurrence } from "../ports/event-browse.js";
 const sourceId=/^[A-Za-z0-9_-]{1,128}$/;
@@ -62,7 +63,9 @@ export function projectOccurrence(raw:unknown,asOf:string):BrowseOccurrence|unde
     const withAddress=venueName&&address?`${venueName}, ${address}`:venueName??address;
     const locationLabel=withAddress&&text(withAddress,200)?withAddress:venueName;
     const venueAddress = projectVenueAddress(raw._embedded.venues);
-    return {...(venueAddress ? {venueAddress} : {}),browseId:id,title:raw.name,startAt:start.toString(),externalSourceUrl:raw.url,
+    const interestConcepts=classifyInterests(raw.classifications);
+    const regionNames=[object(venue.city)?venue.city.name:undefined,object(venue.country)?venue.country.name:undefined].filter((v):v is string=>text(v,120));
+    return {...(venueAddress ? {venueAddress} : {}),interestConcepts,regionNames,browseId:id,title:raw.name,startAt:start.toString(),externalSourceUrl:raw.url,
       ...(shortDescription?{shortDescription}:{}),...(coverUrl?{coverImageUrl:coverUrl}:{}),
       ...(Array.isArray(raw.classifications)&&raw.classifications.some(c=>object(c)&&object(c.segment)&&c.segment.id==="KZFzniwnSyZfZ7v7nJ")?{musicSegment:true as const}:{}),
       ...(end?{endAt:end.toString()}:{}),...(locationLabel?{locationLabel}:{}),...(typeof category==="string"?{categoryLabel:category}:{})};

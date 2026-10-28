@@ -25,6 +25,24 @@ test('address is projected from occurrence, missing address does not remove vali
   assert.equal(projectOccurrence({...raw,_embedded:{venues:[{...venue,postalCode:null}]}},'2026-10-27T00:00:00Z')?.venueAddress,undefined);
   assert.equal(projectOccurrence({...raw,_embedded:{venues:[{...venue,postalCode:null}]}},'2026-10-27T00:00:00Z')?.title,'Synthetic event');
 });
+test('combined provider projection preserves address, interest classification and region without leaking metadata', async () => {
+  const raw = {id:'combined-projection', name:'Synthetic Dance', url:'https://ticketmaster.sg/event/synthetic',
+    classifications:[{genre:{id:'dance',name:'Dance'}}],
+    dates:{start:{dateTime:'2026-11-01T10:00:00Z'},status:{code:'onsale'}},_embedded:{venues:[venue]}};
+  const projected = projectOccurrence(raw,'2026-10-27T00:00:00Z')!;
+  assert.deepEqual(projected.venueAddress,address);
+  assert.deepEqual(projected.interestConcepts,['Dance']);
+  assert.deepEqual(projected.regionNames,['Singapore']);
+  const server=Fastify({logger:false});
+  const identity={verifyIdToken:async()=>({kind:'verified' as const,principal:{firebaseUid:'synthetic'}})};
+  await registerIsolatedSlices(server,identity,undefined,new GetEventDetail({read:async()=>ok({...projected,eventId:'event'})}));
+  try {
+    const response=await server.inject({url:'/v1/events/event?includeVenueAddress=true',headers:{authorization:'Bearer synthetic'}});
+    assert.equal(response.statusCode,200);
+    assert.deepEqual(response.json().event.venueAddress,address);
+    for(const field of ['interestConcepts','regionNames','musicSegment','browseId'])assert.equal(Object.hasOwn(response.json().event,field),false);
+  } finally {await server.close();}
+});
 test('detail address is opt-in, legacy is unchanged, duplicate/unknown inputs and anonymous are rejected', async () => {
   const server=Fastify({logger:false,ajv:{customOptions:{removeAdditional:false}}});
   server.setErrorHandler((_, request, reply) => sendFailureCode(request, reply, 'REQUEST_INVALID'));

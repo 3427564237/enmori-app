@@ -8,6 +8,7 @@ export interface InterestMatchingProjection {
 }
 
 export interface EventRecommendationSources {
+  readonly formulaVersion?: "event_recommendation_v2";
   readonly selectedInterestTagIds: readonly string[];
   readonly interestTags: readonly InterestMatchingProjection[];
   readonly events: readonly {

@@ -12,13 +12,15 @@ export const eventRecommendationItemSchema = {
   properties: {
     eventId: { type: "string", minLength: 1 }, title: { type: "string", minLength: 1 },
     startAt: utc, endAt: utc,
-    matchedInterests: { type: "array", minItems: 1, items: matchedInterest },
-    reasonCode: { type: "string", const: "interest_match" },
+    matchedInterests: { type: "array", items: matchedInterest },
+    reasons: {type:"array",minItems:1,maxItems:3,items:{type:"object",additionalProperties:false,required:["code","count","points"],properties:{
+      code:{type:"string",enum:["shared_interests","friends_participating","same_region"]},count:{type:"integer",minimum:1,maximum:1000},points:{type:"integer",minimum:1,maximum:40}}}},
+    reasonCode: { type: "string", enum: ["interest_match","relevance_match"] },
   },
 } as const;
 export const eventRecommendationsSchema = {
   type: "object", additionalProperties: false, required: ["asOf", "formulaVersion", "items"],
-  properties: { asOf: utc, formulaVersion: { type: "string", const: "event_recommendation_v1" },
+  properties: { asOf: utc, formulaVersion: { type: "string", enum: ["event_recommendation_v1","event_recommendation_v2"] },
     items: { type: "array", items: eventRecommendationItemSchema } },
 } as const;
 export const recommendEventsSchema = {

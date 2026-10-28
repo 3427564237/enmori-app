@@ -31,12 +31,17 @@ final class BackendEventRecommendationRepository
     final items = value['items'];
     if (asOf == null ||
         formulaVersion is! String ||
-        formulaVersion != _formulaVersion ||
+        ![
+          _formulaVersion,
+          'event_recommendation_v2',
+        ].contains(formulaVersion) ||
         items is! List) {
       return _invalidResponse();
     }
 
+    final v2 = formulaVersion == 'event_recommendation_v2';
     final parsedItems = <EventRecommendation>[];
+    final ids = <String>{};
     for (final item in items) {
       if (item is! Map<String, dynamic>) return _invalidResponse();
       final eventId = item['eventId'];
@@ -58,8 +63,8 @@ final class BackendEventRecommendationRepository
                   endInstant == null ||
                   endInstant <= startInstant)) ||
           matchedInterests is! List ||
-          matchedInterests.isEmpty ||
-          reasonCode != _reasonCode) {
+          (!v2 && matchedInterests.isEmpty) ||
+          reasonCode != (v2 ? 'relevance_match' : _reasonCode)) {
         return _invalidResponse();
       }
       final parsedInterests = <MatchedInterest>[];
@@ -80,6 +85,45 @@ final class BackendEventRecommendationRepository
           ),
         );
       }
+      if (!ids.add(eventId)) return _invalidResponse();
+      final reasons = <EventRecommendationReason>[];
+      if (v2) {
+        final rows = item['reasons'];
+        if (rows is! List || rows.isEmpty || rows.length > 3) {
+          return _invalidResponse();
+        }
+        final seen = <String>{};
+        for (final row in rows) {
+          if (row is! Map<String, dynamic> || row.length != 3) {
+            return _invalidResponse();
+          }
+          final code = row['code'],
+              count = row['count'],
+              points = row['points'];
+          if (code is! String ||
+              count is! int ||
+              points is! int ||
+              count < 1 ||
+              count > 1000 ||
+              !seen.add(code)) {
+            return _invalidResponse();
+          }
+          final expected = switch (code) {
+            'shared_interests' =>
+              count == parsedInterests.length ? count * 4 : -1,
+            'friends_participating' => (count > 5 ? 5 : count) * 2,
+            'same_region' => count == 1 ? 1 : -1,
+            _ => -1,
+          };
+          if (points != expected || expected < 1) return _invalidResponse();
+          reasons.add(
+            EventRecommendationReason(code: code, count: count, points: points),
+          );
+        }
+        if (seen.contains('shared_interests') != parsedInterests.isNotEmpty) {
+          return _invalidResponse();
+        }
+      }
       parsedItems.add(
         EventRecommendation(
           eventId: eventId,
@@ -88,6 +132,7 @@ final class BackendEventRecommendationRepository
           endAt: endAt,
           matchedInterests: parsedInterests,
           reasonCode: reasonCode,
+          reasons: List.unmodifiable(reasons),
         ),
       );
     }

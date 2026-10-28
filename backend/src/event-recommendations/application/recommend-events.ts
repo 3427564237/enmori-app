@@ -9,8 +9,9 @@ import type { EventRecommendationRepository } from "../ports/event-recommendatio
 /** Internal result only. Transport mapping remains a separate contract gate. */
 export interface EventRecommendations {
   readonly asOf: string;
-  readonly formulaVersion: typeof EVENT_FORMULA_VERSION;
+  readonly formulaVersion: typeof EVENT_FORMULA_VERSION | "event_recommendation_v2";
   readonly items: readonly {
+    readonly reasons?: import("../domain/rank-events.js").RankedEvent["reasons"];
     readonly eventId: string;
     readonly title: string;
     readonly startAt: string;
@@ -51,6 +52,7 @@ export class RecommendEvents {
       .filter((tag) => tag.lifecycleState === "active")
       .map((tag) => [tag.interestTagId, tag]));
     const ranked = rankEvents({
+      ...(sources.formulaVersion?{formulaVersion:sources.formulaVersion}:{}),
       asOf: BigInt(new Date(instant.value).getTime()) * 1_000_000n,
       activeSelectedInterestTagIds: sources.selectedInterestTagIds
         .filter((id) => activeTags.has(id)),
@@ -61,10 +63,11 @@ export class RecommendEvents {
     const selected = input.view === "home" ? ranked.slice(0, 2) : ranked;
     return ok({
       asOf: instant.value,
-      formulaVersion: EVENT_FORMULA_VERSION,
+      formulaVersion: sources.formulaVersion??EVENT_FORMULA_VERSION,
       items: selected.map((event) => {
         const display = presentation.get(event.eventId)!;
         return {
+          ...(event.reasons?{reasons:event.reasons}:{}),
           eventId: event.eventId,
           title: display.title,
           startAt: display.startAt,

@@ -1,4 +1,5 @@
 import '../../../core/presentation/refresh_on_return.dart';
+import 'recommendation_reason.dart';
 import '../../../core/presentation/enmori_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -651,8 +652,8 @@ final class _RecommendationList extends StatelessWidget {
                     contentPadding: const EdgeInsets.all(16),
                     subtitle: Text(
                       context.tr(
-                        '${_formatTime(item.startAt)}\n${item.endAt == null ? '' : 'Ends: ${_formatTime(item.endAt!)}\n'}Matches: ${item.matchedInterests.map((interest) => interest.displayName).join(', ')}',
-                        '${_formatTime(item.startAt)}\n${item.endAt == null ? '' : '结束：${_formatTime(item.endAt!)}\n'}匹配兴趣：${item.matchedInterests.map((interest) => interest.displayName).join('、')}',
+                        '${_formatTime(item.startAt)}\n${item.endAt == null ? '' : 'Ends: ${_formatTime(item.endAt!)}\n'}${recommendationReason(context, item)}',
+                        '${_formatTime(item.startAt)}\n${item.endAt == null ? '' : '结束：${_formatTime(item.endAt!)}\n'}${recommendationReason(context, item)}',
                       ),
                     ),
                   ),

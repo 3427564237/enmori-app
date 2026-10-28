@@ -1,0 +1,353 @@
+{
+  "author": "JIN",
+  "date_sgt": "2026-10-27",
+  "source": "b5ff56b6289bfaace8ac6f8e868660790a03f320",
+  "tree": "dc4755eda19c4a90aa53d7e42dda8b82a13ea2f7",
+  "reviewed_parent": "c3a823f0baa003603e359a3bf2c7e521136aca66",
+  "input_binding": "Collected after final executions; working bytes compared to source Git blobs with CRLF normalized. Not a before/after whole-tree stability claim.",
+  "inputs": [
+    {
+      "path": "api/recommendation-v2-contract.md",
+      "changed_in_correction": true,
+      "git_blob": "df1a5b3d45cbaafe9dde99b3fa6216c606d715f6",
+      "bytes": 6016,
+      "sha256": "2f9af970dbe946ed1e299ddd97f4aa9098064ad8918ea9a5691b776dd6d53777",
+      "normalized_lf_sha256": "2f9af970dbe946ed1e299ddd97f4aa9098064ad8918ea9a5691b776dd6d53777",
+      "git_blob_sha256": "2f9af970dbe946ed1e299ddd97f4aa9098064ad8918ea9a5691b776dd6d53777"
+    },
+    {
+      "path": "backend/src/event-browse/infrastructure/controlled-source-projection.ts",
+      "changed_in_correction": true,
+      "git_blob": "55f02fca4475d76748a41699bb403bb4fbfd5aad",
+      "bytes": 12597,
+      "sha256": "3bd7dae3ef655f9574d463c29e119caa45f801a28c8b9b4b3b25fa05505f6a67",
+      "normalized_lf_sha256": "3bd7dae3ef655f9574d463c29e119caa45f801a28c8b9b4b3b25fa05505f6a67",
+      "git_blob_sha256": "3bd7dae3ef655f9574d463c29e119caa45f801a28c8b9b4b3b25fa05505f6a67"
+    },
+    {
+      "path": "backend/test/controlled-event-projection.test.ts",
+      "changed_in_correction": false,
+      "git_blob": "8b71267b4c307b903b60ccfcbf790fdfb716d1fd",
+      "bytes": 11141,
+      "sha256": "c339cec7152fce28b32d430c9807790165a90fc45123630f218d1d17d65616f9",
+      "normalized_lf_sha256": "c339cec7152fce28b32d430c9807790165a90fc45123630f218d1d17d65616f9",
+      "git_blob_sha256": "c339cec7152fce28b32d430c9807790165a90fc45123630f218d1d17d65616f9"
+    },
+    {
+      "path": "backend/test/event-recommendations/aggregate-deadline.test.ts",
+      "changed_in_correction": true,
+      "git_blob": "e18591293e0d4b59f5f7a011c6b328a74b05a24f",
+      "bytes": 4978,
+      "sha256": "1997fe5901573d8a382a4317c68983e49a8610c8cb34101d2bfb06c7c98c4676",
+      "normalized_lf_sha256": "1997fe5901573d8a382a4317c68983e49a8610c8cb34101d2bfb06c7c98c4676",
+      "git_blob_sha256": "1997fe5901573d8a382a4317c68983e49a8610c8cb34101d2bfb06c7c98c4676"
+    },
+    {
+      "path": "backend/test/event-recommendations/full-candidate-coverage.test.ts",
+      "changed_in_correction": false,
+      "git_blob": "98ffeb806fd7c0f6149df7bea66a37ec3d75b3c5",
+      "bytes": 1501,
+      "sha256": "e4b822510eb3769f4c5e108f6bc13661ba5d4e9303f030fe8610f29f3f2bf840",
+      "normalized_lf_sha256": "e4b822510eb3769f4c5e108f6bc13661ba5d4e9303f030fe8610f29f3f2bf840",
+      "git_blob_sha256": "e4b822510eb3769f4c5e108f6bc13661ba5d4e9303f030fe8610f29f3f2bf840"
+    },
+    {
+      "path": "backend/test/event-recommendations/v2-personalization.test.ts",
+      "changed_in_correction": false,
+      "git_blob": "0aecebc7181643ad0139d71a1cbc46515eb184f5",
+      "bytes": 11494,
+      "sha256": "34197bf8fc1486caf82d03d692db5d5481b9e013f7aecd0d7386a2436bafd384",
+      "normalized_lf_sha256": "34197bf8fc1486caf82d03d692db5d5481b9e013f7aecd0d7386a2436bafd384",
+      "git_blob_sha256": "34197bf8fc1486caf82d03d692db5d5481b9e013f7aecd0d7386a2436bafd384"
+    },
+    {
+      "path": "backend/test/event-source-generation-regression.test.ts",
+      "changed_in_correction": true,
+      "git_blob": "92cbb9dfae44f57040fcfd06034f904564f0c368",
+      "bytes": 12997,
+      "sha256": "868ba4dd84dd4ac2b2f53258597ab590d89acf28e806651dd62b0028d96906a1",
+      "normalized_lf_sha256": "868ba4dd84dd4ac2b2f53258597ab590d89acf28e806651dd62b0028d96906a1",
+      "git_blob_sha256": "868ba4dd84dd4ac2b2f53258597ab590d89acf28e806651dd62b0028d96906a1"
+    },
+    {
+      "path": "backend/test/friend-recommendation-source.test.ts",
+      "changed_in_correction": false,
+      "git_blob": "568eb2245a9bae7268431bb95a1571e0a1846ee7",
+      "bytes": 10724,
+      "sha256": "5c1499c568cc4c66109f7db4ccd68ebe288b2916bd93766b4f9561d3ee9690f1",
+      "normalized_lf_sha256": "5c1499c568cc4c66109f7db4ccd68ebe288b2916bd93766b4f9561d3ee9690f1",
+      "git_blob_sha256": "5c1499c568cc4c66109f7db4ccd68ebe288b2916bd93766b4f9561d3ee9690f1"
+    },
+    {
+      "path": "backend/test/friend-v2-wire-contract.test.ts",
+      "changed_in_correction": true,
+      "git_blob": "c4671e02e9b3406668575b42f9382dfe04e75ff5",
+      "bytes": 715,
+      "sha256": "e5e17286551a93e8fa501941daf9d65845e92cf14c015912631703baf0340d72",
+      "normalized_lf_sha256": "e5e17286551a93e8fa501941daf9d65845e92cf14c015912631703baf0340d72",
+      "git_blob_sha256": "e5e17286551a93e8fa501941daf9d65845e92cf14c015912631703baf0340d72"
+    },
+    {
+      "path": "backend/test/support/friend-v2-wire-fixture.ts",
+      "changed_in_correction": true,
+      "git_blob": "2e03e09f572e273397d7cac738fc14d248ca232e",
+      "bytes": 2502,
+      "sha256": "dbd14e93edabdaa4a0d9e124a5a97223d76d7d81407adea0e91fc71dbb645550",
+      "normalized_lf_sha256": "dbd14e93edabdaa4a0d9e124a5a97223d76d7d81407adea0e91fc71dbb645550",
+      "git_blob_sha256": "dbd14e93edabdaa4a0d9e124a5a97223d76d7d81407adea0e91fc71dbb645550"
+    },
+    {
+      "path": "backend/tsconfig.json",
+      "changed_in_correction": false,
+      "git_blob": "572834ba99fa1f80e61d419317113be1678e67df",
+      "bytes": 632,
+      "sha256": "4140ebe74d898f00d7570ce861fb54f536d5599e3b2ab58827daa5a2d3d3165f",
+      "normalized_lf_sha256": "4140ebe74d898f00d7570ce861fb54f536d5599e3b2ab58827daa5a2d3d3165f",
+      "git_blob_sha256": "4140ebe74d898f00d7570ce861fb54f536d5599e3b2ab58827daa5a2d3d3165f"
+    },
+    {
+      "path": "lib/features/friends/data/backend_friend_discovery_repository.dart",
+      "changed_in_correction": true,
+      "git_blob": "fe7493e6d6b94979e09f2ef6b32cd11108eaf9fd",
+      "bytes": 3805,
+      "sha256": "524486ef72eeb41240071be0e52feff0214c9faf4f2ae80fbb29133a5c531601",
+      "normalized_lf_sha256": "524486ef72eeb41240071be0e52feff0214c9faf4f2ae80fbb29133a5c531601",
+      "git_blob_sha256": "524486ef72eeb41240071be0e52feff0214c9faf4f2ae80fbb29133a5c531601"
+    },
+    {
+      "path": "lib/features/friends/presentation/friend_discovery_panel.dart",
+      "changed_in_correction": true,
+      "git_blob": "987c47a2e192f2e4a602f5126f3a9ed76a3fa5cb",
+      "bytes": 15006,
+      "sha256": "9d8783302fede6ebbb3caa303a8f8f8946ec0a8a285e6a75bae2738b0427f730",
+      "normalized_lf_sha256": "9d8783302fede6ebbb3caa303a8f8f8946ec0a8a285e6a75bae2738b0427f730",
+      "git_blob_sha256": "9d8783302fede6ebbb3caa303a8f8f8946ec0a8a285e6a75bae2738b0427f730"
+    },
+    {
+      "path": "package.json",
+      "changed_in_correction": false,
+      "git_blob": "29dfaec7b84e61c6adda06f03bb833e65f30f1d5",
+      "bytes": 1128,
+      "sha256": "1ce197bee949c9851c8a2e00779700e289a29f55bfb4d7c848f7148be6ddf5b8",
+      "normalized_lf_sha256": "1ce197bee949c9851c8a2e00779700e289a29f55bfb4d7c848f7148be6ddf5b8",
+      "git_blob_sha256": "1ce197bee949c9851c8a2e00779700e289a29f55bfb4d7c848f7148be6ddf5b8"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "changed_in_correction": false,
+      "git_blob": "c5ba2bc1905864af343e2186db093503f38d4e51",
+      "bytes": 193808,
+      "sha256": "27fcc951d38f289233cf8105e429dc0b3430575933e0f96239f0a3cd04b26c69",
+      "normalized_lf_sha256": "27fcc951d38f289233cf8105e429dc0b3430575933e0f96239f0a3cd04b26c69",
+      "git_blob_sha256": "27fcc951d38f289233cf8105e429dc0b3430575933e0f96239f0a3cd04b26c69"
+    },
+    {
+      "path": "pubspec.lock",
+      "changed_in_correction": false,
+      "git_blob": "aa6970cd87381f875a99674c6b95d13604177c6b",
+      "bytes": 30688,
+      "sha256": "523dfbacd19c0d6e3c33fe9e6e46606ec62f8939bc78f7013810a01d5feb8a96",
+      "normalized_lf_sha256": "523dfbacd19c0d6e3c33fe9e6e46606ec62f8939bc78f7013810a01d5feb8a96",
+      "git_blob_sha256": "523dfbacd19c0d6e3c33fe9e6e46606ec62f8939bc78f7013810a01d5feb8a96"
+    },
+    {
+      "path": "pubspec.yaml",
+      "changed_in_correction": false,
+      "git_blob": "cf3ad08f635bc7f564e2fa122a1c8548801689e2",
+      "bytes": 4564,
+      "sha256": "20e759995b07553998503903eb37c27ea578f9baca9553c6534bde8bd312d1c2",
+      "normalized_lf_sha256": "20e759995b07553998503903eb37c27ea578f9baca9553c6534bde8bd312d1c2",
+      "git_blob_sha256": "20e759995b07553998503903eb37c27ea578f9baca9553c6534bde8bd312d1c2"
+    },
+    {
+      "path": "test/features/friend_discovery_activity_map_test.dart",
+      "changed_in_correction": false,
+      "git_blob": "f74d77079ad5ecdf5bbc27e4a842bb39191574e8",
+      "bytes": 9121,
+      "sha256": "21de32d292a06c4c7e055202c698a3c2dc5b9077bd26b878f14148abb867c502",
+      "normalized_lf_sha256": "21de32d292a06c4c7e055202c698a3c2dc5b9077bd26b878f14148abb867c502",
+      "git_blob_sha256": "21de32d292a06c4c7e055202c698a3c2dc5b9077bd26b878f14148abb867c502"
+    },
+    {
+      "path": "test/features/friend_group_stale_callback_test.dart",
+      "changed_in_correction": true,
+      "git_blob": "fd10810900d2fb9c115ddb60f68372c6745d4338",
+      "bytes": 5659,
+      "sha256": "5e7b33935f15cefe03c7ce99f407e4ef5fb58ba352a49ec787ebb4e7641a2879",
+      "normalized_lf_sha256": "5e7b33935f15cefe03c7ce99f407e4ef5fb58ba352a49ec787ebb4e7641a2879",
+      "git_blob_sha256": "5e7b33935f15cefe03c7ce99f407e4ef5fb58ba352a49ec787ebb4e7641a2879"
+    },
+    {
+      "path": "test/features/friend_ignore_flow_test.dart",
+      "changed_in_correction": false,
+      "git_blob": "8de468a3e6e9fda2259ca56b71ed16875df2f2c5",
+      "bytes": 21360,
+      "sha256": "ca36e26724d36745b1f063a34fd46255de59e984ef59f2a47a6e4ee116287fb7",
+      "normalized_lf_sha256": "ca36e26724d36745b1f063a34fd46255de59e984ef59f2a47a6e4ee116287fb7",
+      "git_blob_sha256": "ca36e26724d36745b1f063a34fd46255de59e984ef59f2a47a6e4ee116287fb7"
+    },
+    {
+      "path": "test/features/friend_v2_parser_test.dart",
+      "changed_in_correction": true,
+      "git_blob": "595ab7c419ffe743df2fb72bf67d2cbcbeebde19",
+      "bytes": 6668,
+      "sha256": "597056aaf0bfab0e7290c066f149b5dcd9a75ad1a98535c3b5378adb86031ec7",
+      "normalized_lf_sha256": "597056aaf0bfab0e7290c066f149b5dcd9a75ad1a98535c3b5378adb86031ec7",
+      "git_blob_sha256": "597056aaf0bfab0e7290c066f149b5dcd9a75ad1a98535c3b5378adb86031ec7"
+    },
+    {
+      "path": "test/features/jin_recommendation_consistency_test.dart",
+      "changed_in_correction": false,
+      "git_blob": "202871ef3e1580c9cd74664e7674f8f9888437cd",
+      "bytes": 10178,
+      "sha256": "7b9252e1d7cc73380d617873b083639e9aa2cdf6bdb706644c25a68dfdce3858",
+      "normalized_lf_sha256": "7b9252e1d7cc73380d617873b083639e9aa2cdf6bdb706644c25a68dfdce3858",
+      "git_blob_sha256": "7b9252e1d7cc73380d617873b083639e9aa2cdf6bdb706644c25a68dfdce3858"
+    },
+    {
+      "path": "test/fixtures/friend-v2-wire.json",
+      "changed_in_correction": true,
+      "git_blob": "13cd16f2fea0e1d009581502f81650e68a27d868",
+      "bytes": 2090,
+      "sha256": "078b1ce63bae0faf3e19a76b829480ae9aac92bc676ab3a21035b0b72032ef74",
+      "normalized_lf_sha256": "078b1ce63bae0faf3e19a76b829480ae9aac92bc676ab3a21035b0b72032ef74",
+      "git_blob_sha256": "078b1ce63bae0faf3e19a76b829480ae9aac92bc676ab3a21035b0b72032ef74"
+    }
+  ],
+  "local_logs_not_uploaded": [
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/aggregate-deadline-probe.mjs",
+      "bytes": 1881,
+      "sha256": "44a68b998a2b602709ab62d0f36bf899962254354baef08d913918bcdb25a584"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/analysis-final.log",
+      "bytes": 169,
+      "sha256": "98554e0b7c197064a6e89ea754054549a8e48cdc1b1eb3af8118bef18b2db3ab"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/analysis.log",
+      "bytes": 169,
+      "sha256": "98554e0b7c197064a6e89ea754054549a8e48cdc1b1eb3af8118bef18b2db3ab"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/backend-affected.log",
+      "bytes": 8232,
+      "sha256": "149cec613daf8c5cdc0335bd81932a54102ee144e8af6aff0c8da8b6a647312c"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/backend-final.log",
+      "bytes": 7279,
+      "sha256": "c2cf7a8158cc9e682037f454b1363b7970582812931985b4ede58af537dd86d2"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/baseline-generation-failure.log",
+      "bytes": 1187,
+      "sha256": "10fd2d34e73c5216e4051b6f9aa0f72bb856f78cb6d897781449b35b7f171c5f"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/before-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/compile-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/compile-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/compile-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/deadline-final.log",
+      "bytes": 67,
+      "sha256": "b6e386beac1de9035c377c6e3dd8f5b30abcbebe369a00c172ad24702e6796c3"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/flutter-affected.log",
+      "bytes": 17124,
+      "sha256": "ff8678c6aae34b3e462a07678c9c5fa7accbf6e90d7219fc58d3f29c105cf92e"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/flutter-final.log",
+      "bytes": 14598,
+      "sha256": "05a6f5c1be8255a5adcd95c3bf5ee6af050c5a875112cd00bdfd6d89ecf9efab"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/flutter-group-final.log",
+      "bytes": 521,
+      "sha256": "10f1d7a394bc415c3f36f18bdc253ff9cf65f2c4c6915ce281d1ac33886b1ea7"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/format-apply.log",
+      "bytes": 236,
+      "sha256": "3919b4a2ea80af6867ee779b028945f46259cc544dedc62a880c38a73851bbd4"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/format-final.log",
+      "bytes": 48,
+      "sha256": "7e1c47408b0a7a5b0e6b1f69583154b335c2c4f67599b06abb52ccc912acedf2"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/generation-final.log",
+      "bytes": 1403,
+      "sha256": "c45ae910c78c9000959c462ea4d669ea36fdaf8d0b3157a92b706725c70aabd8"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/green-deadline.log",
+      "bytes": 67,
+      "sha256": "2b8732ed6aabb509742783be859f3506a072357e79dea414b83fbc7869711b67"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/new-backend.log",
+      "bytes": 1668,
+      "sha256": "9b55c92cc92d84a430767d16e56bdf753bd76cadce1dab7a4fea77e8b3b16dc0"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/red-deadline.log",
+      "bytes": 666,
+      "sha256": "41b629b47f750833c7bb2068aa5fdcf60bc3bae0b056326cf5e155676d1d272f"
+    },
+    {
+      "path": "build/jin-pr190-r1-r3-20261027-01/red-flutter.log",
+      "bytes": 10482,
+      "sha256": "7f545649aac4e50b1d9f5a51a5f749a7d2f19d9d7fbc1a9edbf90515bbd5fd93"
+    }
+  ],
+  "final_results": {
+    "strict_compile_exit": 0,
+    "backend": {
+      "pass": 70,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0
+    },
+    "flutter": {
+      "pass": 56,
+      "fail": 0,
+      "exit": 0
+    },
+    "real_clock_fixture": {
+      "rejected": true,
+      "elapsed_ms": 10006,
+      "exit": 0
+    },
+    "analysis_exit": 0,
+    "format_exit": 0
+  },
+  "not_run": [
+    "real Auth/Firestore SDK",
+    "remote/provider/model",
+    "phone/APK",
+    "live all-14 taxonomy",
+    "LI combined tree",
+    "whole-library analysis"
+  ]
+}
