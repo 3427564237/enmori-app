@@ -129,15 +129,6 @@ final class EventCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
-                    if ((event?.shortDescription ?? summary?.shortDescription)
-                        case final description?) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        description,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
                     if (content != null) ...[
                       const SizedBox(height: 8),
                       Text(content.sourceName),
@@ -155,16 +146,6 @@ final class EventCard extends StatelessWidget {
                           ),
                         ),
                     ],
-                    if ((event?.shortDescription ??
-                            summary?.shortDescription) ==
-                        null)
-                      Text(
-                        context.tr(
-                          'Introduction unavailable. Open official details to check.',
-                          '暂无简介，可打开官网详情查看。',
-                        ),
-                        maxLines: 2,
-                      ),
                     if (authorizedReason case final reason?) ...[
                       const SizedBox(height: 8),
                       Text(

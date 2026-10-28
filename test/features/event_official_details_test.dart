@@ -77,13 +77,12 @@ void main() {
                 eventId: 'a',
                 opener: opener,
                 onParticipants: (_) {},
-                detailBuilder: (context, event) =>
-                    Text(event.content!.fullDescription!),
               ),
             ),
           ),
         );
         await tester.pumpAndSettle();
+        expect(find.text(content.fullDescription!), findsOneWidget);
         final action = find.text('Official event details');
         expect(action.hitTestable(), findsOneWidget);
         await tester.tap(action);

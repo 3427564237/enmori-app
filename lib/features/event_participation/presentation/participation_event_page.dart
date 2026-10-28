@@ -11,10 +11,10 @@ import '../../auth/auth_providers.dart';
 import '../../auth/domain/auth_repository.dart';
 import '../../event_browse/domain/activity_repository.dart';
 import '../../event_detail/domain/event_detail_repository.dart';
+import '../../event_detail/presentation/event_information.dart';
 import '../../event_detail/event_detail_providers.dart';
 import '../../event_detail/recent_events_provider.dart';
 import '../participation_providers.dart';
-import 'event_card.dart';
 import 'external_registration_action.dart';
 import 'participation_controller.dart';
 import 'participation_controls.dart';
@@ -206,7 +206,7 @@ final class _ParticipationEventPageState
               ),
             if (details != null)
               widget.detailBuilder?.call(context, details) ??
-                  EventCard(event: details, onSelect: null)
+                  EventInformation(event: details)
             else if (!_loading)
               Text(
                 context.tr(
