@@ -21,7 +21,7 @@ function privateJson(path) {
   } finally { closeSync(fd); }
 }
 
-export function retainedCoreEvents(directory, requested, enabled) {
+export function retainedCoreEvents(directory, requested, enabled, batchTimeoutMs) {
   if (!requested) return { configuration: 'not_requested' };
   try {
     const config = privateJson(join(directory, 'event-source.json'));
@@ -36,7 +36,7 @@ export function retainedCoreEvents(directory, requested, enabled) {
     return {
       configuration: 'configured',
       input: {
-        source: new CombinedEventSource(new EnrichedTicketmasterSource(new TicketmasterBrowseSource({ key: () => credential.apiKey, enabled }), new PublicEventBrowser(category => console.warn(JSON.stringify({dependency: 'ticketmaster', errorCategory: category})))), new OnePaBrowseSource(enabled, new OnePaPublicReader().read, readOnePaCatalogue)),
+        source: new CombinedEventSource(new EnrichedTicketmasterSource(new TicketmasterBrowseSource({ key: () => credential.apiKey, enabled }), new PublicEventBrowser(category => console.warn(JSON.stringify({dependency: 'ticketmaster', errorCategory: category})))), new OnePaBrowseSource(enabled, new OnePaPublicReader().read, readOnePaCatalogue), batchTimeoutMs),
         musicInterestTagId: config.musicInterestTagId,
       },
     };

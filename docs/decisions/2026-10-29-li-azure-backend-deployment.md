@@ -71,3 +71,17 @@ Firebase access, so that archive is not an accepted deployment.
 The initial archive including Chromium hit an upload gateway timeout without a
 new Kudu deployment. The browser is therefore downloaded by the pinned vendor
 installer on Azure instead of transferring the same large binary from this host.
+
+## Ordinary activity deadline correction
+
+LI reported “活动不可用” on mobile data after v51 installation. A live cloud
+list returned 18 Ticketmaster rows only after 42.777 seconds, with onePA marked
+unavailable. The approved ordinary mobile read budget remains 15 seconds; do not
+extend it or turn provider failure into empty success. As a repair within the
+existing independent-source/partial-failure contract, the Azure composition caps
+each combined list provider at ten seconds, propagates cancellation and stops awaiting asynchronous
+browser cleanup after that deadline. Keep failures explicit in `sourceStatus`,
+reject when both providers fail, and exclude late results from response and
+pagination completion. This does not authorize challenge bypass, a paid tier
+change, a different data source, or a claim that missing onePA/detail content is
+complete. The existing local composition and separate detail acquisition limit remain unchanged.

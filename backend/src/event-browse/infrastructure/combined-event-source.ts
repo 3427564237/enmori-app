@@ -10,7 +10,30 @@ export class CombinedEventSource implements BrowseSource {
   constructor(
     private readonly ticketmaster: BrowseSource,
     private readonly onepa: BrowseSource,
+    private readonly batchTimeoutMs?: number,
   ) {}
+  private async boundedBatch<T>(signal: AbortSignal, read: (signal: AbortSignal) => Promise<T>): Promise<T> {
+    if (signal.aborted) throw Error("Source unavailable");
+    if (this.batchTimeoutMs === undefined) return read(signal);
+    const controller = new AbortController();
+    let cancel!: () => void;
+    const expired = new Promise<never>((_, reject) => {
+      cancel = () => {
+        controller.abort();
+        reject(Error("Source unavailable"));
+      };
+    });
+    const timer = setTimeout(cancel, this.batchTimeoutMs);
+    signal.addEventListener("abort", cancel, {once: true});
+    try {
+      // A browser's asynchronous close may outlive its abort. Do not make the
+      // healthy provider wait for that cleanup past the ordinary client budget.
+      return await Promise.race([Promise.resolve().then(() => read(controller.signal)), expired]);
+    } finally {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", cancel);
+    }
+  }
   status() {
     return this.statuses.map((x) => ({ ...x }));
   }
@@ -30,9 +53,9 @@ export class CombinedEventSource implements BrowseSource {
       sources.map(async (s, i) => {
         if (page > (ends!.get(i) ?? Infinity))
           return { items: [] as BrowseOccurrence[] };
-        const batch = s.batch
-          ? await s.batch(asOf, page, signal)
-          : { items: page === 0 ? await s.firstBatch(asOf, signal) : [] };
+        const batch = await this.boundedBatch(signal, async providerSignal => s.batch
+          ? s.batch(asOf, page, providerSignal)
+          : { items: page === 0 ? await s.firstBatch(asOf, providerSignal) : [] });
         if (!("nextPage" in batch) || batch.nextPage === undefined)
           ends!.set(i, page);
         return batch;
