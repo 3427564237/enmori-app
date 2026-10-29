@@ -1,4 +1,7 @@
 export const ROUTE_INVENTORY = [
+  {method:"GET",path:"/v1/me/recommendation-profile",successStatuses:[200],requiresIdempotencyKey:false},
+  {method:"PUT",path:"/v1/me/recommendation-profile",successStatuses:[200],requiresIdempotencyKey:false},
+  {method:"GET",path:"/v1/users/{username}/discovery-card",successStatuses:[200],requiresIdempotencyKey:false},
   { method: "GET", path: "/v1/me/profile/shared-avatar", successStatuses: [200], requiresIdempotencyKey: false },
   { method: "PUT", path: "/v1/me/profile/shared-avatar", successStatuses: [200], requiresIdempotencyKey: false },
   { method: "GET", path: "/v1/users/{username}/avatar", successStatuses: [200], requiresIdempotencyKey: false },

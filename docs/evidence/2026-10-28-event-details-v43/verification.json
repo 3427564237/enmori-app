@@ -1,0 +1,290 @@
+{
+  "sourceCommit": "04f65cdb4b6c4eaa2c0587e1fbb5f87bfa76d240",
+  "apk": {
+    "path": "build/group-delivery-v43/ENMORI-group-v43-release.apk",
+    "bytes": 68113696,
+    "sha256": "5b39313f18dcc2e062de98d80fbc026b248959845caa889af514553acb9f5e3f",
+    "package": "com.enmori.app.group",
+    "versionCode": 43,
+    "versionName": "1.0.0-group20261028",
+    "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee"
+  },
+  "service": {
+    "workingDirectory": "/home/miku/.local/state/enmori-event-details-v43-20261028/service-229d333",
+    "status": {
+      "ownedRunner": true,
+      "httpsIdentityGate": true,
+      "ready": true,
+      "lastState": {
+        "phase": "listening",
+        "ready": true,
+        "authAdminRead": true,
+        "firestoreRead": true,
+        "remoteLoopbackEnabled": true,
+        "fullFeatures": true,
+        "firstFlow": {
+          "configured": true,
+          "workerConfigured": false,
+          "pushConfigured": false
+        },
+        "ai": {
+          "configured": true,
+          "available": true,
+          "maintenanceHealthy": true,
+          "pending": false,
+          "outcomeUnknown": false
+        },
+        "events": {
+          "configured": true,
+          "enabled": true,
+          "pending": 0
+        },
+        "emailVerified": true,
+        "bindingExists": true,
+        "checkedAt": "2026-10-28T15:00:09.853Z"
+      },
+      "lockPresent": true
+    }
+  },
+  "logs": [
+    {
+      "localPath": "/tmp/enmori-v43-final-full-backend.txt",
+      "sha256": "338b27758f811ce824a0310ceacbc53847c013fd9a02f37e47deced54bc05ee0"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-final-flutter-tests.txt",
+      "sha256": "61d824480e7e4b384e58bd593ee04ea9dc6a1083a91a3972e54416588396b804"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-final-analyze.txt",
+      "sha256": "19794cfd134952013020da13809dab04f4c59ea2ad18a4914b53b9f2954e0ce2"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-final-build.txt",
+      "sha256": "96b384489bdeb570d9c5ed985355f8946b68b4b5de0dc63dc07cb94ac1cf6f8b"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-ai-baseline.txt",
+      "sha256": "2561672d2d12284556cc119b63cf40a6cd44af2e92104c83d9f2cfc2f0f41b0f"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-final-live-details.txt",
+      "sha256": "547ff3adbf29857c0730648e873d3e51f4a1ed98b41fbcface6dffe6e4d1c756"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-public-wire-replay-tests.txt",
+      "sha256": "753fdbe5d5cc0991e08876aa6c10badde378255988823981e4e54205a54a94f9"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-replay-capture.txt",
+      "sha256": "d16814f7fc3be102d3546c1ddc4e3e0619f3ceffd0b1d550938f29dc8e8b9216"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-public-wire-replay.json",
+      "sha256": "9c8ff54ac5c7cf603a574933f1238a4b1fdf68804062f96baad0104a2b326875"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-onepa-full-backend.txt",
+      "sha256": "137eae69b5b292f028a8710b1efe6c8df5b4810fec0a952e911d8ed55206fc0a"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-final-onepa-source.txt",
+      "sha256": "fd6dc349cfca50da1c4e8f8b562e456b45943a02851def22a4639d6cb4e722ce"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-cold-fix-full-backend.txt",
+      "sha256": "67f00fec503dd6a9c61b70556714fea0ce5b5b1981043bfe5734a9565fad4334"
+    },
+    {
+      "localPath": "/tmp/enmori-v43-cold-stable-path.txt",
+      "sha256": "b963a2bf1559319f29f8db049d2a211eb8588c76577f8d925da1fb848e9193fa"
+    },
+    {
+      "localPath": "/tmp/enmori-tm-cold-diagnostic.txt",
+      "sha256": "75602350f9c7f80343efc75e1014385503a48ef13638def386ae0c601ae697f8"
+    }
+  ],
+  "physicalDevice": {
+    "state": "scoped-event-details-and-information-navigation-verified-after-cold-fix",
+    "installedVersionCode": 43,
+    "installedApkSha256": "5b39313f18dcc2e062de98d80fbc026b248959845caa889af514553acb9f5e3f",
+    "loginPreserved": true,
+    "realSources": [
+      {
+        "provider": "ticketmaster",
+        "event": "Benson Boone",
+        "descriptionCharacters": 1365,
+        "officialInformationUrl": "https://ticketmaster.sg/activity/detail/26sg_bensonboone",
+        "nativeBrowserOpened": true,
+        "returnTextAndBoundsIdentical": true
+      },
+      {
+        "provider": "ticketmaster",
+        "event": "yung kai",
+        "descriptionCharacters": 655,
+        "literalArrowsPreserved": true,
+        "officialInformationUrl": "https://ticketmaster.sg/activity/detail/26sg_yungkai",
+        "nativeBrowserOpened": true,
+        "returnTextAndBoundsIdentical": true
+      },
+      {
+        "provider": "onepa",
+        "event": "Karaoke Club @ Punggol 21 CC (December 2026)",
+        "descriptionCharacters": 1685,
+        "officialInformationUrl": "https://www.onepa.gov.sg/events/karaoke-club-punggol-21-cc-december-2026-e14084476",
+        "nativeBrowserOpened": true,
+        "returnTextAndBoundsIdentical": true,
+        "participationBeforeAndAfter": {
+          "interestedSelected": false,
+          "goingSelected": false
+        },
+        "duplicateBookingAction": false
+      }
+    ],
+    "registrationConfirmationAfterInformationNavigation": false,
+    "initialStartupRetryObserved": true,
+    "reopenedReason": "After both provider journeys passed, a fresh Benson read on final service returned supplementary details unavailable.",
+    "reopenedInvestigationResolution": "229d333 corrects the deterministic summary-only fallback; fresh-service Benson and final-service onePA physical checks passed.",
+    "temporaryUsbStayAwakeRestored": true
+  },
+  "limitations": [
+    "Not a passing full Flutter suite",
+    "Not independent review or full UAT/Release",
+    "Source probes do not replace physical UI verification"
+  ],
+  "publicDtoReplay": {
+    "events": 3,
+    "passed": 3,
+    "widthLogicalPixels": 320,
+    "realPublicSource": true,
+    "syntheticAccountGate": true,
+    "mockHttpAndOpener": true,
+    "physicalDevice": false
+  },
+  "apkSourceCommit": "04f65cdb4b6c4eaa2c0587e1fbb5f87bfa76d240",
+  "backendSourceCommit": "229d333bd215102971c04e70537c2d94347a6a1c",
+  "onePaCorrection": {
+    "previousFailure": "plain public requests sometimes returned browser verification; twenty-detail batch made one failed page invalidate the list",
+    "listMode": "anonymous official search, first fifty records, five pages, no per-card detail reads",
+    "coldCombinedFirstBatchMs": 10676,
+    "backendAndConfigurationTests": {
+      "passed": 1620,
+      "failed": 0
+    }
+  },
+  "screenshots": [
+    {
+      "path": "build/group-delivery-v43/benson-admission.png",
+      "sha256": "1a45868cfc9caada5b875b7f485b80f814563c7da2ae7c29710e8aef8b87fa59"
+    },
+    {
+      "path": "build/group-delivery-v43/benson-conditions.png",
+      "sha256": "e0e64971b10f2e750e15df2f4f2138737acae0071f29f986a40ddb0aad21aa7b"
+    },
+    {
+      "path": "build/group-delivery-v43/benson-description.png",
+      "sha256": "e0c5c0f349a9fffcd1055280188bb71c9f84b0a9e5e6f909e10e9c3373d1ee20"
+    },
+    {
+      "path": "build/group-delivery-v43/benson-detail-top.png",
+      "sha256": "0cc2349f614c1df0a44fd4ceab5a8f22950e620c8a5c0353161fa6aa3ad671de"
+    },
+    {
+      "path": "build/group-delivery-v43/benson-official.png",
+      "sha256": "f05639a350374bf217e2b54609a412ff9b5c1594f9bfad2e2b6c111622ba275b"
+    },
+    {
+      "path": "build/group-delivery-v43/benson-return.png",
+      "sha256": "8d9d992a26d387e4dc3ef9bb9776f5e20f05d59342d8baf51b3a7f8eb795efed"
+    },
+    {
+      "path": "build/group-delivery-v43/onepa-description.png",
+      "sha256": "f81a85b31546a1ccdd4905989508901fa8b53a983b7767e8207f96c3f7740c26"
+    },
+    {
+      "path": "build/group-delivery-v43/onepa-detail-top.png",
+      "sha256": "23b73d396593b5b9f68f7842b7ae153d18f466beb9a9fbc0f98e2cd036c7a8cb"
+    },
+    {
+      "path": "build/group-delivery-v43/onepa-official.png",
+      "sha256": "34f263af45a98d53f2aec75e2a4d7626e76b5221d1f01182675268f84b44aa2c"
+    },
+    {
+      "path": "build/group-delivery-v43/onepa-plans-after.png",
+      "sha256": "81aafc0b28775e18991ffbd478085151ad08823a5d0bf07b5a9df7f936d5b119"
+    },
+    {
+      "path": "build/group-delivery-v43/onepa-plans-before.png",
+      "sha256": "1ecd8884d826c7bf21d3094f8a8b45f36731e3288d761c6f7c37a8ade24d6d1f"
+    },
+    {
+      "path": "build/group-delivery-v43/onepa-return.png",
+      "sha256": "a6db79cbc1b0a332c348ce72937bf7f9ed3d127d9f20c214187b559f576632bd"
+    },
+    {
+      "path": "build/group-delivery-v43/yung-description.png",
+      "sha256": "c173ef645aae9249cfe58141b1dd42dfd25d6b2e861c0b5040013b2b3d21c495"
+    },
+    {
+      "path": "build/group-delivery-v43/yung-detail-top.png",
+      "sha256": "85139f5b5b1f54347ed2b2246fc10ca3ded4589de8f43a8892b5568686b514c5"
+    },
+    {
+      "path": "build/group-delivery-v43/yung-official.png",
+      "sha256": "4db5dee2cbae409cbcff9efdaf35552cd550cddea51e859edd00604a1b53955c"
+    },
+    {
+      "path": "build/group-delivery-v43/benson-cold-fix-top.png",
+      "sha256": "b6f30cccc495743e12043cc9093d38a34395ba57dc40c3f9e321bb3e8d0a6b71"
+    },
+    {
+      "path": "build/group-delivery-v43/benson-cold-fix-official.png",
+      "sha256": "aa0bbf8d79ac71c3a4ae9aca161697e733c2e26d51cb90aaecfdec4abc78a0e7"
+    },
+    {
+      "path": "build/group-delivery-v43/onepa-final-top.png",
+      "sha256": "a65d6395427d02b48bc874664b6a9c29c06a33de3558436d0d8aa5557135bcba"
+    },
+    {
+      "path": "build/group-delivery-v43/onepa-final-official.png",
+      "sha256": "0fa20189ce2b084b0779349d091573be65507acae90ef4c906dbee66d53b79c9"
+    },
+    {
+      "path": "build/group-delivery-v43/onepa-final-description.png",
+      "sha256": "8bdef28ffaa15ba8d2f256b832c67b65b510e698de6609132fba22a46e96a55e"
+    },
+    {
+      "path": "build/group-delivery-v43/onepa-final-plans.png",
+      "sha256": "aba7774f48b6d7935f18c82e4dd2b1b888dbcfbe2ab60ac40bf684d45c5670db"
+    }
+  ],
+  "coldIdentityFallbackCorrection": {
+    "regressionFailedBeforeFix": true,
+    "backendAndConfigurationTests": {
+      "passed": 1621,
+      "failed": 0
+    },
+    "liveCompositionProbe": {
+      "syntheticOwner": true,
+      "liveProviders": true,
+      "freshSourceInstance": true,
+      "descriptionCharacters": 1365,
+      "elapsedMs": 20598
+    },
+    "physicalColdRead": {
+      "sameApk": true,
+      "freshServiceProcess": true,
+      "refreshedPreviouslyFailingBensonPage": true,
+      "descriptionCharacters": 1365,
+      "nativeBrowserInformationUrl": "https://ticketmaster.sg/activity/detail/26sg_bensonboone",
+      "returnTextAndBoundsIdentical": true
+    },
+    "physicalOnePaRecheck": {
+      "descriptionCharacters": 1685,
+      "nativeBrowserInformationUrl": "https://www.onepa.gov.sg/events/karaoke-club-punggol-21-cc-december-2026-e14084476",
+      "returnTextAndBoundsIdentical": true,
+      "participationStillUnselected": true
+    },
+    "originalFailureAttribution": "Exact prior phone failure had no retained diagnostic; fallback defect reproduced independently, corrected, and verified on the same phone."
+  }
+}

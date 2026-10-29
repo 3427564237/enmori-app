@@ -18,8 +18,12 @@ String recommendationReason(BuildContext context, EventRecommendation event) {
           '${reason.count} friends interested or going',
           '${reason.count} 位好友感兴趣或将参加',
         )
+      else if (reason.code == 'same_area')
+        context.tr('In your activity area', '位于当前活动地区')
+      else if (reason.code == 'target_age')
+        context.tr('Within the source target age range', '符合来源提供的目标年龄')
       else if (reason.code == 'same_region')
-        context.tr('Matches your region', '与资料地区匹配'),
+        context.tr('Matches your region', '与活动地区同属一个大区'),
   ];
   return parts.join(' · ');
 }

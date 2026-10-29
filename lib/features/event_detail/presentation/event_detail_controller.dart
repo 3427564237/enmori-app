@@ -79,7 +79,10 @@ final class EventDetailController extends Notifier<AsyncValue<EventDetail>> {
     );
   }
 
-  Future<Result<void>> openSource(EventDetail event) async {
+  Future<Result<void>> openSource(
+    EventDetail event, {
+    bool booking = false,
+  }) async {
     final snapshot = state;
     final actions = ref.read(eventDetailSourceActionsProvider);
     if (!_foreground || actions == null || !identical(snapshot.value, event)) {
@@ -91,7 +94,11 @@ final class EventDetailController extends Notifier<AsyncValue<EventDetail>> {
       );
     }
     return actions.open(
-      Uri.parse(event.externalSourceUrl),
+      Uri.parse(
+        booking
+            ? (event.content?.bookingUrl ?? event.externalSourceUrl)
+            : (event.content?.detailUrl ?? event.externalSourceUrl),
+      ),
       () =>
           ref.mounted &&
           identical(state, snapshot) &&

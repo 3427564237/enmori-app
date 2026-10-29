@@ -1,0 +1,15 @@
+{
+  "sourceHead": "2306ac0c5a060b2d999a5b8c34e09704c446de31",
+  "versionCode": 40,
+  "package": "com.enmori.app.group",
+  "bytes": 67214466,
+  "sha256": "344c26ff1d48a2465cf013039b9d503990587274bc185dad4751327224710897",
+  "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "samePermissionsAsV39": true,
+  "permissionCount": 9,
+  "debuggable": false,
+  "installedSha256": "344c26ff1d48a2465cf013039b9d503990587274bc185dad4751327224710897",
+  "installedVersionCode": 40,
+  "firstInstallTimeUnchanged": true,
+  "installMethod": "adb install -r; no data clear"
+}

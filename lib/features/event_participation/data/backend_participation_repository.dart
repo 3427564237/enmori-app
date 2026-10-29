@@ -7,8 +7,8 @@ bool validParticipationEventId(Object? value) =>
     value is String &&
     RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(value) &&
     !RegExp(r'[^A-Za-z0-9_-]').hasMatch(value) &&
-    (!value.startsWith('tm_') ||
-        RegExp(r'^tm_event_[0-9a-f]{64}$').hasMatch(value));
+    ((!value.startsWith('tm_') && !value.startsWith('pa_')) ||
+        RegExp(r'^(tm|pa)_event_[0-9a-f]{64}$').hasMatch(value));
 bool _keys(
   Map<String, Object?> m,
   List<String> required,

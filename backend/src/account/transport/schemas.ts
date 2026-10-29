@@ -16,9 +16,14 @@ export const profileSchema = {
   type: "object", additionalProperties: false, required: ["username", "displayName", "profileVisibility", "revision"],
   properties: { details: profileDetailsSchema, username: { type: "string" }, displayName: name, profileVisibility: visibility, revision },
 } as const;
+export const cloudAiConsentSchema = { type: "object", additionalProperties: false,
+  required: ["state", "disclosureVersion"], properties: {
+    state: { type: "string", enum: ["accepted", "declined"] },
+    disclosureVersion: { type: "string", enum: ["groq_cloud_v1"] },
+  } } as const;
 export const settingsSchema = {
   type: "object", additionalProperties: false, required: ["checkInVisibility", "optionalProcessingConsent", "revision"],
-  properties: { defaultCheckInLocation: { type: "boolean" }, defaultCheckInWeather: { type: "boolean" }, homeWeatherAuto: { type: "boolean" }, fieldPrivacy: fieldPrivacySchema, checkInVisibility: visibility, optionalProcessingConsent: { type: "string", enum: ["accepted", "rejected"] }, revision },
+  properties: { cloudAiConsent: cloudAiConsentSchema, defaultCheckInLocation: { type: "boolean" }, defaultCheckInWeather: { type: "boolean" }, homeWeatherAuto: { type: "boolean" }, fieldPrivacy: fieldPrivacySchema, checkInVisibility: visibility, optionalProcessingConsent: { type: "string", enum: ["accepted", "rejected"] }, revision },
 } as const;
 export const saveProfileBody = {
   type: "object", additionalProperties: false, required: ["displayName", "profileVisibility", "expectedRevision"],
@@ -26,7 +31,7 @@ export const saveProfileBody = {
 } as const;
 export const saveSettingsBody = {
   type: "object", additionalProperties: false, required: ["checkInVisibility", "optionalProcessingConsent", "expectedRevision"],
-  properties: { defaultCheckInLocation: { type: "boolean" }, defaultCheckInWeather: { type: "boolean" }, homeWeatherAuto: { type: "boolean" }, fieldPrivacy: fieldPrivacySchema, checkInVisibility: visibility, optionalProcessingConsent: settingsSchema.properties.optionalProcessingConsent, expectedRevision: revision },
+  properties: { cloudAiConsent: cloudAiConsentSchema, defaultCheckInLocation: { type: "boolean" }, defaultCheckInWeather: { type: "boolean" }, homeWeatherAuto: { type: "boolean" }, fieldPrivacy: fieldPrivacySchema, checkInVisibility: visibility, optionalProcessingConsent: settingsSchema.properties.optionalProcessingConsent, expectedRevision: revision },
 } as const;
 const response = (key: string, resource: unknown, write: boolean) => Object.fromEntries([
   [200, { type: "object", additionalProperties: false, required: [key], properties: { [key]: resource } }],

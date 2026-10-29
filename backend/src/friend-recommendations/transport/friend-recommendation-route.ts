@@ -14,7 +14,7 @@ export const friendSuggestionSchema={
 export const friendRecommendationsSchema={
   querystring:{type:"object",additionalProperties:false,required:["view"],properties:{view:{enum:["home","all"]}}},
   response:{200:{type:"object",additionalProperties:false,required:["suggestions"],
-    properties:{suggestions:{type:"array",maxItems:999,items:friendSuggestionSchema}}},
+    properties:{ownState:{type:"string",enum:["disabled","incomplete","no_matches","ready"]},suggestions:{type:"array",maxItems:999,items:friendSuggestionSchema}}},
     ...Object.fromEntries([400,401,403,409,503].map(code=>[code,errorEnvelopeSchema]))},
 };
 export async function registerFriendRecommendations(app:FastifyInstance,identity:IdentityVerifier,recommendations:FriendRecommendations){
@@ -24,7 +24,9 @@ export async function registerFriendRecommendations(app:FastifyInstance,identity
     scope.setErrorHandler((error,request,reply)=>sendFailureCode(request,reply,
       (error as {validation?:unknown}).validation?"REQUEST_INVALID":"SERVICE_UNAVAILABLE"));
     scope.get<{Querystring:{view:"home"|"all"}}>("/v1/recommendations/friends",{onRequest:buildAuthenticate(identity),schema:friendRecommendationsSchema},
-      async(request,reply)=>{const result=await recommendations.recommend(requirePrincipal(request).firebaseUid,request.query.view);
-        return result.ok?reply.send(result.value):sendFailure(request,reply,result.failure);});
+      async(request,reply)=>{const result=await recommendations.recommend(requirePrincipal(request).firebaseUid,request.query.view,request.headers["x-enmori-contract-version"]!=="3");
+        if(!result.ok)return sendFailure(request,reply,result.failure);
+        const {ownState,...legacy}=result.value;
+        return reply.send(request.headers["x-enmori-contract-version"]==="3"?result.value:legacy);});
   });
 }

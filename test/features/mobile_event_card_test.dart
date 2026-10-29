@@ -33,8 +33,17 @@ void main() {
                     browseId: 'event-a',
                     eventId: 'event-a',
                     title: 'Evening at the gardens',
+                    shortDescription: use24Hour
+                        ? 'Detail-only introduction.'
+                        : null,
                     categoryLabel: 'Arts, culture and community gatherings',
-                    startAt: DateTime(2026, 10, 22, 20, 5).toIso8601String(),
+                    startAt: DateTime.utc(
+                      2026,
+                      10,
+                      22,
+                      12,
+                      5,
+                    ).toIso8601String(),
                   ),
                   onSelect: opened.add,
                   actions: FilledButton(
@@ -48,6 +57,9 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
+        expect(find.text('Detail-only introduction.'), findsNothing);
+        expect(find.textContaining('Introduction unavailable'), findsNothing);
+        expect(find.textContaining('暂无简介'), findsNothing);
         expect(
           find.textContaining(use24Hour ? '20:05' : '8:05 PM'),
           findsOneWidget,

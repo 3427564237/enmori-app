@@ -47,6 +47,7 @@ final class AiMessage {
     this.origin = AiMessageOrigin.ordinary,
     this.occurrenceId,
     this.sources = const [],
+    this.cloudProcessed = false,
   });
 
   final String messageId;
@@ -58,6 +59,7 @@ final class AiMessage {
   final AiMessageOrigin origin;
   final String? occurrenceId;
   final List<AiSourceCard> sources;
+  final bool cloudProcessed;
   bool get isProactive =>
       role == AiRole.assistant && origin == AiMessageOrigin.proactive;
 }

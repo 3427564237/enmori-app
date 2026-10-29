@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx, StoredDocument as Row } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { createAuthBindingDocumentId, parseAuthBinding, parseAccountProjection } from "../../shared/infrastructure/firebase/firestore-records.js";
 import { requireFeatureEnvironment } from "../../shared/infrastructure/firebase/feature-environment.js";
@@ -16,6 +16,10 @@ export interface FirstFlowStoreOptions {
    * Omission disables registration/dispatch, including in ordinary composition. */
   readonly installationRef?: string;
   readonly registrationLeaseExpiresAt?: string;
+  /** Explicit service-mode lease, renewed only by an authorized registration. */
+  readonly registrationLeaseDurationMs?: number;
+  /** Ordinary accounts: current installation and token ownership are mandatory. */
+  readonly accountScopedRegistration?: boolean;
 }
 interface State extends FirstFlowSettings {
   readonly activeIntentIds: readonly string[];
@@ -113,6 +117,8 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
     if(!UUID.test(options.ownerAccountId))throw new Error("Fixed first-flow owner required");
     if(options.installationRef!==undefined&&!UUID.test(options.installationRef))throw new Error("Invalid fixed installation");
     if(options.registrationLeaseExpiresAt!==undefined&&!iso(options.registrationLeaseExpiresAt))throw new Error("Invalid absolute registration lease");
+    if(options.registrationLeaseDurationMs!==undefined&&(options.registrationLeaseExpiresAt!==undefined||!Number.isSafeInteger(options.registrationLeaseDurationMs)||options.registrationLeaseDurationMs<60000||options.registrationLeaseDurationMs>30*86400000))throw new Error("Invalid service registration lease");
+    if(options.accountScopedRegistration&&(options.installationRef!==undefined||options.registrationLeaseDurationMs===undefined))throw new Error("Invalid ordinary registration configuration");
     this.clock=options.utcMilliseconds??Date.now;
   }
   private base(){return `accounts/${this.options.ownerAccountId}`;}
@@ -225,23 +231,56 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
     if(!row.enabled)return {revision:row.revision,enabled:false,availability:"unregistered"};
     const expired=this.now()>=Date.parse(row.expiresAt!);return {revision:row.revision,enabled:!expired,installationRef:row.installationRef!,expiresAt:row.expiresAt!,availability:expired?"expired":"registered"};
   }
-  registration(a:ProactiveActor):Promise<FirstFlowResult<FirstFlowRegistration>>{return this.run(a,async tx=>this.registrationView(parseRegistration(await this.read(a,()=>tx.get(`${this.base()}/proactive_registration/current`)))),false);}
+  private ownershipPaths(row:RegistrationRow):readonly string[]{
+    return [`proactive_installations/${row.installationRef}`,`proactive_token_owners/${createHash("sha256").update(row.registrationValue!).digest("hex")}`];
+  }
+  private ownsRegistration(row:Row|undefined,registration:RegistrationRow):boolean {
+    return !!row&&row.ownerAccountId===this.options.ownerAccountId&&row.installationRef===registration.installationRef&&row.registrationRevision===registration.revision;
+  }
+  private async ownership(tx:Tx,a:ProactiveActor,row:RegistrationRow):Promise<boolean>{
+    if(!this.options.accountScopedRegistration)return true;
+    if(!row.enabled)return false;
+    for(const path of this.ownershipPaths(row))if(!this.ownsRegistration(await this.read(a,()=>tx.get(path)),row))return false;
+    return true;
+  }
+  registration(a:ProactiveActor):Promise<FirstFlowResult<FirstFlowRegistration>>{return this.run(a,async tx=>{
+    const row=parseRegistration(await this.read(a,()=>tx.get(`${this.base()}/proactive_registration/current`)));
+    if(row.enabled&&!await this.ownership(tx,a,row))return {revision:row.revision,enabled:false,availability:"unregistered"};
+    return this.registrationView(row);
+  },false);}
   replaceRegistration(a:ProactiveActor,input:FirstFlowRegistrationCommand):Promise<FirstFlowResult<FirstFlowRegistration>>{
     return this.run(a,async tx=>{
       if(!exact(input as unknown as Row,["expectedRevision","installationRef","registrationKind","registrationValue","enabled"])||!uint(input.expectedRevision)||input.enabled!==true||
         input.registrationKind!=="fcm_token"||typeof input.registrationValue!=="string"||!input.registrationValue.trim()||!input.registrationValue.isWellFormed()||Buffer.byteLength(input.registrationValue,"utf8")>4096)refuse("invalid");
-      const lease=this.options.registrationLeaseExpiresAt,now=this.now();
-      if(!this.options.installationRef||input.installationRef!==this.options.installationRef||!lease||now>=Date.parse(lease))refuse("denied");
+      const now=this.now(),lease=this.options.registrationLeaseDurationMs!==undefined
+        ? new Date(now+this.options.registrationLeaseDurationMs).toISOString():this.options.registrationLeaseExpiresAt;
+      if(!UUID.test(input.installationRef)||(!this.options.accountScopedRegistration&&(!this.options.installationRef||input.installationRef!==this.options.installationRef))||!lease||now>=Date.parse(lease))refuse("denied");
       const old=parseRegistration(await this.read(a,()=>tx.get(`${this.base()}/proactive_registration/current`)));if(old.revision!==input.expectedRevision)refuse("revision_conflict");
       const state=await this.state(tx,a);this.enabled(state);if(!state.pushEnabled)refuse("denied");
       const row:RegistrationRow={revision:bump(old.revision),enabled:true,installationRef:input.installationRef,registrationKind:"fcm_token",registrationValue:input.registrationValue,
-        registeredAt:new Date(now).toISOString(),expiresAt:lease};current(a);tx.set(`${this.base()}/proactive_registration/current`,row as unknown as Row);return this.registrationView(row);
+        registeredAt:new Date(now).toISOString(),expiresAt:lease};
+      const previousOwned:string[]=[];
+      if(this.options.accountScopedRegistration&&old.enabled){
+        for(const path of this.ownershipPaths(old))if(this.ownsRegistration(await this.read(a,()=>tx.get(path)),old))previousOwned.push(path);
+      }
+      current(a);
+      if(this.options.accountScopedRegistration){
+        if(!tx.delete)refuse("unavailable");
+        const nextPaths=this.ownershipPaths(row);
+        for(const path of previousOwned)if(!nextPaths.includes(path))tx.delete(path);
+        for(const path of nextPaths)tx.set(path,{ownerAccountId:this.options.ownerAccountId,installationRef:row.installationRef!,registrationRevision:row.revision});
+      }
+      tx.set(`${this.base()}/proactive_registration/current`,row as unknown as Row);return this.registrationView(row);
     });
   }
   deleteRegistration(a:ProactiveActor,installationRef:string,expectedRevision:number):Promise<FirstFlowResult<FirstFlowRegistration>>{
     return this.run(a,async tx=>{if(!UUID.test(installationRef)||!uint(expectedRevision))refuse("invalid");const old=parseRegistration(await this.read(a,()=>tx.get(`${this.base()}/proactive_registration/current`)));
       if(old.revision!==expectedRevision)refuse("revision_conflict");if(old.enabled&&old.installationRef!==installationRef)refuse("denied");if(!old.enabled)return this.registrationView(old);
-      const row={revision:bump(old.revision),enabled:false};current(a);tx.set(`${this.base()}/proactive_registration/current`,row);return this.registrationView(row);},false);
+      const owned:string[]=[];
+      if(this.options.accountScopedRegistration){for(const path of this.ownershipPaths(old))if(this.ownsRegistration(await this.read(a,()=>tx.get(path)),old))owned.push(path);if(!tx.delete)refuse("unavailable");}
+      const row={revision:bump(old.revision),enabled:false};current(a);
+      for(const path of owned)tx.delete!(path);
+      tx.set(`${this.base()}/proactive_registration/current`,row);return this.registrationView(row);},false);
   }
   private readStateRow(row:Row|undefined):FirstFlowReadState{
     if(!row)return {revision:0,readThroughSequence:0};if(!exact(row,["revision","readThroughSequence","updatedAt"])||!uint(row.revision)||row.revision<1||!uint(row.readThroughSequence)||!iso(row.updatedAt))refuse("unavailable");return {revision:row.revision,readThroughSequence:row.readThroughSequence};
@@ -289,8 +328,13 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
       if(i.state!=="published"||i.dispatchState!=="not_started")refuse("conflict");this.ensureActive(s,i);this.timing(s,i,false);if(!s.pushEnabled)refuse("denied");
       await this.validateSource(c,i);ok(await c.readableSequence(i.conversationId,i.messageSequence!));
       const row=parseRegistration(await this.read(a,()=>tx.get(`${this.base()}/proactive_registration/current`))),now=this.now(),lease=this.options.registrationLeaseExpiresAt;
-      if(!row.enabled||!row.registrationValue||!lease||!this.options.installationRef||row.installationRef!==this.options.installationRef||
-        now>=Date.parse(row.expiresAt!)||now>=Date.parse(lease)||Date.parse(row.expiresAt!)>Date.parse(lease))refuse("denied");
+      const duration=this.options.registrationLeaseDurationMs;
+      const validLease=duration!==undefined
+        ? Number.isFinite(Date.parse(row.registeredAt!))&&Date.parse(row.registeredAt!)<=now&&Date.parse(row.expiresAt!)-Date.parse(row.registeredAt!)<=duration
+        : !!lease&&now<Date.parse(lease)&&Date.parse(row.expiresAt!)<=Date.parse(lease);
+      if(!row.enabled||!row.registrationValue||!validLease||(!this.options.accountScopedRegistration&&(!this.options.installationRef||row.installationRef!==this.options.installationRef))||
+        now>=Date.parse(row.expiresAt!))refuse("denied");
+      if(!await this.ownership(tx,a,row))refuse("denied");
       this.timing(s,i,false);const next:FirstFlowIntent={...i,revision:bump(i.revision),dispatchState:"dispatching",attemptedAt:new Date(now).toISOString(),registrationRevision:row.revision};
       const claim:FirstFlowClaim={intentId:id,conversationId:i.conversationId,messageId:i.messageId!,revision:next.revision,authorizationScope:i.authorizationScope,expiresAt:i.expiresAt,registrationRevision:row.revision};
       current(a);this.stageIntent(tx,next);return {claim,registrationValue:row.registrationValue,deliveryRef:id,preview:s.preview};

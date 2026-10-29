@@ -1,3 +1,6 @@
+import { parseRecommendationProfile,civilAge,singaporeDate } from "../../recommendation-profile/domain/recommendation-profile.js";
+import { area } from "../../recommendation-profile/domain/areas.js";
+import { eventSummaryPresentation } from "../../event-detail/domain/event-content.js";
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx } from '../../shared/infrastructure/firebase/firestore-gateway.js';
 import type { SocialAuthority } from '../../friends/ports/social-authority.js';
 import { SocialFailure, visible } from '../../friends/domain/social-failure.js';
@@ -46,11 +49,13 @@ export class FirestorePersonalizedEvents {
     }
     throw Error('Friend capacity');
   }
-  async read(uid: string, asOf: string, snapshot: RecommendationSnapshot): Promise<EventRecommendationReadResult> {
+  async read(uid: string, asOf: string, snapshot: RecommendationSnapshot, activityAreaCode?:string): Promise<EventRecommendationReadResult> {
     try {
       const result = await this.store.runTransaction(async tx => {
         const own=await this.authority.viewer(tx,uid);
-        const empty: EventRecommendationReadResult={kind:'ready',sources:{formulaVersion:'event_recommendation_v2',selectedInterestTagIds:[],interestTags:[],events:[]}};
+        const profile=parseRecommendationProfile(own.data.recommendationProfile);if(!profile)throw Error('Invalid recommendation profile');
+        const selectedArea=area(activityAreaCode??profile.homeAreaCode);
+        const empty: EventRecommendationReadResult={kind:'ready',sources:{formulaVersion:'event_recommendation_v3',selectedInterestTagIds:[],interestTags:[],events:[]}};
         if(own.data.optionalProcessingConsent!=='accepted')return empty;
         const raw=await tx.get(`account_interests/${own.id}`);
         const selected=raw===undefined?[]:parseSelectedInterests(raw);
@@ -82,6 +87,12 @@ export class FirestorePersonalizedEvents {
         const events=[];
         for(const row of snapshot.items) {
           const eventId=sourceEventId(row.browseId);
+          const content=row.content;
+          if(content?.status==='cancelled'||content?.status==='sold_out'||content?.status==='postponed'||content?.status==='registration_closed'||content?.status==='not_on_sale')continue;
+          const age=civilAge(profile.birthDate,singaporeDate(row.startAt));
+          if(age!==undefined&&((content?.minimumAge!==undefined&&age<content.minimumAge)||(content?.maximumAge!==undefined&&age>content.maximumAge)))continue;
+          const eventArea=area(content?.areaCode);
+          const targetAgeMatch=age!==undefined&&(content?.targetMinimumAge!==undefined||content?.targetMaximumAge!==undefined)&&age>=(content?.targetMinimumAge??0)&&age<=(content?.targetMaximumAge??150);
           const preference=await tx.get(`event_participations/${sha256(JSON.stringify([own.id,eventId]))}`);
           if(preference && (preference.accountId!==own.id||preference.eventId!==eventId||typeof preference.ignored!=='boolean'))throw Error('Invalid preference');
           if(preference?.ignored===true)continue;
@@ -93,11 +104,12 @@ export class FirestorePersonalizedEvents {
           events.push({scoring:{eventId,active:true,published:true,startInstant,
             interestTagIds:matched.map(tag=>tag.interestTagId),
             visibleFriendCount:counts.get(eventId)??0,
-            sameRegion:row.regionNames?.some(region=>matchingRegion(own.details.region,region))??false},
-            presentation:{title:row.title,startAt:row.startAt,...(row.endAt?{endAt:row.endAt}:{})}});
+            sameArea:!!selectedArea&&selectedArea.code===eventArea?.code,
+            sameRegion:!!selectedArea&&selectedArea.regionCode===eventArea?.regionCode,targetAgeMatch},
+            presentation:{...eventSummaryPresentation(row),title:row.title,startAt:row.startAt,...(row.endAt?{endAt:row.endAt}:{})}});
         }
         if(!snapshot.current())throw Error('Source generation invalidated');
-        return {kind:'ready' as const,sources:{formulaVersion:'event_recommendation_v2' as const,
+        return {kind:'ready' as const,sources:{formulaVersion:'event_recommendation_v3' as const,
           selectedInterestTagIds:selected,interestTags,events}};
       });
       return snapshot.current() ? result : {kind:'dependency_unavailable'};

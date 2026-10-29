@@ -39,7 +39,7 @@ void main() {
       }
       expect(tester.widget<ChoiceChip>(chip).selected, isTrue);
       expect(find.byType(FriendDiscoveryPanel), findsOneWidget);
-      expect(find.text('No friend recommendations right now'), findsOneWidget);
+      expect(find.text('No matches right now'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }

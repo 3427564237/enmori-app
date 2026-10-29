@@ -42,8 +42,8 @@ function uuid(v: unknown): v is string { return typeof v === "string" && ID.test
 function operationKey(v: unknown): v is string {
   return typeof v === "string" && KEY.test(v) && Buffer.from(v, "base64url").length === 32 && Buffer.from(v, "base64url").toString("base64url") === v;
 }
-function selectContext(value: unknown): value is SelectReplyContext {
-  if (!record(value) || value.processing !== "local") return false;
+function selectContext(value: unknown, processing: "local" | "cloud"): value is SelectReplyContext {
+  if (!record(value) || value.processing !== processing) return false;
   if (Object.hasOwn(value, "today")) {
     return keys(value, ["processing", "today"]) && record(value.today) &&
       keys(value.today, ["timeZone"]) && typeof value.today.timeZone === "string" &&
@@ -123,12 +123,15 @@ function message(m: StoredConversationMessage): Record<string, unknown> {
   const persistedAt = `${base}.${String(Math.floor(m.persistedAt.nanoseconds / 1000)).padStart(6, "0")}Z`;
   if ((m.origin !== undefined || m.occurrenceId !== undefined || m.category !== undefined) &&
       !(m.role === "assistant" && m.origin === "proactive" && uuid(m.occurrenceId) && m.category === "explicit_follow_up")) throw Error("Invalid inner proactive message");
+  if ((m.processing !== undefined || m.provider !== undefined || m.disclosureVersion !== undefined) &&
+      (m.role !== 'assistant' || m.availability !== 'available' || m.processing !== 'cloud' || m.provider !== 'groq' || m.disclosureVersion !== 'groq_cloud_v1')) throw Error('Invalid inner cloud provenance');
   if (m.sources !== undefined && (m.role !== "assistant" || m.availability !== "available" || !Array.isArray(m.sources) ||
       m.sources.length < 1 || m.sources.length > 15 || new Set(m.sources.map(v => v.cardRef)).size !== m.sources.length)) throw Error("Invalid inner message sources");
   return { messageId: m.messageId, sequence: m.sequence, role: m.role, persistedAt, availability: m.availability,
     ...(m.text === undefined ? {} : { text: m.text }),
     ...(m.origin === undefined ? {} : { origin: m.origin, occurrenceId: m.occurrenceId, category: m.category }),
-    ...(m.sources === undefined ? {} : { sources: m.sources.map(card) }) };
+    ...(m.sources === undefined ? {} : { sources: m.sources.map(card) }),
+    ...(m.processing === 'cloud' ? {processing:m.processing,provider:m.provider,disclosureVersion:m.disclosureVersion} : {}) };
 }
 function noBody(request: FastifyRequest): boolean {
   return request.body === undefined && Number(request.headers["content-length"] ?? 0) === 0 && request.headers["transfer-encoding"] === undefined;
@@ -139,7 +142,7 @@ function deliver<T>(request: FastifyRequest, reply: FastifyReply, result: Conver
   return reply.code(status).send(project(result.value));
 }
 
-export async function registerConversationRoutes(app: FastifyInstance, identity: IdentityVerifier, operations: ConversationOperations): Promise<void> {
+export async function registerConversationRoutes(app: FastifyInstance, identity: IdentityVerifier, operations: ConversationOperations, processing: "local" | "cloud" = "local"): Promise<void> {
   const authenticate = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     reply.header("Cache-Control", "no-store");
     const value = request.headers.authorization;
@@ -166,7 +169,7 @@ export async function registerConversationRoutes(app: FastifyInstance, identity:
   app.post("/v1/me/ai/operations", options, async (request, reply) => {
     const b = request.body;
     if (!clean(request) || request.headers["ai-operation-key"] !== undefined || !record(b) || b.purpose !== "checkin_conversation" ||
-      (b.contextSelection !== undefined && !selectContext(b.contextSelection)) ||
+      (b.contextSelection !== undefined && !selectContext(b.contextSelection, processing)) ||
       !((b.kind === "send" && keys(b, ["kind", "purpose"], ["conversationId", "contextSelection"]) && (b.conversationId === undefined || uuid(b.conversationId))) ||
         (b.kind === "retry" && keys(b, ["kind", "purpose", "conversationId", "userMessageId"], ["contextSelection"]) && uuid(b.conversationId) && uuid(b.userMessageId)))) return failure(request, reply, "REQUEST_INVALID");
     return deliver(request, reply, await operations.prepare(caller(request), b as unknown as PrepareConversation), 201, v => {

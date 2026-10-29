@@ -245,6 +245,7 @@ final class OfflinePreferencesRepository
 
   @override
   Future<Result<OwnSettings>> saveSettings({
+    CloudAiConsent? cloudAiConsent,
     bool? defaultCheckInLocation,
     bool? defaultCheckInWeather,
     bool? homeWeatherAuto,
@@ -260,6 +261,7 @@ final class OfflinePreferencesRepository
       );
     }
     store.settings = OwnSettings(
+      cloudAiConsent: cloudAiConsent ?? store.settings.cloudAiConsent,
       defaultCheckInLocation:
           defaultCheckInLocation ?? store.settings.defaultCheckInLocation,
       defaultCheckInWeather:

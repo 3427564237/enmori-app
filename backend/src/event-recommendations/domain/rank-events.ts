@@ -9,9 +9,11 @@ export interface EventScoringInput {
   readonly interestTagIds: readonly string[];
   readonly visibleFriendCount?: number;
   readonly sameRegion?: boolean;
+  readonly sameArea?: boolean;
+  readonly targetAgeMatch?: boolean;
 }
 
-export interface RecommendationReason { readonly code: "shared_interests" | "friends_participating" | "same_region"; readonly count: number; readonly points: number }
+export interface RecommendationReason { readonly code: "shared_interests" | "friends_participating" | "same_region" | "same_area" | "target_age"; readonly count: number; readonly points: number }
 export interface RankedEvent {
   readonly reasons?: readonly RecommendationReason[];
   readonly eventId: string;
@@ -22,7 +24,7 @@ export interface RankedEvent {
     readonly factorCode: "interest_match_count";
     readonly matchedCount: number;
     readonly points: number;
-    readonly formulaVersion: typeof EVENT_FORMULA_VERSION | "event_recommendation_v2";
+    readonly formulaVersion: typeof EVENT_FORMULA_VERSION | "event_recommendation_v2" | "event_recommendation_v3";
   };
 }
 
@@ -37,7 +39,7 @@ function distinctIds(ids: readonly string[]): string[] {
 
 function sameSource(left: EventScoringInput, right: EventScoringInput): boolean {
   return left.active === right.active && left.published === right.published &&
-    left.startInstant === right.startInstant && left.visibleFriendCount === right.visibleFriendCount && left.sameRegion === right.sameRegion &&
+    left.startInstant === right.startInstant && left.visibleFriendCount === right.visibleFriendCount && left.sameRegion === right.sameRegion && left.sameArea === right.sameArea && left.targetAgeMatch === right.targetAgeMatch &&
     JSON.stringify(distinctIds(left.interestTagIds)) ===
       JSON.stringify(distinctIds(right.interestTagIds));
 }
@@ -49,7 +51,7 @@ function sameSource(left: EventScoringInput, right: EventScoringInput): boolean 
  * Conflicting projections of one identity are invalid inputs, not extra votes.
  */
 export function rankEvents(input: {
-  readonly formulaVersion?: "event_recommendation_v2";
+  readonly formulaVersion?: "event_recommendation_v2" | "event_recommendation_v3";
   readonly asOf: bigint;
   readonly activeSelectedInterestTagIds: readonly string[];
   readonly events: readonly EventScoringInput[];
@@ -68,13 +70,16 @@ export function rankEvents(input: {
     if (event.eventId.length === 0 || ambiguous.has(event.eventId) ||
         !event.active || !event.published || event.startInstant <= input.asOf) continue;
     const matched = distinctIds(event.interestTagIds).filter((id) => selected.has(id));
-    const v2=input.formulaVersion==="event_recommendation_v2";
+    const v2=input.formulaVersion!==undefined;
     const friends=event.visibleFriendCount??0;
     if(!Number.isSafeInteger(friends)||friends<0||friends>1000)continue;
-    const region=event.sameRegion===true;
+    const v3=input.formulaVersion==="event_recommendation_v3";
+    const region=event.sameRegion===true&&!(v3&&event.sameArea);
     const reasons:RecommendationReason[]=[
       ...(matched.length?[{code:"shared_interests" as const,count:matched.length,points:matched.length*4}]:[]),
       ...(friends?[{code:"friends_participating" as const,count:friends,points:Math.min(friends,5)*2}]:[]),
+      ...(v3&&event.sameArea?[{code:"same_area" as const,count:1,points:2}]:[]),
+      ...(v3&&event.targetAgeMatch?[{code:"target_age" as const,count:1,points:1}]:[]),
       ...(region?[{code:"same_region" as const,count:1,points:1}]:[])];
     if(v2?reasons.length===0:matched.length===0)continue;
     ranked.push({
@@ -87,7 +92,7 @@ export function rankEvents(input: {
         factorCode: "interest_match_count",
         matchedCount: matched.length,
         points: matched.length * (v2 ? 4 : 1),
-        formulaVersion: v2 ? "event_recommendation_v2" : EVENT_FORMULA_VERSION,
+        formulaVersion: input.formulaVersion ?? EVENT_FORMULA_VERSION,
       },
     });
   }

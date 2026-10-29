@@ -6,15 +6,15 @@ import * as retained from '../../backend/dist/src/bootstrap/retained-core-runtim
 // open a listener, read a credential/account, acquire a real lock or call a model.
 let sequence = 0;
 const owner = '00000000-0000-4000-8000-000000000001';
-async function entry(t, firstFlow, fullFeatures = true) {
-  const calls = { remote: [], core: 0, locks: 0, reads: [], writes: [], listening: [], closed: 0 };
+async function entry(t, firstFlow, fullFeatures = true, flags = []) {
+  const calls = { remote: [], core: 0, locks: 0, reads: [], writes: [], listening: [], closed: 0, authOwnerReads: 0, authProjectReads: 0 };
   const configPath = '/synthetic-private/local-backend.json';
   const config = { projectId: 'enmori-rmvp-controlled', host: '127.0.0.1', port: 9381,
     verificationEmail: 'synthetic@example.invalid', keyPath: '/synthetic-private/key',
     certificatePath: '/synthetic-private/cert', fullFeatures,
     ...(firstFlow === undefined ? {} : { firstFlow }) };
   const previousArgv = process.argv, previousExitCode = process.exitCode;
-  process.argv = [process.execPath, 'tool/run_real_account_local.mjs', configPath];
+  process.argv = [process.execPath, 'tool/run_real_account_local.mjs', configPath, ...flags];
   process.exitCode = undefined;
   t.after(() => { process.argv = previousArgv; process.exitCode = previousExitCode; });
   const mockModule = (specifier, exports) => t.mock.module(specifier, { exports });
@@ -40,7 +40,8 @@ async function entry(t, firstFlow, fullFeatures = true) {
   mockModule('node:https', { createServer: server });
   mockModule('node:http', { createServer: server });
   mockModule('firebase-admin/auth', { getAuth: () => ({
-    getUserByEmail: async () => ({ uid: 'synthetic-owner', emailVerified: true }),
+    getUserByEmail: async () => { calls.authOwnerReads++; return { uid: 'synthetic-owner', emailVerified: true }; },
+    listUsers: async limit => { assert.equal(limit, 1); calls.authProjectReads++; return {users: []}; },
     verifyIdToken: async () => { throw Error('No request permitted'); },
   }) });
   mockModule('firebase-admin/firestore', { getFirestore: () => ({ doc: path => ({ get: async () => ({
@@ -99,7 +100,7 @@ test('existing real entry without firstFlow keeps companion construction off', a
   assert.equal(run.remote[0][3], undefined);
 });
 
-test('malformed or push-enabled configuration fails before credential, lock, runtime and listener work', async t => {
+test('malformed push configuration fails before credential, lock, runtime and listener work', async t => {
   const run = await entry(t, { ownerAccountId: owner, firebaseUid: 'synthetic-owner', push: { installationRef: owner } });
   assert.equal(run.exitCode, 1);
   assert.deepEqual(run.reads, ['/synthetic-private/local-backend.json']);
@@ -108,9 +109,58 @@ test('malformed or push-enabled configuration fails before credential, lock, run
   assert.equal(run.listening.length + run.writes.length, 0);
 });
 
+test('actual entry forwards explicit service-mode push and reports configuration without claiming delivery', async t => {
+  const firstFlow = {ownerAccountId:owner,firebaseUid:'synthetic-owner',worker:{mode:'service'},
+    push:{installationRef:owner,leaseDurationMs:30*86400000}};
+  const run = await entry(t,firstFlow);
+  assert.equal(run.exitCode,undefined);
+  assert.deepEqual(run.remote[0][3],firstFlow);
+  const state=run.writes.find(w=>w.body.phase==='listening').body.firstFlow;
+  assert.equal(state.pushConfigured,true);
+  assert.equal(state.workerConfigured,true);
+  assert.equal(Object.hasOwn(state,'delivered'),false);
+});
+
 test('firstFlow cannot silently disappear behind fullFeatures false', async t => {
   const run = await entry(t, { ownerAccountId: owner, firebaseUid: 'synthetic-owner' }, false);
   assert.equal(run.exitCode, 1);
   assert.equal(run.locks, 0);
   assert.equal(run.remote.length + run.core, 0);
+});
+
+// Backend-first selection is exercised through the actual entry, with no models.
+test('backend-only retains full ordinary composition but supplies no model or first-flow',async t=>{
+ const run=await entry(t,undefined,true,['--backend-only']);
+ assert.equal(run.exitCode,undefined);assert.equal(run.core,0);assert.equal(run.remote.length,1);
+ assert.equal(run.remote[0][0].ENMORI_REMOTE_GROUP,'true');
+ assert.equal(run.remote[0][1].musicInterestTagId,'synthetic-music');
+ assert.equal(run.remote[0][2],undefined);assert.equal(run.remote[0][3],undefined);
+ assert.equal(run.closed,1);assert.deepEqual(run.listening,[{host:'127.0.0.1',port:9381}]);
+});
+test('backend-only refuses configured first-flow rather than silently discarding it',async t=>{
+ const run=await entry(t,{ownerAccountId:owner,firebaseUid:'synthetic-owner'},true,['--backend-only']);
+ assert.equal(run.exitCode,1);assert.equal(run.locks,0);assert.equal(run.remote.length+run.core,0);
+ assert.deepEqual(run.reads,['/synthetic-private/local-backend.json']);assert.equal(run.writes.length,0);
+});
+test('backend-only rejects incomplete ordinary composition before credential or listener work',async t=>{
+ const run=await entry(t,undefined,false,['--backend-only']);
+ assert.equal(run.exitCode,1);assert.equal(run.locks,0);assert.equal(run.remote.length+run.core,0);
+ assert.deepEqual(run.reads,['/synthetic-private/local-backend.json']);assert.equal(run.listening.length,0);
+});
+test('mistyped backend-only flag cannot silently enable the legacy model path',async t=>{
+ const run=await entry(t,undefined,true,['--backend-onyl']);
+ assert.equal(run.exitCode,1);assert.equal(run.locks,0);assert.equal(run.remote.length+run.core,0);
+ assert.deepEqual(run.reads,['/synthetic-private/local-backend.json']);assert.equal(run.writes.length,0);
+});
+
+test('ordinary entry starts with no named tester readiness dependency and forwards no account allowlist', async t => {
+  const firstFlow={audience:'registered_accounts',worker:{mode:'service',intervalMs:60000},push:{leaseDurationMs:2592000000}};
+  const run=await entry(t,firstFlow);
+  assert.equal(run.exitCode,undefined);
+  assert.deepEqual(run.remote[0][3],firstFlow);
+  assert.equal(run.authOwnerReads,0);assert.equal(run.authProjectReads,1);
+  const ready=run.writes.find(w=>w.body.phase==='listening').body;
+  assert.equal(ready.accountScope,'registered_accounts');
+  assert.equal(Object.hasOwn(ready,'emailVerified'),false);
+
 });

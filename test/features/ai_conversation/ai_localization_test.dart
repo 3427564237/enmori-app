@@ -152,7 +152,11 @@ void main() {
     expect(controller.sends, 0);
     controller.unresolved();
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('ai-conversation-actions')));
+    await tester.pumpAndSettle();
     expect(find.text('核对结果'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
     expect(find.text('已请求取消，但尚未确认结果。'), findsOneWidget);
     expect(find.byKey(const Key('ai-make-plan')), findsNothing);
     expect(tester.takeException(), isNull);

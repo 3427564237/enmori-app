@@ -1,3 +1,4 @@
+import { parseCloudAiConsent } from "../../account/domain/cloud-ai-consent.js";
 import { isPersonaId, isPersonaRevision, isStateRevision, normalizePersonaInput, personaExpressionFields } from "../../personas/domain/persona-values.js";
 import { personaExpressionProjection } from "../application/persona-expression.js";
 import type { StoredDocument } from "../../shared/infrastructure/firebase/firestore-gateway.js";
@@ -42,7 +43,14 @@ export function parseReadAuthority(account: StoredDocument | undefined, ownerId:
   const settingsRevision = Object.hasOwn(account, "settingsRevision") ? account.settingsRevision : 0;
   if (!validGeneration(settingsRevision) || (Object.hasOwn(account, "settingsRevision") && settingsRevision < 1) ||
       !validGeneration(account.purposeRevocationGeneration)) return undefined;
-  return Object.freeze({ ownerId, completed: true, purpose: "checkin_conversation",
+  const cloudAiConsent = Object.hasOwn(account, 'cloudAiConsent') ? parseCloudAiConsent(account.cloudAiConsent) : undefined;
+  const invalidCloud = (Object.hasOwn(account, 'cloudAiConsent') && (!cloudAiConsent || !validGeneration(account.cloudAiConsentGeneration))) ||
+    (Object.hasOwn(account, 'cloudAiConsentGeneration') && !validGeneration(account.cloudAiConsentGeneration));
+  const cloudAuthority = invalidCloud ? {cloudAiConsentUnavailable:true as const} : {
+    ...(cloudAiConsent ? {cloudAiConsent} : {}),
+    ...(validGeneration(account.cloudAiConsentGeneration) ? {cloudAiConsentGeneration:account.cloudAiConsentGeneration} : {}),
+  };
+  return Object.freeze({ ...cloudAuthority, ownerId, completed: true, purpose: "checkin_conversation",
     consent: account.optionalProcessingConsent as "accepted" | "rejected", purposeRevocationGeneration: account.purposeRevocationGeneration,
     settingsRevision });
 }

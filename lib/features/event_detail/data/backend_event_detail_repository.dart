@@ -1,3 +1,4 @@
+import '../domain/event_content.dart';
 import '../domain/event_actions.dart';
 
 import 'package:flutter/services.dart';
@@ -16,6 +17,8 @@ final class BackendEventDetailRepository implements EventDetailRepository {
   Future<Result<EventDetail>> read(String eventId) async {
     final result = await client.get(
       '/v1/events/${Uri.encodeComponent(eventId)}${includeVenueAddress ? '?includeVenueAddress=true' : ''}',
+      contractVersion: 3,
+      readTimeout: const Duration(seconds: 30),
     );
     if (result case Failure<JsonObject>(:final failure)) {
       return Failure(failure);
@@ -32,6 +35,7 @@ final class BackendEventDetailRepository implements EventDetailRepository {
       'shortDescription',
       'coverImageUrl',
       'venueAddress',
+      'content',
     ];
     bool text(Object? v, int max) =>
         v is String &&
@@ -103,8 +107,15 @@ final class BackendEventDetailRepository implements EventDetailRepository {
         countryCode: 'SG',
       );
     }
+    EventContent? content;
+    try {
+      content = EventContent.parse(value['content']);
+    } catch (_) {
+      return _invalid();
+    }
     return Success(
       EventDetail(
+        content: content,
         eventId: eventId,
         venueAddress: address,
         title: value['title'] as String,

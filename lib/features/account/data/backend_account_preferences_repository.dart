@@ -45,6 +45,7 @@ final class BackendAccountPreferencesRepository
   );
   @override
   Future<Result<OwnSettings>> saveSettings({
+    CloudAiConsent? cloudAiConsent,
     bool? defaultCheckInLocation,
     bool? defaultCheckInWeather,
     bool? homeWeatherAuto,
@@ -67,6 +68,11 @@ final class BackendAccountPreferencesRepository
         'defaultCheckInWeather': ?defaultCheckInWeather,
         'homeWeatherAuto': ?homeWeatherAuto,
         'checkInVisibility': _checkInVisibility(visibility),
+        if (cloudAiConsent != null)
+          'cloudAiConsent': {
+            'state': cloudAiConsent.name,
+            'disclosureVersion': 'groq_cloud_v1',
+          },
         'optionalProcessingConsent': consent.name,
         'expectedRevision': expectedRevision,
       },
@@ -140,6 +146,7 @@ final class BackendAccountPreferencesRepository
           if (p.containsKey('defaultCheckInWeather')) 'defaultCheckInWeather',
           if (p.containsKey('homeWeatherAuto')) 'homeWeatherAuto',
           if (p.containsKey('fieldPrivacy')) 'fieldPrivacy',
+          if (p.containsKey('cloudAiConsent')) 'cloudAiConsent',
           'checkInVisibility',
           'optionalProcessingConsent',
           'revision',
@@ -152,6 +159,21 @@ final class BackendAccountPreferencesRepository
       'homeWeatherAuto',
     ]) {
       if (p.containsKey(key) && p[key] is! bool) return _invalid();
+    }
+    CloudAiConsent? cloudAiConsent;
+    if (p.containsKey('cloudAiConsent')) {
+      final grant = p['cloudAiConsent'];
+      if (grant is! Map<String, dynamic> ||
+          !_keys(grant, ['state', 'disclosureVersion']) ||
+          grant['disclosureVersion'] != 'groq_cloud_v1') {
+        return _invalid();
+      }
+      cloudAiConsent = switch (grant['state']) {
+        'accepted' => CloudAiConsent.accepted,
+        'declined' => CloudAiConsent.declined,
+        _ => null,
+      };
+      if (cloudAiConsent == null) return _invalid();
     }
     final visibility = switch (p['checkInVisibility']) {
       'private' => CheckInVisibility.private,
@@ -173,6 +195,7 @@ final class BackendAccountPreferencesRepository
     }
     return Success(
       OwnSettings(
+        cloudAiConsent: cloudAiConsent,
         defaultCheckInLocation: p['defaultCheckInLocation'] as bool? ?? false,
         defaultCheckInWeather: p['defaultCheckInWeather'] as bool? ?? false,
         homeWeatherAuto: p['homeWeatherAuto'] as bool? ?? false,

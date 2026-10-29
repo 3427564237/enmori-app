@@ -16,6 +16,41 @@ const item = (id = "occurrence_a", title = "Same concert"): BrowseOccurrence => 
 });
 const after = (ms: number) => new Date(Date.parse(EVENT_AS_OF) + ms).toISOString();
 
+test('stable detail resolves an expired source lookup through exact detail, never the list summary', async () => {
+  const records = eventTestRecords(), summary = item();
+  let detailReads = 0, missing = false, fail = false;
+  const source: BrowseSource = {
+    event: async () => undefined, // The short-lived observed-ID mapping expired.
+    firstBatch: async () => [summary, item('other', summary.title)],
+    detail: async id => {
+      detailReads++;
+      assert.equal(id, summary.browseId);
+      if (fail) throw Error('Source unavailable');
+      return missing ? undefined : {...summary, content: {
+        provider: 'ticketmaster', sourceId: 'occurrence_a', fetchedAt: EVENT_AS_OF,
+        timeZone: 'Asia/Singapore', status: 'available', detailsStatus: 'available',
+        detailUrl: 'https://ticketmaster.sg/activity/detail/a',
+        fullDescription: 'Complete source Event Details, beyond the list introduction.',
+      }};
+    },
+  };
+  const joined = createControlledEventRecommendations({
+    gateway: {get: async path => records[path], listEvents: async () => []},
+    source, clock: {now: () => ok(new Date(EVENT_AS_OF))},
+  });
+  const read = () => joined.eventDetail.execute({firebaseUid: EVENT_TEST_UID}, sourceEventId(summary.browseId));
+  const result = await read();
+  assert.ok(result.ok);
+  if (result.ok) assert.equal(result.value.content?.fullDescription, 'Complete source Event Details, beyond the list introduction.');
+  assert.equal(detailReads, 1);
+  missing = true;
+  assert.equal((await read()).ok, false);
+  fail = true;
+  const failed = await read();
+  assert.ok(!failed.ok);
+  if (!failed.ok) assert.equal(failed.failure.code, 'SERVICE_UNAVAILABLE');
+});
+
 test('participation ignore filters only the selected Music rows and final consent check follows async filter',async()=>{
   const records=eventTestRecords();records['accounts/s2-account']!.optionalProcessingConsent='accepted';
   const {musicSegment:_unused,...nonMusic}=item('other');

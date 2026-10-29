@@ -67,6 +67,43 @@ its structural-candidate-only success remain supported and independently tested.
 See [internal Conversation lifecycle](../ai-conversation/README.md) for the
 handwritten fake-Port orchestration. This extension has no Bootstrap wiring.
 
+## Approved cloud-only recovery mode
+
+[LI's cloud recovery decision](../../../docs/decisions/2026-10-28-li-cloud-independent-request-recovery.md)
+authorizes an explicit `{ kind: "cloud", owner }` runtime configuration. The
+default local composition above retains physical-settlement quarantine.
+`CloudGenerationTransport` separately distinguishes confirmed stopped responses
+or failures from unknown remote execution. Application cancellation/timeout
+fences the old operation and releases admission for an independent new request;
+it does not claim the remote generation stopped or permit same-target replay.
+
+A single `CloudAdmissionOwner` binds one runtime and clock across consumers.
+It starts closed, requires explicit trusted authority recovery, and reserves
+request/token capacity before preparation. Unknown attempts are not refunded;
+quota expiry is accounting only. Dispatch permits are opaque, single-use and
+bound to the original signal, deadline and live reservation. Late results cannot
+commit, deliver or release a newer request's lane. Lease loss fails closed.
+
+The [first internal receipt](../../../docs/evidence/2026-10-28-cloud-recovery/README.md)
+is followed by the [Groq/Firestore integration receipt](../../../docs/evidence/2026-10-28-cloud-integration/README.md).
+`FirestoreCloudQuotaAuthority` now implements the approved Backend-only quota
+document with atomic minute/day reservations, persisted 429 cooldown and strict
+runtime-epoch checks. Missing state never initializes itself. Recovery does not
+credit unproved downtime: remaining windows at the last confirmed ledger write
+are conservatively carried forward. Frequent restarts can therefore extend
+waiting. Unknown acknowledgments close admission without retry or refund.
+
+`GroqCloudTransport` uses explicit HTTP and framing-aware input-token bounds,
+fixed HTTPS, bounded receipt, terminal-envelope validation and a final dynamic
+admission guard. The factory binds the reservation to the same durable policy;
+it supplies no tokenizer, credentials, consent or HTTP defaults. A separate
+cloud-consent verifier is required; existing local consent is insufficient.
+The factory starts closed and neither initializes a ledger nor wires a route.
+The owner retains only quota/settlement metadata. Real token framing, cloud
+consent/provenance, shared Persona/F0 production composition, confirmed exclusive
+host ownership and deployment remain unintegrated. Emulator evidence is not
+proof of a real database migration, IAM or off-host availability.
+
 ## Parsing and interpretation
 
 `parseOutput` uses fatal UTF-8 decoding and the exact two-string-property Q31

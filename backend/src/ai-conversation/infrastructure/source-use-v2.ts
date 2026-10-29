@@ -1,3 +1,4 @@
+import { hasCloudAiConsent } from "../../account/domain/cloud-ai-consent.js";
 import type { FirestoreTransactionGateway as Tx, StoredDocument, StoredDocumentSnapshot } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { isSafeDocumentId, parseCheckInProjection } from "../../shared/infrastructure/firebase/firestore-records.js";
 import { parseReadInstant, parseReadAuthority } from "./real-context-records.js";
@@ -17,14 +18,23 @@ export interface SourceUseV2 {
   readonly requiredCategories: readonly ("conversation_history" | "check_ins")[];
   readonly purposeRevocationGeneration: number;
 }
+export type SourceUseV3 = Omit<SourceUseV2, 'schemaVersion' | 'processing'> & {
+  readonly schemaVersion: 'source_use_v3'; readonly processing: 'cloud';
+  readonly cloudAiConsentGeneration: number; readonly provider: 'groq'; readonly disclosureVersion: 'groq_cloud_v1';
+};
+export type SourceUse = SourceUseV2 | SourceUseV3;
 const exact = (row: StoredDocument, required: readonly string[]) =>
   Object.keys(row).length === required.length && required.every(k => Object.hasOwn(row, k));
 const uint = (v: unknown): v is number => typeof v === "number" && Number.isSafeInteger(v) && v >= 0;
 const plain = (v: unknown): v is StoredDocument => !!v && typeof v === "object" && !Array.isArray(v);
 export function parseSourceUseV2(row: StoredDocument | undefined): SourceUseV2 | undefined {
-  if (!row || !exact(row, ["schemaVersion", "purpose", "processing", "sources", "requiredCategories", "purposeRevocationGeneration"]) ||
-      row.schemaVersion !== "source_use_v2" || !["explicit_follow_up", "selected_checkin_reply"].includes(String(row.purpose)) ||
-      row.processing !== "local" || !uint(row.purposeRevocationGeneration) || !Array.isArray(row.sources) || row.sources.length<1 || row.sources.length > 15 ||
+  const result = parseSourceUse(row); return result?.schemaVersion === 'source_use_v2' ? result : undefined;
+}
+export function parseSourceUse(row: StoredDocument | undefined): SourceUse | undefined {
+  const cloud = row?.schemaVersion === 'source_use_v3';
+  if (!row || !exact(row, ["schemaVersion", "purpose", "processing", "sources", "requiredCategories", "purposeRevocationGeneration", ...(cloud ? ["provider", "disclosureVersion", "cloudAiConsentGeneration"] : [])]) ||
+      (!cloud && row.schemaVersion !== "source_use_v2") || (cloud && (!uint(row.cloudAiConsentGeneration) || row.provider !== "groq" || row.disclosureVersion !== "groq_cloud_v1")) || !["explicit_follow_up", "selected_checkin_reply"].includes(String(row.purpose)) ||
+      row.processing !== (cloud ? "cloud" : "local") || !uint(row.purposeRevocationGeneration) || !Array.isArray(row.sources) || row.sources.length<(cloud ? 0 : 1) || row.sources.length > 15 ||
       !Array.isArray(row.requiredCategories) || new Set(row.requiredCategories).size !== row.requiredCategories.length ||
       row.requiredCategories.some(c => c !== "conversation_history" && c !== "check_ins")) return undefined;
   const keys = new Set<string>(), cards = new Set<string>();
@@ -42,7 +52,7 @@ export function parseSourceUseV2(row: StoredDocument | undefined): SourceUseV2 |
   if(categories.size!==row.requiredCategories.length||row.requiredCategories.some(c=>!categories.has(c as "check_ins"|"conversation_history")))return undefined;
   if(row.purpose==="explicit_follow_up"&&(row.sources.length!==1||row.sources[0]?.kind!=="conversation_message"||
     row.requiredCategories.length!==1||row.requiredCategories[0]!=="conversation_history"))return undefined;
-  return row as unknown as SourceUseV2;
+  return row as unknown as SourceUse;
 }
 
 /** Server metadata tuple, not a content hash. Message text is immutable; its
@@ -60,7 +70,7 @@ export function checkInSourceVersion(row: StoredDocumentSnapshot): string | unde
     ? JSON.stringify(["checkin_v1", created.seconds, created.nanoseconds, updated.seconds, updated.nanoseconds, revision ?? null]) : undefined;
 }
 
-export async function inspectSourceUseV2(tx: Tx, ownerId: string, conversationId: string, receipt: SourceUseV2,
+export async function inspectSourceUseV2(tx: Tx, ownerId: string, conversationId: string, receipt: SourceUse,
   utcMilliseconds: () => number, check: () => void): Promise<{ readonly kind: "valid"; readonly cards: readonly OwnedSourceCard[] }
     | { readonly kind: "invalid";readonly reason:"changed"|"missing"|"denied" }|{readonly kind:"unavailable"}> {
   if (!tx.getSnapshot) return { kind: "unavailable" };
@@ -73,6 +83,9 @@ export async function inspectSourceUseV2(tx: Tx, ownerId: string, conversationId
     check(); account = await tx.get(`accounts/${ownerId}`); check();if(!fresh())return {kind:"unavailable"};
     const authority=parseReadAuthority(account,ownerId);
     if (!authority) return { kind: "unavailable" };
+    if (receipt.processing === 'cloud' && authority.cloudAiConsentUnavailable) return {kind:'unavailable'};
+    if (receipt.processing === 'cloud' && authority.cloudAiConsentGeneration !== undefined && authority.cloudAiConsentGeneration < receipt.cloudAiConsentGeneration) return {kind:'unavailable'};
+    if (receipt.processing === 'cloud' && (!hasCloudAiConsent(authority.cloudAiConsent, authority.consent) || receipt.cloudAiConsentGeneration !== authority.cloudAiConsentGeneration)) return {kind:'invalid', reason:'denied'};
     if (authority.purposeRevocationGeneration > receipt.purposeRevocationGeneration) return { kind: "invalid",reason:"denied" };
     if (authority.purposeRevocationGeneration < receipt.purposeRevocationGeneration || authority.consent !== "accepted") return { kind: "unavailable" };
   }

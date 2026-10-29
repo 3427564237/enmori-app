@@ -44,3 +44,48 @@ APK 构建使用私有 account-dart-defines.json：
 5. 同一候选继续邮件状态刷新、账户切换/错误恢复；真实保存后再集中验证一次正常服务停止/启动后的回读。未执行的步骤保持 Not Run。
 
 若没有手机，停止于安装前。本轮只读 live preflight 与组件检查不等于真实密码登录、资料已保存或全项目验收。
+
+## Approved continuous companion scope (29 October)
+
+The [continuous-delivery decision](../docs/decisions/2026-10-29-li-continuous-proactive-delivery.md)
+allows the existing fixed test owner/device to use private
+`firstFlow.worker = {"mode":"service","intervalMs":60000}`. This selects
+service-lifetime scheduling; absence still disables the worker and the existing
+`endsAtMs` form remains a nonrenewable window of at most 30 minutes. Unknown or
+mixed mode/window fields fail before opening the real runtime.
+
+For that scope, `firstFlow.push` contains the explicit `installationRef` matching
+the approved APK's private installation define and `leaseDurationMs:2592000000`
+(30 days). A user's authorized registration renews the lease; a dispatch does
+not. Bounded mode instead requires an absolute `leaseExpiresAt` no later than
+the worker end plus 15 minutes. No credentials or registration token go in the
+operator config or evidence. The existing credential is used by the single-POST
+FCM sender. Actual user push opt-in and Android notification permission remain
+required. `firstFlow.workerRunning` reports scheduling, `pushConfigured` reports
+configuration; neither asserts a notification reached the device.
+
+
+### Ordinary registered-account companion mode (29 October)
+
+`firstFlow: {"audience":"registered_accounts","worker":{"mode":"service","intervalMs":60000},"push":{"leaseDurationMs":2592000000}}`
+selects the approved ordinary-account flow on the existing remote group service.
+Do not combine this with `ownerAccountId`, `firebaseUid` or an installation ID.
+Client identity comes from authentication and onboarding; the worker pages up to
+25 auth-binding metadata rows per cycle with a rotating cursor and examines only
+pending occurrence metadata before current identity/consent/source checks.
+The existing local model lane and no-replay reservation still limit execution.
+A large queue may delay execution; this is not unlimited parallel model capacity.
+
+The distributed Android APK generates its installation identity in no-backup
+local storage. Remove the obsolete `ENMORI_AI_COMPANION_INSTALLATION_REF` define;
+it is not read by the ordinary bootstrap. Push opt-in remains per account/device.
+Existing fixed-build registrations require explicit enable in the new app to
+create current ownership records. Do not pre-enrol accounts, reset daily limits
+or transfer old registrations in an operator script.
+
+Private metadata: `proactive_installations/{installationRef}` and
+`proactive_token_owners/{sha256(fcmToken)}` each hold only `ownerAccountId`,
+`installationRef`, `registrationRevision`. Only authenticated registration writes
+these pointers; claim dispatch rechecks both within its transaction. Replacement
+and revocation delete old pointers only while they still belong to that exact
+owner/revision. No client Firestore access or new public endpoint is added.

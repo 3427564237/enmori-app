@@ -1,3 +1,6 @@
+import "../features/recommendation_profile/recommendation_profile_providers.dart";
+import "../features/recommendation_profile/data/backend_recommendation_profile_repository.dart";
+import "../features/recommendation_profile/data/device_region_repository.dart";
 import '../features/event_detail/data/platform_event_actions.dart';
 import '../core/presentation/identity_avatar.dart';
 import '../features/account/presentation/authenticated_avatar.dart';
@@ -280,12 +283,21 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       ownAvatarRepositoryProvider.overrideWithValue(
         BackendOwnAvatarRepository(_api, shared: true),
       ),
+      regionRepositoryProvider.overrideWith((ref) => DeviceRegionRepository()),
+      recommendationProfileRepositoryProvider.overrideWith(
+        (ref) => BackendRecommendationProfileRepository(
+          ref.watch(backendApiClientProvider),
+        ),
+      ),
       accountPreferencesRepositoryProvider.overrideWithValue(
         BackendAccountPreferencesRepository(_api),
       ),
       if (widget.dualAccounts)
-        eventRecommendationRepositoryProvider.overrideWithValue(
-          BackendEventRecommendationRepository(_api),
+        eventRecommendationRepositoryProvider.overrideWith(
+          (ref) => BackendEventRecommendationRepository(
+            _api,
+            activityAreaCode: () => ref.read(activityAreaProvider).code,
+          ),
         ),
       interestRepositoryProvider.overrideWithValue(
         BackendInterestRepository(_api),

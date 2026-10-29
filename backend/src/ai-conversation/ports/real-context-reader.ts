@@ -1,3 +1,4 @@
+import type { CloudAiConsent } from "../../account/domain/cloud-ai-consent.js";
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
 import type { PersonaProjection } from "./conversation-lifecycle.js";
@@ -19,6 +20,9 @@ export type ContextReadResult<T> = { readonly kind: "read"; readonly value: T }
   | { readonly kind: ContextReadFailure };
 
 export interface ReadAuthority {
+  readonly cloudAiConsent?: CloudAiConsent;
+  readonly cloudAiConsentGeneration?: number;
+  readonly cloudAiConsentUnavailable?: true;
   readonly ownerId: string;
   readonly completed: boolean;
   readonly purpose: "checkin_conversation";

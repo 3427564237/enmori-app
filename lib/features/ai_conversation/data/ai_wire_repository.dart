@@ -779,7 +779,16 @@ AiMessage _message(Object? value) {
   final dto = _object(
     value,
     {'messageId', 'sequence', 'role', 'persistedAt', 'availability'},
-    {'text', 'origin', 'occurrenceId', 'category', 'sources'},
+    {
+      'text',
+      'origin',
+      'occurrenceId',
+      'category',
+      'sources',
+      'processing',
+      'provider',
+      'disclosureVersion',
+    },
   );
   final sequence = dto['sequence'];
   _require(sequence is int && sequence > 0 && sequence <= _maxSafeInteger);
@@ -806,6 +815,19 @@ AiMessage _message(Object? value) {
     );
     occurrenceId = _id(dto['occurrenceId']);
     origin = AiMessageOrigin.proactive;
+  }
+  final cloudProcessed =
+      dto.containsKey('processing') ||
+      dto.containsKey('provider') ||
+      dto.containsKey('disclosureVersion');
+  if (cloudProcessed) {
+    _require(
+      role == AiRole.assistant &&
+          availability == AiAvailability.available &&
+          dto['processing'] == 'cloud' &&
+          dto['provider'] == 'groq' &&
+          dto['disclosureVersion'] == 'groq_cloud_v1',
+    );
   }
   List<AiSourceCard> sources = const [];
   if (dto.containsKey('sources')) {
@@ -837,6 +859,7 @@ AiMessage _message(Object? value) {
     origin: origin,
     occurrenceId: occurrenceId,
     sources: sources,
+    cloudProcessed: cloudProcessed,
   );
 }
 

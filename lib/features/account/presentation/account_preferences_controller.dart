@@ -143,6 +143,7 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
   Future<void> saveSettings(
     CheckInVisibility visibility,
     OptionalProcessingConsent consent, {
+    CloudAiConsent? cloudAiConsent,
     bool? defaultCheckInLocation,
     bool? defaultCheckInWeather,
     bool? homeWeatherAuto,
@@ -152,6 +153,7 @@ final class AccountPreferencesController extends Notifier<PreferencesState> {
     if (state.phase != PreferencesPhase.ready || settings == null) return;
     await _save(
       () => _repository.saveSettings(
+        cloudAiConsent: cloudAiConsent,
         defaultCheckInLocation: defaultCheckInLocation,
         defaultCheckInWeather: defaultCheckInWeather,
         homeWeatherAuto: homeWeatherAuto,

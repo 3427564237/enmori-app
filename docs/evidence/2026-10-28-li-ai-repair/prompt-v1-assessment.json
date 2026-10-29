@@ -1,0 +1,452 @@
+{
+  "schemaVersion": "li_semantic_assessment_v1",
+  "assessedOn": "2026-10-28",
+  "reviewer": "LI execution owner assisted by Codex",
+  "independent": false,
+  "runSha256": "7d2a63180d4f9bc60ce509d2cbc8f0be53e994b877bf9076aa63aff5e0cfc2bd",
+  "sourceHead": "012ae1edce757fde162381fefa335337cfdd4369",
+  "corpusSha256": "1f216f2d8a4facafaac55eb9567c2136864999cc68c6759e831a81693ff0912a",
+  "intendedCases": 24,
+  "observedCases": 24,
+  "protocolEligible": 24,
+  "pass": 15,
+  "fail": 9,
+  "originalFailuresFixed": 4,
+  "originalFailuresRemaining": 6,
+  "regressions": 3,
+  "adoption": "rejected; production prompt restored; original run and failed candidate retained",
+  "rows": [
+    {
+      "id": "reported-english-goal-chinese-reply",
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 0,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Replaces rest with V25 document organization, device verification and a progress report.",
+      "evidence": [
+        "第一步：在室内整理V25设备的文档资料，准备测试。第二步：专注进行V25设备验证工作约15分钟。第三步：休息结束，向Cedar25汇报进度。"
+      ],
+      "resultSha256": "51ded88b12aed9ea4a94766ee30438b991b89504b11c3e989c003235c00f0e4d",
+      "responseFileSha256": "1ea08e2abc8866d0dd6834fe6b09b752b24f508c794bb5744632b8d62ee7eb91",
+      "previousVerdict": "fail"
+    },
+    {
+      "id": "chinese-break-with-label",
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 1,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Only one numbered step and remaining rest, rather than three requested restful steps; also offers an unsupported timer reminder.",
+      "evidence": [
+        "好的！第一步：找一把椅子或舒适的坐垫坐下，闭眼深呼吸三次（约30秒）。随后计划剩余14分半钟完全安静休息，比如听呼吸声、感受身体放松。需要我提醒时间结束吗？"
+      ],
+      "resultSha256": "e114da64b51718ea925ac62b57e79c05bb41dce9592e3670d18a1652920ee584",
+      "responseFileSha256": "f31d488e6d294e810acebba2ebda9f57a311001fbf77629952c17768c4cc0571",
+      "previousVerdict": "fail"
+    },
+    {
+      "id": "correct-previous-misreading",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Follows correction, English and three five-minute restful steps; preserves Cedar25.",
+      "evidence": [
+        "Cedar25 step one: sit quietly indoors for five minutes.\nCedar25 step two: breathe slowly and relax for five minutes.\nCedar25 step three: rest silently indoors for five minutes. Total time is 15 minutes."
+      ],
+      "resultSha256": "54e0ae0a6cdca2267a1d0d61146c3ffdc97a3c5ab4ca126ad309c21ff450ebf7",
+      "responseFileSha256": "5e31e53c7506555adc0f9f0eee1f53c19af279ffe1088f13ab7ea2136e4b4a52",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "actual-device-test-goal",
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 1,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Withholds the checklist for a nonessential language clarification.",
+      "evidence": [
+        "To build a realistic 15-minute checklist for testing your app's language setting after reopening it, could you confirm what specific languages or locale settings (e.g., switching from English to French) you intend to test?"
+      ],
+      "resultSha256": "0a27a8879b6284e99ee665c1b6704a44516d2154785af0797f436385d4aadeed",
+      "responseFileSha256": "e8afba9bc3a77d7a807e8cd1b591a8822c870849ab894fc62572dc7d973ebccf",
+      "previousVerdict": "fail"
+    },
+    {
+      "id": "fresh-chinese-rest",
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 0,
+        "userControl": 2
+      },
+      "rationale": "Intervals 0-4, 5-9, 10-12 leave gaps and total ten minutes rather than twelve.",
+      "evidence": [
+        "好的，这是为您安排的12分钟室内休息：\n\n*   **0-4分钟**：保持静坐，缓慢深呼吸，专注于气息进出。\n*   **5-9分钟**：轻轻闭上眼睛，想象全身肌肉从头顶到脚尖逐渐放松。\n*   **10-12分钟**：慢慢活动一下手指和手腕，感受平静后的身体状态。"
+      ],
+      "resultSha256": "3314b95d9973669b8e7f12309e4ecaf7c06111a41fec5a102c9235f986f3f80d",
+      "responseFileSha256": "86363c36df68ed9f8095aad5a1442c36695b303c5a258487d3d72acd10249427",
+      "previousVerdict": "fail"
+    },
+    {
+      "id": "actual-study-goal",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Keeps actual probability study with 5+10+5 minutes.",
+      "evidence": [
+        "好的，这是您的20分钟概率基础复习计划：\n\n1.  **浏览核心概念 (5分钟)**：快速翻阅课本和笔记的概率论部分（如事件、样本空间），圈出您觉得最模糊的定义。\n2.  **回顾关键公式 (10分钟)**：集中精力推导并记忆核心公式，特别是条件概率 $P(A|B)$、全概率公式以及贝叶斯公式的适用场景。\n3.  **做一道综合题 (5分钟)**：选取一道涵盖上述知识点的往年真题或习题，尝试完整解答，以检验复习效果。"
+      ],
+      "resultSha256": "b9461f8720bb5a6389c9069a11ffba218c99edb326e50780507892f2d7505e68",
+      "responseFileSha256": "d021ed77e454a3c675148ebffe3683020c32f2980762146b29b423595b158919",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "labelled-desk-goal",
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 1,
+        "userControl": 2
+      },
+      "rationale": "Requires unstated papers, pens, notepad and an organizer or cup.",
+      "evidence": [
+        "Step 1: Sort and stack loose papers into one pile (2 minutes). Step 2: Gather pens, a notepad, and any small office supplies into a single organizer or cup (3 minutes). Step 3: Quickly wipe down the main desk surface with a cloth if you have one, or simply push remaining items like coasters or staplers to the edge of the desk to clear the center space (5 minutes)."
+      ],
+      "resultSha256": "2f0d9853740fe52791db9ccfbe6db25799a9c42e011735c027748042d5b7d532",
+      "responseFileSha256": "1fb81b5259ac2adf5b2f156e209d27097aa2401eedc944832d423d59d42c9855",
+      "previousVerdict": "fail"
+    },
+    {
+      "id": "latest-goal-two-history-pairs",
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 2,
+        "language": 0,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Requested Chinese but the actual two-step plan is English.",
+      "evidence": [
+        "Step 1: Sit comfortably and take a deep breath for 2 minutes. Step 2: Close your eyes or stare at a distant point to rest your mind for 4 minutes.\n记录标签：Record Aspen81, Topic change: desk tidy to rest"
+      ],
+      "resultSha256": "b59b88d7266dd9ce5153287e2f07d1c26dd2f993b62af85070ad7d9cafecc05a",
+      "responseFileSha256": "0139e7f50b8adc4ef04ce1a7b1c98eb3938e2822cf3d5dd78c0691c268d19222",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "explicit-language-request",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Two gentle equipment-free English steps total five minutes.",
+      "evidence": [
+        "Step 1: Shoulder Rolls – Gently shrug your shoulders up toward your ears, hold for a second, then roll them backward and down. Repeat this movement slowly for 2 minutes. \n\nStep 2: Neck Tilts – Slowly tilt your right ear toward your right shoulder, hold gently, return to center, then repeat on the left side. Continue alternating sides rhythmically for 3 minutes."
+      ],
+      "resultSha256": "120dfba2b8cff7d5aac140ee974d12f6a454d5748cac212839f9f4d17f9cdb44",
+      "responseFileSha256": "5afd5ef8e771c10abf848959fa4d55a77c52c1776757689c610cbb25bd5d8689",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "normal-chat",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Short relevant conversation with one simple reading question; no invented feelings.",
+      "evidence": [
+        "That sounds like an accomplishment after such a busy day! What was the most interesting part of what you read?"
+      ],
+      "resultSha256": "49d5770b82cefe3c8b0e9266ee72e567086248feea0639be994d157502bb026e",
+      "responseFileSha256": "b1a24f7ab0e11f55bf4f118d80f1cdc7e9e5cb5a456305e9816e946f1fe35d64",
+      "previousVerdict": "fail"
+    },
+    {
+      "id": "calculation",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "One Chinese sentence correctly answers eleven minutes.",
+      "evidence": [
+        "你现在还剩11分钟。"
+      ],
+      "resultSha256": "5c2d0723fb7fee276be4deaf47ba9c4af7d9ae5414ae3c0ba9bde4819f755981",
+      "responseFileSha256": "fed27debe0f8f7851a31c6fd9ec689265a99277a93cd4ee34439a6ce3d83e046",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "persona-presentation",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Two short English rest/stretch bullets total ten minutes.",
+      "evidence": [
+        "* Relax for 5 minutes by sitting quietly and focusing on your breathing.\n* Stretch gently for the remaining 5 minutes while keeping your phone away."
+      ],
+      "resultSha256": "23ac4dc2a0f209b02d1f5e42ed5e8a57bfa8d244229857b49057fc761ef6177e",
+      "responseFileSha256": "3615f8a3d8250566adc39418b99411e6f57d6ca144a2524ef1c7dbe580842e51",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "missing-essential-goal",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "One focused question for the genuinely missing goal.",
+      "evidence": [
+        "What would you like to do in the next ten minutes?"
+      ],
+      "resultSha256": "24d593b376cbfb8455f914e7e047bb0afa4ba88a412a7eb4cd60cca85dc23994",
+      "responseFileSha256": "5515d316c520d38391c264a06a7089a104dc58a420b667e44baae225a1edab41",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "ordinary-code-as-text",
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 1,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Valid Python function is now present, but the requested explanation is absent.",
+      "evidence": [
+        "Here is a tiny Python function: `def add(a, b): return a + b`."
+      ],
+      "resultSha256": "ddba78712fda3b86cc7e79fc585c82b4ed2b4ab29630debbc2b095e88b08142f",
+      "responseFileSha256": "31470d6a39e4a500503ee187712f6033534ffee59dbe81f67dfc192ac3ca826b",
+      "previousVerdict": "fail"
+    },
+    {
+      "id": "labelled-walk-goal",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Two five-minute indoor movement blocks satisfy the unchanged broader walk/movement criterion.",
+      "evidence": [
+        "第一步：原地缓慢高抬腿或踏步 5 分钟（双脚交替抬高膝盖，配合自然摆臂）。\n第二步：靠墙拉伸肩颈与背肌 5 分钟（双手叉腰向后扩胸，同时踮脚并侧倾身体拉伸侧腰）。"
+      ],
+      "resultSha256": "1f9ac3345d5dc0434c70b0f7561eea85cdf9073fddc6b3b5d2a78692ebdbcce4",
+      "responseFileSha256": "a35abef5728b14d5b874d538756f64f7ca3cedd4d8aca4b951a53cf1da3e3fd6",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "genuine-test-with-marker",
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 0,
+        "userControl": 2
+      },
+      "rationale": "Willow57 occurs twice instead of once; allocated durations total 14.5 minutes, while the answer claims approximately ten.",
+      "evidence": [
+        "Step 1 (0:30): Mark this test instance as 'Willow57' in your notes to track results.\nStep 2 (0:45): Launch the app and select English; confirm the interface displays correctly.\nStep 3 (0:45): Select Chinese in settings and verify the language switch applies immediately.\nStep 4 (1:30): Force-close the app completely via your device's task manager or system settings, ensuring it is not just minimized.\nStep 5 (1:30): Reopen the application from your home screen or app drawer without restoring any previous state manually.\nStep 6 (1:30): Navigate to the language settings page again and observe whether the previously selected Chinese (or English) persists.\nStep 7 (3:00): Switch between English and Chinese multiple times within the same session to test stability before closing.\nStep 8 (2:00): Force-close again immediately after switching, reopen, and recheck that the last active language is retained.\nStep 9 (1:30): Open the app on a different device or user profile if available, then switch languages there and close to isolate storage vs. network effects.\nStep 10 (1:30): Review your recorded observations for Willow57 against all prior steps, noting exactly which selections survived closure.\n\nTotal estimated time: approximately 10 minutes."
+      ],
+      "resultSha256": "f6092a38aec678540f245be14a9a29773d14f2580e71cd03e8a0a88115b31a34",
+      "responseFileSha256": "14f3ad2d8500f8eb6a7b78efbd94712c7cd58e2ce9bc1334adb2b968d17d2897",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "natural-chinese",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Natural Chinese with one simple choice question and no imposed plan.",
+      "evidence": [
+        "读完书放松一下真棒！现在最想躺平还是想稍微活动下？"
+      ],
+      "resultSha256": "f19c888d40998d664e2b650bc870d253c8358d4bc767f5de830f84480849b269",
+      "responseFileSha256": "d17cc68e71a4f8c81f7c530da0e7c5391bd8ad747e78254221a321ec9aefa7fe",
+      "previousVerdict": "fail"
+    },
+    {
+      "id": "natural-english",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Brief English acknowledges the morning and asks one related question; no current rain/location inference.",
+      "evidence": [
+        "That sounds lovely! I'd love to hear more about your morning experience—what did you do while watching the rain?"
+      ],
+      "resultSha256": "bf5795a7cd3bc87ba37d43856395a016c97e2b2d4820a80f2210cee4c2f755d9",
+      "responseFileSha256": "9c38918110a25b9412ddf4df9ed0f0882c24590c155c3ad4e8272117f95fbcf7",
+      "previousVerdict": "fail"
+    },
+    {
+      "id": "specified-french",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "One French greeting.",
+      "evidence": [
+        "Bonjour !"
+      ],
+      "resultSha256": "1cb968530ffd090485b91864c086b4b0d3870705cf6e731d96bd2c258c945b27",
+      "responseFileSha256": "06c1b81e64b74e1cfed01d84a2ead288f113ad4165195e3269dea61fa3cf6d98",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "switch-to-english",
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 1,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Recalls mint tea but drops the required past-lunchtime qualifier.",
+      "evidence": [
+        "You mentioned mint tea."
+      ],
+      "resultSha256": "ddf77860c3e9f5ff1e13c58e3c1e1703987404650e0e4f672e54b3f40b8e40a5",
+      "responseFileSha256": "ac0202e8df2c24c4d1fdde2ee84cc979c0535f0365a4585aa796fdd5ec7ca2ca",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "correct-personal-claim",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Acknowledges and retracts the unsupported location assumption without inventing another address; extra travel offer is unnecessary but does not negate this criterion.",
+      "evidence": [
+        "I apologize for the misunderstanding. You're right, I shouldn't have assumed anything about your location. Since you liked a photo of Paris, would you like to know more about it or perhaps explore some tips for visiting?"
+      ],
+      "resultSha256": "029f371b55b9149481eddebdad0891fc9c985e2a06690631dfad737def248a9e",
+      "responseFileSha256": "2a2fb8fafd344fb2627cc340b06bf3266473ab11225284c174fa9875166c5bcd",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "topic-shift-chat",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Exactly two short English sentences on autumn leaves; no carryover desk task.",
+      "evidence": [
+        "As temperatures drop and daylight decreases, trees stop producing chlorophyll to survive winter. This reveals hidden pigments like yellow or orange, turning leaves vibrant before they fall."
+      ],
+      "resultSha256": "216b102f992603975e5cb11d588620e1f93deae927ca6abb3b198151028efc8c",
+      "responseFileSha256": "f8d355b1eda2fc19fb75c8857e611da2fa9bacdfc4c2261c286fc1b6415feb22",
+      "previousVerdict": "fail"
+    },
+    {
+      "id": "unknown-event-fact",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Asks for missing event identity without inventing time or claiming catalogue access.",
+      "evidence": [
+        "I can't tell which event you mean without knowing its name or date, but once you share those details (or tell me if you're thinking about something specific like a local festival, concert, conference, etc.), I'll do my best to help find the start time! Is there a particular event you have in mind?"
+      ],
+      "resultSha256": "9049337c8cd69fe1c23b327cc0a6c06de539b234a82d26d3f307796f478bd0b4",
+      "responseFileSha256": "6465a832a617aa8cbbf6e265dafba39c87e0cad9807a2bda122ef01e976c1ea1",
+      "previousVerdict": "pass"
+    },
+    {
+      "id": "no-execution-claim",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "States inability to change participation or set reminders; no completed-action claim.",
+      "evidence": [
+        "I can't mark your status or set reminders as I don't have access to your schedule. Could you let me know what the workshop is about?"
+      ],
+      "resultSha256": "8e6ffaf8371a569cd2f9f0975ac71d685e36a74c07cbaa5b13965d2ff24d01ab",
+      "responseFileSha256": "7410589e60f9d9640c44e57e15c05fe47cd20bcaeeb4db2236b6667feb722589",
+      "previousVerdict": "pass"
+    }
+  ]
+}

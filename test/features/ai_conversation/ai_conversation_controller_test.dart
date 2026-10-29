@@ -247,17 +247,52 @@ void main() {
   );
 
   testWidgets(
-    'unknown request cannot be bypassed by history selection or New',
+    'unknown target stays guarded after history selection and an independent topic',
     (tester) async {
       final r = await _Rig.create(tester);
+      r.repo.historyResult = Future.value(
+        Success(
+          AiConversationHistoryPage(
+            conversations: [
+              AiConversationSummary(
+                conversationId: 'previous',
+                lastMessageAt: _date,
+              ),
+              AiConversationSummary(
+                conversationId: 'conversation',
+                lastMessageAt: _date,
+              ),
+            ],
+          ),
+        ),
+      );
       await r.controller.loadConversations();
       r.repo.executeResult = Future.value(const Failure(_unresolved));
       await r.controller.send('note');
-      expect(r.state.canSelectConversation, isFalse);
+      expect(r.state.canSend, isFalse);
+      expect(r.state.canSelectConversation, isTrue);
       await r.controller.selectConversation('previous');
+      expect(r.state.conversationId, 'previous');
+      expect(r.state.canSend, isTrue);
+      await r.controller.selectConversation('conversation');
+      expect(r.state.canSend, isFalse);
+      expect(r.state.canRetry, isFalse);
+      expect(r.state.canCheckResult, isTrue);
       r.controller.startNewConversation();
+      expect(r.state.conversationId, isNull);
+      expect(r.state.canSend, isTrue);
+      await r.controller.selectConversation('conversation');
       expect(r.state.conversationId, 'conversation');
-      expect(r.repo.messageTargets, isEmpty);
+      expect(r.state.canSend, isFalse);
+      expect(r.state.canRetry, isFalse);
+      await r.controller.send('must not bypass original unknown');
+      await r.controller.retry('note');
+      expect(r.repo.messageTargets, [
+        'previous',
+        'conversation',
+        'conversation',
+      ]);
+      expect(r.repo.prepares, hasLength(1));
       expect(r.repo.executes, hasLength(1));
       r.dispose();
     },
@@ -307,7 +342,7 @@ void main() {
   );
 
   testWidgets(
-    'New conversation cannot bypass pending generation or an unknown outcome',
+    'New topic waits for dispatch to finish and never replays an unknown outcome',
     (tester) async {
       final r = await _Rig.create(tester);
       final reply = Completer<Result<AiReply>>();
@@ -320,10 +355,13 @@ void main() {
       expect(r.state.conversationId, conversation);
       reply.complete(const Failure(_unresolved));
       await tester.pump();
-      expect(r.state.canStartNewConversation, isFalse);
+      expect(r.state.canStartNewConversation, isTrue);
       r.controller.startNewConversation();
-      expect(r.state.conversationId, conversation);
+      expect(r.state.conversationId, isNull);
+      expect(r.state.messages, isEmpty);
+      expect(r.state.canSend, isTrue);
       expect(r.repo.prepares, hasLength(1));
+      expect(r.repo.executes, hasLength(1));
       r.dispose();
     },
   );

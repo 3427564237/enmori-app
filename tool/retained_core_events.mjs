@@ -1,3 +1,9 @@
+import { readOnePaCatalogue } from '../backend/dist/src/event-browse/infrastructure/onepa-public-catalogue.js';
+import { OnePaPublicReader } from '../backend/dist/src/event-browse/infrastructure/onepa-public-reader.js';
+import { OnePaBrowseSource } from '../backend/dist/src/event-browse/infrastructure/onepa-browse-source.js';
+import { CombinedEventSource } from '../backend/dist/src/event-browse/infrastructure/combined-event-source.js';
+import { EnrichedTicketmasterSource } from '../backend/dist/src/event-browse/infrastructure/enriched-ticketmaster-source.js';
+import { PublicEventBrowser } from '../backend/dist/src/event-browse/infrastructure/public-event-pages.js';
 /** Explicit local configuration only. Never discover keys or log file contents. */
 import { constants, openSync, fstatSync, readFileSync, closeSync, realpathSync } from 'node:fs';
 import { isAbsolute, join } from 'node:path';
@@ -15,7 +21,7 @@ function privateJson(path) {
   } finally { closeSync(fd); }
 }
 
-export function retainedCoreEvents(directory, requested, enabled) {
+export function retainedCoreEvents(directory, requested, enabled, batchTimeoutMs) {
   if (!requested) return { configuration: 'not_requested' };
   try {
     const config = privateJson(join(directory, 'event-source.json'));
@@ -30,7 +36,7 @@ export function retainedCoreEvents(directory, requested, enabled) {
     return {
       configuration: 'configured',
       input: {
-        source: new TicketmasterBrowseSource({ key: () => credential.apiKey, enabled }),
+        source: new CombinedEventSource(new EnrichedTicketmasterSource(new TicketmasterBrowseSource({ key: () => credential.apiKey, enabled }), new PublicEventBrowser(category => console.warn(JSON.stringify({dependency: 'ticketmaster', errorCategory: category})))), new OnePaBrowseSource(enabled, new OnePaPublicReader().read, readOnePaCatalogue), batchTimeoutMs),
         musicInterestTagId: config.musicInterestTagId,
       },
     };

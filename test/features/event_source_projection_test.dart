@@ -1,3 +1,4 @@
+import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/auth/auth_providers.dart';
 import 'package:enmori/features/event_browse/domain/activity_repository.dart';
@@ -54,6 +55,9 @@ void main() {
         ProviderScope(
           overrides: [
             currentAuthSubjectProvider.overrideWithValue('controlled-owner'),
+            authSessionProvider.overrideWith(
+              (ref) => const Stream<AuthSession>.empty(),
+            ),
             eventDetailRepositoryProvider.overrideWithValue(repository),
             eventDetailSourceActionsProvider.overrideWithValue(actions),
           ],
@@ -69,6 +73,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(actions.opened, isEmpty);
+
       expect(find.text('End time not provided.'), findsOneWidget);
       await tester.ensureVisible(
         find.byKey(const Key('event-detail-open-source')),

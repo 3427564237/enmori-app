@@ -114,7 +114,7 @@ void main() {
   });
 
   testWidgets(
-    'unknown entry keeps recovery through its authorized message read',
+    'unknown entry bounds automatic readback and keeps independent navigation explicit',
     (tester) async {
       final ready = _ready();
       final controller = _Controller(
@@ -126,27 +126,32 @@ void main() {
           conversations: ready.conversations,
           historyLoaded: true,
           canBrowseHistory: true,
+          canStartNewConversation: true,
+          canSelectConversation: true,
           canCheckResult: true,
           canLeaveWithoutRetrying: true,
         ),
       );
       await _pump(tester, controller);
       expect(controller.reads, [null]);
-      expect(controller.checks, 0);
+      expect(controller.checks, 1);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(seconds: 30));
+      expect(controller.checks, 3);
       expect(find.byKey(const Key('ai-entry-empty')), findsNothing);
-      expect(find.byKey(const Key('ai-check-result')), findsOneWidget);
       expect(
         tester
             .widget<IconButton>(find.byKey(const Key('ai-new-conversation')))
             .onPressed,
-        isNull,
+        isNotNull,
       );
       await _openHistory(tester);
       expect(
         tester
             .widget<ListTile>(find.byKey(const Key('ai-history-other')))
             .enabled,
-        isFalse,
+        isTrue,
       );
       expect(
         tester
@@ -158,6 +163,15 @@ void main() {
       await tester.pumpAndSettle();
       expect(controller.selected, isEmpty);
       expect(controller.newTopics, 0);
+      expect(controller.sends, 0);
+      expect(controller.retries, 0);
+      await tester.tap(find.byKey(const Key('ai-conversation-actions')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-check-result-menu')), findsOneWidget);
+      expect(controller.checks, 3);
+      await tester.tap(find.byKey(const Key('ai-check-result-menu')));
+      await tester.pumpAndSettle();
+      expect(controller.checks, 4);
       expect(controller.sends, 0);
       expect(controller.retries, 0);
       expect(tester.takeException(), isNull);

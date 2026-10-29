@@ -84,7 +84,7 @@ test("completed owner with optional processing rejected gets minimized fresh res
   try {
     for (let i = 0; i < 2; i++) {
       const r = await app.inject({ url: paths[0]!, headers }); assert.equal(r.statusCode, 200);
-      assert.deepEqual(r.json(), { asOf, scope: "ticketmaster_sg_first_batch_v1", items: [{ browseId: item.browseId, title: item.title, startAt: item.startAt }] });
+      assert.deepEqual(r.json(), { asOf, scope: "ticketmaster_sg_first_batch_v1", items: [{ browseId: item.browseId, title: item.title, startAt: item.startAt,locationLabel:item.locationLabel }] });
       assert.equal(r.headers["cache-control"], "no-store");
     }
     const detail = await app.inject({ url: paths[1]!, headers }); assert.equal(detail.statusCode, 200); assert.deepEqual(detail.json(), item);

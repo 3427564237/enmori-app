@@ -73,6 +73,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    - assets/regions/sg-planning-areas-2025.json
     - assets/fonts/playfair_display/OFL.txt
   fonts:
     - family: Playfair Display

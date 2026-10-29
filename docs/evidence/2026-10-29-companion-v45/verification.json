@@ -1,0 +1,16 @@
+{
+  "sourceCommit": "2fed011",
+  "apk": {
+    "path": "build/group-delivery-v45/ENMORI-group-v45-release.apk",
+    "versionCode": 45,
+    "sha256": "92ec68485b0ba6390f9099c013e38578a7650020ceb39d967d2c42e8293ab2fd",
+    "signerMatchesV44": true
+  },
+  "effectiveCompanionFlag": true,
+  "installationBindingConfigured": false,
+  "testsPassed": 27,
+  "missingFlagBuildRejected": true,
+  "physicalDeviceVerified": false,
+  "workerConfigured": false,
+  "pushConfigured": false
+}

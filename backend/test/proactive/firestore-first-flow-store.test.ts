@@ -1,3 +1,7 @@
+import { FirstFlowApplication } from "../../src/proactive/application/first-flow-application.js";
+import { AccountFirstFlowDueWorker } from "../../src/proactive/application/account-due-worker.js";
+import { createAccountScopedFirstFlowStore } from "../../src/proactive/infrastructure/account-scoped-first-flow-store.js";
+import { FirestoreProactiveAccountRoster } from "../../src/proactive/infrastructure/firestore-account-roster.js";
 import assert from "node:assert/strict";
 import { MetadataFirestoreGateway } from "../support/metadata-firestore-gateway.js";
 import test from "node:test";
@@ -15,7 +19,7 @@ const environment={ENMORI_ENVIRONMENT:"test",ENMORI_CONTROLLED_PROFILE_DIRECTORY
 const settings:FirstFlowSettingsInput={mode:"on",categories:["explicit_follow_up"],timeZone:"UTC",quiet:{kind:"window",startMinute:1320,endMinute:480},maximumInRolling24h:1,cooldownMinutes:480,pushEnabled:true,preview:"generic"};
 function value<T>(r:FirstFlowResult<T>):T{assert.equal(r.kind,"ok");if(r.kind!=="ok")throw Error("Expected ok");return r.value;}
 
-function fixture(configured=true){
+function fixture(configured=true, serviceLeaseMs?:number){
   const g=new MetadataFirestoreGateway(start);let live=true,checks=0;
   g.put(`auth_bindings/${createAuthBindingDocumentId(principal.firebaseUid)!}`,{accountId:owner});
   g.put(base,{username:"first_flow_owner",optionalProcessingConsent:"accepted",checkInVisibility:"private",onboardingCompletedAt:new Date(start).toISOString(),purposeRevocationGeneration:0});
@@ -28,7 +32,7 @@ function fixture(configured=true){
   const conversations=new FirestoreConversationStore(g,environment,()=>g.now);
   const store=new FirestoreFirstFlowStore(g,environment,{ownerAccountId:owner,utcMilliseconds:()=>g.now,
     conversationTransaction:(tx,p,o,current)=>conversations.firstFlowTransaction(tx,p,o,current),
-    ...(configured?{installationRef:installation,registrationLeaseExpiresAt:new Date(start+45*60000).toISOString()}: {})});
+    ...(configured?{installationRef:installation,...(serviceLeaseMs===undefined?{registrationLeaseExpiresAt:new Date(start+45*60000).toISOString()}:{registrationLeaseDurationMs:serviceLeaseMs})}: {})});
   const actor:ProactiveActor={principal,current:()=>live,verifyCurrentAuth:async()=>{checks++;return {kind:"verified",principal};}};
   const create=async(n=10)=>value(await store.createIntent(actor,{intentId:id(n),conversationId:topic,sourceMessageId:user,category:"explicit_follow_up",dueAt:new Date(start+60000).toISOString(),timeZone:"UTC",processing:"local",expectedSettingsRevision:1}));
   const enable=async()=>value(await store.replaceSettings(actor,0,settings));
@@ -60,6 +64,20 @@ test("restart expires a stale queued occurrence; idempotent readback never resur
   const read=value(await restarted.intent(f.actor,old.intentId));assert.equal(read.state,"expired");
   assert.equal((await restarted.reserve(f.actor,read.intentId,read.revision)).kind,"conflict");
   const settings=value(await restarted.settings(f.actor));assert.equal(settings.revision,1);
+});
+
+test('service registration expiry is finite, dispatch never renews it, and explicit registration renews',async()=>{
+  const f=fixture(true,60000);await f.enable();
+  const command={expectedRevision:0,installationRef:installation,registrationKind:'fcm_token' as const,registrationValue:'synthetic-token',enabled:true as const};
+  const registered=value(await f.store.replaceRegistration(f.actor,command));
+  assert.equal(registered.expiresAt,new Date(start+60000).toISOString());
+  const p=await f.publish(await f.reserve(await f.create()));
+  assert.equal((await f.store.claimDispatch(f.actor,p.intentId,p.revision)).kind,'denied');
+  assert.equal(value(await f.store.registration(f.actor)).availability,'expired');
+  const renewed=value(await f.store.replaceRegistration(f.actor,{...command,expectedRevision:1}));
+  assert.equal(renewed.expiresAt,new Date(start+120000).toISOString());
+  value(await f.store.claimDispatch(f.actor,p.intentId,p.revision));
+  assert.equal(value(await f.store.registration(f.actor)).expiresAt,renewed.expiresAt);
 });
 
 test("F0 defaults off, no implicit confirmed zone, no registration secret in metadata",async()=>{
@@ -153,4 +171,102 @@ test("preview-only settings edits preserve grants; expiry and registration lease
 });
 test("recovery with no saved settings is a read-only empty set and does not create an invalid revision zero row",async()=>{
   const f=fixture();assert.deepEqual(value(await f.store.recover(f.actor)),[]);assert.equal(f.g.writes,0);assert.equal(value(await f.store.settings(f.actor)).revision,0);
+});
+
+function ordinaryFixture(){
+  const f=fixture(false),otherOwner=id(100),otherBase=`accounts/${otherOwner}`;
+  for(const [path,row] of [...f.g.rows])if(path===base||path.startsWith(base+"/")){
+    const data={...structuredClone(row.data),...(path===base?{username:"ordinary_other"}:{})};
+    f.g.put(path.replace(base,otherBase),data,row.createTime.seconds*1000+row.createTime.nanoseconds/1e6);
+  }
+  const otherPrincipal={firebaseUid:"ordinary-second-account"};
+  f.g.put(`auth_bindings/${createAuthBindingDocumentId(otherPrincipal.firebaseUid)}`,{accountId:otherOwner});
+  const other:ProactiveActor={principal:otherPrincipal,current:()=>true,verifyCurrentAuth:async()=>({kind:"verified",principal:otherPrincipal})};
+  const store=createAccountScopedFirstFlowStore(f.g,environment,{utcMilliseconds:()=>f.g.now,accountScopedRegistration:true,registrationLeaseDurationMs:30*86400000,
+    conversationTransaction:(tx,p,o,live)=>f.conversations.firstFlowTransaction(tx,p,o,live)});
+  const register=(a:ProactiveActor,installationRef:string,token:string,expectedRevision=0)=>store.replaceRegistration(a,{expectedRevision,installationRef,registrationKind:"fcm_token",registrationValue:token,enabled:true});
+  const create=(a:ProactiveActor,n:number)=>store.createIntent(a,{intentId:id(n),conversationId:topic,sourceMessageId:user,category:"explicit_follow_up",dueAt:new Date(start+60000).toISOString(),timeZone:"UTC",processing:"local",expectedSettingsRevision:1});
+  return {...f,store,other,otherBase,register,create};
+}
+
+test("ordinary accounts have independent defaults, settings, sources and opaque occurrence ownership",async()=>{
+  const f=ordinaryFixture();
+  assert.equal(value(await f.store.settings(f.actor)).mode,"off");assert.equal(value(await f.store.settings(f.other)).mode,"off");
+  value(await f.store.replaceSettings(f.actor,0,settings));
+  assert.equal(value(await f.store.settings(f.other)).mode,"off");
+  value(await f.store.replaceSettings(f.other,0,settings));
+  value(await f.create(f.actor,401));value(await f.create(f.other,402));
+  assert.equal((await f.store.intent(f.other,id(401))).kind,"not_found");
+  assert.equal((await f.store.cancelIntent(f.actor,id(402),1)).kind,"not_found");
+  assert.deepEqual(value(await f.store.activeIntents(f.actor)).map(i=>i.intentId),[id(401)]);
+  assert.deepEqual(value(await f.store.activeIntents(f.other)).map(i=>i.intentId),[id(402)]);
+  const roster=await new FirestoreProactiveAccountRoster(f.g).page(undefined);
+  assert.deepEqual(new Set(roster.actors),new Set([principal.firebaseUid,f.other.principal.firebaseUid]));
+});
+
+test("ordinary installation or token transfer fences the previous account's dispatch without changing its data",async()=>{
+  for(const reuse of ["installation","token"]){
+    const f=ordinaryFixture();value(await f.store.replaceSettings(f.actor,0,settings));value(await f.store.replaceSettings(f.other,0,settings));
+    value(await f.register(f.actor,id(501),"synthetic-token-a"));
+    const i=value(await f.create(f.actor,601));f.g.now=start+60000;
+    const reserved=value(await f.store.reserve(f.actor,i.intentId,i.revision));
+    const published=value(await f.store.publish(f.actor,{reservation:reserved,messageId:id(602),text:"Synthetic follow up",presentation:{presentationMode:"default"}}));
+    const prior=f.g.rows.get(`${base}/proactive_registration/current`);
+    value(await f.register(f.other,reuse==="installation"?id(501):id(502),reuse==="token"?"synthetic-token-a":"synthetic-token-b"));
+    assert.deepEqual(f.g.rows.get(`${base}/proactive_registration/current`),prior);
+    assert.equal(value(await f.store.registration(f.actor)).enabled,false);
+    assert.equal(value(await f.store.registration(f.other)).enabled,true);
+    assert.equal((await f.store.claimDispatch(f.actor,published.intentId,published.revision)).kind,"denied");
+    value(await f.store.deleteRegistration(f.actor,id(501),1));
+    assert.equal(value(await f.store.registration(f.other)).enabled,true,"old owner cleanup cannot release new owner");
+  }
+});
+
+test("ordinary device replacement uses revision, removes old indexes, and denies stale revocation",async()=>{
+  const f=ordinaryFixture();value(await f.store.replaceSettings(f.actor,0,settings));
+  value(await f.register(f.actor,id(701),"token-one"));
+  assert.equal((await f.register(f.actor,id(702),"token-two",0)).kind,"revision_conflict");
+  value(await f.register(f.actor,id(702),"token-two",1));
+  assert.equal(f.g.rows.has(`proactive_installations/${id(701)}`),false);
+  assert.equal((await f.store.deleteRegistration(f.actor,id(701),2)).kind,"denied");
+  assert.equal(value(await f.store.registration(f.actor)).installationRef,id(702));
+  value(await f.store.deleteRegistration(f.actor,id(702),2));
+  assert.equal([...f.g.rows.keys()].some(k=>k.startsWith("proactive_installations/")||k.startsWith("proactive_token_owners/")),false);
+});
+
+test("ordinary identity replacement and consent rejection do not borrow another owner's grant",async()=>{
+  const f=ordinaryFixture();value(await f.store.replaceSettings(f.actor,0,settings));
+  const changed={...f.actor,verifyCurrentAuth:async()=>({kind:"verified" as const,principal:f.other.principal})};
+  assert.equal((await f.store.settings(changed)).kind,"denied");
+  const row=f.g.rows.get(base)!.data;f.g.put(base,{...row,optionalProcessingConsent:"rejected",purposeRevocationGeneration:1});
+  assert.equal((await f.register(f.actor,id(801),"token")).kind,"denied");
+  assert.equal(value(await f.store.settings(f.other)).mode,"off");
+});
+
+
+test("ordinary worker runs two registered owners once, restores after restart and never replays unknown send",async()=>{
+  const f=ordinaryFixture();
+  for(const [a,n] of [[f.actor,901],[f.other,902]] as const){
+    value(await f.store.replaceSettings(a,0,settings));value(await f.register(a,id(n),`synthetic-${n}`));value(await f.create(a,n+10));
+  }
+  f.g.now=start+60000;let models=0,sends=0;
+  const app=new FirstFlowApplication({store:f.store,newMessageId:()=>id(1000+models),nowMs:()=>f.g.now,
+    model:{generate:async()=>{models++;return new TextEncoder().encode(JSON.stringify({schemaVersion:"ai_assistant_message_v1",message:"Synthetic requested reminder"}));}},
+    sender:{sendOnce:async input=>{const dispatch=value(await input.claimAfterCredential());assert(input.current(dispatch.claim));sends++;return {kind:sends===1?"unknown":"accepted"};}}});
+  const options={application:app,roster:new FirestoreProactiveAccountRoster(f.g),actor:(uid:string)=>uid===principal.firebaseUid?f.actor:f.other,current:()=>true,nowMs:()=>f.g.now};
+  const worker=new AccountFirstFlowDueWorker(options);await worker.tick();await worker.stop();
+  assert.equal(models,2);assert.equal(sends,2);
+  assert.equal(value(await f.store.activeIntents(f.actor)).length,0);assert.equal(value(await f.store.activeIntents(f.other)).length,0);
+  assert.deepEqual(new Set([value(await f.store.intent(f.actor,id(911))).dispatchState,value(await f.store.intent(f.other,id(912))).dispatchState]),new Set(["accepted","unknown"]));
+  const restarted=new AccountFirstFlowDueWorker(options);await restarted.tick();await restarted.stop();assert.equal(models,2);assert.equal(sends,2);
+});
+
+test("ordinary roster rotates beyond a full page without reading private message content",async()=>{
+  const g=new MetadataFirestoreGateway(start),seen:string[]=[];
+  for(let i=0;i<27;i++){const uid=`ordinary-roster-${String(i).padStart(3,"0")}`;g.put(`auth_bindings/${createAuthBindingDocumentId(uid)}`,{accountId:id(2000+i)});g.put(`accounts/${id(2000+i)}/proactive_state/current`,{activeIntentIds:[id(3000+i)]});}
+  g.onRead=path=>{seen.push(path);};const roster=new FirestoreProactiveAccountRoster(g);
+  const first=await roster.page(undefined);assert.equal(first.actors.length,25);assert(first.next);
+  const second=await roster.page(first.next);assert.equal(second.actors.length,2);assert.equal(second.next,undefined);
+  assert.equal(new Set([...first.actors,...second.actors]).size,27);
+  assert(seen.every(path=>path==="auth_bindings"||path.endsWith("/proactive_state/current")));
 });

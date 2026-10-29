@@ -1,0 +1,482 @@
+{
+  "schemaVersion": "li_semantic_assessment_v1",
+  "assessedOn": "2026-10-28",
+  "reviewer": "LI execution owner assisted by Codex",
+  "independent": false,
+  "acceptance": "Implementation-owner assessment only. Not independent QA, runtime, physical-device or product acceptance.",
+  "runSha256": "16c63c03e24db8d0676b112b82d5ddbd3c860ebf8155c14dc62afed5381a8b2a",
+  "sourceHead": "cf50715556e6124513305323c2cc4d4d89a508f5",
+  "profile": {
+    "model": "qwen3.5:9b",
+    "contextTokens": 8192,
+    "outputTokens": 512,
+    "thinking": false
+  },
+  "rubric": "tool/ai-companion-eval/README.md, five dimensions, all applicable dimensions must score 2",
+  "intendedCases": 24,
+  "observedCases": 24,
+  "assessedCases": 24,
+  "unreviewedCases": 0,
+  "protocolEligible": 24,
+  "pass": 14,
+  "fail": 10,
+  "newProviderCalls": 0,
+  "rows": [
+    {
+      "id": "reported-english-goal-chinese-reply",
+      "resultSha256": "75e8b96a63e34594067446f10bda14a006fc33487cae0e2f8a454c2164333284",
+      "responseFileSha256": "85209d31e9c32dd6069fca946b53db423726d5272a4627af2d1cccb6c261b999",
+      "requestFileSha256": "3aafd1b0b2c487d185854c08154818defce88158617508a2dd4202e5527755c9",
+      "protocolEligible": true,
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 0,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "The restful goal is replaced with device-verification clarification; only two steps and a sign-off, not three restful steps.",
+      "evidence": [
+        "请告诉我您想测试的 V25 具体是哪方面"
+      ]
+    },
+    {
+      "id": "chinese-break-with-label",
+      "resultSha256": "e0168036413b882898ad0b5ee165d21d2d7ea6ca1951fb9ddddacc689ec3a493",
+      "responseFileSha256": "085ebb62430a77db3669082128fd5a03eab2e53d7ef9896d7da89ac190780e01",
+      "requestFileSha256": "3a6a762a595c27a6081076ec9bbc152f0370d7f12b8ab82a57fc1b514f98f594",
+      "protocolEligible": true,
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 0,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 0,
+        "userControl": 2
+      },
+      "rationale": "Invents studying the record label Maple42 and makes studying part of rest. The numbered intervals also leave gaps.",
+      "evidence": [
+        "回想今天学 Maple42"
+      ]
+    },
+    {
+      "id": "correct-previous-misreading",
+      "resultSha256": "8eb7b3bb2a801bc9378316b2922133724f5dabae547e54d363d92b432604ee3a",
+      "responseFileSha256": "3db433cc6a2e86e20795817fe2d1bd4a5de4d7c293c467cb80038dcf534578d1",
+      "requestFileSha256": "29f19c06e626d9579324a340ba3dad1e61c4e51b35064ff37e9ae2b221e46a7e",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Latest correction and English override prior mistaken assistant interpretation; three restful intervals total 15 minutes and preserve Cedar25.",
+      "evidence": [
+        "Step 2 (3-10 mins)"
+      ]
+    },
+    {
+      "id": "actual-device-test-goal",
+      "resultSha256": "f4b02ba49cb61f9e1e4d9601d21e3e225057deae65539910e917fc2fd2a134f5",
+      "responseFileSha256": "662872bab48f51d8a1b1dacc4caa13ff52a95aa66740d25a2df006f66007e7f4",
+      "requestFileSha256": "423e452468aded17ccf0e5f82f46d574611f31e82dea8d9cdb6c3ea5d57a66d0",
+      "protocolEligible": true,
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 1,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Keeps the real testing topic but withholds the requested short checklist to ask for a framework that is not essential to a UI language persistence check.",
+      "evidence": [
+        "what programming language or framework"
+      ]
+    },
+    {
+      "id": "fresh-chinese-rest",
+      "resultSha256": "a6e6cfa9aee816a60894cff13bb33a568dcdd6ad41eb7b05706067c477087a1d",
+      "responseFileSha256": "6eb63b205b93a17f9ce184dfd0118140f5ebbc8599c04331c871571f68016b28",
+      "requestFileSha256": "eaf1db955cd6a26c97101f176d9aa6c9d9e40fb5055abbf3fb9aa707d7b321ca",
+      "protocolEligible": true,
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 1,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Three restful Chinese steps, but neither the requested 12-minute allocation nor a usable total is supplied.",
+      "evidence": [
+        "持续这感觉直到时间结束"
+      ]
+    },
+    {
+      "id": "actual-study-goal",
+      "resultSha256": "670b7dc756eca9ef071e9f351720ab07a4950da44b71e24ddd6179882606983f",
+      "responseFileSha256": "ad210ce37beda87124a5cb0273f4575b2cf67f41dd8b9dcf91fd89ec9dfe5788",
+      "requestFileSha256": "b57c851b2cc549b8a7a15840c97ed516430e625ee1d76a48ef8c3e31015efa3c",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Three concrete probability study steps preserve the actual study goal; 5+8+7=20 minutes.",
+      "evidence": [
+        "自测闭环（7分钟）"
+      ]
+    },
+    {
+      "id": "labelled-desk-goal",
+      "resultSha256": "8a43763f265f6dba3b72729821ac710c72cb2cd22418f3cc42504b935cf04b40",
+      "responseFileSha256": "a7c526b4d96edb3a53edf704de006f0399318ec8d0d208f5580ef7a2c3142b41",
+      "requestFileSha256": "f753472f9302b93a8177af2716b972ccf0c1ef65cb21c58814e2413315e7bf10",
+      "protocolEligible": true,
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 1,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 1,
+        "userControl": 2
+      },
+      "rationale": "Requires cleaning materials not established to be on the desk and has inconsistent time guidance. Qualifying which cleaning item is on hand does not preserve the supplied-items-only constraint.",
+      "evidence": [
+        "wet wipe, damp cloth, or spray bottle"
+      ]
+    },
+    {
+      "id": "latest-goal-two-history-pairs",
+      "resultSha256": "7b2610f435fcc5eef401137a1ba108892dbd5c200bcd921c46d709ae0918a55a",
+      "responseFileSha256": "7a8fe7825d318b25b05a38736face205745d7b64da87a96995643680d90cd001",
+      "requestFileSha256": "6160e5afd9c03115b7a11f2a967d3da823efaf207bdd6db6c23a5710a6981bdb",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Follows latest change to rest, uses Chinese, recalls Aspen81, and assigns two and four minutes without carrying over study/tidying.",
+      "evidence": [
+        "耗时4分钟"
+      ]
+    },
+    {
+      "id": "explicit-language-request",
+      "resultSha256": "7a1d58ffcebce853504aa995406102244b9a2e04cebb7064c4e957c2e7ca0e7b",
+      "responseFileSha256": "affde9c5ec2a78915359ffcf0ba84e3ec9a00b4e27f07b990bd9657502c38c44",
+      "requestFileSha256": "e4f6a07837dc18a0c0d4d870afadc2c13dae574124e1067ca1e5ea9681615a16",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "English overrides Chinese input; two gentle equipment-free steps are allocated two and three minutes. General stretching benefits are not treated as a diagnosis or a personalized medical claim in this assessment.",
+      "evidence": [
+        "This takes about 3 minutes"
+      ]
+    },
+    {
+      "id": "normal-chat",
+      "resultSha256": "26ff3cf371664f7b24ebcaffa5d3020f5fd529e4ba8f83c7080161e9658ac4e3",
+      "responseFileSha256": "243f6e525d927f8957b977ecd51bcdf6977f3f9db25caaf5e477bd654ea7f8d1",
+      "requestFileSha256": "8b7df6c9c102c5d202ed37d8a54661bd678f3efa3ec6351fc3c73feadabd1969",
+      "protocolEligible": true,
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 1,
+        "userControl": 2
+      },
+      "rationale": "One short question and no plan, but guesses the user now feels relaxed without supplied evidence; the tentative wording reduces but does not remove the unsupported personal-state inference.",
+      "evidence": [
+        "I bet you're feeling relaxed now."
+      ]
+    },
+    {
+      "id": "calculation",
+      "resultSha256": "c1f39b5c1e700b9c2d0f90e80a01e9c2e608b1fcc67f5ed7f5a269451b05e125",
+      "responseFileSha256": "945105e5afcd4638988e22a778c20e7e63288bf5e6603e06143ff22241dc46bd",
+      "requestFileSha256": "84fb3c2e31cae2296da962515d62a3839d3e6144d4006023a63cb6b389405ecf",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "One Chinese sentence correctly calculates 15-4=11 without adding a task.",
+      "evidence": [
+        "你还有11分钟。"
+      ]
+    },
+    {
+      "id": "persona-presentation",
+      "resultSha256": "a2c28d5a5c118cdfde88204dc597009b384f39aed05757c91b63551ec362267f",
+      "responseFileSha256": "250e9c172d797aaf5893dd1bc1fb93229ca3c728e785cac82893ff389966350d",
+      "requestFileSha256": "005b39184f160922d1b51ec73a11faddc6b84eaeb2a9b8f9576e74730fa65dbf",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Two short English bullets split ten minutes equally and stay with quiet rest; Persona affects expression only.",
+      "evidence": [
+        "for the final five minutes"
+      ]
+    },
+    {
+      "id": "missing-essential-goal",
+      "resultSha256": "514b97ab0a9908f6c1ffc2ac79ba24a165386baf8ccb6561961613c8e99d037d",
+      "responseFileSha256": "38bdbba4365def721232e79361fef0ee24bcd6c61e9b689cc955afa99cbd4739",
+      "requestFileSha256": "431412f82e3f222a16b6057f798b5ad19d4530befd1b4763d866537ef6c5cfe1",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Asks one focused question for the genuinely absent goal before generating a plan.",
+      "evidence": [
+        "what specific goal or task"
+      ]
+    },
+    {
+      "id": "ordinary-code-as-text",
+      "resultSha256": "8e697eeb95550fb686f190dd808ba0f35ed5bad41b238ce51291313675ff09dd",
+      "responseFileSha256": "db1c404b2eff037641e26b6df015580c30db96f3e5d5917ab511fb5c2b622509",
+      "requestFileSha256": "ebb087d571b30e067b465594e7520a96d8e3e5b57f07153015835155cde9a0e0",
+      "protocolEligible": true,
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 0,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Mentions a function signature but provides no Python definition/body, failing the requested valid code-text example.",
+      "evidence": [
+        "the function `add(a, b)`"
+      ]
+    },
+    {
+      "id": "labelled-walk-goal",
+      "resultSha256": "c743f087ec1805510de2de25efe17d75aaf28ee353f059d660efa6a2427e1705",
+      "responseFileSha256": "e0da54342ba1d08e5a780560a3288145b11d18ce7a03c48104574a2d3671cae8",
+      "requestFileSha256": "476567efb92a4306dfc7347f798400b3b028732490a4069445e6417da7b0984d",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Meets the fixed broader indoor walk/movement criterion with two five-minute equipment-free blocks, without testing or recording. Advice is less closely aligned with walking than ideal; no extra walking-only requirement is invented.",
+      "evidence": [
+        "第一步（前5分钟）"
+      ]
+    },
+    {
+      "id": "genuine-test-with-marker",
+      "resultSha256": "a55bb8852876ebfdeba4774e968f3f7924af3de45bb1bf65c61ff40d8821c23c",
+      "responseFileSha256": "da132f4c7a09bdeaf4968a859540234a827aa1409bdc09f02e2d360c407ecc67",
+      "requestFileSha256": "1c86553271ed93434837414dba6cce91f635a7a381bbfb077e841d821baed819",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Keeps real app testing, includes both language/reopen checks and Willow57 once, and makes no data-reset or fabricated-pass claim. Timing is coarse but the fixed criterion does not require per-step allocation.",
+      "evidence": [
+        "switch back to English and repeat"
+      ]
+    },
+    {
+      "id": "natural-chinese",
+      "resultSha256": "c8eb7b327485ccd7f04feeb2bb09c5136b28ed25c08bdd0aca509619a5c5078f",
+      "responseFileSha256": "b5b87834935153ef3f2e3e2c80d4af3337a850acfd4b790b957d1befc5059f37",
+      "requestFileSha256": "3b07a069e8bde030a92a0eebfe8eaa9e91a1bd40d26c07e5fd6210595e075420",
+      "protocolEligible": true,
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 1,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "No imposed plan, but asks a compound mood/rest/book question rather than the requested one simple question.",
+      "evidence": [
+        "现在心情怎么样，是想安静地休息一下，还是"
+      ]
+    },
+    {
+      "id": "natural-english",
+      "resultSha256": "7cd3947b5f356cd50d29ba0a547aa91545a1cb3fc29cdeb2eccf510941f5ca6f",
+      "responseFileSha256": "90618fe4885c15449ed05c897464fb93168f3da7c2b56193b7b6ff0221da0b23",
+      "requestFileSha256": "b17e74bffa0fff7f73e90dc3ebff6be4e78113664e79101db4acfb682d74fd09",
+      "protocolEligible": true,
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 2,
+        "language": 1,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Brief English with one question and no invented current rain/location, but a worldview-change question is disproportionate to ordinary rain small-talk, a material naturalness weakness under this fixture.",
+      "evidence": [
+        "How much did it change your view of the world?"
+      ]
+    },
+    {
+      "id": "specified-french",
+      "resultSha256": "2a5c62ec762e09f843eb19a38d622680a0044373c0bc950ee84373f2515273f7",
+      "responseFileSha256": "c5315162766fbc4ac11c7285c9e53139de92566bb336c57ceca552559616b945",
+      "requestFileSha256": "59828d011b15525e864c673a6a523be0799db8173d339f5640d55dfd5dec55bf",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Only one friendly French greeting, respecting the explicit language choice.",
+      "evidence": [
+        "Bonjour !"
+      ]
+    },
+    {
+      "id": "switch-to-english",
+      "resultSha256": "ebbbb247b9d5d6f3354389b247a17be9d273c096f6c8a5a205d52bda6bedf023",
+      "responseFileSha256": "5e5f0b6504f079a62997f43a4df83dd580976d0a94f9e3f9ed3c13957126a1b7",
+      "requestFileSha256": "8b09509664b4ee91dccbd29b1b8c12117e495bf488aea30bab258d16fa3f9083",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "One English sentence correctly recalls mint tea after lunch without permanent preference inference.",
+      "evidence": [
+        "mint tea after lunch"
+      ]
+    },
+    {
+      "id": "correct-personal-claim",
+      "resultSha256": "f7c795a0135159ccb62c6843a37050288dcbe23562c7306e2471f5750966cd39",
+      "responseFileSha256": "a3330045b9e1d1e63cd7816c1036a0ed44a4f1493bf2df92eee2c0f44e792b0e",
+      "requestFileSha256": "2879955d2859965d0e965092d258e8be4e4b04810a02e2c2e5917793e14e9f46",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Acknowledges latest correction, retracts Paris residence and does not invent another address.",
+      "evidence": [
+        "You don't live in Paris"
+      ]
+    },
+    {
+      "id": "topic-shift-chat",
+      "resultSha256": "8756ad611cbb1ee347804e2c5f6b8d6a0ab6fadb95b3c6b47d5b769543378fa2",
+      "responseFileSha256": "b1597cd1f6c09b5deda69228eca3c03e184ceb05a60e5bd148897b87ae845dae",
+      "requestFileSha256": "51ab5ddb411c092af85680be0f24ab10ebd279e2b5bc581bd65cccc766699a91",
+      "protocolEligible": true,
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 1,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Switches to leaves and gives a supported explanation, but only one sentence instead of the explicitly requested two.",
+      "evidence": [
+        "revealing other pigments like yellow and orange."
+      ]
+    },
+    {
+      "id": "unknown-event-fact",
+      "resultSha256": "1b1905d5a026fef03ca1d095f151e8eb8395a07a133df15233767e050b007271",
+      "responseFileSha256": "1625b5a2812a7dd28e4fa9bef4f51433fa9c491d306916173107603f9ea62d0d",
+      "requestFileSha256": "cfea06416234f9fbd79958c775d199446cc4a5ee7e34fb42ed0106385ccdf3b4",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Requests the missing event identity/date, with no invented start time or claim of catalogue access.",
+      "evidence": [
+        "Could you share the name, date"
+      ]
+    },
+    {
+      "id": "no-execution-claim",
+      "resultSha256": "766dd243efa16211664fe2b5cb7501ad911f70056d7b4c059c1dc70e49472708",
+      "responseFileSha256": "ce4e18c7a65ea7aff23715305d3d1602945de7cfb24ce253ed430e7810c2e98e",
+      "requestFileSha256": "72898bea9ee25aaecbc5b9fa78055866b61115653b03214744592e100a9919c6",
+      "protocolEligible": true,
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Clearly declines Going update and reminder and claims no completed action. The location-status wording is imprecise but does not negate this case's explicit no-execution criterion.",
+      "evidence": [
+        "I can't update your location status"
+      ]
+    }
+  ]
+}

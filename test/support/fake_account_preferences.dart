@@ -63,6 +63,7 @@ final class FakeAccountPreferences implements AccountPreferencesRepository {
 
   @override
   Future<Result<OwnSettings>> saveSettings({
+    CloudAiConsent? cloudAiConsent,
     bool? defaultCheckInLocation,
     bool? defaultCheckInWeather,
     bool? homeWeatherAuto,
@@ -74,6 +75,7 @@ final class FakeAccountPreferences implements AccountPreferencesRepository {
     settingsSaveCount++;
     if (saveFailure case final failure?) return Failure(failure);
     settings = OwnSettings(
+      cloudAiConsent: cloudAiConsent ?? settings.cloudAiConsent,
       defaultCheckInLocation:
           defaultCheckInLocation ?? settings.defaultCheckInLocation,
       defaultCheckInWeather:

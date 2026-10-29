@@ -12,6 +12,22 @@ import {createControlledEventRecommendations} from '../src/bootstrap/controlled-
 import {eventTestRecords,EVENT_TEST_UID} from './support/event-repository-contract.js';
 const instant='2026-10-20T00:00:00.000Z',signal=()=>new AbortController().signal;
 const occurrence=(title:string)=>({browseId:browseId('same')!,title,startAt:'2026-11-01T00:00:00Z',externalSourceUrl:'https://ticketmaster.sg/event/same'});
+test('combined provider current social projection preserves first and later page identities without blocking detail enrichment',async()=>{
+  const first=occurrence('First'),later={...occurrence('Later'),browseId:browseId('later','pa')!};
+  let details=0;
+  const cache=new ControlledSourceProjection({status:()=>[{provider:'ticketmaster',available:true},{provider:'onepa',available:true}],
+    firstBatch:async()=>[first],batch:async(_at,page)=>page===0?{items:[first],nextPage:1}:{items:[later]},
+    detail:async()=>{details++;return {...first,shortDescription:'Full source detail'};}});
+  const snapshot=await cache.recommendationSnapshot(instant,signal());
+  assert.equal(snapshot.items.length,2);
+  assert.equal(cache.peek(sourceEventId(first.browseId),instant)?.title,'First');
+  assert.equal(cache.peek(sourceEventId(later.browseId),instant)?.title,'Later');
+  assert.equal((await cache.detail(first.browseId,instant,signal()))?.shortDescription,'Full source detail');
+  assert.equal(details,1);
+  cache.clear();
+  assert.equal(snapshot.current(),false);
+  assert.equal(cache.peek(sourceEventId(first.browseId),instant),undefined);
+});
 test('EB2 initial page atomically replaces cached first generation for browse and stable detail',async()=>{
   let reads=0;
   const raw=new TicketmasterBrowseSource({key:()=> 'synthetic-only',enabled:()=>true},async()=>{

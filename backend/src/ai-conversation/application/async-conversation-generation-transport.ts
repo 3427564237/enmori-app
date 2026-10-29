@@ -8,7 +8,7 @@ export class AuthorizedAsyncConversationGenerationTransport implements Generatio
   constructor(private readonly model: GenerationTransport<ConversationInput>) {}
 
   generate(handle: AsyncConversationModelInput, budget: RequestBudget): Promise<Uint8Array> {
-    if (!handle || this.consumed.has(handle) || !this.live(budget)) return Promise.reject(new Error("unavailable"));
+    if (!handle || handle.processing === "cloud" || this.consumed.has(handle) || !this.live(budget)) return Promise.reject(new Error("unavailable"));
     this.consumed.add(handle);
     // The closure retains only a revocable, content-free handle during authority I/O.
     return handle.authorize().then(authorized => {

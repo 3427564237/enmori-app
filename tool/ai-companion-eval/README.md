@@ -51,6 +51,55 @@ An experiment response is not a `GenerationTransport` settlement: an unknown
 network result means stop this run, not “the model stopped.” Production adapters
 must preserve the existing quarantined-lane lifecycle separately.
 
+### Groq Free Plan comparison (28 October 2026)
+
+`groq-evaluation.mjs` is another isolated adapter, not a production transport.
+It accepts only the fixed 24 current-prompt cases. `baseline` keeps their exact
+golden messages and uses GPT-OSS 120B with 2048 completion tokens;
+`goal-v2` substitutes only the general system instructions, retains the original
+Persona suffix and user/history text, and uses 1024 completion tokens. Both use
+low reasoning. The separately authorized `baseline-medium` profile preserves
+every `baseline` request property and message, including its 2048 completion
+ceiling, except that `reasoning_effort` is `medium`. All three use strict JSON
+Schema and non-streaming requests. Refusal, truncation, malformed output,
+missing terminal state and late delivery cannot pass.
+
+`groq-run.mjs` requires a private key file, private fresh LI authorization and
+an exclusive output directory outside the repository. The authorization names
+the exact profile, corpus hash, 24-request ceiling, zero-dollar Free Plan,
+verified time, expiry and unique approval reference. It is consumed once; a
+crashed or uncertain run is never automatically resumed. Each intent is saved
+before dispatch; raw provider errors and authentication headers are not logged.
+The fixed endpoint rejects redirects and has no paid fallback.
+`baseline-medium` additionally requires a new grant with its own exact profile
+and scope, `reasoningEffort: "medium"`, and a new approval reference; previous
+baseline and goal-v2 grants do not authorize it. Keep Groq grants under the same
+private parent directory and shared `claims/` ledger: its one-use reference
+check is path-scoped, so moving a grant to evade that ledger is prohibited.
+
+```sh
+node --test tool/ai-companion-eval/groq-evaluation.test.mjs tool/ai-companion-eval/evaluation.test.mjs
+node tool/ai-companion-eval/groq-run.mjs --profile goal-v2 --key-file /private/key --authorization /private/grant.json --out /private/new-run
+```
+
+This command is not a grant to make calls. Use only a separately authorized,
+account-verified pass. Keep its source/corpus frozen until the report is saved.
+The separately authorized baseline-medium pass later completed 24 calls with
+16/24 owner-assessed semantic passes and was rejected; see its
+[assessment](../../docs/evidence/2026-10-28-li-ai-repair/groq-baseline-medium-assessment.md).
+That consumed grant is not reusable. All three Groq runs remain synthetic and
+none selects a production provider/model.
+
+The baseline and goal-v2 profiles retain 30.1-second start spacing; baseline-medium
+requires at least 61 seconds. Its conservative per-request check reserves the
+whole request's UTF-8 byte count plus 2048 completion tokens plus 512 wrapper
+tokens within the previously observed 8000 TPM. This is an estimate, not proof
+of tokenization, free eligibility or rate-limit availability. Recheck provider
+and account limits before a separately authorized run. Unknown results, 429 and
+usage over the reservation stop the run without retry. `completion_tokens`
+already includes reasoning; do not add `thinkingTokens` again. Missing usage is
+never zero.
+
 The local runner exists for a later Integration-assigned slot:
 
 ```sh
@@ -181,3 +230,14 @@ are recorded. Truncated/unknown bodies remain failures, with their available
 prefix preserved. Complete reports and independent review templates retain all
 attempted cases; real cloud latency/cost remains Not Run until a separately authorized
 evaluation actually occurs.
+
+### Subsequent constraints-v3 comparison
+
+The separately authorized fourth Groq pass changes only the system instruction
+from baseline-medium; all 24 actual request pairs were checked. It retains
+GPT-OSS 120B, medium reasoning, 2048 completion tokens, strict schema, exact
+history/Persona and 61-second start spacing. The combined offline regression is
+41/41. Live outcome: 24 protocol-eligible responses, **16/24 semantic passes**,
+rejected with remaining failures and regressions. All **96** Groq grants/calls
+are consumed; this profile is neither production wiring nor a reusable grant.
+See [assessment](../../docs/evidence/2026-10-28-li-ai-repair/groq-constraints-v3-assessment.md).

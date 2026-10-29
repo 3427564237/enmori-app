@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-28",
+  "sourceCommit": "f4ecb616ed56638a60a8f9793d5b3683006a16f0",
+  "scope": "Internal cloud recovery; handwritten fake Ports and offline tests only",
+  "runtime": "Node.js 24.19.0",
+  "compiler": "TypeScript 7.0.2",
+  "commands": {
+    "compile": "/home/miku/.local/share/pnpm/store/v11/links/@/node/24.19.0/00cf8b7bd601ac85fa8bfdb2a328cdee2766a25aaf53b02afe1a55508b36b33e/node_modules/node/bin/node node_modules/typescript/bin/tsc --project backend/tsconfig.json",
+    "backend": "/home/miku/.local/share/pnpm/store/v11/links/@/node/24.19.0/00cf8b7bd601ac85fa8bfdb2a328cdee2766a25aaf53b02afe1a55508b36b33e/node_modules/node/bin/node --test --test-reporter=spec 'backend/dist/test/**/*.test.js'",
+    "evaluation": "/home/miku/.local/share/pnpm/store/v11/links/@/node/24.19.0/00cf8b7bd601ac85fa8bfdb2a328cdee2766a25aaf53b02afe1a55508b36b33e/node_modules/node/bin/node --test --test-reporter=spec tool/ai-companion-eval/groq-evaluation.test.mjs tool/ai-companion-eval/groq-run-policy.test.mjs tool/ai-companion-eval/evaluation.test.mjs"
+  },
+  "results": {
+    "strictCompilation": "pass",
+    "backend": {
+      "tests": 1609,
+      "pass": 1609,
+      "fail": 0,
+      "skipped": 0
+    },
+    "evaluationRegression": {
+      "tests": 38,
+      "pass": 38,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "sourceSha256": {
+    "backend/src/ai-runtime/application/bounded-ai-runtime.ts": "a08c15b7fe0c5b25704499d60684eb61729786e3741232aa874ba050498bc8d6",
+    "backend/src/ai-runtime/application/cloud-admission-owner.ts": "0b4573ef15a25998b1f9a48b15e0d24a7682bb571cef913ff30526969e914533",
+    "backend/src/ai-runtime/ports/cloud-generation-transport.ts": "78a04082f1b7e9adf87e44e92fa4b304e556cffa1f179ae58e46707ed519850a",
+    "backend/test/ai-conversation/async-conversation-fakes.ts": "9ac867248b88276501e9115fdffbed2669e6eab8650779a4f1ada1ef8d9e1515",
+    "backend/test/ai-conversation/cloud-conversation-runtime.test.ts": "6fb60946a8190ae47bb2f1dbe306721c94a3ef8132b0102d8fc39828fcf3cc90",
+    "backend/test/ai-runtime/cloud-ai-runtime.test.ts": "4d4a58ce8826286ed78b1ae7dc2536f34e677e766fb94ea317fa0c68d2e79e2a"
+  },
+  "localLogSha256": {
+    "build/cloud-recovery-20261028/backend-tests-final.log": "320aba338cee1e938283bfd255d90011cc0f2c687e817de3a0804269d555e8b7",
+    "build/cloud-recovery-20261028/evaluation-regression.log": "3e6135d9a7af929871a5463fc7a03ae88ab75c01b3f0abbb07808c6ccd06c2d8"
+  },
+  "externalModelCalls": 0,
+  "productionWiring": false,
+  "durableAuthorityImplementation": false,
+  "independentReview": false,
+  "limitations": [
+    "One configurable accounting window, not full provider multi-window quotas or tokenization",
+    "Restart and provider behavior tested with fakes; no actual durable store or provider adapter",
+    "No deployment, real-user data transfer, phone verification or model adoption"
+  ]
+}

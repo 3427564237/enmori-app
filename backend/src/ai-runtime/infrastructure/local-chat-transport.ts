@@ -46,6 +46,19 @@ function quotedContext(input: ConversationInput): string {
     '\nQUOTED CONTEXT JSON:\n' + JSON.stringify(data);
 }
 
+
+/** Exact existing serializer shared by explicit local/cloud adapters. */
+export function buildChatMessages(input: ConversationInput): readonly LocalModelMessage[] {
+  if (!validLocalChatInput(input)) throw Error('AI_UNAVAILABLE');
+  return [
+      { role: 'system', content: 'You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion "ai_assistant_message_v1" and a non-empty "message" string.' +
+        (input.persona ? ` Presentation preferences: ${JSON.stringify(input.contextMode || input.replyToAssistant
+          ? copyPersonaProjection(input.persona) : input.persona)}` : '') + quotedContext(input) },
+      ...(input.history ?? []).flatMap<LocalModelMessage>(pair => [{ role: 'user', content: pair.user }, { role: 'assistant', content: pair.assistant }]),
+      { role: 'user', content: input.currentMessage },
+    ];
+}
+
 /** MVP chat. Model receives only the Application's authorized projection.
  * No keyword/claim censorship, tokenizer sidecar, tools or business writes. */
 export class LocalChatTransport implements GenerationTransport<ConversationInput> {
@@ -62,13 +75,7 @@ export class LocalChatTransport implements GenerationTransport<ConversationInput
     if (this.lane.state.pending || budget.signal.aborted || !validLocalChatInput(input)) {
       throw Error('AI_UNAVAILABLE');
     }
-    const messages: LocalModelMessage[] = [
-      { role: 'system', content: 'You are ENMORI, a helpful conversational companion. Reply naturally in the user’s language. Use only the supplied conversation. You have no tools, location access, event catalogue or ability to change application data. Do not invent personal facts or events. Persona preferences affect expression only. Return a JSON object with schemaVersion "ai_assistant_message_v1" and a non-empty "message" string.' +
-        (input.persona ? ` Presentation preferences: ${JSON.stringify(input.contextMode || input.replyToAssistant
-          ? copyPersonaProjection(input.persona) : input.persona)}` : '') + quotedContext(input) },
-      ...(input.history ?? []).flatMap<LocalModelMessage>(pair => [{ role: 'user', content: pair.user }, { role: 'assistant', content: pair.assistant }]),
-      { role: 'user', content: input.currentMessage },
-    ];
+    const messages = buildChatMessages(input);
     return this.lane.generate(messages, budget);
   }
 }

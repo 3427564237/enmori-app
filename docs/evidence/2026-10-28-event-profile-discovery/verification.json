@@ -1,0 +1,148 @@
+{
+  "date": "2026-10-28",
+  "timezone": "Asia/Singapore",
+  "authority": "docs/decisions/2026-10-28-li-event-profile-discovery.md",
+  "baseCommit": "d811c23375fbf5465fd4176e907072546fb20a78",
+  "backendSourceCommit": "dfec1313885e7ccd3877b145798892f6a2a60a5e",
+  "apkSourceCommit": "301cb9c51d2fb2f7ead63f1f37e4eac3ab6b7f95",
+  "apk": {
+    "name": "ENMORI-group-v42-release.apk",
+    "bytes": 68113696,
+    "sha256": "435b9358956f27b06354ad01158548bf253323b7263db0ec740c439a308e1e32",
+    "package": "com.enmori.app.group",
+    "versionCode": 42,
+    "versionName": "1.0.0-group20261028",
+    "installedHashMatches": true
+  },
+  "logs": [
+    {
+      "name": "enmori-compat-final-backend.txt",
+      "bytes": 160012,
+      "sha256": "128e82cd76cb9780f9fccf06b737b7ff0170f28d1aa3fdfc0fb451481ca5a126"
+    },
+    {
+      "name": "enmori-contract-tests.txt",
+      "bytes": 629,
+      "sha256": "f69d88046a605ee2fd4c2437f7b3c3b3848d31b684a50f9b9c341a3beae3ed5e"
+    },
+    {
+      "name": "enmori-compat-flutter-final.txt",
+      "bytes": 10673,
+      "sha256": "1b7e08b26a5fb2c2845e2b027cc0a70c7d4ff4ae588c1e5a39799b4281b0e54b"
+    },
+    {
+      "name": "enmori-phone-fixes-tests.txt",
+      "bytes": 2846,
+      "sha256": "2daeac9c8e5a667a6e4cfbca5c703ee162ae93849cf50b22b6c2232dda6278bd"
+    },
+    {
+      "name": "enmori-phone-fixes-analyze.txt",
+      "bytes": 96,
+      "sha256": "f55b896b92cba8035e92d192387113cad34eabef3a998104952e1580e208c547"
+    },
+    {
+      "name": "enmori-baseline-flutter-all.txt",
+      "bytes": 470029,
+      "sha256": "302a4760db9d2449ba95ee7a6558bb0d95c828a6a3fcc0003e433da6c749f195"
+    },
+    {
+      "name": "enmori-final-flutter-all.txt",
+      "bytes": 537010,
+      "sha256": "12a005ea38aa00c53c3e1050514d07ac7ff6dc3ff76086db17e2b55a44999e1e"
+    },
+    {
+      "name": "enmori-v42-phone-fix-build.txt",
+      "bytes": 4085,
+      "sha256": "e454edb2ca6859cb9efcfa76ca3682287e0525bef1ac17c8a1ffa51dd2890e32"
+    },
+    {
+      "name": "enmori-v42-real-source-probe.txt",
+      "bytes": 366,
+      "sha256": "af016b5ff18520482a22ae1a4a31d9e92f4f40d65f61e1883be83f6a57f54294"
+    },
+    {
+      "name": "enmori-combined-social-before.txt",
+      "bytes": 1094,
+      "sha256": "20a070f3d2d2583d35d84c69aade12eb1848be130c72f2fe0b738c6383d31c57"
+    },
+    {
+      "name": "enmori-v42-social-final-backend.txt",
+      "bytes": 160195,
+      "sha256": "0fd82081d518f71f4620adb6a3458097054735ad44f587adb912c6e97e1f5892"
+    },
+    {
+      "name": "enmori-recommendation-source-probe.txt",
+      "bytes": 737,
+      "sha256": "eee8618deeb6a6a608d1837f404b04f73c00bd4a2655150ed09b0eb546897800"
+    },
+    {
+      "name": "enmori-v42-social-source-after.txt",
+      "bytes": 737,
+      "sha256": "185ee72b247891e9b0c38d73bf78c7dc2e0a3be9af8caba9170bb40e50da877f"
+    },
+    {
+      "name": "enmori-owner-recommendation-probe.txt",
+      "bytes": 737,
+      "sha256": "73c17d14d6f875f2f502d9294533a334fb760bd7f281f38e44a5fabb95d85d37"
+    }
+  ],
+  "physicalDevice": {
+    "model": "vivo X200 Pro",
+    "upgradePreservedLogin": true,
+    "ownerProfileUiSaveAndReadback": true,
+    "savedBirthdayMatchesHumanInput": true,
+    "homeAreaCode": "DT",
+    "discoverable": true,
+    "matchRegion": true,
+    "matchAge": true,
+    "matchInterests": false,
+    "matchAffiliation": false,
+    "autoActivityLocation": false,
+    "onePaOfficialSameEventOpened": true,
+    "onePaReturnSameVisibleTextBoundsSelection": true,
+    "ticketmasterActualCoverSeen": true,
+    "ticketmasterDescriptionUnavailableShown": true,
+    "ticketmasterOfficialSameOccurrenceSeatPageOpened": true,
+    "homeRecommendationInitialTransientFailure": true,
+    "homeRecommendationRetryDisplayedActualCard": true,
+    "finalBackendRelaunchHomeCardsWithoutManualRetry": true
+  },
+  "screenshots": [
+    {
+      "name": "home-recommendation.png",
+      "bytes": 867829,
+      "sha256": "9d603f12a8bb88c0e2414829abd64e30d638b56576f87a41e8ead90f15218e11"
+    },
+    {
+      "name": "onepa-detail.png",
+      "bytes": 363045,
+      "sha256": "92f5bfede88d6ad076b95ae9e5fb0db9eefe051557d24a64cb7f658fe90527fe"
+    },
+    {
+      "name": "onepa-return.png",
+      "bytes": 503596,
+      "sha256": "eb78da93a917bd25be6a0786ff1a5805ce0e49c580da89e9821f8a8769e17783"
+    },
+    {
+      "name": "ticketmaster-card.png",
+      "bytes": 760279,
+      "sha256": "bb14dd38d92588526ce3fc60b9ffda57d465a8676594481c8e9ddac5faceac75"
+    },
+    {
+      "name": "ticketmaster-detail.png",
+      "bytes": 858713,
+      "sha256": "f2fde7dfb25da69dc6577dace94f2795bafe11bbd6f0d082f9b5d075c7901ae0"
+    }
+  ],
+  "boundaries": {
+    "independentReview": false,
+    "fullFlutterGreen": false,
+    "liveTicketmasterFullDescription": false,
+    "twoFreshRealAccountsMutualOptIn": false,
+    "realMultiDeviceConflict": false,
+    "successfulPhysicalGeolocation": false,
+    "fullPlanAccepted": false,
+    "coldStartReliabilityAccepted": false
+  },
+  "privateReceiptsExcluded": true
+}

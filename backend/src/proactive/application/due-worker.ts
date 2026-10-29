@@ -4,12 +4,13 @@ import type { ProactiveActor } from "../ports/first-flow.js";
 export interface DueWorkerOptions {
   readonly application: FirstFlowApplication;
   readonly actor: ProactiveActor;
-  readonly endsAtMs: number;
+  readonly mode?: "service";
+  readonly endsAtMs?: number;
   readonly nowMs?: () => number;
   readonly intervalMs?: number;
 }
 
-/** Explicitly started, bounded one-owner worker. No global scans, provider retry
+/** Explicitly started one-owner worker. No global scans, provider retry
  * or automatic bootstrap registration. Integration owns its actual composition. */
 export class FirstFlowDueWorker {
   private readonly now: () => number;
@@ -21,28 +22,35 @@ export class FirstFlowDueWorker {
 
   constructor(private readonly options: DueWorkerOptions) {
     this.now = options.nowMs ?? Date.now;
-    if (!Number.isSafeInteger(options.endsAtMs) || options.endsAtMs <= this.now() || options.endsAtMs - this.now() > 30 * 60000 ||
-      !Number.isSafeInteger(options.intervalMs ?? 60000) || (options.intervalMs ?? 60000) < 1000) throw Error("Invalid worker window");
+    if ((options.mode === "service" ? options.endsAtMs !== undefined :
+        options.mode !== undefined || !Number.isSafeInteger(options.endsAtMs) || options.endsAtMs! <= this.now() || options.endsAtMs! - this.now() > 30 * 60000) ||
+      !Number.isSafeInteger(options.intervalMs ?? 60000) || (options.intervalMs ?? 60000) < 1000 ||
+      (options.intervalMs ?? 60000) > 2_147_483_647) throw Error("Invalid worker window");
   }
+  private expired(): boolean { return this.options.mode !== "service" && this.now() >= this.options.endsAtMs!; }
   private current(): boolean {
-    try { return !this.abort.signal.aborted && this.now() < this.options.endsAtMs && this.options.actor.current(); }
+    try { return !this.abort.signal.aborted && !this.expired() && this.options.actor.current(); }
     catch { return false; }
   }
   start(): void {
-    if (this.timer || !this.current()) return;
+    if (this.timer || this.abort.signal.aborted || this.expired()) return;
     this.timer = setInterval(() => { void this.tick(); }, this.options.intervalMs ?? 60000);
-    this.endTimer = setTimeout(() => {
+    if (this.options.mode !== "service") this.endTimer = setTimeout(() => {
       this.abort.abort(); if (this.timer) clearInterval(this.timer); this.timer = undefined;
-    }, Math.max(1, this.options.endsAtMs - this.now()));
-    this.endTimer.unref();
+    }, Math.max(1, this.options.endsAtMs! - this.now()));
+    this.endTimer?.unref();
     this.timer.unref(); void this.tick();
   }
+  get running(): boolean { return this.timer !== undefined && !this.abort.signal.aborted && !this.expired(); }
   tick(): Promise<void> {
-    if (!this.current()) {
+    if (this.abort.signal.aborted || this.expired()) {
       this.abort.abort(); if (this.timer) clearInterval(this.timer); this.timer = undefined;
       if (this.endTimer) clearTimeout(this.endTimer); this.endTimer = undefined;
       return this.pending ?? Promise.resolve();
     }
+    // A transient dependency-health failure blocks this cycle, not all future
+    // appointments. Pending work still rechecks the original actor throughout.
+    if (!this.current()) return this.pending ?? Promise.resolve();
     if (this.pending) return this.pending;
     this.pending = this.cycle().catch(() => { /* Safe failure; no private detail/log/retry. */ })
       .finally(() => { this.pending = undefined; });

@@ -3,15 +3,19 @@ import '../../../core/result/result.dart';
 import '../domain/friend_discovery_repository.dart';
 
 final class BackendFriendDiscoveryRepository
-    implements FriendDiscoveryRepository {
+    implements FriendDiscoveryRepository, FriendDiscoveryStatus {
   BackendFriendDiscoveryRepository(this.client);
   final BackendApiClient client;
+  @override
+  String? ownState;
   @override
   Future<Result<List<FriendSuggestion>>> suggestions({
     required bool home,
   }) async {
+    ownState = null;
     final response = await client.get(
       '/v1/recommendations/friends?view=${home ? 'home' : 'all'}',
+      contractVersion: 3,
     );
     if (response case Failure<JsonObject>(:final failure)) {
       return Failure(failure);
@@ -19,9 +23,19 @@ final class BackendFriendDiscoveryRepository
     try {
       final body = (response as Success<JsonObject>).value,
           rows = body['suggestions'];
-      if (body.length != 1 || rows is! List || rows.length > (home ? 2 : 999)) {
+      if (body.keys.any((k) => !['suggestions', 'ownState'].contains(k)) ||
+          (body['ownState'] != null &&
+              ![
+                'disabled',
+                'incomplete',
+                'no_matches',
+                'ready',
+              ].contains(body['ownState'])) ||
+          rows is! List ||
+          rows.length > (home ? 2 : 999)) {
         return _invalid();
       }
+      ownState = body['ownState'] as String?;
       final result = <FriendSuggestion>[], names = <String>{};
       for (final row in rows) {
         const keys = {
@@ -56,9 +70,7 @@ final class BackendFriendDiscoveryRepository
             tags.any((tag) => tag is! String || tag.isEmpty) ||
             count < 0 ||
             count > 2000 ||
-            tags.isEmpty &&
-                count == 0 &&
-                !_profileOnlyReasons.contains(row['reason'])) {
+            tags.isEmpty && count == 0 && !_validProfileReason(row['reason'])) {
           return _invalid();
         }
         result.add(
@@ -107,3 +119,20 @@ Failure<T> _invalid<T>() => const Failure(
     message: 'Friend information is unavailable. Reload to check again.',
   ),
 );
+
+bool _validProfileReason(Object? value) {
+  if (_profileOnlyReasons.contains(value)) return true;
+  if (value is! String) return false;
+  final parts = value.split(' · ');
+  return parts.toSet().length == parts.length &&
+      parts.every(
+        const {
+          'Same area',
+          'Same region',
+          'Similar age range',
+          'Shared interests',
+          'Same shared school or organization',
+        }.contains,
+      ) &&
+      parts.any((p) => p != 'Similar age range');
+}

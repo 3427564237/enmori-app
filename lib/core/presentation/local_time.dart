@@ -15,3 +15,14 @@ String localTimeLabel(
   );
   return includeDate ? '${labels.formatMediumDate(local)} · $clock' : clock;
 }
+
+/// Source-local Singapore time, independent of the phone's current timezone.
+String singaporeEventTimeLabel(BuildContext context, DateTime instant) {
+  final local = instant.toUtc().add(const Duration(hours: 8));
+  final labels = MaterialLocalizations.of(context);
+  final clock = labels.formatTimeOfDay(
+    TimeOfDay.fromDateTime(local),
+    alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+  );
+  return '${labels.formatMediumDate(local)} · $clock SGT';
+}

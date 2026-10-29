@@ -1,0 +1,41 @@
+{
+  "sourceHead": "2306ac0c5a060b2d999a5b8c34e09704c446de31",
+  "normalStopStart": true,
+  "configurationUnchanged": true,
+  "previousCandidateRetained": true,
+  "status": {
+    "ownedRunner": true,
+    "httpsIdentityGate": true,
+    "ready": true,
+    "lastState": {
+      "phase": "listening",
+      "ready": true,
+      "authAdminRead": true,
+      "firestoreRead": true,
+      "remoteLoopbackEnabled": true,
+      "fullFeatures": true,
+      "firstFlow": {
+        "configured": true,
+        "workerConfigured": false,
+        "pushConfigured": false
+      },
+      "ai": {
+        "configured": true,
+        "available": true,
+        "maintenanceHealthy": true,
+        "pending": false,
+        "outcomeUnknown": false
+      },
+      "events": {
+        "configured": true,
+        "enabled": true,
+        "pending": 0
+      },
+      "emailVerified": true,
+      "bindingExists": true,
+      "checkedAt": "2026-10-28T04:04:55.248Z"
+    },
+    "lockPresent": true
+  },
+  "note": "lastState is the startup receipt, not a live AI-operation observation"
+}

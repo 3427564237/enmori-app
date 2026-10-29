@@ -1,0 +1,49 @@
+{
+  "sourceHead": "2306ac0c5a060b2d999a5b8c34e09704c446de31",
+  "versionCode": 40,
+  "checkedAt": "2026-10-28T04:14:00.131103+00:00",
+  "userReportedV39": {
+    "setup": "Music + Gaming; Havelock",
+    "loadAndOrder": "pass",
+    "removeMusicShowsGaming": "pass",
+    "originalChecklist5": "pass",
+    "originalChecklist6": "pass"
+  },
+  "assistantObservedV40": {
+    "existingAuthenticatedSession": "pass",
+    "accurateLocationHintAndDetailVenue": "pass",
+    "catalogueDestination": "pass",
+    "allRecommendationsDestination": "pass",
+    "sameTopTwoAcrossDetailCatalogueAndForegroundReturns": "pass",
+    "nextGroupAdvancesWithoutRepeatingTopTwo": "pass",
+    "friendResult": "empty; not an error"
+  },
+  "notRun": [
+    "Friend grouping / Ignore / Undo on real candidates",
+    "two-account privacy journey",
+    "new real AI send",
+    "30-minute-idle first send",
+    "network-interruption recovery"
+  ],
+  "accountChanges": "No profile, interests, privacy, consent or participation changes; no data clear or logout.",
+  "serverObservation": {
+    "sinceLocal": "2026-10-28T12:05:20+08:00",
+    "errors5xx": [],
+    "note": "Bounded service journal observation; no claim of long-running reliability."
+  },
+  "privateArtifactHashes": {
+    "v40-home-recommendations.xml": "f531df234111bb94ad305a75b3fca71d8494a86ed82957e6ce5bf6e958cd914e",
+    "v40-detail-loaded.xml": "22d93b7a2828bb81621b74293d1eb68fa274658e0258489500d23cf3afe03b92",
+    "v40-catalogue-loaded.xml": "f6b01fce575ad24e986c0ceb817e23330a929286609608ed4cf0f63c4b0bebb9",
+    "v40-home-return-loaded.xml": "d813d36a67c3010249c09d62c4bf40c1259610eae3164facf773583a71878d54",
+    "v40-home-after-catalogue.xml": "d813d36a67c3010249c09d62c4bf40c1259610eae3164facf773583a71878d54",
+    "v40-all-button.xml": "42acee6e9504cf3e7a9ed305ce78d4632a3db3d187de581c36f8134fe81f389d",
+    "v40-all-loaded.xml": "766630058146e23a98414e52c53b372dcd1517629b9af659048d97d531ece093",
+    "v40-next-group.xml": "d2b7691bac05e0739cea46ebd726c231fedb2ee35348a9090c07526b28d97e94",
+    "v40-final-home.xml": "2fc00382e5fc400847fdda9a5c98113c0c15ce4e4a2bece2dc4eef01bae25b46",
+    "v40-home-recommendations.png": "8d4237e0f0547398a1cdc935bf9a47b13c5696a714150f3f4fdbf55315bef4eb",
+    "v40-detail.png": "41af4dc13e0ce8ae959210f7a6361446e6470da5ef2c67c06bafe1fe1046051d",
+    "v40-next-group.png": "426f0a5f31cf415518fef6a054a0c8e51c2ed06f1f4a1c2a7aefd73d69bd7c22",
+    "v40-final-home.png": "c86ed05fe99693d2dc8ae96d621091346a229c93f0d383a253416aae615b16ac"
+  }
+}

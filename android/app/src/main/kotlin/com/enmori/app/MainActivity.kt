@@ -6,6 +6,9 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.util.AtomicFile
+import java.io.File
+import java.util.UUID
 import java.net.URI
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -35,7 +38,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/event_actions")
             .setMethodCallHandler { call, result ->
-                if (call.method !in setOf("openMap", "editCalendar")) result.notImplemented()
+                if (call.method !in setOf("openMap", "openSourceAddress", "editCalendar")) result.notImplemented()
                 else result.success(EventActions.open(this, call.method, call.arguments))
             }
         avatarPhotoPicker = AvatarPhotoPicker(this, flutterEngine.dartExecutor.binaryMessenger)
@@ -120,7 +123,27 @@ class MainActivity : FlutterActivity() {
         // the handler itself creates no channel and obtains no token.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/proactive_notifications")
             .setMethodCallHandler { call, result ->
-                if (call.method != "prepareChannel") {
+                if (call.method == "installationRef") {
+                    try {
+                        // Random app-install identity, never backed up to another device.
+                        // This creates no Messaging token or notification permission.
+                        val file = AtomicFile(File(noBackupFilesDir, "enmori_companion_installation"))
+                        val value = if (file.baseFile.exists()) {
+                            file.openRead().bufferedReader().use { it.readText() }
+                        } else {
+                            val generated = UUID.randomUUID().toString()
+                            val stream = file.startWrite()
+                            try { stream.write(generated.toByteArray(Charsets.UTF_8)); file.finishWrite(stream) }
+                            catch (error: Exception) { file.failWrite(stream); throw error }
+                            generated
+                        }
+                        if (!Regex("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$").matches(value)) {
+                            result.error("INSTALLATION_UNAVAILABLE", "Notification installation could not be checked.", null)
+                        } else result.success(value)
+                    } catch (_: Exception) {
+                        result.error("INSTALLATION_UNAVAILABLE", "Notification installation could not be checked.", null)
+                    }
+                } else if (call.method != "prepareChannel") {
                     result.notImplemented()
                 } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     result.success(false)
@@ -151,7 +174,7 @@ class MainActivity : FlutterActivity() {
             if (Regex("[\\s\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]").containsMatchIn(value)) return false
             val url = URI(value)
             if (url.scheme != "https" ||
-                url.host?.lowercase(Locale.ROOT) !in (if (attribution) setOf("open-meteo.com", "creativecommons.org", "www.openstreetmap.org") else setOf("ticketmaster.sg", "www.ticketmaster.sg")) ||
+                url.host?.lowercase(Locale.ROOT) !in (if (attribution) setOf("open-meteo.com", "creativecommons.org", "www.openstreetmap.org") else setOf("ticketmaster.sg", "www.ticketmaster.sg", "www1.ticketmaster.sg", "www.onepa.gov.sg")) ||
                 url.rawUserInfo != null || url.rawFragment != null || url.port !in setOf(-1, 443)) return false
             val nativeUri = Uri.parse(value)
             if (nativeUri.queryParameterNames.any {

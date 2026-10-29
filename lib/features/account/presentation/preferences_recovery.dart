@@ -63,6 +63,12 @@ PreferenceReview<OwnSettings> reviewSettingsDraft({
 }) {
   final merge = _ReviewFields();
   final value = OwnSettings(
+    cloudAiConsent: merge.choose(
+      'Groq cloud processing',
+      base.cloudAiConsent,
+      draft.cloudAiConsent,
+      latest.cloudAiConsent,
+    ),
     revision: latest.revision,
     checkInVisibility: merge.choose(
       'Check-in default visibility',

@@ -14,6 +14,29 @@ import 'proactive_test_support.dart';
 
 void main() {
   testWidgets(
+    'explicit enable replaces another installation; sign-out never revokes that other device',
+    (tester) async {
+      final r = await MessagingRig.create(tester);
+      addTearDown(r.dispose);
+      r.registrations.metadata = ProactiveRegistration(
+        revision: 1,
+        enabled: true,
+        availability: ProactiveRegistrationAvailability.registered,
+        installationRef: '00000000-0000-4000-8000-000000000999',
+        expiresAt: fixtureNow.add(const Duration(days: 30)),
+      );
+      await r.controller.readRegistration();
+      expect(r.state.registration?.installationRef, endsWith('999'));
+      expect(r.registrations.puts, 0);
+      await r.controller.beforeSignOut();
+      expect(r.registrations.deletes, 0);
+      await r.controller.enablePush();
+      expect(r.registrations.puts, 1);
+      expect(r.registrations.revisions.last, 1);
+      expect(r.state.registration?.installationRef, messagingInstallation);
+    },
+  );
+  testWidgets(
     'unknown registration fence survives same-owner session replacement and unchanged GET',
     (tester) async {
       final r = await MessagingRig.create(tester);
