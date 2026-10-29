@@ -48,7 +48,12 @@ test('Azure lifecycle probes read permissions before listening, excludes models 
       return runtime;
     }, closeControlledRuntime: async () => {closed++;},
   }});
-  t.mock.module(new URL('../backend/dist/src/event-browse/infrastructure/ticketmaster-browse-source.js', import.meta.url), {exports: {TicketmasterBrowseSource: class {}}});
+  t.mock.module(new URL('./retained_core_events.mjs', import.meta.url), {exports: {retainedCoreEvents: (directory, requested) => {
+    assert.equal(requested, true);
+    const config = JSON.parse(readFileSync(`${directory}/event-source.json`));
+    assert.equal(statSync(config.credentialFile).mode & 0o777, 0o600);
+    return {configuration: 'configured', input: {source: {}, musicInterestTagId: config.musicInterestTagId}};
+  }}});
   t.mock.module('firebase-admin/firestore', {exports: {getFirestore: () => ({doc: path => {
     assert.equal(path, 'interest_tags/music'); return {get: async () => {reads++; if (denyRead) throw Error('denied'); return {data: () => ({displayName: 'Music', lifecycleState: 'active'})};}};
   }})}});

@@ -58,14 +58,18 @@ export async function startAzureBackend(env = process.env) {
   let phase = 'composition';
   try {
     const {createRemoteGroupRuntime, closeControlledRuntime} = await import('../backend/dist/src/bootstrap/retained-core-runtime.js');
-    const {TicketmasterBrowseSource} = await import('../backend/dist/src/event-browse/infrastructure/ticketmaster-browse-source.js');
+    const {retainedCoreEvents} = await import('./retained_core_events.mjs');
     const {getFirestore} = await import('firebase-admin/firestore');
     const {getAuth} = await import('firebase-admin/auth');
-    const source = new TicketmasterBrowseSource({key: () => env.ENMORI_TICKETMASTER_KEY, enabled: () => runtime?.eventBrowseControl?.observation().enabled === true});
+    const eventCredentialPath = join(directory, 'event-credential.json');
+    writeFileSync(eventCredentialPath, JSON.stringify({apiKey: env.ENMORI_TICKETMASTER_KEY, termsAccepted: true}), {mode: 0o600});
+    writeFileSync(join(directory, 'event-source.json'), JSON.stringify({credentialFile: eventCredentialPath, musicInterestTagId: config.musicInterestTagId}), {mode: 0o600});
+    const events = retainedCoreEvents(directory, true, () => runtime?.eventBrowseControl?.observation().enabled === true);
+    assert.equal(events.configuration, 'configured');
     runtime = await createRemoteGroupRuntime({
       ...env, ENMORI_REMOTE_GROUP: 'true', ENMORI_ENVIRONMENT: 'controlled-demo',
       ENMORI_FIREBASE_PROJECT_ID: 'enmori-rmvp-controlled',
-    }, {source, musicInterestTagId: config.musicInterestTagId}, undefined);
+    }, events.input, undefined);
     phase = 'firestore-read';
     const music = await getFirestore(runtime.firebaseApp).doc(`interest_tags/${config.musicInterestTagId}`).get();
     assert(music.data()?.displayName === 'Music' && music.data()?.lifecycleState === 'active');

@@ -58,3 +58,12 @@ Integrate the already-approved ordinary-feature source used by installed v48
 the event/detail/profile/discovery work. Retain its decision trail. The Azure
 entry still constructs no AI, appointment worker or push sender; the existing
 local-host service remains untouched.
+
+The existing event source composition includes the approved Playwright 1.64.1
+public readers. Include its matching Chromium 1248 and the existing region asset
+in the deployment bundle. The Azure Linux startup installs the pinned Playwright
+release's OS dependency list and uses Xvfb for the existing ordinary headed
+browser mode. This changes the host runtime only, not source access rules or
+retention. Use a hoisted production dependency installation for ZIP packaging;
+the first dereferenced pnpm symlink archive failed module resolution before
+Firebase access, so that archive is not an accepted deployment.
