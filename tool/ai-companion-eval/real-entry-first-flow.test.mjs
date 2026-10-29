@@ -6,7 +6,7 @@ import * as retained from '../../backend/dist/src/bootstrap/retained-core-runtim
 // open a listener, read a credential/account, acquire a real lock or call a model.
 let sequence = 0;
 const owner = '00000000-0000-4000-8000-000000000001';
-async function entry(t, firstFlow, fullFeatures = true) {
+async function entry(t, firstFlow, fullFeatures = true, flags = []) {
   const calls = { remote: [], core: 0, locks: 0, reads: [], writes: [], listening: [], closed: 0 };
   const configPath = '/synthetic-private/local-backend.json';
   const config = { projectId: 'enmori-rmvp-controlled', host: '127.0.0.1', port: 9381,
@@ -14,7 +14,7 @@ async function entry(t, firstFlow, fullFeatures = true) {
     certificatePath: '/synthetic-private/cert', fullFeatures,
     ...(firstFlow === undefined ? {} : { firstFlow }) };
   const previousArgv = process.argv, previousExitCode = process.exitCode;
-  process.argv = [process.execPath, 'tool/run_real_account_local.mjs', configPath];
+  process.argv = [process.execPath, 'tool/run_real_account_local.mjs', configPath, ...flags];
   process.exitCode = undefined;
   t.after(() => { process.argv = previousArgv; process.exitCode = previousExitCode; });
   const mockModule = (specifier, exports) => t.mock.module(specifier, { exports });
@@ -113,4 +113,29 @@ test('firstFlow cannot silently disappear behind fullFeatures false', async t =>
   assert.equal(run.exitCode, 1);
   assert.equal(run.locks, 0);
   assert.equal(run.remote.length + run.core, 0);
+});
+
+// Backend-first selection is exercised through the actual entry, with no models.
+test('backend-only retains full ordinary composition but supplies no model or first-flow',async t=>{
+ const run=await entry(t,undefined,true,['--backend-only']);
+ assert.equal(run.exitCode,undefined);assert.equal(run.core,0);assert.equal(run.remote.length,1);
+ assert.equal(run.remote[0][0].ENMORI_REMOTE_GROUP,'true');
+ assert.equal(run.remote[0][1].musicInterestTagId,'synthetic-music');
+ assert.equal(run.remote[0][2],undefined);assert.equal(run.remote[0][3],undefined);
+ assert.equal(run.closed,1);assert.deepEqual(run.listening,[{host:'127.0.0.1',port:9381}]);
+});
+test('backend-only refuses configured first-flow rather than silently discarding it',async t=>{
+ const run=await entry(t,{ownerAccountId:owner,firebaseUid:'synthetic-owner'},true,['--backend-only']);
+ assert.equal(run.exitCode,1);assert.equal(run.locks,0);assert.equal(run.remote.length+run.core,0);
+ assert.deepEqual(run.reads,['/synthetic-private/local-backend.json']);assert.equal(run.writes.length,0);
+});
+test('backend-only rejects incomplete ordinary composition before credential or listener work',async t=>{
+ const run=await entry(t,undefined,false,['--backend-only']);
+ assert.equal(run.exitCode,1);assert.equal(run.locks,0);assert.equal(run.remote.length+run.core,0);
+ assert.deepEqual(run.reads,['/synthetic-private/local-backend.json']);assert.equal(run.listening.length,0);
+});
+test('mistyped backend-only flag cannot silently enable the legacy model path',async t=>{
+ const run=await entry(t,undefined,true,['--backend-onyl']);
+ assert.equal(run.exitCode,1);assert.equal(run.locks,0);assert.equal(run.remote.length+run.core,0);
+ assert.deepEqual(run.reads,['/synthetic-private/local-backend.json']);assert.equal(run.writes.length,0);
 });

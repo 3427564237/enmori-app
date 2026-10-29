@@ -35,9 +35,14 @@ try {
   assert(config.remotePort === undefined || config.remotePort === 9382);
   assert.equal(typeof config.verificationEmail, 'string');
   for (const name of ['FIREBASE_AUTH_EMULATOR_HOST', 'FIRESTORE_EMULATOR_HOST']) assert.equal(process.env[name], undefined);
+  const flags = process.argv.slice(3);
+  assert(flags.length === 0 || flags.length === 1 && flags[0] === '--backend-only', 'Unknown runtime option');
+  const backendOnly = flags[0] === '--backend-only';
   fullFeatures = config.fullFeatures === true;
+  assert(!backendOnly || fullFeatures, 'Backend-only requires the full ordinary feature composition');
   const firstFlow = parseLocalFirstFlowConfiguration(config.firstFlow);
   assert(firstFlow === undefined || fullFeatures, 'Local first-flow requires full features');
+  assert(!backendOnly || firstFlow === undefined, 'Backend-only cannot configure a model-backed first flow');
   privateOwned(config.keyPath);
   const certificate = readFileSync(config.certificatePath);
   const parsed = new X509Certificate(certificate);
@@ -51,7 +56,7 @@ try {
   const environment = { ...process.env,
     ENMORI_ENVIRONMENT: 'controlled-demo', ENMORI_FIREBASE_PROJECT_ID: config.projectId,
     ENMORI_BACKEND_HOST: config.host, ENMORI_BACKEND_PORT: String(config.port) };
-  runtime = fullFeatures ? await createRemoteGroupRuntime({...environment, ENMORI_REMOTE_GROUP:'true'}, events.input, 'qwen3.5:9b', firstFlow)
+  runtime = fullFeatures ? await createRemoteGroupRuntime({...environment, ENMORI_REMOTE_GROUP:'true'}, events.input, backendOnly ? undefined : 'qwen3.5:9b', firstFlow)
     : await createControlledRuntime(environment);
   if (fullFeatures) {
     const music = await getFirestore(runtime.firebaseApp).doc(`interest_tags/${events.input.musicInterestTagId}`).get();
