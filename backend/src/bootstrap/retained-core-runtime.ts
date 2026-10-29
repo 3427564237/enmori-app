@@ -88,6 +88,13 @@ export function parseLocalFirstFlowConfiguration(value: unknown, nowMs = Date.no
     typeof v === "object" && v !== null && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype;
   const invalid = (): never => { throw Error("Invalid local first-flow configuration"); };
   const uuid = (v: unknown): v is string => typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(v);
+  if(record(value)&&value.audience==="registered_accounts"){
+    if(Object.keys(value).length!==3||Object.keys(value).some(k=>!["audience","worker","push"].includes(k))||!record(value.worker)||!record(value.push)||
+      value.worker.mode!=="service"||Object.keys(value.worker).some(k=>!["mode","intervalMs"].includes(k))||
+      (value.worker.intervalMs!==undefined&&(typeof value.worker.intervalMs!=="number"||!Number.isSafeInteger(value.worker.intervalMs)||value.worker.intervalMs<1000||value.worker.intervalMs>2147483647))||
+      Object.keys(value.push).length!==1||typeof value.push.leaseDurationMs!=="number"||!Number.isSafeInteger(value.push.leaseDurationMs)||value.push.leaseDurationMs<60000||value.push.leaseDurationMs>30*86400000)return invalid();
+    return Object.freeze({audience:"registered_accounts",worker:Object.freeze({mode:"service",...(typeof value.worker.intervalMs==="number"?{intervalMs:value.worker.intervalMs}:{})}),push:Object.freeze({leaseDurationMs:value.push.leaseDurationMs})});
+  }
   if (!record(value) || !Object.hasOwn(value, "ownerAccountId") || !Object.hasOwn(value, "firebaseUid") ||
       Object.keys(value).some(key => !["ownerAccountId", "firebaseUid", "worker", "push"].includes(key))) return invalid();
   const { ownerAccountId, firebaseUid, worker, push } = value;
@@ -106,7 +113,7 @@ export function parseLocalFirstFlowConfiguration(value: unknown, nowMs = Date.no
   if (Object.hasOwn(worker, "intervalMs") && (typeof intervalMs !== "number" || !Number.isSafeInteger(intervalMs) || intervalMs < 1000 || intervalMs > 2_147_483_647)) return invalid();
   const selectedWorker = Object.freeze({...(service ? {mode: "service" as const} : {endsAtMs: endsAtMs as number}),
     ...(typeof intervalMs === "number" ? {intervalMs} : {})});
-  let selectedPush: FirstFlowConfiguration["push"];
+  let selectedPush: import("./first-flow-composition.js").FixedFirstFlowConfiguration["push"];
   if (Object.hasOwn(value, "push")) {
     const keys = service ? ["installationRef", "leaseDurationMs"] : ["installationRef", "leaseExpiresAt"];
     if (!record(push) || Object.keys(push).length !== keys.length || Object.keys(push).some(key => !keys.includes(key)) || !uuid(push.installationRef)) return invalid();

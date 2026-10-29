@@ -7,7 +7,7 @@ import * as retained from '../../backend/dist/src/bootstrap/retained-core-runtim
 let sequence = 0;
 const owner = '00000000-0000-4000-8000-000000000001';
 async function entry(t, firstFlow, fullFeatures = true) {
-  const calls = { remote: [], core: 0, locks: 0, reads: [], writes: [], listening: [], closed: 0 };
+  const calls = { remote: [], core: 0, locks: 0, reads: [], writes: [], listening: [], closed: 0, authOwnerReads: 0, authProjectReads: 0 };
   const configPath = '/synthetic-private/local-backend.json';
   const config = { projectId: 'enmori-rmvp-controlled', host: '127.0.0.1', port: 9381,
     verificationEmail: 'synthetic@example.invalid', keyPath: '/synthetic-private/key',
@@ -40,7 +40,8 @@ async function entry(t, firstFlow, fullFeatures = true) {
   mockModule('node:https', { createServer: server });
   mockModule('node:http', { createServer: server });
   mockModule('firebase-admin/auth', { getAuth: () => ({
-    getUserByEmail: async () => ({ uid: 'synthetic-owner', emailVerified: true }),
+    getUserByEmail: async () => { calls.authOwnerReads++; return { uid: 'synthetic-owner', emailVerified: true }; },
+    listUsers: async limit => { assert.equal(limit, 1); calls.authProjectReads++; return {users: []}; },
     verifyIdToken: async () => { throw Error('No request permitted'); },
   }) });
   mockModule('firebase-admin/firestore', { getFirestore: () => ({ doc: path => ({ get: async () => ({
@@ -125,4 +126,16 @@ test('firstFlow cannot silently disappear behind fullFeatures false', async t =>
   assert.equal(run.exitCode, 1);
   assert.equal(run.locks, 0);
   assert.equal(run.remote.length + run.core, 0);
+});
+
+
+test('ordinary entry starts with no named tester readiness dependency and forwards no account allowlist', async t => {
+  const firstFlow={audience:'registered_accounts',worker:{mode:'service',intervalMs:60000},push:{leaseDurationMs:2592000000}};
+  const run=await entry(t,firstFlow);
+  assert.equal(run.exitCode,undefined);
+  assert.deepEqual(run.remote[0][3],firstFlow);
+  assert.equal(run.authOwnerReads,0);assert.equal(run.authProjectReads,1);
+  const ready=run.writes.find(w=>w.body.phase==='listening').body;
+  assert.equal(ready.accountScope,'registered_accounts');
+  assert.equal(Object.hasOwn(ready,'emailVerified'),false);
 });

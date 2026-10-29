@@ -1,8 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "ENMORI approved first-flow candidate schemas",
-    "version": "2026-10-25"
+    "title": "ENMORI approved companion schemas",
+    "version": "2026-10-29",
+    "description": "Ordinary authenticated accounts use the same owner-only contracts. Registration is explicit and replaces the account current installation; installation and token ownership are rechecked at dispatch. No account or device allowlist is required. See docs/decisions/2026-10-29-li-ordinary-account-companion.md. Existing DTO shapes remain unchanged."
   },
   "paths": {},
   "components": {

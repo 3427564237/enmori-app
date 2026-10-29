@@ -8,7 +8,7 @@ import '../features/account/presentation/authenticated_avatar.dart';
 import '../features/account/own_avatar_providers.dart';
 import '../features/account/data/backend_own_avatar_repository.dart';
 import 'controlled_demo_app.dart';
-import 'proactive_messaging_composition.dart';
+import '../features/proactive/data/companion_installation.dart';
 import '../features/proactive/data/firebase_proactive_messaging.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -50,24 +50,16 @@ Future<void> bootstrap() async {
   const companionFirstFlow = bool.fromEnvironment(
     'ENMORI_AI_COMPANION_FIRST_FLOW',
   );
-  const companionInstallation = String.fromEnvironment(
-    'ENMORI_AI_COMPANION_INSTALLATION_REF',
-  );
   const backendUrl = String.fromEnvironment('ENMORI_API_BASE_URL');
   const certificate = String.fromEnvironment('ENMORI_API_CERTIFICATE_BASE64');
   final baseUri = parseApprovedBackendBaseUri(backendUrl);
-  final configurationValid =
-      (companionInstallation.isEmpty ||
-          companionFirstFlow &&
-              remoteAccount &&
-              validCompanionInstallationRef(companionInstallation)) &&
-      validAccountRuntimeConfiguration(
-        configuration,
-        controlledAccount: controlledAccount,
-        remoteAccount: remoteAccount,
-        certificateBase64: certificate,
-        baseUri: baseUri,
-      );
+  final configurationValid = validAccountRuntimeConfiguration(
+    configuration,
+    controlledAccount: controlledAccount,
+    remoteAccount: remoteAccount,
+    certificateBase64: certificate,
+    baseUri: baseUri,
+  );
   http.Client? controlledClient;
   var firebaseReady = false;
 
@@ -98,6 +90,9 @@ Future<void> bootstrap() async {
 
   if (remoteAccount && firebaseReady && baseUri != null) {
     final auth = FirebaseAuthRepository(FirebaseAuth.instance);
+    final companionInstallation = companionFirstFlow
+        ? await readCompanionInstallation()
+        : null;
     runApp(
       ControlledDemoApp(
         baseUri: baseUri,
@@ -108,10 +103,8 @@ Future<void> bootstrap() async {
         eventParticipationEnabled: true,
         remoteGroupEnabled: true,
         companionFirstFlowEnabled: companionFirstFlow,
-        companionInstallationRef: companionInstallation.isEmpty
-            ? null
-            : companionInstallation,
-        companionMessagingPort: companionInstallation.isEmpty
+        companionInstallationRef: companionInstallation,
+        companionMessagingPort: companionInstallation == null
             ? null
             : FirebaseProactiveMessagingPort(),
       ),

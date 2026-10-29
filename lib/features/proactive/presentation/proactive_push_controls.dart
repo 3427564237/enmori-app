@@ -15,6 +15,10 @@ class ProactivePushControls extends ConsumerWidget {
     final controller = ref.read(
       proactiveNotificationControllerProvider.notifier,
     );
+    final otherInstallation =
+        state.registration?.enabled == true &&
+        state.registration?.installationRef !=
+            ref.watch(proactiveMessagingInstallationRefProvider);
     final active = state.configured && state.authenticated && !state.busy;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,6 +61,13 @@ class ProactivePushControls extends ConsumerWidget {
               '本次通知登记已过期，仍可在 App 内查看跟进。',
             ),
           )
+        else if (otherInstallation)
+          Text(
+            context.tr(
+              'Notifications are registered on another installation. Enabling here replaces that registration.',
+              '通知已登记在另一台设备或旧安装上。在此启用将替换那次登记。',
+            ),
+          )
         else if (state.registration?.enabled == true)
           Text(
             context.tr(
@@ -97,7 +108,7 @@ class ProactivePushControls extends ConsumerWidget {
               child: Text(context.tr('Enable system notifications', '启用系统通知')),
             ),
             OutlinedButton(
-              onPressed: active && !state.unconfirmed
+              onPressed: active && !state.unconfirmed && !otherInstallation
                   ? controller.disablePush
                   : null,
               child: Text(context.tr('Disable system notifications', '关闭系统通知')),

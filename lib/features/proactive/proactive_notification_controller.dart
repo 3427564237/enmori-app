@@ -418,11 +418,6 @@ class ProactiveNotificationController
       return null;
     }
     final value = (result as Success<ProactiveRegistration>).value;
-    if (value.installationRef != null &&
-        value.installationRef != _installation) {
-      _failure = _notVerified;
-      return null;
-    }
     _registration = value;
     if (_unknownRegistrationRevision != null &&
         value.revision > _unknownRegistrationRevision!) {
@@ -711,7 +706,8 @@ class ProactiveNotificationController
       if (_unknownRegistrationRevision != null) {
         // An unchanged GET cannot prove an earlier unknown PUT will not commit.
         _failure = _unconfirmed;
-      } else if (metadata.enabled) {
+      } else if (metadata.enabled &&
+          metadata.installationRef == _installation) {
         final result = await _call(epoch, (token, abort) {
           _unknownRegistrationRevision = metadata.revision;
           _checkRequired = true;

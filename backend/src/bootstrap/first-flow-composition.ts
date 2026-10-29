@@ -1,3 +1,6 @@
+import { AccountFirstFlowDueWorker } from "../proactive/application/account-due-worker.js";
+import { FirestoreProactiveAccountRoster } from "../proactive/infrastructure/firestore-account-roster.js";
+import { createAccountScopedFirstFlowStore } from "../proactive/infrastructure/account-scoped-first-flow-store.js";
 import { randomUUID } from "node:crypto";
 import type { Auth } from "firebase-admin/auth";
 import type { Credential } from "firebase-admin/app";
@@ -14,12 +17,20 @@ import type { FirstFlowSender, ProactiveActor } from "../proactive/ports/first-f
 
 /** Explicit operator-owned candidate configuration. No ordinary environment
  * variable, application startup or HTTP input constructs this permission. */
-export interface FirstFlowConfiguration {
+export interface FixedFirstFlowConfiguration {
+  readonly audience?: "fixed";
   readonly ownerAccountId: string;
   readonly firebaseUid: string;
   readonly worker?: { readonly mode?: "service"; readonly endsAtMs?: number; readonly intervalMs?: number };
   readonly push?: { readonly installationRef: string; readonly leaseExpiresAt?: string; readonly leaseDurationMs?: number };
 }
+
+export interface RegisteredFirstFlowConfiguration {
+  readonly audience: "registered_accounts";
+  readonly worker: {readonly mode:"service";readonly intervalMs?:number};
+  readonly push: {readonly leaseDurationMs:number};
+}
+export type FirstFlowConfiguration=FixedFirstFlowConfiguration|RegisteredFirstFlowConfiguration;
 
 interface FirstFlowCompositionOptions {
   readonly configuration: FirstFlowConfiguration;
@@ -36,6 +47,7 @@ interface FirstFlowCompositionOptions {
 export function createFirstFlowComposition(options: FirstFlowCompositionOptions) {
   requireFeatureEnvironment(options.environment);
   const config = options.configuration, now = options.nowMs ?? Date.now;
+  if(config.audience==="registered_accounts")return createRegisteredComposition(options,config);
   if (!config.firebaseUid || config.firebaseUid.length > 128 || !config.firebaseUid.isWellFormed() ||
       /[\u0000-\u001f\u007f]/u.test(config.firebaseUid)) throw Error("Fixed first-flow identity required");
   const serviceLease = config.worker?.mode === "service";
@@ -88,4 +100,27 @@ export function createFirstFlowComposition(options: FirstFlowCompositionOptions)
     start: () => { if (current()) worker?.start(); },
     stop: async () => { accepting = false; await worker?.stop(); },
   };
+}
+
+function createRegisteredComposition(options:FirstFlowCompositionOptions,config:RegisteredFirstFlowConfiguration){
+  if(options.environment.ENMORI_REMOTE_GROUP!=="true"||!options.credential||config.worker.mode!=="service"||
+    !Number.isSafeInteger(config.push.leaseDurationMs)||config.push.leaseDurationMs<60000||config.push.leaseDurationMs>30*86400000)
+    throw Error("Invalid ordinary-account companion configuration");
+  let accepting=true;const current=()=>accepting&&options.healthy(),now=options.nowMs??Date.now;
+  const store=createAccountScopedFirstFlowStore(options.conversation.gateway,options.environment,{
+    conversationTransaction:(tx,principal,owner,live)=>options.conversation.store.firstFlowTransaction(tx,principal,owner,live),
+    utcMilliseconds:now,accountScopedRegistration:true,registrationLeaseDurationMs:config.push.leaseDurationMs});
+  const application=new FirstFlowApplication({store,model:new LocalFirstFlowTransport(options.lane),
+    sender:new SinglePostFcmSender({projectId:"enmori-rmvp-controlled",credential:options.credential}),newMessageId:randomUUID,nowMs:now});
+  const actor=(uid:string):ProactiveActor=>({principal:{firebaseUid:uid},current,verifyCurrentAuth:async()=>{
+    if(!current())return {kind:"invalid"};
+    try{const user=await options.auth.getUser(uid);if(!current())return {kind:"invalid"};
+      return user.uid===uid&&!user.disabled?{kind:"verified",principal:{firebaseUid:uid}}:{kind:"forbidden"};
+    }catch(error:unknown){return typeof error==="object"&&error!==null&&"code" in error&&error.code==="auth/user-not-found"?{kind:"invalid"}:{kind:"dependency_unavailable"};}
+  }});
+  const worker=new AccountFirstFlowDueWorker({application,roster:new FirestoreProactiveAccountRoster(options.conversation.gateway),actor,current,
+    intervalMs:config.worker.intervalMs??60000,nowMs:now});
+  return {application,store,accepting:current,
+    status:()=>({configured:true,workerConfigured:true,workerRunning:worker.running,workerMode:"service",pushConfigured:true}),
+    start:()=>worker.start(),stop:async()=>{accepting=false;await worker.stop();}};
 }

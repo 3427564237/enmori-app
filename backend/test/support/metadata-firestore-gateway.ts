@@ -10,6 +10,7 @@ export class MetadataFirestoreGateway implements FirestoreGateway {
     const entries=(path:string)=>[...rows.entries()].filter(([k])=>k.startsWith(`${path}/`)&&!k.slice(path.length+1).includes("/")).map(([,v])=>v);
     const stage=(path:string,data:Row)=>{wrote=true;count++;if(this.failAtWrite===count)throw Error("private staged write failure");const prev=rows.get(path);rows.set(path,{id:path.split("/").at(-1)!,data:structuredClone(data),createTime:prev?.createTime??{seconds:Math.floor(this.now/1000),nanoseconds:this.now%1000*1e6},updateTime:{seconds:Math.floor(this.now/1000),nanoseconds:this.now%1000*1e6}});};
     const tx:Tx={get:p=>read(p,rows.get(p)?.data),getSnapshot:p=>read(p,rows.get(p)),list:p=>read(p,entries(p).map(v=>({id:v.id,data:v.data}))),listSnapshots:p=>read(p,entries(p)),
+      listPage:(p,after,limit)=>read(p,entries(p).filter(r=>after===undefined||r.id>after).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0).slice(0,limit)),
       listOwnCheckInDayPage:input=>read("check_ins:own-day",entries("check_ins")
         .filter(r=>r.data.ownerAccountId===input.ownerAccountId&&typeof r.data.createdAt==="string"&&r.data.createdAt>=input.startUtc&&r.data.createdAt<=input.asOf&&
           (input.endUtc===null||r.data.createdAt<input.endUtc))
