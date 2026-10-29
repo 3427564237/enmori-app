@@ -162,8 +162,8 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
                   if (!widget.syntheticPreview) ...[
                     Text(
                       context.tr(
-                        'Ticketmaster handles tickets and booking. Its link may open booking or seat selection. Opening it does not register you for the event.',
-                        'Ticketmaster 处理购票与预订，链接可能打开预订或选座页面。打开网页不代表你已报名。',
+                        'The official site handles registration and tickets. Opening it does not register you for the event.',
+                        '官网处理报名与购票。打开网页不代表你已报名。',
                       ),
                     ),
                     FilledButton.icon(
@@ -186,13 +186,35 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
                       },
                       icon: const Icon(Icons.open_in_new),
                       label: Text(
-                        context.tr(
-                          'Tickets / booking on Ticketmaster',
-                          '在 Ticketmaster 购票／预订',
-                        ),
+                        context.tr('Official event details', '官网活动详情'),
                       ),
                     ),
                   ],
+                  if (!widget.syntheticPreview &&
+                      value.content?.bookingUrl != null &&
+                      value.content!.bookingUrl != value.content!.detailUrl)
+                    FilledButton.icon(
+                      onPressed: () async {
+                        final result = await ref
+                            .read(
+                              eventDetailControllerProvider(widget.eventId)
+                                  .notifier,
+                            )
+                            .openSource(value, booking: true);
+                        if (result case Failure<void>(:final failure)
+                            when context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(localizedFailure(context, failure)),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.confirmation_number_outlined),
+                      label: Text(
+                        context.tr('Registration / tickets', '报名／购票'),
+                      ),
+                    ),
                   OutlinedButton.icon(
                     key: const Key('event-detail-copy-link'),
                     onPressed: () async {

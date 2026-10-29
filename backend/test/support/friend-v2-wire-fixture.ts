@@ -1,3 +1,4 @@
+import {emptyRecommendationProfile} from '../../src/recommendation-profile/domain/recommendation-profile.js';
 import Fastify from 'fastify';
 import { FirestoreFriendRecommendations } from '../../src/friend-recommendations/infrastructure/firestore-friend-recommendations.js';
 import { registerFriendRecommendations } from '../../src/friend-recommendations/transport/friend-recommendation-route.js';
@@ -15,6 +16,7 @@ export async function friendWireResponse(kind:typeof friendWireCases[number],vie
     const affiliation=self||(candidate&&['affiliation','both'].includes(kind));
     const interest=self||(candidate?kind==='interest':kind==='mixed');
     seed['accounts/'+id]={...seed['accounts/'+id],optionalProcessingConsent:'accepted',
+      recommendationProfile:{...emptyRecommendationProfile,discoverable:true,matchInterests:true,matchRegion:true,matchAffiliation:true,homeAreaCode:region?'TM':null},
       profileVisibility:'public',fieldPrivacy:{interests:'public',location:'public',participation:'private',mapSharedWithFriends:false},
       profileDetails:{bio:null,region:region?'Singapore':null,affiliationType:affiliation?'school':null,affiliationName:affiliation?'Synthetic School':null}};
     seed['account_interests/'+id]={interestTagIds:interest?['music']:[],revision:1};
@@ -26,7 +28,7 @@ export async function friendWireResponse(kind:typeof friendWireCases[number],vie
   await registerFriendRecommendations(app,{verifyIdToken:async token=>token==='synthetic-owner'?
     {kind:'verified',principal:{firebaseUid:'owner'}}:{kind:'invalid'}},repository);
   try{
-    const response=await app.inject({url:'/v1/recommendations/friends?view='+view,headers:{authorization:'Bearer synthetic-owner'}});
+    const response=await app.inject({url:'/v1/recommendations/friends?view='+view,headers:{authorization:'Bearer synthetic-owner','x-enmori-contract-version':'3'}});
     return {status:response.statusCode,cacheControl:response.headers['cache-control'],body:response.json() as unknown};
   }finally{await app.close();}
 }

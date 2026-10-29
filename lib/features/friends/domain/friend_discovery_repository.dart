@@ -20,3 +20,7 @@ abstract interface class FriendDiscoveryRepository {
   Future<Result<List<FriendSuggestion>>> suggestions({required bool home});
   Future<Result<int>> pendingCount();
 }
+
+abstract interface class FriendDiscoveryStatus {
+  String? get ownState;
+}

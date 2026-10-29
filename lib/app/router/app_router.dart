@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+
+import '../../core/presentation/enmori_localizations.dart';
+import "../../features/recommendation_profile/presentation/recommendation_profile_page.dart";
+import "../../features/recommendation_profile/presentation/activity_area_bar.dart";
 import '../../features/weather/presentation/home_weather_card.dart';
 import '../remote_social_composition.dart';
 import '../../features/friends/presentation/friend_module_page.dart';
@@ -6,8 +11,6 @@ import '../../features/event_participation/presentation/own_participation_sectio
 import '../../features/event_participation/presentation/plan_comparison_page.dart';
 import '../event_recommendation_card.dart';
 import 'event_participation_routes.dart';
-
-import 'package:flutter/widgets.dart';
 
 import '../social_demo_presentation.dart';
 
@@ -530,7 +533,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (context, state) => OnboardingPage(
-          onCompleted: () => context.go(AppRoutes.setupInterests),
+          onCompleted: () async {
+            if (remoteGroup) {
+              await Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => const RecommendationProfilePage(),
+                ),
+              );
+            }
+            if (context.mounted) context.go(AppRoutes.setupInterests);
+          },
         ),
       ),
       GoRoute(
@@ -545,12 +557,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'root-home',
         builder: (context, state) => HomeShellPage(
           profileHeader: remoteGroup
-              ? ConnectedOwnHeader(
-                  onEdit: () async {
-                    if (canNavigateShared(context, AppRoutes.home)) {
-                      await context.push<void>(AppRoutes.profileEdit);
-                    }
-                  },
+              ? Column(
+                  children: [
+                    const ActivityAreaBar(),
+                    ConnectedOwnHeader(
+                      onEdit: () async {
+                        if (canNavigateShared(context, AppRoutes.home)) {
+                          await context.push<void>(AppRoutes.profileEdit);
+                        }
+                      },
+                    ),
+                  ],
                 )
               : null,
           onContinueDiscovery: () async {
@@ -714,8 +731,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.profileEdit,
-        builder: (context, state) =>
-            const AccountPreferencesPage(view: PreferencesView.profile),
+        builder: (context, state) => AccountPreferencesPage(
+          view: PreferencesView.profile,
+          recommendationSection: !remoteGroup
+              ? null
+              : ListTile(
+                  title: Text(context.tr('Recommendation profile', '推荐资料')),
+                  subtitle: Text(
+                    context.tr(
+                      'Home area, birthday and discovery',
+                      '常用地区、生日与好友发现',
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const RecommendationProfilePage(),
+                    ),
+                  ),
+                ),
+        ),
       ),
       GoRoute(
         path: AppRoutes.aiSettings,

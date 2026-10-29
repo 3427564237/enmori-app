@@ -12,7 +12,11 @@ bool validEventCoverUrl(Object? value) {
   final url = Uri.tryParse(value);
   return url != null &&
       url.scheme == 'https' &&
-      url.host == 's1.ticketm.net' &&
+      const [
+        's1.ticketm.net',
+        'static.ticketmaster.sg',
+        'www.onepa.gov.sg',
+      ].contains(url.host) &&
       url.userInfo.isEmpty &&
       (!url.hasPort || url.port == 443) &&
       !url.hasQuery &&

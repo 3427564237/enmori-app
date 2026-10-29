@@ -1,3 +1,4 @@
+import '../../event_detail/domain/event_content.dart';
 import 'event_actions.dart';
 import '../../../core/result/result.dart';
 
@@ -13,7 +14,9 @@ final class EventDetail {
     this.shortDescription,
     this.coverImageUrl,
     this.venueAddress,
+    this.content,
   });
+  final EventContent? content;
   final VenueAddress? venueAddress;
   final String eventId, title, externalSourceUrl;
   final DateTime startAt;

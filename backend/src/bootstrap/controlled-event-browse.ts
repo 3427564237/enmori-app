@@ -38,6 +38,7 @@ export function createControlledEventBrowse(options: {
     } finally { pending.delete(controller); }
   }
   const source: BrowseSource = {
+    ...(options.source?.status?{status:()=>options.source!.status!()}:{}),
     ...(projection ? {recommendationSnapshot: (asOf:string,signal:AbortSignal)=>read(signal,async(value,current)=>{
       const snapshot=await value.recommendationSnapshot!(asOf,current),admitted=epoch;
       return {items:snapshot.items,current:()=>enabled&&options.running()&&admitted===epoch&&snapshot.current()};

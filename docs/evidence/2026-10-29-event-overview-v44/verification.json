@@ -1,0 +1,42 @@
+{
+  "sourceCommit": "2218c8633b372d4f1b0c83924b9da7dd97170bd3",
+  "tests": {
+    "focusedPassed": 31,
+    "officialDetailActionsPassed": 2,
+    "failed": 0
+  },
+  "analyze": "no issues",
+  "apk": {
+    "path": "build/group-delivery-v44/ENMORI-group-v44-release.apk",
+    "sha256": "a7a3ce3ccca15d362a50b3ccd8b7b604200d2e05937cc2b934f7ce1f579c98a1",
+    "bytes": 68113696,
+    "package": "com.enmori.app.group",
+    "versionCode": 44,
+    "versionName": "1.0.0-group20261029",
+    "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+    "matchesV43Signer": true
+  },
+  "physicalDevice": {
+    "state": "not_connected",
+    "installed": false,
+    "verified": false
+  },
+  "logs": [
+    {
+      "path": "/tmp/enmori-v44-overview-tests.txt",
+      "sha256": "9c92e158baf28ff07bca8ca79937c59be557356734f4250ff62a7830dcd3e97b"
+    },
+    {
+      "path": "/tmp/enmori-v44-detail-actions-tests.txt",
+      "sha256": "235011fec5d2a4ad1c51742d5ffa73ea40f71fa98cbf753c8fbb8c4407f12cbf"
+    },
+    {
+      "path": "/tmp/enmori-v44-overview-analyze.txt",
+      "sha256": "bd7bb1cfa2e79f02402baf32366ccda93abce406009a0b4e95815a348a7a4fa1"
+    },
+    {
+      "path": "/tmp/enmori-v44-overview-build.txt",
+      "sha256": "3851ea77a475a0f04b2c9166bcbea85b9e45dc0014b04b646cb6462de3cbac91"
+    }
+  ]
+}

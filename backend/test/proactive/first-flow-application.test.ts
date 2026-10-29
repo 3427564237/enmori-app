@@ -3,6 +3,29 @@ import test from "node:test";
 import { FirstFlowDueWorker } from "../../src/proactive/application/due-worker.js";
 import { deferred, fixture, ids, rawReply } from "./first-flow-fakes.js";
 
+test('service worker survives the old window and transient health loss, then stops permanently', async () => {
+  const f = fixture();
+  let healthy = false;
+  const worker = new FirstFlowDueWorker({application:f.app, actor:{...f.actor,current:()=>healthy},
+    mode:'service', nowMs:()=>f.clock.now});
+  worker.start();
+  assert.equal(worker.running,true);
+  f.clock.advance(31 * 60000);
+  await worker.tick();
+  assert.deepEqual(f.counts(),{model:0,sends:0});
+  await f.queued();
+  healthy=true;
+  await worker.tick();
+  assert.deepEqual(f.counts(),{model:1,sends:1});
+  await worker.tick();
+  assert.deepEqual(f.counts(),{model:1,sends:1});
+  await worker.stop();
+  assert.equal(worker.running,false);
+  worker.start(); await worker.tick();
+  assert.equal(worker.running,false);
+  assert.deepEqual(f.counts(),{model:1,sends:1});
+});
+
 test("F0 fake vertical: explicit intent -> one genuine proactive append -> one dispatch -> visible read, without old-anchor advance", async () => {
   const f = fixture(); await f.queued();
   const anchor = f.store.anchor;

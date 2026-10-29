@@ -1,0 +1,15 @@
+{
+  "source": "0ec7df5",
+  "versionCode": 48,
+  "apkSha256": "17c71be068b4b3c50ce7f510394e33b69ce08a0be06ba3fe70bf78b439a5cc48",
+  "installedApkMatches": true,
+  "sameSigningCertificate": true,
+  "buildSeconds": 48.2,
+  "pageTestsPassed": 14,
+  "changeSinceV47": "Hide the legacy unverified push-status copy when actual notification controls are present.",
+  "realPushEvidence": "v47 verification.json; no replay for presentation-only v48",
+  "physicalStatusCheck": "passed: active registration and contacts on, obsolete duplicate absent",
+  "loginPreserved": true,
+  "phoneStayAwakeRestored": true,
+  "noAdditionalAppointment": true
+}

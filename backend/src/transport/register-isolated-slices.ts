@@ -1,3 +1,4 @@
+import { eventPresentationSchema } from "../event-detail/transport/content-schema.js";
 import { checkInResponse } from "../check-ins/transport/check-in-response.js";
 import type { FastifyInstance, FastifySchema } from "fastify";
 import type { IdentityVerifier } from "../shared/ports/identity-verifier.js";
@@ -10,7 +11,7 @@ import { sendFailure, sendFailureCode } from "./error-response.js";
 import { errorEnvelopeSchema, getCheckInHistorySchema } from "./schemas.js";
 export const targetSchema = { type: "object", additionalProperties: false, required: ["username","displayName","relationshipState"], properties: {
   username: { type: "string" }, displayName: { type: "string" }, relationshipState: { type: "string", enum: ["self","already_friends","outgoing_request_pending","incoming_request_pending","can_send_request"] } } } as const;
-export const eventDetailSchema = { type: "object", additionalProperties: false, required: ["eventId","title","startAt","externalSourceUrl"], properties: {
+export const eventDetailSchema = { type: "object", additionalProperties: false, required: ["eventId","title","startAt","externalSourceUrl"], properties: {...eventPresentationSchema,
   eventId: { type: "string", minLength: 1 }, title: { type: "string", minLength: 1, maxLength: 200 }, startAt: { type: "string" }, externalSourceUrl: { type: "string", maxLength: 2048 }, endAt: { type: "string" },
   locationLabel: { type: "string", minLength: 1, maxLength: 200 }, categoryLabel: { type: "string", minLength: 1, maxLength: 100 }, shortDescription: { type: "string", minLength: 1, maxLength: 1000 },
   coverImageUrl: { type: "string", minLength: 1, maxLength: 2048 } } } as const;
@@ -81,8 +82,8 @@ export async function registerIsolatedSlices(app: FastifyInstance, identity: Ide
         (query.has('includeVenueAddress') && query.get('includeVenueAddress') !== 'true')) return sendFailureCode(request, reply, 'REQUEST_INVALID');
     const result = await events.execute(requirePrincipal(request),request.params.eventId);
     if (!result.ok) return sendFailure(request,reply,result.failure);
-    const {venueAddress, ...legacy} = result.value;
-    return reply.send({event: query.get('includeVenueAddress') === 'true' ? result.value : legacy});
+    const {venueAddress, content, ...legacy} = result.value;
+    return reply.send({event: {...legacy, ...(query.get('includeVenueAddress') === 'true' && venueAddress ? {venueAddress}:{}), ...(request.headers['x-enmori-contract-version'] === '3' && content ? {content}: {})}});
   });
   if (checkInHistory !== undefined) {
     app.get<{ Querystring: { date: string; timeZone: string; cursor?: string } }>(

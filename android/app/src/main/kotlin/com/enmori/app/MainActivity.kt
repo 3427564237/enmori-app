@@ -35,7 +35,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.enmori.app/event_actions")
             .setMethodCallHandler { call, result ->
-                if (call.method !in setOf("openMap", "editCalendar")) result.notImplemented()
+                if (call.method !in setOf("openMap", "openSourceAddress", "editCalendar")) result.notImplemented()
                 else result.success(EventActions.open(this, call.method, call.arguments))
             }
         avatarPhotoPicker = AvatarPhotoPicker(this, flutterEngine.dartExecutor.binaryMessenger)
@@ -151,7 +151,7 @@ class MainActivity : FlutterActivity() {
             if (Regex("[\\s\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]").containsMatchIn(value)) return false
             val url = URI(value)
             if (url.scheme != "https" ||
-                url.host?.lowercase(Locale.ROOT) !in (if (attribution) setOf("open-meteo.com", "creativecommons.org", "www.openstreetmap.org") else setOf("ticketmaster.sg", "www.ticketmaster.sg")) ||
+                url.host?.lowercase(Locale.ROOT) !in (if (attribution) setOf("open-meteo.com", "creativecommons.org", "www.openstreetmap.org") else setOf("ticketmaster.sg", "www.ticketmaster.sg", "www1.ticketmaster.sg", "www.onepa.gov.sg")) ||
                 url.rawUserInfo != null || url.rawFragment != null || url.port !in setOf(-1, 443)) return false
             val nativeUri = Uri.parse(value)
             if (nativeUri.queryParameterNames.any {

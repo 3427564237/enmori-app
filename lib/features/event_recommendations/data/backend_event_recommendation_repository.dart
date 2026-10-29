@@ -1,3 +1,5 @@
+import '../../event_detail/domain/event_content.dart';
+import '../../event_detail/domain/event_cover.dart';
 import '../../../core/network/backend_api_client.dart';
 import '../../../core/network/utc_timestamp_parser.dart';
 import '../../../core/result/result.dart';
@@ -8,7 +10,8 @@ const _reasonCode = 'interest_match';
 
 final class BackendEventRecommendationRepository
     implements EventRecommendationRepository {
-  BackendEventRecommendationRepository(this._client);
+  BackendEventRecommendationRepository(this._client, {this.activityAreaCode});
+  final String? Function()? activityAreaCode;
 
   final BackendApiClient _client;
 
@@ -17,7 +20,8 @@ final class BackendEventRecommendationRepository
     required EventRecommendationView view,
   }) async {
     final response = await _client.get(
-      '/v1/recommendations/events?view=${view.name}',
+      '/v1/recommendations/events?view=${view.name}${activityAreaCode?.call() == null ? '' : '&activityAreaCode=${Uri.encodeQueryComponent(activityAreaCode!.call()!)}'}',
+      contractVersion: 3,
     );
     return switch (response) {
       Failure<JsonObject>(:final failure) => Failure(failure),
@@ -34,16 +38,26 @@ final class BackendEventRecommendationRepository
         ![
           _formulaVersion,
           'event_recommendation_v2',
+          'event_recommendation_v3',
         ].contains(formulaVersion) ||
         items is! List) {
       return _invalidResponse();
     }
 
-    final v2 = formulaVersion == 'event_recommendation_v2';
+    final v2 = formulaVersion != _formulaVersion;
     final parsedItems = <EventRecommendation>[];
     final ids = <String>{};
     for (final item in items) {
       if (item is! Map<String, dynamic>) return _invalidResponse();
+      for (final field in [
+        'locationLabel',
+        'shortDescription',
+        'coverImageUrl',
+      ]) {
+        if (item[field] != null && item[field] is! String) {
+          return _invalidResponse();
+        }
+      }
       final eventId = item['eventId'];
       final title = item['title'];
       final startAt = tryParseUtcTimestamp(item['startAt']);
@@ -89,7 +103,7 @@ final class BackendEventRecommendationRepository
       final reasons = <EventRecommendationReason>[];
       if (v2) {
         final rows = item['reasons'];
-        if (rows is! List || rows.isEmpty || rows.length > 3) {
+        if (rows is! List || rows.isEmpty || rows.length > 5) {
           return _invalidResponse();
         }
         final seen = <String>{};
@@ -112,6 +126,14 @@ final class BackendEventRecommendationRepository
             'shared_interests' =>
               count == parsedInterests.length ? count * 4 : -1,
             'friends_participating' => (count > 5 ? 5 : count) * 2,
+            'same_area' =>
+              formulaVersion == 'event_recommendation_v3' && count == 1
+                  ? 2
+                  : -1,
+            'target_age' =>
+              formulaVersion == 'event_recommendation_v3' && count == 1
+                  ? 1
+                  : -1,
             'same_region' => count == 1 ? 1 : -1,
             _ => -1,
           };
@@ -124,9 +146,21 @@ final class BackendEventRecommendationRepository
           return _invalidResponse();
         }
       }
+      EventContent? content;
+      try {
+        content = EventContent.parse(item['content']);
+      } catch (_) {
+        return _invalidResponse();
+      }
       parsedItems.add(
         EventRecommendation(
           eventId: eventId,
+          content: content,
+          locationLabel: item['locationLabel'] as String?,
+          shortDescription: item['shortDescription'] as String?,
+          coverImageUrl: validEventCoverUrl(item['coverImageUrl'])
+              ? item['coverImageUrl'] as String
+              : null,
           title: title,
           startAt: startAt,
           endAt: endAt,

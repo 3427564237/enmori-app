@@ -184,8 +184,8 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       const SizedBox(height: 12),
       Text(
         context.tr(
-          'Check-in Notes are not used for Recommendation ranking. Approximate location is not a Recommendation or AI input.',
-          "签到文字不用于推荐排序。大致位置不作为推荐或 AI 的输入。",
+          'Check-in Notes are not used for Recommendation ranking. Your selected area and optional private birthday can help recommendations when enabled. Device coordinates are not sent to AI.',
+          "签到文字不用于推荐排序。开启后可使用所选地区和选填生日辅助推荐，设备坐标不会发送给 AI。",
         ),
         key: Key('r6-initial-choice-purpose-supporting-statement'),
       ),

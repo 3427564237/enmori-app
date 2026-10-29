@@ -1,3 +1,7 @@
+import '../../event_detail/domain/event_source_url.dart';
+export '../../event_detail/domain/event_source_url.dart';
+import '../../event_detail/domain/event_content.dart';
+
 import 'dart:convert';
 
 import '../../../core/network/backend_api_client.dart';
@@ -10,7 +14,7 @@ bool validBrowseId(Object? value) {
   if (value is! String ||
       value.length < 5 ||
       value.length > 174 ||
-      !RegExp(r'^tm_[A-Za-z0-9_-]+$').hasMatch(value)) {
+      !RegExp(r'^(tm|pa)_[A-Za-z0-9_-]+$').hasMatch(value)) {
     return false;
   }
   try {
@@ -19,28 +23,12 @@ bool validBrowseId(Object? value) {
       allowMalformed: false,
     );
     return RegExp(r'^[A-Za-z0-9_-]{1,128}$').hasMatch(source) &&
-        'tm_${base64Url.encode(utf8.encode(source)).replaceAll('=', '')}' ==
+        '${value.substring(0, 3)}${base64Url.encode(utf8.encode(source)).replaceAll('=', '')}' ==
             value;
   } catch (_) {
     return false;
   }
 }
-
-bool validActivitySourceUrl(Uri url) =>
-    url.scheme == 'https' &&
-    const ['ticketmaster.sg', 'www.ticketmaster.sg'].contains(url.host) &&
-    url.userInfo.isEmpty &&
-    !url.hasFragment &&
-    (!url.hasPort || url.port == 443) &&
-    url.toString().length <= 2048 &&
-    !RegExp(r'[\s\x00-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]')
-        .hasMatch(url.toString()) &&
-    !url.queryParameters.keys.any(
-      (k) => RegExp(
-        r'^(api[_-]?key|token|access_token|secret|password|authorization)$',
-        caseSensitive: false,
-      ).hasMatch(k),
-    );
 
 bool _text(Object? v, int max) =>
     v is String &&
@@ -68,7 +56,7 @@ ActivitySummary? _summary(Map<String, Object?> raw) {
       (raw.containsKey('categoryLabel') && !_text(raw['categoryLabel'], 100)) ||
       (raw.containsKey('eventId') &&
           (raw['eventId'] is! String ||
-              !RegExp(r'^tm_event_[0-9a-f]{64}$')
+              !RegExp(r'^(tm|pa)_event_[0-9a-f]{64}$')
                   .hasMatch(raw['eventId'] as String))) ||
       !_text(raw['title'], 200) ||
       start == null ||
@@ -83,6 +71,11 @@ ActivitySummary? _summary(Map<String, Object?> raw) {
     eventId: raw['eventId'] as String?,
     locationLabel: raw['locationLabel'] as String?,
     categoryLabel: raw['categoryLabel'] as String?,
+    content: EventContent.parse(raw['content']),
+    shortDescription: raw['shortDescription'] as String?,
+    coverImageUrl: validEventCoverUrl(raw['coverImageUrl'])
+        ? raw['coverImageUrl'] as String
+        : null,
   );
 }
 
@@ -114,6 +107,8 @@ final class BackendActivityRepository implements PagedActivityRepository {
       browseId == null
           ? '/v1/event-browse${cursor == null ? '' : '?cursor=${Uri.encodeQueryComponent(cursor)}'}'
           : '/v1/event-browse/${Uri.encodeComponent(browseId)}',
+      contractVersion: 3,
+      readTimeout: browseId == null ? null : const Duration(seconds: 30),
     );
     if (result case Failure<JsonObject>(:final failure)) {
       return Failure(failure);
@@ -122,23 +117,34 @@ final class BackendActivityRepository implements PagedActivityRepository {
       final raw = (result as Success<JsonObject>).value;
       if (browseId == null) {
         if (raw.keys.any(
-              (k) =>
-                  !const ['asOf', 'scope', 'items', 'nextCursor'].contains(k),
+              (k) => !const [
+                'asOf',
+                'scope',
+                'items',
+                'nextCursor',
+                'sourceStatus',
+              ].contains(k),
             ) ||
-            raw['scope'] != 'ticketmaster_sg_first_batch_v1' ||
+            ![
+              'ticketmaster_sg_first_batch_v1',
+              'singapore_events_v2',
+            ].contains(raw['scope']) ||
             _instant(raw['asOf']) == null ||
             raw['items'] is! List ||
             (raw.containsKey('nextCursor') && !_cursor(raw['nextCursor']))) {
           return _invalid();
         }
         final rows = raw['items']! as List;
-        if (rows.length > 20) return _invalid();
+        if (rows.length > 40) return _invalid();
         final items = <ActivitySummary>[];
         final ids = <String>{};
         for (final row in rows) {
           if (row is! Map<String, dynamic> ||
               row.keys.any(
                 (k) => !const [
+                  'content',
+                  'shortDescription',
+                  'coverImageUrl',
                   'browseId',
                   'eventId',
                   'locationLabel',
@@ -158,12 +164,17 @@ final class BackendActivityRepository implements PagedActivityRepository {
           ActivityBatch(
             asOf: raw['asOf']! as String,
             items: items,
+            sourceStatus: {
+              for (final row in (raw['sourceStatus'] as List? ?? const []))
+                (row as Map)['provider'] as String: row['available'] as bool,
+            },
             nextCursor: raw['nextCursor'] as String?,
           ),
         );
       }
       if (raw.keys.any(
             (k) => !const [
+              'content',
               'browseId',
               'eventId',
               'title',
@@ -200,6 +211,7 @@ final class BackendActivityRepository implements PagedActivityRepository {
       return Success(
         ActivityDetail(
           summary: summary,
+          content: EventContent.parse(raw['content']),
           sourceUrl: url,
           locationLabel: raw['locationLabel'] as String?,
           categoryLabel: raw['categoryLabel'] as String?,

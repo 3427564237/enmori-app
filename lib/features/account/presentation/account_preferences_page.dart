@@ -21,6 +21,7 @@ final class AccountPreferencesPage extends ConsumerWidget {
   const AccountPreferencesPage({
     required this.view,
     this.languageSection,
+    this.recommendationSection,
     this.onEditProfile,
     this.onSignOut,
     this.aiOnly = false,
@@ -28,7 +29,7 @@ final class AccountPreferencesPage extends ConsumerWidget {
     super.key,
   });
   final PreferencesView view;
-  final Widget? languageSection;
+  final Widget? languageSection, recommendationSection;
   final bool aiOnly;
   final VoidCallback? onOpenPersonas;
   final Future<void> Function()? onEditProfile;
@@ -38,6 +39,7 @@ final class AccountPreferencesPage extends ConsumerWidget {
     key: ValueKey((view, ref.watch(authSessionProvider).asData?.value)),
     view: view,
     languageSection: languageSection,
+    recommendationSection: recommendationSection,
     onEditProfile: onEditProfile,
     onSignOut: onSignOut,
     aiOnly: aiOnly,
@@ -50,6 +52,7 @@ final class _AccountPreferencesForm extends ConsumerStatefulWidget {
   const _AccountPreferencesForm({
     required this.view,
     this.languageSection,
+    this.recommendationSection,
     this.onEditProfile,
     this.onSignOut,
     this.aiOnly = false,
@@ -57,7 +60,7 @@ final class _AccountPreferencesForm extends ConsumerStatefulWidget {
     super.key,
   });
   final PreferencesView view;
-  final Widget? languageSection;
+  final Widget? languageSection, recommendationSection;
   final bool aiOnly;
   final VoidCallback? onOpenPersonas;
   final Future<void> Function()? onEditProfile;
@@ -440,20 +443,26 @@ final class _AccountPreferencesPageState
                           ),
                         ),
                       ),
+                      if (widget.recommendationSection != null)
+                        widget.recommendationSection!,
                       TextField(
                         key: const Key('profile-region'),
+                        readOnly: widget.recommendationSection != null,
                         controller: _region,
                         onChanged: (_) => setState(() {}),
                         enabled: ready,
                         maxLength: 120,
                         decoration: InputDecoration(
-                          labelText: context.tr('Region', "地区"),
+                          labelText: context.tr(
+                            'Legacy region (kept for reference)',
+                            '原地区（保留供参考）',
+                          ),
                         ),
                       ),
                       Text(
                         context.tr(
-                          'Enter a city, neighbourhood or place name.',
-                          '填写城市、街区或具体地点名称。',
+                          'Choose your standard home area in Recommendation profile.',
+                          '请在推荐资料中选择标准常用地区。',
                         ),
                       ),
                       const SizedBox(height: 24),

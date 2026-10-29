@@ -84,19 +84,14 @@ final class _ExternalRegistrationActionState
     final allowed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          context.tr(
-            'Continue to Ticketmaster tickets?',
-            '前往 Ticketmaster 购票？',
-          ),
-        ),
+        title: Text(context.tr('Continue to the official site?', '前往官网报名／购票？')),
         content: SingleChildScrollView(
           child: Text(
             context.tr(
-              'Your browser opens the event’s Ticketmaster ticket link. Ticketmaster controls the destination, including any booking or seat selection. Its privacy and payment '
+              'Your browser opens the event’s the official provider ticket link. the official provider controls the destination, including any booking or seat selection. Its privacy and payment '
                   'terms apply. ENMORI does not verify registration or take payment. '
                   'Opening the page does not mark you as Going.',
-              '浏览器将打开此活动的 Ticketmaster 购票链接，具体页面及预订或选座步骤由 Ticketmaster 决定，其隐私和支付条款适用。ENMORI 不核实报名，也不收款。打开网页不会自动标记为将参加。',
+              '浏览器将打开此活动的官网报名链接，具体页面及预订或选座步骤由活动提供方决定，其隐私和支付条款适用。ENMORI 不核实报名，也不收款。打开网页不会自动标记为将参加。',
             ),
           ),
         ),
@@ -208,8 +203,8 @@ final class _ExternalRegistrationActionState
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
             context.tr(
-              'Tickets and booking are handled by Ticketmaster. Its link may open booking or seat selection.',
-              '购票与预订由 Ticketmaster 处理，链接可能打开预订或选座页面。',
+              'Tickets and booking are handled by the official provider. Its link may open booking or seat selection.',
+              '购票与预订由活动提供方处理，链接可能打开预订或选座页面。',
             ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
@@ -252,10 +247,7 @@ final class _ExternalRegistrationActionState
               : null,
           icon: const Icon(Icons.open_in_new),
           label: Text(
-            context.tr(
-              'Tickets / booking on Ticketmaster',
-              '在 Ticketmaster 购票／预订',
-            ),
+            context.tr('Tickets / booking on the official provider', '官网报名／购票'),
           ),
         ),
       ],

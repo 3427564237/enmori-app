@@ -99,13 +99,25 @@ test('existing real entry without firstFlow keeps companion construction off', a
   assert.equal(run.remote[0][3], undefined);
 });
 
-test('malformed or push-enabled configuration fails before credential, lock, runtime and listener work', async t => {
+test('malformed push configuration fails before credential, lock, runtime and listener work', async t => {
   const run = await entry(t, { ownerAccountId: owner, firebaseUid: 'synthetic-owner', push: { installationRef: owner } });
   assert.equal(run.exitCode, 1);
   assert.deepEqual(run.reads, ['/synthetic-private/local-backend.json']);
   assert.equal(run.locks, 0);
   assert.equal(run.remote.length + run.core, 0);
   assert.equal(run.listening.length + run.writes.length, 0);
+});
+
+test('actual entry forwards explicit service-mode push and reports configuration without claiming delivery', async t => {
+  const firstFlow = {ownerAccountId:owner,firebaseUid:'synthetic-owner',worker:{mode:'service'},
+    push:{installationRef:owner,leaseDurationMs:30*86400000}};
+  const run = await entry(t,firstFlow);
+  assert.equal(run.exitCode,undefined);
+  assert.deepEqual(run.remote[0][3],firstFlow);
+  const state=run.writes.find(w=>w.body.phase==='listening').body.firstFlow;
+  assert.equal(state.pushConfigured,true);
+  assert.equal(state.workerConfigured,true);
+  assert.equal(Object.hasOwn(state,'delivered'),false);
 });
 
 test('firstFlow cannot silently disappear behind fullFeatures false', async t => {

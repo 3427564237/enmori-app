@@ -1,3 +1,6 @@
+import "../features/recommendation_profile/recommendation_profile_providers.dart";
+import "../features/recommendation_profile/data/backend_recommendation_profile_repository.dart";
+import "../features/recommendation_profile/data/device_region_repository.dart";
 import '../features/event_detail/event_detail_providers.dart';
 import '../features/event_detail/data/platform_event_actions.dart';
 import '../core/presentation/identity_avatar.dart';
@@ -153,6 +156,14 @@ Future<void> bootstrap() async {
             shared: true,
           ),
         ),
+        regionRepositoryProvider.overrideWith(
+          (ref) => DeviceRegionRepository(),
+        ),
+        recommendationProfileRepositoryProvider.overrideWith(
+          (ref) => BackendRecommendationProfileRepository(
+            ref.watch(backendApiClientProvider),
+          ),
+        ),
         accountPreferencesRepositoryProvider.overrideWith(
           (ref) => BackendAccountPreferencesRepository(
             ref.watch(backendApiClientProvider),
@@ -183,6 +194,7 @@ Future<void> bootstrap() async {
         eventRecommendationRepositoryProvider.overrideWith(
           (ref) => BackendEventRecommendationRepository(
             ref.watch(backendApiClientProvider),
+            activityAreaCode: () => ref.read(activityAreaProvider).code,
           ),
         ),
       ],

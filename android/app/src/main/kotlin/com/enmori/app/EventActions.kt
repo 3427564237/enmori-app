@@ -17,6 +17,11 @@ internal object EventActions {
 
     fun intent(method: String, args: Map<*, *>): Intent? {
         return when (method) {
+            "openSourceAddress" -> {
+                if (args.keys != setOf("address", "countryCode") || args["countryCode"] != "SG") return null
+                val address = text(args["address"], 200) ?: return null
+                Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=${Uri.encode("$address, Singapore")}"))
+            }
             "openMap" -> {
                 if (args.keys.any { it !in setOf("street", "street2", "city", "postalCode", "countryCode") }) return null
                 val street = text(args["street"], 200) ?: return null
@@ -36,7 +41,7 @@ internal object EventActions {
                 val location = if (args.containsKey("location")) text(args["location"], 600) ?: return null else null
                 val url = text(args["url"], 2048) ?: return null
                 val uri = URI(url)
-                if (uri.scheme != "https" || uri.host !in setOf("ticketmaster.sg", "www.ticketmaster.sg") ||
+                if (uri.scheme != "https" || uri.host !in setOf("ticketmaster.sg", "www.ticketmaster.sg", "www1.ticketmaster.sg", "www.onepa.gov.sg") ||
                     uri.rawUserInfo != null || uri.rawFragment != null || uri.port !in setOf(-1, 443)) return null
                 if (Uri.parse(url).queryParameterNames.any {
                     Regex("^(api[_-]?key|token|access_token|secret|password|authorization)$", RegexOption.IGNORE_CASE).matches(it)

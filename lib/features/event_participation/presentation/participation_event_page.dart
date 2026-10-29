@@ -11,10 +11,10 @@ import '../../auth/auth_providers.dart';
 import '../../auth/domain/auth_repository.dart';
 import '../../event_browse/domain/activity_repository.dart';
 import '../../event_detail/domain/event_detail_repository.dart';
+import '../../event_detail/presentation/event_information.dart';
 import '../../event_detail/event_detail_providers.dart';
 import '../../event_detail/recent_events_provider.dart';
 import '../participation_providers.dart';
-import 'event_card.dart';
 import 'external_registration_action.dart';
 import 'participation_controller.dart';
 import 'participation_controls.dart';
@@ -127,7 +127,11 @@ final class _ParticipationEventPageState
           when value.eventId == widget.eventId) {
         _detail = value;
         ref.read(recentEventsProvider.notifier).viewed(value.eventId);
-        _returnUrl = Uri.tryParse(value.externalSourceUrl);
+        _returnUrl = Uri.tryParse(
+          value.content?.bookingUrl ??
+              value.content?.detailUrl ??
+              value.externalSourceUrl,
+        );
         _expiry?.cancel();
         _expiry = Timer(const Duration(minutes: 5), () {
           if (mounted) setState(_reset);
@@ -171,9 +175,38 @@ final class _ParticipationEventPageState
               Text(context.tr('Loading Event information…', '正在加载活动信息…')),
             if (_failure case final failure?)
               Text(localizedFailure(context, failure)),
+            if (details != null && details.content != null)
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final session = _session;
+                  final opened = await widget.opener.open(
+                    Uri.parse(details.content!.detailUrl),
+                    current: () =>
+                        mounted &&
+                        identical(_session, session) &&
+                        identical(_detail, details) &&
+                        (_expiry?.isActive ?? false) &&
+                        ModalRoute.of(context)?.isCurrent == true,
+                  );
+                  if (context.mounted && !opened) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          context.tr(
+                            'Could not open official details.',
+                            '无法打开官网详情。',
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.open_in_new),
+                label: Text(context.tr('Official event details', '官网活动详情')),
+              ),
             if (details != null)
               widget.detailBuilder?.call(context, details) ??
-                  EventCard(event: details, onSelect: null)
+                  EventInformation(event: details)
             else if (!_loading)
               Text(
                 context.tr(
@@ -211,7 +244,11 @@ final class _ParticipationEventPageState
               eventId: widget.eventId,
             ),
             const Divider(height: 32),
-            if (_returnUrl case final url?)
+            if (_returnUrl case final url?
+                when details?.content == null ||
+                    details!.content!.bookingUrl != null &&
+                        details.content!.bookingUrl !=
+                            details.content!.detailUrl)
               ExternalRegistrationAction(
                 key: ValueKey('registration-${widget.eventId}'),
                 eventId: widget.eventId,

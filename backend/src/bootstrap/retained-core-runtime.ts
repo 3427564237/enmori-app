@@ -77,31 +77,49 @@ interface ControlledRuntime {
   readonly stopEvents: () => Promise<void>;
   readonly stopAi: () => Promise<void>;
   readonly aiStatus: () => { configured: boolean; available: boolean; maintenanceHealthy: boolean; pending: boolean; outcomeUnknown: boolean };
+  readonly firstFlowStatus: () => { configured: boolean; workerConfigured: boolean; workerRunning: boolean; workerMode: string; pushConfigured: boolean };
 }
 
-/** Private real-entry selection only. Absence keeps F0/F1 off; this never
- * grants user consent, enables intents, discovers an owner or configures push. */
+/** Private fixed-owner configuration. Selecting a worker does not grant user
+ * consent, enable appointments or register a device. */
 export function parseLocalFirstFlowConfiguration(value: unknown, nowMs = Date.now()): FirstFlowConfiguration | undefined {
   if (value === undefined) return undefined;
   const record = (v: unknown): v is Record<string, unknown> =>
     typeof v === "object" && v !== null && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype;
-  const invalid = () => { throw Error("Invalid local first-flow configuration"); };
+  const invalid = (): never => { throw Error("Invalid local first-flow configuration"); };
+  const uuid = (v: unknown): v is string => typeof v === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(v);
   if (!record(value) || !Object.hasOwn(value, "ownerAccountId") || !Object.hasOwn(value, "firebaseUid") ||
-      Object.keys(value).some(key => !["ownerAccountId", "firebaseUid", "worker"].includes(key))) return invalid();
-  const { ownerAccountId, firebaseUid, worker } = value;
-  if (typeof ownerAccountId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(ownerAccountId) ||
-      typeof firebaseUid !== "string" || !firebaseUid || firebaseUid.length > 128 || !firebaseUid.isWellFormed() ||
-      /[\u0000-\u001f\u007f]/u.test(firebaseUid)) return invalid();
-  if (worker === undefined && !Object.hasOwn(value, "worker")) return Object.freeze({ ownerAccountId, firebaseUid });
-  if (!record(worker) || Object.keys(worker).some(key => !["endsAtMs", "intervalMs"].includes(key))) return invalid();
-  const { endsAtMs, intervalMs } = worker;
-  if (typeof endsAtMs !== "number" || !Number.isSafeInteger(endsAtMs) || !Number.isSafeInteger(nowMs) ||
-      endsAtMs <= nowMs || endsAtMs - nowMs > 30 * 60000 ||
-      (Object.hasOwn(worker, "intervalMs") && (typeof intervalMs !== "number" || !Number.isSafeInteger(intervalMs) ||
-        intervalMs < 1000 || intervalMs > 2_147_483_647))) return invalid();
-  // Copy the fixed selection; do not retain a mutable JSON/configuration object.
-  return Object.freeze({ ownerAccountId, firebaseUid, worker: Object.freeze({ endsAtMs,
-    ...(typeof intervalMs === "number" ? { intervalMs } : {}) }) });
+      Object.keys(value).some(key => !["ownerAccountId", "firebaseUid", "worker", "push"].includes(key))) return invalid();
+  const { ownerAccountId, firebaseUid, worker, push } = value;
+  if (!uuid(ownerAccountId) || typeof firebaseUid !== "string" || !firebaseUid || firebaseUid.length > 128 || !firebaseUid.isWellFormed() ||
+      /[\u0000-\u001f\u007f]/u.test(firebaseUid) || !Number.isSafeInteger(nowMs)) return invalid();
+  if (!Object.hasOwn(value, "worker")) {
+    if (Object.hasOwn(value, "push")) return invalid();
+    return Object.freeze({ownerAccountId, firebaseUid});
+  }
+  if (!record(worker)) return invalid();
+  const service = worker.mode === "service";
+  const keys = service ? ["mode", "intervalMs"] : ["endsAtMs", "intervalMs"];
+  if (Object.keys(worker).some(key => !keys.includes(key))) return invalid();
+  const {endsAtMs, intervalMs} = worker;
+  if (!service && (typeof endsAtMs !== "number" || !Number.isSafeInteger(endsAtMs) || endsAtMs <= nowMs || endsAtMs - nowMs > 30 * 60000)) return invalid();
+  if (Object.hasOwn(worker, "intervalMs") && (typeof intervalMs !== "number" || !Number.isSafeInteger(intervalMs) || intervalMs < 1000 || intervalMs > 2_147_483_647)) return invalid();
+  const selectedWorker = Object.freeze({...(service ? {mode: "service" as const} : {endsAtMs: endsAtMs as number}),
+    ...(typeof intervalMs === "number" ? {intervalMs} : {})});
+  let selectedPush: FirstFlowConfiguration["push"];
+  if (Object.hasOwn(value, "push")) {
+    const keys = service ? ["installationRef", "leaseDurationMs"] : ["installationRef", "leaseExpiresAt"];
+    if (!record(push) || Object.keys(push).length !== keys.length || Object.keys(push).some(key => !keys.includes(key)) || !uuid(push.installationRef)) return invalid();
+    if (service) {
+      if (typeof push.leaseDurationMs !== "number" || !Number.isSafeInteger(push.leaseDurationMs) || push.leaseDurationMs < 60000 || push.leaseDurationMs > 30 * 86400000) return invalid();
+      selectedPush = Object.freeze({installationRef: push.installationRef, leaseDurationMs: push.leaseDurationMs});
+    } else {
+      const lease = push.leaseExpiresAt;
+      if (typeof lease !== "string" || !Number.isFinite(Date.parse(lease)) || new Date(lease).toISOString() !== lease || Date.parse(lease) <= nowMs || Date.parse(lease) > (endsAtMs as number) + 15 * 60000) return invalid();
+      selectedPush = Object.freeze({installationRef: push.installationRef, leaseExpiresAt: lease});
+    }
+  }
+  return Object.freeze({ownerAccountId, firebaseUid, worker: selectedWorker, ...(selectedPush ? {push: selectedPush} : {})});
 }
 
 async function createControlledRuntime(
@@ -285,7 +303,8 @@ async function createControlledRuntime(
       replaceOwnInterests: new ReplaceOwnInterests(interestRepository),
     });
     firstFlow?.start();
-    return { app, firebaseApp, eventBrowseControl, stopEvents, stopAi, aiStatus };
+    return { app, firebaseApp, eventBrowseControl, stopEvents, stopAi, aiStatus,
+      firstFlowStatus: () => firstFlow?.status() ?? {configured:false,workerConfigured:false,workerRunning:false,workerMode:"off",pushConfigured:false} };
   } catch (error: unknown) {
     await deleteApp(firebaseApp);
     throw error;

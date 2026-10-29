@@ -46,7 +46,7 @@ test("Event route maps verified principal/view and explicit public reason/allowl
   try {
     const response = await app.inject({ method: "GET", url: "/v1/recommendations/events?view=all", headers: authHeaders });
     assert.equal(response.statusCode, 200);
-    assert.deepEqual(calls, [{ principal: { firebaseUid: "verified-only" }, view: "all" }]);
+    assert.deepEqual(calls, [{ principal: { firebaseUid: "verified-only" }, view: "all", legacyClient: true }]);
     assert.deepEqual(response.json(), { ...value, items: value.items.map((item) => ({ ...item, reasonCode: "interest_match" })) });
     assert.equal(response.body.includes("synthetic-private"), false);
   } finally { await app.close(); }

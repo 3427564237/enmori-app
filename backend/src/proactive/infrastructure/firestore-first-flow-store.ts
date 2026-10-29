@@ -16,6 +16,8 @@ export interface FirstFlowStoreOptions {
    * Omission disables registration/dispatch, including in ordinary composition. */
   readonly installationRef?: string;
   readonly registrationLeaseExpiresAt?: string;
+  /** Explicit service-mode lease, renewed only by an authorized registration. */
+  readonly registrationLeaseDurationMs?: number;
 }
 interface State extends FirstFlowSettings {
   readonly activeIntentIds: readonly string[];
@@ -113,6 +115,7 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
     if(!UUID.test(options.ownerAccountId))throw new Error("Fixed first-flow owner required");
     if(options.installationRef!==undefined&&!UUID.test(options.installationRef))throw new Error("Invalid fixed installation");
     if(options.registrationLeaseExpiresAt!==undefined&&!iso(options.registrationLeaseExpiresAt))throw new Error("Invalid absolute registration lease");
+    if(options.registrationLeaseDurationMs!==undefined&&(options.registrationLeaseExpiresAt!==undefined||!Number.isSafeInteger(options.registrationLeaseDurationMs)||options.registrationLeaseDurationMs<60000||options.registrationLeaseDurationMs>30*86400000))throw new Error("Invalid service registration lease");
     this.clock=options.utcMilliseconds??Date.now;
   }
   private base(){return `accounts/${this.options.ownerAccountId}`;}
@@ -230,7 +233,8 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
     return this.run(a,async tx=>{
       if(!exact(input as unknown as Row,["expectedRevision","installationRef","registrationKind","registrationValue","enabled"])||!uint(input.expectedRevision)||input.enabled!==true||
         input.registrationKind!=="fcm_token"||typeof input.registrationValue!=="string"||!input.registrationValue.trim()||!input.registrationValue.isWellFormed()||Buffer.byteLength(input.registrationValue,"utf8")>4096)refuse("invalid");
-      const lease=this.options.registrationLeaseExpiresAt,now=this.now();
+      const now=this.now(),lease=this.options.registrationLeaseDurationMs!==undefined
+        ? new Date(now+this.options.registrationLeaseDurationMs).toISOString():this.options.registrationLeaseExpiresAt;
       if(!this.options.installationRef||input.installationRef!==this.options.installationRef||!lease||now>=Date.parse(lease))refuse("denied");
       const old=parseRegistration(await this.read(a,()=>tx.get(`${this.base()}/proactive_registration/current`)));if(old.revision!==input.expectedRevision)refuse("revision_conflict");
       const state=await this.state(tx,a);this.enabled(state);if(!state.pushEnabled)refuse("denied");
@@ -289,8 +293,12 @@ export class FirestoreFirstFlowStore implements FirstFlowStore {
       if(i.state!=="published"||i.dispatchState!=="not_started")refuse("conflict");this.ensureActive(s,i);this.timing(s,i,false);if(!s.pushEnabled)refuse("denied");
       await this.validateSource(c,i);ok(await c.readableSequence(i.conversationId,i.messageSequence!));
       const row=parseRegistration(await this.read(a,()=>tx.get(`${this.base()}/proactive_registration/current`))),now=this.now(),lease=this.options.registrationLeaseExpiresAt;
-      if(!row.enabled||!row.registrationValue||!lease||!this.options.installationRef||row.installationRef!==this.options.installationRef||
-        now>=Date.parse(row.expiresAt!)||now>=Date.parse(lease)||Date.parse(row.expiresAt!)>Date.parse(lease))refuse("denied");
+      const duration=this.options.registrationLeaseDurationMs;
+      const validLease=duration!==undefined
+        ? Number.isFinite(Date.parse(row.registeredAt!))&&Date.parse(row.registeredAt!)<=now&&Date.parse(row.expiresAt!)-Date.parse(row.registeredAt!)<=duration
+        : !!lease&&now<Date.parse(lease)&&Date.parse(row.expiresAt!)<=Date.parse(lease);
+      if(!row.enabled||!row.registrationValue||!validLease||!this.options.installationRef||row.installationRef!==this.options.installationRef||
+        now>=Date.parse(row.expiresAt!))refuse("denied");
       this.timing(s,i,false);const next:FirstFlowIntent={...i,revision:bump(i.revision),dispatchState:"dispatching",attemptedAt:new Date(now).toISOString(),registrationRevision:row.revision};
       const claim:FirstFlowClaim={intentId:id,conversationId:i.conversationId,messageId:i.messageId!,revision:next.revision,authorizationScope:i.authorizationScope,expiresAt:i.expiresAt,registrationRevision:row.revision};
       current(a);this.stageIntent(tx,next);return {claim,registrationValue:row.registrationValue,deliveryRef:id,preview:s.preview};

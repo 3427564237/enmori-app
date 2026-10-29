@@ -19,12 +19,14 @@ final friendDiscoveryControllerProvider = NotifierProvider.autoDispose
 final class FriendDiscoveryState {
   const FriendDiscoveryState({
     this.suggestions = const [],
+    this.ownState,
     this.pendingCount,
     this.busy = false,
     this.loaded = false,
     this.failure,
     this.countFailure,
   });
+  final String? ownState;
   final List<FriendSuggestion> suggestions;
   final int? pendingCount;
   final bool busy, loaded;
@@ -79,6 +81,9 @@ final class FriendDiscoveryController extends Notifier<FriendDiscoveryState> {
     final suggestions = results[0] as Result<List<FriendSuggestion>>,
         count = results[1] as Result<int>;
     state = FriendDiscoveryState(
+      ownState: repository is FriendDiscoveryStatus
+          ? (repository as FriendDiscoveryStatus).ownState
+          : null,
       suggestions: suggestions is Success<List<FriendSuggestion>>
           ? suggestions.value
           : const [],

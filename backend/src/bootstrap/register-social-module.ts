@@ -1,3 +1,5 @@
+import { FirestoreRecommendationProfiles } from "../recommendation-profile/infrastructure/firestore-recommendation-profile.js";
+import { registerRecommendationProfiles } from "../recommendation-profile/transport/register-routes.js";
 import { firestoreSocialAuthority } from "../friends/infrastructure/social-authority.js";
 import type { FastifyInstance } from "fastify";
 import type { IdentityVerifier } from "../shared/ports/identity-verifier.js";
@@ -28,6 +30,7 @@ import { registerHomeWeather } from "../weather/transport/home-weather-route.js"
 export async function registerSocialModule(app:FastifyInstance,input:{identity:IdentityVerifier;store:FirestoreGateway;
   history:CheckInHistoryFirestoreGateway;cursor:CheckInHistoryCursorCodec;clock:Clock;weather:WeatherProvider;
   recommendationEvents?:FriendEventProjection;activityEvents?:EventActivitySource}){
+  await registerRecommendationProfiles(app,input.identity,new FirestoreRecommendationProfiles(input.store,input.clock));
   await registerSocialRoutes(app,input.identity,new SocialProfiles(new FirestoreSocialRepository(input.store,input.history,input.cursor,input.clock)));
   await registerFriendSummary(app,input.identity,new FirestoreFriendSummary(input.store,input.clock));
   await registerFriendRecommendations(app,input.identity,new FirestoreFriendRecommendations(input.store,input.clock, firestoreSocialAuthority,input.recommendationEvents,true));

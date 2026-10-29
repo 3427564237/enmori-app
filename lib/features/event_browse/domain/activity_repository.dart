@@ -1,3 +1,4 @@
+import '../../event_detail/domain/event_content.dart';
 import '../../../core/result/result.dart';
 
 sealed class ActivityRead {
@@ -11,9 +12,14 @@ final class ActivitySummary {
     required this.startAt,
     this.endAt,
     this.eventId,
+    this.shortDescription,
+    this.coverImageUrl,
     this.locationLabel,
     this.categoryLabel,
+    this.content,
   });
+  final EventContent? content;
+  final String? shortDescription, coverImageUrl;
   final String browseId, title, startAt;
   final String? endAt;
   final String? eventId;
@@ -25,7 +31,9 @@ final class ActivityBatch extends ActivityRead {
     required this.asOf,
     required List<ActivitySummary> items,
     this.nextCursor,
+    this.sourceStatus = const {},
   }) : items = List.unmodifiable(items);
+  final Map<String, bool> sourceStatus;
   final String asOf;
   final List<ActivitySummary> items;
   final String? nextCursor;
@@ -37,9 +45,11 @@ final class ActivityDetail extends ActivityRead {
     required this.sourceUrl,
     this.locationLabel,
     this.categoryLabel,
+    this.content,
     this.shortDescription,
     this.coverImageUrl,
   });
+  final EventContent? content;
   final ActivitySummary summary;
   final Uri sourceUrl;
   final String? locationLabel, categoryLabel;
