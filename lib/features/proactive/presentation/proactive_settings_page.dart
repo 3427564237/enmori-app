@@ -45,7 +45,21 @@ final class _ProactiveSettingsPageState
     ref.listenManual(proactiveControllerProvider, (_, next) {
       if (next.sessionKey != _session || !next.authenticated) _retire();
     });
-    ref.listenManual(contentAccessProvider, (_, _) => _retire());
+    ref.listenManual(contentAccessProvider, (_, next) {
+      // Native notification permission temporarily backgrounds the same
+      // session. Retire stale drafts/reads, not the authenticated settings page.
+      // Controller invalidation still aborts commands and preserves unknowns.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _zone.clear();
+        setState(() => _confirmedZone = false);
+        if (_owns &&
+            ref.read(contentAccessProvider).revision == next.revision &&
+            ModalRoute.of(context)?.isCurrent == true) {
+          unawaited(ref.read(proactiveControllerProvider.notifier).load());
+        }
+      });
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_owns) {
         unawaited(ref.read(proactiveControllerProvider.notifier).load());

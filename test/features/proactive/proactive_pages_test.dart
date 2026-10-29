@@ -14,6 +14,32 @@ import 'package:flutter_test/flutter_test.dart';
 import 'proactive_test_support.dart';
 
 void main() {
+  testWidgets(
+    'settings survive permission foreground roundtrip with fresh reads but retire on session replacement',
+    (tester) async {
+      final r = await ProactiveRig.create(tester);
+      await _pump(tester, r, ProactiveSettingsPage(onBack: () {}));
+      final reads = r.repo.settingsReads;
+      r.container.read(contentAccessProvider.notifier).setForeground(false);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('proactive-mode')), findsNothing);
+      r.repo.settings = fixtureSettings(mode: ProactiveMode.on, revision: 1);
+      r.container.read(contentAccessProvider.notifier).setForeground(true);
+      await tester.pumpAndSettle();
+      expect(find.text('Later contacts are on'), findsOneWidget);
+      expect(r.repo.settingsReads, greaterThan(reads));
+      expect(r.repo.saved, isEmpty);
+      expect(r.repo.creates, isEmpty);
+      r.auth.sessions.add(AuthSessionAuthenticated(subject: 'same-user'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('proactive-mode')), findsNothing);
+      expect(
+        find.text('Return and sign in again to continue.'),
+        findsOneWidget,
+      );
+      await _dispose(tester, r);
+    },
+  );
   for (final allPast in [false, true]) {
     testWidgets(
       'fold preserves explicit choice when earlier passed; both passed is rejected allPast=$allPast',

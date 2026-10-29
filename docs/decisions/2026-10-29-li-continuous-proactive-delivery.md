@@ -32,3 +32,11 @@ The phone owner must opt into notifications and Android permission. A real test
 appointment uses a permitted time without overriding quiet hours. Acknowledged
 FCM submission is not delivery proof: verify actual notification and navigation
 on the named phone. Source, service, APK and physical evidence remain separate.
+
+Physical activation exposed an existing settings-page lifecycle defect: a native
+notification permission roundtrip permanently retired the page despite the same
+authenticated session and successful registration. Correct the page to clear
+stale drafts and re-read on foreground return, preserving controller cancellation
+and unknown-result fences. Actual session replacement still retires the page.
+This is required for the approved notification opt-in flow, not a relaxation of
+source or account authorization.
