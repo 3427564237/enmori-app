@@ -48,6 +48,9 @@ Account enabling may require the owner's browser authentication. No paid upgrade
 Main entry `lib/main.dart`, real Firebase project `enmori-rmvp-controlled`:
 
 - `ENMORI_REMOTE_GROUP=true`
+- `ENMORI_AI_COMPANION_FIRST_FLOW=true` (required for existing Check-in references,
+  automatic today context and follow-up entry points; group release builds fail
+  when absent or false)
 - `ENMORI_CONTROLLED_REAL_ACCOUNT=false`
 - `ENMORI_USE_FIREBASE_AUTH_EMULATOR=false`
 - `ENMORI_API_BASE_URL=https://enmori-rmvp-demo.tail29ae43.ts.net:8443`
@@ -74,6 +77,11 @@ fvm flutter build apk --release --target lib/main.dart \
 Allow Flutter to regenerate platform plugin tooling for release; do not reuse a
 test-generated Java registrant. Verify the APK package, version, non-debuggable
 flag and signature before handing it over. Increment the build number for updates.
+Record the effective companion flag in the build receipt. It is independent of
+local/cloud model selection and does not establish a running appointment worker
+or push delivery. Leave `ENMORI_AI_COMPANION_INSTALLATION_REF` absent unless the
+specific device registration/push scope is authorized and configured; notification
+auto-init remains off. See the [repair decision](../docs/decisions/2026-10-29-li-companion-build-repair.md).
 Public host mismatch, loopback, emulator, mixed local/remote mode, private
 certificate, query/fragment/path and wrong project fail closed before Firebase.
 

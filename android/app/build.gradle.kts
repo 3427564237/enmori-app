@@ -53,6 +53,11 @@ val companionDefines = mutableMapOf<String, String>()
         }
     }
 val companionNative = companionDefines["ENMORI_AI_COMPANION_FIRST_FLOW"] == "true"
+// Group updates must preserve the approved companion entries. Missing defines
+// previously produced a valid APK with these existing features silently absent.
+check(!groupRelease || companionNative) {
+    "Group release requires ENMORI_AI_COMPANION_FIRST_FLOW=true; companion entries must not silently disappear"
+}
 check(companionDefines["ENMORI_AI_COMPANION_FIRST_FLOW"] in setOf(null, "true", "false")) {
     "Invalid companion build selection"
 }
