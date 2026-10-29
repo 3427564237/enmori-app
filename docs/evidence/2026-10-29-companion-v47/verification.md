@@ -88,3 +88,22 @@ Local ignored artifacts: `build/group-delivery-v47/ENMORI-group-v47-release.apk`
 `scheduled-once.png`, `notification-opened-exact-message.png` and the sanitized
 notification-visible receipt. Companion test/build logs remain under `/tmp`.
 The machine-readable receipt records each evidence layer separately.
+
+## Final installed v48
+
+The presentation-only correction was built from `0ec7df5` (48.2 seconds); all
+14 proactive page tests passed. The first USB installation was aborted by the
+phone installer; completing its known-source installation confirmation allowed
+the authorized same-signature upgrade. VersionCode 48 is installed and its
+SHA-256 matches the built APK:
+`17c71be068b4b3c50ce7f510394e33b69ce08a0be06ba3fe70bf78b439a5cc48`.
+Login was retained. On this exact package, Manage later contacts and its read-only
+notification check showed active registration, contacts on, the confirmed zone
+and quiet hours, without the contradictory legacy status line. The original
+occurrence stayed published/accepted at revision 5 with one proactive message
+and read-through sequence 3. No second appointment or push was sent.
+
+The temporary USB stay-awake setting was restored to its original value and
+read back. Local final artifacts: `build/group-delivery-v48/ENMORI-group-v48-release.apk`
+and `confirmed-notification-status.png`. Actual push/tap proof was obtained on
+v47; v48 differs only in the documented duplicate-label cleanup.
