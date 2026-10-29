@@ -21,6 +21,9 @@ final class OnboardingController
   late AccountRepository _repository;
   late IdempotencyKeyGenerator _keyGenerator;
   String? _authSubject;
+  bool _needsReadBack = false;
+
+  bool get needsReadBack => _needsReadBack;
 
   @override
   CommandState<ProductAccount> build() {
@@ -31,6 +34,7 @@ final class OnboardingController
       _operation++;
       _commandFingerprint = null;
       _idempotencyKey = null;
+      _needsReadBack = false;
     }
     _authSubject = authSubject;
     return const CommandIdle();
@@ -40,6 +44,8 @@ final class OnboardingController
     required String username,
     required InitialChoice initialChoice,
   }) async {
+    if (state is CommandPending<ProductAccount>) return;
+    if (_needsReadBack) return checkSaved();
     final operation = ++_operation;
     final fingerprint = '${initialChoice.name}\u0000$username';
     if (_commandFingerprint != fingerprint || _idempotencyKey == null) {
@@ -53,18 +59,59 @@ final class OnboardingController
       initialChoice: initialChoice,
       idempotencyKey: idempotencyKey,
     );
-    if (operation != _operation) return;
+    if (!ref.mounted || operation != _operation) return;
+    switch (result) {
+      case Success<ProductAccount>(:final value):
+        _succeed(value);
+      case Failure<ProductAccount>(:final failure):
+        if (failure.kind == AppFailureKind.serviceUnavailable ||
+            failure.kind == AppFailureKind.unexpected ||
+            failure.kind == AppFailureKind.onboardingConflict) {
+          _needsReadBack = true;
+          await _readSaved(operation);
+        } else {
+          state = CommandFailed(failure);
+        }
+    }
+  }
 
-    state = switch (result) {
-      Success<ProductAccount>(:final value) => CommandSucceeded(value),
-      Failure<ProductAccount>(:final failure) => CommandFailed(failure),
-    };
-    if (result case Success<ProductAccount>()) {
-      _commandFingerprint = null;
-      _idempotencyKey = null;
-      if (_authSubject case final subject?) {
-        ref.invalidate(onboardingStatusProvider(subject));
-      }
+  /// An uncertain write must be reconciled before offering another choice.
+  Future<void> checkSaved() async {
+    if (state is CommandPending<ProductAccount> || !_needsReadBack) return;
+    final operation = ++_operation;
+    state = const CommandPending();
+    await _readSaved(operation);
+  }
+
+  Future<void> _readSaved(int operation) async {
+    final result = await _repository.readOnboardingStatus();
+    if (!ref.mounted || operation != _operation) return;
+    switch (result) {
+      case Success<OnboardingStatus>(
+        value: OnboardingCompleted(:final account),
+      ):
+        _succeed(account);
+      case Failure<OnboardingStatus>(:final failure):
+        state = CommandFailed(failure);
+      case Success<OnboardingStatus>():
+        // A concurrent write can still settle after this read. Keep its choice
+        // and key; a read reporting required is not proof of write failure.
+        state = const CommandFailed(
+          AppFailure(
+            kind: AppFailureKind.serviceUnavailable,
+            message: 'Onboarding save is not yet confirmed.',
+          ),
+        );
+    }
+  }
+
+  void _succeed(ProductAccount account) {
+    _needsReadBack = false;
+    _commandFingerprint = null;
+    _idempotencyKey = null;
+    state = CommandSucceeded(account);
+    if (_authSubject case final subject?) {
+      ref.invalidate(onboardingStatusProvider(subject));
     }
   }
 

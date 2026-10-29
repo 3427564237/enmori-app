@@ -394,6 +394,43 @@ void main() {
   });
 
   testWidgets(
+    'uncertain onboarding offers read-only recovery and locks choices',
+    (tester) async {
+      const failure = AppFailure(
+        kind: AppFailureKind.serviceUnavailable,
+        message: 'Offline',
+      );
+      final account = FakeAccountRepository()
+        ..completionResult = const Failure(failure)
+        ..statusResult = const Failure(failure);
+      await _pumpOnboardingToChoice(tester, account: account);
+      await _tapByKey(tester, const Key('r6-initial-choice-accept'));
+      await tester.pumpAndSettle();
+      await _ensureBuiltAndVisible(
+        tester,
+        find.byKey(const Key('r6-initial-choice-reject')),
+      );
+      expect(
+        tester
+            .widget<FilledButton>(
+              find.byKey(const Key('r6-initial-choice-reject')),
+            )
+            .onPressed,
+        isNull,
+      );
+      await _ensureBuiltAndVisible(
+        tester,
+        find.byKey(const Key('r6-initial-choice-retry')),
+      );
+      expect(find.text('Check saved settings'), findsOneWidget);
+      await _tapByKey(tester, const Key('r6-initial-choice-retry'));
+      await tester.pumpAndSettle();
+      expect(account.completedChoices, [InitialChoice.accept]);
+      expect(account.statusReadCount, 2);
+    },
+  );
+
+  testWidgets(
     'note-only Check-in blocks invalid note before repository create',
     (tester) async {
       final checkIn = FakeCheckInRepository();
@@ -569,13 +606,13 @@ void main() {
     );
   });
 
-  testWidgets('onboarding maps SERVICE_UNAVAILABLE to public copy', (
+  testWidgets('onboarding maps uncertain service failure to recovery copy', (
     tester,
   ) async {
     await _expectOnboardingPublicError(
       tester,
       AppFailureKind.serviceUnavailable,
-      'This service is temporarily unavailable. Try again.',
+      'Your settings may already be saved. Check the saved settings to continue without submitting again.',
     );
   });
 

@@ -33,7 +33,6 @@ try {
   assert.equal(config.host, '127.0.0.1'); assert.equal(config.port, 9381);
   // Explicit opt-in for the public HTTPS edge; never bind this HTTP hop to LAN.
   assert(config.remotePort === undefined || config.remotePort === 9382);
-  assert.equal(typeof config.verificationEmail, 'string');
   for (const name of ['FIREBASE_AUTH_EMULATOR_HOST', 'FIRESTORE_EMULATOR_HOST']) assert.equal(process.env[name], undefined);
   const flags = process.argv.slice(3);
   assert(flags.length === 0 || flags.length === 1 && flags[0] === '--backend-only', 'Unknown runtime option');
@@ -41,6 +40,8 @@ try {
   fullFeatures = config.fullFeatures === true;
   assert(!backendOnly || fullFeatures, 'Backend-only requires the full ordinary feature composition');
   const firstFlow = parseLocalFirstFlowConfiguration(config.firstFlow);
+  const ordinaryAccounts = firstFlow?.audience === 'registered_accounts';
+  if (!ordinaryAccounts) assert.equal(typeof config.verificationEmail, 'string');
   assert(firstFlow === undefined || fullFeatures, 'Local first-flow requires full features');
   assert(!backendOnly || firstFlow === undefined, 'Backend-only cannot configure a model-backed first flow');
   privateOwned(config.keyPath);
@@ -64,9 +65,17 @@ try {
     runtime.eventBrowseControl.enable();
   }
   // Read-only readiness; no custom token, synthetic account or business writes.
-  const user = await getAuth(runtime.firebaseApp).getUserByEmail(config.verificationEmail);
-  const binding = await getFirestore(runtime.firebaseApp)
-    .doc(`${FIRESTORE_COLLECTIONS.authBindings}/${createAuthBindingDocumentId(user.uid)}`).get();
+  let ownerReadiness;
+  if (ordinaryAccounts) {
+    // Project access probe, not a named tester's continued existence/eligibility.
+    await getAuth(runtime.firebaseApp).listUsers(1);
+    ownerReadiness = { accountScope: 'registered_accounts' };
+  } else {
+    const user = await getAuth(runtime.firebaseApp).getUserByEmail(config.verificationEmail);
+    const binding = await getFirestore(runtime.firebaseApp)
+      .doc(`${FIRESTORE_COLLECTIONS.authBindings}/${createAuthBindingDocumentId(user.uid)}`).get();
+    ownerReadiness = { emailVerified: user.emailVerified, bindingExists: binding.exists };
+  }
   // Operational metadata only: never log tokens, query strings or response bodies.
   const identity = getAuth(runtime.firebaseApp);
   const verifyIdToken = identity.verifyIdToken.bind(identity);
@@ -112,7 +121,7 @@ try {
     remoteLoopbackEnabled: Boolean(remoteServer?.listening), fullFeatures,
     firstFlow: runtime.firstFlowStatus?.() ?? { configured: firstFlow !== undefined, workerConfigured: firstFlow?.worker !== undefined, pushConfigured: firstFlow?.push !== undefined },
     ...(fullFeatures ? {ai: runtime.aiStatus(), events: runtime.eventBrowseControl.observation()} : {}),
-    emailVerified: user.emailVerified, bindingExists: binding.exists });
+    ...ownerReadiness });
   console.log('Real account HTTPS ready; Firebase identity verification remains required.');
   await new Promise((resolve) => {
     process.once('SIGTERM', resolve); process.once('SIGINT', resolve);
