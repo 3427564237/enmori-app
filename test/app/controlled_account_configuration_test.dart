@@ -35,6 +35,14 @@ void main() {
         baseUri: Uri.tryParse(url),
       );
       expect(valid(), isTrue);
+      expect(
+        valid(url: 'https://enmori-backend-20261029.azurewebsites.net'),
+        isTrue,
+      );
+      expect(
+        valid(url: 'https://enmori-backend-20261029.azurewebsites.net:443/'),
+        isTrue,
+      );
       expect(valid(local: true), isFalse);
       expect(valid(cert: 'local-pinned-root'), isFalse);
       expect(valid(config: configuration(emulator: true)), isFalse);
@@ -51,6 +59,14 @@ void main() {
         'https://enmori-rmvp-demo.tail29ae43.ts.net:8443/other',
         'https://enmori-rmvp-demo.tail29ae43.ts.net:8443/?q=1',
         'https://enmori-rmvp-demo.tail29ae43.ts.net:8443/#fragment',
+        'https://other.azurewebsites.net',
+        'http://enmori-backend-20261029.azurewebsites.net',
+        'https://enmori-backend-20261029.azurewebsites.net:8443',
+        'https://user@enmori-backend-20261029.azurewebsites.net',
+        'https://enmori-backend-20261029.azurewebsites.net/other',
+        'https://enmori-backend-20261029.azurewebsites.net/?q=1',
+        'https://enmori-backend-20261029.azurewebsites.net/#fragment',
+        'https://enmori-backend-20261029.azurewebsites.net.evil.invalid',
       ]) {
         expect(valid(url: url), isFalse, reason: url);
       }

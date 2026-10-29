@@ -262,8 +262,10 @@ bool validAccountRuntimeConfiguration(
         !configuration.useAuthEmulator &&
         certificateBase64.isEmpty &&
         baseUri?.scheme == 'https' &&
-        baseUri?.host == 'enmori-rmvp-demo.tail29ae43.ts.net' &&
-        baseUri?.port == 8443 &&
+        ((baseUri?.host == 'enmori-rmvp-demo.tail29ae43.ts.net' &&
+                baseUri?.port == 8443) ||
+            (baseUri?.host == 'enmori-backend-20261029.azurewebsites.net' &&
+                baseUri?.port == 443)) &&
         baseUri!.userInfo.isEmpty &&
         !baseUri.hasQuery &&
         !baseUri.hasFragment &&
