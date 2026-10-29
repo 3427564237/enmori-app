@@ -15,7 +15,7 @@ const environment={ENMORI_ENVIRONMENT:"test",ENMORI_CONTROLLED_PROFILE_DIRECTORY
 const settings:FirstFlowSettingsInput={mode:"on",categories:["explicit_follow_up"],timeZone:"UTC",quiet:{kind:"window",startMinute:1320,endMinute:480},maximumInRolling24h:1,cooldownMinutes:480,pushEnabled:true,preview:"generic"};
 function value<T>(r:FirstFlowResult<T>):T{assert.equal(r.kind,"ok");if(r.kind!=="ok")throw Error("Expected ok");return r.value;}
 
-function fixture(configured=true){
+function fixture(configured=true, serviceLeaseMs?:number){
   const g=new MetadataFirestoreGateway(start);let live=true,checks=0;
   g.put(`auth_bindings/${createAuthBindingDocumentId(principal.firebaseUid)!}`,{accountId:owner});
   g.put(base,{username:"first_flow_owner",optionalProcessingConsent:"accepted",checkInVisibility:"private",onboardingCompletedAt:new Date(start).toISOString(),purposeRevocationGeneration:0});
@@ -28,7 +28,7 @@ function fixture(configured=true){
   const conversations=new FirestoreConversationStore(g,environment,()=>g.now);
   const store=new FirestoreFirstFlowStore(g,environment,{ownerAccountId:owner,utcMilliseconds:()=>g.now,
     conversationTransaction:(tx,p,o,current)=>conversations.firstFlowTransaction(tx,p,o,current),
-    ...(configured?{installationRef:installation,registrationLeaseExpiresAt:new Date(start+45*60000).toISOString()}: {})});
+    ...(configured?{installationRef:installation,...(serviceLeaseMs===undefined?{registrationLeaseExpiresAt:new Date(start+45*60000).toISOString()}:{registrationLeaseDurationMs:serviceLeaseMs})}: {})});
   const actor:ProactiveActor={principal,current:()=>live,verifyCurrentAuth:async()=>{checks++;return {kind:"verified",principal};}};
   const create=async(n=10)=>value(await store.createIntent(actor,{intentId:id(n),conversationId:topic,sourceMessageId:user,category:"explicit_follow_up",dueAt:new Date(start+60000).toISOString(),timeZone:"UTC",processing:"local",expectedSettingsRevision:1}));
   const enable=async()=>value(await store.replaceSettings(actor,0,settings));
@@ -60,6 +60,20 @@ test("restart expires a stale queued occurrence; idempotent readback never resur
   const read=value(await restarted.intent(f.actor,old.intentId));assert.equal(read.state,"expired");
   assert.equal((await restarted.reserve(f.actor,read.intentId,read.revision)).kind,"conflict");
   const settings=value(await restarted.settings(f.actor));assert.equal(settings.revision,1);
+});
+
+test('service registration expiry is finite, dispatch never renews it, and explicit registration renews',async()=>{
+  const f=fixture(true,60000);await f.enable();
+  const command={expectedRevision:0,installationRef:installation,registrationKind:'fcm_token' as const,registrationValue:'synthetic-token',enabled:true as const};
+  const registered=value(await f.store.replaceRegistration(f.actor,command));
+  assert.equal(registered.expiresAt,new Date(start+60000).toISOString());
+  const p=await f.publish(await f.reserve(await f.create()));
+  assert.equal((await f.store.claimDispatch(f.actor,p.intentId,p.revision)).kind,'denied');
+  assert.equal(value(await f.store.registration(f.actor)).availability,'expired');
+  const renewed=value(await f.store.replaceRegistration(f.actor,{...command,expectedRevision:1}));
+  assert.equal(renewed.expiresAt,new Date(start+120000).toISOString());
+  value(await f.store.claimDispatch(f.actor,p.intentId,p.revision));
+  assert.equal(value(await f.store.registration(f.actor)).expiresAt,renewed.expiresAt);
 });
 
 test("F0 defaults off, no implicit confirmed zone, no registration secret in metadata",async()=>{

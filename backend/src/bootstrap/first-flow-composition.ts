@@ -17,8 +17,8 @@ import type { FirstFlowSender, ProactiveActor } from "../proactive/ports/first-f
 export interface FirstFlowConfiguration {
   readonly ownerAccountId: string;
   readonly firebaseUid: string;
-  readonly worker?: { readonly endsAtMs: number; readonly intervalMs?: number };
-  readonly push?: { readonly installationRef: string; readonly leaseExpiresAt: string };
+  readonly worker?: { readonly mode?: "service"; readonly endsAtMs?: number; readonly intervalMs?: number };
+  readonly push?: { readonly installationRef: string; readonly leaseExpiresAt?: string; readonly leaseDurationMs?: number };
 }
 
 interface FirstFlowCompositionOptions {
@@ -38,11 +38,15 @@ export function createFirstFlowComposition(options: FirstFlowCompositionOptions)
   const config = options.configuration, now = options.nowMs ?? Date.now;
   if (!config.firebaseUid || config.firebaseUid.length > 128 || !config.firebaseUid.isWellFormed() ||
       /[\u0000-\u001f\u007f]/u.test(config.firebaseUid)) throw Error("Fixed first-flow identity required");
+  const serviceLease = config.worker?.mode === "service";
   if (config.push && (!config.worker || !options.credential || options.environment.ENMORI_REMOTE_GROUP !== "true" ||
-      !Number.isFinite(Date.parse(config.push.leaseExpiresAt)) ||
-      new Date(config.push.leaseExpiresAt).toISOString() !== config.push.leaseExpiresAt ||
-      Date.parse(config.push.leaseExpiresAt) <= now() ||
-      Date.parse(config.push.leaseExpiresAt) > config.worker.endsAtMs + 15 * 60000)) {
+      (serviceLease ? config.push.leaseExpiresAt !== undefined || !Number.isSafeInteger(config.push.leaseDurationMs) ||
+        config.push.leaseDurationMs! < 60000 || config.push.leaseDurationMs! > 30 * 86400000 :
+        config.push.leaseDurationMs !== undefined || !config.push.leaseExpiresAt ||
+        !Number.isFinite(Date.parse(config.push.leaseExpiresAt)) ||
+        new Date(config.push.leaseExpiresAt).toISOString() !== config.push.leaseExpiresAt ||
+        Date.parse(config.push.leaseExpiresAt) <= now() ||
+        Date.parse(config.push.leaseExpiresAt) > config.worker.endsAtMs! + 15 * 60000))) {
     throw Error("Explicit bounded push configuration required");
   }
   let accepting = true;
@@ -51,7 +55,8 @@ export function createFirstFlowComposition(options: FirstFlowCompositionOptions)
     ownerAccountId: config.ownerAccountId,
     conversationTransaction: (tx, principal, owner, live) => options.conversation.store.firstFlowTransaction(tx, principal, owner, live),
     utcMilliseconds: now,
-    ...(config.push ? { installationRef: config.push.installationRef, registrationLeaseExpiresAt: config.push.leaseExpiresAt } : {}),
+    ...(config.push ? { installationRef: config.push.installationRef,
+      ...(serviceLease ? {registrationLeaseDurationMs: config.push.leaseDurationMs!} : {registrationLeaseExpiresAt: config.push.leaseExpiresAt!}) } : {}),
   });
   const sender: FirstFlowSender = config.push && options.credential
     ? new SinglePostFcmSender({ projectId: "enmori-rmvp-controlled", credential: options.credential })
@@ -76,9 +81,10 @@ export function createFirstFlowComposition(options: FirstFlowCompositionOptions)
       }
     },
   };
-  const worker = config.worker ? new FirstFlowDueWorker({ application, actor, endsAtMs: config.worker.endsAtMs,
-    ...(config.worker.intervalMs === undefined ? {} : { intervalMs: config.worker.intervalMs }), nowMs: now }) : undefined;
+  const worker = config.worker ? new FirstFlowDueWorker({ application, actor, ...config.worker, nowMs: now }) : undefined;
   return { application, store, accepting: current,
+    status: () => ({configured: true, workerConfigured: !!worker, workerRunning: worker?.running ?? false,
+      workerMode: config.worker?.mode ?? (worker ? "bounded" : "off"), pushConfigured: !!config.push}),
     start: () => { if (current()) worker?.start(); },
     stop: async () => { accepting = false; await worker?.stop(); },
   };

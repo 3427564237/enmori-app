@@ -46,3 +46,10 @@ If the user chooses only the former 30-minute validation scope, keep it temporar
 and do not call it permanently available proactive contact. If no real-push scope
 is approved, the v45 entry repair remains usable for Check-in references/today
 context and managing existing settings, but does not complete proactive delivery.
+
+## Subsequent authorization
+
+LI selected **批准持续执行和真实推送** on 29 October. The
+[confirmed decision](../decisions/2026-10-29-li-continuous-proactive-delivery.md)
+supersedes this packet's pending-approval status for the stated fixed-owner/device
+scope. The proposal and earlier limits above remain as history.

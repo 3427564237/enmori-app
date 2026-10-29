@@ -16,6 +16,22 @@ const principal = { firebaseUid: "synthetic-entry-owner" };
 const identity = { ownerAccountId: owner, firebaseUid: principal.firebaseUid };
 const start = Date.UTC(2026, 9, 25, 10);
 
+test('explicit service worker and fixed renewable registration lease survive real-entry parsing', () => {
+  const input = {...identity, worker: {mode: 'service', intervalMs: 60000},
+    push: {installationRef: id(9), leaseDurationMs: 30 * 86400000}};
+  const parsed = parseLocalFirstFlowConfiguration(input, start)!;
+  assert.deepEqual(parsed, input);
+  assert(Object.isFrozen(parsed.worker) && Object.isFrozen(parsed.push));
+  for (const value of [
+    {...input, worker: {mode: 'service', endsAtMs: start + 60000}},
+    {...input, worker: {mode: 'unknown'}},
+    {...input, worker: undefined},
+    {...input, push: {...input.push, installationRef: 'wrong'}},
+    {...input, push: {...input.push, leaseDurationMs: 30 * 86400000 + 1}},
+    {...input, push: {...input.push, leaseExpiresAt: new Date(start + 60000).toISOString()}},
+  ]) assert.throws(() => parseLocalFirstFlowConfiguration(value, start));
+});
+
 test("private configuration defaults off and copies only the approved local projection", () => {
   assert.equal(parseLocalFirstFlowConfiguration(undefined, start), undefined);
   assert.deepEqual(parseLocalFirstFlowConfiguration(identity, start), identity);

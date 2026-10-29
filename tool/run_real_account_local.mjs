@@ -105,7 +105,7 @@ try {
   }
   publish({ phase: 'listening', ready: true, authAdminRead: true, firestoreRead: true,
     remoteLoopbackEnabled: Boolean(remoteServer?.listening), fullFeatures,
-    firstFlow: { configured: firstFlow !== undefined, workerConfigured: firstFlow?.worker !== undefined, pushConfigured: false },
+    firstFlow: runtime.firstFlowStatus?.() ?? { configured: firstFlow !== undefined, workerConfigured: firstFlow?.worker !== undefined, pushConfigured: firstFlow?.push !== undefined },
     ...(fullFeatures ? {ai: runtime.aiStatus(), events: runtime.eventBrowseControl.observation()} : {}),
     emailVerified: user.emailVerified, bindingExists: binding.exists });
   console.log('Real account HTTPS ready; Firebase identity verification remains required.');
