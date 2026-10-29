@@ -58,6 +58,7 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
     final state = ref.watch(onboardingControllerProvider);
     final pending = state is CommandPending<ProductAccount>;
+    final needsReadBack = _controller.needsReadBack;
     final title = switch (_step) {
       _OnboardingStep.username => context.tr('Choose your Username', "设置用户名"),
       _OnboardingStep.purpose => context.tr('Optional data use', "可选数据使用"),
@@ -83,20 +84,30 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 ...switch (_step) {
                   _OnboardingStep.username => _usernameStep(),
                   _OnboardingStep.purpose => _purposeStep(),
-                  _OnboardingStep.choice => _choiceStep(pending),
+                  _OnboardingStep.choice => _choiceStep(
+                    pending || needsReadBack,
+                  ),
                 },
                 if (pending) ...[
                   const SizedBox(height: 16),
                   Semantics(
                     label: context.tr(
-                      'Submitting ${_choiceLabel(_chosenChoice)} initial settings.',
-                      '正在提交初始设置：${_choiceLabel(_chosenChoice)}。',
+                      needsReadBack
+                          ? 'Checking your saved settings.'
+                          : 'Submitting ${_choiceLabel(_chosenChoice)} initial settings.',
+                      needsReadBack
+                          ? '正在核对已保存的设置。'
+                          : '正在提交初始设置：${_choiceLabel(_chosenChoice)}。',
                     ),
                     liveRegion: true,
                     child: Text(
                       context.tr(
-                        'Submitting ${_choiceLabel(_chosenChoice)} settings...',
-                        '正在提交设置：${_choiceLabel(_chosenChoice)}…',
+                        needsReadBack
+                            ? 'Checking your saved settings...'
+                            : 'Submitting ${_choiceLabel(_chosenChoice)} settings...',
+                        needsReadBack
+                            ? '正在核对已保存的设置…'
+                            : '正在提交设置：${_choiceLabel(_chosenChoice)}…',
                       ),
                     ),
                   ),
@@ -107,8 +118,18 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   :final failure,
                 )) ...[
                   const SizedBox(height: 16),
-                  _FailureText(failure: failure),
-                  if (_step == _OnboardingStep.choice &&
+                  if (needsReadBack)
+                    Text(
+                      context.tr(
+                        'Your settings may already be saved. Check the saved settings to continue without submitting again.',
+                        '设置可能已经保存。请核对已保存的设置后继续，无需重复提交。',
+                      ),
+                      key: const Key('r6-onboarding-failure'),
+                    )
+                  else
+                    _FailureText(failure: failure),
+                  if (!needsReadBack &&
+                      _step == _OnboardingStep.choice &&
                       (failure.kind == AppFailureKind.usernameInvalid ||
                           failure.kind == AppFailureKind.usernameUnavailable))
                     TextButton(
@@ -130,8 +151,14 @@ final class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       key: const Key('r6-initial-choice-retry'),
                       onPressed: pending
                           ? null
+                          : needsReadBack
+                          ? _controller.checkSaved
                           : () => _complete(_chosenChoice!),
-                      child: Text(context.tr('Retry', "重试")),
+                      child: Text(
+                        needsReadBack
+                            ? context.tr('Check saved settings', '核对已保存设置')
+                            : context.tr('Retry', '重试'),
+                      ),
                     ),
                   ],
                 ],

@@ -44,6 +44,151 @@ void main() {
     },
   );
 
+  test(
+    'onboarding reconciles a lost write response using canonical state',
+    () async {
+      final account = testAccount(username: 'saved_member');
+      final repository = FakeAccountRepository()
+        ..completionResult = const Failure(
+          AppFailure(
+            kind: AppFailureKind.serviceUnavailable,
+            message: 'Connection lost',
+          ),
+        )
+        ..statusResult = Success(OnboardingCompleted(account));
+      final container = ProviderContainer(
+        overrides: [accountRepositoryProvider.overrideWithValue(repository)],
+      );
+      addTearDown(container.dispose);
+      final controller = container.read(onboardingControllerProvider.notifier);
+      await controller.complete(
+        username: 'saved_member',
+        initialChoice: .accept,
+      );
+      expect(
+        container.read(onboardingControllerProvider),
+        isA<CommandSucceeded<ProductAccount>>().having(
+          (s) => s.value,
+          'canonical account',
+          account,
+        ),
+      );
+      expect(repository.completedUsernames, ['saved_member']);
+      expect(repository.statusReadCount, 1);
+      expect(controller.needsReadBack, isFalse);
+    },
+  );
+
+  test(
+    'unconfirmed onboarding retains choice and only retries reads',
+    () async {
+      const failure = AppFailure(
+        kind: AppFailureKind.serviceUnavailable,
+        message: 'Offline',
+      );
+      final repository = FakeAccountRepository()
+        ..completionResult = const Failure(failure)
+        ..statusResult = const Failure(failure);
+      final container = ProviderContainer(
+        overrides: [accountRepositoryProvider.overrideWithValue(repository)],
+      );
+      addTearDown(container.dispose);
+      final controller = container.read(onboardingControllerProvider.notifier);
+      await controller.complete(username: 'member_one', initialChoice: .accept);
+      expect(controller.needsReadBack, isTrue);
+      repository.statusResult = const Success(OnboardingRequired());
+      await controller.complete(
+        username: 'changed_name',
+        initialChoice: .reject,
+      );
+      expect(controller.needsReadBack, isTrue);
+      expect(repository.completedUsernames, ['member_one']);
+      expect(repository.completedChoices, [InitialChoice.accept]);
+      repository.statusResult = Success(OnboardingCompleted(testAccount()));
+      await controller.checkSaved();
+      expect(controller.needsReadBack, isFalse);
+      expect(repository.statusReadCount, 3);
+      expect(repository.onboardingKeys, hasLength(1));
+    },
+  );
+
+  test(
+    'abandoned onboarding ignores late reconciliation and does not resubmit',
+    () async {
+      final read = Completer<Result<OnboardingStatus>>();
+      final repository = FakeAccountRepository()
+        ..completionResult = const Failure(
+          AppFailure(
+            kind: AppFailureKind.unexpected,
+            message: 'Unreadable response',
+          ),
+        )
+        ..statusResponses.add(read.future);
+      final container = ProviderContainer(
+        overrides: [accountRepositoryProvider.overrideWithValue(repository)],
+      );
+      addTearDown(container.dispose);
+      final controller = container.read(onboardingControllerProvider.notifier);
+      final pending = controller.complete(
+        username: 'member_one',
+        initialChoice: .accept,
+      );
+      await Future<void>.delayed(Duration.zero);
+      controller.abandon();
+      read.complete(Success(OnboardingCompleted(testAccount())));
+      await pending;
+      expect(container.read(onboardingControllerProvider), isA<CommandIdle>());
+      expect(controller.needsReadBack, isTrue);
+      await controller.complete(
+        username: 'changed_name',
+        initialChoice: .reject,
+      );
+      expect(repository.completedUsernames, ['member_one']);
+    },
+  );
+
+  test('account change discards an old onboarding reconciliation', () async {
+    final auth = FakeAuthRepository();
+    final read = Completer<Result<OnboardingStatus>>();
+    final repository = FakeAccountRepository()
+      ..completionResult = const Failure(
+        AppFailure(
+          kind: AppFailureKind.serviceUnavailable,
+          message: 'Lost response',
+        ),
+      )
+      ..statusResponses.add(read.future);
+    final container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(auth),
+        accountRepositoryProvider.overrideWithValue(repository),
+      ],
+    );
+    addTearDown(auth.close);
+    addTearDown(container.dispose);
+    final subscription = container.listen(
+      onboardingControllerProvider,
+      (_, _) {},
+    );
+    addTearDown(subscription.close);
+    final controller = container.read(onboardingControllerProvider.notifier);
+    auth.emit(const AuthSessionAuthenticated(subject: 'member-a'));
+    await Future<void>.delayed(Duration.zero);
+    final pending = controller.complete(
+      username: 'member_a',
+      initialChoice: .accept,
+    );
+    await Future<void>.delayed(Duration.zero);
+    auth.emit(const AuthSessionAuthenticated(subject: 'member-b'));
+    await Future<void>.delayed(Duration.zero);
+    read.complete(
+      Success(OnboardingCompleted(testAccount(username: 'member_a'))),
+    );
+    await pending;
+    expect(container.read(onboardingControllerProvider), isA<CommandIdle>());
+    expect(controller.needsReadBack, isFalse);
+  });
+
   test('Check-in ignores a late create result after abandonment', () async {
     final repository = FakeCheckInRepository()..pendingCreate = Completer();
     final container = ProviderContainer(
