@@ -1,3 +1,4 @@
+import { OPENAI_CLOUD_PROCESSING, GROQ_CLOUD_PROCESSING } from "../../src/account/domain/cloud-ai-consent.js";
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { fixture as baseFixture, until, deferred } from './async-conversation-fakes.js';
@@ -10,10 +11,11 @@ import { CloudAdmissionOwner } from '../../src/ai-runtime/application/cloud-admi
 import type { AsyncConversationStore } from '../../src/ai-conversation/ports/async-conversation.js';
 function fixture(_strategy: 'open_conversation_v1', _unused: undefined, consent: CloudAiConsentAuthority) {
   const lease = {}; let finalAuthorization = false;
-  const consentBridge = new ApplicationCloudConversationConsent();
+  const processing=consent.processing??GROQ_CLOUD_PROCESSING;
+  const consentBridge = new ApplicationCloudConversationConsent(processing);
   const f = baseFixture('open_conversation_v1', (clock, model) => {
-    const transport = new AuthorizedAsyncCloudConversationTransport({dispatch: async (input, budget) =>
-      ({kind:'response',physical:'stopped',raw:await model.generate(input,budget)})}, {verify:(handle,budget)=>{finalAuthorization=true;return consentBridge.verify(handle,budget);},current:handle=>consentBridge.current(handle)});
+    const transport = new AuthorizedAsyncCloudConversationTransport({processing,dispatch: async (input, budget) =>
+      ({kind:'response',physical:'stopped',raw:await model.generate(input,budget)})}, {processing,verify:(handle,budget)=>{finalAuthorization=true;return consentBridge.verify(handle,budget);},current:handle=>consentBridge.current(handle)});
     const owner = new CloudAdmissionOwner(clock,transport,{recover:async()=>({kind:'confirmed',reservations:[],previousRemote:'none_confirmed',lease}),current:l=>l===lease,reserve:async()=> 'confirmed'},
       {windowMs:86400000,maxRequests:24,maxTokens:24000,tokensPerRequest:1000});
     void owner.recover();
@@ -61,4 +63,18 @@ test('revocation during the last history await blocks physical dispatch even if 
  await Promise.resolve();await Promise.resolve();const a=await f.app.dispatch(f.create());if(!a.accepted)throw Error();
  await until(()=>f.finalAuthorization() && historyReads>=5);assert.equal(f.store.rows.size,1);live=false;wait.resolve();
  assert.equal((await a.request.outcome).ok,false);assert.equal(f.calls.length,0);assert.equal(f.delivered.length,0);
+});
+
+
+test('cloud bridge binds provider at construction and refuses Groq-authorized handles on OpenAI',async()=>{
+ const budget={signal:new AbortController().signal,deadline:1,remainingMs:()=>1};
+ const groq=new ApplicationCloudConversationConsent(),openai=new ApplicationCloudConversationConsent(OPENAI_CLOUD_PROCESSING);
+ let dispatched=0;const inner={processing:OPENAI_CLOUD_PROCESSING,dispatch:async()=>{dispatched++;return {kind:'failure' as const,physical:'stopped' as const};}};
+ assert.throws(()=>new AuthorizedAsyncCloudConversationTransport(inner,groq),/CLOUD_PROCESSING_REQUIRED/);
+ const transport=new AuthorizedAsyncCloudConversationTransport(inner,openai);
+ const base={processing:'cloud' as const,cloudConsentCurrent:()=>true,authorize:async()=>true,projection:()=>({currentMessage:'Synthetic',checkIns:[],persona:undefined})};
+ assert.equal(await openai.verify(base,budget),false);
+ assert.equal(await openai.verify({...base,...GROQ_CLOUD_PROCESSING},budget),false);
+ assert.equal((await transport.dispatch({...base,...GROQ_CLOUD_PROCESSING},budget)).kind,'unknown');assert.equal(dispatched,0);
+ assert.equal((await transport.dispatch({...base,...OPENAI_CLOUD_PROCESSING},budget)).kind,'failure');assert.equal(dispatched,1);
 });

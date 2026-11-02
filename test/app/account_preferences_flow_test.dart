@@ -23,6 +23,48 @@ import '../support/fake_account_preferences.dart';
 
 void main() {
   testWidgets(
+    'OpenAI disclosure requires a new choice and withdrawal preserves its version',
+    (tester) async {
+      final h = await start(
+        tester,
+        cloudProvider: CloudAiProvider.openai,
+        initialSettings: const OwnSettings(
+          checkInVisibility: CheckInVisibility.private,
+          consent: OptionalProcessingConsent.accepted,
+          revision: 0,
+          cloudAiConsent: CloudAiConsent.accepted,
+        ),
+      );
+      await tap(tester, 'profile-settings');
+      await tester.ensureVisible(
+        find.byKey(const Key('settings-cloud-consent')),
+      );
+      expect(find.text('OpenAI cloud processing'), findsOneWidget);
+      expect(
+        find.textContaining('OpenAI, an external processor'),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<SwitchListTile>(
+              find.byKey(const Key('settings-cloud-consent')),
+            )
+            .value,
+        isFalse,
+      );
+      await tap(tester, 'settings-save');
+      expect(h.prefs.settings.cloudAiConsent, CloudAiConsent.accepted);
+      await tap(tester, 'settings-cloud-consent');
+      await tap(tester, 'settings-save');
+      expect(h.prefs.settings.cloudAiConsent, CloudAiConsent.openaiAccepted);
+      await tap(tester, 'settings-consent');
+      await tap(tester, 'settings-save');
+      expect(h.prefs.settings.cloudAiConsent, CloudAiConsent.openaiDeclined);
+      expect(h.prefs.settings.consent, OptionalProcessingConsent.rejected);
+    },
+  );
+
+  testWidgets(
     'cloud consent requires a separate choice and survives uncertain save for review',
     (tester) async {
       final h = await start(tester);
@@ -824,10 +866,13 @@ void main() {
 }
 
 Future<({FakeAccountPreferences prefs, FakeAuthRepository auth})> start(
-  WidgetTester tester,
-) async {
+  WidgetTester tester, {
+  CloudAiProvider cloudProvider = CloudAiProvider.groq,
+  OwnSettings? initialSettings,
+}) async {
   final auth = FakeAuthRepository();
   final prefs = FakeAccountPreferences();
+  if (initialSettings != null) prefs.settings = initialSettings;
   final accounts = FakeAccountRepository()
     ..statusResult = Success(
       OnboardingCompleted(testAccount(username: 'member_a')),
@@ -837,6 +882,11 @@ Future<({FakeAccountPreferences prefs, FakeAuthRepository auth})> start(
       authRepositoryProvider.overrideWithValue(auth),
       accountRepositoryProvider.overrideWithValue(accounts),
       accountPreferencesRepositoryProvider.overrideWithValue(prefs),
+      aiClientProcessingProvider.overrideWithValue(
+        cloudProvider == CloudAiProvider.openai
+            ? AiClientProcessing.openaiCloud
+            : AiClientProcessing.local,
+      ),
       interestRepositoryProvider.overrideWithValue(FakeInterestRepository()),
       eventRecommendationRepositoryProvider.overrideWithValue(
         FakeEventRecommendationRepository(),

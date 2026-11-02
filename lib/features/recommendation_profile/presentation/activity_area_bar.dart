@@ -16,6 +16,44 @@ class ActivityAreaBar extends ConsumerStatefulWidget {
 
 class _AreaBarState extends ConsumerState<ActivityAreaBar>
     with WidgetsBindingObserver {
+  bool _choosingArea = false;
+  bool _loadingAreas = false;
+  bool _areasFailed = false;
+
+  Future<void> _chooseArea({bool retry = false}) async {
+    if (_choosingArea) return;
+    final refresh =
+        retry || _areasFailed || ref.read(planningAreasProvider).hasError;
+    setState(() {
+      _choosingArea = true;
+      _loadingAreas = true;
+      _areasFailed = false;
+    });
+    try {
+      if (refresh) ref.invalidate(planningAreasProvider);
+      final rows = await ref.read(planningAreasProvider.future);
+      if (!mounted) return;
+      setState(() => _loadingAreas = false);
+      if (rows.isEmpty) {
+        setState(() => _areasFailed = true);
+        return;
+      }
+      final selected = await choosePlanningArea(context, rows);
+      if (selected != null && mounted) {
+        ref.read(activityAreaProvider.notifier).manual(selected);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _areasFailed = true);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _choosingArea = false;
+          _loadingAreas = false;
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -71,14 +109,7 @@ class _AreaBarState extends ConsumerState<ActivityAreaBar>
             TextButton.icon(
               icon: const Icon(Icons.place_outlined),
               label: Text(a.name ?? context.tr('All Singapore', '全新加坡')),
-              onPressed: () async {
-                final rows = await ref.read(planningAreasProvider.future);
-                if (!context.mounted) return;
-                final selected = await choosePlanningArea(context, rows);
-                if (selected != null && mounted) {
-                  ref.read(activityAreaProvider.notifier).manual(selected);
-                }
-              },
+              onPressed: _choosingArea ? null : _chooseArea,
             ),
             Text(
               context.tr(a.source, switch (a.source) {
@@ -97,6 +128,23 @@ class _AreaBarState extends ConsumerState<ActivityAreaBar>
               ),
           ],
         ),
+        if (_loadingAreas)
+          LinearProgressIndicator(
+            semanticsLabel: context.tr('Loading areas', '正在加载地区'),
+          ),
+        if (_areasFailed) ...[
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              context.tr('Areas couldn’t be loaded.', '无法加载地区。'),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+          TextButton(
+            onPressed: _choosingArea ? null : () => _chooseArea(retry: true),
+            child: Text(context.tr('Retry areas', '重新加载地区')),
+          ),
+        ],
         if (a.failed)
           Text(
             context.tr(

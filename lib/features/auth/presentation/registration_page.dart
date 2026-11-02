@@ -103,6 +103,9 @@ final class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                   const SizedBox(height: 24),
                   Form(
                     key: _formKey,
+                    autovalidateMode: _submitted
+                        ? AutovalidateMode.onUserInteraction
+                        : AutovalidateMode.disabled,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [

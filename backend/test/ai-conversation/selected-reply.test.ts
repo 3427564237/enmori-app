@@ -1,3 +1,4 @@
+import { OPENAI_CLOUD_PROCESSING, GROQ_CLOUD_PROCESSING, type CloudAiProcessing } from "../../src/account/domain/cloud-ai-consent.js";
 import { CloudConsentFence } from "../../src/account/application/cloud-consent-fence.js";
 import { FirestoreCloudAiConsentAuthority } from "../../src/account/infrastructure/firestore-cloud-ai-consent-authority.js";
 import { BoundedAiRuntime } from "../../src/ai-runtime/application/bounded-ai-runtime.js";
@@ -27,22 +28,23 @@ const base=`accounts/${owner}`,root=`${base}/conversations/${topic}`,principal={
 const profile="synthetic-selected-profile",environment={ENMORI_ENVIRONMENT:"test",ENMORI_CONTROLLED_PROFILE_DIRECTORY:profile,APPDATA:profile,HOME:profile,USERPROFILE:profile,XDG_CONFIG_HOME:profile,
   GCLOUD_PROJECT:"demo-enmori-rmvp01a-r10",FIRESTORE_EMULATOR_HOST:"127.0.0.1:8080",FIREBASE_AUTH_EMULATOR_HOST:"127.0.0.1:9099"};
 function value<T>(r:ConversationResult<T>):T{assert.equal(r.kind,"success");if(r.kind!=="success")throw Error("expected success");return r.value;}
-function fixture(cloud=false){
+function fixture(cloud: boolean | CloudAiProcessing = false){
+  const processing = typeof cloud === "object" ? cloud : GROQ_CLOUD_PROCESSING;
   const g=new MetadataFirestoreGateway(now);let live=true,monotonic=0;
   g.put(`auth_bindings/${createAuthBindingDocumentId(principal.firebaseUid)!}`,{accountId:owner});
-  g.put(base,{username:"selected_owner",optionalProcessingConsent:"accepted",checkInVisibility:"private",onboardingCompletedAt:new Date(now).toISOString(),purposeRevocationGeneration:0,...(cloud?{cloudAiConsent:{state:"accepted",disclosureVersion:"groq_cloud_v1"},cloudAiConsentGeneration:1}:{})});
+  g.put(base,{username:"selected_owner",optionalProcessingConsent:"accepted",checkInVisibility:"private",onboardingCompletedAt:new Date(now).toISOString(),purposeRevocationGeneration:0,...(cloud?{cloudAiConsent:{state:"accepted",disclosureVersion:processing.disclosureVersion},cloudAiConsentGeneration:1}:{})});
   g.put(`${base}/persona_state/current`,{stateRevision:0,livePersonaIds:[]});
   for(const [index,key]of [a,b].entries())g.put(`check_ins/${key}`,{ownerAccountId:owner,note:`quoted-${key}`,mood:"calm",activity:"walking",createdAt:new Date(now-60000-index*60000).toISOString(),
     locationLabel:"location-canary",revision:1},now-60000-index*60000);
   const controller=new AbortController(),context:AcceptedContextRead={principal,ownerId:owner,session:{},originalRequest:{},acceptedAt:0,deadline:60000,asOf:{seconds:now/1000,nanoseconds:0},signal:controller.signal};
-  const adapter=new FirestoreSelectedReplyReader(g,environment,{verifyRead:async c=>c===context&&live?{kind:"read",value:principal}:{kind:"denied"},currentRead:c=>c===context&&live},()=>g.now,(tx,p,o,c,current)=>store.prepareHistorySnapshot(tx,p,o,c,current),cloud?"cloud":"local");
+  const adapter=new FirestoreSelectedReplyReader(g,environment,{verifyRead:async c=>c===context&&live?{kind:"read",value:principal}:{kind:"denied"},currentRead:c=>c===context&&live},()=>g.now,(tx,p,o,c,current)=>store.prepareHistorySnapshot(tx,p,o,c,current),cloud?"cloud":"local",processing);
   const ordinary={principal,ownerId:owner,signal:controller.signal,deadline:15000,current:()=>live};
   const prepare=async(ids=[a])=>value(await adapter.prepare(ordinary,{processing:cloud?"cloud":"local",sources:ids.map(checkInId=>({kind:"check_in",checkInId}))},g.rows.has(root)?topic:undefined));
   const grant=(snapshot:SelectedReplySnapshot,include=snapshot.sources.map((_,i)=>id(100+i)),exclude:string[]=[]):SelectedReplyGrant=>({...snapshot,purposeRevocationGeneration:snapshot.purposeRevocationGeneration,selectionRevision:id(90),historyPairs:snapshot.historyPairs.map((p,i)=>({...p,historyKey:id(200+i)})),excludedHistoryKeys:[],sources:snapshot.sources.map((s,i)=>({...s,selectionKey:id(100+i)})),includedKeys:include,excludedKeys:exclude});
   const failures:string[]=[];const reader=(selection:SelectedReplyGrant)=>new SelectedReplyReader(context,selection,adapter,()=>monotonic,()=>live,k=>failures.push(k));
-  const store=new FirestoreConversationStore(g,environment,()=>g.now);
+  const store=new FirestoreConversationStore(g,environment,()=>g.now,undefined,processing);
   const target:OperationTarget={ownerAccountId:owner,conversationId:topic,userMessageId:id(30),operationId:id(31),kind:"send",targetKind:"existing"};
-  return {g,adapter,context,ordinary,prepare,grant,reader,failures,store,target,stop:()=>{live=false;},time:(ms:number)=>{monotonic=ms;}};
+  return {g,processing,adapter,context,ordinary,prepare,grant,reader,failures,store,target,stop:()=>{live=false;},time:(ms:number)=>{monotonic=ms;}};
 }
 test("F1a reads only exact selected own records and keeps original time/Mood/Activity, no location or IDs in model",async()=>{
   const f=fixture(),snapshot=await f.prepare([a,b]),reader=f.reader(f.grant(snapshot));assert.equal(await reader.prepare(),"ready");
@@ -105,18 +107,18 @@ test("effect transaction independently rejects a changed selected source before 
   assert.equal((await f.store.initializeOperation(f.target,epoch.value,auth)).kind,"source_changed");assert.equal(f.g.writes,before);assert(!f.g.rows.has(`ai_operation_fences/${f.target.operationId}`));
 });
 
-async function executionFixture(selected:string[]|null=[a],existing=false,replyToMessageId?:string,initialPairSource?:string,cloud=false){
+async function executionFixture(selected:string[]|null=[a],existing=false,replyToMessageId?:string,initialPairSource?:string,cloud: boolean | CloudAiProcessing = false){
   const f=fixture(cloud),runtime=runtimeFixture(undefined,cloud?(clock,model)=>{
-    const lease={};const transport=new AuthorizedAsyncCloudConversationTransport({dispatch:async(input,budget)=>({kind:"response",physical:"stopped",raw:await model.generate(input,budget)})},new ApplicationCloudConversationConsent());
+    const lease={};const transport=new AuthorizedAsyncCloudConversationTransport({processing:f.processing,dispatch:async(input,budget)=>({kind:"response",physical:"stopped",raw:await model.generate(input,budget)})},new ApplicationCloudConversationConsent(f.processing));
     const owner=new CloudAdmissionOwner(clock,transport,{recover:async()=>({kind:"confirmed",lease,reservations:[],previousRemote:"none_confirmed"}),current:l=>l===lease,reserve:async()=>"confirmed"},{windowMs:86400000,maxRequests:24,maxTokens:24000,tokensPerRequest:1000});
     void owner.recover();return new BoundedAiRuntime(clock,{kind:"cloud",owner},true);
   }:undefined);if(initialPairSource)seedPair(f,initialPairSource);const snapshot=selected===null?undefined:await f.prepare(selected),grant=snapshot?f.grant(snapshot):undefined,epoch=await f.store.startEpoch(id(50));assert.equal(epoch.kind,"confirmed");if(epoch.kind!=="confirmed")throw Error("epoch");
   const accepted:ExecutedConversation[]=[];runtime.reads.authority={...runtime.reads.authority,purposeRevocationGeneration:0};
-  const executor=new AsyncConversationOperationExecutor({...(cloud?{cloudConsent:new FirestoreCloudAiConsentAuthority(f.g,new CloudConsentFence())}:{}),runtime:runtime.runtime,strategy:"open_conversation_v1",clock:{monotonicNow:()=>runtime.clock.now(),utcNow:()=>({seconds:f.g.now/1000,nanoseconds:0})},gates:runtime.gates,
+  const executor=new AsyncConversationOperationExecutor({...(cloud?{cloudConsent:new FirestoreCloudAiConsentAuthority(f.g,new CloudConsentFence(),()=>true,f.processing)}:{}),runtime:runtime.runtime,strategy:"open_conversation_v1",clock:{monotonicNow:()=>runtime.clock.now(),utcNow:()=>({seconds:f.g.now/1000,nanoseconds:0})},gates:runtime.gates,
     ports:original=>{
       const authority:AsyncConversationAuthority={current:i=>original.current(i),freshAuth:async i=>{const r=await original.verify(i);return r.kind==="verified"?"authorized":r.kind==="dependency_unavailable"?"unavailable":"denied";},preaccept:async i=>{const r=await original.verify(i);return r.kind==="verified"?"authorized":"denied";}};
       const store=new AsyncFirestoreConversationStore(f.store,epoch.value,authority);
-      return {authority,reads:runtime.reads,selectedReads:new FirestoreSelectedReplyReader(f.g,environment,original,()=>f.g.now,(tx,p,o,c,current)=>f.store.prepareHistorySnapshot(tx,p,o,c,current),cloud?"cloud":"local"),store,acknowledgedPair:store};
+      return {authority,reads:runtime.reads,selectedReads:new FirestoreSelectedReplyReader(f.g,environment,original,()=>f.g.now,(tx,p,o,c,current)=>f.store.prepareHistorySnapshot(tx,p,o,c,current),cloud?"cloud":"local",f.processing),store,acknowledgedPair:store};
     }});
   const identity={principal,ownerId:owner,session:{},tokenInstance:{},originalRequest:{}},operation={operationId:id(80),conversationId:topic,userMessageId:id(81),kind:"send" as const,targetKind:existing?"existing" as const:"reserved_new" as const};
   const create=(chosen=grant)=>executor.create({identity,operation,text:()=>"Synthetic exact draft",verifyCurrentAuth:async()=>({kind:"verified",principal}),...(chosen?{selectedReply:chosen}:{}),...(replyToMessageId?{replyToMessageId}: {})},
@@ -232,4 +234,51 @@ test("cloud selected execution persists v3 and returns cloud provenance through 
  assert.equal(result.value.assistantMessage.processing,'cloud');assert.equal(result.value.assistantMessage.provider,'groq');
  const proof=f.g.rows.get(`${root}/message_sources/${result.value.assistantMessage.messageId}`)!.data;
  assert.equal(proof.schemaVersion,'source_use_v3');assert.equal(proof.cloudAiConsentGeneration,1);assert.equal(proof.processing,'cloud');
+});
+
+
+test("OpenAI selected execution preserves provider/disclosure through preparation, persistence and readback",async()=>{
+ const f=await executionFixture([a],false,undefined,undefined,OPENAI_CLOUD_PROCESSING);
+ assert.equal(f.selectedGrant?.provider,"openai");
+ assert.equal(f.selectedGrant?.disclosureVersion,"openai_cloud_v1");
+ const pending=f.create().dispatch();await waitModel(f,pending);
+ f.runtime.calls[0]!.completion.resolve(valid("Synthetic OpenAI reply"));const result=await pending;
+ assert.equal(result.kind,"success");if(result.kind!=="success")return;
+ assert.equal(result.value.assistantMessage.provider,"openai");
+ assert.equal(result.value.assistantMessage.disclosureVersion,"openai_cloud_v1");
+ const proof=f.g.rows.get(`${root}/message_sources/${result.value.assistantMessage.messageId}`)!.data;
+ assert.equal(proof.schemaVersion,"source_use_v3");assert.equal(proof.provider,"openai");assert.equal(proof.disclosureVersion,"openai_cloud_v1");
+ const reread=await f.store.readOutcome(principal,{...f.operation,ownerAccountId:owner});
+ assert.equal(reread.kind,"confirmed");
+ if(reread.kind==="confirmed"&&reread.value.state==="assistant_saved")assert.equal(reread.value.assistant.provider,"openai");
+});
+
+test("OpenAI preparation and effects reject Groq grants even with identical counters",async()=>{
+ const f=fixture(OPENAI_CLOUD_PROCESSING);
+ const snapshot=await f.prepare([]),reader=f.reader(f.grant(snapshot));assert.equal(await reader.prepare(),"ready");
+ const authority:OriginalWriteAuthority={principal,current:()=>true,verifyCurrentAuth:async()=>({kind:"verified",principal}),dependencies:reader.dependencies()!};
+ const epoch=await f.store.startEpoch(id(50));assert.equal(epoch.kind,"confirmed");if(epoch.kind!=="confirmed")return;
+ f.g.put(base,{...f.g.rows.get(base)!.data,cloudAiConsent:{state:"accepted",disclosureVersion:"groq_cloud_v1"}});
+ assert.deepEqual(await f.adapter.prepare(f.ordinary,{processing:"cloud",sources:[]}),{kind:"failure",code:"AI_CONTEXT_NOT_PERMITTED"});
+ const before=f.g.writes;
+ assert.equal((await f.store.initializeOperation({...f.target,targetKind:"reserved_new"},epoch.value,authority)).kind,"denied");
+ assert.equal(f.g.writes,before);
+});
+
+test("legacy Groq or mismatched provider selection cannot enter OpenAI generation",async()=>{
+ for(const patch of [{provider:"groq",disclosureVersion:"groq_cloud_v1"},{provider:"openai",disclosureVersion:"groq_cloud_v1"},{provider:undefined,disclosureVersion:undefined}]){
+  const f=await executionFixture([],false,undefined,undefined,OPENAI_CLOUD_PROCESSING);
+  const chosen={...f.selectedGrant!,...patch} as SelectedReplyGrant;
+  const pending=f.create(chosen).dispatch();const result=await pending;
+  assert.equal(result.kind,"failure");assert.equal(f.runtime.calls.length,0);
+ }
+});
+
+
+test("OpenAI withdrawal after dispatch prevents assistant publication and delivery",async()=>{
+ const f=await executionFixture([],false,undefined,undefined,OPENAI_CLOUD_PROCESSING),pending=f.create().dispatch();await waitModel(f,pending);
+ f.g.put(base,{...f.g.rows.get(base)!.data,cloudAiConsent:{state:"declined",disclosureVersion:"openai_cloud_v1"},cloudAiConsentGeneration:2});
+ f.runtime.calls[0]!.completion.resolve(valid("Late synthetic reply"));
+ assert.equal((await pending).kind,"terminated");assert.equal(f.accepted.length,0);
+ assert.equal([...f.g.rows.entries()].filter(([path,row])=>path.startsWith(`${root}/messages/`)&&row.data.role==="assistant").length,0);
 });

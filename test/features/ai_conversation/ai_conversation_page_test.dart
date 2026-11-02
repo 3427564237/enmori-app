@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:enmori/features/account/domain/cloud_ai_consent.dart';
+
 import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
 import 'package:enmori/features/ai_conversation/presentation/ai_conversation_page.dart';
 import 'package:enmori/harness/social/offline_social_pages.dart';
@@ -10,6 +12,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('cloud message disclosure retains each saved processor', (
+    tester,
+  ) async {
+    final controller = _PageController(
+      _state(
+        canSend: true,
+        canSelectConversation: true,
+        conversationId: 'topic',
+        messages: [
+          for (final provider in CloudAiProvider.values)
+            AiMessage(
+              messageId: provider.name,
+              sequence: provider.index + 1,
+              role: AiRole.assistant,
+              persistedAt: DateTime.utc(2026, 11, 2),
+              availability: AiAvailability.available,
+              text: 'Synthetic ${provider.displayName} reply',
+              cloudProcessed: true,
+              cloudProvider: provider,
+            ),
+        ],
+      ),
+    );
+    await _pump(tester, controller);
+    expect(find.text('Processed by OpenAI'), findsOneWidget);
+    expect(find.text('Processed by GroqCloud'), findsOneWidget);
+  });
+
   testWidgets(
     'Ask me later chooses a saved user message and keeps the composer draft',
     (tester) async {

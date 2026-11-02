@@ -1,3 +1,4 @@
+import { GROQ_CLOUD_PROCESSING, type CloudAiProcessing } from '../account/domain/cloud-ai-consent.js';
 import { FirestoreCloudConsentGateway } from '../account/infrastructure/firestore-cloud-consent-gateway.js';
 import type { RuntimeEpoch } from '../ai-conversation/ports/real-conversation-store.js';
 import { CloudConsentFence } from '../account/application/cloud-consent-fence.js';
@@ -12,7 +13,7 @@ import type { FirestoreGateway } from '../shared/infrastructure/firebase/firesto
  * service must use this preferences instance; an unfenced second writer/host
  * prevents production enablement. Construction performs no I/O. */
 export function createCloudConsentServices(gateway: FirestoreGateway,
-  environment: Readonly<Record<string,string|undefined>>, epoch: RuntimeEpoch, ownsHost: () => boolean, avatar?: OwnAvatar) {
+  environment: Readonly<Record<string,string|undefined>>, epoch: RuntimeEpoch, ownsHost: () => boolean, avatar?: OwnAvatar, processing: CloudAiProcessing = GROQ_CLOUD_PROCESSING) {
   const fence = new CloudConsentFence();
   const ownedGateway = new FirestoreCloudConsentGateway(gateway,epoch,ownsHost);
   const ordinary = new FirestoreAccountPreferencesRepository(gateway, environment);
@@ -24,7 +25,7 @@ export function createCloudConsentServices(gateway: FirestoreGateway,
       getSettings: uid => ordinary.getSettings(uid),
       saveSettings: (uid, change) => settingsWriter.saveSettings(uid, change),
     }, avatar, fence),
-    authority: new FirestoreCloudAiConsentAuthority(ownedGateway, fence, ownsHost),
-    dispatchConsent: new ApplicationCloudConversationConsent(),
+    authority: new FirestoreCloudAiConsentAuthority(ownedGateway, fence, ownsHost, processing),
+    dispatchConsent: new ApplicationCloudConversationConsent(processing),
   });
 }

@@ -1,3 +1,4 @@
+import type { CloudAiProcessing } from '../../account/domain/cloud-ai-consent.js';
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
 import type { ContextDependencies, ConversationHistory, HistoryPairIdentity } from "./real-context-reader.js";
@@ -38,8 +39,8 @@ export interface OriginalWriteAuthority {
 }
 export interface StoredConversationMessage {
   readonly processing?: 'cloud';
-  readonly provider?: 'groq';
-  readonly disclosureVersion?: 'groq_cloud_v1';
+  readonly provider?: CloudAiProcessing['provider'];
+  readonly disclosureVersion?: CloudAiProcessing['disclosureVersion'];
   readonly messageId: string;
   readonly sequence: number;
   readonly role: "user" | "assistant";

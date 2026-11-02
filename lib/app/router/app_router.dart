@@ -694,6 +694,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             onOpenSettings: () async {
               await context.push<void>(AppRoutes.settings);
             },
+            onOpenRecommendationProfile: remoteGroup
+                ? () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => const RecommendationProfilePage(),
+                    ),
+                  )
+                : null,
             onEditInterests: () async {
               await context.push<bool>(AppRoutes.interests);
             },

@@ -19,7 +19,7 @@ export const profileSchema = {
 export const cloudAiConsentSchema = { type: "object", additionalProperties: false,
   required: ["state", "disclosureVersion"], properties: {
     state: { type: "string", enum: ["accepted", "declined"] },
-    disclosureVersion: { type: "string", enum: ["groq_cloud_v1"] },
+    disclosureVersion: { type: "string", enum: ["groq_cloud_v1", "openai_cloud_v1"] },
   } } as const;
 export const settingsSchema = {
   type: "object", additionalProperties: false, required: ["checkInVisibility", "optionalProcessingConsent", "revision"],

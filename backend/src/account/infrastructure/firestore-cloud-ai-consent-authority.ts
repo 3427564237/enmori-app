@@ -3,10 +3,11 @@ import type { CloudAiConsentAuthority, CloudConsentObservation } from '../ports/
 import type { AuthPrincipal } from '../../shared/ports/identity-verifier.js';
 import type { FirestoreGateway } from '../../shared/infrastructure/firebase/firestore-gateway.js';
 import { resolveAccount } from './firestore-account-preferences-repository.js';
-import { hasCloudAiConsent, parseCloudAiConsent } from '../domain/cloud-ai-consent.js';
+import { hasCloudAiConsent, parseCloudAiConsent, parseCloudAiProcessing, GROQ_CLOUD_PROCESSING, type CloudAiProcessing } from '../domain/cloud-ai-consent.js';
 /** No grant cache or implicit acceptance from local consent. */
 export class FirestoreCloudAiConsentAuthority implements CloudAiConsentAuthority {
-  constructor(private readonly gateway: FirestoreGateway, private readonly fence: CloudConsentFence, private readonly ownsHost: () => boolean = () => true) {
+  constructor(private readonly gateway: FirestoreGateway, private readonly fence: CloudConsentFence, private readonly ownsHost: () => boolean = () => true, readonly processing: CloudAiProcessing = GROQ_CLOUD_PROCESSING) {
+    if (!parseCloudAiProcessing(processing.provider, processing.disclosureVersion)) throw Error("CLOUD_PROCESSING_REQUIRED");
     if (!(fence instanceof CloudConsentFence)) throw Error("CLOUD_CONSENT_FENCE_REQUIRED");
   }
   async read(principal: AuthPrincipal, ownerId: string, current: () => boolean, signal?: AbortSignal): Promise<CloudConsentObservation> {
@@ -25,7 +26,7 @@ export class FirestoreCloudAiConsentAuthority implements CloudAiConsentAuthority
         if (account.kind === 'dependency_unavailable') return { kind: 'unavailable' };
         if (account.kind !== 'found' || account.path !== `accounts/${ownerId}`) return { kind: 'denied' };
         if (Object.hasOwn(account.data, 'cloudAiConsent') && !parseCloudAiConsent(account.data.cloudAiConsent)) return { kind: 'unavailable' };
-        if (!hasCloudAiConsent(account.data.cloudAiConsent, account.data.optionalProcessingConsent)) return { kind: 'denied' };
+        if (!hasCloudAiConsent(account.data.cloudAiConsent, account.data.optionalProcessingConsent, this.processing)) return { kind: 'denied' };
         const generation = account.data.cloudAiConsentGeneration, purposeGeneration = account.data.purposeRevocationGeneration;
         return typeof generation === 'number' && Number.isSafeInteger(generation) && generation >= 0 && typeof purposeGeneration === 'number' && Number.isSafeInteger(purposeGeneration) && purposeGeneration >= 0
           ? { kind: 'authorized', generation, purposeGeneration, current: lease.current, release: lease.release } : { kind: 'unavailable' };

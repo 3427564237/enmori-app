@@ -77,7 +77,7 @@ final class _MyFriendsListPageState extends ConsumerState<MyFriendsListPage>
           controller: _query,
           focusNode: _queryFocus,
           decoration: InputDecoration(
-            labelText: context.tr('Search by display name', '按显示名称搜索'),
+            labelText: context.tr('Display name', '显示名称'),
             prefixIcon: const Icon(Icons.search),
             errorText: state.queryError == null
                 ? null

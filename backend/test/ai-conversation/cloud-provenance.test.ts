@@ -44,3 +44,18 @@ test('cloud generation older than receipt is unavailable, not evidence of revoca
  const result=await gateway.runTransaction(tx=>inspectSourceUseV2({...tx,getSnapshot:async()=>undefined},'owner','conversation',parseSourceUse(receipt)!,()=>1000,()=>{}));
  assert.equal(result.kind,'unavailable');
 });
+
+
+test('v3 preserves each provider tuple and refuses cross-provider authorization',async()=>{
+ const account={username:'member_a',optionalProcessingConsent:'accepted',checkInVisibility:'private',onboardingCompletedAt:'2026-10-05T00:00:00.000Z',purposeRevocationGeneration:3,cloudAiConsentGeneration:1};
+ for(const [provider,disclosureVersion]of [['groq','groq_cloud_v1'],['openai','openai_cloud_v1']]){
+  const original={...receipt,provider,disclosureVersion},parsed=parseSourceUse(original)!;
+  assert.equal(parsed?.schemaVersion,'source_use_v3');assert.equal(parsed.processing==='cloud'&&parsed.provider,provider);
+  for(const consentVersion of ['groq_cloud_v1','openai_cloud_v1']){
+   const gateway=new InMemoryFirestoreGateway({'accounts/owner':{...account,cloudAiConsent:{state:'accepted',disclosureVersion:consentVersion}}});
+   const result=await gateway.runTransaction<Awaited<ReturnType<typeof inspectSourceUseV2>>>((tx): ReturnType<typeof inspectSourceUseV2>=>inspectSourceUseV2({...tx,getSnapshot:async():Promise<undefined>=>undefined},'owner','conversation',parsed,()=>1000,()=>{}));
+   assert.equal(result.kind,consentVersion===disclosureVersion?'valid':'invalid');assert.deepEqual(parsed,original);
+  }
+ }
+ for(const invalid of [{provider:'openai',disclosureVersion:'groq_cloud_v1'},{provider:'groq',disclosureVersion:'openai_cloud_v1'},{provider:'openai',disclosureVersion:'future_unknown'}])assert.equal(parseSourceUse({...receipt,...invalid}),undefined);
+});

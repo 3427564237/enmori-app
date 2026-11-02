@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import '../../../core/result/result.dart';
+import '../../account/domain/cloud_ai_consent.dart';
 import '../domain/ai_conversation.dart';
 import '../domain/ai_conversation_repository.dart';
 import '../domain/ai_owned_sources.dart';
@@ -16,9 +17,13 @@ final class AiWireRepository
         AiCompanionReplyRepository,
         AiSelectedReplyRepository,
         AiTodayReplyRepository {
-  AiWireRepository(this._transport);
+  AiWireRepository(
+    this._transport, {
+    this.processing = AiClientProcessing.local,
+  });
 
   final AiWireTransport _transport;
+  final AiClientProcessing processing;
 
   @override
   Future<Result<AiMessageAnchor>> resolveDelivery({
@@ -322,7 +327,7 @@ final class AiWireRepository
         'conversationId': ?conversationId,
         'userMessageId': ?userMessageId,
         'contextSelection': {
-          'processing': 'local',
+          'processing': processing.wireProcessing,
           if (todayZone != null)
             'today': {'timeZone': todayZone}
           else
@@ -820,13 +825,18 @@ AiMessage _message(Object? value) {
       dto.containsKey('processing') ||
       dto.containsKey('provider') ||
       dto.containsKey('disclosureVersion');
+  CloudAiProvider? cloudProvider;
   if (cloudProcessed) {
+    cloudProvider = switch ((dto['provider'], dto['disclosureVersion'])) {
+      ('groq', 'groq_cloud_v1') => CloudAiProvider.groq,
+      ('openai', 'openai_cloud_v1') => CloudAiProvider.openai,
+      _ => null,
+    };
     _require(
       role == AiRole.assistant &&
           availability == AiAvailability.available &&
           dto['processing'] == 'cloud' &&
-          dto['provider'] == 'groq' &&
-          dto['disclosureVersion'] == 'groq_cloud_v1',
+          cloudProvider != null,
     );
   }
   List<AiSourceCard> sources = const [];
@@ -860,6 +870,7 @@ AiMessage _message(Object? value) {
     occurrenceId: occurrenceId,
     sources: sources,
     cloudProcessed: cloudProcessed,
+    cloudProvider: cloudProvider,
   );
 }
 

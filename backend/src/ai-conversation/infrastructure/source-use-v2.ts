@@ -1,4 +1,4 @@
-import { hasCloudAiConsent } from "../../account/domain/cloud-ai-consent.js";
+import { hasCloudAiConsent, parseCloudAiProcessing, type CloudAiProcessing } from "../../account/domain/cloud-ai-consent.js";
 import type { FirestoreTransactionGateway as Tx, StoredDocument, StoredDocumentSnapshot } from "../../shared/infrastructure/firebase/firestore-gateway.js";
 import { isSafeDocumentId, parseCheckInProjection } from "../../shared/infrastructure/firebase/firestore-records.js";
 import { parseReadInstant, parseReadAuthority } from "./real-context-records.js";
@@ -20,7 +20,7 @@ export interface SourceUseV2 {
 }
 export type SourceUseV3 = Omit<SourceUseV2, 'schemaVersion' | 'processing'> & {
   readonly schemaVersion: 'source_use_v3'; readonly processing: 'cloud';
-  readonly cloudAiConsentGeneration: number; readonly provider: 'groq'; readonly disclosureVersion: 'groq_cloud_v1';
+  readonly cloudAiConsentGeneration: number; readonly provider: CloudAiProcessing['provider']; readonly disclosureVersion: CloudAiProcessing['disclosureVersion'];
 };
 export type SourceUse = SourceUseV2 | SourceUseV3;
 const exact = (row: StoredDocument, required: readonly string[]) =>
@@ -33,7 +33,7 @@ export function parseSourceUseV2(row: StoredDocument | undefined): SourceUseV2 |
 export function parseSourceUse(row: StoredDocument | undefined): SourceUse | undefined {
   const cloud = row?.schemaVersion === 'source_use_v3';
   if (!row || !exact(row, ["schemaVersion", "purpose", "processing", "sources", "requiredCategories", "purposeRevocationGeneration", ...(cloud ? ["provider", "disclosureVersion", "cloudAiConsentGeneration"] : [])]) ||
-      (!cloud && row.schemaVersion !== "source_use_v2") || (cloud && (!uint(row.cloudAiConsentGeneration) || row.provider !== "groq" || row.disclosureVersion !== "groq_cloud_v1")) || !["explicit_follow_up", "selected_checkin_reply"].includes(String(row.purpose)) ||
+      (!cloud && row.schemaVersion !== "source_use_v2") || (cloud && (!uint(row.cloudAiConsentGeneration) || !parseCloudAiProcessing(row.provider, row.disclosureVersion))) || !["explicit_follow_up", "selected_checkin_reply"].includes(String(row.purpose)) ||
       row.processing !== (cloud ? "cloud" : "local") || !uint(row.purposeRevocationGeneration) || !Array.isArray(row.sources) || row.sources.length<(cloud ? 0 : 1) || row.sources.length > 15 ||
       !Array.isArray(row.requiredCategories) || new Set(row.requiredCategories).size !== row.requiredCategories.length ||
       row.requiredCategories.some(c => c !== "conversation_history" && c !== "check_ins")) return undefined;
@@ -74,6 +74,8 @@ export async function inspectSourceUseV2(tx: Tx, ownerId: string, conversationId
   utcMilliseconds: () => number, check: () => void): Promise<{ readonly kind: "valid"; readonly cards: readonly OwnedSourceCard[] }
     | { readonly kind: "invalid";readonly reason:"changed"|"missing"|"denied" }|{readonly kind:"unavailable"}> {
   if (!tx.getSnapshot) return { kind: "unavailable" };
+  const processing = receipt.processing === 'cloud' ? parseCloudAiProcessing(receipt.provider, receipt.disclosureVersion) : undefined;
+  if (receipt.processing === 'cloud' && !processing) return { kind: 'unavailable' };
   const started=utcMilliseconds();let last=started;
   const fresh=()=>{const now=utcMilliseconds();if(!Number.isSafeInteger(now)||now<last||now-started>5000)return false;last=now;return true;};
   if(!Number.isSafeInteger(started))return {kind:"unavailable"};
@@ -85,7 +87,7 @@ export async function inspectSourceUseV2(tx: Tx, ownerId: string, conversationId
     if (!authority) return { kind: "unavailable" };
     if (receipt.processing === 'cloud' && authority.cloudAiConsentUnavailable) return {kind:'unavailable'};
     if (receipt.processing === 'cloud' && authority.cloudAiConsentGeneration !== undefined && authority.cloudAiConsentGeneration < receipt.cloudAiConsentGeneration) return {kind:'unavailable'};
-    if (receipt.processing === 'cloud' && (!hasCloudAiConsent(authority.cloudAiConsent, authority.consent) || receipt.cloudAiConsentGeneration !== authority.cloudAiConsentGeneration)) return {kind:'invalid', reason:'denied'};
+    if (receipt.processing === 'cloud' && (!hasCloudAiConsent(authority.cloudAiConsent, authority.consent, processing!) || receipt.cloudAiConsentGeneration !== authority.cloudAiConsentGeneration)) return {kind:'invalid', reason:'denied'};
     if (authority.purposeRevocationGeneration > receipt.purposeRevocationGeneration) return { kind: "invalid",reason:"denied" };
     if (authority.purposeRevocationGeneration < receipt.purposeRevocationGeneration || authority.consent !== "accepted") return { kind: "unavailable" };
   }

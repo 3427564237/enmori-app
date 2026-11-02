@@ -10,6 +10,12 @@ import '../auth/auth_providers.dart';
 import 'domain/account_preferences_repository.dart';
 import 'domain/account_repository.dart';
 
+// The selected composition passes this same value to its Conversation mapper.
+// It never converts a stored grant for another processor.
+final aiClientProcessingProvider = Provider<AiClientProcessing>(
+  (ref) => AiClientProcessing.local,
+);
+
 final accountPreferencesRepositoryProvider =
     Provider<AccountPreferencesRepository>(
       (ref) => const _UnavailablePreferences(),

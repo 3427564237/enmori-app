@@ -222,6 +222,7 @@ final class _ParticipationEventsPageState
                     ),
                 ],
               ),
+              const SizedBox(height: 16),
               DropdownButtonFormField<int>(
                 isExpanded: true,
                 key: _sortKey,

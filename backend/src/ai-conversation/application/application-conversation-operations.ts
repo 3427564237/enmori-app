@@ -1,3 +1,4 @@
+import { legacyCloudAiProcessing } from "../../account/domain/cloud-ai-consent.js";
 import type { AsyncConversationIdentity, AsyncOperation, AsyncSavedUser } from "../ports/async-conversation.js";
 import type { ConversationCaller, ConversationFailureCode, ConversationOperations, ConversationReadback,
   ConversationResult, ConversationSummaryPage, PrepareConversation, PreparedConversationOperation } from "../ports/conversation-operations.js";
@@ -162,6 +163,7 @@ export class ApplicationConversationOperations implements ConversationOperations
     if((selection!==undefined)!==(choice!==undefined))return Promise.resolve(failure("AI_CONTEXT_SELECTION_CONFLICT"));
     if(selection?.today&&!validTodayReplySelection(selection.today,this.clock.utcMilliseconds()))return Promise.resolve(failure("AI_CONTEXT_SELECTION_CONFLICT"));
     if(selection&&choice){
+      if(selection.processing === "cloud" && !legacyCloudAiProcessing(selection))return Promise.resolve(failure("AI_CONTEXT_SELECTION_CONFLICT"));
       if(choice.selectionRevision!==selection.selectionRevision||!Array.isArray(choice.includedKeys)||!Array.isArray(choice.excludedKeys)||
         new Set(choice.includedKeys).size!==choice.includedKeys.length||new Set(choice.excludedKeys).size!==choice.excludedKeys.length||
         [...choice.includedKeys,...choice.excludedKeys].some(k=>!selection.keys.includes(k))||selection.keys.some(k=>!choice.includedKeys.includes(k)&&!choice.excludedKeys.includes(k))||
@@ -172,7 +174,7 @@ export class ApplicationConversationOperations implements ConversationOperations
     // capability to arrive within its original 15s, rather than consume it falsely.
     if (!delivery || typeof delivery.acceptCompleteBody !== "function") return Promise.resolve(failure("AI_UNAVAILABLE"));
     if (!this.deliveryCurrent(delivery)) return Promise.resolve({ kind: "terminated" });
-    ticket.selectedGrant=selection&&choice?Object.freeze({...(selection.processing ? {processing:selection.processing,...(selection.processing === "cloud" ? {cloudAiConsentGeneration:selection.cloudAiConsentGeneration!} : {})} : {}),purposeRevocationGeneration:selection.purposeRevocationGeneration,selectionRevision:selection.selectionRevision,
+    ticket.selectedGrant=selection&&choice?Object.freeze({...(selection.processing ? {processing:selection.processing,...(selection.processing === "cloud" ? {...legacyCloudAiProcessing(selection)!,cloudAiConsentGeneration:selection.cloudAiConsentGeneration!} : {})} : {}),purposeRevocationGeneration:selection.purposeRevocationGeneration,selectionRevision:selection.selectionRevision,
       ...(selection.today?{today:Object.freeze({...selection.today})}:{}),
       sources:Object.freeze(selection.sources.map((s,i)=>Object.freeze({...s,selectionKey:selection.keys[i]!}))),includedKeys:Object.freeze([...choice.includedKeys]),excludedKeys:Object.freeze([...choice.excludedKeys]),
       historyPairs:Object.freeze(selection.historyPairs.map((p,i)=>Object.freeze({...p,historyKey:selection.historyKeys[i]!}))),excludedHistoryKeys:Object.freeze([...(choice.excludedHistoryKeys??[])])}):undefined;

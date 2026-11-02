@@ -15,12 +15,14 @@ import '../../../core/result/result.dart';
 import '../../interests/domain/interest_repository.dart';
 import 'own_profile_controller.dart';
 import 'own_profile_header.dart';
+import 'profile_action_group.dart';
 
 final class OwnProfilePage extends ConsumerWidget {
   const OwnProfilePage({
     required this.onEditInterests,
     this.onEditProfile,
     this.onOpenSettings,
+    this.onOpenRecommendationProfile,
     this.participationSection,
     this.onOpenRecords,
     this.onOpenHistory,
@@ -30,7 +32,9 @@ final class OwnProfilePage extends ConsumerWidget {
     super.key,
   });
   final Future<void> Function() onEditInterests;
-  final Future<void> Function()? onEditProfile, onOpenSettings;
+  final Future<void> Function()? onEditProfile,
+      onOpenSettings,
+      onOpenRecommendationProfile;
   final Widget? participationSection;
   final Future<void> Function(String)? onOpenRecords;
   final VoidCallback? onOpenHistory, onOpenFootprint, onManagePersonas;
@@ -52,20 +56,82 @@ final class OwnProfilePage extends ConsumerWidget {
       ref.invalidate(ownProfileDetailsProvider(subject));
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.tr('My profile', "我的资料")),
-        actions: [
-          IconButton(
-            key: const Key('profile-settings'),
-            tooltip: context.tr('Settings', "设置"),
-            onPressed: state.username == null || onOpenSettings == null
-                ? null
-                : () => edit(onOpenSettings),
-            icon: const Icon(Icons.settings_outlined),
-          ),
-        ],
+    final canEdit = state.username != null;
+    final commonActions = <ProfileAction>[
+      if (onOpenHistory != null)
+        ProfileAction(
+          key: const Key('profile-history'),
+          icon: Icons.history_outlined,
+          label: context.tr('Check-in History', '签到历史'),
+          onPressed: onOpenHistory,
+          emphasized: true,
+        )
+      else if (onOpenRecords != null)
+        ProfileAction(
+          key: const Key('profile-records'),
+          icon: Icons.calendar_month_outlined,
+          label: context.tr('My records', '我的记录'),
+          onPressed: canEdit ? () => onOpenRecords!(state.username!) : null,
+          emphasized: true,
+        ),
+      ProfileAction(
+        key: const Key('profile-edit-interests'),
+        icon: Icons.interests_outlined,
+        label: context.tr('Edit interests', '编辑兴趣'),
+        onPressed: !canEdit
+            ? null
+            : () async {
+                final controller = ref.read(
+                  ownProfileControllerProvider.notifier,
+                );
+                await onEditInterests();
+                if (context.mounted &&
+                    ref.read(currentAuthSubjectProvider) == subject) {
+                  await controller.load();
+                }
+              },
       ),
+      if (onOpenFootprint != null)
+        ProfileAction(
+          key: const Key('profile-footprint'),
+          icon: Icons.map_outlined,
+          label: context.tr('Footprint', '足迹'),
+          onPressed: onOpenFootprint,
+        ),
+    ];
+    final settingsActions = <ProfileAction>[
+      if (onEditProfile != null)
+        ProfileAction(
+          key: const Key('profile-edit'),
+          icon: Icons.edit_outlined,
+          label: context.tr('Edit profile', '编辑资料'),
+          onPressed: canEdit ? () => edit(onEditProfile) : null,
+        ),
+      if (onOpenRecommendationProfile != null)
+        ProfileAction(
+          key: const Key('profile-recommendation-profile'),
+          icon: Icons.person_search_outlined,
+          label: context.tr('Area, birthday & discovery', '地区、生日与发现'),
+          onPressed: canEdit ? () => edit(onOpenRecommendationProfile) : null,
+        ),
+      if (onOpenSettings != null)
+        ProfileAction(
+          key: const Key('profile-settings'),
+          icon: Icons.privacy_tip_outlined,
+          label: context.tr('Privacy & settings', '隐私与设置'),
+          onPressed: canEdit ? () => edit(onOpenSettings) : null,
+        ),
+      if (onManagePersonas != null)
+        ProfileAction(
+          key: const Key('profile-manage-personas'),
+          icon: Icons.auto_awesome_outlined,
+          label: context.tr('Your Personas', '我的 AI 角色'),
+          onPressed: onManagePersonas,
+        ),
+    ];
+
+    return Scaffold(
+      appBar: AppBar(title: Text(context.tr('My profile', "我的资料"))),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -81,56 +147,59 @@ final class OwnProfilePage extends ConsumerWidget {
                     AsyncData<Result<OwnProfile>>(
                       value: Success<OwnProfile>(:final value),
                     ) =>
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          OwnProfileHeader(
-                            profile: value,
-                            onEdit: onEditProfile == null
-                                ? null
-                                : () => edit(onEditProfile),
+                      Card(
+                        margin: EdgeInsets.zero,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              OwnProfileHeader(profile: value),
+                              if (value.details.bio case final bio?)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 16),
+                                  child: Text(
+                                    bio,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge,
+                                  ),
+                                ),
+                              if (value.details.affiliationName != null ||
+                                  value.details.region != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 12),
+                                  child: Wrap(
+                                    spacing: 16,
+                                    runSpacing: 8,
+                                    children: [
+                                      if (value.details.affiliationName
+                                          case final name?)
+                                        _ProfileDetail(
+                                          icon:
+                                              value.details.affiliationType ==
+                                                  AffiliationType.company
+                                              ? Icons.business_outlined
+                                              : Icons.school_outlined,
+                                          label: name,
+                                        ),
+                                      if (value.details.region
+                                          case final region?)
+                                        _ProfileDetail(
+                                          icon: Icons.place_outlined,
+                                          label: isCoordinateRegion(region)
+                                              ? context.tr(
+                                                  'Add a place name in Edit profile',
+                                                  '在编辑资料中填写地点名称',
+                                                )
+                                              : region,
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                            ],
                           ),
-                          const SizedBox(height: 16),
-                          if (value.details.bio case final bio?)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 16),
-                              child: Text(
-                                bio,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ),
-                          if (value.details.affiliationName != null ||
-                              value.details.region != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: Wrap(
-                                spacing: 16,
-                                runSpacing: 8,
-                                children: [
-                                  if (value.details.affiliationName
-                                      case final name?)
-                                    _ProfileDetail(
-                                      icon:
-                                          value.details.affiliationType ==
-                                              AffiliationType.company
-                                          ? Icons.business_outlined
-                                          : Icons.school_outlined,
-                                      label: name,
-                                    ),
-                                  if (value.details.region case final region?)
-                                    _ProfileDetail(
-                                      icon: Icons.place_outlined,
-                                      label: isCoordinateRegion(region)
-                                          ? context.tr(
-                                              'Add a place name in Edit profile',
-                                              '在编辑资料中填写地点名称',
-                                            )
-                                          : region,
-                                    ),
-                                ],
-                              ),
-                            ),
-                        ],
+                        ),
                       ),
                     AsyncData<Result<OwnProfile>>(
                       value: Failure<OwnProfile>(),
@@ -157,50 +226,38 @@ final class OwnProfilePage extends ConsumerWidget {
                     ),
                     _ => const LinearProgressIndicator(),
                   },
-                  const SizedBox(height: 20),
-                  Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 12,
-                    children: [
-                      Text(
-                        context.tr('Interests', "兴趣"),
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      TextButton.icon(
-                        key: const Key('profile-edit-interests'),
-                        onPressed: state.username == null
-                            ? null
-                            : () async {
-                                final controller = ref.read(
-                                  ownProfileControllerProvider.notifier,
-                                );
-                                await onEditInterests();
-                                if (context.mounted &&
-                                    ref.read(currentAuthSubjectProvider) ==
-                                        subject) {
-                                  await controller.load();
-                                }
-                              },
-                        icon: const Icon(Icons.edit_outlined, size: 18),
-                        label: Text(context.tr('Edit interests', "编辑兴趣")),
-                      ),
-                    ],
+                  const SizedBox(height: 24),
+                  Text(
+                    context.tr('Quick access', '常用功能'),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
+                  const SizedBox(height: 4),
+                  ProfileActionGroup(actions: commonActions),
+                  const SizedBox(height: 20),
+                  Text(
+                    context.tr('Interests', '兴趣'),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
                   if (state.phase == OwnProfilePhase.loading)
                     const LinearProgressIndicator(key: Key('profile-loading'))
                   else if (state.phase == OwnProfilePhase.failed)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        context.tr('Interests could not be loaded.', "兴趣加载失败。"),
-                      ),
-                      trailing: TextButton(
-                        onPressed: () => ref
-                            .read(ownProfileControllerProvider.notifier)
-                            .load(),
-                        child: Text(context.tr('Retry', "重试")),
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.tr(
+                            'Interests could not be loaded.',
+                            "兴趣加载失败。",
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => ref
+                              .read(ownProfileControllerProvider.notifier)
+                              .load(),
+                          child: Text(context.tr('Retry', "重试")),
+                        ),
+                      ],
                     )
                   else if (state.interests.isEmpty)
                     Text(
@@ -231,68 +288,20 @@ final class OwnProfilePage extends ConsumerWidget {
                           ),
                       ],
                     ),
-                  const SizedBox(height: 20),
-                  Text(
-                    context.tr('Your records', "我的记录"),
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  if (onOpenHistory != null)
-                    ListTile(
-                      leading: const Icon(Icons.history),
-                      title: Text(context.tr('Check-in History', "签到记录")),
-                      subtitle: Text(
-                        context.tr(
-                          'Notes, moods and saved moments',
-                          "文字、心情与留存的时刻",
-                        ),
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: onOpenHistory,
+                  if (settingsActions.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    Text(
+                      context.tr('Profile & privacy', '资料与隐私'),
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                  if (onOpenFootprint != null)
-                    ListTile(
-                      leading: const Icon(Icons.map_outlined),
-                      title: Text(context.tr('Footprint', "足迹")),
-                      subtitle: Text(
-                        context.tr('Your Check-in locations', "签到留下的地点"),
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: onOpenFootprint,
-                    ),
-                  if (onOpenHistory == null &&
-                      onOpenRecords != null &&
-                      state.username != null)
-                    ListTile(
-                      leading: const Icon(Icons.calendar_month),
-                      title: Text(
-                        context.tr('My records, calendar & map', "我的记录、日历与地图"),
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => onOpenRecords!(state.username!),
-                    ),
-                  if (onManagePersonas != null) ...[
-                    const Divider(height: 32),
-                    ListTile(
-                      key: const Key('profile-manage-personas'),
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.auto_awesome_outlined),
-                      title: Text(context.tr('Your Personas', "我的 AI 角色")),
-                      subtitle: Text(
-                        context.tr(
-                          'Choose how your AI companion responds',
-                          "选择 AI 伙伴的回应方式",
-                        ),
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: onManagePersonas,
-                    ),
+                    const SizedBox(height: 4),
+                    ProfileActionGroup(actions: settingsActions),
                   ],
                   if (participationSection != null) ...[
                     const SizedBox(height: 20),
                     participationSection!,
                   ],
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
                   const VerifyEmailButton(),
                   ?adminCatalogueEntry,
                 ],

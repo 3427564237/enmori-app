@@ -33,6 +33,8 @@ class _AreaPickerState extends State<_AreaPicker> {
   String _query = '';
   @override
   Widget build(BuildContext context) {
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final availableHeight = MediaQuery.sizeOf(context).height - keyboardInset;
     final rows = widget.areas
         .where(
           (a) => '${a.name} ${a.regionName} ${a.code}'.toLowerCase().contains(
@@ -40,32 +42,50 @@ class _AreaPickerState extends State<_AreaPicker> {
           ),
         )
         .toList();
-    return SizedBox(
-      height: MediaQuery.sizeOf(context).height * .75,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: context.tr('Search Singapore areas', '搜索新加坡地区'),
-                prefixIcon: const Icon(Icons.search),
-              ),
-              onChanged: (v) => setState(() => _query = v),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: rows.length,
-              itemBuilder: (context, i) => ListTile(
-                title: Text(rows[i].name),
-                subtitle: Text(rows[i].regionName),
-                onTap: () => Navigator.pop(context, rows[i]),
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboardInset),
+      child: SizedBox(
+        height: keyboardInset > 0 ? availableHeight : availableHeight * .75,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: context.tr('Search Singapore areas', '搜索新加坡地区'),
+                  prefixIcon: const Icon(Icons.search),
+                ),
+                onChanged: (v) => setState(() => _query = v),
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: rows.isEmpty
+                  ? Center(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            context.tr(
+                              'No matching areas. Try another search.',
+                              '没有匹配的地区，请尝试其他搜索词。',
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: rows.length,
+                      itemBuilder: (context, i) => ListTile(
+                        title: Text(rows[i].name),
+                        subtitle: Text(rows[i].regionName),
+                        onTap: () => Navigator.pop(context, rows[i]),
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -262,8 +282,9 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
     final own = subject == null
         ? null
         : ref.watch(ownProfileDetailsProvider(subject)).asData?.value;
-    final areas =
-        ref.watch(planningAreasProvider).asData?.value ?? <PlanningArea>[];
+    final areaState = ref.watch(planningAreasProvider);
+    final areas = areaState.asData?.value ?? <PlanningArea>[];
+    final areasReady = areaState.hasValue && areas.isNotEmpty;
     if (_opening || _base == null) {
       return Scaffold(
         appBar: AppBar(
@@ -350,10 +371,12 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
                 ),
               ),
             ListTile(
+              key: const Key('recommendation-home-area'),
               contentPadding: EdgeInsets.zero,
               title: Text(context.tr('Home area', '常用地区')),
               subtitle: Text(
                 areas.where((a) => a.code == _area).firstOrNull?.name ??
+                    _area ??
                     context.tr('Not set', '未选择'),
               ),
               trailing: Wrap(
@@ -369,13 +392,30 @@ class _ProfileState extends ConsumerState<RecommendationProfilePage> {
                   const Icon(Icons.chevron_right),
                 ],
               ),
-              onTap: _busy
+              onTap: _busy || !areasReady
                   ? null
                   : () async {
                       final a = await choosePlanningArea(context, areas);
                       if (a != null && mounted) change(() => _area = a.code);
                     },
             ),
+            if (areaState.isLoading)
+              LinearProgressIndicator(
+                semanticsLabel: context.tr('Loading areas', '正在加载地区'),
+              )
+            else if (!areasReady) ...[
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  context.tr('Areas couldn’t be loaded.', '无法加载地区。'),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+              TextButton(
+                onPressed: () => ref.invalidate(planningAreasProvider),
+                child: Text(context.tr('Retry areas', '重新加载地区')),
+              ),
+            ],
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(context.tr('Automatic activity area', '自动更新活动地区')),

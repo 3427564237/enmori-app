@@ -70,8 +70,8 @@ final class BackendAccountPreferencesRepository
         'checkInVisibility': _checkInVisibility(visibility),
         if (cloudAiConsent != null)
           'cloudAiConsent': {
-            'state': cloudAiConsent.name,
-            'disclosureVersion': 'groq_cloud_v1',
+            'state': cloudAiConsent.wireState,
+            'disclosureVersion': cloudAiConsent.disclosureVersion,
           },
         'optionalProcessingConsent': consent.name,
         'expectedRevision': expectedRevision,
@@ -164,13 +164,14 @@ final class BackendAccountPreferencesRepository
     if (p.containsKey('cloudAiConsent')) {
       final grant = p['cloudAiConsent'];
       if (grant is! Map<String, dynamic> ||
-          !_keys(grant, ['state', 'disclosureVersion']) ||
-          grant['disclosureVersion'] != 'groq_cloud_v1') {
+          !_keys(grant, ['state', 'disclosureVersion'])) {
         return _invalid();
       }
-      cloudAiConsent = switch (grant['state']) {
-        'accepted' => CloudAiConsent.accepted,
-        'declined' => CloudAiConsent.declined,
+      cloudAiConsent = switch ((grant['state'], grant['disclosureVersion'])) {
+        ('accepted', 'groq_cloud_v1') => CloudAiConsent.accepted,
+        ('declined', 'groq_cloud_v1') => CloudAiConsent.declined,
+        ('accepted', 'openai_cloud_v1') => CloudAiConsent.openaiAccepted,
+        ('declined', 'openai_cloud_v1') => CloudAiConsent.openaiDeclined,
         _ => null,
       };
       if (cloudAiConsent == null) return _invalid();

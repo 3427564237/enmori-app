@@ -232,11 +232,48 @@ Future<void> pumpPlans(
 }
 
 Future<void> tap(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
+  if (finder.evaluate().isEmpty) {
+    // ListView may not have built controls below the Event information yet.
+    await tester.scrollUntilVisible(
+      finder,
+      250,
+      scrollable: find
+          .byWidgetPredicate(
+            (widget) =>
+                widget is Scrollable &&
+                widget.axisDirection == AxisDirection.down,
+          )
+          .hitTestable()
+          .first,
+      maxScrolls: 20,
+    );
+  } else {
+    await tester.ensureVisible(finder);
+  }
   await tester.pumpAndSettle();
   expect(finder.hitTestable(), findsOneWidget);
   await tester.tap(finder);
   await tester.pumpAndSettle();
+}
+
+void pauseApp(WidgetTester tester) {
+  for (final state in [
+    AppLifecycleState.inactive,
+    AppLifecycleState.hidden,
+    AppLifecycleState.paused,
+  ]) {
+    tester.binding.handleAppLifecycleStateChanged(state);
+  }
+}
+
+void resumeApp(WidgetTester tester) {
+  for (final state in [
+    AppLifecycleState.hidden,
+    AppLifecycleState.inactive,
+    AppLifecycleState.resumed,
+  ]) {
+    tester.binding.handleAppLifecycleStateChanged(state);
+  }
 }
 
 void main() {
@@ -270,10 +307,10 @@ void main() {
       expect(find.text('An evening of music a'), findsOneWidget);
       final resumedRead = Completer<Result<EventDetail>>();
       details.pending = resumedRead;
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      pauseApp(tester);
       await tester.pump();
       expect(details.reads, 1);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      resumeApp(tester);
       await tester.pump();
       await tester.pump();
       expect(details.reads, 1);
@@ -290,8 +327,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(details.reads, 1);
       await tester.pump(const Duration(minutes: 5));
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      pauseApp(tester);
+      resumeApp(tester);
       await tester.pump();
       await tester.pump();
       expect(details.reads, 2);
@@ -483,6 +520,30 @@ void main() {
   );
 
   testWidgets(
+    'refresh plans retries failed titles for the current filter without writing participation',
+    (tester) async {
+      final repo = PlansRepo()
+        ..facts['b'] = fact('b', status: ParticipationStatus.going);
+      final details = Details()..available = false;
+      await pumpPlans(tester, repo, details: details);
+      expect(details.reads, 2);
+      await tap(tester, find.byKey(const ValueKey('plans-filter-interested')));
+      expect(find.text('Event details currently unavailable'), findsOneWidget);
+      details.available = true;
+
+      await tap(tester, find.text('Refresh plans'));
+
+      expect(find.text('An evening of music a'), findsOneWidget);
+      expect(find.text('Event details currently unavailable'), findsNothing);
+      expect(find.byKey(const ValueKey('plan-b')), findsNothing);
+      expect(details.reads, 3);
+      expect(repo.cursors, [null, null]);
+      expect(repo.writes, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'source-unavailable hidden plan remains manageable and changes sync on return',
     (tester) async {
       final repo = PlansRepo()
@@ -558,15 +619,14 @@ void main() {
       repo.pending = held;
       await tester.tap(find.text('Refresh plans'));
       await tester.pump();
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      pauseApp(tester);
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('plan-a')), findsNothing);
       held.complete(Success(EventParticipationPage([fact('a')], null)));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('plan-a')), findsNothing);
       repo.facts.clear();
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      resumeApp(tester);
       await tester.pumpAndSettle();
       expect(find.textContaining('No saved plans yet'), findsOneWidget);
     },

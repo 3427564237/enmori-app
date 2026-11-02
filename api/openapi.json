@@ -15411,7 +15411,8 @@
               "disclosureVersion": {
                 "type": "string",
                 "enum": [
-                  "groq_cloud_v1"
+                  "groq_cloud_v1",
+                  "openai_cloud_v1"
                 ]
               }
             }
@@ -15580,7 +15581,8 @@
               "disclosureVersion": {
                 "type": "string",
                 "enum": [
-                  "groq_cloud_v1"
+                  "groq_cloud_v1",
+                  "openai_cloud_v1"
                 ]
               }
             }
@@ -16902,13 +16904,15 @@
           "provider": {
             "type": "string",
             "enum": [
-              "groq"
+              "groq",
+              "openai"
             ]
           },
           "disclosureVersion": {
             "type": "string",
             "enum": [
-              "groq_cloud_v1"
+              "groq_cloud_v1",
+              "openai_cloud_v1"
             ]
           }
         },
@@ -16925,7 +16929,40 @@
             "processing",
             "provider"
           ]
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "required": [
+                "processing"
+              ]
+            },
+            "then": {
+              "oneOf": [
+                {
+                  "properties": {
+                    "provider": {
+                      "const": "groq"
+                    },
+                    "disclosureVersion": {
+                      "const": "groq_cloud_v1"
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "provider": {
+                      "const": "openai"
+                    },
+                    "disclosureVersion": {
+                      "const": "openai_cloud_v1"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
       },
       "ConversationAssistant": {
         "oneOf": [

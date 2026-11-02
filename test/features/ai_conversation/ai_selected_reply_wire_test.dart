@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:enmori/core/result/result.dart';
+import 'package:enmori/features/account/domain/cloud_ai_consent.dart';
 import 'package:enmori/features/ai_conversation/data/ai_wire_repository.dart';
 import 'package:enmori/features/ai_conversation/data/ai_wire_transport.dart';
 import 'package:enmori/features/ai_conversation/domain/ai_conversation.dart';
@@ -72,6 +73,89 @@ Map<String, dynamic> reply() => {
 };
 
 void main() {
+  for (final processing in [
+    AiClientProcessing.groqCloud,
+    AiClientProcessing.openaiCloud,
+  ]) {
+    test(
+      '${processing.name} binds cloud mode for manual, Retry and today preparation without provider selectors',
+      () async {
+        final manual = _Transport(preparation(), 201);
+        final repository = AiWireRepository(manual, processing: processing);
+        expect(
+          repository.processing.cloudProvider,
+          processing.disclosureProvider,
+        );
+        expect(
+          await repository.prepareSelected(
+            token: 'original-token',
+            abort: AiAbortSignal(),
+            conversationId: id(2),
+            sourceIds: ['own-check-in'],
+          ),
+          isA<Success<AiSelectedReplyTicket>>(),
+        );
+        expect(jsonDecode(manual.requests.single.body!), {
+          'kind': 'send',
+          'purpose': 'checkin_conversation',
+          'conversationId': id(2),
+          'contextSelection': {
+            'processing': 'cloud',
+            'sources': [
+              {'kind': 'check_in', 'checkInId': 'own-check-in'},
+            ],
+          },
+        });
+        final retryDto = preparation();
+        retryDto['contextSelection']['sourceCards'] = [];
+        final retry = _Transport(retryDto, 201);
+        expect(
+          await AiWireRepository(retry, processing: processing).prepareSelected(
+            token: 'original-token',
+            abort: AiAbortSignal(),
+            conversationId: id(2),
+            userMessageId: id(10),
+            sourceIds: [],
+          ),
+          isA<Success<AiSelectedReplyTicket>>(),
+        );
+        expect(jsonDecode(retry.requests.single.body!), {
+          'kind': 'retry',
+          'purpose': 'checkin_conversation',
+          'conversationId': id(2),
+          'userMessageId': id(10),
+          'contextSelection': {'processing': 'cloud', 'sources': []},
+        });
+        final automatic = preparation();
+        automatic['contextSelection']['today'] = {
+          'date': '2026-10-25',
+          'timeZone': 'Asia/Singapore',
+          'limit': 5,
+          'hasMore': false,
+        };
+        automatic['contextSelection']['sourceCards'][0]['checkInId'] =
+            'own-check-in';
+        final today = _Transport(automatic, 201);
+        expect(
+          await AiWireRepository(today, processing: processing).prepareToday(
+            token: 'original-token',
+            abort: AiAbortSignal(),
+            timeZone: 'Asia/Singapore',
+          ),
+          isA<Success<AiSelectedReplyTicket>>(),
+        );
+        expect(jsonDecode(today.requests.single.body!), {
+          'kind': 'send',
+          'purpose': 'checkin_conversation',
+          'contextSelection': {
+            'processing': 'cloud',
+            'today': {'timeZone': 'Asia/Singapore'},
+          },
+        });
+      },
+    );
+  }
+
   test('today prepare sends only IANA zone and parses explicit owner IDs and server day', () async {
     final dto = preparation();
     dto['contextSelection']['today'] = {
@@ -82,6 +166,7 @@ void main() {
     };
     dto['contextSelection']['sourceCards'][0]['checkInId'] = 'own-check-in';
     final transport = _Transport(dto, 201);
+    expect(AiWireRepository(transport).processing, AiClientProcessing.local);
     final result = await AiWireRepository(transport).prepareToday(
       token: 't',
       abort: AiAbortSignal(),

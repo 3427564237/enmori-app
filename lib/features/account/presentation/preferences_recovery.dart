@@ -64,7 +64,7 @@ PreferenceReview<OwnSettings> reviewSettingsDraft({
   final merge = _ReviewFields();
   final value = OwnSettings(
     cloudAiConsent: merge.choose(
-      'Groq cloud processing',
+      'Cloud AI processing',
       base.cloudAiConsent,
       draft.cloudAiConsent,
       latest.cloudAiConsent,

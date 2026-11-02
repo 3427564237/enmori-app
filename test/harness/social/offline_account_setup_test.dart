@@ -14,13 +14,20 @@ import 'package:flutter_test/flutter_test.dart';
 Future<void> tap(WidgetTester tester, String key) async {
   final target = find.byKey(Key(key));
   if (target.evaluate().isEmpty) {
-    await tester.scrollUntilVisible(target, 200);
+    await tester.scrollUntilVisible(target, 200, scrollable: _pageScroll());
   }
   await tester.ensureVisible(target);
   await tester.pumpAndSettle();
   await tester.tap(target);
   await tester.pumpAndSettle();
 }
+
+Finder _pageScroll() => find
+    .descendant(
+      of: find.byKey(const Key('route-onboarding')),
+      matching: find.byType(Scrollable),
+    )
+    .first;
 
 Future<void> start(
   WidgetTester tester,
@@ -63,6 +70,7 @@ Future<void> choose(WidgetTester tester, InitialChoice choice) async {
     await tester.scrollUntilVisible(
       find.byKey(const Key('r6-onboarding-username')),
       200,
+      scrollable: _pageScroll(),
     );
   }
   await tester.enterText(
@@ -86,6 +94,7 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const Key('r6-onboarding-username')),
         200,
+        scrollable: _pageScroll(),
       );
       await tester.enterText(
         find.byKey(const Key('r6-onboarding-username')),
@@ -97,12 +106,14 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const Key('r6-onboarding-failure')),
         200,
+        scrollable: _pageScroll(),
       );
       expect(find.byKey(const Key('r6-onboarding-failure')), findsOneWidget);
       expect(store.onboardingCompleted, isFalse);
       await tester.scrollUntilVisible(
         find.byKey(const Key('r6-onboarding-change-username')),
         200,
+        scrollable: _pageScroll(),
       );
       await tester.pumpAndSettle();
       expect(
@@ -247,6 +258,9 @@ void main() {
       expect(store.onboardingCompleted, isFalse);
       expect(store.onboardingReceipt, isNull);
       await tap(tester, 'register-sign-in');
+      expect(find.text('Leave registration?'), findsOneWidget);
+      await tester.tap(find.text('Discard details'));
+      await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-sign-in')), findsOneWidget);
       expect(tester.takeException(), isNull);
     },

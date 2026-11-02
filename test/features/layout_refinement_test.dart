@@ -188,7 +188,9 @@ void main() {
             await tester.tap(find.text('Activity'));
             await tester.pumpAndSettle();
             expect(find.text('No friends activity to show.'), findsOneWidget);
-            await tester.tap(find.text('Discover'));
+            await tester.tap(
+              find.widgetWithText(ChoiceChip, 'People you may know'),
+            );
             await tester.pumpAndSettle();
             expect(find.byTooltip('Recommendation options'), findsOneWidget);
             await tester.tap(find.text('My Friends'));
@@ -236,6 +238,8 @@ void main() {
           } else {
             expect(find.text('1.3, 103.8'), findsNothing);
             await tester.ensureVisible(find.text('Location details'));
+            await tester.pumpAndSettle();
+            expect(find.text('Location details').hitTestable(), findsOneWidget);
             await tester.tap(find.text('Location details'));
             await tester.pumpAndSettle();
             expect(find.text('1.3, 103.8'), findsOneWidget);

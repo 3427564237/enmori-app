@@ -1,4 +1,4 @@
-import { hasCloudAiConsent } from "../../account/domain/cloud-ai-consent.js";
+import { hasCloudAiConsent, legacyCloudAiProcessing, parseCloudAiProcessing, GROQ_CLOUD_PROCESSING, type CloudAiProcessing } from "../../account/domain/cloud-ai-consent.js";
 import { randomUUID } from "node:crypto";
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx, StoredDocument as RecordData,
   StoredDocumentSnapshot as Snapshot } from "../../shared/infrastructure/firebase/firestore-gateway.js";
@@ -64,7 +64,8 @@ export class FirestoreConversationStore implements RealConversationStore {
   private lastNow = Number.NEGATIVE_INFINITY;
   constructor(private readonly gateway: FirestoreGateway, environment: Readonly<Record<string, string | undefined>>,
     private readonly utcMilliseconds: () => number = Date.now,
-    private readonly notePrerequisites?: TransactionalNotePrerequisites) {
+    private readonly notePrerequisites?: TransactionalNotePrerequisites, private readonly cloudProcessing: CloudAiProcessing = GROQ_CLOUD_PROCESSING) {
+    if (!parseCloudAiProcessing(cloudProcessing.provider, cloudProcessing.disclosureVersion)) throw Error("CLOUD_PROCESSING_REQUIRED");
     requireFeatureEnvironment(environment);
   }
 
@@ -230,7 +231,7 @@ export class FirestoreConversationStore implements RealConversationStore {
     if (!validDependencies(deps)) refuse("unavailable");
     if(deps.selectedReply){
       const selected=deps.selectedReply,started=this.utcMilliseconds();
-      if (selected.processing === 'cloud' && (!hasCloudAiConsent(account.cloudAiConsent, account.optionalProcessingConsent) || !nonnegative(selected.cloudAiConsentGeneration) || selected.cloudAiConsentGeneration !== account.cloudAiConsentGeneration)) refuse('denied');
+      if (selected.processing === 'cloud' && (legacyCloudAiProcessing(selected)?.provider !== this.cloudProcessing.provider || !hasCloudAiConsent(account.cloudAiConsent, account.optionalProcessingConsent, this.cloudProcessing) || !nonnegative(selected.cloudAiConsentGeneration) || selected.cloudAiConsentGeneration !== account.cloudAiConsentGeneration)) refuse('denied');
       if(!["local","cloud"].includes(selected.processing)||!Array.isArray(selected.permittedCheckInIds)||selected.permittedCheckInIds.length>5||
         new Set(selected.permittedCheckInIds).size!==selected.permittedCheckInIds.length||!Array.isArray(selected.excludedCheckInIds)||!Array.isArray(selected.sources)||selected.sources.length>15||
         selected.permittedCheckInIds.some(id=>selected.excludedCheckInIds.includes(id))||deps.sources.some(s=>!selected.permittedCheckInIds.includes(s.sourceId)))refuse("selection_conflict");
@@ -468,7 +469,7 @@ export class FirestoreConversationStore implements RealConversationStore {
         ...input.presentation, appendBefore: inv.cutoff });
       const selected=a.dependencies.selectedReply;
       tx.create(provenance,selected&&(selected.sources.length||selected.processing==="cloud")?{schemaVersion:selected.processing==="cloud"?"source_use_v3":"source_use_v2",purpose:"selected_checkin_reply",processing:selected.processing,
-        ...(selected.processing==="cloud"?{provider:"groq",disclosureVersion:"groq_cloud_v1",cloudAiConsentGeneration:selected.cloudAiConsentGeneration}:{}),
+        ...(selected.processing==="cloud"?{...this.cloudProcessing,cloudAiConsentGeneration:selected.cloudAiConsentGeneration}:{}),
         sources:selected.sources.map(s=>({...s,cardRef:randomUUID()})),requiredCategories:[...(selected.sources.some(s=>s.kind==="check_in")?["check_ins"]:[]),
           ...(selected.sources.some(s=>s.kind==="conversation_message")?["conversation_history"]:[])],purposeRevocationGeneration:a.dependencies.purposeRevocationGeneration}:
         { sources: a.dependencies.sources.map(({ sourceType, sourceId }) => ({ sourceType, sourceId })),
@@ -548,7 +549,7 @@ export class FirestoreConversationStore implements RealConversationStore {
     }
     if(result.kind!=="valid")refuse("unavailable");
     return {...this.message(row),...(result.cards.length ? {sources:result.cards} : {}),
-      ...(receipt.processing === 'cloud' ? {processing:'cloud' as const,provider:'groq' as const,disclosureVersion:'groq_cloud_v1' as const} : {})};
+      ...(receipt.processing === 'cloud' ? {processing:'cloud' as const,provider:receipt.provider,disclosureVersion:receipt.disclosureVersion} : {})};
   }
   /** Select the latest TWO canonical complete pairs before exclusions. Never backfill.
    * An explicit expected set rechecks precisely the borrowed pairs at every effect. */

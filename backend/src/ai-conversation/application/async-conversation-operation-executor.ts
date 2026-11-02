@@ -1,3 +1,4 @@
+import { parseCloudAiProcessing } from "../../account/domain/cloud-ai-consent.js";
 import type { CloudAiConsentAuthority } from "../../account/ports/cloud-ai-consent-authority.js";
 import type { BoundedAiRuntime, RuntimeFailure } from "../../ai-runtime/application/bounded-ai-runtime.js";
 import type { AuthPrincipal, IdentityVerificationResult } from "../../shared/ports/identity-verifier.js";
@@ -57,13 +58,13 @@ function copyMessage(value: StoredConversationMessage, role: StoredConversationM
       typeof value.text !== "string" || !value.text.isWellFormed() || !/\S/u.test(value.text) || [...value.text].length > 2400) return undefined;
   if(value.replyToMessageId!==undefined&&!uuid(value.replyToMessageId))return undefined;
   const cloud = value.processing !== undefined || value.provider !== undefined || value.disclosureVersion !== undefined;
-  if (cloud && (role !== 'assistant' || value.processing !== 'cloud' || value.provider !== 'groq' || value.disclosureVersion !== 'groq_cloud_v1')) return undefined;
+  if (cloud && (role !== 'assistant' || value.processing !== 'cloud' || !parseCloudAiProcessing(value.provider, value.disclosureVersion))) return undefined;
   const sources=value.sources?.map(s=>Object.freeze({cardRef:s.cardRef,kind:s.kind,version:s.version,sourceOccurredAt:s.sourceOccurredAt,observedAt:s.observedAt,state:s.state,canNavigate:s.canNavigate}));
   if(sources&&(sources.length>15||sources.some(s=>typeof s.cardRef!=="string"||!s.cardRef||!s.version||s.state!=="available"||s.canNavigate!==true||
     !["conversation_message","check_in"].includes(s.kind)||!Number.isFinite(Date.parse(s.sourceOccurredAt))||!Number.isFinite(Date.parse(s.observedAt)))))return undefined;
   return Object.freeze({ messageId: value.messageId, sequence: value.sequence, role,
     persistedAt: Object.freeze({ seconds: value.persistedAt.seconds, nanoseconds: value.persistedAt.nanoseconds }),
-    availability: "available", text: value.text,...(cloud ? {processing:'cloud' as const,provider:'groq' as const,disclosureVersion:'groq_cloud_v1' as const} : {}),...(sources?{sources:Object.freeze(sources)}:{}),...(value.replyToMessageId?{replyToMessageId:value.replyToMessageId}:{}) });
+    availability: "available", text: value.text,...(cloud ? {processing:'cloud' as const,...parseCloudAiProcessing(value.provider,value.disclosureVersion)!} : {}),...(sources?{sources:Object.freeze(sources)}:{}),...(value.replyToMessageId?{replyToMessageId:value.replyToMessageId}:{}) });
 }
 function failure(value: RuntimeFailure | "overload" | "invalid_input"): ConversationFailureCode {
   switch (value) {

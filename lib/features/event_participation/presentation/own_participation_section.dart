@@ -148,7 +148,23 @@ final class _OwnParticipationSectionState
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: TextButton.icon(
-            onPressed: state.busy ? null : () => controller.load(),
+            onPressed: state.busy
+                ? null
+                : () {
+                    if (!_active ||
+                        session == null ||
+                        !identical(
+                          participationSession(ref.read(authSessionProvider)),
+                          session,
+                        )) {
+                      return;
+                    }
+                    for (final id
+                        in visible.map((row) => row.eventId).toSet()) {
+                      ref.invalidate(authorizedEventTitleProvider(id));
+                    }
+                    controller.load();
+                  },
             icon: const Icon(Icons.refresh, size: 18),
             label: Text(context.tr('Refresh plans', '刷新计划')),
           ),

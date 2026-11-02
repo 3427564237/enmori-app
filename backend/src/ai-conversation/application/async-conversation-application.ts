@@ -1,3 +1,4 @@
+import { GROQ_CLOUD_PROCESSING, legacyCloudAiProcessing } from "../../account/domain/cloud-ai-consent.js";
 import type { CloudAiConsentAuthority } from "../../account/ports/cloud-ai-consent-authority.js";
 import { BoundedAiRuntime, type Cancellation, type RuntimeApplicationControl,
   type RuntimeApplicationRequest, type RuntimeApplicationWork, type RuntimeFailure } from "../../ai-runtime/application/bounded-ai-runtime.js";
@@ -108,6 +109,7 @@ export class AsyncConversationApplication {
       if (s.terminal || !this.originalCurrent(s)) return this.reject(s, "stale_authority");
       if (!this.validInput(s)) return this.reject(s, "invalid_input");
       if ((s.selectedReply?.processing ?? 'local') !== (this.cloudConsent ? 'cloud' : 'local') && s.selectedReply) return this.reject(s, 'stale_authority');
+      if (this.cloudConsent && s.selectedReply && legacyCloudAiProcessing(s.selectedReply)?.provider !== (this.cloudConsent.processing ?? GROQ_CLOUD_PROCESSING).provider) return this.reject(s, "stale_authority");
       const authorized = await this.authority.preaccept(s.identity, s.operation);
       if (s.terminal || !this.originalCurrent(s)) return this.reject(s, "stale_authority");
       if (authorized !== "authorized") return this.reject(s, authorized === "denied" ? "stale_authority" : "dependency_unavailable");
@@ -228,7 +230,7 @@ export class AsyncConversationApplication {
     const flattened=[...(selected?.sources??[]),...messages].filter((ref,i,all)=>all.findIndex(r=>r.kind===ref.kind&&r.id===ref.id)===i);
     if(flattened.length>15)return undefined;
     return Object.freeze({...dependencies,sources:Object.freeze([...sources.values()]),history:Object.freeze(s.history?.pairs.map(p => p.identity) ?? []),
-      ...(selected||messages.length||this.cloudConsent?{selectedReply:{processing:this.cloudConsent ? "cloud" as const : "local" as const,...(this.cloudConsent ? {cloudAiConsentGeneration:s.cloudGeneration!} : {}),asOf:s.context!.read.asOf,permittedCheckInIds:selected?.permittedCheckInIds??[],
+      ...(selected||messages.length||this.cloudConsent?{selectedReply:{processing:this.cloudConsent ? "cloud" as const : "local" as const,...(this.cloudConsent ? {...(this.cloudConsent.processing ?? GROQ_CLOUD_PROCESSING),cloudAiConsentGeneration:s.cloudGeneration!} : {}),asOf:s.context!.read.asOf,permittedCheckInIds:selected?.permittedCheckInIds??[],
         excludedCheckInIds:selected?.excludedCheckInIds??[],sources:Object.freeze(flattened),
         ...(selected?.historySnapshot?{historySnapshot:selected.historySnapshot}:{}),...(selected?.excludedHistoryPairs?{excludedHistoryPairs:selected.excludedHistoryPairs}:{})}}:{})});
   }
@@ -291,7 +293,7 @@ export class AsyncConversationApplication {
   private work(s: State): RuntimeApplicationWork<AsyncConversationModelInput> {
     return { purpose: "ai_assistant_message_v1", prepare: () => this.prepare(s),
       dispatchInput: () => this.live(s) && !!s.user && !s.uncertain && !!this.model(s)
-        ? ok(Object.freeze({ ...(this.cloudConsent ? { processing: 'cloud' as const,
+        ? ok(Object.freeze({ ...(this.cloudConsent ? { processing: 'cloud' as const, ...(this.cloudConsent.processing ?? GROQ_CLOUD_PROCESSING),
             cloudConsentCurrent: () => this.live(s) && s.cloudGeneration !== undefined } : {}), authorize: () => this.checkpoint(s), projection: () => this.model(s) }))
         : err("dependency_unavailable"),
       acceptCandidate: candidate => { if (this.live(s) && s.processing) s.processing.candidate = candidate; },

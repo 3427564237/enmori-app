@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'ai_owned_sources.dart';
+import '../../account/domain/cloud_ai_consent.dart';
 
 /// Cancels only the request receiving this signal; it never closes a client.
 final class AiAbortSignal {
@@ -48,6 +49,7 @@ final class AiMessage {
     this.occurrenceId,
     this.sources = const [],
     this.cloudProcessed = false,
+    this.cloudProvider,
   });
 
   final String messageId;
@@ -60,6 +62,7 @@ final class AiMessage {
   final String? occurrenceId;
   final List<AiSourceCard> sources;
   final bool cloudProcessed;
+  final CloudAiProvider? cloudProvider;
   bool get isProactive =>
       role == AiRole.assistant && origin == AiMessageOrigin.proactive;
 }

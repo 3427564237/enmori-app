@@ -15,7 +15,8 @@ const mode = process.argv[2] ?? '--backend';
 assert.ok(['--backend', '--backend-child'].includes(mode));
 if (mode === '--backend-child') {
   const env = buildControlledEmulatorTestEnvironment(process.env, process.env.ENMORI_CONTROLLED_PROFILE_DIRECTORY);
-  await run(process.execPath, ['--test', '--test-concurrency=1', 'backend/dist/emulator-test/cloud-quota.integration.test.js'], env);
+  await run(process.execPath, ['--test', '--test-concurrency=1', 'backend/dist/emulator-test/cloud-quota.integration.test.js',
+    'backend/dist/emulator-test/openai-cost-budget.integration.test.js'], env);
 } else {
   for (const port of [8080, 9099]) await new Promise((done, reject) => {
     const server = createServer(); server.once('error', reject);

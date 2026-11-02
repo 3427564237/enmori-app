@@ -33,6 +33,7 @@ final class AiNetworkHarnessApp extends StatefulWidget {
     required this.client,
     required this.environmentLabel,
     required this.onOpenSettings,
+    this.processing = AiClientProcessing.local,
     this.onOpenPersonas,
     this.navigatorKey,
     this.accountPreferencesRepository,
@@ -49,6 +50,7 @@ final class AiNetworkHarnessApp extends StatefulWidget {
     required this.client,
     required this.environmentLabel,
     required this.onOpenSettings,
+    this.processing = AiClientProcessing.local,
     this.onOpenPersonas,
     this.navigatorKey,
     this.accountPreferencesRepository,
@@ -62,6 +64,9 @@ final class AiNetworkHarnessApp extends StatefulWidget {
   final AuthRepository auth;
   final http.Client client;
   final String environmentLabel;
+
+  /// Source-only isolated selection. No UI or environment-based live toggle.
+  final AiClientProcessing processing;
   final VoidCallback onOpenSettings;
   final VoidCallback? onOpenPersonas;
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -91,6 +96,7 @@ final class _AiNetworkHarnessAppState extends State<AiNetworkHarnessApp> {
     if (widget.baseUri != oldWidget.baseUri ||
         widget.auth != oldWidget.auth ||
         widget.client != oldWidget.client ||
+        widget.processing != oldWidget.processing ||
         widget._isolatedLoopback != oldWidget._isolatedLoopback) {
       _compose();
     }
@@ -103,7 +109,7 @@ final class _AiNetworkHarnessAppState extends State<AiNetworkHarnessApp> {
             client: widget.client,
           )
         : HttpAiWireTransport(baseUri: widget.baseUri, client: widget.client);
-    _repository = AiWireRepository(transport);
+    _repository = AiWireRepository(transport, processing: widget.processing);
     _personas = BackendPersonaRepository(
       BackendApiClient(
         widget.baseUri,
@@ -121,6 +127,7 @@ final class _AiNetworkHarnessAppState extends State<AiNetworkHarnessApp> {
     return ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(widget.auth),
+        aiClientProcessingProvider.overrideWithValue(widget.processing),
         if (widget.accountPreferencesRepository case final repository?)
           accountPreferencesRepositoryProvider.overrideWithValue(repository),
         aiConversationRepositoryProvider.overrideWithValue(_repository),

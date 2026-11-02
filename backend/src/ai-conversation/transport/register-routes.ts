@@ -1,3 +1,4 @@
+import { parseCloudAiProcessing } from "../../account/domain/cloud-ai-consent.js";
 import { createHash } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { IdentityVerifier } from "../../shared/ports/identity-verifier.js";
@@ -124,7 +125,7 @@ function message(m: StoredConversationMessage): Record<string, unknown> {
   if ((m.origin !== undefined || m.occurrenceId !== undefined || m.category !== undefined) &&
       !(m.role === "assistant" && m.origin === "proactive" && uuid(m.occurrenceId) && m.category === "explicit_follow_up")) throw Error("Invalid inner proactive message");
   if ((m.processing !== undefined || m.provider !== undefined || m.disclosureVersion !== undefined) &&
-      (m.role !== 'assistant' || m.availability !== 'available' || m.processing !== 'cloud' || m.provider !== 'groq' || m.disclosureVersion !== 'groq_cloud_v1')) throw Error('Invalid inner cloud provenance');
+      (m.role !== 'assistant' || m.availability !== 'available' || m.processing !== 'cloud' || !parseCloudAiProcessing(m.provider, m.disclosureVersion))) throw Error('Invalid inner cloud provenance');
   if (m.sources !== undefined && (m.role !== "assistant" || m.availability !== "available" || !Array.isArray(m.sources) ||
       m.sources.length < 1 || m.sources.length > 15 || new Set(m.sources.map(v => v.cardRef)).size !== m.sources.length)) throw Error("Invalid inner message sources");
   return { messageId: m.messageId, sequence: m.sequence, role: m.role, persistedAt, availability: m.availability,

@@ -2460,7 +2460,10 @@ final class _MessageTile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
-                context.tr('Processed by GroqCloud', '由 GroqCloud 云端处理'),
+                context.tr(
+                  'Processed by ${message.cloudProvider?.displayName ?? 'GroqCloud'}',
+                  '由 ${message.cloudProvider?.displayName ?? 'GroqCloud'} 云端处理',
+                ),
                 key: ValueKey('ai-cloud-origin-${message.messageId}'),
               ),
             ),

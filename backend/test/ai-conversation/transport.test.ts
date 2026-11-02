@@ -204,3 +204,17 @@ test("complete-body sink rejects mismatched pair before writing any response byt
   const response=await f.app.inject({method:"POST",url:routes[1][1],headers:controlHeaders,payload:{text:user.text}});
   failure(response,503,"AI_UNAVAILABLE");assert.equal(response.body.includes("Synthetic reply"),false);
 });
+
+
+test("AI message transport preserves recognized processor tuples and rejects cross-provider provenance",async t=>{
+ for(const [provider,disclosureVersion]of [["groq","groq_cloud_v1"],["openai","openai_cloud_v1"]]as const){
+  const cloud={...assistant,processing:"cloud" as const,provider,disclosureVersion};
+  const f=await fixture(true,{listMessages:async()=>({kind:"success",value:{messages:[user,cloud]}})});t.after(()=>f.app.close());
+  const response=await f.app.inject({method:"GET",url:routes[4][1],headers});assert.equal(response.statusCode,200);
+  assert.equal(response.json().messages[1].provider,provider);assert.equal(response.json().messages[1].disclosureVersion,disclosureVersion);
+ }
+ for(const cloud of [{...assistant,processing:"cloud",provider:"openai",disclosureVersion:"groq_cloud_v1"},{...assistant,processing:"cloud",provider:"groq",disclosureVersion:"openai_cloud_v1"},{...assistant,processing:"cloud",provider:"openai"}]){
+  const f=await fixture(true,{listMessages:async()=>({kind:"success",value:{messages:[user,cloud as StoredConversationMessage]}})});t.after(()=>f.app.close());
+  const response=await f.app.inject({method:"GET",url:routes[4][1],headers});failure(response,503,"AI_UNAVAILABLE");assert(!response.body.includes(assistant.text!));
+ }
+});

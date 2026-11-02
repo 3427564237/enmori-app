@@ -4,7 +4,7 @@ import test from 'node:test';
 import { OwnAccountPreferences } from '../../src/account/application/own-account-preferences.js';
 import { FirestoreAccountPreferencesRepository } from '../../src/account/infrastructure/firestore-account-preferences-repository.js';
 import { FirestoreCloudAiConsentAuthority } from '../../src/account/infrastructure/firestore-cloud-ai-consent-authority.js';
-import { parseCloudAiConsent } from '../../src/account/domain/cloud-ai-consent.js';
+import { parseCloudAiConsent, hasCloudAiConsent, OPENAI_CLOUD_PROCESSING, GROQ_CLOUD_PROCESSING } from '../../src/account/domain/cloud-ai-consent.js';
 import { InMemoryFirestoreGateway } from '../support/in-memory-firestore-gateway.js';
 import { createAuthBindingDocumentId } from '../../src/shared/infrastructure/firebase/firestore-records.js';
 const profile='/tmp/enmori-cloud-consent-unit';
@@ -116,4 +116,32 @@ test('cloud factory keeps ordinary profile and Settings reads independent of una
  assert.equal((await services.preferences.getSettings(principal)).ok,true);
  assert.equal((await services.preferences.saveProfile({principal,displayName:'Synthetic',profileVisibility:'private',expectedRevision:0})).ok,true);
  assert.equal((await services.preferences.saveSettings({...change,cloudAiConsent:grant})).ok,false);
+});
+
+
+test('OpenAI acceptance is distinct from Groq, local consent and legacy missing grants',async()=>{
+ for(const cloudAiConsent of [undefined,grant,{state:'declined',disclosureVersion:'openai_cloud_v1'},{state:'accepted',disclosureVersion:'openai_cloud_v1'}]){
+  const f=fixture({...cloudAiConsent?{cloudAiConsent,cloudAiConsentGeneration:1}:{}});
+  const authority=new FirestoreCloudAiConsentAuthority(f.store,new CloudConsentFence(),()=>true,OPENAI_CLOUD_PROCESSING);
+  const observed=await authority.read(principal,'owner',()=>true);
+  assert.equal(observed.kind,cloudAiConsent?.state==='accepted'&&cloudAiConsent.disclosureVersion==='openai_cloud_v1'?'authorized':'denied');
+  if(observed.kind==='authorized')observed.release();
+ }
+ assert.equal(hasCloudAiConsent(grant,'accepted',OPENAI_CLOUD_PROCESSING),false);
+ assert.equal(hasCloudAiConsent({state:'accepted',disclosureVersion:'openai_cloud_v1'},'accepted',GROQ_CLOUD_PROCESSING),false);
+});
+
+test('processor change and OpenAI withdrawal increment only cloud generation; omission never migrates Groq',async()=>{
+ const f=fixture({cloudAiConsent:grant,cloudAiConsentGeneration:7});
+ await f.use.saveSettings(change);assert.deepEqual(f.store.read('accounts/owner')?.cloudAiConsent,grant);
+ const accepted={state:'accepted',disclosureVersion:'openai_cloud_v1'};
+ assert.equal((await f.use.saveSettings({...change,expectedRevision:1,cloudAiConsent:accepted})).ok,true);
+ assert.deepEqual(f.store.read('accounts/owner')?.cloudAiConsent,accepted);
+ assert.equal(f.store.read('accounts/owner')?.cloudAiConsentGeneration,8);
+ assert.equal(f.store.read('accounts/owner')?.purposeRevocationGeneration,3);
+ assert.equal((await f.use.saveSettings({...change,expectedRevision:2,cloudAiConsent:{...accepted,state:'declined'}})).ok,true);
+ assert.equal(f.store.read('accounts/owner')?.cloudAiConsentGeneration,9);
+ assert.equal(f.store.read('accounts/owner')?.purposeRevocationGeneration,3);
+ const authority=new FirestoreCloudAiConsentAuthority(f.store,new CloudConsentFence(),()=>true,OPENAI_CLOUD_PROCESSING);
+ assert.deepEqual(await authority.read(principal,'owner',()=>true),{kind:'denied'});
 });

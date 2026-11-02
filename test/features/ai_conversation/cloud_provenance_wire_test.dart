@@ -5,6 +5,7 @@ import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/ai_conversation/data/ai_wire_repository.dart';
 import 'package:enmori/features/ai_conversation/data/ai_wire_transport.dart';
 import 'package:enmori/features/ai_conversation/domain/ai_conversation.dart';
+import 'package:enmori/features/account/domain/cloud_ai_consent.dart';
 
 void main() {
   test(
@@ -42,8 +43,25 @@ void main() {
         ) as Success<AiMessagePage>).value.messages.single.cloudProcessed,
         isTrue,
       );
+      final openai = {
+        ...cloud,
+        'provider': 'openai',
+        'disclosureVersion': 'openai_cloud_v1',
+      };
+      final decodedOpenai =
+          (await read(openai) as Success<AiMessagePage>).value.messages.single;
+      expect(decodedOpenai.cloudProcessed, isTrue);
+      expect(decodedOpenai.cloudProvider, CloudAiProvider.openai);
+      final decodedGroq =
+          (await read(cloud) as Success<AiMessagePage>).value.messages.single;
+      expect(decodedGroq.cloudProvider, CloudAiProvider.groq);
       for (final broken in [
         {...cloud}..remove('provider'),
+        {...openai}..remove('disclosureVersion'),
+        {...cloud, 'provider': 'openai'},
+        {...openai, 'provider': 'groq'},
+        {...openai, 'processing': 'local'},
+        {...openai, 'availability': 'unavailable'}..remove('text'),
         {...cloud, 'provider': 'other'},
         {...cloud, 'role': 'user'},
         {...cloud, 'disclosureVersion': 'other'},

@@ -3,6 +3,7 @@ import 'own_profile_header.dart';
 import 'package:enmori/core/presentation/enmori_localizations.dart';
 
 import '../domain/profile_details.dart';
+import '../account_preferences_providers.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,6 +107,9 @@ final class _AccountPreferencesPageState
   @override
   Widget build(BuildContext context) {
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final cloudProvider = ref
+        .watch(aiClientProcessingProvider)
+        .disclosureProvider;
     final provider = accountPreferencesControllerProvider(widget.view);
     final state = ref.watch(provider);
     final revision = state.profile?.revision ?? state.settings?.revision;
@@ -453,16 +457,13 @@ final class _AccountPreferencesPageState
                         enabled: ready,
                         maxLength: 120,
                         decoration: InputDecoration(
-                          labelText: context.tr(
-                            'Legacy region (kept for reference)',
-                            '原地区（保留供参考）',
-                          ),
+                          labelText: context.tr('Previous region', '原地区'),
                         ),
                       ),
                       Text(
                         context.tr(
-                          'Choose your standard home area in Recommendation profile.',
-                          '请在推荐资料中选择标准常用地区。',
+                          'Kept for reference. Choose your home area in Recommendation profile.',
+                          '保留供参考。请在推荐资料中选择常用地区。',
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -720,20 +721,30 @@ final class _AccountPreferencesPageState
                                     ? OptionalProcessingConsent.accepted
                                     : OptionalProcessingConsent.rejected;
                                 if (!v && _cloudConsent != null) {
-                                  _cloudConsent = CloudAiConsent.declined;
+                                  _cloudConsent = CloudAiConsent.forProvider(
+                                    _cloudConsent!.provider,
+                                    accepted: false,
+                                  );
                                 }
                               })
                             : null,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        context.tr('Groq cloud processing', 'Groq 云端处理'),
+                        context.tr(
+                          '${cloudProvider == CloudAiProvider.openai ? 'OpenAI' : 'Groq'} cloud processing',
+                          '${cloudProvider == CloudAiProvider.openai ? 'OpenAI' : 'Groq'} 云端处理',
+                        ),
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       Text(
                         context.tr(
-                          'When cloud AI is available, your current message, selected conversation or Check-in text, and applicable Persona expression are sent through the Azure backend to GroqCloud. Unselected records, location, weather and account IDs are excluded. Groq may retain content for reliability or abuse investigations for up to 30 days, or longer if legally required; retained data is stored in the United States. Declining does not disable ordinary features. You can revoke this permission here. This setting does not switch the current service to cloud.',
-                          '云端 AI 可用时，当前消息、选中的对话或打卡文字，以及适用的人设表达偏好会经 Azure 后端发送到 GroqCloud。不发送未选中的记录、位置、天气或账号 ID。Groq 可能因可靠性或滥用调查保留内容最多 30 天，法律另有要求时更久；保留的数据存储于美国。拒绝不会停用普通功能，你可随时在此撤回。此设置不会把当前服务切换到云端。',
+                          cloudProvider == CloudAiProvider.openai
+                              ? 'When cloud AI is available, ENMORI sends your current message, selected conversation or Check-in text, and applicable Persona expression to OpenAI, an external processor. Azure hosts ENMORI’s backend. Unselected records, location, weather and account IDs are excluded. OpenAI may retain content in abuse monitoring logs for up to 30 days, or longer if legally required. The backend region does not establish where OpenAI processes your data. Declining does not disable ordinary features. You can revoke this permission here. This setting does not switch the current service to cloud.'
+                              : 'When cloud AI is available, your current message, selected conversation or Check-in text, and applicable Persona expression are sent through the Azure backend to GroqCloud. Unselected records, location, weather and account IDs are excluded. Groq may retain content for reliability or abuse investigations for up to 30 days, or longer if legally required; retained data is stored in the United States. Declining does not disable ordinary features. You can revoke this permission here. This setting does not switch the current service to cloud.',
+                          cloudProvider == CloudAiProvider.openai
+                              ? '云端 AI 可用时，ENMORI 会把当前消息、选中的对话或打卡文字，以及适用的人设表达偏好发送给外部处理方 OpenAI。Azure 托管 ENMORI 后端。不发送未选中的记录、位置、天气或账号 ID。OpenAI 可能在滥用监测日志中保留内容最多 30 天，法律另有要求时更久。后端所在地区不代表 OpenAI 处理数据的地区。拒绝不会停用普通功能，你可在此撤回。此设置不会把当前服务切换到云端。'
+                              : '云端 AI 可用时，当前消息、选中的对话或打卡文字，以及适用的人设表达偏好会经 Azure 后端发送到 GroqCloud。不发送未选中的记录、位置、天气或账号 ID。Groq 可能因可靠性或滥用调查保留内容最多 30 天，法律另有要求时更久；保留的数据存储于美国。拒绝不会停用普通功能，你可随时在此撤回。此设置不会把当前服务切换到云端。',
                         ),
                       ),
                       SwitchListTile(
@@ -741,18 +752,25 @@ final class _AccountPreferencesPageState
                         contentPadding: EdgeInsets.zero,
                         title: Text(
                           context.tr(
-                            'Allow Groq cloud processing',
-                            '允许 Groq 云端处理',
+                            'Allow ${cloudProvider == CloudAiProvider.openai ? 'OpenAI' : 'Groq'} cloud processing',
+                            '允许 ${cloudProvider == CloudAiProvider.openai ? 'OpenAI' : 'Groq'} 云端处理',
                           ),
                         ),
-                        value: _cloudConsent == CloudAiConsent.accepted,
+                        value:
+                            _cloudConsent ==
+                            CloudAiConsent.forProvider(
+                              cloudProvider,
+                              accepted: true,
+                            ),
                         onChanged:
                             ready &&
                                 _consent == OptionalProcessingConsent.accepted
                             ? (value) => setState(
-                                () => _cloudConsent = value
-                                    ? CloudAiConsent.accepted
-                                    : CloudAiConsent.declined,
+                                () =>
+                                    _cloudConsent = CloudAiConsent.forProvider(
+                                      cloudProvider,
+                                      accepted: value,
+                                    ),
                               )
                             : null,
                       ),
@@ -862,7 +880,7 @@ final class _AccountPreferencesPageState
     "BIO" => context.tr(label, "个人简介"),
     "Region" => context.tr(label, "地区"),
     "Check-in default visibility" => context.tr(label, "签到默认可见范围"),
-    "Groq cloud processing" => context.tr(label, "Groq 云端处理"),
+    "Cloud AI processing" => context.tr(label, "云端 AI 处理"),
     "Optional data use" => context.tr(label, "可选数据使用"),
     "Check-in location" => context.tr(label, "签到位置"),
     "Check-in weather" => context.tr(label, "签到天气"),
@@ -889,10 +907,10 @@ final class _AccountPreferencesPageState
         profile == null ? null : _profileLabel(profile.visibility),
       'Check-in default visibility' =>
         settings == null ? null : _checkInLabel(settings.checkInVisibility),
-      'Groq cloud processing' =>
-        state.settings?.cloudAiConsent == CloudAiConsent.accepted
-            ? context.tr('Allowed', '允许')
-            : context.tr('Not allowed', '不允许'),
+      'Cloud AI processing' =>
+        settings?.cloudAiConsent == null
+            ? context.tr('Not allowed', '不允许')
+            : '${settings!.cloudAiConsent!.provider.displayName} · ${settings.cloudAiConsent!.isAccepted ? context.tr('Allowed', '允许') : context.tr('Not allowed', '不允许')}',
       'Optional data use' =>
         settings == null
             ? null

@@ -1,3 +1,4 @@
+import type { CloudAiProcessing } from '../../account/domain/cloud-ai-consent.js';
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
 import type { OwnedSourceCard } from "./owned-sources.js";
 import type { AcceptedContextRead, ReadAuthority, ReadPersonaSet, HistoryPairIdentity } from "./real-context-reader.js";
@@ -35,6 +36,8 @@ export interface SelectedSourceIdentity {
 }
 export interface SelectedReplySnapshot {
   readonly processing?: "local" | "cloud";
+  readonly provider?: CloudAiProcessing["provider"];
+  readonly disclosureVersion?: CloudAiProcessing["disclosureVersion"];
   readonly cloudAiConsentGeneration?: number;
   readonly purposeRevocationGeneration:number;
   readonly sources:readonly SelectedSourceIdentity[];
@@ -50,6 +53,8 @@ export interface PreparedReplySelection {
 }
 export interface SelectedReplyGrant extends ExecuteReplySelection {
   readonly processing?: "local" | "cloud";
+  readonly provider?: CloudAiProcessing["provider"];
+  readonly disclosureVersion?: CloudAiProcessing["disclosureVersion"];
   readonly cloudAiConsentGeneration?: number;
   readonly purposeRevocationGeneration:number;
   readonly sources:readonly (SelectedSourceIdentity & {readonly selectionKey:string})[];
@@ -71,6 +76,8 @@ export interface SelectedReplyReadPort {
   read(context:AcceptedContextRead,grant:SelectedReplyGrant):Promise<SelectedReplyReadResult>;
 }
 export interface SelectedReplyDependencies {
+  readonly provider?: CloudAiProcessing["provider"];
+  readonly disclosureVersion?: CloudAiProcessing["disclosureVersion"];
   readonly cloudAiConsentGeneration?: number;
   readonly historySnapshot?:readonly HistoryPairIdentity[];
   readonly excludedHistoryPairs?:readonly HistoryPairIdentity[];

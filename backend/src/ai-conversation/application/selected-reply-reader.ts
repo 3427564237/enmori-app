@@ -1,3 +1,4 @@
+import { legacyCloudAiProcessing } from "../../account/domain/cloud-ai-consent.js";
 import type { AcceptedContextRead, ContextDependencies, NoteModelContext } from "../ports/real-context-reader.js";
 import type { SelectedReplyGrant, SelectedReplyReadPort, SelectedReplyFailure } from "../ports/selected-reply.js";
 import { copyPersonaProjection } from "./persona-expression.js";
@@ -32,6 +33,7 @@ export class SelectedReplyReader {
     if(!revalidate)this.phase="reading";
     try{
       const result=await this.port.read(context,grant);if(!this.live())return this.phase;if(result.kind!=="read")return this.stop(result.kind);
+      if(grant.processing === "cloud" && !legacyCloudAiProcessing(grant))return this.stop("selection_conflict");
       const v=result.value;
       if(v.authority.ownerId!==context.ownerId||v.authority.consent!=="accepted"||v.authority.purposeRevocationGeneration!==grant.purposeRevocationGeneration)return this.stop("changed");
       const expected=grant.sources.filter(s=>grant.includedKeys.includes(s.selectionKey)&&!grant.excludedKeys.includes(s.selectionKey));
@@ -46,7 +48,7 @@ export class SelectedReplyReader {
         ...(s.moodLabel?{moodLabel:s.moodLabel}:{}),...(s.activityLabel?{activityLabel:s.activityLabel}:{})})))});
       this.deps=Object.freeze({ownerId:context.ownerId,purpose:"checkin_conversation",purposeRevocationGeneration:grant.purposeRevocationGeneration,usedPersonaId:active,
         sources:Object.freeze(v.sources.map(s=>Object.freeze({sourceType:"check_in" as const,sourceId:s.checkInId,observedVersion:s.observedVersion}))),
-        selectedReply:Object.freeze({processing:grant.processing??"local",...(grant.processing === "cloud" ? {cloudAiConsentGeneration:grant.cloudAiConsentGeneration!} : {}),asOf:context.asOf,permittedCheckInIds:Object.freeze(expected.map(s=>s.checkInId)),
+        selectedReply:Object.freeze({processing:grant.processing??"local",...(grant.processing === "cloud" ? {...legacyCloudAiProcessing(grant)!,cloudAiConsentGeneration:grant.cloudAiConsentGeneration!} : {}),asOf:context.asOf,permittedCheckInIds:Object.freeze(expected.map(s=>s.checkInId)),
           historySnapshot:Object.freeze(grant.historyPairs.map(({historyKey:_,...identity})=>Object.freeze(identity))),
           excludedHistoryPairs:Object.freeze(grant.historyPairs.filter(p=>grant.excludedHistoryKeys?.includes(p.historyKey)).map(({historyKey:_,...identity})=>Object.freeze(identity))),
           excludedCheckInIds:Object.freeze(grant.sources.filter(s=>grant.excludedKeys.includes(s.selectionKey)).map(s=>s.checkInId)),

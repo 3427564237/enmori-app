@@ -2,7 +2,8 @@ import 'profile_details.dart';
 import '../../../core/result/result.dart';
 import 'account_repository.dart';
 
-enum CloudAiConsent { accepted, declined }
+import 'cloud_ai_consent.dart';
+export 'cloud_ai_consent.dart';
 
 enum ProfileVisibility { private, friendsOnly, public }
 

@@ -62,8 +62,45 @@ void main() {
       'state': 'declined',
       'disclosureVersion': 'groq_cloud_v1',
     });
+    settings['cloudAiConsent'] = {
+      'state': 'accepted',
+      'disclosureVersion': 'openai_cloud_v1',
+    };
+    expect(
+      (await repository.readSettings() as Success<OwnSettings>)
+          .value
+          .cloudAiConsent,
+      CloudAiConsent.openaiAccepted,
+    );
+    await repository.saveSettings(
+      visibility: CheckInVisibility.private,
+      consent: OptionalProcessingConsent.accepted,
+      expectedRevision: 0,
+      cloudAiConsent: CloudAiConsent.openaiDeclined,
+    );
+    expect(sent!['cloudAiConsent'], {
+      'state': 'declined',
+      'disclosureVersion': 'openai_cloud_v1',
+    });
+    settings['cloudAiConsent'] = {
+      'state': 'declined',
+      'disclosureVersion': 'openai_cloud_v1',
+    };
+    expect(
+      (await repository.readSettings() as Success<OwnSettings>)
+          .value
+          .cloudAiConsent,
+      CloudAiConsent.openaiDeclined,
+    );
     for (final invalid in [
       null,
+      {'state': 'accepted'},
+      {'state': 'unknown', 'disclosureVersion': 'openai_cloud_v1'},
+      {
+        'state': 'accepted',
+        'disclosureVersion': 'openai_cloud_v1',
+        'provider': 'groq',
+      },
       {'state': 'accepted', 'disclosureVersion': 'other'},
       {
         'state': 'accepted',
