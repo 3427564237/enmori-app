@@ -1,0 +1,21 @@
+{
+  "mode": "readback",
+  "passed": [
+    {
+      "check": "profile-after-restart",
+      "status": 200,
+      "elapsedMs": 6394
+    },
+    {
+      "check": "check-in-after-restart",
+      "status": 200,
+      "elapsedMs": 1667
+    },
+    {
+      "check": "disabled-identity-denied",
+      "status": 403,
+      "elapsedMs": 631
+    }
+  ],
+  "completed": true
+}

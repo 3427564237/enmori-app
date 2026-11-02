@@ -1,0 +1,263 @@
+{
+  "vantage": "operator-host-not-Azure-or-phone",
+  "categories": [
+    {
+      "name": "firebase-auth-revocation",
+      "rows": [
+        {
+          "elapsedMs": 5306,
+          "ok": true
+        },
+        {
+          "elapsedMs": 307,
+          "ok": true
+        },
+        {
+          "elapsedMs": 256,
+          "ok": true
+        },
+        {
+          "elapsedMs": 254,
+          "ok": true
+        },
+        {
+          "elapsedMs": 251,
+          "ok": true
+        },
+        {
+          "elapsedMs": 258,
+          "ok": true
+        },
+        {
+          "elapsedMs": 273,
+          "ok": true
+        },
+        {
+          "elapsedMs": 286,
+          "ok": true
+        },
+        {
+          "elapsedMs": 260,
+          "ok": true
+        },
+        {
+          "elapsedMs": 259,
+          "ok": true
+        },
+        {
+          "elapsedMs": 250,
+          "ok": true
+        },
+        {
+          "elapsedMs": 270,
+          "ok": true
+        },
+        {
+          "elapsedMs": 246,
+          "ok": true
+        },
+        {
+          "elapsedMs": 1169,
+          "ok": true
+        },
+        {
+          "elapsedMs": 276,
+          "ok": true
+        },
+        {
+          "elapsedMs": 260,
+          "ok": true
+        },
+        {
+          "elapsedMs": 273,
+          "ok": true
+        },
+        {
+          "elapsedMs": 220,
+          "ok": true
+        },
+        {
+          "elapsedMs": 253,
+          "ok": true
+        },
+        {
+          "elapsedMs": 262,
+          "ok": true
+        },
+        {
+          "elapsedMs": 272,
+          "ok": true
+        },
+        {
+          "elapsedMs": 268,
+          "ok": true
+        },
+        {
+          "elapsedMs": 227,
+          "ok": true
+        },
+        {
+          "elapsedMs": 246,
+          "ok": true
+        },
+        {
+          "elapsedMs": 279,
+          "ok": true
+        },
+        {
+          "elapsedMs": 252,
+          "ok": true
+        },
+        {
+          "elapsedMs": 240,
+          "ok": true
+        },
+        {
+          "elapsedMs": 267,
+          "ok": true
+        },
+        {
+          "elapsedMs": 291,
+          "ok": true
+        },
+        {
+          "elapsedMs": 249,
+          "ok": true
+        }
+      ],
+      "samples": 30,
+      "failures": 0,
+      "p50Ms": 260,
+      "p95Ms": 1169
+    },
+    {
+      "name": "firestore-owned-account",
+      "rows": [
+        {
+          "elapsedMs": 227,
+          "ok": true
+        },
+        {
+          "elapsedMs": 42,
+          "ok": true
+        },
+        {
+          "elapsedMs": 21,
+          "ok": true
+        },
+        {
+          "elapsedMs": 38,
+          "ok": true
+        },
+        {
+          "elapsedMs": 40,
+          "ok": true
+        },
+        {
+          "elapsedMs": 28,
+          "ok": true
+        },
+        {
+          "elapsedMs": 22,
+          "ok": true
+        },
+        {
+          "elapsedMs": 26,
+          "ok": true
+        },
+        {
+          "elapsedMs": 33,
+          "ok": true
+        },
+        {
+          "elapsedMs": 30,
+          "ok": true
+        },
+        {
+          "elapsedMs": 51,
+          "ok": true
+        },
+        {
+          "elapsedMs": 36,
+          "ok": true
+        },
+        {
+          "elapsedMs": 19,
+          "ok": true
+        },
+        {
+          "elapsedMs": 14,
+          "ok": true
+        },
+        {
+          "elapsedMs": 14,
+          "ok": true
+        },
+        {
+          "elapsedMs": 13,
+          "ok": true
+        },
+        {
+          "elapsedMs": 16,
+          "ok": true
+        },
+        {
+          "elapsedMs": 14,
+          "ok": true
+        },
+        {
+          "elapsedMs": 25,
+          "ok": true
+        },
+        {
+          "elapsedMs": 16,
+          "ok": true
+        },
+        {
+          "elapsedMs": 13,
+          "ok": true
+        },
+        {
+          "elapsedMs": 14,
+          "ok": true
+        },
+        {
+          "elapsedMs": 15,
+          "ok": true
+        },
+        {
+          "elapsedMs": 30,
+          "ok": true
+        },
+        {
+          "elapsedMs": 15,
+          "ok": true
+        },
+        {
+          "elapsedMs": 16,
+          "ok": true
+        },
+        {
+          "elapsedMs": 15,
+          "ok": true
+        },
+        {
+          "elapsedMs": 21,
+          "ok": true
+        },
+        {
+          "elapsedMs": 14,
+          "ok": true
+        },
+        {
+          "elapsedMs": 17,
+          "ok": true
+        }
+      ],
+      "samples": 30,
+      "failures": 0,
+      "p50Ms": 19,
+      "p95Ms": 51
+    }
+  ]
+}

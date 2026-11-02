@@ -1,0 +1,20 @@
+{
+  "observedDate": "2026-11-02",
+  "subscription": "Azure for Students",
+  "allowedRegions": [
+    "indiasouthcentral",
+    "koreacentral",
+    "uaenorth",
+    "japaneast",
+    "indonesiacentral"
+  ],
+  "requestedRegionsAllowed": false,
+  "newRegionalResourcesCreated": 0,
+  "regionalTrialSpendUsd": 0,
+  "existingPlan": {
+    "region": "Japan East",
+    "sku": "B1",
+    "instances": 1
+  },
+  "nextCandidate": "Indonesia Central requires user decision after subscription-policy discovery"
+}

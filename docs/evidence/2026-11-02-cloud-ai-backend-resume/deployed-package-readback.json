@@ -1,0 +1,10 @@
+{
+  "method": "Kudu read-only command: packagename.txt and unzip -p deployment-manifest.json",
+  "package": "20261102125309.zip",
+  "manifest": {
+    "sourceCommit": "477417fe7c6b3696a1b766f6e8dd80c01929db70",
+    "aiConfigured": false,
+    "eventSourceDeadlineMs": 10000
+  },
+  "note": "Run-from-ZIP mount is in app worker; SCM wwwroot has hostingstart.html, so the active SitePackages archive was inspected."
+}

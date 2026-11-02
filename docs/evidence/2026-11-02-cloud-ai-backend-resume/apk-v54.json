@@ -1,0 +1,12 @@
+{
+  "sourceCommit": "27cc47e9702f03a881cf586c57c2d38926804a21",
+  "apk": "/home/miku/.codex/worktrees/cloud-ai-backend-resume-20261102/ENMORI/build/cloud-ai-backend-resume-v54/ENMORI-recovery-v54-release.apk",
+  "sha256": "c36478ad4ef75f1ef5efbbc1c3d32502ac2f5cf5173fdacf3d6ecbc259fa6c14",
+  "packageLine": "package: name='com.enmori.app.group' versionCode='54' versionName='1.0.0-recovery20261102' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+  "debuggable": false,
+  "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "permissionsUnchangedFromV53": true,
+  "endpoint": "https://enmori-backend-20261029.azurewebsites.net",
+  "cloudAiEnabled": false,
+  "installedOnPhone": false
+}

@@ -1,0 +1,1069 @@
+{
+  "schemaVersion": "backend_latency_probe_v1",
+  "vantage": "operator-host-not-phone",
+  "startedAt": "2026-11-02T12:56:17.933Z",
+  "base": "https://enmori-backend-20261029.azurewebsites.net",
+  "scenarios": [
+    {
+      "name": "profile",
+      "rows": [
+        {
+          "attempt": 1,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1409
+        },
+        {
+          "attempt": 2,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1066
+        },
+        {
+          "attempt": 3,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 980
+        },
+        {
+          "attempt": 4,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 782
+        },
+        {
+          "attempt": 5,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 871
+        },
+        {
+          "attempt": 6,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 767
+        },
+        {
+          "attempt": 7,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 772
+        },
+        {
+          "attempt": 8,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 702
+        },
+        {
+          "attempt": 9,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 862
+        },
+        {
+          "attempt": 10,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 968
+        },
+        {
+          "attempt": 11,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1928
+        },
+        {
+          "attempt": 12,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 723
+        },
+        {
+          "attempt": 13,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 630
+        },
+        {
+          "attempt": 14,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 707
+        },
+        {
+          "attempt": 15,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 617
+        },
+        {
+          "attempt": 16,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 676
+        },
+        {
+          "attempt": 17,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 660
+        },
+        {
+          "attempt": 18,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 734
+        },
+        {
+          "attempt": 19,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 683
+        },
+        {
+          "attempt": 20,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 760
+        },
+        {
+          "attempt": 21,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 651
+        },
+        {
+          "attempt": 22,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 705
+        },
+        {
+          "attempt": 23,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 839
+        },
+        {
+          "attempt": 24,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 714
+        },
+        {
+          "attempt": 25,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 682
+        },
+        {
+          "attempt": 26,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 684
+        },
+        {
+          "attempt": 27,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 657
+        },
+        {
+          "attempt": 28,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 698
+        },
+        {
+          "attempt": 29,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 634
+        },
+        {
+          "attempt": 30,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 738
+        }
+      ],
+      "summary": {
+        "samples": 30,
+        "p50Ms": 714,
+        "p95Ms": 1409,
+        "failures": 0,
+        "timeouts": 0,
+        "failureRate": 0,
+        "targetMs": 3000,
+        "meetsTarget": true
+      }
+    },
+    {
+      "name": "settings",
+      "rows": [
+        {
+          "attempt": 1,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 749
+        },
+        {
+          "attempt": 2,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 686
+        },
+        {
+          "attempt": 3,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 616
+        },
+        {
+          "attempt": 4,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 703
+        },
+        {
+          "attempt": 5,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 819
+        },
+        {
+          "attempt": 6,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 654
+        },
+        {
+          "attempt": 7,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 734
+        },
+        {
+          "attempt": 8,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 792
+        },
+        {
+          "attempt": 9,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 637
+        },
+        {
+          "attempt": 10,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 681
+        },
+        {
+          "attempt": 11,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 664
+        },
+        {
+          "attempt": 12,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 664
+        },
+        {
+          "attempt": 13,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 632
+        },
+        {
+          "attempt": 14,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 693
+        },
+        {
+          "attempt": 15,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 751
+        },
+        {
+          "attempt": 16,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 867
+        },
+        {
+          "attempt": 17,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 645
+        },
+        {
+          "attempt": 18,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 682
+        },
+        {
+          "attempt": 19,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 719
+        },
+        {
+          "attempt": 20,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 652
+        },
+        {
+          "attempt": 21,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 718
+        },
+        {
+          "attempt": 22,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 644
+        },
+        {
+          "attempt": 23,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 706
+        },
+        {
+          "attempt": 24,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 771
+        },
+        {
+          "attempt": 25,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 634
+        },
+        {
+          "attempt": 26,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 689
+        },
+        {
+          "attempt": 27,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 784
+        },
+        {
+          "attempt": 28,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 847
+        },
+        {
+          "attempt": 29,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 768
+        },
+        {
+          "attempt": 30,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 872
+        }
+      ],
+      "summary": {
+        "samples": 30,
+        "p50Ms": 693,
+        "p95Ms": 867,
+        "failures": 0,
+        "timeouts": 0,
+        "failureRate": 0,
+        "targetMs": 3000,
+        "meetsTarget": true
+      }
+    },
+    {
+      "name": "friends",
+      "rows": [
+        {
+          "attempt": 1,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1417
+        },
+        {
+          "attempt": 2,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1166
+        },
+        {
+          "attempt": 3,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1060
+        },
+        {
+          "attempt": 4,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1035
+        },
+        {
+          "attempt": 5,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1317
+        },
+        {
+          "attempt": 6,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 2386
+        },
+        {
+          "attempt": 7,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1241
+        },
+        {
+          "attempt": 8,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1349
+        },
+        {
+          "attempt": 9,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1168
+        },
+        {
+          "attempt": 10,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1159
+        },
+        {
+          "attempt": 11,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1083
+        },
+        {
+          "attempt": 12,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1361
+        },
+        {
+          "attempt": 13,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 3273
+        },
+        {
+          "attempt": 14,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1286
+        },
+        {
+          "attempt": 15,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1687
+        },
+        {
+          "attempt": 16,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1787
+        },
+        {
+          "attempt": 17,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1565
+        },
+        {
+          "attempt": 18,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1867
+        },
+        {
+          "attempt": 19,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1686
+        },
+        {
+          "attempt": 20,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1534
+        },
+        {
+          "attempt": 21,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1444
+        },
+        {
+          "attempt": 22,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1207
+        },
+        {
+          "attempt": 23,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1166
+        },
+        {
+          "attempt": 24,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1083
+        },
+        {
+          "attempt": 25,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1001
+        },
+        {
+          "attempt": 26,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1142
+        },
+        {
+          "attempt": 27,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1094
+        },
+        {
+          "attempt": 28,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 1059
+        },
+        {
+          "attempt": 29,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 988
+        },
+        {
+          "attempt": 30,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 2600
+        }
+      ],
+      "summary": {
+        "samples": 30,
+        "p50Ms": 1241,
+        "p95Ms": 2600,
+        "failures": 0,
+        "timeouts": 0,
+        "failureRate": 0,
+        "targetMs": 3000,
+        "meetsTarget": true
+      }
+    },
+    {
+      "name": "events",
+      "rows": [
+        {
+          "attempt": 1,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11226,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 2,
+          "status": 0,
+          "timeout": true,
+          "elapsedMs": 15003
+        },
+        {
+          "attempt": 3,
+          "status": 0,
+          "timeout": true,
+          "elapsedMs": 15001
+        },
+        {
+          "attempt": 4,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 5531,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 5,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11297,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 6,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11641,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 7,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11346,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 8,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11488,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 9,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11845,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 10,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 12841,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 11,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 2512,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 12,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11112,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 13,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11217,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 14,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 12263,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 15,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11688,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 16,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11048,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 17,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11180,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 18,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 10979,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 19,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11737,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 20,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11433,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 21,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11377,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 22,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11583,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 23,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11276,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 24,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 3467,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 25,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11204,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 26,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11720,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 27,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 10674,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 28,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 12000,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 29,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11770,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        },
+        {
+          "attempt": 30,
+          "status": 200,
+          "timeout": false,
+          "elapsedMs": 11846,
+          "sourceStatus": [
+            {
+              "provider": "ticketmaster",
+              "available": true
+            },
+            {
+              "provider": "onepa",
+              "available": false
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "samples": 30,
+        "p50Ms": 11377,
+        "p95Ms": 15001,
+        "failures": 2,
+        "timeouts": 2,
+        "failureRate": 0.06666666666666667,
+        "targetMs": 12000,
+        "meetsTarget": false
+      }
+    }
+  ],
+  "finishedAt": "2026-11-02T13:03:16.227Z"
+}

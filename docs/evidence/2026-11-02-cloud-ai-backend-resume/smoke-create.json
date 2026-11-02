@@ -1,0 +1,81 @@
+{
+  "mode": "create",
+  "passed": [
+    {
+      "check": "unauthenticated-profile",
+      "status": 401,
+      "elapsedMs": 1614
+    },
+    {
+      "check": "invalid-token",
+      "status": 401,
+      "elapsedMs": 320
+    },
+    {
+      "check": "onboarding-create-0",
+      "status": 201,
+      "elapsedMs": 7333
+    },
+    {
+      "check": "profile-read-0",
+      "status": 200,
+      "elapsedMs": 620
+    },
+    {
+      "check": "onboarding-create-1",
+      "status": 201,
+      "elapsedMs": 1509
+    },
+    {
+      "check": "profile-read-1",
+      "status": 200,
+      "elapsedMs": 665
+    },
+    {
+      "check": "profile-save",
+      "status": 200,
+      "elapsedMs": 946
+    },
+    {
+      "check": "stale-profile-denied",
+      "status": 412,
+      "elapsedMs": 631
+    },
+    {
+      "check": "second-owner-isolation",
+      "status": 200,
+      "elapsedMs": 558
+    },
+    {
+      "check": "settings-save",
+      "status": 200,
+      "elapsedMs": 641
+    },
+    {
+      "check": "recommendation-profile-read",
+      "status": 200,
+      "elapsedMs": 865
+    },
+    {
+      "check": "friends-read",
+      "status": 200,
+      "elapsedMs": 983
+    },
+    {
+      "check": "private-check-in-create",
+      "status": 201,
+      "elapsedMs": 863
+    },
+    {
+      "check": "private-check-in-read",
+      "status": 200,
+      "elapsedMs": 687
+    },
+    {
+      "check": "cross-owner-check-in-denied",
+      "status": 404,
+      "elapsedMs": 710
+    }
+  ],
+  "completed": true
+}

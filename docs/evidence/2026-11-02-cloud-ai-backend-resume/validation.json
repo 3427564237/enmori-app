@@ -1,0 +1,41 @@
+{
+  "sourceCommit": "27cc47e9702f03a881cf586c57c2d38926804a21",
+  "node": "24.19.0",
+  "flutter": "3.47.2",
+  "backend": {
+    "passed": 1768,
+    "failed": 0
+  },
+  "flutterDirected": {
+    "passed": 178,
+    "failed": 0,
+    "files": [
+      "test/app/account_preferences_flow_test.dart",
+      "test/features/ai_conversation/ai_conversation_page_test.dart",
+      "test/features/ai_conversation/ai_selected_reply_wire_test.dart",
+      "test/features/ai_conversation/cloud_provenance_wire_test.dart",
+      "test/features/auth/registration_validation_test.dart",
+      "test/features/backend_account_preferences_test.dart",
+      "test/features/event_plans_test.dart",
+      "test/features/layout_refinement_test.dart",
+      "test/features/own_profile_shortcuts_test.dart",
+      "test/features/profile_location_flow_test.dart",
+      "test/features/recommendation_profile_usability_test.dart",
+      "test/harness/ai_network_harness_test.dart",
+      "test/harness/social/offline_account_setup_test.dart"
+    ]
+  },
+  "flutterAnalysis": "lib: no issues",
+  "tools": {
+    "passed": 11,
+    "failed": 0
+  },
+  "firebaseEmulator": {
+    "passed": 8,
+    "failed": 0,
+    "project": "demo-enmori-rmvp01a-r10"
+  },
+  "realOpenAiCalls": 0,
+  "physicalPhoneVerified": false,
+  "mainMerged": false
+}

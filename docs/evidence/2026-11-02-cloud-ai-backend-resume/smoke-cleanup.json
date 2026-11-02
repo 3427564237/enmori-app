@@ -1,0 +1,10 @@
+{
+  "mode": "cleanup",
+  "passed": [
+    {
+      "check": "owned-synthetic-records-and-auth-removed",
+      "count": 2
+    }
+  ],
+  "completed": true
+}
