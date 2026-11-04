@@ -519,6 +519,18 @@ void main() {
     },
   );
 
+  testWidgets('chart status selection filters saved plans without a write', (
+    tester,
+  ) async {
+    final repo = PlansRepo()
+      ..facts['b'] = fact('b', status: ParticipationStatus.going);
+    await pumpPlans(tester, repo);
+    await tap(tester, find.byKey(const ValueKey('plans-chart-going')));
+    expect(find.byKey(const ValueKey('plan-a')), findsNothing);
+    expect(find.byKey(const ValueKey('plan-b')), findsOneWidget);
+    expect(repo.writes, isEmpty);
+  });
+
   testWidgets(
     'refresh plans retries failed titles for the current filter without writing participation',
     (tester) async {
@@ -596,6 +608,8 @@ void main() {
       final oldTap = tester.widget<ListTile>(find.byType(ListTile)).onTap!;
       final held = Completer<Result<EventParticipationPage>>();
       repo.pending = held;
+      await tester.ensureVisible(find.text('Refresh plans'));
+      await tester.pump();
       await tester.tap(find.text('Refresh plans'));
       await tester.pump();
       repo.facts.clear();
@@ -617,6 +631,8 @@ void main() {
       await pumpPlans(tester, repo);
       final held = Completer<Result<EventParticipationPage>>();
       repo.pending = held;
+      await tester.ensureVisible(find.text('Refresh plans'));
+      await tester.pump();
       await tester.tap(find.text('Refresh plans'));
       await tester.pump();
       pauseApp(tester);

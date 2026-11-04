@@ -33,6 +33,7 @@ final class EventPlansPage extends ConsumerWidget {
               children: [
                 OwnParticipationSection(
                   showHeading: false,
+                  showInsights: true,
                   onSelect: onOpenEvent,
                 ),
               ],

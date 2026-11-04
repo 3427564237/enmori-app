@@ -51,6 +51,7 @@ final class InterestEditorState {
     this.failure,
     this.validationMessage,
     this.savedSelection,
+    this.savedIds = const {},
   });
 
   final InterestEditorPhase phase;
@@ -60,6 +61,15 @@ final class InterestEditorState {
   final AppFailure? failure;
   final String? validationMessage;
   final InterestSelection? savedSelection;
+  final Set<String> savedIds;
+
+  bool get hasUnsavedChanges =>
+      hasLoaded &&
+      (selectedCount != savedIds.length ||
+          options.any(
+            (option) =>
+                option.isSelected && !savedIds.contains(option.interestTagId),
+          ));
 
   int get selectedCount => options.where((option) => option.isSelected).length;
 
@@ -77,6 +87,7 @@ final class InterestEditorState {
   }) => InterestEditorState(
     phase: phase ?? this.phase,
     options: options ?? this.options,
+    savedIds: savedIds,
     revision: revision ?? this.revision,
     hasLoaded: hasLoaded ?? this.hasLoaded,
     failure: clearFailure ? null : failure ?? this.failure,
@@ -149,6 +160,9 @@ final class InterestEditorController extends Notifier<InterestEditorState> {
       phase: InterestEditorPhase.ready,
       options: _merge(catalogueValue, ownValue),
       revision: ownValue.revision,
+      savedIds: Set.unmodifiable(
+        ownValue.interestTags.map((tag) => tag.interestTagId),
+      ),
       hasLoaded: true,
     );
   }
@@ -243,6 +257,9 @@ final class InterestEditorController extends Notifier<InterestEditorState> {
           revision: value.revision,
           hasLoaded: true,
           savedSelection: value,
+          savedIds: Set.unmodifiable(
+            value.interestTags.map((tag) => tag.interestTagId),
+          ),
         );
       case Failure<InterestSelection>(:final failure):
         state = state.copyWith(

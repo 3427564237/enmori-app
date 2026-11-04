@@ -24,6 +24,7 @@ final class SignInPage extends ConsumerStatefulWidget {
 final class _SignInPageState extends ConsumerState<SignInPage> {
   late final SignInController _controller;
   bool _showPassword = false;
+  bool _submitted = false;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -75,12 +76,16 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                 const SizedBox(height: 24),
                 Form(
                   key: _formKey,
+                  autovalidateMode: _submitted
+                      ? AutovalidateMode.onUserInteraction
+                      : AutovalidateMode.disabled,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       TextFormField(
                         key: const Key('sign-in-email'),
                         controller: _emailController,
+                        enabled: !pending,
                         autofillHints: const [AutofillHints.email],
                         decoration: InputDecoration(
                           labelText: context.tr('Email', "邮箱"),
@@ -99,6 +104,7 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                       TextFormField(
                         key: const Key('sign-in-password'),
                         controller: _passwordController,
+                        enabled: !pending,
                         autofillHints: const [AutofillHints.password],
                         decoration: InputDecoration(
                           suffixIcon: IconButton(
@@ -118,6 +124,7 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
                         ),
                         obscureText: !_showPassword,
                         textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) => _submit(),
                         validator: (value) => (value ?? '').isEmpty
                             ? context.tr('Enter your password.', "请输入密码。")
                             : null,
@@ -180,6 +187,8 @@ final class _SignInPageState extends ConsumerState<SignInPage> {
   }
 
   void _submit() {
+    if (ref.read(signInControllerProvider) is CommandPending<void>) return;
+    setState(() => _submitted = true);
     if (!(_formKey.currentState?.validate() ?? false)) return;
     ref
         .read(signInControllerProvider.notifier)

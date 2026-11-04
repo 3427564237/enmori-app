@@ -188,12 +188,7 @@ class _CheckInHistoryPageState extends ConsumerState<CheckInHistoryPage> {
                           ),
                         ),
                   icon: const Icon(Icons.insights_outlined),
-                  label: Text(
-                    context.tr(
-                      'Review 7 days ending on this date',
-                      '回顾截至所选日期的七天',
-                    ),
-                  ),
+                  label: Text(context.tr('Record charts', '记录图表')),
                 ),
               ),
               Padding(

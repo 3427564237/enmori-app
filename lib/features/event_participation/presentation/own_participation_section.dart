@@ -12,12 +12,14 @@ import '../participation_providers.dart';
 import 'authorized_event_title.dart';
 import 'own_participation_controller.dart';
 import 'participation_controller.dart';
+import 'plan_status_insights.dart';
 
 enum _PlanFilter {
   all('All records'),
   interested('Interested'),
   going('Going'),
-  hidden('Hidden');
+  hidden('Hidden'),
+  none('No current participation');
 
   const _PlanFilter(this.label);
   final String label;
@@ -26,12 +28,14 @@ enum _PlanFilter {
     _PlanFilter.interested => '感兴趣',
     _PlanFilter.going => '将参加',
     _PlanFilter.hidden => '已隐藏',
+    _PlanFilter.none => '当前未参与',
   });
   bool includes(EventParticipation row) => switch (this) {
     _PlanFilter.all => true,
     _PlanFilter.interested => row.status == ParticipationStatus.interested,
     _PlanFilter.going => row.status == ParticipationStatus.going,
     _PlanFilter.hidden => row.ignored,
+    _PlanFilter.none => row.status == ParticipationStatus.none,
   };
 }
 
@@ -41,10 +45,12 @@ final class OwnParticipationSection extends ConsumerStatefulWidget {
   const OwnParticipationSection({
     required this.onSelect,
     this.showHeading = true,
+    this.showInsights = false,
     super.key,
   });
   final ValueChanged<String> onSelect;
   final bool showHeading;
+  final bool showInsights;
   @override
   ConsumerState<OwnParticipationSection> createState() =>
       _OwnParticipationSectionState();
@@ -109,6 +115,25 @@ final class _OwnParticipationSectionState
           ),
           const SizedBox(height: 8),
         ],
+        if (widget.showInsights && state.loaded && _active)
+          PlanStatusInsights(
+            rows: rows,
+            complete: state.nextCursor == null && state.failure == null,
+            refreshing: state.busy,
+            failed: state.failure != null,
+            unconfirmed: rows.any(
+              (row) =>
+                  entries[row.eventId]?.uncertain == true ||
+                  entries[row.eventId]?.busy == true,
+            ),
+            onSelectStatus: (status) => setState(
+              () => _filter = switch (status) {
+                ParticipationStatus.interested => _PlanFilter.interested,
+                ParticipationStatus.going => _PlanFilter.going,
+                ParticipationStatus.none => _PlanFilter.none,
+              },
+            ),
+          ),
         Text(
           context.tr(
             'Your saved choices in ENMORI. Interested and Going do not book a place.',

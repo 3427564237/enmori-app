@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/result/result.dart';
+import '../../auth/auth_providers.dart';
+import '../../auth/domain/auth_repository.dart';
 import '../domain/interest_repository.dart';
 import 'interest_editor_controller.dart';
 
@@ -18,6 +20,9 @@ final class InterestEditorPage extends ConsumerStatefulWidget {
 
 final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
   late final InterestEditorController _controller;
+  bool _allowLeave = false;
+  bool _confirming = false;
+  DialogRoute<bool>? _exitDialog;
 
   @override
   void initState() {
@@ -29,31 +34,64 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
   @override
   void dispose() {
     Future<void>.microtask(() => _controller.abandon(resetState: false));
+    final dialog = _exitDialog;
+    if (dialog != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => dialog.navigator?.removeRoute(dialog),
+      );
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authSessionProvider, (previous, next) {
+      if (!identical(previous?.asData?.value, next.asData?.value)) {
+        final dialog = _exitDialog;
+        _exitDialog = null;
+        _allowLeave = false;
+        final observed = next.asData?.value;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (dialog != null) dialog.navigator?.removeRoute(dialog);
+          if (mounted &&
+              observed is AuthSessionAuthenticated &&
+              identical(
+                observed,
+                ref.read(authSessionProvider).asData?.value,
+              )) {
+            _load();
+          }
+        });
+      }
+    });
     final state = ref.watch(interestEditorControllerProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.tr('Your interests', "我的兴趣")),
-        actions: [
-          if (widget.onSkip != null)
-            TextButton(
-              onPressed: state.phase == InterestEditorPhase.saving
-                  ? null
-                  : widget.onSkip,
-              child: Text(context.tr('Skip for now', "暂时跳过")),
+    final needsConfirmation =
+        state.hasUnsavedChanges || state.phase == InterestEditorPhase.saving;
+    return PopScope<void>(
+      canPop: _allowLeave || !needsConfirmation,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _leave();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(context.tr('Your interests', "我的兴趣")),
+          actions: [
+            if (widget.onSkip != null)
+              TextButton(
+                onPressed: state.phase == InterestEditorPhase.saving
+                    ? null
+                    : () => _leave(widget.onSkip),
+                child: Text(context.tr('Skip for now', "暂时跳过")),
+              ),
+          ],
+        ),
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: _body(state),
             ),
-        ],
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
-            child: _body(state),
           ),
         ),
       ),
@@ -230,6 +268,75 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
         ),
       ],
     );
+  }
+
+  Future<void> _leave([VoidCallback? action]) async {
+    if (_confirming || !mounted) return;
+    final session = ref.read(authSessionProvider).asData?.value;
+    final state = ref.read(interestEditorControllerProvider);
+    if (state.hasUnsavedChanges || state.phase == InterestEditorPhase.saving) {
+      _confirming = true;
+      final saving = state.phase == InterestEditorPhase.saving;
+      final saveSent = saving || state.phase == InterestEditorPhase.failed;
+      final dialog = DialogRoute<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(
+            saving
+                ? context.tr('Leave while saving?', '保存时离开？')
+                : saveSent
+                ? context.tr('Leave after a save attempt?', '保存尝试后离开？')
+                : context.tr('Discard interest changes?', '放弃兴趣修改？'),
+          ),
+          content: Text(
+            saveSent
+                ? context.tr(
+                    'A save has already been sent. Leaving will not cancel it. Check your saved interests when you return.',
+                    '保存请求已经发出，离开不会取消请求。返回后请核对已保存的兴趣。',
+                  )
+                : context.tr(
+                    'Your unsaved selection will be discarded.',
+                    '尚未保存的选择将被放弃。',
+                  ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(context.tr('Keep editing', '继续编辑')),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(
+                saveSent
+                    ? context.tr('Leave', '离开')
+                    : context.tr('Discard', '放弃'),
+              ),
+            ),
+          ],
+        ),
+      );
+      _exitDialog = dialog;
+      final leave = await Navigator.of(context).push(dialog);
+      _exitDialog = null;
+      _confirming = false;
+      if (!mounted || leave != true) return;
+    }
+    if (!mounted ||
+        !identical(session, ref.read(authSessionProvider).asData?.value)) {
+      return;
+    }
+    setState(() => _allowLeave = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted ||
+          !identical(session, ref.read(authSessionProvider).asData?.value)) {
+        return;
+      }
+      if (action != null) {
+        action();
+      } else {
+        Navigator.of(context).maybePop();
+      }
+    });
   }
 
   void _load() {

@@ -231,6 +231,9 @@ class _CheckInEditPageState extends ConsumerState<CheckInEditPage> {
                     'check-in-edit-visibility-${_current.revision}',
                   ),
                   initialValue: _visibility,
+                  isExpanded: true,
+                  isDense: false,
+                  itemHeight: null,
                   decoration: InputDecoration(
                     labelText: context.tr('Visibility', '可见范围'),
                   ),

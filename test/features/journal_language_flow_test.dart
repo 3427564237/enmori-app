@@ -307,6 +307,19 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
+        final visibility = find.byType(
+          DropdownButtonFormField<CheckInVisibility>,
+        );
+        await tester.ensureVisible(visibility);
+        await tester.tap(visibility);
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.text(language == 'zh' ? '仅好友' : 'Friends-only').last,
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        // The longer label remains usable; choosing it alone does not save.
+        expect(repo.record.checkInVisibility, CheckInVisibility.private);
       },
     );
   }

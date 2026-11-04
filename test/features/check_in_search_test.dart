@@ -203,6 +203,9 @@ void main() {
         find.byKey(const Key('weekly-record-a')),
         180,
       );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('weekly-record-a')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('weekly-record-a')));
       await tester.pump();
       expect(opened, 'a');

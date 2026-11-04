@@ -54,6 +54,8 @@ final class _CatalogueEditor extends ConsumerStatefulWidget {
 
 final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
   final _name = TextEditingController();
+  final _search = TextEditingController();
+  int _sort = 0;
   final _nameFocus = FocusNode();
   DialogRoute<bool>? _exitDialog;
   bool _leaving = false;
@@ -75,6 +77,8 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
       final confirmed = next.confirmed!;
       // The verified readback is the only path that clears an entered draft.
       _name.clear();
+      _search.clear();
+      setState(() {});
       widget.onCreated?.call(
         InterestTagOption(
           interestTagId: confirmed.interestTagId,
@@ -102,6 +106,7 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
       });
     }
     _name.dispose();
+    _search.dispose();
     _nameFocus.dispose();
     super.dispose();
   }
@@ -117,6 +122,25 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
         !state.busy &&
         !state.needsReadback &&
         state.phase != AdminInterestPhase.denied;
+    final query = _search.text.trim().toLowerCase();
+    final visible = state.tags
+        .where(
+          (tag) =>
+              tag.displayName.toLowerCase().contains(query) ||
+              tag.interestTagId.toLowerCase().contains(query),
+        )
+        .toList();
+    if (_sort != 0) {
+      visible.sort((a, b) {
+        final byName = a.displayName.toLowerCase().compareTo(
+          b.displayName.toLowerCase(),
+        );
+        final order = byName == 0
+            ? a.interestTagId.compareTo(b.interestTagId)
+            : byName;
+        return _sort == 1 ? order : -order;
+      });
+    }
     return PopScope(
       canPop: _allowPop,
       onPopInvokedWithResult: (didPop, _) {
@@ -126,7 +150,7 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
         key: const Key('admin-interest-page'),
         appBar: AppBar(
           leading: BackButton(onPressed: _back),
-          title: Text(context.tr('Interest catalogue', '兴趣目录')),
+          title: Text(context.tr('Interest administration', '兴趣管理')),
         ),
         body: SafeArea(
           child: Align(
@@ -136,6 +160,26 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
               child: ListView(
                 padding: const EdgeInsets.all(24),
                 children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.admin_panel_settings_outlined, size: 32),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          state.hasLoaded
+                              ? context.tr(
+                                  '${state.tags.length} available interests',
+                                  '${state.tags.length} 项可选兴趣',
+                                )
+                              : context.tr('Catalogue management', '目录管理'),
+                          key: const Key('admin-catalogue-count'),
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                   Text(
                     context.tr('Add an interest', '添加兴趣'),
                     style: Theme.of(context).textTheme.headlineSmall,
@@ -287,14 +331,101 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                         '暂无可用兴趣。',
                       ),
                     )
-                  else
-                    for (final tag in state.tags)
-                      ListTile(
-                        key: Key('admin-interest-tag-${tag.interestTagId}'),
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(tag.displayName),
-                        subtitle: Text('ID: ${tag.interestTagId}'),
+                  else ...[
+                    Text(
+                      context.tr(
+                        'Only currently available interests are listed.',
+                        '仅列出当前可选的兴趣。',
                       ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      key: const Key('admin-catalogue-search'),
+                      controller: _search,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: context.tr('Find an interest', '查找兴趣'),
+                        hintText: context.tr('Name or ID', '名称或 ID'),
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: query.isEmpty
+                            ? null
+                            : IconButton(
+                                tooltip: context.tr('Clear search', '清空搜索'),
+                                onPressed: () => setState(_search.clear),
+                                icon: const Icon(Icons.close),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<int>(
+                      key: const Key('admin-catalogue-sort'),
+                      initialValue: _sort,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: context.tr('Order', '排序'),
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 0,
+                          child: Text(context.tr('Catalogue order', '目录顺序')),
+                        ),
+                        DropdownMenuItem(
+                          value: 1,
+                          child: Text(context.tr('Name A–Z', '名称升序')),
+                        ),
+                        DropdownMenuItem(
+                          value: 2,
+                          child: Text(context.tr('Name Z–A', '名称降序')),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) setState(() => _sort = value);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      context.tr(
+                        '${visible.length} of ${state.tags.length} interests',
+                        '显示 ${visible.length} / ${state.tags.length} 项兴趣',
+                      ),
+                      key: const Key('admin-search-count'),
+                    ),
+                    if (visible.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Text(
+                          context.tr(
+                            'No matching interests. Try another name or clear the search.',
+                            '没有匹配的兴趣，请更换名称或清空搜索。',
+                          ),
+                          key: const Key('admin-search-empty'),
+                        ),
+                      ),
+                    for (final tag in visible)
+                      ExpansionTile(
+                        key: Key('admin-interest-tag-${tag.interestTagId}'),
+                        tilePadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.label_outline),
+                        title: Text(tag.displayName),
+                        subtitle: Text(
+                          context.tr(
+                            'Available · tap for details',
+                            '可选 · 点击查看详情',
+                          ),
+                        ),
+                        childrenPadding: const EdgeInsets.only(bottom: 16),
+                        expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SelectableText('ID: ${tag.interestTagId}'),
+                          Text(
+                            context.tr(
+                              'Members can select this interest from the catalogue.',
+                              '用户可以在兴趣目录中选择此项。',
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
                 ],
               ),
             ),

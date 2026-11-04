@@ -75,6 +75,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('register-sign-in')));
     await tester.pumpAndSettle();
+    expect(find.text('Leave registration?'), findsOneWidget);
+    await tester.tap(find.text('Discard details'));
+    await tester.pumpAndSettle();
     expect(find.byKey(const Key('route-sign-in')), findsOneWidget);
   });
 
