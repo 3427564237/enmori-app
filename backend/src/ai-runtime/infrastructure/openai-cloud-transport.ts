@@ -27,6 +27,22 @@ export interface OpenAiUsage {
   readonly totalTokens: number;
 }
 
+type OpenAiUsageRejection = 'usage-missing' | 'usage-breakdown-invalid' | 'usage-cache-write-count-missing' |
+  'usage-count-invalid' | 'usage-input-over-bound' | 'usage-output-over-bound' | 'usage-totals-invalid';
+type OpenAiRejectionReason = OpenAiUsageRejection | 'receive-cancelled-or-expired' | 'admission-unavailable' |
+  'http-status-rejected' | 'http-response-invalid' | 'transport-or-decode-failed' | 'response-envelope-invalid' |
+  'response-model-mismatch' | 'response-not-terminal' | 'service-tier-invalid' | 'storage-echo-invalid' |
+  'background-echo-invalid' | 'hosted-tool-usage-present' | 'response-output-kind-invalid' |
+  'usage-settlement-unconfirmed' | 'terminal-response-not-deliverable' | 'response-output-invalid';
+type ReportedTokenCounts = Partial<Omit<OpenAiUsage, 'provider' | 'model'>>;
+
+export interface OpenAiRejectionDiagnostic {
+  readonly reason: OpenAiRejectionReason;
+  /** Individual numeric fields observed in the envelope, before settlement. */
+  readonly reportedTokenCounts?: Readonly<ReportedTokenCounts>;
+  readonly hostedToolUsageShape?: 'empty' | 'zero' | 'nonzero' | 'unrecognized';
+}
+
 export interface OpenAiDispatchControls {
   /** Verified bound for this exact Responses body, including schema/framing.
    * No tokenizer, byte estimate, credential or permissive default is supplied. */
@@ -40,6 +56,8 @@ export interface OpenAiDispatchControls {
    * An unknown result retains that reservation and must close budget admission.
    * A confirmed invalid/refused output is still billable. */
   confirmUsage(usage: Readonly<OpenAiUsage>): Promise<'confirmed' | 'unknown'>;
+  /** Optional synthetic-evaluation observation. No provider strings or IDs. */
+  observeRejection?(diagnostic: Readonly<OpenAiRejectionDiagnostic>): void;
 }
 
 export const openAiResponsesEndpoint = 'https://api.openai.com/v1/responses';
@@ -50,6 +68,48 @@ const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v ===
 const count = (v: unknown): v is number => Number.isSafeInteger(v) && (v as number) >= 0;
 const within = (v: unknown, min: number, max: number): v is number => count(v) && v >= min && v <= max;
 const keysWithin = (value: Record<string, unknown>, keys: readonly string[]): boolean => Object.keys(value).every(key => keys.includes(key));
+
+function usageFields(value: Record<string, unknown>) {
+  const input = record(value.input_tokens_details) ? value.input_tokens_details : undefined;
+  const output = record(value.output_tokens_details) ? value.output_tokens_details : undefined;
+  return { inputTokens: value.input_tokens, cachedInputTokens: input?.cached_tokens,
+    cacheWriteTokens: input?.cache_write_tokens, outputTokens: value.output_tokens,
+    reasoningTokens: output?.reasoning_tokens, totalTokens: value.total_tokens };
+}
+
+function hostedToolUsageShape(value: unknown): NonNullable<OpenAiRejectionDiagnostic['hostedToolUsageShape']> {
+  if (!record(value) || !keysWithin(value, ['image_gen', 'web_search'])) return 'unrecognized';
+  if (Object.keys(value).length === 0) return 'empty';
+  const counts: number[] = [];
+  if (Object.hasOwn(value, 'web_search')) {
+    const web = value.web_search;
+    if (!record(web) || !keysWithin(web, ['num_requests']) || !count(web.num_requests)) return 'unrecognized';
+    counts.push(web.num_requests);
+  }
+  if (Object.hasOwn(value, 'image_gen')) {
+    const image = value.image_gen;
+    if (!record(image) || !keysWithin(image, ['input_tokens', 'output_tokens', 'total_tokens', 'cached_tokens',
+      'input_tokens_details', 'output_tokens_details', 'cached_tokens_details']) ||
+      !count(image.input_tokens) || !count(image.output_tokens) || !count(image.total_tokens)) return 'unrecognized';
+    counts.push(image.input_tokens, image.output_tokens, image.total_tokens);
+    if (image.cached_tokens !== undefined) {
+      if (!count(image.cached_tokens)) return 'unrecognized';
+      counts.push(image.cached_tokens);
+    }
+    for (const [details, keys] of [[image.input_tokens_details, ['image_tokens', 'text_tokens']],
+      [image.output_tokens_details, ['image_tokens', 'text_tokens']],
+      [image.cached_tokens_details, ['cached_image_tokens', 'cached_text_tokens']]] as const) {
+      if (details == null) continue;
+      if (!record(details) || !keysWithin(details, keys)) return 'unrecognized';
+      for (const key of keys) {
+        const tokens = details[key];
+        if (!count(tokens)) return 'unrecognized';
+        counts.push(tokens);
+      }
+    }
+  }
+  return counts.some(tokens => tokens > 0) ? 'nonzero' : 'zero';
+}
 
 function validConfiguration(config: OpenAiTransportConfiguration): boolean {
   return !!config && ['gpt-6-luna', 'gpt-6.1-sol'].includes(config.model) && config.reasoningEffort === 'low' &&
@@ -172,17 +232,30 @@ export class OpenAiCloudTransport implements CloudGenerationTransport<readonly O
     return { body, inputBound };
   }
 
-  private usage(value: unknown, inputBound: number): Readonly<OpenAiUsage> | undefined {
-    if (!record(value) || !record(value.input_tokens_details) || !record(value.output_tokens_details)) return;
-    const input = value.input_tokens, cached = value.input_tokens_details.cached_tokens,
-      writes = value.input_tokens_details.cache_write_tokens, output = value.output_tokens,
-      reasoning = value.output_tokens_details.reasoning_tokens, total = value.total_tokens;
-    if (!count(input) || !count(cached) || !count(writes) || !count(output) || !count(reasoning) || !count(total) ||
-        input > inputBound || input > this.config.maxInputTokens || output > this.config.maxOutputTokens ||
-        cached + writes > input || reasoning > output || total !== input + output ||
-        total > this.reservedTokens) return;
+  private usage(value: unknown, inputBound: number): Readonly<OpenAiUsage> | OpenAiUsageRejection {
+    if (!record(value)) return 'usage-missing';
+    if (!record(value.input_tokens_details) || !record(value.output_tokens_details)) return 'usage-breakdown-invalid';
+    const { inputTokens: input, cachedInputTokens: cached, cacheWriteTokens: writes, outputTokens: output,
+      reasoningTokens: reasoning, totalTokens: total } = usageFields(value);
+    if (writes === undefined) return 'usage-cache-write-count-missing';
+    if (!count(input) || !count(cached) || !count(writes) || !count(output) || !count(reasoning) || !count(total)) return 'usage-count-invalid';
+    if (input > inputBound || input > this.config.maxInputTokens) return 'usage-input-over-bound';
+    if (output > this.config.maxOutputTokens) return 'usage-output-over-bound';
+    if (cached + writes > input || reasoning > output || total !== input + output || total > this.reservedTokens) return 'usage-totals-invalid';
     return Object.freeze({ provider: 'openai', model: this.config.model, inputTokens: input,
       cachedInputTokens: cached, cacheWriteTokens: writes, outputTokens: output, reasoningTokens: reasoning, totalTokens: total });
+  }
+
+  private observeRejection(reason: OpenAiRejectionReason, usage: unknown, toolUsage: unknown): void {
+    try {
+      if (!this.controls.observeRejection) return;
+      const fields = record(usage) ? Object.entries(usageFields(usage)).filter(([, value]) => count(value)) : [];
+      this.controls.observeRejection(Object.freeze({ reason,
+        ...(reason === 'hosted-tool-usage-present' ? { hostedToolUsageShape: hostedToolUsageShape(toolUsage) } : {}),
+        ...(fields.length > 0 ? {
+        reportedTokenCounts: Object.freeze(Object.fromEntries(fields)),
+      } : {}) }));
+    } catch { /* Diagnostic observers cannot change dispatch, settlement or delivery. */ }
   }
 
   /** Only one complete assistant output_text. Recognized reasoning metadata is
@@ -229,7 +302,7 @@ export class OpenAiCloudTransport implements CloudGenerationTransport<readonly O
     let ended = false;
     let complete!: (value: CloudGenerationObservation) => void;
     const result = new Promise<CloudGenerationObservation>(resolve => { complete = resolve; });
-    const finish = (observation: CloudGenerationObservation) => {
+    const finish = (observation: CloudGenerationObservation, reason?: OpenAiRejectionReason, usage?: unknown, toolUsage?: unknown) => {
       if (ended) return;
       ended = true;
       try { closeTimer?.(); } catch { /* Cleanup cannot expose injected errors. */ }
@@ -239,13 +312,16 @@ export class OpenAiCloudTransport implements CloudGenerationTransport<readonly O
         if (reader) void reader.cancel().catch(() => {});
       }
       complete(observation);
+      if (reason) this.observeRejection(reason, usage, toolUsage);
     };
-    const cancel = () => finish(unknown());
+    const cancel = () => finish(unknown(), 'receive-cancelled-or-expired');
     budget.signal.addEventListener('abort', cancel, { once: true });
     try {
       const now = this.clock.now();
       closeTimer = this.clock.at(Math.min(budget.deadline, now + budget.remainingMs(), now + 120000), cancel);
-      if (!this.live(budget) || ended || this.controls.available() !== true || !this.live(budget) || ended) { cancel(); return result; }
+      if (!this.live(budget) || ended || this.controls.available() !== true || !this.live(budget) || ended) {
+        finish(unknown(), 'admission-unavailable'); return result;
+      }
       // No asynchronous gap between the final original-budget guard and HTTP.
       const pending = this.http(openAiResponsesEndpoint, { method: 'POST', redirect: 'error', cache: 'no-store',
         signal: receive.signal, headers: { 'content-type': 'application/json', authorization: `Bearer ${this.#key}` },
@@ -255,11 +331,14 @@ export class OpenAiCloudTransport implements CloudGenerationTransport<readonly O
           const response = await pending;
           if (ended) { if (response.body) void response.body.cancel().catch(() => {}); return; }
           if (response.status === 429) await this.controls.rateLimited(retryAfter(response));
-          if (ended || !this.live(budget) || response.status !== 200 || !response.body ||
+          const receiving = !ended && this.live(budget);
+          if (!receiving || response.status !== 200 || !response.body ||
               response.redirected || response.url && response.url !== openAiResponsesEndpoint ||
               !/^application\/json(?:\s*;|$)/i.test(response.headers.get('content-type') ?? '')) {
             if (response.body) void response.body.cancel().catch(() => {});
-            cancel(); return;
+            finish(unknown(), !receiving ? 'receive-cancelled-or-expired'
+              : response.status !== 200 ? 'http-status-rejected' : 'http-response-invalid');
+            return;
           }
           reader = response.body.getReader();
           const decoder = new TextDecoder('utf-8', { fatal: true });
@@ -276,29 +355,40 @@ export class OpenAiCloudTransport implements CloudGenerationTransport<readonly O
           reader.releaseLock(); reader = undefined;
           if (!this.live(budget)) { cancel(); return; }
           const value: unknown = parseUnambiguousJson(text);
-          if (!record(value) || value.object !== 'response' || value.model !== this.config.model ||
-              typeof value.id !== 'string' || !value.id || !['completed', 'failed', 'cancelled', 'incomplete'].includes(value.status as string)) {
-            cancel(); return;
+          if (!record(value) || value.object !== 'response' || typeof value.id !== 'string' || !value.id) {
+            finish(unknown(), 'response-envelope-invalid'); return;
+          }
+          if (value.model !== this.config.model) { finish(unknown(), 'response-model-mismatch'); return; }
+          if (!['completed', 'failed', 'cancelled', 'incomplete'].includes(value.status as string)) {
+            finish(unknown(), 'response-not-terminal'); return;
           }
           // A complete terminal provider envelope proves stop, not deliverability
           // or permission to reduce an unknown monetary reservation.
+          const reject = (reason: OpenAiRejectionReason) => finish(stopped(), reason, value.usage, value.tool_usage);
+          if (value.service_tier !== 'default') { reject('service-tier-invalid'); return; }
+          if (value.store !== undefined && value.store !== false) { reject('storage-echo-invalid'); return; }
+          if (value.background !== undefined && value.background !== false) { reject('background-echo-invalid'); return; }
+          if (value.tool_usage != null) { reject('hosted-tool-usage-present'); return; }
           const usage = this.usage(value.usage, prepared.inputBound);
-          if (value.service_tier !== 'default' || (value.store !== undefined && value.store !== false) ||
-              (value.background !== undefined && value.background !== false) ||
-              value.tool_usage != null || !usage || !Array.isArray(value.output) || value.output.some(
-                (item: unknown) => !record(item) || !['message', 'reasoning'].includes(item.type as string))) { finish(stopped()); return; }
+          if (typeof usage === 'string') { reject(usage); return; }
+          if (!Array.isArray(value.output) || value.output.some(
+            (item: unknown) => !record(item) || !['message', 'reasoning'].includes(item.type as string))) {
+            reject('response-output-kind-invalid'); return;
+          }
           let confirmed = false;
           try { confirmed = await this.controls.confirmUsage(usage) === 'confirmed'; } catch { /* Retain reservation. */ }
           if (ended) return;
           if (!this.live(budget)) { cancel(); return; }
-          if (!confirmed || value.status !== 'completed' || value.error !== null || value.incomplete_details !== null) {
-            finish(stopped()); return;
+          if (!confirmed) { reject('usage-settlement-unconfirmed'); return; }
+          if (value.status !== 'completed' || value.error !== null || value.incomplete_details !== null) {
+            reject('terminal-response-not-deliverable'); return;
           }
           const raw = this.candidate(value.output);
-          finish(raw ? { kind: 'response', physical: 'stopped', raw } : stopped());
-        } catch { cancel(); }
+          if (raw) finish({ kind: 'response', physical: 'stopped', raw });
+          else reject('response-output-invalid');
+        } catch { finish(unknown(), 'transport-or-decode-failed'); }
       })();
-    } catch { cancel(); }
+    } catch { finish(unknown(), 'transport-or-decode-failed'); }
     return result;
   }
 }

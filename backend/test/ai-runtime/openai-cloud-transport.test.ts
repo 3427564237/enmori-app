@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { OpenAiCloudTransport, buildOpenAiRequest, assertOpenAiTransportSettings, openAiResponsesEndpoint, type OpenAiDispatchControls,
-  type OpenAiMessage, type OpenAiTransportConfiguration, type OpenAiUsage } from '../../src/ai-runtime/infrastructure/openai-cloud-transport.js';
+  type OpenAiMessage, type OpenAiRejectionDiagnostic, type OpenAiTransportConfiguration, type OpenAiUsage }
+  from '../../src/ai-runtime/infrastructure/openai-cloud-transport.js';
 import { OpenAiChatTransport } from '../../src/ai-runtime/infrastructure/openai-chat-transport.js';
 import { buildChatMessages } from '../../src/ai-runtime/infrastructure/local-chat-transport.js';
 import type { ConversationInput } from '../../src/ai-conversation/ports/conversation-lifecycle.js';
@@ -259,10 +260,60 @@ test('unexpected billing tier, storage mode, background mode, tools or hosted-to
   }
 });
 
+test('optional rejection diagnostics separate usage and envelope failures without retaining provider strings', async () => {
+  const { model: _model, provider: _provider, ...reportedTokenCounts } = expectedUsage;
+  const cases = [
+    { delta: { model: key }, reason: 'response-model-mismatch', observation: unknown },
+    { delta: { service_tier: key }, reason: 'service-tier-invalid', reportedTokenCounts },
+    { delta: { store: true }, reason: 'storage-echo-invalid', reportedTokenCounts },
+    { delta: { background: true }, reason: 'background-echo-invalid', reportedTokenCounts },
+    { delta: { usage: { ...usage(), input_tokens: 101 } }, reason: 'usage-input-over-bound',
+      reportedTokenCounts: { ...reportedTokenCounts, inputTokens: 101 } },
+    { delta: { usage: { ...usage(), input_tokens_details: { cached_tokens: 20, unknown: key } } }, reason: 'usage-cache-write-count-missing',
+      reportedTokenCounts: { inputTokens: 100, cachedInputTokens: 20, outputTokens: 200, reasoningTokens: 100, totalTokens: 300 } },
+    { delta: { usage: { ...usage(), input_tokens: key } }, reason: 'usage-count-invalid',
+      reportedTokenCounts: { cachedInputTokens: 20, cacheWriteTokens: 30, outputTokens: 200, reasoningTokens: 100, totalTokens: 300 } },
+  ];
+  for (const { delta, reason, reportedTokenCounts: counts, observation = failure } of cases) {
+    const diagnostics: OpenAiRejectionDiagnostic[] = [];
+    const f = fixture(async () => Response.json(envelope({ ...delta, id: key })), {
+      observeRejection: diagnostic => { diagnostics.push(diagnostic); throw Error(key); },
+    });
+    assert.deepEqual(await f.transport.dispatch(messages, f.budget), observation);
+    assert.deepEqual(diagnostics, [{ reason, ...(counts ? { reportedTokenCounts: counts } : {}) }]);
+    assert.equal(f.confirmed.length, 0);
+    assert(!JSON.stringify(diagnostics).includes(key));
+  }
+});
+
+test('hosted-tool diagnostics distinguish recognized zero summaries without allowing them', async () => {
+  const allZero = { image_gen: { input_tokens: 0, output_tokens: 0, total_tokens: 0, cached_tokens: 0,
+    input_tokens_details: { image_tokens: 0, text_tokens: 0 },
+    output_tokens_details: { image_tokens: 0, text_tokens: 0 },
+    cached_tokens_details: { cached_image_tokens: 0, cached_text_tokens: 0 } }, web_search: { num_requests: 0 } };
+  const variants = [[{}, 'empty'], [allZero, 'zero'], [{ web_search: { num_requests: 1 } }, 'nonzero'],
+    [{ web_search: { num_requests: key } }, 'unrecognized'], [{ [key]: 0 }, 'unrecognized']] as const;
+  for (const [tool_usage, shape] of variants) {
+    const diagnostics: OpenAiRejectionDiagnostic[] = [];
+    const f = fixture(async () => Response.json(envelope({ tool_usage })), {
+      observeRejection: diagnostic => { diagnostics.push(diagnostic); },
+    });
+    assert.deepEqual(await f.transport.dispatch(messages, f.budget), failure);
+    assert.equal(f.confirmed.length, 0);
+    assert.equal(diagnostics.length, 1);
+    assert.equal(diagnostics[0]?.reason, 'hosted-tool-usage-present');
+    assert.equal(diagnostics[0]?.hostedToolUsageShape, shape);
+    assert(!JSON.stringify(diagnostics).includes(key));
+  }
+});
+
 test('usage confirmation is required before delivery; rejected or thrown accounting remains closed', async () => {
   for (const confirmUsage of [async () => 'unknown' as const, async () => { throw Error(key); }]) {
-    const f = fixture(undefined, { confirmUsage });
+    const diagnostics: OpenAiRejectionDiagnostic[] = [];
+    const f = fixture(undefined, { confirmUsage, observeRejection: diagnostic => { diagnostics.push(diagnostic); } });
     assert.deepEqual(await f.transport.dispatch(messages, f.budget), failure);
+    assert.equal(diagnostics[0]?.reason, 'usage-settlement-unconfirmed');
+    assert.equal(diagnostics[0]?.reportedTokenCounts?.inputTokens, 100);
   }
   const pending = deferred<'confirmed' | 'unknown'>(); let confirmed = 0;
   const f = fixture(undefined, { confirmUsage: async () => { confirmed++; return pending.promise; } });

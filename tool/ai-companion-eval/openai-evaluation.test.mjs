@@ -155,6 +155,22 @@ test('rate reservation precedes monetary reservation and a 429 stops after persi
   assert.equal(f.actions.filter(([type]) => type === 'settle').length, 0);
 });
 
+test('unsettled diagnostic counters remain separate from confirmed usage and provider content', async () => {
+  const f = await fixture(async () => Response.json({ id: key, object: 'response', model: 'gpt-6-luna',
+    status: 'completed', service_tier: 'default', store: false, background: false, error: null, incomplete_details: null,
+    usage: { input_tokens: 100, output_tokens: 20, total_tokens: 120,
+      input_tokens_details: { cached_tokens: 0 }, output_tokens_details: { reasoning_tokens: 0 }, private: key },
+    output: [{ type: 'message', content: key }] }));
+  const report = await runOpenAiEvaluation(f.args);
+  const observation = report.rows[0].observation;
+  assert.deepEqual(observation.rejectionDiagnostic, { reason: 'usage-cache-write-count-missing',
+    reportedTokenCounts: { inputTokens: 100, cachedInputTokens: 0, outputTokens: 20, reasoningTokens: 0, totalTokens: 120 } });
+  assert.equal(observation.usage, undefined);
+  assert.equal(observation.rawText, undefined);
+  assert(!JSON.stringify([...f.writes.values()]).includes(key));
+  assert.equal(f.actions.filter(([type]) => type === 'settle').length, 0);
+});
+
 test('24 mock responses stay unreviewed and never become semantic acceptance', async () => {
   const f = await fixture(async () => Response.json({ id: 'resp_synthetic', object: 'response', model: 'gpt-6-luna',
     status: 'completed', service_tier: 'default', store: false, background: false, error: null, incomplete_details: null,
