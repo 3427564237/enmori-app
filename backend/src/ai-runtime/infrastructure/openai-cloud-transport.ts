@@ -368,7 +368,11 @@ export class OpenAiCloudTransport implements CloudGenerationTransport<readonly O
           if (value.service_tier !== 'default') { reject('service-tier-invalid'); return; }
           if (value.store !== undefined && value.store !== false) { reject('storage-echo-invalid'); return; }
           if (value.background !== undefined && value.background !== false) { reject('background-echo-invalid'); return; }
-          if (value.tool_usage != null) { reject('hosted-tool-usage-present'); return; }
+          // Responses may include documented zero-count hosted-tool summaries
+          // for requests that used no tools. Unknown or nonzero usage stays closed.
+          if (value.tool_usage != null && hostedToolUsageShape(value.tool_usage) !== 'zero') {
+            reject('hosted-tool-usage-present'); return;
+          }
           const usage = this.usage(value.usage, prepared.inputBound);
           if (typeof usage === 'string') { reject(usage); return; }
           if (!Array.isArray(value.output) || value.output.some(

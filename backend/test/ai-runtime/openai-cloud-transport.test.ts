@@ -286,13 +286,26 @@ test('optional rejection diagnostics separate usage and envelope failures withou
   }
 });
 
-test('hosted-tool diagnostics distinguish recognized zero summaries without allowing them', async () => {
+test('documented zero hosted-tool summaries still require output and confirmed base usage', async () => {
   const allZero = { image_gen: { input_tokens: 0, output_tokens: 0, total_tokens: 0, cached_tokens: 0,
     input_tokens_details: { image_tokens: 0, text_tokens: 0 },
     output_tokens_details: { image_tokens: 0, text_tokens: 0 },
     cached_tokens_details: { cached_image_tokens: 0, cached_text_tokens: 0 } }, web_search: { num_requests: 0 } };
-  const variants = [[{}, 'empty'], [allZero, 'zero'], [{ web_search: { num_requests: 1 } }, 'nonzero'],
-    [{ web_search: { num_requests: key } }, 'unrecognized'], [{ [key]: 0 }, 'unrecognized']] as const;
+  const f = fixture(async () => Response.json(envelope({ tool_usage: allZero })));
+  assert.equal((await f.transport.dispatch(messages, f.budget)).kind, 'response');
+  assert.deepEqual(f.confirmed, [expectedUsage]);
+  for (const delta of [{ usage: undefined }, { output: [{ type: 'web_search_call' }] }]) {
+    const rejected = fixture(async () => Response.json(envelope({ tool_usage: allZero, ...delta })));
+    assert.deepEqual(await rejected.transport.dispatch(messages, rejected.budget), failure);
+    assert.equal(rejected.confirmed.length, 0);
+  }
+});
+
+test('empty, nonzero or unrecognized hosted-tool usage cannot reconcile or deliver', async () => {
+  const variants = [[{}, 'empty'], [{ web_search: { num_requests: 1 } }, 'nonzero'],
+    [{ web_search: {} }, 'unrecognized'], [{ web_search: { num_requests: key } }, 'unrecognized'],
+    [{ image_gen: { input_tokens: 0, output_tokens: 0, total_tokens: 0,
+      input_tokens_details: { image_tokens: 0 } } }, 'unrecognized'], [{ [key]: 0 }, 'unrecognized']] as const;
   for (const [tool_usage, shape] of variants) {
     const diagnostics: OpenAiRejectionDiagnostic[] = [];
     const f = fixture(async () => Response.json(envelope({ tool_usage })), {

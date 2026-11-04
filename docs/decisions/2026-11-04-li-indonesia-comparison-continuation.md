@@ -32,3 +32,23 @@ runtime ownership must be verified before dispatch. Project permission alone is
 not proof of successful model access. Existing Groq consent does not authorize
 OpenAI; semantic review precedes test-app activation. This decision does not claim
 model, phone, UAT or release acceptance.
+
+## Bounded verification after a demonstrated adapter defect
+
+The approved plan includes failed calls and retries in the same fixed monetary
+budget and prohibits blind resubmission. The first Luna evaluation stopped after
+one terminal HTTP 200 without confirmed usage. A separately claimed, previously
+unattempted second original case demonstrated that the adapter rejects a
+documented hosted-tool summary whose reported counts are all zero. Both failed
+results and their worst-case reservations remain permanent evidence.
+
+Within the already approved repair and verification scope, the execution is
+bounded to one corrected full 24-case Luna run after a minimal compatibility fix
+and independent review. This is an implementation verification step following a
+demonstrated defect, not a new PM product decision or prompt experiment. Keep
+the original prompts and rubric, fresh attempt identifiers, separate single-use
+run claims, the original US$3.40 grant and both previous US$0.002048 reservations.
+Never overwrite or replenish the monetary ledger, reuse a dispatched capability,
+or relabel either earlier failure as a pass. No additional Luna correction pass
+is authorized by this execution detail. The original independently reviewed
+quality gate still controls whether Sol evaluation or test-app adoption follows.
