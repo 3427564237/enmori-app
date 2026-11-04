@@ -1,6 +1,7 @@
 import { legacyBrowse } from "../../src/event-browse/transport/legacy-browse.js";
 import test from "node:test";
 import assert from "node:assert/strict";
+import { setImmediate } from "node:timers/promises";
 import {
   projectOnePa,
   onePaInstant,
@@ -458,4 +459,29 @@ test("onePA public-list input stays bounded, rejects duplicate identities and do
     },
   );
   await assert.rejects(source.firstBatch(asOf, new AbortController().signal));
+});
+
+test("onePA follow-up lists fail promptly while an aborted catalogue reader cleans up", async () => {
+  const product = payload().props.pageProps.page.layout.sitecore.route.fields.currentProduct.value;
+  const closing = Promise.withResolvers<readonly { product: unknown; url: string }[]>();
+  let reads = 0;
+  const source = new OnePaBrowseSource(
+    () => true,
+    async () => { throw Error("no detail read"); },
+    async () => ++reads === 1 ? closing.promise : [{ product, url }],
+  );
+  const owner = new AbortController();
+  const first = assert.rejects(source.firstBatch(asOf, owner.signal));
+  owner.abort();
+  const followUp = assert.rejects(source.firstBatch(asOf, new AbortController().signal));
+  try {
+    assert.equal(await Promise.race([followUp.then(() => "rejected"), setImmediate("waiting")]), "rejected");
+    assert.equal(reads, 1);
+  } finally {
+    closing.resolve([{ product, url }]);
+    await Promise.all([first, followUp]);
+  }
+  const recovered = await source.firstBatch(asOf, new AbortController().signal);
+  assert.equal(recovered[0]?.externalSourceUrl, url);
+  assert.equal(reads, 2);
 });

@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import {get} from "node:http";
 import test from "node:test";
+import {setImmediate} from "node:timers/promises";
 import Fastify from "fastify";
 import {browseId,decodeBrowseId,projectOccurrence,sourceUrl} from "../../src/event-browse/domain/browse-values.js";
 import {TicketmasterBrowseSource} from "../../src/event-browse/infrastructure/ticketmaster-browse-source.js";
@@ -106,6 +108,46 @@ test("two feature-local routes authenticate before reading, no-store, unknown in
   const r=await app.inject({url:"/v1/event-browse",headers});assert.equal(r.statusCode,200);assert.equal(r.headers["cache-control"],"no-store");assert.equal(r.json().items.length,1);
   assert.equal((await app.inject({url:`/v1/event-browse/${locator}`,headers})).statusCode,200);
   assert.equal((await app.inject({url:"/v1/event-browse/invalid",headers})).statusCode,404);
+});
+
+test("a disconnect during authentication starts no account or provider read", {timeout: 5000}, async t => {
+  const app = Fastify();
+  app.decorateRequest("authPrincipal", null);
+  const authenticating = Promise.withResolvers<void>();
+  const authRelease = Promise.withResolvers<void>();
+  const responseClosed = Promise.withResolvers<void>();
+  t.after(async () => {
+    authRelease.resolve();
+    await app.close();
+  });
+  app.addHook("onRequest", async (_request, reply) => {
+    reply.raw.once("close", responseClosed.resolve);
+  });
+  let accountReads = 0;
+  let providerReads = 0;
+  const useCase = new EventBrowse({
+    verify: async () => { accountReads++; return ok(undefined); },
+  }, {
+    firstBatch: async () => { providerReads++; return []; },
+    detail: async () => undefined,
+  });
+  await registerEventBrowseRoutes(app, {
+    verifyIdToken: async () => {
+      authenticating.resolve();
+      await authRelease.promise;
+      return {kind: "verified", principal: {firebaseUid: "synthetic"}};
+    },
+  }, useCase);
+  const address = await app.listen({host: "127.0.0.1", port: 0});
+  const request = get(new URL("/v1/event-browse", address), {headers: {authorization: "Bearer synthetic"}});
+  request.on("error", () => {}); // The client intentionally closes the socket.
+  await authenticating.promise;
+  request.destroy();
+  await responseClosed.promise;
+  authRelease.resolve();
+  await setImmediate();
+  assert.equal(accountReads, 0);
+  assert.equal(providerReads, 0);
 });
 
 // Real provider counterexample: fractional UTC query values return HTTP400.

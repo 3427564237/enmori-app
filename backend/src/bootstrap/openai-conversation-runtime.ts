@@ -11,13 +11,18 @@ import type { CloudAdmissionLimits, CloudGenerationObservation, CloudGenerationT
   from '../ai-runtime/ports/cloud-generation-transport.js';
 import type { RuntimeClock } from '../ai-runtime/ports/runtime-clock.js';
 
+export interface OpenAiRateAuthority extends CloudRecoveryAuthority {
+  readonly quotaIdentity: Readonly<{ provider: 'openai' | 'groq'; model: string }>;
+  dispatchAllowed(lease: object): boolean;
+  blockRateLimit(retryAfterSeconds: number | undefined): Promise<void>;
+}
+
 export interface OpenAiConversationRuntimeOptions {
   readonly clock: RuntimeClock;
   /** The SAME monetary owner must serve evaluation, chat, Persona and proactive work. */
   readonly costBudget: CloudCostBudgetOwner;
-  /** Verified OpenAI account/model quota, not the Groq-specific Firestore adapter.
-   * This composition additionally requires its final dispatchAllowed guard. */
-  readonly rateAuthority: CloudRecoveryAuthority;
+  /** Verified OpenAI account/model quota, bound to the configured model. */
+  readonly rateAuthority: OpenAiRateAuthority;
   readonly rateLimits: CloudAdmissionLimits;
   readonly ownsHost: () => boolean;
   readonly apiKey: string;
@@ -26,8 +31,6 @@ export interface OpenAiConversationRuntimeOptions {
   readonly cloudConsent: CloudConversationConsent;
   readonly randomAttemptId: () => string;
   readonly http: typeof fetch;
-  /** Persist provider cooldown in the same supplied rate authority. */
-  readonly rateLimited: (retryAfterSeconds: number | undefined) => Promise<void>;
 }
 
 const unknown = (): CloudGenerationObservation => ({ kind: 'unknown', physical: 'unknown' });
@@ -35,15 +38,16 @@ const unknown = (): CloudGenerationObservation => ({ kind: 'unknown', physical: 
 /** Explicit, closed Conversation construction only. No env, credential lookup,
  * store initialization, recovery, route, worker or real network defaults.
  * Recover the already-verified shared monetary owner before owner.recover().
- * Actual OpenAI rate authority, token count/framing, consent services, exclusive
+ * Verified OpenAI rate scope, token count/framing, consent services, exclusive
  * host cutover and Persona/F0 integration remain separate enablement gates. */
 export function createOpenAiConversationRuntime(options: OpenAiConversationRuntimeOptions) {
+  const rateAuthority = options?.rateAuthority;
   if (!options || !(options.costBudget instanceof CloudCostBudgetOwner) ||
       typeof options.ownsHost !== 'function' || typeof options.randomAttemptId !== 'function' ||
       typeof options.http !== 'function' || typeof options.inputTokenUpperBound !== 'function' ||
-      typeof options.rateLimited !== 'function' || typeof options.rateAuthority?.dispatchAllowed !== 'function' ||
-      typeof options.rateAuthority.recover !== 'function' || typeof options.rateAuthority.reserve !== 'function' ||
-      typeof options.rateAuthority.current !== 'function' ||
+      typeof rateAuthority?.dispatchAllowed !== 'function' || typeof rateAuthority.blockRateLimit !== 'function' ||
+      typeof rateAuthority.recover !== 'function' || typeof rateAuthority.reserve !== 'function' ||
+      typeof rateAuthority.current !== 'function' ||
       options.cloudConsent?.processing?.provider !== OPENAI_CLOUD_PROCESSING.provider ||
       options.cloudConsent.processing.disclosureVersion !== OPENAI_CLOUD_PROCESSING.disclosureVersion ||
       typeof options.cloudConsent.verify !== 'function' || typeof options.cloudConsent.current !== 'function' ||
@@ -51,7 +55,11 @@ export function createOpenAiConversationRuntime(options: OpenAiConversationRunti
     throw Error('OPENAI_RUNTIME_CONFIGURATION_INVALID');
   }
   let configuration: Readonly<OpenAiTransportConfiguration>;
-  try { configuration = assertOpenAiTransportSettings(options.apiKey, options.configuration, options.rateLimits.tokensPerRequest); }
+  try {
+    configuration = assertOpenAiTransportSettings(options.apiKey, options.configuration, options.rateLimits.tokensPerRequest);
+    const identity = rateAuthority.quotaIdentity;
+    if (identity?.provider !== 'openai' || identity.model !== configuration.model) throw Error();
+  }
   catch { throw Error('OPENAI_RUNTIME_CONFIGURATION_INVALID'); }
   const rateLimits = Object.freeze({ ...options.rateLimits });
   let owner: CloudAdmissionOwner<AsyncConversationModelInput>;
@@ -65,14 +73,14 @@ export function createOpenAiConversationRuntime(options: OpenAiConversationRunti
   const authority: CloudRecoveryAuthority = {
     recover: async limits => {
       if (!monetaryHostCurrent()) return { kind: 'unavailable' };
-      const result = await options.rateAuthority.recover(limits);
+      const result = await rateAuthority.recover(limits);
       if (result.kind === 'confirmed') rateLease = result.lease;
       return result;
     },
-    current: lease => monetaryHostCurrent() && options.rateAuthority.current(lease) === true,
-    reserve: (lease, input, live) => options.rateAuthority.reserve(lease, input, () => monetaryHostCurrent() && live()),
+    current: lease => monetaryHostCurrent() && rateAuthority.current(lease) === true,
+    reserve: (lease, input, live) => rateAuthority.reserve(lease, input, () => monetaryHostCurrent() && live()),
     dispatchAllowed: lease => !rateLimitPending && !rateLimitFailed && monetaryHostCurrent() &&
-      options.rateAuthority.current(lease) === true && options.rateAuthority.dispatchAllowed!(lease) === true,
+      rateAuthority.current(lease) === true && rateAuthority.dispatchAllowed(lease) === true,
   };
   const finalRateCurrent = () => {
     try { return !!rateLease && authority.current(rateLease) && authority.dispatchAllowed!(rateLease); }
@@ -81,7 +89,7 @@ export function createOpenAiConversationRuntime(options: OpenAiConversationRunti
   const rateLimited = async (seconds: number | undefined) => {
     if (rateLimitPending || rateLimitFailed) { rateLimitFailed = true; return; }
     rateLimitPending = true;
-    try { await options.rateLimited(seconds); }
+    try { await rateAuthority.blockRateLimit(seconds); }
     catch { rateLimitFailed = true; throw Error('OPENAI_RATE_AUTHORITY_UNAVAILABLE'); }
     finally { rateLimitPending = false; }
   };

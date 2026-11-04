@@ -6,14 +6,19 @@ import {join, resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 
 export const azureHost = 'enmori-backend-20261029.azurewebsites.net';
+export const azureIndonesiaHost = 'enmori-backend-idc-20261104.azurewebsites.net';
 const application = 'api://18887a0d-6060-4ed5-ad3b-9a1d9ec2410d';
 const serviceAccount = 'enmori-azure-backend@enmori-rmvp-controlled.iam.gserviceaccount.com';
-const audience = '//iam.googleapis.com/projects/11254388146/locations/global/workloadIdentityPools/enmori-azure-backend/providers/azure-app-service';
+const federationAudiences = new Map([
+  [azureHost, '//iam.googleapis.com/projects/11254388146/locations/global/workloadIdentityPools/enmori-azure-backend/providers/azure-app-service'],
+  [azureIndonesiaHost, '//iam.googleapis.com/projects/11254388146/locations/global/workloadIdentityPools/enmori-azure-backend-idc/providers/azure-app-service'],
+]);
 
 export function azureConfiguration(env, nodeVersion = process.versions.node) {
   assert.equal(nodeVersion, '24.19.0');
   assert.equal(env.ENMORI_AZURE_BACKEND_ONLY, 'true');
-  assert.equal(env.WEBSITE_HOSTNAME, azureHost);
+  const audience = federationAudiences.get(env.WEBSITE_HOSTNAME);
+  assert(audience, 'Unapproved Azure hostname');
   for (const key of ['FIREBASE_AUTH_EMULATOR_HOST', 'FIRESTORE_EMULATOR_HOST', 'GOOGLE_APPLICATION_CREDENTIALS']) {
     assert.equal(env[key], undefined, 'Ambient credential/emulator configuration forbidden');
   }
@@ -45,7 +50,7 @@ export function azureConfiguration(env, nodeVersion = process.versions.node) {
 export async function startAzureBackend(env = process.env) {
   // Allowlisted, non-secret deployment diagnostics. Never log the full environment.
   console.log(JSON.stringify({phase: 'configuration', nodeVersion: process.versions.node,
-    selectedHost: env.WEBSITE_HOSTNAME === azureHost,
+    selectedHost: federationAudiences.has(env.WEBSITE_HOSTNAME),
     identityEndpointPath: (() => {try {return new URL(env.IDENTITY_ENDPOINT).pathname;} catch {return 'invalid';}})(),
   }));
   const config = azureConfiguration(env);

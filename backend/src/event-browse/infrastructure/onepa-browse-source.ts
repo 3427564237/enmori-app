@@ -172,7 +172,9 @@ export class OnePaBrowseSource implements BrowseSource {
   private catalogue:
     | { until: number; items: readonly OnePaListItem[] }
     | undefined;
-  private cataloguePending: Promise<readonly OnePaListItem[]> | undefined;
+  private cataloguePending:
+    | { signal: AbortSignal; work: Promise<readonly OnePaListItem[]> }
+    | undefined;
   private index: { until: number; urls: string[] } | undefined;
   private rows = new Map<string, { until: number; row: BrowseOccurrence }>();
   private pending = new Map<string, Promise<BrowseOccurrence | undefined>>();
@@ -186,33 +188,38 @@ export class OnePaBrowseSource implements BrowseSource {
   private async list(signal: AbortSignal): Promise<readonly OnePaListItem[]> {
     if (this.catalogue && this.catalogue.until > Date.now())
       return this.catalogue.items;
-    if (!this.cataloguePending) {
-      const work = this.readCatalogue!(signal).then((items) => {
-        if (
-          signal.aborted ||
-          !this.enabled() ||
-          items.length > 50 ||
-          new Set(items.map((x) => x.url)).size !== items.length ||
-          items.some(
-            (x) =>
-              typeof (x.product as any)?.ID !== "string" ||
-              !/^PA-Event-\d+$/.test((x.product as any).ID),
-          ) ||
-          new Set(items.map((x) => (x.product as any)?.ID)).size !==
-            items.length
-        )
-          throw Error("Source unavailable");
-        this.catalogue = { until: Date.now() + 300000, items };
-        return items;
-      });
-      this.cataloguePending = work;
-      void work
-        .finally(() => {
-          if (this.cataloguePending === work) this.cataloguePending = undefined;
-        })
-        .catch(() => {});
+    const pending = this.cataloguePending;
+    if (pending) {
+      // An aborted reader cannot publish a catalogue. Keep its cleanup fence
+      // until it settles, and fail new waiters promptly during that cleanup.
+      if (pending.signal.aborted) throw Error("Source unavailable");
+      return pending.work;
     }
-    return this.cataloguePending;
+    const work = this.readCatalogue!(signal).then((items) => {
+      if (
+        signal.aborted ||
+        !this.enabled() ||
+        items.length > 50 ||
+        new Set(items.map((x) => x.url)).size !== items.length ||
+        items.some(
+          (x) =>
+            typeof (x.product as any)?.ID !== "string" ||
+            !/^PA-Event-\d+$/.test((x.product as any).ID),
+        ) ||
+        new Set(items.map((x) => (x.product as any)?.ID)).size !== items.length
+      )
+        throw Error("Source unavailable");
+      this.catalogue = { until: Date.now() + 300000, items };
+      return items;
+    });
+    const admitted = { signal, work };
+    this.cataloguePending = admitted;
+    void work
+      .finally(() => {
+        if (this.cataloguePending === admitted) this.cataloguePending = undefined;
+      })
+      .catch(() => {});
+    return work;
   }
   private async urls(signal: AbortSignal) {
     if (this.index && this.index.until > Date.now()) return this.index.urls;

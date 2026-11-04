@@ -11,11 +11,10 @@ export interface CloudQuotaPolicy {
 }
 interface Reservation { readonly minuteExpiresAtMs: number; readonly dayExpiresAtMs: number; readonly tokens: number }
 interface Ledger {
-  readonly schemaVersion: 'cloud_quota_v1'; readonly provider: 'groq'; readonly model: string; readonly scope: string;
+  readonly schemaVersion: 'cloud_quota_v1'; readonly provider: 'groq' | 'openai'; readonly model: string; readonly scope: string;
   readonly policy: CloudQuotaPolicy; readonly processEpoch: string; readonly generation: number;
   readonly lastObservedAtMs: number; readonly reservations: readonly Reservation[]; readonly blockedUntilMs: number;
 }
-const path = 'ai_cloud_quota/current';
 const positive = (x: unknown): x is number => Number.isSafeInteger(x) && (x as number) > 0;
 const nonnegative = (x: unknown): x is number => Number.isSafeInteger(x) && (x as number) >= 0;
 const record = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
@@ -40,20 +39,31 @@ export class FirestoreCloudQuotaAuthority implements CloudRecoveryAuthority {
   private cooldownUntil = 0;
   private readonly policy: CloudQuotaPolicy;
   private readonly epoch: RuntimeEpoch;
+  private readonly path: string;
+  readonly #quotaIdentity: Readonly<Pick<Ledger, 'provider' | 'model'>>;
   constructor(private readonly gateway: FirestoreGateway, epoch: RuntimeEpoch,
-    private readonly scope: string, private readonly model: string, policy: CloudQuotaPolicy,
+    private readonly scope: string, model: string, policy: CloudQuotaPolicy,
     private readonly clock: RuntimeClock, private readonly utcMilliseconds: () => number,
-    private readonly ownsHost: () => boolean) {
+    private readonly ownsHost: () => boolean, provider: 'groq' | 'openai' = 'groq') {
+    const openai = provider === 'openai';
     if (!uuid(epoch.processEpoch) || !positive(epoch.generation) || !/^[A-Za-z0-9_-]{1,64}$/.test(scope) ||
-        model !== 'openai/gpt-oss-120b' || !policy || !positive(policy.tokensPerRequest) ||
+        !['groq', 'openai'].includes(provider) ||
+        !(openai ? ['gpt-6-luna', 'gpt-6.1-sol'].includes(model) : model === 'openai/gpt-oss-120b') ||
+        !policy || !positive(policy.tokensPerRequest) ||
         policy.minute?.windowMs !== 60000 || policy.day?.windowMs !== 86400000 ||
         ![policy.minute, policy.day].every(w => positive(w.maxRequests) && positive(w.maxTokens) &&
-          w.maxRequests <= 1000 && w.maxTokens <= 200000 && policy.tokensPerRequest <= w.maxTokens) ||
-        policy.minute.maxRequests > 30 || policy.minute.maxTokens > 8000 ||
+          w.maxRequests <= 1000 && w.maxTokens <= (openai ? 10240000 : 200000) && policy.tokensPerRequest <= w.maxTokens) ||
+        policy.minute.maxRequests > (openai ? 60 : 30) || policy.minute.maxTokens > (openai ? 614400 : 8000) ||
         policy.day.maxRequests < policy.minute.maxRequests || policy.day.maxTokens < policy.minute.maxTokens ||
         typeof utcMilliseconds !== 'function' || typeof ownsHost !== 'function') throw Error('CLOUD_QUOTA_CONFIGURATION_INVALID');
     this.epoch = Object.freeze({ ...epoch });
+    this.#quotaIdentity = Object.freeze({ provider, model });
+    // Provider/model separation never adopts or overwrites the old Groq ledger.
+    this.path = openai ? `ai_openai_quota/${model}` : 'ai_cloud_quota/current';
     this.policy = Object.freeze({ minute: Object.freeze({ ...policy.minute }), day: Object.freeze({ ...policy.day }), tokensPerRequest: policy.tokensPerRequest });
+  }
+  get quotaIdentity(): Readonly<Pick<Ledger, 'provider' | 'model'>> {
+    return this.#quotaIdentity;
   }
   private now(): number {
     const value = this.utcMilliseconds();
@@ -83,9 +93,10 @@ export class FirestoreCloudQuotaAuthority implements CloudRecoveryAuthority {
       limits.maxTokens === this.policy.day.maxTokens && limits.tokensPerRequest === this.policy.tokensPerRequest;
   }
   private decode(value: StoredDocument | undefined, now: number): Ledger {
+    const { provider, model } = this.#quotaIdentity;
     if (!value || !exact(value, ['schemaVersion', 'provider', 'model', 'scope', 'policy', 'processEpoch', 'generation',
-      'lastObservedAtMs', 'reservations', 'blockedUntilMs']) || value.schemaVersion !== 'cloud_quota_v1' || value.provider !== 'groq' ||
-      value.model !== this.model || value.scope !== this.scope || !record(value.policy) ||
+      'lastObservedAtMs', 'reservations', 'blockedUntilMs']) || value.schemaVersion !== 'cloud_quota_v1' || value.provider !== provider ||
+      value.model !== model || value.scope !== this.scope || !record(value.policy) ||
       !exact(value.policy, ['minute', 'day', 'tokensPerRequest']) || value.policy.tokensPerRequest !== this.policy.tokensPerRequest ||
       !uuid(value.processEpoch) || !positive(value.generation) || value.generation > this.epoch.generation ||
       (value.generation === this.epoch.generation && value.processEpoch !== this.epoch.processEpoch) ||
@@ -107,7 +118,7 @@ export class FirestoreCloudQuotaAuthority implements CloudRecoveryAuthority {
       if (!Number.isSafeInteger(tokens) || tokens > this.policy.day.maxTokens) throw Error();
       return { tokens: r.tokens, minuteExpiresAtMs: r.minuteExpiresAtMs, dayExpiresAtMs: r.dayExpiresAtMs };
     });
-    return { schemaVersion: 'cloud_quota_v1', provider: 'groq', model: this.model, scope: this.scope, policy: this.policy,
+    return { schemaVersion: 'cloud_quota_v1', provider, model, scope: this.scope, policy: this.policy,
       processEpoch: value.processEpoch, generation: value.generation, lastObservedAtMs: value.lastObservedAtMs,
       blockedUntilMs: value.blockedUntilMs, reservations };
   }
@@ -120,7 +131,7 @@ export class FirestoreCloudQuotaAuthority implements CloudRecoveryAuthority {
     try {
       const ledger = await this.gateway.runTransaction(async tx => {
         this.verifyEpoch(await tx.get('ai_runtime_fence/current'));
-        const raw = await tx.get(path), now = this.now();
+        const raw = await tx.get(this.path), now = this.now();
         const old = this.decode(raw, now);
         // Do not credit unproved downtime or a new process's wall-clock jump.
         // Restore the remaining windows at the last confirmed ledger write.
@@ -132,7 +143,7 @@ export class FirestoreCloudQuotaAuthority implements CloudRecoveryAuthority {
         if (reservations.some(r => !Number.isSafeInteger(r.dayExpiresAtMs)) || !Number.isSafeInteger(blockedUntilMs)) throw Error();
         const next = { ...old, ...this.epoch, lastObservedAtMs: now, reservations, blockedUntilMs };
         if (!this.host()) throw Error();
-        tx.set(path, next); return next;
+        tx.set(this.path, next); return next;
       }, { maxAttempts: 1 });
       const now = this.now();
       if (!this.host()) throw Error();
@@ -154,7 +165,7 @@ export class FirestoreCloudQuotaAuthority implements CloudRecoveryAuthority {
       const expires = Math.ceil(this.timeAnchor!.utc + this.clock.now() - this.timeAnchor!.monotonic + delta);
       return await this.gateway.runTransaction(async tx => {
         this.verifyEpoch(await tx.get('ai_runtime_fence/current'));
-        const raw = await tx.get(path), now = this.now(), old = this.decode(raw, now);
+        const raw = await tx.get(this.path), now = this.now(), old = this.decode(raw, now);
         if (old.processEpoch !== this.epoch.processEpoch || old.generation !== this.epoch.generation) throw Error();
         if (!this.dispatchAllowed(lease) || !live() || now >= expires) return 'rejected' as const;
         const active = old.reservations.filter(r => r.dayExpiresAtMs > now);
@@ -166,7 +177,7 @@ export class FirestoreCloudQuotaAuthority implements CloudRecoveryAuthority {
         active.push({ tokens: input.tokens, minuteExpiresAtMs: expires + this.policy.minute.windowMs,
           dayExpiresAtMs: expires + this.policy.day.windowMs });
         if (!this.dispatchAllowed(lease) || !live()) return 'rejected' as const;
-        tx.set(path, { ...old, ...this.epoch, lastObservedAtMs: now, reservations: active });
+        tx.set(this.path, { ...old, ...this.epoch, lastObservedAtMs: now, reservations: active });
         return 'confirmed' as const;
       }, { maxAttempts: 1 });
     } catch { this.active = false; return 'unknown' as const; }
@@ -186,12 +197,12 @@ export class FirestoreCloudQuotaAuthority implements CloudRecoveryAuthority {
       this.cooldownUntil = Math.max(this.cooldownUntil, untilAt(this.now()));
       const persistedUntil = await this.gateway.runTransaction(async tx => {
         this.verifyEpoch(await tx.get('ai_runtime_fence/current'));
-        const raw = await tx.get(path), now = this.now(), old = this.decode(raw, now);
+        const raw = await tx.get(this.path), now = this.now(), old = this.decode(raw, now);
         if (old.processEpoch !== this.epoch.processEpoch || old.generation !== this.epoch.generation) throw Error();
         if (!this.current(lease)) throw Error();
         const until = Math.max(old.blockedUntilMs, untilAt(now));
         if (!Number.isSafeInteger(until)) throw Error();
-        tx.set(path, { ...old, ...this.epoch, lastObservedAtMs: now, blockedUntilMs: until });
+        tx.set(this.path, { ...old, ...this.epoch, lastObservedAtMs: now, blockedUntilMs: until });
         return until;
       }, { maxAttempts: 1 });
       this.cooldownUntil = Math.max(this.cooldownUntil, persistedUntil);

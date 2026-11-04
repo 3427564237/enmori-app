@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {existsSync, readFileSync, statSync} from 'node:fs';
-import {azureConfiguration, azureHost, startAzureBackend} from './azure_backend.mjs';
+import {azureConfiguration, azureHost, azureIndonesiaHost, startAzureBackend} from './azure_backend.mjs';
 const valid = {
   ENMORI_AZURE_BACKEND_ONLY: 'true', WEBSITE_HOSTNAME: azureHost, PORT: '8080',
   IDENTITY_ENDPOINT: 'http://169.254.129.2:8081/msi/token', IDENTITY_HEADER: 'synthetic-header',
@@ -11,11 +11,20 @@ test('Azure uses the exact managed identity audience and impersonation account',
   const c = azureConfiguration(valid, '24.19.0');
   assert.equal(c.port, 8080);
   assert.equal(c.credential.type, 'external_account');
+  assert.equal(c.credential.audience, '//iam.googleapis.com/projects/11254388146/locations/global/workloadIdentityPools/enmori-azure-backend/providers/azure-app-service');
   assert.equal(new URL(c.credential.credential_source.url).searchParams.get('api-version'), '2019-08-01');
   assert.equal(new URL(c.credential.credential_source.url).searchParams.get('resource'), 'api://18887a0d-6060-4ed5-ad3b-9a1d9ec2410d');
   assert.equal(c.credential.credential_source.headers['X-IDENTITY-HEADER'], 'synthetic-header');
   assert.equal(c.credential.service_account_impersonation_url, 'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/enmori-azure-backend@enmori-rmvp-controlled.iam.gserviceaccount.com:generateAccessToken');
   assert.equal(azureConfiguration({...valid, IDENTITY_ENDPOINT: 'http://127.0.0.1:8081/msi/token'}, '24.19.0').port, 8080);
+});
+test('Indonesia candidate uses its own federation audience and the existing scoped service account', () => {
+  const japan = azureConfiguration(valid, '24.19.0').credential;
+  const indonesia = azureConfiguration({...valid, WEBSITE_HOSTNAME: azureIndonesiaHost}, '24.19.0').credential;
+  assert.deepEqual(indonesia, {
+    ...japan,
+    audience: '//iam.googleapis.com/projects/11254388146/locations/global/workloadIdentityPools/enmori-azure-backend-idc/providers/azure-app-service',
+  });
 });
 test('rejects ambient personal credentials, emulators, wrong host and malformed settings', () => {
   for (const patch of [

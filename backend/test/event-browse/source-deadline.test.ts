@@ -43,3 +43,28 @@ test('caller cancellation aborts provider reads and never publishes a partial re
   assert.equal(seen.length, 2);
   assert(seen.every(s=>s.aborted));
 });
+
+test('late provider completion cannot win before the queued deadline callback', async t => {
+  let elapsed = 0;
+  t.mock.method(performance, 'now', () => elapsed);
+  const lateRow = { ...row, browseId: 'pa_c3ludGhldGlj' };
+  let providerSignal!: AbortSignal;
+  const late: BrowseSource = {
+    detail: async () => undefined,
+    firstBatch: async (_asOf, signal) => {
+      providerSignal = signal;
+      // The source completes in a microtask after its deadline has elapsed,
+      // before the timer phase has a chance to abort it.
+      await new Promise<void>(resolve => setImmediate(() => {
+        elapsed = 10000;
+        resolve();
+      }));
+      return [lateRow];
+    },
+  };
+  const source = new CombinedEventSource(healthy, late, 10000);
+  const batch = await source.batch(asOf, 0, new AbortController().signal);
+  assert.deepEqual(batch.items, [row]);
+  assert.equal(batch.sourceStatus[1]?.available, false);
+  assert.equal(providerSignal.aborted, true);
+});

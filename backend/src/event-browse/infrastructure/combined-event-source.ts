@@ -15,6 +15,7 @@ export class CombinedEventSource implements BrowseSource {
   private async boundedBatch<T>(signal: AbortSignal, read: (signal: AbortSignal) => Promise<T>): Promise<T> {
     if (signal.aborted) throw Error("Source unavailable");
     if (this.batchTimeoutMs === undefined) return read(signal);
+    const deadline = performance.now() + this.batchTimeoutMs;
     const controller = new AbortController();
     let cancel!: () => void;
     const expired = new Promise<never>((_, reject) => {
@@ -28,7 +29,13 @@ export class CombinedEventSource implements BrowseSource {
     try {
       // A browser's asynchronous close may outlive its abort. Do not make the
       // healthy provider wait for that cleanup past the ordinary client budget.
-      return await Promise.race([Promise.resolve().then(() => read(controller.signal)), expired]);
+      const result = await Promise.race([Promise.resolve().then(() => read(controller.signal)), expired]);
+      // A ready provider promise can run before an overdue timer callback.
+      if (signal.aborted || performance.now() >= deadline) {
+        controller.abort();
+        throw Error("Source unavailable");
+      }
+      return result;
     } finally {
       clearTimeout(timer);
       signal.removeEventListener("abort", cancel);

@@ -177,6 +177,34 @@ transaction fake. No live Firestore migration, IAM change, index, initializer
 command or deployment is included. Source/fake tests do not claim emulator,
 real-provider, concurrent-host, physical-phone, UAT or release evidence.
 
+## Provider rate ledger
+
+OpenAI rate claims and provider cooldowns use `ai_openai_quota/{model}` for
+`gpt-6-luna` and `gpt-6.1-sol`. These Admin-only records reuse the
+`cloud_quota_v1` format. Each contains exactly `schemaVersion`, `provider`
+(`openai`), `model`, `scope`, `policy`, `processEpoch`, `generation`,
+`lastObservedAtMs`, `reservations` and `blockedUntilMs`. The configured scope
+and policy must match exactly. The policy contains `minute`, `day` and
+`tokensPerRequest`. Each window contains `windowMs`, `maxRequests` and
+`maxTokens`. Each reservation contains `minuteExpiresAtMs`,
+`dayExpiresAtMs` and `tokens`. Groq keeps its existing
+`ai_cloud_quota/current` record and policy.
+
+The organization and project limits displayed on 4 November were
+2,000,000 tokens/minute for Luna, 1,000,000 tokens/minute for Sol, and 5,000
+requests/minute for each. The configurable implementation caps are lower:
+at most 60 requests and 614,400 tokens per 60,000 ms and at most 1,000
+requests and 10,240,000 tokens per 86,400,000 ms. A deployment must verify
+the current limits for its credential scope and choose a conservative policy
+within them. [Recorded platform observation](../docs/evidence/2026-11-04-cloud-resume/openai-billing.json).
+
+The Conversation factory validates the rate authority's immutable provider
+and model before recovery. The same authority handles reservations, the
+final dispatch guard, and durable 429 cooldown. Recovery requires a matching
+existing record, verified exclusive ownership and the current runtime fence
+in the transaction. Rate recovery never creates a missing ledger. The shared
+monetary grant still applies to every model and consumer.
+
 ## Recorded local verification, 2 November 2026
 
 The existing pinned Node 24.19.0 and TypeScript 7.0.2 built the strict Backend

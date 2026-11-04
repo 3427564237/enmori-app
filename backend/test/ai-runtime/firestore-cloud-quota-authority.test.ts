@@ -28,14 +28,15 @@ class Gateway implements FirestoreGateway {
     return result;
   }
 }
-function fixture(config = policy, gateway = new Gateway(), epoch = oldEpoch, initial = true) {
+function fixture(config = policy, gateway = new Gateway(), epoch = oldEpoch, initial = true,
+  provider: 'groq' | 'openai' = 'groq', model = provider === 'openai' ? 'gpt-6-luna' : 'openai/gpt-oss-120b') {
   const clock = new FakeClock(); let utc = 1000000, owned = true;
   if (initial) {
     gateway.docs.set('ai_runtime_fence/current', { ...epoch, cleanupGeneration: 0 });
-    gateway.docs.set(path, { schemaVersion: 'cloud_quota_v1', provider: 'groq', model: 'openai/gpt-oss-120b', scope: 'synthetic',
+    gateway.docs.set(provider === 'openai' ? `ai_openai_quota/${model}` : path, { schemaVersion: 'cloud_quota_v1', provider, model, scope: 'synthetic',
       policy: config, ...epoch, lastObservedAtMs: utc, reservations: [], blockedUntilMs: 0 });
   }
-  const authority = new FirestoreCloudQuotaAuthority(gateway, epoch, 'synthetic', 'openai/gpt-oss-120b', config, clock, () => utc, () => owned);
+  const authority = new FirestoreCloudQuotaAuthority(gateway, epoch, 'synthetic', model, config, clock, () => utc, () => owned, provider);
   return { clock, gateway, authority, advance: (ms: number) => { utc += ms; clock.advance(ms); }, revoke: () => { owned = false; },
     setUtc: (value: number) => { utc = value; },
     claim: (lease: object) => authority.reserve(lease, { tokens: config.tokensPerRequest, conservativeExpiresAt: clock.now() + 60000 + config.day.windowMs }, () => true) };
@@ -205,4 +206,48 @@ test('uninterpretable Retry-After sentinel remains closed across recovery', asyn
   f.revoke(); f.gateway.docs.set('ai_runtime_fence/current', { ...nextEpoch, cleanupGeneration: 0 });
   const restarted = fixture(policy, f.gateway, nextEpoch, false); await recovered(restarted);
   assert.equal(restarted.authority.canDispatch(), false);
+});
+
+test('OpenAI recovery cannot adopt a Groq ledger or another model and leaves old quota untouched', async () => {
+  const old = fixture(), before = structuredClone(old.gateway.docs.get(path));
+  const missing = fixture(policy, old.gateway, oldEpoch, false, 'openai');
+  assert.equal((await missing.authority.recover(limits)).kind, 'unknown');
+  assert.deepEqual(old.gateway.docs.get(path), before);
+  for (const mutation of [{ provider: 'groq' }, { model: 'gpt-6.1-sol' }, { scope: 'other' }]) {
+    const f = fixture(policy, new Gateway(), oldEpoch, true, 'openai');
+    const key = 'ai_openai_quota/gpt-6-luna';
+    f.gateway.docs.set(key, { ...f.gateway.docs.get(key), ...mutation });
+    assert.equal((await f.authority.recover(limits)).kind, 'unknown');
+    assert.equal(f.gateway.writes, 0);
+  }
+});
+
+test('both OpenAI candidates retain unknown claims and cooldown across replacement epochs', async () => {
+  for (const model of ['gpt-6-luna', 'gpt-6.1-sol']) {
+    const f = fixture(policy, new Gateway(), oldEpoch, true, 'openai', model), r = await recovered(f);
+    assert.equal(await f.claim(r.lease), 'confirmed');
+    await f.authority.blockRateLimit(120);
+    assert.equal(f.authority.canDispatch(), false);
+    f.revoke(); f.gateway.docs.set('ai_runtime_fence/current', { ...nextEpoch, cleanupGeneration: 0 });
+    const next = fixture(policy, f.gateway, nextEpoch, false, 'openai', model), restored = await recovered(next);
+    assert.equal(restored.reservations.length, 1);
+    assert.equal(await next.claim(restored.lease), 'rejected');
+    next.advance(120000); assert.equal(await next.claim(restored.lease), 'confirmed');
+    f.gateway.loseAck = true;
+    assert.equal(await next.claim(restored.lease), 'unknown');
+    assert.equal(next.authority.current(restored.lease), false);
+    assert.equal((f.gateway.docs.get(`ai_openai_quota/${model}`)!.reservations as unknown[]).length, 3);
+    assert.equal(f.gateway.docs.has(path), false);
+  }
+});
+
+test('OpenAI policy can reserve the full bounded request while Groq limits remain unchanged', async () => {
+  const p = { minute: { windowMs: 60000, maxRequests: 24, maxTokens: 245760 },
+    day: { windowMs: 86400000, maxRequests: 96, maxTokens: 983040 }, tokensPerRequest: 10240 };
+  assert.throws(() => fixture(p));
+  const f = fixture(p, new Gateway(), oldEpoch, true, 'openai');
+  const r = await recovered(f, { ...p.day, tokensPerRequest: p.tokensPerRequest });
+  assert.equal(await f.claim(r.lease), 'confirmed');
+  assert.throws(() => fixture(p, new Gateway(), oldEpoch, true, 'openai', 'openai/gpt-oss-120b'));
+  assert.throws(() => fixture({ ...p, minute: { ...p.minute, maxRequests: 61 } }, new Gateway(), oldEpoch, true, 'openai'));
 });

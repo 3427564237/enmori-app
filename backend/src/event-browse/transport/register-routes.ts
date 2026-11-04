@@ -11,6 +11,8 @@ export async function registerEventBrowseRoutes(app:FastifyInstance,identity:Ide
   for(const path of ["/v1/event-browse","/v1/event-browse/:browseId"]){
     app.get<{Params:{browseId?:string};Querystring:{cursor?:string}}>(path,{exposeHeadRoute:false,schema:{response:{200:path.endsWith(":browseId")?browseDetailSchema:browseBatchSchema}},onRequest:async(req,reply)=>{reply.header("Cache-Control","no-store");await auth(req,reply);},
       errorHandler:(error,req,reply)=>sendFailureCode(req,reply,error.statusCode===400||error.statusCode===415?"REQUEST_INVALID":"SERVICE_UNAVAILABLE")},async(req,reply)=>{
+      // The client may have closed while the onRequest authentication awaited Firebase.
+      if (reply.raw.destroyed) return reply.hijack();
       const query=req.query;
       if(Object.keys(query).some(k=>k!=='cursor')||(query.cursor!==undefined&&(req.params.browseId!==undefined||typeof query.cursor!=='string'||query.cursor.length===0||query.cursor.length>512))||req.body!==undefined||Number(req.headers["content-length"]??0)!==0||req.headers["transfer-encoding"]!==undefined)return sendFailureCode(req,reply,"REQUEST_INVALID");
       const abort=new AbortController();const gone=()=>{if(!reply.raw.writableEnded)abort.abort();};req.raw.once("aborted",gone);reply.raw.once("close",gone);

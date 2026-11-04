@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createOpenAiConversationRuntime, type OpenAiConversationRuntimeOptions }
+import { createOpenAiConversationRuntime, type OpenAiConversationRuntimeOptions, type OpenAiRateAuthority }
   from '../../src/bootstrap/openai-conversation-runtime.js';
 import { OPENAI_CLOUD_PROCESSING, GROQ_CLOUD_PROCESSING } from '../../src/account/domain/cloud-ai-consent.js';
 import { ApplicationCloudConversationConsent } from '../../src/ai-conversation/application/async-cloud-conversation-transport.js';
@@ -9,7 +9,8 @@ import type { RuntimeWork } from '../../src/ai-runtime/application/bounded-ai-ru
 import { CloudCostBudgetOwner } from '../../src/ai-runtime/application/cloud-cost-budget-owner.js';
 import { createOfflineCloudCostBudgetSeed, cloudCostBudgetPath, FirestoreCloudCostBudget }
   from '../../src/ai-runtime/infrastructure/firestore-cloud-cost-budget.js';
-import type { CloudAdmissionLimits, CloudRecoveryAuthority } from '../../src/ai-runtime/ports/cloud-generation-transport.js';
+import { FirestoreCloudQuotaAuthority } from '../../src/ai-runtime/infrastructure/firestore-cloud-quota-authority.js';
+import type { CloudAdmissionLimits } from '../../src/ai-runtime/ports/cloud-generation-transport.js';
 import type { CloudCostGrant } from '../../src/ai-runtime/ports/cloud-cost-budget.js';
 import { MetadataFirestoreGateway } from '../support/metadata-firestore-gateway.js';
 import { syntheticCostGrant, syntheticCostUsage } from '../support/cloud-cost-fixtures.js';
@@ -29,8 +30,10 @@ const response = () => Response.json({ id: 'resp_synthetic', object: 'response',
     total_tokens: syntheticCostUsage.totalTokens } });
 
 /** A generic synthetic quota authority; no production OpenAI limits are inferred. */
-class FakeOpenAiRateAuthority implements CloudRecoveryAuthority {
+class FakeOpenAiRateAuthority implements OpenAiRateAuthority {
+  readonly quotaIdentity = Object.freeze({ provider: 'openai', model: config.model } as const);
   readonly lease = {};
+  readonly cooldowns: (number | undefined)[] = [];
   currentEpoch = true;
   allowed = true;
   recoveries = 0;
@@ -45,6 +48,10 @@ class FakeOpenAiRateAuthority implements CloudRecoveryAuthority {
     if (!this.dispatchAllowed(lease) || !live()) return 'rejected' as const;
     assert.equal(input.tokens, limits.tokensPerRequest); this.reservations++;
     return 'confirmed' as const;
+  }
+  async blockRateLimit(seconds: number | undefined) {
+    this.cooldowns.push(seconds);
+    this.allowed = false;
   }
 }
 
@@ -61,7 +68,6 @@ function fixture(settings: { grant?: CloudCostGrant; http?: typeof fetch } = {})
     cloudConsent: new ApplicationCloudConversationConsent(OPENAI_CLOUD_PROCESSING),
     randomAttemptId: () => `00000000-0000-4000-8000-${(++nextAttempt).toString(16).padStart(12, '0')}`,
     http: async (url, init) => { httpCalls++; return settings.http ? settings.http(url, init) : response(); },
-    rateLimited: async () => { rate.allowed = false; },
   };
   const built = createOpenAiConversationRuntime(options);
   return { ...built, options, gateway, budgetAuthority, rate, clock,
@@ -102,6 +108,23 @@ test('missing quota dispatch guard, wrong processor or insufficient reservation 
     { rateAuthority: { ...f.rate, dispatchAllowed: undefined } }, { costBudget: undefined },
     { rateLimits: { ...limits, tokensPerRequest: 199 } }]) {
     assert.throws(() => createOpenAiConversationRuntime({ ...f.options, ...change } as OpenAiConversationRuntimeOptions),
+      /^Error: OPENAI_RUNTIME_CONFIGURATION_INVALID$/);
+  }
+  assert.equal(f.gateway.calls, 0); assert.equal(f.httpCalls, 0);
+});
+
+test('a Groq or different-model quota cannot be used for OpenAI dispatch', () => {
+  const f = fixture();
+  const policy = { minute: { windowMs: 60000, maxRequests: 2, maxTokens: 400 },
+    day: { windowMs: 86400000, maxRequests: 4, maxTokens: 800 }, tokensPerRequest: 200 };
+  for (const [provider, model] of [['groq', 'openai/gpt-oss-120b'], ['openai', 'gpt-6.1-sol']] as const) {
+    const authority = new FirestoreCloudQuotaAuthority(f.gateway, epoch, 'synthetic', model, policy,
+      f.clock, () => 1_000_000, () => true, provider);
+    assert.deepEqual(authority.quotaIdentity, { provider, model });
+    assert.equal(Reflect.set(authority.quotaIdentity, 'model', config.model), false);
+    assert.equal(Reflect.set(authority, 'quotaIdentity', f.rate.quotaIdentity), false);
+    assert.throws(() => createOpenAiConversationRuntime({ ...f.options, rateAuthority: authority,
+      rateLimits: { ...policy.day, tokensPerRequest: policy.tokensPerRequest } }),
       /^Error: OPENAI_RUNTIME_CONFIGURATION_INVALID$/);
   }
   assert.equal(f.gateway.calls, 0); assert.equal(f.httpCalls, 0);
@@ -221,6 +244,7 @@ test('unknown HTTP and 429 retain the full monetary claim without retries or dup
     const handle = f.handle(), request = accepted(f.runtime.submit('synthetic', work(handle)));
     assert.equal((await request.outcome).ok, false); assert.equal(f.httpCalls, 1);
     assert.equal(f.ledger().reservedNanoUsd, 600); assert.equal(f.ledger().spentNanoUsd, 0);
+    assert.deepEqual(f.rate.cooldowns, status === 429 ? [60] : []);
     const repeated = accepted(f.runtime.submit('synthetic', work(handle)));
     assert.equal((await repeated.outcome).ok, false); assert.equal(f.httpCalls, 1); assert.equal(f.ledger().attemptCount, 1);
   }

@@ -65,7 +65,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     }
     const rows = JSON.parse(readFileSync(statePath, 'utf8'));
     const identity = rows[1];
-    assert(identity?.uid?.startsWith('azure-nov02-') && typeof identity.token === 'string');
+    assert(/^azure-nov(?:02|04)-[a-f0-9]{12}$/.test(identity?.uid ?? '') && typeof identity.token === 'string');
     const report = await probe(url.origin, identity.token);
     writeFileSync(outputPath, JSON.stringify(report, null, 2), { flag: 'wx', mode: 0o600 });
   } catch { console.error('BACKEND_LATENCY_PROBE_STOPPED'); process.exitCode = 2; }
