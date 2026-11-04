@@ -10,7 +10,7 @@ unchanged lockfile. Build in this worktree first:
 
 ```sh
 node node_modules/typescript/bin/tsc --project backend/tsconfig.json
-node --test backend/dist/test/ai-runtime/synthetic-evaluation.test.js 'tool/ai-companion-eval/*.test.mjs'
+node --experimental-test-module-mocks --test backend/dist/test/ai-runtime/synthetic-evaluation.test.js 'tool/ai-companion-eval/*.test.mjs'
 node tool/ai-companion-eval/run.mjs --provider mock --out /absolute/owner-only-directory/new-mock-run
 ```
 
@@ -154,6 +154,37 @@ The later, separately authorized one-pass local baseline is recorded in
 [`runtime.md`](../../docs/evidence/ai-companion-20261025/runtime.md), with the
 exact source snapshot and complete private artifact hashes. Its structural and
 timing observations do not establish semantic acceptance or cloud performance.
+
+## OpenAI input-token preflight
+
+`collectOpenAiTokenEvidence` in `openai-evaluation.mjs` prepares the same 24
+baseline cases as `runOpenAiEvaluation`. It submits the model, messages,
+reasoning effort, tools, truncation and structured-output schema to the
+Responses input-token endpoint. It binds both the submitted count body and the
+complete generation body to the case. The count endpoint omits generation
+controls such as `max_output_tokens`, `service_tier` and `store`. OpenAI
+documents that counting is free and that generating a response is billed
+separately. [Count API reference](https://developers.openai.com/api/reference/resources/responses/subresources/input_tokens/methods/count),
+[spending-controller example](https://developers.openai.com/cookbook/articles/per_run_spending_controller_responses_api),
+[count endpoint pricing](https://help.openai.com/en/articles/4936856-understanding-and-counting-tokens).
+
+Supply a fresh, authorized fixed-corpus grant with `model`, `corpusSha256`,
+`syntheticOnly: true`, `maximumRequests: 24`, `approvalReference` and
+`expiresAtMs`. Use the conservative verified expiry and the owner-only output
+writer in `private-output.mjs`. The operator must supply a durable single-use
+`claimPreflight` scoped to the authorized model and corpus. Use a separate
+single-use claim for paid generation. Keep both claim ledgers on the designated
+operator host and retain them across runs. `mode: 'live'` uses native `fetch`;
+mock mode uses an offline fake. Pass the key from private operator storage and
+keep the output outside the repository. A failure preserves its intent and
+stops the pass without retry. Only a complete pass saves `token-evidence.json`.
+
+Count success establishes input framing for the fixed requests. Independently
+verify model access, pricing, account balance and expiry before paid generation,
+and use the shared durable monetary and rate authorities in `runOpenAiEvaluation`.
+The live rate authority reserves before each paid attempt and persists any 429
+cooldown. Both count and generation remain synthetic. A Sol pass requires a documented Luna quality
+failure and an active grant. Mock token counts cannot authorize live evaluation.
 
 ## Guarded cloud candidate (disabled by default)
 

@@ -1,12 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
-import { prepareOpenAiCases, validateOpenAiTokenEvidence, runOpenAiEvaluation, requireOpenAiSemanticAcceptance } from './openai-evaluation.mjs';
+import { collectOpenAiTokenEvidence, prepareOpenAiCases, validateOpenAiTokenEvidence, runOpenAiEvaluation,
+  requireOpenAiSemanticAcceptance } from './openai-evaluation.mjs';
+import { sha256 } from './evaluation.mjs';
+import { buildOpenAiRequest } from '../../backend/dist/src/ai-runtime/infrastructure/openai-cloud-transport.js';
 
 const key = 'sk-synthetic_only_not_a_credential_123456789';
 async function fixture(http) {
   const prepared = await prepareOpenAiCases('gpt-6-luna');
-  const evidence = { schemaVersion: 'openai_input_bound_v1', model: 'gpt-6-luna',
+  const evidence = { schemaVersion: 'openai_input_bound_v1', mode: 'mock', model: 'gpt-6-luna',
     verifiedAtMs: 100, expiresAtMs: 200, method: 'verified-model-framing', corpusSha256: prepared.corpusSha256,
     rows: prepared.rows.map(r => ({ id: r.id, requestSha256: r.requestSha256, inputTokenUpperBound: 8192 })) };
   const actions = [], writes = new Map(); let claimed = false;
@@ -33,6 +36,73 @@ test('both OpenAI models preserve all 24 exact golden messages and criteria', as
   }
 });
 
+test('OpenAI preflight counts only the 24 fixed inputs and binds both request bodies', async () => {
+  const f = await fixture(() => { throw Error('generation must not run'); });
+  const { model, grant, save, utcNow } = f.args;
+  let calls = 0, claims = 0;
+  const args = { model, grant, key, save, utcNow, claimPreflight: async () => { assert.equal(++claims, 1); },
+    http: async (url, options) => {
+      const row = f.prepared.rows[calls++];
+      assert.equal(url, 'https://api.openai.com/v1/responses/input_tokens');
+      assert.equal(options.method, 'POST');
+      assert.equal(options.redirect, 'error');
+      assert.equal(options.headers.authorization, `Bearer ${key}`);
+      const generation = JSON.parse(buildOpenAiRequest(row.messages, f.prepared.config));
+      const { model, input, reasoning, text, truncation, tool_choice, tools } = generation;
+      assert.deepEqual(JSON.parse(options.body), { model, input, reasoning, text, truncation, tool_choice, tools });
+      assert.deepEqual(f.writes.get(`${row.id}.count-intent.json`),
+        { id: row.id, requestSha256: row.requestSha256, countRequestSha256: sha256(options.body) });
+      return Response.json({ object: 'response.input_tokens', input_tokens: 100 + calls });
+    } };
+  const evidence = await collectOpenAiTokenEvidence(args);
+  assert.equal(calls, 24);
+  assert.equal(evidence.rows.length, 24);
+  assert.equal(evidence.mode, 'mock');
+  assert.deepEqual(f.writes.get('token-evidence.json'), evidence);
+  assert.equal(validateOpenAiTokenEvidence(evidence, f.prepared, 101).get(f.prepared.rows[0].requestSha256), 101);
+  assert.throws(() => validateOpenAiTokenEvidence(evidence, f.prepared, 101, 'live'));
+  await assert.rejects(collectOpenAiTokenEvidence(args));
+  assert.equal(calls, 24);
+  evidence.rows[0].countRequestSha256 = 'changed';
+  assert.throws(() => validateOpenAiTokenEvidence(evidence, f.prepared, 101));
+  assert(!JSON.stringify([...f.writes.values()]).includes(key));
+});
+
+test('count rejection, malformed data or unknown outcome preserve intent and stop without retry', async () => {
+  for (const observe of [
+    () => new Response(key, { status: 429 }),
+    () => Response.json({ object: 'response.input_tokens', input_tokens: 8193 }),
+    () => Response.json({ object: 'response', input_tokens: 100 }),
+    () => new Response('{"object":"response.input_tokens","input_tokens":500,"input_\\u0074okens":1}',
+      { headers: { 'content-type': 'application/json' } }),
+    () => { throw Error(key); },
+  ]) {
+    const f = await fixture(() => { throw Error('generation must not run'); });
+    const { model, grant, save, utcNow } = f.args;
+    let calls = 0;
+    await assert.rejects(collectOpenAiTokenEvidence({ model, grant, key, save, utcNow, claimPreflight: async () => {},
+      http: async () => { calls++; return observe(); } }), { message: 'OPENAI_COUNT_UNCONFIRMED_NO_RETRY' });
+    assert.equal(calls, 1);
+    assert.deepEqual([...f.writes.keys()], [`${f.prepared.rows[0].id}.count-intent.json`, `${f.prepared.rows[0].id}.count-failure.json`]);
+    assert(!JSON.stringify([...f.writes.values()]).includes(key));
+  }
+});
+
+test('preflight rejects expired grants, incorrect modes and unsaved intent before HTTP', async () => {
+  const f = await fixture(() => { throw Error('generation must not run'); });
+  const { model, grant, save, utcNow } = f.args;
+  let claims = 0, calls = 0;
+  const args = { model, grant, key, save, utcNow, claimPreflight: async () => { claims++; },
+    http: async () => { calls++; throw Error('must not call'); } };
+  await assert.rejects(collectOpenAiTokenEvidence({ ...args, utcNow: () => grant.expiresAtMs }));
+  await assert.rejects(collectOpenAiTokenEvidence({ ...args, mode: 'live' }));
+  await assert.rejects(collectOpenAiTokenEvidence({ ...args, http: globalThis.fetch }));
+  assert.equal(claims, 0);
+  await assert.rejects(collectOpenAiTokenEvidence({ ...args, save: async () => { throw Error('private output unavailable'); } }));
+  assert.equal(claims, 1);
+  assert.equal(calls, 0);
+});
+
 test('altered request token evidence and expired evidence never authorize dispatch', async () => {
   const f = await fixture(() => { throw Error('must not call'); });
   f.evidence.rows[0].requestSha256 = 'changed';
@@ -42,6 +112,13 @@ test('altered request token evidence and expired evidence never authorize dispat
   const g = await fixture(() => { throw Error('must not call'); });
   g.args.utcNow = () => 200;
   await assert.rejects(runOpenAiEvaluation(g.args)); assert.equal(g.actions.length, 0);
+});
+
+test('live validation rejects model-framing evidence marked mock or missing a mode', async () => {
+  const f = await fixture(() => { throw Error('must not call'); });
+  assert.throws(() => validateOpenAiTokenEvidence(f.evidence, f.prepared, 101, 'live'));
+  delete f.evidence.mode;
+  assert.throws(() => validateOpenAiTokenEvidence(f.evidence, f.prepared, 101, 'live'));
 });
 
 test('unknown network outcome keeps reservation and stops after the first call without retry', async () => {
@@ -61,6 +138,20 @@ test('missing monetary budget stops before HTTP even with complete token evidenc
   f.args.owner.reserve = async () => ({ kind: 'rejected', reason: 'exhausted' });
   const report = await runOpenAiEvaluation(f.args);
   assert.equal(report.actualProviderCalls, 0); assert.equal(report.stopReason, 'budget-unavailable');
+});
+
+test('rate reservation precedes monetary reservation and a 429 stops after persisting cooldown', async () => {
+  const f = await fixture(async () => new Response(null, { status: 429, headers: { 'retry-after': '2' } }));
+  f.args.rateAuthority = { available: () => true,
+    reserve: async live => { assert(live()); f.actions.push(['rate-reserve']); return 'confirmed'; },
+    rateLimited: async seconds => { f.actions.push(['cooldown', seconds]); } };
+  const report = await runOpenAiEvaluation(f.args);
+  assert.equal(report.intendedCases, 24);
+  assert.equal(report.transportInvocations, 1);
+  assert.deepEqual(f.actions.filter(([type]) => ['rate-reserve', 'reserve', 'http', 'cooldown'].includes(type)).map(([type]) => type),
+    ['rate-reserve', 'reserve', 'http', 'cooldown']);
+  assert.deepEqual(f.actions.find(([type]) => type === 'cooldown'), ['cooldown', 2]);
+  assert.equal(f.actions.filter(([type]) => type === 'settle').length, 0);
 });
 
 test('24 mock responses stay unreviewed and never become semantic acceptance', async () => {
