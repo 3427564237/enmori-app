@@ -1,0 +1,88 @@
+{
+  "date": "2026-11-05",
+  "sourceCommit": "6aeb776abfbf66375009469a2a1d4e5479deac6c",
+  "flutter": "3.47.2",
+  "tests": {
+    "files": 17,
+    "passed": 152,
+    "failed": 0,
+    "fullRepositorySuiteRun": false,
+    "sourceCommit": "8529315c2f244ef91daddf64d831ada9255dd30d"
+  },
+  "analysis": "Full flutter analyze --no-pub: no issues",
+  "rendering": "8 synthetic production-widget previews: English 390dp/1x and Chinese 360dp/1.3x; top and scrolled captures",
+  "logs": {
+    "candidate-tests.log": {
+      "sha256": "83c2f140ad5925da8871b6b6476376b3898f90c0ea848fb86c1af1ae1f1e66b9",
+      "bytes": 28927
+    },
+    "analyze-final.log": {
+      "sha256": "9d46fab2ba3b8c22c45814acf0fee0ca37b5cc9b36c36dd50970dee75e271a0b",
+      "bytes": 96
+    },
+    "preview.log": {
+      "sha256": "5778a685e44d0d86c0b196315a4388df84f69f1f2bed4d0497b2f44c8b9e24e1",
+      "bytes": 472
+    },
+    "final-corrections.log": {
+      "sha256": "d2e235c2da843eaacc4aea56d7536b1e3af6b7417aaae36d67be8db160b12c14",
+      "bytes": 2828
+    },
+    "layout-diagnosis.log": {
+      "sha256": "e6388131415bf12631c5f8e2cb12b09292f1f5c9469a7e649e26619fbc4955d3",
+      "bytes": 5717
+    },
+    "plan-copy-tests.log": {
+      "sha256": "f4ca5c27208b19a2b0bd54b5a2a86d32cb67bfa62bf594d68edddc4ad9d6cf72",
+      "bytes": 2189
+    },
+    "analyze-delivery.log": {
+      "sha256": "f8ce34ca63f7ee069c37d0f9734dd21ad4de3348c5026d687b0c6a39263fb03d",
+      "bytes": 96
+    },
+    "apk-build.log": {
+      "sha256": "11271fb0ed030cc692782d991f3ca81f8bacddc03c3c4226d3308f558e3901ef",
+      "bytes": 4119
+    }
+  },
+  "phoneAttached": false,
+  "backendChanges": false,
+  "aiChanges": false,
+  "dependenciesChanged": false,
+  "followupTests": {
+    "sourceCommit": "6aeb776abfbf66375009469a2a1d4e5479deac6c",
+    "reason": "English empty-state copy correction only",
+    "file": "test/features/event_plans_test.dart",
+    "passed": 24,
+    "failed": 0,
+    "overlapsEarlierBatch": true
+  },
+  "analysisSourceCommit": "6aeb776abfbf66375009469a2a1d4e5479deac6c",
+  "previewFiles": {
+    "admin-en.png": {
+      "sha256": "3bc35ef5cac14cd3d26738907fd74551913766751d4e7662b0365d7845fa8352",
+      "bytes": 98811
+    },
+    "admin-lower-en.png": {
+      "sha256": "1e37a69bffc0a7b7568acd5e5716b2b8bf77c223272ba61b52b451c9654a7e22",
+      "bytes": 93302
+    },
+    "check-in28-lower-zh.png": {
+      "sha256": "0023d6fa252f20d1f8e66657ffa20b09e9d628f2754df886171e950dfc1d33bd",
+      "bytes": 107823
+    },
+    "check-in7-en.png": {
+      "sha256": "055e9bc995d87c579e7380bc4e7e6c6e7ac43116753c48488a23a0f309c4471d",
+      "bytes": 106309
+    },
+    "check-in7-lower-en.png": {
+      "sha256": "0f75db8ece6dae87d5d1866ce6c9ea73a1f01289492954e6d4b2034c76cf0048",
+      "bytes": 75500
+    },
+    "plans-en.png": {
+      "sha256": "4fc1e6687d3049afc50b0c998e7a296cf8ffd9a6285350e472f8fa0594185ae1",
+      "bytes": 108978
+    }
+  },
+  "apkReceipt": "apk.json"
+}

@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-05",
+  "sourceCommit": "6aeb776abfbf66375009469a2a1d4e5479deac6c",
+  "baseCommit": "d97812dedf0408926bf4cf4aed0162429e7dd073",
+  "artifact": "build/nonai-admin-insights-v55/ENMORI-insights-v55-release.apk",
+  "sha256": "baff603b9c86c30e63e0e0d2dac54cfb2939ccb85931dd858276c98c490e6c23",
+  "bytes": 68969796,
+  "package": "com.enmori.app.group",
+  "versionCode": 55,
+  "versionName": "1.0.0-insights20261105",
+  "debuggable": false,
+  "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "signatureVerified": true,
+  "permissions": [
+    "android.permission.ACCESS_COARSE_LOCATION",
+    "android.permission.ACCESS_FINE_LOCATION",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.INTERNET",
+    "android.permission.POST_NOTIFICATIONS",
+    "android.permission.WAKE_LOCK",
+    "com.enmori.app.group.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+    "com.google.android.c2dm.permission.RECEIVE",
+    "com.google.android.providers.gsf.permission.READ_GSERVICES"
+  ],
+  "comparison": {
+    "artifact": "ENMORI-recovery-v54-release.apk",
+    "versionCode": 54,
+    "samePackage": true,
+    "sameSigner": true,
+    "samePermissions": true
+  },
+  "phoneInstallation": "Not Run - no device connected",
+  "realAccountServiceValidation": "Not Run",
+  "published": false
+}
