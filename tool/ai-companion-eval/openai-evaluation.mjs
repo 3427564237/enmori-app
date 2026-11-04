@@ -191,13 +191,15 @@ export async function runOpenAiEvaluation({ mode = 'mock', model, key, owner, to
     const started = clock.now(), controller = new AbortController();
     const deadline = started + 15000;
     const requestBudget = { signal: controller.signal, deadline, remainingMs: () => Math.max(0, deadline - clock.now()) };
-    let usage, cooldownPersisted;
+    let usage, cooldownPersisted, httpStatus;
     const dispatch = owner.dispatch(reservation.reservation, controls => {
       const transport = new OpenAiCloudTransport(key, config, clock, async (...args) => {
         assert(live() && report.transportInvocations < 24);
         report.transportInvocations++;
         if (mode === 'live') report.actualProviderCalls++;
-        return http(...args);
+        const response = await http(...args);
+        if (Number.isInteger(response.status) && response.status >= 100 && response.status <= 599) httpStatus = response.status;
+        return response;
       }, { ...controls, available: () => live() && controls.available(),
         reservedTokens: config.maxInputTokens + config.maxOutputTokens,
         inputTokenUpperBound: body => {
@@ -222,6 +224,7 @@ export async function runOpenAiEvaluation({ mode = 'mock', model, key, owner, to
     const elapsedMs = Math.max(0, clock.now() - started);
     const observation = { provider: 'openai', outcome: outcome.kind === 'response' ? 'response-observed' : 'unconfirmed',
       physicallySettled: outcome.physical === 'stopped', elapsedMs, withinDeliveryDeadline: elapsedMs < 15000,
+      ...(httpStatus === undefined ? {} : { httpStatus }),
       ...(usage ? { usage } : {}),
       ...(outcome.kind === 'response' ? { rawText: new TextDecoder().decode(outcome.raw) } : {}) };
     const result = { id: row.id, criteria: row.criteria, requestSha256: row.requestSha256,

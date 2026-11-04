@@ -148,6 +148,7 @@ test('rate reservation precedes monetary reservation and a 429 stops after persi
   const report = await runOpenAiEvaluation(f.args);
   assert.equal(report.intendedCases, 24);
   assert.equal(report.transportInvocations, 1);
+  assert.equal(report.rows[0].observation.httpStatus, 429);
   assert.deepEqual(f.actions.filter(([type]) => ['rate-reserve', 'reserve', 'http', 'cooldown'].includes(type)).map(([type]) => type),
     ['rate-reserve', 'reserve', 'http', 'cooldown']);
   assert.deepEqual(f.actions.find(([type]) => type === 'cooldown'), ['cooldown', 2]);
