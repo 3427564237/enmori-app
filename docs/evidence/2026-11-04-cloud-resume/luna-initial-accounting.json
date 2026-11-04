@@ -1,0 +1,16 @@
+{
+  "capNanoUsd": 3400000000,
+  "reservedNanoUsd": 2048000,
+  "spentNanoUsd": 0,
+  "attemptCount": 1,
+  "reconciledCount": 0,
+  "fence": {
+    "processEpoch": "8e615b62-389e-42bf-a75e-24752acdc0f8",
+    "generation": 64,
+    "cleanupGeneration": 0
+  },
+  "quotaReservations": 1,
+  "quotaBlockedUntilMs": 0,
+  "providerCalls": 1,
+  "stopReason": "ineligible-or-unconfirmed-no-retry"
+}

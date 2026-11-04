@@ -1,0 +1,59 @@
+{
+  "recorded_at_utc": "2026-11-04T08:53:26Z",
+  "evidence_type": "read_only_platform_ui_observation",
+  "scope": {
+    "organization_display_name": "Personal",
+    "project_display_name": "Default project",
+    "identifiers_recorded": false
+  },
+  "billing": {
+    "currency": "USD",
+    "overview_route": "/settings/organization/billing/overview",
+    "overview_label": "Free trial",
+    "api_credit_balance_usd": 68.0,
+    "subscription_benefit_label": "ChatGPT subscription linked",
+    "credit_grants_route": "/settings/organization/billing/credit-grants",
+    "available_grants": [
+      {
+        "received_date_displayed": "2026-10-29",
+        "status_displayed": "Available",
+        "remaining_usd": 68.0,
+        "original_amount_usd": 68.0,
+        "expiry_date_displayed": "2026-11-19",
+        "expiry_time_and_timezone_displayed": false
+      }
+    ],
+    "grant_funding_origin_and_cycle": "Not specified in the displayed grant row.",
+    "note": "The API grant is the observed balance. A linked ChatGPT subscription alone is not evidence of an API credit amount."
+  },
+  "approved_round_cap_calculation": {
+    "formula": "min(original grant amount * 0.05, remaining grant balance)",
+    "calculated_usd": 3.4,
+    "basis": "The single available $68.00 grant shown above.",
+    "enforcement": "Arithmetic only; separate application ledger enforcement is required."
+  },
+  "model_access": {
+    "project_limits_route": "/settings/<project>/limits",
+    "selected_policy": "Allow all existing and future models",
+    "examples_marked_allowed": ["gpt-6-luna", "gpt-6.1-sol", "gpt-6.1-terra"],
+    "qualification": "Organization and system restrictions also apply. No model request was made."
+  },
+  "rate_limits": {
+    "organization_limits_route": "/settings/organization/limits",
+    "organization_tier_displayed": "Build",
+    "project_limits_route": "/settings/<project>/limits",
+    "project_page_note": "Rate limits are inherited from the organization unless overridden.",
+    "organization_and_project_displayed": {
+      "gpt-6-luna": {"tokens_per_minute": 2000000, "requests_per_minute": 5000},
+      "gpt-6.1-sol": {"tokens_per_minute": 1000000, "requests_per_minute": 5000},
+      "gpt-6.1-terra": {"tokens_per_minute": 1000000, "requests_per_minute": 5000}
+    }
+  },
+  "actions": {
+    "read_only": true,
+    "model_requests_made": false,
+    "keys_created": false,
+    "payment_or_credit_purchase": false,
+    "settings_changed": false
+  }
+}

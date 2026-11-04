@@ -1,0 +1,29 @@
+{
+  "id": "chinese-break-with-label",
+  "requestSha256": "c429c38819c822db6720184b10d998caf0a77c37d87055286f16c46af77be0f5",
+  "observation": {
+    "provider": "openai",
+    "outcome": "unconfirmed",
+    "physicallySettled": true,
+    "elapsedMs": 4017.6947969999997,
+    "withinDeliveryDeadline": true,
+    "httpStatus": 200
+  },
+  "diagnostic": {
+    "reason": "hosted-tool-usage-present",
+    "hostedToolUsageShape": "zero",
+    "reportedTokenCounts": {
+      "inputTokens": 232,
+      "cachedInputTokens": 0,
+      "cacheWriteTokens": 0,
+      "outputTokens": 136,
+      "reasoningTokens": 0,
+      "totalTokens": 368
+    }
+  },
+  "protocol": {
+    "valid": false,
+    "eligible": false
+  },
+  "semanticReview": "unreviewed"
+}

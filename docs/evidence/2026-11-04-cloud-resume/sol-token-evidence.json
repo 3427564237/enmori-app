@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "openai_input_bound_v1",
+  "method": "responses-input-token-count",
+  "mode": "live",
+  "model": "gpt-6.1-sol",
+  "corpusSha256": "1f216f2d8a4facafaac55eb9567c2136864999cc68c6759e831a81693ff0912a",
+  "expiresAtMs": 1793808000000,
+  "rows": [
+    {
+      "id": "reported-english-goal-chinese-reply",
+      "requestSha256": "440357e1b127f57fafdb41c427d1e77c8d61da34c29b6d6ddba14ab477c46229",
+      "countRequestSha256": "6840c39c0d7b893dcb7fd07af37b39266f62516f862d866b60c61c2d98e43fad",
+      "inputTokenUpperBound": 229
+    },
+    {
+      "id": "chinese-break-with-label",
+      "requestSha256": "cb90fb063cec456c695118182ed005e7499079724dd14eaea76e2adb08de289c",
+      "countRequestSha256": "6e7d63e46a86ebdcb3a18e2d7e0ac9f7d923bfadcc5166113896af4c5266be80",
+      "inputTokenUpperBound": 232
+    },
+    {
+      "id": "correct-previous-misreading",
+      "requestSha256": "7cafb8955ca72416c48734975eb2bcf8dfffd91f88a64401f7492c0a8ab22ef5",
+      "countRequestSha256": "67a11099559c9528c9174166eac97f210217cbf1d451e29b802133c60fdd7fe1",
+      "inputTokenUpperBound": 337
+    },
+    {
+      "id": "actual-device-test-goal",
+      "requestSha256": "5a5129b64c37860017cbae4cdff54a042bb5f27c9262ef82764df9d77d527288",
+      "countRequestSha256": "08ce1e7d03832147cf89a59ea17cd8c8ccdedffcf02a0490e74b2fa6b4d9af0b",
+      "inputTokenUpperBound": 219
+    },
+    {
+      "id": "fresh-chinese-rest",
+      "requestSha256": "40ab3f81355d9d2ce7573099bc842d685424ec39872d996361b2a442f7146fee",
+      "countRequestSha256": "a8d50de4595935a31dc38172a4f53859af3b4df8da6d4501dfe897b99ef39d5a",
+      "inputTokenUpperBound": 169
+    },
+    {
+      "id": "actual-study-goal",
+      "requestSha256": "7eaca4f052a538a4915858dca9ad50ebfa2a75d309458c2eaf806474af92af57",
+      "countRequestSha256": "fcb75da72fcfd9e75dc80d4ed8b6fd021d84e9748592541191a7eb1d05cef2a6",
+      "inputTokenUpperBound": 168
+    },
+    {
+      "id": "labelled-desk-goal",
+      "requestSha256": "ee6bc7a8e98bb21a9b146d84b8bf6842387221d73f9e8665bce90e4160c365f0",
+      "countRequestSha256": "514519347fb4fdd0dd8b3cb46d8076f72f5f29a74003d5399658dc644af30cbc",
+      "inputTokenUpperBound": 167
+    },
+    {
+      "id": "latest-goal-two-history-pairs",
+      "requestSha256": "277d7422ee29713d9da611187ff6ef61b1d50a466ecf3fd92d9d5803edb4ea59",
+      "countRequestSha256": "926de75dee842b754b312c79639f6ee702f44eab282bcec01e04184b4fcbcc44",
+      "inputTokenUpperBound": 244
+    },
+    {
+      "id": "explicit-language-request",
+      "requestSha256": "5b9fbbf796f83a7c172e360c4898807d09c1049e96449cc8661c4cf0c11fd59c",
+      "countRequestSha256": "d2c81a47365180b30ca2f7799c492e7fc137d912acd2c9b2f0c2f6b69b3347da",
+      "inputTokenUpperBound": 163
+    },
+    {
+      "id": "normal-chat",
+      "requestSha256": "f0a1e251499f02f49d1d1e76437e90fee23028cba259c4c3dbdf0d60323d49db",
+      "countRequestSha256": "fe1897dc3f926b3f1bdb96a10b6bf34f445fd1ec73783a31b4e01be4bfa6a936",
+      "inputTokenUpperBound": 160
+    },
+    {
+      "id": "calculation",
+      "requestSha256": "2e3ee81a20f2c51f8ccfd2fe555c2054066f3392c64d494fede23bc965fa4cdf",
+      "countRequestSha256": "72f2e8e7d943c0c2f58cc10a9afb9ee3628029817813bfd32fd1f2bebce6ca3c",
+      "inputTokenUpperBound": 161
+    },
+    {
+      "id": "persona-presentation",
+      "requestSha256": "27a33b727d418e18293de438e03859ec4b61d431618abad0eaaa5d00d2fe8c71",
+      "countRequestSha256": "f9a7a0fbd092152304254d4f43a9ca901dc548cf123679880dad769a62b7509a",
+      "inputTokenUpperBound": 187
+    },
+    {
+      "id": "missing-essential-goal",
+      "requestSha256": "55b7bf5a69a26fe5f995f96bb6c8460de0b2e9353b0a22024b966826082b07f7",
+      "countRequestSha256": "926fc2b597971ab24b5901d209b97b5632b3dacefe606d26ccccade08bbe22f6",
+      "inputTokenUpperBound": 167
+    },
+    {
+      "id": "ordinary-code-as-text",
+      "requestSha256": "01235a5f946b9274e78ce8ee9f2ae4faa5048d5d3144d621b74e4bffe0a1d684",
+      "countRequestSha256": "924ade7182a2c46c222e94dcc9fa02506389bc41856dd917eedb7f9989271b81",
+      "inputTokenUpperBound": 155
+    },
+    {
+      "id": "labelled-walk-goal",
+      "requestSha256": "51add7fc004ea4bf81495fe4fc9093243dae77e6e096587f62c80698f8a588d8",
+      "countRequestSha256": "7ccba635a4d7bb7d91b1761fd362c47599e75e37725371a3583b6bcea3437aa1",
+      "inputTokenUpperBound": 176
+    },
+    {
+      "id": "genuine-test-with-marker",
+      "requestSha256": "04104d873387d7cd339131b33853ef1e69910d96b0730ee2cba1633df2c8cbdf",
+      "countRequestSha256": "504474626894725b43095ceb167a89597ca95114e8b852521b2ac517eded31f8",
+      "inputTokenUpperBound": 184
+    },
+    {
+      "id": "natural-chinese",
+      "requestSha256": "a413a3b4b9b4c32c75b34bebece31fabcd587a0091872dd2a41d30c511b30193",
+      "countRequestSha256": "f290c05f1085df8b717c03db5be25b1d480d5b3e8bc3f51ffc75be1b7a0e129b",
+      "inputTokenUpperBound": 167
+    },
+    {
+      "id": "natural-english",
+      "requestSha256": "e7641c9268e0ca75e12cd29861cc1871aa16cd354dbe2219c616f6e88938c745",
+      "countRequestSha256": "2905fe528927188a86e96dc19a4b0341588a9bfb1fef023129a6b46f54ca7c8f",
+      "inputTokenUpperBound": 157
+    },
+    {
+      "id": "specified-french",
+      "requestSha256": "b6be06d1b4fb543808b211665b678d5eeeadc647cefac73e089acac9b5fe11a0",
+      "countRequestSha256": "185cb3aae941586ad07144373dbaeea95eedcb4a8a66072ed284cdbe7a9b9fd1",
+      "inputTokenUpperBound": 156
+    },
+    {
+      "id": "switch-to-english",
+      "requestSha256": "494627716280a3a45f517721b708ef1add7f93df0406f9e307600d719e228c00",
+      "countRequestSha256": "fa7bf2dddb975e37c99a94434bd0f5ac25041e7eed80c2650048b7a404a3e1c1",
+      "inputTokenUpperBound": 184
+    },
+    {
+      "id": "correct-personal-claim",
+      "requestSha256": "abcd6b0d2400ba7903976fedc026fc04999284844713e339916ec7651ef8730c",
+      "countRequestSha256": "1d3b96669220cd24981530bca48467c42843299105f30dc8efb76ef3a502896b",
+      "inputTokenUpperBound": 190
+    },
+    {
+      "id": "topic-shift-chat",
+      "requestSha256": "62bee02522f7ed4ee6387dd8e19fec4f47ac3eb08685d12361cbca5195068ebe",
+      "countRequestSha256": "33d2a04922d747b39192e68a7f1361737162b515b9099537b7f7a6b4af1ae076",
+      "inputTokenUpperBound": 182
+    },
+    {
+      "id": "unknown-event-fact",
+      "requestSha256": "8a55cd83d320b0e87e20b29128d1876eb124d202554b430f156b6c3466b59169",
+      "countRequestSha256": "a9b18545714233d172b1d89d46a2ea50c446cd8415e47bcc7d3eee14a2f7189c",
+      "inputTokenUpperBound": 154
+    },
+    {
+      "id": "no-execution-claim",
+      "requestSha256": "9620bfc73f9b8aaa86c7a6df03d211670adb6eb9b992f377243ecd7c42dd113f",
+      "countRequestSha256": "e40b2e4fa30d2a0f93a2340528815f7655aefe06fcb47dadd9dd326e7522bda6",
+      "inputTokenUpperBound": 157
+    }
+  ],
+  "verifiedAtMs": 1793784576298
+}

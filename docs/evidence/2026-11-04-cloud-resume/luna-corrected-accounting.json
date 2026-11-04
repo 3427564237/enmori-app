@@ -1,0 +1,32 @@
+{
+  "capNanoUsd": 3400000000,
+  "reservedNanoUsd": 4096000,
+  "spentNanoUsd": 1729000,
+  "attemptCount": 26,
+  "reconciledCount": 24,
+  "quotaReservations": 26,
+  "quotaBlockedUntilMs": 0,
+  "originalAttemptsRetained": 2,
+  "fence": {
+    "processEpoch": "e21a06f9-8cf0-4992-bbb5-8a5daa46654b",
+    "generation": 66,
+    "cleanupGeneration": 0
+  },
+  "priorArtifactSha256": {
+    "luna-paid/operator-intent.json": "09e7fc45177ed65b87ce37eff00b9d0f710c023980e2b78c275f465a9f8ecbbf",
+    "luna-paid/report.json": "bdb5efffb1b91ff22816d1d68349a73dfc4c7b4aa444fa137f3b29e7732e4ad3",
+    "luna-paid/post-run-accounting.json": "ce436b45a66f91c2435ac28553a620ce6b317dde014771a96a6dd22b547c25d1",
+    "luna-paid/reported-english-goal-chinese-reply.intent.json": "be2a166b54daeb327bd78a3c7bdee1d5184a9947fd7a735fd7c7834be6d01252",
+    "luna-case2-diagnostic/operator-intent.json": "c8bd2f06d33ab0443d5b83a8c9ab92f6a3ae3293f4996d561caa1a83c3867715",
+    "luna-case2-diagnostic/post-run-accounting.json": "b4675083c8c38415198a46fb66680eeda9f2def09f99d08a063ce6841e133a3b",
+    "luna-case2-diagnostic/chinese-break-with-label.intent.json": "7d7d78343529f8345dd66ad4589ca470e481f420edfe7a522cd9e0dc69920ebb",
+    "luna-case2-diagnostic/chinese-break-with-label.response.json": "1257f70f0137ff62db86c1160c09199e7a49796dd888719e46da695cd6554fd0",
+    "luna-preflight/grant.json": "77d28822b22798d8d33e0a1272a9e2cd6ba0563b0c393faf882eda6d8ff4c493",
+    "luna-preflight/token-evidence.json": "5e64c923f456ba3ec4fe36da42acc1e771c3a531b43f5cbb8cd65ae565e34a2c",
+    "generation-claims/664600d81e3b66154791d080deb7da041a37226072559934e25cee36e3eec42c.claimed.json": "f46c2460f50e2ff985c8babaa20c93bd3a0bf3b4d81b0ec14143922357d46017",
+    "diagnostic-case-claims/f70d6269a166b29c99e4e7608d2f5b2b8d51e698c0792333d75dd9ec3d9b9fa8.claimed.json": "e8eab9a4d409d1c8707f5aee1faaf0b33f9b1d0beac893bf806e22cee7fe6aad"
+  },
+  "providerCalls": 24,
+  "cumulativeProviderCalls": 26,
+  "stopReason": "case-budget-exhausted"
+}

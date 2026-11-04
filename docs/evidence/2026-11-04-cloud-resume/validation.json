@@ -1,0 +1,24 @@
+{
+  "node": "24.19.0",
+  "deployedBackendSource": "1e3c5c085ac1a810517e671061290ac30946cbf8",
+  "deployedSourceBackendTests": {
+    "passed": 1775,
+    "failed": 0
+  },
+  "finalAiSource": "b61a728200b516d5a397ed8cd0ca64d22380811f",
+  "finalSourceStrictTypeScript": "passed",
+  "finalSourceBackendTests": {
+    "passed": 1778,
+    "failed": 0
+  },
+  "azureAndLatencyTools": {
+    "passed": 6,
+    "failed": 0,
+    "moduleMockFlagRequired": true
+  },
+  "deviceAttached": false,
+  "newApkBuilt": false,
+  "openAiTestAppEnabled": false,
+  "uat": "not_claimed",
+  "release": "not_claimed"
+}

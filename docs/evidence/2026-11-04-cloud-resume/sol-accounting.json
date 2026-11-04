@@ -1,0 +1,34 @@
+{
+  "capNanoUsd": 3400000000,
+  "reservedNanoUsd": 4096000,
+  "spentNanoUsd": 41209000,
+  "newSpentNanoUsd": 39480000,
+  "attemptCount": 50,
+  "reconciledCount": 48,
+  "lunaQuotaReservations": 26,
+  "solQuotaReservations": 24,
+  "solQuotaBlockedUntilMs": 0,
+  "originalAttemptsRetained": 2,
+  "fence": {
+    "processEpoch": "134bdfc5-749a-4980-8779-0e969bac6109",
+    "generation": 67,
+    "cleanupGeneration": 0
+  },
+  "priorArtifactSha256": {
+    "luna-paid/operator-intent.json": "09e7fc45177ed65b87ce37eff00b9d0f710c023980e2b78c275f465a9f8ecbbf",
+    "luna-paid/reported-english-goal-chinese-reply.intent.json": "be2a166b54daeb327bd78a3c7bdee1d5184a9947fd7a735fd7c7834be6d01252",
+    "luna-case2-diagnostic/operator-intent.json": "c8bd2f06d33ab0443d5b83a8c9ab92f6a3ae3293f4996d561caa1a83c3867715",
+    "luna-case2-diagnostic/chinese-break-with-label.intent.json": "7d7d78343529f8345dd66ad4589ca470e481f420edfe7a522cd9e0dc69920ebb",
+    "luna-corrected/operator-intent.json": "2c6a01e5901f58e03b2bf66265eca929d3d71b4283c01a555873638b32af22ee",
+    "luna-corrected/report.json": "7d9b10ebd6b99767a61ea90874a682c193d18746c98077ef195cad26732b838b",
+    "luna-corrected/post-run-accounting.json": "a9e7d9fbdf77e24da8fa900d1327f836f3c20d4a4b5c9f49b577d70fe17f4bd9",
+    "luna-corrected/independent-semantic-review.json": "aa0361793cafdccde25c060181ecebf41bfa21d6877fe60d719dd3be0e883d77",
+    "sol-preflight/source.json": "b25cb1f45e43921ad894beadff3acb7bdd4e66f4dae3c53232766fd2ff4e36e9",
+    "sol-preflight/model-access.json": "f1da776f4e1d02a8fc5cf978ccb317e7e9cbffa03ce2b78737d4f2ebdc4f02e3",
+    "sol-preflight/grant.json": "3eb964031fc99769f3b050d6f20d16f76d398b4277a4a3971cd97c3060e5e23e",
+    "sol-preflight/token-evidence.json": "356cd56546f705d27db3655991b68f38381f8a9144d7ebfbef87235c06ff7423"
+  },
+  "providerCalls": 24,
+  "cumulativeProviderCalls": 50,
+  "stopReason": "case-budget-exhausted"
+}

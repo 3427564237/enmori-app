@@ -1,0 +1,21 @@
+{
+  "capNanoUsd": 3400000000,
+  "reservedNanoUsd": 4096000,
+  "spentNanoUsd": 0,
+  "attemptCount": 2,
+  "reconciledCount": 0,
+  "quotaBlockedUntilMs": 0,
+  "originalAttempt": "reserved",
+  "diagnosticAttempt": "reserved",
+  "priorArtifactSha256": {
+    "luna-paid/operator-intent.json": "09e7fc45177ed65b87ce37eff00b9d0f710c023980e2b78c275f465a9f8ecbbf",
+    "luna-paid/report.json": "bdb5efffb1b91ff22816d1d68349a73dfc4c7b4aa444fa137f3b29e7732e4ad3",
+    "luna-paid/post-run-accounting.json": "ce436b45a66f91c2435ac28553a620ce6b317dde014771a96a6dd22b547c25d1",
+    "luna-paid/reported-english-goal-chinese-reply.intent.json": "be2a166b54daeb327bd78a3c7bdee1d5184a9947fd7a735fd7c7834be6d01252",
+    "luna-preflight/grant.json": "77d28822b22798d8d33e0a1272a9e2cd6ba0563b0c393faf882eda6d8ff4c493",
+    "luna-preflight/token-evidence.json": "5e64c923f456ba3ec4fe36da42acc1e771c3a531b43f5cbb8cd65ae565e34a2c",
+    "generation-claims/664600d81e3b66154791d080deb7da041a37226072559934e25cee36e3eec42c.claimed.json": "f46c2460f50e2ff985c8babaa20c93bd3a0bf3b4d81b0ec14143922357d46017"
+  },
+  "actualNewProviderCalls": 1,
+  "cumulativeProviderCalls": 2
+}

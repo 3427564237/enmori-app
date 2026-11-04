@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "openai_synthetic_run_v1",
+  "mode": "live",
+  "syntheticOnly": true,
+  "model": "gpt-6-luna",
+  "corpusSha256": "1f216f2d8a4facafaac55eb9567c2136864999cc68c6759e831a81693ff0912a",
+  "configuration": {
+    "model": "gpt-6-luna",
+    "reasoningEffort": "low",
+    "maxOutputTokens": 2048,
+    "maxInputTokens": 8192,
+    "maxRequestBytes": 131072
+  },
+  "intendedCases": 24,
+  "maximumRequests": 24,
+  "grantSha256": "d0209f8982983e57f6ed62c2e65c0a587bf529b0616f315442b4088d17fc4074",
+  "tokenEvidenceSha256": "070ae127aab4936a024b38a6faf15434416c2b245ab98200e91b78e1f60c2c0c",
+  "actualProviderCalls": 1,
+  "transportInvocations": 1,
+  "startedAt": "2026-11-04T09:11:04.564Z",
+  "rows": [
+    {
+      "id": "reported-english-goal-chinese-reply",
+      "criteria": "Simplified Chinese; three short restful steps only; preserve Cedar25; no verification, studying or marker-related activity; indoors, no equipment or spending.",
+      "requestSha256": "dfa607220561e29b2da960a658019314d34a8d0c13801eea7de8a78e09a8b9e3",
+      "observation": {
+        "provider": "openai",
+        "outcome": "unconfirmed",
+        "physicallySettled": true,
+        "elapsedMs": 3450.223501,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200
+      },
+      "protocol": {
+        "valid": false,
+        "eligible": false
+      },
+      "semanticReview": "unreviewed"
+    }
+  ],
+  "semanticReview": "unreviewed",
+  "stopReason": "ineligible-or-unconfirmed-no-retry",
+  "finishedAt": "2026-11-04T09:11:08.441Z"
+}

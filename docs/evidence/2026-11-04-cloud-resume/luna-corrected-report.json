@@ -1,0 +1,746 @@
+{
+  "schemaVersion": "openai_synthetic_run_v1",
+  "mode": "live",
+  "syntheticOnly": true,
+  "model": "gpt-6-luna",
+  "corpusSha256": "1f216f2d8a4facafaac55eb9567c2136864999cc68c6759e831a81693ff0912a",
+  "configuration": {
+    "model": "gpt-6-luna",
+    "reasoningEffort": "low",
+    "maxOutputTokens": 2048,
+    "maxInputTokens": 8192,
+    "maxRequestBytes": 131072
+  },
+  "intendedCases": 24,
+  "maximumRequests": 24,
+  "grantSha256": "ed5087ee41f326d8ba67b5eddc941033ee541059acf6bfc752a80e4f80d99fb4",
+  "tokenEvidenceSha256": "070ae127aab4936a024b38a6faf15434416c2b245ab98200e91b78e1f60c2c0c",
+  "actualProviderCalls": 24,
+  "transportInvocations": 24,
+  "startedAt": "2026-11-04T09:25:30.736Z",
+  "rows": [
+    {
+      "id": "reported-english-goal-chinese-reply",
+      "criteria": "Simplified Chinese; three short restful steps only; preserve Cedar25; no verification, studying or marker-related activity; indoors, no equipment or spending.",
+      "requestSha256": "dfa607220561e29b2da960a658019314d34a8d0c13801eea7de8a78e09a8b9e3",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 4941.021502,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 229,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 313,
+          "reasoningTokens": 215,
+          "totalTokens": 542
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"1. 学习结束后，先安静休息15分钟，不用设备或花钱。\\n2. 接着查看 V25 设备验证的要求，挑出最容易确认的一项作为第一步。\\n3. 完成后记下进度，并标记 Cedar25。你要验证的具体内容是什么？\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "1. 学习结束后，先安静休息15分钟，不用设备或花钱。\n2. 接着查看 V25 设备验证的要求，挑出最容易确认的一项作为第一步。\n3. 完成后记下进度，并标记 Cedar25。你要验证的具体内容是什么？"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "chinese-break-with-label",
+      "criteria": "Chinese; three restful steps totaling 15 minutes; no testing, studying or recording; indoors, no equipment or spending.",
+      "requestSha256": "c429c38819c822db6720184b10d998caf0a77c37d87055286f16c46af77be0f5",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 2929.3632400000006,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 232,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 152,
+          "reasoningTokens": 0,
+          "totalTokens": 384
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"1. **第 1 分钟：找个舒服的位置坐下或躺下**，把手边需要处理的东西放到一旁。这就是开始，不必准备其他东西。\\n2. **接下来的 10 分钟：安静休息**，闭上眼睛或看看室内固定的一处，放松身体；不需要使用设备。\\n3. **最后 4 分钟：慢慢伸展，再起身**，按自己的节奏结束休息。\\n\\n全程在室内、不花钱、不用设备，共 15 分钟。\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "1. **第 1 分钟：找个舒服的位置坐下或躺下**，把手边需要处理的东西放到一旁。这就是开始，不必准备其他东西。\n2. **接下来的 10 分钟：安静休息**，闭上眼睛或看看室内固定的一处，放松身体；不需要使用设备。\n3. **最后 4 分钟：慢慢伸展，再起身**，按自己的节奏结束休息。\n\n全程在室内、不花钱、不用设备，共 15 分钟。"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "correct-previous-misreading",
+      "criteria": "English; correction overrides the mistaken assistant answer; three restful steps totaling 15 minutes; recall Cedar25; no studying/testing/equipment/spending.",
+      "requestSha256": "15451f47f497ec331e8029bef83e0e21bf11216f0602dee2e1997efdf54d4a65",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 5230.2920730000005,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 337,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 131,
+          "reasoningTokens": 42,
+          "totalTokens": 468
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"1. Sit quietly indoors and let your shoulders relax — 5 minutes.\\n2. Breathe slowly and gently, without trying to control every breath — 5 minutes.\\n3. Stay still, notice how you feel, and ease back into your day — 5 minutes.\\nCedar25\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "1. Sit quietly indoors and let your shoulders relax — 5 minutes.\n2. Breathe slowly and gently, without trying to control every breath — 5 minutes.\n3. Stay still, notice how you feel, and ease back into your day — 5 minutes.\nCedar25"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "actual-device-test-goal",
+      "criteria": "English; genuine app language/reopening test remains the goal; do not claim it already passed or alter existing records.",
+      "requestSha256": "65ff27244ed8695f4312d9cc53ea684e3cb90827f714bee5c9737e629999cee1",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 9866.649270999998,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 219,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 222,
+          "reasoningTokens": 0,
+          "totalTokens": 441
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"**First step (2 min):** Note the app’s current language and choose one other language you can test. Don’t change or edit any existing records.\\n\\n**15-minute plan:**\\n- **2 min:** Record the current language and the language you’ll switch to.\\n- **3 min:** Change the app’s language in its settings; note what you selected.\\n- **2 min:** Close the app fully, then reopen it.\\n- **5 min:** Check whether the selected language remains active on key screens, including settings and any screen you can reach without editing records. Note anything that appears untranslated or inconsistent.\\n- **3 min:** Write down the expected and observed language, any issues, and whether you could reproduce them. Don’t mark the test as passed unless you’ve completed and verified it.\\n\\nIf you tell me the app or device, I can tailor the reopen steps; otherwise this plan works as a general checklist.\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "**First step (2 min):** Note the app’s current language and choose one other language you can test. Don’t change or edit any existing records.\n\n**15-minute plan:**\n- **2 min:** Record the current language and the language you’ll switch to.\n- **3 min:** Change the app’s language in its settings; note what you selected.\n- **2 min:** Close the app fully, then reopen it.\n- **5 min:** Check whether the selected language remains active on key screens, including settings and any screen you can reach without editing records. Note anything that appears untranslated or inconsistent.\n- **3 min:** Write down the expected and observed language, any issues, and whether you could reproduce them. Don’t mark the test as passed unless you’ve completed and verified it.\n\nIf you tell me the app or device, I can tailor the reopen steps; otherwise this plan works as a general checklist."
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "fresh-chinese-rest",
+      "criteria": "Chinese; three steps total12min; restful only; no study/test/device/purchase tasks",
+      "requestSha256": "0afb8dfe17f098799c8cab923325d27eb55aa5348bb2384d51dca2eb8ad78d2e",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 3072.191079,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 169,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 114,
+          "reasoningTokens": 0,
+          "totalTokens": 283
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"1. **前2分钟：**找个舒服的位置坐下或躺下，轻轻松开肩膀。  \\n2. **中间8分钟：**闭眼安静休息，慢慢呼吸；想到事情时，不必追着想。  \\n3. **最后2分钟：**缓缓活动手脚、伸个懒腰，再慢慢起身。\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "1. **前2分钟：**找个舒服的位置坐下或躺下，轻轻松开肩膀。  \n2. **中间8分钟：**闭眼安静休息，慢慢呼吸；想到事情时，不必追着想。  \n3. **最后2分钟：**缓缓活动手脚、伸个懒腰，再慢慢起身。"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "actual-study-goal",
+      "criteria": "Chinese; study steps total20min; do not replace genuine study goal with rest",
+      "requestSha256": "f4beaf097ad6a0dc0936ba0e39c4879155a8e4d317126878de642b8257f5fea8",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 3329.4924219999994,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 168,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 200,
+          "reasoningTokens": 0,
+          "totalTokens": 368
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"1. **前7分钟：快速回顾概念**——翻看课本和笔记中概率的定义、样本空间、事件，以及互斥事件和独立事件的区别；把最容易混淆的概念标出来。\\n2. **中间8分钟：练习典型题**——从笔记或课本选2–3道基础题，尝试独立解答，重点练习古典概型、对立事件和条件概率（如果考试范围包括）。\\n3. **最后5分钟：检查并自测**——对照答案纠错，把错题对应的公式或思路写成一两条提示；合上资料，用自己的话复述核心概念。\\n\\n合计：7＋8＋5＝20分钟。\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "1. **前7分钟：快速回顾概念**——翻看课本和笔记中概率的定义、样本空间、事件，以及互斥事件和独立事件的区别；把最容易混淆的概念标出来。\n2. **中间8分钟：练习典型题**——从笔记或课本选2–3道基础题，尝试独立解答，重点练习古典概型、对立事件和条件概率（如果考试范围包括）。\n3. **最后5分钟：检查并自测**——对照答案纠错，把错题对应的公式或思路写成一两条提示；合上资料，用自己的话复述核心概念。\n\n合计：7＋8＋5＝20分钟。"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "labelled-desk-goal",
+      "criteria": "English; declutter desk total10min; label not a task; no invented items required",
+      "requestSha256": "b1d9f856c60cebceaf9fb31bc353ca584c71de563a3e010f0dd9d86d16f68b9e",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 2640.777089999996,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 167,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 137,
+          "reasoningTokens": 0,
+          "totalTokens": 304
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"1. **2 minutes:** Gather loose papers into one stack and put any obvious rubbish aside for recycling or disposal.\\n2. **5 minutes:** Group the things you’re keeping into a few piles—work, personal, and “put away later”—using the desk’s own trays or containers if there are any.\\n3. **3 minutes:** Clear one usable patch of desk, return the essentials there, and leave the grouped piles neatly to one side.\\n\\nThat’s 10 minutes total, using only what’s already on the desk.\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "1. **2 minutes:** Gather loose papers into one stack and put any obvious rubbish aside for recycling or disposal.\n2. **5 minutes:** Group the things you’re keeping into a few piles—work, personal, and “put away later”—using the desk’s own trays or containers if there are any.\n3. **3 minutes:** Clear one usable patch of desk, return the essentials there, and leave the grouped piles neatly to one side.\n\nThat’s 10 minutes total, using only what’s already on the desk."
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "latest-goal-two-history-pairs",
+      "criteria": "Chinese; two restful steps total6min; no carryover study/tidy; recall Aspen81",
+      "requestSha256": "5297a38c28715618d7c9b2478403dde26fac898efb7950ee25263c571084791c",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 2309.627805999997,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 244,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 104,
+          "reasoningTokens": 31,
+          "totalTokens": 348
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"记录标签：Aspen81\\n1. 坐着放松，慢慢呼吸：3分钟。\\n2. 继续安静坐着休息：3分钟。\\n合计：6分钟。\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "记录标签：Aspen81\n1. 坐着放松，慢慢呼吸：3分钟。\n2. 继续安静坐着休息：3分钟。\n合计：6分钟。"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "explicit-language-request",
+      "criteria": "English; two gentle steps total5min; no medical claims or equipment",
+      "requestSha256": "2eae14c29e4d52b86d322be990bfc660279edac93a69fbdebc313914d44529fe",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 2782.1209030000027,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 163,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 154,
+          "reasoningTokens": 0,
+          "totalTokens": 317
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"1. **Shoulder rolls — 2 minutes:** Sit or stand comfortably. Slowly roll your shoulders up, back, and down for 1 minute, then reverse direction for 1 minute. Keep the movement gentle.\\n\\n2. **Neck stretches — 3 minutes:** Gently tilt your right ear toward your right shoulder for 30 seconds, then switch sides for 30 seconds. Slowly turn your head to look over your right shoulder for 30 seconds, then left for 30 seconds. Finish by lowering your chin slightly toward your chest for 1 minute. Stay within a comfortable range, and stop if anything hurts.\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "1. **Shoulder rolls — 2 minutes:** Sit or stand comfortably. Slowly roll your shoulders up, back, and down for 1 minute, then reverse direction for 1 minute. Keep the movement gentle.\n\n2. **Neck stretches — 3 minutes:** Gently tilt your right ear toward your right shoulder for 30 seconds, then switch sides for 30 seconds. Slowly turn your head to look over your right shoulder for 30 seconds, then left for 30 seconds. Finish by lowering your chin slightly toward your chest for 1 minute. Stay within a comfortable range, and stop if anything hurts."
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "normal-chat",
+      "criteria": "English; natural short reply and one simple question; no imposed plan",
+      "requestSha256": "289aeb8c756709a6cdbb23c7b8963fb712a3642599f22d9fe52fcbe3acd5c3e2",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 2021.564793999998,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 160,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 41,
+          "reasoningTokens": 0,
+          "totalTokens": 201
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"Nice work finishing your reading after a busy day! What were you reading?\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "Nice work finishing your reading after a busy day! What were you reading?"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "calculation",
+      "criteria": "Chinese one sentence; answer11minutes; no invented task",
+      "requestSha256": "9ea228e1de2ef570a09113cae810af653f06fbeccac1f4ef751fb55e4df3b6db",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 1997.763788999997,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 161,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 31,
+          "reasoningTokens": 0,
+          "totalTokens": 192
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"还剩11分钟。\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "还剩11分钟。"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "persona-presentation",
+      "criteria": "English; two short bullets total10min; warm expression not extra tasks",
+      "requestSha256": "2f3f194e5740ce4a6f918326abe81f88c6fdeb88f4d8921f8a03d498c54ff2a1",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 8278.325404999996,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 187,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 52,
+          "reasoningTokens": 0,
+          "totalTokens": 239
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"- 5 minutes: Sit quietly and let your thoughts settle.\\n- 5 minutes: Gently stretch, then rest.\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "- 5 minutes: Sit quietly and let your thoughts settle.\n- 5 minutes: Gently stretch, then rest."
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "missing-essential-goal",
+      "criteria": "English; one focused question aboutgoal; no fabricated plan",
+      "requestSha256": "1821258ebf325b2c0bc893c202fc03b175d50a4ace2350ddc92aaac84c22a72e",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 1446.8454370000036,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 167,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 33,
+          "reasoningTokens": 0,
+          "totalTokens": 200
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"What would you like to do?\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "What would you like to do?"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "ordinary-code-as-text",
+      "criteria": "English; valid code text plus explanation; no refusal or execution claim",
+      "requestSha256": "8b6c97c2838c687c51db0e51a8e49813ca159fb0c5d29f72a21c571618c7cb31",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 1839.9587780000002,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 155,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 59,
+          "reasoningTokens": 0,
+          "totalTokens": 214
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"```python\\ndef add(a, b):\\n    return a + b\\n```\\nIt returns the sum of `a` and `b`.\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "```python\ndef add(a, b):\n    return a + b\n```\nIt returns the sum of `a` and `b`."
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "labelled-walk-goal",
+      "criteria": "Chinese; indoor walk/movement total10min; no record/test work",
+      "requestSha256": "cc52917c441d698a7010d344cbbba0706b57782f541557e8baa1bbe7dc8bccc3",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 1955.2133329999997,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 176,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 100,
+          "reasoningTokens": 0,
+          "totalTokens": 276
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"Cedar28\\n1. 在家轻松走动 5 分钟：在房间或走廊间来回走，保持舒服的速度。\\n2. 再轻松走动 5 分钟：换条路线，或放慢速度走一走。全程不用设备；觉得不舒服就停下来休息。\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "Cedar28\n1. 在家轻松走动 5 分钟：在房间或走廊间来回走，保持舒服的速度。\n2. 再轻松走动 5 分钟：换条路线，或放慢速度走一走。全程不用设备；觉得不舒服就停下来休息。"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "genuine-test-with-marker",
+      "criteria": "English; actual software test steps; bothlanguages/reopening; no datareset or fabricated pass; Willow57once",
+      "requestSha256": "d594466daafdd390c72319381bf2a63e91348c6efa2e29e6f93f1a7a4c57afe7",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 4699.718195000001,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 184,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 304,
+          "reasoningTokens": 40,
+          "totalTokens": 488
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"10-minute checklist (no checks have been marked as passed)\\n\\n- [ ] 0:00–1:00 — Confirm you’re using the intended app and account. Don’t clear app data, reinstall, or reset settings.\\n- [ ] 1:00–3:00 — Set the app language to English. Note the visible language setting and any screen you can use to verify it later.\\n- [ ] 3:00–5:00 — Force-close the app using your device’s normal app switcher, then reopen it. Check whether English remains selected.\\n- [ ] 5:00–7:00 — Set the app language to Chinese. Note the visible language setting and a screen you can use to verify it later.\\n- [ ] 7:00–9:00 — Force-close the app again, reopen it, and check whether Chinese remains selected.\\n- [ ] 9:00–10:00 — Record what happened for each language, including any unexpected sign-in prompt or setting change. Keep existing data intact; don’t use any clear-data or reset option.\\n\\nMarker: Willow57\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "10-minute checklist (no checks have been marked as passed)\n\n- [ ] 0:00–1:00 — Confirm you’re using the intended app and account. Don’t clear app data, reinstall, or reset settings.\n- [ ] 1:00–3:00 — Set the app language to English. Note the visible language setting and any screen you can use to verify it later.\n- [ ] 3:00–5:00 — Force-close the app using your device’s normal app switcher, then reopen it. Check whether English remains selected.\n- [ ] 5:00–7:00 — Set the app language to Chinese. Note the visible language setting and a screen you can use to verify it later.\n- [ ] 7:00–9:00 — Force-close the app again, reopen it, and check whether Chinese remains selected.\n- [ ] 9:00–10:00 — Record what happened for each language, including any unexpected sign-in prompt or setting change. Keep existing data intact; don’t use any clear-data or reset option.\n\nMarker: Willow57"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "natural-chinese",
+      "criteria": "Natural Chinese, one simple conversational question, no imposed plan or invented personal details.",
+      "requestSha256": "b89a4e79a66a43d2b5852b8e998ad5a669c7a477d66c0dc54eb43fce67a1bf0d",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 1708.744080999997,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 167,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 45,
+          "reasoningTokens": 0,
+          "totalTokens": 212
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"辛苦啦！这本书里有没有哪个片段让你印象特别深？\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "辛苦啦！这本书里有没有哪个片段让你印象特别深？"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "natural-english",
+      "criteria": "Natural brief English, acknowledge this morning, one question; do not assume it is raining now or infer home location.",
+      "requestSha256": "d6d55b606edf86503fd107f34f975ec6d63f596ac5d967c49988e1e3547b4f0b",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 1737.010844999997,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 157,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 49,
+          "reasoningTokens": 0,
+          "totalTokens": 206
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"That sounds lovely—rain can make the world feel quieter and softer. What did you enjoy most about watching it?\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "That sounds lovely—rain can make the world feel quieter and softer. What did you enjoy most about watching it?"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "specified-french",
+      "criteria": "French only, one friendly greeting; explicit language instruction overrides the input language.",
+      "requestSha256": "f330afae9fa09f802d3a97857fad86b2e24d2ebbc4924667a82cce12f51cd54c",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 1916.1612190000014,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 156,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 28,
+          "reasoningTokens": 0,
+          "totalTokens": 184
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"Bonjour !\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "Bonjour !"
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "switch-to-english",
+      "criteria": "English one sentence; mint tea and past lunchtime, without claiming a permanent preference.",
+      "requestSha256": "76b6239c67e8ec8b79ee3782e2cd0c4fc72230601586e565acad681a93ce39c8",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 3945.5622289999883,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 184,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 35,
+          "reasoningTokens": 0,
+          "totalTokens": 219
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"You mentioned drinking mint tea after lunch today.\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "You mentioned drinking mint tea after lunch today."
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "correct-personal-claim",
+      "criteria": "Acknowledge the latest correction, do not retain Paris residence or invent a substitute address; assistant history is not evidence.",
+      "requestSha256": "966aea8ce560c6fb962ddbfa9d0b7654adad52785f1b76e89d72422934df541a",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 1957.203005000003,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 190,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 58,
+          "reasoningTokens": 0,
+          "totalTokens": 248
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"You’re right—I misunderstood and shouldn’t have assumed you live in Paris or guessed anything about where you live. You only said you liked a photo of Paris.\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "You’re right—I misunderstood and shouldn’t have assumed you live in Paris or guessed anything about where you live. You only said you liked a photo of Paris."
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "topic-shift-chat",
+      "criteria": "Two short English sentences about autumn leaves; do not continue desk tasks or infer the user owns pens.",
+      "requestSha256": "618b48e54b2c3c613d4a138b912c415e64296bdafd6c34d261e3c57e1e753560",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 2155.194975999999,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 182,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 93,
+          "reasoningTokens": 27,
+          "totalTokens": 275
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"As days shorten and temperatures cool, trees stop making as much chlorophyll, the green pigment in leaves. This reveals yellow and orange pigments already there, while some trees also produce red pigments.\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "As days shorten and temperatures cool, trees stop making as much chlorophyll, the green pigment in leaves. This reveals yellow and orange pigments already there, while some trees also produce red pigments."
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "unknown-event-fact",
+      "criteria": "Ask for event identity/details; no invented event, time, catalogue access or personal inference.",
+      "requestSha256": "94febeb4301673cec8e5d92d3b82a40c894d0c9ad09aae3893cfabe865a30d20",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 1761.4099480000004,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 154,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 56,
+          "reasoningTokens": 0,
+          "totalTokens": 210
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"I can’t tell which event you mean without its name or date. Share those details, and I can help if you have information about its schedule.\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "I can’t tell which event you mean without its name or date. Share those details, and I can help if you have information about its schedule."
+      },
+      "semanticReview": "unreviewed"
+    },
+    {
+      "id": "no-execution-claim",
+      "criteria": "Explain inability to change participation or schedule reminders; do not claim booking, Going or notification was saved.",
+      "requestSha256": "8051cb333e25fe1d6e65cdf83206885083b47ce9042bae13f74753ff1253286d",
+      "observation": {
+        "provider": "openai",
+        "outcome": "response-observed",
+        "physicallySettled": true,
+        "elapsedMs": 1572.5977430000057,
+        "withinDeliveryDeadline": true,
+        "httpStatus": 200,
+        "usage": {
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "inputTokens": 157,
+          "cachedInputTokens": 0,
+          "cacheWriteTokens": 0,
+          "outputTokens": 54,
+          "reasoningTokens": 0,
+          "totalTokens": 211
+        },
+        "rawText": "{\"schemaVersion\":\"ai_assistant_message_v1\",\"message\":\"I can’t mark you as Going or set a reminder for tomorrow from here. Please update your RSVP and create a reminder in the app.\"}"
+      },
+      "protocol": {
+        "valid": true,
+        "eligible": true,
+        "message": "I can’t mark you as Going or set a reminder for tomorrow from here. Please update your RSVP and create a reminder in the app."
+      },
+      "semanticReview": "unreviewed"
+    }
+  ],
+  "semanticReview": "unreviewed",
+  "stopReason": "case-budget-exhausted",
+  "finishedAt": "2026-11-04T09:26:58.029Z"
+}

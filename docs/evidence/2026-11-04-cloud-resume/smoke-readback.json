@@ -1,0 +1,1 @@
+{"mode":"readback","passed":[{"check":"profile-after-restart","status":200,"elapsedMs":6430},{"check":"check-in-after-restart","status":200,"elapsedMs":3266},{"check":"disabled-identity-denied","status":403,"elapsedMs":797}],"completed":true}
