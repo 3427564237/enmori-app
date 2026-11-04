@@ -225,7 +225,9 @@ final class _OwnParticipationSectionState
                       '还没有保存的计划。打开活动后，可选择“感兴趣”或“将参加”。',
                     )
                   : context.tr(
-                      'No ${_filter == _PlanFilter.all ? '' : '${_filter.label.toLowerCase()} '}records in this loaded selection. Try another filter${state.nextCursor != null ? ' or load more' : ''}.',
+                      _filter == _PlanFilter.none
+                          ? 'No records without current participation in this loaded selection. Try another filter${state.nextCursor != null ? ' or load more' : ''}.'
+                          : 'No ${_filter == _PlanFilter.all ? '' : '${_filter.label.toLowerCase()} '}records in this loaded selection. Try another filter${state.nextCursor != null ? ' or load more' : ''}.',
                       '已加载的记录中没有匹配项，请尝试其他筛选${state.nextCursor != null ? '或加载更多' : ''}。',
                     ),
             ),
