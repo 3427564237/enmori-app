@@ -65,7 +65,7 @@ test('Responses sends one fixed-host standard-tier strict JSON request with stor
 
 test('only the two explicitly selected trial models and low effort are constructible; configuration errors are safe', () => {
   for (const delta of [{ model: 'gpt-6-astra' }, { reasoningEffort: 'medium' }, { maxOutputTokens: 15 },
-    { maxOutputTokens: 128001 }, { maxInputTokens: 0 }, { maxRequestBytes: 131073 }]) {
+    { maxOutputTokens: 128001 }, { maxInputTokens: 0 }, { maxRequestBytes: 131073 }, { promptProfile: 'unknown' }]) {
     assert.throws(() => fixture(undefined, {}, { ...config, ...delta } as OpenAiTransportConfiguration),
       error => error instanceof Error && error.message === 'OPENAI_CONFIGURATION_INVALID');
   }
@@ -388,4 +388,25 @@ test('chat bridge reuses exact local authorized messages and does not add provid
   assert.equal((await new OpenAiChatTransport(f.transport).dispatch(input, f.budget)).kind, 'response');
   assert.deepEqual(sent, buildChatMessages(input));
   assert.deepEqual(await new OpenAiChatTransport(f.transport).dispatch({ ...input, currentMessage: '' }, f.budget), unknown);
+});
+
+test('the explicit goal profile uses the same Responses body through the authorized chat bridge', async () => {
+  const input: ConversationInput = { strategy: 'open_conversation_v1', currentMessage: 'Now rest.',
+    contextMode: 'selected_checkins_v1', checkIns: [{ occurredAt: '2026-10-24T10:00:00.000Z', noteText: 'Tried sketching.' }],
+    history: [{ user: 'Earlier fact.', assistant: 'Earlier suggestion.' }],
+    persona: { schemaVersion: 'persona_presentation_v1', tone: 'warm', responseLength: 'concise', formatStyle: 'bulleted' } };
+  const settings = { ...config, promptProfile: 'goal-grounding-v1' } as const;
+  const authorized = buildChatMessages(input);
+  const baseline = buildOpenAiRequest(authorized, config);
+  const candidate = buildOpenAiRequest(authorized, settings);
+  assert.equal(buildOpenAiRequest(authorized, { ...config, promptProfile: 'baseline' }), baseline);
+  const { input: changed, ...controls } = JSON.parse(candidate);
+  assert.equal(changed[0].role, 'system');
+  assert(changed[0].content.startsWith(`${authorized[0]!.content}\n\n`));
+  assert.deepEqual({ ...controls, input: [authorized[0], ...changed.slice(1)] }, JSON.parse(baseline));
+  const f = fixture(async (_url, init) => {
+    assert.equal(init?.body, candidate);
+    return Response.json(envelope());
+  }, { inputTokenUpperBound: body => { assert.equal(body, candidate); return 100; } }, settings);
+  assert.equal((await new OpenAiChatTransport(f.transport).dispatch(input, f.budget)).kind, 'response');
 });

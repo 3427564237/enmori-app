@@ -8,14 +8,16 @@ import { OpenAiCloudTransport, assertOpenAiTransportSettings, buildOpenAiRequest
 const countEndpoint = `${openAiResponsesEndpoint}/input_tokens`;
 const countMethod = 'responses-input-token-count';
 
-export const openAiEvaluationConfiguration = model => Object.freeze({ model,
+export const openAiEvaluationConfiguration = (model, promptProfile = 'baseline') => Object.freeze({ model,
+  ...(promptProfile === 'baseline' ? {} : { promptProfile }),
   reasoningEffort: 'low', maxOutputTokens: 2048, maxInputTokens: 8192, maxRequestBytes: 131072 });
 
-/** Golden production prompts and original criteria, not candidate-specific
- * rewrites. This preparation is offline and accepts no arbitrary user data. */
-export async function prepareOpenAiCases(model) {
+/** Golden production messages and original criteria. The shared OpenAI request
+ * builder applies an explicitly selected profile to the system message. */
+export async function prepareOpenAiCases(model, promptProfile = 'baseline') {
   assert(['gpt-6-luna', 'gpt-6.1-sol'].includes(model));
-  const config = openAiEvaluationConfiguration(model), rows = [];
+  assert(['baseline', 'goal-grounding-v1'].includes(promptProfile));
+  const config = openAiEvaluationConfiguration(model, promptProfile), rows = [];
   for (const fixture of loadGroqCases()) {
     const { prompt } = await prepareGroqCase(fixture.id, 'baseline');
     const messages = [{ role: 'system', content: prompt.system },
@@ -44,6 +46,8 @@ function checkGrant(grant, prepared, now) {
   assert(grant?.syntheticOnly === true && grant.model === prepared.config.model && grant.corpusSha256 === prepared.corpusSha256 &&
     grant.maximumRequests === 24 && typeof grant.approvalReference === 'string' && grant.approvalReference.length > 0 &&
     Number.isSafeInteger(now) && Number.isSafeInteger(grant.expiresAtMs) && now < grant.expiresAtMs);
+  const { promptProfile = 'baseline' } = grant;
+  assert(promptProfile === (prepared.config.promptProfile ?? 'baseline'));
   assert(grant.model === 'gpt-6-luna' || grant.lunaQualityFailed === true);
 }
 
@@ -56,6 +60,8 @@ function checkHttpMode(mode, http) {
  * or verified model framing, never a bytes/characters heuristic. */
 export function validateOpenAiTokenEvidence(evidence, prepared, now, mode = 'mock') {
   assert(evidence?.schemaVersion === 'openai_input_bound_v1' && evidence.model === prepared.config.model);
+  const { promptProfile = 'baseline' } = evidence;
+  assert(promptProfile === (prepared.config.promptProfile ?? 'baseline'));
   assert(Number.isSafeInteger(evidence.verifiedAtMs) && evidence.verifiedAtMs <= now &&
     Number.isSafeInteger(evidence.expiresAtMs) && now < evidence.expiresAtMs);
   assert([countMethod, 'verified-model-framing'].includes(evidence.method));
@@ -104,15 +110,16 @@ async function readCount(response, maxInputTokens) {
 /** An explicit, one-use synthetic preflight. OpenAI documents this endpoint
  * as free; paid generation stays in runOpenAiEvaluation and its monetary owner.
  * The caller supplies a durable count claim separate from the generation claim. */
-export async function collectOpenAiTokenEvidence({ mode = 'mock', model, key, grant,
+export async function collectOpenAiTokenEvidence({ mode = 'mock', model, promptProfile = 'baseline', key, grant,
   claimPreflight, save, http, utcNow = Date.now }) {
-  const prepared = await prepareOpenAiCases(model), { config, corpusSha256 } = prepared;
+  const prepared = await prepareOpenAiCases(model, promptProfile), { config, corpusSha256 } = prepared;
   checkGrant(grant, prepared, utcNow());
   assertOpenAiTransportSettings(key, config, config.maxInputTokens + config.maxOutputTokens);
   assert(typeof save === 'function' && typeof claimPreflight === 'function');
   checkHttpMode(mode, http);
   await claimPreflight(grant);
   const evidence = { schemaVersion: 'openai_input_bound_v1', method: countMethod, mode, model,
+    ...(config.promptProfile === undefined ? {} : { promptProfile: config.promptProfile }),
     corpusSha256, expiresAtMs: grant.expiresAtMs, rows: [] };
   for (const row of prepared.rows) {
     const body = countRequestBody(row, config);
@@ -151,9 +158,9 @@ export async function collectOpenAiTokenEvidence({ mode = 'mock', model, key, gr
 /** Explicit dependency injection: one shared durable monetary owner, a private
  * writer, a single-use run claim, and verified exact-request input bounds.
  * Importing this module never reads credentials, calls HTTP, or renews credit. */
-export async function runOpenAiEvaluation({ mode = 'mock', model, key, owner, tokenEvidence, grant,
+export async function runOpenAiEvaluation({ mode = 'mock', model, promptProfile = 'baseline', key, owner, tokenEvidence, grant,
   claimRun, save, http, clock, rateAuthority, utcNow = Date.now, newAttemptId = randomUUID }) {
-  const prepared = await prepareOpenAiCases(model), { config } = prepared;
+  const prepared = await prepareOpenAiCases(model, promptProfile), { config } = prepared;
   const bounds = validateOpenAiTokenEvidence(tokenEvidence, prepared, utcNow(), mode);
   checkGrant(grant, prepared, utcNow());
   assert(typeof save === 'function' && typeof claimRun === 'function');
@@ -167,7 +174,7 @@ export async function runOpenAiEvaluation({ mode = 'mock', model, key, owner, to
     const recovery = await owner.recover();
     assert.equal(recovery.kind, 'confirmed');
   }
-  const report = { schemaVersion: 'openai_synthetic_run_v1', mode, syntheticOnly: true, model,
+  const report = { schemaVersion: 'openai_synthetic_run_v1', mode, syntheticOnly: true, model, promptProfile,
     corpusSha256: prepared.corpusSha256, configuration: config, intendedCases: 24, maximumRequests: 24,
     grantSha256: sha256(JSON.stringify(grant)), tokenEvidenceSha256: sha256(JSON.stringify(tokenEvidence)),
     actualProviderCalls: 0, transportInvocations: 0,

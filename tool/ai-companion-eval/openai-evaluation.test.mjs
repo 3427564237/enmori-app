@@ -3,7 +3,8 @@ import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { collectOpenAiTokenEvidence, prepareOpenAiCases, validateOpenAiTokenEvidence, runOpenAiEvaluation,
   requireOpenAiSemanticAcceptance } from './openai-evaluation.mjs';
-import { sha256 } from './evaluation.mjs';
+import { loadCases, sha256 } from './evaluation.mjs';
+import { OpenAiChatTransport } from '../../backend/dist/src/ai-runtime/infrastructure/openai-chat-transport.js';
 import { buildOpenAiRequest } from '../../backend/dist/src/ai-runtime/infrastructure/openai-cloud-transport.js';
 
 const key = 'sk-synthetic_only_not_a_credential_123456789';
@@ -28,12 +29,81 @@ async function fixture(http) {
 }
 
 test('both OpenAI models preserve all 24 exact golden messages and criteria', async () => {
-  const golden = JSON.parse(readFileSync(new URL('./fixtures/current-prompt-requests.json', import.meta.url)));
+  const fixture = readFileSync(new URL('./fixtures/current-prompt-requests.json', import.meta.url));
+  assert.equal(sha256(fixture), 'b6a8673446a1a36cc5921e097ecacbf06aa752450227e9eddbab6ad7049027ee');
+  const golden = JSON.parse(fixture);
   for (const model of ['gpt-6-luna', 'gpt-6.1-sol']) {
     const prepared = await prepareOpenAiCases(model);
     assert.equal(prepared.rows.length, 24);
     for (let i = 0; i < 24; i++) assert.deepEqual(prepared.rows[i].messages, JSON.parse(golden.cases[i].body).messages);
   }
+});
+
+test('the goal-grounding profile changes only the system message in both complete candidate sets', async () => {
+  const suffixes = new Set();
+  const corpus = loadCases().cases.filter(item => item.track === 'current-prompt');
+  for (const model of ['gpt-6-luna', 'gpt-6.1-sol']) {
+    const baseline = await prepareOpenAiCases(model);
+    const candidate = await prepareOpenAiCases(model, 'goal-grounding-v1');
+    assert.equal(candidate.corpusSha256, baseline.corpusSha256);
+    assert.deepEqual(candidate.config, { ...baseline.config, promptProfile: 'goal-grounding-v1' });
+    let projectedBody;
+    const production = new OpenAiChatTransport({ dispatch: async messages => {
+      projectedBody = buildOpenAiRequest(messages, candidate.config);
+      return { kind: 'unknown', physical: 'unknown' };
+    } });
+    for (const [index, row] of candidate.rows.entries()) {
+      const old = baseline.rows[index];
+      assert.equal(row.id, corpus[index].id);
+      assert.equal(row.criteria, corpus[index].criteria);
+      assert.deepEqual(row, { ...old, requestSha256: row.requestSha256 });
+      const before = JSON.parse(buildOpenAiRequest(old.messages, baseline.config));
+      const raw = buildOpenAiRequest(row.messages, candidate.config);
+      const { input, ...controls } = JSON.parse(raw);
+      projectedBody = undefined;
+      await production.dispatch(corpus[index].input, {});
+      assert.equal(projectedBody, raw);
+      assert.equal(row.requestSha256, sha256(raw));
+      assert.notEqual(row.requestSha256, old.requestSha256);
+      assert.equal(input[0].role, 'system');
+      assert(input[0].content.startsWith(`${before.input[0].content}\n\n`));
+      suffixes.add(input[0].content.slice(before.input[0].content.length + 2));
+      assert.deepEqual({ ...controls, input: [before.input[0], ...input.slice(1)] }, before);
+    }
+  }
+  assert.equal(suffixes.size, 1);
+  assert([...suffixes][0].length > 0);
+});
+
+test('the goal-grounding profile requires a matching grant and new exact-body count evidence', async () => {
+  const promptProfile = 'goal-grounding-v1';
+  const f = await fixture(async () => { throw Error('synthetic generation stopped'); });
+  const candidate = await prepareOpenAiCases(f.args.model, promptProfile);
+  const { model, utcNow } = f.args;
+  const grant = { ...f.args.grant, promptProfile };
+  let countCalls = 0, claims = 0;
+  const count = { model, promptProfile, key, grant, utcNow, save: async () => {}, claimPreflight: async () => { claims++; },
+    http: async (_url, { body }) => {
+      const row = candidate.rows[countCalls++];
+      const generation = JSON.parse(buildOpenAiRequest(row.messages, candidate.config));
+      assert.deepEqual(JSON.parse(body).input, generation.input);
+      return Response.json({ object: 'response.input_tokens', input_tokens: 101 });
+    } };
+  await assert.rejects(collectOpenAiTokenEvidence({ ...count, grant: f.args.grant }));
+  assert.equal(claims, 0);
+  assert.equal(countCalls, 0);
+  const tokenEvidence = await collectOpenAiTokenEvidence(count);
+  assert.equal(tokenEvidence.promptProfile, promptProfile);
+  assert.equal(claims, 1);
+  assert.equal(countCalls, 24);
+  await assert.rejects(runOpenAiEvaluation({ ...f.args, promptProfile, grant }));
+  await assert.rejects(runOpenAiEvaluation({ ...f.args, promptProfile, tokenEvidence }));
+  assert.equal(f.actions.length, 0);
+  const report = await runOpenAiEvaluation({ ...f.args, promptProfile, grant, tokenEvidence });
+  assert.equal(report.promptProfile, promptProfile);
+  assert.equal(report.configuration.promptProfile, promptProfile);
+  assert.equal(report.rows[0].requestSha256, candidate.rows[0].requestSha256);
+  assert.equal(report.transportInvocations, 1);
 });
 
 test('OpenAI preflight counts only the 24 fixed inputs and binds both request bodies', async () => {

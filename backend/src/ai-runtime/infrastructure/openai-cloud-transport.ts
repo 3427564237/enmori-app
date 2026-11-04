@@ -3,10 +3,12 @@ import type { RequestBudget } from '../ports/generation-transport.js';
 import type { RuntimeClock } from '../ports/runtime-clock.js';
 
 export type OpenAiTrialModel = 'gpt-6-luna' | 'gpt-6.1-sol';
+export type OpenAiPromptProfile = 'baseline' | 'goal-grounding-v1';
 export interface OpenAiMessage { readonly role: 'system' | 'user' | 'assistant'; readonly content: string }
 export interface OpenAiTransportConfiguration {
   readonly model: OpenAiTrialModel;
   readonly reasoningEffort: 'low';
+  readonly promptProfile?: OpenAiPromptProfile;
   /** Includes reasoning tokens, not just the visible JSON. */
   readonly maxOutputTokens: number;
   readonly maxInputTokens: number;
@@ -61,6 +63,9 @@ export interface OpenAiDispatchControls {
 }
 
 export const openAiResponsesEndpoint = 'https://api.openai.com/v1/responses';
+const goalGroundingInstruction = 'Keep each step focused on the latest user’s explicit outcome and constraints. ' +
+  'Treat labels, markers and background activities as context unless the user asks to act on them. ' +
+  'Make required steps work without assuming unstated items. Ask for details only when needed to satisfy the request.';
 const maxResponseBytes = 1024 * 1024;
 const unknown = (): CloudGenerationObservation => ({ kind: 'unknown', physical: 'unknown' });
 const stopped = (): CloudGenerationObservation => ({ kind: 'failure', physical: 'stopped' });
@@ -113,6 +118,7 @@ function hostedToolUsageShape(value: unknown): NonNullable<OpenAiRejectionDiagno
 
 function validConfiguration(config: OpenAiTransportConfiguration): boolean {
   return !!config && ['gpt-6-luna', 'gpt-6.1-sol'].includes(config.model) && config.reasoningEffort === 'low' &&
+    (config.promptProfile === undefined || config.promptProfile === 'baseline' || config.promptProfile === 'goal-grounding-v1') &&
     within(config.maxOutputTokens, 16, 128000) && within(config.maxInputTokens, 1, 131072) &&
     within(config.maxRequestBytes, 1, 131072);
 }
@@ -123,6 +129,7 @@ export function assertOpenAiTransportSettings(key: string, config: OpenAiTranspo
   reservedTokens: number): Readonly<OpenAiTransportConfiguration> {
   try {
     const selected: OpenAiTransportConfiguration = { model: config.model, reasoningEffort: config.reasoningEffort,
+      ...(config.promptProfile === undefined ? {} : { promptProfile: config.promptProfile }),
       maxOutputTokens: config.maxOutputTokens, maxInputTokens: config.maxInputTokens, maxRequestBytes: config.maxRequestBytes };
     if (typeof key !== 'string' || !/^sk-[A-Za-z0-9_-]{20,508}$/.test(key) || !validConfiguration(selected) ||
         !count(reservedTokens) || reservedTokens < selected.maxInputTokens + selected.maxOutputTokens) throw Error();
@@ -140,7 +147,9 @@ export function buildOpenAiRequest(messages: readonly OpenAiMessage[], config: O
           !record(m) || Object.keys(m).length !== 2 || !keysWithin(m, ['role', 'content']) ||
           m.role !== (i === 0 ? 'system' : i % 2 === 1 ? 'user' : 'assistant') ||
           typeof m.content !== 'string' || !m.content.isWellFormed() || !m.content.trim())) throw Error();
-    const input = messages.map(message => ({ role: message.role, content: message.content }));
+    const input = messages.map((message, index) => ({ role: message.role,
+      content: index === 0 && config.promptProfile === 'goal-grounding-v1'
+        ? `${message.content}\n\n${goalGroundingInstruction}` : message.content }));
     body = JSON.stringify({ model: config.model, input,
       reasoning: { effort: config.reasoningEffort }, max_output_tokens: config.maxOutputTokens,
       stream: false, store: false, background: false, service_tier: 'default', truncation: 'disabled',
