@@ -15,6 +15,145 @@ import 'package:flutter_test/flutter_test.dart';
 import 'ai_selected_test_support.dart';
 
 void main() {
+  void observeOpenAi(SelectedRig rig, CloudAiConsent grant, int revision) {
+    rig.container
+        .read(accountSettingsSnapshotProvider.notifier)
+        .observe(
+          OwnSettings(
+            checkInVisibility: CheckInVisibility.private,
+            consent: OptionalProcessingConsent.accepted,
+            revision: revision,
+            cloudAiConsent: grant,
+          ),
+        );
+  }
+
+  testWidgets('OpenAI withdrawal aborts a pending selection before Execute', (
+    tester,
+  ) async {
+    final r = await SelectedRig.create(
+      tester,
+      processing: AiClientProcessing.openaiCloud,
+    );
+    r.add('record');
+    await r.sources.chooseOwned('record');
+    final response = Completer<Result<AiSelectedReplyTicket>>();
+    r.repo.nextPrepare = response.future;
+    final pending = r.sources.review();
+    await tester.pump();
+    expect(r.repo.selectedPrepares, hasLength(1));
+    observeOpenAi(r, CloudAiConsent.openaiDeclined, 2);
+    await tester.pump();
+    await pending;
+    expect(r.repo.selectedPrepares.single.abort.isAborted, isTrue);
+    expect(r.aiState.phase, AiConversationPhase.limited);
+    final operation = AiTicket(
+      operationId: 'operation-1',
+      operationKey: 'stale',
+      conversationId: 'selected-topic',
+      preparationExpiresAt: r.utc.add(const Duration(seconds: 15)),
+    );
+    response.complete(
+      Success(
+        AiSelectedReplyTicket(
+          operation: operation,
+          selection: AiPreparedReplySelection(
+            selectionRevision: 'old',
+            expiresAt: operation.preparationExpiresAt,
+            sourceCards: [],
+            historyPairs: [],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await r.sources.send('Private synthetic text');
+    expect(r.repo.selectedExecutes, isEmpty);
+    expect(r.sourceState.review, isNull);
+    r.dispose();
+    await tester.pump();
+  });
+
+  testWidgets(
+    'OpenAI withdrawal cancels in-flight work and reacceptance cannot display cached replies',
+    (tester) async {
+      final r = await SelectedRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+      );
+      r.add('record');
+      Future<void> review() async {
+        await r.sources.chooseOwned('record');
+        await r.sources.review();
+        r.sources.confirm(r.sourceState.review!.selectionRevision);
+      }
+
+      await review();
+      await r.sources.send('First synthetic message');
+      expect(r.aiState.messages, hasLength(2));
+      expect(r.repo.selectedExecutes, hasLength(1));
+      await review();
+      final response = Completer<Result<AiReply>>();
+      r.repo.nextExecute = response.future;
+      final pending = r.sources.send('Second synthetic message');
+      await tester.pump();
+      expect(r.repo.selectedExecutes, hasLength(2));
+      final original = r.repo.selectedExecutes.last.ticket.operation;
+
+      observeOpenAi(r, CloudAiConsent.openaiDeclined, 2);
+      await tester.pump();
+      await pending;
+      expect(
+        r.repo.cancellations.where(
+          (ticket) => ticket.operationId == original.operationId,
+        ),
+        hasLength(1),
+      );
+      expect(r.aiState.messages, isEmpty);
+      expect(r.aiState.phase, AiConversationPhase.limited);
+      observeOpenAi(r, CloudAiConsent.openaiAccepted, 1);
+      expect(r.aiState.phase, AiConversationPhase.limited);
+
+      observeOpenAi(r, CloudAiConsent.openaiAccepted, 3);
+      expect(r.aiState.messages, isEmpty);
+      expect(r.aiState.phase, AiConversationPhase.unknown);
+      expect(r.aiState.canCheckResult, isTrue);
+      response.complete(const Failure(selectedUnknown));
+      await tester.pump();
+      expect(r.aiState.messages, isEmpty);
+      expect(r.repo.selectedExecutes, hasLength(2));
+      r.dispose();
+      await tester.pump();
+    },
+  );
+
+  testWidgets(
+    'unknown OpenAI settings close sending while retaining the unsent draft',
+    (tester) async {
+      final r = await SelectedRig.create(
+        tester,
+        processing: AiClientProcessing.openaiCloud,
+      );
+      const text = 'Unsent synthetic draft';
+      r.ai.updateDraft(
+        const TextEditingValue(text: text),
+        sessionKey: r.aiState.sessionKey,
+      );
+      expect(r.aiState.canSend, isTrue);
+      r.container.invalidate(accountSettingsSnapshotProvider);
+      await tester.pump();
+      expect(r.aiState.canSend, isFalse);
+      expect(r.ai.draft.text, text);
+      await r.ai.send(text);
+      expect(r.repo.ordinaryPrepares, 0);
+      observeOpenAi(r, CloudAiConsent.openaiAccepted, 2);
+      expect(r.aiState.canSend, isTrue);
+      expect(r.ai.draft.text, text);
+      r.dispose();
+      await tester.pump();
+    },
+  );
+
   for (final background in [false, true]) {
     testWidgets(
       'pending selected execution recovers after access retirement (background=$background)',

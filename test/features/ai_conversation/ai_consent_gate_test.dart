@@ -17,6 +17,68 @@ import '../../support/fakes.dart';
 import '../../support/fake_account_preferences.dart';
 
 void main() {
+  testWidgets('OpenAI requires its own grant and withdrawal hides chat', (
+    tester,
+  ) async {
+    final auth = FakeAuthRepository();
+    final prefs = FakeAccountPreferences()
+      ..settings = const OwnSettings(
+        checkInVisibility: CheckInVisibility.private,
+        consent: OptionalProcessingConsent.accepted,
+        revision: 1,
+        cloudAiConsent: CloudAiConsent.accepted,
+      );
+    addTearDown(auth.close);
+    var openedSettings = false;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(auth),
+          accountPreferencesRepositoryProvider.overrideWithValue(prefs),
+          aiClientProcessingProvider.overrideWithValue(
+            AiClientProcessing.openaiCloud,
+          ),
+        ],
+        child: MaterialApp(
+          home: AiConsentGate(
+            onOpenSettings: () {
+              openedSettings = true;
+            },
+            navigationBar: const SizedBox(),
+            child: const Text('Cloud chat contents'),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    auth.emit(AuthSessionAuthenticated(subject: 'synthetic-openai-member'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cloud chat contents'), findsNothing);
+    expect(find.textContaining('OpenAI processing'), findsOneWidget);
+    await tester.tap(find.text('Open settings'));
+    expect(openedSettings, isTrue);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(AiConsentGate)),
+    );
+    final controller = container.read(
+      accountPreferencesControllerProvider(PreferencesView.settings).notifier,
+    );
+    await controller.saveSettings(
+      CheckInVisibility.private,
+      OptionalProcessingConsent.accepted,
+      cloudAiConsent: CloudAiConsent.openaiAccepted,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Cloud chat contents'), findsOneWidget);
+    await controller.saveSettings(
+      CheckInVisibility.private,
+      OptionalProcessingConsent.accepted,
+      cloudAiConsent: CloudAiConsent.openaiDeclined,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Cloud chat contents'), findsNothing);
+    expect(find.textContaining('OpenAI processing'), findsOneWidget);
+  });
   for (final language in ['en', 'zh']) {
     testWidgets(
       'initial refusal hides chat; consent save and account replacement recheck access in $language',

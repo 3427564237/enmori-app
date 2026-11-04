@@ -22,6 +22,7 @@ import 'platform/controlled_account_http_client.dart';
 
 import '../features/account/account_providers.dart';
 import '../features/account/account_preferences_providers.dart';
+import '../features/account/domain/cloud_ai_consent.dart';
 import '../features/account/data/backend_account_preferences_repository.dart';
 import '../features/account/data/backend_account_repository.dart';
 import '../features/auth/auth_providers.dart';
@@ -50,16 +51,24 @@ Future<void> bootstrap() async {
   const companionFirstFlow = bool.fromEnvironment(
     'ENMORI_AI_COMPANION_FIRST_FLOW',
   );
+  const openAiTestApp = bool.fromEnvironment('ENMORI_OPENAI_TEST_APP');
   const backendUrl = String.fromEnvironment('ENMORI_API_BASE_URL');
   const certificate = String.fromEnvironment('ENMORI_API_CERTIFICATE_BASE64');
   final baseUri = parseApprovedBackendBaseUri(backendUrl);
-  final configurationValid = validAccountRuntimeConfiguration(
-    configuration,
-    controlledAccount: controlledAccount,
-    remoteAccount: remoteAccount,
-    certificateBase64: certificate,
-    baseUri: baseUri,
-  );
+  final configurationValid =
+      validOpenAiTestAppSelection(
+        enabled: openAiTestApp,
+        remoteAccount: remoteAccount,
+        companionFirstFlow: companionFirstFlow,
+        baseUri: baseUri,
+      ) &&
+      validAccountRuntimeConfiguration(
+        configuration,
+        controlledAccount: controlledAccount,
+        remoteAccount: remoteAccount,
+        certificateBase64: certificate,
+        baseUri: baseUri,
+      );
   http.Client? controlledClient;
   var firebaseReady = false;
 
@@ -103,6 +112,9 @@ Future<void> bootstrap() async {
         eventParticipationEnabled: true,
         remoteGroupEnabled: true,
         companionFirstFlowEnabled: companionFirstFlow,
+        aiProcessing: openAiTestApp
+            ? AiClientProcessing.openaiCloud
+            : AiClientProcessing.local,
         companionInstallationRef: companionInstallation,
         companionMessagingPort: companionInstallation == null
             ? null
@@ -199,6 +211,24 @@ Future<void> bootstrap() async {
     ),
   );
 }
+
+/// Explicit test build only; never infer cloud processing from saved consent.
+bool validOpenAiTestAppSelection({
+  required bool enabled,
+  required bool remoteAccount,
+  required bool companionFirstFlow,
+  required Uri? baseUri,
+}) =>
+    !enabled ||
+    (remoteAccount &&
+        !companionFirstFlow &&
+        baseUri?.scheme == 'https' &&
+        baseUri?.host == 'enmori-backend-20261029.azurewebsites.net' &&
+        baseUri?.port == 443 &&
+        baseUri?.userInfo == '' &&
+        (baseUri?.path == '' || baseUri?.path == '/') &&
+        baseUri?.hasQuery == false &&
+        baseUri?.hasFragment == false);
 
 final class FirebaseRuntimeConfiguration {
   const FirebaseRuntimeConfiguration({

@@ -66,6 +66,7 @@ import { FirebaseIdentityVerifier } from "../shared/infrastructure/firebase/fire
 import { FirebaseAdminFirestoreGateway } from "../shared/infrastructure/firebase/firestore-gateway.js";
 import { SystemClock } from "../shared/infrastructure/system-clock.js";
 import { buildApp } from "./build-app.js";
+import { createOpenAiTestAppComposition, type OpenAiTestAppConfiguration } from './openai-test-app-composition.js';
 import {
   type ControlledRuntimeConfiguration,
 } from "./controlled-runtime-configuration.js";
@@ -135,9 +136,13 @@ async function createControlledRuntime(
   eventInput?: { readonly source: BrowseSource; readonly musicInterestTagId: string },
   chatModel?: string,
   firstFlowConfiguration?: FirstFlowConfiguration,
+  cloudTestApp?: OpenAiTestAppConfiguration | null,
 ): Promise<ControlledRuntime> {
   if (firstFlowConfiguration && (!isolatedEnvironment || chatModel !== "qwen3.5:9b")) throw Error("First-flow requires the approved local model and feature environment");
   const remote = isolatedEnvironment?.ENMORI_REMOTE_GROUP === 'true';
+  if (cloudTestApp !== undefined && (!remote || chatModel !== undefined || firstFlowConfiguration !== undefined)) {
+    throw Error("OpenAI test app requires the exclusive remote Conversation composition");
+  }
   const firebaseApp = initializeApp(
     { projectId: configuration.firebaseProjectId },
     "enmori-controlled-backend",
@@ -146,6 +151,10 @@ async function createControlledRuntime(
     const gateway = new FirebaseAdminFirestoreGateway(
       getFirestore(firebaseApp),
     );
+    const identity = new FirebaseIdentityVerifier(getAuth(firebaseApp));
+    const avatar = new OwnAvatar(new FirestoreOwnAvatarRepository(gateway));
+    const cloud = cloudTestApp !== undefined && isolatedEnvironment
+      ? createOpenAiTestAppComposition(cloudTestApp, gateway, isolatedEnvironment, avatar, identity) : undefined;
     const onboardingRepository = new FirestoreOnboardingRepository(gateway, isolatedEnvironment);
     const weather = new OpenMeteoWeatherProvider(() => running);
     const checkInRepository = new FirestoreCheckInRepository(gateway, weather, new SystemClock());
@@ -191,25 +200,31 @@ async function createControlledRuntime(
     // composition. A delivery timeout never releases it for another feature.
     const modelLane = chatModel ? new LocalModelLane(chatModel) : undefined;
     const chatTransport = modelLane ? new LocalChatTransport(modelLane) : undefined;
-    if (chatTransport && isolatedEnvironment) {
+    if ((chatTransport || cloud?.selection) && isolatedEnvironment) {
       try {
-        await chatTransport.prepareModel();
-        chat = await (remote ? createRemoteConversationComposition : createIsolatedConversationComposition)({
+        const options = {
           firestore: getFirestore(firebaseApp), environment: isolatedEnvironment,
-          transport: chatTransport, gates: simpleChatGates, simpleChat: true,
-          ...(firstFlowConfiguration ? { selectedReplies: true as const } : {}),
-          conversationStrategy: 'open_conversation_v1',
-          prepareHost: () => chatTransport.prepareForChat(),
-          report: (_phase, result) => { if (!result.complete) maintenanceHealthy = false; },
+          gates: simpleChatGates, simpleChat: true as const,
+          conversationStrategy: 'open_conversation_v1' as const,
+          report: (_phase: 'expiry' | 'source', result: {readonly complete: boolean}) => { if (!result.complete) maintenanceHealthy = false; },
           // A closed target's failed control retirement degrades maintenance.
           // Its own durable claim guards remain; other chats keep their checks.
-          reportRetirement: confirmed => {
+          reportRetirement: (confirmed: boolean) => {
             if (!confirmed) {
               maintenanceHealthy = false;
               console.warn(JSON.stringify({ diagnostic: 'ai-control-retirement', status: 'unconfirmed' }));
             }
           },
-        });
+        };
+        if (cloud?.selection) {
+          chat = await createRemoteConversationComposition({ ...options, openAiTestApp: cloud.selection, selectedReplies: true });
+        } else if (chatTransport) {
+          await chatTransport.prepareModel();
+          chat = await (remote ? createRemoteConversationComposition : createIsolatedConversationComposition)({
+            ...options, transport: chatTransport, prepareHost: () => chatTransport.prepareForChat(),
+            ...(firstFlowConfiguration ? { selectedReplies: true as const } : {}),
+          });
+        }
       } catch { healthy = false; }
     }
     const firstFlow = firstFlowConfiguration && chat && healthy && modelLane && isolatedEnvironment
@@ -217,17 +232,25 @@ async function createControlledRuntime(
         conversation: chat, lane: modelLane, auth: getAuth(firebaseApp), healthy: () => healthy && maintenanceHealthy,
         ...(firstFlowConfiguration.push ? { credential: firebaseApp.options.credential ?? applicationDefault() } : {}) }) : undefined;
     const stopAi = async () => {
+      cloud?.closeAdmission();
       previewAccepting = false;
-      await firstFlow?.stop();
-      if (!chat) return;
-      await chat.stopAdmissionAndMaintenance();
-      // Let accepted work settle normally. Unknown generation outcomes retain
-      // the process/data rather than exporting a false clean shutdown.
-      while (chat.runtime.state.nonTerminal > 0 || modelLane?.state.pending || firstFlow?.application.executionState.running) await wait(250);
-      chat.runtime.shutdown();
+      try {
+        await firstFlow?.stop();
+        if (!chat) return;
+        await chat.stopAdmissionAndMaintenance();
+        // Drain active work and observed rate-limit writes. Unknown remote
+        // outcomes retain their durable reservations.
+        while (chat.runtime.state.nonTerminal > 0 || modelLane?.state.pending ||
+          (cloud?.state()?.remotePending ?? 0) > 0 || cloud?.rateLimitPending() || firstFlow?.application.executionState.running) await wait(250);
+        chat.runtime.shutdown();
+      } finally { cloud?.release(); }
     };
-    const aiStatus = () => ({ configured: !!chatTransport, available: !!chat && healthy,
-      maintenanceHealthy, pending: modelLane?.state.pending ?? false, outcomeUnknown: modelLane?.state.outcomeUnknown ?? false });
+    const aiStatus = () => {
+      const state = cloud?.state();
+      return { configured: !!chatTransport || cloud !== undefined, available: !!chat && healthy && (!cloud || state?.ready === true),
+        maintenanceHealthy, pending: modelLane?.state.pending ?? ((state?.remotePending ?? 0) > 0 || cloud?.rateLimitPending() === true),
+        outcomeUnknown: modelLane?.state.outcomeUnknown ?? (state?.remoteUnknown ?? 0) > 0 };
+    };
     const personaPreview = chat && healthy && chatTransport ? new PreviewPersona(
       new FirestorePersonaPreviewAuthority(gateway), chatTransport,
       () => performance.now(), () => modelLane?.state.pending ?? true,
@@ -260,10 +283,11 @@ async function createControlledRuntime(
       ...(firstFlow ? { firstFlow } : {}),
       ...(chat?.ownedSources ? { ownedSources: firstFlow
         ? withDeliveryResolution(chat.ownedSources, firstFlow.application, firstFlow.accepting) : chat.ownedSources } : {}),
-      ...(remote ? {socialModule: {identity: new FirebaseIdentityVerifier(getAuth(firebaseApp)), store: gateway,
+      ...(remote ? {socialModule: {identity, store: gateway,
         history: new FirebaseAdminCheckInHistoryGateway(getFirestore(firebaseApp)), cursor: createHistoryCursorCodec(), clock, weather, activityEvents: socialEvents.activity, recommendationEvents: socialEvents.recommendations}} : {}),
       ...(isolatedEnvironment ? { [remote ? 'remoteSlices' : 'isolatedSlices']: {
         environment: isolatedEnvironment,
+        ...(cloud ? { cloudConversationIdentity: cloud.identity } : {}),
         ...(chat && healthy ? { conversations: {
           ...chat.operations,
           prepare: (...args: Parameters<typeof chat.operations.prepare>) => healthy
@@ -288,9 +312,9 @@ async function createControlledRuntime(
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
       createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(getAuth(firebaseApp)), new FirestoreCatalogueWriter(gateway)),
       getInterestAdminCapability: new GetInterestAdminCapability(new FirebaseInterestAdmin(getAuth(firebaseApp))),
-      accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, isolatedEnvironment), new OwnAvatar(new FirestoreOwnAvatarRepository(gateway))),
+      accountPreferences: cloud?.preferences ?? new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, isolatedEnvironment), avatar),
       recommendEvents: realEvents.recommendEvents,
-      identityVerifier: new FirebaseIdentityVerifier(getAuth(firebaseApp)),
+      identityVerifier: identity,
       completeOnboarding: { execute: async input => {
         const result = await complete.execute(input);
         if (result.ok && isolatedEnvironment) {
@@ -341,7 +365,7 @@ export async function createRetainedCoreRuntime(environment: Readonly<Record<str
 /** Public group entry uses real Firebase only; it cannot select Emulator bindings. */
 export async function createRemoteGroupRuntime(environment: Readonly<Record<string, string | undefined>>,
   events?: { readonly source: BrowseSource; readonly musicInterestTagId: string }, chatModel?: string,
-  firstFlow?: FirstFlowConfiguration): Promise<ControlledRuntime> {
+  firstFlow?: FirstFlowConfiguration, cloudTestApp?: OpenAiTestAppConfiguration | null): Promise<ControlledRuntime> {
   requireRemoteGroupEnvironment(environment);
-  return createControlledRuntime({firebaseProjectId: 'enmori-rmvp-controlled', host: '127.0.0.1', port: 9381}, environment, events, chatModel, firstFlow);
+  return createControlledRuntime({firebaseProjectId: 'enmori-rmvp-controlled', host: '127.0.0.1', port: 9381}, environment, events, chatModel, firstFlow, cloudTestApp);
 }

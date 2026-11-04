@@ -173,6 +173,7 @@ export async function registerConversationRoutes(app: FastifyInstance, identity:
       (b.contextSelection !== undefined && !selectContext(b.contextSelection, processing)) ||
       !((b.kind === "send" && keys(b, ["kind", "purpose"], ["conversationId", "contextSelection"]) && (b.conversationId === undefined || uuid(b.conversationId))) ||
         (b.kind === "retry" && keys(b, ["kind", "purpose", "conversationId", "userMessageId"], ["contextSelection"]) && uuid(b.conversationId) && uuid(b.userMessageId)))) return failure(request, reply, "REQUEST_INVALID");
+    if (processing === 'cloud' && b.contextSelection === undefined) return failure(request, reply, "AI_CONTEXT_NOT_PERMITTED");
     return deliver(request, reply, await operations.prepare(caller(request), b as unknown as PrepareConversation), 201, v => {
       if (!uuid(v.operationId) || !operationKey(v.operationKey) || !uuid(v.conversationId) ||
           !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(v.preparationExpiresAt) ||
@@ -187,6 +188,7 @@ export async function registerConversationRoutes(app: FastifyInstance, identity:
       !keys(b, ["text"], ["contextSelection", "replyToMessageId"]) || typeof b.text !== "string" ||
       (b.contextSelection !== undefined && !executeSelection(b.contextSelection)) ||
       (b.replyToMessageId !== undefined && !uuid(b.replyToMessageId))) return failure(request, reply, "REQUEST_INVALID");
+    if (processing === 'cloud' && b.contextSelection === undefined) return failure(request, reply, "AI_CONTEXT_NOT_PERMITTED");
     if (!b.text.isWellFormed() || b.text.trim().length === 0 || [...b.text].length > 2400) return failure(request, reply, "AI_INPUT_INVALID");
     const controller = new AbortController();
     let accepted=false;

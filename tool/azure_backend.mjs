@@ -1,9 +1,10 @@
-/** Azure-only ordinary Backend entry. No model, personal ADC or local-host fallback. */
+/** Azure Backend entry. Ordinary by default, with an explicit Sol test-app arm. */
 import assert from 'node:assert/strict';
 import {mkdtempSync, writeFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
+import {costRecord, decodeCloudCostGrant, exactCostFields, isCostInteger, isCostUuid} from '../backend/dist/src/ai-runtime/domain/cloud-cost.js';
 
 export const azureHost = 'enmori-backend-20261029.azurewebsites.net';
 export const azureIndonesiaHost = 'enmori-backend-idc-20261104.azurewebsites.net';
@@ -13,6 +14,41 @@ const federationAudiences = new Map([
   [azureHost, '//iam.googleapis.com/projects/11254388146/locations/global/workloadIdentityPools/enmori-azure-backend/providers/azure-app-service'],
   [azureIndonesiaHost, '//iam.googleapis.com/projects/11254388146/locations/global/workloadIdentityPools/enmori-azure-backend-idc/providers/azure-app-service'],
 ]);
+const openAiSettings = new Set(['ENMORI_OPENAI_TEST_APP', 'ENMORI_OPENAI_TEST_APP_CONFIG', 'ENMORI_OPENAI_API_KEY']);
+const exactRecord = (value, keys) => costRecord(value) && exactCostFields(value, keys);
+
+function rateWindow(value, duration, maxRequests, maxTokens) {
+  return exactRecord(value, ['windowMs', 'maxRequests', 'maxTokens']) && value.windowMs === duration &&
+    isCostInteger(value.maxRequests) && value.maxRequests > 0 && value.maxRequests <= maxRequests &&
+    isCostInteger(value.maxTokens) && value.maxTokens >= 10240 && value.maxTokens <= maxTokens;
+}
+
+function openAiTestAppConfiguration(env) {
+  const mode = env.ENMORI_OPENAI_TEST_APP;
+  if (mode === undefined || mode === 'false') return undefined;
+  if (env.WEBSITE_HOSTNAME !== azureHost) throw Error('OPENAI_TEST_APP_HOST_UNAPPROVED');
+  if (mode !== 'true') return null;
+
+  const raw = env.ENMORI_OPENAI_TEST_APP_CONFIG, apiKey = env.ENMORI_OPENAI_API_KEY;
+  if (typeof raw !== 'string' || Buffer.byteLength(raw) > 16384 ||
+      typeof apiKey !== 'string' || !/^sk-[A-Za-z0-9_-]{20,508}$/.test(apiKey)) return null;
+  let input;
+  try { input = JSON.parse(raw); } catch { return null; }
+  if (!exactRecord(input, ['claim', 'firebaseUid', 'grant', 'rateScope', 'ratePolicy'])) return null;
+  const {claim, firebaseUid, rateScope, ratePolicy} = input;
+  if (!exactRecord(claim, ['expectedFence', 'expiresAtMs']) || !isCostInteger(claim.expiresAtMs) || claim.expiresAtMs === 0) return null;
+  const {expectedFence} = claim;
+  if (!exactRecord(expectedFence, ['processEpoch', 'generation', 'cleanupGeneration']) || !isCostUuid(expectedFence.processEpoch) ||
+      !isCostInteger(expectedFence.generation) || expectedFence.generation < 1 || expectedFence.generation >= Number.MAX_SAFE_INTEGER ||
+      !isCostInteger(expectedFence.cleanupGeneration)) return null;
+  if (typeof firebaseUid !== 'string' || firebaseUid.trim().length === 0 || firebaseUid.length > 128 || !firebaseUid.isWellFormed() ||
+      typeof rateScope !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(rateScope) ||
+      !exactRecord(ratePolicy, ['minute', 'day', 'tokensPerRequest']) || ratePolicy.tokensPerRequest !== 10240 ||
+      !rateWindow(ratePolicy.minute, 60000, 60, 614400) || !rateWindow(ratePolicy.day, 86400000, 1000, 10240000) ||
+      ratePolicy.day.maxRequests < ratePolicy.minute.maxRequests || ratePolicy.day.maxTokens < ratePolicy.minute.maxTokens) return null;
+  const grant = decodeCloudCostGrant(input.grant);
+  return grant?.capNanoUsd === 3_400_000_000 ? {claim, firebaseUid, grant, rateScope, ratePolicy, apiKey} : null;
+}
 
 export function azureConfiguration(env, nodeVersion = process.versions.node) {
   assert.equal(nodeVersion, '24.19.0');
@@ -36,7 +72,7 @@ export function azureConfiguration(env, nodeVersion = process.versions.node) {
   endpoint.searchParams.set('resource', application);
   endpoint.searchParams.set('api-version', '2019-08-01');
   return {
-    port, musicInterestTagId: env.ENMORI_MUSIC_TAG_ID,
+    port, musicInterestTagId: env.ENMORI_MUSIC_TAG_ID, cloudTestApp: openAiTestAppConfiguration(env),
     credential: {
       type: 'external_account', audience,
       subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
@@ -48,12 +84,12 @@ export function azureConfiguration(env, nodeVersion = process.versions.node) {
 }
 
 export async function startAzureBackend(env = process.env) {
+  const config = azureConfiguration(env);
   // Allowlisted, non-secret deployment diagnostics. Never log the full environment.
   console.log(JSON.stringify({phase: 'configuration', nodeVersion: process.versions.node,
-    selectedHost: federationAudiences.has(env.WEBSITE_HOSTNAME),
-    identityEndpointPath: (() => {try {return new URL(env.IDENTITY_ENDPOINT).pathname;} catch {return 'invalid';}})(),
+    selectedHost: true, identityEndpointPath: '/msi/token',
+    cloudTestApp: config.cloudTestApp === undefined ? 'disarmed' : config.cloudTestApp === null ? 'invalid' : 'armed',
   }));
-  const config = azureConfiguration(env);
   const directory = mkdtempSync(join(tmpdir(), 'enmori-azure-'));
   const credentialPath = join(directory, 'federation.json');
   // The platform identity header is sensitive; this file never enters the bundle.
@@ -71,10 +107,11 @@ export async function startAzureBackend(env = process.env) {
     writeFileSync(join(directory, 'event-source.json'), JSON.stringify({credentialFile: eventCredentialPath, musicInterestTagId: config.musicInterestTagId}), {mode: 0o600});
     const events = retainedCoreEvents(directory, true, () => runtime?.eventBrowseControl?.observation().enabled === true, 10000);
     assert.equal(events.configuration, 'configured');
+    const backendEnvironment = Object.fromEntries(Object.keys(env).filter(name => !openAiSettings.has(name)).map(name => [name, env[name]]));
     runtime = await createRemoteGroupRuntime({
-      ...env, ENMORI_REMOTE_GROUP: 'true', ENMORI_ENVIRONMENT: 'controlled-demo',
+      ...backendEnvironment, ENMORI_REMOTE_GROUP: 'true', ENMORI_ENVIRONMENT: 'controlled-demo',
       ENMORI_FIREBASE_PROJECT_ID: 'enmori-rmvp-controlled',
-    }, events.input, undefined);
+    }, events.input, undefined, undefined, config.cloudTestApp);
     phase = 'firestore-read';
     const music = await getFirestore(runtime.firebaseApp).doc(`interest_tags/${config.musicInterestTagId}`).get();
     assert(music.data()?.displayName === 'Music' && music.data()?.lifecycleState === 'active');
@@ -85,12 +122,15 @@ export async function startAzureBackend(env = process.env) {
     runtime.eventBrowseControl.enable();
     phase = 'listen';
     await runtime.app.listen({host: '0.0.0.0', port: config.port});
-    console.log(JSON.stringify({phase: 'listening', firebaseRead: true, aiConfigured: false}));
+    const aiConfigured = config.cloudTestApp !== undefined;
+    console.log(JSON.stringify({phase: 'listening', firebaseRead: true, aiConfigured,
+      ...(aiConfigured ? {aiAvailable: config.cloudTestApp !== null && runtime.aiStatus().available === true} : {})}));
     let closed = false;
     return async () => {
       if (closed) return;
       closed = true;
       try {await closeControlledRuntime(runtime);}
+      catch {throw Error('AZURE_BACKEND_SHUTDOWN_FAILURE');}
       finally {delete process.env.GOOGLE_APPLICATION_CREDENTIALS; rmSync(directory, {recursive: true, force: true});}
     };
   } catch (error) {
@@ -104,7 +144,7 @@ export async function startAzureBackend(env = process.env) {
     }
     delete process.env.GOOGLE_APPLICATION_CREDENTIALS;
     rmSync(directory, {recursive: true, force: true});
-    throw error;
+    throw Error('AZURE_BACKEND_DEPENDENCY_FAILURE');
   }
 }
 

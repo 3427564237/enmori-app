@@ -37,6 +37,39 @@ test("runtime epoch missing initializes exactly selected fields; overflow never 
   assert.deepEqual(await new FirestoreConversationStore(exhausted, environment).startEpoch(randomUUID()), { kind: "unavailable" });
   assert.deepEqual(exhausted.read("ai_runtime_fence/current"), seed);
 });
+test("expected fence claim is single use and refuses expired or changed cleanup generations", async () => {
+  const path = "ai_runtime_fence/current";
+  const expectedFence = { processEpoch: randomUUID(), generation: 5, cleanupGeneration: 2 };
+  const gateway = new InMemoryFirestoreGateway({ [path]: expectedFence });
+  let now = 10;
+  const store = new FirestoreConversationStore(gateway, environment, () => now);
+  const claim = { expectedFence, expiresAtMs: 20 };
+  const winner = randomUUID();
+  assert.deepEqual(await store.startEpoch(randomUUID(), { ...claim, expectedFence: { ...expectedFence, cleanupGeneration: 1 } }), { kind: "conflict" });
+  assert.deepEqual(gateway.read(path), expectedFence);
+  now = 19;
+  assert.deepEqual(await store.startEpoch(winner, claim), { kind: "confirmed", value: { processEpoch: winner, generation: 6 } });
+  assert.deepEqual(await store.startEpoch(randomUUID(), claim), { kind: "conflict" });
+  const currentFence = { processEpoch: winner, generation: 6, cleanupGeneration: 2 };
+  now = 20;
+  assert.deepEqual(await store.startEpoch(randomUUID(), { ...claim, expectedFence: currentFence }), { kind: "unavailable" });
+  assert.deepEqual(gateway.read(path), currentFence);
+});
+test("a committed claim with a lost acknowledgment never grants this or a later startup ownership", async () => {
+  const path = "ai_runtime_fence/current";
+  const expectedFence = { processEpoch: randomUUID(), generation: 5, cleanupGeneration: 2 };
+  const gateway = new InMemoryFirestoreGateway({ [path]: expectedFence });
+  const claim = { expectedFence, expiresAtMs: 20 }, processEpoch = randomUUID();
+  const lostAck = new FirestoreConversationStore({ runTransaction: async (work, options) => {
+    assert.deepEqual(options, { maxAttempts: 1 });
+    await gateway.runTransaction(work);
+    throw Error("unknown acknowledgment");
+  } }, environment, () => 10);
+  assert.deepEqual(await lostAck.startEpoch(processEpoch, claim), { kind: "unresolved" });
+  const replacement = new FirestoreConversationStore(gateway, environment, () => 10);
+  assert.deepEqual(await replacement.startEpoch(randomUUID(), claim), { kind: "conflict" });
+  assert.deepEqual(gateway.read(path), { processEpoch, generation: 6, cleanupGeneration: 2 });
+});
 test("termination and Auth failure cannot dispatch SDK transactions", async () => {
   let calls = 0;
   const store = new FirestoreConversationStore({ runTransaction: async <T>(): Promise<T> => { calls++; throw new Error("not called"); } }, environment);

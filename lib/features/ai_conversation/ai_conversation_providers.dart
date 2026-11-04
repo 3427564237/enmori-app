@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
 
 import '../account/account_preferences_providers.dart';
+import '../account/domain/account_preferences_repository.dart';
 import '../account/domain/account_repository.dart';
 import '../account/content_access.dart';
 
@@ -55,6 +56,7 @@ class AiConversationController extends Notifier<AiConversationState> {
   AiConversationRepository? _repository;
   late AuthRepository _auth;
   late _Memory _memory;
+  late AiClientProcessing _processing;
   late Duration Function() _now;
   late DateTime Function() _utcNow;
   Object _epoch = Object();
@@ -143,6 +145,7 @@ class AiConversationController extends Notifier<AiConversationState> {
     _localOutgoingKey = null;
     _outgoingMessageId = null;
     _repository = ref.watch(aiConversationRepositoryProvider);
+    _processing = ref.watch(aiClientProcessingProvider);
     _auth = ref.watch(authRepositoryProvider);
     _memory = ref.watch(_memoryProvider);
     _now = ref.watch(aiConversationNowProvider);
@@ -193,32 +196,37 @@ class AiConversationController extends Notifier<AiConversationState> {
         _show(state.phase);
       }
     });
-    ref.listen(accountSettingsSnapshotProvider, (previous, next) {
-      if (next?.consent != OptionalProcessingConsent.accepted) {
+    ref.listen(accountSettingsSnapshotProvider, (_, next) {
+      if (!_settingsAllowAi(next)) {
         discardSelectedPreparation();
-      }
-      if (next?.consent == OptionalProcessingConsent.rejected) {
-        cancel();
-        _failure(
-          const AppFailure(
-            kind: AppFailureKind.aiContextNotPermitted,
-            message: 'AI data use is turned off.',
-          ),
-          preserveOutcome: true,
-        );
-      } else if (next?.consent == OptionalProcessingConsent.accepted &&
-          state.phase == AiConversationPhase.limited) {
+        if (next != null) {
+          cancel();
+          _failure(
+            const AppFailure(
+              kind: AppFailureKind.aiContextNotPermitted,
+              message: 'AI data use is turned off.',
+            ),
+            preserveOutcome: true,
+          );
+        } else if (_processing.cloudProvider != null) {
+          cancel();
+          _invalidateReads();
+          _show(state.phase, message: state.statusMessage);
+        }
+      } else if (state.phase == AiConversationPhase.limited) {
         _show(
           _memory.unresolved
               ? AiConversationPhase.unknown
               : AiConversationPhase.idle,
         );
+      } else if (_processing.cloudProvider != null) {
+        _show(state.phase, message: state.statusMessage);
       }
     });
+    final settings = ref.read(accountSettingsSnapshotProvider);
     final phase = !_memory.authenticated
         ? AiConversationPhase.unauthenticated
-        : ref.read(accountSettingsSnapshotProvider)?.consent ==
-              OptionalProcessingConsent.rejected
+        : settings != null && !_settingsAllowAi(settings)
         ? AiConversationPhase.limited
         : _repository == null
         ? AiConversationPhase.unavailable
@@ -232,13 +240,25 @@ class AiConversationController extends Notifier<AiConversationState> {
     return _snapshot(phase);
   }
 
+  bool _settingsAllowAi(OwnSettings? settings) =>
+      settings?.consent == OptionalProcessingConsent.accepted &&
+      _processing.allowsCloudConsent(settings?.cloudAiConsent);
+
+  bool get _cloudConsentCurrent =>
+      _processing.cloudProvider == null ||
+      _settingsAllowAi(ref.read(accountSettingsSnapshotProvider));
+
   AiConversationState _snapshot(
     AiConversationPhase phase, {
     Iterable<AiMessage> messages = const [],
     String? nextCursor,
     String? statusMessage,
   }) {
-    final available = _alive && _memory.authenticated && _repository != null;
+    final available =
+        _alive &&
+        _memory.authenticated &&
+        _repository != null &&
+        _cloudConsentCurrent;
     final terminalView = {
       AiConversationPhase.limited,
       AiConversationPhase.unauthenticated,
@@ -415,8 +435,7 @@ class AiConversationController extends Notifier<AiConversationState> {
       !_memory.deleted &&
       _memory.conversationId == p.scopeConversationId &&
       ref.read(contentAccessProvider).foreground &&
-      ref.read(accountSettingsSnapshotProvider)?.consent ==
-          OptionalProcessingConsent.accepted;
+      _settingsAllowAi(ref.read(accountSettingsSnapshotProvider));
 
   Future<Result<AiPreparedReplySelection>> prepareSelectedSources(
     List<String> sourceIds,
@@ -440,8 +459,7 @@ class AiConversationController extends Notifier<AiConversationState> {
         (todayZone != null &&
             (todayZone.isEmpty || repository is! AiTodayReplyRepository)) ||
         !ref.read(contentAccessProvider).foreground ||
-        ref.read(accountSettingsSnapshotProvider)?.consent !=
-            OptionalProcessingConsent.accepted) {
+        !_settingsAllowAi(ref.read(accountSettingsSnapshotProvider))) {
       return const Failure(_unknown);
     }
     final epoch = _epoch, command = _commandVersion;
@@ -677,7 +695,8 @@ class AiConversationController extends Notifier<AiConversationState> {
       ref.mounted &&
       identical(_epoch, attempt.epoch) &&
       identical(_attempt, attempt) &&
-      attempt.dispatchAllowed;
+      attempt.dispatchAllowed &&
+      _cloudConsentCurrent;
 
   Future<void> _run(_Attempt attempt) async {
     try {
@@ -959,6 +978,7 @@ class AiConversationController extends Notifier<AiConversationState> {
   Future<Result<T>> _ordinary<T>(
     Future<Result<T>> Function(String token, AiAbortSignal abort) invoke,
   ) {
+    if (!_cloudConsentCurrent) return Future.value(const Failure(_unknown));
     final task = _ReadTask(_epoch, _commandVersion);
     final completion = Completer<Result<T>>();
     _reads.add(task);
@@ -1014,7 +1034,8 @@ class AiConversationController extends Notifier<AiConversationState> {
       ref.mounted &&
       identical(task.epoch, _epoch) &&
       task.commandVersion == _commandVersion &&
-      !task.abort.isAborted;
+      !task.abort.isAborted &&
+      _cloudConsentCurrent;
 
   Future<void> checkResult() async {
     if (!state.canCheckResult) return;
@@ -1426,7 +1447,8 @@ class AiConversationController extends Notifier<AiConversationState> {
       _alive &&
       ref.mounted &&
       identical(epoch, _epoch) &&
-      command == _commandVersion;
+      command == _commandVersion &&
+      _cloudConsentCurrent;
 
   bool _relevantAssistant(AiMessage assistant, AiMessage user) =>
       assistant.role == AiRole.assistant &&

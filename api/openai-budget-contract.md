@@ -32,6 +32,27 @@ valid exhausted authority. Ordinary Backend features do not depend on this
 ledger. Real balance, expiry, current price and intended model access still need
 verification; fabricated fixtures and this schema prove none of them.
 
+## Same-cycle operator freshness refresh
+
+[LI’s 5 November test-app decision](../docs/decisions/2026-11-05-li-sol-test-app-acceptance.md)
+permits a separately reviewed, explicit freshness refresh after fresh billing,
+model-access and price verification. This supersedes “immutable” only for
+`balanceVerifiedAtMs`, `balanceValidUntilMs` and the price snapshot's
+`snapshotId`, `verifiedAtMs`, `validUntilMs`. The grant identity, original credit,
+creation balance, cap, cycle, credit expiry and all price rates remain fixed.
+This narrow operation cannot change a model, price or allowance.
+
+The operator must stop and drain all owners, retain the old verification and
+exact ledger/attempt digests, and perform a single-attempt transaction conditioned
+on the observed runtime fence and entire old ledger. It changes only those
+verification fields. All charges, outstanding reservations, counts, attempt
+records and quota state remain unchanged and are read back. A lost acknowledgment
+requires read-only reconciliation, never a blind retry. The newly verified
+remaining credit must cover the entire original cap; otherwise this operator
+path refuses to refresh. The resulting validity ends within the verified cycle
+and requires another explicit verification when expired. App startup, restart,
+recovery and a new cycle never invoke this operator or renew the budget.
+
 ## Reservation and settlement
 
 `CloudCostBudgetOwner` wraps `CloudCostBudgetAuthority`; Infrastructure provides
@@ -104,7 +125,7 @@ pages or screenshots.
 | Field | Meaning |
 | --- | --- |
 | `schemaVersion` | `openai_cost_budget_v1` |
-| `grant` | Immutable verified grant below; must exactly match the configured grant |
+| `grant` | Verified grant below; must exactly match the configured grant |
 | `processEpoch`, `generation` | Current existing runtime-fence epoch; positive generation |
 | `lastObservedAtMs` | Last confirmed monotonic-compatible UTC observation |
 | `reservedNanoUsd` | Sum of full outstanding worst-case reservations |
@@ -124,7 +145,7 @@ pages or screenshots.
 | `verifiedSpendableRemainingNanoUsd` | Verified spendable credit at grant creation |
 | `balanceVerifiedAtMs`, `balanceValidUntilMs` | Verification time and explicit freshness boundary |
 | `capNanoUsd` | Exact fixed formula above |
-| `priceSnapshot` | Immutable price verification snapshot below |
+| `priceSnapshot` | Explicit price verification snapshot below |
 
 `priceSnapshot` contains exactly `snapshotId`, `verifiedAtMs`, `validUntilMs` and
 `prices`. Each unique model price contains exactly `model` (`gpt-6-luna` or

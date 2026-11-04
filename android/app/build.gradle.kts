@@ -35,6 +35,7 @@ val groupRelease = providers.environmentVariable("ENMORI_GROUP_RELEASE").orNull 
 // No google-services plugin, service-account material or ambient lookup.
 val companionDefineKeys = setOf(
     "ENMORI_AI_COMPANION_FIRST_FLOW", "ENMORI_REMOTE_GROUP",
+    "ENMORI_OPENAI_TEST_APP", "ENMORI_API_BASE_URL",
     "ENMORI_FIREBASE_API_KEY", "ENMORI_FIREBASE_APP_ID",
     "ENMORI_FIREBASE_MESSAGING_SENDER_ID", "ENMORI_FIREBASE_PROJECT_ID",
 )
@@ -53,10 +54,19 @@ val companionDefines = mutableMapOf<String, String>()
         }
     }
 val companionNative = companionDefines["ENMORI_AI_COMPANION_FIRST_FLOW"] == "true"
+val openAiTestApp = companionDefines["ENMORI_OPENAI_TEST_APP"] == "true"
+val openAiTestEdge = "https://enmori-backend-20261029.azurewebsites.net"
+check(companionDefines["ENMORI_OPENAI_TEST_APP"] in setOf(null, "true", "false")) {
+    "Invalid OpenAI test-app selection"
+}
+check(!openAiTestApp || (!companionNative && companionDefines["ENMORI_REMOTE_GROUP"] == "true" &&
+    companionDefines["ENMORI_API_BASE_URL"] in setOf(openAiTestEdge, "$openAiTestEdge/", "$openAiTestEdge:443", "$openAiTestEdge:443/"))) {
+    "OpenAI test app requires the approved Azure edge with proactive consumers disabled"
+}
 // Group updates must preserve the approved companion entries. Missing defines
 // previously produced a valid APK with these existing features silently absent.
-check(!groupRelease || companionNative) {
-    "Group release requires ENMORI_AI_COMPANION_FIRST_FLOW=true; companion entries must not silently disappear"
+check(!groupRelease || companionNative || openAiTestApp) {
+    "Group release requires the local companion or an explicitly selected OpenAI test app"
 }
 check(companionDefines["ENMORI_AI_COMPANION_FIRST_FLOW"] in setOf(null, "true", "false")) {
     "Invalid companion build selection"

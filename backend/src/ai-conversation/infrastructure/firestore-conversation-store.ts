@@ -7,7 +7,7 @@ import { requireFeatureEnvironment } from "../../shared/infrastructure/firebase/
 import type { AuthPrincipal } from "../../shared/ports/identity-verifier.js";
 import { resolveRealRetention } from "../domain/real-retention-resolver.js";
 import type { FullPrecisionInstant } from "../domain/real-effect-expiry.js";
-import type { RealConversationStore, StoreResult, StoreFailure, RuntimeEpoch, OperationTarget,
+import type { RealConversationStore, StoreResult, StoreFailure, RuntimeEpoch, RuntimeEpochClaim, OperationTarget,
   OpenOperation, OriginalWriteAuthority, StoredConversationMessage, StoredUserIdentity, SavedOperationOutcome } from "../ports/real-conversation-store.js";
 import type { ConversationHistory, HistoryPairIdentity } from "../ports/real-context-reader.js";
 import { parseReadNote } from "./real-context-records.js";
@@ -379,7 +379,9 @@ export class FirestoreConversationStore implements RealConversationStore {
     return { ownerAccountId: t.ownerAccountId, conversationId: t.conversationId, userMessageId: t.userMessageId,
       kind: t.kind, targetKind: t.targetKind, processEpoch: epoch.processEpoch, state, revision };
   }
-  async startEpoch(processEpoch: string): Promise<StoreResult<RuntimeEpoch>> {
+  async startEpoch(processEpoch: string, claim?: RuntimeEpochClaim): Promise<StoreResult<RuntimeEpoch>> {
+    const expected = claim === undefined ? undefined : { ...claim?.expectedFence };
+    const expiresAtMs = claim?.expiresAtMs;
     return this.run(async tx => {
       if (!UUID.test(processEpoch)) refuse("unavailable");
       const previous = await tx.get(RUNTIME);
@@ -387,6 +389,13 @@ export class FirestoreConversationStore implements RealConversationStore {
           typeof previous.processEpoch !== "string" || !UUID.test(previous.processEpoch) || !positive(previous.generation) ||
           !nonnegative(previous.cleanupGeneration) || previous.generation >= Number.MAX_SAFE_INTEGER ||
           previous.processEpoch === processEpoch)) refuse("unavailable");
+      if (expected !== undefined) {
+        const now = this.utcMilliseconds();
+        if (!nonnegative(now) || !positive(expiresAtMs) || now >= expiresAtMs ||
+            !exact(expected, ["processEpoch", "generation", "cleanupGeneration"])) refuse("unavailable");
+        if (!previous || previous.processEpoch !== expected.processEpoch || previous.generation !== expected.generation ||
+            previous.cleanupGeneration !== expected.cleanupGeneration) refuse("conflict");
+      }
       const generation = previous === undefined ? 1 : (previous.generation as number) + 1;
       tx.set(RUNTIME, { processEpoch, generation, cleanupGeneration: previous?.cleanupGeneration ?? 0 });
       return { processEpoch, generation };
