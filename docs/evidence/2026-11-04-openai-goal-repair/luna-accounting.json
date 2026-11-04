@@ -1,0 +1,20 @@
+{
+  "account": {
+    "capNanoUsd": 3400000000,
+    "spentNanoUsd": 43062700,
+    "reservedNanoUsd": 4096000,
+    "attemptCount": 74,
+    "reconciledCount": 72,
+    "costSha256": "5969d81ffacf0d76baf1affe2afff488270cf74cf4de6e68429b9a38c82d2cd3",
+    "attemptSha256": "3fbbcb365bc534691d6f614bf15731c7b704724c4d657b20782e7ba42a55ae33",
+    "quotaSha256": {
+      "gpt-6-luna": "06b077feff78d2e53c34057c3fcd39871e9fc9d945aae17cd44c820f6dc90773",
+      "gpt-6.1-sol": "56882fa6907668b65090aee9d7945a78287d1aaf9f375243cc94739ee6b504eb"
+    }
+  },
+  "runSha256": "c2ab188bd0ded10508fc8b7030dde4305bdbab4451ab62e40c8956337c776766",
+  "protocolEligible": 24,
+  "complete": true,
+  "providerCalls": 24,
+  "stopReason": "case-budget-exhausted"
+}

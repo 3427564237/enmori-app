@@ -3,6 +3,11 @@
 Authority: [approved recovery](../../decisions/2026-11-02-li-cloud-ai-backend-resume.md)
 and [regional continuation and bounded compatibility verification](../../decisions/2026-11-04-li-indonesia-comparison-continuation.md).
 
+Later on 4 November, LI authorized a bounded Luna-first minimal prompt repair.
+The baseline below remains historical evidence; see the
+[follow-up results and cumulative accounting](../2026-11-04-openai-goal-repair/README.md)
+for the subsequent candidate runs and their unchanged rejection gate.
+
 ## Ordinary Backend deployment
 
 Japan East now runs ordinary Backend source `1e3c5c085ac1a810517e671061290ac30946cbf8`.

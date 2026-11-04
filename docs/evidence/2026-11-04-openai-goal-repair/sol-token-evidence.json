@@ -1,0 +1,156 @@
+{
+  "schemaVersion": "openai_input_bound_v1",
+  "method": "responses-input-token-count",
+  "mode": "live",
+  "model": "gpt-6.1-sol",
+  "promptProfile": "goal-grounding-v1",
+  "corpusSha256": "1f216f2d8a4facafaac55eb9567c2136864999cc68c6759e831a81693ff0912a",
+  "expiresAtMs": 1793808000000,
+  "rows": [
+    {
+      "id": "reported-english-goal-chinese-reply",
+      "requestSha256": "b3cecff72ae34c3427171afda8ed240555fedac826cef08ff9a183aa0f09bba0",
+      "countRequestSha256": "fb4d01e3c24484ce5e2b65a8710ba54964e703b022eb56bf723a60b870d178dd",
+      "inputTokenUpperBound": 282
+    },
+    {
+      "id": "chinese-break-with-label",
+      "requestSha256": "ebea6667929ab805e3b1ae1718366a137d349069b83b625681ce0fa85c454b71",
+      "countRequestSha256": "a12706384074dc72dd9a433343c40b3254d610e5950a185631eca76a76abfb57",
+      "inputTokenUpperBound": 285
+    },
+    {
+      "id": "correct-previous-misreading",
+      "requestSha256": "0c7a23cd1b4f8c65b25f7cccdc4ccb9609054eea12fe06844cabdafd5ed2f425",
+      "countRequestSha256": "ecd0ca194b6b7d046f2bad0c93234883bc494a75a42646fac1ed876a7b26206e",
+      "inputTokenUpperBound": 390
+    },
+    {
+      "id": "actual-device-test-goal",
+      "requestSha256": "db73b3e41451ebde2c01793311dc27a615778de6487cd91da99ab781256e1c3b",
+      "countRequestSha256": "ab526a9eea028afdd9014668555217d50877ba56aef070600a75fe0e3f053d74",
+      "inputTokenUpperBound": 272
+    },
+    {
+      "id": "fresh-chinese-rest",
+      "requestSha256": "0ee4fd20f4e4150e7bfa6360e892562eea0a93a582410be7c40a86dc55465284",
+      "countRequestSha256": "02f09d991c7f944b713cd44fd0d9c1b89e0f26a37ff3089b4339488c536c88ca",
+      "inputTokenUpperBound": 222
+    },
+    {
+      "id": "actual-study-goal",
+      "requestSha256": "e7401795cd19441d1a35060cdbe874b81bd73e2203a956708590c0b20e106998",
+      "countRequestSha256": "06e896ec2eacff193acb0e157c2b60b697b5555d0b8625d148f9ef67d1e82ce8",
+      "inputTokenUpperBound": 221
+    },
+    {
+      "id": "labelled-desk-goal",
+      "requestSha256": "959998ed23834763ab168d5f1e7c75280f8c3dc82d14756fab5be4e7e20fb514",
+      "countRequestSha256": "6f0d48b40633b3c204ac56858310b15f8af9179ff3ca9d8440c0cf7727d3e611",
+      "inputTokenUpperBound": 220
+    },
+    {
+      "id": "latest-goal-two-history-pairs",
+      "requestSha256": "e2003b2805d202d30d2104726a046a7b0fe15648ac5fb83bef2970a07abdb552",
+      "countRequestSha256": "754023e218cd9802446edb109bf1d028a7aea3f00d8caabaf17b0d1ce07c1d38",
+      "inputTokenUpperBound": 297
+    },
+    {
+      "id": "explicit-language-request",
+      "requestSha256": "e6376c84e4546b616c19e6545e20c465210e322e856a8254080a48df8c241b7f",
+      "countRequestSha256": "fe224cd1a21f6f7d415d691a1c65ed0453d6b2ca930c3548c876dfa5d8879597",
+      "inputTokenUpperBound": 216
+    },
+    {
+      "id": "normal-chat",
+      "requestSha256": "0c2897e63bb23fbc0f6fcb2970c5ecdca82713115c2735ea2117a47c9c446959",
+      "countRequestSha256": "683c7f16a31e24a7958c3eb60f98f7155abcb7c2d225c25efb83e09cbc86bb90",
+      "inputTokenUpperBound": 213
+    },
+    {
+      "id": "calculation",
+      "requestSha256": "9ecc5d1b20c7459f9486b9c3df0d8fc02561f48fa3998fcb1ce7efc966dde84d",
+      "countRequestSha256": "b10cc8c7e0e7616b690d6a35fea995ec7280b64c25ee2d6486ee5231fcc89f04",
+      "inputTokenUpperBound": 214
+    },
+    {
+      "id": "persona-presentation",
+      "requestSha256": "79d9e362da36ca1ae07ca2212da90ff3ed53542edc24d99a4eb37b6ae0e6c9b2",
+      "countRequestSha256": "7910b49d35d7aaec442af005f211954c5182405e9106d88b53e6e5bc4ce90164",
+      "inputTokenUpperBound": 240
+    },
+    {
+      "id": "missing-essential-goal",
+      "requestSha256": "914990521be2ef0c22e05fa644f194321cea87d480146a153a8e5430af04fb2f",
+      "countRequestSha256": "26f543612f7c7bcc1c64afe5954683d23075797873f93a3b188c4d37e2acd886",
+      "inputTokenUpperBound": 220
+    },
+    {
+      "id": "ordinary-code-as-text",
+      "requestSha256": "7291cc3f820ee796ca9082fb97def2e24418127c099b85fba5a3eb92cb8f4d61",
+      "countRequestSha256": "c258af4fa7caaad75cd0dad808b1cb73af8a79ade88dd4bcc39c734cbd29e531",
+      "inputTokenUpperBound": 208
+    },
+    {
+      "id": "labelled-walk-goal",
+      "requestSha256": "5d68dc61e1f19e102c7fd23a23939e6874cc1ed39ee88541be58fe94ced3d699",
+      "countRequestSha256": "a50c240b617675723d799fbbfef59894c969f5eb718f839af3d20faf79c54c8b",
+      "inputTokenUpperBound": 229
+    },
+    {
+      "id": "genuine-test-with-marker",
+      "requestSha256": "71dab99bc62b76eb7cc437b877e5dfc8ec420b6d8c503c1cbf0ad15c09bfc5ad",
+      "countRequestSha256": "93453fc995f063d90ca1442b10e0aebe06ec6f2e6d0e54dba99b77266f4812c3",
+      "inputTokenUpperBound": 237
+    },
+    {
+      "id": "natural-chinese",
+      "requestSha256": "e423d3e019670e988b1cc2b18816821c65af7617de15b3e12d5898e75d16950b",
+      "countRequestSha256": "4fe298da843458033a644472e56f7a8414bb1c94a60cee984127c3d933ad86a2",
+      "inputTokenUpperBound": 220
+    },
+    {
+      "id": "natural-english",
+      "requestSha256": "b5c00b0151ff1b927e020e3d2133f034abb6a09a09df480d3b8bfb670e9bce12",
+      "countRequestSha256": "c7150fba336752d9f56baf01a4784436e010db88a17f54fa991e4fe08a295202",
+      "inputTokenUpperBound": 210
+    },
+    {
+      "id": "specified-french",
+      "requestSha256": "2cd94d52807c6b3b3886874c52828da03000e7381f5332af9e279d3bff1c97a8",
+      "countRequestSha256": "20b5b54e88444b2419f9f3f9f6bcf3d49526fdf318d4dc18f071240566556604",
+      "inputTokenUpperBound": 209
+    },
+    {
+      "id": "switch-to-english",
+      "requestSha256": "6d4b1c8258a10906aaf41d7f3b062737714f839007f38d626c3195dfc5e6304d",
+      "countRequestSha256": "0cedfb3b2043583ba6bb3a692ebb727e8962773ea2a252ba3cebbb570e9b3974",
+      "inputTokenUpperBound": 237
+    },
+    {
+      "id": "correct-personal-claim",
+      "requestSha256": "3555961e27700114c5076dd11b835d58fb6600bf05e9dc55fb12774a5c0ee807",
+      "countRequestSha256": "b6b3df6760b88a046954aee193f7e24b78f755d3b485d4082613a07b6515d0a0",
+      "inputTokenUpperBound": 243
+    },
+    {
+      "id": "topic-shift-chat",
+      "requestSha256": "d42e92718a473bb129a7caac1f91affc814db0f6a5eed4d65be032885e8cea45",
+      "countRequestSha256": "b65ac91c4f7d0e465d05c2cea23335a43e759e44842a50e57eb32bf4061f0823",
+      "inputTokenUpperBound": 235
+    },
+    {
+      "id": "unknown-event-fact",
+      "requestSha256": "3e6a94c02124a9b9a9c7575b3dd261b8bfb542cec82d76db4b9155c2dfaf99f6",
+      "countRequestSha256": "27233a434d3ceeb2331cb78ffc73540b7b18947b10fdad54f1d026c2813e6433",
+      "inputTokenUpperBound": 207
+    },
+    {
+      "id": "no-execution-claim",
+      "requestSha256": "4e43bc3bb722857cc6c62bcfd6a265df0681fb476c9aa58f9c1d513f7f73cbff",
+      "countRequestSha256": "c2010da94d28d383d581c76e750dc9179c543ed5dc85a82fc3bd6de7ca0fa354",
+      "inputTokenUpperBound": 210
+    }
+  ],
+  "verifiedAtMs": 1793786409760
+}
