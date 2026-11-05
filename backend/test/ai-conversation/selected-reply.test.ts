@@ -23,6 +23,7 @@ import type { SelectedReplyGrant, SelectedReplySnapshot } from "../../src/ai-con
 import type { ConversationResult } from "../../src/ai-conversation/ports/conversation-operations.js";
 import type { OriginalWriteAuthority, OperationTarget } from "../../src/ai-conversation/ports/real-conversation-store.js";
 import type { AcceptedContextRead } from "../../src/ai-conversation/ports/real-context-reader.js";
+import type { FirestoreTransactionGateway } from "../../src/shared/infrastructure/firebase/firestore-gateway.js";
 const id=(n:number)=>`00000000-0000-4000-8000-${String(n).padStart(12,"0")}`,owner=id(1),topic=id(2),user=id(3),assistant=id(4),a="selected-a",b="selected-b",now=Date.UTC(2026,9,25,10);
 const base=`accounts/${owner}`,root=`${base}/conversations/${topic}`,principal={firebaseUid:"synthetic-selected"};
 const profile="synthetic-selected-profile",environment={ENMORI_ENVIRONMENT:"test",ENMORI_CONTROLLED_PROFILE_DIRECTORY:profile,APPDATA:profile,HOME:profile,USERPROFILE:profile,XDG_CONFIG_HOME:profile,
@@ -46,6 +47,55 @@ function fixture(cloud: boolean | CloudAiProcessing = false){
   const target:OperationTarget={ownerAccountId:owner,conversationId:topic,userMessageId:id(30),operationId:id(31),kind:"send",targetKind:"existing"};
   return {g,processing,adapter,context,ordinary,prepare,grant,reader,failures,store,target,stop:()=>{live=false;},time:(ms:number)=>{monotonic=ms;}};
 }
+function delayedSelectedReads(f:ReturnType<typeof fixture>,delay:(path:string)=>Promise<void>){
+  const run=f.g.runTransaction.bind(f.g);
+  f.g.runTransaction=(work,options)=>run(tx=>work({...tx,
+    get:async path=>{if(path.includes("/personas/"))await delay(path);return tx.get(path);},
+    getSnapshot:async path=>{await delay(path);return tx.getSnapshot!(path);},
+  } satisfies FirestoreTransactionGateway),options);
+}
+test("five selected documents overlap per authorized stage while retaining all reads",async t=>{
+  t.mock.timers.enable({apis:["setTimeout"]});const f=fixture(),ids=[a,b,"selected-c","selected-d","selected-e"];
+  const personIds=["a","b","c","d","e"].map(c=>c.repeat(64));
+  for(const key of ids)f.g.put(`check_ins/${key}`,{...f.g.rows.get(`check_ins/${a}`)!.data});
+  f.g.put(`${base}/persona_state/current`,{stateRevision:1,livePersonaIds:personIds,activePersonaId:personIds[0]});
+  for(const key of personIds)f.g.put(`${base}/personas/${key}`,{displayName:"Synthetic persona",tone:"warm",responseLength:"balanced",formatStyle:"plain",createdAt:new Date(now).toISOString(),updatedAt:new Date(now).toISOString(),revision:1});
+  const paths:string[]=[];delayedSelectedReads(f,async path=>{paths.push(path);await new Promise<void>(resolve=>setTimeout(resolve,100));});
+  async function complete<T>(pending:Promise<T>){let done=false,elapsed=0;void pending.then(()=>{done=true;});
+    for(let i=0;i<100;i++)await Promise.resolve();
+    for(let tick=0;tick<20&&!done;tick++){t.mock.timers.tick(100);elapsed+=100;for(let i=0;i<100;i++)await Promise.resolve();}
+    assert.equal(done,true);return {result:await pending,elapsed};}
+  const prepared=await complete(f.prepare(ids));assert.equal(paths.length,5);
+  const read=await complete(f.adapter.read(f.context,f.grant(prepared.result)));assert.equal(read.result.kind,"read");
+  assert.equal(paths.length,15);assert.equal(f.g.writes,0);
+  t.diagnostic(`Controlled 100ms/document: prepare ${prepared.elapsed}ms; Persona and source revalidation ${read.elapsed}ms.`);
+  assert.equal(prepared.elapsed,100);assert.equal(read.elapsed,200);
+});
+test("parallel selected reads settle before leaving transaction and preserve first-source failure",async()=>{
+  const f=fixture();let release!:()=>void,settled=false;const held=new Promise<void>(resolve=>{release=resolve;});
+  delayedSelectedReads(f,async path=>{if(path===`check_ins/${b}`)await held;});f.g.rows.delete(`check_ins/${a}`);
+  const result=f.adapter.prepare(f.ordinary,{processing:"local",sources:[{kind:"check_in",checkInId:a},{kind:"check_in",checkInId:b}]}).then(value=>{settled=true;return value;});
+  for(let i=0;i<100;i++)await Promise.resolve();assert.equal(settled,false);release();
+  assert.deepEqual(await result,{kind:"failure",code:"AI_SOURCE_UNAVAILABLE"});assert.equal(f.g.writes,0);
+});
+test("revoking the request while parallel selected sources wait publishes no prepared context",async()=>{
+  const f=fixture();let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve;});let reads=0;
+  delayedSelectedReads(f,async()=>{reads++;await held;});const result=f.adapter.prepare(f.ordinary,{processing:"local",sources:[{kind:"check_in",checkInId:a},{kind:"check_in",checkInId:b}]});
+  for(let i=0;i<100;i++)await Promise.resolve();assert.equal(reads,2);f.stop();release();
+  assert.deepEqual(await result,{kind:"failure",code:"AI_UNAVAILABLE"});assert.equal(f.g.writes,0);
+});
+test("denied authority or invalid Persona stage starts no selected source content reads",async()=>{
+  for(const failure of ["owner","purpose","cloud","persona"] as const){
+    const f=fixture(failure==="cloud"?OPENAI_CLOUD_PROCESSING:false),snapshot=await f.prepare([a,b]);
+    if(failure==="owner")f.g.put(`auth_bindings/${createAuthBindingDocumentId(principal.firebaseUid)!}`,{accountId:id(99)});
+    else if(failure==="purpose")f.g.put(base,{...f.g.rows.get(base)!.data,optionalProcessingConsent:"rejected"});
+    else if(failure==="cloud")f.g.put(base,{...f.g.rows.get(base)!.data,cloudAiConsent:{state:"rejected",disclosureVersion:OPENAI_CLOUD_PROCESSING.disclosureVersion}});
+    else f.g.put(`${base}/persona_state/current`,{stateRevision:1,livePersonaIds:["a".repeat(64)],activePersonaId:"a".repeat(64)});
+    const reads:string[]=[];f.g.onRead=path=>{reads.push(path);};
+    assert.notEqual((await f.adapter.read(f.context,f.grant(snapshot))).kind,"read");
+    assert.equal(reads.some(path=>path.startsWith("check_ins/")),false,failure);assert.equal(f.g.writes,0);
+  }
+});
 test("F1a reads only exact selected own records and keeps original time/Mood/Activity, no location or IDs in model",async()=>{
   const f=fixture(),snapshot=await f.prepare([a,b]),reader=f.reader(f.grant(snapshot));assert.equal(await reader.prepare(),"ready");
   const model=reader.modelContext()!;assert.deepEqual(model.checkIns.map(s=>s.noteText),["quoted-selected-a","quoted-selected-b"]);assert.equal(model.checkIns[0]?.moodLabel,"calm");assert.equal(model.checkIns[0]?.activityLabel,"walking");

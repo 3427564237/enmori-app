@@ -257,12 +257,24 @@ export class AsyncConversationApplication {
       if (!this.live(s)) return false;
       if (auth !== "authorized") { this.fail(s, auth === "denied" ? "stale_authority" : "dependency_unavailable"); return false; }
       if (!await this.checkCloudConsent(s)) return false;
+      // These reads independently authorize the same captured dependencies.
+      // Keep fresh Auth/provider consent ahead of content reads, but do not
+      // serialize the independent context and history network waits. Observe
+      // both successes before any effect; context retains failure priority.
+      const expectedHistory = this.strategy ? s.history : undefined;
+      const historyRead = Promise.resolve().then(() => expectedHistory && this.live(s)
+        ? this.store.readHistory?.(s.context!, expectedHistory.pairs.map(p => p.identity)) : undefined)
+        // Observe rejection immediately, even if context fails first. A late
+        // supplier cannot restore the disposed request or publish its contents.
+        .then(value => ({ value }), () => ({ failed: true as const }));
       const current = await s.reader!.revalidate();
       if (!this.live(s)) return false;
       if (current !== "ready") { this.fail(s, current === "denied" ? "stale_authority" : "dependency_unavailable"); return false; }
-      if (this.strategy && s.history) {
-        const history = await this.store.readHistory?.(s.context!,s.history.pairs.map(p => p.identity));
+      if (expectedHistory) {
+        const observed = await historyRead;
         if (!this.live(s)) return false;
+        if ("failed" in observed) { this.fail(s, "dependency_unavailable"); return false; }
+        const history = observed.value;
         if (history?.kind !== "read") {
           if(history&&["selection_conflict","changed","source_unavailable"].includes(history.kind))this.selectedFailure?.(history.kind as SelectedReplyFailure);
           this.fail(s,history?.kind === "denied" ? "stale_authority" : "dependency_unavailable"); return false;

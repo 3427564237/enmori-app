@@ -27,6 +27,15 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
   }
   private check(current:()=>boolean){try{if(current())return;}catch{}fail("terminated");}
   private async guardedRead<T>(current:()=>boolean,operation:()=>Promise<T>):Promise<T>{this.check(current);const result=await operation();this.check(current);return result;}
+  /** Same authorized transaction stage, at most five existing references. Drain
+   * every read before returning/throwing so no I/O escapes the transaction; keep
+   * reference-order failure precedence rather than completion-order precedence. */
+  private async readStage<T>(current:()=>boolean,reads:readonly (()=>Promise<T>)[]):Promise<T[]>{
+    this.check(current);if(reads.length>5)fail("unavailable");
+    const settled=await Promise.allSettled(reads.map(read=>Promise.resolve().then(()=>{this.check(current);return read();})));
+    this.check(current);
+    return settled.map(result=>{if(result.status==="rejected")throw result.reason;return result.value;});
+  }
   private valid(input:SelectReplyContext):void{
     if(!input||input.processing!==this.processing)fail("selection_conflict");
     if("today" in input){
@@ -77,8 +86,10 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
           refs=rows.slice(0,5).map(r=>({checkInId:r.id,createdAt:r.data.createdAt as string}));
           today={date:day.date,timeZone:day.timeZone,limit:5,hasMore:rows.length>5};
         }else refs=input.sources;
-        for(const ref of refs){const {noteText:_,moodLabel:__,activityLabel:___,observedVersion:____,...identity}=await this.source(tx,context.ownerId,ref.checkInId,started,context.current);
-          if(ref.createdAt!==undefined&&ref.createdAt!==identity.sourceOccurredAt)fail("unavailable");sources.push(identity);}
+        sources.push(...await this.readStage(context.current,refs.map(ref=>async()=>{
+          const {noteText:_,moodLabel:__,activityLabel:___,observedVersion:____,...identity}=await this.source(tx,context.ownerId,ref.checkInId,started,context.current);
+          if(ref.createdAt!==undefined&&ref.createdAt!==identity.sourceOccurredAt)fail("unavailable");return identity;
+        })));
         let historyPairs:readonly HistoryPairIdentity[]=[];
         if(conversationId!==undefined){
           if(!this.historySnapshot)fail("unavailable");const read=await this.guardedRead(context.current,()=>this.historySnapshot!(tx,context.principal,context.ownerId,conversationId,context.current));
@@ -113,14 +124,15 @@ export class FirestoreSelectedReplyReader implements SelectedReplyReadPort {
         if(this.processing === "cloud" && (legacyCloudAiProcessing(grant)?.provider !== this.cloudProcessing.provider || !uint(grant.cloudAiConsentGeneration) || grant.cloudAiConsentGeneration !== authority.cloudAiConsentGeneration))fail("changed");
         if(authority.purposeRevocationGeneration!==grant.purposeRevocationGeneration)fail(authority.purposeRevocationGeneration>grant.purposeRevocationGeneration?"changed":"unavailable");
         const state=parseReadPersonaState(await this.guardedRead(current,()=>tx.get(`accounts/${context.ownerId}/persona_state/current`)));if(!state)fail("unavailable");
-        const items:ReadPersonaSet["items"][number][]=[];
-        for(const id of state.livePersonaIds){const item=parseReadPersona(await this.guardedRead(current,()=>tx.get(`accounts/${context.ownerId}/personas/${id}`)),id,true);if(!item)fail("unavailable");items.push(item);}
-        const sources:SelectedReplyObservation["sources"][number][]=[];
-        for(const ref of grant.sources){
-          if(!grant.includedKeys.includes(ref.selectionKey)||grant.excludedKeys.includes(ref.selectionKey))continue;
-          const source=await this.source(tx,context.ownerId,ref.checkInId,asOf,current);if(source.version!==ref.version)fail("changed");sources.push(source);
+        const items:ReadPersonaSet["items"]=await this.readStage(current,state.livePersonaIds.map(id=>async()=>{
+          const item=parseReadPersona(await this.guardedRead(current,()=>tx.get(`accounts/${context.ownerId}/personas/${id}`)),id,true);if(!item)fail("unavailable");return item;
+        }));
+        const included=grant.sources.filter(ref=>grant.includedKeys.includes(ref.selectionKey)&&!grant.excludedKeys.includes(ref.selectionKey));
+        const sources:SelectedReplyObservation["sources"]=await this.readStage(current,included.map(ref=>async()=>{
+          const source=await this.source(tx,context.ownerId,ref.checkInId,asOf,current);if(source.version!==ref.version)fail("changed");
           if(day&&(source.sourceOccurredAt<day.startUtc||(day.endUtc!==null&&source.sourceOccurredAt>=day.endUtc)))fail("selection_conflict");
-        }
+          return source;
+        }));
         const ended=this.utcMilliseconds();if(ended<started||ended-started>5000)fail("unavailable");
         return {authority,personas:{...state,items},sources};
       },{maxAttempts:1});this.check(current);return {kind:"read",value};
