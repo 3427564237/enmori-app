@@ -1,0 +1,51 @@
+{
+  "completed": true,
+  "mode": null,
+  "checks": [
+    {
+      "label": "owned-outcome-0",
+      "status": 200,
+      "elapsedMs": 2145
+    },
+    {
+      "label": "owned-outcome-31",
+      "status": 200,
+      "elapsedMs": 1816
+    },
+    {
+      "label": "owned-outcome-32",
+      "status": 200,
+      "elapsedMs": 1768
+    },
+    {
+      "label": "delete-0",
+      "status": 204,
+      "elapsedMs": 5085
+    },
+    {
+      "label": "deleted-readback-0",
+      "status": 404,
+      "elapsedMs": 1697
+    },
+    {
+      "label": "delete-31",
+      "status": 204,
+      "elapsedMs": 5515
+    },
+    {
+      "label": "deleted-readback-31",
+      "status": 404,
+      "elapsedMs": 1738
+    },
+    {
+      "label": "delete-32",
+      "status": 204,
+      "elapsedMs": 6287
+    },
+    {
+      "label": "deleted-readback-32",
+      "status": 404,
+      "elapsedMs": 2125
+    }
+  ]
+}

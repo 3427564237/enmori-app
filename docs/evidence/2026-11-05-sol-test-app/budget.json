@@ -1,0 +1,17 @@
+{
+  "implementationCommit": "e7f55e659f76e8f0aa4ff62c570379d476b0264d",
+  "originalCapNanoUsd": 3400000000,
+  "newConfirmedChargeNanoUsd": 6604000,
+  "spentNanoUsd": 93860700,
+  "reservedNanoUsd": 4096000,
+  "availableNanoUsd": 3302043300,
+  "attemptCount": 101,
+  "reconciledCount": 99,
+  "unknownHoldsPreserved": true,
+  "priorAttemptsPreserved": true,
+  "verificationRefreshOnly": true,
+  "balanceAndPriceValidUntilUtc": "2026-11-05T16:00:00Z",
+  "creditCycleRenewed": false,
+  "newRegionalSpendUsd": 0,
+  "privateAttemptDigest": "40df020550430e8cb460c907a78ff2bd95418d57170bab4eba94c302ec895149"
+}

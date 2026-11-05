@@ -1,0 +1,27 @@
+{
+  "completed": true,
+  "mode": "withdraw",
+  "checks": [
+    {
+      "label": "settings-declined-read",
+      "status": 200,
+      "elapsedMs": 967
+    },
+    {
+      "label": "settings-declined",
+      "status": 200,
+      "elapsedMs": 1035
+    },
+    {
+      "label": "withdrawal-denied",
+      "status": 403,
+      "elapsedMs": 1495,
+      "error": "AI_CONTEXT_NOT_PERMITTED"
+    },
+    {
+      "label": "ordinary-after-withdraw",
+      "status": 200,
+      "elapsedMs": 748
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "implementationCommit": "e7f55e659f76e8f0aa4ff62c570379d476b0264d",
+  "backend": {
+    "node": "24.19.0",
+    "strictBuild": "passed",
+    "tests": 1792,
+    "passed": 1792,
+    "azureAndLatencyToolsPassed": 8
+  },
+  "flutter": {
+    "sdk": "3.47.2",
+    "focusedAppConsentTestsPassed": 60,
+    "aiConversationDirectoryPassed": 384,
+    "scopedAnalyzeFiles": 13,
+    "scopedAnalyze": "passed",
+    "countsOverlap": true
+  },
+  "baselineLimitations": [
+    {
+      "suite": "Firestore real-store emulator",
+      "currentPassed": 25,
+      "currentTotal": 26,
+      "baselinePassed": 24,
+      "baselineTotal": 25,
+      "failure": "historical Note readHistory selection_conflict",
+      "baseline": "7e5bb369"
+    },
+    {
+      "suite": "Flutter Home recommendation",
+      "failure": "expected one home read, observed two",
+      "baseline": "7e5bb369",
+      "excludedFromFocusedPassCount": true
+    }
+  ],
+  "independentSourceReview": "no remaining source blockers",
+  "concurrentStartupEmulator": "one confirmed winner; stale claim rejected",
+  "phoneInstalled": false,
+  "phoneNetworksVerified": false,
+  "computerPoweredOffVerified": false,
+  "uatOrReleaseComplete": false
+}

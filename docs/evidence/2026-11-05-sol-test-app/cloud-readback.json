@@ -1,0 +1,16 @@
+{
+  "completed": true,
+  "mode": "readback",
+  "checks": [
+    {
+      "label": "settings-readback",
+      "status": 200,
+      "elapsedMs": 791
+    },
+    {
+      "label": "profile-readback",
+      "status": 200,
+      "elapsedMs": 587
+    }
+  ]
+}
