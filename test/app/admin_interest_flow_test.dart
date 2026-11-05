@@ -35,6 +35,15 @@ void main() {
         find.byKey(const Key('admin-interest-name')),
         'Astronomy',
       );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<FilledButton>(
+              find.byKey(const Key('admin-interest-create')),
+            )
+            .onPressed,
+        isNotNull,
+      );
       await _tap(tester, find.byKey(const Key('admin-interest-create')));
       expect(find.byKey(const Key('admin-interest-confirmed')), findsOneWidget);
       expect(peer.creates, 1);
@@ -204,6 +213,16 @@ final class _CataloguePeer {
     if (path == '/v1/interest-tags') {
       if (creates > 0) catalogueReadsAfterCreate++;
       return _json({'interestTags': tags});
+    }
+    if (path == '/v1/admin/interest-tags' && request.method == 'GET') {
+      if (!admin) return _error('AUTH_FORBIDDEN', 403);
+      if (creates > 0) catalogueReadsAfterCreate++;
+      return _json({
+        'interestTags': [
+          for (final tag in tags)
+            {...tag, 'lifecycleState': 'active', 'revision': 1},
+        ],
+      });
     }
     if (path == '/v1/admin/interest-tags' && request.method == 'POST') {
       if (!admin) return _error('AUTH_FORBIDDEN', 403);

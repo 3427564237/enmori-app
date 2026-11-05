@@ -10,6 +10,7 @@ import '../../auth/auth_providers.dart';
 import '../../auth/domain/auth_repository.dart';
 import '../admin_interest_providers.dart';
 import '../domain/interest_repository.dart';
+import '../domain/admin_interest_repository.dart';
 import 'admin_interest_controller.dart';
 
 final class AdminInterestCataloguePage extends ConsumerWidget {
@@ -55,9 +56,12 @@ final class _CatalogueEditor extends ConsumerStatefulWidget {
 final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
   final _name = TextEditingController();
   final _search = TextEditingController();
+  final _scroll = ScrollController();
+  InterestLifecycleState? _filter;
   int _sort = 0;
   final _nameFocus = FocusNode();
   DialogRoute<bool>? _exitDialog;
+  DialogRoute<bool>? _actionDialog;
   bool _leaving = false;
   bool _allowPop = false;
 
@@ -86,6 +90,11 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
         ),
       );
     });
+    ref.listenManual(adminInterestCapabilityProvider, (_, next) {
+      if (next.asData?.value == false) {
+        _actionDialog?.navigator?.removeRoute(_actionDialog!);
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         unawaited(
@@ -105,8 +114,15 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
         dialog.navigator?.removeRoute(dialog);
       });
     }
+    final action = _actionDialog;
+    if (action != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => action.navigator?.removeRoute(action),
+      );
+    }
     _name.dispose();
     _search.dispose();
+    _scroll.dispose();
     _nameFocus.dispose();
     super.dispose();
   }
@@ -123,11 +139,23 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
         !state.needsReadback &&
         state.phase != AdminInterestPhase.denied;
     final query = _search.text.trim().toLowerCase();
+    final createEditable = editable && state.editTarget == null;
+    final visibleEditTarget =
+        allowed && state.phase != AdminInterestPhase.denied
+        ? state.editTarget
+        : null;
     final visible = state.tags
         .where(
           (tag) =>
-              tag.displayName.toLowerCase().contains(query) ||
-              tag.interestTagId.toLowerCase().contains(query),
+              (_filter == null ||
+                  !state.managementEnabled ||
+                  state.managedTags.any(
+                    (item) =>
+                        item.interestTagId == tag.interestTagId &&
+                        item.lifecycleState == _filter,
+                  )) &&
+              (tag.displayName.toLowerCase().contains(query) ||
+                  tag.interestTagId.toLowerCase().contains(query)),
         )
         .toList();
     if (_sort != 0) {
@@ -158,8 +186,86 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 640),
               child: ListView(
+                controller: _scroll,
                 padding: const EdgeInsets.all(24),
                 children: [
+                  if (visibleEditTarget case final target?) ...[
+                    Text(
+                      context.tr('Rename interest', '重命名兴趣'),
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'ID: ${target.interestTagId} · ${context.tr('Revision', '版本')} ${target.revision}',
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      key: ValueKey(
+                        'admin-interest-rename-name-${target.interestTagId}',
+                      ),
+                      initialValue: state.renameDraft,
+                      enabled: editable,
+                      textInputAction: TextInputAction.done,
+                      decoration: InputDecoration(
+                        labelText: context.tr('New name', '新名称'),
+                        errorText: _adminMessage(
+                          context,
+                          state.validationMessage,
+                        ),
+                        errorMaxLines: 4,
+                      ),
+                      onChanged: (value) => ref
+                          .read(adminInterestControllerProvider.notifier)
+                          .editRename(value, session: widget.session),
+                      onFieldSubmitted: editable
+                          ? (_) => ref
+                                .read(adminInterestControllerProvider.notifier)
+                                .rename(
+                                  session: widget.session,
+                                  expected: ref.read(
+                                    adminInterestControllerProvider,
+                                  ),
+                                )
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton(
+                          key: const Key('admin-interest-rename-save'),
+                          onPressed:
+                              editable &&
+                                  state.managedTags.any(
+                                    (tag) => tag.sameVersion(target),
+                                  )
+                              ? () => ref
+                                    .read(
+                                      adminInterestControllerProvider.notifier,
+                                    )
+                                    .rename(
+                                      session: widget.session,
+                                      expected: state,
+                                    )
+                              : null,
+                          child: Text(context.tr('Save name', '保存名称')),
+                        ),
+                        TextButton(
+                          key: const Key('admin-interest-rename-cancel'),
+                          onPressed: editable
+                              ? () => ref
+                                    .read(
+                                      adminInterestControllerProvider.notifier,
+                                    )
+                                    .cancelRename(session: widget.session)
+                              : null,
+                          child: Text(context.tr('Cancel editing', '取消编辑')),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 28),
+                  ],
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -168,10 +274,15 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                       Expanded(
                         child: Text(
                           state.hasLoaded
-                              ? context.tr(
-                                  '${state.tags.length} available interests',
-                                  '${state.tags.length} 项可选兴趣',
-                                )
+                              ? state.managementEnabled
+                                    ? context.tr(
+                                        '${state.managedTags.where((tag) => tag.lifecycleState == InterestLifecycleState.active).length} active · ${state.managedTags.where((tag) => tag.lifecycleState == InterestLifecycleState.inactive).length} inactive',
+                                        '${state.managedTags.where((tag) => tag.lifecycleState == InterestLifecycleState.active).length} 项启用 · ${state.managedTags.where((tag) => tag.lifecycleState == InterestLifecycleState.inactive).length} 项停用',
+                                      )
+                                    : context.tr(
+                                        '${state.tags.length} available interests',
+                                        '${state.tags.length} 项可选兴趣',
+                                      )
                               : context.tr('Catalogue management', '目录管理'),
                           key: const Key('admin-catalogue-count'),
                           style: Theme.of(context).textTheme.titleLarge,
@@ -196,7 +307,7 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                     key: const Key('admin-interest-name'),
                     controller: _name,
                     focusNode: _nameFocus,
-                    enabled: editable,
+                    enabled: createEditable,
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
                       labelText: context.tr('Interest name', '兴趣名称'),
@@ -215,7 +326,7 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                     onChanged: (value) => ref
                         .read(adminInterestControllerProvider.notifier)
                         .editDraft(value, session: widget.session),
-                    onSubmitted: editable && state.hasLoaded
+                    onSubmitted: createEditable && state.hasLoaded
                         ? (_) =>
                               _create(ref.read(adminInterestControllerProvider))
                         : null,
@@ -227,7 +338,7 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                     children: [
                       FilledButton.icon(
                         key: const Key('admin-interest-create'),
-                        onPressed: editable && state.hasLoaded
+                        onPressed: createEditable && state.hasLoaded
                             ? () => _create(state)
                             : null,
                         icon: const Icon(Icons.add),
@@ -259,6 +370,10 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                       AdminInterestPhase.creating => context.tr(
                         'Saving the new interest…',
                         '正在保存新兴趣…',
+                      ),
+                      AdminInterestPhase.updating => context.tr(
+                        'Saving the change…',
+                        '正在保存变更…',
                       ),
                       AdminInterestPhase.checking => context.tr(
                         'Checking the saved catalogue…',
@@ -313,7 +428,9 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                   ],
                   const SizedBox(height: 32),
                   Text(
-                    context.tr('Available interests', '可选兴趣'),
+                    state.managementEnabled
+                        ? context.tr('Interest catalogue', '兴趣目录')
+                        : context.tr('Available interests', '可选兴趣'),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
@@ -325,19 +442,52 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                       ),
                     )
                   else if (state.tags.isEmpty)
-                    Text(
-                      context.tr(
-                        'No active interests are available.',
-                        '暂无可用兴趣。',
-                      ),
-                    )
+                    Text(context.tr('No interests are available.', '暂无兴趣条目。'))
                   else ...[
                     Text(
-                      context.tr(
-                        'Only currently available interests are listed.',
-                        '仅列出当前可选的兴趣。',
-                      ),
+                      state.managementEnabled
+                          ? context.tr(
+                              'Inactive interests keep existing references and cannot be newly selected.',
+                              '停用兴趣保留已有引用，不能被新选用。',
+                            )
+                          : context.tr(
+                              'Only currently available interests are listed.',
+                              '仅列出当前可选的兴趣。',
+                            ),
                     ),
+                    if (state.managementEnabled) ...[
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final filter in <InterestLifecycleState?>[
+                            null,
+                            InterestLifecycleState.active,
+                            InterestLifecycleState.inactive,
+                          ])
+                            ChoiceChip(
+                              key: ValueKey(
+                                'admin-filter-${filter?.name ?? 'all'}',
+                              ),
+                              selected: _filter == filter,
+                              label: Text(switch (filter) {
+                                null => context.tr('All', '全部'),
+                                InterestLifecycleState.active => context.tr(
+                                  'Active',
+                                  '启用',
+                                ),
+                                InterestLifecycleState.inactive => context.tr(
+                                  'Inactive',
+                                  '停用',
+                                ),
+                              }),
+                              onSelected: (_) =>
+                                  setState(() => _filter = filter),
+                            ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     TextField(
                       key: const Key('admin-catalogue-search'),
@@ -408,21 +558,54 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
                         leading: const Icon(Icons.label_outline),
                         title: Text(tag.displayName),
                         subtitle: Text(
-                          context.tr(
-                            'Available · tap for details',
-                            '可选 · 点击查看详情',
-                          ),
+                          state.managementEnabled
+                              ? context.tr(
+                                  state.managedTags
+                                              .firstWhere(
+                                                (item) =>
+                                                    item.interestTagId ==
+                                                    tag.interestTagId,
+                                              )
+                                              .lifecycleState ==
+                                          InterestLifecycleState.active
+                                      ? 'Active · tap for details'
+                                      : 'Inactive · tap for details',
+                                  state.managedTags
+                                              .firstWhere(
+                                                (item) =>
+                                                    item.interestTagId ==
+                                                    tag.interestTagId,
+                                              )
+                                              .lifecycleState ==
+                                          InterestLifecycleState.active
+                                      ? '启用 · 点击查看详情'
+                                      : '停用 · 点击查看详情',
+                                )
+                              : context.tr(
+                                  'Available · tap for details',
+                                  '可选 · 点击查看详情',
+                                ),
                         ),
                         childrenPadding: const EdgeInsets.only(bottom: 16),
                         expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           SelectableText('ID: ${tag.interestTagId}'),
-                          Text(
-                            context.tr(
-                              'Members can select this interest from the catalogue.',
-                              '用户可以在兴趣目录中选择此项。',
+                          if (!state.managementEnabled)
+                            Text(
+                              context.tr(
+                                'Members can select this interest from the catalogue.',
+                                '用户可以在兴趣目录中选择此项。',
+                              ),
                             ),
-                          ),
+                          if (state.managementEnabled)
+                            ..._managementActions(
+                              state.managedTags.firstWhere(
+                                (item) =>
+                                    item.interestTagId == tag.interestTagId,
+                              ),
+                              state,
+                              editable,
+                            ),
                         ],
                       ),
                   ],
@@ -433,6 +616,137 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
         ),
       ),
     );
+  }
+
+  List<Widget> _managementActions(
+    ManagedInterestTag tag,
+    AdminInterestState state,
+    bool editable,
+  ) => [
+    Text('${context.tr('Revision', '版本')}: ${tag.revision}'),
+    const SizedBox(height: 12),
+    Wrap(
+      spacing: 12,
+      runSpacing: 8,
+      children: [
+        OutlinedButton.icon(
+          key: ValueKey('admin-rename-${tag.interestTagId}'),
+          onPressed: editable && state.editTarget == null
+              ? () {
+                  ref
+                      .read(adminInterestControllerProvider.notifier)
+                      .beginRename(
+                        tag,
+                        session: widget.session,
+                        expected: state,
+                      );
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted && _scroll.hasClients) {
+                      unawaited(
+                        _scroll.animateTo(
+                          0,
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                        ),
+                      );
+                    }
+                  });
+                }
+              : null,
+          icon: const Icon(Icons.edit_outlined),
+          label: Text(context.tr('Rename', '重命名')),
+        ),
+        OutlinedButton.icon(
+          key: ValueKey('admin-lifecycle-${tag.interestTagId}'),
+          onPressed: editable && state.editTarget == null
+              ? () => _confirmChange(tag, state)
+              : null,
+          icon: Icon(
+            tag.lifecycleState == InterestLifecycleState.active
+                ? Icons.pause_circle_outline
+                : Icons.restore,
+          ),
+          label: Text(
+            tag.lifecycleState == InterestLifecycleState.active
+                ? context.tr('Deactivate', '停用')
+                : context.tr('Restore', '恢复'),
+          ),
+        ),
+        if (state.permanentDeletionAvailable &&
+            tag.lifecycleState == InterestLifecycleState.inactive)
+          OutlinedButton.icon(
+            key: ValueKey('admin-delete-${tag.interestTagId}'),
+            onPressed: editable && state.editTarget == null
+                ? () => _confirmChange(tag, state, deleting: true)
+                : null,
+            icon: const Icon(Icons.delete_forever_outlined),
+            label: Text(context.tr('Delete permanently', '永久删除')),
+          ),
+      ],
+    ),
+  ];
+
+  Future<void> _confirmChange(
+    ManagedInterestTag tag,
+    AdminInterestState expected, {
+    bool deleting = false,
+  }) async {
+    if (!_currentSession || _actionDialog != null) return;
+    final deactivate = tag.lifecycleState == InterestLifecycleState.active;
+    final action = deleting
+        ? context.tr('Delete permanently', '永久删除')
+        : deactivate
+        ? context.tr('Deactivate', '停用')
+        : context.tr('Restore', '恢复');
+    final dialog = DialogRoute<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('$action ${tag.displayName}?'),
+        content: Text(
+          deleting
+              ? context.tr(
+                  'This cannot be undone. Existing references will prevent deletion.',
+                  '此操作无法撤销。存在引用时将拒绝删除。',
+                )
+              : deactivate
+              ? context.tr(
+                  'Existing selections and records will keep this interest. Members cannot select it again while inactive.',
+                  '已有选择和记录将保留此兴趣。停用后不能新选用。',
+                )
+              : context.tr(
+                  'Members will be able to select this interest again.',
+                  '恢复后可以再次选用此兴趣。',
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(context.tr('Cancel', '取消')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(action),
+          ),
+        ],
+      ),
+    );
+    _actionDialog = dialog;
+    final confirmed = await Navigator.of(context).push(dialog);
+    _actionDialog = null;
+    if (!_currentSession || confirmed != true) return;
+    final controller = ref.read(adminInterestControllerProvider.notifier);
+    if (deleting) {
+      await controller.delete(tag, session: widget.session, expected: expected);
+    } else {
+      await controller.changeLifecycle(
+        tag,
+        deactivate
+            ? InterestLifecycleState.inactive
+            : InterestLifecycleState.active,
+        session: widget.session,
+        expected: expected,
+      );
+    }
   }
 
   Future<void> _create(AdminInterestState expected) async {
@@ -456,16 +770,20 @@ final class _CatalogueEditorState extends ConsumerState<_CatalogueEditor> {
     }
     _leaving = true;
     final snapshot = ref.read(adminInterestControllerProvider);
-    if (snapshot.dirty || snapshot.busy || snapshot.needsReadback) {
+    final createMayBePending =
+        snapshot.phase == AdminInterestPhase.creating ||
+        snapshot.phase == AdminInterestPhase.updating ||
+        snapshot.needsReadback;
+    if (snapshot.dirty || createMayBePending) {
       final dialog = DialogRoute<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
           title: Text(context.tr('Leave interest catalogue?', '离开兴趣目录？')),
           content: Text(
-            snapshot.busy || snapshot.needsReadback
+            createMayBePending
                 ? context.tr(
-                    'The create result may still need checking. Leaving will discard this draft and will not undo a request already sent.',
-                    '创建结果可能仍需核对。离开将丢弃草稿，不会撤销已经发送的请求。',
+                    'The save result may still need checking. Leaving will discard this draft and will not undo a request already sent.',
+                    '保存结果可能仍需核对。离开将丢弃草稿，不会撤销已经发送的请求。',
                   )
                 : context.tr(
                     'Your unsaved interest name will be discarded.',
@@ -520,13 +838,29 @@ String _failureCopy(
     'The name is not valid. Use 1–50 characters without control or direction characters.',
     '名称无效。请使用 1–50 个字符，不包含控制或文字方向字符。',
   ),
+  AppFailureKind.catalogueRevisionPreconditionFailed => context.tr(
+    'This interest changed in another session. Review the latest version before saving again.',
+    '此兴趣已在其他会话中变更，请核对最新版本后再保存。',
+  ),
+  AppFailureKind.catalogueNotFound => context.tr(
+    'This interest is no longer in the catalogue.',
+    '此兴趣已不在目录中。',
+  ),
+  AppFailureKind.catalogueReferenced => context.tr(
+    'This interest is still referenced and cannot be deleted.',
+    '此兴趣仍被引用，无法删除。',
+  ),
+  AppFailureKind.catalogueStateConflict => context.tr(
+    'The current lifecycle state does not allow this change. Reload the catalogue.',
+    '当前状态不允许此变更，请重新读取目录。',
+  ),
   AppFailureKind.authRequired => context.tr(
     'Your session has expired. Sign in again.',
     '会话已失效，请重新登录。',
   ),
   AppFailureKind.authForbidden => context.tr(
-    'Admin access was denied. Creating is disabled.',
-    '管理权限被拒绝，暂时无法创建。',
+    'Admin access was denied. Changes are disabled.',
+    '管理权限被拒绝，暂时无法修改。',
   ),
   AppFailureKind.configurationUnavailable => context.tr(
     'The service is not configured.',
@@ -560,6 +894,13 @@ String? _adminMessage(BuildContext context, String? value) {
             '创建请求已接受，但目录尚未确认保存的条目。请重新读取核对。',
         'Catalogue reloaded. Check the list before trying again; the earlier request may have saved.':
             '目录已重新读取。再次尝试前请核对列表，先前的请求可能已保存。',
+        'The change result is unknown. Reload the catalogue before trying again.':
+            '变更结果尚未确认。再次尝试前请重新读取目录。',
+        'This interest changed. Review the current catalogue before saving again.':
+            '此兴趣已变更，请核对当前目录后再保存。',
+        'The change is confirmed in the current catalogue.': '变更已在当前目录中确认。',
+        'The saved change is not confirmed. Review the current catalogue before making another change.':
+            '尚未确认保存的变更，请核对当前目录后再操作。',
       }[value] ??
       value;
 }

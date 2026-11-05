@@ -40,3 +40,14 @@ CATALOGUE_NAME_CONFLICT /422 CATALOGUE_INVALID semantics. Unknown creation resul
 require an independent catalogue read before further action; a locally similar
 name is not proof that this request created that ID, and no automatic resend or
 new idempotency mechanism is introduced.
+
+## 5 November management extension
+
+The [approved management contract](interest-admin-management-contract.md)
+extends the former single-create implementation scope with a protected
+active/inactive management read and revision-protected single-item lifecycle
+operations. This capability response remains exactly the same navigation hint;
+the Backend independently authorizes every newly approved operation. The
+earlier boundary above is retained as history, superseded only by that contract
+and its linked LI decision. Connected permanent deletion remains closed pending
+verified complete reference inventory.

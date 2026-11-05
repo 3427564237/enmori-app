@@ -32,6 +32,11 @@ String localizedFailure(BuildContext context, AppFailure failure) {
     AppFailureKind.interestRevisionPreconditionFailed => '兴趣已发生变化，请读取最新选择后复核。',
     AppFailureKind.catalogueInvalid => '兴趣目录内容无效，请检查后重试。',
     AppFailureKind.catalogueNameConflict => '此兴趣名称已存在。',
+    AppFailureKind.catalogueNotFound => '此兴趣已不在目录中。',
+    AppFailureKind.catalogueReferenced => '此兴趣仍被引用，无法删除。',
+    AppFailureKind.catalogueStateConflict => '当前兴趣状态不允许此操作，请重新读取目录。',
+    AppFailureKind.catalogueRevisionPreconditionFailed =>
+      '此兴趣已发生变化，请核对最新版本后再保存。',
     AppFailureKind.checkInInvalid => '签到内容无效，请检查后重试。',
     AppFailureKind.checkInUnavailable => '此签到暂时不可用，或你已无权查看。',
     AppFailureKind.checkInRevisionPreconditionFailed => '签到已发生变化，请读取最新记录后复核。',
@@ -66,8 +71,7 @@ String localizedFailure(BuildContext context, AppFailure failure) {
       '跟进状态已发生变化，请读取最新状态后复核。',
     AppFailureKind.proactiveInputInvalid => '跟进设置无效，请核对时间和选项。',
     AppFailureKind.aiSourceUnavailable => '这条参考来源已不可用，请保留草稿并重新选择。',
-    AppFailureKind.aiContextSelectionConflict =>
-      '本次参考与已有上下文冲突，请复核来源后继续。',
+    AppFailureKind.aiContextSelectionConflict => '本次参考与已有上下文冲突，请复核来源后继续。',
     AppFailureKind.configurationUnavailable => '服务尚未配置完成，暂时无法使用。',
     AppFailureKind.serviceUnavailable => '服务暂时不可用，请检查连接后重试。',
     AppFailureKind.unexpected => '暂时无法完成操作，请先核对当前状态。',

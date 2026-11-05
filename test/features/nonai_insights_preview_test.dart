@@ -13,7 +13,7 @@ import 'package:enmori/features/event_participation/participation_providers.dart
 import 'package:enmori/features/event_participation/domain/participation_repository.dart';
 import 'package:enmori/features/event_participation/presentation/event_plans_page.dart';
 import 'package:enmori/features/interests/admin_interest_providers.dart';
-import 'package:enmori/features/interests/domain/interest_repository.dart';
+import 'package:enmori/features/interests/domain/admin_interest_repository.dart';
 import 'package:enmori/features/interests/presentation/admin_interest_catalogue_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -23,6 +23,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'admin_interest_test_support.dart';
+import 'admin_interest_catalogue_page_test.dart' as admin_widgets;
 import 'event_plans_test.dart' as plans;
 import 'nonai_insights_test.dart' as insights;
 
@@ -88,8 +89,8 @@ void main() {
             );
           }
         }
-        final admin = FakeAdminInterestRepository()
-          ..tags = [
+        final admin = FakeManagedAdminInterestRepository()
+          ..managed = [
             for (final name in [
               'Art',
               'Dance',
@@ -100,9 +101,13 @@ void main() {
               'Travel',
               'Volunteering',
             ])
-              InterestTagOption(
+              ManagedInterestTag(
                 interestTagId: 'synthetic-${name.toLowerCase()}',
                 displayName: name,
+                lifecycleState: name == 'Dance' || name == 'Music'
+                    ? InterestLifecycleState.inactive
+                    : InterestLifecycleState.active,
+                revision: name == 'Music' ? 4 : 1,
               ),
           ];
         final planRepo = plans.PlansRepo()..facts.clear();
@@ -155,7 +160,9 @@ void main() {
               localizationsDelegates: GlobalMaterialLocalizations.delegates,
               builder: (context, child) => MediaQuery(
                 data: MediaQuery.of(context).copyWith(
-                  textScaler: TextScaler.linear(language == 'zh' ? 1.3 : 1),
+                  textScaler: TextScaler.linear(
+                    language == 'zh' ? (screen == 'admin' ? 2 : 1.3) : 1,
+                  ),
                 ),
                 child: RepaintBoundary(
                   key: const Key('insights-preview'),
@@ -204,6 +211,37 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         await capture('$screen-lower');
+        if (screen == 'admin') {
+          final inactive = find.byKey(const Key('admin-filter-inactive'));
+          await admin_widgets.reveal(tester, inactive, delta: -180);
+          await tester.tap(inactive);
+          await tester.pumpAndSettle();
+          final music = find.byKey(
+            const Key('admin-interest-tag-synthetic-music'),
+          );
+          await admin_widgets.reveal(tester, music);
+          await tester.tap(music);
+          await tester.pumpAndSettle();
+          await admin_widgets.reveal(
+            tester,
+            find.byKey(const Key('admin-lifecycle-synthetic-music')),
+          );
+          await capture('admin-inactive');
+          final all = find.byKey(const Key('admin-filter-all'));
+          await admin_widgets.reveal(tester, all, delta: -180);
+          await tester.tap(all);
+          await tester.pumpAndSettle();
+          final art = find.byKey(const Key('admin-interest-tag-synthetic-art'));
+          await admin_widgets.reveal(tester, art);
+          await tester.tap(art);
+          await tester.pumpAndSettle();
+          final rename = find.byKey(const Key('admin-rename-synthetic-art'));
+          await admin_widgets.reveal(tester, rename);
+          await tester.tap(rename);
+          await tester.pumpAndSettle();
+          await capture('admin-rename');
+          expect(tester.takeException(), isNull);
+        }
         await tester.pumpWidget(const SizedBox.shrink());
       });
     }

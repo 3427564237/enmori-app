@@ -488,7 +488,7 @@ void main() {
     },
   );
   testWidgets(
-    'v2 social Home reads recommendations and opens manual Events using its authenticated Backend repository',
+    'v2 social Home reads recommendations, browses manually and refreshes once on return',
     (tester) async {
       final auth = AuthDouble();
       final recommendationViews = <String?>[];
@@ -574,7 +574,12 @@ void main() {
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-home')), findsOneWidget);
-      expect(recommendationViews, ['home']);
+      // The 26 October visible-return decision supersedes manual-only Reload.
+      // Manual browsing itself does not request recommendations; returning to
+      // the visible Home section performs one new authorized read.
+      expect(recommendationViews, ['home', 'home']);
+      await tester.pumpAndSettle();
+      expect(recommendationViews, ['home', 'home']);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       await auth.sessions.close();

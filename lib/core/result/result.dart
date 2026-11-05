@@ -1,6 +1,10 @@
 enum AppFailureKind {
   catalogueInvalid,
   catalogueNameConflict,
+  catalogueNotFound,
+  catalogueReferenced,
+  catalogueStateConflict,
+  catalogueRevisionPreconditionFailed,
   eventParticipationInvalid,
   eventParticipationRevisionPreconditionFailed,
   requestInvalid,

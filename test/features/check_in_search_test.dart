@@ -20,7 +20,7 @@ final class _HistoryDevice implements HistoryDevicePort {
   _HistoryDevice();
 
   final zone = 'Asia/Singapore';
-  final today = '2026-10-12';
+  String today = '2026-10-12';
   final formattedZones = <String>[];
 
   @override
@@ -398,4 +398,53 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );
+
+  for (final keyboard in [true, false]) {
+    testWidgets(
+      'rapid ${keyboard ? 'keyboard' : 'button'} search submissions keep one running scan',
+      (tester) async {
+        device.today = DateTime.now().toIso8601String().substring(0, 10);
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(home: CheckInSearchPage(onOpen: (_) {})),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const Key('check-in-search-query')),
+          'walk',
+        );
+        await tester.pump();
+        final submit = keyboard
+            ? () => tester
+                  .widget<TextField>(
+                    find.byKey(const Key('check-in-search-query')),
+                  )
+                  .onSubmitted!('walk')
+            : tester
+                  .widget<FilledButton>(
+                    find.byKey(const Key('check-in-search-start')),
+                  )
+                  .onPressed!;
+        submit();
+        submit();
+        await tester.pump();
+        await tester.pump();
+        expect(repository.calls, hasLength(1));
+        expect(state().phase, CheckInSearchPhase.searching);
+        submit();
+        await tester.pump();
+        expect(repository.calls, hasLength(1));
+        expect(state().phase, CheckInSearchPhase.searching);
+        controller().stop();
+        for (final response in repository.responses) {
+          response.complete(Success(_page([])));
+        }
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
 }

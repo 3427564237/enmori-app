@@ -73,6 +73,100 @@ final class FakeAdminInterestRepository implements AdminInterestRepository {
   }
 }
 
+const managedArt = ManagedInterestTag(
+  interestTagId: 'tag-art',
+  displayName: 'Art',
+  lifecycleState: InterestLifecycleState.active,
+  revision: 1,
+);
+const managedMusic = ManagedInterestTag(
+  interestTagId: 'tag-music',
+  displayName: 'Music',
+  lifecycleState: InterestLifecycleState.inactive,
+  revision: 4,
+);
+
+final class FakeManagedAdminInterestRepository
+    extends FakeAdminInterestRepository
+    implements AdminInterestManagementRepository {
+  List<ManagedInterestTag> managed = [managedArt, managedMusic];
+  final managementCatalogues =
+      Queue<Future<Result<List<ManagedInterestTag>>>>();
+  final updates = Queue<Future<Result<ManagedInterestTag>>>();
+  final changes =
+      <
+        ({
+          String id,
+          int revision,
+          String? name,
+          InterestLifecycleState? lifecycle,
+        })
+      >[];
+  int managementReads = 0, deletes = 0;
+  @override
+  bool permanentDeletionAvailable = false;
+  @override
+  Future<Result<List<ManagedInterestTag>>> readManagementCatalogue({
+    required bool Function() current,
+  }) {
+    managementReads++;
+    return managementCatalogues.isEmpty
+        ? Future.value(Success(List.of(managed)))
+        : managementCatalogues.removeFirst();
+  }
+
+  Future<Result<ManagedInterestTag>> update(
+    ManagedInterestTag expected,
+    String? name,
+    InterestLifecycleState? lifecycle,
+    bool Function() current,
+  ) {
+    changes.add((
+      id: expected.interestTagId,
+      revision: expected.revision,
+      name: name,
+      lifecycle: lifecycle,
+    ));
+    guards.add(current);
+    if (updates.isNotEmpty) return updates.removeFirst();
+    final value = ManagedInterestTag(
+      interestTagId: expected.interestTagId,
+      displayName: name?.trim() ?? expected.displayName,
+      lifecycleState: lifecycle ?? expected.lifecycleState,
+      revision: expected.revision + 1,
+    );
+    managed = [
+      for (final tag in managed)
+        if (tag.interestTagId == expected.interestTagId) value else tag,
+    ];
+    return Future.value(Success(value));
+  }
+
+  @override
+  Future<Result<ManagedInterestTag>> rename({
+    required ManagedInterestTag expected,
+    required String displayName,
+    required bool Function() current,
+  }) => update(expected, displayName, null, current);
+  @override
+  Future<Result<ManagedInterestTag>> changeLifecycle({
+    required ManagedInterestTag expected,
+    required InterestLifecycleState lifecycleState,
+    required bool Function() current,
+  }) => update(expected, null, lifecycleState, current);
+  @override
+  Future<Result<void>> delete({
+    required ManagedInterestTag expected,
+    required bool Function() current,
+  }) async {
+    deletes++;
+    managed = managed
+        .where((tag) => tag.interestTagId != expected.interestTagId)
+        .toList();
+    return const Success(null);
+  }
+}
+
 final class AdminHarness {
   AdminHarness._(this.container, this.auth, this.repository);
   final ProviderContainer container;

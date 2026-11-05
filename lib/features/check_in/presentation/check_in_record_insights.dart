@@ -234,6 +234,7 @@ final class _DayCell extends StatelessWidget {
         label: '$dateKey: $value ${context.tr('records', '条记录')}',
         button: true,
         selected: selected,
+        onTap: onTap,
         child: ExcludeSemantics(
           child: Material(
             color: selected

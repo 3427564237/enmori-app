@@ -87,11 +87,7 @@ final class _CheckInSearchPageState extends ConsumerState<CheckInSearchPage> {
                 controller.clear();
                 setState(() {});
               },
-              onSubmitted: (_) {
-                if (allowed && _query.text.trim().isNotEmpty) {
-                  controller.start(_query.text, _range.start, _range.end);
-                }
-              },
+              onSubmitted: (_) => _startSearch(),
             ),
             TextButton.icon(
               key: const Key('check-in-search-dates'),
@@ -105,8 +101,7 @@ final class _CheckInSearchPageState extends ConsumerState<CheckInSearchPage> {
               key: const Key('check-in-search-start'),
               onPressed: !allowed || busy || _query.text.trim().isEmpty
                   ? null
-                  : () =>
-                        controller.start(_query.text, _range.start, _range.end),
+                  : _startSearch,
               icon: const Icon(Icons.search),
               label: Text(context.tr('Search', '搜索')),
             ),
@@ -202,5 +197,18 @@ final class _CheckInSearchPageState extends ConsumerState<CheckInSearchPage> {
         ),
       ),
     );
+  }
+
+  void _startSearch() {
+    if (!mounted ||
+        ref.read(currentAuthSubjectProvider) == null ||
+        !ref.read(contentAccessProvider).foreground ||
+        ref.read(checkInSearchProvider).phase == CheckInSearchPhase.searching ||
+        _query.text.trim().isEmpty) {
+      return;
+    }
+    ref
+        .read(checkInSearchProvider.notifier)
+        .start(_query.text, _range.start, _range.end);
   }
 }

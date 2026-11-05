@@ -3,6 +3,7 @@ import { FirestoreOwnAvatarRepository } from "../account/infrastructure/firestor
 import { EditCheckIn } from "../check-ins/application/edit-check-in.js";
 import { FirestoreCheckInMutations } from "../check-ins/infrastructure/firestore-check-in-mutations.js";
 import { CreateInterestTag } from '../interests/application/create-interest-tag.js';
+import { ManageInterestTags } from '../interests/application/manage-interest-tags.js';
 import { GetInterestAdminCapability } from '../interests/application/get-interest-admin-capability.js';
 import { FirebaseInterestAdmin } from '../interests/infrastructure/firebase-interest-admin.js';
 import { FirestoreCatalogueWriter } from '../interests/infrastructure/firestore-catalogue-writer.js';
@@ -68,10 +69,13 @@ export async function createControlledRuntime(
     const interestRepository = new FirestoreInterestRepository(gateway);
     const clock = new SystemClock();
     const ids = new CryptoOpaqueIdGenerator();
+    const interestAdmin = new FirebaseInterestAdmin(getAuth(firebaseApp));
+    const catalogueWriter = new FirestoreCatalogueWriter(gateway);
     const app = await buildApp({
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
-      createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(getAuth(firebaseApp)), new FirestoreCatalogueWriter(gateway)),
-      getInterestAdminCapability: new GetInterestAdminCapability(new FirebaseInterestAdmin(getAuth(firebaseApp))),
+      createInterestTag: new CreateInterestTag(interestAdmin, catalogueWriter),
+      getInterestAdminCapability: new GetInterestAdminCapability(interestAdmin),
+      manageInterestTags: new ManageInterestTags(interestAdmin, catalogueWriter),
       accountPreferences: new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway), new OwnAvatar(new FirestoreOwnAvatarRepository(gateway))),
       recommendEvents: new RecommendEvents(new FirestoreEventRecommendationRepository(
         new FirebaseAdminEventReadGateway(getFirestore(firebaseApp)),

@@ -6,6 +6,7 @@ import {FirestoreCheckInCalendar} from "../check-ins/infrastructure/firestore-ch
 import { EditCheckIn } from "../check-ins/application/edit-check-in.js";
 import { FirestoreCheckInMutations } from "../check-ins/infrastructure/firestore-check-in-mutations.js";
 import { CreateInterestTag } from '../interests/application/create-interest-tag.js';
+import { ManageInterestTags } from '../interests/application/manage-interest-tags.js';
 import { GetInterestAdminCapability } from '../interests/application/get-interest-admin-capability.js';
 import { FirebaseInterestAdmin } from '../interests/infrastructure/firebase-interest-admin.js';
 import { FirestoreCatalogueWriter } from '../interests/infrastructure/firestore-catalogue-writer.js';
@@ -366,11 +367,14 @@ export async function createControlledPhoneService(options: {
     const completeOnboarding: Pick<CompleteOnboarding, "execute"> = options.dualAccounts ? {
       execute: input => input.principal.firebaseUid === primaryUid ? completePrimary.execute(input) : Promise.resolve(err(appFailure("AUTH_FORBIDDEN"))),
     } : unavailableOperation;
+    const interestAdmin = new FirebaseInterestAdmin(auth);
+    const catalogueWriter = new FirestoreCatalogueWriter(gateway);
     app = await buildApp({
       ...(options.demoFeatures ? {checkInCalendar:new OwnCheckInCalendar(new FirestoreCheckInCalendar(historyGateway))}:{}),
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
-      createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(auth), new FirestoreCatalogueWriter(gateway)),
-      getInterestAdminCapability: new GetInterestAdminCapability(new FirebaseInterestAdmin(auth)),
+      createInterestTag: new CreateInterestTag(interestAdmin, catalogueWriter),
+      getInterestAdminCapability: new GetInterestAdminCapability(interestAdmin),
+      manageInterestTags: new ManageInterestTags(interestAdmin, catalogueWriter),
       ...(options.diagnostics ? { controlledPhoneDiagnostics: options.diagnostics } : {}),
       ...(realEvents ? { recommendEvents: realEvents.recommendEvents } : {}),
       identityVerifier: { verifyIdToken: async token => {

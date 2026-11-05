@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show SemanticsAction;
 
 import 'package:enmori/core/presentation/record_charts.dart';
 import 'package:enmori/core/result/result.dart';
@@ -87,6 +88,40 @@ Future<void> reveal(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
+  testWidgets('chart dates expose an actionable semantic date filter', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    String? selected;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: CheckInRecordInsights(
+              state: const CheckInSearchState(
+                phase: CheckInSearchPhase.complete,
+                daysRead: 7,
+                totalDays: 7,
+              ),
+              lastDate: lastDate,
+              dayCount: 7,
+              selectedDate: null,
+              onSelectDate: (date) => selected = date,
+            ),
+          ),
+        ),
+      ),
+    );
+    await reveal(tester, find.byKey(const Key('insights-day-2026-11-03')));
+    final day = tester.getSemantics(
+      find.bySemanticsLabel('2026-11-03: 0 records'),
+    );
+    expect(day.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    day.owner!.performAction(day.id, SemanticsAction.tap);
+    expect(selected, '2026-11-03');
+    semantics.dispose();
+  });
+
   testWidgets('coverage uses civil dates, raw labels and marks unread dates', (
     tester,
   ) async {

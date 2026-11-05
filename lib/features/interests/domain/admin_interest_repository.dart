@@ -1,5 +1,6 @@
 import '../../../core/result/result.dart';
 import 'interest_repository.dart';
+export 'interest_repository.dart' show InterestLifecycleState;
 
 /// A server acknowledgement, not proof of the subsequent independent read.
 final class CreatedInterestTag {
@@ -21,6 +22,47 @@ abstract interface class AdminInterestRepository {
 
   Future<Result<CreatedInterestTag>> create({
     required String displayName,
+    required bool Function() current,
+  });
+}
+
+final class ManagedInterestTag {
+  const ManagedInterestTag({
+    required this.interestTagId,
+    required this.displayName,
+    required this.lifecycleState,
+    required this.revision,
+  });
+  final String interestTagId, displayName;
+  final InterestLifecycleState lifecycleState;
+  final int revision;
+  bool sameVersion(ManagedInterestTag other) =>
+      interestTagId == other.interestTagId &&
+      displayName == other.displayName &&
+      lifecycleState == other.lifecycleState &&
+      revision == other.revision;
+}
+
+/// A richer authorized reader; older create-only adapters remain usable.
+abstract interface class AdminInterestManagementRepository
+    implements AdminInterestRepository {
+  /// Trusted composition only, never inferred from a role or a successful read.
+  bool get permanentDeletionAvailable;
+  Future<Result<List<ManagedInterestTag>>> readManagementCatalogue({
+    required bool Function() current,
+  });
+  Future<Result<ManagedInterestTag>> rename({
+    required ManagedInterestTag expected,
+    required String displayName,
+    required bool Function() current,
+  });
+  Future<Result<ManagedInterestTag>> changeLifecycle({
+    required ManagedInterestTag expected,
+    required InterestLifecycleState lifecycleState,
+    required bool Function() current,
+  });
+  Future<Result<void>> delete({
+    required ManagedInterestTag expected,
     required bool Function() current,
   });
 }

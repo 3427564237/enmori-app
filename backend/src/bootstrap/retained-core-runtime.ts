@@ -34,6 +34,7 @@ import { createHistoryCursorCodec } from '../check-ins/infrastructure/aes-gcm-hi
 import { createAuthBindingDocumentId, parseAuthBinding } from '../shared/infrastructure/firebase/firestore-records.js';
 import { ok } from '../shared/domain/result.js';
 import { CreateInterestTag } from '../interests/application/create-interest-tag.js';
+import { ManageInterestTags } from '../interests/application/manage-interest-tags.js';
 import { GetInterestAdminCapability } from '../interests/application/get-interest-admin-capability.js';
 import { FirebaseInterestAdmin } from '../interests/infrastructure/firebase-interest-admin.js';
 import { FirestoreCatalogueWriter } from '../interests/infrastructure/firestore-catalogue-writer.js';
@@ -279,6 +280,8 @@ async function createControlledRuntime(
     };
     const getOnboarding = new GetOnboarding(onboardingRepository);
 
+    const interestAdmin = new FirebaseInterestAdmin(getAuth(firebaseApp));
+    const catalogueWriter = new FirestoreCatalogueWriter(gateway);
     const app = await buildApp({
       ...(firstFlow ? { firstFlow } : {}),
       ...(chat?.ownedSources ? { ownedSources: firstFlow
@@ -310,8 +313,9 @@ async function createControlledRuntime(
       } } : {}),
       checkInCalendar:new OwnCheckInCalendar(new FirestoreCheckInCalendar(new FirebaseAdminCheckInHistoryGateway(getFirestore(firebaseApp)))),
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
-      createInterestTag: new CreateInterestTag(new FirebaseInterestAdmin(getAuth(firebaseApp)), new FirestoreCatalogueWriter(gateway)),
-      getInterestAdminCapability: new GetInterestAdminCapability(new FirebaseInterestAdmin(getAuth(firebaseApp))),
+      createInterestTag: new CreateInterestTag(interestAdmin, catalogueWriter),
+      getInterestAdminCapability: new GetInterestAdminCapability(interestAdmin),
+      manageInterestTags: new ManageInterestTags(interestAdmin, catalogueWriter),
       accountPreferences: cloud?.preferences ?? new OwnAccountPreferences(new FirestoreAccountPreferencesRepository(gateway, isolatedEnvironment), avatar),
       recommendEvents: realEvents.recommendEvents,
       identityVerifier: identity,

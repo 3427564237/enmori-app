@@ -8,7 +8,14 @@ import '../result/result.dart';
 typedef AuthTokenProvider = Future<Result<String>> Function();
 typedef JsonObject = Map<String, Object?>;
 
-enum _InterestAdminOperation { capability, catalogue, create }
+enum _InterestAdminOperation {
+  capability,
+  catalogue,
+  create,
+  management,
+  update,
+  delete,
+}
 
 const defaultBackendOperationTimeout = Duration(seconds: 15);
 
@@ -99,6 +106,37 @@ final class BackendApiClient {
     body: {'displayName': displayName},
     isEligible: current,
     interestAdmin: _InterestAdminOperation.create,
+  );
+
+  Future<Result<JsonObject>> getInterestManagementCatalogue(
+    bool Function() current,
+  ) => _send(
+    'GET',
+    '/v1/admin/interest-tags',
+    isEligible: current,
+    interestAdmin: _InterestAdminOperation.management,
+  );
+  Future<Result<JsonObject>> updateInterestTag(
+    String id,
+    JsonObject body,
+    bool Function() current,
+  ) => _send(
+    'PATCH',
+    '/v1/admin/interest-tags/${Uri.encodeComponent(id)}',
+    body: body,
+    isEligible: current,
+    interestAdmin: _InterestAdminOperation.update,
+  );
+  Future<Result<JsonObject>> deleteInterestTag(
+    String id,
+    int revision,
+    bool Function() current,
+  ) => _send(
+    'DELETE',
+    '/v1/admin/interest-tags/${Uri.encodeComponent(id)}',
+    body: {'expectedRevision': revision},
+    isEligible: current,
+    interestAdmin: _InterestAdminOperation.delete,
   );
 
   /// Session-bound feature operations: recheck after token acquisition and
@@ -464,6 +502,11 @@ final class BackendApiClient {
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (interestAdmin == _InterestAdminOperation.delete) {
+          return response.statusCode == 204 && response.bodyBytes.isEmpty
+              ? const Success(<String, Object?>{})
+              : const Failure(_invalidResponse);
+        }
         if (interestAdmin != null &&
             response.statusCode !=
                 (interestAdmin == _InterestAdminOperation.create ? 201 : 200)) {
@@ -560,11 +603,29 @@ final class BackendApiClient {
       (401, 'AUTH_REQUIRED') => AppFailureKind.authRequired,
       (403, 'AUTH_FORBIDDEN') => AppFailureKind.authForbidden,
       (409, 'CATALOGUE_NAME_CONFLICT')
-          when operation == _InterestAdminOperation.create =>
+          when operation == _InterestAdminOperation.create ||
+              operation == _InterestAdminOperation.update =>
         AppFailureKind.catalogueNameConflict,
       (422, 'CATALOGUE_INVALID')
-          when operation == _InterestAdminOperation.create =>
+          when operation == _InterestAdminOperation.create ||
+              operation == _InterestAdminOperation.update ||
+              operation == _InterestAdminOperation.delete =>
         AppFailureKind.catalogueInvalid,
+      (404, 'CATALOGUE_NOT_FOUND')
+          when operation == _InterestAdminOperation.update ||
+              operation == _InterestAdminOperation.delete =>
+        AppFailureKind.catalogueNotFound,
+      (409, 'CATALOGUE_REFERENCED')
+          when operation == _InterestAdminOperation.delete =>
+        AppFailureKind.catalogueReferenced,
+      (409, 'CATALOGUE_STATE_CONFLICT')
+          when operation == _InterestAdminOperation.update ||
+              operation == _InterestAdminOperation.delete =>
+        AppFailureKind.catalogueStateConflict,
+      (412, 'CATALOGUE_REVISION_PRECONDITION_FAILED')
+          when operation == _InterestAdminOperation.update ||
+              operation == _InterestAdminOperation.delete =>
+        AppFailureKind.catalogueRevisionPreconditionFailed,
       (503, 'SERVICE_UNAVAILABLE') => AppFailureKind.serviceUnavailable,
       _ => null,
     };

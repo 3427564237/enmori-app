@@ -4604,6 +4604,13 @@
                   }
                 }
               }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
             }
           },
           "400": {
@@ -4612,6 +4619,13 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
                 }
               }
             }
@@ -4624,6 +4638,13 @@
                   "$ref": "#/components/schemas/ErrorEnvelope"
                 }
               }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
             }
           },
           "403": {
@@ -4632,6 +4653,13 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
                 }
               }
             }
@@ -4644,6 +4672,13 @@
                   "$ref": "#/components/schemas/ErrorEnvelope"
                 }
               }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
             }
           },
           "422": {
@@ -4654,10 +4689,156 @@
                   "$ref": "#/components/schemas/ErrorEnvelope"
                 }
               }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
             }
           },
           "503": {
             "description": "Safe failure; no automatic retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listManagedInterestTags",
+        "summary": "Admin reads active and inactive interests",
+        "responses": {
+          "200": {
+            "description": "Current authoritative catalogue state",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "interestTags"
+                  ],
+                  "properties": {
+                    "interestTags": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "interestTagId",
+                          "displayName",
+                          "lifecycleState",
+                          "revision"
+                        ],
+                        "properties": {
+                          "interestTagId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "displayName": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "lifecycleState": {
+                            "type": "string",
+                            "enum": [
+                              "active",
+                              "inactive"
+                            ]
+                          },
+                          "revision": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 9007199254740991
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5289,7 +5470,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -5367,7 +5552,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -5445,7 +5634,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -5523,7 +5716,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -5601,7 +5798,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -5679,7 +5880,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -5757,7 +5962,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -6030,7 +6239,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -6108,7 +6321,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -6186,7 +6403,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -6264,7 +6485,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -6342,7 +6567,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -6420,7 +6649,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -6498,7 +6731,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -6739,7 +6976,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -6817,7 +7058,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -6895,7 +7140,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -6973,7 +7222,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -7051,7 +7304,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -7129,7 +7386,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -7207,7 +7468,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -7417,7 +7682,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -7495,7 +7764,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -7573,7 +7846,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -7651,7 +7928,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -7729,7 +8010,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -7807,7 +8092,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -7885,7 +8174,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8015,7 +8308,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8093,7 +8390,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8171,7 +8472,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8249,7 +8554,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8327,7 +8636,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8405,7 +8718,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8483,7 +8800,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8632,7 +8953,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8710,7 +9035,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8788,7 +9117,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8866,7 +9199,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -8944,7 +9281,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -9022,7 +9363,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -9100,7 +9445,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -9236,7 +9585,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -9314,7 +9667,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -9392,7 +9749,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -9470,7 +9831,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -9548,7 +9913,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -9741,7 +10110,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -9819,7 +10192,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -9897,7 +10274,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -9975,7 +10356,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -10053,7 +10438,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -10312,7 +10701,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -10390,7 +10783,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -10468,7 +10865,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -10546,7 +10947,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -10624,7 +11029,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -10775,7 +11184,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -10853,7 +11266,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -10931,7 +11348,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -11009,7 +11430,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -11087,7 +11512,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -11165,7 +11594,11 @@
                             "INTEREST_REVISION_PRECONDITION_FAILED",
                             "IDEMPOTENCY_KEY_INVALID",
                             "IDEMPOTENCY_CONFLICT",
-                            "SERVICE_UNAVAILABLE"
+                            "SERVICE_UNAVAILABLE",
+                            "CATALOGUE_NOT_FOUND",
+                            "CATALOGUE_REFERENCED",
+                            "CATALOGUE_STATE_CONFLICT",
+                            "CATALOGUE_REVISION_PRECONDITION_FAILED"
                           ]
                         },
                         "message": {
@@ -14527,6 +14960,453 @@
           }
         }
       }
+    },
+    "/v1/admin/interest-tags/{interestTagId}": {
+      "patch": {
+        "operationId": "changeInterestTag",
+        "summary": "Admin renames or changes the lifecycle of one revision-protected interest",
+        "parameters": [
+          {
+            "name": "interestTagId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "expectedRevision"
+                ],
+                "properties": {
+                  "expectedRevision": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "lifecycleState": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "inactive"
+                    ]
+                  }
+                },
+                "oneOf": [
+                  {
+                    "required": [
+                      "displayName"
+                    ],
+                    "not": {
+                      "required": [
+                        "lifecycleState"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "lifecycleState"
+                    ],
+                    "not": {
+                      "required": [
+                        "displayName"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Current authoritative catalogue state",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "interestTag"
+                  ],
+                  "properties": {
+                    "interestTag": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "interestTagId",
+                        "displayName",
+                        "lifecycleState",
+                        "revision"
+                      ],
+                      "properties": {
+                        "interestTagId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "lifecycleState": {
+                          "type": "string",
+                          "enum": [
+                            "active",
+                            "inactive"
+                          ]
+                        },
+                        "revision": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteInterestTag",
+        "summary": "Delete one inactive interest only with verified complete reference inventory",
+        "parameters": [
+          {
+            "name": "interestTagId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "expectedRevision"
+                ],
+                "properties": {
+                  "expectedRevision": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Permanently deleted; independent readback still required",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Safe failure; no automatic retry",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -14603,7 +15483,7 @@
           },
           "displayName": {
             "type": "string",
-            "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+            "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
           },
           "tone": {
             "type": "string",
@@ -14713,7 +15593,7 @@
                 },
                 "displayName": {
                   "type": "string",
-                  "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                  "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
                 },
                 "tone": {
                   "type": "string",
@@ -14835,7 +15715,7 @@
               },
               "displayName": {
                 "type": "string",
-                "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
               },
               "tone": {
                 "type": "string",
@@ -14959,7 +15839,7 @@
                     },
                     "displayName": {
                       "type": "string",
-                      "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                      "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
                     },
                     "tone": {
                       "type": "string",
@@ -15059,7 +15939,7 @@
         "properties": {
           "displayName": {
             "type": "string",
-            "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+            "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
           },
           "tone": {
             "type": "string",
@@ -15133,7 +16013,7 @@
         "properties": {
           "displayName": {
             "type": "string",
-            "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+            "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
           },
           "tone": {
             "type": "string",
@@ -16297,7 +17177,11 @@
                   "IDEMPOTENCY_CONFLICT",
                   "SERVICE_UNAVAILABLE",
                   "FRIEND_IGNORE_PRECONDITION_FAILED",
-                  "FRIEND_REVISION_PRECONDITION_FAILED"
+                  "FRIEND_REVISION_PRECONDITION_FAILED",
+                  "CATALOGUE_NOT_FOUND",
+                  "CATALOGUE_REFERENCED",
+                  "CATALOGUE_STATE_CONFLICT",
+                  "CATALOGUE_REVISION_PRECONDITION_FAILED"
                 ]
               },
               "message": {
@@ -17292,7 +18176,7 @@
             "properties": {
               "displayName": {
                 "type": "string",
-                "description": "Well-formed Unicode; ECMAScript trim, then 1\u201350 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
+                "description": "Well-formed Unicode; ECMAScript trim, then 1–50 Unicode scalar values. Reject remaining Cc, Cf, Zl and Zp characters. Preserve internal spacing; no composition normalization or uniqueness requirement."
               },
               "tone": {
                 "type": "string",
