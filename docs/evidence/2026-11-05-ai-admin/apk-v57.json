@@ -1,0 +1,38 @@
+{
+  "sourceCommit": "6c5531bc75fa22cdf0cdcaab5a92a3bd05dbfdae",
+  "sourceBranch": "souma/ai-admin-polish-20261105",
+  "trackedSourceCleanAtBuildVerification": true,
+  "concurrentUntrackedEvidence": "Root agent was writing verification.md; no source/dependency change.",
+  "artifactPurpose": "AI latency and Interest administration candidate; artifact verification only",
+  "apk": "build/ai-admin-v57/ENMORI-admin-v57-release.apk",
+  "sha256": "0d7c98e466c62df7177fcef8e548a855b27d70f0610354c15b7751b39eaced5a",
+  "bytes": 69068164,
+  "packageLine": "package: name='com.enmori.app.group' versionCode='57' versionName='1.0.0-admin20261105' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+  "debuggable": false,
+  "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+  "apkSignatureV2Verified": true,
+  "permissionsUnchangedFromV55": true,
+  "permissionsUnchangedFromV56": true,
+  "permissionBaselines": {
+    "v55": {
+      "apk": "/home/miku/.codex/worktrees/nonai-admin-insights-20261104/ENMORI/build/nonai-admin-insights-v55/ENMORI-insights-v55-release.apk",
+      "sha256": "baff603b9c86c30e63e0e0d2dac54cfb2939ccb85931dd858276c98c490e6c23"
+    },
+    "v56": {
+      "apk": "/home/miku/.codex/worktrees/cloud-ai-backend-resume-20261102/ENMORI/build/cloud-ai-backend-resume-v56/ENMORI-sol-test-v56-release.apk",
+      "sha256": "3c13786c21f634c4ae94ffeb02b27dfb03d4fcfac01c2e0ff0f54b2b92dd5de7"
+    }
+  },
+  "buildSdk": "Flutter 3.47.2",
+  "endpoint": "https://enmori-backend-20261029.azurewebsites.net",
+  "openAiTestApp": false,
+  "companionFirstFlow": true,
+  "remoteGroup": true,
+  "compileConfigurationVerification": "Approved cloud-dart-defines.json passed unchanged; ENMORI_OPENAI_TEST_APP is absent and bootstrap.dart uses bool.fromEnvironment default false. No command-line flag overrides. This is APK configuration evidence, not backend arm-state evidence.",
+  "releaseToolingRecovery": "Initial --no-pub build reused test-generated Android plugin registrant referencing integration_test. Rebuilt with default pub/tooling regeneration; generated release registrant omits integration_test. No source or dependency changes.",
+  "initialFailedBuildLog": "output/ai-admin-20261105/apk-build.log",
+  "successfulBuildLog": "output/ai-admin-20261105/apk-build-regenerated.log",
+  "buildSeconds": 35.9,
+  "installedOnPhone": false,
+  "uploaded": false
+}

@@ -1,0 +1,58 @@
+{
+  "source": {
+    "head": "f56e6cb37706d5916e0b5a35ecd36f3251d5b0e8",
+    "packageSha256": "4bbd8c924824d8b72af80000c2283cf0727874bb9d81a745a4140c737e194fce"
+  },
+  "timings": [
+    {
+      "sample": 1,
+      "prepareMs": 1858,
+      "executeMs": 37867,
+      "fullMs": 39876,
+      "prepareStatus": 201,
+      "executeStatus": 200,
+      "cloudProvenance": true
+    },
+    {
+      "sample": 2,
+      "prepareMs": 1561,
+      "executeMs": 34713,
+      "fullMs": 36331,
+      "prepareStatus": 201,
+      "executeStatus": 200,
+      "cloudProvenance": true
+    },
+    {
+      "sample": 3,
+      "prepareMs": 1417,
+      "executeMs": 34990,
+      "fullMs": 36468,
+      "prepareStatus": 201,
+      "executeStatus": 200,
+      "cloudProvenance": true
+    }
+  ],
+  "budget": {
+    "before": {
+      "attemptCount": 101,
+      "reconciledCount": 99,
+      "grantCapNanoUsd": 3400000000,
+      "spentNanoUsd": 93860700,
+      "heldNanoUsd": 4096000
+    },
+    "after": {
+      "attemptCount": 104,
+      "reconciledCount": 102,
+      "grantCapNanoUsd": 3400000000,
+      "spentNanoUsd": 100184700,
+      "heldNanoUsd": 4096000
+    },
+    "addedCostNanoUsd": 6324000
+  },
+  "priorAttemptsPreserved": true,
+  "threeChargedCostsNanoUsd": [
+    1968000,
+    2258000,
+    2098000
+  ]
+}

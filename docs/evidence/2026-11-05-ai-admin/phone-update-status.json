@@ -1,0 +1,31 @@
+{
+  "sourceCommit": "6c5531bc75fa22cdf0cdcaab5a92a3bd05dbfdae",
+  "candidate": {
+    "artifact": "build/ai-admin-v57/ENMORI-admin-v57-release.apk",
+    "versionCode": 57,
+    "versionName": "1.0.0-admin20261105",
+    "sha256": "0d7c98e466c62df7177fcef8e548a855b27d70f0610354c15b7751b39eaced5a",
+    "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+    "signatureV2Verified": true
+  },
+  "preAttempt": {
+    "versionCode": 53,
+    "apkSha256": "5eac3340359d964f533cb26e78ac972551c204e669b973519169f3c9a3270133",
+    "apkHashAndSignerVerified": true,
+    "firstInstallTimeVerified": true
+  },
+  "installAttempt": {
+    "command": "adb install -r",
+    "errorCode": "INSTALL_FAILED_ABORTED",
+    "platformMessage": "User rejected permissions",
+    "automaticRetryPerformed": false
+  },
+  "postAttemptReadback": {
+    "versionCode": 53,
+    "firstInstallTimeUnchanged": true,
+    "v57Installed": false
+  },
+  "awaitingUserUnlock": true,
+  "appDataContentInspected": false,
+  "deviceIdentifiersOmitted": true
+}

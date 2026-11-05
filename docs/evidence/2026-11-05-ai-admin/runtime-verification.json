@@ -1,0 +1,46 @@
+{
+  "sourceCommit": "6c5531bc75fa22cdf0cdcaab5a92a3bd05dbfdae",
+  "activeZipSha256": "4a22062b2478e44875d1900bae7b44017bb65b4ae579e097a046491177ff28ec",
+  "verifiedAtUtc": "2026-11-05T01:44:46.236352+00:00",
+  "endpoint": "https://enmori-backend-20261029.azurewebsites.net",
+  "manifest": {
+    "sourceCommit": "6c5531bc75fa22cdf0cdcaab5a92a3bd05dbfdae",
+    "aiConfiguredByDefault": false,
+    "openAiTestAppOptIn": true,
+    "eventSourceDeadlineMs": 10000
+  },
+  "firebaseRead": true,
+  "aiConfigured": false,
+  "syntheticProfileHttpStatus": 200,
+  "ordinaryAdminCapability": false,
+  "ordinaryAdminCatalogueHttpStatus": 403,
+  "ordinaryAdminErrorCode": "AUTH_FORBIDDEN",
+  "applicationMethods": [
+    "GET"
+  ],
+  "realAdminRoleGranted": false,
+  "realCatalogueMutated": false,
+  "cloudAiSettingsAbsentAfterPhysicalTermination": true,
+  "cloudAiContainerTerminatedAtUtc": "2026-11-05T01:28:29.6122926Z",
+  "syntheticConversationsDeletedAndReadback404": true,
+  "syntheticIdentitiesDeleted": 2,
+  "localPriorStateRestored": true,
+  "localActiveState": "active",
+  "localUnitFileState": "enabled",
+  "finalLedger": {
+    "attemptCount": 104,
+    "reconciledCount": 102,
+    "spentNanoUsd": 100184700,
+    "reservedNanoUsd": 4096000
+  },
+  "priorAttemptsAndGrantPreserved": true,
+  "evidenceHashes": {
+    "final-ordinary-readiness.json": "0b7727dc2ce189d544417672e5453c2b350f0a623e74857ad6f88a2dbf37fdb4",
+    "rollback-stop-observation.json": "874c081977af2563f5543b7180cd789580865910434979144fb6e5d0b3e31341",
+    "ordinary-restored-readiness.json": "ac71ed1337830a209e5c557f75209c6223877bab1782b3cd7f9f3cf171fd0d64",
+    "synthetic-cleanup.json": "6d0cb36b22e095c49c27a378fb260bba07baaa7659d3e165f1a50cd6de968296",
+    "cloud-latency-three-cleanup.json": "5c189267ea36a13785b173d2f75165b32884b4eae11e9e3171f400dc756291c8",
+    "ledger-after-cleanup-private.json": "735dc5bb62876174cc7c7b4a0dedf2433ee511ca6ae6f00a651d1c1b7cdb4b18",
+    "local-unit-restored.json": "fc8b458d61e6ef3e4c07de264c0f1c14bdf3f670b72dd0451322803e1fbf1353"
+  }
+}
