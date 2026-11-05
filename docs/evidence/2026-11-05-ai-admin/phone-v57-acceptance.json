@@ -1,0 +1,59 @@
+{
+  "sourceCommit": "6c5531bc75fa22cdf0cdcaab5a92a3bd05dbfdae",
+  "observedDate": "2026-11-05",
+  "timezone": "Asia/Singapore",
+  "operatorModel": "gpt-6.1-terra",
+  "operatorReasoningEffort": "max",
+  "analysisBy": "root",
+  "installedVersion": 57,
+  "reinstalledByAgent": false,
+  "loginPromptObserved": false,
+  "profileReadable": true,
+  "adminEntryVisible": false,
+  "adminOperationsCovered": false,
+  "checkInHistory": "selected date empty",
+  "search": "7-day read completed; zero records and matches; temporary query cleared",
+  "charts": "7 dates checked; zero records; populated chart not covered",
+  "friends": "empty list after load",
+  "events": "cards visible; Ticketmaster available; onePA unavailable; location fallback displayed",
+  "home": "25-second settled read: today empty; event recommendations unavailable",
+  "realDataMutationPerformed": false,
+  "aiGenerationPerformed": false,
+  "finalScreen": "Home",
+  "rootConclusion": "Installed artifact and bounded read-only paths verified; not full product, Admin, populated-data or AI acceptance. Provider/recommendation failures remain observed; root cause not established by this UI check.",
+  "screenshotsKeptPrivate": true,
+  "evidence": {
+    "profile": {
+      "privateCaptureDirectory": "phone-v57-capture-20261105T094134113903Z",
+      "screenSha256": "c0770da2c708583d8d3f6dca4c86e69d8bca1357f80e0285f8361db07c09f88e"
+    },
+    "history": {
+      "privateCaptureDirectory": "phone-v57-capture-20261105T094220214464Z",
+      "screenSha256": "44b274f13e3ae93b221bf1b9ff2102bd9d031e6826ed80c4effe93f0e5b17470"
+    },
+    "search": {
+      "privateCaptureDirectory": "phone-v57-capture-20261105T094328239905Z",
+      "screenSha256": "b6c9d196ea250824b8802d8754da87f7a5f9c76d8264aefcf78ddfc24f09c8ba"
+    },
+    "charts": {
+      "privateCaptureDirectory": "phone-v57-capture-20261105T094431455494Z",
+      "screenSha256": "aa49edc08a2a979e3b2aa25fc26606761d25e169fc7aaac5e43f129fbf3b986f"
+    },
+    "friends": {
+      "privateCaptureDirectory": "phone-v57-capture-20261105T094524886798Z",
+      "screenSha256": "1cc752a6f0b9aa77404142657a448419275e158e8f253c7c6b163331b9657618"
+    },
+    "events": {
+      "privateCaptureDirectory": "phone-v57-capture-20261105T094610166996Z",
+      "screenSha256": "6501afb18757b37b607858129f940a120d0ab9ebe46fb682486a2c69aebeb23f"
+    },
+    "searchCleared": {
+      "privateCaptureDirectory": "phone-v57-capture-20261105T094733736407Z",
+      "screenSha256": "b3d21b99f1bf0008d884054715b70ae5813bf97fd90e434e4302258b2315ae51"
+    },
+    "homeFinal": {
+      "privateCaptureDirectory": "phone-v57-capture-20261105T094915167087Z",
+      "screenSha256": "52e38f3660fb815b50269c68a71f19ab2f11cb4723a46dbe217bf4a0acec757b"
+    }
+  }
+}

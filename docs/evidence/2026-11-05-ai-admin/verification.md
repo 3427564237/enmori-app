@@ -1,6 +1,6 @@
 # AI 回应时长与管理员完善：本轮验证
 
-日期：2026-11-05（Asia/Singapore）。源码、自动测试、合成 UI、三次受控云端请求及最终普通服务部署已完成验证；本轮测试数据已清理，本地服务恢复原状态。APK 产物已验证，但手机安装被设备拒绝，仍为 v53；实际 AI 时长仍超过 15 秒目标。
+日期：2026-11-05（Asia/Singapore）。源码、自动测试、合成 UI、三次受控云端请求及最终普通服务部署已完成验证；本轮测试数据已清理，本地服务恢复原状态。首次手机安装被设备拒绝；用户随后完成安装，本轮已独立回读核验 v57，详见下方后续真机记录。实际 AI 时长仍超过 15 秒目标。
 
 ## 源码与批准范围
 
@@ -88,13 +88,30 @@ Backend 使用已有固定 Node 24.19.0、TypeScript 7.0.2；Flutter 使用 3.47
 
 ## v57 APK 与手机更新结果
 
-已从最终整合源码 `6c5531bc75fa22cdf0cdcaab5a92a3bd05dbfdae` 构建发布候选产物 `build/ai-admin-v57/ENMORI-admin-v57-release.apk`，版本 **57 / 1.0.0-admin20261105**，大小 69,068,164 bytes；SHA-256 为 `0d7c98e466c62df7177fcef8e548a855b27d70f0610354c15b7751b39eaced5a`。包名为 `com.enmori.app.group`，非 debuggable，APK v2 签名通过，签名证书与保留安装基线相同；权限列表与 v55/v56 相同。产物逐项记录见 [apk-v57.json](apk-v57.json)。这不是已安装或发布成功的声明。
+已从最终整合源码 `6c5531bc75fa22cdf0cdcaab5a92a3bd05dbfdae` 构建发布候选产物 `build/ai-admin-v57/ENMORI-admin-v57-release.apk`，版本 **57 / 1.0.0-admin20261105**，大小 69,068,164 bytes；SHA-256 为 `0d7c98e466c62df7177fcef8e548a855b27d70f0610354c15b7751b39eaced5a`。包名为 `com.enmori.app.group`，非 debuggable，APK v2 签名通过，签名证书与保留安装基线相同；权限列表与 v55/v56 相同。产物逐项记录见 [apk-v57.json](apk-v57.json)。产物核验与后续安装回读分别记录；不宣称正式 Release。
 
 首次 `--no-pub` 发布构建复用了测试生成的 Android plugin registrant，错误引用 `integration_test`，因此 Java 编译失败。通过正常 pub/tooling 再生成后重新构建成功，release registrant 已移除该测试插件；没有改动产品源码或依赖。初次失败保留在 `apk-build.log`，成功重建保留在 `apk-build-regenerated.log`，没有隐去失败步骤。
 
-实际执行了一次保留数据的 `adb install -r`；安装前从手机拉取现有 v53 APK，验证原 APK SHA-256 `5eac3340359d964f533cb26e78ac972551c204e669b973519169f3c9a3270133`、相同签名及原 first-install 时间。安装返回 **`INSTALL_FAILED_ABORTED: User rejected permissions`**。随后独立读取包状态仍为 **v53**，first-install 时间未变，**没有确认 v57 安装成功**。未自动重试、卸载、清空应用数据或授予权限；正在等待用户解锁手机并处理设备确认。未查看应用数据内容，不把保留安装机制当作登录/数据实际验收。
+实际执行了一次保留数据的 `adb install -r`；安装前从手机拉取现有 v53 APK，验证原 APK SHA-256 `5eac3340359d964f533cb26e78ac972551c204e669b973519169f3c9a3270133`、相同签名及原 first-install 时间。安装返回 **`INSTALL_FAILED_ABORTED: User rejected permissions`**。随后独立读取包状态仍为 **v53**，first-install 时间未变，**没有确认 v57 安装成功**。当时未自动重试、卸载、清空应用数据或授予权限，等待用户处理设备确认。未查看应用数据内容，不把保留安装机制当作登录/数据实际验收。
 
-去除设备标识后的状态见 [phone-update-status.json](phone-update-status.json)。最终普通云服务已完成上节的独立运行验证；手机仍为 v53，不能把后端上线当作 v57 真机 UI 验证。
+去除设备标识后的状态见 [phone-update-status.json](phone-update-status.json)。最终普通云服务已完成上节的独立运行验证。首次失败回读的 v53 状态保留作为历史证据，后续 v57 结果独立记录如下。
+
+## 后续 v57 真机只读检查（用户安装后）
+
+2026-11-05 17:38–17:49 SGT，按用户要求由 **Terra / max** 执行 ADB 操作及采集，主 agent 分析。用户已安装；重新拉取手机上的 APK 后确认版本 57、哈希与签名匹配、first-install 时间未变。本轮没有再次安装。应用进入 Home 和 Profile，未出现登录提示。
+
+| 项目 | 实际观察与边界 |
+| --- | --- |
+| 管理员 | 当前 Profile 未显示管理入口；未覆盖管理员列表、筛选、重命名等真实操作，也没有更改角色。入口缺失本身不能证明权限配置有误。 |
+| History / 搜索 | 所选日期与 7 天范围为空；搜索完成且无匹配，临时搜索词已清空。未覆盖有记录的搜索命中。 |
+| Record charts | 7 天读取完成但无记录；只覆盖空态，未覆盖有数据的图表和日期交互。 |
+| Friends | 加载结束后显示空列表；不作为有好友数据的验收。 |
+| Events | 卡片可见；页面报告 Ticketmaster available、onePA unavailable，并显示定位不可用后的区域回退。只确认部分来源可用。 |
+| Home | 返回并等待 25 秒后，当日 Check-in 为空；活动推荐仍显示 unavailable / service temporarily unavailable。未重试或刷新。 |
+
+主 agent 判断：**已安装产物及本轮基础只读路径通过，整体不作完整验收通过**。首页推荐和 onePA 不可用仍是观察到的限制；本次 UI 检查不能确定其服务端根因。源码检查表明活动推荐使用独立的事件来源/个性化读取链路，不能直接把失败归因于关闭云 AI 测试开关。未据此更改服务配置、个人数据或权限，也没有进行新的 AI 生成测试。
+
+操作结束停留在 Home。截图含真实账号界面，保留在私有目录；脱敏结果与截图哈希见 [phone-v57-acceptance.json](phone-v57-acceptance.json)。首次安装失败的证据仍保留，后续成功回读追加在 [phone-update-status.json](phone-update-status.json)。本轮不改变既有 UAT / Release 状态。
 
 ## 本地日志 SHA-256
 

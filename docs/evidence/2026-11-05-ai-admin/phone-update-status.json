@@ -25,7 +25,18 @@
     "firstInstallTimeUnchanged": true,
     "v57Installed": false
   },
-  "awaitingUserUnlock": true,
+  "awaitingUserUnlock": false,
   "appDataContentInspected": false,
-  "deviceIdentifiersOmitted": true
+  "deviceIdentifiersOmitted": true,
+  "subsequentUserInstalledReadback": {
+    "observedAtUtc": "2026-11-05T09:38:18Z",
+    "versionCode": 57,
+    "versionName": "1.0.0-admin20261105",
+    "apkSha256": "0d7c98e466c62df7177fcef8e548a855b27d70f0610354c15b7751b39eaced5a",
+    "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+    "installedArtifactVerified": true,
+    "firstInstallTimeUnchanged": true,
+    "agentInstalledThisTurn": false,
+    "privateReceiptSha256": "67a464adcd4add2cb324aa7fa623bfceb066f601a0cc48b088d86d710ed5e82f"
+  }
 }

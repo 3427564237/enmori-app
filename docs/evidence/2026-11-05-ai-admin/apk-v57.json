@@ -33,6 +33,7 @@
   "initialFailedBuildLog": "output/ai-admin-20261105/apk-build.log",
   "successfulBuildLog": "output/ai-admin-20261105/apk-build-regenerated.log",
   "buildSeconds": 35.9,
-  "installedOnPhone": false,
-  "uploaded": false
+  "installedOnPhone": true,
+  "uploaded": false,
+  "installationVerification": "User installed; independent pulled-APK readback on 2026-11-05T09:38:18Z matches artifact, signer and first-install time. Prior rejected attempt retained in phone-update-status.json."
 }
