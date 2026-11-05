@@ -63,6 +63,7 @@ export interface OpenAiDispatchControls {
 }
 
 export const openAiResponsesEndpoint = 'https://api.openai.com/v1/responses';
+export const openAiInputTokensEndpoint = `${openAiResponsesEndpoint}/input_tokens`;
 const goalGroundingInstruction = 'Keep each step focused on the latest user’s explicit outcome and constraints. ' +
   'Treat labels, markers and background activities as context unless the user asks to act on them. ' +
   'Make required steps work without assuming unstated items. Ask for details only when needed to satisfy the request.';
@@ -195,6 +196,96 @@ function retryAfter(response: Response): number | undefined {
   }
   const at = Date.parse(value), date = Date.parse(response.headers.get('date') ?? '');
   return Number.isFinite(at) && Number.isFinite(date) && at > date ? Math.ceil((at - date) / 1000) : Infinity;
+}
+
+/** Preserve all input/framing fields of the exact generated body. Generation
+ * controls are deliberately absent from the Count input tokens schema. */
+export function buildOpenAiInputTokenCountRequest(generationBody: string, config: OpenAiTransportConfiguration): string {
+  try {
+    if (!validConfiguration(config) || Buffer.byteLength(generationBody, 'utf8') > config.maxRequestBytes) throw Error();
+    const value = parseUnambiguousJson(generationBody);
+    if (!record(value)) throw Error();
+    const { max_output_tokens, stream, store, background, service_tier, ...input } = value;
+    if (max_output_tokens !== config.maxOutputTokens || stream !== false || store !== false || background !== false ||
+        service_tier !== 'default' || input.model !== config.model || Object.keys(input).length !== 7 ||
+        !keysWithin(input, ['input', 'model', 'reasoning', 'text', 'tool_choice', 'tools', 'truncation'])) throw Error();
+    return JSON.stringify(input);
+  } catch { throw Error('OPENAI_COUNT_REQUEST_INVALID'); }
+}
+
+export async function readOpenAiInputTokenCount(response: Response, maximum: number, signal: AbortSignal): Promise<number> {
+  if (!response.body || !/^application\/json(?:\s*;|$)/i.test(response.headers.get('content-type') ?? '')) {
+    if (response.body) void response.body.cancel().catch(() => {});
+    throw Error('OPENAI_COUNT_RESPONSE_INVALID');
+  }
+  const reader = response.body.getReader(), decoder = new TextDecoder('utf-8', { fatal: true });
+  const cancel = () => { void reader.cancel().catch(() => {}); };
+  signal.addEventListener('abort', cancel, { once: true });
+  try {
+    let raw = '', bytes = 0;
+    while (!signal.aborted) {
+      const part = await reader.read();
+      if (part.done) break;
+      bytes += part.value.byteLength;
+      if (bytes > 4096) throw Error();
+      raw += decoder.decode(part.value, { stream: true });
+    }
+    if (signal.aborted) throw Error();
+    const value = parseUnambiguousJson(raw + decoder.decode());
+    if (!record(value) || value.object !== 'response.input_tokens' || Object.keys(value).length !== 2 ||
+        !within(value.input_tokens, 1, maximum)) throw Error();
+    return value.input_tokens;
+  } catch { throw Error('OPENAI_COUNT_RESPONSE_INVALID'); }
+  finally { signal.removeEventListener('abort', cancel); cancel(); reader.releaseLock(); }
+}
+
+/** One free Count POST under the original generation deadline. Losing the
+ * count response cannot authorize inference or trigger a retry. */
+export async function countOpenAiInputTokens(generationBody: string, config: OpenAiTransportConfiguration,
+  budget: RequestBudget, options: { readonly key: string; readonly http: typeof fetch; readonly clock: RuntimeClock;
+    available(): boolean; rateLimited(seconds: number | undefined): Promise<void> }): Promise<number | undefined> {
+  const receive = new AbortController();
+  let closeTimer: (() => void) | undefined;
+  let resolveStop!: () => void;
+  const stopped = new Promise<undefined>(resolve => { resolveStop = () => resolve(undefined); });
+  const cancel = () => { receive.abort(); resolveStop(); };
+  const live = () => {
+    const now = options.clock.now(), remaining = budget.remainingMs();
+    return !budget.signal.aborted && !receive.signal.aborted && Number.isFinite(now) && Number.isFinite(budget.deadline) &&
+      now < budget.deadline && Number.isFinite(remaining) && remaining > 0;
+  };
+  try {
+    if (generationBody.includes(options.key)) return;
+    const body = buildOpenAiInputTokenCountRequest(generationBody, config);
+    const now = options.clock.now(), remaining = budget.remainingMs();
+    if (!live() || !Number.isFinite(now) || !Number.isFinite(remaining)) return;
+    budget.signal.addEventListener('abort', cancel, { once: true });
+    closeTimer = options.clock.at(Math.min(budget.deadline, now + remaining), cancel);
+    if (!live() || options.available() !== true || !live()) return;
+    const response = options.http(openAiInputTokensEndpoint, { method: 'POST', redirect: 'error', cache: 'no-store',
+      signal: receive.signal, headers: { 'content-type': 'application/json', authorization: `Bearer ${options.key}` }, body });
+    const result = response.then(async observed => {
+      if (observed.redirected || observed.url && observed.url !== openAiInputTokensEndpoint) {
+        if (observed.body) void observed.body.cancel().catch(() => {});
+        return undefined;
+      }
+      // Provider cooldown is an account effect. A cancelled original delivery
+      // must not discard a later authentic rate-limit response.
+      if (observed.status !== 200 || !live()) {
+        if (observed.body) void observed.body.cancel().catch(() => {});
+        if (observed.status === 429) await options.rateLimited(retryAfter(observed));
+        return undefined;
+      }
+      const tokens = await readOpenAiInputTokenCount(observed, config.maxInputTokens, receive.signal);
+      return live() ? tokens : undefined;
+    }).catch(() => undefined);
+    return await Promise.race([result, stopped]);
+  } catch { return undefined; }
+  finally {
+    try { closeTimer?.(); } catch { /* Cleanup does not expose injected errors. */ }
+    budget.signal.removeEventListener('abort', cancel);
+    receive.abort();
+  }
 }
 
 /** An isolated Responses adapter, never an SDK/default-fetch or service switch.
@@ -338,13 +429,13 @@ export class OpenAiCloudTransport implements CloudGenerationTransport<readonly O
       void (async () => {
         try {
           const response = await pending;
-          if (ended) { if (response.body) void response.body.cancel().catch(() => {}); return; }
-          if (response.status === 429) await this.controls.rateLimited(retryAfter(response));
-          const receiving = !ended && this.live(budget);
-          if (!receiving || response.status !== 200 || !response.body ||
-              response.redirected || response.url && response.url !== openAiResponsesEndpoint ||
+          const trusted = !response.redirected && (!response.url || response.url === openAiResponsesEndpoint);
+          if (ended || !this.live(budget) || response.status !== 200 || !trusted || !response.body ||
               !/^application\/json(?:\s*;|$)/i.test(response.headers.get('content-type') ?? '')) {
             if (response.body) void response.body.cancel().catch(() => {});
+            // A trusted 429 still affects account admission after delivery ends.
+            if (trusted && response.status === 429) await this.controls.rateLimited(retryAfter(response));
+            const receiving = !ended && this.live(budget);
             finish(unknown(), !receiving ? 'receive-cancelled-or-expired'
               : response.status !== 200 ? 'http-status-rejected' : 'http-response-invalid');
             return;

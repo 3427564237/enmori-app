@@ -198,6 +198,33 @@ test('429 maps only bounded retry metadata, never upstream bodies, and never ret
   }
 });
 
+test('paid Responses retains authentic 429 cooldown after cancellation or deadline and rejects foreign 429s', async () => {
+  for (const mode of ['cancel', 'deadline', 'redirected', 'wrong-url']) {
+    const pending = deferred<Response>(), cooldowns: (number | undefined)[] = [];
+    let calls = 0, cancelledBodies = 0;
+    const f = fixture(async () => { calls++; return pending.promise; }, {
+      rateLimited: async seconds => { cooldowns.push(seconds); },
+    });
+    const result = f.transport.dispatch(messages, f.budget);
+    const late = mode === 'cancel' || mode === 'deadline';
+    if (late) {
+      if (mode === 'cancel') f.abort.abort(); else f.clock.advance(45_000);
+      assert.deepEqual(await result, unknown);
+    }
+    const limited = new Response(new ReadableStream<Uint8Array>({ cancel() { cancelledBodies++; } }),
+      { status: 429, headers: { 'retry-after': '60' } });
+    Object.defineProperty(limited, 'url', { value: mode === 'wrong-url' ? 'https://wrong.invalid/' : openAiResponsesEndpoint });
+    Object.defineProperty(limited, 'redirected', { value: mode === 'redirected' });
+    pending.resolve(limited);
+    assert.deepEqual(await result, unknown);
+    await flush();
+    assert.deepEqual(cooldowns, late ? [60] : [], mode);
+    assert.equal(cancelledBodies, 1, mode);
+    assert.equal(f.confirmed.length, 0);
+    assert.equal(calls, 1);
+  }
+});
+
 test('HTTP errors, redirects, malformed identities and nonterminal statuses are unknown without implicit retries', async () => {
   for (const make of [() => new Response(key, { status: 503 }), () => new Response('', { status: 302 }),
     () => { throw Error(key); }, () => new Response('{', { headers: { 'content-type': 'application/json' } }),

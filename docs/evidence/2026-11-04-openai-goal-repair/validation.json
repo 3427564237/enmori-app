@@ -1,0 +1,60 @@
+{
+  "sourceHead": "d97812dedf0408926bf4cf4aed0162429e7dd073",
+  "promptProfile": "goal-grounding-v1",
+  "goldenFixtureSha256": "b6a8673446a1a36cc5921e097ecacbf06aa752450227e9eddbab6ad7049027ee",
+  "nodeVersion": "24.19.0",
+  "strictCompilation": true,
+  "affectedOfflineTests": 165,
+  "independentAffectedOfflineTests": 59,
+  "sourceReview": "no blocker",
+  "operatorSha256": "3abac1e57800e8b041e9bde35364f6255198aa25ad3549a58f934e6724286b4c",
+  "operatorSourceDigest": "137691b2a27de166a7c4c0320f4a404dfad96f5abb28153da80d92840ee5bb0a",
+  "files": {
+    "luna-report.json": "c2ab188bd0ded10508fc8b7030dde4305bdbab4451ab62e40c8956337c776766",
+    "luna-semantic-review.json": "1439c3a769fecbaba3d6971746c405547d677500f2ce49f43ba797c27f8a9c3a",
+    "luna-accounting.json": "954d6409971680b620419a0716d45a232007b0fee89e624fd1f581ab0f400594",
+    "luna-token-evidence.json": "ee825241051bd76c8648ddb5a03e6cbbdcd6dedfebb2f0c5bffcc63f8ae029cc",
+    "sol-report.json": "f63c8dd806a5554b9f7db014559c92db04c7bee15d07fd1ffe71607a22268250",
+    "sol-semantic-review.json": "feb63283dc6b10bd6627c1b7292cb129c0e1b68630cc7b790122ccc32f172744",
+    "sol-accounting.json": "8f7fe2b8b613ac726f39156697b7023b8b71c437e33034fbbae528d0d82298b0",
+    "sol-token-evidence.json": "f49fe20ab2d7022fd05f548182191669f5e9d6c480ec7287d2eeddbfb47c4a99",
+    "restored-service-and-ledger.json": "45e82b8f7427511fde30b4b01d36bd9ebb6c2b7341f6a5c2518df5ff3dbf65d4"
+  },
+  "metrics": {
+    "luna": {
+      "samples": 24,
+      "protocolEligible": 24,
+      "semanticPass": 21,
+      "semanticFail": [
+        "reported-english-goal-chinese-reply",
+        "labelled-desk-goal",
+        "explicit-language-request"
+      ],
+      "p50Ms": 2449.767468000002,
+      "p95Ms": 4612.902017,
+      "maxMs": 5498.437651999999,
+      "measurementLayer": "operator generation including usage settlement; not phone end-to-end"
+    },
+    "sol": {
+      "samples": 24,
+      "protocolEligible": 24,
+      "semanticPass": 23,
+      "semanticFail": [
+        "reported-english-goal-chinese-reply"
+      ],
+      "p50Ms": 3454.126343000011,
+      "p95Ms": 12559.652723,
+      "maxMs": 14465.703551999999,
+      "measurementLayer": "operator generation including usage settlement; not phone end-to-end"
+    }
+  },
+  "newConfirmedChargeNanoUsd": 46047700,
+  "capNanoUsd": 3400000000,
+  "cumulativeSpentNanoUsd": 87256700,
+  "retainedUnknownNanoUsd": 4096000,
+  "availableNanoUsd": 3308647300,
+  "adopted": false,
+  "deployed": false,
+  "apkBuilt": false,
+  "deviceAttached": false
+}

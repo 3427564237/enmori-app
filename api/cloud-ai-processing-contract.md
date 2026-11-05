@@ -45,7 +45,8 @@ service's configured recipient. Unknown and cross-provider tuples fail closed.
 
 The OpenAI disclosure identifies OpenAI as the external processor and Azure as
 the ENMORI Backend host. It identifies the same minimized current message,
-selected conversation/Check-in text and applicable Persona expression, and offers
+selected conversation/Check-in text and applicable Persona expression for request-size
+checking and reply generation, and offers
 decline and later withdrawal without disabling ordinary features. No unselected
 records, account/source IDs, location, weather or credentials enter model input.
 The trial uses Responses `store:false`; this does not promise zero retention.
@@ -71,9 +72,14 @@ unchanged. An OpenAI composition must pin the same recipient on the consent
 authority, selected-source readers, application, Conversation store and dispatch
 bridge. The client uses one exhaustive `AiClientProcessing` configuration:
 `local` remains the default, while `groqCloud` and `openaiCloud` bind the cloud
-request discriminator and the matching Settings disclosure. Only the isolated
-network harness accepts this explicit selection; shipped Bootstrap and Azure
-composition are unchanged. The client cannot send an arbitrary provider or
+request discriminator and the matching Settings disclosure. The explicit `ENMORI_OPENAI_TEST_APP` build and Azure server selection bind
+OpenAI for the bounded Conversation trial described in the
+[5 November acceptance decision](../docs/decisions/2026-11-05-li-sol-test-app-acceptance.md).
+The mobile selection is restricted to the existing HTTPS Azure endpoint and
+requires a fresh matching OpenAI acceptance before showing Conversation.
+Azure claims one expected runtime fence, restricts Conversation to the configured
+test identity and leaves Persona generation and proactive workers closed.
+Source implementation alone does not establish deployment or phone acceptance. The client cannot send an arbitrary provider or
 disclosure in the request. No setting silently switches service or request mode.
 Older installed clients reject unknown response fields; optional fields do
 not make that version compatible. Cloud enablement needs a verified client upgrade

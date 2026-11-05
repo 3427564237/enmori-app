@@ -42,6 +42,7 @@ final class SelectedRig {
     bool existingTopic = false,
     SelectedAiRepository? repository,
     bool today = false,
+    AiClientProcessing processing = AiClientProcessing.local,
     Future<Result<String>> Function()? timeZone,
   }) async {
     final r = SelectedRig._(repository: repository);
@@ -49,6 +50,8 @@ final class SelectedRig {
       overrides: [
         authRepositoryProvider.overrideWithValue(r.auth),
         aiConversationRepositoryProvider.overrideWithValue(r.repo),
+        if (processing != AiClientProcessing.local)
+          aiClientProcessingProvider.overrideWithValue(processing),
         checkInRepositoryProvider.overrideWithValue(r.checkIns),
         aiCompanionReferencesEnabledProvider.overrideWithValue(true),
         aiTodayReferencesEnabledProvider.overrideWithValue(today),
@@ -72,10 +75,17 @@ final class SelectedRig {
     r.container
         .read(accountSettingsSnapshotProvider.notifier)
         .observe(
-          const OwnSettings(
+          OwnSettings(
             checkInVisibility: CheckInVisibility.private,
             consent: OptionalProcessingConsent.accepted,
             revision: 1,
+            cloudAiConsent: switch (processing.cloudProvider) {
+              final provider? => CloudAiConsent.forProvider(
+                provider,
+                accepted: true,
+              ),
+              null => null,
+            },
           ),
         );
     await tester.pump();

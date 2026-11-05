@@ -19,6 +19,10 @@ enum AiClientProcessing {
   String get wireProcessing => cloudProvider == null ? 'local' : 'cloud';
   CloudAiProvider get disclosureProvider =>
       cloudProvider ?? CloudAiProvider.groq;
+
+  bool allowsCloudConsent(CloudAiConsent? consent) =>
+      cloudProvider == null ||
+      (consent?.provider == cloudProvider && consent?.isAccepted == true);
 }
 
 /// The historical values remain Groq-specific; they never grant OpenAI use.

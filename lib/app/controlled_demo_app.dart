@@ -29,6 +29,7 @@ import '../features/auth/auth_providers.dart';
 import '../features/auth/domain/auth_repository.dart';
 import '../features/account/account_providers.dart';
 import '../features/account/account_preferences_providers.dart';
+import '../features/account/domain/cloud_ai_consent.dart';
 import '../features/account/data/backend_account_repository.dart';
 import '../features/account/data/backend_account_preferences_repository.dart';
 import '../features/check_in/check_in_providers.dart';
@@ -82,6 +83,7 @@ final class ControlledDemoApp extends StatefulWidget {
     this.eventParticipationEnabled = false,
     this.remoteGroupEnabled = false,
     this.companionFirstFlowEnabled = false,
+    this.aiProcessing = AiClientProcessing.local,
     this.companionInstallationRef,
     this.companionMessagingPort,
     super.key,
@@ -90,6 +92,7 @@ final class ControlledDemoApp extends StatefulWidget {
   final bool eventParticipationEnabled;
   final bool remoteGroupEnabled;
   final bool companionFirstFlowEnabled;
+  final AiClientProcessing aiProcessing;
   final String? companionInstallationRef;
   final ProactiveMessagingPort? companionMessagingPort;
   final Uri baseUri;
@@ -101,6 +104,9 @@ final class ControlledDemoApp extends StatefulWidget {
 }
 
 final class _ControlledDemoAppState extends State<ControlledDemoApp> {
+  bool get _referencesEnabled =>
+      widget.companionFirstFlowEnabled ||
+      widget.aiProcessing.cloudProvider != null;
   late BackendApiClient _api;
   late AiWireRepository _ai;
   late BackendPersonaPreviewRepository _personaPreview;
@@ -115,7 +121,8 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
     super.didUpdateWidget(oldWidget);
     if (widget.baseUri != oldWidget.baseUri ||
         widget.auth != oldWidget.auth ||
-        widget.client != oldWidget.client) {
+        widget.client != oldWidget.client ||
+        widget.aiProcessing != oldWidget.aiProcessing) {
       _compose();
     }
   }
@@ -128,6 +135,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
     );
     _ai = AiWireRepository(
       HttpAiWireTransport(baseUri: widget.baseUri, client: widget.client),
+      processing: widget.aiProcessing,
     );
     _personaPreview = BackendPersonaPreviewRepository(
       baseUri: widget.baseUri,
@@ -148,9 +156,9 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       context,
       listen: false,
     ).read(authSessionProvider).value;
-    bool canOpenCompanion() {
+    bool canOpenAiRoute(bool enabled) {
       if (!context.mounted ||
-          !widget.companionFirstFlowEnabled ||
+          !enabled ||
           session is! AuthSessionAuthenticated) {
         return false;
       }
@@ -190,9 +198,9 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
                 context,
                 listen: false,
               ).read(aiConversationControllerProvider).sessionKey,
-        onOpenSourceTarget: widget.companionFirstFlowEnabled
+        onOpenSourceTarget: _referencesEnabled
             ? (target) {
-                if (!canOpenCompanion()) return;
+                if (!canOpenAiRoute(_referencesEnabled)) return;
                 if (target case AiCheckInTarget(:final checkInId)) {
                   context.push<void>(AppRoutes.savedCheckIn(checkInId));
                 }
@@ -217,7 +225,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
         onOpenSettings: onOpenSettings,
         onFollowUpRequested: widget.companionFirstFlowEnabled
             ? (source) {
-                if (!canOpenCompanion() ||
+                if (!canOpenAiRoute(widget.companionFirstFlowEnabled) ||
                     session is! AuthSessionAuthenticated) {
                   return;
                 }
@@ -229,7 +237,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
             : null,
         onOpenFollowUps: widget.companionFirstFlowEnabled
             ? () {
-                if (canOpenCompanion()) {
+                if (canOpenAiRoute(widget.companionFirstFlowEnabled)) {
                   context.push<void>(AppRoutes.aiFollowUps);
                 }
               }
@@ -313,19 +321,20 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       ),
       personaPreviewRepositoryProvider.overrideWithValue(_personaPreview),
       personaPreviewAccessProvider.overrideWith(
-        (ref) => ref.watch(connectedPersonaPreviewAccessProvider),
+        (ref) =>
+            widget.aiProcessing.cloudProvider == null &&
+            ref.watch(connectedPersonaPreviewAccessProvider),
       ),
+      aiClientProcessingProvider.overrideWithValue(widget.aiProcessing),
       aiConversationRepositoryProvider.overrideWithValue(_ai),
       aiCompanionReferencesEnabledProvider.overrideWithValue(
-        widget.companionFirstFlowEnabled,
+        _referencesEnabled,
       ),
-      aiTodayReferencesEnabledProvider.overrideWithValue(
-        widget.companionFirstFlowEnabled,
-      ),
+      aiTodayReferencesEnabledProvider.overrideWithValue(_referencesEnabled),
       aiTodayTimeZoneProvider.overrideWith(
         (ref) => ref.watch(followUpTimePortProvider).currentIanaZone,
       ),
-      if (widget.companionFirstFlowEnabled)
+      if (_referencesEnabled)
         companionCheckInPageProvider.overrideWithValue(
           CompanionCheckInPage(
             build:
@@ -343,7 +352,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
                 ),
           ),
         ),
-      if (widget.companionFirstFlowEnabled)
+      if (_referencesEnabled)
         companionMessagePageProvider.overrideWithValue(
           CompanionMessagePage(
             build:

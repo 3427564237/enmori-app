@@ -109,6 +109,27 @@ after(async () => {
   } finally { await firestore.terminate(); await deleteApp(firebase); }
 });
 
+test("actual Firestore permits one startup from a single expected runtime fence", async () => {
+  const doc = firestore.doc("ai_runtime_fence/current");
+  const snapshot = (await doc.get()).data();
+  assert.equal(snapshot?.processEpoch, epoch.processEpoch);
+  assert.equal(snapshot?.generation, epoch.generation);
+  assert.equal(typeof snapshot?.cleanupGeneration, "number");
+  const expectedFence = { ...epoch, cleanupGeneration: snapshot!.cleanupGeneration as number };
+  const claim = { expectedFence, expiresAtMs: Date.now() + 30_000 };
+  const starts = await Promise.all([
+    store.startEpoch(randomUUID(), claim),
+    new FirestoreConversationStore(gateway, process.env).startEpoch(randomUUID(), claim),
+  ]);
+  const winners = starts.filter(result => result.kind === "confirmed");
+  assert.equal(winners.length, 1);
+  const winner = winners[0]!;
+  assert.equal(winner.value.generation, expectedFence.generation + 1);
+  assert.deepEqual((await doc.get()).data(), { ...winner.value, cleanupGeneration: expectedFence.cleanupGeneration });
+  assert.deepEqual(await store.startEpoch(randomUUID(), claim), { kind: "conflict" });
+  epoch = winner.value;
+});
+
 test("actual Auth -> first user -> assistant -> definite ACK -> ordinary readback preserves immutable records", async () => {
   const beforeChecks = freshChecks, op = await saved();
   const original = await firestore.doc(user(op)).get();

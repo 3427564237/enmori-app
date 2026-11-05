@@ -1,0 +1,27 @@
+{
+  "verifiedAtUtc": "2026-11-05T00:10:35.313918+00:00",
+  "rollbackStartIntentAtUtc": "2026-11-05T00:05:53.003824+00:00",
+  "manifest": {
+    "sourceCommit": "e7f55e659f76e8f0aa4ff62c570379d476b0264d",
+    "aiConfiguredByDefault": false,
+    "openAiTestAppOptIn": true,
+    "eventSourceDeadlineMs": 10000
+  },
+  "activeZipName": "20261104232906.zip",
+  "activeZipSha256": "327cf830e487fe4eda8dd7bbe14ee4d18da6ad7e705912ed1ff7b8c4b8310d57",
+  "startup": {
+    "applicationLogName": "2026_11_05_lw0sdlwk0001LN_default_docker.log",
+    "applicationLogSha256": "27bf4e7d6cc2ba0d01a15a01b672b13c1c429ce1b16dc84f74da330cb8b2870d",
+    "platformLogName": "2026_11_05_lw0sdlwk0001LN_docker.log",
+    "configurationAtUtc": "2026-11-05T00:09:56.2460170Z",
+    "listeningAtUtc": "2026-11-05T00:10:26.1672397Z",
+    "firebaseRead": true,
+    "aiConfigured": false
+  },
+  "azureState": "Running",
+  "azureHost": "enmori-backend-20261029.azurewebsites.net",
+  "openAiFlag": null,
+  "openAiConfigPresent": false,
+  "openAiKeyPresent": false,
+  "syntheticProfileHttpStatus": 200
+}

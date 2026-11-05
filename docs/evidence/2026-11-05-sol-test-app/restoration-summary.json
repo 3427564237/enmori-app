@@ -1,0 +1,14 @@
+{
+  "implementationCommit": "e7f55e659f76e8f0aa4ff62c570379d476b0264d",
+  "azureOrdinaryReady": true,
+  "azureOpenAiSettingsRemoved": true,
+  "localUnitEnabled": true,
+  "localUnitActive": true,
+  "localOwnedRunner": true,
+  "localHttpsIdentityGate": true,
+  "localReady": true,
+  "monetaryLedgerUnchangedAfterSyntheticAccountCleanup": true,
+  "costSha256": "c063f163279f1b10c38996e7cb2e7a266a65fb1a886e27ecaf86f5c439271ebc",
+  "attemptSha256": "40df020550430e8cb460c907a78ff2bd95418d57170bab4eba94c302ec895149",
+  "realAccountCloudActivation": false
+}

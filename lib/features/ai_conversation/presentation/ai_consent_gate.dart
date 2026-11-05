@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/presentation/enmori_localizations.dart';
 import '../../account/domain/account_repository.dart';
+import '../../account/account_preferences_providers.dart';
 import '../../account/presentation/account_preferences_controller.dart';
 
 /// Presentation gate for the connected app; Backend remains the authority.
@@ -24,15 +25,27 @@ final class AiConsentGate extends ConsumerWidget {
       PreferencesView.settings,
     );
     final state = ref.watch(provider);
+    final processing = ref.watch(aiClientProcessingProvider);
+    final cloudProvider = processing.cloudProvider;
+    final settings = cloudProvider == null
+        ? state.settings
+        : ref.watch(accountSettingsSnapshotProvider);
+    final cloudAccepted = processing.allowsCloudConsent(
+      settings?.cloudAiConsent,
+    );
     if (state.phase == PreferencesPhase.ready &&
-        state.settings?.consent == OptionalProcessingConsent.accepted) {
+        settings?.consent == OptionalProcessingConsent.accepted &&
+        cloudAccepted) {
       return child;
     }
     final loading =
         state.phase == PreferencesPhase.loading ||
         state.phase == PreferencesPhase.saving;
     final rejected =
-        state.settings?.consent == OptionalProcessingConsent.rejected;
+        settings?.consent == OptionalProcessingConsent.rejected ||
+        (state.phase == PreferencesPhase.ready &&
+            settings != null &&
+            !cloudAccepted);
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('AI companion', 'AI 伙伴'))),
       bottomNavigationBar: navigationBar,
@@ -53,10 +66,15 @@ final class AiConsentGate extends ConsumerWidget {
                     const SizedBox(height: 16),
                     Text(
                       rejected
-                          ? context.tr(
-                              'AI requires optional data use. You can still browse activities, use Friends and keep Check-ins.',
-                              '使用 AI 需要允许可选数据处理。你仍可浏览活动、使用好友功能和记录签到。',
-                            )
+                          ? cloudProvider != null && !cloudAccepted
+                                ? context.tr(
+                                    'To chat here, review and allow ${cloudProvider.displayName} processing in Settings. Ordinary features remain available.',
+                                    '如需在此聊天，请在设置中阅读并允许 ${cloudProvider.displayName} 处理。普通功能仍可使用。',
+                                  )
+                                : context.tr(
+                                    'AI requires optional data use. You can still browse activities, use Friends and keep Check-ins.',
+                                    '使用 AI 需要允许可选数据处理。你仍可浏览活动、使用好友功能和记录签到。',
+                                  )
                           : context.tr(
                               'Your settings could not be loaded. Try again.',
                               '未能加载设置，请重试。',

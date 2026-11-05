@@ -1,0 +1,33 @@
+{
+  "completed": true,
+  "sourceHead": "e7f55e659f76e8f0aa4ff62c570379d476b0264d",
+  "recordedAtUtc": "2026-11-05T00:11:23.743Z",
+  "checks": [
+    {
+      "label": "retained-check-in",
+      "status": 200,
+      "elapsedMs": 1005
+    },
+    {
+      "label": "settings-before",
+      "status": 200,
+      "elapsedMs": 625
+    },
+    {
+      "label": "settings-preserving-write",
+      "status": 200,
+      "elapsedMs": 668
+    },
+    {
+      "label": "settings-readback",
+      "status": 200,
+      "elapsedMs": 579
+    }
+  ],
+  "persistedCheckInMatched": true,
+  "settingsRevisionBefore": 4,
+  "settingsRevisionAfter": 5,
+  "settingsFieldsPreserved": true,
+  "optionalProcessingConsent": "accepted",
+  "cloudConsentState": "declined"
+}

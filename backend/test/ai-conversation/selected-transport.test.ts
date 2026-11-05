@@ -12,7 +12,7 @@ const source={cardRef:selectionKey,kind:"check_in" as const,version:"server-vers
 const user:StoredConversationMessage={messageId:randomUUID(),role:"user",sequence:1,persistedAt:{seconds:1792886400,nanoseconds:0},availability:"available",text:"Synthetic request"};
 const assistant:StoredConversationMessage={...user,messageId:randomUUID(),sequence:2,role:"assistant",text:"Synthetic answer",sources:[{...source,...{privateSourceId:"do-not-project"}}]};
 const historyPair={historyKey:randomUUID(),userMessageId:user.messageId,assistantMessageId:assistant.messageId,userSequence:1,assistantSequence:2};
-async function fixture(historyPairs:PreparedReplySelection["historyPairs"]=[historyPair], today?:PreparedReplySelection["today"]){
+async function fixture(historyPairs:PreparedReplySelection["historyPairs"]=[historyPair], today?:PreparedReplySelection["today"], processing?: 'local' | 'cloud'){
  const calls:unknown[]=[];
  const app=Fastify({logger:false});app.decorateRequest("authPrincipal",null);
  const operations:ConversationOperations={
@@ -23,10 +23,25 @@ async function fixture(historyPairs:PreparedReplySelection["historyPairs"]=[hist
   readOutcome:async()=>({kind:"failure",code:"AI_OPERATION_UNAVAILABLE"}),
   deleteConversation:async()=>({kind:"success",value:undefined}),
  };
- await registerConversationRoutes(app,{verifyIdToken:async()=>({kind:"verified",principal:{firebaseUid:"synthetic"}})},operations);
+ await registerConversationRoutes(app,{verifyIdToken:async()=>({kind:"verified",principal:{firebaseUid:"synthetic"}})},operations,processing);
  await app.ready();return{app,calls};
 }
 const headers={authorization:"Bearer synthetic"};
+test('cloud routes require the explicit cloud preparation and reviewed execution selection', async t => {
+  const { app, calls } = await fixture([], undefined, 'cloud');
+  t.after(() => app.close());
+  const prepare = { method: 'POST' as const, url: '/v1/me/ai/operations', headers };
+  const base = { kind: 'send', purpose: 'checkin_conversation' };
+  const legacy = await app.inject({ ...prepare, payload: base });
+  assert.equal(legacy.json().error.code, 'AI_CONTEXT_NOT_PERMITTED');
+  assert.equal((await app.inject({ ...prepare, payload: { ...base, contextSelection: { processing: 'local', sources: [] } } })).statusCode, 400);
+  const execute = { method: 'POST' as const, url: `/v1/me/ai/operations/${operationId}/execute`, headers: { ...headers, 'ai-operation-key': key } };
+  assert.equal((await app.inject({ ...execute, payload: { text: 'Synthetic' } })).json().error.code, 'AI_CONTEXT_NOT_PERMITTED');
+  assert.deepEqual(calls, []);
+  assert.equal((await app.inject({ ...prepare, payload: { ...base, contextSelection: { processing: 'cloud', sources: [] } } })).statusCode, 201);
+  assert.equal((await app.inject({ ...execute, payload: { text: 'Synthetic', contextSelection: { selectionRevision, includedKeys: [], excludedKeys: [] } } })).statusCode, 200);
+  assert.equal(calls.length, 2);
+});
 test("today transport projects the server day and owner source locator without expanding the source card",async t=>{
  const today={date:"2026-10-25",timeZone:"Asia/Singapore",limit:5 as const,hasMore:true};
  const f=await fixture([],today);t.after(()=>f.app.close());

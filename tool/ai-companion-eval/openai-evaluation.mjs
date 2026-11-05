@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { loadGroqCases, prepareGroqCase } from './groq-evaluation.mjs';
 import { loadCases, sha256, protocolAssessment, validateReview } from './evaluation.mjs';
-import { OpenAiCloudTransport, assertOpenAiTransportSettings, buildOpenAiRequest, openAiResponsesEndpoint }
+import { OpenAiCloudTransport, assertOpenAiTransportSettings, buildOpenAiInputTokenCountRequest, buildOpenAiRequest,
+  openAiInputTokensEndpoint, readOpenAiInputTokenCount }
   from '../../backend/dist/src/ai-runtime/infrastructure/openai-cloud-transport.js';
 
-const countEndpoint = `${openAiResponsesEndpoint}/input_tokens`;
 const countMethod = 'responses-input-token-count';
 
 export const openAiEvaluationConfiguration = (model, promptProfile = 'baseline') => Object.freeze({ model,
@@ -32,14 +32,7 @@ export async function prepareOpenAiCases(model, promptProfile = 'baseline') {
 function countRequestBody(row, config) {
   const generationBody = buildOpenAiRequest(row.messages, config);
   assert(sha256(generationBody) === row.requestSha256, 'OPENAI_COUNT_REQUEST_CHANGED');
-  const { max_output_tokens, stream, store, background, service_tier, ...input } = JSON.parse(generationBody);
-  // These generation-only settings are outside the Count input tokens schema.
-  // Forward every current input/framing field, including the output JSON schema.
-  assert(max_output_tokens === config.maxOutputTokens && stream === false && store === false &&
-    background === false && service_tier === 'default', 'OPENAI_COUNT_REQUEST_CHANGED');
-  assert.deepEqual(Object.keys(input).sort(),
-    ['input', 'model', 'reasoning', 'text', 'tool_choice', 'tools', 'truncation'], 'OPENAI_COUNT_REQUEST_CHANGED');
-  return JSON.stringify(input);
+  return buildOpenAiInputTokenCountRequest(generationBody, config);
 }
 
 function checkGrant(grant, prepared, now) {
@@ -79,34 +72,6 @@ export function validateOpenAiTokenEvidence(evidence, prepared, now, mode = 'moc
   return bounds;
 }
 
-async function readCount(response, maxInputTokens) {
-  assert(response.body && /^application\/json(?:\s*;|$)/i.test(response.headers.get('content-type') ?? ''));
-  const reader = response.body.getReader(), decoder = new TextDecoder('utf-8', { fatal: true });
-  let raw = '', bytes = 0;
-  try {
-    for (;;) {
-      const part = await reader.read();
-      if (part.done) break;
-      bytes += part.value.byteLength;
-      assert(bytes <= 4096);
-      raw += decoder.decode(part.value, { stream: true });
-    }
-    raw += decoder.decode();
-    const value = JSON.parse(raw);
-    // Count wire keys as well as decoded keys so JSON.parse cannot collapse a
-    // duplicate input_tokens (including an escaped spelling) into a lower bound.
-    const wireKeys = [...raw.matchAll(/"(?:[^"\\]|\\.)*"/gs)].filter(
-      match => /^\s*:/.test(raw.slice(match.index + match[0].length)));
-    assert(value?.object === 'response.input_tokens' && wireKeys.length === 2 && Object.keys(value).length === 2 &&
-      Number.isSafeInteger(value.input_tokens) &&
-      value.input_tokens > 0 && value.input_tokens <= maxInputTokens);
-    return value.input_tokens;
-  } finally {
-    void reader.cancel().catch(() => {});
-    reader.releaseLock();
-  }
-}
-
 /** An explicit, one-use synthetic preflight. OpenAI documents this endpoint
  * as free; paid generation stays in runOpenAiEvaluation and its monetary owner.
  * The caller supplies a durable count claim separate from the generation claim. */
@@ -131,14 +96,14 @@ export async function collectOpenAiTokenEvidence({ mode = 'mock', model, promptP
     let inputTokenUpperBound, httpStatus;
     try {
       const signal = AbortSignal.timeout(Math.min(15000, evidence.expiresAtMs - now));
-      const response = await http(countEndpoint, { method: 'POST', redirect: 'error', cache: 'no-store', signal,
+      const response = await http(openAiInputTokensEndpoint, { method: 'POST', redirect: 'error', cache: 'no-store', signal,
         headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` }, body });
       if (Number.isInteger(response.status) && response.status >= 100 && response.status <= 599) httpStatus = response.status;
-      if (response.status !== 200 || response.redirected || (response.url && response.url !== countEndpoint)) {
+      if (response.status !== 200 || response.redirected || (response.url && response.url !== openAiInputTokensEndpoint)) {
         if (response.body) void response.body.cancel().catch(() => {});
         throw Error();
       }
-      inputTokenUpperBound = await readCount(response, config.maxInputTokens);
+      inputTokenUpperBound = await readOpenAiInputTokenCount(response, config.maxInputTokens, signal);
       checkGrant(grant, prepared, utcNow());
       assert(!signal.aborted);
     } catch {

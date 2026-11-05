@@ -1,0 +1,47 @@
+{
+  "implementationCommit": "e7f55e659f76e8f0aa4ff62c570379d476b0264d",
+  "model": "gpt-6.1-sol",
+  "promptProfile": "goal-grounding-v1",
+  "vantage": "operator host calling Azure; not phone",
+  "initial": {
+    "executeProbeLimitMs": 45000,
+    "result": "client timeout; canonical read-only recovery assistant_saved",
+    "userPersistedFromExecuteMs": 11463,
+    "reservationFromExecuteMs": 15112,
+    "settlementFromExecuteMs": 27277,
+    "assistantPersistedFromExecuteMs": 38413,
+    "chargedNanoUsd": 2098000,
+    "retried": false,
+    "timingAnchor": "durable Execute intent before HTTP dispatch; not a pure network-stage measurement"
+  },
+  "warmIndependentRequests": [
+    {
+      "prepareMs": 1581,
+      "executeMs": 44744,
+      "fullReplyMs": 46351,
+      "httpStatus": 200
+    },
+    {
+      "prepareMs": 1493,
+      "executeMs": 40023,
+      "fullReplyMs": 41554,
+      "httpStatus": 200
+    }
+  ],
+  "warmExecuteProbeLimitMs": 75000,
+  "latencyTargetMs": 15000,
+  "latencyTargetAccepted": false,
+  "thirtyRequestAiBenchmarkCompleted": false,
+  "p95Claimed": false,
+  "providerOnlyTimingAvailable": false,
+  "modelBudgetIntervalIncludes": [
+    "token count",
+    "fresh authorization",
+    "Responses inference",
+    "usage settlement"
+  ],
+  "backendRegion": "Japan East",
+  "firestoreRegion": "asia-southeast1",
+  "normalReadProbeIsSeparate": true,
+  "realUserDataUsed": false
+}

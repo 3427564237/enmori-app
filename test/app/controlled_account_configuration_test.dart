@@ -19,6 +19,33 @@ FirebaseRuntimeConfiguration configuration({
 );
 
 void main() {
+  test('OpenAI test selection pins Azure and excludes proactive consumers', () {
+    bool valid({
+      bool enabled = true,
+      bool remote = true,
+      bool proactive = false,
+      String url = 'https://enmori-backend-20261029.azurewebsites.net',
+    }) => validOpenAiTestAppSelection(
+      enabled: enabled,
+      remoteAccount: remote,
+      companionFirstFlow: proactive,
+      baseUri: Uri.tryParse(url),
+    );
+    expect(valid(), isTrue);
+    expect(valid(remote: false), isFalse);
+    expect(valid(proactive: true), isFalse);
+    for (final url in [
+      'http://enmori-backend-20261029.azurewebsites.net',
+      'https://other.azurewebsites.net',
+      'https://enmori-rmvp-demo.tail29ae43.ts.net:8443',
+      'https://enmori-backend-20261029.azurewebsites.net?switch=true',
+      'https://enmori-backend-20261029.azurewebsites.net/path',
+      'https://user@enmori-backend-20261029.azurewebsites.net',
+    ]) {
+      expect(valid(url: url), isFalse, reason: url);
+    }
+    expect(valid(enabled: false, proactive: true), isTrue);
+  });
   test(
     'remote group uses real identity and the selected public TLS edge only',
     () {

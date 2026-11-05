@@ -15,6 +15,11 @@ export interface RuntimeEpoch {
   readonly processEpoch: string;
   readonly generation: number;
 }
+/** Captured only after the operator verifies the prior processes stopped. */
+export interface RuntimeEpochClaim {
+  readonly expectedFence: RuntimeEpoch & { readonly cleanupGeneration: number };
+  readonly expiresAtMs: number;
+}
 export interface OperationTarget {
   readonly ownerAccountId: string;
   readonly conversationId: string;
@@ -73,7 +78,7 @@ export type SavedOperationOutcome =
  */
 export interface RealConversationStore {
   readHistory?(target: OperationTarget, authority: OriginalWriteAuthority, expected?: readonly HistoryPairIdentity[]): Promise<StoreResult<ConversationHistory>>;
-  startEpoch(processEpoch: string): Promise<StoreResult<RuntimeEpoch>>;
+  startEpoch(processEpoch: string, claim?: RuntimeEpochClaim): Promise<StoreResult<RuntimeEpoch>>;
   initializeOperation(target: OperationTarget, epoch: RuntimeEpoch,
     authority: OriginalWriteAuthority): Promise<StoreResult<OpenOperation>>;
   /** Borrow only at guarded SDK submission; the supplier returns undefined after terminal disposal. */

@@ -22,6 +22,7 @@ import '../../features/account/presentation/onboarding_page.dart';
 import '../../features/account/presentation/own_profile_page.dart';
 import '../../features/account/presentation/account_preferences_page.dart';
 import '../../features/account/presentation/account_preferences_controller.dart';
+import '../../features/ai_conversation/ai_conversation_providers.dart';
 import '../../core/result/result.dart';
 import '../../features/auth/auth_providers.dart';
 import '../../features/auth/domain/auth_repository.dart';
@@ -152,10 +153,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       : null;
   final companionEnabled =
       aiPage != null && ref.watch(companionFirstFlowEnabledProvider);
-  final companionMessagePage = companionEnabled
+  final referencesEnabled =
+      aiPage != null &&
+      (companionEnabled || ref.watch(aiCompanionReferencesEnabledProvider));
+  final companionMessagePage = referencesEnabled
       ? ref.watch(companionMessagePageProvider)
       : null;
-  final companionCheckInPage = companionEnabled
+  final companionCheckInPage = referencesEnabled
       ? ref.watch(companionCheckInPageProvider)
       : null;
 
@@ -371,7 +375,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
         ),
-      if (companionEnabled) ...[
+      if (referencesEnabled) ...[
         if (companionCheckInPage != null)
           GoRoute(
             path: AppRoutes.aiCheckIn,
@@ -417,6 +421,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               );
             },
           ),
+      ],
+      if (companionEnabled) ...[
         GoRoute(
           path: AppRoutes.aiFollowUps,
           builder: (context, state) => ProactiveSettingsPage(

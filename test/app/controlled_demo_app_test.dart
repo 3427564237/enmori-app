@@ -3,12 +3,22 @@ import 'dart:convert';
 
 import 'package:enmori/app/controlled_demo_app.dart';
 import 'package:enmori/app/router/app_router.dart';
+import 'package:enmori/app/router/companion_navigation.dart';
 import 'package:enmori/core/result/result.dart';
+import 'package:enmori/features/account/account_preferences_providers.dart';
+import 'package:enmori/features/account/domain/cloud_ai_consent.dart';
+import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
+import 'package:enmori/features/ai_conversation/ai_selected_sources_providers.dart';
+import 'package:enmori/features/ai_conversation/data/ai_wire_repository.dart';
 import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/features/event_participation/presentation/participation_events_page.dart';
 import 'package:enmori/features/event_participation/presentation/event_plans_page.dart';
+import 'package:enmori/features/personas/persona_preview_providers.dart';
+import 'package:enmori/features/proactive/proactive_notification_controller.dart';
+import 'package:enmori/features/proactive/proactive_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -45,6 +55,199 @@ final class AuthDouble implements AuthRepository {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  testWidgets('OpenAI app uses its own consent and Today wire request', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(900, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    const zone = MethodChannel('com.enmori.app/time_zone');
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(
+      zone,
+      (call) async => switch (call.method) {
+        'ianaTimeZone' => 'Etc/UTC',
+        'currentDate' => '2026-11-05',
+        'formatInstants' => <String>[],
+        _ => null,
+      },
+    );
+    addTearDown(() => messenger.setMockMethodCallHandler(zone, null));
+    final auth = AuthDouble();
+    final edge = Uri.parse('https://enmori-backend-20261029.azurewebsites.net');
+    final prepares = <Map<String, dynamic>>[];
+    final savedGrants = <Map<String, dynamic>>[];
+    var revision = 0;
+    var grant = <String, dynamic>{
+      'state': 'accepted',
+      'disclosureVersion': 'groq_cloud_v1',
+    };
+    final client = MockClient((request) async {
+      expect(request.url.origin, edge.origin);
+      expect(request.headers['authorization'], 'Bearer synthetic-test-token');
+      final path = request.url.path;
+      Object response;
+      var status = 200;
+      if (path == '/v1/me/onboarding') {
+        response = {
+          'status': 'completed',
+          'account': {
+            'username': 'controlled_primary',
+            'optionalProcessingConsent': 'accepted',
+            'checkInVisibility': 'private',
+            'onboardingCompletedAt': '2026-10-19T00:00:00.000Z',
+          },
+        };
+      } else if (path == '/v1/me/settings') {
+        if (request.method == 'PUT') {
+          final change = jsonDecode(request.body) as Map<String, dynamic>;
+          expect(change['expectedRevision'], revision);
+          expect(change['optionalProcessingConsent'], 'accepted');
+          grant = change['cloudAiConsent'] as Map<String, dynamic>;
+          savedGrants.add(grant);
+          revision++;
+        }
+        response = {
+          'settings': {
+            'checkInVisibility': 'private',
+            'optionalProcessingConsent': 'accepted',
+            'revision': revision,
+            'cloudAiConsent': grant,
+          },
+        };
+      } else {
+        if (path == '/v1/me/ai/operations' && request.method == 'POST') {
+          prepares.add(jsonDecode(request.body) as Map<String, dynamic>);
+        }
+        response = {
+          'error': {'code': 'SERVICE_UNAVAILABLE', 'message': 'Synthetic'},
+        };
+        status = 503;
+      }
+      return http.Response(
+        jsonEncode(response),
+        status,
+        headers: {'content-type': 'application/json'},
+      );
+    });
+    addTearDown(auth.sessions.close);
+    addTearDown(client.close);
+    await tester.pumpWidget(
+      ControlledDemoApp(
+        baseUri: edge,
+        auth: auth,
+        client: client,
+        remoteGroupEnabled: true,
+        aiProcessing: AiClientProcessing.openaiCloud,
+        onClose: () async => const Success(null),
+      ),
+    );
+    await tester.pump();
+    auth.sessions.add(
+      const AuthSessionAuthenticated(subject: 'controlled_primary'),
+    );
+    await tester.pumpAndSettle();
+    final home = tester.element(find.byKey(const Key('route-home')));
+    final scope = ProviderScope.containerOf(home);
+    final router = GoRouter.of(home);
+    expect(
+      scope.read(aiClientProcessingProvider),
+      AiClientProcessing.openaiCloud,
+    );
+    expect(
+      scope.read(aiConversationRepositoryProvider),
+      isA<AiWireRepository>().having(
+        (repo) => repo.processing,
+        'processing',
+        AiClientProcessing.openaiCloud,
+      ),
+    );
+    expect(scope.read(aiCompanionReferencesEnabledProvider), isTrue);
+    expect(scope.read(aiTodayReferencesEnabledProvider), isTrue);
+    expect(scope.read(companionFirstFlowEnabledProvider), isFalse);
+    expect(scope.read(proactiveRepositoryProvider), isNull);
+    expect(scope.read(proactiveMessagingEnabledProvider), isFalse);
+    expect(scope.read(personaPreviewAccessProvider), isFalse);
+    expect(
+      router.configuration.findMatch(Uri.parse(AppRoutes.aiCheckIn)).isError,
+      isFalse,
+    );
+    expect(
+      router.configuration.findMatch(Uri.parse(AppRoutes.aiMessage)).isError,
+      isFalse,
+    );
+    expect(
+      router.configuration.findMatch(Uri.parse(AppRoutes.aiFollowUps)).isError,
+      isTrue,
+    );
+
+    await tester.tap(find.byKey(const Key('social-nav-ai')));
+    await tester.pumpAndSettle();
+    final input = find.byKey(const Key('ai-message-input'));
+    final consent = find.byKey(const Key('settings-cloud-consent'));
+    final save = find.byKey(const Key('settings-save'));
+    expect(input, findsNothing);
+    expect(prepares, isEmpty);
+    await tester.tap(find.text('Open settings'));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, AppRoutes.aiSettings);
+    await tester.ensureVisible(consent);
+    expect(
+      find.textContaining('checking request size and generating replies'),
+      findsOneWidget,
+    );
+    expect(tester.widget<SwitchListTile>(consent).value, isFalse);
+    await tester.tap(consent);
+    await tester.ensureVisible(save);
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+    expect(savedGrants, [
+      {'state': 'accepted', 'disclosureVersion': 'openai_cloud_v1'},
+    ]);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(input, findsOneWidget);
+    await tester.enterText(input, 'A synthetic message');
+    await tester.pump();
+    final send = find.byKey(const Key('ai-send'));
+    await tester.ensureVisible(send);
+    await tester.tap(send);
+    await tester.pumpAndSettle();
+    expect(prepares, [
+      {
+        'kind': 'send',
+        'purpose': 'checkin_conversation',
+        'contextSelection': {
+          'processing': 'cloud',
+          'today': {'timeZone': 'Etc/UTC'},
+        },
+      },
+    ]);
+
+    unawaited(router.push<void>(AppRoutes.aiSettings));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(consent);
+    expect(tester.widget<SwitchListTile>(consent).value, isTrue);
+    await tester.tap(consent);
+    await tester.ensureVisible(save);
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+    expect(savedGrants.last, {
+      'state': 'declined',
+      'disclosureVersion': 'openai_cloud_v1',
+    });
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(input, findsNothing);
+    expect(prepares, hasLength(1));
+    await tester.tap(find.text('Open settings'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(consent);
+    expect(tester.widget<SwitchListTile>(consent).value, isFalse);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
   testWidgets(
     'explicit Events root connects Home, paged list, detail and saved state',
     (tester) async {

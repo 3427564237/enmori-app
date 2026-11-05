@@ -30,14 +30,18 @@ import { startConversationMaintenance, type MaintenanceSchedule } from "./conver
 import { FirestoreSelectedReplyReader } from "../ai-conversation/infrastructure/firestore-selected-reply-reader.js";
 import { createOwnedSourceOperations } from "./owned-source-composition.js";
 import { prepareConversationHost } from './prepare-conversation-host.js';
+import { OPENAI_CLOUD_PROCESSING } from '../account/domain/cloud-ai-consent.js';
+import type { CloudAiConsentAuthority } from '../account/ports/cloud-ai-consent-authority.js';
+import type { RuntimeEpoch, RuntimeEpochClaim } from '../ai-conversation/ports/real-conversation-store.js';
+import type { AsyncConversationModelInput } from '../ai-conversation/ports/async-conversation.js';
+import type { RuntimeClock } from '../ai-runtime/ports/runtime-clock.js';
 
 /** Explicit isolated composition; ordinary buildApp/main never invokes it.
  * Caller validates and owns the actual Emulator Firestore instance. No fake
  * model, policy, Note prerequisite or identity is supplied as a default. */
-interface ConversationCompositionOptions {
+interface ConversationCompositionCommon {
   readonly firestore: Firestore;
   readonly environment: Readonly<Record<string,string|undefined>>;
-  readonly transport: GenerationTransport<ConversationInput>;
   readonly gates: ConversationGates;
   readonly conversationStrategy?: "open_conversation_v1";
   readonly notePrerequisites?: SourceBoundNotePrerequisites;
@@ -51,8 +55,32 @@ interface ConversationCompositionOptions {
   readonly utcMilliseconds?: () => number;
 }
 
-export async function createIsolatedConversationComposition(options: ConversationCompositionOptions) {
+interface LocalConversationOptions extends ConversationCompositionCommon {
+  readonly transport: GenerationTransport<ConversationInput>;
+  readonly openAiTestApp?: never;
+}
+
+export interface OpenAiConversationSelection {
+  readonly claim: RuntimeEpochClaim;
+  /** Called only after the claim receives a definite acknowledgment. Settings
+   * ownership is independent of conversation retirement and budget recovery. */
+  afterClaim(epoch: RuntimeEpoch, clock: RuntimeClock, utcMilliseconds: () => number): {
+    readonly consent: CloudAiConsentAuthority;
+    createRuntime(): Promise<BoundedAiRuntime<AsyncConversationModelInput>>;
+  };
+}
+
+type ConversationCompositionOptions = LocalConversationOptions | (ConversationCompositionCommon & {
+  readonly openAiTestApp: OpenAiConversationSelection;
+  readonly simpleChat: true;
+  readonly selectedReplies: true;
+  readonly transport?: never;
+  readonly prepareHost?: never;
+});
+
+export async function createIsolatedConversationComposition(options: LocalConversationOptions) {
   requireControlledEmulatorEnvironment(options.environment);
+  if (options.openAiTestApp !== undefined) throw Error("OpenAI test app requires the remote environment");
   return createConversationComposition(options);
 }
 export async function createRemoteConversationComposition(options: ConversationCompositionOptions) {
@@ -66,13 +94,18 @@ async function createConversationComposition(options: ConversationCompositionOpt
   const rawGateway = new FirebaseAdminFirestoreGateway(options.firestore);
   const gateway = options.simpleChat ? withRetainedMessageTimes(rawGateway) : rawGateway;
   const notePrerequisites = options.notePrerequisites ? { ...options.notePrerequisites, gateway } : undefined;
-  const store = new FirestoreConversationStore(gateway,options.environment,utcMilliseconds,notePrerequisites);
-  const start = await store.startEpoch(randomUUID());
+  const selection = options.openAiTestApp;
+  if (selection && !selection.claim) throw Error("OpenAI test app requires an expected epoch claim");
+  const cloudProcessing = selection ? OPENAI_CLOUD_PROCESSING : undefined;
+  const store = new FirestoreConversationStore(gateway,options.environment,utcMilliseconds,notePrerequisites,cloudProcessing);
+  const start = await store.startEpoch(randomUUID(), selection?.claim);
   if (start.kind !== "confirmed") throw new Error("Isolated runtime epoch unavailable");
   const epoch = start.value;
+  const cloud = selection?.afterClaim(epoch, clock, utcMilliseconds);
   const restart = await retirePreviousConversationEpoch(gateway,store,epoch,options.environment);
   if (!restart.complete) throw new Error("Previous runtime controls unresolved");
-  const runtime = new BoundedAiRuntime(clock,new AuthorizedAsyncConversationGenerationTransport(options.transport), options.simpleChat === true);
+  const runtime = cloud ? await cloud.createRuntime()
+    : new BoundedAiRuntime(clock,new AuthorizedAsyncConversationGenerationTransport(options.transport!), options.simpleChat === true);
   let consumer!: ApplicationConversationOperations;
   const quiescence = new ConversationIoQuiescence({ acquireTargetLease: (...args) => consumer.acquireTargetLease(...args) },io);
   const cleanup = new FirestoreConversationCleanup(gateway,options.environment,quiescence,utcMilliseconds);
@@ -80,12 +113,14 @@ async function createConversationComposition(options: ConversationCompositionOpt
   const authority = new FirebaseAdminConversationOperationAuthority(options.firestore,options.environment,()=>clock.now());
   const historySnapshot: NonNullable<ConstructorParameters<typeof FirestoreSelectedReplyReader>[4]> =
     (tx, principal, ownerId, conversationId, current) => store.prepareHistorySnapshot(tx, principal, ownerId, conversationId, current);
-  const prepareReader = options.selectedReplies ? new FirestoreSelectedReplyReader(gateway, options.environment, undefined, utcMilliseconds, historySnapshot) : undefined;
+  const processing = cloud ? 'cloud' : 'local';
+  const prepareReader = options.selectedReplies ? new FirestoreSelectedReplyReader(gateway, options.environment, undefined, utcMilliseconds, historySnapshot, processing, cloudProcessing) : undefined;
   const operationReaders = prepareReader ? Object.assign(readers, {
     prepareSelection: (context: Parameters<FirestoreSelectedReplyReader["prepare"]>[0], input: Parameters<FirestoreSelectedReplyReader["prepare"]>[1], conversationId?: string) => prepareReader.prepare(context, input, conversationId),
   }) : readers;
   const executor: import('../ai-conversation/ports/application-conversation-operations.js').ConversationOperationExecutor =
     {create:(input,delivery)=>new AsyncConversationOperationExecutor({runtime,gates:options.gates,
+      ...(cloud ? {cloudConsent: cloud.consent} : {}),
       ...(options.conversationStrategy ? {strategy:options.conversationStrategy} : {}),
       clock:{monotonicNow:()=>clock.now(),utcNow:()=>{const ms=utcMilliseconds(),seconds=Math.floor(ms/1000);return {seconds,nanoseconds:(ms-seconds*1000)*1000000};}},
       ports:original=>{
@@ -100,7 +135,7 @@ async function createConversationComposition(options: ConversationCompositionOpt
         const selectedGateway:FirestoreGateway={runTransaction:(work,transactionOptions)=>
           io.run(ownerId,conversationId,operationId,()=>gateway.runTransaction(work,transactionOptions))};
         return {authority,reads,store:bridge,acknowledgedPair:bridge,
-          ...(options.selectedReplies ? { selectedReads: new FirestoreSelectedReplyReader(selectedGateway, options.environment, original, utcMilliseconds, historySnapshot) } : {})};
+          ...(options.selectedReplies ? { selectedReads: new FirestoreSelectedReplyReader(selectedGateway, options.environment, original, utcMilliseconds, historySnapshot, processing, cloudProcessing) } : {})};
       }}).create(input,delivery)};
   consumer = new ApplicationConversationOperations(
     authority,
@@ -114,8 +149,8 @@ async function createConversationComposition(options: ConversationCompositionOpt
   let accepting=true;
   const refused=()=>Promise.resolve({kind:"failure" as const,code:"AI_UNAVAILABLE" as const});
   const operations:ConversationOperations={
-    prepare:(...args)=>accepting?consumer.prepare(...args):refused(),
-    execute:(...args)=>accepting?consumer.execute(...args):refused(),
+    prepare:(caller,input)=>accepting && (!cloud || input.contextSelection?.processing === 'cloud') ? consumer.prepare(caller,input) : refused(),
+    execute:(caller,input,delivery)=>accepting && (!cloud || input.contextSelection !== undefined) ? consumer.execute(caller,input,delivery) : refused(),
     cancel:(...args)=>consumer.cancel(...args),readOutcome:(...args)=>consumer.readOutcome(...args),
     listMessages:(...args)=>consumer.listMessages(...args),deleteConversation:(...args)=>consumer.deleteConversation(...args),
     listConversations:(caller,after)=>consumer.listConversations(caller,after),

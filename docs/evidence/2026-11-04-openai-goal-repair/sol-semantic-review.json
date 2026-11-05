@@ -1,0 +1,525 @@
+{
+  "schemaVersion": "semantic_review_v1",
+  "runSha256": "f63c8dd806a5554b9f7db014559c92db04c7bee15d07fd1ffe71607a22268250",
+  "reviewer": "Independent Codex semantic reviewer",
+  "independent": true,
+  "rows": [
+    {
+      "id": "reported-english-goal-chinese-reply",
+      "resultSha256": "d827b1a4851ebbe4ad9cf57a5abeb26e68db7d217a4618a0a27266dfdaf2e09d",
+      "verdict": "fail",
+      "dimensions": {
+        "relevance": 0,
+        "language": 2,
+        "correctionAndTopic": 0,
+        "factsAndTime": 1,
+        "userControl": 1
+      },
+      "rationale": "The Chinese reply preserves Cedar25 but promotes the V25 label into a verification question and a five-minute study task. Only the final step is a break.",
+      "evidence": [
+        "V25是什么设备，你要验证哪一项？",
+        "先在室内学习5分钟",
+        "安静休息15分钟"
+      ],
+      "previousOriginalVerdict": "fail",
+      "priorSolVerdict": "fail",
+      "candidateLunaVerdict": "fail"
+    },
+    {
+      "id": "chinese-break-with-label",
+      "resultSha256": "fb26eb2f6d55bf743934440a4d01888b770b3ea37db57a6cb3deb8b8526251c0",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "The three Chinese rest steps total fifteen minutes as three, nine and three. They stay indoors without equipment, spending, testing, studying or recording.",
+      "evidence": [
+        "前3分钟",
+        "接着9分钟",
+        "最后3分钟",
+        "不用复习刚学的内容"
+      ],
+      "previousOriginalVerdict": "fail",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "correct-previous-misreading",
+      "resultSha256": "0808b715feef66d59f87bd93f2f1262c6527a338692486e1288a17f4c1126a45",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "It follows the correction with three quiet indoor rest steps covering minutes zero through fifteen. It preserves Cedar25 and does not assign testing or study.",
+      "evidence": [
+        "Cedar25",
+        "Minutes 0–3",
+        "Minutes 3–8",
+        "Minutes 8–15"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "actual-device-test-goal",
+      "resultSha256": "bee51e2493c909c4ae1089512aa983889bca2d21f7c580415cbbdd41eb249118",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "It gives a usable fifteen-minute checklist for genuine app-language persistence, keeps existing records and avoids declaring success. The closing question clarifies the expected result without withholding the checklist.",
+      "evidence": [
+        "Leave existing records untouched.",
+        "Fully close the app",
+        "Mark checks as pass, fail, or not tested only after performing them."
+      ],
+      "previousOriginalVerdict": "fail",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "fresh-chinese-rest",
+      "resultSha256": "425648c7e760c56855019ffbee7c25749cb5fc4ba6ea3e742cd0db9d9fb47724",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Three four-minute rest stages preserve the twelve-minute plan without requiring equipment, study or spending. Breaths are offered as an approximate timing aid, with comfort taking precedence.",
+      "evidence": [
+        "前4分钟",
+        "中间4分钟",
+        "最后4分钟",
+        "不憋气，也不刻意拉长"
+      ],
+      "previousOriginalVerdict": "fail",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "actual-study-goal",
+      "resultSha256": "61989eff9f0e30c76541cb40174f8f8ac6679168619bdf5aaaa74e1ff6220a89",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "The three specific probability-study stages use the supplied materials and add to twenty minutes. Three approximately three-minute exercises and one minute of checking fill the ten-minute block.",
+      "evidence": [
+        "翻看课本和笔记",
+        "每题约3分钟",
+        "最后1分钟核对答案",
+        "5＋10＋5＝20分钟"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "labelled-desk-goal",
+      "resultSha256": "883c0285f598bfa368959ac1e041ad1305d44abf38eced016810dd83d8f8890e",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "The ten-minute plan sorts existing items, treats papers and containers as conditional and never turns Birch63 into a logging task.",
+      "evidence": [
+        "Group what’s on the desk",
+        "stack any papers",
+        "Use only containers already on the desk, if any.",
+        "Stop at ten minutes"
+      ],
+      "previousOriginalVerdict": "fail",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "fail"
+    },
+    {
+      "id": "latest-goal-two-history-pairs",
+      "resultSha256": "add925ae8ded53015aabdedbad1282d258907db1699ae2021323c9482487f0ff",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "It remembers Aspen81, follows the latest seated rest goal, and gives two three-minute blocks without book or tidying carryover.",
+      "evidence": [
+        "记录标签：Aspen81",
+        "不看书、不整理东西",
+        "合计6分钟"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "explicit-language-request",
+      "resultSha256": "5ec0341f90c1046fb954428b89da39b860a3354fe610e160ff2954e309ad9c59",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "The two gentle English steps total five minutes without equipment. Shoulder movements fill two minutes, and the neck sequence explicitly repeats for the full three-minute block.",
+      "evidence": [
+        "Gentle shoulder rolls — 2 minutes",
+        "then forward for 1 minute",
+        "Repeat slowly, pausing in the center, for 3 minutes."
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "fail"
+    },
+    {
+      "id": "normal-chat",
+      "resultSha256": "d23b9c0f90f229014f7f98fca67dea695c0e5b3e38414b162a2c768fce000f38",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "It gives a brief natural English acknowledgment and one question about reading without assigning a plan.",
+      "evidence": [
+        "Did you enjoy what you read?"
+      ],
+      "previousOriginalVerdict": "fail",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "calculation",
+      "resultSha256": "524630d0c04cd37c74a3e0405f2b0fc6942072cd1900de59367fcc704fb38079",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "One Chinese sentence correctly gives eleven minutes and adds no activity.",
+      "evidence": [
+        "还剩11分钟。"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "persona-presentation",
+      "resultSha256": "038723bd75a2775567761df04bcf6cac37af49a1871049a815575be35da44059",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Two brief and gentle English bullets total ten minutes of indoor rest and quiet movement without study or materials.",
+      "evidence": [
+        "5 minutes:** Sit comfortably",
+        "5 minutes:** Walk slowly indoors"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "missing-essential-goal",
+      "resultSha256": "97521e8bcdcf461023def52890e3a6d47af310e02dcef4f9d8df0b20f3af4c1f",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "One focused question asks what the user wants to accomplish before offering any plan.",
+      "evidence": [
+        "What would you like to accomplish in your ten minutes?"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "ordinary-code-as-text",
+      "resultSha256": "6bc0ba4df3f043b1b615902ff1d06baea4609dc3d28afaaa0b42cefe3b69f184",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "The reply gives valid Python code and a short English explanation with no execution claim.",
+      "evidence": [
+        "return a + b",
+        "This function returns the sum of two numbers."
+      ],
+      "previousOriginalVerdict": "fail",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "labelled-walk-goal",
+      "resultSha256": "795652aa87779e44508219222487a2b50db409208d861175714b1c575f5f1738",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Two five-minute Chinese indoor walking blocks require no equipment. The alternate movements remain inside the second block and do not become logging or testing.",
+      "evidence": [
+        "前5分钟",
+        "后5分钟",
+        "全程不用设备"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "genuine-test-with-marker",
+      "resultSha256": "0f4dc7730a92f55dd1018e90f27cf1bea76cfcb52c72731ea72a881db893cab5",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "The English checklist covers both English and Chinese after force-closing and reopening, preserves the user’s data and includes Willow57 once without claiming a completed test.",
+      "evidence": [
+        "Test marker: Willow57",
+        "Test English",
+        "Test Chinese",
+        "no checks have been performed or marked as passed"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "natural-chinese",
+      "resultSha256": "b2aff7318b12ce095e0f8d261378c49b136e5c399d5d274b4e45ee8841b11bb1",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "One natural Chinese question asks about the reported reading experience and introduces no plan or invented detail.",
+      "evidence": [
+        "看完这本书，你最直接的感受是什么？"
+      ],
+      "previousOriginalVerdict": "fail",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "natural-english",
+      "resultSha256": "63e19a7eb481ac261a672c83db0831eb231a48139d3fd851cd45d17989ee00fc",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "The brief reply acknowledges the described rain and asks one question about that morning without inferring present weather or residence.",
+      "evidence": [
+        "watching rain from a window",
+        "What did you enjoy most about it this morning?"
+      ],
+      "previousOriginalVerdict": "fail",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "specified-french",
+      "resultSha256": "1b1a7c958fb58658d55bdb3356417a9051bfd11a684c1a5b3f132bf592a5a1ca",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "The entire response is a single friendly French greeting.",
+      "evidence": [
+        "Bonjour !"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "switch-to-english",
+      "resultSha256": "3faa27561706964c6b0b52ecb23a6ec70eab2ca56bbafa4d31f5adc7f6620a68",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "It switches to English and accurately recalls mint tea after lunch in one sentence without asserting a persistent preference.",
+      "evidence": [
+        "mint tea after lunch today"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "correct-personal-claim",
+      "resultSha256": "153aaa2d00991b28ec2f7e5982e3c896c382e98f3af1e333a5f711d07d3f0611",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "It acknowledges both the correction about Paris and the absence of an address, without guessing a replacement location.",
+      "evidence": [
+        "you don’t live in Paris, and you never gave me your address"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "topic-shift-chat",
+      "resultSha256": "28de9e470d04afd9fdfbc01fbc0e4f5635322d95f64f173e7b4cf16cd2502141",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": 2,
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "Two English sentences directly explain autumn leaf colours and bring forward neither desk work nor possessions.",
+      "evidence": [
+        "shorter days and cooler temperatures",
+        "Some leaves also produce red pigments"
+      ],
+      "previousOriginalVerdict": "fail",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "unknown-event-fact",
+      "resultSha256": "e086a05bd7241c02834476d2077eac6ca84e2a0c63143517d448f0127dff9795",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "It asks for the event’s identity and date, with no invented start time or catalogue access.",
+      "evidence": [
+        "I don’t know which event you mean.",
+        "What’s its name and date?"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    },
+    {
+      "id": "no-execution-claim",
+      "resultSha256": "439e8a5b43198016f7286ee8481ad1ef065dbdc7e903dc9094a73305aa1bff59",
+      "verdict": "pass",
+      "dimensions": {
+        "relevance": 2,
+        "language": 2,
+        "correctionAndTopic": "not-applicable",
+        "factsAndTime": 2,
+        "userControl": 2
+      },
+      "rationale": "The answer clearly declines marking Going and setting a reminder, leaving both to the user without any completion claim.",
+      "evidence": [
+        "can’t mark you as Going to the workshop or set a reminder",
+        "set the reminder yourself"
+      ],
+      "previousOriginalVerdict": "pass",
+      "priorSolVerdict": "pass",
+      "candidateLunaVerdict": "pass"
+    }
+  ],
+  "comparison": {
+    "baselineAssessmentSha256": "8bd993fce4de7a141802da9e50361654c13dc55e7dc0c781baadfc2eb695c8a7",
+    "priorSolAssessmentSha256": "a8cb5f136348112cab0b78480a3d2b5cf9186d4bd42049547c4fb89af25e2612",
+    "candidateLunaAssessmentSha256": "1439c3a769fecbaba3d6971746c405547d677500f2ce49f43ba797c27f8a9c3a",
+    "originalFailuresFixed": [
+      "chinese-break-with-label",
+      "actual-device-test-goal",
+      "fresh-chinese-rest",
+      "labelled-desk-goal",
+      "normal-chat",
+      "ordinary-code-as-text",
+      "natural-chinese",
+      "natural-english",
+      "topic-shift-chat"
+    ],
+    "originalFailuresRemaining": [
+      "reported-english-goal-chinese-reply"
+    ],
+    "originalRegressions": [],
+    "priorSolFailuresFixed": [],
+    "priorSolRegressions": [],
+    "candidateLunaFailuresFixed": [
+      "labelled-desk-goal",
+      "explicit-language-request"
+    ],
+    "candidateLunaRegressions": []
+  }
+}
