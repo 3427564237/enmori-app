@@ -188,3 +188,35 @@ test('legacy compatibility reranks authorized v3 candidates as v2, filters onePA
  assert.ok(old.value.items.every(r=>r.reasons?.every(x=>['shared_interests','friends_participating','same_region'].includes(x.code))));
  assert.equal(old.value.items[0]!.reasons?.find(r=>r.code==='same_region')?.points,1);
 });
+
+test('personalization reads eligible preferences in bounded groups and preserves source order', async () => {
+  const f=fixture();f.rows.splice(0,f.rows.length,...Array.from({length:13},(_,n)=>item(n+1)));
+  const run=f.store.runTransaction.bind(f.store);
+  let pending:(()=>void)[]=[],active=0,maximum=0,reads=0,finished=false;
+  f.store.runTransaction=work=>run(tx=>work({...tx,get:async path=>{
+    if(!path.startsWith('event_participations/'))return tx.get(path);
+    reads++;active++;maximum=Math.max(maximum,active);
+    await new Promise<void>(resolve=>pending.push(resolve));active--;return tx.get(path);
+  }}));
+  const work=f.reader.read('owner',asOf,f.snapshot).finally(()=>{finished=true;});
+  const drain=async()=>{for(let n=0;n<100;n++)await Promise.resolve();};
+  await drain();assert.equal(active,5);
+  let groups=0;
+  while(!finished&&groups<20){const releases=pending;pending=[];groups++;releases.forEach(release=>release());await drain();}
+  const result=await work;assert.equal(result.kind,'ready');assert.equal(maximum,5);assert.equal(reads,13);assert.equal(groups,3);
+  if(result.kind==='ready')assert.deepEqual(result.sources.events.map(x=>x.scoring.eventId),f.rows.map(x=>sourceEventId(x.browseId)));
+});
+
+test('a failed preference drains siblings before transaction exit and does not read the next group',async()=>{
+  const f=fixture();f.rows.splice(0,f.rows.length,...Array.from({length:8},(_,n)=>item(n+1)));
+  const run=f.store.runTransaction.bind(f.store);let exited=false,reads=0;const releases:(()=>void)[]=[];
+  f.store.runTransaction=work=>run(async tx=>{try{return await work({...tx,get:async path=>{
+    if(!path.startsWith('event_participations/'))return tx.get(path);
+    reads++;if(reads===1)throw Error('synthetic preference outage');
+    await new Promise<void>(resolve=>releases.push(resolve));return tx.get(path);
+  }});}finally{exited=true;}});
+  const work=f.reader.read('owner',asOf,f.snapshot);
+  for(let n=0;n<100;n++)await Promise.resolve();
+  assert.equal(exited,false);assert.equal(reads,5);releases.forEach(release=>release());
+  assert.equal((await work).kind,'dependency_unavailable');assert.equal(exited,true);assert.equal(reads,5);
+});

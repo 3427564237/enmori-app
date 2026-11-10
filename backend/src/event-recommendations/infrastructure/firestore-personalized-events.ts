@@ -9,7 +9,7 @@ import type { RecommendationSnapshot } from '../../event-browse/ports/event-brow
 import { sourceEventId } from '../../event-browse/domain/source-event-id.js';
 import { isSafeDocumentId, sha256 } from '../../shared/infrastructure/firebase/firestore-records.js';
 import { parseEventInstant, parseMatchingInterest, parseSelectedInterests } from './event-records.js';
-import type { EventRecommendationReadResult } from '../ports/event-recommendation-repository.js';
+import type { EventRecommendationReadResult, InterestMatchingProjection } from '../ports/event-recommendation-repository.js';
 
 export function matchingRegion(a: string | null | undefined, b: string | null | undefined): boolean {
   const canonical = (v: string | null | undefined) => v?.normalize('NFC').trim().toLowerCase().replace(/\s+/gu, ' ');
@@ -60,7 +60,7 @@ export class FirestorePersonalizedEvents {
         const raw=await tx.get(`account_interests/${own.id}`);
         const selected=raw===undefined?[]:parseSelectedInterests(raw);
         if(!selected)throw Error('Interest source unavailable');
-        const interestTags=[];
+        const interestTags:InterestMatchingProjection[]=[];
         for(const id of selected) {
           const row=await tx.get(`interest_tags/${id}`);
           if(row===undefined)continue;
@@ -85,28 +85,37 @@ export class FirestorePersonalizedEvents {
           for(const event of new Set([...source.interestedEventIds,...source.goingEventIds]))counts.set(event,(counts.get(event)??0)+1);
         }
         const events=[];
-        for(const row of snapshot.items) {
-          const eventId=sourceEventId(row.browseId);
-          const content=row.content;
-          if(content?.status==='cancelled'||content?.status==='sold_out'||content?.status==='postponed'||content?.status==='registration_closed'||content?.status==='not_on_sale')continue;
-          const age=civilAge(profile.birthDate,singaporeDate(row.startAt));
-          if(age!==undefined&&((content?.minimumAge!==undefined&&age<content.minimumAge)||(content?.maximumAge!==undefined&&age>content.maximumAge)))continue;
-          const eventArea=area(content?.areaCode);
-          const targetAgeMatch=age!==undefined&&(content?.targetMinimumAge!==undefined||content?.targetMaximumAge!==undefined)&&age>=(content?.targetMinimumAge??0)&&age<=(content?.targetMaximumAge??150);
-          const preference=await tx.get(`event_participations/${sha256(JSON.stringify([own.id,eventId]))}`);
-          if(preference && (preference.accountId!==own.id||preference.eventId!==eventId||typeof preference.ignored!=='boolean'))throw Error('Invalid preference');
-          if(preference?.ignored===true)continue;
-          const startInstant=parseEventInstant(row.startAt);
-          if(startInstant===undefined)throw Error('Invalid source instant');
-          const matched=interestTags.filter(tag=>tag.displayName==='Music'
-            ? tag.interestTagId===this.musicInterestTagId&&row.musicSegment===true
-            : row.interestConcepts?.includes(tag.displayName));
-          events.push({scoring:{eventId,active:true,published:true,startInstant,
-            interestTagIds:matched.map(tag=>tag.interestTagId),
-            visibleFriendCount:counts.get(eventId)??0,
-            sameArea:!!selectedArea&&selectedArea.code===eventArea?.code,
-            sameRegion:!!selectedArea&&selectedArea.regionCode===eventArea?.regionCode,targetAgeMatch},
-            presentation:{...eventSummaryPresentation(row),title:row.title,startAt:row.startAt,...(row.endAt?{endAt:row.endAt}:{})}});
+        // Read only already-authorized owner preferences, at most five at a
+        // time. Drain a complete group before leaving the transaction, including
+        // on failure, and append in source order rather than completion order.
+        for(let offset=0;offset<snapshot.items.length;offset+=5) {
+          const settled=await Promise.allSettled(snapshot.items.slice(offset,offset+5).map(async row=>{
+            const eventId=sourceEventId(row.browseId);
+            const content=row.content;
+            if(content?.status==='cancelled'||content?.status==='sold_out'||content?.status==='postponed'||content?.status==='registration_closed'||content?.status==='not_on_sale')return undefined;
+            const age=civilAge(profile.birthDate,singaporeDate(row.startAt));
+            if(age!==undefined&&((content?.minimumAge!==undefined&&age<content.minimumAge)||(content?.maximumAge!==undefined&&age>content.maximumAge)))return undefined;
+            const eventArea=area(content?.areaCode);
+            const targetAgeMatch=age!==undefined&&(content?.targetMinimumAge!==undefined||content?.targetMaximumAge!==undefined)&&age>=(content?.targetMinimumAge??0)&&age<=(content?.targetMaximumAge??150);
+            const preference=await tx.get(`event_participations/${sha256(JSON.stringify([own.id,eventId]))}`);
+            if(preference && (preference.accountId!==own.id||preference.eventId!==eventId||typeof preference.ignored!=='boolean'))throw Error('Invalid preference');
+            if(preference?.ignored===true)return undefined;
+            const startInstant=parseEventInstant(row.startAt);
+            if(startInstant===undefined)throw Error('Invalid source instant');
+            const matched=interestTags.filter(tag=>tag.displayName==='Music'
+              ? tag.interestTagId===this.musicInterestTagId&&row.musicSegment===true
+              : row.interestConcepts?.includes(tag.displayName));
+            return {scoring:{eventId,active:true,published:true,startInstant,
+              interestTagIds:matched.map(tag=>tag.interestTagId),
+              visibleFriendCount:counts.get(eventId)??0,
+              sameArea:!!selectedArea&&selectedArea.code===eventArea?.code,
+              sameRegion:!!selectedArea&&selectedArea.regionCode===eventArea?.regionCode,targetAgeMatch},
+              presentation:{...eventSummaryPresentation(row),title:row.title,startAt:row.startAt,...(row.endAt?{endAt:row.endAt}:{})}};
+          }));
+          for(const result of settled){
+            if(result.status==='rejected')throw result.reason;
+            if(result.value)events.push(result.value);
+          }
         }
         if(!snapshot.current())throw Error('Source generation invalidated');
         return {kind:'ready' as const,sources:{formulaVersion:'event_recommendation_v3' as const,
