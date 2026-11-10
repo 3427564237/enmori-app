@@ -1,0 +1,262 @@
+{
+  "phone": {
+    "package": "com.enmori.app.group",
+    "versionCode": 58,
+    "versionName": "1.0.0-events20261111",
+    "sha256": "487f1e96e6e4a3856febceb66960c4887a6bea5e8b10c370602df90e61cbfd39",
+    "signerSha256": "0fa59aeaa9ce03a830405ce79136b4abc3d62510fbb8360c8ebf7c88a82966ee",
+    "firstInstallTimeUnchanged": true,
+    "installedArtifactVerified": true,
+    "installCommandOutcome": "Timed out during system confirmation; installed artifact independently verified without resubmission."
+  },
+  "isolatedAppCleanup": {
+    "coretestAbsent": true,
+    "groupPresent": true,
+    "groupVersionCode": "58 minSdk=24 targetSdk=36",
+    "groupVersionName": "1.0.0-events20261111",
+    "groupFirstInstallTime": "2026-10-29 10:50:00"
+  },
+  "admin": {
+    "original14Unchanged": true,
+    "testTagFinalState": "inactive",
+    "testTagFinalRevision": 5,
+    "privilegeRevocation": {
+      "atUtc": "2026-11-10T20:00:08.310Z",
+      "claimAbsent": true,
+      "oldSessionAdminStatus": 403,
+      "errorCode": "AUTH_FORBIDDEN",
+      "refreshTokensRevoked": true
+    },
+    "accountCleanup": {
+      "atUtc": "2026-11-10T20:08:52.170Z",
+      "authUserAbsent": true,
+      "ownedPathsAbsent": true,
+      "pathCount": 9,
+      "testTagKeptInactive": true
+    }
+  },
+  "firstFollowupRuntime": {
+    "atUtc": "2026-11-10T20:06:01.368209+00:00",
+    "sourceCommit": "db1185bc74d1455fe34ba2dc4a17f456ac4127a3",
+    "manifest": {
+      "sourceCommit": "db1185bc74d1455fe34ba2dc4a17f456ac4127a3",
+      "aiConfiguredByDefault": false,
+      "openAiTestAppOptIn": true,
+      "eventSourceDeadlineMs": 20000
+    },
+    "package": {
+      "atUtc": "2026-11-10T20:01:21.603095+00:00",
+      "name": "20261110200018.zip",
+      "sha256": "8e8face8d6e69a7f606d051d49ee92cf8b180d72612ed237d6aae263c3b5d80e",
+      "manifest": {
+        "sourceCommit": "db1185bc74d1455fe34ba2dc4a17f456ac4127a3",
+        "aiConfiguredByDefault": false,
+        "openAiTestAppOptIn": true,
+        "eventSourceDeadlineMs": 20000
+      }
+    },
+    "startup": {
+      "applicationLogName": "2026_11_10_lw0sdlwk0001LN_default_docker.log",
+      "applicationLogSha256": "f09a154f829af8c224ed3ea81d784966aa203ac05fdd07a22d968dd1d7da910f",
+      "configurationAtUtc": "2026-11-10T20:04:45.899402+00:00",
+      "listeningAtUtc": "2026-11-10T20:05:25.082527+00:00",
+      "firebaseRead": true,
+      "aiConfigured": false
+    },
+    "ordinaryDisarmed": true
+  },
+  "operatorAfterFirstDeployment": {
+    "atUtc": "2026-11-10T20:07:07.203Z",
+    "stage": "after",
+    "rows": [
+      {
+        "path": "/v1/me/profile",
+        "status": 200,
+        "ms": 9147,
+        "nextCursorPresent": false
+      },
+      {
+        "path": "/v1/recommendations/events?view=home",
+        "status": 200,
+        "ms": 20679,
+        "count": 0,
+        "nextCursorPresent": false
+      },
+      {
+        "path": "/v1/event-browse",
+        "status": 200,
+        "ms": 22119,
+        "count": 19,
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": false
+          }
+        ],
+        "nextCursorPresent": true
+      },
+      {
+        "path": "/v1/event-browse",
+        "page": 1,
+        "status": 200,
+        "ms": 3583,
+        "count": 20,
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": false
+          }
+        ],
+        "nextCursorPresent": true
+      },
+      {
+        "path": "/v1/event-browse",
+        "page": 2,
+        "status": 200,
+        "ms": 1024,
+        "count": 18,
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": false
+          }
+        ],
+        "nextCursorPresent": true
+      },
+      {
+        "path": "/v1/event-browse",
+        "page": 3,
+        "status": 200,
+        "ms": 1538,
+        "count": 17,
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": false
+          }
+        ],
+        "nextCursorPresent": true
+      },
+      {
+        "path": "/v1/event-browse",
+        "page": 4,
+        "status": 200,
+        "ms": 919,
+        "count": 5,
+        "sourceStatus": [
+          {
+            "provider": "ticketmaster",
+            "available": true
+          },
+          {
+            "provider": "onepa",
+            "available": false
+          }
+        ],
+        "nextCursorPresent": false
+      }
+    ]
+  },
+  "phoneHomeAfterFirstDeployment": "unavailable; not accepted",
+  "personalizationCandidate": {
+    "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+    "archiveName": "personalized-backend-1111.zip",
+    "archiveBytes": 67978662,
+    "archiveSha256": "a1da5a466e3263f5cdd958d68b37222c0396f7836dd7fd9fc10e56a1cdfee165",
+    "manifest": {
+      "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+      "aiConfiguredByDefault": false,
+      "openAiTestAppOptIn": true,
+      "eventSourceDeadlineMs": 20000
+    }
+  },
+  "rawReceiptSha256": {
+    "admin-final-catalogue-1111.json": "05aa2f2ec32729a0aea64414a3a2f9a0d06562d042e26b8511db425d83c3dd84",
+    "admin-revoked-1111.json": "1d120dccb32d5ac3c2b7614314de5cda38ea423c2fb4d179bf52bc0ee5bd3da7",
+    "admin-cleaned-1111.json": "fe18c195c87119654bea8bed6f21dce5fc16af8f8786f962ab4e8e6304d29b4c",
+    "phone-v58-readback-20261110T200345683734Z/receipt.json": "003b2cc00714b205f6af61524e1d5d27b2acf2b953fd1703312b046b5f6cb77e",
+    "phone-coretest-cleanup-20261111.json": "5eb130aff3daebae13e974113ea1369b36c15292589b55d6278e6bd5dd86fed9"
+  },
+  "finalBackendRuntime": {
+    "atUtc": "2026-11-10T20:22:28.925047+00:00",
+    "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+    "manifest": {
+      "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+      "aiConfiguredByDefault": false,
+      "openAiTestAppOptIn": true,
+      "eventSourceDeadlineMs": 20000
+    },
+    "package": {
+      "atUtc": "2026-11-10T20:19:31.239816+00:00",
+      "name": "20261110201723.zip",
+      "sha256": "a1da5a466e3263f5cdd958d68b37222c0396f7836dd7fd9fc10e56a1cdfee165",
+      "manifest": {
+        "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+        "aiConfiguredByDefault": false,
+        "openAiTestAppOptIn": true,
+        "eventSourceDeadlineMs": 20000
+      }
+    },
+    "startup": {
+      "applicationLogName": "2026_11_10_lw0sdlwk0001LN_default_docker.log",
+      "applicationLogSha256": "7643a010964ba2f10255a01ba26757dc1d9ad0643f440e3917a161872e4471a0",
+      "configurationAtUtc": "2026-11-10T20:21:23.864062+00:00",
+      "listeningAtUtc": "2026-11-10T20:21:57.635480+00:00",
+      "firebaseRead": true,
+      "aiConfigured": false
+    },
+    "ordinaryDisarmed": true
+  },
+  "personalizationTests": {
+    "strictCompile": "passed",
+    "focusedPassed": 30,
+    "fullPassed": 1820,
+    "failed": 0,
+    "skipped": 0,
+    "beforeNewTestsFailed": 2,
+    "logSha256": {
+      "personalization-batches-before.log": "f8a4f00add19496d8732133a0e2b46f5d6a864dfc8de8a14d106748289341e39",
+      "personalization-batches-after.log": "e52c412f4af3bb2ac8de159ac16f0ebc4aa633d0629129e6d355325544da910f",
+      "backend-personalization-full.log": "3d5b2754843a3e0033a2b996e0427e4db4f48a954607989e0f32390cf09ae5d7",
+      "personalization-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "finalPhoneHome": {
+    "appVersionCode": 58,
+    "retryCount": 1,
+    "tapAtSgt": "2026-11-11 04:25:06.111 +08:00",
+    "loadingObservedAtSeconds": 20.0,
+    "cardsObservedBySeconds": 23.189,
+    "recommendationCardVisible": true,
+    "nextGroupVisible": true,
+    "errorVisible": false,
+    "rootInspectedScreenshot": true,
+    "lastScreen": "Home",
+    "singleSampleOnly": true,
+    "timelineSha256": "510c1b0c7fd160f6d4b10d774f27836a539682e790aede021ec0d476ec97089a",
+    "completedScreenshotSha256": "6cea11d51d3e7303dd565192389392797b4a5d74eb78165df82ab432ee7a3078",
+    "adminFinalScreenshotSha256": "53a0f28ddff94c6543fb1824e5e767e04ab7e32b2a91f4d11e3e576ecfc805c9"
+  },
+  "remainingLimits": [
+    "onePA unavailable; specific Azure cause not established",
+    "prior AI full-reply 15-second target unmet; no new AI calls",
+    "62 unchanged full Flutter failures",
+    "permanent interest deletion remains fail-closed"
+  ]
+}

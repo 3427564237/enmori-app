@@ -60,7 +60,7 @@
 | Backend 全量 | **1817/1817**，无跳过 | `admin-backend-full.log`；含路由/OpenAPI/错误码一致性 |
 | Interest 聚焦 | **34/34** | `admin-backend-focused.log`；已包含在 1817 中，不重复累计 |
 | Firebase Auth/Firestore Emulator | **6/6**，CLI exit 0 | `admin-emulator.log`；并发、引用保护、权限撤销/停用 |
-| Flutter 全量 | **530/530** | `flutter-final.log` |
+| Flutter 本轮选定 app/features 测试集 | **530/530** | `flutter-final.log`；更正：此日志不是整个 `test/` 全量结果 |
 | Flutter analyze | **No issues found** | `admin-full-analyze.log`、`flutter-analyze.log` |
 | 合成 Admin 预览 | 英文、中文 **2/2** | `admin-previews.log`，下方已保留 PNG |
 | 独立 AI 权限边界补查 | **3/3** | `review-checkpoint.log`；单独本地补查，不计入 1817 |
@@ -127,3 +127,7 @@ e9f61e037af3288439ab929ee42400736124fd49f9bc29dde1c872bd6df68529  admin-backend-
 53493c8e95c2553ed25260fbcd805ce8eb69534e117f987fec3d621880aa8329  apk-build.log
 f4ada5468a2bef8dfd3abcc195e546751c4c46638ea6a3e296fda684df5a3aa3  apk-build-regenerated.log
 ```
+
+## 后续修复与管理员验收
+
+用户进一步批准添加私有测试数据、专用临时管理员验证及活动读取最多 30 秒。后续源码、全量测试对照、运行与清理记录见 [followup-verification.md](followup-verification.md)。本报告原有失败、空态和 15 秒未达标结论保留；后续证据不回写为当时已经通过。
