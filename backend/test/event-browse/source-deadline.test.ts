@@ -68,3 +68,26 @@ test('late provider completion cannot win before the queued deadline callback', 
   assert.equal(batch.sourceStatus[1]?.available, false);
   assert.equal(providerSignal.aborted, true);
 });
+
+test('first-page provider failure is not retried for every later page of the same listing', async () => {
+  let failedReads = 0, recovered = false;
+  const paginated: BrowseSource = {
+    firstBatch: async () => [row], detail: async () => row,
+    batch: async (_asOf, page) => ({items:[{...row,browseId:`tm_page_${page}`}],...(page < 4 ? {nextPage:page+1}: {})}),
+  };
+  const fail = async () => {failedReads++;if (recovered) return {items:[]};throw Error('unavailable');};
+  const failed: BrowseSource = {firstBatch:async()=> (await fail()).items,batch:fail,detail:async()=>undefined};
+  const source = new CombinedEventSource(paginated, failed, 10000);
+  for(let page=0;page<5;page++) {
+    const batch=await source.batch(asOf,page,new AbortController().signal);
+    assert.equal(batch.items.length,1);
+    assert.deepEqual(batch.sourceStatus,[{provider:'ticketmaster',available:true},{provider:'onepa',available:false}]);
+  }
+  assert.equal(failedReads,1);
+  await source.batch('2026-10-29T00:01:00.000Z',0,new AbortController().signal);
+  assert.equal(failedReads,2);
+  recovered = true;
+  const refreshed = await source.batch(asOf,0,new AbortController().signal);
+  assert.equal(failedReads,3);
+  assert.equal(refreshed.sourceStatus[1]?.available,true);
+});

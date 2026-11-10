@@ -105,7 +105,7 @@ export async function startAzureBackend(env = process.env) {
     const eventCredentialPath = join(directory, 'event-credential.json');
     writeFileSync(eventCredentialPath, JSON.stringify({apiKey: env.ENMORI_TICKETMASTER_KEY, termsAccepted: true}), {mode: 0o600});
     writeFileSync(join(directory, 'event-source.json'), JSON.stringify({credentialFile: eventCredentialPath, musicInterestTagId: config.musicInterestTagId}), {mode: 0o600});
-    const events = retainedCoreEvents(directory, true, () => runtime?.eventBrowseControl?.observation().enabled === true, 10000);
+    const events = retainedCoreEvents(directory, true, () => runtime?.eventBrowseControl?.observation().enabled === true, 20000);
     assert.equal(events.configuration, 'configured');
     const backendEnvironment = Object.fromEntries(Object.keys(env).filter(name => !openAiSettings.has(name)).map(name => [name, env[name]]));
     runtime = await createRemoteGroupRuntime({

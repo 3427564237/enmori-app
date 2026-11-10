@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:enmori/features/event_browse/data/backend_activity_repository.dart';
+import 'package:enmori/features/event_recommendations/data/backend_event_recommendation_repository.dart';
+import 'package:enmori/features/event_recommendations/domain/event_recommendation_repository.dart';
 import 'package:enmori/core/network/backend_api_client.dart';
 import 'package:enmori/core/result/result.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +10,43 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
+  for (final recommendations in [false, true]) {
+    test(
+      'approved Event ${recommendations ? 'recommendation' : 'list'} read tolerates a slow source without extending writes',
+      () async {
+        final client = BackendApiClient(
+          Uri.https('example.test', '/'),
+          () async => const Success('synthetic'),
+          operationTimeout: const Duration(milliseconds: 5),
+          httpClient: MockClient((request) async {
+            await Future<void>.delayed(const Duration(milliseconds: 40));
+            return http.Response(
+              jsonEncode({
+                'asOf': '2026-11-05T00:00:00Z',
+                'items': [],
+                if (recommendations)
+                  'formulaVersion': 'event_recommendation_v3'
+                else
+                  'scope': 'singapore_events_v2',
+              }),
+              200,
+            );
+          }),
+        );
+        addTearDown(client.close);
+        final result = recommendations
+            ? await BackendEventRecommendationRepository(client)
+                  .read(view: EventRecommendationView.home)
+            : await BackendActivityRepository(client).read(null);
+        expect(result, isA<Success>());
+        expect(await client.get('/v1/me/profile'), isA<Failure<JsonObject>>());
+        expect(
+          await client.put('/v1/me/profile', body: {}),
+          isA<Failure<JsonObject>>(),
+        );
+      },
+    );
+  }
   test(
     'a rendered-detail read budget does not extend other reads or writes',
     () async {

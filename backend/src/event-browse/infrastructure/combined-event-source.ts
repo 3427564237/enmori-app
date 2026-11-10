@@ -6,7 +6,7 @@ export class CombinedEventSource implements BrowseSource {
     { provider: "ticketmaster", available: true },
     { provider: "onepa", available: true },
   ];
-  private endings = new Map<string, Map<number, number>>();
+  private listings = new Map<string, { ends: Map<number, number>; unavailable: Set<number> }>();
   constructor(
     private readonly ticketmaster: BrowseSource,
     private readonly onepa: BrowseSource,
@@ -49,26 +49,34 @@ export class CombinedEventSource implements BrowseSource {
   }
   async batch(asOf: string, page: number, signal: AbortSignal) {
     const sources = [this.ticketmaster, this.onepa];
-    let ends = this.endings.get(asOf);
-    if (!ends) {
-      ends = new Map();
-      this.endings.set(asOf, ends);
-      while (this.endings.size > 20)
-        this.endings.delete(this.endings.keys().next().value!);
+    let listing = page === 0 ? undefined : this.listings.get(asOf);
+    if (!listing) {
+      listing = { ends: new Map(), unavailable: new Set() };
+      this.listings.set(asOf, listing);
+      while (this.listings.size > 20)
+        this.listings.delete(this.listings.keys().next().value!);
     }
+    const current = listing;
     const results = await Promise.allSettled(
       sources.map(async (s, i) => {
-        if (page > (ends!.get(i) ?? Infinity))
+        // A provider absent from the first page remains explicitly unavailable
+        // for this listing. Do not restart its failed cold read for every page
+        // of the healthy provider. A fresh page zero retries both providers.
+        if (current.unavailable.has(i)) throw Error("Source unavailable");
+        if (page > (current.ends.get(i) ?? Infinity))
           return { items: [] as BrowseOccurrence[] };
         const batch = await this.boundedBatch(signal, async providerSignal => s.batch
           ? s.batch(asOf, page, providerSignal)
           : { items: page === 0 ? await s.firstBatch(asOf, providerSignal) : [] });
         if (!("nextPage" in batch) || batch.nextPage === undefined)
-          ends!.set(i, page);
+          current.ends.set(i, page);
         return batch;
       }),
     );
     if (signal.aborted) throw Error("Source unavailable");
+    if (page === 0) results.forEach((result, index) => {
+      if (result.status === "rejected") current.unavailable.add(index);
+    });
     this.statuses = results.map((r, i) => ({
       provider: i === 0 ? "ticketmaster" : "onepa",
       available: r.status === "fulfilled",
