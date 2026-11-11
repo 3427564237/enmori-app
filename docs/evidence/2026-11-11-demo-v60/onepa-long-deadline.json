@@ -1,0 +1,10 @@
+{
+  "vantage": "existing Azure app container",
+  "diagnosticOnly": true,
+  "sourceCommit": "a6272f9fb33dc88dc9125cc6f2db539291180fd9",
+  "sourceDeadlineMs": 90000,
+  "ok": false,
+  "elapsedMs": 91733,
+  "deadline": true,
+  "rowsReturned": 0
+}

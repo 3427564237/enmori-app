@@ -1,0 +1,14 @@
+{
+  "versionCode": 60,
+  "versionName": "1.0.0-demo20261111",
+  "package": "com.enmori.app.group",
+  "sha256": "013d57defa20971077305ffc2083e7533a41fc8cd8ae3c2adf3d14ca65bc2da7",
+  "bytes": 68475096,
+  "sameSigningIdentity": true,
+  "debuggable": false,
+  "clientConfig": "existing approved sol-test-dart-defines",
+  "apk": "/home/miku/.codex/worktrees/demo-ready-20261111/ENMORI/build/demo-v60/ENMORI-demo-v60-release.apk",
+  "installed": true,
+  "installMethod": "adb install -r; no uninstall or clear",
+  "physicalJourneysVerified": false
+}
