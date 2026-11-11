@@ -1,0 +1,50 @@
+{
+  "sourceCommit": "ff119fa6cbc103c025385b4f68b00f50e910c25d",
+  "startedAt": "2026-11-11T07:58:08.682Z",
+  "completedAt": "2026-11-11T07:59:58.423Z",
+  "reads": [
+    {
+      "name": "activity-home-all",
+      "path": "/v1/me/friends/activity?view=home&category=all",
+      "parallelGroup": "cold-home",
+      "status": 200,
+      "elapsedMs": 99096,
+      "counts": {
+        "activities": 0
+      }
+    },
+    {
+      "name": "activity-all-all",
+      "path": "/v1/me/friends/activity?view=all&category=all",
+      "parallelGroup": "cold-home",
+      "status": 200,
+      "elapsedMs": 99108,
+      "counts": {
+        "activities": 0
+      }
+    },
+    {
+      "name": "friends-home",
+      "path": "/v1/recommendations/friends?view=home",
+      "parallelGroup": "cold-home",
+      "status": 200,
+      "elapsedMs": 104620,
+      "counts": {
+        "suggestions": 1
+      }
+    },
+    {
+      "name": "activity-check-in-only",
+      "path": "/v1/me/friends/activity?view=all&category=check_in_created",
+      "parallelGroup": "after-cold-home",
+      "status": 200,
+      "elapsedMs": 1323,
+      "counts": {
+        "activities": 0
+      }
+    }
+  ],
+  "eventPageZeroRefreshed": false,
+  "positiveFriendActionVisibilityVerified": false,
+  "note": "The demo friend has no accepted friendship yet. Empty Activity proves the authenticated cold-source/concurrent route, not actual cross-account action display."
+}

@@ -1,0 +1,47 @@
+{
+  "sourceCommit": "ff119fa6cbc103c025385b4f68b00f50e910c25d",
+  "packageSha256": "82b37db208110403eb7efe53e989fea6415224ded6caee2b818d999b38b817dc",
+  "packageBytes": 67986478,
+  "everyEntryVerified": true,
+  "entryCount": 8519,
+  "claimCapturedWhileStopped": {
+    "generation": 80,
+    "spentNanoUsd": 101226700,
+    "reservedNanoUsd": 4096000,
+    "attemptCount": 105,
+    "reconciledCount": 103
+  },
+  "originalGrantUnchanged": true,
+  "capNanoUsd": 3400000000,
+  "freshnessValidUntil": "2026-11-12T00:00:00+08:00",
+  "apk": {
+    "versionCode": 62,
+    "versionName": "1.0.0-demo20261111",
+    "sha256": "39d524879d694686a008918557eaa831052f5d498c8b0e1d07f40f2c6801938b",
+    "installMode": "adb install -r",
+    "packageReadback": "passed",
+    "physicalUiReverified": false
+  },
+  "tests": {
+    "backend": 1852,
+    "flutterDirected": 39,
+    "flutterAnalysis": "passed"
+  },
+  "startup": [
+    {
+      "phase": "configuration",
+      "nodeVersion": "24.19.0",
+      "selectedHost": true,
+      "identityEndpointPath": "/msi/token",
+      "cloudTestApp": "armed"
+    },
+    {
+      "phase": "listening",
+      "firebaseRead": true,
+      "aiConfigured": true,
+      "aiAvailable": true
+    }
+  ],
+  "startupProbeSeconds": 258.1145213,
+  "liveConcurrentReads": "concurrent-live-reads.json"
+}
