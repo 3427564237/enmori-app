@@ -1,0 +1,11 @@
+# LI — current gift balance re-verification
+
+Date: 11 November 2026, Asia/Singapore. Authority: LI / PM and billing-account operator in the current task.
+
+In response to the explicit request to verify the current OpenAI balance before tonight's old evidence expires, LI supplied the Platform's current Free trial balance and next-expiring-credit display, and said “随便用即可” and “多的是，而且快过期了”. The question explicitly retained the original USD3.40 application cap and excluded charging or increasing it. Keep the supplied account-level amount in the private operator packet; it exceeds the full existing cap. LI's displayed credit-expiry date is 19 November 2026.
+
+This is fresh operator-supplied billing evidence for the already approved [same-cycle freshness procedure](2026-11-05-li-sol-test-app-acceptance.md) and the [teacher continuity implementation](2026-11-11-li-teacher-stability-implementation.md). It is not a numeric replacement cap, new paid-test count, purchased-credit receipt, automatic recharge, or change to another account's consent. The existing grant's earlier stored credit expiry remains 18 November 00:00 SGT; this operation will not rewrite its immutable credit expiry to the later displayed date.
+
+The operator may prepare the existing stopped/drained compare-and-set refresh of the five allowed balance/price verification fields, bounded by the approved maximum-seven-day review policy and the earlier stored expiry. Retain original grant identity, original credit, creation balance, rates, cap, all spend/reservations/counts/attempts and quota state. Preserve earlier verification and exact before/after evidence. Actual model access and prices are checked separately without a paid generation. Unknown results require read-only reconciliation of the original intent.
+
+LI did not explicitly state that no other application can consume the provider balance. Do not record exclusive funding scope as confirmed or promise an unconditional provider-invoice ceiling. Any future paid successor still requires its actual manual purchase, verified net USD receipt/balance/expiry and the concrete approved packet. The reported plentiful current gift does not prove funding through January or remove that later maintenance step.
