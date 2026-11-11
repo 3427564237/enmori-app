@@ -1,0 +1,10 @@
+{
+  "nodeVersion": "v24.19.0",
+  "startUtc": "2026-11-11T04:43:11.212379+00:00",
+  "finishUtc": "2026-11-11T04:43:19.192915+00:00",
+  "elapsedSeconds": 7.981,
+  "compileExitCode": 0,
+  "testExitCode": 0,
+  "suiteCount": 155,
+  "credentialsRemovedFromEnvironment": true
+}

@@ -362,7 +362,8 @@ void main() {
         );
         await _tap(tester, 'test-back');
         expect(f.router.state.uri.path, AppRoutes.home);
-        expect(f.events.views.length, 1);
+        // Personal recommendations refresh on visible route return.
+        expect(f.events.views.length, 2);
         expect(f.auth.watchCount, 1);
       },
     );

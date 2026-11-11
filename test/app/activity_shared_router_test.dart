@@ -99,25 +99,31 @@ void main() {
     },
   );
 
-  testWidgets('background and return clear list and require explicit reload', (
-    tester,
-  ) async {
-    final f = await _start(tester);
-    await _tap(tester, find.byKey(const Key('home-browse-activities')));
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-    await tester.pump();
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pumpAndSettle();
-    expect(find.text('Synthetic browse activity'), findsNothing);
-    expect(find.text('Reload activities to continue.'), findsOneWidget);
-    expect(f.repository.reads, [null]);
-    await _tap(tester, find.text('Reload'));
-    expect(f.repository.reads, [null, null]);
-    await _finish(tester, f);
-  });
+  testWidgets(
+    'background return retains the public snapshot until its original expiry',
+    (tester) async {
+      final f = await _start(tester);
+      await _tap(tester, find.byKey(const Key('home-browse-activities')));
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(find.text('Synthetic browse activity'), findsOneWidget);
+      expect(find.text('Reload activities to continue.'), findsNothing);
+      expect(f.repository.reads, [null]);
+      await tester.pump(const Duration(minutes: 5));
+      await tester.pumpAndSettle();
+      expect(find.text('Synthetic browse activity'), findsNothing);
+      expect(find.text('Reload activities to continue.'), findsOneWidget);
+      expect(f.repository.reads, [null]);
+      await _tap(tester, find.text('Reload'));
+      expect(f.repository.reads, [null, null]);
+      await _finish(tester, f);
+    },
+  );
 
   testWidgets(
-    'pending source action cannot restore notices or data after background and return',
+    'pending source action cannot restore notices; fresh public data survives after background and return',
     (tester) async {
       final f = await _start(tester);
       final pending = f.opener.pending = Completer<bool>();
@@ -135,22 +141,20 @@ void main() {
       await tester.pumpAndSettle();
       pending.complete(false);
       await tester.pumpAndSettle();
-      expect(find.text('Synthetic browse activity'), findsNothing);
-      expect(find.text('Reload activities to continue.'), findsOneWidget);
+      expect(find.text('Synthetic browse activity'), findsOneWidget);
+      expect(find.text('Reload activities to continue.'), findsNothing);
       expect(find.byType(SnackBar), findsNothing);
-      expect(find.text('Copy source link'), findsNothing);
+      expect(find.text('Copy source link'), findsOneWidget);
       expect(f.repository.reads, [null, 'tm_QQ']);
 
-      await _tap(tester, find.text('Reload'));
-      expect(f.repository.reads, [null, 'tm_QQ', 'tm_QQ']);
       expect(find.text('Synthetic browse activity'), findsOneWidget);
       expect(f.opener.calls, 1);
       f.container.read(appRouterProvider).pop();
       await tester.pumpAndSettle();
       expect(find.text('Browse activities'), findsOneWidget);
-      expect(find.text('Reload activities to continue.'), findsOneWidget);
-      expect(find.text('Synthetic browse activity'), findsNothing);
-      expect(f.repository.reads, [null, 'tm_QQ', 'tm_QQ']);
+      expect(find.text('Reload activities to continue.'), findsNothing);
+      expect(find.text('Synthetic browse activity'), findsOneWidget);
+      expect(f.repository.reads, [null, 'tm_QQ']);
       expect(f.events.views, [EventRecommendationView.home]);
       expect(tester.takeException(), isNull);
       await _finish(tester, f);

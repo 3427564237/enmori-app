@@ -1,3 +1,5 @@
+import '../../support/ai_menu.dart';
+
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -39,6 +41,9 @@ Future<void> start(WidgetTester tester, OfflineSocialStore store) async {
 }
 
 Future<void> tap(WidgetTester tester, String key) async {
+  tester.testTextInput.hide();
+  await tester.pumpAndSettle();
+  await revealAiMenuAction(tester, key);
   final target = find.byKey(Key(key));
   if (target.evaluate().isEmpty) {
     await tester.scrollUntilVisible(
@@ -49,6 +54,7 @@ Future<void> tap(WidgetTester tester, String key) async {
   }
   await tester.ensureVisible(target);
   await tester.pumpAndSettle();
+  expect(target.hitTestable(), findsOneWidget, reason: key);
   await tester.tap(target);
   await tester.pumpAndSettle();
 }
@@ -72,7 +78,7 @@ Future<void> capture(WidgetTester tester, String name) async {
 
 void main() {
   testWidgets(
-    'shared AI tab protects draft before opening reviewed Persona management',
+    'shared AI tab retains its draft across reviewed Persona management',
     (tester) async {
       final store = OfflineSocialStore();
       addTearDown(store.dispose);
@@ -88,21 +94,7 @@ void main() {
         'An unsaved sample',
       );
       await tap(tester, 'ai-personas');
-      expect(find.text('Discard unsaved changes?'), findsOneWidget);
-      await tester.tap(find.text('Keep editing'));
-      await tester.pumpAndSettle();
-      expect(find.text('An unsaved sample'), findsOneWidget);
-      expect(
-        container
-            .read(appRouterProvider)
-            .routeInformationProvider
-            .value
-            .uri
-            .path,
-        AppRoutes.aiAssistant,
-      );
-      await tap(tester, 'ai-personas');
-      await tap(tester, 'ai-confirm-discard');
+      expect(find.text('Discard unsaved changes?'), findsNothing);
       expect(find.byKey(const Key('route-persona-management')), findsOneWidget);
       expect(
         container
@@ -116,6 +108,7 @@ void main() {
       expect(find.text('An unsaved sample'), findsNothing);
       await tap(tester, 'persona-back');
       expect(find.byKey(const Key('route-ai-conversation')), findsOneWidget);
+      expect(find.text('An unsaved sample'), findsOneWidget);
       expect(
         tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
         3,
@@ -285,7 +278,10 @@ void main() {
       await tap(tester, 'my-friend-profile-jamie_sample');
       expect(find.text('@jamie_sample'), findsOneWidget);
       await tap(tester, 'offline-friend-back');
-      expect(find.byKey(const Key('route-my-friends')), findsOneWidget);
+      expect(
+        find.byKey(const PageStorageKey('route-my-friends')),
+        findsOneWidget,
+      );
       expect(find.text('Alex · Sample'), findsNothing);
       await tester.tap(find.byTooltip('Back'));
       await tester.pumpAndSettle();
@@ -370,7 +366,7 @@ void main() {
       );
       await capture(tester, 'ai-chat');
       await tap(tester, 'social-nav-check-in');
-      expect(find.text('Keep a little moment'), findsOneWidget);
+      expect(find.text('Check-in'), findsOneWidget);
       await capture(tester, 'check-in');
       await tester.enterText(
         find.byKey(const Key('r6-check-in-note')),

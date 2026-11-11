@@ -1,3 +1,5 @@
+import 'package:enmori/features/auth/domain/auth_repository.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -250,6 +252,9 @@ void main() {
         ProviderScope(
           overrides: [
             currentAuthSubjectProvider.overrideWithValue('a'),
+            authSessionProvider.overrideWithValue(
+              const AsyncData(AuthSessionAuthenticated(subject: 'a')),
+            ),
             eventDetailRepositoryProvider.overrideWithValue(repo),
           ],
           child: const MaterialApp(home: EventDetailPage(eventId: 'ev')),
@@ -261,10 +266,26 @@ void main() {
       repo.failure = null;
       await tester.tap(find.byKey(const Key('event-detail-retry')));
       await tester.pumpAndSettle();
-      expect(find.text('Location: Not provided'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Location not provided by the source.'),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Location not provided by the source.'), findsOneWidget);
       expect(repo.copies, 0);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('event-detail-copy-link')),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       await tester.ensureVisible(
         find.byKey(const Key('event-detail-copy-link')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('event-detail-copy-link')).hitTestable(),
+        findsOneWidget,
       );
       await tester.tap(find.byKey(const Key('event-detail-copy-link')));
       await tester.pumpAndSettle();
@@ -365,6 +386,9 @@ void main() {
           ProviderScope(
             overrides: [
               currentAuthSubjectProvider.overrideWithValue('a'),
+              authSessionProvider.overrideWithValue(
+                const AsyncData(AuthSessionAuthenticated(subject: 'a')),
+              ),
               eventDetailRepositoryProvider.overrideWithValue(repo),
             ],
             child: MaterialApp(
@@ -383,8 +407,10 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        await tester.ensureVisible(
+        await tester.scrollUntilVisible(
           find.byKey(const Key('event-detail-copy-link')),
+          200,
+          scrollable: find.byType(Scrollable).first,
         );
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());
@@ -392,6 +418,9 @@ void main() {
           ProviderScope(
             overrides: [
               currentAuthSubjectProvider.overrideWithValue('a'),
+              authSessionProvider.overrideWithValue(
+                const AsyncData(AuthSessionAuthenticated(subject: 'a')),
+              ),
               friendRepositoryProvider.overrideWithValue(FakeFriends()),
             ],
             child: MaterialApp(

@@ -42,8 +42,8 @@ void expectAiConnectedHistory(
   AiConversationState actual,
   AiConversationState saved,
 ) {
-  // Leaving for Persona clears the page phase to idle. Ordinary history may
-  // restore those rows without representing a new generation or outcome read.
+  // Ordinary navigation retains same-session rows. Verify the latest GET
+  // actually returned each row; cached merging alone is not fresh-read proof.
   expect(
     actual.phase,
     anyOf(AiConversationPhase.idle, AiConversationPhase.success),
@@ -52,6 +52,10 @@ void expectAiConnectedHistory(
   expect(actual.canSend, isTrue);
   expect(actual.conversationId == saved.conversationId, isTrue);
   expect(identical(actual.sessionKey, saved.sessionKey), isTrue);
+  expect(
+    actual.lastReadMessageIds.toSet(),
+    saved.messages.map((message) => message.messageId).toSet(),
+  );
   _expectSameMessages(actual.messages, saved.messages);
 }
 

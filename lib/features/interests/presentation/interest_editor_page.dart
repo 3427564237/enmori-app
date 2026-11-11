@@ -283,18 +283,18 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
         builder: (dialogContext) => AlertDialog(
           title: Text(
             saving
-                ? context.tr('Leave while saving?', '保存时离开？')
+                ? dialogContext.tr('Leave while saving?', '保存时离开？')
                 : saveSent
-                ? context.tr('Leave after a save attempt?', '保存尝试后离开？')
-                : context.tr('Discard interest changes?', '放弃兴趣修改？'),
+                ? dialogContext.tr('Leave after a save attempt?', '保存尝试后离开？')
+                : dialogContext.tr('Discard interest changes?', '放弃兴趣修改？'),
           ),
           content: Text(
             saveSent
-                ? context.tr(
+                ? dialogContext.tr(
                     'A save has already been sent. Leaving will not cancel it. Check your saved interests when you return.',
                     '保存请求已经发出，离开不会取消请求。返回后请核对已保存的兴趣。',
                   )
-                : context.tr(
+                : dialogContext.tr(
                     'Your unsaved selection will be discarded.',
                     '尚未保存的选择将被放弃。',
                   ),
@@ -302,14 +302,14 @@ final class _InterestEditorPageState extends ConsumerState<InterestEditorPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(context.tr('Keep editing', '继续编辑')),
+              child: Text(dialogContext.tr('Keep editing', '继续编辑')),
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text(
                 saveSent
-                    ? context.tr('Leave', '离开')
-                    : context.tr('Discard', '放弃'),
+                    ? dialogContext.tr('Leave', '离开')
+                    : dialogContext.tr('Discard', '放弃'),
               ),
             ),
           ],

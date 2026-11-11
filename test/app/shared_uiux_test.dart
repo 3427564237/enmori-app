@@ -1,3 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:enmori/features/event_recommendations/event_recommendations_providers.dart';
+
+import '../support/fakes.dart';
+
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -23,6 +28,7 @@ void main() {
           onStartCheckIn: () => actions.add('check-in'),
           onSeeAllEvents: () => actions.add('recommendations'),
           onBrowseActivities: () => actions.add('browse'),
+          onOpenEvent: (_) => actions.add('event'),
           onOpenAi: () => actions.add('ai'),
           onOpenHistory: () => actions.add('history'),
           onManagePersonas: () => actions.add('personas'),
@@ -120,7 +126,7 @@ void main() {
     tester,
   ) async {
     await _pump(tester, const StartupPage());
-    expect(find.text('Opening ENMORI'), findsOneWidget);
+    expect(find.text('Opening your space…'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.byType(FilledButton), findsNothing);
     await _capture(tester, 'startup');
@@ -279,17 +285,24 @@ Future<void> _pump(
     }
   }
   await tester.pumpWidget(
-    RepaintBoundary(
-      key: const Key('uiux-capture'),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: enmoriTheme(),
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context)
-              .copyWith(textScaler: const TextScaler.linear(1.3)),
-          child: child!,
+    ProviderScope(
+      overrides: [
+        eventRecommendationRepositoryProvider.overrideWithValue(
+          FakeEventRecommendationRepository(),
         ),
-        home: page,
+      ],
+      child: RepaintBoundary(
+        key: const Key('uiux-capture'),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: enmoriTheme(),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: const TextScaler.linear(1.3)),
+            child: child!,
+          ),
+          home: page,
+        ),
       ),
     ),
   );

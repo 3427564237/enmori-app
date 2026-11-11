@@ -1,3 +1,5 @@
+import '../../support/ai_menu.dart';
+
 import 'package:enmori/app/providers.dart';
 import 'package:enmori/hci_offline_harness.dart' as entry;
 import 'package:enmori/harness/social/offline_social_app.dart';
@@ -8,9 +10,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> tap(WidgetTester tester, String key) async {
+  tester.testTextInput.hide();
+  await tester.pumpAndSettle();
+  await revealAiMenuAction(tester, key);
   final finder = find.byKey(Key(key));
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
+  expect(finder.hitTestable(), findsOneWidget, reason: key);
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }

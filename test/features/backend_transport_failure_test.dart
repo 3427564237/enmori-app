@@ -52,20 +52,31 @@ void main() {
       container.read(aiConversationControllerProvider).phase,
       AiConversationPhase.waiting,
     );
+    final phases = <AiConversationPhase>[];
+    final subscription = container.listen(
+      aiConversationControllerProvider,
+      (_, next) => phases.add(next.phase),
+    );
+    addTearDown(subscription.close);
     await tester.pump(const Duration(seconds: 75));
     await tester.pumpAndSettle();
     final state = container.read(aiConversationControllerProvider);
-    expect(state.phase, AiConversationPhase.timedOut);
+    expect(phases, contains(AiConversationPhase.timedOut));
+    expect(state.phase, AiConversationPhase.unknown);
+    expect(peer.outcomeReads, inInclusiveRange(1, 3));
     expect(state.canCancel, isFalse);
     expect(state.canRetry, isFalse);
     expect(state.canSend, isFalse);
     expect(
       find.text(
-        'This request timed out. Check saved messages before trying again.',
+        'The previous reply is not confirmed. Recovery is being attempted; you can keep drafting or start a new topic.',
       ),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('ai-check-result')), findsOneWidget);
+    expect(state.canCheckResult, isTrue);
+    await tester.tap(find.byKey(const Key('ai-conversation-actions')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('ai-check-result-menu')), findsOneWidget);
     expect(peer.executes, 1);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
@@ -268,6 +279,7 @@ final class _SavePeer extends http.BaseClient {
 }
 
 final class _StalledAiPeer extends http.BaseClient {
+  int outcomeReads = 0;
   final _execution = Completer<http.StreamedResponse>();
   int executes = 0;
   @override
@@ -277,6 +289,17 @@ final class _StalledAiPeer extends http.BaseClient {
       return _execution.future;
     }
     const operation = '00000000-0000-4000-8000-000000000002';
+    if (request.method == 'GET') {
+      outcomeReads++;
+      return http.StreamedResponse(
+        Stream.value(
+          utf8.encode(
+            jsonEncode({'operationId': operation, 'state': 'active'}),
+          ),
+        ),
+        200,
+      );
+    }
     final cancelling = request.url.path.endsWith('/cancel');
     final body = cancelling
         ? {'operationId': operation, 'state': 'terminal'}

@@ -1,0 +1,36 @@
+{
+  "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+  "scriptSha256": "e632dc05ebf14cefafa9ba0c79a922117a2b876d69ceaa5ad53beeeea755417f",
+  "exitCode": 0,
+  "temporaryDirectoryAbsent": true,
+  "safeRecords": [
+    {
+      "phase": "metadata-read",
+      "index": 0,
+      "exists": true,
+      "elapsedMs": 3121
+    },
+    {
+      "phase": "metadata-read",
+      "index": 1,
+      "exists": true,
+      "elapsedMs": 154
+    },
+    {
+      "phase": "metadata-read",
+      "index": 2,
+      "exists": true,
+      "elapsedMs": 98
+    },
+    {
+      "phase": "metadata-read",
+      "index": 3,
+      "exists": true,
+      "elapsedMs": 122
+    },
+    {
+      "phase": "read-only-work-in-current-transaction-mode",
+      "elapsedMs": 468
+    }
+  ]
+}

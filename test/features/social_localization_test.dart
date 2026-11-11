@@ -63,12 +63,14 @@ final class Friends implements FriendRepository {
 }
 
 Widget localized(Widget child, {Locale locale = const Locale('zh')}) =>
-    MaterialApp(
-      locale: locale,
-      supportedLocales: const [Locale('en'), Locale('zh')],
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      theme: enmoriTheme(),
-      home: child,
+    ProviderScope(
+      child: MaterialApp(
+        locale: locale,
+        supportedLocales: const [Locale('en'), Locale('zh')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        theme: enmoriTheme(),
+        home: child,
+      ),
     );
 
 void main() {
@@ -186,14 +188,14 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('前往原网站报名'));
+      await tester.tap(find.text('官网报名／购票'));
       await tester.pumpAndSettle();
-      expect(find.text('前往第三方报名？'), findsOneWidget);
+      expect(find.text('前往官网报名／购票？'), findsOneWidget);
       expect(find.textContaining('打开网页不会自动标记为将参加'), findsOneWidget);
       await tester.tap(find.text('取消'));
       await tester.pumpAndSettle();
       expect(saves, 0);
-      expect(find.text('前往原网站报名'), findsOneWidget);
+      expect(find.text('官网报名／购票'), findsOneWidget);
     },
   );
 }

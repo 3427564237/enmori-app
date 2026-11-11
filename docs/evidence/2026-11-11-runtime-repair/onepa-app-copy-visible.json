@@ -1,0 +1,80 @@
+{
+  "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+  "scriptSha256": "aa8169db34146f907fffe81c48916262e6840049e8920887797e3a2110165f0e",
+  "copySeconds": 26.724,
+  "binaryShaMatches": true,
+  "exitCode": 1,
+  "safeRecords": [
+    {
+      "stage": "warm-launch",
+      "elapsedMs": 2677
+    },
+    {
+      "stage": "warm-ready",
+      "elapsedMs": 5869
+    },
+    {
+      "stage": "launch",
+      "elapsedMs": 5870
+    },
+    {
+      "stage": "context",
+      "elapsedMs": 5871
+    },
+    {
+      "stage": "page-action-0",
+      "elapsedMs": 9727
+    },
+    {
+      "navigationStatus": 200,
+      "elapsedMs": 10659
+    },
+    {
+      "stage": "response-wait-0",
+      "elapsedMs": 10877
+    },
+    {
+      "domContentLoaded": true
+    },
+    {
+      "pageState": {
+        "title": "onePA | Event Search",
+        "ready": "interactive",
+        "links": 0,
+        "scriptCount": 25,
+        "challenge": false
+      }
+    },
+    {
+      "deadline": true,
+      "stage": "response-wait-0"
+    },
+    {
+      "stage": "close",
+      "elapsedMs": 26217
+    },
+    {
+      "ok": false,
+      "stage": "close",
+      "errorClass": "Error",
+      "category": "deadline",
+      "elapsedMs": 26676
+    },
+    {
+      "resources": {
+        "www.onepa.gov.sg:document": 1,
+        "www.onepa.gov.sg:stylesheet": 2,
+        "www.onepa.gov.sg:script": 19,
+        "fonts.googleapis.com:stylesheet": 1,
+        "www.googletagmanager.com:script": 3,
+        "www.onepa.gov.sg:image": 9,
+        "js.stripe.com:script": 1,
+        "www.onepa.gov.sg:fetch": 16,
+        "assets.wogaa.sg:script": 1,
+        "analytics.google.com:fetch": 1,
+        "stats.g.doubleclick.net:ping": 1,
+        "www.google.com:fetch": 1
+      }
+    }
+  ]
+}

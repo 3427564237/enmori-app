@@ -1,3 +1,5 @@
+import '../support/ai_menu.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -13,7 +15,7 @@ import 'package:http/http.dart' as http;
 // double. No Backend, Firebase, real model, phone or runtime is executed here.
 void main() {
   testWidgets(
-    'cancel and repeated return keep canonical history unknown until explicit outcome readback',
+    'explicit cancel and repeated return retain the target until a confirmed outcome',
     (tester) async {
       final auth = SyntheticAiAuthRepository();
       final peer = _Peer();
@@ -34,9 +36,8 @@ void main() {
       expect(peer.executions, hasLength(1));
       expect(peer.originalPersisted, isTrue);
       expect(peer.originalReplyDelivered, isFalse);
+      await _tap(tester, 'ai-cancel');
       await _tap(tester, 'ai-back');
-      expect(find.text('Request cancel and leave'), findsOneWidget);
-      await _tap(tester, 'ai-confirm-leave');
       expect(find.byKey(const Key('ai-network-reopen')), findsOneWidget);
       _expectOriginalCancel(peer);
 
@@ -55,22 +56,22 @@ void main() {
         expect(state.messages.map((message) => message.sequence), [1, 2]);
         expect(
           container.read(aiConversationControllerProvider.notifier),
-          isNot(same(original)),
+          same(original),
         );
         expect(_draft(tester), isEmpty);
         expect(peer.prepares, hasLength(1));
         expect(peer.executions, hasLength(1));
-        expect(peer.outcomeReads, isEmpty);
+        expect(peer.outcomeReads.length, inInclusiveRange(1, 9));
         expect(peer.historyReads, hasLength(returning + 1));
         expect(peer.originalReplyDelivered, isFalse);
         if (returning == 0) {
-          await _tap(tester, 'ai-leave-without-retrying');
+          await _tap(tester, 'ai-back');
         }
       }
 
       // Canonical U/A were persisted before Cancel's terminal acknowledgment.
       // Neither ordinary history nor a delayed execute HTTP success can settle
-      // the original operation in the client; only explicit outcome readback can.
+      // the original operation in the client; only matching outcome readback can.
       peer.deliverOriginalReply();
       await tester.pumpAndSettle();
       expect(peer.originalReplyDelivered, isTrue);
@@ -90,12 +91,24 @@ void main() {
         container.read(aiConversationControllerProvider).canRetry,
         isFalse,
       );
-      expect(peer.outcomeReads, isEmpty);
+      expect(peer.outcomeReads.length, inInclusiveRange(1, 9));
       _expectOriginalCancel(peer);
 
-      await _tap(tester, 'ai-check-result');
-      expect(peer.outcomeReads, hasLength(1));
-      expect(peer.outcomeReads.single.url.path, _readOperationA);
+      // The initial page and two returns each permit at most three reads.
+      // Finish those bounded automatic reads before measuring this manual one.
+      for (var i = 0; i < 3; i++) {
+        await tester.pump(const Duration(seconds: 3));
+        await pumpAiUi(tester);
+      }
+      expect(peer.outcomeReads.length, inInclusiveRange(1, 9));
+      final readsBeforeConfirmation = peer.outcomeReads.length;
+      peer.outcomeReady = true;
+      await _tap(tester, 'ai-check-result-menu');
+      expect(peer.outcomeReads.length, readsBeforeConfirmation + 1);
+      expect(
+        peer.outcomeReads.every((r) => r.url.path == _readOperationA),
+        isTrue,
+      );
       expect(find.text(_inputA), findsOneWidget);
       expect(find.text(_replyA), findsOneWidget);
       expect(container.read(aiConversationControllerProvider).canSend, isTrue);
@@ -131,7 +144,7 @@ void main() {
             .first,
       );
       expect(find.text(_replyB), findsOneWidget);
-      expect(peer.outcomeReads, hasLength(1));
+      expect(peer.outcomeReads.length, readsBeforeConfirmation + 1);
       _expectOriginalCancel(peer);
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
@@ -155,7 +168,7 @@ void main() {
           .sessionKey;
       await _send(tester, _inputA);
       await _tap(tester, 'ai-personas');
-      await _tap(tester, 'ai-confirm-leave');
+      expect(peer.cancels, isEmpty);
       await _tap(tester, 'persona-create');
       await tester.enterText(
         find.byKey(const Key('persona-name')),
@@ -196,16 +209,11 @@ void main() {
       );
       final readsBefore = peer.personaReads.length;
       await _tap(tester, 'ai-personas');
-      expect(find.text('Discard unsaved changes?'), findsOneWidget);
-      await tester.tap(find.text('Keep editing'));
-      await tester.pumpAndSettle();
-      expect(_draft(tester), 'Synthetic new-session unsent draft');
-      expect(peer.personaReads, hasLength(readsBefore));
-      await _tap(tester, 'ai-personas');
-      await _tap(tester, 'ai-confirm-discard');
+      expect(find.text('Discard unsaved changes?'), findsNothing);
+      expect(peer.personaReads, hasLength(readsBefore + 1));
       expect(find.byKey(const Key('persona-empty')), findsOneWidget);
       await _tap(tester, 'persona-back');
-      expect(_draft(tester), isEmpty);
+      expect(_draft(tester), 'Synthetic new-session unsent draft');
       expect(peer.prepares, hasLength(1));
       expect(peer.executions, hasLength(1));
       expect(peer.requests.where((r) => r.method == 'DELETE'), isEmpty);
@@ -271,11 +279,19 @@ Future<void> _send(WidgetTester tester, String text) async {
 }
 
 Future<void> _tap(WidgetTester tester, String key) async {
+  tester.testTextInput.hide();
+  await pumpAiUi(tester);
+  await revealAiMenuAction(tester, key);
+  if (key == 'ai-back') {
+    await tester.binding.handlePopRoute();
+    await pumpAiUi(tester);
+    return;
+  }
   final target = find.byKey(Key(key));
   if (target.evaluate().isEmpty) {
     await tester.scrollUntilVisible(
       target,
-      200,
+      key.startsWith('ai-') ? -200 : 200,
       scrollable: find
           .descendant(
             of: find.byKey(const Key('route-ai-conversation')),
@@ -285,9 +301,10 @@ Future<void> _tap(WidgetTester tester, String key) async {
     );
   }
   await tester.ensureVisible(target);
-  await tester.pumpAndSettle();
+  await pumpAiUi(tester);
+  expect(target.hitTestable(), findsOneWidget, reason: key);
   await tester.tap(target);
-  await tester.pumpAndSettle();
+  await pumpAiUi(tester);
 }
 
 String _draft(WidgetTester tester) => tester
@@ -369,6 +386,7 @@ http.StreamedResponse _json(Object value, [int status = 200]) =>
     http.StreamedResponse(Stream.value(utf8.encode(jsonEncode(value))), status);
 
 final class _Peer extends http.BaseClient {
+  bool outcomeReady = false;
   _Peer({this.newSessionConversation = false});
 
   final bool newSessionConversation;
@@ -407,6 +425,9 @@ final class _Peer extends http.BaseClient {
     final request = outbound as http.Request;
     requests.add(request);
     final path = request.url.path;
+    if (request.method == 'GET' && path == '/v1/me/conversations') {
+      return _json({'conversations': []});
+    }
     if (request.method == 'GET' && path == '/v1/me/personas') {
       return _json({
         'personas': {'items': [], 'stateRevision': 0},
@@ -453,6 +474,9 @@ final class _Peer extends http.BaseClient {
     if (request.method == 'GET' &&
         path == _readOperationA &&
         originalPersisted) {
+      if (!outcomeReady) {
+        return _json({'operationId': _operationA, 'state': 'unresolved'});
+      }
       final pair = _pair(next: false);
       return _json({
         'operationId': _operationA,

@@ -1,3 +1,5 @@
+import '../support/ai_menu.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -37,6 +39,13 @@ void main() {
         'tone': 'neutral',
         'responseLength': 'balanced',
         'formatStyle': 'plain',
+        'relationship': '',
+        'shortIntroduction': '',
+        'description': '',
+        'personality': '',
+        'communicationStyle': '',
+        'interests': '',
+        'extraInstructions': '',
         'expectedStateRevision': 0,
       });
       expect(
@@ -89,6 +98,13 @@ void main() {
         'tone': 'neutral',
         'responseLength': 'balanced',
         'formatStyle': 'plain',
+        'relationship': '',
+        'shortIntroduction': '',
+        'description': '',
+        'personality': '',
+        'communicationStyle': '',
+        'interests': '',
+        'extraInstructions': '',
         'expectedRevision': 1,
         'expectedStateRevision': 2,
       });
@@ -129,7 +145,7 @@ void main() {
   );
 
   testWidgets(
-    'AI Persona detour cancels original attempt, hides late output and requires explicit readback',
+    'explicit cancel before a Persona detour fences late output and checks current authority',
     (tester) async {
       final auth = SyntheticAiAuthRepository();
       final client = _Peer(pendingExecute: true, seeded: true);
@@ -138,9 +154,8 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(find.byKey(const Key('ai-message-input')), _input);
       await _tap(tester, 'ai-send');
+      await _tap(tester, 'ai-cancel');
       await _tap(tester, 'ai-personas');
-      expect(find.text('Request cancel and leave'), findsOneWidget);
-      await _tap(tester, 'ai-confirm-leave');
       final cancel = client.requests.singleWhere(
         (r) => r.url.path.endsWith('/cancel'),
       );
@@ -156,10 +171,11 @@ void main() {
       await tester.pumpAndSettle();
       await _tap(tester, 'persona-back');
       expect(find.text(_reply), findsNothing);
-      expect(find.byKey(const Key('ai-check-result')), findsOneWidget);
+      await revealAiMenuAction(tester, 'ai-check-result-menu');
+      expect(find.byKey(const Key('ai-check-result-menu')), findsOneWidget);
       expect(find.byKey(const Key('ai-retry')), findsNothing);
       client.authorityChanged = true;
-      await _tap(tester, 'ai-check-result');
+      await _tap(tester, 'ai-check-result-menu');
       expect(find.text('This reply is no longer available.'), findsOneWidget);
       expect(find.text(_reply), findsNothing);
       expect(find.byKey(const Key('ai-retry')), findsNothing);
@@ -231,7 +247,9 @@ void main() {
     await _tap(tester, 'ai-personas');
     expect(opens, 1);
     expect(find.text('Manage Personas'), findsNothing);
-    expect(client.requests, isEmpty);
+    expect(client.requests.map((r) => '${r.method} ${r.url.path}'), [
+      'GET /v1/me/conversations',
+    ]);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -291,7 +309,9 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const Key('persona-empty')), findsNothing);
-      expect(client.requests, isEmpty);
+      expect(client.requests.map((r) => '${r.method} ${r.url.path}'), [
+        'GET /v1/me/conversations',
+      ]);
       await tester.pumpWidget(const SizedBox.shrink());
       expect(client.closes, 0);
     },
@@ -318,11 +338,15 @@ String _name(WidgetTester tester) => tester
     .text;
 
 Future<void> _tap(WidgetTester tester, String key, [String? surface]) async {
+  tester.testTextInput.hide();
+  await pumpAiUi(tester);
+  await revealAiMenuAction(tester, key);
+  surface ??= key.startsWith('ai-') ? 'route-ai-conversation' : null;
   final finder = find.byKey(Key(key));
   if (finder.evaluate().isEmpty && surface != null) {
     await tester.scrollUntilVisible(
       finder,
-      200,
+      key.startsWith('ai-') ? -200 : 200,
       scrollable: find
           .descendant(
             of: find.byKey(Key(surface)),
@@ -332,9 +356,10 @@ Future<void> _tap(WidgetTester tester, String key, [String? surface]) async {
     );
   }
   await tester.ensureVisible(finder);
-  await tester.pumpAndSettle();
+  await pumpAiUi(tester);
+  expect(finder.hitTestable(), findsOneWidget, reason: key);
   await tester.tap(finder);
-  await tester.pumpAndSettle();
+  await pumpAiUi(tester);
 }
 
 Future<void> _menu(WidgetTester tester, String key) async {
@@ -443,6 +468,9 @@ final class _Peer extends http.BaseClient {
     final request = outbound as http.Request;
     requests.add(request);
     final path = request.url.path;
+    if (request.method == 'GET' && path == '/v1/me/conversations') {
+      return _json({'conversations': []});
+    }
     if (path == '/v1/me/personas') {
       if (request.method == 'GET') return _json(_collection());
       if (pendingCreate) return createCompletion.future;

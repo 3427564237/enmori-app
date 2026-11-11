@@ -1,3 +1,4 @@
+import 'package:enmori/features/auth/domain/auth_repository.dart';
 import 'package:enmori/app/app.dart';
 import 'package:enmori/app/providers.dart';
 import 'package:enmori/app/router/app_router.dart';
@@ -49,7 +50,7 @@ void main() {
   );
 
   testWidgets(
-    'Home traverses all four surfaces and Back preserves Home reads',
+    'Home traverses all four surfaces and Back refreshes recommendations once',
     (tester) async {
       final pages = _TestPages();
       final fixture = await _pumpApp(tester, pages: pages);
@@ -75,7 +76,7 @@ void main() {
       await _tap(tester, 'test-back');
       await _tap(tester, 'test-back');
       expect(find.byKey(const Key('route-home')), findsOneWidget);
-      expect(fixture.events.views.length, 1);
+      expect(fixture.events.views.length, 2);
       expect(tester.takeException(), isNull);
     },
   );
@@ -272,6 +273,9 @@ Future<_Fixture> _pumpApp(
     overrides: [
       routerGateProvider.overrideWith((ref) => fixture.gate),
       currentAuthSubjectProvider.overrideWith((ref) => fixture.subject),
+      authSessionProvider.overrideWith(
+        (ref) => Stream.value(const AuthSessionUnauthenticated()),
+      ),
       isolatedSlicesEnabledProvider.overrideWithValue(isolated),
       isolatedPersonaPagesProvider.overrideWithValue(pages?.builders),
       eventRecommendationRepositoryProvider.overrideWithValue(fixture.events),

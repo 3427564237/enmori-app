@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { randomUUID } from "node:crypto";
+import { createAuthBindingDocumentId } from "../../src/shared/infrastructure/firebase/firestore-records.js";
 import { FirestoreConversationStore } from "../../src/ai-conversation/infrastructure/firestore-conversation-store.js";
 import { InMemoryFirestoreGateway } from "../support/in-memory-firestore-gateway.js";
 import type { OriginalWriteAuthority, OperationTarget } from "../../src/ai-conversation/ports/real-conversation-store.js";
@@ -104,4 +105,32 @@ test("terminal during fresh Auth never borrows user/reply text or dispatches a t
   live=true;
   assert.equal((await store.saveAssistant(op,()=>{borrowed++;return {messageId:randomUUID(),text:"synthetic",presentation:{presentationMode:"default"}};},a)).kind,"terminated");
   assert.equal(borrowed,0); assert.equal(transactions,0);
+});
+
+
+test("retained children keep failure priority while concurrent sibling reads drain", async () => {
+  const base = new InMemoryFirestoreGateway({
+    [`auth_bindings/${createAuthBindingDocumentId(authority.principal.firebaseUid)}`]: {accountId: target.ownerAccountId},
+    [`accounts/${target.ownerAccountId}`]: {username: "synthetic_owner", optionalProcessingConsent: "accepted",
+      checkInVisibility: "private", onboardingCompletedAt: "2026-10-01T00:00:00Z", purposeRevocationGeneration: 0},
+  });
+  const reads: string[] = [];
+  let release!: () => void, started!: () => void, settled = false;
+  const blocked = new Promise<void>(resolve => {release = resolve;});
+  const allStarted = new Promise<void>(resolve => {started = resolve;});
+  const store = new FirestoreConversationStore({runTransaction: work => base.runTransaction(tx => work({...tx,
+    list: async path => {
+      reads.push(path);
+      if (path.endsWith("/messages")) return [{id: "retained", data: {}}];
+      if (path.endsWith("/message_sources")) throw Error("later dependency failure");
+      started(); await blocked; return [];
+    },
+  }))}, environment);
+  const outcome = store.readOutcome(authority.principal, target).finally(() => {settled = true;});
+  await allStarted;
+  assert.equal(reads.length, 3);
+  assert.equal(settled, false);
+  release();
+  assert.deepEqual(await outcome, {kind: "unavailable"});
+  assert.equal(base.entries().length, 2);
 });

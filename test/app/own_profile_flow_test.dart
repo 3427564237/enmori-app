@@ -144,6 +144,9 @@ void main() {
     await _tap(tester, find.byKey(const Key('interest-option-tag-art')));
     await tester.tap(find.byType(BackButton));
     await _frames(tester);
+    expect(find.text('Discard interest changes?'), findsOneWidget);
+    await tester.tap(find.text('Discard'));
+    await _frames(tester);
     expect(
       find.text('No interests selected. Add up to 10 things you enjoy.'),
       findsOneWidget,

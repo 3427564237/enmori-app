@@ -1,0 +1,16 @@
+{
+  "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+  "firebaseAppModule": true,
+  "firebaseFirestoreModule": true,
+  "browserExecutable": "/home/enmori-browsers/chromium-1248/chrome-linux64/chrome",
+  "browserExecutablePresent": true,
+  "browserRealpath": "/home/enmori-browsers",
+  "browserBytes": 426218782,
+  "browserFsType": "smb2",
+  "tmpFsType": "overlayfs",
+  "tmpAvailableBytes": 13791019008,
+  "duError": null,
+  "qaBrowserPathExists": false,
+  "qaFirestorePathExists": false,
+  "qaFirestoreScriptExists": false
+}

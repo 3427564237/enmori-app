@@ -1,0 +1,11 @@
+{
+  "startUtc": "2026-11-11T04:40:48.230481+00:00",
+  "formatFileCount": 24,
+  "suiteCount": 21,
+  "sharedLock": "/home/miku/.local/state/enmori-product-round-20261023/flutter-validation.lock",
+  "formatExitCode": 0,
+  "pass5ExitCode": 1,
+  "fullAndAnalyzeSkipped": "pass5 or format failed",
+  "finishUtc": "2026-11-11T04:41:13.180733+00:00",
+  "elapsedSeconds": 24.95
+}

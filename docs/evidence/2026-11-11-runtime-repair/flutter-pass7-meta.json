@@ -1,0 +1,11 @@
+{
+  "startUtc": "2026-11-11T04:45:25.522504+00:00",
+  "suiteFile": "test/harness/ai_network_cancel_return_test.dart",
+  "sharedLock": "/home/miku/.local/state/enmori-product-round-20261023/flutter-validation.lock",
+  "formatExitCode": 0,
+  "targetedExitCode": 0,
+  "fullTestExitCode": 0,
+  "analyzeExitCode": 1,
+  "finishUtc": "2026-11-11T04:47:18.176818+00:00",
+  "elapsedSeconds": 112.654
+}

@@ -1,3 +1,4 @@
+import { readTogether } from "../../shared/infrastructure/firebase/read-together.js";
 import { hasCloudAiConsent, legacyCloudAiProcessing, parseCloudAiProcessing, GROQ_CLOUD_PROCESSING, type CloudAiProcessing } from "../../account/domain/cloud-ai-consent.js";
 import { randomUUID } from "node:crypto";
 import type { FirestoreGateway, FirestoreTransactionGateway as Tx, StoredDocument as RecordData,
@@ -311,9 +312,12 @@ export class FirestoreConversationStore implements RealConversationStore {
     const parent = await readWhileCurrent(check, () => tx.get(parentPath(target)));
     if (parent === undefined) {
       // A missing parent cannot hide retained children and become a fresh target.
-      for (const collection of ["messages", "message_sources", "effects"]) {
-        if ((await readWhileCurrent(check, () => tx.list(`${parentPath(target)}/${collection}`))).length !== 0) refuse("unavailable");
-      }
+      await readTogether(["messages", "message_sources", "effects"].map(collection => async () => {
+        const rows = await readWhileCurrent(check, () => tx.list(`${parentPath(target)}/${collection}`));
+        // Validate inside each read so retained children keep their original
+        // failure priority even when a later sibling read also rejects.
+        if (rows.length !== 0) refuse("unavailable");
+      }));
       return undefined;
     }
     if (!exact(parent, ["state", "lifecycleVersion", "nextSequence", "latestMessageId"]) ||
@@ -404,7 +408,10 @@ export class FirestoreConversationStore implements RealConversationStore {
   async initializeOperation(t: OperationTarget, epoch: RuntimeEpoch, a: OriginalWriteAuthority): Promise<StoreResult<OpenOperation>> {
     return this.content(a, async tx => {
       requireTarget(t); await this.epoch(tx, epoch); await this.authority(tx, t, a);
-      const previous = await tx.get(fencePath(t)), oldEffect = await tx.get(effectPath(t));
+      const [previous, oldEffect] = await readTogether([
+        () => readWhileCurrent(() => current(a), () => tx.get(fencePath(t))),
+        () => readWhileCurrent(() => current(a), () => tx.get(effectPath(t))),
+      ]);
       if (previous !== undefined || oldEffect !== undefined) refuse("conflict"); // No reopen after normal guard retirement either.
       const inv = await this.inventory(tx, t);
       if (t.targetKind === "existing" && inv === undefined) refuse("conversation_unavailable");
@@ -418,7 +425,10 @@ export class FirestoreConversationStore implements RealConversationStore {
       if (op.kind !== "send") refuse("conflict");
       await this.writable(tx, op, a);
       const inv = await this.inventory(tx, op);
-      const existingUser = await tx.get(userPath(op)), existingEffect = await tx.get(effectPath(op));
+      const [existingUser, existingEffect] = await readTogether([
+        () => readWhileCurrent(() => current(a), () => tx.get(userPath(op))),
+        () => readWhileCurrent(() => current(a), () => tx.get(effectPath(op))),
+      ]);
       if (existingUser !== undefined || existingEffect !== undefined) refuse("conflict");
       if (inv === undefined && op.targetKind !== "reserved_new") refuse("conversation_unavailable");
       if (inv !== undefined && op.targetKind === "reserved_new") refuse("conflict");

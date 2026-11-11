@@ -1,3 +1,8 @@
+import '../support/ai_menu.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
+
 import 'package:enmori/harness/ai_conversation/synthetic_ai_transport.dart';
 import 'package:enmori/harness/ai_conversation/synthetic_auth_repository.dart';
 import 'package:enmori/harness/ai_persona/ai_persona_harness_app.dart';
@@ -77,38 +82,34 @@ void main() {
     },
   );
 
-  testWidgets('draft guard prevents navigation until explicit discard', (
-    tester,
-  ) async {
-    final transport = SyntheticAiTransport(responseDelay: Duration.zero);
-    await tester.pumpWidget(AiPersonaHarnessApp(transport: transport));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const Key('ai-message-input')),
-      'private unsent fixture',
-    );
-    await _tap(tester, 'ai-personas', 'route-ai-conversation');
-    expect(find.text('Discard unsaved changes?'), findsOneWidget);
-    expect(find.text('Manage Personas'), findsNothing);
-    await tester.tap(find.text('Keep editing'));
-    await tester.pumpAndSettle();
-    await _tap(tester, 'ai-personas', 'route-ai-conversation');
-    await _tap(tester, 'ai-confirm-discard');
-    expect(find.text('Manage Personas'), findsOneWidget);
-    await _tap(tester, 'persona-back', 'route-persona-management');
-    expect(
-      tester
-          .widget<TextField>(find.byKey(const Key('ai-message-input')))
-          .controller!
-          .text,
-      isEmpty,
-    );
-    expect(transport.executeCalls, 0);
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
+  testWidgets(
+    'ordinary Persona navigation preserves the same-session AI draft',
+    (tester) async {
+      final transport = SyntheticAiTransport(responseDelay: Duration.zero);
+      await tester.pumpWidget(AiPersonaHarnessApp(transport: transport));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('ai-message-input')),
+        'private unsent fixture',
+      );
+      await _tap(tester, 'ai-personas', 'route-ai-conversation');
+      expect(find.text('Discard unsaved changes?'), findsNothing);
+      expect(find.text('Manage Personas'), findsOneWidget);
+      await _tap(tester, 'persona-back', 'route-persona-management');
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('ai-message-input')))
+            .controller!
+            .text,
+        'private unsent fixture',
+      );
+      expect(transport.executeCalls, 0);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
   testWidgets(
-    'Persona detour cancels only the active attempt and never resumes it',
+    'explicit cancellation before a Persona detour never resumes the attempt',
     (tester) async {
       final transport = SyntheticAiTransport(
         scenario: SyntheticAiScenario.cancellable,
@@ -121,20 +122,33 @@ void main() {
       );
       await _tap(tester, 'ai-send', 'route-ai-conversation');
       expect(transport.executeCalls, 1);
+      await _tap(tester, 'ai-cancel', 'route-ai-conversation');
       await _tap(tester, 'ai-personas', 'route-ai-conversation');
-      expect(find.text('Request cancel and leave'), findsOneWidget);
-      await _tap(tester, 'ai-confirm-leave');
       expect(find.text('Manage Personas'), findsOneWidget);
       expect(transport.cancelCalls, 1);
       await _tap(tester, 'persona-back', 'route-persona-management');
       expect(transport.executeCalls, 1);
-      expect(find.byKey(const Key('ai-check-result')), findsOneWidget);
-      expect(find.byKey(const Key('ai-retry')), findsNothing);
+      // The bounded outcome read confirms the cancelled user-only request.
+      // Navigation must not resume it or dispatch another model request.
+      final state = ProviderScope.containerOf(
+        tester.element(find.byKey(const Key('route-ai-conversation'))),
+      ).read(aiConversationControllerProvider);
+      expect(state.canRetry, isTrue);
+      expect(state.messages.map((message) => message.text), [
+        'synthetic pending input',
+      ]);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('ai-retry')),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-retry')), findsOneWidget);
       expect(
         find.textContaining('Synthetic reply for client testing.'),
         findsNothing,
       );
-      await _tap(tester, 'ai-check-result', 'route-ai-conversation');
+      expect(transport.cancelCalls, 1);
       expect(transport.executeCalls, 1);
       await tester.pumpWidget(const SizedBox.shrink());
     },
@@ -184,11 +198,14 @@ void main() {
 
 Future<void> _tap(WidgetTester tester, String key, [String? surface]) async {
   await tester.pump();
+  tester.testTextInput.hide();
+  await pumpAiUi(tester);
+  await revealAiMenuAction(tester, key);
   final finder = find.byKey(Key(key));
   if (finder.evaluate().isEmpty && surface != null) {
     await tester.scrollUntilVisible(
       finder,
-      200,
+      key.startsWith('ai-') ? -200 : 200,
       scrollable: find
           .descendant(
             of: find.byKey(Key(surface)),
@@ -198,7 +215,8 @@ Future<void> _tap(WidgetTester tester, String key, [String? surface]) async {
     );
   }
   await tester.ensureVisible(finder);
-  await tester.pumpAndSettle();
+  await pumpAiUi(tester);
+  expect(finder.hitTestable(), findsOneWidget, reason: key);
   await tester.tap(finder);
-  await tester.pumpAndSettle();
+  await pumpAiUi(tester);
 }

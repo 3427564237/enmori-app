@@ -1,0 +1,40 @@
+{
+  "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+  "scriptSha256": "1186c231d004dc2426248e7eded3476af0b13438afebe5c26b91810e9c00e63f",
+  "exitCode": 1,
+  "temporaryScriptAbsent": true,
+  "safeRecords": [
+    {
+      "stage": "warm-launch",
+      "elapsedMs": 2662
+    },
+    {
+      "stage": "warm-ready",
+      "elapsedMs": 8404
+    },
+    {
+      "stage": "launch",
+      "elapsedMs": 8416
+    },
+    {
+      "stage": "context",
+      "elapsedMs": 8426
+    },
+    {
+      "stage": "page-action-0",
+      "elapsedMs": 12526
+    },
+    {
+      "stage": "close",
+      "elapsedMs": 20701
+    },
+    {
+      "ok": false,
+      "stage": "close",
+      "errorClass": "TimeoutError",
+      "category": "stage-timeout",
+      "elapsedMs": 22425
+    }
+  ],
+  "knownStartupError": null
+}

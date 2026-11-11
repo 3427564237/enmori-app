@@ -198,3 +198,27 @@ test('grant expiry closes new generation while original confirmed billing can st
   assert.equal(await f.authority.reconcile(permit, usage), 'confirmed'); assert.equal(ledger(f).spentNanoUsd, 133);
   assert.equal(await f.authority.reconcile(permit, usage), 'already_reconciled'); assert.equal(f.owner.isCurrent(), false);
 });
+
+test('reservation overlaps only independent metadata after its fence and never commits before both settle', async () => {
+  const f = fixture(); await recovered(f);
+  const original = f.gateway.runTransaction.bind(f.gateway);
+  const ledgerRead = deferred<void>(), attemptRead = deferred<void>(), bothStarted = deferred<void>();
+  const seen: string[] = [];
+  f.gateway.runTransaction = (work, options) => original(tx => work({ ...tx, get: async path => {
+    seen.push(path);
+    if (path === cloudCostBudgetPath || path === rowPath) {
+      if (seen.includes(cloudCostBudgetPath) && seen.includes(rowPath)) bothStarted.resolve();
+      await (path === cloudCostBudgetPath ? ledgerRead.promise : attemptRead.promise);
+    }
+    return tx.get(path);
+  }}), options);
+  const writes = f.gateway.writes;
+  let completed = false;
+  const pending = f.owner.reserve(attempt, () => true).finally(() => { completed = true; });
+  await bothStarted.promise;
+  assert.deepEqual(seen, ['ai_runtime_fence/current', cloudCostBudgetPath, rowPath]);
+  ledgerRead.resolve(); await Promise.resolve();
+  assert.equal(completed, false); assert.equal(f.gateway.writes, writes);
+  attemptRead.resolve(); assert.equal((await pending).kind, 'confirmed');
+  assert.equal(f.gateway.rows.has(rowPath), true);
+});

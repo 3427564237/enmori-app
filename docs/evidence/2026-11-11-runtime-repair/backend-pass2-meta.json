@@ -1,0 +1,16 @@
+{
+  "nodeVersion": "v24.19.0",
+  "startUtc": "2026-11-11T04:45:25.531908+00:00",
+  "targetSources": [
+    "backend/test/ai-conversation/real-store-boundary.test.ts",
+    "backend/test/ai-runtime/read-together.test.ts",
+    "backend/test/ai-runtime/firestore-cloud-cost-budget.test.ts"
+  ],
+  "credentialsRemovedFromEnvironment": true,
+  "compileExitCode": 0,
+  "targetExitCode": 0,
+  "fullSuiteCount": 155,
+  "fullExitCode": 0,
+  "finishUtc": "2026-11-11T04:45:33.750239+00:00",
+  "elapsedSeconds": 8.218
+}

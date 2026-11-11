@@ -78,7 +78,7 @@ void main() {
     });
 
     testWidgets(
-      'local Retry mismatch retains draft before exact Retry readback and next Send social=$social',
+      'local Retry mismatch retains draft after bounded recovery and before exact Retry readback and next Send social=$social',
       (tester) async {
         final peer = await _mount(
           tester,
@@ -89,9 +89,10 @@ void main() {
         const original = 'Saved synthetic input';
         await tester.enterText(_input, original);
         await _tap(tester, 'ai-send');
-        expect(_state(tester).phase, AiConversationPhase.unknown);
+        // The approved bounded foreground read resolves the saved user turn.
+        expect(_state(tester).phase, AiConversationPhase.idle);
+        expect(peer.outcomeReads, 1);
         expect(editor.controller!.text, isEmpty);
-        await _tap(tester, 'ai-check-result');
         expect(_state(tester).canRetry, isTrue);
         final saved = Map<String, Object>.of(peer.messages.single);
         const mismatch = TextEditingValue(
@@ -247,6 +248,13 @@ Future<void> _ensure(
 
 Future<void> _reload(WidgetTester tester, {required bool social}) async {
   if (social) await _tap(tester, 'ai-conversation-actions');
+  if (!social) {
+    await _ensure(
+      tester,
+      find.byKey(const Key('ai-reload-messages')),
+      delta: -200,
+    );
+  }
   await _tap(tester, 'ai-reload-messages');
 }
 
@@ -257,6 +265,7 @@ String _id(int number) =>
 final class _Peer extends http.BaseClient {
   _Peer({required this.firstUnresolved});
   final bool firstUnresolved;
+  int outcomeReads = 0;
   final calls = <http.BaseRequest>[];
   final prepareBodies = <Map<String, dynamic>>[];
   final sentTexts = <String>[];
@@ -314,6 +323,7 @@ final class _Peer extends http.BaseClient {
       return _json({'messages': messages});
     }
     if (request.method == 'GET' && request.url.path.endsWith('/${_id(11)}')) {
+      outcomeReads++;
       return _json({
         'operationId': _id(11),
         'state': 'user_saved',

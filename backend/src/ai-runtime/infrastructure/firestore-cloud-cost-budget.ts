@@ -1,3 +1,4 @@
+import { readTogether } from '../../shared/infrastructure/firebase/read-together.js';
 import type { RuntimeEpoch } from '../../ai-conversation/ports/real-conversation-store.js';
 import type { FirestoreGateway, StoredDocument } from '../../shared/infrastructure/firebase/firestore-gateway.js';
 import { cloudConfirmedCostNanoUsd, cloudCostGrantCurrent, cloudCostGrantExpiresAt, cloudReservationNanoUsd,
@@ -153,7 +154,9 @@ export class FirestoreCloudCostBudget implements CloudCostBudgetAuthority {
     try {
       const result = await this.gateway.runTransaction(async tx => {
         this.verifyFence(await tx.get('ai_runtime_fence/current'));
-        const raw = await tx.get(cloudCostBudgetPath), existing = await tx.get(attemptPath(input.attemptId));
+        const [raw, existing] = await readTogether([
+          () => tx.get(cloudCostBudgetPath), () => tx.get(attemptPath(input.attemptId)),
+        ]);
         const now = this.now(), old = this.decodeLedger(raw, now); this.requireCurrentLedger(old);
         if (!this.current(lease) || !this.live(live)) return { kind: 'rejected', reason: 'unavailable' } as const;
         if (existing !== undefined) return { kind: 'rejected', reason: 'duplicate' } as const;
@@ -217,7 +220,9 @@ export class FirestoreCloudCostBudget implements CloudCostBudgetAuthority {
     try {
       const result = await this.gateway.runTransaction(async tx => {
         this.verifyFence(await tx.get('ai_runtime_fence/current'));
-        const raw = await tx.get(cloudCostBudgetPath), attemptRaw = await tx.get(attemptPath(state.input.attemptId));
+        const [raw, attemptRaw] = await readTogether([
+          () => tx.get(cloudCostBudgetPath), () => tx.get(attemptPath(state.input.attemptId)),
+        ]);
         const now = this.now(), old = this.decodeLedger(raw, now, false); this.requireCurrentLedger(old);
         const attempt = this.decodeAttempt(attemptRaw, state, now);
         if (!this.settlementCurrent(state.lease)) throw Error();

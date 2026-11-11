@@ -1,3 +1,5 @@
+import '../support/ai_menu.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -66,7 +68,7 @@ File readyFile(Directory directory) =>
 void main() {
   for (final enabled in [false, true]) {
     testWidgets(
-      'controlled Activity client reads respect service availability $enabled and clear on background',
+      'controlled Activity client reads respect service availability $enabled and preserve only fresh public snapshots on return',
       (tester) async {
         final cache = await directory(tester), auth = _Auth();
         addTearDown(auth.dispose);
@@ -195,8 +197,11 @@ void main() {
           AppLifecycleState.resumed,
         );
         await tester.pumpAndSettle();
-        expect(find.text('Synthetic joined activity'), findsNothing);
-        expect(paths, hasLength(enabled ? 4 : 1));
+        expect(
+          find.text('Synthetic joined activity'),
+          enabled ? findsOneWidget : findsNothing,
+        );
+        expect(paths, hasLength(enabled ? 4 : 2));
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());
       },
@@ -294,6 +299,7 @@ void main() {
       );
       expect(find.byKey(const Key('home-browse-activities')), findsNothing);
       await tester.pumpAndSettle();
+      await revealAiMenuAction(tester, 'ai-settings');
       await tester.tap(find.byKey(const Key('ai-settings')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('route-settings')), findsOneWidget);
@@ -327,7 +333,13 @@ void main() {
       expect(client.closes, 1);
       expect(releases, 1);
       expect(
-        paths.every((p) => ['/v1/me/settings', '/v1/me/profile'].contains(p)),
+        paths.every(
+          (p) => [
+            '/v1/me/settings',
+            '/v1/me/profile',
+            '/v1/me/conversations',
+          ].contains(p),
+        ),
         isTrue,
       );
       expect(tester.takeException(), isNull);
@@ -410,7 +422,9 @@ final class _Client extends MockClient {
   _Client(List<String> paths)
     : super((request) async {
         paths.add(request.url.path);
-        final body = request.url.path == '/v1/me/settings'
+        final body = request.url.path == '/v1/me/conversations'
+            ? {'conversations': <Object>[]}
+            : request.url.path == '/v1/me/settings'
             ? {
                 'settings': {
                   'checkInVisibility': 'private',

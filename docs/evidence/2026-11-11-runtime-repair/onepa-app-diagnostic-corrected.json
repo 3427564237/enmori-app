@@ -1,0 +1,36 @@
+{
+  "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+  "scriptSha256": "cd1b66fe4861b45d6c37748990fa64ae7d810eaaf27f01e1cd91f499338b1331",
+  "exitCode": 1,
+  "temporaryScriptAbsent": true,
+  "safeRecords": [
+    {
+      "stage": "launch",
+      "elapsedMs": 3598
+    },
+    {
+      "stage": "context",
+      "elapsedMs": 10355
+    },
+    {
+      "stage": "page-action-0",
+      "elapsedMs": 16189
+    },
+    {
+      "deadline": true,
+      "stage": "page-action-0"
+    },
+    {
+      "stage": "close",
+      "elapsedMs": 23929
+    },
+    {
+      "ok": false,
+      "stage": "close",
+      "errorClass": "Error",
+      "category": "deadline",
+      "elapsedMs": 24375
+    }
+  ],
+  "knownStartupError": null
+}

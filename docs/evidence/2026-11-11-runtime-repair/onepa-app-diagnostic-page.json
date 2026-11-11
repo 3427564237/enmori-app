@@ -1,0 +1,71 @@
+{
+  "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+  "scriptSha256": "44995a40f2ae0bae2d64458e637b3379d3402ed3727bb940ff5f796ed14caba8",
+  "exitCode": 1,
+  "temporaryScriptAbsent": true,
+  "safeRecords": [
+    {
+      "stage": "warm-launch",
+      "elapsedMs": 2632
+    },
+    {
+      "stage": "warm-ready",
+      "elapsedMs": 8643
+    },
+    {
+      "stage": "launch",
+      "elapsedMs": 8681
+    },
+    {
+      "stage": "context",
+      "elapsedMs": 8689
+    },
+    {
+      "stage": "page-action-0",
+      "elapsedMs": 13139
+    },
+    {
+      "navigationStatus": 200,
+      "elapsedMs": 14638
+    },
+    {
+      "stage": "response-wait-0",
+      "elapsedMs": 14748
+    },
+    {
+      "domContentLoaded": true
+    },
+    {
+      "deadline": true,
+      "stage": "response-wait-0"
+    },
+    {
+      "stage": "close",
+      "elapsedMs": 30159
+    },
+    {
+      "pageInspectionFailed": true
+    },
+    {
+      "ok": false,
+      "stage": "close",
+      "errorClass": "Error",
+      "category": "deadline",
+      "elapsedMs": 31063
+    },
+    {
+      "resources": {
+        "www.onepa.gov.sg:document": 1,
+        "www.onepa.gov.sg:stylesheet": 2,
+        "www.onepa.gov.sg:script": 19,
+        "fonts.googleapis.com:stylesheet": 1,
+        "www.googletagmanager.com:script": 2,
+        "js.stripe.com:script": 1,
+        "www.onepa.gov.sg:image": 5,
+        "www.onepa.gov.sg:fetch": 7,
+        "assets.wogaa.sg:script": 1
+      }
+    }
+  ],
+  "knownStartupError": null
+}

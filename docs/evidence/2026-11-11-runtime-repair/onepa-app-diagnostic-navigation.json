@@ -1,0 +1,52 @@
+{
+  "sourceCommit": "cb80c43595c22d166c3b87a5dd68359c436e52e9",
+  "scriptSha256": "20e3083c477d113a424b0c3c940e26dce7e9c2d03f1ec39b879ea5fd8c57ce76",
+  "exitCode": 1,
+  "temporaryScriptAbsent": true,
+  "safeRecords": [
+    {
+      "stage": "warm-launch",
+      "elapsedMs": 5712
+    },
+    {
+      "stage": "warm-ready",
+      "elapsedMs": 12573
+    },
+    {
+      "stage": "launch",
+      "elapsedMs": 12633
+    },
+    {
+      "stage": "context",
+      "elapsedMs": 12634
+    },
+    {
+      "stage": "page-action-0",
+      "elapsedMs": 16333
+    },
+    {
+      "navigationStatus": 200,
+      "elapsedMs": 17447
+    },
+    {
+      "stage": "response-wait-0",
+      "elapsedMs": 17716
+    },
+    {
+      "deadline": true,
+      "stage": "response-wait-0"
+    },
+    {
+      "stage": "close",
+      "elapsedMs": 32916
+    },
+    {
+      "ok": false,
+      "stage": "close",
+      "errorClass": "Error",
+      "category": "deadline",
+      "elapsedMs": 33584
+    }
+  ],
+  "knownStartupError": null
+}

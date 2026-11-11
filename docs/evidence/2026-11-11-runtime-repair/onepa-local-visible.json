@@ -1,0 +1,176 @@
+{
+  "nodeVersion": "v24.19.0",
+  "scriptSha256": "aa8169db34146f907fffe81c48916262e6840049e8920887797e3a2110165f0e",
+  "readerSha256": "192765f37dd8a21e8513f3661621d8d34ee135ba2f348ce25e3947cc095ae3ba",
+  "exitCode": 0,
+  "timedOut": false,
+  "elapsedSeconds": 8.25,
+  "safeRecords": [
+    {
+      "stage": "warm-launch",
+      "elapsedMs": 381
+    },
+    {
+      "stage": "warm-ready",
+      "elapsedMs": 1165
+    },
+    {
+      "stage": "launch",
+      "elapsedMs": 1167
+    },
+    {
+      "stage": "context",
+      "elapsedMs": 1167
+    },
+    {
+      "stage": "page-action-0",
+      "elapsedMs": 1524
+    },
+    {
+      "navigationStatus": 200,
+      "elapsedMs": 1727
+    },
+    {
+      "stage": "response-wait-0",
+      "elapsedMs": 1736
+    },
+    {
+      "domContentLoaded": true
+    },
+    {
+      "queryStatus": 201
+    },
+    {
+      "stage": "response-read-0",
+      "elapsedMs": 3122
+    },
+    {
+      "stage": "dom-wait-0",
+      "elapsedMs": 3124
+    },
+    {
+      "stage": "dom-ready-0",
+      "elapsedMs": 3281
+    },
+    {
+      "stage": "page-action-1",
+      "elapsedMs": 3301
+    },
+    {
+      "stage": "response-wait-1",
+      "elapsedMs": 3434
+    },
+    {
+      "queryStatus": 201
+    },
+    {
+      "stage": "response-read-1",
+      "elapsedMs": 4204
+    },
+    {
+      "stage": "dom-wait-1",
+      "elapsedMs": 4205
+    },
+    {
+      "stage": "dom-ready-1",
+      "elapsedMs": 4283
+    },
+    {
+      "stage": "page-action-2",
+      "elapsedMs": 4299
+    },
+    {
+      "stage": "response-wait-2",
+      "elapsedMs": 4387
+    },
+    {
+      "queryStatus": 201
+    },
+    {
+      "stage": "response-read-2",
+      "elapsedMs": 5489
+    },
+    {
+      "stage": "dom-wait-2",
+      "elapsedMs": 5489
+    },
+    {
+      "stage": "dom-ready-2",
+      "elapsedMs": 5560
+    },
+    {
+      "stage": "page-action-3",
+      "elapsedMs": 5582
+    },
+    {
+      "stage": "response-wait-3",
+      "elapsedMs": 5652
+    },
+    {
+      "queryStatus": 201
+    },
+    {
+      "stage": "response-read-3",
+      "elapsedMs": 6663
+    },
+    {
+      "stage": "dom-wait-3",
+      "elapsedMs": 6664
+    },
+    {
+      "stage": "dom-ready-3",
+      "elapsedMs": 6733
+    },
+    {
+      "stage": "page-action-4",
+      "elapsedMs": 6751
+    },
+    {
+      "stage": "response-wait-4",
+      "elapsedMs": 6846
+    },
+    {
+      "queryStatus": 201
+    },
+    {
+      "stage": "response-read-4",
+      "elapsedMs": 7899
+    },
+    {
+      "stage": "dom-wait-4",
+      "elapsedMs": 7900
+    },
+    {
+      "stage": "dom-ready-4",
+      "elapsedMs": 7985
+    },
+    {
+      "stage": "close",
+      "elapsedMs": 8001
+    },
+    {
+      "ok": true,
+      "rows": 50,
+      "elapsedMs": 8185
+    },
+    {
+      "resources": {
+        "www.onepa.gov.sg:document": 1,
+        "www.onepa.gov.sg:stylesheet": 2,
+        "www.onepa.gov.sg:script": 19,
+        "fonts.googleapis.com:stylesheet": 1,
+        "www.googletagmanager.com:script": 2,
+        "www.onepa.gov.sg:image": 19,
+        "js.stripe.com:script": 1,
+        "www.onepa.gov.sg:fetch": 29,
+        "assets.wogaa.sg:script": 5,
+        "analytics.google.com:fetch": 1,
+        "stats.g.doubleclick.net:ping": 1,
+        "www.google.com.sg:image": 1,
+        "www.google.com:fetch": 1,
+        "www.onemap.gov.sg:image": 268
+      }
+    }
+  ],
+  "stderrPresent": false
+}

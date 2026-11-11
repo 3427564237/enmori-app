@@ -1,3 +1,5 @@
+import '../support/ai_menu.dart';
+
 import 'dart:convert';
 
 import 'package:enmori/features/ai_conversation/ai_conversation_providers.dart';
@@ -69,12 +71,13 @@ void main() {
         isTrue,
       );
       final returned = await _returnThroughPersonas(tester);
-      expect(returned.phase, AiConversationPhase.idle);
+      expect(returned.phase, AiConversationPhase.success);
       expectAiConnectedHistory(returned, accepted);
       expect(peer.prepares, 2);
       expect(peer.executes, 2);
       expect(peer.reads, 3);
       expect(peer.calls.skip(6).map((call) => call.route), [
+        'GET /v1/me/conversations',
         'GET /v1/me/personas',
         'GET /v1/me/conversations/$_conversation/messages',
       ]);
@@ -83,7 +86,7 @@ void main() {
   );
 
   for (final fault in [_Fault.wrongSecondOperation, _Fault.changedHistory]) {
-    testWidgets('connected script refuses ${fault.name} without recovery', (
+    testWidgets('connected script refuses ${fault.name} without resending', (
       tester,
     ) async {
       final peer = await _mount(tester, fault: fault);
@@ -108,39 +111,41 @@ void main() {
               call.route.contains('/operations/') &&
               call.route.startsWith('GET '),
         ),
-        isEmpty,
+        fault == _Fault.wrongSecondOperation ? hasLength(2) : isEmpty,
       );
       await tester.pumpWidget(const SizedBox.shrink());
     });
   }
 
   for (final fault in [_Fault.emptyFreshHistory, _Fault.partialFreshHistory]) {
-    testWidgets('fresh cleared-view history refuses ${fault.name}', (
-      tester,
-    ) async {
-      final peer = await _mount(tester, fault: fault);
-      final saved = await runAiConnectedRepeatJourney(tester);
-      final returned = await _returnThroughPersonas(tester);
-      Object? refusal;
-      try {
-        expectAiConnectedHistory(returned, saved);
-      } on TestFailure catch (error) {
-        refusal = error;
-      }
-      expect(refusal, isA<TestFailure>());
-      expect(
-        returned.messages.length,
-        fault == _Fault.emptyFreshHistory ? 0 : 2,
-      );
-      expect(peer.prepares, 2);
-      expect(peer.executes, 2);
-      expect(peer.reads, 3);
-      expect(peer.calls.skip(6).map((call) => call.route), [
-        'GET /v1/me/personas',
-        'GET /v1/me/conversations/$_conversation/messages',
-      ]);
-      await tester.pumpWidget(const SizedBox.shrink());
-    });
+    testWidgets(
+      'fresh read proof refuses ${fault.name} despite retained history',
+      (tester) async {
+        final peer = await _mount(tester, fault: fault);
+        final saved = await runAiConnectedRepeatJourney(tester);
+        final returned = await _returnThroughPersonas(tester);
+        Object? refusal;
+        try {
+          expectAiConnectedHistory(returned, saved);
+        } on TestFailure catch (error) {
+          refusal = error;
+        }
+        expect(refusal, isA<TestFailure>());
+        expect(
+          returned.lastReadMessageIds.length,
+          fault == _Fault.emptyFreshHistory ? 0 : 2,
+        );
+        expect(peer.prepares, 2);
+        expect(peer.executes, 2);
+        expect(peer.reads, 3);
+        expect(peer.calls.skip(6).map((call) => call.route), [
+          'GET /v1/me/conversations',
+          'GET /v1/me/personas',
+          'GET /v1/me/conversations/$_conversation/messages',
+        ]);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
   }
 }
 
@@ -149,7 +154,7 @@ Future<AiConversationState> _returnThroughPersonas(WidgetTester tester) async {
     tester.element(find.byKey(const Key('ai-network-harness-banner'))),
   );
   await _tap(tester, 'ai-personas');
-  expect(scope.read(aiConversationControllerProvider).messages, isEmpty);
+  expect(scope.read(aiConversationControllerProvider).messages, hasLength(4));
   expect(find.byKey(const Key('persona-empty')), findsOneWidget);
   await _tap(tester, 'persona-back');
   await _tap(tester, 'ai-conversation-actions');
@@ -175,6 +180,7 @@ Future<_Peer> _mount(WidgetTester tester, {_Fault? fault}) async {
 }
 
 Future<void> _tap(WidgetTester tester, String key) async {
+  await revealAiMenuAction(tester, key);
   final target = find.byKey(Key(key));
   await tester.ensureVisible(target);
   await tester.pumpAndSettle();
@@ -217,6 +223,9 @@ final class _Peer extends http.BaseClient {
     final raw = await utf8.decoder.bind(request.finalize()).join();
     calls.add(_Call(request, raw.isEmpty ? null : jsonDecode(raw)));
     final path = request.url.path;
+    if (request.method == 'GET' && path == '/v1/me/conversations') {
+      return _json({'conversations': []});
+    }
     if (request.method == 'GET' && path == '/v1/me/personas') {
       return _json({
         'personas': {'items': <Object>[], 'stateRevision': 0},

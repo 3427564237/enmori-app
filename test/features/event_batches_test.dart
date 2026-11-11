@@ -596,8 +596,18 @@ void main() {
         200,
         scrollable: listScrollable,
       );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Load more events'));
+      await tester.pumpAndSettle();
+      expect(find.text('Load more events').hitTestable(), findsOneWidget);
       await tester.tap(find.text('Load more events'));
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.textContaining('Synthetic next failure'),
+        -50,
+        maxScrolls: 100,
+        scrollable: listScrollable,
+      );
       expect(find.textContaining('Synthetic next failure'), findsOneWidget);
       await tester.scrollUntilVisible(
         find.text('Try loading more again'),
@@ -622,6 +632,10 @@ void main() {
           ],
         ),
       );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Try loading more again'));
+      await tester.pumpAndSettle();
+      expect(find.text('Try loading more again').hitTestable(), findsOneWidget);
       await tester.tap(find.text('Try loading more again'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(

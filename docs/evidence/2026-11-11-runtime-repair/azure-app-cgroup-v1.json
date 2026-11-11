@@ -1,0 +1,42 @@
+{
+  "controllers": [
+    "blkio",
+    "cpu",
+    "cpuacct",
+    "cpuset",
+    "devices",
+    "freezer",
+    "hugetlb",
+    "memory",
+    "name=systemd",
+    "net_cls",
+    "net_prio",
+    "perf_event",
+    "pids",
+    "rdma"
+  ],
+  "cpuQuotaUs": {
+    "value": "-1",
+    "error": null
+  },
+  "cpuPeriodUs": {
+    "value": "100000",
+    "error": null
+  },
+  "cpuShares": {
+    "value": "1024",
+    "error": null
+  },
+  "cpuStat": {
+    "value": "nr_periods 0\nnr_throttled 0\nthrottled_time 0\nnr_bursts 0\nburst_time 0",
+    "error": null
+  },
+  "memoryLimitBytes": {
+    "value": "9223372036854771712",
+    "error": null
+  },
+  "memoryUsageBytes": {
+    "value": "273715200",
+    "error": null
+  }
+}

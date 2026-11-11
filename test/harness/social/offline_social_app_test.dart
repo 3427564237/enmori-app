@@ -27,6 +27,8 @@ Future<void> start(WidgetTester tester, OfflineSocialStore store) async {
 }
 
 Future<void> tap(WidgetTester tester, Finder target) async {
+  tester.testTextInput.hide();
+  await tester.pumpAndSettle();
   await tester.ensureVisible(target);
   await tester.pumpAndSettle();
   await tester.tap(target);

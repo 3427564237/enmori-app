@@ -1,3 +1,5 @@
+import '../support/ai_menu.dart';
+
 import 'package:enmori/core/result/result.dart';
 import 'package:enmori/features/ai_conversation/data/ai_wire_repository.dart';
 import 'package:enmori/features/ai_conversation/domain/ai_conversation.dart';
@@ -294,11 +296,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         find.text(
-          'Check-in context is not available under your current permissions.',
+          'AI chat is turned off. You can allow AI data use in Settings.',
         ),
         findsOneWidget,
       );
       expect(transport.executeCalls, 0);
+      await revealAiMenuAction(tester, 'ai-settings');
       await tester.tap(find.byKey(const Key('ai-settings')));
       await tester.pumpAndSettle();
       expect(

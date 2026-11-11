@@ -1,0 +1,36 @@
+{
+  "operator": "terra_phone_acceptance",
+  "baseCommit": "1848c2a1c601c5f7e08e3a7e5ca74347bc32e70a",
+  "uncommittedRepairAtValidation": true,
+  "records": [
+    {
+      "log": "output/repair-20261111/flutter-full-after-pass7.log",
+      "sha256": "c73ea82c427c61a19219cf006b6622b6903782943f26b9ac2175052bd27cac47",
+      "counts": {
+        "passed": 1681,
+        "failed": 0,
+        "skipped": 0
+      },
+      "exitCode": 0
+    },
+    {
+      "log": "output/repair-20261111/backend-final.log",
+      "sha256": "d414d0e41f43de065361cb0539477a590b39284007fe82a62d18c296f3f18fd3",
+      "counts": {
+        "passed": 1824,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "exitCode": 0
+    },
+    {
+      "log": "output/repair-20261111/flutter-analyze-final.log",
+      "sha256": "862811a058ec8b9108460fbc15fe60e178a42670299fb963f5f804f51b81a436",
+      "counts": {
+        "issues": 0
+      },
+      "exitCode": 0
+    }
+  ]
+}

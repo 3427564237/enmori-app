@@ -1,0 +1,16 @@
+{
+  "evidenceDate": "2026-11-11",
+  "samplesDate": "2026-11-05",
+  "scope": "three previously authorized synthetic cloud requests; no new paid dispatch",
+  "model": "gpt-6.1-sol",
+  "samples": [
+    {"executeMs":37867,"beforeMonetaryReservationMs":13735,"reserveThroughUsageConfirmMs":10444,"afterUsageConfirmToHttpResponseMs":13688,"inputTokens":389,"outputTokens":148,"reasoningTokens":0},
+    {"executeMs":34713,"beforeMonetaryReservationMs":13770,"reserveThroughUsageConfirmMs":8405,"afterUsageConfirmToHttpResponseMs":12538,"inputTokens":389,"outputTokens":119,"reasoningTokens":0},
+    {"executeMs":34990,"beforeMonetaryReservationMs":13084,"reserveThroughUsageConfirmMs":8954,"afterUsageConfirmToHttpResponseMs":12952,"inputTokens":389,"outputTokens":132,"reasoningTokens":0}
+  ],
+  "limitations": [
+    "The monetary interval includes authorization, token counting, inference and usage confirmation; it is not pure model inference time.",
+    "These are historical operator-host measurements, not new live or phone acceptance.",
+    "Three samples do not establish p95 or satisfaction of the 15-second target."
+  ]
+}

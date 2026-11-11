@@ -63,7 +63,7 @@ void main() {
       );
       sessions.add(AuthSessionAuthenticated(subject: 'synthetic-member'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Register on original website'));
+      await tester.tap(find.text('Tickets / booking on the official provider'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Open website'));
       await tester.pumpAndSettle();
