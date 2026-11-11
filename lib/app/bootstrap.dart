@@ -1,3 +1,5 @@
+import '../features/admin/data/backend_admin_repository.dart';
+import '../features/admin/presentation/admin_controller.dart';
 import "../features/recommendation_profile/recommendation_profile_providers.dart";
 import "../features/recommendation_profile/data/backend_recommendation_profile_repository.dart";
 import "../features/recommendation_profile/data/device_region_repository.dart";
@@ -190,6 +192,9 @@ Future<void> bootstrap() async {
         interestRepositoryProvider.overrideWith(
           (ref) =>
               BackendInterestRepository(ref.watch(backendApiClientProvider)),
+        ),
+        adminRepositoryProvider.overrideWith(
+          (ref) => BackendAdminRepository(ref.watch(backendApiClientProvider)),
         ),
         adminInterestRepositoryProvider.overrideWith(
           (ref) => BackendAdminInterestRepository(

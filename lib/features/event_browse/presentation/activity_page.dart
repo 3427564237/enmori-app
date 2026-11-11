@@ -36,11 +36,13 @@ final class ActivityPage extends ConsumerStatefulWidget {
     this.browseId = '',
     this.onSelect,
     this.detailBuilder,
+    this.adminCategoryBuilder,
     super.key,
   });
   final String browseId;
   final ValueChanged<String>? onSelect;
   final Widget Function(BuildContext, ActivityDetail)? detailBuilder;
+  final Widget Function(ActivityDetail, VoidCallback)? adminCategoryBuilder;
   @override
   ConsumerState<ActivityPage> createState() => _ActivityPageState();
 }
@@ -228,6 +230,11 @@ final class _ActivityPageState extends ConsumerState<ActivityPage>
                             ),
                       ),
                     ],
+                    if (widget.adminCategoryBuilder != null)
+                      widget.adminCategoryBuilder!(
+                        detail,
+                        () => unawaited(controller.load()),
+                      ),
                     const SizedBox(height: 16),
                     Text(
                       context.tr(

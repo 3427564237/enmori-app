@@ -36,6 +36,7 @@ final class EventInformation extends StatelessWidget {
       externalSourceUrl: activity.sourceUrl.toString(),
       locationLabel: activity.locationLabel,
       categoryLabel: activity.categoryLabel,
+      managedCategory: activity.managedCategory,
       shortDescription: activity.shortDescription,
       coverImageUrl: activity.coverImageUrl,
       content: activity.content,
@@ -99,6 +100,22 @@ final class EventInformation extends StatelessWidget {
       if (event.categoryLabel case final category?) ...[
         const SizedBox(height: 8),
         Text(category),
+      ],
+      if (event.managedCategory case final managed?) ...[
+        const SizedBox(height: 8),
+        Text(
+          context.tr(
+            'ENMORI category: ${managed.name}',
+            'ENMORI 分类：${managed.name}',
+          ),
+        ),
+        if (!managed.active)
+          Text(
+            context.tr(
+              'Inactive category; existing assignment retained.',
+              '分类已停用，保留已有活动关联。',
+            ),
+          ),
       ],
       const SizedBox(height: 24),
       _Heading(context.tr('About this event', '活动简介')),

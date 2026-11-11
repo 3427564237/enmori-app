@@ -42,6 +42,13 @@ export class InMemoryFirestoreGateway implements FirestoreGateway {
             data: copyDocument(document),
           }));
       },
+      listAdminOperationPage: async input => [...candidate.entries()]
+        .filter(([path,d])=>path.startsWith('admin_operation_records/')&&!path.slice(24).includes('/')&&typeof d.occurredAt==='string'&&
+          (input.mode==='expired'?d.occurredAt<=input.boundary:d.occurredAt>input.boundary&&d.occurredAt<=input.now))
+        .map(([path,data])=>({id:path.split('/')[1]!,data:{...data}}))
+        .sort((a,b)=> (String(a.data.occurredAt).localeCompare(String(b.data.occurredAt))||a.id.localeCompare(b.id))*(input.mode==='expired'?1:-1))
+        .filter(r=>!input.before||String(r.data.occurredAt)<input.before[0]||(r.data.occurredAt===input.before[0]&&r.id<input.before[1]))
+        .slice(0,input.mode==='expired'?50:51),
       delete: path => { candidate.delete(path); },
       listOwnCheckInDayPage:async input=>[...candidate.entries()]
         .filter(([path,data])=>path.startsWith("check_ins/")&&!path.slice(10).includes("/")&&data.ownerAccountId===input.ownerAccountId&&

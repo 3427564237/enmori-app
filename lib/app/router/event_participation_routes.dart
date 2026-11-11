@@ -1,3 +1,5 @@
+import '../admin_event_category_entry.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -86,6 +88,11 @@ List<GoRoute> eventParticipationRoutes({
       key: ValueKey(state.pathParameters['eventId']),
       eventId: state.pathParameters['eventId'] ?? '',
       detailBuilder: (context, event) => EventInformation(event: event),
+      adminCategoryBuilder: (event, refresh) => AdminEventCategoryEntry(
+        eventId: event.eventId,
+        title: event.title,
+        onReturn: refresh,
+      ),
       actionsBuilder: (context, event, current) =>
           EventActionButtons(event: event, current: current),
       opener: opener,

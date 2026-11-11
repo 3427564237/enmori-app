@@ -2,6 +2,16 @@ import type { BrowseSource, BrowseOccurrence } from "../ports/event-browse.js";
 /** Two independent providers. Partial source failure is explicit, never empty
  * success. Stable occurrence identity is preserved without cross-provider merge. */
 export class CombinedEventSource implements BrowseSource {
+  private observed = new Map<number, import("../../admin/ports/admin-repository.js").ServiceObservation>();
+  private attempts = [0, 0];
+  observations() {
+    for (const [i, source] of [this.ticketmaster, this.onepa].entries()) {
+      const value = source.observations?.().find(v => v.provider === (i === 0 ? 'ticketmaster' : 'onepa'));
+      const current = this.observed.get(i);
+      if (value && (!current || value.lastObservedAt > current.lastObservedAt)) this.observed.set(i, {...value});
+    }
+    return [...this.observed.values()].map(v => ({...v}));
+  }
   private statuses = [
     { provider: "ticketmaster", available: true },
     { provider: "onepa", available: true },
@@ -65,9 +75,26 @@ export class CombinedEventSource implements BrowseSource {
         if (current.unavailable.has(i)) throw Error("Source unavailable");
         if (page > (current.ends.get(i) ?? Infinity))
           return { items: [] as BrowseOccurrence[] };
-        const batch = await this.boundedBatch(signal, async providerSignal => s.batch
-          ? s.batch(asOf, page, providerSignal)
-          : { items: page === 0 ? await s.firstBatch(asOf, providerSignal) : [] });
+        const attempt = (this.attempts[i] ?? 0) + 1; this.attempts[i] = attempt;
+        const observe = (available: boolean) => {
+          if (signal.aborted || this.attempts[i] !== attempt) return;
+          if (available && s.observations) {
+            // The child owns its network/cache boundary. A successful cached
+            // batch is not a new observation of the remote provider.
+            this.observations();
+            return;
+          }
+          const at = new Date().toISOString(), prior = this.observed.get(i);
+          this.observed.set(i, {provider: i === 0 ? 'ticketmaster' : 'onepa', available, lastObservedAt: at,
+            ...(available ? {lastSucceededAt: at} : prior?.lastSucceededAt ? {lastSucceededAt: prior.lastSucceededAt} : {})});
+        };
+        let batch;
+        try {
+          batch = await this.boundedBatch(signal, async providerSignal => s.batch
+            ? s.batch(asOf, page, providerSignal)
+            : { items: page === 0 ? await s.firstBatch(asOf, providerSignal) : [] });
+          observe(true);
+        } catch (error) { observe(false); throw error; }
         if (!("nextPage" in batch) || batch.nextPage === undefined)
           current.ends.set(i, page);
         return batch;

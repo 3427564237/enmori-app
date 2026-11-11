@@ -1,3 +1,4 @@
+import '../../admin/domain/managed_event_category.dart';
 import '../../event_detail/domain/event_source_url.dart';
 export '../../event_detail/domain/event_source_url.dart';
 import '../../event_detail/domain/event_content.dart';
@@ -63,6 +64,11 @@ ActivitySummary? _summary(Map<String, Object?> raw) {
       (raw.containsKey('endAt') && (end == null || end <= start))) {
     return null;
   }
+  try {
+    parseManagedEventCategory(raw['managedCategory']);
+  } on FormatException {
+    return null;
+  }
   return ActivitySummary(
     browseId: raw['browseId']! as String,
     title: raw['title']! as String,
@@ -71,6 +77,7 @@ ActivitySummary? _summary(Map<String, Object?> raw) {
     eventId: raw['eventId'] as String?,
     locationLabel: raw['locationLabel'] as String?,
     categoryLabel: raw['categoryLabel'] as String?,
+    managedCategory: parseManagedEventCategory(raw['managedCategory']),
     content: EventContent.parse(raw['content']),
     shortDescription: raw['shortDescription'] as String?,
     coverImageUrl: validEventCoverUrl(raw['coverImageUrl'])
@@ -149,6 +156,7 @@ final class BackendActivityRepository implements PagedActivityRepository {
                   'eventId',
                   'locationLabel',
                   'categoryLabel',
+                  'managedCategory',
                   'title',
                   'startAt',
                   'endAt',
@@ -185,6 +193,7 @@ final class BackendActivityRepository implements PagedActivityRepository {
               'coverImageUrl',
               'locationLabel',
               'categoryLabel',
+              'managedCategory',
             ].contains(k),
           ) ||
           raw['browseId'] != browseId) {
@@ -215,6 +224,7 @@ final class BackendActivityRepository implements PagedActivityRepository {
           sourceUrl: url,
           locationLabel: raw['locationLabel'] as String?,
           categoryLabel: raw['categoryLabel'] as String?,
+          managedCategory: parseManagedEventCategory(raw['managedCategory']),
           shortDescription: raw['shortDescription'] as String?,
           coverImageUrl: validEventCoverUrl(raw['coverImageUrl'])
               ? raw['coverImageUrl'] as String

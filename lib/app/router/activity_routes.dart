@@ -1,3 +1,5 @@
+import '../admin_event_category_entry.dart';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +39,14 @@ List<GoRoute> activityRoutes({
       browseId: state.pathParameters['browseId'] ?? '',
       detailBuilder: (context, activity) =>
           EventInformation.activity(activity: activity),
+      adminCategoryBuilder: (activity, refresh) =>
+          activity.summary.eventId == null
+          ? const SizedBox.shrink()
+          : AdminEventCategoryEntry(
+              eventId: activity.summary.eventId!,
+              title: activity.summary.title,
+              onReturn: refresh,
+            ),
     ),
   ),
 ];

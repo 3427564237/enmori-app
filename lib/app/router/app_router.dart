@@ -1,3 +1,6 @@
+import '../../features/admin/presentation/admin_pages.dart';
+import '../admin_event_category_entry.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../core/presentation/enmori_localizations.dart';
@@ -512,8 +515,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isolatedSlices)
         GoRoute(
           path: '/events/:eventId',
-          builder: (context, state) =>
-              EventDetailPage(eventId: state.pathParameters['eventId'] ?? ''),
+          builder: (context, state) => EventDetailPage(
+            eventId: state.pathParameters['eventId'] ?? '',
+            adminCategoryBuilder: (event, refresh) => AdminEventCategoryEntry(
+              eventId: event.eventId,
+              title: event.title,
+              onReturn: refresh,
+            ),
+          ),
         ),
       GoRoute(
         path: AppRoutes.startup,
@@ -672,7 +681,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 ? () => openPersona(context, AppRoutes.personas)
                 : null,
             adminCatalogueEntry: InterestAdminEntry(
-              onOpen: () => context.push<void>(AppRoutes.adminInterests),
+              onOpen: () => context.push<void>('/admin'),
             ),
             onOpenHistory: historyPage != null
                 ? () => context.push<void>(AppRoutes.checkInHistory)
@@ -713,6 +722,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ),
       ),
+      GoRoute(
+        path: '/admin',
+        builder: (context, state) => AdminHomePage(
+          open: (page) => context.push<void>(
+            page == 'interests' ? AppRoutes.adminInterests : '/admin/$page',
+          ),
+        ),
+      ),
+      for (final page in ['status', 'categories', 'records'])
+        GoRoute(
+          path: '/admin/$page',
+          builder: (context, state) => AdminPanelPage(
+            page: page,
+            openEvents: () => context.push<void>('/activities'),
+          ),
+        ),
       GoRoute(
         path: AppRoutes.adminInterests,
         builder: (context, state) => Consumer(

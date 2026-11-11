@@ -1,3 +1,4 @@
+import type { FirestoreOperationRecords } from '../../admin/infrastructure/firestore-operation-records.js';
 import { createHash, randomUUID } from 'node:crypto';
 import type { FirestoreGateway, StoredDocument } from '../../shared/infrastructure/firebase/firestore-gateway.js';
 import { isSafeDocumentId } from '../../shared/infrastructure/firebase/firestore-records.js';
@@ -19,9 +20,10 @@ function reservationMatches(row: StoredDocument, comparisonKey: string, id: stri
   return Object.keys(row).length === 2 && row.comparisonKey === comparisonKey && row.interestTagId === id;
 }
 export class FirestoreCatalogueWriter implements InterestCatalogueWriter, InterestCatalogueManagement {
-  constructor(private readonly firestore: FirestoreGateway, private readonly verifiedReferences?: VerifiedInterestReferenceInventory) {}
-  async create(displayName: string, comparisonKey: string): ReturnType<InterestCatalogueWriter['create']> {
+  constructor(private readonly firestore: FirestoreGateway, private readonly verifiedReferences?: VerifiedInterestReferenceInventory, private readonly audit?: FirestoreOperationRecords) {}
+  async create(displayName: string, comparisonKey: string, actorAdminUid?: string): ReturnType<InterestCatalogueWriter['create']> {
     try {
+      const audit = this.audit?.begin(actorAdminUid), interestTagId = randomUUID();
       return await this.firestore.runTransaction(async tx => {
         // Existing catalogue is small; inspect all Active AND Inactive entries.
         // The list is inside the transaction, so a legacy unreserved name cannot
@@ -36,10 +38,10 @@ export class FirestoreCatalogueWriter implements InterestCatalogueWriter, Intere
         if (keys.has(comparisonKey)) return { kind: 'conflict' };
         const reservation = `interest_tag_names/${createHash('sha256').update(comparisonKey).digest('hex')}`;
         if (await tx.get(reservation)) return { kind: 'conflict' };
-        const interestTagId = randomUUID();
         const interestTag = { interestTagId, displayName, lifecycleState: 'active' as const, revision: 1 as const };
         tx.create(reservation, { comparisonKey, interestTagId });
         tx.create(`interest_tags/${interestTagId}`, { displayName, lifecycleState: 'active', revision: 1 });
+        if (audit) this.audit!.append(tx, audit, {targetType: 'interest_tag', targetId: interestTagId, operation: 'create', afterRevision: 1});
         return { kind: 'created', interestTag };
       });
     } catch { return { kind: 'unavailable' }; }
@@ -60,10 +62,11 @@ export class FirestoreCatalogueWriter implements InterestCatalogueWriter, Intere
     } catch { return { kind: 'unavailable' }; }
   }
 
-  async change(id: string, expectedRevision: number, change: InterestCatalogueChange): ReturnType<InterestCatalogueManagement['change']> {
+  async change(id: string, expectedRevision: number, change: InterestCatalogueChange, actorAdminUid?: string): ReturnType<InterestCatalogueManagement['change']> {
     if (!isSafeDocumentId(id)) return { kind: 'not_found' };
     if (!validRevision(expectedRevision)) return { kind: 'unavailable' };
     try {
+      const audit = this.audit?.begin(actorAdminUid);
       return await this.firestore.runTransaction(async tx => {
         const path = `interest_tags/${id}`, data = await tx.get(path);
         if (!data) return { kind: 'not_found' };
@@ -101,6 +104,7 @@ export class FirestoreCatalogueWriter implements InterestCatalogueWriter, Intere
           if (!newReservation) tx.create(namePath(newKey), { comparisonKey: newKey, interestTagId: id });
         }
         tx.set(path, { displayName, lifecycleState, revision: interestTag.revision });
+        if (audit) this.audit!.append(tx, audit, {targetType: 'interest_tag', targetId: id, operation: 'displayName' in change ? 'rename' : lifecycleState === 'active' ? 'restore' : 'deactivate', beforeRevision: current.revision, afterRevision: interestTag.revision});
         return { kind: 'saved', interestTag };
       });
     } catch { return { kind: 'unavailable' }; }

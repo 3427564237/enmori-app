@@ -19,10 +19,12 @@ final class EventDetailPage extends ConsumerStatefulWidget {
   const EventDetailPage({
     required this.eventId,
     this.syntheticPreview = false,
+    this.adminCategoryBuilder,
     super.key,
   });
   final String eventId;
   final bool syntheticPreview;
+  final Widget Function(EventDetail, VoidCallback)? adminCategoryBuilder;
   @override
   ConsumerState<EventDetailPage> createState() => _EventDetailPageState();
 }
@@ -137,6 +139,19 @@ final class _EventDetailPageState extends ConsumerState<EventDetailPage>
                     event: value,
                     syntheticPreview: widget.syntheticPreview,
                   ),
+                  if (!widget.syntheticPreview &&
+                      widget.adminCategoryBuilder != null)
+                    widget.adminCategoryBuilder!(
+                      value,
+                      () => unawaited(
+                        ref
+                            .read(
+                              eventDetailControllerProvider(widget.eventId)
+                                  .notifier,
+                            )
+                            .load(),
+                      ),
+                    ),
                   if (!widget.syntheticPreview)
                     EventActionButtons(
                       event: value,

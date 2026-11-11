@@ -1,3 +1,4 @@
+import { createAdminComposition } from './admin-composition.js';
 import { OwnAvatar } from "../account/application/own-avatar.js";
 import { FirestoreOwnAvatarRepository } from "../account/infrastructure/firestore-own-avatar-repository.js";
 import type {CheckInHistoryFirestoreGateway} from "../check-ins/ports/check-in-history-firestore-gateway.js";
@@ -368,8 +369,10 @@ export async function createControlledPhoneService(options: {
       execute: input => input.principal.firebaseUid === primaryUid ? completePrimary.execute(input) : Promise.resolve(err(appFailure("AUTH_FORBIDDEN"))),
     } : unavailableOperation;
     const interestAdmin = new FirebaseInterestAdmin(auth);
-    const catalogueWriter = new FirestoreCatalogueWriter(gateway);
+    const admin = createAdminComposition(gateway, interestAdmin, { ...(options.eventBrowse ? {source:options.eventBrowse.source} : {}), ...(realEvents ? {eventExists:async(p: import('../shared/ports/identity-verifier.js').AuthPrincipal,id:string)=>{const r=await realEvents.eventDetail.execute(p,id);return r.ok ? ok(undefined) : r;}} : {}) });
+    const catalogueWriter = new FirestoreCatalogueWriter(gateway, undefined, admin.audit);
     app = await buildApp({
+      adminOperations: admin.operations, adminMaintenance: admin.maintenance, managedCategories: admin.repository,
       ...(options.demoFeatures ? {checkInCalendar:new OwnCheckInCalendar(new FirestoreCheckInCalendar(historyGateway))}:{}),
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
       createInterestTag: new CreateInterestTag(interestAdmin, catalogueWriter),

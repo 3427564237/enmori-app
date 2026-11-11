@@ -1,3 +1,4 @@
+import { createAdminComposition } from './admin-composition.js';
 import { OwnAvatar } from "../account/application/own-avatar.js";
 import { FirestoreOwnAvatarRepository } from "../account/infrastructure/firestore-own-avatar-repository.js";
 import { EditCheckIn } from "../check-ins/application/edit-check-in.js";
@@ -70,8 +71,10 @@ export async function createControlledRuntime(
     const clock = new SystemClock();
     const ids = new CryptoOpaqueIdGenerator();
     const interestAdmin = new FirebaseInterestAdmin(getAuth(firebaseApp));
-    const catalogueWriter = new FirestoreCatalogueWriter(gateway);
+    const admin = createAdminComposition(gateway, interestAdmin);
+    const catalogueWriter = new FirestoreCatalogueWriter(gateway, undefined, admin.audit);
     const app = await buildApp({
+      adminOperations: admin.operations, adminMaintenance: admin.maintenance, managedCategories: admin.repository,
       editCheckIn: new EditCheckIn(new FirestoreCheckInMutations(gateway)),
       createInterestTag: new CreateInterestTag(interestAdmin, catalogueWriter),
       getInterestAdminCapability: new GetInterestAdminCapability(interestAdmin),

@@ -129,4 +129,11 @@ export const ROUTE_INVENTORY = [
   { method: "POST", path: "/v1/me/ai/source-references/resolve", successStatuses: [200], requiresIdempotencyKey: false },
   { method: "POST", path: "/v1/me/ai/delivery-references/resolve", successStatuses: [200], requiresIdempotencyKey: false },
   { method: "GET", path: "/v1/me/conversations/{conversationId}/messages/{messageId}/anchor", successStatuses: [200], requiresIdempotencyKey: false },
+  {method: "GET", path: "/v1/admin/operations-status", successStatuses: [200], requiresIdempotencyKey: false},
+  {method: "GET", path: "/v1/admin/event-categories", successStatuses: [200], requiresIdempotencyKey: false},
+  {method: "POST", path: "/v1/admin/event-categories", successStatuses: [201], requiresIdempotencyKey: false},
+  {method: "PATCH", path: "/v1/admin/event-categories/{eventCategoryId}", successStatuses: [200], requiresIdempotencyKey: false},
+  {method: "GET", path: "/v1/admin/events/{eventId}/category", successStatuses: [200], requiresIdempotencyKey: false},
+  {method: "PUT", path: "/v1/admin/events/{eventId}/category", successStatuses: [200], requiresIdempotencyKey: false},
+  {method: "GET", path: "/v1/admin/operation-records", successStatuses: [200], requiresIdempotencyKey: false},
 ] as const;

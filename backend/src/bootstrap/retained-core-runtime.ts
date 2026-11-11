@@ -1,3 +1,4 @@
+import { createAdminComposition } from './admin-composition.js';
 import { OwnAvatar } from "../account/application/own-avatar.js";
 import { FirestoreOwnAvatarRepository } from "../account/infrastructure/firestore-own-avatar-repository.js";
 import { socialEventSource } from './social-event-source.js';
@@ -281,8 +282,10 @@ async function createControlledRuntime(
     const getOnboarding = new GetOnboarding(onboardingRepository);
 
     const interestAdmin = new FirebaseInterestAdmin(getAuth(firebaseApp));
-    const catalogueWriter = new FirestoreCatalogueWriter(gateway);
+    const admin = createAdminComposition(gateway, interestAdmin, { ...(eventInput ? {source:eventInput.source} : {}), ai:aiStatus, eventExists:async(p,id)=>{const r=await realEvents.eventDetail.execute(p,id);return r.ok ? ok(undefined) : r;} });
+    const catalogueWriter = new FirestoreCatalogueWriter(gateway, undefined, admin.audit);
     const app = await buildApp({
+      adminOperations: admin.operations, adminMaintenance: admin.maintenance, managedCategories: admin.repository,
       ...(firstFlow ? { firstFlow } : {}),
       ...(chat?.ownedSources ? { ownedSources: firstFlow
         ? withDeliveryResolution(chat.ownedSources, firstFlow.application, firstFlow.accepting) : chat.ownedSources } : {}),

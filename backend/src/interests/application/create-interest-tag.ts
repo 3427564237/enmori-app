@@ -10,7 +10,7 @@ export class CreateInterestTag {
     if (access !== 'allowed') return err(appFailure(access === 'forbidden' ? 'AUTH_FORBIDDEN' : 'SERVICE_UNAVAILABLE'));
     const name = catalogueName(input);
     if (!name) return err(appFailure('CATALOGUE_INVALID'));
-    const result = await this.writer.create(name.displayName, name.comparisonKey);
+    const result = await this.writer.create(name.displayName, name.comparisonKey, principal.firebaseUid);
     return result.kind === 'created' ? ok(result.interestTag) : err(appFailure(result.kind === 'conflict' ? 'CATALOGUE_NAME_CONFLICT' : 'SERVICE_UNAVAILABLE'));
   }
 }

@@ -1,5 +1,9 @@
 # Open Questions and Required Decisions
 
+## Bounded Admin resolution — 2026-11-11
+
+[LI's confirmed Admin contract](decisions/2026-11-11-li-admin-value-integration.md) resolves the physical choices for passive status, Event categories/explicit classification and 30-day atomic operation records. It supersedes Q12-D's audit exclusion only for those records. The wider historical Q-07/Q-08 provenance, Q-27 account actions and Q-28 recommendation configuration are unchanged. Source verification, connected runtime cleanup timing, APK/phone evidence and release acceptance remain separate.
+
 ## Sprint 2 bounded disposition — 2026-09-13
 
 [S-PM-0913-SPRINT2](decisions/2026-09-13-sprint2-scope-capacity-contract.md) records LI's confirmed Sprint 2 scope, 104h capacity, own-interest cardinality, minimum Interest/Event interfaces and synthetic-data boundary. It does not close the wider Profile, Event-publishing, AI-product, Friend-discoverability, Q04 provenance or Release-evidence questions. Owners record concrete contract mappings inside the approved boundary before shared implementation integration; unresolved material authority is escalated only for the affected behavior. Internal AI/Friend components are not proof of those wider gates. Earlier unresolved and resolved records below remain retained.

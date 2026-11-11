@@ -28,6 +28,7 @@ final class ParticipationEventPage extends ConsumerStatefulWidget {
     required this.opener,
     required this.onParticipants,
     this.detailBuilder,
+    this.adminCategoryBuilder,
     this.actionsBuilder,
     super.key,
   });
@@ -35,6 +36,7 @@ final class ParticipationEventPage extends ConsumerStatefulWidget {
   final ExternalActivityOpener opener;
   final ValueChanged<ParticipantSelection> onParticipants;
   final Widget Function(BuildContext, EventDetail)? detailBuilder;
+  final Widget Function(EventDetail, VoidCallback)? adminCategoryBuilder;
   final Widget Function(BuildContext, EventDetail, bool Function())?
   actionsBuilder;
   @override
@@ -217,6 +219,8 @@ final class _ParticipationEventPageState
                   '暂时无法获取活动详情。请点击上方刷新图标重试；如果仍不可用，请返回活动列表刷新后再打开。你保存的感兴趣或将参加状态保持不变。',
                 ),
               ),
+            if (details != null && widget.adminCategoryBuilder != null)
+              widget.adminCategoryBuilder!(details, () => unawaited(_load())),
             if (details != null && widget.actionsBuilder != null)
               widget.actionsBuilder!(
                 context,

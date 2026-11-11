@@ -12,6 +12,7 @@ export interface BrowseBatch { readonly asOf:string; readonly scope:"ticketmaste
 /** Completed-owner check; caller identity is verified by Transport, not JSON. */
 export interface BrowseAccountGate { verify(principal:AuthPrincipal):Promise<Result<void,AppFailure>> }
 export interface BrowseSource {
+  observations?(): readonly import("../../admin/ports/admin-repository.js").ServiceObservation[];
   status?():readonly {provider:string;available:boolean}[];
   recommendationSnapshot?(asOf:string,signal:AbortSignal):Promise<RecommendationSnapshot>;
   batch?(asOf:string,page:number,signal:AbortSignal):Promise<{readonly items:readonly BrowseOccurrence[];readonly sourceStatus?:readonly {provider:string;available:boolean}[];readonly nextPage?:number}>;

@@ -30,6 +30,7 @@ void main() {
       final harness = await _start(tester, peer);
       await _tap(tester, find.byKey(const Key('my-profile-button')));
       await _tap(tester, find.byKey(const Key('profile-admin-interests')));
+      await _tap(tester, find.text('Interest tags'));
       expect(find.byKey(const Key('admin-interest-page')), findsOneWidget);
       await tester.enterText(
         find.byKey(const Key('admin-interest-name')),

@@ -1,3 +1,4 @@
+import '../../admin/domain/managed_event_category.dart';
 import '../domain/event_content.dart';
 import '../domain/event_actions.dart';
 
@@ -32,6 +33,7 @@ final class BackendEventDetailRepository implements EventDetailRepository {
       'endAt',
       'locationLabel',
       'categoryLabel',
+      'managedCategory',
       'shortDescription',
       'coverImageUrl',
       'venueAddress',
@@ -113,6 +115,11 @@ final class BackendEventDetailRepository implements EventDetailRepository {
     } catch (_) {
       return _invalid();
     }
+    try {
+      parseManagedEventCategory(value['managedCategory']);
+    } on FormatException {
+      return _invalid();
+    }
     return Success(
       EventDetail(
         content: content,
@@ -124,6 +131,7 @@ final class BackendEventDetailRepository implements EventDetailRepository {
         endAt: end,
         locationLabel: value['locationLabel'] as String?,
         categoryLabel: value['categoryLabel'] as String?,
+        managedCategory: parseManagedEventCategory(value['managedCategory']),
         shortDescription: value['shortDescription'] as String?,
         coverImageUrl: validEventCoverUrl(value['coverImageUrl'])
             ? value['coverImageUrl'] as String

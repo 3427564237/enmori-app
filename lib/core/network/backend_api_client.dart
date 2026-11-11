@@ -141,6 +141,12 @@ final class BackendApiClient {
 
   /// Session-bound feature operations: recheck after token acquisition and
   /// immediately before dispatch. Existing unguarded callers are unchanged.
+  Future<Result<JsonObject>> patchGuarded(
+    String path,
+    JsonObject body,
+    bool Function() current,
+  ) => _send('PATCH', path, body: body, isEligible: current);
+
   Future<Result<JsonObject>> getGuarded(String path, bool Function() current) =>
       _send('GET', path, isEligible: current);
   Future<Result<JsonObject>> putGuarded(
@@ -529,12 +535,13 @@ final class BackendApiClient {
         }
         return Success(decoded);
       }
-      if (interestAdmin != null) {
+      if (interestAdmin != null || path.startsWith('/v1/admin/')) {
         return Failure(
           _decodeInterestAdminFailure(
             response.statusCode,
             decoded,
-            interestAdmin,
+            interestAdmin ?? _InterestAdminOperation.update,
+            eventClassification: path.startsWith('/v1/admin/events/'),
           ),
         );
       }
@@ -590,8 +597,9 @@ final class BackendApiClient {
   AppFailure _decodeInterestAdminFailure(
     int status,
     JsonObject? body,
-    _InterestAdminOperation operation,
-  ) {
+    _InterestAdminOperation operation, {
+    bool eventClassification = false,
+  }) {
     final error = body?['error'];
     if (error is! Map<String, dynamic> ||
         error['message'] is! String ||
@@ -602,6 +610,10 @@ final class BackendApiClient {
       (400, 'REQUEST_INVALID') => AppFailureKind.requestInvalid,
       (401, 'AUTH_REQUIRED') => AppFailureKind.authRequired,
       (403, 'AUTH_FORBIDDEN') => AppFailureKind.authForbidden,
+      (404, 'EVENT_UNAVAILABLE') when eventClassification =>
+        AppFailureKind.eventUnavailable,
+      (409, 'ONBOARDING_REQUIRED') when eventClassification =>
+        AppFailureKind.onboardingRequired,
       (409, 'CATALOGUE_NAME_CONFLICT')
           when operation == _InterestAdminOperation.create ||
               operation == _InterestAdminOperation.update =>

@@ -383,12 +383,21 @@ void main() {
       'externalSourceUrl': _event.externalSourceUrl,
       'shortDescription': _event.shortDescription,
       'coverImageUrl': _cover,
+      'categoryLabel': 'Original source category',
+      'managedCategory': {
+        'eventCategoryId': 'cat_12345678-1234-4123-8123-123456789012',
+        'displayName': 'Community arts',
+        'lifecycleState': 'inactive',
+      },
     };
     final details = await BackendEventDetailRepository(
       await client({'event': raw}),
     ).read(raw['eventId']! as String);
     expect((details as Success<EventDetail>).value.coverImageUrl, _cover);
     expect(details.value.shortDescription, _event.shortDescription);
+    expect(details.value.categoryLabel, 'Original source category');
+    expect(details.value.managedCategory?.name, 'Community arts');
+    expect(details.value.managedCategory?.active, false);
     final browse = {...raw, 'browseId': 'tm_YQ'};
     final activity = await BackendActivityRepository(await client(browse))
         .read('tm_YQ');
@@ -400,6 +409,25 @@ void main() {
     expect(
       (activity.value as ActivityDetail).shortDescription,
       _event.shortDescription,
+    );
+    expect(
+      (activity.value as ActivityDetail).summary.managedCategory?.name,
+      'Community arts',
+    );
+    final malformed = {
+      ...raw,
+      'managedCategory': {'displayName': 'Incomplete'},
+    };
+    expect(
+      await BackendEventDetailRepository(await client({'event': malformed}))
+          .read(raw['eventId']! as String),
+      isA<Failure<EventDetail>>(),
+    );
+    expect(
+      await BackendActivityRepository(
+        await client({...malformed, 'browseId': 'tm_YQ'}),
+      ).read('tm_YQ'),
+      isA<Failure<ActivityRead>>(),
     );
     raw['coverImageUrl'] = 'https://unapproved.example/tracker.png';
     final rejected = await BackendEventDetailRepository(

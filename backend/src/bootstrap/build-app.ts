@@ -1,3 +1,6 @@
+import { registerAdminOperations } from '../admin/transport/admin-routes.js';
+import type { AdminOperations } from '../admin/application/admin-operations.js';
+import type { EventCategoryProjection } from '../admin/ports/admin-repository.js';
 import { registerSocialModule } from './register-social-module.js';
 import { requireRemoteGroupEnvironment } from '../shared/infrastructure/firebase/feature-environment.js';
 import type { createIsolatedEventParticipation } from "./event-participation.js";
@@ -44,7 +47,7 @@ import {
 } from "../transport/register-routes.js";
 
 export async function buildApp(
-  dependencies: R4RouteDependencies & { readonly checkInCalendar?:OwnCheckInCalendar; readonly editCheckIn?: EditCheckIn; readonly createInterestTag?: CreateInterestTag; readonly getInterestAdminCapability?: GetInterestAdminCapability; readonly manageInterestTags?: ManageInterestTags; readonly recommendEvents?: Pick<RecommendEvents, "execute">;
+  dependencies: R4RouteDependencies & { readonly adminMaintenance?: {start():Promise<void>;stop():Promise<void>}; readonly adminOperations?: AdminOperations; readonly managedCategories?: EventCategoryProjection; readonly checkInCalendar?:OwnCheckInCalendar; readonly editCheckIn?: EditCheckIn; readonly createInterestTag?: CreateInterestTag; readonly getInterestAdminCapability?: GetInterestAdminCapability; readonly manageInterestTags?: ManageInterestTags; readonly recommendEvents?: Pick<RecommendEvents, "execute">;
     readonly accountPreferences?: OwnAccountPreferences;
     readonly socialModule?: Parameters<typeof registerSocialModule>[1];
     readonly controlledPhoneDiagnostics?: ControlledPhoneDiagnostics;
@@ -78,6 +81,10 @@ export async function buildApp(
     }),
   });
   app.decorateRequest("authPrincipal", null);
+  if (dependencies.adminMaintenance) {
+    app.addHook("onReady", () => dependencies.adminMaintenance!.start());
+    app.addHook("onClose", () => dependencies.adminMaintenance!.stop());
+  }
   dependencies.controlledPhoneDiagnostics?.install(app);
 
   app.setErrorHandler((error, request, reply) => {
@@ -86,6 +93,7 @@ export async function buildApp(
   });
 
   await registerR4Routes(app, dependencies);
+  if (dependencies.adminOperations) await registerAdminOperations(app, dependencies.identityVerifier, dependencies.adminOperations);
   if(dependencies.checkInCalendar)await registerCheckInCalendar(app,dependencies.identityVerifier,dependencies.checkInCalendar);
   if (dependencies.editCheckIn) await registerCheckInMutations(app, dependencies.identityVerifier, dependencies.editCheckIn);
   if (dependencies.createInterestTag) await registerInterestAdmin(app, dependencies.identityVerifier, dependencies.createInterestTag, dependencies.getInterestAdminCapability, dependencies.manageInterestTags);
@@ -99,7 +107,7 @@ export async function buildApp(
     });
   }
   if (slices !== undefined) {
-    await registerIsolatedSlices(app, dependencies.identityVerifier, slices.friends, slices.eventDetail, slices.checkInHistory);
+    await registerIsolatedSlices(app, dependencies.identityVerifier, slices.friends, slices.eventDetail, slices.checkInHistory, dependencies.managedCategories);
     if (slices.personas !== undefined) {
       await registerPersonaRoutes(app, dependencies.identityVerifier, slices.personas);
     }
@@ -108,10 +116,10 @@ export async function buildApp(
     }
     if (slices.eventParticipation !== undefined) {
       await registerParticipationRoutes(app, dependencies.identityVerifier, slices.eventParticipation.operations);
-      await registerEventBrowseRoutes(app, dependencies.identityVerifier, slices.eventParticipation.browse);
+      await registerEventBrowseRoutes(app, dependencies.identityVerifier, slices.eventParticipation.browse, dependencies.managedCategories);
     } else if (slices.eventBrowse !== undefined) {
       await registerEventBrowseRoutes(app, dependencies.identityVerifier,
-        createIsolatedEventBrowse(dependencies.getOnboarding, slices.eventBrowse));
+        createIsolatedEventBrowse(dependencies.getOnboarding, slices.eventBrowse), dependencies.managedCategories);
     }
     if (slices.conversations !== undefined) {
       const cloudIdentity = dependencies.remoteSlices?.cloudConversationIdentity;

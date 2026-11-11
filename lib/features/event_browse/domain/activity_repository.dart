@@ -1,3 +1,4 @@
+import '../../admin/domain/managed_event_category.dart';
 import '../../event_detail/domain/event_content.dart';
 import '../../../core/result/result.dart';
 
@@ -16,6 +17,7 @@ final class ActivitySummary {
     this.coverImageUrl,
     this.locationLabel,
     this.categoryLabel,
+    this.managedCategory,
     this.content,
   });
   final EventContent? content;
@@ -23,6 +25,7 @@ final class ActivitySummary {
   final String browseId, title, startAt;
   final String? endAt;
   final String? eventId;
+  final ManagedEventCategory? managedCategory;
   final String? locationLabel, categoryLabel;
 }
 
@@ -45,6 +48,7 @@ final class ActivityDetail extends ActivityRead {
     required this.sourceUrl,
     this.locationLabel,
     this.categoryLabel,
+    this.managedCategory,
     this.content,
     this.shortDescription,
     this.coverImageUrl,
@@ -52,6 +56,7 @@ final class ActivityDetail extends ActivityRead {
   final EventContent? content;
   final ActivitySummary summary;
   final Uri sourceUrl;
+  final ManagedEventCategory? managedCategory;
   final String? locationLabel, categoryLabel;
   final String? shortDescription, coverImageUrl;
 }

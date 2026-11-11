@@ -1,3 +1,4 @@
+import type { ServiceObservation } from '../../admin/ports/admin-repository.js';
 import type { BrowseSource, BrowseOccurrence } from "../ports/event-browse.js";
 import { browseId, coverImageUrl } from "../domain/browse-values.js";
 import { sourceEventId } from "../domain/source-event-id.js";
@@ -169,6 +170,20 @@ export function projectOnePaListItem(
   };
 }
 export class OnePaBrowseSource implements BrowseSource {
+  private latestObservation: ServiceObservation | undefined;
+  private observationAttempt = 0;
+  observations() { return this.latestObservation ? [{...this.latestObservation}] : []; }
+  private async observeRead<T>(read: () => Promise<T>, signal: AbortSignal): Promise<T> {
+    const attempt = ++this.observationAttempt;
+    const record = (available: boolean) => {
+      if (signal.aborted || !this.enabled() || attempt !== this.observationAttempt) return;
+      const at = new Date().toISOString(), prior = this.latestObservation;
+      this.latestObservation = {provider:'onepa',available,lastObservedAt:at,
+        ...(available ? {lastSucceededAt:at} : prior?.lastSucceededAt ? {lastSucceededAt:prior.lastSucceededAt} : {})};
+    };
+    try { const result = await read(); record(true); return result; }
+    catch (error) { record(false); throw error; }
+  }
   private catalogue:
     | { until: number; items: readonly OnePaListItem[] }
     | undefined;
@@ -184,7 +199,12 @@ export class OnePaBrowseSource implements BrowseSource {
     private readonly readCatalogue?: (
       signal: AbortSignal,
     ) => Promise<readonly OnePaListItem[]>,
-  ) {}
+  ) {
+    // Observe only dispatched public reads. Catalogue/index/row cache hits do
+    // not refresh these timestamps or assert upstream availability.
+    this.read = (url, signal) => this.observeRead(() => read(url, signal), signal);
+    if (readCatalogue) this.readCatalogue = signal => this.observeRead(() => readCatalogue(signal), signal);
+  }
   private async list(signal: AbortSignal): Promise<readonly OnePaListItem[]> {
     if (this.catalogue && this.catalogue.until > Date.now())
       return this.catalogue.items;

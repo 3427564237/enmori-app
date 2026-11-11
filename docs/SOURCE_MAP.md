@@ -1,5 +1,9 @@
 # Project Source Map
 
+## Bounded Admin increment — 2026-11-11
+
+- **S-PM-1111-LI-ADMIN-VALUE:** [Confirmed implementation and local integration](decisions/2026-11-11-li-admin-value-integration.md), accepting the [concrete contract](planning/2026-11-11-admin-value-contract-proposal.md). Adds passive status, Event Category management and explicit existing-Event classification, plus allowlisted atomic operation records retained for 30 days. Supersedes Q12-D's audit exclusion only within that purpose; C2, other Q12 rules and Q14 remain. Permanent deletion, recommendation configuration, account actions, deployment and release acceptance remain outside this increment.
+
 ## Real Event interface selection — 2026-10-15
 
 - **S-PM-1015-LI-EVENT-EXTERNAL-OPEN:** [Confirmed direct external-browser action](decisions/2026-10-15-li-event-external-open-selection.md). Human LI chooses explicit direct source-page opening as the primary EB07 action, with copying auxiliary; this supersedes only the copy-only restriction in the earlier row selection. Opening/returning does not set Going or prove registration. Provider rights, technical/platform evidence and all EB01–EB06 rules remain separate; no new package is selected.

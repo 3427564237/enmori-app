@@ -19,6 +19,7 @@ export interface StoredDocumentSnapshot extends StoredDocumentEntry {
 }
 
 export interface FirestoreTransactionGateway {
+  listAdminOperationPage?(input: {readonly mode: 'live' | 'expired'; readonly boundary: string; readonly now: string; readonly before?: readonly [string, string]}): Promise<readonly StoredDocumentEntry[]>;
   get(path: string): Promise<StoredDocument | undefined>;
   getSnapshot?(path: string): Promise<StoredDocumentSnapshot | undefined>;
   listSnapshots?(collectionPath: string): Promise<readonly StoredDocumentSnapshot[]>;
@@ -53,6 +54,19 @@ class FirebaseAdminTransactionGateway
     private readonly firestore: Firestore,
     private readonly transaction: Transaction,
   ) {}
+
+  public async listAdminOperationPage(input: {readonly mode: 'live' | 'expired'; readonly boundary: string; readonly now: string; readonly before?: readonly [string, string]}): Promise<readonly StoredDocumentEntry[]> {
+    const ascending = input.mode === 'expired';
+    let query = this.firestore.collection('admin_operation_records')
+      .where('occurredAt', ascending ? '<=' : '>', input.boundary)
+      .orderBy('occurredAt', ascending ? 'asc' : 'desc')
+      .orderBy(FieldPath.documentId(), ascending ? 'asc' : 'desc')
+      .limit(ascending ? 50 : 51);
+    if (!ascending) query = query.where('occurredAt', '<=', input.now);
+    if (input.before) query = query.startAfter(input.before[0], input.before[1]);
+    const snapshot = await this.transaction.get(query);
+    return snapshot.docs.map(doc => ({id: doc.id, data: {...doc.data()}}));
+  }
 
   public async get(path: string): Promise<StoredDocument | undefined> {
     const snapshot = await this.transaction.get(this.firestore.doc(path));

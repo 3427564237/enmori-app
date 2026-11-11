@@ -1,3 +1,5 @@
+import type { EventCategoryProjection } from '../admin/ports/admin-repository.js';
+import { managedCategorySchema } from '../admin/transport/admin-routes.js';
 import { eventPresentationSchema } from "../event-detail/transport/content-schema.js";
 import { checkInResponse } from "../check-ins/transport/check-in-response.js";
 import type { FastifyInstance, FastifySchema } from "fastify";
@@ -11,7 +13,7 @@ import { sendFailure, sendFailureCode } from "./error-response.js";
 import { errorEnvelopeSchema, getCheckInHistorySchema } from "./schemas.js";
 export const targetSchema = { type: "object", additionalProperties: false, required: ["username","displayName","relationshipState"], properties: {
   username: { type: "string" }, displayName: { type: "string" }, relationshipState: { type: "string", enum: ["self","already_friends","outgoing_request_pending","incoming_request_pending","can_send_request"] } } } as const;
-export const eventDetailSchema = { type: "object", additionalProperties: false, required: ["eventId","title","startAt","externalSourceUrl"], properties: {...eventPresentationSchema,
+export const eventDetailSchema = { type: "object", additionalProperties: false, required: ["eventId","title","startAt","externalSourceUrl"], properties: {managedCategory:managedCategorySchema,...eventPresentationSchema,
   eventId: { type: "string", minLength: 1 }, title: { type: "string", minLength: 1, maxLength: 200 }, startAt: { type: "string" }, externalSourceUrl: { type: "string", maxLength: 2048 }, endAt: { type: "string" },
   locationLabel: { type: "string", minLength: 1, maxLength: 200 }, categoryLabel: { type: "string", minLength: 1, maxLength: 100 }, shortDescription: { type: "string", minLength: 1, maxLength: 1000 },
   coverImageUrl: { type: "string", minLength: 1, maxLength: 2048 } } } as const;
@@ -30,7 +32,7 @@ export const myFriendsSchema = { type: "object", additionalProperties: false, re
   nextCursor: { anyOf: [{ type: "string" }, { type: "null" }] } } } as const;
 function responses(success: unknown) { return { 200: success, 400:errorEnvelopeSchema,401:errorEnvelopeSchema,403:errorEnvelopeSchema,404:errorEnvelopeSchema,409:errorEnvelopeSchema,503:errorEnvelopeSchema }; }
 const emptyQuery = { type:"object", additionalProperties:false, properties:{} };
-export async function registerIsolatedSlices(app: FastifyInstance, identity: IdentityVerifier, friends?: FriendRequests, events?: GetEventDetail, checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">): Promise<void> {
+export async function registerIsolatedSlices(app: FastifyInstance, identity: IdentityVerifier, friends?: FriendRequests, events?: GetEventDetail, checkInHistory?: Pick<ListOwnCheckInsForDate, "execute">, categories?:EventCategoryProjection): Promise<void> {
   const authenticate = buildAuthenticate(identity);
   if (friends !== undefined) {
     // Keep raw input validation after requester authorization in the transaction.
@@ -82,8 +84,13 @@ export async function registerIsolatedSlices(app: FastifyInstance, identity: Ide
         (query.has('includeVenueAddress') && query.get('includeVenueAddress') !== 'true')) return sendFailureCode(request, reply, 'REQUEST_INVALID');
     const result = await events.execute(requirePrincipal(request),request.params.eventId);
     if (!result.ok) return sendFailure(request,reply,result.failure);
+    let managedCategory;
+    if(categories && request.headers['x-enmori-contract-version'] === '3') {
+      try {managedCategory=(await categories.readMany([result.value.eventId])).get(result.value.eventId);}
+      catch {return sendFailureCode(request,reply,'SERVICE_UNAVAILABLE');}
+    }
     const {venueAddress, content, ...legacy} = result.value;
-    return reply.send({event: {...legacy, ...(query.get('includeVenueAddress') === 'true' && venueAddress ? {venueAddress}:{}), ...(request.headers['x-enmori-contract-version'] === '3' && content ? {content}: {})}});
+    return reply.send({event: {...legacy, ...(managedCategory?{managedCategory}:{}), ...(query.get('includeVenueAddress') === 'true' && venueAddress ? {venueAddress}:{}), ...(request.headers['x-enmori-contract-version'] === '3' && content ? {content}: {})}});
   });
   if (checkInHistory !== undefined) {
     app.get<{ Querystring: { date: string; timeZone: string; cursor?: string } }>(

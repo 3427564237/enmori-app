@@ -1,3 +1,5 @@
+import '../features/admin/data/backend_admin_repository.dart';
+import '../features/admin/presentation/admin_controller.dart';
 import "../features/recommendation_profile/recommendation_profile_providers.dart";
 import "../features/recommendation_profile/data/backend_recommendation_profile_repository.dart";
 import "../features/recommendation_profile/data/device_region_repository.dart";
@@ -311,6 +313,7 @@ final class _ControlledDemoAppState extends State<ControlledDemoApp> {
       interestRepositoryProvider.overrideWithValue(
         BackendInterestRepository(_api),
       ),
+      adminRepositoryProvider.overrideWithValue(BackendAdminRepository(_api)),
       adminInterestRepositoryProvider.overrideWithValue(
         BackendAdminInterestRepository(_api),
       ),

@@ -39,7 +39,7 @@ export class ManageInterestTags {
       } else if (value.lifecycleState === 'active' || value.lifecycleState === 'inactive') {
         change = { lifecycleState: value.lifecycleState };
       } else return err(appFailure('CATALOGUE_INVALID'));
-      const result = await this.catalogue.change(id, value.expectedRevision, change);
+      const result = await this.catalogue.change(id, value.expectedRevision, change, principal.firebaseUid);
       return result.kind === 'saved' ? ok(result.interestTag) : err(appFailure(failures[result.kind]));
     });
   }

@@ -1,3 +1,4 @@
+import '../../admin/domain/managed_event_category.dart';
 import '../../event_detail/domain/event_content.dart';
 import 'event_actions.dart';
 import '../../../core/result/result.dart';
@@ -11,6 +12,7 @@ final class EventDetail {
     this.endAt,
     this.locationLabel,
     this.categoryLabel,
+    this.managedCategory,
     this.shortDescription,
     this.coverImageUrl,
     this.venueAddress,
@@ -21,6 +23,7 @@ final class EventDetail {
   final String eventId, title, externalSourceUrl;
   final DateTime startAt;
   final DateTime? endAt;
+  final ManagedEventCategory? managedCategory;
   final String? locationLabel, categoryLabel, shortDescription, coverImageUrl;
 }
 
