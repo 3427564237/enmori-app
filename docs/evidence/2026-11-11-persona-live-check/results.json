@@ -1,0 +1,116 @@
+{
+  "negative": {
+    "startedAt": "2026-11-11T07:21:04.345Z",
+    "scope": "real API negative authorization checks only",
+    "results": [
+      {
+        "name": "unmarked_legacy",
+        "status": 403,
+        "code": "AI_CONTEXT_NOT_PERMITTED",
+        "elapsedMs": 2234,
+        "noStore": true
+      },
+      {
+        "name": "wrong_provider",
+        "status": 400,
+        "code": "REQUEST_INVALID",
+        "elapsedMs": 822,
+        "noStore": true
+      },
+      {
+        "name": "explicit_openai_without_consent",
+        "status": 403,
+        "code": "AI_CONTEXT_NOT_PERMITTED",
+        "elapsedMs": 2318,
+        "noStore": true
+      }
+    ],
+    "optionalProcessingAccepted": false,
+    "openAiAccepted": false,
+    "settingsUnchanged": true,
+    "passed": true,
+    "finishedAt": "2026-11-11T07:21:15.146Z"
+  },
+  "positive": {
+    "startedAt": "2026-11-11T07:21:31.173Z",
+    "maximumPaidRequests": 1,
+    "checks": [
+      {
+        "label": "synthetic-onboarding",
+        "status": 201,
+        "elapsedMs": 1931,
+        "code": null
+      },
+      {
+        "label": "synthetic-settings-before-consent",
+        "status": 200,
+        "elapsedMs": 805,
+        "code": null
+      },
+      {
+        "label": "synthetic-openai-consent",
+        "status": 200,
+        "elapsedMs": 1672,
+        "code": null
+      },
+      {
+        "label": "one-real-persona-preview",
+        "status": 200,
+        "elapsedMs": 12760,
+        "code": null
+      },
+      {
+        "label": "synthetic-settings-before-withdrawal",
+        "status": 200,
+        "elapsedMs": 767,
+        "code": null
+      },
+      {
+        "label": "synthetic-consent-withdrawal",
+        "status": 200,
+        "elapsedMs": 2049,
+        "code": null
+      }
+    ],
+    "completed": true,
+    "sourceCommit": "a04251b0775e512bafdcafb75d026edc2caf499b",
+    "reply": {
+      "nonempty": true,
+      "characters": 100
+    },
+    "businessRecordsUnchanged": true,
+    "ledger": {
+      "before": {
+        "capNanoUsd": 3400000000,
+        "spentNanoUsd": 100184700,
+        "reservedNanoUsd": 4096000,
+        "attemptCount": 104,
+        "reconciledCount": 102
+      },
+      "after": {
+        "capNanoUsd": 3400000000,
+        "spentNanoUsd": 101226700,
+        "reservedNanoUsd": 4096000,
+        "attemptCount": 105,
+        "reconciledCount": 103
+      },
+      "addedAttempts": [
+        {
+          "consumer": "persona",
+          "model": "gpt-6.1-sol",
+          "state": "reconciled",
+          "reservedNanoUsd": 40960000,
+          "chargedNanoUsd": 1042000
+        }
+      ],
+      "priorAttemptsUnchanged": true
+    },
+    "cleanup": {
+      "consentWithdrawn": true,
+      "knownBusinessRecordsRemoved": true,
+      "authRemoved": true,
+      "financialRecordsUntouched": true
+    },
+    "finishedAt": "2026-11-11T07:22:28.796Z"
+  }
+}
