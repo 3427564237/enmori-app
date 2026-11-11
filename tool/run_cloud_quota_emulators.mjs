@@ -12,10 +12,10 @@ const run = (program, args, env) => new Promise((done, reject) => {
   child.on('error', reject); child.on('exit', code => code === 0 ? done() : reject(new Error(`Test child exited ${code}`)));
 });
 const mode = process.argv[2] ?? '--backend';
-assert.ok(['--backend', '--backend-child', '--proactive', '--proactive-child'].includes(mode));
-if (mode === '--backend-child' || mode === '--proactive-child') {
+assert.ok(['--backend', '--backend-child', '--proactive', '--proactive-child','--owner','--owner-child'].includes(mode));
+if (mode === '--backend-child' || mode === '--proactive-child'||mode==='--owner-child') {
   const env = buildControlledEmulatorTestEnvironment(process.env, process.env.ENMORI_CONTROLLED_PROFILE_DIRECTORY);
-  await run(process.execPath, ['--test', '--test-concurrency=1', ...(mode === '--proactive-child'
+  await run(process.execPath, ['--test', '--test-concurrency=1', ...(mode==='--owner-child'?['backend/dist/emulator-test/service-owner.integration.test.js']:mode === '--proactive-child'
     ? ['backend/dist/emulator-test/openai-proactive.integration.test.js']
     : ['backend/dist/emulator-test/cloud-quota.integration.test.js', 'backend/dist/emulator-test/openai-cost-budget.integration.test.js'])], env);
 } else {
@@ -32,7 +32,7 @@ if (mode === '--backend-child' || mode === '--proactive-child') {
     env.CI = 'true'; env.FIREBASE_CLI_DISABLE_USAGE = 'true';
     if (process.env.FIREBASE_EMULATORS_PATH) env.FIREBASE_EMULATORS_PATH = process.env.FIREBASE_EMULATORS_PATH;
     const quote = value => `'${value.replaceAll("'", "'\\''")}'`;
-    const command = `${quote(process.execPath)} ${quote(resolve('tool/run_cloud_quota_emulators.mjs'))} ${mode === '--proactive' ? '--proactive-child' : '--backend-child'}`;
+    const command = `${quote(process.execPath)} ${quote(resolve('tool/run_cloud_quota_emulators.mjs'))} ${mode==='--owner'?'--owner-child':mode === '--proactive' ? '--proactive-child' : '--backend-child'}`;
     await run(process.execPath, [resolve('node_modules/firebase-tools/lib/bin/firebase.js'), 'emulators:exec',
       '--project', 'demo-enmori-rmvp01a-r10', '--only', 'auth,firestore', '--config', 'firebase.json', '--non-interactive', command], env);
   } finally {

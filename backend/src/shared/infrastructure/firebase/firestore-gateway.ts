@@ -16,6 +16,8 @@ export interface StoredDocumentSnapshot extends StoredDocumentEntry {
   readonly createTime: { readonly seconds: number; readonly nanoseconds: number };
   /** Current service metadata; request-only, never persisted as provenance. */
   readonly updateTime?: { readonly seconds: number; readonly nanoseconds: number };
+  /** Fresh transaction service observation, never a local or persisted timestamp. */
+  readonly readTime?: { readonly seconds: number; readonly nanoseconds: number };
 }
 
 export interface FirestoreTransactionGateway {
@@ -82,6 +84,7 @@ class FirebaseAdminTransactionGateway
     if (data === undefined || created === undefined) throw new Error("Required immutable metadata unavailable");
     return { id: snapshot.id, data: { ...data },
       createTime: { seconds: created.seconds, nanoseconds: created.nanoseconds },
+      ...(snapshot.readTime ? {readTime:Object.freeze({seconds:snapshot.readTime.seconds,nanoseconds:snapshot.readTime.nanoseconds})} : {}),
       ...(snapshot.updateTime ? { updateTime: { seconds: snapshot.updateTime.seconds, nanoseconds: snapshot.updateTime.nanoseconds } } : {}) };
   }
 

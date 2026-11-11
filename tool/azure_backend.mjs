@@ -4,7 +4,8 @@ import {mkdtempSync, writeFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
-import {costRecord, decodeCloudCostGrant, exactCostFields, isCostInteger, isCostUuid} from '../backend/dist/src/ai-runtime/domain/cloud-cost.js';
+import {costRecord, decodeOpenAiDeploymentCostGrant, exactCostFields, isCostInteger, isCostUuid} from '../backend/dist/src/ai-runtime/domain/cloud-cost.js';
+import {parseServiceOwnership} from '../backend/dist/src/ai-runtime/domain/service-owner.js';
 
 export const azureHost = 'enmori-backend-20261029.azurewebsites.net';
 export const azureIndonesiaHost = 'enmori-backend-idc-20261104.azurewebsites.net';
@@ -16,6 +17,23 @@ const federationAudiences = new Map([
 ]);
 const openAiSettings = new Set(['ENMORI_OPENAI_TEST_APP', 'ENMORI_OPENAI_TEST_APP_CONFIG', 'ENMORI_OPENAI_API_KEY']);
 const exactRecord = (value, keys) => costRecord(value) && exactCostFields(value, keys);
+
+/** Owner loss already retired the shared capability synchronously. Best-effort
+ * disposal is bounded; exiting is never evidence of remote physical settlement. */
+export function watchOwnershipLoss(whenLost, close, {schedule=(wake,ms)=>setTimeout(wake,ms),
+  cancel=timer=>clearTimeout(timer),exit=code=>process.exit(code)}={}) {
+  let stopped=false,handling=false,exited=false;
+  if(!whenLost)return()=>{};
+  Promise.resolve(whenLost).then(()=>{
+    if(stopped||handling)return;handling=true;
+    let timer;
+    const finish=()=>{if(exited)return;exited=true;cancel(timer);exit(1);};
+    timer=schedule(finish,15000);
+    Promise.resolve().then(close).then(finish,finish);
+  }).catch(()=>{/* The owner-loss promise is locally constructed and never rejects. */});
+  // Ordinary SIGTERM uses the existing unbounded drain, with no owner-loss exit timer.
+  return()=>{if(!handling)stopped=true;};
+}
 
 function rateWindow(value, duration, maxRequests, maxTokens) {
   return exactRecord(value, ['windowMs', 'maxRequests', 'maxTokens']) && value.windowMs === duration &&
@@ -34,24 +52,30 @@ function openAiTestAppConfiguration(env) {
       typeof apiKey !== 'string' || !/^sk-[A-Za-z0-9_-]{20,508}$/.test(apiKey)) return null;
   let input;
   try { input = JSON.parse(raw); } catch { return null; }
-  if (!exactRecord(input, ['claim', 'firebaseUid', 'grant', 'rateScope', 'ratePolicy', ...(Object.hasOwn(input ?? {}, 'firstFlow') ? ['firstFlow'] : [])])) return null;
+  const hasClaim=Object.hasOwn(input??{},'claim'),hasOwnership=Object.hasOwn(input??{},'ownership');
+  if(hasClaim===hasOwnership)return null;
+  if (!exactRecord(input, [hasClaim?'claim':'ownership', 'firebaseUid', 'grant', 'rateScope', 'ratePolicy', ...(Object.hasOwn(input ?? {}, 'firstFlow') ? ['firstFlow'] : [])])) return null;
   const firstFlow=input.firstFlow;
   if(firstFlow!==undefined && (!exactRecord(firstFlow,['audience','worker','push']) || firstFlow.audience!=='registered_accounts' ||
       !exactRecord(firstFlow.worker,['mode','intervalMs']) || firstFlow.worker.mode!=='service' || firstFlow.worker.intervalMs!==60000 ||
       !exactRecord(firstFlow.push,['leaseDurationMs']) || firstFlow.push.leaseDurationMs!==2592000000)) return null;
   const {claim, firebaseUid, rateScope, ratePolicy} = input;
-  if (!exactRecord(claim, ['expectedFence', 'expiresAtMs']) || !isCostInteger(claim.expiresAtMs) || claim.expiresAtMs === 0) return null;
-  const {expectedFence} = claim;
-  if (!exactRecord(expectedFence, ['processEpoch', 'generation', 'cleanupGeneration']) || !isCostUuid(expectedFence.processEpoch) ||
+  const ownership=hasOwnership?parseServiceOwnership(input.ownership):undefined;
+  if(hasOwnership&&!ownership)return null;
+  if(hasClaim){
+    if (!exactRecord(claim, ['expectedFence', 'expiresAtMs']) || !isCostInteger(claim.expiresAtMs) || claim.expiresAtMs === 0) return null;
+    const {expectedFence} = claim;
+    if (!exactRecord(expectedFence, ['processEpoch', 'generation', 'cleanupGeneration']) || !isCostUuid(expectedFence.processEpoch) ||
       !isCostInteger(expectedFence.generation) || expectedFence.generation < 1 || expectedFence.generation >= Number.MAX_SAFE_INTEGER ||
       !isCostInteger(expectedFence.cleanupGeneration)) return null;
+  }
   if (typeof firebaseUid !== 'string' || firebaseUid.trim().length === 0 || firebaseUid.length > 128 || !firebaseUid.isWellFormed() ||
       typeof rateScope !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(rateScope) ||
       !exactRecord(ratePolicy, ['minute', 'day', 'tokensPerRequest']) || ratePolicy.tokensPerRequest !== 10240 ||
       !rateWindow(ratePolicy.minute, 60000, 60, 614400) || !rateWindow(ratePolicy.day, 86400000, 1000, 10240000) ||
       ratePolicy.day.maxRequests < ratePolicy.minute.maxRequests || ratePolicy.day.maxTokens < ratePolicy.minute.maxTokens) return null;
-  const grant = decodeCloudCostGrant(input.grant);
-  return grant?.capNanoUsd === 3_400_000_000 ? {claim, firebaseUid, grant, rateScope, ratePolicy, apiKey, ...(firstFlow?{firstFlow}:{})} : null;
+  const grant = decodeOpenAiDeploymentCostGrant(input.grant);
+  return grant ? {...(ownership?{ownership}:{claim}), firebaseUid, grant, rateScope, ratePolicy, apiKey, ...(firstFlow?{firstFlow}:{})} : null;
 }
 
 export function azureConfiguration(env, nodeVersion = process.versions.node) {
@@ -100,6 +124,21 @@ export async function startAzureBackend(env = process.env) {
   writeFileSync(credentialPath, JSON.stringify(config.credential), {mode: 0o600});
   process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialPath;
   let runtime;
+  let composing;
+  let cancelOwnershipWatch=()=>{};
+  let closing;
+  const close=()=>{
+    if(closing)return closing;
+    cancelOwnershipWatch();
+    closing=(async()=>{
+      try{
+        if(!runtime&&composing)try{runtime=await composing;}catch{}
+        if(runtime){const {closeControlledRuntime}=await import('../backend/dist/src/bootstrap/retained-core-runtime.js');await closeControlledRuntime(runtime);}
+      }
+      catch{throw Error('AZURE_BACKEND_SHUTDOWN_FAILURE');}
+      finally{delete process.env.GOOGLE_APPLICATION_CREDENTIALS;rmSync(directory,{recursive:true,force:true});}
+    })();return closing;
+  };
   let phase = 'composition';
   try {
     const {createRemoteGroupRuntime, closeControlledRuntime} = await import('../backend/dist/src/bootstrap/retained-core-runtime.js');
@@ -112,10 +151,15 @@ export async function startAzureBackend(env = process.env) {
     const events = retainedCoreEvents(directory, true, () => runtime?.eventBrowseControl?.observation().enabled === true, 180000);
     assert.equal(events.configuration, 'configured');
     const backendEnvironment = Object.fromEntries(Object.keys(env).filter(name => !openAiSettings.has(name)).map(name => [name, env[name]]));
-    runtime = await createRemoteGroupRuntime({
+    let reportOwnershipLost;
+    const ownershipLost=new Promise(resolve=>{reportOwnershipLost=resolve;});
+    cancelOwnershipWatch=watchOwnershipLoss(ownershipLost,close);
+    composing = createRemoteGroupRuntime({
       ...backendEnvironment, ENMORI_REMOTE_GROUP: 'true', ENMORI_ENVIRONMENT: 'controlled-demo',
       ENMORI_FIREBASE_PROJECT_ID: 'enmori-rmvp-controlled',
-    }, events.input, undefined, undefined, config.cloudTestApp);
+    }, events.input, undefined, undefined, config.cloudTestApp,reportOwnershipLost);
+    runtime=await composing;
+    if(runtime.cloudOwnershipLost?.())throw Error('OPENAI_SERVICE_OWNER_LOST');
     phase = 'firestore-read';
     const music = await getFirestore(runtime.firebaseApp).doc(`interest_tags/${config.musicInterestTagId}`).get();
     assert(music.data()?.displayName === 'Music' && music.data()?.lifecycleState === 'active');
@@ -129,22 +173,15 @@ export async function startAzureBackend(env = process.env) {
     const aiConfigured = config.cloudTestApp !== undefined;
     console.log(JSON.stringify({phase: 'listening', firebaseRead: true, aiConfigured,
       ...(aiConfigured ? {aiAvailable: config.cloudTestApp !== null && runtime.aiStatus().available === true} : {})}));
-    let closed = false;
-    return async () => {
-      if (closed) return;
-      closed = true;
-      try {await closeControlledRuntime(runtime);}
-      catch {throw Error('AZURE_BACKEND_SHUTDOWN_FAILURE');}
-      finally {delete process.env.GOOGLE_APPLICATION_CREDENTIALS; rmSync(directory, {recursive: true, force: true});}
-    };
+    // Keep repeat manual-close behavior while sharing one in-flight disposal.
+    let closeReturned=false;return async()=>{if(closeReturned)return;closeReturned=true;await close();};
   } catch (error) {
     console.error(JSON.stringify({phase, category: 'dependency-failure',
       code: Number.isInteger(error?.code) ? error.code :
         typeof error?.code === 'string' && /^(auth\/[a-z-]+|ERR_[A-Z_]+|E[A-Z]+)$/.test(error.code) ? error.code : 'unclassified',
     }));
     if (runtime) {
-      const {closeControlledRuntime} = await import('../backend/dist/src/bootstrap/retained-core-runtime.js');
-      await closeControlledRuntime(runtime).catch(() => {});
+      await close().catch(() => {});
     }
     delete process.env.GOOGLE_APPLICATION_CREDENTIALS;
     rmSync(directory, {recursive: true, force: true});

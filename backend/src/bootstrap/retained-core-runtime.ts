@@ -80,6 +80,8 @@ interface ControlledRuntime {
   readonly eventBrowseControl: ReturnType<typeof createControlledEventBrowse>;
   readonly stopEvents: () => Promise<void>;
   readonly stopAi: () => Promise<void>;
+  readonly whenCloudOwnershipLost?: Promise<void>;
+  readonly cloudOwnershipLost: () => boolean;
   readonly aiStatus: () => { configured: boolean; available: boolean; maintenanceHealthy: boolean; pending: boolean; outcomeUnknown: boolean };
   readonly firstFlowStatus: () => { configured: boolean; workerConfigured: boolean; workerRunning: boolean; workerMode: string; pushConfigured: boolean };
 }
@@ -140,6 +142,7 @@ async function createControlledRuntime(
   chatModel?: string,
   firstFlowConfiguration?: FirstFlowConfiguration,
   cloudTestApp?: OpenAiTestAppConfiguration | null,
+  onCloudOwnershipLost?: () => void,
 ): Promise<ControlledRuntime> {
   if (firstFlowConfiguration && (!isolatedEnvironment || chatModel !== "qwen3.5:9b")) throw Error("First-flow requires the approved local model and feature environment");
   const remote = isolatedEnvironment?.ENMORI_REMOTE_GROUP === 'true';
@@ -150,6 +153,7 @@ async function createControlledRuntime(
     { projectId: configuration.firebaseProjectId },
     "enmori-controlled-backend",
   );
+  let releaseCloud:()=>void=()=>{};
   try {
     const gateway = new FirebaseAdminFirestoreGateway(
       getFirestore(firebaseApp),
@@ -158,6 +162,9 @@ async function createControlledRuntime(
     const avatar = new OwnAvatar(new FirestoreOwnAvatarRepository(gateway));
     const cloud = cloudTestApp !== undefined && isolatedEnvironment
       ? createOpenAiTestAppComposition(cloudTestApp, gateway, isolatedEnvironment, avatar, identity) : undefined;
+    releaseCloud=()=>{cloud?.closeAdmission();cloud?.release();};
+    // Install before the first ownership/retirement await: startup itself can lose its lease.
+    void cloud?.whenOwnershipLost?.then(()=>{cloud.closeAdmission();onCloudOwnershipLost?.();});
     const onboardingRepository = new FirestoreOnboardingRepository(gateway, isolatedEnvironment);
     const weather = new OpenMeteoWeatherProvider(() => running);
     const checkInRepository = new FirestoreCheckInRepository(gateway, weather, new SystemClock());
@@ -253,7 +260,7 @@ async function createControlledRuntime(
     };
     const aiStatus = () => {
       const state = cloud?.state();
-      return { configured: !!chatTransport || cloud !== undefined, available: !!chat && healthy && (!cloud || state?.ready === true),
+      return { configured: !!chatTransport || cloud !== undefined, available: !!chat && healthy && (!cloud || cloud.ownerCurrent() && state?.ready === true),
         maintenanceHealthy, pending: modelLane?.state.pending ?? ((state?.remotePending ?? 0) > 0 || cloud?.rateLimitPending() === true),
         outcomeUnknown: modelLane?.state.outcomeUnknown ?? (state?.remoteUnknown ?? 0) > 0 };
     };
@@ -347,8 +354,10 @@ async function createControlledRuntime(
     });
     firstFlow?.start();
     return { app, firebaseApp, eventBrowseControl, stopEvents, stopAi, aiStatus,
+      ...(cloud?.whenOwnershipLost?{whenCloudOwnershipLost:cloud.whenOwnershipLost}:{}),cloudOwnershipLost:()=>cloud?.ownershipLost()===true,
       firstFlowStatus: () => firstFlow?.status() ?? {configured:false,workerConfigured:false,workerRunning:false,workerMode:"off",pushConfigured:false} };
   } catch (error: unknown) {
+    releaseCloud();
     await deleteApp(firebaseApp);
     throw error;
   }
@@ -377,7 +386,8 @@ export async function createRetainedCoreRuntime(environment: Readonly<Record<str
 /** Public group entry uses real Firebase only; it cannot select Emulator bindings. */
 export async function createRemoteGroupRuntime(environment: Readonly<Record<string, string | undefined>>,
   events?: { readonly source: BrowseSource; readonly musicInterestTagId: string }, chatModel?: string,
-  firstFlow?: FirstFlowConfiguration, cloudTestApp?: OpenAiTestAppConfiguration | null): Promise<ControlledRuntime> {
+  firstFlow?: FirstFlowConfiguration, cloudTestApp?: OpenAiTestAppConfiguration | null,
+  onCloudOwnershipLost?:()=>void): Promise<ControlledRuntime> {
   requireRemoteGroupEnvironment(environment);
-  return createControlledRuntime({firebaseProjectId: 'enmori-rmvp-controlled', host: '127.0.0.1', port: 9381}, environment, events, chatModel, firstFlow, cloudTestApp);
+  return createControlledRuntime({firebaseProjectId: 'enmori-rmvp-controlled', host: '127.0.0.1', port: 9381}, environment, events, chatModel, firstFlow, cloudTestApp,onCloudOwnershipLost);
 }

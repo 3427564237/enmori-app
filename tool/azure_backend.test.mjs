@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {existsSync, readFileSync, statSync} from 'node:fs';
-import {azureConfiguration, azureHost, azureIndonesiaHost, startAzureBackend} from './azure_backend.mjs';
+import {azureConfiguration, azureHost, azureIndonesiaHost, startAzureBackend,watchOwnershipLoss} from './azure_backend.mjs';
 import {syntheticCostGrant} from '../backend/dist/test/support/cloud-cost-fixtures.js';
 const valid = {
   ENMORI_AZURE_BACKEND_ONLY: 'true', WEBSITE_HOSTNAME: azureHost, PORT: '8080',
@@ -147,4 +147,35 @@ test('OpenAI proactive is absent by default and accepts only the approved existi
   for(const bad of [null,{}, {...firstFlow,audience:'fixed'}, {...firstFlow,extra:true},
     {...firstFlow,worker:{mode:'service'}}, {...firstFlow,worker:{mode:'service',intervalMs:1000}},
     {...firstFlow,push:{leaseDurationMs:5184000000}}, {...firstFlow,push:{leaseDurationMs:2592000000,enabled:true}}]) assert.equal(parse(bad),null);
+});
+
+test('private same-service ownership is XOR with manual claim and preserves the original manual arm',()=>{
+  const ownership={mode:'renewable_service_lease',serviceKey:'synthetic_azure',leaseDurationMs:120000,renewEveryMs:30000,safetyMarginMs:15000};
+  const {claim,...withoutClaim}=arm;
+  const parse=input=>azureConfiguration({...armed,ENMORI_OPENAI_TEST_APP_CONFIG:JSON.stringify(input)},'24.19.0').cloudTestApp;
+  assert.deepEqual(parse({...withoutClaim,ownership}),{...withoutClaim,ownership,apiKey:syntheticOpenAiKey});
+  assert.deepEqual(parse(arm),{...arm,apiKey:syntheticOpenAiKey});
+  for(const input of [withoutClaim,{...arm,ownership},{...withoutClaim,ownership:{...ownership,leaseDurationMs:180000}},
+    {...withoutClaim,ownership:{...ownership,renewEveryMs:15000}},{...withoutClaim,ownership:{...ownership,safetyMarginMs:1000}},
+    {...withoutClaim,ownership:{...ownership,serviceKey:'wrong/host'}},{...withoutClaim,ownership:{...ownership,extra:true}}])assert.equal(parse(input),null);
+});
+test('owner loss starts disposal once; a stuck shutdown exits after exactly 15s without a stopped claim',async()=>{
+  let lost,settleClose,wake,delay,closed=0,cancelled=0;const exits=[];
+  const whenLost=new Promise(resolve=>{lost=resolve;}),closing=new Promise(resolve=>{settleClose=resolve;});
+  watchOwnershipLoss(whenLost,()=>{closed++;return closing;},{schedule:(callback,ms)=>{wake=callback;delay=ms;return 7;},
+    cancel:timer=>{assert.equal(timer,7);cancelled++;},exit:code=>exits.push(code)});
+  lost();await Promise.resolve();await Promise.resolve();assert.equal(closed,1);assert.equal(delay,15000);assert.deepEqual(exits,[]);
+  wake();assert.deepEqual(exits,[1]);settleClose();await Promise.resolve();await Promise.resolve();wake();
+  assert.deepEqual(exits,[1]);assert.equal(closed,1);assert.equal(cancelled,1);
+});
+test('completed/failed owner-loss disposal exits once; manual close cancellation preserves ordinary drain',async()=>{
+  for(const failed of [false,true]){
+    let lost;const exits=[];let cancels=0;
+    watchOwnershipLoss(new Promise(resolve=>{lost=resolve;}),async()=>{if(failed)throw Error('unknown');},
+      {schedule:()=>1,cancel:()=>{cancels++;},exit:code=>exits.push(code)});
+    lost();for(let i=0;i<8;i++)await Promise.resolve();assert.deepEqual(exits,[1]);assert.equal(cancels,1);
+  }
+  let lost,closed=0;const cancel=watchOwnershipLoss(new Promise(resolve=>{lost=resolve;}),async()=>{closed++;},
+    {schedule:()=>assert.fail('no forced timer for manual close'),exit:()=>assert.fail('manual drain must not force exit')});
+  cancel();lost();for(let i=0;i<5;i++)await Promise.resolve();assert.equal(closed,0);
 });

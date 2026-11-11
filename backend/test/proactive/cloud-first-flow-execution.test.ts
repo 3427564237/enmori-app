@@ -8,6 +8,8 @@ import type { AsyncConversationModelInput } from '../../src/ai-conversation/port
 import { BoundedAiRuntime } from '../../src/ai-runtime/application/bounded-ai-runtime.js';
 import { FakeClock, deferred, flush } from '../ai-runtime/support.js';
 import { fixture as localFixture, ids, rawReply } from './first-flow-fakes.js';
+import {RenewableServiceOwner} from '../../src/ai-runtime/application/renewable-service-owner.js';
+import {randomUUID} from 'node:crypto';
 
 async function fixture(effect: (handle: AsyncConversationModelInput) => Promise<Uint8Array> = async () => rawReply()) {
   const f = localFixture(); await f.queued();
@@ -15,28 +17,32 @@ async function fixture(effect: (handle: AsyncConversationModelInput) => Promise<
   f.store.rows.set(ids.intent, {...row, processing: 'cloud', ...OPENAI_CLOUD_PROCESSING,
     cloudAiConsentGeneration: 3, authorizationScope: `v1.0.${ids.intent}`});
   let grant = true, generation = 3, purpose = 0, owner = 'synthetic-owner', calls = 0, sends = 0, leases = 0;
+  let serviceCurrent=()=>true;
+  const actor={...f.actor,current:()=>f.actor.current()&&serviceCurrent()};
   const consent: CloudAiConsentAuthority = {processing: OPENAI_CLOUD_PROCESSING, async read() {
     if (!grant) return {kind: 'denied'};
     let released = false; leases++;
     return {kind: 'authorized', generation, purposeGeneration: purpose,
-      current: () => grant && !released, release: () => {if (!released) leases--; released = true;}};
+      current: () => grant && !released && serviceCurrent(), release: () => {if (!released) leases--; released = true;}};
   }};
   const runtime = new BoundedAiRuntime<AsyncConversationModelInput>(new FakeClock(), {async generate(handle) {
     assert.equal(await handle.authorize(), true); calls++; return effect(handle);
   }}, true);
   const execution = new CloudFirstFlowExecution({read: async () => ({kind: 'success', value: {ownerId: owner, purposeRevocationGeneration: purpose}})}, consent, runtime);
   let beforeClaim: (() => void) | undefined;
+  let sendOutcome=async()=>({kind:'accepted'} as {kind:'accepted'|'unknown'});
   const app = new FirstFlowApplication({store: f.store, cloudExecution: execution, nowMs: () => f.clock.now,
     newMessageId: () => ids.message, sender: {async sendOnce(input) {
       beforeClaim?.(); const result = await input.claimAfterCredential();
       if (result.kind !== 'ok' || !input.current(result.value.claim)) return {kind: 'not_attempted'};
-      sends++; return {kind: 'accepted'};
+      sends++; return sendOutcome();
     }}});
   const abort = new AbortController();
-  return {...f, app, runtime, execution, abort, run: () => app.runIntent(f.actor, ids.intent, abort.signal),
+  return {...f, actor, app, runtime, execution, abort, run: () => app.runIntent(actor, ids.intent, abort.signal),
     get calls() {return calls;}, get sends() {return sends;}, get leases() {return leases;},
     withdraw() {grant = false;}, reaccept() {generation++;}, changePurpose() {purpose++;}, changeOwner() {owner = 'another-owner';},
     beforeClaim(fn: () => void) {beforeClaim = fn;},
+    bindService(fn:()=>boolean){serviceCurrent=fn;},holdSend(fn:()=>Promise<{kind:'accepted'|'unknown'}>){sendOutcome=fn;},
   };
 }
 
@@ -55,6 +61,29 @@ test('cloud F0 borrows only quoted source/time/persona and keeps its consent lea
   assert.equal(f.store.publications.length, 1); assert.equal(f.leases, 0);
   assert.equal(seen?.proactiveProjection?.(), undefined); assert.equal(seen?.cloudConsentCurrent?.(), false);
   assert.equal((await f.run()).kind, 'ok'); assert.equal(f.calls, 1); assert.equal(f.sends, 1); f.runtime.shutdown();
+});
+
+test('service lease loss after publication retains pending FCM uncertainty and a fresh process never resends',async()=>{
+  const clock=new FakeClock(),processEpoch=randomUUID();
+  const config={mode:'renewable_service_lease',serviceKey:'synthetic_service',leaseDurationMs:120000,renewEveryMs:30000,safetyMarginMs:15000} as const;
+  const service=new RenewableServiceOwner({acquire:async()=>({kind:'confirmed',lease:{processEpoch,generation:1,serviceKey:config.serviceKey,
+    leaseVersion:1,renewedAtMs:1000000,leaseUntilMs:1120000}}),renew:async()=>({kind:'unknown'})},clock,config,processEpoch);
+  await service.start();const f=await fixture(),entered=deferred<void>(),response=deferred<{kind:'accepted'|'unknown'}>();
+  f.bindService(()=>service.current());f.holdSend(()=>{entered.resolve();return response.promise;});
+  const pending=f.run();await entered.promise;assert.equal(f.store.publications.length,1);assert.equal(f.sends,1);
+  assert.equal(f.store.rows.get(ids.intent)?.dispatchState,'dispatching');assert(f.leases>0);
+  // Simulate a paused process waking after its original deadline, before timer callbacks run.
+  clock.time=105000;assert.equal(service.current(),false);assert.equal(service.lost,true);
+  assert.equal((await f.app.recover(f.actor)).kind,'unavailable');
+  response.resolve({kind:'unknown'});assert.notEqual((await pending).kind,'ok');
+  assert.equal(f.store.rows.get(ids.intent)?.dispatchState,'dispatching');assert.equal(f.leases,0);f.runtime.shutdown();
+  const restarted=new FirstFlowApplication({store:f.store,cloudExecution:{open:async()=>({kind:'ok',value:{current:()=>true,
+    verify:async()=>true,release:()=>{},generate:async()=>{throw Error('No replayed generation');}}})},
+    sender:{sendOnce:async()=>{throw Error('No replayed notification');}},newMessageId:()=>ids.message,nowMs:()=>f.clock.now});
+  const newActor={...f.actor,current:()=>true};assert.equal((await restarted.recover(newActor)).kind,'ok');
+  assert.equal(f.store.rows.get(ids.intent)?.dispatchState,'unknown');
+  assert.equal((await restarted.runIntent(newActor,ids.intent,new AbortController().signal)).kind,'ok');
+  assert.equal(f.calls,1);assert.equal(f.sends,1);assert.equal(f.store.publications.length,1);
 });
 
 for (const change of ['withdraw', 'reaccept', 'changePurpose', 'changeOwner'] as const) {

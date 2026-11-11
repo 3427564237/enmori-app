@@ -10,6 +10,8 @@ import { createAuthBindingDocumentId } from '../../src/shared/infrastructure/fir
 import type { IdentityVerifier } from '../../src/shared/ports/identity-verifier.js';
 import { syntheticCostGrant } from '../support/cloud-cost-fixtures.js';
 import { InMemoryFirestoreGateway } from '../support/in-memory-firestore-gateway.js';
+import type { FirestoreGateway } from '../../src/shared/infrastructure/firebase/firestore-gateway.js';
+import type { RuntimeClock } from '../../src/ai-runtime/ports/runtime-clock.js';
 
 const principal = { firebaseUid: 'synthetic-test-operator' };
 const environment = { ENMORI_ENVIRONMENT: 'controlled-demo', ENMORI_REMOTE_GROUP: 'true', ENMORI_FIREBASE_PROJECT_ID: 'enmori-rmvp-controlled' };
@@ -77,4 +79,25 @@ test('all-account admission preserves upstream authentication rejection', async 
   const rejected: IdentityVerifier = { async verifyIdToken() { return { kind: 'invalid' }; } };
   const app = createOpenAiTestAppComposition(config, gateway, environment, avatar, rejected);
   assert.deepEqual(await app.identity.verifyIdToken('invalid'), { kind: 'invalid' });
+});
+
+test('renewable owner gates Settings synchronously after suspend/expiry and retains ordinary reads/profile edits',async()=>{
+  const {gateway:memory,avatar}=fixture();
+  const ownership={mode:'renewable_service_lease',serviceKey:'synthetic_azure',leaseDurationMs:120000,renewEveryMs:30000,safetyMarginMs:15000} as const;
+  await memory.runTransaction(async tx=>tx.set('ai_runtime_fence/service_owner',{schemaVersion:'openai_service_owner_v1',
+    serviceKey:ownership.serviceKey,enabled:true,processEpoch:expectedFence.processEpoch,generation:expectedFence.generation,
+    leaseVersion:0,renewedAtMs:0,leaseUntilMs:0}));
+  const gateway:FirestoreGateway={runTransaction:(work,options)=>memory.runTransaction(tx=>work({...tx,getSnapshot:async path=>{
+    const data=await tx.get(path);return data?{id:path.split('/').at(-1)!,data,createTime:{seconds:1,nanoseconds:0},readTime:{seconds:2000,nanoseconds:0}}:undefined;
+  }}))};
+  let now=0;const clock:RuntimeClock={now:()=>now,at:()=>()=>{}};
+  const {claim:_claim,...common}=config;
+  const app=createOpenAiTestAppComposition({...common,ownership},gateway,environment,avatar,identity,clock);
+  assert.equal((await app.preferences.saveSettings(settings)).ok,false);
+  const epoch=await app.selection?.acquireEpoch?.();assert(epoch);app.selection!.afterClaim(epoch,new MonotonicRuntimeClock(),()=>2000000);
+  assert.equal((await app.preferences.saveSettings(settings)).ok,true);
+  now=105000;assert.equal((await app.preferences.saveSettings({...settings,expectedRevision:1})).ok,false);
+  assert.equal(app.ownerCurrent(),false);assert.equal(app.ownershipLost(),true);
+  assert.equal((await app.preferences.getSettings(principal)).ok,true);assert.equal((await app.preferences.saveProfile(profile)).ok,true);
+  app.release();
 });
