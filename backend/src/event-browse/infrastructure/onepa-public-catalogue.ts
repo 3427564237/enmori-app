@@ -14,13 +14,13 @@ export async function readOnePaCatalogue(
   const browser = await chromium.launch({
     headless: false,
     args: ["--start-minimized"],
-    timeout: 10000,
+    timeout: 30000,
   });
   const abort = () => {
     void browser.close().catch(() => {});
   };
   signal.addEventListener("abort", abort, { once: true });
-  const timer = setTimeout(abort, 20000);
+  const timer = setTimeout(abort, 90000);
   try {
     if (signal.aborted) throw Error("Source unavailable");
     const context = await browser.newContext({
@@ -44,7 +44,7 @@ export async function readOnePaCatalogue(
           new URL(r.url()).origin === "https://www.onepa.gov.sg" &&
           new URL(r.url()).pathname === "/-api/search/query" &&
           r.status() === 201,
-        { timeout: 10000 },
+        { timeout: 60000 },
       );
     for (let index = 0; index < 5; index++) {
       const pending = response();
@@ -53,12 +53,12 @@ export async function readOnePaCatalogue(
       if (index === 0)
         await page.goto("https://www.onepa.gov.sg/events/search", {
           waitUntil: "domcontentloaded",
-          timeout: 8000,
+          timeout: 60000,
         });
       else
         await page
           .getByRole("link", { name: "Next Page", exact: true })
-          .click({ timeout: 5000 });
+          .click({ timeout: 15000 });
       const payload = await (await pending).body();
       if (payload.length > 2500000) throw Error("Source too large");
       const raw = JSON.parse(payload.toString("utf8"));
@@ -97,7 +97,7 @@ export async function readOnePaCatalogue(
             ),
           ),
         ids,
-        { timeout: 5000, polling: 100 },
+        { timeout: 15000, polling: 100 },
       );
       const links = await page
         .locator("a.serp-grid__item[href]")
