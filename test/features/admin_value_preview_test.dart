@@ -160,7 +160,11 @@ void main() {
         find.byKey(const Key('admin-category-name')),
         'Music',
       );
-      await tester.ensureVisible(find.text('Create category'));
+      await tester.scrollUntilVisible(
+        find.text('Create category'),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
