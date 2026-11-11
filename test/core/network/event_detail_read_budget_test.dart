@@ -47,6 +47,45 @@ void main() {
       },
     );
   }
+  for (final recommendations in [false, true]) {
+    testWidgets('demo Event read waits beyond 30 seconds without resending', (
+      tester,
+    ) async {
+      var requests = 0;
+      final client = BackendApiClient(
+        Uri.https('example.test', '/'),
+        () async => const Success('synthetic'),
+        httpClient: MockClient((request) async {
+          requests++;
+          await Future<void>.delayed(const Duration(seconds: 45));
+          return http.Response(
+            jsonEncode({
+              'asOf': '2026-11-11T00:00:00Z',
+              'items': [],
+              if (recommendations)
+                'formulaVersion': 'event_recommendation_v3'
+              else
+                'scope': 'singapore_events_v2',
+            }),
+            200,
+          );
+        }),
+      );
+      addTearDown(client.close);
+      Object? result;
+      final work = recommendations
+          ? BackendEventRecommendationRepository(client)
+                .read(view: EventRecommendationView.home)
+          : BackendActivityRepository(client).read(null);
+      work.then((value) => result = value);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 31));
+      expect(result, isNull);
+      await tester.pump(const Duration(seconds: 15));
+      expect(result, isA<Success>());
+      expect(requests, 1);
+    });
+  }
   test(
     'a rendered-detail read budget does not extend other reads or writes',
     () async {
