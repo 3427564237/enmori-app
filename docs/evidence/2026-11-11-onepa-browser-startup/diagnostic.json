@@ -1,0 +1,47 @@
+{
+  "vantage": "existing Azure app container",
+  "diagnosticOnly": true,
+  "observedPackageSourceCommit": "fade6c78ac2edf1f8c54cf9f4ee9fd0bd333243f",
+  "execution": {
+    "entry": "existing az webapp exec --target app guard",
+    "requestedNodeExecutable": "/home/site/wwwroot/bin/node",
+    "display": "temporary existing xvfb-run executable",
+    "browserPath": "/home/enmori-browsers",
+    "browserMode": "ordinary headed Chromium, --start-minimized",
+    "resourcePolicy": "active package permittedBrowserResource, images/media/fonts blocked",
+    "launchTimeoutMs": 15000,
+    "postLaunchBrowserLifetimeMs": 45000,
+    "outerDiagnosticTimeoutMs": 80000,
+    "freshAnonymousContext": true,
+    "paginationAttempted": false
+  },
+  "result": {
+    "stage": "launch",
+    "stageIncludes": [
+      "browser launch",
+      "browser context creation",
+      "resource routing installation",
+      "page creation"
+    ],
+    "navigationStatus": null,
+    "queryResponses": [],
+    "blocked": [],
+    "pageErrors": 0,
+    "errorName": "TimeoutError",
+    "timeout": true,
+    "elapsedMs": 31210
+  },
+  "cleanup": {
+    "browserCloseAwaitedInFinally": true,
+    "appShellClosed": true,
+    "guardExitCode": 0,
+    "secondAttempt": false
+  },
+  "scope": {
+    "serviceOrConfigurationMutation": false,
+    "accountOrProductDataMutation": false,
+    "deploymentScriptMutation": false,
+    "credentialsOrTokensLogged": false,
+    "challengeSolvingOrAccessBypass": false
+  }
+}
